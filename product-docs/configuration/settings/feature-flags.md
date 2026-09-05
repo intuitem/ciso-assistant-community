@@ -10,6 +10,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 - **incidents** — incident management.
 - **tasks** — the task-management module (one-off and recurring tasks).
 - **control_plan** — the consolidated control-plan view across applied controls.
+- **workflows** — the [workflow builder](../../features/workflows/README.md): automation on a schedule, an event or a webhook. _Default off._
 
 ## Governance
 

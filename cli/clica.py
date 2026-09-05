@@ -339,9 +339,14 @@ DATA_WIZARD_COMMANDS = [
         "command": "import_evidences",
         "model_type": "Evidence",
         "help": (
-            "Import evidences from CSV/Excel.\n"
+            "Import evidence definitions from CSV/Excel.\n"
             "\nRequired columns: name\n\n"
-            "Optional columns: ref_id, description, filtering_labels, domain\n"
+            "Optional columns: description, domain, "
+            "status (draft/missing/in_review/approved/rejected/expired), "
+            "expiry_date, owner (semicolon-separated emails/team names), "
+            "filtering_labels\n"
+            "\nDefinitions only: attachments and links belong to a revision and are "
+            "not imported.\n"
             "\nConflict detection: by name + folder"
         ),
         "requires_folder": True,
@@ -675,7 +680,12 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_tasks",
         "model_type": "TaskTemplate",
-        "help": "Import task templates and past task node occurrences (multi-sheet Excel or CSV) using the Data Wizard backend.",
+        "help": (
+            "Import task templates and past task node occurrences (multi-sheet Excel "
+            "or CSV) using the Data Wizard backend.\n"
+            "\nNames in the 'evidences' column are matched in the task's domain and "
+            "created there when missing, so expected evidence is linked in one pass."
+        ),
         "requires_folder": False,
         "requires_perimeter": False,
         "requires_framework": False,

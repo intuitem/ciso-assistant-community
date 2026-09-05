@@ -47,7 +47,17 @@ The default state is `draft` and you can set them and send feedbacks individuall
 
 <figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
+An assignment moves through the following states:
 
+* `draft`: being prepared. Actors and requirements can be edited, and the assignment can be deleted.
+* `in_progress`: launched, the respondent is working on it.
+* `submitted`: the respondent has handed the work back for review.
+* `changes_requested`: the reviewer asked for corrections, the respondent is expected to resubmit.
+* `closed`: reviewed and accepted.
+
+Once an assignment leaves `draft`, its scope (assigned actors and requirements) is locked, so the agreement between the auditor and the respondent stays consistent while work is ongoing. Edit and delete are therefore only available in `draft`.
+
+To change a locked assignment, a reviewer reopens it back to `draft` from any other state, which unlocks editing and reassignment. Respondents are notified by email of a reopening only when it comes from `in_progress` or `changes_requested`, the states where they were actively working; reopening a `submitted` or `closed` assignment stays silent.
 
 For review, if the auditors don't have the permissions to update the requirements compliance result, which will be the general case to keep consistent inputs from the respondent side, they can interact with comments on each one:\
 <br>

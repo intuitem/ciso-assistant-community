@@ -17,6 +17,7 @@ import uuid
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta, timezone
+from types import MappingProxyType
 from typing import Dict, Any, List, Tuple, Final
 import time
 from django.db.models import (
@@ -977,6 +978,93 @@ def actor_prefetch(field_name: str) -> Prefetch:
     )
 
 
+RESTRICTED_BUCKET_KEY = "_restricted"
+
+
+def viewable_actor_ids(user) -> set[str]:
+    """Ids of the actors *user* may see, as strings, for analytics bucketing.
+
+    ``Actor`` has no folder of its own: its visibility is derived from
+    ``view_user``/``view_team``/``view_entity`` on the underlying object, which is a
+    different permission on a different subtree from the one that grants sight of
+    the objects an actor is assigned to. The two sets genuinely diverge.
+    """
+    return {str(pk) for pk in RoleAssignment.get_viewable_object_ids(user, Actor)}
+
+
+def actor_bucket_identity(actor, allowed_ids: set[str]) -> tuple[str, str | None]:
+    """Bucket key and label for *actor*, anonymised when it may not be seen.
+
+    ``list``/``retrieve`` mask unviewable related objects in
+    ``BaseModelViewSet._filter_related_fields``, but an analytics ``@action``
+    builds its payload by hand and never passes through it. Folding every hidden
+    actor into one keyless bucket keeps the totals reconcilable with ``count``
+    without naming anyone; a bucket per hidden actor would still disclose how
+    many there are and how the work splits between them.
+    """
+    actor_id = str(actor.pk)
+    if actor_id in allowed_ids:
+        # Key by pk so two actors sharing a display name stay separate.
+        return actor_id, str(actor)
+    return RESTRICTED_BUCKET_KEY, None
+
+
+def task_node_read_queryset(queryset):
+    """Join in everything ``TaskNodeReadSerializer`` walks.
+
+    Half of what a node exposes is proxied off its template — ``expected_evidence``
+    and friends are properties over ``self.task_template.<m2m>`` — so the prefetch
+    has to reach through ``task_template`` for the cache to be hit. The related rows
+    are rendered as ``{"folder": ..., "id": ...}``, hence the inner
+    ``select_related("folder")`` on each.
+    """
+
+    def scoped(model):
+        return model.objects.select_related("folder")
+
+    return queryset.select_related(
+        "folder", "task_template", "task_template__folder"
+    ).prefetch_related(
+        # assigned_to is one of the proxied properties, not a field on the node.
+        actor_prefetch("task_template__assigned_to"),
+        Prefetch("evidences", queryset=scoped(Evidence)),
+        # Read by get_evidence_revisions_map instead of a query per evidence.
+        "evidence_revisions",
+        # last_revision walks revisions in python, so they come along.
+        Prefetch(
+            "task_template__evidences",
+            queryset=scoped(Evidence).prefetch_related("revisions"),
+        ),
+        Prefetch("task_template__applied_controls", queryset=scoped(AppliedControl)),
+        Prefetch(
+            "task_template__compliance_assessments",
+            queryset=scoped(ComplianceAssessment),
+        ),
+        Prefetch("task_template__assets", queryset=scoped(Asset)),
+        Prefetch("task_template__risk_assessments", queryset=scoped(RiskAssessment)),
+        Prefetch(
+            "task_template__findings_assessment", queryset=scoped(FindingsAssessment)
+        ),
+    )
+
+
+def check_folder_add_permission(user, folder, *models):
+    """Raise PermissionDenied unless *user* may create each of *models* in *folder*.
+
+    Mirror of the check ``BaseModelSerializer.create`` performs; use it from
+    actions that create objects directly through the ORM.
+    """
+    for model in models:
+        if not RoleAssignment.is_access_allowed(
+            user=user,
+            perm=Permission.objects.get(codename=f"add_{model._meta.model_name}"),
+            folder=folder,
+        ):
+            raise PermissionDenied(
+                {"folder": "You do not have permission to add objects in this folder"}
+            )
+
+
 class AutocompleteMixin:
     """Adds a lightweight, server-paginated ``autocomplete`` action for entity
     pickers (search/ordering/filtering come from the viewset's existing filter
@@ -1124,17 +1212,64 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return new_labels
 
     def _process_evidences(self, evidences, folder):
+        """Resolve an evidence list where entries may be names instead of ids.
+
+        A name typed into the picker declares an expected evidence that does not
+        exist yet; it is created in the parent object's own folder. Reusing a name
+        already taken in that folder links the existing evidence rather than
+        creating a homonym nobody can tell apart.
+
+        Both branches are authorized here rather than by the caller's serializer:
+        this writes through the ORM, so it runs before the parent object's own
+        add/change check and would otherwise let `add_tasktemplate` alone create
+        evidence. Reuse is scoped to what the user may see, so an invisible
+        evidence is never silently attached.
+        """
         new_evidences = []
+        viewable_ids = None
         for value in evidences or []:
             try:
                 uuid.UUID(str(value), version=4)
                 new_evidences.append(str(value))
+                continue
             except ValueError:
-                new_evidence = Evidence(name=value, folder=folder)
-                new_evidence.full_clean()
-                new_evidence.save()
-                new_evidences.append(str(new_evidence.id))
+                pass
+            if viewable_ids is None:
+                viewable_ids = set(
+                    RoleAssignment.get_viewable_object_ids(self.request.user, Evidence)
+                )
+            evidence = Evidence.objects.filter(
+                name=value, folder=folder, id__in=viewable_ids
+            ).first()
+            if evidence is None:
+                check_folder_add_permission(self.request.user, folder, Evidence)
+                evidence = Evidence(name=value, folder=folder)
+                evidence.full_clean()
+                evidence.save()
+            new_evidences.append(str(evidence.id))
         return new_evidences
+
+    def _process_task_template_evidences(self, request: Request) -> None:
+        """Turn typed evidence names on a TaskTemplate payload into evidence ids."""
+        if not request.data.get("evidences") or self.model != TaskTemplate:
+            return
+        folder_id = request.data.get("folder")
+        if not folder_id:
+            # A partial write can carry evidences without a folder; fall back to the
+            # object being updated, and leave the payload alone when there is none.
+            instance = self.get_object() if self.kwargs.get("pk") else None
+            if instance is None:
+                return
+            folder = instance.folder
+        else:
+            folder = Folder.objects.filter(id=folder_id).first()
+            if folder is None:
+                return
+        if hasattr(request.data, "_mutable"):
+            request.data._mutable = True
+        request.data["evidences"] = self._process_evidences(
+            request.data["evidences"], folder=folder
+        )
 
     def _resolve_related_model(self, source: str):
         """Resolve a dotted source path (e.g. 'asset.folder') to its related model."""
@@ -1376,22 +1511,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
             )
-        # Experimental: process evidences on TaskTemplate creation
-        if request.data.get("evidences") and self.model == TaskTemplate:
-            folder = Folder.objects.get(id=request.data.get("folder"))
-            request.data["evidences"] = self._process_evidences(
-                request.data.get("evidences"), folder=folder
-            )
+        self._process_task_template_evidences(request)
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
-        # Experimental: process evidences on TaskTemplate update
-
-        if request.data.get("evidences") and self.model == TaskTemplate:
-            folder = Folder.objects.get(id=request.data.get("folder"))
-            request.data["evidences"] = self._process_evidences(
-                request.data["evidences"], folder=folder
-            )
+        self._process_task_template_evidences(request)
 
         # NOTE: Handle filtering_labels field - SvelteKit SuperForms behavior inconsistency:
         # Forms with file inputs (like Evidence attachments) use dataType="form" and omit empty fields
@@ -1412,6 +1536,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+        self._process_task_template_evidences(request)
         return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
@@ -4394,7 +4519,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         serializer_class=RiskAssessmentDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = RiskAssessmentDuplicateSerializer(data=request.data)
+        serializer = RiskAssessmentDuplicateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -4406,7 +4533,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             risk_assessment = self.get_object()
 
             perimeter = data.get("perimeter")
-            folder = data.get("folder")
+            # folder always follows the perimeter, as on update
+            folder = perimeter.folder if perimeter else data.get("folder")
+            target_models = [RiskAssessment]
+            if risk_assessment.risk_scenarios.exists():
+                target_models.append(RiskScenario)
+            check_folder_add_permission(request.user, folder, *target_models)
 
             duplicate_risk_assessment = RiskAssessment.objects.create(
                 name=data.get("name"),
@@ -5701,7 +5833,9 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         can carry the table's current filters through verbatim.
         """
         qs = self.filter_queryset(self.get_queryset())
-        return Response(ActionPlanBudgetOverview.compute_budget_overview(qs))
+        return Response(
+            ActionPlanBudgetOverview.compute_budget_overview(qs, request.user)
+        )
 
     @action(
         detail=False, name="Something"
@@ -6063,7 +6197,9 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         serializer_class=AppliedControlDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = AppliedControlDuplicateSerializer(data=request.data)
+        serializer = AppliedControlDuplicateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -6077,6 +6213,10 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
 
         applied_control = self.get_object()
         new_folder = data["folder"]
+        target_models = [AppliedControl]
+        if data["duplicate_evidences"]:
+            target_models.append(Evidence)
+        check_folder_add_permission(request.user, new_folder, *target_models)
         duplicate_applied_control = AppliedControl.objects.create(
             reference_control=applied_control.reference_control,
             name=data["name"],
@@ -6491,7 +6631,7 @@ class ActionPlanBudgetOverview:
         return annual_cost
 
     @staticmethod
-    def compute_budget_overview(queryset):
+    def compute_budget_overview(queryset, user):
         from core.utils import get_global_currency, format_currency
         from global_settings.models import GlobalSettings
         from django.utils import timezone
@@ -6530,6 +6670,7 @@ class ActionPlanBudgetOverview:
         build_days_total = 0.0
         run_fixed_total = 0.0
         run_days_total = 0.0
+        allowed_actor_ids = viewable_actor_ids(user)
 
         for ctrl in controls:
             cost = ActionPlanBudgetOverview._compute_annual_cost(ctrl, daily_rate)
@@ -6616,14 +6757,14 @@ class ActionPlanBudgetOverview:
                 eta_buckets[key]["count"] += 1
                 eta_buckets[key]["total"] += cost
 
-            # top owners (M2M) — key by pk so homonyms don't collapse into one bucket
+            # top owners (M2M)
             for owner in ctrl.owner.all():
-                owner_key = str(owner.pk)
+                owner_key, label = actor_bucket_identity(owner, allowed_actor_ids)
                 bucket = owner_counts.setdefault(
                     owner_key,
                     {
                         "key": owner_key,
-                        "label": str(owner),
+                        "label": label,
                         "count": 0,
                         "total": 0.0,
                         "status_breakdown": {},
@@ -6900,7 +7041,7 @@ class ComplianceAssessmentActionPlanBudgetOverview(
 ):
     def get(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())
-        return Response(self.compute_budget_overview(qs))
+        return Response(self.compute_budget_overview(qs, request.user))
 
 
 class RiskAssessmentActionPlanBudgetOverview(
@@ -6908,7 +7049,7 @@ class RiskAssessmentActionPlanBudgetOverview(
 ):
     def get(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())
-        return Response(self.compute_budget_overview(qs))
+        return Response(self.compute_budget_overview(qs, request.user))
 
 
 class PolicyViewSet(AppliedControlViewSet):
@@ -9897,6 +10038,7 @@ class EvidenceFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
             "filtering_labels",
             "findings",
             "findings_assessments",
+            "task_templates",
             "genericcollection",
             "expiry_date",
             "contracts",
@@ -9919,6 +10061,7 @@ class EvidenceViewSet(BaseModelViewSet):
         return (
             super()
             .get_queryset()
+            .select_related("folder")
             .prefetch_related(
                 "revisions",
                 "applied_controls",
@@ -9926,7 +10069,7 @@ class EvidenceViewSet(BaseModelViewSet):
                 "security_exceptions",
                 "contracts",
                 "filtering_labels",
-                "owner",
+                actor_prefetch("owner"),
             )
         )
 
@@ -9945,23 +10088,19 @@ class EvidenceViewSet(BaseModelViewSet):
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
             evidence = self.get_object()
+            revision = evidence.last_revision
             if (
-                not evidence.last_revision.attachment
-                or not evidence.last_revision.attachment.storage.exists(
-                    evidence.last_revision.attachment.name
-                )
+                revision is None
+                or not revision.attachment
+                or not revision.attachment.storage.exists(revision.attachment.name)
             ):
                 return Response(status=status.HTTP_404_NOT_FOUND)
             if request.method == "GET":
-                content_type = mimetypes.guess_type(evidence.last_revision.filename())[
-                    0
-                ]
+                filename = revision.filename()
                 response = HttpResponse(
-                    evidence.last_revision.attachment,
-                    content_type=content_type,
-                    headers={
-                        "Content-Disposition": f"attachment; filename={evidence.last_revision.filename()}"
-                    },
+                    revision.attachment,
+                    content_type=mimetypes.guess_type(filename)[0],
+                    headers={"Content-Disposition": f"attachment; filename={filename}"},
                     status=status.HTTP_200_OK,
                 )
         return response
@@ -10715,7 +10854,9 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
         serializer_class=OrganisationObjectiveDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = OrganisationObjectiveDuplicateSerializer(data=request.data)
+        serializer = OrganisationObjectiveDuplicateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -10728,6 +10869,7 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
             )
 
         new_folder = data["folder"]
+        check_folder_add_permission(request.user, new_folder, OrganisationObjective)
         objective = self.get_object()
         duplicate_objective = OrganisationObjective.objects.create(
             name=data["name"],
@@ -14811,6 +14953,8 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
                 "requirement__questions",  # Needed by FilteredNodeSerializer.questions
                 "requirement__questions__choices",  # Needed by get_questions_translated
+                "requirement__reference_controls",  # Needed by associated_reference_controls property
+                "requirement__threats",  # Needed by associated_threats property
             )
         )
         respondent_folders = get_respondent_scoped_folder_ids(self.request.user)
@@ -14821,6 +14965,34 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 | Q(assignments__actor__in=user_actors)
             ).distinct()
         return qs
+
+    def paginate_queryset(self, queryset):
+        page = super().paginate_queryset(queryset)
+        self._preset_parent_requirements(page if page is not None else queryset)
+        return page
+
+    @staticmethod
+    def _preset_parent_requirements(requirement_assessments):
+        """Batch-resolve RequirementNode.parent_requirement for the page: the
+        property falls back to one query per row when _parent_requirement_obj
+        is not preset (urn is globally unique, so one urn__in fetch is
+        equivalent)."""
+        requirements = [
+            ra.requirement
+            for ra in requirement_assessments
+            if getattr(ra, "requirement", None)
+        ]
+        parent_urns = {req.parent_urn for req in requirements if req.parent_urn}
+        if not parent_urns:
+            return
+        parents_by_urn = {
+            node.urn: node
+            for node in RequirementNode.objects.filter(urn__in=parent_urns)
+        }
+        for req in requirements:
+            parent = parents_by_urn.get(req.parent_urn)
+            if parent:
+                req._parent_requirement_obj = parent
 
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
@@ -17064,6 +17236,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "name",
             "assigned_to",
             "is_recurrent",
+            "enabled",
             "applied_controls",
             "last_occurrence_status",
             "next_occurrence_status",
@@ -17113,12 +17286,18 @@ def _bucket_by_date(due, today):
     return "later"
 
 
+# Actions that serialize whole templates and so need the related columns resolved
+# in the queryset rather than per row.
+READ_HEAVY_ACTIONS = frozenset({"list", "retrieve", "yearly_review"})
+
+
 class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet):
     model = TaskTemplate
 
     filterset_fields = [
         "assigned_to",
         "is_recurrent",
+        "enabled",
         "folder",
         "applied_controls",
         "evidences",
@@ -17133,7 +17312,11 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         queryset = self.filter_queryset(self.get_queryset())
         # `str(actor)` resolves a OneToOne hop, so the actor prefetch has to join the
         # target in; `commitments` is already prefetched by get_queryset.
-        tasks = list(queryset.prefetch_related(actor_prefetch("assigned_to")))
+        tasks = list(
+            queryset.select_related("folder").prefetch_related(
+                actor_prefetch("assigned_to")
+            )
+        )
         today = timezone.localdate()
 
         # One query for every occurrence, grouped in python: the serializer's
@@ -17158,10 +17341,12 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             for key in ("overdue", "due_30d", "due_90d", "later", "no_eta")
         }
         assignee_counts: dict = {}
+        folder_counts: dict = {}
         recurrence = {"one_time": 0, "recurrent": 0}
         commitment_states: dict = {}
         slipped = breached = 0
         commitment_enabled = ff_is_enabled("commitment_management")
+        allowed_actor_ids = viewable_actor_ids(request.user)
 
         for task in tasks:
             node = next_node_by_template.get(task.id)
@@ -17175,12 +17360,39 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
             recurrence["recurrent" if task.is_recurrent else "one_time"] += 1
 
+            # Key by folder_id so two domains sharing a name stay separate.
+            folder_key = str(task.folder_id)
+            bucket = folder_counts.setdefault(
+                folder_key,
+                {
+                    "key": folder_key,
+                    "label": task.folder.name,
+                    "count": 0,
+                    "status_breakdown": {},
+                },
+            )
+            bucket["count"] += 1
+            segment = bucket["status_breakdown"].setdefault(
+                status, {"key": status, "count": 0}
+            )
+            segment["count"] += 1
+
             for actor in task.assigned_to.all():
+                actor_key, label = actor_bucket_identity(actor, allowed_actor_ids)
                 bucket = assignee_counts.setdefault(
-                    str(actor.id),
-                    {"key": str(actor.id), "label": str(actor), "count": 0},
+                    actor_key,
+                    {
+                        "key": actor_key,
+                        "label": label,
+                        "count": 0,
+                        "status_breakdown": {},
+                    },
                 )
                 bucket["count"] += 1
+                segment = bucket["status_breakdown"].setdefault(
+                    status, {"key": status, "count": 0}
+                )
+                segment["count"] += 1
 
             if commitment_enabled and not task.is_recurrent:
                 state = task.commitment_state or "--"
@@ -17191,13 +17403,27 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 if task.commitment_is_breached:
                     breached += 1
 
+        def top_buckets(counts: dict, limit: int = 10) -> list:
+            """Top buckets by count, each with its status_breakdown flattened.
+
+            The order is fixed server-side so the charts stay stable across
+            reloads, as top_owners does for applied controls.
+            """
+            buckets = sorted(counts.values(), key=lambda b: -b["count"])[:limit]
+            for bucket in buckets:
+                bucket["status_breakdown"] = sorted(
+                    bucket["status_breakdown"].values(), key=lambda b: -b["count"]
+                )
+            return buckets
+
+        by_assignee = top_buckets(assignee_counts)
+
         payload = {
             "count": len(tasks),
             "by_status": sorted(by_status.values(), key=lambda b: -b["count"]),
             "due_buckets": list(due_buckets.values()),
-            "by_assignee": sorted(assignee_counts.values(), key=lambda b: -b["count"])[
-                :10
-            ],
+            "by_assignee": by_assignee,
+            "by_folder": top_buckets(folder_counts),
             "unassigned": sum(1 for t in tasks if not t.assigned_to.all()),
             "recurrence": recurrence,
         }
@@ -17459,10 +17685,12 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 ),
             },
             "labels": {
-                "source": "filtering_labels",
+                "source": "task_template.filtering_labels",
                 "label": "labels",
-                "format": lambda qs: ",".join(
-                    escape_excel_formula(o.label) for o in qs.all()
+                "format": lambda qs: (
+                    ",".join(escape_excel_formula(o.label) for o in qs.all())
+                    if qs
+                    else ""
                 ),
             },
         },
@@ -17470,7 +17698,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
     def get_queryset(self):
         qs = super().get_queryset().select_related("folder")
-        if self.action in ("list", "retrieve"):
+        if self.action in READ_HEAVY_ACTIONS:
             # Opt-in columns: one query each, not one per row.
             qs = qs.prefetch_related(
                 "filtering_labels__folder",
@@ -17489,7 +17717,10 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             )
         ordering = self.request.query_params.get("ordering", "")
 
-        if any(
+        # The serializer reads these three columns on every row, and each falls back
+        # to its own TaskNode query when the annotation is missing — ~114 queries on
+        # a page of 50. Sorting is not the only reason to resolve them here.
+        if self.action in READ_HEAVY_ACTIONS or any(
             f in ordering
             for f in (
                 "next_occurrence",
@@ -17541,6 +17772,18 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                     default=Value(None),
                     output_field=models.CharField(),
                 ),
+                # The serializer exposes the single occurrence's status and
+                # observation directly; without these it fetches that node per row.
+                one_time_status=Subquery(
+                    TaskNode.objects.filter(task_template=OuterRef("pk"))
+                    .order_by("due_date")
+                    .values("status")[:1]
+                ),
+                one_time_observation=Subquery(
+                    TaskNode.objects.filter(task_template=OuterRef("pk"))
+                    .order_by("due_date")
+                    .values("observation")[:1]
+                ),
             )
 
         return qs
@@ -17553,6 +17796,28 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             str(template.id): template for template in task_templates
         }
         tasks_list = []
+
+        # Serializing a node one at a time costs ~7 queries each, because nothing is
+        # prefetched on a lone instance. Stand in for each with a placeholder here
+        # and serialize the whole set once at the end, off a joined queryset.
+        deferred_nodes: dict[str, TaskNode] = {}
+
+        def rescue(node):
+            """Clear the GC flag, but only when it is actually set.
+
+            The calendar rescues nodes on every view; an unconditional save still
+            runs clean() and an UPDATE for a row that already holds the value.
+            """
+            if node.to_delete:
+                node.to_delete = False
+                node.save(update_fields=["to_delete"])
+
+        def defer(node):
+            deferred_nodes[str(node.id)] = node
+            # Carries what the code below reads off a real entry: an id, a due date,
+            # and the absence of "virtual".
+            return {"id": str(node.id), "due_date": node.due_date, "_deferred": True}
+
         for template in task_templates:
             if not template.is_recurrent:
                 if not template.task_date:
@@ -17601,17 +17866,15 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             for node in existing_nodes:
                 if node.due_date != node.scheduled_date:
                     # Always preserve user-rescheduled nodes
-                    node.to_delete = False
-                    node.save(update_fields=["to_delete"])
+                    rescue(node)
                     if node.due_date and start_date <= node.due_date <= end_date:
-                        tasks_list.append(TaskNodeReadSerializer(node).data)
+                        tasks_list.append(defer(node))
                 elif node.scheduled_date not in generated_scheduled_dates:
                     effective_date = node.due_date or node.scheduled_date
                     if effective_date and effective_date < today:
                         # Preserve past nodes whose slot was removed
-                        node.to_delete = False
-                        node.save(update_fields=["to_delete"])
-                        tasks_list.append(TaskNodeReadSerializer(node).data)
+                        rescue(node)
+                        tasks_list.append(defer(node))
 
         def _parse_due_date(val):
             """Normalize due_date to a date object"""
@@ -17704,11 +17967,72 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                     tasks_list[i] = None
                     continue
                 materialized_node_ids.add(str(task_node.id))
-                task_node.to_delete = False
-                task_node.save(update_fields=["to_delete"])
-                tasks_list[i] = TaskNodeReadSerializer(task_node).data
+                rescue(task_node)
+                tasks_list[i] = defer(task_node)
+
+        if deferred_nodes:
+            nodes = task_node_read_queryset(
+                TaskNode.objects.filter(id__in=deferred_nodes)
+            )
+            # Deliberately serialized without an "optimized_data" context: it and
+            # PathField's own fallback disagree on objects sitting directly in the
+            # root folder, and the calendar has always used the fallback.
+            serialized = {
+                str(row["id"]): row
+                for row in TaskNodeReadSerializer(nodes, many=True).data
+            }
+            for i, task in enumerate(tasks_list):
+                if task is not None and task.get("_deferred"):
+                    tasks_list[i] = serialized.get(task["id"])
 
         return [task for task in tasks_list if task is not None]
+
+    # Every occurrence in the horizon becomes a DB row, so the horizon is what
+    # bounds the TaskNode table. Two things pull against each other: planning views
+    # (yearly_review) read nodes without generating them, so a year has to be
+    # covered to be plannable; but a daily task would be 365 rows. So: at least a
+    # few periods ahead, extended to a year when that costs a sane number of rows,
+    # and never more than that many occurrences.
+    SYNC_AHEAD_OCCURRENCES = 3
+    SYNC_MAX_OCCURRENCES = 53
+    SYNC_MIN_HORIZON = rd.relativedelta(years=1)
+    SYNC_HORIZON_CAP = rd.relativedelta(years=2)
+    _SCHEDULE_UNIT = MappingProxyType(
+        {
+            "DAILY": rd.relativedelta(days=1),
+            "WEEKLY": rd.relativedelta(weeks=1),
+            "MONTHLY": rd.relativedelta(months=1),
+            "YEARLY": rd.relativedelta(years=1),
+        }
+    )
+
+    @classmethod
+    def _sync_end_date(cls, schedule: dict | None, today):
+        """Last date `_sync_task_nodes` materializes occurrences up to."""
+        schedule = schedule or {}
+        try:
+            interval = max(int(schedule.get("interval") or 1), 1)
+        except TypeError, ValueError:
+            interval = 1
+        unit = cls._SCHEDULE_UNIT.get(
+            schedule.get("frequency"), rd.relativedelta(months=1)
+        )
+        end_date = today + unit * (interval * cls.SYNC_AHEAD_OCCURRENCES)
+        min_end = today + cls.SYNC_MIN_HORIZON
+        if end_date < min_end:
+            # Reach for a full year, but stop at the occurrence budget so a short
+            # period does not turn a year into hundreds of rows.
+            end_date = min(
+                min_end, today + unit * (interval * cls.SYNC_MAX_OCCURRENCES)
+            )
+        end_date = min(end_date, today + cls.SYNC_HORIZON_CAP)
+        end_recurrence = schedule.get("end_date")
+        if end_recurrence:
+            # Never materialize past the date the recurrence itself stops.
+            end_date = min(
+                end_date, datetime.strptime(end_recurrence, "%Y-%m-%d").date()
+            )
+        return end_date
 
     def _sync_task_nodes(self, task_template: TaskTemplate):
         if task_template.is_recurrent:
@@ -17719,35 +18043,15 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                     Q(scheduled_date__gte=today)
                     | Q(scheduled_date__isnull=True, due_date__gte=today)
                 ).update(to_delete=True)
-                # Determine the end date based on the frequency
-                start_date = task_template.task_date
-                if task_template.is_recurrent:
-                    if task_template.schedule["frequency"] == "DAILY":
-                        delta = rd.relativedelta(months=3)
-                    elif task_template.schedule["frequency"] == "WEEKLY":
-                        delta = rd.relativedelta(weeks=52)
-                    elif task_template.schedule["frequency"] == "MONTHLY":
-                        delta = rd.relativedelta(years=2)
-                    elif task_template.schedule["frequency"] == "YEARLY":
-                        delta = rd.relativedelta(years=5)
-
-                    end_date_param = task_template.schedule.get("end_date")
-                    if end_date_param:
-                        end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
-                    else:
-                        end_date = today + delta
-                    # Ensure end_date is not before the calculated delta
-                    min_end_date = today + delta
-                    if end_date < min_end_date:
-                        end_date = min_end_date
-                else:
-                    end_date = start_date
-                # Generate the task nodes
-                self.task_calendar(
-                    task_templates=self.get_queryset().filter(id=task_template.id),
-                    start=start_date,
-                    end=end_date,
-                )
+                # A disabled template generates nothing: the soft-delete above
+                # plus the garbage collection below retire its pending future
+                # occurrences without touching completed or annotated ones.
+                if task_template.enabled:
+                    self.task_calendar(
+                        task_templates=self.get_queryset().filter(id=task_template.id),
+                        start=task_template.task_date,
+                        end=self._sync_end_date(task_template.schedule, today),
+                    )
 
                 # garbage-collect — only delete untouched nodes
                 TaskNode.objects.filter(
@@ -17843,6 +18147,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                     "task_template__compliance_assessments",
                     "task_template__risk_assessments",
                     "task_template__findings_assessment",
+                    "task_template__filtering_labels",
                 )
                 .order_by("due_date")
             )
@@ -18103,9 +18408,8 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             due_date__gte=year_start, due_date__lte=year_end
         ).order_by("due_date")
 
-        task_templates = queryset.select_related("folder").prefetch_related(
-            "assigned_to",
-            "applied_controls",
+        # get_queryset already joins folder and the serializer's related columns.
+        task_templates = queryset.prefetch_related(
             Prefetch(
                 "tasknode_set",
                 queryset=filtered_nodes_qs,
@@ -18206,6 +18510,12 @@ class TaskNodeViewSet(BaseModelViewSet):
     filterset_class = TaskNodeFilterSet
     search_fields = ["observation"]
     ordering = ["due_date"]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action not in ("list", "retrieve"):
+            return qs.select_related("folder", "task_template")
+        return task_node_read_queryset(qs)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Task Node status choices")
@@ -18361,7 +18671,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             ).distinct()
         return qs
 
-    EDITABLE_STATUSES = ("draft", "in_progress")
+    EDITABLE_STATUSES = ("draft",)  # Keep the tuple type
 
     def update(self, request, *args, **kwargs):
         assignment = self.get_object()
@@ -18390,6 +18700,24 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             )
         return super().destroy(request, *args, **kwargs)
 
+    def perform_update(self, serializer):
+        # Override batch_action, which calls perform_update directly
+        # rather than going through update()/partial_update() above.
+        if serializer.instance.status not in self.EDITABLE_STATUSES:
+            raise PermissionDenied(
+                f"Cannot edit assignment in '{serializer.instance.status}' status."
+            )
+        super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        # Override batch_action, which calls perform_destroy directly
+        # rather than going through destroy() above.
+        if instance.status not in self.EDITABLE_STATUSES:
+            raise PermissionDenied(
+                f"Cannot delete assignment in '{instance.status}' status."
+            )
+        super().perform_destroy(instance)
+
     # Valid transitions: (from_status, to_status) → config
     # reviewer_only: respondents are forbidden
     # actor_only: only assigned actors can perform this transition
@@ -18414,6 +18742,22 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             "observation": "required",
         },
         ("closed", "submitted"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("submitted", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("changes_requested", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("closed", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("in_progress", "draft"): {
             "reviewer_only": True,
             "observation": "clear",
         },
@@ -18659,6 +19003,13 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
             decision = "reopened" if from_status == "closed" else to_status
             send_assignment_reviewed_notification(assignment.id, decision, observation)
+        elif to_status == "draft" and from_status in (
+            "in_progress",
+            "changes_requested",
+        ):
+            from core.tasks import send_assignment_reopened_notification
+
+            send_assignment_reopened_notification(assignment.id, observation)
 
 
 class QuestionViewSet(BaseModelViewSet):

@@ -158,7 +158,7 @@
 		backgroundColor = 'bg-surface-50-950',
 		color = '',
 		regionHead = '',
-		regionHeadCell = 'uppercase bg-surface-50-950 text-surface-700-300',
+		regionHeadCell = 'bg-surface-50-950 text-surface-700-300',
 		regionBody = 'bg-surface-50-950',
 		regionCell = 'max-w-[65ch] max-h-[8em] overflow-hidden hover:overflow-y-auto',
 		regionFoot = '',
@@ -372,14 +372,14 @@
 
 	const hiddenRowCount = $derived(typeof expectedCount === 'number' ? expectedCount : 0);
 
-	$tableHandlers[baseEndpoint] = handler;
-
-	const toastStore = getToastStore();
-
 	// A table handed its rows up front has no model or endpoint ("/undefined"): the
 	// remote handler would poll it and clear the seeded rows. A bare baseEndpoint is
 	// still remote.
 	const hasRemoteSource = Boolean(URLModel) || baseEndpoint !== '/undefined';
+
+	if (hasRemoteSource) $tableHandlers[baseEndpoint] = handler;
+
+	const toastStore = getToastStore();
 
 	if (hasRemoteSource)
 		handler.onChange((state: State) =>
@@ -437,7 +437,7 @@
 	const filters = $derived(source?.filters ?? tableFilters);
 	const filteredFields = $derived(Object.keys(filters));
 	// Only persist filters on standalone list pages, not embedded sub-tables
-	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
+	const isStandaloneTable = hasRemoteSource && baseEndpoint === `/${URLModel}`;
 	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
 	const storedFilters = isStandaloneTable ? ($tableFilterStates[filterStoreKey] ?? {}) : {};
 	// Check if any filter-related URL params exist
@@ -700,7 +700,7 @@
 
 	// Computed in Python from related rows, so there is no column for the backend to
 	// ORDER BY: DRF drops the term and the click does nothing. Better not to offer it.
-	const UNSORTABLE_COMPUTED_COLUMNS = ['completion', 'review_progress'];
+	const UNSORTABLE_COMPUTED_COLUMNS = ['completion', 'review_progress', 'schedule'];
 
 	// Function to check if a column is multi-value and should not be sortable
 	const isMultiValueColumn = (key: string): boolean => {
