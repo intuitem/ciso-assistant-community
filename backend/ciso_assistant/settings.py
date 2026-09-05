@@ -445,14 +445,33 @@ else:
     MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
     MEDIA_URL = ""
 
-# Default page size when a list request passes no ?limit=.
-PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=50))
+# Default page size when a list request passes no ?limit=. 100 is the largest
+# page the UI offers and the MCP client's own default, and it is the measured
+# knee of the cost curve: on a 12k-row table, 50/100/200 rows cost
+# 126/187/325 ms and 4.6/7.5/14.1 MB peak per request.
+PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=100))
+# The ceiling we intend to converge on. Requests above it are logged even while
+# a higher live ceiling still serves them, so the blast radius of lowering
+# PAGINATE_MAX is known before it is lowered.
+PAGINATE_TARGET_MAX = 200
 # Hard ceiling a client can request via ?limit= (larger values are clamped,
-# invalid ones rejected with HTTP 400). The ceiling follows PAGINATE_BY upward
-# so raising only PAGINATE_BY keeps working, and the default page size can
-# never exceed the ceiling.
-PAGINATE_MAX = int(os.environ.get("PAGINATE_MAX", default=max(200, PAGINATE_BY)))
+# invalid ones rejected with HTTP 400). The ceiling follows PAGINATE_BY upward,
+# and the default page size can never exceed the ceiling.
+# Temporarily held at 5000: the Power BI connector <= 1.0.2 asks for limit=5000
+# and pages by the size it requested, so a lower ceiling makes it silently
+# import a fraction of every table, and installed copies upgrade by hand. Drop
+# to PAGINATE_TARGET_MAX once connector 1.0.3 has shipped and been adopted —
+# check the "pagination limit above target ceiling" logs first.
+# See docs/powerbi_pagination_followup.md.
+PAGINATE_MAX = int(os.environ.get("PAGINATE_MAX", default=max(5000, PAGINATE_BY)))
 PAGINATE_BY = min(PAGINATE_BY, PAGINATE_MAX)
+if PAGINATE_BY < 1 or PAGINATE_MAX < 1:
+    # A zero or negative ceiling disables clamping or serves empty pages,
+    # depending on the path — fail at boot rather than at request time.
+    raise ImproperlyConfigured(
+        f"PAGINATE_BY and PAGINATE_MAX must be >= 1 "
+        f"(got PAGINATE_BY={PAGINATE_BY}, PAGINATE_MAX={PAGINATE_MAX})"
+    )
 
 # Application definition
 

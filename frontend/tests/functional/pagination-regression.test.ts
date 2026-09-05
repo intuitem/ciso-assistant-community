@@ -1,14 +1,15 @@
 /**
  * Pagination regression harness.
  *
- * Backend lists are paginated (50 by default, 200 max). The regular seed
+ * Backend lists are paginated (100 by default). The regular seed
  * data of the functional suite never exceeds one page, so a frontend
  * consumer that silently reads only the first page still passes CI. These
  * tests create MORE THAN ONE PAGE of objects through the backend API (fast)
  * and then drive the UI, so any first-page-only consumer fails:
  *
  *   1. lazy autocomplete search must reach options beyond the first page,
- *   2. >50 m2m links must survive an edit-form save that does not touch them,
+ *   2. m2m links beyond one hydration chunk must survive an edit-form save
+ *      that does not touch them,
  *   3. ListSelector must render the full option list (Django permissions).
  *
  * Data is created via direct API calls with the session token, following the
@@ -24,7 +25,7 @@ import type { BrowserContext } from '@playwright/test';
 const BACKEND_API_URL = process.env.PUBLIC_BACKEND_API_URL ?? 'http://localhost:8000/api';
 
 /** Default backend page size — objects created must exceed this. */
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 100;
 const SEED_COUNT = 60;
 
 /** Extract the auth token the frontend stored after login. */
@@ -142,7 +143,7 @@ test('lazy picker search finds a user group beyond the first page', async ({ log
 	await groupsField.click();
 	await groupsField.getByRole('combobox').fill(needleName);
 
-	// A first-page-only consumer would filter 50 locally-known options and
+	// A first-page-only consumer would filter only locally-known options and
 	// never surface the needle.
 	await expect(groupsField.getByRole('option', { name: needleName }).first()).toBeVisible();
 });

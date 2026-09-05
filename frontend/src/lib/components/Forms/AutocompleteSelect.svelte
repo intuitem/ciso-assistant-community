@@ -287,10 +287,16 @@
 					if (probeResponse.ok) {
 						const probeData = await probeResponse.json();
 						const items = probeData?.results ?? probeData;
-						const totalCount = probeData?.count ?? (Array.isArray(items) ? items.length : 0);
 						const returnedCount = Array.isArray(items) ? items.length : 0;
-						if (totalCount <= lazyThreshold && returnedCount >= totalCount) {
-							// Small dataset with complete response — use eager mode
+						// Only a paginated envelope can have been truncated. An endpoint
+						// answering with a bare array — or a `results` list carrying no
+						// `count` — already returned everything and has no /autocomplete
+						// action to search against, so it must stay eager at any size.
+						const paginated =
+							Boolean(probeData) && !Array.isArray(probeData) && 'count' in probeData;
+						const totalCount = paginated ? probeData.count : returnedCount;
+						if (!paginated || (totalCount <= lazyThreshold && returnedCount >= totalCount)) {
+							// Complete response, or a small paginated one — use eager mode
 							effectiveLazy = false;
 							if (returnedCount > 0) {
 								options = processOptions(items);
@@ -415,7 +421,10 @@
 				lazyBase
 			);
 			const response = await fetch(endpoint, { cache: 'no-store' });
-			if (response.ok) {
+			if (!response.ok) {
+				// Swallowing this leaves the picker looking empty rather than broken.
+				console.error(`Error searching ${optionsEndpoint}: ${response.status} ${endpoint}`);
+			} else {
 				const data = await response.json().then((res) => res?.results ?? res);
 				const searchResults = data.length > 0 ? processOptions(data) : [];
 				// Merge with currently selected items so they remain visible

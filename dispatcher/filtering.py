@@ -1,4 +1,5 @@
 import requests
+from urllib.parse import urljoin
 from loguru import logger
 import utils.api as api
 
@@ -74,6 +75,10 @@ def process_selector(
             results = data.get("results", [])
             results_list.extend(results)
             next_url = data.get("next")
+            # The API returns path-relative next links ("/api/...?limit="),
+            # which requests cannot resolve on its own.
+            if next_url:
+                next_url = urljoin(endpoint, next_url)
         elif isinstance(data, list):
             results_list = data
             next_url = None

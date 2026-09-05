@@ -14,7 +14,7 @@ Every list endpoint of the API returns a paginated envelope:
 ```json
 {
   "count": 1234,
-  "next": "/api/assets/?limit=50&offset=50",
+  "next": "/api/assets/?limit=100&offset=100",
   "previous": null,
   "results": ["..."]
 }
@@ -27,14 +27,20 @@ with fewer rows than `count` is a page, not the whole dataset.
 
 ## Environment variables
 
-| Variable       | Default                 | Meaning                                                                          |
-| -------------- | ----------------------- | -------------------------------------------------------------------------------- |
-| `PAGINATE_BY`  | `50`                    | Page size applied when a request passes no `limit` parameter.                    |
-| `PAGINATE_MAX` | `max(200, PAGINATE_BY)` | Hard ceiling for the `limit` parameter. Larger values are clamped, never served. |
+| Variable       | Default                  | Meaning                                                                          |
+| -------------- | ------------------------ | -------------------------------------------------------------------------------- |
+| `PAGINATE_BY`  | `100`                    | Page size applied when a request passes no `limit` parameter.                    |
+| `PAGINATE_MAX` | `max(5000, PAGINATE_BY)` | Hard ceiling for the `limit` parameter. Larger values are clamped, never served. |
 
 The default page size can never exceed the ceiling: if `PAGINATE_BY` is set
 above `PAGINATE_MAX`, the effective page size is `PAGINATE_MAX`. Because the
 ceiling follows `PAGINATE_BY` upward, raising only `PAGINATE_BY` raises both.
+
+{% hint style="info" %}
+The ceiling is deliberately generous today so that existing integrations
+keep working. It is expected to come down to 200 in a future release — build
+new clients to follow `next` rather than to request a large `limit`.
+{% endhint %}
 
 ## Client rules
 
@@ -50,10 +56,12 @@ ceiling follows `PAGINATE_BY` upward, raising only `PAGINATE_BY` raises both.
 
 {% hint style="warning" %}
 Releases prior to this change defaulted to 5,000-row pages, which let scripts
-fetch most collections in a single request. If an integration relies on that,
-teach it to follow `next` links (recommended). As a transition workaround,
-`PAGINATE_BY=5000` restores the old **default page size** only — responses
-remain paginated envelopes, invalid `limit`/`offset` values are still
-rejected, and collections larger than the page size still require following
-`next`.
+fetch most collections in a single request. A client that sends no `limit` now
+receives 100 rows per page. If an integration relies on the old behaviour,
+teach it to follow `next` links (recommended), or have it request an explicit
+`limit` — up to `PAGINATE_MAX`, which still allows 5,000. As a transition
+workaround, `PAGINATE_BY=5000` restores the old **default page size** —
+responses remain paginated envelopes, invalid `limit`/`offset` values are
+still rejected, and collections larger than the page size still require
+following `next`.
 {% endhint %}

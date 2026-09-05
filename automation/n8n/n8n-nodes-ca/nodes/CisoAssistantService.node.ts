@@ -1028,7 +1028,9 @@ export class CisoAssistantService implements INodeType {
             operation: ["list", "listUsers"],
           },
         },
-        default: false,
+        // Defaults to true so workflows saved before this option existed keep
+        // receiving whole collections instead of silently dropping to one page.
+        default: true,
         description:
           "Whether to return all results or only up to a given limit",
       },

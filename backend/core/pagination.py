@@ -1,14 +1,17 @@
+import structlog
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import LimitOffsetPagination
 from urllib.parse import urlparse
 
+logger = structlog.get_logger(__name__)
 
-def _bounded_int(value, minimum, cutoff=None):
+
+def _bounded_int(value, minimum):
     number = int(value)
     if number < minimum:
         raise ValueError()
-    return min(number, cutoff) if cutoff else number
+    return number
 
 
 class CustomLimitOffsetPagination(LimitOffsetPagination):
@@ -25,11 +28,30 @@ class CustomLimitOffsetPagination(LimitOffsetPagination):
         if param is None:
             return self.default_limit
         try:
-            return _bounded_int(param, minimum=1, cutoff=self.max_limit)
+            requested = _bounded_int(param, minimum=1)
         except ValueError:
             raise ValidationError(
                 {self.limit_query_param: "expected a strictly positive integer"}
             )
+        if requested > self.max_limit:
+            # Clients asking above the ceiling are exactly the ones a lower
+            # ceiling would truncate: record them while it is still generous.
+            logger.warning(
+                "pagination limit clamped",
+                requested=requested,
+                served=self.max_limit,
+                path=request.path,
+            )
+            return self.max_limit
+        if requested > settings.PAGINATE_TARGET_MAX:
+            # Served today, truncated if the ceiling ever drops to the target.
+            logger.info(
+                "pagination limit above target ceiling",
+                requested=requested,
+                target=settings.PAGINATE_TARGET_MAX,
+                path=request.path,
+            )
+        return requested
 
     def get_offset(self, request):
         param = request.query_params.get(self.offset_query_param)
