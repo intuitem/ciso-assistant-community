@@ -1058,6 +1058,7 @@
 	"noThreatsMapped": "No threats mapped. Consider attaching threats to your risk scenarios for a better overview.",
 	"actionPlan": "Action plan",
 	"noStatus": "No status",
+	"restricted": "Restricted",
 	"actionPlanHelpText": "The counter represents the number of associated requirements.",
 	"matchingRequirements": "Matching requirements",
 	"incoming": "Incoming",
@@ -2168,6 +2169,8 @@
 	"ebiosRMStudyARMDescription": "Import an EBIOS RM study from ARM Excel format.\nNote that this is a proprietary format, not all objects are supported and some imports could miss because of the headers or sheets changes.",
 	"ebiosRMStudyExcel": "EBIOS RM study (CISO Assistant format)",
 	"ebiosRMStudyExcelDescription": "Import an EBIOS RM study from a CISO Assistant Excel export. This allows sharing studies between different instances or restoring previously exported studies.",
+	"ebiosRMStudyEgerieXML": "EBIOS RM study (Egerie XML format)",
+	"ebiosRMStudyEgerieXMLDescription": "Import an EBIOS RM study from an Egerie Suite XML export (analyse_*.xml). Egerie's 0..1 scales are reprojected onto the selected risk matrix; controls are created as applied controls, without being linked to scenarios.",
 	"armImportPreview": "ARM Import Preview",
 	"armPreviewSummary": "The following objects will be created:",
 	"primaryAssets": "Primary assets",
@@ -2654,6 +2657,64 @@
 	"taskNodes": "Tasks occurrences",
 	"associatedTaskNodes": "Associated occurrences",
 	"nextOccurrence": "Next occurrence",
+	"scheduleDaily": "Daily",
+	"scheduleWeekly": "Weekly",
+	"scheduleMonthly": "Monthly",
+	"scheduleYearly": "Yearly",
+	"scheduleEveryNDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Every day",
+				"countPlural=other": "Every {count} days"
+			}
+		}
+	],
+	"scheduleEveryNWeeks": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Every week",
+				"countPlural=other": "Every {count} weeks"
+			}
+		}
+	],
+	"scheduleEveryNMonths": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Every month",
+				"countPlural=other": "Every {count} months"
+			}
+		}
+	],
+	"scheduleEveryNYears": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Every year",
+				"countPlural=other": "Every {count} years"
+			}
+		}
+	],
+	"dueInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "in {count} day",
+				"countPlural=other": "in {count} days"
+			}
+		}
+	],
+	"occurrenceHistory": "Occurrence history",
+	"noOccurrenceHistory": "This task has not run yet.",
+	"moreUpcoming": "{count} more upcoming",
+	"allOccurrences": "All occurrences",
 	"taskTemplate": "Task",
 	"taskTemplates": "Tasks",
 	"noTaskTemplates": "No task",
@@ -3500,6 +3561,7 @@
 	"dataWizardFindingsAssessmentDescription": "Import a findings binder (pentest, internal audit, etc.)",
 	"dataWizardElementaryActionDescription": "Import elementary actions for EBIOS RM",
 	"dataWizardProcessingDescription": "Import processings as a flat list, or re-import an exported processing workbook to recreate its purposes, personal data and other sub-objects",
+	"dataWizardEvidenceDescription": "Import evidence definitions (name, owner, status, expiry). Files and links are not imported: they are added later as revisions.",
 	"dataWizardOnConflict": "If a record already exists",
 	"dataWizardOnConflictStop": "Stop",
 	"dataWizardOnConflictSkip": "Skip",
@@ -4541,7 +4603,8 @@
 	"taskNodeNewEvidence": "Evidence globally linked to the task and spread to occurrences. You can add a revision in the 'Evidences' tab below",
 	"statusUpdatedSuccessfully": "Status updated successfully",
 	"observationUpdatedSuccessfully": "Observation updated successfully",
-	"taskTemplateEvidenceHelpText": "👉 Expected Evidence for this task.\n This will be linked to all occurrences so that you can submit revisions for each one directly.",
+	"taskTemplateEvidenceHelpText": "Expected evidence, linked to every occurrence so a revision can be filed for each.\n✨ Type a new name to create it in this task's domain.",
+	"createExpectedEvidence": "✨ Create expected evidence \"{name}\"",
 	"unassigned": "Unassigned",
 	"addEvidenceRevisionFor": "Add revision for:\n{evidenceName}",
 	"occurrenceDueDate": "Occurrence due date",

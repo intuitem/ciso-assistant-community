@@ -42,6 +42,9 @@ type Fixtures = {
 	solutionsPage: PageContent;
 	representativesPage: PageContent;
 	entityAssessmentsPage: PageContent;
+	metricDefinitionsPage: PageContent;
+	metricInstancesPage: PageContent;
+	customMetricSamplesPage: PageContent;
 	settingsPage: PageContent;
 	logedPage: LoginPage;
 	thirdPartyAuthenticatedPage: LoginPage;
@@ -421,6 +424,38 @@ export const test = base.extend<Fixtures>({
 			{ name: 'conclusion', type: type.SELECT }
 		]);
 		await use(ePage);
+	},
+
+	metricDefinitionsPage: async ({ page }, use) => {
+		const mPage = new PageContent(page, '/metric-definitions', 'Metric definitions', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'category', type: type.SELECT },
+			{ name: 'unit', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(mPage);
+	},
+
+	metricInstancesPage: async ({ page }, use) => {
+		const mPage = new PageContent(page, '/metric-instances', 'Metric instances', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'metric_definition', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'status', type: type.SELECT },
+			{ name: 'target_value', type: type.NUMBER }
+		]);
+		await use(mPage);
+	},
+
+	customMetricSamplesPage: async ({ page }, use) => {
+		const cPage = new PageContent(page, '/custom-metric-samples', 'Custom metric samples', [
+			{ name: 'metric_instance', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'timestamp', type: type.DATE },
+			{ name: 'value', type: type.NUMBER }
+		]);
+		await use(cPage);
 	},
 
 	usersPage: async ({ page }, use) => {

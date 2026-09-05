@@ -17,6 +17,8 @@ export default {
 	threatName: 'Test threat',
 	description: 'Test description',
 	biaName: 'Test BIA',
+	metricDefinitionName: 'Test metric definition',
+	metricInstanceName: 'Test metric instance',
 	file: new URL('../utils/test_image.png', import.meta.url).pathname,
 	file2: new URL('../utils/test_file.txt', import.meta.url).pathname,
 	favicon: new URL('../utils/test_favicon.ico', import.meta.url).pathname,
