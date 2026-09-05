@@ -109,9 +109,9 @@
 	// --- Edit mode for step links ---
 	let editMode = $state(false);
 
-	// One lazy picker per direct-link step: options are searched server-side via
-	// /<target_model>/autocomplete (or fetched eagerly when the collection is small)
-	// instead of fetching entire collections up front.
+	// One picker per direct-link step. Eager for now (fetches the target
+	// collection page by page) — pass `lazy` for server-side search via
+	// /<target_model>/autocomplete if step targets grow into large collections.
 	const editableSteps: any[] = (data.steps ?? []).filter(
 		(s: any) => s.target_model && s.target_ref != null
 	);

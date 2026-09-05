@@ -16,6 +16,16 @@ dependencies = [
     "uvicorn>=0.30.0",
 ]
 
+[dependency-groups]
+dev = [
+    "httpx",
+    "pytest>=7.0.0",
+    "pytest-asyncio",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-xdist>=3.0.0",
+]
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
