@@ -551,3 +551,32 @@ class TestTaskTemplateEvidenceAutoCreate:
         consumer = TaskTemplateRecordConsumer(base_context)
         consumer.prepare_create({"name": "T", "evidences": "Deferred proof"}, None)
         assert Evidence.objects.get(name="Deferred proof").revisions.count() == 0
+
+
+@pytest.mark.django_db
+class TestTaskTemplateEvidenceAuthorization:
+    """Import-time evidence creation is authorized too, but a refusal is a row
+    error rather than a 403 that discards the rest of the file."""
+
+    def test_row_is_refused_without_add_evidence(self, base_context, domain_folder):
+        from unittest.mock import patch
+        from core.models import Evidence
+        from iam.models import RoleAssignment
+
+        real = RoleAssignment.is_access_allowed
+
+        def deny_add_evidence(user, perm, folder=None):
+            if perm.codename == "add_evidence":
+                return False
+            return real(user=user, perm=perm, folder=folder)
+
+        before = Evidence.objects.count()
+        consumer = TaskTemplateRecordConsumer(base_context)
+        with patch.object(
+            RoleAssignment, "is_access_allowed", side_effect=deny_add_evidence
+        ):
+            _, error = consumer.prepare_create(
+                {"name": "T", "evidences": "Unauthorized proof"}, None
+            )
+        assert error is not None and not error.is_warning
+        assert Evidence.objects.count() == before

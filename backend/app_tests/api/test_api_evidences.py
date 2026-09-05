@@ -274,3 +274,72 @@ class TestEvidenceRevisionCreation:
         )
         assert response.status_code == 201
         assert "observation" not in response.json()
+
+
+@pytest.mark.django_db
+class TestEvidenceCreationAuthorization:
+    """Naming an evidence on a task writes through the ORM, ahead of the task's own
+    permission check, so it has to authorize add_evidence itself."""
+
+    def _viewset(self, user, folder, names):
+        from rest_framework.test import APIRequestFactory, force_authenticate
+        from core.views import TaskTemplateViewSet
+
+        request = APIRequestFactory().post(
+            "/api/task-templates/",
+            {"name": "Guarded task", "folder": str(folder.id), "evidences": names},
+            format="json",
+        )
+        force_authenticate(request, user=user)
+        response = TaskTemplateViewSet.as_view({"post": "create"})(request)
+        response.render()
+        return response
+
+    def test_typed_name_is_refused_without_add_evidence(self, authenticated_client):
+        """The reason this test exists: add_tasktemplate alone used to be enough."""
+        from unittest.mock import patch
+        from iam.models import RoleAssignment, User
+        from core.models import Evidence
+
+        user = User.objects.filter(is_superuser=True).first()
+        folder = Folder.get_root_folder()
+        real = RoleAssignment.is_access_allowed
+
+        def deny_add_evidence(user, perm, folder=None):
+            if perm.codename == "add_evidence":
+                return False
+            return real(user=user, perm=perm, folder=folder)
+
+        before = Evidence.objects.count()
+        with patch.object(
+            RoleAssignment, "is_access_allowed", side_effect=deny_add_evidence
+        ):
+            response = self._viewset(user, folder, ["Brand new evidence"])
+        assert response.status_code == 403, response.data
+        assert Evidence.objects.count() == before, "evidence created despite refusal"
+
+    def test_existing_evidence_is_linked_without_add_evidence(
+        self, authenticated_client
+    ):
+        """Reuse needs no add permission — only creation does."""
+        from unittest.mock import patch
+        from iam.models import RoleAssignment, User
+        from core.models import Evidence, TaskTemplate
+
+        user = User.objects.filter(is_superuser=True).first()
+        folder = Folder.get_root_folder()
+        existing = Evidence.objects.create(name="Already there", folder=folder)
+        real = RoleAssignment.is_access_allowed
+
+        def deny_add_evidence(user, perm, folder=None):
+            if perm.codename == "add_evidence":
+                return False
+            return real(user=user, perm=perm, folder=folder)
+
+        with patch.object(
+            RoleAssignment, "is_access_allowed", side_effect=deny_add_evidence
+        ):
+            response = self._viewset(user, folder, ["Already there"])
+        assert response.status_code == 201, response.data
+        template = TaskTemplate.objects.get(id=response.data["id"])
+        assert list(template.evidences.all()) == [existing]

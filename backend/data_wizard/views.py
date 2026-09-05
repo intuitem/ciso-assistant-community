@@ -106,6 +106,9 @@ from ebios_rm.serializers import (
     EbiosRMStudyWriteSerializer,
     ElementaryActionWriteSerializer,
 )
+from rest_framework.exceptions import PermissionDenied
+
+from core.views import check_folder_add_permission
 from iam.models import Permission, RoleAssignment, User
 from privacy.models import (
     ART6_LAWFUL_BASIS_CHOICES,
@@ -1490,8 +1493,11 @@ class EvidenceRecordConsumer(RecordConsumer):
         return None, None
 
     def find_existing(self, record_data: dict) -> Optional[Evidence]:
+        # Case-insensitive, matching how a task import resolves an evidence name:
+        # an exact match would import "audit log" as a second "Audit Log".
         return Evidence.objects.filter(
-            name=record_data.get("name"), folder_id=record_data.get("folder")
+            name__iexact=record_data.get("name"),
+            folder_id=record_data.get("folder"),
         ).first()
 
     @classmethod
@@ -2526,17 +2532,21 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
                 )
         return list(ids)
 
-    @staticmethod
     def _resolve_or_create_evidences(
-        raw: str, accessible_folder_ids: set, folder_id
+        self, raw: str, accessible_folder_ids: set, folder_id
     ) -> list[UUID]:
         """Resolve evidence names to ids, creating the ones the domain lacks.
 
         An existing evidence wins, preferring the task's own folder so a name reused
         across domains binds locally; only when nothing matches is one created, in
         the task's folder.
+
+        Creation is authorized here because it writes through the ORM, ahead of the
+        task's own permission check: without it, `add_tasktemplate` alone would be
+        enough to create evidence.
         """
         ids: list[UUID] = []
+        folder = None
         for entry in re.split(r"[|,\n]", str(raw)):
             entry = entry.strip()
             if not entry:
@@ -2550,6 +2560,9 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
                 (c for c in candidates if str(c.folder_id) == str(folder_id)), None
             ) or (candidates[0] if candidates else None)
             if evidence is None:
+                if folder is None:
+                    folder = Folder.objects.filter(id=folder_id).first()
+                check_folder_add_permission(self.request.user, folder, Evidence)
                 evidence = Evidence(name=entry, folder_id=folder_id)
                 evidence.full_clean()
                 evidence.save()
@@ -2683,13 +2696,18 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         # Expected evidence is a declaration, not a pre-existing artifact: naming one
         # the domain does not have yet creates it there rather than dropping the link.
         raw_evidences = record.get("evidences") or ""
-        data["evidences"] = (
-            self._resolve_or_create_evidences(
-                raw_evidences, accessible_folder_ids, folder_id
-            )
-            if raw_evidences
-            else []
-        )
+        if raw_evidences:
+            try:
+                data["evidences"] = self._resolve_or_create_evidences(
+                    raw_evidences, accessible_folder_ids, folder_id
+                )
+            except PermissionDenied:
+                return {}, Error(
+                    record=record,
+                    error="Not allowed to create evidence in this domain",
+                )
+        else:
+            data["evidences"] = []
 
         if unresolved:
             return data, Error(

@@ -915,7 +915,7 @@ The wizard imports both in a single multi-sheet Excel file: a **Summary** sheet 
 * `assigned_to` - comma- or semicolon-separated list of user emails and/or team names
 * `assets` - comma-separated asset names or ref\_ids
 * `applied_controls` - comma-separated control names or ref\_ids
-* `evidences` - comma-separated evidence names; a name the task's domain does not have yet is created there as an expected evidence and linked
+* `evidences` - comma-, pipe- or newline-separated evidence names; a name the task's domain does not have yet is created there as an expected evidence and linked
 * `compliance_assessments` - comma-separated assessment names or ref\_ids
 * `risk_assessments` - comma-separated assessment names or ref\_ids; the `name - version` format produced by the export is accepted
 * `findings_assessment` - comma-separated findings assessment names or ref\_ids

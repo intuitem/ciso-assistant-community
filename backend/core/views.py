@@ -1148,8 +1148,15 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         exist yet; it is created in the parent object's own folder. Reusing a name
         already taken in that folder links the existing evidence rather than
         creating a homonym nobody can tell apart.
+
+        Both branches are authorized here rather than by the caller's serializer:
+        this writes through the ORM, so it runs before the parent object's own
+        add/change check and would otherwise let `add_tasktemplate` alone create
+        evidence. Reuse is scoped to what the user may see, so an invisible
+        evidence is never silently attached.
         """
         new_evidences = []
+        viewable_ids = None
         for value in evidences or []:
             try:
                 uuid.UUID(str(value), version=4)
@@ -1157,8 +1164,15 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 continue
             except ValueError:
                 pass
-            evidence = Evidence.objects.filter(name=value, folder=folder).first()
+            if viewable_ids is None:
+                viewable_ids = set(
+                    RoleAssignment.get_viewable_object_ids(self.request.user, Evidence)
+                )
+            evidence = Evidence.objects.filter(
+                name=value, folder=folder, id__in=viewable_ids
+            ).first()
             if evidence is None:
+                check_folder_add_permission(self.request.user, folder, Evidence)
                 evidence = Evidence(name=value, folder=folder)
                 evidence.full_clean()
                 evidence.save()
