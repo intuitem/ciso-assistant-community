@@ -234,9 +234,11 @@
 
 	function autocompleteBase() {
 		// optionsEndpoint may carry a query string ("folders?content_type=DO"):
-		// the /autocomplete action must be inserted before it.
+		// the /autocomplete action must be inserted before it. Some callers
+		// already target the autocomplete action — don't double the segment.
 		const [path, query] = optionsEndpoint.split('?');
-		return query ? `${path}/autocomplete?${query}` : `${path}/autocomplete`;
+		const base = path.endsWith('/autocomplete') ? path : `${path}/autocomplete`;
+		return query ? `${base}?${query}` : base;
 	}
 
 	// Surface suggested options in lazy mode, where no option list is fetched

@@ -143,7 +143,12 @@
 	function onStepTargetRefChange(step: any, value: unknown) {
 		if (!touchedStepPickers[step.id]) return;
 		const targetRef = (Array.isArray(value) ? (value[0] ?? null) : value) || null;
-		if (targetRef === (step.target_ref ?? null)) return;
+		// Compare against the live server state, not the load-time snapshot in
+		// editableSteps — after a PATCH + invalidateAll the snapshot is stale and
+		// would silently drop a revert to the original value.
+		const liveStep = (data.steps ?? []).find((s: any) => s.id === step.id);
+		const currentRef = (liveStep ? liveStep.target_ref : step.target_ref) ?? null;
+		if (targetRef === currentRef) return;
 		updateStepTargetRef(step.id, targetRef);
 	}
 
