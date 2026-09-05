@@ -445,7 +445,7 @@ else:
     MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
     MEDIA_URL = ""
 
-PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=100))
+PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
 # Ceiling we intend to converge on; requests above it are logged, not clamped.
 PAGINATE_TARGET_MAX = 200
 # Held at 5000: Power BI connector <= 1.0.2 pages by the limit it requested, so a
