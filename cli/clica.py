@@ -2,6 +2,7 @@
 from datetime import datetime
 import sys
 from pathlib import Path
+from urllib.parse import urlsplit
 import tempfile
 import hashlib
 import struct
@@ -74,7 +75,9 @@ def get_global_folder_id() -> Optional[str]:
     global GLOBAL_FOLDER_ID
     if GLOBAL_FOLDER_ID:
         return GLOBAL_FOLDER_ID
-    url = f"{API_URL}/folders/"
+    # Filter server-side: the API paginates, so scanning an unfiltered first
+    # page misses the root folder once more than a page of folders exists.
+    url = f"{API_URL}/folders/?content_type=GL"
     headers = {"Authorization": f"Token {TOKEN}"}
 
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
@@ -305,9 +308,14 @@ DATA_WIZARD_COMMANDS = [
         "command": "import_evidences",
         "model_type": "Evidence",
         "help": (
-            "Import evidences from CSV/Excel.\n"
+            "Import evidence definitions from CSV/Excel.\n"
             "\nRequired columns: name\n\n"
-            "Optional columns: ref_id, description, filtering_labels, domain\n"
+            "Optional columns: description, domain, "
+            "status (draft/missing/in_review/approved/rejected/expired), "
+            "expiry_date, owner (semicolon-separated emails/team names), "
+            "filtering_labels\n"
+            "\nDefinitions only: attachments and links belong to a revision and are "
+            "not imported.\n"
             "\nConflict detection: by name + folder"
         ),
         "requires_folder": True,
@@ -641,7 +649,12 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_tasks",
         "model_type": "TaskTemplate",
-        "help": "Import task templates and past task node occurrences (multi-sheet Excel or CSV) using the Data Wizard backend.",
+        "help": (
+            "Import task templates and past task node occurrences (multi-sheet Excel "
+            "or CSV) using the Data Wizard backend.\n"
+            "\nNames in the 'evidences' column are matched in the task's domain and "
+            "created there when missing, so expected evidence is linked in one pass."
+        ),
         "requires_folder": False,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -913,8 +926,14 @@ def backup_full(dest_dir, batch_size, resume):
         all_metadata.extend(data["results"])
         url = data.get("next")
         if url and not url.startswith("http"):
-            # Convert relative URL to absolute
-            url = f"{API_URL}/serdes/attachment-metadata/{url}"
+            # Convert relative URL to absolute. The API returns
+            # path-relative next links ("/api/...?limit=..."), so join
+            # against the origin, not the endpoint.
+            if url.startswith("/"):
+                split = urlsplit(API_URL)
+                url = f"{split.scheme}://{split.netloc}{url}"
+            else:
+                url = f"{API_URL}/serdes/attachment-metadata/{url}"
 
     rprint(f"[cyan]Found {len(all_metadata)} total attachments[/cyan]")
 
