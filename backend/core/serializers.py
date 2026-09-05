@@ -5550,11 +5550,27 @@ class TaskTemplateReadSerializer(CommitmentSerializerMixin, BaseModelSerializer)
             )
         return obj._cached_task_node
 
+    # Resolved in the list/retrieve queryset; None there is a real answer, so it
+    # cannot double as "not annotated".
+    _NOT_ANNOTATED = object()
+
     def get_status(self, obj):
+        annotated = getattr(obj, "one_time_status", self._NOT_ANNOTATED)
+        if annotated is not self._NOT_ANNOTATED:
+            return None if obj.is_recurrent else annotated
         task_node = self.get_task_node(obj)
         return task_node.status if task_node else None
 
     def get_observation(self, obj):
+        annotated = getattr(obj, "one_time_observation", self._NOT_ANNOTATED)
+        if annotated is not self._NOT_ANNOTATED:
+            # A null observation on an existing node is not the same answer as no
+            # node at all. TaskNode.status is non-nullable, so its annotation being
+            # None is what tells the two apart.
+            no_occurrence = getattr(obj, "one_time_status", None) is None
+            if obj.is_recurrent or no_occurrence:
+                return ""
+            return annotated
         task_node = self.get_task_node(obj)
         return task_node.observation if task_node else ""
 
@@ -5744,14 +5760,30 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     assigned_to = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(["folder", "id"], many=True)
     is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
-    expected_evidence = FieldsRelatedField(["folder", "id"], many=True)
+    # These read off the template. The model exposes them as properties returning
+    # `.all()`, and DRF calls `.all()` again on whatever it gets — on a QuerySet that
+    # clones and discards the prefetched rows, costing a query per node per field.
+    # Naming the manager instead lets the second `.all()` hit the prefetch cache.
+    expected_evidence = FieldsRelatedField(
+        ["folder", "id"], many=True, source="task_template.evidences"
+    )
     evidence_reviewed = serializers.SerializerMethodField()
     evidence_revisions_map = serializers.SerializerMethodField()
-    applied_controls = FieldsRelatedField(["folder", "id"], many=True)
-    compliance_assessments = FieldsRelatedField(["folder", "id"], many=True)
-    assets = FieldsRelatedField(["folder", "id"], many=True)
-    risk_assessments = FieldsRelatedField(["folder", "id"], many=True)
-    findings_assessment = FieldsRelatedField(["folder", "id"], many=True)
+    applied_controls = FieldsRelatedField(
+        ["folder", "id"], many=True, source="task_template.applied_controls"
+    )
+    compliance_assessments = FieldsRelatedField(
+        ["folder", "id"], many=True, source="task_template.compliance_assessments"
+    )
+    assets = FieldsRelatedField(
+        ["folder", "id"], many=True, source="task_template.assets"
+    )
+    risk_assessments = FieldsRelatedField(
+        ["folder", "id"], many=True, source="task_template.risk_assessments"
+    )
+    findings_assessment = FieldsRelatedField(
+        ["folder", "id"], many=True, source="task_template.findings_assessment"
+    )
 
     def get_name(self, obj):
         return obj.task_template.name if obj.task_template else ""
@@ -5766,16 +5798,16 @@ class TaskNodeReadSerializer(BaseModelSerializer):
 
     def get_evidence_revisions_map(self, obj):
         """Returns a mapping of evidence ID to revision ID for this task node"""
-        from core.models import EvidenceRevision
-
+        expected = {evidence.id for evidence in obj.expected_evidence}
         evidence_revisions = {}
-        for evidence in obj.expected_evidence:
-            # Find revisions for this evidence that belong to this task node
-            revision = EvidenceRevision.objects.filter(
-                evidence=evidence, task_node=obj
-            ).first()
-            if revision:
-                evidence_revisions[str(evidence.id)] = str(revision.id)
+        # Walking the node's own revisions costs one prefetched list; querying per
+        # expected evidence cost a query each. setdefault keeps the first match, as
+        # the per-evidence .first() did.
+        for revision in obj.evidence_revisions.all():
+            if revision.evidence_id in expected:
+                evidence_revisions.setdefault(
+                    str(revision.evidence_id), str(revision.id)
+                )
         return evidence_revisions
 
     class Meta:

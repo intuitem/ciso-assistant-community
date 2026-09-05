@@ -1009,6 +1009,45 @@ def actor_bucket_identity(actor, allowed_ids: set[str]) -> tuple[str, str | None
     return RESTRICTED_BUCKET_KEY, None
 
 
+def task_node_read_queryset(queryset):
+    """Join in everything ``TaskNodeReadSerializer`` walks.
+
+    Half of what a node exposes is proxied off its template — ``expected_evidence``
+    and friends are properties over ``self.task_template.<m2m>`` — so the prefetch
+    has to reach through ``task_template`` for the cache to be hit. The related rows
+    are rendered as ``{"folder": ..., "id": ...}``, hence the inner
+    ``select_related("folder")`` on each.
+    """
+
+    def scoped(model):
+        return model.objects.select_related("folder")
+
+    return queryset.select_related(
+        "folder", "task_template", "task_template__folder"
+    ).prefetch_related(
+        # assigned_to is one of the proxied properties, not a field on the node.
+        actor_prefetch("task_template__assigned_to"),
+        Prefetch("evidences", queryset=scoped(Evidence)),
+        # Read by get_evidence_revisions_map instead of a query per evidence.
+        "evidence_revisions",
+        # last_revision walks revisions in python, so they come along.
+        Prefetch(
+            "task_template__evidences",
+            queryset=scoped(Evidence).prefetch_related("revisions"),
+        ),
+        Prefetch("task_template__applied_controls", queryset=scoped(AppliedControl)),
+        Prefetch(
+            "task_template__compliance_assessments",
+            queryset=scoped(ComplianceAssessment),
+        ),
+        Prefetch("task_template__assets", queryset=scoped(Asset)),
+        Prefetch("task_template__risk_assessments", queryset=scoped(RiskAssessment)),
+        Prefetch(
+            "task_template__findings_assessment", queryset=scoped(FindingsAssessment)
+        ),
+    )
+
+
 def check_folder_add_permission(user, folder, *models):
     """Raise PermissionDenied unless *user* may create each of *models* in *folder*.
 
@@ -10022,6 +10061,7 @@ class EvidenceViewSet(BaseModelViewSet):
         return (
             super()
             .get_queryset()
+            .select_related("folder")
             .prefetch_related(
                 "revisions",
                 "applied_controls",
@@ -10029,7 +10069,7 @@ class EvidenceViewSet(BaseModelViewSet):
                 "security_exceptions",
                 "contracts",
                 "filtering_labels",
-                "owner",
+                actor_prefetch("owner"),
             )
         )
 
@@ -17246,6 +17286,11 @@ def _bucket_by_date(due, today):
     return "later"
 
 
+# Actions that serialize whole templates and so need the related columns resolved
+# in the queryset rather than per row.
+READ_HEAVY_ACTIONS = frozenset({"list", "retrieve", "yearly_review"})
+
+
 class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet):
     model = TaskTemplate
 
@@ -17653,7 +17698,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
     def get_queryset(self):
         qs = super().get_queryset().select_related("folder")
-        if self.action in ("list", "retrieve"):
+        if self.action in READ_HEAVY_ACTIONS:
             # Opt-in columns: one query each, not one per row.
             qs = qs.prefetch_related(
                 "filtering_labels__folder",
@@ -17672,7 +17717,10 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             )
         ordering = self.request.query_params.get("ordering", "")
 
-        if any(
+        # The serializer reads these three columns on every row, and each falls back
+        # to its own TaskNode query when the annotation is missing — ~114 queries on
+        # a page of 50. Sorting is not the only reason to resolve them here.
+        if self.action in READ_HEAVY_ACTIONS or any(
             f in ordering
             for f in (
                 "next_occurrence",
@@ -17724,6 +17772,18 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                     default=Value(None),
                     output_field=models.CharField(),
                 ),
+                # The serializer exposes the single occurrence's status and
+                # observation directly; without these it fetches that node per row.
+                one_time_status=Subquery(
+                    TaskNode.objects.filter(task_template=OuterRef("pk"))
+                    .order_by("due_date")
+                    .values("status")[:1]
+                ),
+                one_time_observation=Subquery(
+                    TaskNode.objects.filter(task_template=OuterRef("pk"))
+                    .order_by("due_date")
+                    .values("observation")[:1]
+                ),
             )
 
         return qs
@@ -17736,6 +17796,28 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             str(template.id): template for template in task_templates
         }
         tasks_list = []
+
+        # Serializing a node one at a time costs ~7 queries each, because nothing is
+        # prefetched on a lone instance. Stand in for each with a placeholder here
+        # and serialize the whole set once at the end, off a joined queryset.
+        deferred_nodes: dict[str, TaskNode] = {}
+
+        def rescue(node):
+            """Clear the GC flag, but only when it is actually set.
+
+            The calendar rescues nodes on every view; an unconditional save still
+            runs clean() and an UPDATE for a row that already holds the value.
+            """
+            if node.to_delete:
+                node.to_delete = False
+                node.save(update_fields=["to_delete"])
+
+        def defer(node):
+            deferred_nodes[str(node.id)] = node
+            # Carries what the code below reads off a real entry: an id, a due date,
+            # and the absence of "virtual".
+            return {"id": str(node.id), "due_date": node.due_date, "_deferred": True}
+
         for template in task_templates:
             if not template.is_recurrent:
                 if not template.task_date:
@@ -17784,17 +17866,15 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             for node in existing_nodes:
                 if node.due_date != node.scheduled_date:
                     # Always preserve user-rescheduled nodes
-                    node.to_delete = False
-                    node.save(update_fields=["to_delete"])
+                    rescue(node)
                     if node.due_date and start_date <= node.due_date <= end_date:
-                        tasks_list.append(TaskNodeReadSerializer(node).data)
+                        tasks_list.append(defer(node))
                 elif node.scheduled_date not in generated_scheduled_dates:
                     effective_date = node.due_date or node.scheduled_date
                     if effective_date and effective_date < today:
                         # Preserve past nodes whose slot was removed
-                        node.to_delete = False
-                        node.save(update_fields=["to_delete"])
-                        tasks_list.append(TaskNodeReadSerializer(node).data)
+                        rescue(node)
+                        tasks_list.append(defer(node))
 
         def _parse_due_date(val):
             """Normalize due_date to a date object"""
@@ -17887,9 +17967,23 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                     tasks_list[i] = None
                     continue
                 materialized_node_ids.add(str(task_node.id))
-                task_node.to_delete = False
-                task_node.save(update_fields=["to_delete"])
-                tasks_list[i] = TaskNodeReadSerializer(task_node).data
+                rescue(task_node)
+                tasks_list[i] = defer(task_node)
+
+        if deferred_nodes:
+            nodes = task_node_read_queryset(
+                TaskNode.objects.filter(id__in=deferred_nodes)
+            )
+            # Deliberately serialized without an "optimized_data" context: it and
+            # PathField's own fallback disagree on objects sitting directly in the
+            # root folder, and the calendar has always used the fallback.
+            serialized = {
+                str(row["id"]): row
+                for row in TaskNodeReadSerializer(nodes, many=True).data
+            }
+            for i, task in enumerate(tasks_list):
+                if task is not None and task.get("_deferred"):
+                    tasks_list[i] = serialized.get(task["id"])
 
         return [task for task in tasks_list if task is not None]
 
@@ -18314,9 +18408,8 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             due_date__gte=year_start, due_date__lte=year_end
         ).order_by("due_date")
 
-        task_templates = queryset.select_related("folder").prefetch_related(
-            "assigned_to",
-            "applied_controls",
+        # get_queryset already joins folder and the serializer's related columns.
+        task_templates = queryset.prefetch_related(
             Prefetch(
                 "tasknode_set",
                 queryset=filtered_nodes_qs,
@@ -18417,6 +18510,12 @@ class TaskNodeViewSet(BaseModelViewSet):
     filterset_class = TaskNodeFilterSet
     search_fields = ["observation"]
     ordering = ["due_date"]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action not in ("list", "retrieve"):
+            return qs.select_related("folder", "task_template")
+        return task_node_read_queryset(qs)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Task Node status choices")
