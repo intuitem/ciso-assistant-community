@@ -46,7 +46,7 @@ def app_config():
 
 @pytest.fixture
 def admin_client(app_config):
-    admin = User.objects.create_superuser("admin@sa-tests.com", is_published=True)
+    admin = User.objects.create_superuser("admin@sa-tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()
@@ -486,6 +486,11 @@ class TestServiceAccountExclusions:
         assert str(domain_folder.id) not in folder_ids
 
     def test_update_permissions_to_empty_is_allowed(self, admin_client, domain_folder):
+        root_folder = Folder.get_root_folder()
+        assert root_folder is not None, "No root folder found."
+        root_folder.default_role = None
+        root_folder.save()
+
         payload = _create_sa(admin_client, domain_folder)
         access_token = _fetch_token(
             payload["client_id"], payload["client_secret"]

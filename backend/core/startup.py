@@ -169,6 +169,70 @@ READER_PERMISSIONS_LIST = [
     "view_agentaction",
 ]
 
+READER_CATALOG_PERMISSIONS_LIST = [
+    "view_securityadvisory",
+    "view_cwe",
+    "view_technique",
+    "view_ttpcatalog",
+    "view_tactic",
+    "view_responsibilityrole",
+    "view_metricdefinition",
+    "view_metricinstance",
+    "view_terminology",
+    "view_riskmatrix",
+    "view_framework",
+    "view_question",
+    "view_questionchoice",
+    "view_requirementnode",
+    "view_referencecontrol",
+    "view_elementaryaction",
+    "view_asset",
+    "view_threat",
+    "view_evidence",
+    "view_evidencerevision",
+    "view_comment",
+    "view_appliedcontrol",
+    "view_policy",
+    "view_vulnerability",
+    "view_folder",
+    "view_actor",
+    "view_user",
+    "view_team",
+    "view_storedlibrary",
+    "view_loadedlibrary",
+    "view_filteringlabel",
+    "view_libraryfilteringlabel",
+    "view_organisationobjective",
+    "view_organisationissue",
+    "view_assetclass",
+    "view_assetcapability",
+    "view_objectclassification",
+    "view_entity",
+    "view_documenttemplate",
+    "view_customfielddefinition",
+    "view_requirementmapping",
+    "view_requirementmappingset",
+]
+
+READER_MIGRATION_REMOVED_PERMISSIONS_LIST = {
+    "view_tactic",
+    "view_metricinstance",
+    "view_riskmatrix",
+    "view_framework",
+    "view_question",
+    "view_questionchoice",
+    "view_requirementnode",
+    "view_entity",
+    "view_documenttemplate",
+    "view_customfielddefinition",
+    "view_organisationobjective",
+    "view_organisationissue",
+}
+
+READER_MIGRATION_PERMISSIONS_LIST = list(
+    set(READER_CATALOG_PERMISSIONS_LIST) - READER_MIGRATION_REMOVED_PERMISSIONS_LIST
+)
+
 APPROVER_PERMISSIONS_LIST = [
     "view_customfielddefinition",
     "view_compliance_assessment_full",
@@ -2124,6 +2188,8 @@ def startup(sender=None, **kwargs):
     # Sync builtin role permissions — all permission rows exist at this point
     for name, perm_list in (
         ("BI-RL-AUD", READER_PERMISSIONS_LIST),
+        ("BI-RL-MIG", READER_MIGRATION_PERMISSIONS_LIST),
+        ("BI-RL-CAT", READER_CATALOG_PERMISSIONS_LIST),
         ("BI-RL-APP", APPROVER_PERMISSIONS_LIST),
         ("BI-RL-ANA", ANALYST_PERMISSIONS_LIST),
         ("BI-RL-DMA", DOMAIN_MANAGER_PERMISSIONS_LIST),
@@ -2385,7 +2451,6 @@ def startup(sender=None, **kwargs):
             name="vulnerability-sla",
             defaults={
                 "value": vulnerability_sla_defaults,
-                "is_published": True,
                 "folder": Folder.get_root_folder(),
             },
         )
@@ -2406,7 +2471,6 @@ def startup(sender=None, **kwargs):
             name="sec-intel-feeds",
             defaults={
                 "value": sec_intel_defaults,
-                "is_published": True,
                 "folder": Folder.get_root_folder(),
             },
         )

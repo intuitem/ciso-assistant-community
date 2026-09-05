@@ -1342,6 +1342,8 @@
 	"removeIdentifier": "Eemalda identifikaator",
 	"phone": "Telefon",
 	"role": "Roll",
+	"defaultRole": "Vaikimisi roll",
+	"defaultRoleHelpText": "Roll, mis antakse automaatselt sellele domeenile igale kasutajale, kellel on rollimääramine mõnel selle alamdomeenil.",
 	"questions": "Küsimused",
 	"recipientEntity": "Saajaüksus",
 	"financial": "Finants",

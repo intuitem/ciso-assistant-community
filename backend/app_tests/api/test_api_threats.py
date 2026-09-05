@@ -31,7 +31,6 @@ class TestThreatsUnauthenticated:
                 "ref_id": THREAT_REF_ID,
                 "name": THREAT_NAME,
                 "description": THREAT_DESCRIPTION,
-                "is_published": True,
                 "folder": Folder.objects.create(name="test"),
             },
         )
@@ -64,7 +63,6 @@ class TestThreatsUnauthenticated:
                 "description": THREAT_DESCRIPTION,
                 "provider": THREAT_PROVIDER,
                 "folder": Folder.objects.create(name="test"),
-                "is_published": True,
             },
             {
                 "ref_id": "new " + THREAT_REF_ID,
@@ -106,7 +104,6 @@ class TestThreatsAuthenticated:
                 "description": THREAT_DESCRIPTION,
                 "provider": THREAT_PROVIDER,
                 "urn": THREAT_URN,
-                "is_published": True,
             },
             {
                 "folder": {
@@ -154,7 +151,6 @@ class TestThreatsAuthenticated:
                 "description": THREAT_DESCRIPTION,
                 "provider": THREAT_PROVIDER,
                 "urn": THREAT_URN,
-                "is_published": True,
             },
             {
                 "ref_id": "new " + THREAT_REF_ID,

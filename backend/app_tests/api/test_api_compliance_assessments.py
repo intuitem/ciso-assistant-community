@@ -852,7 +852,7 @@ class TestComplianceAssessmentDetailActionAuthorization:
     @pytest.fixture
     def outsider_client(self, app_config):
         """An authenticated user with no role assignment on any folder."""
-        user = User.objects.create_user("outsider@tests.com", is_published=True)
+        user = User.objects.create_user("outsider@tests.com")
         client = APIClient()
         client.credentials(
             HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"

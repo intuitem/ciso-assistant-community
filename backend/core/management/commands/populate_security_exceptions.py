@@ -197,7 +197,6 @@ class Command(BaseCommand):
                 severity=severity,
                 expiration_date=expiration_date,
                 approver=approver,
-                is_published=True,
             )
 
             # Randomly assign owners (1-3 actors)

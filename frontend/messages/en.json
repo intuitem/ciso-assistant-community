@@ -1444,6 +1444,8 @@
 	"removeIdentifier": "Remove identifier",
 	"phone": "Phone",
 	"role": "Role",
+	"defaultRole": "Default role",
+	"defaultRoleHelpText": "Role automatically granted on this domain to any user with a role assignment on one of its sub-domains.",
 	"questions": "Questions",
 	"recipientEntity": "Recipient entity",
 	"financial": "Financial",

@@ -43,9 +43,7 @@ def _client_for(user):
 
 @pytest.fixture
 def admin_client(app_config):
-    admin = User.objects.create_superuser(
-        "admin@default-dashboard-tests.com", is_published=True
-    )
+    admin = User.objects.create_superuser("admin@default-dashboard-tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()
@@ -55,9 +53,7 @@ def admin_client(app_config):
 
 @pytest.fixture
 def non_admin_client(app_config):
-    user = User.objects.create_user(
-        email="user@default-dashboard-tests.com", is_published=True
-    )
+    user = User.objects.create_user(email="user@default-dashboard-tests.com")
     return _client_for(user)
 
 

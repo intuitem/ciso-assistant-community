@@ -42,7 +42,7 @@
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
 
-	const defaultExcludes = ['id', 'is_published', 'str', 'path', 'sync_mappings'];
+	const defaultExcludes = ['id', 'str', 'path', 'sync_mappings'];
 
 	// Format the raw numbers of the ROSI explanation per the active locale.
 	function formatRosiExplanationParams(params: Record<string, number> | undefined) {

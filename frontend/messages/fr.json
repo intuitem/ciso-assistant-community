@@ -1474,6 +1474,8 @@
 	"mappingMaxDepthHelpText": "Profondeur maximale pour explorer les relations de mapping entre référentiels (2-5). Des valeurs plus élevées trouvent plus de mappings indirects mais nécessitent plus de temps de calcul.",
 	"phone": "Téléphone",
 	"role": "Rôle",
+	"defaultRole": "Rôle par défaut",
+	"defaultRoleHelpText": "Rôle accordé automatiquement sur ce domaine à tout utilisateur disposant d'une affectation de rôle sur l'un de ses sous-domaines.",
 	"questions": "Questions",
 	"recipientEntity": "Entité destinataire",
 	"financial": "Financier",

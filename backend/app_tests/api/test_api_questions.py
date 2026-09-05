@@ -21,7 +21,6 @@ def framework_with_node(app_config):
     fw = Framework.objects.create(
         name="Test Framework",
         folder=folder,
-        is_published=True,
     )
     rn = RequirementNode.objects.create(
         framework=fw,
@@ -29,7 +28,6 @@ def framework_with_node(app_config):
         ref_id="REQ-001",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     return fw, rn
 
@@ -58,7 +56,6 @@ class TestQuestionEndpoints:
             text="What is your name?",
             type=Question.Type.TEXT,
             folder=folder,
-            is_published=True,
         )
         response = authenticated_client.get(reverse("questions-list"))
         assert response.status_code == status.HTTP_200_OK
@@ -123,7 +120,6 @@ class TestQuestionChoiceEndpoints:
             ref_id="CQ1",
             type=Question.Type.UNIQUE_CHOICE,
             folder=folder,
-            is_published=True,
         )
         data = {
             "question": str(q.id),

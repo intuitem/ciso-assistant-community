@@ -1368,6 +1368,8 @@
 	"removeIdentifier": "Odstrani identifikator",
 	"phone": "Telefon",
 	"role": "Vloga",
+	"defaultRole": "Privzeta vloga",
+	"defaultRoleHelpText": "Vloga, ki se samodejno dodeli na tej domeni vsakemu uporabniku z dodelitvijo vloge na eni od njenih poddomen.",
 	"questions": "Vprašanja",
 	"recipientEntity": "Subjekt prejemnik",
 	"financial": "Finančni",

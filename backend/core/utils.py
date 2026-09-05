@@ -440,6 +440,60 @@ BUILTIN_ROLE_TRANSLATIONS = {
         "ur": {"name": "تکنیکی ٹیسٹر"},
         "zh": {"name": "技术测试员"},
     },
+    "BI-RL-MIG": {
+        "en": {"name": "Legacy migration reader"},
+        "ar": {"name": "قارئ الترحيل القديم"},
+        "cs": {"name": "Čtečka starší migrace"},
+        "da": {"name": "Ældre migrationslæser"},
+        "de": {"name": "Legacy-Migrationsleser"},
+        "el": {"name": "Αναγνώστης παλαιάς μετάβασης"},
+        "es": {"name": "Lector de migración heredada"},
+        "et": {"name": "Pärand-migratsiooni lugeja"},
+        "fr": {"name": "Lecteur de migration héritée"},
+        "hi": {"name": "विरासती माइग्रेशन रीडर"},
+        "hr": {"name": "Čitatelj naslijeđene migracije"},
+        "hu": {"name": "Örökölt migrációolvasó"},
+        "id": {"name": "Pembaca migrasi warisan"},
+        "it": {"name": "Lettore della migrazione legacy"},
+        "ko": {"name": "레거시 마이그레이션 열람자"},
+        "lt": {"name": "Paveldėtos migracijos skaitytojas"},
+        "nl": {"name": "Legacy-migratielezer"},
+        "pl": {"name": "Czytelnik starszej migracji"},
+        "pt": {"name": "Leitor de migração legada"},
+        "ro": {"name": "Cititor de migrare moștenită"},
+        "sv": {"name": "Äldre migrationsläsare"},
+        "tr": {"name": "Eski geçiş okuyucusu"},
+        "uk": {"name": "Читач застарілої міграції"},
+        "ur": {"name": "پرانی مائیگریشن ریڈر"},
+        "zh": {"name": "遗留迁移阅读者"},
+    },
+    "BI-RL-CAT": {
+        "en": {"name": "Catalog reader"},
+        "ar": {"name": "قارئ الكتالوج"},
+        "cs": {"name": "Čtečka katalogu"},
+        "da": {"name": "Kataloglæser"},
+        "de": {"name": "Katalogleser"},
+        "el": {"name": "Αναγνώστης καταλόγου"},
+        "es": {"name": "Lector de catálogo"},
+        "et": {"name": "Kataloogilugeja"},
+        "fr": {"name": "Lecteur de catalogue"},
+        "hi": {"name": "सूची रीडर"},
+        "hr": {"name": "Čitatelj kataloga"},
+        "hu": {"name": "Katalógusolvasó"},
+        "id": {"name": "Pembaca katalog"},
+        "it": {"name": "Lettore del catalogo"},
+        "ko": {"name": "카탈로그 열람자"},
+        "lt": {"name": "Katalogo skaitytojas"},
+        "nl": {"name": "Cataloguslezer"},
+        "pl": {"name": "Czytelnik katalogu"},
+        "pt": {"name": "Leitor de catálogo"},
+        "ro": {"name": "Cititor de catalog"},
+        "sv": {"name": "Katalogläsare"},
+        "tr": {"name": "Katalog okuyucusu"},
+        "uk": {"name": "Читач каталогу"},
+        "ur": {"name": "کیٹلاگ ریڈر"},
+        "zh": {"name": "目录阅读者"},
+    },
 }
 
 
@@ -1556,8 +1610,6 @@ def get_respondent_scoped_folder_ids(user) -> set[UUID]:
     treated as a respondent. Auditor-side roles (reader, approver, analyst,
     domain-manager, administrator) hold ``view_compliance_assessment_full`` and are therefore
     excluded; auditee and third-party respondent do not and are included.
-
-    Uses the IAM snapshot caches exclusively (no extra DB queries).
     """
     from iam.models import RoleAssignment
 

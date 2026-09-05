@@ -179,7 +179,6 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 |-------|------|----------|
 | `annotation` | TextField | Medium |
 | `provider` | CharField | Low |
-| `is_published` | BooleanField | Low |
 | i18n fields | Various | Low |
 
 ---
@@ -367,6 +366,7 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
+| `default_role` | FK Role | Medium |
 | `content_type` | CharField | Low |
 | `builtin` | BooleanField | Low |
 | `hide_in_selects` | BooleanField | Low |
@@ -426,7 +426,6 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `requirement_assessments` | M2M | Medium |
 | `applied_controls` | M2M | Medium |
 | `assets` | M2M | Medium |
-| `is_published` | BooleanField | Low |
 
 ---
 
@@ -454,7 +453,6 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `assets` | M2M | High |
 | `entities` | M2M | Medium |
 | `qualifications` | M2M Terminology | Medium |
-| `is_published` | BooleanField | Low |
 
 ---
 

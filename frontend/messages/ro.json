@@ -821,6 +821,8 @@
 	"addRepresentative": "Adăugați un reprezentant",
 	"phone": "Telefon",
 	"role": "Rol",
+	"defaultRole": "Rol implicit",
+	"defaultRoleHelpText": "Rol acordat automat pe acest domeniu oricărui utilizator cu o atribuire de rol pe unul dintre subdomeniile sale.",
 	"questions": "Întrebări",
 	"recipientEntity": "Entitatea destinatară",
 	"financial": "Finanțe",

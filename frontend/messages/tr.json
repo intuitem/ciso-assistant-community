@@ -868,6 +868,8 @@
 	"addRepresentative": "Temsilci ekle",
 	"phone": "Telefon",
 	"role": "Rol",
+	"defaultRole": "Varsayılan rol",
+	"defaultRoleHelpText": "Bu etki alanında, alt etki alanlarından birinde rol ataması bulunan her kullanıcıya otomatik olarak verilen rol.",
 	"questions": "Sorular",
 	"recipientEntity": "Alıcı kuruluş",
 	"financial": "Finansal",

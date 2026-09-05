@@ -1184,6 +1184,8 @@
 	"removeIdentifier": "식별자 제거",
 	"phone": "전화",
 	"role": "역할",
+	"defaultRole": "기본 역할",
+	"defaultRoleHelpText": "이 도메인에서 하위 도메인 중 하나에 역할 할당이 있는 모든 사용자에게 자동으로 부여되는 역할입니다.",
 	"questions": "질문",
 	"recipientEntity": "수신 엔터티",
 	"financial": "재무",

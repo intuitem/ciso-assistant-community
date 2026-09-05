@@ -832,6 +832,8 @@
 	"addRepresentative": "Tilføj repræsentant",
 	"phone": "Telefon",
 	"role": "Rolle",
+	"defaultRole": "Standardrolle",
+	"defaultRoleHelpText": "Rolle, der automatisk tildeles på dette domæne til enhver bruger med en rolletildeling på et af dets underdomæner.",
 	"questions": "Spørgsmål",
 	"recipientEntity": "Modtagerenhed",
 	"financial": "Finansiel",

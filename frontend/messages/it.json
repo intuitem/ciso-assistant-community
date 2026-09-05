@@ -800,6 +800,8 @@
 	"addRepresentative": "Aggiungi rappresentante",
 	"phone": "Telefono",
 	"role": "Ruolo",
+	"defaultRole": "Ruolo predefinito",
+	"defaultRoleHelpText": "Ruolo concesso automaticamente su questo dominio a qualsiasi utente con un'assegnazione di ruolo su uno dei suoi sottodomini.",
 	"questions": "Domande",
 	"recipientEntity": "Entità destinataria",
 	"financial": "Finanziario",

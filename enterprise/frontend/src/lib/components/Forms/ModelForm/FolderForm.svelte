@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Checkbox from '../Checkbox.svelte';
@@ -28,25 +29,15 @@
 		model
 	}: Props = $props();
 
-	const setCreateIamGroups = (value: boolean) => {
-		form.form.update((currentData) => ({
-			...currentData,
-			create_iam_groups: value
-		}));
-	};
-
-	const normalizeParentSelection = (selection: string | string[] | undefined) =>
-		Array.isArray(selection) ? selection.at(-1) : selection;
-
-	function handleParentFolderChange(value: string | string[] | undefined) {
-		const selectedId = normalizeParentSelection(value);
-		const rootFolderId = $page.data.user?.root_folder_id;
-		if (!selectedId) {
-			setCreateIamGroups(false);
-			return;
+	onMount(() => {
+		const isEdit = Boolean(object?.id);
+		if (!isEdit && form.data?.create_iam_groups !== true) {
+			form.form.update((currentData) => ({
+				...currentData,
+				create_iam_groups: true
+			}));
 		}
-		setCreateIamGroups(selectedId === rootFolderId);
-	}
+	});
 </script>
 
 {#if importFolder}
@@ -78,7 +69,16 @@
 		cacheLock={cacheLocks['parent_folder']}
 		bind:cachedValue={formDataCache['parent_folder']}
 		label={m.parentDomain()}
-		onChange={handleParentFolderChange}
+	/>
+	<AutocompleteSelect
+		{form}
+		translateOptions={false}
+		optionsEndpoint="roles"
+		field="default_role"
+		cacheLock={cacheLocks['default_role']}
+		bind:cachedValue={formDataCache['default_role']}
+		label={m.defaultRole()}
+		helpText={m.defaultRoleHelpText()}
 	/>
 	<AutocompleteSelect
 		multiple

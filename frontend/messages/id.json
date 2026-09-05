@@ -825,6 +825,8 @@
 	"addRepresentative": "Tambahkan perwakilan",
 	"phone": "Telepon",
 	"role": "Peran",
+	"defaultRole": "Peran default",
+	"defaultRoleHelpText": "Peran yang secara otomatis diberikan pada domain ini kepada setiap pengguna yang memiliki penugasan peran di salah satu subdomainnya.",
 	"questions": "Pertanyaan",
 	"recipientEntity": "Entitas penerima",
 	"financial": "Finansial",

@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
 from core.validators import validate_file_size, validate_file_name
-from iam.models import FolderMixin, User
+from iam.models import FolderMixin, Folder, User
 
 
 class ChatSession(AbstractBaseModel, FolderMixin):
@@ -102,6 +102,8 @@ class ChatMessage(models.Model):
         ),
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("Chat message")
@@ -305,6 +307,8 @@ class QuestionnaireQuestion(AbstractBaseModel):
         ),
     )
 
+    IAM_SCOPE_FIELD = "questionnaire_run"
+
     class Meta:
         verbose_name = _("Questionnaire question")
         verbose_name_plural = _("Questionnaire questions")
@@ -499,6 +503,8 @@ class AgentAction(AbstractBaseModel):
     approved_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("Approved at")
     )
+
+    IAM_SCOPE_FIELD = "agent_run"
 
     class Meta:
         verbose_name = _("Agent action")

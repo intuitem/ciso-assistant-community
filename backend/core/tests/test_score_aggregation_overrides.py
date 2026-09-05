@@ -29,9 +29,7 @@ from iam.models import Folder, User, UserGroup
 @pytest.fixture
 def admin_client():
     startup(sender=None, **{})
-    admin = User.objects.create_superuser(
-        "admin@score-aggregation-tests.com", is_published=True
-    )
+    admin = User.objects.create_superuser("admin@score-aggregation-tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()

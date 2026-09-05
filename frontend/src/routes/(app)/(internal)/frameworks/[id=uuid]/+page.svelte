@@ -80,11 +80,6 @@
 					{#if fw.provider}<span class="text-surface-300-700">·</span>{/if}
 					<span class="font-mono normal-case text-surface-600-400">{fw.ref_id}</span>
 				{/if}
-				{#if fw.is_published}
-					<span class="badge preset-tonal-success normal-case text-[10px] ml-1"
-						>{m.published()}</span
-					>
-				{/if}
 				{#if fw.has_update}
 					<a
 						href="/libraries?is_update=true"
@@ -214,18 +209,6 @@
 						<dd>{formatDate(new Date(fw.updated_at), true, getLocale())}</dd>
 					</div>
 				{/if}
-				<div class="flex flex-col">
-					<dt class="text-xs text-surface-600-400">{m.published()}</dt>
-					<dd>
-						<span
-							class="badge {fw.is_published
-								? 'preset-tonal-success'
-								: 'preset-tonal-surface'} text-xs"
-						>
-							{fw.is_published ? '✓' : '—'}
-						</span>
-					</dd>
-				</div>
 				{#if fw.has_update}
 					<div class="flex flex-col">
 						<dt class="text-xs text-surface-600-400">{m.updateAvailable()}</dt>

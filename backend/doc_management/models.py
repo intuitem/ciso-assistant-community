@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from core.base_models import AbstractBaseModel
 from core.models import FilteringLabelMixin, I18nObjectMixin
 from core.validators import validate_file_name, validate_file_size
-from iam.models import FolderMixin, User
+from iam.models import FolderMixin, Folder, User
 
 
 class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
@@ -74,20 +74,15 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         propagate = False
         if self.pk:
             old = (
-                DocumentContainer.objects.filter(pk=self.pk)
-                .values("folder_id", "is_published")
-                .first()
+                DocumentContainer.objects.filter(pk=self.pk).values("folder_id").first()
             )
-            if old and (
-                old["folder_id"] != self.folder_id
-                or old["is_published"] != self.is_published
-            ):
+            if old and (old["folder_id"] != self.folder_id):
                 propagate = True
         super().save(*args, **kwargs)
-        # Children denormalize folder/is_published from the container, so a
+        # Children denormalize folder from the container, so a
         # container move/publish must reach the already-saved rows too.
         if propagate:
-            fields = {"folder_id": self.folder_id, "is_published": self.is_published}
+            fields = {"folder_id": self.folder_id}
             self.documents.update(**fields)
             DocumentRevision.objects.filter(document__container=self).update(**fields)
             DocumentAttachment.objects.filter(document__container=self).update(**fields)
@@ -120,6 +115,7 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
         related_name="+",
     )
     template_used = models.CharField(max_length=200, null=True, blank=True)
+
     fields_to_check = ["container", "locale"]
 
     class Meta:
@@ -129,7 +125,7 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     def save(self, *args, **kwargs):
         if self.container_id:
             self.folder = self.container.folder
-            self.is_published = self.container.is_published
+
         super().save(*args, **kwargs)
 
     @property
@@ -209,6 +205,7 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         related_name="+",
     )
     editing_since = models.DateTimeField(null=True, blank=True)
+
     fields_to_check = ["document", "version_number"]
 
     class Meta:
@@ -225,7 +222,7 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
-        self.is_published = self.document.is_published
+
         if self.source == self.Source.UPLOADED and not self.file:
             raise ValidationError("Uploaded revisions require a file.")
         if self.status == self.Status.DRAFT:
@@ -310,6 +307,7 @@ class DocumentAttachment(AbstractBaseModel, FolderMixin):
         blank=True,
         related_name="document_attachments",
     )
+
     fields_to_check = []
 
     class Meta:
@@ -318,7 +316,6 @@ class DocumentAttachment(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
-        self.is_published = self.document.is_published
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -347,6 +344,7 @@ class DocumentEdit(AbstractBaseModel, FolderMixin):
     )
     summary = models.CharField(max_length=500, blank=True)
     content_snapshot = models.TextField(blank=True)
+
     fields_to_check = []
 
     class Meta:
@@ -356,7 +354,6 @@ class DocumentEdit(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.revision.folder
-        self.is_published = self.revision.is_published
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -430,6 +427,8 @@ class DocumentReference(AbstractBaseModel):
         related_name="incoming_references",
     )
     fields_to_check = []
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         constraints = [

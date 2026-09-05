@@ -40,7 +40,7 @@ from django.utils.translation import gettext_lazy as _
 from structlog import get_logger
 from django.utils.timezone import now
 
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from iam.models import Folder, FolderMixin, User
 from custom_fields.host import CustomFieldsMixin
 
 from library.helpers import (
@@ -168,7 +168,6 @@ def _sync_questions_from_data(requirement_node, questions_data):
                 requirement_node=requirement_node,
                 urn=q_urn,
                 folder=requirement_node.folder,
-                is_published=True,
                 **question_fields,
             )
 
@@ -239,7 +238,6 @@ def _sync_questions_from_data(requirement_node, questions_data):
                         question=question,
                         urn=c_urn,
                         folder=requirement_node.folder,
-                        is_published=True,
                         **choice_fields,
                     )
             else:
@@ -248,7 +246,6 @@ def _sync_questions_from_data(requirement_node, questions_data):
                     question=question,
                     urn=None,
                     folder=requirement_node.folder,
-                    is_published=True,
                     **choice_fields,
                 )
 
@@ -351,7 +348,7 @@ class I18nObjectMixin(models.Model):
         abstract = True
 
 
-class FilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
+class FilteringLabel(FolderMixin, AbstractBaseModel):
     label = models.CharField(
         max_length=100,
         verbose_name=_("Label"),
@@ -379,7 +376,7 @@ class FilteringLabelMixin(models.Model):
         abstract = True
 
 
-class LibraryFilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
+class LibraryFilteringLabel(FolderMixin, AbstractBaseModel):
     @property
     def reference_count(self) -> int:
         return self.stored_libraries.count()
@@ -578,7 +575,6 @@ class StoredLibrary(LibraryMixin):
             ]
             new_library = StoredLibrary.objects.create(
                 name=library_data["name"],
-                is_published=True,
                 urn=urn,
                 locale=locale,
                 version=version,
@@ -768,7 +764,7 @@ class LibraryDraft(NameDescriptionMixin, FolderMixin):
     # The library "objects" document (framework, threats, reference_controls,
     # risk_matrices, requirement_mapping_sets, metric_definitions, preset).
     content = models.JSONField(default=dict, blank=True)
-    # Builder lifecycle markers — never overload is_published (IAM visibility).
+
     first_published_at = models.DateTimeField(null=True, blank=True)
     last_published_at = models.DateTimeField(null=True, blank=True)
     # Snapshot of what was last loaded, so the builder can tell a published
@@ -872,7 +868,6 @@ class LibraryUpdater:
         }
         self.referential_object_dict = {
             "provider": self.new_library.provider,
-            "is_published": True,
         }
 
         # The "framework" field will be ignored if the "frameworks" field is defined.
@@ -1984,7 +1979,7 @@ class LoadedLibrary(LibraryMixin):
         )
 
 
-class ObjectClassification(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class ObjectClassification(NameDescriptionMixin, FolderMixin):
     DEFAULT_TLP_LEVELS = [
         {
             "abbreviation": "CLEAR",
@@ -2116,7 +2111,7 @@ class ClassificationLevel(NameDescriptionMixin, FolderMixin):
         return t.get("name") or self.abbreviation or self.name
 
 
-class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class Terminology(NameDescriptionMixin, FolderMixin):
     """
     Model to store custom terminology for the application
     """
@@ -2583,7 +2578,6 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             "translations": {"fr": {"name": "événements par seconde"}},
         },
     ]
-    is_published = models.BooleanField(_("published"), default=True)
     field_path = models.CharField(
         max_length=100,
         verbose_name=_("Field path"),
@@ -2676,7 +2670,6 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 class Threat(
     ReferentialObjectMixin,
     I18nObjectMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     library = models.ForeignKey(
@@ -2686,8 +2679,6 @@ class Threat(
         blank=True,
         related_name="threats",
     )
-
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
 
@@ -2753,7 +2744,6 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
     typical_evidence = models.JSONField(
         verbose_name=_("Typical evidence"), null=True, blank=True
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
 
@@ -3520,6 +3510,8 @@ class RequirementMapping(models.Model):
     )
     annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
 
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
     @property
     def coverage(self) -> str:
         if self.relationship == RequirementMapping.Relationship.NOT_RELATED:
@@ -3584,9 +3576,7 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         return self.folder.name + "/" + self.name
 
 
-class SecurityException(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, CustomFieldsMixin
-):
+class SecurityException(NameDescriptionMixin, FolderMixin, CustomFieldsMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
@@ -3634,7 +3624,6 @@ class SecurityException(
         verbose_name=_("Evidences"),
         related_name="security_exceptions",
     )
-    is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     link = models.URLField(
         null=True, blank=True, max_length=2048, verbose_name=_("Link")
@@ -3685,7 +3674,6 @@ class Asset(
     IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
     CustomFieldsMixin,
 ):
@@ -3863,7 +3851,6 @@ class Asset(
         blank=True,
         null=True,
     )
-    is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     is_business_function = models.BooleanField("is_business_function", default=False)
@@ -4656,7 +4643,7 @@ class Asset(
         return result
 
 
-class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class AssetClass(NameDescriptionMixin, FolderMixin):
     parent = models.ForeignKey(
         "AssetClass", on_delete=models.CASCADE, blank=True, null=True
     )
@@ -5115,9 +5102,7 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         ]
 
 
-class Evidence(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
-):
+class Evidence(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
         MISSING = "missing", "Missing"
@@ -5125,8 +5110,6 @@ class Evidence(
         APPROVED = "approved", "Approved"
         REJECTED = "rejected", "Rejected"
         EXPIRED = "expired", "Expired"
-
-    is_published = models.BooleanField(_("published"), default=True)
 
     owner = models.ManyToManyField(
         "core.Actor",
@@ -5144,15 +5127,12 @@ class Evidence(
         null=True,
         verbose_name=_("Expiry date"),
     )
+
     fields_to_check = ["name"]
 
     class Meta:
         verbose_name = _("Evidence")
         verbose_name_plural = _("Evidences")
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.revisions.update(is_published=self.is_published)
 
     @property
     def last_revision(self):
@@ -5238,8 +5218,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         # Set folder to match the evidence's folder
         if hasattr(self.evidence, "folder") and self.evidence.folder:
             self.folder = self.evidence.folder
-
-        self.is_published = self.evidence.is_published
 
         # Compute attachment hash if attachment exists and has changed
         if self.attachment:
@@ -5398,8 +5376,6 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         blank=True,
     )
 
-    is_published = models.BooleanField(_("published"), default=True)
-
     occurred_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("Occurred at")
     )
@@ -5487,7 +5463,6 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         verbose_name="Evidence",
         blank=True,
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     def __str__(self):
         return f"{self.entry}"
@@ -5526,7 +5501,6 @@ class Comment(AbstractBaseModel, FolderMixin):
     body = models.TextField(verbose_name=_("Body"))
     is_tainted = models.BooleanField(default=False, verbose_name=_("Edited"))
     is_active = models.BooleanField(default=True, verbose_name=_("Active"))
-    is_published = models.BooleanField(default=True)
 
     author = models.ForeignKey(
         "iam.User",
@@ -5816,7 +5790,6 @@ class AppliedControl(
     IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
     CustomFieldsMixin,
     CommitmentMixin,
@@ -6014,7 +5987,6 @@ class AppliedControl(
         verbose_name="Security exceptions",
         related_name="applied_controls",
     )
-    is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     objectives = models.ManyToManyField(
@@ -6219,7 +6191,6 @@ class AppliedControl(
 class OrganisationIssue(
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
 ):
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
@@ -6287,6 +6258,7 @@ class OrganisationIssue(
         default=Status.DRAFT,
         verbose_name=_("Status"),
     )
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -6297,7 +6269,6 @@ class OrganisationIssue(
 class OrganisationObjective(
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
 ):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
@@ -6366,6 +6337,7 @@ class OrganisationObjective(
         blank=True,
         related_name="organisation_objectives",
     )
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -6399,7 +6371,6 @@ class Vulnerability(
     NameDescriptionMixin,
     ETADueDateMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     class Status(models.TextChoices):
@@ -6459,7 +6430,6 @@ class Vulnerability(
     published_date = models.DateField(
         null=True, blank=True, verbose_name=_("Publication date")
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
 
@@ -6522,6 +6492,8 @@ class HistoricalMetric(models.Model):
     model = models.TextField(verbose_name=_("Model"), db_index=True)
     object_id = models.UUIDField(verbose_name=_("Object ID"), db_index=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         unique_together = ("model", "object_id", "date")
@@ -10244,7 +10216,7 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
 
 
-class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class RiskAcceptance(NameDescriptionMixin, FolderMixin):
     ACCEPTANCE_STATE = [
         ("created", "Created"),
         ("submitted", "Submitted"),
@@ -10923,10 +10895,6 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
     )
     team_email = models.EmailField(verbose_name="Team Email", blank=True, null=True)
 
-    def save(self, *args, **kwargs):
-        self.is_published = True
-        return super().save(*args, **kwargs)
-
     def get_emails(self) -> list[str]:
         emails = []
         if self.team_email:
@@ -10960,6 +10928,9 @@ class Actor(AbstractBaseModel):
         related_name="actor",
     )
 
+    # The "normal" IAM isn't implemented for the `Actor` model, but this model can still be passed to the IAM (the IAM has specific internal routines to handle this model).
+    IAM_SCOPE_FIELD = Folder.IAM_SPECIAL_CASE
+
     class Meta:
         constraints = [
             # Ensure exactly one field is set (XOR logic)
@@ -10972,10 +10943,6 @@ class Actor(AbstractBaseModel):
                 name="actor_exactly_one_link",
             )
         ]
-
-    def save(self, *args, **kwargs):
-        self.is_published = True
-        return super().save(*args, **kwargs)
 
     @property
     def type(self) -> Literal["user", "team", "entity"]:
@@ -11112,6 +11079,8 @@ class PresetJourneyStep(AbstractBaseModel):
         User, null=True, blank=True, on_delete=models.SET_NULL
     )
     notes = models.TextField(blank=True)
+
+    IAM_SCOPE_FIELD = "journey"
 
     class Meta:
         ordering = ["order"]

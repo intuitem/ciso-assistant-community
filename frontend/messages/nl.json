@@ -785,6 +785,8 @@
 	"addRepresentative": "Vertegenwoordiger toevoegen",
 	"phone": "Telefoon",
 	"role": "Rol",
+	"defaultRole": "Standaardrol",
+	"defaultRoleHelpText": "Rol die automatisch wordt verleend op dit domein aan elke gebruiker met een roltoewijzing op een van de subdomeinen ervan.",
 	"questions": "Vraagen",
 	"recipientEntity": "Ontvangende entiteit",
 	"financial": "Financieel",

@@ -11,7 +11,7 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin
 
 
 class FieldType(models.TextChoices):
@@ -90,7 +90,7 @@ def coerce_value(field_type: str, raw):
     return str(raw)
 
 
-class CustomFieldDefinition(FolderMixin, PublishInRootFolderMixin, AbstractBaseModel):
+class CustomFieldDefinition(FolderMixin, AbstractBaseModel):
     """Schema of an org-defined field attached to a host model.
 
     Scoping (design B): the inherited ``folder`` decides where the field applies.
@@ -231,6 +231,8 @@ class CustomFieldChoice(AbstractBaseModel):
             (self.translations or {}).get(get_language(), {}).get("label", self.label)
         )
 
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
     class Meta:
         verbose_name = _("custom field choice")
         verbose_name_plural = _("custom field choices")
@@ -271,6 +273,8 @@ class CustomFieldValue(AbstractBaseModel):
     )
     value_date = models.DateField(null=True, blank=True)
     value_boolean = models.BooleanField(null=True, blank=True)
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("custom field value")

@@ -790,6 +790,8 @@
 	"addRepresentative": "Agregar representante",
 	"phone": "Teléfono",
 	"role": "Role",
+	"defaultRole": "Rol predeterminado",
+	"defaultRoleHelpText": "Rol concedido automáticamente en este dominio a cualquier usuario con una asignación de rol en uno de sus subdominios.",
 	"questions": "Preguntas",
 	"recipientEntity": "Entidad destinataria",
 	"financial": "Finanzas",

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import FileInput from '../FileInput.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
@@ -63,6 +64,16 @@
 		helpText={m.createMissingAssetClassesHelpText()}
 	/>
 {:else}
+	<AutocompleteSelect
+		{form}
+		translateOptions={false}
+		optionsEndpoint="roles"
+		field="default_role"
+		cacheLock={cacheLocks['default_role']}
+		bind:cachedValue={formDataCache['default_role']}
+		label={m.defaultRole()}
+		helpText={m.defaultRoleHelpText()}
+	/>
 	<AutocompleteSelect
 		multiple
 		{form}

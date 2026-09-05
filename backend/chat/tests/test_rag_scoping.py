@@ -3,6 +3,10 @@ view_folder — a role can see a domain without being allowed to read what is
 in it."""
 
 import pytest
+from qdrant_client.models import ValueVariants
+
+from chat.scoping import ReadScope
+from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
 pytestmark = pytest.mark.django_db
 
@@ -19,8 +23,6 @@ def domain():
 
 
 def _user_with_role(email, role_name, domain):
-    from iam.models import Folder, Role, RoleAssignment, User, UserGroup
-
     user = User.objects.create(email=email)
     group = UserGroup.objects.create(folder=domain, name=f"{email}-group")
     assignment = RoleAssignment.objects.create(
@@ -41,42 +43,56 @@ def reader(domain):
 
 @pytest.fixture
 def auditee(domain):
-    """Holds view_appliedcontrol but not view_riskscenario / view_asset."""
+    """Holds view_appliedcontrol/view_asset(via default_role) but not view_riskscenario."""
     return _user_with_role("rag-auditee@test.local", "BI-RL-ADE", domain)
 
 
-def scope_for(user):
-    from chat.scoping import ReadScope
-
+def scope_for(user: User) -> ReadScope:
     return ReadScope(user)
 
 
-def _allowed_types(scope):
+def _allowed_types(scope: ReadScope) -> set[ValueVariants]:
     import chat.rag as rag
 
     partition = rag._user_partition_filter(scope, None, None)
     if partition is None:
         return set()
+
     return {clause.must[0].match.value for clause in partition.must[0].should}
 
 
 class TestUserPartitionFilter:
     def test_reader_may_search_risk_scenarios(self, reader, domain):
-        assert "risk_scenario" in _allowed_types(scope_for(reader))
+        assert "risk_scenario" in _allowed_types(ReadScope(reader))
 
     def test_auditee_may_not_search_risk_scenarios(self, auditee, domain):
-        allowed = _allowed_types(scope_for(auditee))
+        import chat.rag as rag
+
+        from iam.models import Folder
+
+        allowed = _allowed_types(ReadScope(auditee))
         assert "applied_control" in allowed
         assert "risk_scenario" not in allowed
-        assert "asset" not in allowed
+
+        # The `"BI-RL-CAT"` `root_folder.default_role` grants any non-third-party user the `"view_asset"` `Role`` on the root folder.
+        assert "asset" in allowed
+        partition = rag._user_partition_filter(ReadScope(auditee), None, None)
+        asset_folders = {
+            fid
+            for clause in partition.must[0].should
+            if clause.must[0].match.value == "asset"
+            for fid in clause.must[1].match.any
+        }
+        assert asset_folders == {str(Folder.get_root_folder().id)}
+        assert str(domain.id) not in asset_folders
 
     def test_each_clause_carries_only_that_types_folders(self, auditee, domain):
         import chat.rag as rag
 
         from core.models import AppliedControl
 
-        partition = rag._user_partition_filter(scope_for(auditee), None, None)
-        scope = scope_for(auditee)
+        partition = rag._user_partition_filter(ReadScope(auditee), None, None)
+        scope = ReadScope(auditee)
         for clause in partition.must[0].should:
             if clause.must[0].match.value == "applied_control":
                 assert set(clause.must[1].match.any) == set(
@@ -86,7 +102,7 @@ class TestUserPartitionFilter:
     def test_object_type_argument_narrows_further(self, reader, domain):
         import chat.rag as rag
 
-        partition = rag._user_partition_filter(scope_for(reader), None, "asset")
+        partition = rag._user_partition_filter(ReadScope(reader), None, "asset")
         assert [c.must[0].match.value for c in partition.must[0].should] == ["asset"]
 
     def test_no_readable_type_yields_no_filter(self, domain):
@@ -95,7 +111,7 @@ class TestUserPartitionFilter:
         from iam.models import User
 
         stranger = User.objects.create(email="rag-stranger@test.local")
-        assert rag._user_partition_filter(scope_for(stranger), None, None) is None
+        assert rag._user_partition_filter(ReadScope(stranger), None, None) is None
 
 
 class TestSearchEndToEnd:
@@ -211,7 +227,7 @@ class TestGraphExpandScoping:
         seeds = [
             {"object_type": "risk_scenario", "object_id": str(scenario_with_control.id)}
         ]
-        assert [e["name"] for e in rag.graph_expand(seeds, scope_for(reader))] == [
+        assert [e["name"] for e in rag.graph_expand(seeds, ReadScope(reader))] == [
             "rag scoping control"
         ]
 
@@ -223,4 +239,4 @@ class TestGraphExpandScoping:
         seeds = [
             {"object_type": "risk_scenario", "object_id": str(scenario_with_control.id)}
         ]
-        assert rag.graph_expand(seeds, scope_for(auditee)) == []
+        assert rag.graph_expand(seeds, ReadScope(auditee)) == []

@@ -1,6 +1,10 @@
-import pytest
+from dataclasses import dataclass
 
-from iam.models import Folder
+import pytest
+from django.contrib.auth.models import Permission
+
+from core.models import AppliedControl
+from iam.models import Folder, RoleAssignment, User, Role
 from . import utils
 
 
@@ -185,7 +189,7 @@ class TestFolderTreeShape:
 @pytest.mark.django_db
 class TestFolderDescendants:
     """
-    The `Folder.descendants` field is a `ManyToManyField` which MUST perfectly consistent to the current folder tree.
+    The `Folder.descendants` field is a `ManyToManyField` which MUST be perfectly consistent to the current folder tree.
 
     This is very important as the IAM perform decisions based on this field.
 
@@ -295,4 +299,289 @@ class TestFolderDescendants:
                 "folder_1_1_1",
                 "folder_1_1_1_1",
             ],
+        )
+
+
+@pytest.mark.django_db
+class TestFolderDefaultRole:
+    """
+    When a `Folder` `F` has a non-NULL `F.default_role`, then if a user has a `RoleAssignment` assigned to a descendant folder of `F`.
+    He will be granted the permissions of the `F.default_role` `Role` on the `F` folder, example:
+
+    - If the `A.default_role` is set to `Role(permissions=["view_appliedcontrol"])`.
+    - If `root_folder <= A <= B <= C` (`C` is a child of `B`, `B` is a child of `A`, `A` is a child of `root_folder`).
+    - If the `USER` `User` has a `RoleAssignment` on `C`.
+    - Then the `USER` `User` will have the `"view_appliedcontrol"` permission on `A` (and will therefore be able to view all the `AppliedControl` objects in the `A` folder).
+    """
+
+    NOT_CALLED = "The `RoleAssignment._get_default_role_allowed_folder_ids` function MUST be called by the above function, as it's the safe way for IAM functions to get the accessible folder IDs from a default_role."
+
+    CALL_COUNT = 0
+    """Count how much time the `RoleAssignment._get_default_role_allowed_folder_ids` function has been called."""
+
+    @pytest.fixture(autouse=True)
+    def _monkeypatch_default_role(self):
+        """Monkeypatch `RoleAssignment._get_default_role_allowed_folder_ids` to track calls during test."""
+        _get_default_role_allowed_folder_ids_original = (
+            RoleAssignment._get_default_role_allowed_folder_ids
+        )
+
+        def _get_default_role_allowed_folder_ids_wrapper(*args, **kwargs):
+            TestFolderDefaultRole.CALL_COUNT += 1
+            return _get_default_role_allowed_folder_ids_original(*args, **kwargs)
+
+        # Monkeypatch `RoleAssignment._get_default_role_allowed_folder_ids` to increment `CALL_COUNT` each time it's called.
+        RoleAssignment._get_default_role_allowed_folder_ids = (
+            _get_default_role_allowed_folder_ids_wrapper
+        )
+
+        yield
+
+        # Restore the original method
+        RoleAssignment._get_default_role_allowed_folder_ids = (
+            _get_default_role_allowed_folder_ids_original
+        )
+
+    @staticmethod
+    def _test_and_reset_call_count() -> bool:
+        """Return `true` if the `RoleAssignment._get_default_role_allowed_folder_ids` was called (and reset the `CALL_COUNT` after)."""
+        call_count = TestFolderDefaultRole.CALL_COUNT
+        TestFolderDefaultRole.CALL_COUNT = 0
+
+        assert call_count > 0, (
+            "The `RoleAssignment._get_default_role_allowed_folder_ids` function MUST be called by the above function, as it's the safe way for IAM functions to get the accessible folder IDs from a default_role."
+        )
+
+    @dataclass(frozen=True)
+    class UserInfo:
+        user: User
+        folder: Folder
+        parent_folder: Folder
+        default_role: Role
+        applied_control: AppliedControl
+        default_role_permission: Permission
+        user_role_permission: Permission
+
+    @pytest.fixture
+    def ctx(self) -> TestFolderDefaultRole.UserInfo:
+        # Save the root folder's original default_role to restore it later
+        root_folder = Folder.get_root_folder()
+        original_root_default_role = root_folder.default_role
+
+        # Temporarily remove root folder's default_role to prevent permission pollution
+        root_folder.default_role = None
+        root_folder.save()
+
+        try:
+            # Create a parent folder with a default_role (use create() to avoid state pollution)
+            parent_folder = Folder.objects.create(
+                name=f"test_default_role_parent_{id(self)}"
+            )
+            default_role = Role.objects.create(name=f"test_default_role_{id(self)}")
+            default_role_permission = Permission.objects.get(
+                codename="view_appliedcontrol"
+            )
+            default_role.permissions.set([default_role_permission])
+            parent_folder.default_role = default_role
+            parent_folder.save()
+
+            # Create a child folder in the parent
+            folder = Folder.objects.create(
+                name=f"test_default_role_child_{id(self)}", parent_folder=parent_folder
+            )
+
+            # Create a user and assign them a role on the child folder
+            user = User.objects.create_user(
+                f"test_default_role_user_{id(self)}@gmail.com"
+            )
+
+            user_role = Role.objects.create(
+                name=f"test_default_role_user_role_{id(self)}"
+            )
+            user_role_permission = Permission.objects.get(codename="view_asset")
+            user_role.permissions.set([user_role_permission])
+            role_assignment = RoleAssignment.objects.create(
+                user=user, role=user_role, is_recursive=True
+            )
+            role_assignment.perimeter_folders.add(folder)
+
+            # Create an AppliedControl in the parent folder
+            applied_control = AppliedControl.objects.create(
+                folder=parent_folder, name=f"test_default_role_control_{id(self)}"
+            )
+
+            yield TestFolderDefaultRole.UserInfo(
+                user,
+                folder,
+                parent_folder,
+                default_role,
+                applied_control,
+                default_role_permission,
+                user_role_permission,
+            )
+
+            # Cleanup after test
+            user.delete()
+            parent_folder.delete()
+            default_role.delete()
+            user_role.delete()
+        finally:
+            # Restore root folder's original default_role
+            root_folder.default_role = original_root_default_role
+            root_folder.save()
+
+    def test_get_directly_allowed_folder_ids(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that _get_directly_allowed_folder_ids calls _get_default_role_allowed_folder_ids."""
+
+        RoleAssignment._get_directly_allowed_folder_ids(
+            ctx.user, ctx.default_role_permission
+        )
+        self._test_and_reset_call_count()
+
+    def test_has_permission_anywhere(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that has_permission_anywhere calls _get_default_role_allowed_folder_ids."""
+
+        # We use the `"view_vulnerability"` permission instead as the user isn't assigned to it.
+        # When a user doesn't have a permission, this IIAM function falls back to checking if any `Folder.default_role` grants it.
+
+        unassigned_permission = Permission.objects.get(codename="view_vulnerability")
+        RoleAssignment.has_permission_anywhere(ctx.user, unassigned_permission.codename)
+        self._test_and_reset_call_count()
+
+    def test_is_access_allowed(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that is_access_allowed calls _get_default_role_allowed_folder_ids."""
+
+        RoleAssignment.is_access_allowed(
+            ctx.user, ctx.default_role_permission, ctx.parent_folder
+        )
+        self._test_and_reset_call_count()
+
+    def test_is_object_accessible(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that is_object_accessible calls _get_default_role_allowed_folder_ids."""
+        RoleAssignment.is_object_accessible(
+            ctx.user, "view", AppliedControl, ctx.applied_control.id
+        )
+        self._test_and_reset_call_count()
+
+    def test_get_allowed_folder_ids(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that get_allowed_folder_ids calls _get_default_role_allowed_folder_ids."""
+
+        RoleAssignment.get_allowed_folder_ids(ctx.user, ctx.default_role_permission)
+        self._test_and_reset_call_count()
+
+    def test_is_object_readable(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that is_object_readable calls _get_default_role_allowed_folder_ids."""
+
+        RoleAssignment.is_object_readable(
+            ctx.user, AppliedControl, ctx.applied_control.id
+        )
+        self._test_and_reset_call_count()
+
+    def test_get_actor_accessible_ids_by_perm(
+        self, ctx: TestFolderDefaultRole.UserInfo
+    ):
+        """Test that _get_actor_accessible_ids_by_perm calls _get_default_role_allowed_folder_ids."""
+
+        RoleAssignment._get_actor_accessible_ids_by_perm(ctx.user, "view")
+        self._test_and_reset_call_count()
+
+    def test_get_accessible_ids(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that _get_accessible_ids calls _get_default_role_allowed_folder_ids."""
+
+        RoleAssignment._get_accessible_ids(
+            ctx.user, "view", AppliedControl, ctx.parent_folder
+        )
+        self._test_and_reset_call_count()
+
+    def test_get_actor_accessible_ids(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that _get_actor_accessible_ids calls _get_default_role_allowed_folder_ids."""
+
+        RoleAssignment._get_actor_accessible_ids(ctx.user)
+        self._test_and_reset_call_count()
+
+    def test_get_viewable_object_ids(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that get_viewable_object_ids calls _get_default_role_allowed_folder_ids."""
+
+        RoleAssignment.get_viewable_object_ids(
+            ctx.user, AppliedControl, ctx.parent_folder
+        )
+        self._test_and_reset_call_count()
+
+    def test_get_changeable_object_ids(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that get_changeable_object_ids calls _get_default_role_allowed_folder_ids."""
+
+        RoleAssignment.get_changeable_object_ids(
+            ctx.user, AppliedControl, ctx.parent_folder
+        )
+        self._test_and_reset_call_count()
+
+    def test_get_deletable_object_ids(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that get_deletable_object_ids calls _get_default_role_allowed_folder_ids."""
+
+        RoleAssignment.get_deletable_object_ids(
+            ctx.user, AppliedControl, ctx.parent_folder
+        )
+        self._test_and_reset_call_count()
+
+    def test_get_permissions(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that get_permissions returns the correct permissions via default_role mechanism."""
+        codename_to_perm_name_dict = RoleAssignment.get_permissions(ctx.user)
+
+        codenames = sorted(codename_to_perm_name_dict.keys())
+        expected_codenames = sorted(
+            [
+                ctx.default_role_permission.codename,
+                ctx.user_role_permission.codename,
+            ]
+        )
+
+        assert codenames == expected_codenames, (
+            "Unexpected missing/unknown/extra codenames in the RoleAssignment.get_permissions return."
+        )
+
+    def test_get_default_role_allowed_folder_ids(
+        self, ctx: TestFolderDefaultRole.UserInfo
+    ):
+        """Test that _get_default_role_allowed_folder_ids correctly identifies folders accessible via default_role."""
+        assert not RoleAssignment._get_default_role_allowed_folder_ids(
+            [ctx.parent_folder.id], ctx.user_role_permission
+        ).exists(), (
+            "The user role not permission SHALL NOT be granted by the folder.default_role"
+        )
+        assert not RoleAssignment._get_default_role_allowed_folder_ids(
+            [ctx.folder.id], ctx.user_role_permission
+        ).exists(), (
+            "The user role not permission SHALL NOT be granted by the folder.default_role"
+        )
+
+        assert list(
+            RoleAssignment._get_default_role_allowed_folder_ids(
+                [ctx.folder.id], ctx.default_role_permission
+            )
+        ) == [ctx.parent_folder.id], (
+            "The user default role permissions SHALL be granted by the folder.default_role"
+        )
+
+        assert not RoleAssignment._get_default_role_allowed_folder_ids(
+            [ctx.parent_folder.id], ctx.default_role_permission
+        ).exists(), (
+            "The folder.default_role SHALL only grant the default role for RoleAssignments not descendant folders (not on itself)."
+        )
+
+        ctx.parent_folder.default_role = None
+        ctx.parent_folder.save()
+
+        assert not RoleAssignment._get_default_role_allowed_folder_ids(
+            [ctx.folder.id], ctx.default_role_permission
+        ).exists(), (
+            "The default role permission SHALL NOT be granted if there's no folder.default_role"
+        )
+
+        ctx.folder.default_role = ctx.default_role
+        ctx.folder.save()
+
+        assert not RoleAssignment._get_default_role_allowed_folder_ids(
+            [ctx.parent_folder.id], ctx.default_role_permission
+        ).exists(), (
+            "The default role permission SHALL NOT be granted to ancestor folders."
         )

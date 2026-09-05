@@ -80,7 +80,7 @@ class EndpointTestsUtils:
             )
             test_folder = Folder.objects.get(name=test_folder_name)
 
-        user = User.objects.create_user(TEST_USER_EMAIL, is_published=True)
+        user = User.objects.create_user(TEST_USER_EMAIL)
         user_group = UserGroup.objects.get(
             name=role,
             folder=Folder.objects.get(name=GROUPS_PERMISSIONS[role]["folder"]),
@@ -433,9 +433,8 @@ class EndpointTestsQueries:
             if build_params and object:
                 if object.__name__ == "User":
                     # Ensure new test users are published so they're visible through IAM filtering
-                    build_params_with_published = {**build_params, "is_published": True}
                     user = object.objects.create_superuser(
-                        **build_params_with_published
+                        **build_params
                     )  # no password is required in the build_params
                     # create the new user in the same group as the test user to make it visible
                     if user_group:

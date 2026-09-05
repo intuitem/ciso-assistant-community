@@ -818,6 +818,8 @@
 	"addRepresentative": "Přidat zástupce",
 	"phone": "Telefon",
 	"role": "Role",
+	"defaultRole": "Výchozí role",
+	"defaultRoleHelpText": "Role automaticky udělená v této doméně každému uživateli s přiřazením role v některé z jejích subdomén.",
 	"questions": "Otázky",
 	"recipientEntity": "Příjemce entita",
 	"financial": "Finanční",

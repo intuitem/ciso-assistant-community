@@ -195,12 +195,10 @@ class LibraryDraftWriteSerializer(BaseModelSerializer):
     class Meta:
         model = LibraryDraft
         # urn and the published-* snapshot are lifecycle fields, only ever set
-        # by the adopt/publish actions; is_published is the IAM visibility flag
-        # (unrelated to library publication) and is never client-writable.
+        # by the adopt/publish actions
         exclude = [
             "created_at",
             "updated_at",
-            "is_published",
             "urn",
             "first_published_at",
             "last_published_at",
