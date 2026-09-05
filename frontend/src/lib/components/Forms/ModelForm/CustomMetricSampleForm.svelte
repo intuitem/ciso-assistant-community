@@ -6,6 +6,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -27,7 +28,7 @@
 		object = {}
 	}: Props = $props();
 
-	const { value: valueFieldProxy } = formFieldProxy(form, 'value');
+	const { value: valueFieldProxy, errors: valueErrors } = formFieldProxy(form, 'value');
 
 	// Get full metric instance data from autocomplete cache (includes nested fields like metric_definition, evidences)
 	const metricInstanceCache = $derived.by(() => {
@@ -89,7 +90,7 @@
 	});
 
 	function handleQualitativeChange(selectedIndex: string) {
-		$valueFieldProxy = JSON.stringify({ choice_index: parseInt(selectedIndex) });
+		$valueFieldProxy = { choice_index: parseInt(selectedIndex) };
 	}
 
 	// For quantitative metrics, parse the numeric value
@@ -108,7 +109,7 @@
 		const value = (event.target as HTMLInputElement).value;
 		const numValue = parseFloat(value);
 		if (!isNaN(numValue)) {
-			$valueFieldProxy = JSON.stringify({ result: numValue });
+			$valueFieldProxy = { result: numValue };
 		}
 	}
 
@@ -179,6 +180,14 @@
 			value={quantitativeValue}
 			oninput={handleQuantitativeChange}
 		/>
+	</div>
+{/if}
+
+{#if $valueErrors}
+	<div>
+		{#each $valueErrors as error}
+			<p class="text-error-500 text-xs font-medium">{safeTranslate(error)}</p>
+		{/each}
 	</div>
 {/if}
 
