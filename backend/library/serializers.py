@@ -15,10 +15,21 @@ class StoredLibrarySerializer(ReferentialSerializer):
     is_preset = serializers.BooleanField(read_only=True)
     profile = serializers.SerializerMethodField()
     scaffolded_objects = serializers.SerializerMethodField()
+    overview = serializers.SerializerMethodField()
 
     def get_loaded_library(self, obj) -> Optional[str]:
         loaded_library = obj.get_loaded_library()
         return str(loaded_library.id) if loaded_library else None
+
+    def get_overview(self, obj) -> list[str]:
+        # Served on every page so the table column stays populated past the
+        # first page (the frontend used to build this client-side from the
+        # first response only).
+        return [
+            f"Packager: {obj.packager}",
+            f"Version: {obj.version}",
+            *[f"{key}: {value}" for key, value in (obj.objects_meta or {}).items()],
+        ]
 
     def get_profile(self, obj) -> Optional[dict]:
         if obj.is_preset:
@@ -63,6 +74,7 @@ class StoredLibrarySerializer(ReferentialSerializer):
             "is_preset",
             "profile",
             "scaffolded_objects",
+            "overview",
         ]
 
 

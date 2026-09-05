@@ -858,6 +858,36 @@ Folders (domains) are the top-level organisational units in CISO Assistant. Impo
 
 ***
 
+## Evidences
+
+The import creates evidence **definitions**: what is expected, who owns it, and when it expires. The document itself is not imported - a file or a link belongs to a **revision**, which is filed against the evidence afterwards (through the UI, or with `upload-attachment` on the CLI). An evidence imported this way therefore starts with no revision at all.
+
+### Template
+
+{% file src="../.gitbook/assets/evidences_template.xlsx" %}
+
+### Supported fields
+
+* `name`\*
+* `description`
+* `domain` - domain name; falls back to the domain selected in the wizard
+* `status`
+  * `draft` (default)
+  * `missing`
+  * `in_review`
+  * `approved`
+  * `rejected`
+  * `expired`
+* `expiry_date` - date (YYYY-MM-DD)
+* `owner` - semicolon-separated list of user emails and/or team names
+* `filtering_labels` - comma- or pipe-separated label names; labels that do not exist are created
+
+### Special considerations
+
+* **Conflict detection is by name + domain.** The same name in two different domains gives two distinct evidences.
+* **Status accepts either form.** The stored key (`in_review`) and the displayed label (`In review`) are both understood; an unrecognised value fails the row rather than falling back silently.
+* **Tasks can create evidences too.** Naming an evidence in the `evidences` column of a task import creates it in the task's domain when it does not exist - see [#tasks](#tasks). Import evidences first when you want to control their status, owner or expiry.
+
 ## Tasks
 
 Tasks in CISO Assistant are modelled as **TaskTemplates** (definitions) with **TaskNodes** (individual occurrences). A non-recurrent task has one node; recurrent tasks generate one node per scheduled occurrence.
@@ -885,7 +915,7 @@ The wizard imports both in a single multi-sheet Excel file: a **Summary** sheet 
 * `assigned_to` - comma- or semicolon-separated list of user emails and/or team names
 * `assets` - comma-separated asset names or ref\_ids
 * `applied_controls` - comma-separated control names or ref\_ids
-* `evidences` - comma-separated evidence names
+* `evidences` - comma-, pipe- or newline-separated evidence names; a name the task's domain does not have yet is created there as an expected evidence and linked
 * `compliance_assessments` - comma-separated assessment names or ref\_ids
 * `risk_assessments` - comma-separated assessment names or ref\_ids; the `name - version` format produced by the export is accepted
 * `findings_assessment` - comma-separated findings assessment names or ref\_ids
@@ -926,8 +956,10 @@ Each sheet is named `N-template name` (truncated to 31 characters) and contains 
 #### Special considerations
 
 * **Folder is a fallback.** Each row's `folder` column is resolved first; the domain selected in the wizard is only used when a row has no folder.
-* **Linked records are resolved within your accessible domains.** `assigned_to`, `assets`, `applied_controls`, `evidences` and the assessment columns are matched by ref\_id or name inside the domains you can access; an exact ref\_id match wins, then an object in the row's own domain. Unresolved entries are skipped and reported as warnings, they will not block the import.
-* **Future nodes are skipped.** Rows whose `due_date` is after today are ignored - those occurrences will be regenerated automatically from the schedule. Upcoming occurrences of an imported recurrent task are generated when the task is next opened or edited.
+* **Linked records are resolved within your accessible domains.** `assigned_to`, `assets`, `applied_controls` and the assessment columns are matched by ref\_id or name inside the domains you can access; an exact ref\_id match wins, then an object in the row's own domain. Unresolved entries are skipped and reported as warnings, they will not block the import.
+* **Expected evidence is created, not skipped.** `evidences` is the exception: a name is matched case-insensitively, preferring the task's own domain, and an evidence is created there when nothing matches. The new evidence holds only a name and a domain - the document itself is filed later as a revision against each occurrence.
+* **Future nodes are skipped.** Rows whose `due_date` is after today are ignored - those occurrences are regenerated from the schedule instead.
+* **Upcoming occurrences appear after the import, not during it.** The import writes the templates; the occurrences are materialised the first time something asks for them - saving the task, opening its edit form, or browsing the calendar over that period. Viewing a task's detail page does not generate them, and a disabled task never generates any.
 * **Round-trip safe.** Importing a fresh export works with the default **Stop** mode: the node auto-created for a non-recurrent task is updated by its node sheet instead of raising a conflict. Re-importing with **Update** mode overwrites existing task nodes and templates without creating duplicates. With **Skip** mode, existing records are left unchanged.
 * **Clearing relationships.** In **Update** mode, leaving a relation column (e.g. `assigned_to`, `assets`) blank in the file clears the existing links on the template.
 * **Older exports.** Files exported by previous versions numbered the node sheets differently; the importer re-matches those sheets by name and adds a warning when the sheet number and name disagree.

@@ -6,6 +6,7 @@
 	import DocumentReferencesPanel from './DocumentReferencesPanel.svelte';
 	import DocumentLinkModal from './DocumentLinkModal.svelte';
 	import { documentTypeLabel } from '$lib/utils/documentTypes';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
@@ -266,10 +267,12 @@
 	async function refreshData() {
 		if (!document) return;
 
-		const revRes = await proxyGet({ _action: 'revisions', document: document.id });
-		if (!revRes.ok) return;
-		const revData = await revRes.json();
-		revisions = revData.results || [];
+		try {
+			const qs = new URLSearchParams({ _action: 'revisions', document: document.id });
+			revisions = await fetchAllPages(fetch, `${proxyUrl}?${qs}`);
+		} catch {
+			return;
+		}
 
 		const activeStatuses = ['draft', 'change_requested', 'in_review', 'validated'];
 		const target = revisions.find((r: any) => activeStatuses.includes(r.status)) ?? revisions[0];
