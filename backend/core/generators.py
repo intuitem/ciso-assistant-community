@@ -14,9 +14,11 @@ from .utils import is_field_visible_to
 
 from .models import (
     AppliedControl,
+    Commitment,
     ComplianceAssessment,
     RequirementAssessment,
     RequirementNode,
+    TaskTemplate,
 )
 
 matplotlib.use("Agg")
@@ -339,6 +341,45 @@ def calculate_depths(framework):
     return depth_map
 
 
+def _answer_rows(ra):
+    """Questions and the respondent's answers, resolved the way the zip index does.
+
+    Mirrors `get_answers` in core_extras so the PDF and `audit_report.html` agree:
+    a `urn:` value is a choice reference and renders as the choice's label.
+    """
+    from core.utils import build_answers_dict, visible_questions
+
+    answers = build_answers_dict(ra.answers.all())
+    # `visible_questions` drops questions hidden by an unsatisfied `depends_on`,
+    # so a conditional question that does not apply is not listed as unanswered.
+    questions = visible_questions(ra.requirement.get_questions_translated, answers)
+    if not questions:
+        return []
+
+    def resolve(question, value):
+        if value is None or value == "":
+            return None
+        if isinstance(value, list):
+            resolved = [resolve(question, item) for item in value]
+            return ", ".join(item for item in resolved if item) or None
+        if not str(value).startswith("urn:"):
+            return str(value)
+        for choice in question.get("choices", []):
+            if choice["urn"] == value:
+                return choice["value"]
+        return None
+
+    rows = []
+    for urn, question in questions.items():
+        rows.append(
+            {
+                "question": question.get("text", "-"),
+                "answer": resolve(question, answers.get(urn)) or "-",
+            }
+        )
+    return rows
+
+
 def gen_audit_context(id, tree, lang):
     def count_category_results(data):
         def recursive_result_count(node_data):
@@ -648,6 +689,9 @@ def gen_audit_context(id, tree, lang):
                 "score": ra.score,
                 "max_score": audit.framework.max_score if ra.is_scored else None,
                 "observation": ra.observation or "-",
+                "answers": _answer_rows(ra),
+                "evidences": [e.name for e in ra.evidences.all()],
+                "task_templates": [t.name for t in ra.task_templates.all()],
                 "applied_controls": ", ".join(
                     ac.name for ac in ra.applied_controls.all()
                 )
@@ -766,9 +810,67 @@ def inline_charts_for_docx(context, doc, width=Cm(15)):
     return wrapped
 
 
-# Fields of a requirement assessment governed by `field_visibility`; `max_score`
-# is not itself governed but is meaningless once `score` is dropped.
-_REDACTABLE_RA_FIELDS = ("status", "extended_result", "score")
+# Requirement-assessment fields governed by the audit's `field_visibility`;
+# `max_score` is not itself governed but is meaningless once `score` is dropped.
+_REDACTABLE_RA_FIELDS = (
+    "answers",
+    "evidences",
+    "task_templates",
+    "status",
+    "result",
+    "extended_result",
+    "score",
+    "observation",
+    "applied_controls",
+)
+
+# Charts built from a governed field: redacting the field does not redact an
+# image drawn from it, so they have to be dropped together.
+_FIELD_DERIVED_CHARTS = {"score": ("category_radar",)}
+
+# Report profiles. `sections` drives layout; `drops` drives the payload. Both are
+# needed: a template flag alone would leave excluded values in the JSON, and the
+# template is overridable, so anything a reader must not see is removed here.
+REPORT_PROFILES = {
+    "full": {
+        # The reader's own role still applies on top; this is the ceiling.
+        "role": "auditor",
+        "discloses": (),
+        "sections": (
+            "summary",
+            "charts",
+            "scope",
+            "drifts",
+            "categories",
+            "controls",
+            "requirements",
+            "answers",
+            "commitments",
+            "tasks",
+        ),
+    },
+    "attestation": {
+        "role": "respondent",
+        # The questionnaire deliberately withholds the auditor's verdict while the
+        # respondent is answering (THIRD_PARTY_VISIBILITY marks `result` auditor-only).
+        # The attestation exists to state that verdict for agreement, so it is
+        # disclosed back — explicitly and in one place, rather than by a parallel
+        # redaction list that could drift from the audit's own configuration.
+        "discloses": ("result",),
+        # A record of what was recorded, not an analysis: no aggregate counts,
+        # percentages, drift tallies or charts — the same content selection as the
+        # zip's `audit_report.html`, which walks the requirements and prints what
+        # is on them.
+        "sections": (
+            "scope",
+            "requirements",
+            "answers",
+            "commitments",
+            "tasks",
+            "signatures",
+        ),
+    },
+}
 
 # Template chrome, keyed the way `frontend/messages/*.json` keys it so this can be
 # swapped for the shared catalog without touching the template. English literals
@@ -803,6 +905,29 @@ _REPORT_LABEL_KEYS = (
     "notApplicable",
     "notAssessed",
     "assessableRequirements",
+    "commitments",
+    "tasks",
+    "undertaking",
+    "committedDate",
+    "currentDate",
+    "notes",
+    "signatures",
+    "signatureIntro",
+    "forTheAssessedEntity",
+    "forTheAssessingOrganisation",
+    "nameAndRole",
+    "signature",
+    "slipped",
+    "noCommitments",
+    "undefined",
+    "inNegotiation",
+    "committed",
+    "declined",
+    "fulfilled",
+    "assessedEntity",
+    "expiryDate",
+    "legalIdentifiers",
+    "evidences",
     "all",
 )
 
@@ -836,6 +961,29 @@ _REPORT_LABELS_EN = {
     "notApplicable": "Not applicable",
     "notAssessed": "Not assessed",
     "assessableRequirements": "assessable requirements",
+    "commitments": "Commitments",
+    "tasks": "Tasks",
+    "undertaking": "Undertaking",
+    "committedDate": "Committed date",
+    "currentDate": "Current date",
+    "notes": "Notes",
+    "signatures": "Signatures",
+    "signatureIntro": "By signing below, the parties agree to the compliance status and the commitments recorded in this document.",
+    "forTheAssessedEntity": "For the assessed entity",
+    "forTheAssessingOrganisation": "For the assessing organisation",
+    "nameAndRole": "Name and role",
+    "signature": "Signature",
+    "slipped": "slipped",
+    "noCommitments": "No commitments recorded.",
+    "undefined": "Undefined",
+    "inNegotiation": "In negotiation",
+    "committed": "Committed",
+    "declined": "Declined",
+    "fulfilled": "Fulfilled",
+    "assessedEntity": "Assessed entity",
+    "expiryDate": "Expiry date",
+    "legalIdentifiers": "Legal identifiers",
+    "evidences": "Evidences",
     "all": "All",
 }
 
@@ -849,7 +997,92 @@ def report_labels(lang="en"):
     return {key: _REPORT_LABELS_EN[key] for key in _REPORT_LABEL_KEYS}
 
 
-def audit_context_for_typst(context, audit, role="auditor", lang="en"):
+# Commitment states are enum values; the catalog keys them camelCase.
+_STATE_LABEL_KEYS = {
+    Commitment.State.UNDEFINED: "undefined",
+    Commitment.State.IN_NEGOTIATION: "inNegotiation",
+    Commitment.State.COMMITTED: "committed",
+    Commitment.State.DECLINED: "declined",
+    Commitment.State.FULFILLED: "fulfilled",
+}
+
+
+def _date_str(value):
+    return value.isoformat() if value else "-"
+
+
+def _commitment_row(obj, labels, kind):
+    state = obj.commitment_state
+    return {
+        "kind": kind,
+        "name": obj.name or "-",
+        "state": labels.get(_STATE_LABEL_KEYS.get(state, state), state),
+        "committed_eta": _date_str(obj.committed_eta),
+        "current_date": _date_str(obj.commitment_date),
+        "has_slipped": obj.commitment_has_slipped,
+        "notes": obj.commitment_notes or "",
+    }
+
+
+def audit_undertakings(audit, lang="en"):
+    """Applied controls and tasks attached to the audit, with commitment state.
+
+    Returns ``(commitments, tasks)``: the first is everything carrying a live
+    commitment — the promises a counterparty would countersign — the second is the
+    task list regardless of commitment.
+    """
+    ras = audit.get_requirement_assessments(include_non_assessable=False)
+    controls = (
+        AppliedControl.objects.filter(requirement_assessments__in=ras)
+        .distinct()
+        .prefetch_related("commitments")
+        .order_by("eta")
+    )
+    task_templates = (
+        TaskTemplate.objects.filter(requirement_assessments__in=ras)
+        .distinct()
+        .prefetch_related("commitments")
+        .order_by("name")
+    )
+
+    labels = report_labels(lang)
+    tasks = [_commitment_row(t, labels, "task") for t in task_templates]
+    commitments = [
+        _commitment_row(obj, labels, kind)
+        for obj, kind in (
+            [(c, "control") for c in controls] + [(t, "task") for t in task_templates]
+        )
+        if obj.commitment_state != Commitment.State.UNDEFINED
+    ]
+    return commitments, tasks
+
+
+def counterparty_context(audit):
+    """The assessed entity behind this audit, when it is a third-party questionnaire.
+
+    An audit reached through an entity assessment identifies a counterparty; a plain
+    internal audit does not, and the cover simply omits the block.
+    """
+    entity_assessment = audit.entityassessment_set.select_related("entity").first()
+    if entity_assessment is None or entity_assessment.entity is None:
+        return None
+    entity = entity_assessment.entity
+    identifiers = entity.legal_identifiers or {}
+    return {
+        "entity": entity.name,
+        "ref_id": entity.ref_id or "",
+        "address": entity.address or "",
+        "legal_identifiers": [
+            {"label": key, "value": value}
+            for key, value in identifiers.items()
+            if value
+        ],
+        "expiry_date": _date_str(entity_assessment.expiry_date),
+        "assessment": entity_assessment.name,
+    }
+
+
+def audit_context_for_typst(context, audit, role="auditor", lang="en", profile="full"):
     """Split `gen_audit_context` output into a JSON payload and chart images.
 
     Fields hidden from `role` are dropped here rather than in the template:
@@ -860,10 +1093,24 @@ def audit_context_for_typst(context, audit, role="auditor", lang="en"):
         key: value for key, value in context.items() if key not in AUDIT_CHART_KEYS
     }
 
+    spec = REPORT_PROFILES.get(profile, REPORT_PROFILES["full"])
+    # Least privilege of the two: an auditor exporting the external document gets
+    # the respondent's field set, and a respondent never escalates by asking for
+    # the internal one.
+    effective_role = "respondent" if "respondent" in (role, spec["role"]) else "auditor"
     hidden = {
         field
         for field in _REDACTABLE_RA_FIELDS
-        if not is_field_visible_to(audit, field, role)
+        if not is_field_visible_to(audit, field, effective_role)
+    }
+    # Disclose only what the auditor themselves can see: a field the *framework*
+    # hides from everyone (a maturity questionnaire that does not use `result`, say)
+    # is a stronger statement than the third-party base's auditor-only default, and
+    # the external copy must never show more than the internal one.
+    hidden -= {
+        field
+        for field in spec["discloses"]
+        if is_field_visible_to(audit, field, "auditor")
     }
     if hidden:
         payload["requirement_assessments"] = [
@@ -883,6 +1130,25 @@ def audit_context_for_typst(context, audit, role="auditor", lang="en"):
             continue
         buffer.seek(0)
         images[f"{key}.png"] = buffer.read()
+    if "categories" not in spec["sections"] or "score" in hidden:
+        payload.pop("category_scores", None)
+
+    for field, charts in _FIELD_DERIVED_CHARTS.items():
+        if field in hidden:
+            for name in charts:
+                images.pop(f"{name}.png", None)
+
+    if {"commitments", "tasks"} & set(spec["sections"]):
+        commitments, tasks = audit_undertakings(audit, lang)
+        payload["commitments"] = commitments
+        payload["tasks"] = tasks
+
+    if "charts" not in spec["sections"]:
+        images = {}
+
+    payload["counterparty"] = counterparty_context(audit)
+    payload["profile"] = profile
+    payload["sections"] = list(spec["sections"])
     payload["charts"] = sorted(images)
     payload["labels"] = report_labels(lang)
     return payload, images

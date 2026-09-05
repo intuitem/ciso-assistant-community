@@ -439,8 +439,15 @@
 				titleKey: 'exportAuditPosture',
 				descriptionKey: 'exportAuditPostureDesc',
 				format: 'PDF' as const,
-				href: `/compliance-assessments/${id}/export/posture-pdf`,
+				href: `/compliance-assessments/${id}/export/posture-pdf?profile=full`,
 				testId: 'export-option-posture-pdf'
+			},
+			{
+				titleKey: 'exportAuditAttestation',
+				descriptionKey: 'exportAuditAttestationDesc',
+				format: 'PDF' as const,
+				href: `/compliance-assessments/${id}/export/posture-pdf?profile=attestation`,
+				testId: 'export-option-attestation-pdf'
 			},
 			isInternal &&
 				isCyFun && {

@@ -250,6 +250,15 @@
 		cacheLock={cacheLocks['conclusion']}
 		bind:cachedValue={formDataCache['conclusion']}
 	/>
+	<TextField
+		type="date"
+		{form}
+		field="expiry_date"
+		label={m.expiryDate()}
+		helpText={m.entityAssessmentExpiryDateHelpText()}
+		cacheLock={cacheLocks['expiry_date']}
+		bind:cachedValue={formDataCache['expiry_date']}
+	/>
 	<Select
 		{form}
 		options={model.selectOptions['status']}

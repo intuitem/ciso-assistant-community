@@ -68,6 +68,7 @@ from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from webhooks.service import dispatch_webhook_event
 from .generators import (
+    REPORT_PROFILES,
     audit_context_for_typst,
     gen_audit_context,
     inline_charts_for_docx,
@@ -12085,7 +12086,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         lang = request.user.preferences.get("lang") or "en"
         context = gen_audit_context(pk, tree, lang)
-        payload, images = audit_context_for_typst(context, audit, role, lang)
+        profile = request.query_params.get("profile", "full")
+        if profile not in REPORT_PROFILES:
+            return Response(
+                {"error": "unknownProfile"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        payload, images = audit_context_for_typst(context, audit, role, lang, profile)
 
         response = HttpResponse(
             render_pdf("audit_report.typ", payload, images=images),
@@ -12093,7 +12099,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         safe_name = slugify(audit.name) or "audit"
         response["Content-Disposition"] = (
-            f'attachment; filename="{safe_name}_posture.pdf"'
+            f'attachment; filename="{safe_name}_{profile}.pdf"'
         )
         return response
 
