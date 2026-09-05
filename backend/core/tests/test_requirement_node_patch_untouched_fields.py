@@ -49,3 +49,30 @@ def test_patch_still_validates_the_field_it_touches():
         RequirementNodeWriteSerializer().update(
             rn, {"scores_definition_ref": "does-not-exist"}
         )
+
+
+@pytest.mark.django_db
+def test_patch_accepts_explicit_null_on_nullable_fields():
+    folder = Folder.get_root_folder()
+    fw = Framework.objects.create(name="FW", folder=folder, min_score=0, max_score=100)
+    rn = RequirementNode.objects.create(
+        framework=fw,
+        urn="urn:test:patch:req:003",
+        ref_id="REQ-3",
+        assessable=True,
+        folder=folder,
+    )
+
+    RequirementNodeWriteSerializer().update(
+        rn,
+        {
+            "ref_id": "REQ-3-renamed",
+            "name": None,
+            "order_id": None,
+            "implementation_groups": None,
+        },
+    )
+
+    rn.refresh_from_db()
+    assert rn.ref_id == "REQ-3-renamed"
+    assert rn.implementation_groups is None
