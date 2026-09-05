@@ -104,6 +104,13 @@
 		label={m.parentEntity()}
 		helpText={m.parentEntityHelpText()}
 	/>
+	<TextArea
+		{form}
+		field="address"
+		label={m.address()}
+		cacheLock={cacheLocks['address']}
+		bind:cachedValue={formDataCache['address']}
+	/>
 	<AutocompleteSelect
 		{form}
 		field="country"

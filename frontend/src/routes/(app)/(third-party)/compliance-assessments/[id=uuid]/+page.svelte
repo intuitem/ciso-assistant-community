@@ -434,6 +434,21 @@
 				href: `/compliance-assessments/${id}/export/word`,
 				testId: 'export-option-word'
 			},
+			// Offered to third parties too: the backend redacts per viewer role.
+			{
+				titleKey: 'exportAuditPosture',
+				descriptionKey: 'exportAuditPostureDesc',
+				format: 'PDF' as const,
+				href: `/compliance-assessments/${id}/export/posture-pdf?profile=full`,
+				testId: 'export-option-posture-pdf'
+			},
+			{
+				titleKey: 'exportAuditAttestation',
+				descriptionKey: 'exportAuditAttestationDesc',
+				format: 'PDF' as const,
+				href: `/compliance-assessments/${id}/export/posture-pdf?profile=attestation`,
+				testId: 'export-option-attestation-pdf'
+			},
 			isInternal &&
 				isCyFun && {
 					titleKey: 'exportCyFunAssessment',
