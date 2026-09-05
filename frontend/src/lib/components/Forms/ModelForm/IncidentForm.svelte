@@ -109,6 +109,10 @@
 		optionsEndpoint="applied-controls"
 		optionsLabelField="auto"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [{ field: 'category', translate: true }],
+			position: 'prefix'
+		}}
 		field="applied_controls"
 		label={m.appliedControls()}
 	/>
@@ -175,6 +179,7 @@
 		{form}
 		multiple
 		optionsEndpoint="entities"
+		optionsExtraFields={[['folder', 'str']]}
 		field="entities"
 		cacheLock={cacheLocks['entities']}
 		bind:cachedValue={formDataCache['entities']}

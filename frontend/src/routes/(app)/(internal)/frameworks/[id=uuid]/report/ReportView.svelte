@@ -109,6 +109,7 @@
 		ca_status_counts: Record<string, number>;
 		live_statuses: string[];
 		aggregation_strategy: string;
+		campaign: { id: string; name: string } | null;
 		generated_at: string;
 	};
 
@@ -122,6 +123,7 @@
 	// is defense-in-depth and means the file stays correct if a future caller
 	// passes a reactive `report` prop without remounting.
 	let framework = $derived(report.framework);
+	let campaign = $derived(report.campaign ?? null);
 	let rows = $derived<ReportRow[]>(report.rows ?? []);
 	let sectionList = $derived<Section[]>(framework.sections ?? []);
 	let igDefs = $derived<IGDef[]>(framework.implementation_groups_definition ?? []);
@@ -142,7 +144,9 @@
 	let excludedCAs = $derived(totalDetectedCAs - countedCAs);
 
 	$effect(() => {
-		$pageTitle = `${framework.name} — ${m.frameworkReport()}`;
+		$pageTitle = campaign
+			? `${campaign.name} — ${m.frameworkReport()}`
+			: `${framework.name} — ${m.frameworkReport()}`;
 	});
 
 	// IG id resolver: most YAMLs use ref_id as the canonical key on the requirement
@@ -459,6 +463,14 @@
 					{m.frameworkReport()}
 				</div>
 				<h1 class="text-xl font-semibold">{framework.name}</h1>
+				{#if campaign}
+					<a
+						href="/campaigns/{campaign.id}"
+						class="badge preset-tonal-secondary text-xs mt-1 inline-block hover:preset-filled-secondary-500"
+					>
+						<i class="fa-solid fa-bullhorn mr-1"></i>{campaign.name}
+					</a>
+				{/if}
 				<div class="text-sm text-surface-600-400 mt-1">
 					{m.frameworkReportSubtitle({
 						min: framework.min_score ?? '—',

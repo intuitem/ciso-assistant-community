@@ -105,7 +105,7 @@ def _wrap_framework_drafts(apps, root):
     QuestionChoice = apps.get_model("core", "QuestionChoice")
     LibraryDraft = apps.get_model("core", "LibraryDraft")
 
-    for framework in Framework.objects.exclude(editing_draft=None):
+    for framework in Framework.objects.exclude(editing_draft__isnull=True):
         label = f"framework {framework.id} ({framework.name!r})"
         if framework.library_id:
             _log_wip_loss("framework", framework, "library-backed (WIP dropped)")
@@ -264,7 +264,7 @@ def _wrap_matrix_drafts(apps, root):
     RiskMatrix = apps.get_model("core", "RiskMatrix")
     LibraryDraft = apps.get_model("core", "LibraryDraft")
 
-    for matrix in RiskMatrix.objects.exclude(editing_draft=None):
+    for matrix in RiskMatrix.objects.exclude(editing_draft__isnull=True):
         label = f"risk matrix {matrix.id} ({matrix.name!r})"
         if matrix.library_id:
             _log_wip_loss("risk_matrix", matrix, "library-backed (WIP dropped)")
@@ -329,7 +329,7 @@ def _wrap_preset_drafts(apps, root):
     PresetJourney = apps.get_model("core", "PresetJourney")
     LibraryDraft = apps.get_model("core", "LibraryDraft")
 
-    for preset in Preset.objects.exclude(editing_draft=None):
+    for preset in Preset.objects.exclude(editing_draft__isnull=True):
         label = f"preset {preset.id} ({preset.name!r})"
         if preset.urn:
             _log_wip_loss("preset", preset, "library-loaded (WIP dropped)")
