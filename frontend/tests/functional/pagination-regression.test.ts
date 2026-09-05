@@ -1,19 +1,13 @@
 /**
  * Pagination regression harness.
  *
- * Backend lists are paginated (100 by default). The regular seed
- * data of the functional suite never exceeds one page, so a frontend
- * consumer that silently reads only the first page still passes CI. These
- * tests create MORE THAN ONE PAGE of objects through the backend API (fast)
- * and then drive the UI, so any first-page-only consumer fails:
+ * Backend lists are paginated (100 by default) and the functional suite's seed
+ * data never exceeds one page, so a first-page-only consumer still passes CI.
+ * These tests create more than one page through the API, then drive the UI:
  *
- *   1. lazy autocomplete search must reach options beyond the first page,
- *   2. m2m links beyond one hydration chunk must survive an edit-form save
- *      that does not touch them,
- *   3. ListSelector must render the full option list (Django permissions).
- *
- * Data is created via direct API calls with the session token, following the
- * pattern of visibility-effects.test.ts, and cleaned up in afterAll.
+ *   1. picker search must reach options beyond the first page,
+ *   2. m2m links beyond one hydration chunk must survive an unrelated save,
+ *   3. ListSelector must render the full option list.
  */
 
 import { randomBytes } from 'crypto';

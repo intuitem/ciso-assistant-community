@@ -40,8 +40,7 @@ export const load: PageServerLoad = async (event) => {
 		? `${BASE_API_URL}/entity-assessments/?compliance_assessment__campaign=${event.params.id}`
 		: `${BASE_API_URL}/compliance-assessments/?campaign=${event.params.id}`;
 
-	// Every target is rendered, so the whole collection is needed: a campaign
-	// can carry more targets than one page.
+	// Every target is rendered, and a campaign can exceed one page.
 	const [rows, dashboardRes] = await Promise.all([
 		fetchAllPages<Record<string, any>>(event.fetch, targetsUrl).catch(() => []),
 		event.fetch(`${BASE_API_URL}/campaigns/${event.params.id}/dashboard/`)

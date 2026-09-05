@@ -75,8 +75,7 @@ def process_selector(
             results = data.get("results", [])
             results_list.extend(results)
             next_url = data.get("next")
-            # The API returns path-relative next links ("/api/...?limit="),
-            # which requests cannot resolve on its own.
+            # next links are path-relative; requests cannot resolve them alone.
             if next_url:
                 next_url = urljoin(endpoint, next_url)
         elif isinstance(data, list):

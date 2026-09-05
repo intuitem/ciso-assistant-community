@@ -1,10 +1,7 @@
-"""Pagination contract, enforced across every registered route.
+"""Pagination contract, enforced across every registered list route.
 
-CI datasets rarely exceed one page, so pagination regressions (routes escaping
-the envelope, next links a client cannot resolve, silent fallback on invalid
-params) are invisible to per-model tests. These tests sweep every registered
-list route — core's router plus the ~15 sub-app routers it includes — so any
-new or modified route stays inside the contract.
+CI datasets rarely exceed one page, so pagination regressions are invisible to
+per-model tests; this sweeps core's router plus the sub-app routers it includes.
 """
 
 import pytest
@@ -22,9 +19,8 @@ def _row_id(row):
 def _list_route_names(resolver=None, prefix=""):
     """Every `-list` route name in the URL conf, namespaces included.
 
-    Walking the resolver rather than one router's registry: list endpoints are
-    registered by core's router, by the routers of ebios_rm/privacy/resilience/
-    pmbok/metrology/iam/... that core includes, and by standalone ListAPIViews.
+    Walks the resolver, not one router's registry: routes come from core, the
+    sub-app routers it includes, and standalone ListAPIViews.
     """
     resolver = resolver or get_resolver()
     names = {
@@ -37,44 +33,31 @@ def _list_route_names(resolver=None, prefix=""):
     return names
 
 
-# Routes that are not paginated collections by design.
-#   chat-sessions: ChatSessionViewSet.list deliberately answers with a plain
-#     array; fe-api/chat/sessions/+server.ts already forwards query params so
-#     it can be switched to the envelope later without a frontend change.
-#   content-types: a fixed, cached catalogue of Django models, not rows.
-#   ...-graph-data: a graph payload keyed by node, not a row collection.
+# Not paginated collections by design.
 UNPAGINATED_BY_DESIGN = {
-    "chat-sessions-list",
-    "content-types-list",
-    "requirement-mapping-sets-graph-data-list",
+    "chat-sessions-list",  # plain array by design
+    "content-types-list",  # cached model catalogue, not rows
+    "requirement-mapping-sets-graph-data-list",  # graph payload keyed by node
 }
 
-# Pre-existing breakage, listed rather than silently skipped so it stays
-# visible. Neither is caused by, nor in scope for, the pagination work; delete
-# an entry once its route is fixed.
-#   builtin-metric-samples: 500, BuiltinMetricSample has no FolderMixin so
-#     RoleAssignment.get_iam_folder_field raises NotImplementedError.
-#   document-attachments: 500, DocumentAttachmentReadSerializer does not exist.
+# Pre-existing 500s, listed rather than skipped silently; delete once fixed.
 KNOWN_BROKEN = {
-    "builtin-metric-samples-list",
-    "document-attachments-list",
+    "builtin-metric-samples-list",  # no FolderMixin -> get_iam_folder_field raises
+    "document-attachments-list",  # DocumentAttachmentReadSerializer does not exist
 }
 
 # Reachable, but not with this fixture's session.
 SKIPPED_STATUSES = (
     status.HTTP_405_METHOD_NOT_ALLOWED,
-    # Feature-gated route (e.g. idp-groups without SSO configured).
-    status.HTTP_403_FORBIDDEN,
-    # Different auth scheme (SCIM uses its own bearer token).
-    status.HTTP_401_UNAUTHORIZED,
+    status.HTTP_403_FORBIDDEN,  # feature-gated, e.g. idp-groups without SSO
+    status.HTTP_401_UNAUTHORIZED,  # different auth scheme, e.g. SCIM
 )
 
 
 def _reversible_list_urls():
     """List routes reachable with no URL arguments, as (name, url) pairs.
 
-    Nested lists (``.../<pk>/evidences``) need a parent id, so they cannot be
-    swept generically; they are covered by their own per-model tests.
+    Nested lists need a parent id, so they are left to per-model tests.
     """
     urls = []
     for name in sorted(_list_route_names()):

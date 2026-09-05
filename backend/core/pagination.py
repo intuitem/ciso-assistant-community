@@ -15,14 +15,10 @@ def _bounded_int(value, minimum):
 
 
 class CustomLimitOffsetPagination(LimitOffsetPagination):
-    # PAGINATE_BY is the default page size, PAGINATE_MAX the hard ceiling:
-    # larger ?limit= values are clamped to max_limit.
     max_limit = settings.PAGINATE_MAX
 
-    # Stock DRF silently falls back to the defaults on invalid limit/offset
-    # values (limit=0 historically read as "no limit" but never was). Reject
-    # them instead so broken clients fail loudly rather than get a silently
-    # truncated dataset.
+    # Stock DRF falls back to the default on an invalid limit/offset; reject
+    # instead, so a broken client fails loudly rather than silently truncating.
     def get_limit(self, request):
         param = request.query_params.get(self.limit_query_param)
         if param is None:
@@ -34,8 +30,6 @@ class CustomLimitOffsetPagination(LimitOffsetPagination):
                 {self.limit_query_param: "expected a strictly positive integer"}
             )
         if requested > self.max_limit:
-            # Clients asking above the ceiling are exactly the ones a lower
-            # ceiling would truncate: record them while it is still generous.
             logger.warning(
                 "pagination limit clamped",
                 requested=requested,
@@ -44,7 +38,6 @@ class CustomLimitOffsetPagination(LimitOffsetPagination):
             )
             return self.max_limit
         if requested > settings.PAGINATE_TARGET_MAX:
-            # Served today, truncated if the ceiling ever drops to the target.
             logger.info(
                 "pagination limit above target ceiling",
                 requested=requested,

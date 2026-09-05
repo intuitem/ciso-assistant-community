@@ -2,9 +2,8 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error, type NumericRange } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
-// fetch() does not reject on 4xx/5xx and DRF answers with a JSON error body, so
-// an unchecked `data.count ?? 0` turns a 403 into a legitimate-looking "no
-// assessments" empty state.
+// fetch() does not reject on 4xx, so an unchecked count turns a 403 into an
+// empty state.
 const probeCount = async (fetchFn: typeof fetch, endpoint: string, label: string) => {
 	const res = await fetchFn(`${BASE_API_URL}/${endpoint}/?limit=1`);
 	if (!res.ok) {
