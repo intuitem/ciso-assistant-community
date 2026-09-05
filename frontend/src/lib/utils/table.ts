@@ -945,6 +945,15 @@ export const IS_RECURRENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const ENABLED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'enabled',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -3158,6 +3167,7 @@ export const listViewFields = {
 			'refId',
 			'name',
 			'is_recurrent',
+			'frequency',
 			'assigned_to',
 			'startDate',
 			'lastOccurrenceStatus',
@@ -3170,6 +3180,7 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'is_recurrent',
+			'schedule',
 			'assigned_to',
 			'task_date',
 			'last_occurrence_status',
@@ -3179,13 +3190,14 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['createdAt', 'updatedAt'],
-			body: ['created_at', 'updated_at']
+			head: ['enabled', 'createdAt', 'updatedAt'],
+			body: ['enabled', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			assigned_to: TASK_TEMPLATE_ASSIGNED_TO_FILTER,
 			is_recurrent: IS_RECURRENT_FILTER,
+			enabled: ENABLED_FILTER,
 			last_occurrence_status: LAST_OCCURENCE_STATUS_FILTER,
 			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER,
 			filtering_labels: LABELS_FILTER
@@ -3196,7 +3208,10 @@ export const listViewFields = {
 		body: ['due_date', 'status'],
 		filters: {
 			status: TASK_STATUS_FILTER,
-			past: PAST_FILTER
+			past: PAST_FILTER,
+			// URL-driven only (the "All occurrences" link on a task's detail page):
+			// without an entry here the table drops the param instead of applying it.
+			task_template: { hide: true } as ListViewFilterConfig
 		}
 	},
 	qualifications: {
