@@ -33,6 +33,8 @@
 		field: string;
 		valuePath?: string; // Default will be handled in destructuring
 		helpText?: string | undefined;
+		/** Extra classes on the help text, for a field whose hint carries an action. */
+		helpTextClass?: string;
 		form: SuperForm<Record<string, unknown>, any>;
 		resetForm?: boolean;
 		multiple?: boolean;
@@ -89,6 +91,7 @@
 		field,
 		valuePath = field,
 		helpText = undefined,
+		helpTextClass = '',
 		form,
 		resetForm = false,
 		multiple = false,
@@ -924,6 +927,6 @@
 		{/if}
 	</div>
 	{#if helpText}
-		<p class="text-sm text-surface-600-400 whitespace-pre-line">{helpText}</p>
+		<p class="text-sm text-surface-600-400 whitespace-pre-line {helpTextClass}">{helpText}</p>
 	{/if}
 </div>

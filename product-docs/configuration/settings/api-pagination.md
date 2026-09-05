@@ -14,7 +14,7 @@ Every list endpoint of the API returns a paginated envelope:
 ```json
 {
   "count": 1234,
-  "next": "/api/assets/?limit=100&offset=100",
+  "next": "/api/assets/?limit=5000&offset=5000",
   "previous": null,
   "results": ["..."]
 }
@@ -29,7 +29,7 @@ with fewer rows than `count` is a page, not the whole dataset.
 
 | Variable       | Default                  | Meaning                                                                          |
 | -------------- | ------------------------ | -------------------------------------------------------------------------------- |
-| `PAGINATE_BY`  | `100`                    | Page size applied when a request passes no `limit` parameter.                    |
+| `PAGINATE_BY`  | `5000`                   | Page size applied when a request passes no `limit` parameter.                    |
 | `PAGINATE_MAX` | `max(5000, PAGINATE_BY)` | Hard ceiling for the `limit` parameter. Larger values are clamped, never served. |
 
 The default page size can never exceed the ceiling: if `PAGINATE_BY` is set
@@ -55,13 +55,8 @@ new clients to follow `next` rather than to request a large `limit`.
   or deleted **while** you page can still shift across page boundaries.
 
 {% hint style="warning" %}
-Releases prior to this change defaulted to 5,000-row pages, which let scripts
-fetch most collections in a single request. A client that sends no `limit` now
-receives 100 rows per page. If an integration relies on the old behaviour,
-teach it to follow `next` links (recommended), or have it request an explicit
-`limit` — up to `PAGINATE_MAX`, which still allows 5,000. As a transition
-workaround, `PAGINATE_BY=5000` restores the old **default page size** —
-responses remain paginated envelopes, invalid `limit`/`offset` values are
-still rejected, and collections larger than the page size still require
-following `next`.
+The default page size is unchanged, but `limit` and `offset` validation is
+stricter: values that are not positive integers are rejected with **HTTP 400**
+instead of falling back to the default, so a client sending `limit=0` now gets
+an error where it previously got a full page.
 {% endhint %}

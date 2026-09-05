@@ -34,6 +34,12 @@
 	let { data, form }: Props = $props();
 	const toastStore = getToastStore();
 	let URLModel = $derived(data.URLModel);
+	// Models with an analytics page. The link carries the table's current filters,
+	// so the page aggregates exactly the rows the user is looking at.
+	const ANALYTICS_LABELS: Record<string, () => string> = {
+		'applied-controls': m.appliedControlsAnalytics,
+		'task-templates': m.taskTemplatesAnalytics
+	};
 	// Static (per-model) filters merged with dynamic custom-field filters.
 	const tableFilters = $derived({
 		...listViewFields[URLModel]?.filters,
@@ -374,11 +380,14 @@
 										aria-label={m.kanbanMode()}
 										data-testid="kanban-mode-button"><i class="fa-solid fa-table-columns"></i></a
 									>
+								{/if}
+								{#if ANALYTICS_LABELS[URLModel]}
+									{@const analyticsLabel = ANALYTICS_LABELS[URLModel]()}
 									<a
 										href="{URLModel}/analytics/{currentFilterSearch}"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-										title={m.appliedControlsAnalytics()}
-										aria-label={m.appliedControlsAnalytics()}
+										title={analyticsLabel}
+										aria-label={analyticsLabel}
 										data-testid="analytics-button"><i class="fa-solid fa-chart-pie"></i></a
 									>
 								{/if}

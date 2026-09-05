@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from rest_framework.test import APIClient
 
@@ -56,6 +58,20 @@ def setup(db):
         "owner": owner_client,
     }
     set_flag(False)
+
+
+def hide_all_actors():
+    """Make every Actor invisible while leaving other models' scoping intact."""
+    real = RoleAssignment.get_viewable_object_ids
+
+    def only_non_actors(user, model, folder=None):
+        if model is Actor:
+            return Actor.objects.none().values_list("id", flat=True)
+        return real(user, model, folder)
+
+    return patch.object(
+        RoleAssignment, "get_viewable_object_ids", side_effect=only_non_actors
+    )
 
 
 def patch_control(client, control, **payload):
@@ -598,6 +614,32 @@ class TestTaskAnalytics:
         assert body["by_assignee"][0]["count"] == 1
         assert body["recurrence"] == {"one_time": 1, "recurrent": 0}
 
+    def test_hidden_assignees_are_merged_into_one_anonymous_bucket(self, setup):
+        """analytics builds its payload by hand, so it misses the masking that
+        _filter_related_fields applies on list/retrieve. Actor visibility is its
+        own policy and genuinely diverges from the tasks' one."""
+        task = TaskTemplate.objects.create(name="Retest", folder=setup["domain"])
+        task.assigned_to.set([setup["owner_actor"]])
+        label = str(setup["owner_actor"])
+
+        named = setup["manager"].get("/api/task-templates/analytics/").json()
+        assert [b["label"] for b in named["by_assignee"]] == [label]
+
+        with hide_all_actors():
+            res = setup["manager"].get("/api/task-templates/analytics/")
+
+        assert res.status_code == 200, res.json()
+        body = res.json()
+        assert label not in res.content.decode()
+        assert body["by_assignee"] == [
+            {
+                "key": "_restricted",
+                "label": None,
+                "count": 1,
+                "status_breakdown": [{"key": "_unset", "count": 1}],
+            }
+        ]
+
     def test_commitment_section_follows_the_flag(self, setup):
         task = TaskTemplate.objects.create(name="Retest", folder=setup["domain"])
         setup["manager"].patch(
@@ -614,6 +656,24 @@ class TestTaskAnalytics:
             "commitment"
             not in setup["manager"].get("/api/task-templates/analytics/").json()
         )
+
+
+class TestAppliedControlAnalytics:
+    def test_hidden_owners_are_merged_into_one_anonymous_bucket(self, setup):
+        label = str(setup["owner_actor"])
+
+        named = setup["manager"].get("/api/applied-controls/analytics/").json()
+        assert label in [b["label"] for b in named["top_owners"]]
+
+        with hide_all_actors():
+            res = setup["manager"].get("/api/applied-controls/analytics/")
+
+        assert res.status_code == 200, res.json()
+        assert label not in res.content.decode()
+        buckets = res.json()["top_owners"]
+        assert [b["key"] for b in buckets] == ["_restricted"]
+        assert buckets[0]["label"] is None
+        assert buckets[0]["count"] == 1
 
 
 class TestRegister:

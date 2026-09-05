@@ -1,9 +1,9 @@
 /**
  * Pagination regression harness.
  *
- * Backend lists are paginated (100 by default) and the functional suite's seed
- * data never exceeds one page, so a first-page-only consumer still passes CI.
- * These tests create more than one page through the API, then drive the UI:
+ * The suite's seed data never exceeds one page, so a first-page-only consumer
+ * still passes CI. e2e-tests.sh pins PAGINATE_BY=100; these tests then create
+ * more than one page through the API and drive the UI:
  *
  *   1. picker search must reach options beyond the first page,
  *   2. m2m links beyond one hydration chunk must survive an unrelated save,
