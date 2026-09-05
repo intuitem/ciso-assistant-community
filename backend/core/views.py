@@ -978,6 +978,37 @@ def actor_prefetch(field_name: str) -> Prefetch:
     )
 
 
+RESTRICTED_BUCKET_KEY = "_restricted"
+
+
+def viewable_actor_ids(user) -> set[str]:
+    """Ids of the actors *user* may see, as strings, for analytics bucketing.
+
+    ``Actor`` has no folder of its own: its visibility is derived from
+    ``view_user``/``view_team``/``view_entity`` on the underlying object, which is a
+    different permission on a different subtree from the one that grants sight of
+    the objects an actor is assigned to. The two sets genuinely diverge.
+    """
+    return {str(pk) for pk in RoleAssignment.get_viewable_object_ids(user, Actor)}
+
+
+def actor_bucket_identity(actor, allowed_ids: set[str]) -> tuple[str, str | None]:
+    """Bucket key and label for *actor*, anonymised when it may not be seen.
+
+    ``list``/``retrieve`` mask unviewable related objects in
+    ``BaseModelViewSet._filter_related_fields``, but an analytics ``@action``
+    builds its payload by hand and never passes through it. Folding every hidden
+    actor into one keyless bucket keeps the totals reconcilable with ``count``
+    without naming anyone; a bucket per hidden actor would still disclose how
+    many there are and how the work splits between them.
+    """
+    actor_id = str(actor.pk)
+    if actor_id in allowed_ids:
+        # Key by pk so two actors sharing a display name stay separate.
+        return actor_id, str(actor)
+    return RESTRICTED_BUCKET_KEY, None
+
+
 def check_folder_add_permission(user, folder, *models):
     """Raise PermissionDenied unless *user* may create each of *models* in *folder*.
 
@@ -5763,7 +5794,9 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         can carry the table's current filters through verbatim.
         """
         qs = self.filter_queryset(self.get_queryset())
-        return Response(ActionPlanBudgetOverview.compute_budget_overview(qs))
+        return Response(
+            ActionPlanBudgetOverview.compute_budget_overview(qs, request.user)
+        )
 
     @action(
         detail=False, name="Something"
@@ -6559,7 +6592,7 @@ class ActionPlanBudgetOverview:
         return annual_cost
 
     @staticmethod
-    def compute_budget_overview(queryset):
+    def compute_budget_overview(queryset, user):
         from core.utils import get_global_currency, format_currency
         from global_settings.models import GlobalSettings
         from django.utils import timezone
@@ -6598,6 +6631,7 @@ class ActionPlanBudgetOverview:
         build_days_total = 0.0
         run_fixed_total = 0.0
         run_days_total = 0.0
+        allowed_actor_ids = viewable_actor_ids(user)
 
         for ctrl in controls:
             cost = ActionPlanBudgetOverview._compute_annual_cost(ctrl, daily_rate)
@@ -6684,14 +6718,14 @@ class ActionPlanBudgetOverview:
                 eta_buckets[key]["count"] += 1
                 eta_buckets[key]["total"] += cost
 
-            # top owners (M2M) — key by pk so homonyms don't collapse into one bucket
+            # top owners (M2M)
             for owner in ctrl.owner.all():
-                owner_key = str(owner.pk)
+                owner_key, label = actor_bucket_identity(owner, allowed_actor_ids)
                 bucket = owner_counts.setdefault(
                     owner_key,
                     {
                         "key": owner_key,
-                        "label": str(owner),
+                        "label": label,
                         "count": 0,
                         "total": 0.0,
                         "status_breakdown": {},
@@ -6968,7 +7002,7 @@ class ComplianceAssessmentActionPlanBudgetOverview(
 ):
     def get(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())
-        return Response(self.compute_budget_overview(qs))
+        return Response(self.compute_budget_overview(qs, request.user))
 
 
 class RiskAssessmentActionPlanBudgetOverview(
@@ -6976,7 +7010,7 @@ class RiskAssessmentActionPlanBudgetOverview(
 ):
     def get(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())
-        return Response(self.compute_budget_overview(qs))
+        return Response(self.compute_budget_overview(qs, request.user))
 
 
 class PolicyViewSet(AppliedControlViewSet):
@@ -17267,6 +17301,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         commitment_states: dict = {}
         slipped = breached = 0
         commitment_enabled = ff_is_enabled("commitment_management")
+        allowed_actor_ids = viewable_actor_ids(request.user)
 
         for task in tasks:
             node = next_node_by_template.get(task.id)
@@ -17298,13 +17333,12 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             segment["count"] += 1
 
             for actor in task.assigned_to.all():
-                # Key by pk so two actors sharing a display name stay separate.
-                actor_key = str(actor.id)
+                actor_key, label = actor_bucket_identity(actor, allowed_actor_ids)
                 bucket = assignee_counts.setdefault(
                     actor_key,
                     {
                         "key": actor_key,
-                        "label": str(actor),
+                        "label": label,
                         "count": 0,
                         "status_breakdown": {},
                     },

@@ -1107,6 +1107,7 @@
 	"noThreatsMapped": "Aucune menace n'a été attachée. Pensez à lier les menaces à vos scénarios de risque pour une meilleure visibilité.",
 	"actionPlan": "Plan d'action",
 	"noStatus": "Pas de statut",
+	"restricted": "Restreint",
 	"actionPlanHelpText": "Le compteur correspond aux nombres d'exigences liées",
 	"matchingRequirements": "Exigences associées",
 	"incoming": "En approche",

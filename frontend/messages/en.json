@@ -1056,6 +1056,7 @@
 	"noThreatsMapped": "No threats mapped. Consider attaching threats to your risk scenarios for a better overview.",
 	"actionPlan": "Action plan",
 	"noStatus": "No status",
+	"restricted": "Restricted",
 	"actionPlanHelpText": "The counter represents the number of associated requirements.",
 	"matchingRequirements": "Matching requirements",
 	"incoming": "Incoming",

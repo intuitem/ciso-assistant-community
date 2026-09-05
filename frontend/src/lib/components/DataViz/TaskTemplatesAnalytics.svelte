@@ -20,7 +20,12 @@
 		count: number;
 		by_status: Bucket[];
 		due_buckets: Bucket[];
-		by_assignee: { key: string; label: string; count: number; status_breakdown: Bucket[] }[];
+		by_assignee: {
+			key: string;
+			label: string | null;
+			count: number;
+			status_breakdown: Bucket[];
+		}[];
 		by_folder: { key: string; label: string; count: number; status_breakdown: Bucket[] }[];
 		unassigned: number;
 		recurrence: { one_time: number; recurrent: number };
@@ -87,6 +92,10 @@
 	// list's next_occurrence_status disagree for a one-time task whose only
 	// occurrence is past, and '_unset' has no filter value at all. Every segment
 	// therefore lands on the same place as the assignee name.
+	// Assignees the caller may not see are merged server-side into one anonymous
+	// bucket, so it names nobody and has no id to filter the table by.
+	const RESTRICTED_KEY = '_restricted';
+
 	function drillDownHref(assigneeId: string) {
 		return listHref('assigned_to', assigneeId);
 	}
@@ -248,14 +257,20 @@
 						{#each data.by_assignee as row (row.key)}
 							<tr class="border-b last:border-b-0">
 								<td class="py-1.5">
-									<a href={drillDownHref(row.key)} class="hover:underline">{row.label}</a>
+									{#if row.key === RESTRICTED_KEY}
+										<span class="italic text-surface-600-400">{m.restricted()}</span>
+									{:else}
+										<a href={drillDownHref(row.key)} class="hover:underline">{row.label}</a>
+									{/if}
 								</td>
 								<td class="py-1.5 w-1/2">
 									<div class="flex h-2 w-full rounded bg-surface-100-900 overflow-hidden">
 										{#each row.status_breakdown as segment (segment.key)}
 											{@const label = statusLabel(segment.key)}
+											<!-- No href on the restricted bucket: omitting it leaves a plain
+											     element rather than a link to a filter that cannot be built. -->
 											<a
-												href={drillDownHref(row.key)}
+												href={row.key === RESTRICTED_KEY ? undefined : drillDownHref(row.key)}
 												title="{label}: {segment.count}"
 												class="relative h-full group"
 												style="width: {(segment.count / row.count) *
