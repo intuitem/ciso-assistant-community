@@ -2725,6 +2725,9 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     )
     attachment = serializers.FileField(required=False)
     link = serializers.URLField(required=False)
+    observation = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True, write_only=True
+    )
 
     # A respondent deposits evidence but must not adjudicate it: the status
     # (in_review / approved / rejected / …) is an auditor-side decision.
@@ -2737,12 +2740,23 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         attachment = validated_data.pop("attachment", None)
         link = validated_data.pop("link", None)
+        observation = validated_data.pop("observation", None)
 
         evidence = super().create(validated_data)
 
-        EvidenceRevision.objects.get_or_create(
-            evidence=evidence, defaults={"link": link, "attachment": attachment}
-        )
+        # A revision stands for a deposited artifact. Opening an empty one just to
+        # have a row makes an evidence that holds nothing look like it holds
+        # something; a definition with no content stays revision-less until one
+        # is filed against it.
+        if attachment or link or observation:
+            EvidenceRevision.objects.get_or_create(
+                evidence=evidence,
+                defaults={
+                    "link": link,
+                    "attachment": attachment,
+                    "observation": observation,
+                },
+            )
 
         return evidence
 
@@ -2813,17 +2827,36 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = EvidenceRevision
         fields = "__all__"
+        read_only_fields = ["version"]
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        # The submitted folder is decorative: EvidenceRevision.save() replaces it
+        # with the evidence's own. Authorizing the submitted one therefore checks a
+        # folder the row never lands in, letting a caller with rights in folder A
+        # file a revision against evidence in folder B.
+        evidence = attrs.get("evidence") or getattr(self.instance, "evidence", None)
+        if evidence is not None:
+            self._check_object_perm(attrs, "add", folder=evidence.folder)
+            # create() flips the evidence to in_review, which is a write to the
+            # parent row and not covered by add_evidencerevision.
+            self._check_object_perm(
+                attrs, "change", folder=evidence.folder, model=Evidence
+            )
+        return attrs
 
     def create(self, validated_data):
-        evidence = validated_data["evidence"]
-        max_version = EvidenceRevision.objects.filter(evidence=evidence).aggregate(
-            models.Max("version")
-        )["version__max"]
-        validated_data["version"] = (max_version or 0) + 1
-        # Update evidence status to in_review when a new revision is submitted
-        evidence.status = Evidence.Status.IN_REVIEW
-        evidence.save()
-        return super().create(validated_data)
+        with transaction.atomic():
+            evidence = Evidence.objects.select_for_update().get(
+                pk=validated_data["evidence"].pk
+            )
+            max_version = EvidenceRevision.objects.filter(evidence=evidence).aggregate(
+                models.Max("version")
+            )["version__max"]
+            validated_data["version"] = (max_version or 0) + 1
+            evidence.status = Evidence.Status.IN_REVIEW
+            evidence.save()
+            return super().create(validated_data)
 
 
 class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
@@ -5499,7 +5532,9 @@ class TaskTemplateReadSerializer(CommitmentSerializerMixin, BaseModelSerializer)
 
     class Meta:
         model = TaskTemplate
-        exclude = ["schedule"]
+        # The schedule is exposed so the UI can render the cadence in words; it is
+        # not shown raw anywhere, detailViewFields decides what the table renders.
+        fields = "__all__"
 
     def get_task_node(self, obj):
         """
@@ -5516,11 +5551,27 @@ class TaskTemplateReadSerializer(CommitmentSerializerMixin, BaseModelSerializer)
             )
         return obj._cached_task_node
 
+    # Resolved in the list/retrieve queryset; None there is a real answer, so it
+    # cannot double as "not annotated".
+    _NOT_ANNOTATED = object()
+
     def get_status(self, obj):
+        annotated = getattr(obj, "one_time_status", self._NOT_ANNOTATED)
+        if annotated is not self._NOT_ANNOTATED:
+            return None if obj.is_recurrent else annotated
         task_node = self.get_task_node(obj)
         return task_node.status if task_node else None
 
     def get_observation(self, obj):
+        annotated = getattr(obj, "one_time_observation", self._NOT_ANNOTATED)
+        if annotated is not self._NOT_ANNOTATED:
+            # A null observation on an existing node is not the same answer as no
+            # node at all. TaskNode.status is non-nullable, so its annotation being
+            # None is what tells the two apart.
+            no_occurrence = getattr(obj, "one_time_status", None) is None
+            if obj.is_recurrent or no_occurrence:
+                return ""
+            return annotated
         task_node = self.get_task_node(obj)
         return task_node.observation if task_node else ""
 
@@ -5710,14 +5761,30 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     assigned_to = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(["folder", "id"], many=True)
     is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
-    expected_evidence = FieldsRelatedField(["folder", "id"], many=True)
+    # These read off the template. The model exposes them as properties returning
+    # `.all()`, and DRF calls `.all()` again on whatever it gets — on a QuerySet that
+    # clones and discards the prefetched rows, costing a query per node per field.
+    # Naming the manager instead lets the second `.all()` hit the prefetch cache.
+    expected_evidence = FieldsRelatedField(
+        ["folder", "id"], many=True, source="task_template.evidences"
+    )
     evidence_reviewed = serializers.SerializerMethodField()
     evidence_revisions_map = serializers.SerializerMethodField()
-    applied_controls = FieldsRelatedField(["folder", "id"], many=True)
-    compliance_assessments = FieldsRelatedField(["folder", "id"], many=True)
-    assets = FieldsRelatedField(["folder", "id"], many=True)
-    risk_assessments = FieldsRelatedField(["folder", "id"], many=True)
-    findings_assessment = FieldsRelatedField(["folder", "id"], many=True)
+    applied_controls = FieldsRelatedField(
+        ["folder", "id"], many=True, source="task_template.applied_controls"
+    )
+    compliance_assessments = FieldsRelatedField(
+        ["folder", "id"], many=True, source="task_template.compliance_assessments"
+    )
+    assets = FieldsRelatedField(
+        ["folder", "id"], many=True, source="task_template.assets"
+    )
+    risk_assessments = FieldsRelatedField(
+        ["folder", "id"], many=True, source="task_template.risk_assessments"
+    )
+    findings_assessment = FieldsRelatedField(
+        ["folder", "id"], many=True, source="task_template.findings_assessment"
+    )
 
     def get_name(self, obj):
         return obj.task_template.name if obj.task_template else ""
@@ -5732,16 +5799,16 @@ class TaskNodeReadSerializer(BaseModelSerializer):
 
     def get_evidence_revisions_map(self, obj):
         """Returns a mapping of evidence ID to revision ID for this task node"""
-        from core.models import EvidenceRevision
-
+        expected = {evidence.id for evidence in obj.expected_evidence}
         evidence_revisions = {}
-        for evidence in obj.expected_evidence:
-            # Find revisions for this evidence that belong to this task node
-            revision = EvidenceRevision.objects.filter(
-                evidence=evidence, task_node=obj
-            ).first()
-            if revision:
-                evidence_revisions[str(evidence.id)] = str(revision.id)
+        # Walking the node's own revisions costs one prefetched list; querying per
+        # expected evidence cost a query each. setdefault keeps the first match, as
+        # the per-evidence .first() did.
+        for revision in obj.evidence_revisions.all():
+            if revision.evidence_id in expected:
+                evidence_revisions.setdefault(
+                    str(revision.evidence_id), str(revision.id)
+                )
         return evidence_revisions
 
     class Meta:
