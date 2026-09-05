@@ -2828,6 +2828,22 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
         fields = "__all__"
         read_only_fields = ["version"]
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        # The submitted folder is decorative: EvidenceRevision.save() replaces it
+        # with the evidence's own. Authorizing the submitted one therefore checks a
+        # folder the row never lands in, letting a caller with rights in folder A
+        # file a revision against evidence in folder B.
+        evidence = attrs.get("evidence") or getattr(self.instance, "evidence", None)
+        if evidence is not None:
+            self._check_object_perm(attrs, "add", folder=evidence.folder)
+            # create() flips the evidence to in_review, which is a write to the
+            # parent row and not covered by add_evidencerevision.
+            self._check_object_perm(
+                attrs, "change", folder=evidence.folder, model=Evidence
+            )
+        return attrs
+
     def create(self, validated_data):
         with transaction.atomic():
             evidence = Evidence.objects.select_for_update().get(

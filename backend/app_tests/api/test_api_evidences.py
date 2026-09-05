@@ -343,3 +343,90 @@ class TestEvidenceCreationAuthorization:
         assert response.status_code == 201, response.data
         template = TaskTemplate.objects.get(id=response.data["id"])
         assert list(template.evidences.all()) == [existing]
+
+
+@pytest.mark.django_db
+class TestEvidenceRevisionFolderAuthorization:
+    """EvidenceRevision.save() replaces the submitted folder with the evidence's,
+    so the submitted one must not be what gets authorized."""
+
+    def _post_revision(self, user, evidence, claimed_folder):
+        from rest_framework.test import APIRequestFactory, force_authenticate
+        from core.views import EvidenceRevisionViewSet
+
+        request = APIRequestFactory().post(
+            "/api/evidence-revisions/",
+            {
+                "evidence": str(evidence.id),
+                "folder": str(claimed_folder.id),
+                "observation": "cross-folder attempt",
+            },
+            format="json",
+        )
+        force_authenticate(request, user=user)
+        response = EvidenceRevisionViewSet.as_view({"post": "create"})(request)
+        response.render()
+        return response
+
+    def test_claimed_folder_does_not_authorize_the_write(self, authenticated_client):
+        from unittest.mock import patch
+        from core.models import Evidence, EvidenceRevision
+        from iam.models import Folder, RoleAssignment, User
+
+        user = User.objects.filter(is_superuser=True).first()
+        root = Folder.get_root_folder()
+        allowed = Folder.objects.create(name="revision-allowed", parent_folder=root)
+        forbidden = Folder.objects.create(name="revision-forbidden", parent_folder=root)
+        evidence = Evidence.objects.create(name="Elsewhere", folder=forbidden)
+
+        real = RoleAssignment.is_access_allowed
+
+        def only_in_allowed(user, perm, folder=None):
+            if perm.codename == "add_evidencerevision":
+                return folder == allowed
+            return real(user=user, perm=perm, folder=folder)
+
+        before = EvidenceRevision.objects.count()
+        with patch.object(
+            RoleAssignment, "is_access_allowed", side_effect=only_in_allowed
+        ):
+            response = self._post_revision(user, evidence, claimed_folder=allowed)
+
+        assert response.status_code == 403, response.data
+        assert EvidenceRevision.objects.count() == before
+        evidence.refresh_from_db()
+        assert evidence.status != Evidence.Status.IN_REVIEW, (
+            "evidence was moved to in_review by a refused revision"
+        )
+
+    def test_revision_requires_change_permission_on_the_evidence(
+        self, authenticated_client
+    ):
+        """create() flips the evidence to in_review, so filing a revision is also a
+        write to the parent row."""
+        from unittest.mock import patch
+        from core.models import Evidence, EvidenceRevision
+        from iam.models import Folder, RoleAssignment, User
+
+        user = User.objects.filter(is_superuser=True).first()
+        root = Folder.get_root_folder()
+        folder = Folder.objects.create(name="revision-add-only", parent_folder=root)
+        evidence = Evidence.objects.create(name="Add only", folder=folder)
+
+        real = RoleAssignment.is_access_allowed
+
+        def no_change_evidence(user, perm, folder=None):
+            if perm.codename == "change_evidence":
+                return False
+            return real(user=user, perm=perm, folder=folder)
+
+        before = EvidenceRevision.objects.count()
+        with patch.object(
+            RoleAssignment, "is_access_allowed", side_effect=no_change_evidence
+        ):
+            response = self._post_revision(user, evidence, claimed_folder=folder)
+
+        assert response.status_code == 403, response.data
+        assert EvidenceRevision.objects.count() == before
+        evidence.refresh_from_db()
+        assert evidence.status != Evidence.Status.IN_REVIEW
