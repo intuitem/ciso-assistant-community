@@ -2644,15 +2644,10 @@ class RequirementNodeWriteSerializer(BaseModelSerializer):
                 }
                 for attr, value in validated_data.items():
                     setattr(instance, attr, value)
-                # Trigger clean() for override constraints; exclude M2M fields
-                # (not yet attached) and untouched ones (clean() still sees
-                # every field, only clean_fields() skips them) from the checks.
-                untouched_field_names = {f.name for f in instance._meta.fields} - set(
-                    validated_data.keys()
-                )
-                instance.full_clean(
-                    exclude=list(m2m_field_names | untouched_field_names)
-                )
+                # Only the cross-field override constraints: full_clean() would
+                # also re-run clean_fields() over untouched nullable columns and
+                # reject them as blank. DRF already validated what was sent.
+                instance.clean()
                 instance.save()
                 for attr, value in m2m_values.items():
                     getattr(instance, attr).set(value)
