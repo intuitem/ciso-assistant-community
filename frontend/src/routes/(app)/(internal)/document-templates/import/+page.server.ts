@@ -1,13 +1,15 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { fail, redirect } from '@sveltejs/kit';
 import { m } from '$paraglide/messages';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
 	if (!locals.featureflags?.document_management) redirect(302, '/');
-	const res = await fetch(`${BASE_API_URL}/folders/?content_type=DO&content_type=GL`);
-	const json = res.ok ? await res.json() : {};
-	const raw: any[] = json.results ?? (Array.isArray(json) ? json : []);
+	const raw: any[] = await fetchAllPages(
+		fetch,
+		`${BASE_API_URL}/folders/?content_type=DO&content_type=GL`
+	).catch(() => []);
 	const folders = raw.map((f) => ({ id: f.id, name: f.str ?? f.name }));
 	return { folders };
 };

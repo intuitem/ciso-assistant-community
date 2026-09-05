@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
@@ -38,45 +39,40 @@ export const load = (async ({ fetch, params }) => {
 	const assignmentForm = await superValidate(zod(assignmentSchema));
 
 	// Fetch existing assignments from backend
-	const assignmentsRes = await fetch(
-		`${BASE_API_URL}/requirement-assignments/?compliance_assessment=${params.id}`
-	);
-	const assignmentsData = await assignmentsRes.json();
+	const assignmentsData = await fetchAllPages<{
+		id: string;
+		actor: Array<{ id: string; str: string; type?: string }>;
+		requirement_assessments: { id: string; review_state?: string }[];
+		status: string;
+		events: Array<{
+			id: string;
+			event_type: string;
+			event_actor: { id: string; email: string; first_name: string; last_name: string } | null;
+			event_notes: string | null;
+			created_at: string;
+		}>;
+	}>(fetch, `${BASE_API_URL}/requirement-assignments/?compliance_assessment=${params.id}`);
 
 	// Transform backend data to frontend format
-	const assignments = assignmentsData.results.map(
-		(assignment: {
-			id: string;
-			actor: Array<{ id: string; str: string; type?: string }>;
-			requirement_assessments: { id: string; review_state?: string }[];
-			status: string;
-			events: Array<{
-				id: string;
-				event_type: string;
-				event_actor: { id: string; email: string; first_name: string; last_name: string } | null;
-				event_notes: string | null;
-				created_at: string;
-			}>;
-		}) => ({
-			id: assignment.id,
-			actor: assignment.actor.map((a) => ({
-				id: a.id,
-				str: a.str,
-				type: a.type || 'user'
-			})),
-			requirement_assessments: assignment.requirement_assessments.map((ra) => ra.id),
-			review_counts: {
-				changes_requested: assignment.requirement_assessments.filter(
-					(ra) => ra.review_state === 'changes_requested'
-				).length,
-				resubmitted: assignment.requirement_assessments.filter(
-					(ra) => ra.review_state === 'resubmitted'
-				).length
-			},
-			status: assignment.status,
-			events: assignment.events ?? []
-		})
-	);
+	const assignments = assignmentsData.map((assignment) => ({
+		id: assignment.id,
+		actor: assignment.actor.map((a) => ({
+			id: a.id,
+			str: a.str,
+			type: a.type || 'user'
+		})),
+		requirement_assessments: assignment.requirement_assessments.map((ra) => ra.id),
+		review_counts: {
+			changes_requested: assignment.requirement_assessments.filter(
+				(ra) => ra.review_state === 'changes_requested'
+			).length,
+			resubmitted: assignment.requirement_assessments.filter(
+				(ra) => ra.review_state === 'resubmitted'
+			).length
+		},
+		status: assignment.status,
+		events: assignment.events ?? []
+	}));
 
 	return {
 		URLModel,

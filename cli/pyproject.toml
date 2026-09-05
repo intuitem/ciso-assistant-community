@@ -3,7 +3,7 @@ name = "ciso-assistant-cli"
 version = "0.1.0"
 description = "CISO Assistant CLI tools"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "click>=8.1.0",
     "icecream>=2.1.0",
@@ -14,6 +14,16 @@ dependencies = [
     "requests>=2.32.3",
     "rich>=13.0.0",
     "uvicorn>=0.30.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx",
+    "pytest>=7.0.0",
+    "pytest-asyncio",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-xdist>=3.0.0",
 ]
 
 [build-system]

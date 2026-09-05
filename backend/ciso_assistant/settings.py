@@ -446,6 +446,18 @@ else:
     MEDIA_URL = ""
 
 PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
+# Ceiling we intend to converge on; requests above it are logged, not clamped.
+PAGINATE_TARGET_MAX = 200
+# Held at 5000: Power BI connector <= 1.0.2 pages by the limit it requested, so a
+# lower ceiling truncates its imports silently. Lowering plan:
+# product-docs/configuration/settings/api-pagination.md.
+PAGINATE_MAX = int(os.environ.get("PAGINATE_MAX", default=max(5000, PAGINATE_BY)))
+PAGINATE_BY = min(PAGINATE_BY, PAGINATE_MAX)
+if PAGINATE_BY < 1 or PAGINATE_MAX < 1:
+    raise ImproperlyConfigured(
+        f"PAGINATE_BY and PAGINATE_MAX must be >= 1 "
+        f"(got PAGINATE_BY={PAGINATE_BY}, PAGINATE_MAX={PAGINATE_MAX})"
+    )
 
 # Application definition
 

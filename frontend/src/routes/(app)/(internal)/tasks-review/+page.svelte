@@ -3,6 +3,10 @@
 	import { goto } from '$app/navigation';
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -73,6 +77,30 @@
 	let selectedAppliedControls = $state(data.selectedAppliedControls || '');
 	let selectedStatus = $state(data.selectedStatus || '');
 
+	// Lazy applied-controls picker: options are searched server-side instead of
+	// fetching the whole collection up front (same pattern as ModelTable filters).
+	const appliedControlsFilterSchema = z.object({
+		applied_controls: z.array(z.string()).optional().nullable()
+	});
+	const appliedControlsFilterForm = superForm(
+		defaults(
+			{
+				applied_controls: data.selectedAppliedControls ? [data.selectedAppliedControls] : []
+			},
+			zod(appliedControlsFilterSchema)
+		),
+		{
+			SPA: true,
+			validators: zod(appliedControlsFilterSchema),
+			dataType: 'json',
+			invalidateAll: false,
+			applyAction: false,
+			resetForm: false,
+			taintedMessage: false,
+			validationMethod: 'auto'
+		}
+	);
+
 	let startFormatted = $derived.by(() => {
 		const parsed = parseMonthFormat(startPeriod);
 		if (!parsed)
@@ -137,6 +165,10 @@
 		selectedAssignedTo = '';
 		selectedAppliedControls = '';
 		selectedStatus = '';
+		appliedControlsFilterForm.form.update((formData) => {
+			formData.applied_controls = [];
+			return formData;
+		});
 		goto('/tasks-review');
 	}
 
@@ -251,7 +283,7 @@
 
 				<!-- Filter dropdowns — streamed -->
 				{#await data.filterData}
-					<div class="col-span-4 flex items-end">
+					<div class="col-span-2 flex items-end">
 						<div class="flex items-center gap-2 text-xs text-surface-500 py-2">
 							<i class="fa-solid fa-spinner fa-spin"></i>
 							{m.loading()}...
@@ -292,24 +324,20 @@
 							{/each}
 						</select>
 					</div>
-					<div>
-						<label
-							for="applied-controls-filter"
-							class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
-							>{m.appliedControls()}</label
-						>
-						<select
-							id="applied-controls-filter"
-							bind:value={selectedAppliedControls}
-							class="w-full px-2.5 py-1.5 text-sm border border-surface-200-800 rounded-lg bg-surface-50-950 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
-						>
-							<option value="">{m.allAppliedControls()}</option>
-							{#each filters.allAppliedControls as control}
-								<option value={control.id}>{control.str || control.name}</option>
-							{/each}
-						</select>
-					</div>
 				{/await}
+
+				<div>
+					<AutocompleteSelect
+						form={appliedControlsFilterForm}
+						field="applied_controls"
+						label={m.appliedControls()}
+						optionsEndpoint="applied-controls"
+						optionsExtraFields={[['folder', 'str']]}
+						onChange={(value) => {
+							selectedAppliedControls = value || '';
+						}}
+					/>
+				</div>
 
 				<div>
 					<label

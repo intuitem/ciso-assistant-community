@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -23,13 +24,10 @@ export const load: PageServerLoad = async (event) => {
 	// Gracefully degrade if doc_management is unavailable
 	let allDocuments: any[] = [];
 	try {
-		const allDocsRes = await fetch(
+		allDocuments = await fetchAllPages(
+			fetch,
 			`${BASE_API_URL}/managed-documents/?container__policies=${params.id}`
 		);
-		if (allDocsRes.ok) {
-			const allDocsData = await allDocsRes.json();
-			allDocuments = allDocsData.results || [];
-		}
 	} catch {
 		// doc_management app may not be available
 	}
@@ -50,13 +48,10 @@ export const load: PageServerLoad = async (event) => {
 	if (document) {
 		// Load revisions
 		try {
-			const revRes = await fetch(
+			revisions = await fetchAllPages(
+				fetch,
 				`${BASE_API_URL}/document-revisions/?document=${document.id}&ordering=-version_number`
 			);
-			if (revRes.ok) {
-				const revData = await revRes.json();
-				revisions = revData.results || [];
-			}
 		} catch {
 			// Gracefully degrade
 		}

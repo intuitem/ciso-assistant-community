@@ -91,6 +91,7 @@
   * [Allowed IP whitelist](configuration/settings/infra-config-allowed-ip.md)
   * [Branding](configuration/settings/branding.md)
   * [Custom templates](configuration/settings/custom-templates.md)
+  * [API pagination](configuration/settings/api-pagination.md)
 * [Organization](configuration/organization/README.md)
   * [Add and manage users](configuration/organization/users.md)
   * [User groups](configuration/organization/user-groups.md)

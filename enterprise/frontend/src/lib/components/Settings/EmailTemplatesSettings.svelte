@@ -2,6 +2,7 @@
 	import * as m from '$paraglide/messages';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { LOCALE_DISPLAY_MAP } from '$lib/utils/constants';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import {
 		getModalStore,
 		type ModalStore,
@@ -81,12 +82,12 @@
 		loading = true;
 		error = '';
 		try {
-			const [availableRes, overridesRes] = await Promise.all([
+			const [availableRes, overridesData] = await Promise.all([
 				fetch('/fe-api/custom-email-templates/available'),
-				fetch('/fe-api/custom-email-templates')
+				fetchAllPages<TemplateOverride>(fetch, '/fe-api/custom-email-templates')
 			]);
 
-			if (!availableRes.ok || !overridesRes.ok) {
+			if (!availableRes.ok) {
 				throw new Error('Failed to load templates');
 			}
 			const available = await availableRes.json();
@@ -96,8 +97,7 @@
 				...t,
 				is_enabled: t.is_enabled ?? true
 			}));
-			const data = await overridesRes.json();
-			overrides = data.results || data;
+			overrides = overridesData;
 		} catch {
 			error = 'Failed to load templates';
 		}

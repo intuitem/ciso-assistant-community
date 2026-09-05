@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { listViewFields } from '$lib/utils/table';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { superValidate } from 'sveltekit-superforms';
@@ -25,17 +26,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
 	// Presets feed the "Start a journey" picker; domains feed the folder selector.
 	// Always resolve to an array: tolerate non-OK responses and non-list payloads.
-	const fetchCollection = async (endpoint: string) => {
-		try {
-			const res = await fetch(endpoint);
-			if (!res.ok) return [];
-			const data = await res.json();
-			const list = data?.results ?? data;
-			return Array.isArray(list) ? list : [];
-		} catch {
-			return [];
-		}
-	};
+	const fetchCollection = (endpoint: string) => fetchAllPages(fetch, endpoint).catch(() => []);
 
 	const [presets, domains] = await Promise.all([
 		fetchCollection(`${BASE_API_URL}/presets/`),

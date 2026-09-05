@@ -45,3 +45,6 @@ automation/powerbi/connector/obj/
 cli/.mcp.json
 .mcp.json
 cli/.mcp.env
+
+# pnpm package cache (materialized by npx/pnpm runs at repo root)
+.pnpm-store/

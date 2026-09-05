@@ -2,6 +2,7 @@
 from datetime import datetime
 import sys
 from pathlib import Path
+from urllib.parse import urlsplit
 import tempfile
 import hashlib
 import struct
@@ -74,7 +75,9 @@ def get_global_folder_id() -> Optional[str]:
     global GLOBAL_FOLDER_ID
     if GLOBAL_FOLDER_ID:
         return GLOBAL_FOLDER_ID
-    url = f"{API_URL}/folders/"
+    # Filter server-side: the API paginates, so scanning an unfiltered first
+    # page misses the root folder once more than a page of folders exists.
+    url = f"{API_URL}/folders/?content_type=GL"
     headers = {"Authorization": f"Token {TOKEN}"}
 
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
@@ -923,8 +926,14 @@ def backup_full(dest_dir, batch_size, resume):
         all_metadata.extend(data["results"])
         url = data.get("next")
         if url and not url.startswith("http"):
-            # Convert relative URL to absolute
-            url = f"{API_URL}/serdes/attachment-metadata/{url}"
+            # Convert relative URL to absolute. The API returns
+            # path-relative next links ("/api/...?limit=..."), so join
+            # against the origin, not the endpoint.
+            if url.startswith("/"):
+                split = urlsplit(API_URL)
+                url = f"{split.scheme}://{split.netloc}{url}"
+            else:
+                url = f"{API_URL}/serdes/attachment-metadata/{url}"
 
     rprint(f"[cyan]Found {len(all_metadata)} total attachments[/cyan]")
 

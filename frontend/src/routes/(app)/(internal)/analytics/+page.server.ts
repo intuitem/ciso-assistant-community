@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { Actions, PageServerLoad } from './$types';
 import { fail } from '@sveltejs/kit';
 import { m } from '$paraglide/messages';
@@ -10,11 +11,10 @@ async function loadCustomDashboard(fetch: typeof globalThis.fetch, dashboardId: 
 	const dashboard = await dashboardRes.json();
 
 	// Fetch widgets for this dashboard
-	const widgetsRes = await fetch(
+	const widgets = await fetchAllPages(
+		fetch,
 		`${BASE_API_URL}/metrology/dashboard-widgets/?dashboard=${dashboardId}`
-	);
-	const widgetsData = widgetsRes.ok ? await widgetsRes.json() : { results: [] };
-	const widgets = widgetsData.results || [];
+	).catch(() => []);
 
 	// For each widget, fetch its samples (matches /dashboards/[id]/+page.server.ts)
 	const widgetsWithSamples = await Promise.all(
@@ -38,11 +38,11 @@ async function loadCustomDashboard(fetch: typeof globalThis.fetch, dashboardId: 
 			}
 			const metricInstanceId = widget.metric_instance?.id || widget.metric_instance;
 			if (!metricInstanceId) return { ...widget, samples: [], builtinSamples: [] };
-			const r = await fetch(
+			const samples = await fetchAllPages(
+				fetch,
 				`${BASE_API_URL}/metrology/custom-metric-samples/?metric_instance=${metricInstanceId}`
-			);
-			const data = r.ok ? await r.json() : { results: [] };
-			return { ...widget, samples: data.results || [], builtinSamples: [] };
+			).catch(() => []);
+			return { ...widget, samples, builtinSamples: [] };
 		})
 	);
 
@@ -238,11 +238,9 @@ export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 		});
 
 	// Custom tab: list of dashboards (always) + selected dashboard data (if any)
-	const dashboardsListPromise = fetch(`${BASE_API_URL}/metrology/dashboards/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.then((data) => data.results || [])
-		.catch(() => []);
+	const dashboardsListPromise = fetchAllPages(fetch, `${BASE_API_URL}/metrology/dashboards/`).catch(
+		() => []
+	);
 
 	const generalSettingsPromise = fetch(`${BASE_API_URL}/settings/general/object/`)
 		.then(assertOk)

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages';
 	import { LOCALE_DISPLAY_MAP } from '$lib/utils/constants';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import {
 		getModalStore,
 		type ModalStore,
@@ -47,17 +48,16 @@
 		loading = true;
 		error = '';
 		try {
-			const [availableRes, overridesRes] = await Promise.all([
+			const [availableRes, overridesData] = await Promise.all([
 				fetch('/fe-api/custom-doc-html-templates/available'),
-				fetch('/fe-api/custom-doc-html-templates')
+				fetchAllPages<TemplateOverride>(fetch, '/fe-api/custom-doc-html-templates')
 			]);
 
-			if (!availableRes.ok || !overridesRes.ok) {
+			if (!availableRes.ok) {
 				throw new Error('Failed to load templates');
 			}
 			availableTemplates = await availableRes.json();
-			const data = await overridesRes.json();
-			overrides = data.results || data;
+			overrides = overridesData;
 		} catch {
 			error = 'Failed to load templates';
 		}

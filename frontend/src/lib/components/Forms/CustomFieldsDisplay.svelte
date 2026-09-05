@@ -2,6 +2,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { CUSTOM_FIELD_HOST_MODELS } from '$lib/utils/customFields';
 	import { isURL } from '$lib/utils/helpers';
@@ -36,10 +37,7 @@
 		const params = new URLSearchParams({ model, visible: 'true' });
 		if (folderId) params.set('for_folder', folderId);
 		try {
-			const res = await fetch(`/custom-fields/?${params.toString()}`);
-			if (!res.ok) return;
-			const data = await res.json();
-			definitions = data.results ?? data;
+			definitions = await fetchAllPages<Definition>(fetch, `/custom-fields/?${params.toString()}`);
 		} catch (e) {
 			console.error('Failed to load custom field definitions', e);
 		}

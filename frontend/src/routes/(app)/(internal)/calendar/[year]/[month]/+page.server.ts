@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 
 import type { PageServerLoad } from './$types';
 
@@ -35,20 +36,14 @@ export const load = (async ({ fetch, locals, params }) => {
 	const keys = Object.keys(endpoints) as (keyof typeof endpoints)[];
 	const [actorIds, ...results] = await Promise.all([
 		actorIdsPromise,
-		...keys.map((key) =>
-			Promise.resolve(fetch(endpoints[key]).then((res) => res.json())).catch(() => null)
-		)
+		// tasks endpoint returns an array directly, others are paginated —
+		// fetchAllPages handles both.
+		...keys.map((key) => fetchAllPages(fetch, endpoints[key]).catch(() => []))
 	]);
 
 	const data: Record<string, any[]> = {};
 	keys.forEach((key, i) => {
-		const result = results[i];
-		if (result) {
-			// tasks endpoint returns array directly, others return { results: [...] }
-			data[key] = key === 'tasks' ? result : (result.results ?? []);
-		} else {
-			data[key] = [];
-		}
+		data[key] = results[i];
 	});
 
 	return {
