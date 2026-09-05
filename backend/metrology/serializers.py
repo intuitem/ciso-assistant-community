@@ -52,9 +52,12 @@ def coerce_sample_value(value):
     if not isinstance(value, str):
         return value
     try:
-        return json.loads(value)
+        decoded = json.loads(value)
     except json.JSONDecodeError, TypeError:
         return value
+    # Only a dict is a legacy encoding; anything else stays a string so the
+    # value schema rejects it instead of slipping past the field's allow_null.
+    return decoded if isinstance(decoded, dict) else value
 
 
 # MetricDefinition serializers

@@ -276,6 +276,19 @@ class TestCustomMetricSampleWriteSerializerValidatesValueShape:
         assert serializer.is_valid(), serializer.errors
         assert serializer.validated_data["value"] == {"choice_index": 1}
 
+    @pytest.mark.parametrize("bad_value", ["null", "99.9", "[]", "false", '"null"'])
+    def test_rejects_legacy_json_string_that_does_not_decode_to_an_object(
+        self, metric_instance, bad_value
+    ):
+        errors = self._errors_for_value(metric_instance, bad_value)
+
+        assert "value" in errors
+
+    def test_rejects_legacy_json_string_null_on_the_value_schema(self, metric_instance):
+        errors = self._errors_for_value(metric_instance, "null")
+
+        assert "is not of type 'object'" in str(errors["value"][0])
+
     def test_accepts_partial_update_of_legacy_string_valued_sample(
         self, metric_instance
     ):
