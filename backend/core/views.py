@@ -12072,9 +12072,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
 
         framework = audit.framework
+        # Object-level permission is not enough: a respondent sees only their
+        # assigned requirements, and CEL-hidden ones do not apply at all.
+        assessments, hidden_urns = scoped_requirement_assessments(audit, request.user)
+        nodes = RequirementNode.objects.filter(framework=framework)
+        if hidden_urns:
+            nodes = nodes.exclude(urn__in=hidden_urns)
         tree = get_sorted_requirement_nodes(
-            RequirementNode.objects.filter(framework=framework).all(),
-            RequirementAssessment.objects.filter(compliance_assessment=audit).all(),
+            list(nodes),
+            assessments,
             audit.max_score if audit.max_score is not None else framework.max_score,
             audit.min_score if audit.min_score is not None else framework.min_score,
         )
@@ -12085,7 +12091,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         annotate_tree_with_aggregated_scores(tree, audit)
 
         lang = request.user.preferences.get("lang") or "en"
-        context = gen_audit_context(pk, tree, lang)
+        context = gen_audit_context(pk, tree, lang, assessments=assessments)
         profile = request.query_params.get("profile", "full")
         if profile not in REPORT_PROFILES:
             return Response(

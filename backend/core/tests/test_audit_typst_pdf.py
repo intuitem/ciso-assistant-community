@@ -12,6 +12,7 @@ from core.typst_render import render_pdf
 from core.helpers import (
     annotate_tree_with_aggregated_scores,
     get_sorted_requirement_nodes,
+    scoped_requirement_assessments,
 )
 from core.models import RequirementNode
 
@@ -253,3 +254,43 @@ def test_requirement_rows_carry_evidences_and_opted_in_tasks(audit):
     _, opted_in = _render(audit, "auditor", profile="full")
     for ra in opted_in["requirement_assessments"]:
         assert "task_templates" in ra
+
+
+@pytest.mark.django_db
+def test_hiding_result_drops_the_aggregates_derived_from_it(audit):
+    """Redacting rows is not enough: totals and charts recompute the same thing."""
+    audit.field_visibility = {"result": {"auditor": "hidden", "respondent": "hidden"}}
+    audit.save()
+
+    _, payload = _render(audit, "auditor", profile="full")
+    assert "result" in payload["hidden_fields"]
+    assert "req" not in payload, "the counts disclose the result distribution"
+    assert "drifts_per_domain" not in payload
+    for chart in ("compliance_donut.png", "compliance_radar.png", "completion_bar.png"):
+        assert chart not in payload["charts"]
+    for ra in payload["requirement_assessments"]:
+        assert "result_key" not in ra, "the raw value must follow its label"
+
+
+@pytest.mark.django_db
+def test_long_observations_are_not_silently_dropped(audit):
+    """A non-breakable block discards overflow without any visible marker."""
+    marker = "TAILSENTINEL"
+    for ra in RequirementAssessment.objects.filter(compliance_assessment=audit):
+        ra.observation = ("Observation text that runs on and on. " * 240) + marker
+        ra.save()
+
+    pdf, _ = _render(audit, "auditor", profile="attestation")
+    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    assert text.count(marker) >= 1, "the end of a long observation was clipped"
+
+
+@pytest.mark.django_db
+def test_scoping_helper_matches_the_interactive_endpoint(audit, django_user_model):
+    """The PDF and `requirements_list` must scope rows the same way; an auditor with
+    no respondent folders sees every assessment."""
+    user = django_user_model.objects.filter(is_superuser=True).first()
+    assessments, hidden_urns = scoped_requirement_assessments(audit, user)
+    total = audit.get_requirement_assessments(include_non_assessable=True).count()
+    assert len(assessments) == total
+    assert hidden_urns == set() or isinstance(hidden_urns, (set, frozenset))

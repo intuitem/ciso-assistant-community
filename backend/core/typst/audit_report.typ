@@ -24,12 +24,13 @@
 #let accent = rgb("#1e3a8a")
 #let muted = rgb("#6b7280")
 
-#let result-color(result) = {
-  let key = lower(result)
-  if key.contains("non") { rgb("#fee2e2") } else if key.contains("partial") {
-    rgb("#fef3c7")
-  } else if key.contains("compliant") { rgb("#dcfce7") } else { rgb("#f1f5f9") }
-}
+// Keyed on the raw enum value, never the label: matching English substrings
+// mis-colours every other locale ("Conforme" contains no "compliant").
+#let result-color(key) = (
+  compliant: rgb("#dcfce7"),
+  partially_compliant: rgb("#fef3c7"),
+  non_compliant: rgb("#fee2e2"),
+).at(key, default: rgb("#f1f5f9"))
 
 #set page(
   paper: "a4",
@@ -124,10 +125,10 @@
 
 // ------------------------------------------------------------------- summary
 
-#let r = d.req
-#let total = field(r, "total", fallback: 0)
+#let r = d.at("req", default: none)
+#let total = if r != none { field(r, "total", fallback: 0) } else { 0 }
 
-#if shows("summary") [
+#if shows("summary") and r != none [
   = #t("executiveSummary")
   #table(
     columns: 5,
@@ -147,7 +148,7 @@
   )
 ]
 
-#if shows("summary") and total > 0 [
+#if shows("summary") and r != none and total > 0 [
   #v(0.6em)
   Compliant on *#calc.round(100 * r.compliant / total, digits: 1)%* of
   #total assessed requirements. #field(d, "ac_count", fallback: 0) applied
@@ -237,8 +238,10 @@
 #v(0.6em)
 
 #for ra in ras [
+  // Breakable on purpose: Typst silently discards content that overflows a
+  // non-breakable block, and `observation` is unbounded text.
   #block(
-    breakable: false,
+    breakable: true,
     above: 1em,
     width: 100%,
     inset: (bottom: 0.7em),
@@ -252,7 +255,7 @@
       // as "no result recorded", which is a different statement.
       if "result" in ra {
         box(
-          fill: result-color(ra.result),
+          fill: result-color(ra.at("result_key", default: "")),
           inset: (x: 5pt, y: 2pt),
           radius: 3pt,
         )[#text(8pt)[#ra.result]]

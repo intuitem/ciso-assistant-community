@@ -380,7 +380,7 @@ def _answer_rows(ra):
     return rows
 
 
-def gen_audit_context(id, tree, lang):
+def gen_audit_context(id, tree, lang, assessments=None):
     def count_category_results(data):
         def recursive_result_count(node_data):
             # Initialize result counts for this node
@@ -665,8 +665,12 @@ def gen_audit_context(id, tree, lang):
     category_radar_buffer = plot_category_radar(
         category_scores, max_score=max_score, colors=custom_colors
     )
-    requirement_assessments_objects = audit.get_requirement_assessments(
-        include_non_assessable=True
+    # `assessments` lets a caller pass a row-level-scoped set (see
+    # `scoped_requirement_assessments`); without it every assessment is included.
+    requirement_assessments_objects = (
+        audit.get_requirement_assessments(include_non_assessable=True)
+        if assessments is None
+        else assessments
     )
 
     # Build flat list of requirement assessments for Word template
@@ -685,6 +689,8 @@ def gen_audit_context(id, tree, lang):
                 or "-",
                 "status": safe_translate(lang, ra.status),
                 "result": safe_translate(lang, ra.result),
+                # The label is localised; the colour must key off the raw value.
+                "result_key": ra.result or "",
                 "extended_result": safe_translate(lang, ra.extended_result),
                 "score": ra.score,
                 "max_score": audit.framework.max_score if ra.is_scored else None,
@@ -824,9 +830,18 @@ _REDACTABLE_RA_FIELDS = (
     "applied_controls",
 )
 
-# Charts built from a governed field: redacting the field does not redact an
-# image drawn from it, so they have to be dropped together.
-_FIELD_DERIVED_CHARTS = {"score": ("category_radar",)}
+# Data derived from a governed field. Redacting the field does not redact an
+# aggregate or an image computed from it, so they have to be dropped together —
+# otherwise the PDF discloses as a total or a picture what the rows withheld.
+_FIELD_DERIVED_CHARTS = {
+    "score": ("category_radar",),
+    "result": ("compliance_donut", "compliance_radar", "completion_bar"),
+}
+_FIELD_DERIVED_KEYS = {
+    "score": ("category_scores",),
+    "result": ("req", "drifts_per_domain"),
+    "applied_controls": ("p1_controls", "full_controls", "ac_count"),
+}
 
 # Report profiles. `sections` drives layout; `drops` drives the payload. Both are
 # needed: a template flag alone would leave excluded values in the JSON, and the
@@ -1117,7 +1132,9 @@ def audit_context_for_typst(context, audit, role="auditor", lang="en", profile="
             {
                 key: value
                 for key, value in ra.items()
-                if key not in hidden and not (key == "max_score" and "score" in hidden)
+                if key not in hidden
+                and not (key == "max_score" and "score" in hidden)
+                and not (key == "result_key" and "result" in hidden)
             }
             for ra in payload.get("requirement_assessments", [])
         ]
@@ -1130,13 +1147,14 @@ def audit_context_for_typst(context, audit, role="auditor", lang="en", profile="
             continue
         buffer.seek(0)
         images[f"{key}.png"] = buffer.read()
-    if "categories" not in spec["sections"] or "score" in hidden:
+    if "categories" not in spec["sections"]:
         payload.pop("category_scores", None)
 
-    for field, charts in _FIELD_DERIVED_CHARTS.items():
-        if field in hidden:
-            for name in charts:
-                images.pop(f"{name}.png", None)
+    for field in hidden:
+        for key in _FIELD_DERIVED_KEYS.get(field, ()):
+            payload.pop(key, None)
+        for name in _FIELD_DERIVED_CHARTS.get(field, ()):
+            images.pop(f"{name}.png", None)
 
     if {"commitments", "tasks"} & set(spec["sections"]):
         commitments, tasks = audit_undertakings(audit, lang)

@@ -16,7 +16,8 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(400, 'Error fetching the PDF file');
+		// Forward the backend's status: a 403 must not surface as a generic 400.
+		error(res.status, 'Error fetching the PDF file');
 	}
 
 	const fileName = `audit-${profile}-${new Date().toISOString()}.pdf`;
