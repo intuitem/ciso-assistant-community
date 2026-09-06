@@ -8,7 +8,7 @@ import pytest
 
 from core.generators import audit_context_for_typst, gen_audit_context
 from core.models import RequirementAssessment
-from core.typst_render import render_pdf
+from core.typst_render import localized_template, render_pdf
 from core.helpers import (
     annotate_tree_with_aggregated_scores,
     get_sorted_requirement_nodes,
@@ -38,11 +38,12 @@ def _context(audit_obj):
     return gen_audit_context(audit_obj.id, tree, "en")
 
 
-def _render(audit_obj, role, profile="full"):
+def _render(audit_obj, role, profile="full", lang="en"):
     payload, images = audit_context_for_typst(
-        _context(audit_obj), audit_obj, role, "en", profile
+        _context(audit_obj), audit_obj, role, lang, profile
     )
-    return render_pdf("audit_report.typ", payload, images=images), payload
+    template = localized_template("audit_report", lang)
+    return render_pdf(template, payload, images=images), payload
 
 
 @pytest.mark.django_db
@@ -294,3 +295,55 @@ def test_scoping_helper_matches_the_interactive_endpoint(audit, django_user_mode
     total = audit.get_requirement_assessments(include_non_assessable=True).count()
     assert len(assessments) == total
     assert hidden_urns == set() or isinstance(hidden_urns, (set, frozenset))
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("lang", ["en", "fr"])
+def test_every_locale_template_renders(audit, lang):
+    pdf, _ = _render(audit, "auditor", profile="attestation", lang=lang)
+    assert pdf[:5] == b"%PDF-"
+
+
+@pytest.mark.django_db
+def test_locale_templates_do_not_drift(audit):
+    """Self-contained templates are twins: a change to one must reach the other.
+
+    Same page count and the same headings for the same payload; the strings differ
+    but the structure must not.
+    """
+    en_pdf, _ = _render(audit, "auditor", profile="attestation", lang="en")
+    fr_pdf, _ = _render(audit, "auditor", profile="attestation", lang="fr")
+
+    en_doc = pymupdf.open(stream=en_pdf, filetype="pdf")
+    fr_doc = pymupdf.open(stream=fr_pdf, filetype="pdf")
+    assert en_doc.page_count == fr_doc.page_count
+
+    fr_text = "".join(page.get_text() for page in fr_doc)
+    for english_only in ("Detailed results", "Signatures", "Assessed entity"):
+        if english_only == "Signatures":
+            continue  # spelled the same in French
+        assert english_only not in fr_text, (
+            "the French template still has English chrome"
+        )
+
+
+def test_unknown_locale_falls_back_whole(tmp_path):
+    """No half-translated documents: an unauthored locale falls back entirely."""
+    assert localized_template("audit_report", "de") == "audit_report_en.typ"
+    assert localized_template("audit_report", "fr") == "audit_report_fr.typ"
+    assert localized_template("audit_report", "fr-CA") == "audit_report_fr.typ"
+    assert localized_template("audit_report", None) == "audit_report_en.typ"
+
+
+@pytest.mark.django_db
+def test_french_result_badges_are_singular(audit):
+    """One badge qualifies one requirement. `i18n_dict` carries plurals because it
+    was written for chart legends and aggregate counts, so the badge must not use it."""
+    for ra in RequirementAssessment.objects.filter(compliance_assessment=audit):
+        ra.result = "compliant"
+        ra.save()
+
+    pdf, _ = _render(audit, "auditor", profile="attestation", lang="fr")
+    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    assert "Conforme" in text
+    assert "Conformes" not in text, "badge picked up the plural aggregate label"

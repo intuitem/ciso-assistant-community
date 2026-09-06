@@ -890,135 +890,26 @@ REPORT_PROFILES = {
 # Template chrome, keyed the way `frontend/messages/*.json` keys it so this can be
 # swapped for the shared catalog without touching the template. English literals
 # stand in until then — see docs/backend_i18n_catalog_shaping.md.
-_REPORT_LABEL_KEYS = (
-    "executiveSummary",
-    "scope",
-    "driftsPerDomain",
-    "scoresPerCategory",
-    "priorityControls",
-    "detailedResults",
-    "reference",
-    "date",
-    "implementationGroups",
-    "contributors",
-    "domain",
-    "findings",
-    "category",
-    "average",
-    "scored",
-    "items",
-    "control",
-    "status",
-    "progress",
-    "resultDetail",
-    "score",
-    "observation",
-    "appliedControls",
-    "compliant",
-    "partiallyCompliant",
-    "nonCompliant",
-    "notApplicable",
-    "notAssessed",
-    "assessableRequirements",
-    "commitments",
-    "tasks",
-    "undertaking",
-    "committedDate",
-    "currentDate",
-    "notes",
-    "signatures",
-    "signatureIntro",
-    "forTheAssessedEntity",
-    "forTheAssessingOrganisation",
-    "nameAndRole",
-    "signature",
-    "slipped",
-    "noCommitments",
-    "undefined",
-    "inNegotiation",
-    "committed",
-    "declined",
-    "fulfilled",
-    "assessedEntity",
-    "expiryDate",
-    "legalIdentifiers",
-    "evidences",
-    "all",
-)
-
-_REPORT_LABELS_EN = {
-    "executiveSummary": "Executive summary",
-    "scope": "Scope",
-    "driftsPerDomain": "Drifts per domain",
-    "scoresPerCategory": "Scores per category",
-    "priorityControls": "Priority controls",
-    "detailedResults": "Detailed results",
-    "reference": "Reference",
-    "date": "Date",
-    "implementationGroups": "Implementation groups",
-    "contributors": "Contributors",
-    "domain": "Domain",
-    "findings": "Findings",
-    "category": "Category",
-    "average": "Average",
-    "scored": "Scored",
-    "items": "Items",
-    "control": "Control",
-    "status": "Status",
-    "progress": "Progress",
-    "resultDetail": "Result detail",
-    "score": "Score",
-    "observation": "Observation",
-    "appliedControls": "Applied controls",
-    "compliant": "Compliant",
-    "partiallyCompliant": "Partially compliant",
-    "nonCompliant": "Non compliant",
-    "notApplicable": "Not applicable",
-    "notAssessed": "Not assessed",
-    "assessableRequirements": "assessable requirements",
-    "commitments": "Commitments",
-    "tasks": "Tasks",
-    "undertaking": "Undertaking",
-    "committedDate": "Committed date",
-    "currentDate": "Current date",
-    "notes": "Notes",
-    "signatures": "Signatures",
-    "signatureIntro": "By signing below, the parties agree to the compliance status and the commitments recorded in this document.",
-    "forTheAssessedEntity": "For the assessed entity",
-    "forTheAssessingOrganisation": "For the assessing organisation",
-    "nameAndRole": "Name and role",
-    "signature": "Signature",
-    "slipped": "slipped",
-    "noCommitments": "No commitments recorded.",
-    "undefined": "Undefined",
-    "inNegotiation": "In negotiation",
-    "committed": "Committed",
-    "declined": "Declined",
-    "fulfilled": "Fulfilled",
-    "assessedEntity": "Assessed entity",
-    "expiryDate": "Expiry date",
-    "legalIdentifiers": "Legal identifiers",
-    "evidences": "Evidences",
-    "all": "All",
-}
 
 
-def report_labels(lang="en"):
-    """Chrome strings for the Typst templates.
-
-    Single seam for document i18n: once `core.i18n_catalog` lands this reads the
-    maintained frontend catalog for `lang` and the templates stay unchanged.
-    """
-    return {key: _REPORT_LABELS_EN[key] for key in _REPORT_LABEL_KEYS}
-
-
-# Commitment states are enum values; the catalog keys them camelCase.
-_STATE_LABEL_KEYS = {
-    Commitment.State.UNDEFINED: "undefined",
-    Commitment.State.IN_NEGOTIATION: "inNegotiation",
-    Commitment.State.COMMITTED: "committed",
-    Commitment.State.DECLINED: "declined",
-    Commitment.State.FULFILLED: "fulfilled",
+# Commitment states are row data, so they are localised here rather than in the
+# per-locale template. Same category as `i18n_dict` above, retired by the same
+# catalog work; a new locale template needs an entry here too.
+_STATE_LABELS = {
+    "en": {
+        Commitment.State.UNDEFINED: "Undefined",
+        Commitment.State.IN_NEGOTIATION: "In negotiation",
+        Commitment.State.COMMITTED: "Committed",
+        Commitment.State.DECLINED: "Declined",
+        Commitment.State.FULFILLED: "Fulfilled",
+    },
+    "fr": {
+        Commitment.State.UNDEFINED: "Non défini",
+        Commitment.State.IN_NEGOTIATION: "En négociation",
+        Commitment.State.COMMITTED: "Engagé",
+        Commitment.State.DECLINED: "Refusé",
+        Commitment.State.FULFILLED: "Réalisé",
+    },
 }
 
 
@@ -1026,12 +917,13 @@ def _date_str(value):
     return value.isoformat() if value else "-"
 
 
-def _commitment_row(obj, labels, kind):
+def _commitment_row(obj, lang, kind):
     state = obj.commitment_state
+    states = _STATE_LABELS.get(lang, _STATE_LABELS["en"])
     return {
         "kind": kind,
         "name": obj.name or "-",
-        "state": labels.get(_STATE_LABEL_KEYS.get(state, state), state),
+        "state": states.get(state, state),
         "committed_eta": _date_str(obj.committed_eta),
         "current_date": _date_str(obj.commitment_date),
         "has_slipped": obj.commitment_has_slipped,
@@ -1060,10 +952,9 @@ def audit_undertakings(audit, lang="en"):
         .order_by("name")
     )
 
-    labels = report_labels(lang)
-    tasks = [_commitment_row(t, labels, "task") for t in task_templates]
+    tasks = [_commitment_row(t, lang, "task") for t in task_templates]
     commitments = [
-        _commitment_row(obj, labels, kind)
+        _commitment_row(obj, lang, kind)
         for obj, kind in (
             [(c, "control") for c in controls] + [(t, "task") for t in task_templates]
         )
@@ -1168,5 +1059,4 @@ def audit_context_for_typst(context, audit, role="auditor", lang="en", profile="
     payload["profile"] = profile
     payload["sections"] = list(spec["sections"])
     payload["charts"] = sorted(images)
-    payload["labels"] = report_labels(lang)
     return payload, images

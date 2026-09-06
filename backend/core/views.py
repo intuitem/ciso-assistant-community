@@ -73,7 +73,7 @@ from .generators import (
     gen_audit_context,
     inline_charts_for_docx,
 )
-from .typst_render import render_pdf
+from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField
 
 from django.utils import timezone, translation
@@ -12158,7 +12158,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         payload, images = audit_context_for_typst(context, audit, role, lang, profile)
 
         response = HttpResponse(
-            render_pdf("audit_report.typ", payload, images=images),
+            render_pdf(
+                localized_template("audit_report", lang), payload, images=images
+            ),
             content_type="application/pdf",
         )
         safe_name = slugify(audit.name) or "audit"

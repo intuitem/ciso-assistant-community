@@ -14,6 +14,20 @@ from pathlib import Path
 import typst
 
 TEMPLATE_DIR = Path(__file__).resolve().parent / "typst"
+DEFAULT_LOCALE = "en"
+
+
+def localized_template(stem: str, lang: str) -> str:
+    """`stem` for `lang`, falling back to English when that locale has no file.
+
+    Templates are self-contained per locale (see `core/typst/audit_report_en.typ`),
+    so an unauthored locale falls back as a whole document rather than rendering
+    half-translated.
+    """
+    candidate = f"{stem}_{(lang or DEFAULT_LOCALE).split('-')[0].lower()}.typ"
+    if (TEMPLATE_DIR / candidate).is_file():
+        return candidate
+    return f"{stem}_{DEFAULT_LOCALE}.typ"
 
 
 def render_pdf(
