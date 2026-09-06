@@ -6,6 +6,7 @@ from urllib.parse import urlsplit
 import tempfile
 import hashlib
 import struct
+from urllib.parse import urljoin
 import click
 import requests
 import os
@@ -48,7 +49,7 @@ else:
     ic.disable()
 
 
-def ids_map(model, folder=None):
+def ids_map(model, folder=None, url_parameters=None):
     if not TOKEN:
         print(
             "No authentication token available. Please set PAT token in .clica.env.",
@@ -57,13 +58,23 @@ def ids_map(model, folder=None):
         sys.exit(1)
 
     my_map = dict()
-    url = f"{API_URL}/{model}/ids/"
+    if model == "frameworks":
+        url = f"{API_URL}/{model}"
+    else:
+        url = f"{API_URL}/{model}/ids/"
+    if isinstance(url_parameters, str):
+        url = urljoin(url, url_parameters)
     headers = {"Authorization": f"Token {TOKEN}"}
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
     if res.status_code != 200:
         print("something went wrong. check authentication.")
         sys.exit(1)
     data = res.json()
+    if model == "frameworks" and isinstance(data, dict):
+        next_url = data.get("next")
+        if isinstance(next_url, str) and next_url:
+            next_page = ids_map(model, None, next_url)
+            data.setdefault("results", []).extend(next_page.get("results") or [])
     if folder and isinstance(data, dict):
         my_map = data.get(folder)
     else:
@@ -133,6 +144,22 @@ def flatten_mapping(mapping) -> Dict[str, str]:
     return flat
 
 
+def flatten_frameworks_mapping(mapping) -> Dict[str, list[str]]:
+    flat: Dict[str, list[str]] = {}
+    if isinstance(mapping, dict):
+        results = mapping.get("results")
+        if isinstance(results, list):
+            for framework in results:
+                if isinstance(framework, dict):
+                    framework_name = framework.get("name")
+                    framework_id = framework.get("id")
+                    if isinstance(framework_name, str) and isinstance(
+                        framework_id, str
+                    ):
+                        flat.setdefault(framework_name, []).append(framework_id)
+    return flat
+
+
 def resolve_named_id(
     model: str, name: Optional[str], *, folder: Optional[str] = None
 ) -> Optional[str]:
@@ -143,7 +170,18 @@ def resolve_named_id(
     mapping = ids_map(model, folder=folder)
     if not isinstance(mapping, dict):
         return None
-    flat = flatten_mapping(mapping)
+    if model == "frameworks":
+        flat = flatten_frameworks_mapping(mapping)
+        values = flat.get(name, [])
+        if len(values) > 1:
+            click.echo(
+                f"❌ Ambiguous framework name '{name}', found {len(values)}",
+                err=True,
+            )
+            sys.exit(1)
+        return values[0] if values else None
+    else:
+        flat = flatten_mapping(mapping)
     value = flat.get(name)
     if value:
         return value

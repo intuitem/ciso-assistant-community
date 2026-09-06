@@ -25,7 +25,7 @@ Categories surfaced (in render order):
 | **Risk scenarios** | Scenarios you own | `owner` |
 | **Incidents** | Incidents you co-own | `owners` |
 | **Exceptions** | Security exceptions you co-own | `owners` |
-| **Follow-ups** | Findings assessments where you're an author | `authors` |
+| **Findings binders** | Findings binders where you're an author | `authors` |
 | **Findings** | Findings you own | `owner` |
 | **Validation flows** | Approval requests waiting for you | `approver` _(user, not actor)_ |
 | **Organisation objectives** | Objectives assigned to you | `assigned_to` |
