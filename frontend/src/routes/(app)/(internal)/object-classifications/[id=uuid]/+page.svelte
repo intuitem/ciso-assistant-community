@@ -42,6 +42,7 @@
 			object: scheme
 		})
 	);
+	const canReorder = $derived(canEdit && levels.some((l: any) => !l.builtin));
 
 	const toastStore = getToastStore();
 	const modalStore: ModalStore = getModalStore();
@@ -210,24 +211,22 @@
 						? ''
 						: 'opacity-50'}"
 				>
-					<div class="flex flex-col text-surface-400">
-						<button
-							class="hover:text-primary-500 disabled:opacity-30"
-							disabled={busy || i === 0 || !canEdit || l.builtin || levels[i - 1]?.builtin}
-							onclick={() => move(l, -1)}
-							aria-label={m.moveUp()}><i class="fa-solid fa-chevron-up text-xs"></i></button
-						>
-						<button
-							class="hover:text-primary-500 disabled:opacity-30"
-							disabled={busy ||
-								i === levels.length - 1 ||
-								!canEdit ||
-								l.builtin ||
-								levels[i + 1]?.builtin}
-							onclick={() => move(l, 1)}
-							aria-label={m.moveDown()}><i class="fa-solid fa-chevron-down text-xs"></i></button
-						>
-					</div>
+					{#if canReorder}
+						<div class="flex flex-col text-surface-400">
+							<button
+								class="hover:text-primary-500 disabled:opacity-30"
+								disabled={busy || i === 0 || l.builtin || levels[i - 1]?.builtin}
+								onclick={() => move(l, -1)}
+								aria-label={m.moveUp()}><i class="fa-solid fa-chevron-up text-xs"></i></button
+							>
+							<button
+								class="hover:text-primary-500 disabled:opacity-30"
+								disabled={busy || i === levels.length - 1 || l.builtin || levels[i + 1]?.builtin}
+								onclick={() => move(l, 1)}
+								aria-label={m.moveDown()}><i class="fa-solid fa-chevron-down text-xs"></i></button
+							>
+						</div>
+					{/if}
 					<span class="w-5 text-center text-xs tabular-nums text-surface-400">{l.rank}</span>
 
 					{#if editingId === l.id}
@@ -250,14 +249,16 @@
 								: '#0f172a'}">{l.abbreviation || l.name}</span
 						>
 						<span class="flex-1 truncate text-sm">{l.name || l.label}</span>
-						<button
-							class="text-surface-400 hover:text-primary-500 disabled:opacity-30"
-							disabled={busy || !canEdit}
-							title={m.isVisible()}
-							onclick={() => toggleVisible(l)}
-						>
-							<i class="fa-solid {l.is_visible ? 'fa-eye' : 'fa-eye-slash'}"></i>
-						</button>
+						{#if canEdit}
+							<button
+								class="text-surface-400 hover:text-primary-500 disabled:opacity-30"
+								disabled={busy}
+								title={m.isVisible()}
+								onclick={() => toggleVisible(l)}
+							>
+								<i class="fa-solid {l.is_visible ? 'fa-eye' : 'fa-eye-slash'}"></i>
+							</button>
+						{/if}
 						{#if !l.builtin && canEdit}
 							<button
 								class="text-surface-400 hover:text-primary-500"
