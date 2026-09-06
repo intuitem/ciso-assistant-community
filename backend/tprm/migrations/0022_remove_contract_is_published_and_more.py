@@ -5,10 +5,17 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("tprm", "0019_null_perimeter_on_enclave_audits"),
+        # 0021 (findings epic, merged from main) creates EntityScore WITH is_published,
+        # since it was generated while AbstractBaseModel still carried the field;
+        # this migration must run after it to drop that column too.
+        ("tprm", "0021_entityscore"),
     ]
 
     operations = [
+        migrations.RemoveField(
+            model_name="entityscore",
+            name="is_published",
+        ),
         migrations.RemoveField(
             model_name="contract",
             name="is_published",

@@ -8,12 +8,16 @@ from .views import (
     get_build,
     LogEntryViewSet,
     PermissionViewSet,
+    RoleViewSet,
 )
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r"log-entries", LogEntryViewSet, basename="log-entries")
 router.register(r"permissions", PermissionViewSet, basename="permissions")
+# Custom-role management is enterprise-only: this full-CRUD viewset shadows the
+# community read-only one (enterprise URL modules are mounted first).
+router.register(r"roles", RoleViewSet, basename="roles")
 
 urlpatterns = [
     path("", include(router.urls)),

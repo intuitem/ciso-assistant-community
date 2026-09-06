@@ -99,8 +99,15 @@ class TestUserGroupMembership:
         )
         group = UserGroup.objects.create(name=f"{name} team", folder=domain)
         manager = User.objects.create_user(f"dm-{name}@tests.com")
+        # Managers hold their role through a standard (builtin) group, as
+        # production provisioning does — group membership is also what enrolls
+        # them in ancestor default-role audiences (e.g. view_user at the root).
+        manager_group = UserGroup.objects.create(
+            name=f"{name} managers", folder=domain, builtin=True
+        )
+        manager_group.user_set.add(manager)
         ra = RoleAssignment.objects.create(
-            user=manager,
+            user_group=manager_group,
             role=_domain_manager_role(),
             folder=domain,
             is_recursive=True,

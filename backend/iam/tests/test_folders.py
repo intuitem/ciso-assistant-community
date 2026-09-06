@@ -4,7 +4,7 @@ import pytest
 from django.contrib.auth.models import Permission
 
 from core.models import AppliedControl
-from iam.models import Folder, RoleAssignment, User, Role
+from iam.models import Folder, RoleAssignment, User, UserGroup, Role
 from . import utils
 
 
@@ -390,7 +390,9 @@ class TestFolderDefaultRole:
                 name=f"test_default_role_child_{id(self)}", parent_folder=parent_folder
             )
 
-            # Create a user and assign them a role on the child folder
+            # Create a user and place them in a standard (builtin) group on the
+            # child folder — group membership is what enrolls a user in ancestor
+            # default-role audiences (direct role assignments never do).
             user = User.objects.create_user(
                 f"test_default_role_user_{id(self)}@gmail.com"
             )
@@ -400,8 +402,14 @@ class TestFolderDefaultRole:
             )
             user_role_permission = Permission.objects.get(codename="view_asset")
             user_role.permissions.set([user_role_permission])
+            user_group = UserGroup.objects.create(
+                name=f"test_default_role_group_{id(self)}",
+                folder=folder,
+                builtin=True,
+            )
+            user.user_groups.add(user_group)
             role_assignment = RoleAssignment.objects.create(
-                user=user, role=user_role, is_recursive=True
+                user_group=user_group, role=user_role, is_recursive=True
             )
             role_assignment.perimeter_folders.add(folder)
 
@@ -585,3 +593,239 @@ class TestFolderDefaultRole:
         ).exists(), (
             "The default role permission SHALL NOT be granted to ancestor folders."
         )
+
+    def test_group_member_gets_default_role_access(
+        self, ctx: TestFolderDefaultRole.UserInfo
+    ):
+        """End-to-end positive case: a member of a standard group below the folder is
+        granted the default role's permissions on the folder itself."""
+        assert RoleAssignment.is_access_allowed(
+            ctx.user, ctx.default_role_permission, ctx.parent_folder
+        ), (
+            "A standard-group member below the folder MUST get its default_role permissions on it."
+        )
+        assert RoleAssignment.is_object_accessible(
+            ctx.user, "view", AppliedControl, ctx.applied_control.id
+        ), "An object in the folder MUST be viewable through the default_role grant."
+
+    def test_direct_role_assignment_gives_no_default_role_access(
+        self, ctx: TestFolderDefaultRole.UserInfo
+    ):
+        """The audience is structural: a principal holding only a DIRECT role assignment
+        (the machine path — service accounts) has no group membership, hence no audience
+        source folders, and receives nothing from any default role."""
+        direct_user = User.objects.create_user(
+            f"test_default_role_direct_{id(self)}@gmail.com"
+        )
+        direct_role = Role.objects.create(name=f"test_default_role_direct_{id(self)}")
+        direct_role.permissions.set([ctx.user_role_permission])
+        try:
+            role_assignment = RoleAssignment.objects.create(
+                user=direct_user, role=direct_role, is_recursive=True
+            )
+            role_assignment.perimeter_folders.add(ctx.folder)
+
+            assert not RoleAssignment._get_default_role_source_folder_ids(
+                direct_user
+            ).exists(), "A direct role assignment MUST NOT contribute audience sources."
+            assert not RoleAssignment.is_access_allowed(
+                direct_user, ctx.default_role_permission, ctx.parent_folder
+            ), (
+                "A direct-assignment-only principal MUST NOT receive default_role permissions."
+            )
+        finally:
+            direct_user.delete()
+            direct_role.delete()
+
+    def test_third_party_group_member_gets_no_default_role_access(
+        self, ctx: TestFolderDefaultRole.UserInfo
+    ):
+        """Defense-in-depth: even a third-party user placed in a standard non-enclave
+        group (against the placement convention) contributes no audience sources."""
+        ctx.user.is_third_party = True
+        ctx.user.save()
+
+        assert not RoleAssignment._get_default_role_source_folder_ids(
+            ctx.user
+        ).exists(), "A third-party user MUST NOT contribute audience sources."
+        assert not RoleAssignment.is_access_allowed(
+            ctx.user, ctx.default_role_permission, ctx.parent_folder
+        ), "A third-party user MUST NOT receive default_role permissions."
+
+    def test_enclave_group_membership_contributes_nothing(
+        self, ctx: TestFolderDefaultRole.UserInfo
+    ):
+        """Positional exclusion: membership in a group placed on an enclave — or on any
+        folder beneath one — never joins a default-role audience."""
+        enclave = Folder.objects.create(
+            name=f"test_default_role_enclave_{id(self)}",
+            parent_folder=ctx.folder,
+            content_type=Folder.ContentType.ENCLAVE,
+        )
+        enclave_group = UserGroup.objects.create(
+            name=f"test_default_role_enclave_group_{id(self)}",
+            folder=enclave,
+            builtin=True,
+        )
+        sub_folder = Folder.objects.create(
+            name=f"test_default_role_enclave_sub_{id(self)}",
+            parent_folder=enclave,
+        )
+        sub_group = UserGroup.objects.create(
+            name=f"test_default_role_enclave_sub_group_{id(self)}",
+            folder=sub_folder,
+            builtin=True,
+        )
+        user = User.objects.create_user(
+            f"test_default_role_enclave_user_{id(self)}@gmail.com"
+        )
+        try:
+            user.user_groups.add(enclave_group)
+            user.user_groups.add(sub_group)
+
+            assert not RoleAssignment._get_default_role_source_folder_ids(
+                user
+            ).exists(), (
+                "Groups on an enclave, or beneath one, MUST NOT contribute audience sources."
+            )
+            assert not RoleAssignment.is_access_allowed(
+                user, ctx.default_role_permission, ctx.parent_folder
+            ), (
+                "An enclave-scoped member MUST NOT receive ancestor default_role permissions."
+            )
+        finally:
+            user.delete()
+
+    def test_non_builtin_group_membership_contributes_nothing(
+        self, ctx: TestFolderDefaultRole.UserInfo
+    ):
+        """Only standard (builtin) IAM groups define the audience."""
+        custom_group = UserGroup.objects.create(
+            name=f"test_default_role_custom_group_{id(self)}",
+            folder=ctx.folder,
+            builtin=False,
+        )
+        user = User.objects.create_user(
+            f"test_default_role_custom_group_user_{id(self)}@gmail.com"
+        )
+        try:
+            user.user_groups.add(custom_group)
+
+            assert not RoleAssignment._get_default_role_source_folder_ids(
+                user
+            ).exists(), "Non-builtin groups MUST NOT contribute audience sources."
+        finally:
+            user.delete()
+
+    def test_ce_folder_serializer_does_not_expose_default_role(self):
+        """The default role is not configurable through this serializer: it must
+        not expose the field at all. (A subclass may reopen it and inherits the
+        validators below.)"""
+        from core.serializers import FolderWriteSerializer
+
+        assert "default_role" not in FolderWriteSerializer().fields
+
+    def test_ce_startup_pins_root_default_role(self):
+        """In the community edition the root folder's default role is hard-coded
+        to the catalog reader role: startup() re-pins it at every boot."""
+        from django.apps import apps as django_apps
+
+        from core.startup import startup
+
+        root_folder = Folder.get_root_folder()
+        original_default_role = root_folder.default_role
+        root_folder.default_role = None
+        root_folder.save()
+        try:
+            migratable = [
+                c for c in django_apps.get_app_configs() if c.models_module is not None
+            ]
+            startup(sender=migratable[-1])
+
+            root_folder.refresh_from_db()
+            assert root_folder.default_role is not None
+            assert root_folder.default_role.name == "BI-RL-CAT", (
+                "startup() MUST re-pin the catalog reader role on the root folder in CE."
+            )
+        finally:
+            root_folder.default_role = original_default_role
+            root_folder.save()
+
+    def test_default_role_must_be_view_only(self, ctx: TestFolderDefaultRole.UserInfo):
+        """A role carrying any non-view permission is rejected as a default role.
+
+        The validator only binds where the field is writable (a subclass that
+        reopens it), so it is exercised directly here."""
+        from rest_framework.exceptions import ValidationError
+
+        from core.serializers import FolderWriteSerializer
+
+        write_role = Role.objects.create(name=f"test_default_role_write_{id(self)}")
+        write_role.permissions.set(
+            [Permission.objects.get(codename="add_appliedcontrol")]
+        )
+        try:
+            serializer = FolderWriteSerializer(instance=ctx.parent_folder)
+            with pytest.raises(ValidationError):
+                serializer.validate_default_role(write_role)
+
+            # A view-only role passes.
+            assert (
+                serializer.validate_default_role(ctx.default_role) == ctx.default_role
+            )
+        finally:
+            write_role.delete()
+
+    def test_enclave_folder_cannot_have_default_role(
+        self, ctx: TestFolderDefaultRole.UserInfo
+    ):
+        """Enclaves receive explicit grants only; a default role there is rejected."""
+        from rest_framework.exceptions import ValidationError
+
+        from core.serializers import FolderWriteSerializer
+
+        enclave = Folder.objects.create(
+            name=f"test_default_role_enclave_target_{id(self)}",
+            parent_folder=ctx.folder,
+            content_type=Folder.ContentType.ENCLAVE,
+        )
+        serializer = FolderWriteSerializer(instance=enclave)
+        with pytest.raises(ValidationError):
+            serializer.validate_default_role(ctx.default_role)
+
+    def test_role_used_as_default_role_must_stay_view_only(
+        self, ctx: TestFolderDefaultRole.UserInfo
+    ):
+        """Editing a role that is in use as a default role may not add write permissions."""
+        from core.serializers import RoleWriteSerializer
+
+        serializer = RoleWriteSerializer(
+            instance=ctx.default_role,
+            data={
+                "permissions": [
+                    ctx.default_role_permission.id,
+                    Permission.objects.get(codename="add_appliedcontrol").id,
+                ]
+            },
+            partial=True,
+        )
+        assert not serializer.is_valid(), (
+            "A role in use as a default role MUST stay view-only."
+        )
+        assert "permissions" in serializer.errors
+
+        # The same edit on a role NOT used as a default role is accepted.
+        unused_role = Role.objects.create(name=f"test_default_role_unused_{id(self)}")
+        try:
+            serializer = RoleWriteSerializer(
+                instance=unused_role,
+                data={
+                    "permissions": [
+                        Permission.objects.get(codename="add_appliedcontrol").id
+                    ]
+                },
+                partial=True,
+            )
+            assert serializer.is_valid(), serializer.errors
+        finally:
+            unused_role.delete()

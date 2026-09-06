@@ -54,6 +54,11 @@ MODULES["enterprise_core"] = {  # noqa: F405
 
 INSTALLED_APPS.append("enterprise_core")  # noqa: F405
 
+# Folder default roles are configurable here (folder form + validators); without
+# this flag, startup() pins the catalog reader role on the root folder and the
+# upgrade migration assigns no per-folder posture.
+CONFIGURABLE_DEFAULT_ROLE = True
+
 # --- License ---
 LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 1))
 LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")

@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("custom_fields", "0001_initial"),
+        ("custom_fields", "0002_alter_customfielddefinition_field_type"),
     ]
 
     operations = [

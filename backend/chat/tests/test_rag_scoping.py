@@ -24,7 +24,9 @@ def domain():
 
 def _user_with_role(email, role_name, domain):
     user = User.objects.create(email=email)
-    group = UserGroup.objects.create(folder=domain, name=f"{email}-group")
+    # builtin=True: default-role audiences are sourced from the standard (builtin)
+    # IAM groups, which is the only kind production flows create memberships in.
+    group = UserGroup.objects.create(folder=domain, name=f"{email}-group", builtin=True)
     assignment = RoleAssignment.objects.create(
         user_group=group,
         role=Role.objects.get(name=role_name),
@@ -47,6 +49,19 @@ def auditee(domain):
     return _user_with_role("rag-auditee@test.local", "BI-RL-ADE", domain)
 
 
+@pytest.fixture
+def root_catalog_default_role():
+    """Ensure the root folder carries the BI-RL-CAT default role, independently of
+    whether the data migration that seeds it has run in this test database."""
+    root_folder = Folder.get_root_folder()
+    original_default_role = root_folder.default_role
+    root_folder.default_role = Role.objects.get(name="BI-RL-CAT")
+    root_folder.save()
+    yield
+    root_folder.default_role = original_default_role
+    root_folder.save()
+
+
 def scope_for(user: User) -> ReadScope:
     return ReadScope(user)
 
@@ -65,7 +80,9 @@ class TestUserPartitionFilter:
     def test_reader_may_search_risk_scenarios(self, reader, domain):
         assert "risk_scenario" in _allowed_types(ReadScope(reader))
 
-    def test_auditee_may_not_search_risk_scenarios(self, auditee, domain):
+    def test_auditee_may_not_search_risk_scenarios(
+        self, auditee, domain, root_catalog_default_role
+    ):
         import chat.rag as rag
 
         from iam.models import Folder

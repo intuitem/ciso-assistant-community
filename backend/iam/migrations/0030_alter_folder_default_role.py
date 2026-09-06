@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name="default_role",
             field=models.ForeignKey(
                 blank=True,
-                help_text="Folder-attached `Role` which permissions are assigned(granted) to ANY user with ANY RoleAssignment on a descendant folder of `this` folder.",
+                help_text="Role whose permissions are granted, on this folder only, to the members of the standard IAM groups of its sub-folders (enclaves excluded). Only roles containing view permissions exclusively are eligible.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="default_role_folders",

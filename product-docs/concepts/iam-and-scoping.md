@@ -45,15 +45,17 @@ The same inheritance also drives reporting: most dashboards and analytics roll u
 
 ## Domain default role — why catalogues appear across all domains
 
-A domain can have a default role, which is granted to any user with a role assignment on a sub-domain of it.
-This means in an ancestor domain **ANCESTOR** of the **DOMAIN** domain has a **ROLE** default role, the user will have the **ROLE** role permissions granted on to him on the **ANCESTOR** domain.
+A domain can carry a **default role**. When it does, everyone who works somewhere below that domain — meaning every user who is a member of the standard IAM groups of its sub-domains, enclaves excluded — is granted that role's permissions **on that domain itself** (and only there: the grant is never recursive).
 
-By default the global domain (the root domain) have the "reader catalog" default role, which give the permission to view catalog objects.
-So any user with a role assignment on a sub-domain of the root domain (basically any domain) will get the "reader catalog" role permissions granted on the root folder.
+For example: if the **EMEA** domain has the _Reader catalog_ default role, then a user who holds any role in **EMEA/France** can view EMEA's catalog objects. The reverse is not true — a role on EMEA alone grants nothing extra, and the grant never extends downward into EMEA's sub-domains.
 
-Some objects exist to be **shared**. Frameworks, threats, risk matrices, reference controls, and other catalogue-style items wouldn't be useful if they were trapped in a single domain — every team needs to be able to pull from the same shared library.
+By default, the global domain (the root) carries the **Reader catalog** default role, which grants view access to catalog objects. Since every user works under the root, everyone can read the root-level catalog.
 
-That's why catalog objects (usually stored in the root domain) are usually viewable by anyone (except third parties, as third parties aren't granted any permission by the domain default roles).
+Some objects exist to be **shared**. Frameworks, threats, risk matrices, reference controls, and other catalogue-style items wouldn't be useful if they were trapped in a single domain — every team needs to be able to pull from the same shared library. That's why catalog objects (usually stored in the root domain) are viewable by everyone in the organization.
+
+Third parties and service accounts are never part of a default role's audience: third parties belong only to enclave groups, and service accounts hold direct assignments rather than group memberships — so neither is ever "working below" a domain in the sense the mechanism uses.
+
+Configuring default roles is an **enterprise** capability. In the community edition, the default role exists only on the root domain, fixed to _Reader catalog_ — it cannot be changed, and no other domain carries one.
 
 ## Why you sometimes see items from other domains
 

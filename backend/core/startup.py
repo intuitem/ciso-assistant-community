@@ -2203,6 +2203,17 @@ def startup(sender=None, **kwargs):
     ):
         role, _ = Role.objects.get_or_create(name=name, builtin=True)
         role.permissions.set(Permission.objects.filter(codename__in=perm_list))
+    # When nothing installed makes the default role configurable, it is
+    # hard-coded: the root folder carries the catalog reader role and nothing
+    # else is configurable (the folder serializer excludes the field).
+    # Re-pinning it at every boot is what makes it hard-coded rather than
+    # merely seeded.
+    if not getattr(settings, "CONFIGURABLE_DEFAULT_ROLE", False):
+        root_folder = Folder.get_root_folder()
+        reader_catalog_role = Role.objects.get(name="BI-RL-CAT")
+        if root_folder.default_role_id != reader_catalog_role.id:
+            root_folder.default_role = reader_catalog_role
+            root_folder.save()
     # backfill builtin groups (e.g. technical tester) on pre-existing domains
     for folder in Folder.objects.filter(
         content_type=Folder.ContentType.DOMAIN, create_iam_groups=True

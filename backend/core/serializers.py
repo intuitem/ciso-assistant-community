@@ -2439,7 +2439,36 @@ class FolderWriteSerializer(BaseModelSerializer):
             "builtin",
             "content_type",
             "descendants",
+            # The default role is not configurable through this serializer: the
+            # root folder carries the catalog reader role, pinned by startup(),
+            # and no other folder gets one. A subclass may reopen the field
+            # (and inherits the validator below).
+            "default_role",
         ]
+
+    def validate_default_role(self, default_role):
+        # Only runs where the field is writable — i.e. through a subclass that
+        # reopens it.
+        if default_role is None:
+            return default_role
+
+        # The default role's audience is coarse (everyone working below), so only
+        # read capability may ever be ambient — write capability reaches people
+        # through explicit group placement, never through a default role.
+        if default_role.permissions.exclude(codename__startswith="view_").exists():
+            raise serializers.ValidationError(
+                "defaultRoleMustContainOnlyViewPermissions"
+            )
+
+        # Enclaves are visitor spaces and receive explicit grants only; a member
+        # audience there would contradict their purpose.
+        if (
+            self.instance is not None
+            and self.instance.content_type == Folder.ContentType.ENCLAVE
+        ):
+            raise serializers.ValidationError("enclaveFolderCannotHaveDefaultRole")
+
+        return default_role
 
     def update(self, instance, validated_data):
         if (
@@ -2554,6 +2583,21 @@ class RoleWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Role
         fields = "__all__"
+
+    def validate_permissions(self, permissions):
+        # A role already in use as some folder's default role must stay view-only;
+        # otherwise editing the role would silently hand write capability to every
+        # member audience that references it.
+        if (
+            self.instance is not None
+            and self.instance.default_role_folders.exists()
+            and any(
+                not permission.codename.startswith("view_")
+                for permission in permissions
+            )
+        ):
+            raise serializers.ValidationError("roleUsedAsDefaultRoleMustStayViewOnly")
+        return permissions
 
 
 # Compliance Assessment
@@ -5168,7 +5212,7 @@ class CommitmentReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Commitment
-        exclude = ["content_type", "object_id", "is_published"]
+        exclude = ["content_type", "object_id"]
 
 
 class PresetReadSerializer(BaseModelSerializer):

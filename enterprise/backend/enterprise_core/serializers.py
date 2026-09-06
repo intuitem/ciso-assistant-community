@@ -30,6 +30,17 @@ logger = structlog.get_logger(__name__)
 
 
 class FolderWriteSerializer(CommunityFolderWriteSerializer):
+    class Meta(CommunityFolderWriteSerializer.Meta):
+        # The default role is configurable in the enterprise edition only; the
+        # community serializer excludes it (fixed catalog default at the root).
+        # The eligibility and enclave validators are inherited from the
+        # community class and bind here, where the field is writable.
+        exclude = [
+            "builtin",
+            "content_type",
+            "descendants",
+        ]
+
     def validate_parent_folder(self, parent_folder):
         """
         Check that the folders graph will not contain cycles

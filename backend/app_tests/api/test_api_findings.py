@@ -65,7 +65,7 @@ class TestFindingsFromRequirements:
         )
 
         framework = Framework.objects.create(
-            name="F", folder=Folder.get_root_folder(), is_published=True
+            name="F", folder=Folder.get_root_folder()
         )
         node = RequirementNode.objects.create(
             framework=framework,
@@ -73,7 +73,6 @@ class TestFindingsFromRequirements:
             ref_id="1",
             assessable=True,
             folder=Folder.get_root_folder(),
-            is_published=True,
         )
         assessment = ComplianceAssessment.objects.create(
             name="ISO audit", folder=setup["domain"], framework=framework

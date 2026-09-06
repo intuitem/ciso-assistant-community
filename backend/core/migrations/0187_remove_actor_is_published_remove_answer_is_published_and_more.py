@@ -5,10 +5,17 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0185_presetjourney_sequence"),
+        # 0186 (findings epic, merged from main) creates Commitment WITH is_published,
+        # since it was generated while AbstractBaseModel still carried the field;
+        # this migration must run after it to drop that column too.
+        ("core", "0186_commitment_remove_comment_comment_exactly_one_parent_and_more"),
     ]
 
     operations = [
+        migrations.RemoveField(
+            model_name="commitment",
+            name="is_published",
+        ),
         migrations.RemoveField(
             model_name="actor",
             name="is_published",

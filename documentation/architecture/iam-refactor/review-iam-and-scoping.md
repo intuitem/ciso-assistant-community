@@ -1,8 +1,8 @@
 # IAM & scoping — object visibility specification
 
-- **Status:** specification, ready for implementation decomposition. §1–§10 are normative; §11 (release plan) evolves with implementation; §12 (principles) is explanatory and binds nothing.
+- **Status: SUPERSEDED** by `documentation/architecture/decisions/is-published-field-removal.md`, which records the accepted design: a three-layer model (stable role-assignment kernel; a usage discipline of generated groups + folder default roles with a structurally defined member audience; account lifecycle orthogonal). This document is kept as the analysis record of the member-group/projection design it explored.
+- **Retained by the accepted design** (now normative via the ADR): the structural audience derivation of §4.1 (generated-group sources, positional enclave exclusion), the view-only default-role eligibility rule (§4.2, row 28), the enclave prohibition on default roles (§4.1), the write-time placement validators (invariant 4), the requirement that default-role grants surface wherever grants are displayed, the non-recursion rule, and the disclosure discipline for access-changing migrations (§6). **Not adopted:** materialized/derived member groups as a principal kind, the `DOMAIN_MEMBERS` discriminator, the default role as a projection of an assignment row, the two-release protocol with diff-report gates, the classification manifest as a build artifact.
 - **Date:** 2026-08-23
-- **Supersedes:** `documentation/architecture/decisions/is-published-field-removal.md`
 - **Complements:** `documentation/architecture/iam-refactor/iam-target-architecture-plan.md` (Phases 0–4 unchanged; this document replaces its Phase 5 and **pulls one of its cross-cutting deliverables forward into release 1** as platform hygiene — see §4.1 on `check_iam_closure`).
 
 ---

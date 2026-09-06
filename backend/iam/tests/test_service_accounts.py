@@ -486,11 +486,9 @@ class TestServiceAccountExclusions:
         assert str(domain_folder.id) not in folder_ids
 
     def test_update_permissions_to_empty_is_allowed(self, admin_client, domain_folder):
-        root_folder = Folder.get_root_folder()
-        assert root_folder is not None, "No root folder found."
-        root_folder.default_role = None
-        root_folder.save()
-
+        # Note: the root folder's default_role is deliberately left in place — service
+        # accounts hold direct role assignments and no group membership, so nothing
+        # about them is ambient and no default role can reach them.
         payload = _create_sa(admin_client, domain_folder)
         access_token = _fetch_token(
             payload["client_id"], payload["client_secret"]

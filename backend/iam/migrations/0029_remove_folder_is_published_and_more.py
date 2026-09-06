@@ -3,11 +3,12 @@
 from dataclasses import dataclass
 import itertools
 
+from django.conf import settings
 from django.db import migrations, models
 from django.db.models.deletion import SET_NULL
 from django.apps import apps as django_apps
 
-from iam.models import RoleAssignment
+from iam.models import Folder as LiveFolder, RoleAssignment
 
 
 @dataclass(frozen=True)
@@ -125,9 +126,26 @@ def fill_default_roles(apps, schema_editor):
 
     non_leaf_folder_ids.discard(root_folder.id)
 
+    # Enclave folders never carry a default role: they are visitor spaces that
+    # receive explicit grants only (the write path rejects it as well), and any
+    # such row would be inert anyway since audiences exclude enclave positions.
+    non_leaf_folder_ids -= set(
+        Folder.objects.filter(content_type="EN").values_list("id", flat=True)
+    )
+
     root_folder.default_role = reader_catalog_role
     root_folder.save()
 
+    if not getattr(settings, "CONFIGURABLE_DEFAULT_ROLE", False):
+        # Nothing installed makes the default role configurable here: it exists
+        # on the root folder only (pinned to the catalog reader role by
+        # startup()); no other folder receives one.
+        return
+
+    # A module making the default role configurable is installed: assign the
+    # legacy migration role to every non-leaf folder that holds at least one
+    # published object of a legacy-list model, so upgraded tenants keep
+    # (approximately) what `is_published` exposed.
     affected_folder_ids = set()
     for model_config in READER_MIGRATION_MODEL_LIST:
         model = model_config.get_model(apps)
@@ -139,7 +157,12 @@ def fill_default_roles(apps, schema_editor):
 
         try:
             iam_folder_field = RoleAssignment.get_iam_folder_field(real_model)
-        except Exception:
+        except LiveFolder.IAMNotImplementedError:
+            # Models with no IAM scope of their own (e.g. RequirementMapping)
+            # are read through their aggregate root and hold no folder to
+            # sweep; skipping them is expected. Any other failure must raise:
+            # a silent skip here would under-assign default roles, losing
+            # tenant access without a trace.
             continue
 
         folder_ids = (
@@ -176,9 +199,9 @@ class Migration(migrations.Migration):
         # We need to ensure this migraton runs BEFORE all migrations which remove an `is_published` field from a model.
         # (as `fill_default_roles` relies on the `is_published` fields to assign the appropriate `default_role` to the folders (`Folder` objects)).
         ("automation", "0006_remove_condition_is_published_and_more"),
-        ("core", "0186_remove_actor_is_published_remove_answer_is_published_and_more"),
+        ("core", "0187_remove_actor_is_published_remove_answer_is_published_and_more"),
         ("crq", "0004_remove_quantitativeriskhypothesis_is_published_and_more"),
-        ("custom_fields", "0002_remove_customfieldchoice_is_published_and_more"),
+        ("custom_fields", "0003_remove_customfieldchoice_is_published_and_more"),
         ("doc_management", "0006_remove_documentattachment_is_published_and_more"),
         ("ebios_rm", "0026_remove_attackpath_is_published_and_more"),
         ("global_settings", "0007_remove_globalsettings_is_published"),
@@ -190,7 +213,7 @@ class Migration(migrations.Migration):
         ("resilience", "0008_remove_assetassessment_is_published_and_more"),
         ("sec_intel", "0003_remove_cwe_is_published_and_more"),
         ("threat_modeling", "0002_remove_threatmodel_is_published_and_more"),
-        ("tprm", "0020_remove_contract_is_published_and_more"),
+        ("tprm", "0022_remove_contract_is_published_and_more"),
         ("webhooks", "0006_remove_webhookendpoint_is_published"),
         # The `("enterprise_core, "0004_remove_clientsettings_is_published")` dependency isn't added as it could break community edition migrations + this migration doesn't depend on any model in `enterprise_core` anyway.
     ]
@@ -201,7 +224,7 @@ class Migration(migrations.Migration):
             name="default_role",
             field=models.ForeignKey(
                 blank=True,
-                help_text="Role which permissions are applied(assigned) to this folder only which is granted for ANY user with ANY RoleAssignment on a descendant(folder) of this folder.",
+                help_text="Role whose permissions are granted, on this folder only, to the members of the standard IAM groups of its sub-folders (enclaves excluded). Only roles containing view permissions exclusively are eligible.",
                 null=True,
                 on_delete=SET_NULL,
                 related_name="default_role_folders",
