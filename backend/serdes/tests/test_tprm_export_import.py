@@ -26,6 +26,7 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     Framework,
+    Question,
     StoredLibrary,
 )
 from core.utils import build_initial_field_visibility
@@ -342,6 +343,17 @@ class TestEntityAssessmentAuditRoundTrip:
         requirement_assessment = audit.requirement_assessments.first()
         evidence = Evidence.objects.create(name="Audit proof", folder=enclave)
         requirement_assessment.evidences.add(evidence)
+        question = Question.objects.create(
+            requirement_node=requirement_assessment.requirement,
+            urn="urn:test:question:audit-roundtrip",
+            text="Who signed off?",
+        )
+        Answer.objects.create(
+            requirement_assessment=requirement_assessment,
+            question=question,
+            value="the provider",
+            folder=enclave,
+        )
         source_ra_count = audit.requirement_assessments.count()
 
         assert audit.perimeter is None
@@ -377,11 +389,13 @@ class TestEntityAssessmentAuditRoundTrip:
         assert set(
             imported_audit.requirement_assessments.values_list("folder", flat=True)
         ) == {imported_audit.folder_id}
-        assert set(
-            Answer.objects.filter(
-                requirement_assessment__compliance_assessment=imported_audit
-            ).values_list("folder", flat=True)
-        ) <= {imported_audit.folder_id}
+        imported_answers = Answer.objects.filter(
+            requirement_assessment__compliance_assessment=imported_audit
+        )
+        assert imported_answers.count() == 1
+        assert set(imported_answers.values_list("folder", flat=True)) == {
+            imported_audit.folder_id
+        }
 
         # Granting a representative access must not reach beyond the enclave.
         respondent = User.objects.create(email="rep@provider.test", is_third_party=True)
@@ -451,7 +465,8 @@ class TestEntityAssessmentAuditRoundTrip:
         assert imported_eas.count() == 2
         enclaves = {ea.compliance_assessment.folder for ea in imported_eas}
         assert len(enclaves) == 1
-        assert enclaves.pop().parent_folder == imported
+        imported_enclave = next(iter(enclaves))
+        assert imported_enclave.parent_folder == imported
 
 
 # ============ Flattened name collisions ============
@@ -499,3 +514,41 @@ class TestFlattenedNameCollision:
         assert len(names) == 2
         assert len(set(names)) == 2
         assert all(name.startswith("Shared proof") for name in names)
+
+    @pytest.mark.django_db
+    def test_near_max_length_names_are_truncated_not_grown(
+        self, root_folder, admin_user
+    ):
+        """The UUID suffix must not push a de-duplicated name past max_length."""
+        max_length = Evidence._meta.get_field("name").max_length
+        long_name = "L" * (max_length - 10)
+        domain = Folder.objects.create(
+            name="Long Name Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        for sub_name in ("Sub A", "Sub B"):
+            sub = Folder.objects.create(
+                name=sub_name,
+                content_type=Folder.ContentType.DOMAIN,
+                parent_folder=domain,
+            )
+            Evidence.objects.create(name=long_name, folder=sub)
+
+        response = export_domain(domain, admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        import_objects(
+            json_dump,
+            domain_name="Long Name Imported",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        imported = Folder.objects.get(
+            name="Long Name Imported", content_type=Folder.ContentType.DOMAIN
+        )
+        names = list(
+            Evidence.objects.filter(folder=imported).values_list("name", flat=True)
+        )
+        assert len(set(names)) == 2
+        assert all(len(name) <= max_length for name in names)

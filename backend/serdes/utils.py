@@ -429,12 +429,15 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         .filter(content_type=Folder.ContentType.DOMAIN)
         .distinct()
     )
-    perimeters = Perimeter.objects.filter(folder__in=folders).distinct()
+    # Campaigns reach perimeters outside `folders`, so the full perimeter scope
+    # has to exist before anything filters on it.
+    campaigns = Campaign.objects.filter(folder__in=folders).distinct()
+    perimeters = Perimeter.objects.filter(
+        Q(folder__in=folders) | Q(campaigns__in=campaigns)
+    ).distinct()
 
     # Computed early: the audits these reference live in enclave sub-folders
     # (excluded from `folders`) and must feed compliance_assessments below.
-    # Scoped by folder OR perimeter like the sibling assessments (Assessment.save
-    # can move folder to perimeter.folder, so folder alone isn't sufficient).
     entity_assessments = EntityAssessment.objects.filter(
         Q(folder__in=folders) | Q(perimeter__in=perimeters)
     ).distinct()
@@ -535,7 +538,6 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     # incidents/campaigns/findings still make it into the dump (and into
     # loaded_libraries). Rebuild with fresh Q filters rather than queryset
     # union so the result plays nicely with .distinct().
-    campaigns = Campaign.objects.filter(folder__in=folders).distinct()
     entities = Entity.objects.filter(
         Q(folder__in=folders)
         | Q(stakeholders__in=stakeholders)
@@ -557,10 +559,6 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(feared_events__in=feared_events)
         | Q(findings__in=findings)
     ).distinct()
-    perimeters = Perimeter.objects.filter(
-        Q(folder__in=folders) | Q(campaigns__in=campaigns)
-    ).distinct()
-
     task_templates = TaskTemplate.objects.filter(folder__in=folders).distinct()
     task_nodes = TaskNode.objects.filter(
         Q(folder__in=folders) | Q(task_template__in=task_templates)

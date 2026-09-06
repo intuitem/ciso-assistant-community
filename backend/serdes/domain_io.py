@@ -674,6 +674,33 @@ def create_model_objects(
         )
 
 
+def dedup_clashing_fields(
+    model: type[models.Model], fields: dict[str, Any], error: ValidationError
+) -> List[str]:
+    """Suffix the fields_to_check values `error` reports as taken, in place.
+
+    Returns the fields changed. Dates / FKs / enums (e.g. TaskNode.fields_to_check
+    = ["task_template", "due_date"]), fields the model's own clean() rejected for
+    another reason, and over-long values are left alone: a UUID would corrupt the
+    first two and only push the third further past max_length.
+    """
+    checkable = set(getattr(model, "fields_to_check", []) or [])
+    changed = []
+    for field, errors in getattr(error, "error_dict", {}).items():
+        current = fields.get(field)
+        if field not in checkable or not isinstance(current, str):
+            continue
+        if any(getattr(err, "code", None) == "max_length" for err in errors):
+            continue
+        suffix = f" {uuid.uuid4()}"
+        max_length = model._meta.get_field(field).max_length
+        if max_length:
+            current = current[: max_length - len(suffix)]
+        fields[field] = f"{current}{suffix}"
+        changed.append(field)
+    return changed
+
+
 def create_batch(
     model: type[models.Model],
     batch: List[dict],
@@ -709,29 +736,10 @@ def create_batch(
                 try:
                     model(**fields).clean()
                 except ValidationError as e:
-                    # clean() raises on fields_to_check uniqueness conflicts;
-                    # de-duplicate by appending a UUID, but only for
-                    # string-valued fields_to_check. Dates / FKs / enums (e.g.
-                    # TaskNode.fields_to_check = ["task_template", "due_date"])
-                    # and non-uniqueness errors raised by a model's own clean()
-                    # are left untouched so we don't corrupt them.
-                    checkable = set(getattr(model, "fields_to_check", []) or [])
-                    for field in getattr(e, "error_dict", {}):
-                        current = fields.get(field)
-                        if field in checkable and isinstance(current, str):
-                            fields[field] = f"{current} {uuid.uuid4()}"
-                    # Re-validate. Anything still failing isn't a name
-                    # collision we can paper over — log it so it's visible
-                    # instead of silently creating bogus data.
-                    try:
-                        model(**fields).clean()
-                    except ValidationError as retry_err:
-                        logger.warning(
-                            "Import validation still failing after UUID dedup",
-                            model=model._meta.model_name,
-                            obj_id=obj_id,
-                            errors=getattr(retry_err, "error_dict", {}),
-                        )
+                    # Anything left after the dedup isn't a name collision we can
+                    # paper over, so let it abort the import.
+                    dedup_clashing_fields(model, fields, e)
+                    model(**fields).clean()
 
                 logger.debug("Creating object", fields=fields)
                 objects_creation_data.append(
@@ -752,20 +760,9 @@ def create_batch(
                     try:
                         obj_created = model.objects.create(**fields)
                     except ValidationError as e:
-                        # clean() also raises for non-uniqueness reasons, so only
-                        # dedup the fields_to_check values it flagged (clash with
-                        # a sibling created earlier in this batch) and re-raise
-                        # anything else rather than mutating an invalid object.
-                        checkable = set(getattr(model, "fields_to_check", []) or [])
-                        clashes = [
-                            field
-                            for field in getattr(e, "error_dict", {})
-                            if field in checkable and isinstance(fields.get(field), str)
-                        ]
-                        if not clashes:
+                        # A sibling created earlier in this batch took the value.
+                        if not dedup_clashing_fields(model, fields, e):
                             raise
-                        for field in clashes:
-                            fields[field] = f"{fields[field]} {uuid.uuid4()}"
                         obj_created = model.objects.create(**fields)
                     created_objects.append(obj_created)
             else:
