@@ -276,6 +276,8 @@ export DJANGO_DEBUG=True
 export DJANGO_SUPERUSER_EMAIL=admin@tests.com
 export DJANGO_SUPERUSER_PASSWORD=1234
 export SQLITE_FILE=db/$DB_NAME
+# Small pages so pagination-regression.test.ts can reach a second page.
+export PAGINATE_BY=100
 export EMAIL_HOST_USER=tests@tests.com
 export DEFAULT_FROM_EMAIL='ciso-assistant@tests.net'
 export EMAIL_HOST=localhost

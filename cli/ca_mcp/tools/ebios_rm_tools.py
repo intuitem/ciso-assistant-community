@@ -5,7 +5,7 @@ from ..client import (
     make_get_request,
     make_post_request,
     make_patch_request,
-    get_paginated_results,
+    fetch_all_results,
 )
 from ..resolvers import (
     resolve_folder_id,
@@ -92,18 +92,13 @@ def _resolve_or_create_risk_origin(risk_origin_input: str) -> tuple[str, bool]:
         Tuple of (terminology_id, was_created)
     """
     # Fetch all risk origin terminologies
-    res = make_get_request(
+    terminologies, error = fetch_all_results(
         "/terminologies/",
         params={"field_path": "ro_to.risk_origin", "is_visible": "true"},
     )
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"Failed to fetch risk origin terminologies: {res.status_code}"
-        )
-
-    data = res.json()
-    terminologies = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Failed to fetch risk origin terminologies: {error}")
 
     # Try to find a match
     match = _find_terminology_match(terminologies, risk_origin_input)
@@ -150,18 +145,13 @@ def _resolve_or_create_stakeholder_category(category_input: str) -> tuple[str, b
         Tuple of (terminology_id, was_created)
     """
     # Fetch all entity relationship terminologies
-    res = make_get_request(
+    terminologies, error = fetch_all_results(
         "/terminologies/",
         params={"field_path": "entity.relationship", "is_visible": "true"},
     )
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"Failed to fetch stakeholder category terminologies: {res.status_code}"
-        )
-
-    data = res.json()
-    terminologies = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Failed to fetch stakeholder category terminologies: {error}")
 
     # Try to find a match
     match = _find_terminology_match(terminologies, category_input)
@@ -223,13 +213,9 @@ async def get_ebios_rm_studies(
             params["status"] = status
             filters["status"] = status
 
-        res = make_get_request("/ebios-rm/studies/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        studies = get_paginated_results(data)
+        studies, error = fetch_all_results("/ebios-rm/studies/", params=params)
+        if error:
+            return error
 
         if not studies:
             return empty_response("EBIOS RM studies", filters)
@@ -295,13 +281,11 @@ async def get_feared_events(
             params["is_selected"] = str(is_selected).lower()
             filters["is_selected"] = is_selected
 
-        res = make_get_request("/ebios-rm/feared-events/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        feared_events = get_paginated_results(data)
+        feared_events, error = fetch_all_results(
+            "/ebios-rm/feared-events/", params=params
+        )
+        if error:
+            return error
 
         if not feared_events:
             return empty_response("feared events", filters)
@@ -370,13 +354,9 @@ async def get_ro_to_couples(
             params["is_selected"] = str(is_selected).lower()
             filters["is_selected"] = is_selected
 
-        res = make_get_request("/ebios-rm/ro-to/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        ro_to_couples = get_paginated_results(data)
+        ro_to_couples, error = fetch_all_results("/ebios-rm/ro-to/", params=params)
+        if error:
+            return error
 
         if not ro_to_couples:
             return empty_response("RoTo couples", filters)
@@ -444,13 +424,11 @@ async def get_stakeholders(
             params["entity"] = resolve_entity_id(entity)
             filters["entity"] = entity
 
-        res = make_get_request("/ebios-rm/stakeholders/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        stakeholders = get_paginated_results(data)
+        stakeholders, error = fetch_all_results(
+            "/ebios-rm/stakeholders/", params=params
+        )
+        if error:
+            return error
 
         if not stakeholders:
             return empty_response("stakeholders", filters)
@@ -503,13 +481,11 @@ async def get_strategic_scenarios(
             params["ebios_rm_study"] = resolve_ebios_rm_study_id(ebios_rm_study)
             filters["ebios_rm_study"] = ebios_rm_study
 
-        res = make_get_request("/ebios-rm/strategic-scenarios/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        scenarios = get_paginated_results(data)
+        scenarios, error = fetch_all_results(
+            "/ebios-rm/strategic-scenarios/", params=params
+        )
+        if error:
+            return error
 
         if not scenarios:
             return empty_response("strategic scenarios", filters)
@@ -580,13 +556,11 @@ async def get_attack_paths(
             params["is_selected"] = str(is_selected).lower()
             filters["is_selected"] = is_selected
 
-        res = make_get_request("/ebios-rm/attack-paths/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        attack_paths = get_paginated_results(data)
+        attack_paths, error = fetch_all_results(
+            "/ebios-rm/attack-paths/", params=params
+        )
+        if error:
+            return error
 
         if not attack_paths:
             return empty_response("attack paths", filters)
@@ -640,13 +614,11 @@ async def get_operational_scenarios(
             params["ebios_rm_study"] = resolve_ebios_rm_study_id(ebios_rm_study)
             filters["ebios_rm_study"] = ebios_rm_study
 
-        res = make_get_request("/ebios-rm/operational-scenarios/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        scenarios = get_paginated_results(data)
+        scenarios, error = fetch_all_results(
+            "/ebios-rm/operational-scenarios/", params=params
+        )
+        if error:
+            return error
 
         if not scenarios:
             return empty_response("operational scenarios", filters)
@@ -719,13 +691,11 @@ async def get_elementary_actions(
             params["operating_modes"] = resolve_operating_mode_id(operating_mode)
             filters["operating_mode"] = operating_mode
 
-        res = make_get_request("/ebios-rm/elementary-actions/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        actions = get_paginated_results(data)
+        actions, error = fetch_all_results(
+            "/ebios-rm/elementary-actions/", params=params
+        )
+        if error:
+            return error
 
         if not actions:
             return empty_response("elementary actions", filters)
@@ -779,13 +749,9 @@ async def get_operating_modes(
             )
             filters["operational_scenario"] = operational_scenario
 
-        res = make_get_request("/ebios-rm/operating-modes/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        modes = get_paginated_results(data)
+        modes, error = fetch_all_results("/ebios-rm/operating-modes/", params=params)
+        if error:
+            return error
 
         if not modes:
             return empty_response("operating modes", filters)
@@ -848,16 +814,12 @@ async def get_kill_chains(
     try:
         operating_mode_id = resolve_operating_mode_id(operating_mode)
 
-        res = make_get_request(
+        kill_chains, error = fetch_all_results(
             "/ebios-rm/kill-chains/",
             params={"operating_mode": operating_mode_id},
         )
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        kill_chains = get_paginated_results(data)
+        if error:
+            return error
 
         if not kill_chains:
             return empty_response(
