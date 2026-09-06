@@ -29,6 +29,7 @@ from django.contrib.auth.models import Permission
 
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
+from django.core.exceptions import FieldDoesNotExist
 from django.core.exceptions import ValidationError as DjangoValidationError
 
 from integrations.models import IntegrationConfiguration, SyncMapping
@@ -2301,14 +2302,49 @@ class UserWriteSerializer(BaseModelSerializer):
 
 def build_autocomplete_serializer(model_cls, extra_fields=()):
     """Build a lightweight serializer for autocomplete/entity pickers: ``id`` plus
-    the given fields, and always a display ``str``. Enables server-side search so
-    pickers scale to large datasets without loading every row client-side. Used by
+    the given fields, and always a display ``str``. Also carries the common
+    label ingredients — ``ref_id``/``name`` (or ``description`` for models
+    without a name) and a nested ``folder`` — when the model defines them, so
+    lazily searched options render with the same composed labels as eagerly
+    fetched ones. Enables server-side search so pickers scale to large
+    datasets without loading every row client-side. Used by
     core.views.AutocompleteMixin."""
 
+    def _has_field(name: str) -> bool:
+        try:
+            model_cls._meta.get_field(name)
+            return True
+        except FieldDoesNotExist:
+            return False
+
+    label_fields = [
+        f for f in ("ref_id", "name") if f not in extra_fields and _has_field(f)
+    ]
+    if (
+        "name" not in label_fields
+        and "description" not in extra_fields
+        and _has_field("description")
+    ):
+        label_fields.append("description")
+    has_folder = "folder" not in extra_fields and _has_field("folder")
+    # Hierarchy breadcrumb used by pickers to disambiguate same-named rows.
+    has_path = "path" not in extra_fields and hasattr(model_cls, "get_folder_full_path")
+
     class _AutocompleteSerializer(BaseModelSerializer):
+        if has_folder:
+            folder = FieldsRelatedField()
+        if has_path:
+            path = PathField(source="get_folder_full_path", read_only=True)
+
         class Meta:
             model = model_cls
-            fields = ["id", *extra_fields]
+            fields = [
+                "id",
+                *label_fields,
+                *(["folder"] if has_folder else []),
+                *(["path"] if has_path else []),
+                *extra_fields,
+            ]
 
         def to_representation(self, instance):
             data = super().to_representation(instance)

@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { getModelInfo } from '$lib/utils/crud';
 import { loadDetail } from '$lib/utils/load';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -21,15 +22,13 @@ export const load: PageServerLoad = async (event) => {
 	const auditId = detail.data?.compliance_assessment?.id;
 	let reviewAssignments: Array<{ id: string; status: string }> = [];
 	if (auditId) {
-		const res = await event.fetch(
+		const assignments = await fetchAllPages<{ id: string; status?: string }>(
+			event.fetch,
 			`${BASE_API_URL}/requirement-assignments/?compliance_assessment=${auditId}`
-		);
-		if (res.ok) {
-			const body = await res.json();
-			reviewAssignments = (body.results ?? []).filter(
-				(a: { status?: string }) => a.status && a.status !== 'draft'
-			);
-		}
+		).catch(() => []);
+		reviewAssignments = assignments.filter(
+			(a: { status?: string }) => a.status && a.status !== 'draft'
+		) as Array<{ id: string; status: string }>;
 	}
 
 	return { ...detail, reviewAssignments };
