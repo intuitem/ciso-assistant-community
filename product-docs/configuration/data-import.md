@@ -488,7 +488,7 @@ Selected in the wizard as **EBIOS RM Study (Excel)**.
 
 The XML export produced by the [Egerie Suite](https://www.egerie.eu/) risk-management platform. The only XML target supported by the wizard; everything else accepts Excel or CSV. Egerie's internal cross-references (`PA_`, `SA_`, `FE_`, `RS_`, …) are resolved automatically.
 
-Selected in the wizard as **EBIOS RM Study (Egerie XML)**.
+Selected in the wizard as **EBIOS RM study (Egerie XML format)**.
 
 
 
