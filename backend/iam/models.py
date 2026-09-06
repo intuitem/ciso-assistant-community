@@ -2004,7 +2004,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return "folder_id"
 
         # TRACE: model.IAM_SCOPE_FIELD
-        iam_scope_field_name = getattr(model, "IAM_SCOPE_FIELD")
+        # Models that declare nothing (typically third-party models such as
+        # django.contrib.contenttypes.ContentType, reached as related models of
+        # an IAM-scoped one) default to IAM_NOT_IMPLEMENTED: callers that
+        # tolerate unscoped models catch IAMNotImplementedError, and a bare
+        # AttributeError would escape them.
+        iam_scope_field_name = getattr(
+            model, "IAM_SCOPE_FIELD", Folder.IAM_NOT_IMPLEMENTED
+        )
 
         if iam_scope_field_name in [
             Folder.IAM_NOT_IMPLEMENTED,

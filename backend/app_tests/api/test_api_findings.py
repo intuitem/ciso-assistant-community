@@ -64,9 +64,7 @@ class TestFindingsFromRequirements:
             RequirementNode,
         )
 
-        framework = Framework.objects.create(
-            name="F", folder=Folder.get_root_folder()
-        )
+        framework = Framework.objects.create(name="F", folder=Folder.get_root_folder())
         node = RequirementNode.objects.create(
             framework=framework,
             urn="urn:test:req:1",
