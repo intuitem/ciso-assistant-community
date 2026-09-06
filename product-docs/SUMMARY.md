@@ -31,12 +31,13 @@
 * Operations
   * [Applied controls](concepts/applied-controls.md)
   * [Tasks](concepts/tasks.md)
+  * [Commitments](concepts/commitments.md)
   * [Incidents](concepts/incidents.md)
   * [Workflows](concepts/workflows.md)
 * Governance
   * [Policies](concepts/policies.md)
   * [Documents](concepts/documents.md)
-  * [Findings assessments](concepts/findings-assessments.md)
+  * [Findings binders](concepts/findings-assessments.md)
   * [Validation flows](concepts/validation-flows.md)
 * Risk
   * [Risk assessments](concepts/risk-assessments.md)
@@ -160,6 +161,7 @@
 * [Flash mode](features/flash-mode.md)
 * [Kanban mode](features/kanban-mode.md)
 * [Applied controls analytics](features/applied-controls-analytics.md)
+* [Tasks analytics](features/task-analytics.md)
 * [Evidences from clipboard](features/evidences-from-clipboard.md)
 * [Evidence preview](features/evidence-preview.md)
 * [Mappings](features/mappings.md)
@@ -167,6 +169,7 @@
 * [X-rays](features/x-rays.md)
 * [Scoring Assistant](features/scoring-assistant.md)
 * [Assignments / respondent mode](features/assignments.md)
+* [Campaigns](features/campaigns.md)
 * [Comments](features/comments.md)
 * [Audit log](features/audit-log.md)
 * [Domain export/import](features/domain-export-import.md)

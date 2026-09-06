@@ -57,7 +57,7 @@ The Update object step can only write fields that record facts. Assessment resul
 |---|---|
 | Evidence status | Only `expired` or `missing` |
 | Security exception status | Only `expired` or `deprecated` |
-| Assessments (audit, risk assessment, entity assessment, findings assessment) status | Only planning states: `planned`, `in_progress`, `in_review`, `done`, `deprecated` |
+| Assessments (audit, risk assessment, entity assessment, findings binder) status | Only planning states: `planned`, `in_progress`, `in_review`, `done`, `deprecated` |
 | Requirement assessment | Status, dates and observation only. Never the result or score |
 
 Name fields are not writable either, so **Update when it already exists** can always match the object it created.
