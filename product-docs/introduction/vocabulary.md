@@ -21,8 +21,9 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 
 ## C
 
-- **Campaign** — An orchestration object for running many audits in parallel — for example, one audit per perimeter against the same framework. PRO feature.
+- **Campaign** — An orchestration object for running one assessment exercise across many targets at once: an **internal campaign** targets your perimeters, a **third-party campaign** targets your third parties. PRO feature.
 - **Catalog object** — A reusable building block of CISO Assistant: framework, threat, risk matrix, reference control, mapping, security advisory, CWE. Catalog objects are packaged into libraries.
+- **Commitment** — The delivery date an owner has actually promised for a piece of remediation work, and the record of the negotiation that produced it. Distinct from an ETA, which anyone can type in.
 - **Compliance assessment** — Internal model name for an **audit**. See **Audit**.
 - **Contract** — A third-party agreement attached to a supplier entity or solution, with terms, dates, and renewal information.
 - **Control** — Generic term. Disambiguate against **applied control** (concrete instance) and **reference control** (template).
@@ -50,12 +51,14 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Escalation threshold** — A point-in-time / impact pair attached to an asset assessment inside a BIA: "after 4 hours of outage, impact is _high_". Lets a BIA model how disruption escalates rather than recording a single worst-case impact.
 - **Evidence** — A document, screenshot, configuration sample, or any other artifact attached to an applied control or requirement assessment to substantiate compliance.
 - **Evidence revision** — A single versioned iteration of an evidence object. Replacing an attachment creates a new revision rather than overwriting the previous one; revisions carry a version number, an SHA-256 integrity hash, optional observation, and a link to the task occurrence that produced them when applicable.
+- **External rating** — A score published about one of your third parties by an outside rating service (SecurityScorecard, Bitsight, CyberVadis, …), recorded with the provider's scale so readings from different providers can be compared.
 
 ## F
 
 - **Feared event** — In EBIOS RM, the undesirable outcome to be avoided on a primary asset — for example, a confidentiality breach of customer data.
 - **Filtering label** — A free-form tag that can be attached to most objects for categorisation, filtering, and reporting.
-- **Findings assessment** — A formal record tracking issues raised by an audit, a security review, or an external assessor, used to drive remediation through to closure.
+- **Finding** — A single issue to be remediated — a non-compliance, an observation, a vulnerability found in a pentest. Usually collected in a **findings binder**, but can stand alone.
+- **Findings binder** — A formal record collecting the issues raised by one review — an audit, a security review, a pentest, an external assessor's report — and driving them through to closure. Internally `FindingsAssessment`; surfaced as *Follow-up* in earlier versions.
 - **Focus mode** — A workspace mode that filters the entire UI to a single domain, hiding objects belonging to other domains. PRO feature.
 - **Folder** — Internal model name for a **domain**. See **Domain**.
 - **Framework** — A set of requirements covering patterns and expectations needed to comply with a regulation, prepare a certification, or establish a foundation. Shipped as a YAML library.
@@ -156,6 +159,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Task template** — Internal model name for a **task definition**. See **Task definition**.
 - **Team** — A named grouping of users used for collaborative ownership of objects, with a leader, optional deputies, members, and an optional team email for notification routing. Distinct from a [User group](#u) (which is role-scoped to a domain — see the disambiguation in [Actors and teams](../concepts/actors-and-teams.md)).
 - **Terminology** — An organisation's overrides to the platform's default labels, used to align the UI with internal vocabulary.
+- **Third-party workspace** — The folder holding a third party's questionnaire, one per entity per domain. Access granted there does not reach up into the parent domain, which is what makes it safe to give an external party an account. Internally an *enclave* `Folder`.
 - **Threat** — A catalogued source of harm — reusable across scenarios. Optional: assessments can be performed without referencing threats explicitly.
 
 ## U

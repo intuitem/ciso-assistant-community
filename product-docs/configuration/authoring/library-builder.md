@@ -4,14 +4,16 @@ description: Author a whole library — frameworks, matrices, threats, controls,
 
 # Library builder
 
-The **Library builder** is the single place to author library content in CISO Assistant. It lives at **`/experimental/library-builder`** and replaces the earlier per-object builders (framework builder, matrix editor, preset editor): they are now surfaces _inside_ one builder rather than separate tools.
+The **Library builder** is the single place to author library content in CISO Assistant. It sits in the sidebar under **Catalog → Library Builder**, and replaces the earlier per-object builders (framework builder, matrix editor, preset editor): they are now surfaces _inside_ one builder rather than separate tools.
+
+Reaching it needs permission to add at least one kind of catalog object — a framework, a risk matrix, a threat, or a reference control.
 
 You edit a **draft document** — a `LibraryDraft` — not live database objects. Think of it as a spreadsheet editor for a library: you assemble frameworks (with requirement trees that can reference reference controls and threats), risk matrices, threats, reference controls, and journey presets into one draft, and nothing touches the live catalog until you **publish**. Publishing hands the draft to the **standard library loader** — the same code path that imports any built-in or community library — so authored content behaves exactly like everything else: versioned, upgradable, exportable.
 
 Because a draft serializes to a plain library **YAML**, you can also export it and re-import it on another instance, or import an existing library YAML straight into a new editable draft.
 
 {% hint style="warning" %}
-**Experimental.** The library builder is exposed under the `/experimental/` namespace while its UX is being polished. The URL and menu entry may move once it graduates, and individual surfaces may change between releases. Your drafts and published libraries are not at risk. Feedback is welcome.
+**Experimental.** The menu entry now sits alongside the rest of the catalog, but the builder still answers at **`/experimental/library-builder`** while its UX is being polished — the URL may move once it graduates, and individual surfaces may change between releases. Your drafts and published libraries are not at risk. Feedback is welcome.
 {% endhint %}
 
 ## Concepts in one minute
@@ -33,7 +35,7 @@ Because a draft serializes to a plain library **YAML**, you can also export it a
 
 For the common case — one framework, or one matrix, with no other objects — you don't need to think about libraries at all.
 
-1. Go to **`/experimental/library-builder`**.
+1. Open **Catalog → Library Builder**.
 2. Click **New framework** or **New matrix**.
 3. Enter a **name** and a **packager** (your namespace, e.g. `acme`). The packager is remembered after the first time, and the default can be set instance-wide (see [Set the default packager](#set-the-default-packager)).
 4. Click **Create and edit**. The wrapping library is minted behind the scenes — its ref_id is slugged from the name and de-duplicated against your corpus — and you land straight in the object's editor.
@@ -43,7 +45,7 @@ The draft page shows a **Simple view** for single-object libraries and a toggle 
 
 ### Author a full library (multiple objects)
 
-1. Go to **`/experimental/library-builder`** and click **New Library Draft**.
+1. Open **Catalog → Library Builder** and click **New Library Draft**.
 2. Set the **name**, **packager**, and **Reference ID** (the ref_id). The assembled URN previews live below the inputs, and an identity check warns if it collides with an existing library or object ("This identity collides with … existing object(s)") or confirms "Identity is free."
 3. Click **Create**. You land on the draft page in Full view.
 4. Add objects from the draft page:
