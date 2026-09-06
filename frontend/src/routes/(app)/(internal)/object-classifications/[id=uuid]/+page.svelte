@@ -213,13 +213,17 @@
 					<div class="flex flex-col text-surface-400">
 						<button
 							class="hover:text-primary-500 disabled:opacity-30"
-							disabled={busy || i === 0 || !canEdit}
+							disabled={busy || i === 0 || !canEdit || l.builtin || levels[i - 1]?.builtin}
 							onclick={() => move(l, -1)}
 							aria-label={m.moveUp()}><i class="fa-solid fa-chevron-up text-xs"></i></button
 						>
 						<button
 							class="hover:text-primary-500 disabled:opacity-30"
-							disabled={busy || i === levels.length - 1 || !canEdit}
+							disabled={busy ||
+								i === levels.length - 1 ||
+								!canEdit ||
+								l.builtin ||
+								levels[i + 1]?.builtin}
 							onclick={() => move(l, 1)}
 							aria-label={m.moveDown()}><i class="fa-solid fa-chevron-down text-xs"></i></button
 						>
