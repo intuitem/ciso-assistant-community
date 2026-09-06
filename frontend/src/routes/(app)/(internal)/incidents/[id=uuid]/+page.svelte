@@ -43,6 +43,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
@@ -101,6 +102,7 @@
 		}
 	);
 	const rows = handler.getRows();
+	const toastStore = getToastStore();
 	const field = data.model.reverseForeignKeyFields.find(
 		(item) => item.urlModel === 'timeline-entries'
 	);
@@ -109,7 +111,11 @@
 			state,
 			URLModel: 'timeline-entries',
 			endpoint: `/timeline-entries?incident=${data.data.id}`,
-			fields: listViewFields['timeline-entries'].body.filter((v) => v !== field.field)
+			fields: listViewFields['timeline-entries'].body.filter((v) => v !== field.field),
+			onError: (error) => {
+				console.error(error);
+				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+			}
 		})
 	);
 
@@ -188,6 +194,8 @@
 				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
 	});
 
+	const doraEnabled = $derived(!!page.data?.featureflags?.dora);
+
 	function buildExportGroups(): ExportGroup[] {
 		const id = data.data.id;
 		return [
@@ -210,19 +218,23 @@
 					}
 				]
 			},
-			{
-				titleKey: 'doraIncidentReports',
-				options: [
-					{
-						titleKey: 'generateDoraReport',
-						descriptionKey: 'generateDoraReportDesc',
-						format: 'JSON',
-						href: `/dora-incident-reports/new?incident=${id}`,
-						kind: 'navigate',
-						testId: 'export-option-dora'
-					}
-				]
-			}
+			...(doraEnabled
+				? [
+						{
+							titleKey: 'doraIncidentReports',
+							options: [
+								{
+									titleKey: 'generateDoraReport',
+									descriptionKey: 'generateDoraReportDesc',
+									format: 'JSON',
+									href: `/dora-incident-reports/new?incident=${id}`,
+									kind: 'navigate',
+									testId: 'export-option-dora'
+								}
+							]
+						}
+					]
+				: [])
 		];
 	}
 
@@ -327,7 +339,7 @@
 
 	// DORA reports fetched server-side, sorted by creation date (newest first)
 	const doraRows: any[] = $derived(
-		[...(data.doraReports ?? [])].sort(
+		[...(doraEnabled ? (data.doraReports ?? []) : [])].sort(
 			(a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
 		)
 	);
@@ -454,16 +466,18 @@
 				<Tabs.Trigger value="timeline">
 					<i class="fa-solid fa-timeline mr-2"></i>{m.timeline()}
 				</Tabs.Trigger>
-				<Tabs.Trigger value="dora-reports">
-					<i class="fa-solid fa-file-shield mr-2"></i>{m.doraIncidentReports()}
-					{#if doraRows.length > 0}
-						<span
-							class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-surface-700-300"
-						>
-							{doraRows.length}
-						</span>
-					{/if}
-				</Tabs.Trigger>
+				{#if doraEnabled}
+					<Tabs.Trigger value="dora-reports">
+						<i class="fa-solid fa-file-shield mr-2"></i>{m.doraIncidentReports()}
+						{#if doraRows.length > 0}
+							<span
+								class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-surface-700-300"
+							>
+								{doraRows.length}
+							</span>
+						{/if}
+					</Tabs.Trigger>
+				{/if}
 				{#each linkedPanels as panel}
 					{@const related = data.relatedModels?.[panel.urlmodel]}
 					{#if related}
@@ -636,72 +650,76 @@
 				{/if}
 			{/each}
 
-			<Tabs.Content value="dora-reports" class="pt-4">
-				{#if doraRows.length > 0}
-					<table class="w-full text-sm">
-						<thead>
-							<tr class="border-b text-left text-surface-600-400">
-								<th class="py-2 px-3">{m.incidentSubmission()}</th>
-								<th class="py-2 px-3">{safeTranslate('createdAt')}</th>
-								<th class="py-2 px-3">{safeTranslate('updatedAt')}</th>
-								<th class="py-2 px-3"></th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each doraRows as report}
-								<tr
-									class="border-b hover:bg-surface-100-900 cursor-pointer"
-									onclick={(e) => {
-										if (!(e.target as HTMLElement).closest('button')) {
-											window.location.href = `/dora-incident-reports/${report.id}`;
-										}
-									}}
-								>
-									<td class="py-2 px-3">
-										<span
-											class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded"
-										>
-											{safeTranslate(report.incident_submission)}
-										</span>
-										{#if report.is_submitted}
-											<span
-												class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs px-2 py-1 rounded ml-1"
-											>
-												<i class="fa-solid fa-lock text-xs mr-1"></i>{m.submitted()}
-											</span>
-										{:else}
-											<span
-												class="bg-surface-200-800 text-surface-600-400 text-xs px-2 py-1 rounded ml-1"
-											>
-												{m.draft()}
-											</span>
-										{/if}
-									</td>
-									<td class="py-2 px-3">{formatDateOrDateTime(report.created_at, getLocale())}</td>
-									<td class="py-2 px-3">{formatDateOrDateTime(report.updated_at, getLocale())}</td>
-									<td class="py-2 px-3 text-right">
-										{#if !report.is_submitted}
-											<button
-												type="button"
-												class="text-red-500 hover:text-red-700 text-sm"
-												onclick={() =>
-													modalDeleteDoraReport(
-														report.id,
-														safeTranslate(report.incident_submission)
-													)}
-											>
-												<i class="fa-solid fa-trash"></i>
-											</button>
-										{/if}
-									</td>
+			{#if doraEnabled}
+				<Tabs.Content value="dora-reports" class="pt-4">
+					{#if doraRows.length > 0}
+						<table class="w-full text-sm">
+							<thead>
+								<tr class="border-b text-left text-surface-600-400">
+									<th class="py-2 px-3">{m.incidentSubmission()}</th>
+									<th class="py-2 px-3">{safeTranslate('createdAt')}</th>
+									<th class="py-2 px-3">{safeTranslate('updatedAt')}</th>
+									<th class="py-2 px-3"></th>
 								</tr>
-							{/each}
-						</tbody>
-					</table>
-				{:else}
-					<p class="text-surface-600-400 text-sm italic py-4">{m.noResultFound()}</p>
-				{/if}
-			</Tabs.Content>
+							</thead>
+							<tbody>
+								{#each doraRows as report}
+									<tr
+										class="border-b hover:bg-surface-100-900 cursor-pointer"
+										onclick={(e) => {
+											if (!(e.target as HTMLElement).closest('button')) {
+												window.location.href = `/dora-incident-reports/${report.id}`;
+											}
+										}}
+									>
+										<td class="py-2 px-3">
+											<span
+												class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded"
+											>
+												{safeTranslate(report.incident_submission)}
+											</span>
+											{#if report.is_submitted}
+												<span
+													class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs px-2 py-1 rounded ml-1"
+												>
+													<i class="fa-solid fa-lock text-xs mr-1"></i>{m.submitted()}
+												</span>
+											{:else}
+												<span
+													class="bg-surface-200-800 text-surface-600-400 text-xs px-2 py-1 rounded ml-1"
+												>
+													{m.draft()}
+												</span>
+											{/if}
+										</td>
+										<td class="py-2 px-3">{formatDateOrDateTime(report.created_at, getLocale())}</td
+										>
+										<td class="py-2 px-3">{formatDateOrDateTime(report.updated_at, getLocale())}</td
+										>
+										<td class="py-2 px-3 text-right">
+											{#if !report.is_submitted}
+												<button
+													type="button"
+													class="text-red-500 hover:text-red-700 text-sm"
+													onclick={() =>
+														modalDeleteDoraReport(
+															report.id,
+															safeTranslate(report.incident_submission)
+														)}
+												>
+													<i class="fa-solid fa-trash"></i>
+												</button>
+											{/if}
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					{:else}
+						<p class="text-surface-600-400 text-sm italic py-4">{m.noResultFound()}</p>
+					{/if}
+				</Tabs.Content>
+			{/if}
 		</Tabs>
 	</div>
 </div>

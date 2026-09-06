@@ -1,10 +1,15 @@
 import io
 import re
 
+import django_filters as df
+from django.db import transaction
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from django.db.models import ProtectedError
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.status import (
+    HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
     HTTP_409_CONFLICT,
@@ -13,10 +18,26 @@ from iam.models import Folder, Permission, RoleAssignment
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
+    GenericFilterSet,
     escape_excel_formula,
 )
-from core.models import Asset
-from tprm.models import Entity, Representative, Solution, EntityAssessment, Contract
+from core.models import (
+    Asset,
+    ComplianceAssessment,
+    RequirementAssessment,
+    RequirementAssignment,
+    Terminology,
+)
+from core.utils import compute_respondent_progress
+from django.db.models import Case, IntegerField, OuterRef, Q, Subquery, Value, When
+from tprm.models import (
+    Entity,
+    EntityScore,
+    Representative,
+    Solution,
+    EntityAssessment,
+    Contract,
+)
 from rest_framework.decorators import action
 import structlog
 
@@ -81,6 +102,56 @@ class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "tprm.serializers"
 
 
+NEVER_ASSESSED = "never"
+
+ENTITY_FILTERSET_FIELDS = [
+    "name",
+    "ref_id",
+    "is_active",
+    "folder",
+    "parent_entity",
+    "relationship",
+    "relationship__name",
+    "contracts",
+    "country",
+    "currency",
+    "dora_entity_type",
+    "dora_entity_hierarchy",
+    "dora_competent_authority",
+    "filtering_labels",
+    "default_dependency",
+    "default_penetration",
+    "default_maturity",
+    "default_trust",
+]
+
+
+class EntityFilterSet(GenericFilterSet):
+    """`last_assessment_status` is annotated, so the auto-built FilterSet misses it."""
+
+    last_assessment_status = df.MultipleChoiceFilter(
+        choices=lambda: (
+            list(EntityAssessment.Status.choices)
+            + [(NEVER_ASSESSED, _("Never assessed"))]
+        ),
+        method="filter_last_assessment_status",
+    )
+
+    class Meta:
+        model = Entity
+        fields = ENTITY_FILTERSET_FIELDS
+
+    def filter_last_assessment_status(self, queryset, name, value):
+        if not value:
+            return queryset
+        statuses = [v for v in value if v != NEVER_ASSESSED]
+        condition = Q(last_assessment_status__in=statuses) if statuses else Q()
+        if NEVER_ASSESSED in value:
+            # `status` is nullable, so only a missing date means "never assessed".
+            condition |= Q(last_assessment_date__isnull=True)
+        return queryset.filter(condition)
+
+
 # Create your views here.
 class EntityViewSet(ExportMixin, BaseModelViewSet):
     """
@@ -135,27 +206,18 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         "select_related": ["folder", "parent_entity"],
         "wrap_columns": ["name", "description", "mission"],
     }
-    filterset_fields = [
-        "name",
-        "ref_id",
-        "is_active",
-        "folder",
-        "parent_entity",
-        "relationship",
-        "relationship__name",
-        "contracts",
-        "country",
-        "currency",
-        "dora_entity_type",
-        "dora_entity_hierarchy",
-        "dora_competent_authority",
-        "filtering_labels",
-        "default_dependency",
-        "default_penetration",
-        "default_maturity",
-        "default_trust",
-    ]
+    filterset_class = EntityFilterSet
     search_fields = ["name", "description", "legal_identifiers_text"]
+    # The column shows the status; chronology is what makes it sortable.
+    ordering_remap = {"last_assessment_status": "last_assessment_date"}
+    ordering_nulls_last = ("last_assessment_date",)
+
+    @action(detail=False, name="Get last assessment status choices")
+    def last_assessment_status(self, request):
+        return Response(
+            dict(EntityAssessment.Status.choices)
+            | {NEVER_ASSESSED: _("Never assessed")}
+        )
 
     def destroy(self, request, *args, **kwargs):
         """
@@ -238,6 +300,16 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         # Works on both SQLite (JSON stored as text) and PostgreSQL (jsonb → text cast).
         qs = qs.annotate(
             legal_identifiers_text=Cast("legal_identifiers", output_field=TextField()),
+        )
+
+        # Newest by creation: a revision supersedes its predecessor, and editing an
+        # old assessment must not float it back to the top.
+        latest_assessment = EntityAssessment.objects.filter(
+            entity=OuterRef("pk")
+        ).order_by("-created_at")
+        qs = qs.annotate(
+            last_assessment_status=Subquery(latest_assessment.values("status")[:1]),
+            last_assessment_date=Subquery(latest_assessment.values("created_at")[:1]),
         )
 
         # Annotate with default_criticality calculation
@@ -1098,19 +1170,129 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         "criticality",
         "conclusion",
         "genericcollection",
+        # A third-party campaign owns the questionnaire; the assessment hangs off it.
+        "compliance_assessment__campaign",
     ]
+
+    # Ordering the raw string would be alphabetical; the annotation ranks it by
+    # workflow position.
+    ordering_remap = {"assignment_status": "assignment_status_rank"}
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        order = RequirementAssignment.WORKFLOW_ORDER
+        rank = Case(
+            *[
+                When(status=value, then=Value(index))
+                for index, value in enumerate(order)
+            ],
+            default=Value(len(order)),
+            output_field=IntegerField(),
+        )
+        least_advanced = (
+            RequirementAssignment.objects.filter(
+                compliance_assessment_id=OuterRef("compliance_assessment_id")
+            )
+            .annotate(rank=rank)
+            .order_by("rank")
+            .values("rank")[:1]
+        )
+        return qs.annotate(assignment_status_rank=Subquery(least_advanced))
+
+    @staticmethod
+    def _prefetched_requirement_assessments(audit):
+        """Same selection rules as `get_requirement_assessments`, read off what is in memory:
+
+        calling it would bypass the page-level prefetch and re-query per row.
+        """
+        rows = [
+            ra
+            for ra in audit.requirement_assessments.all()
+            if ra.requirement.assessable
+        ]
+        selected = set(audit.selected_implementation_groups or [])
+        if not selected:
+            return rows
+        return [
+            ra
+            for ra in rows
+            if selected & set(ra.requirement.implementation_groups or [])
+        ]
+
+    def _get_optimized_object_data(self, queryset):
+        """Answering progress and assignment state for the whole page at once: per row the walk is a query storm."""
+        data = super()._get_optimized_object_data(queryset)
+
+        audit_ids = {
+            ea.compliance_assessment_id
+            for ea in queryset
+            if ea.compliance_assessment_id
+        }
+        if not audit_ids:
+            return data
+
+        audits = list(
+            ComplianceAssessment.objects.filter(id__in=audit_ids)
+            .select_related("framework")
+            .prefetch_related(
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.select_related(
+                        "requirement"
+                    ).prefetch_related(
+                        "requirement__questions",
+                        "requirement__questions__choices",
+                        "answers",
+                        "answers__question",
+                        "answers__selected_choices",
+                    ),
+                ),
+            )
+        )
+        data["completion"] = {
+            audit.id: compute_respondent_progress(
+                audit, self._prefetched_requirement_assessments(audit)
+            )
+            for audit in audits
+        }
+        data["review_progress"] = {audit.id: audit.progress for audit in audits}
+
+        statuses: dict = {}
+        for audit_id, status_value in RequirementAssignment.objects.filter(
+            compliance_assessment_id__in=audit_ids
+        ).values_list("compliance_assessment_id", "status"):
+            statuses.setdefault(audit_id, []).append(status_value)
+        data["assignment_statuses"] = statuses
+
+        return data
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.compliance_assessment:
-            folder = instance.compliance_assessment.folder
+            audit = instance.compliance_assessment
+            folder = audit.folder
             if folder.content_type == Folder.ContentType.ENCLAVE:
-                logger.info(
-                    "deleting_compliance_assessment_folder",
-                    folder_id=str(folder.id),
-                    content_type=str(folder.content_type),
+                # Revisions share the enclave: it is the vendor's workspace, not this
+                # round's. Only the last audit takes the folder down with it.
+                shared = (
+                    ComplianceAssessment.objects.filter(folder=folder)
+                    .exclude(pk=audit.pk)
+                    .exists()
                 )
-                folder.delete()
+                if shared:
+                    logger.info(
+                        "deleting_audit_keeping_shared_enclave",
+                        audit_id=str(audit.pk),
+                        folder_id=str(folder.id),
+                    )
+                    audit.delete()
+                else:
+                    logger.info(
+                        "deleting_compliance_assessment_folder",
+                        folder_id=str(folder.id),
+                        content_type=str(folder.content_type),
+                    )
+                    folder.delete()
             else:
                 logger.warning(
                     "Compliance assessment folder is not an Enclave, skipping deletion",
@@ -1118,6 +1300,60 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 )
 
         return super().destroy(request, *args, **kwargs)
+
+    @action(detail=True, methods=["post"], name="Clone as a new revision")
+    def clone(self, request, pk=None):
+        """Start the next round: a new assessment for the same entity, sharing the vendor's
+
+        enclave, with a questionnaire carrying the previous answers. The source is untouched.
+        """
+        source = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            request.user,
+            Permission.objects.get(codename="add_entityassessment"),
+            source.folder,
+        ):
+            raise PermissionDenied(
+                {"error": "You do not have permission to create an entity assessment"}
+            )
+        if source.compliance_assessment is None:
+            return Response(
+                {"error": "sourceAssessmentHasNoAudit"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+
+        from tprm.services import create_enclave_audit
+
+        name = request.data.get("name") or f"{source.name} (copy)"
+        with transaction.atomic():
+            clone = EntityAssessment.objects.create(
+                name=name,
+                description=source.description,
+                folder=source.folder,
+                perimeter=source.perimeter,
+                entity=source.entity,
+                version=request.data.get("version") or source.version,
+                # Criticality and its inputs are typed by hand, so a revision would
+                # show last round's judgement as current. A new round rates again.
+                reference_link=source.reference_link,
+                due_date=request.data.get("due_date") or None,
+            )
+            clone.solutions.set(source.solutions.all())
+            clone.reviewers.set(source.reviewers.all())
+            clone.authors.set(source.authors.all())
+            clone.representatives.set(source.representatives.all())
+            audit = create_enclave_audit(
+                clone,
+                source.compliance_assessment.framework,
+                source.compliance_assessment.selected_implementation_groups,
+                field_visibility=source.compliance_assessment.field_visibility,
+                baseline=source.compliance_assessment,
+                enclave=source.compliance_assessment.folder,
+            )
+        return Response(
+            {"id": str(clone.id), "compliance_assessment": str(audit.id)},
+            status=HTTP_201_CREATED,
+        )
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -1135,9 +1371,44 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             request.user, EntityAssessment
         )
 
+        # One query for the whole page, scoped to the audits rendered.
+        audit_ids = EntityAssessment.objects.filter(
+            id__in=viewable_items, compliance_assessment__isnull=False
+        ).values_list("compliance_assessment_id", flat=True)
+        assignments_by_audit: dict = {}
+        for audit_id, assignment_id in (
+            RequirementAssignment.objects.filter(compliance_assessment_id__in=audit_ids)
+            .exclude(status=RequirementAssignment.Status.DRAFT)
+            .values_list("compliance_assessment_id", "id")
+        ):
+            assignments_by_audit.setdefault(audit_id, []).append(str(assignment_id))
+
+        # Same page-level prefetch as the list endpoint: per-row resolution is a
+        # query storm.
+        audits_by_id = {
+            audit.id: audit
+            for audit in ComplianceAssessment.objects.filter(id__in=list(audit_ids))
+            .select_related("framework")
+            .prefetch_related(
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.select_related(
+                        "requirement"
+                    ).prefetch_related(
+                        "requirement__questions",
+                        "requirement__questions__choices",
+                        "answers",
+                        "answers__question",
+                        "answers__selected_choices",
+                    ),
+                ),
+            )
+        }
+
         for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(
             "folder", "entity"
         ):
+            audit = audits_by_id.get(ea.compliance_assessment_id)
             # Use entity assessment's folder for grouping
             folder = ea.folder
             entry = {
@@ -1148,40 +1419,81 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 "solutions": ",".join([sol.name for sol in ea.solutions.all()])
                 if len(ea.solutions.all()) > 0
                 else "-",
-                "baseline": ea.compliance_assessment.framework.name
-                if ea.compliance_assessment
-                else "-",
+                "baseline": audit.framework.name if audit else "-",
                 "due_date": ea.due_date.strftime("%Y-%m-%d") if ea.due_date else "-",
                 "last_update": ea.updated_at.strftime("%Y-%m-%d")
                 if ea.updated_at
                 else "-",
                 "conclusion": ea.conclusion if ea.conclusion else "ongoing",
-                "compliance_assessment_id": ea.compliance_assessment.id
-                if ea.compliance_assessment
-                else "#",
+                "compliance_assessment_id": audit.id if audit else "#",
                 "reviewers": ",".join([str(re.specific) for re in ea.reviewers.all()])
                 if len(ea.reviewers.all())
                 else "-",
                 "observation": ea.observation if ea.observation else "-",
-                "has_questions": ea.compliance_assessment.has_questions
-                if ea.compliance_assessment
-                else False,
+                "has_questions": audit.has_questions if audit else False,
             }
 
+            # With several, no single target is right: the card falls back to the audit.
+            review_assignments = assignments_by_audit.get(
+                ea.compliance_assessment_id, []
+            )
+            entry["review_assignment_id"] = (
+                review_assignments[0] if len(review_assignments) == 1 else None
+            )
+
+            # Same respondent-facing walk as the list and the auditee dashboard.
+            # `answers_progress` counted questions only: a framework without any read 0%.
             completion = (
-                ea.compliance_assessment.answers_progress
-                if ea.compliance_assessment
+                compute_respondent_progress(
+                    audit, self._prefetched_requirement_assessments(audit)
+                )
+                if audit
                 else 0
             )
             entry.update({"completion": completion})
 
-            review_progress = (
-                ea.compliance_assessment.progress if ea.compliance_assessment else 0
-            )
+            review_progress = audit.progress if audit else 0
             entry.update({"review_progress": review_progress})
             assessments_data.append(entry)
 
         return Response(assessments_data)
+
+
+class EntityScoreViewSet(BaseModelViewSet):
+    """API endpoint that allows entity scores to be viewed or edited."""
+
+    model = EntityScore
+    filterset_fields = ["entity", "provider", "filtering_labels", "folder"]
+    search_fields = ["grade", "observation"]
+    ordering_fields = ["as_of", "score", "normalized_score"]
+    # A property: the ORM needs it computed in SQL to order by it.
+    ordering_remap = {"normalized_score": "normalized_score_value"}
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("entity", "provider", "folder")
+            .annotate(
+                normalized_score_value=Case(
+                    When(scale_max=0, then=Value(None)),
+                    default=(F("score") * 100.0) / F("scale_max"),
+                    output_field=FloatField(),
+                )
+            )
+        )
+
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        return Response(
+            {
+                str(t.id): t.get_name_translated
+                for t in Terminology.objects.filter(
+                    field_path=Terminology.FieldPath.ENTITY_SCORE_PROVIDER,
+                    is_visible=True,
+                )
+            }
+        )
 
 
 class RepresentativeViewSet(ExportMixin, BaseModelViewSet):
@@ -1190,6 +1502,11 @@ class RepresentativeViewSet(ExportMixin, BaseModelViewSet):
     """
 
     model = Representative
+
+    @action(detail=False, name="Get language choices")
+    def language(self, request):
+        return Response(dict(settings.LANGUAGES))
+
     export_config = {
         "filename": "representatives_export",
         "fields": {

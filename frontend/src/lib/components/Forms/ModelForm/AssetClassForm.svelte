@@ -42,7 +42,7 @@
 </script>
 
 {#if object.builtin}
-	<aside class="alert variant-ghost-warning text-sm">
+	<aside class="alert preset-outlined-warning-500 text-sm">
 		<i class="fa-solid fa-lock"></i>
 		<span>{m.builtinAssetClassHelpText()}</span>
 	</aside>

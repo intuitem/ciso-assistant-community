@@ -4,6 +4,7 @@ from .views import (
     AuditedModelsView,
     LicenseStatusView,
     ObjectAuditTrailView,
+    TimelineEntriesView,
     get_build,
     LogEntryViewSet,
     PermissionViewSet,
@@ -26,4 +27,9 @@ urlpatterns = [
         name="object-audit-trail",
     ),
     path("audited-models/", AuditedModelsView.as_view(), name="audited-models"),
+    path(
+        "insights-timeline/",
+        TimelineEntriesView.as_view(),
+        name="insights-timeline",
+    ),
 ]

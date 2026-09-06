@@ -1,0 +1,174 @@
+urn: urn:intuitem:risk:library:workflow-operations-entity-tiered-diligence
+locale: en
+ref_id: workflow-operations-entity-tiered-diligence
+name: Third party added — tiered due diligence
+description: 'Routes a new third party by how much you depend on it: a critical one gets the full questionnaire
+  and two weeks, everything else gets the core implementation group and six weeks. Set framework_urn to
+  the questionnaire you send vendors — leave it empty and the assessments are created without one.'
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-entity-tiered-diligence:workflow:entity-tiered-diligence
+    schema_version: 1
+    ref_id: entity-tiered-diligence
+    name: Third party added — tiered due diligence
+    description: 'Routes a new third party by how much you depend on it: a critical one gets the full
+      questionnaire and two weeks, everything else gets the core implementation group and six weeks. Set
+      framework_urn to the questionnaire you send vendors — leave it empty and the assessments are created
+      without one.'
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: tprm@example.com
+      - key: urgent_emails
+        type: string
+        default_value: tprm-lead@example.com
+      - key: dependency
+        type: number
+        default_value: 0
+      - key: due_date
+        type: date
+        default_value: ''
+      - key: framework_urn
+        type: string
+        default_value: ''
+      - key: critical_groups
+        type: string
+        default_value: ''
+      - key: standard_groups
+        type: string
+        default_value: ''
+      nodes:
+      - ref: on_entity
+        type: trigger
+        label: Third party created
+        trigger_config:
+          type: internal_event
+          event_key: entity.created
+      - ref: read_tier
+        type: action
+        label: Keep its dependency level
+        action_config:
+          type: set_variables
+          variables:
+            dependency: '{{payload.new_values.default_dependency}}'
+      - ref: route
+        type: condition
+        label: How critical is it?
+        branches:
+        - name: critical
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: dependency
+              op: gte
+              value: 3
+        - name: standard
+          is_default: true
+      - ref: urgent_horizon
+        type: action
+        label: Two weeks
+        action_config:
+          type: date_offset
+          days: 14
+          output: due_date
+      - ref: standard_horizon
+        type: action
+        label: Six weeks
+        action_config:
+          type: date_offset
+          weeks: 6
+          output: due_date
+      - ref: open_urgent
+        type: action
+        label: Open the full questionnaire
+        action_config:
+          type: create_object
+          model: entity_assessment
+          fields:
+            name: 'Due diligence (critical): {{payload.object_repr}}'
+            description: Opened automatically on {{today}} at dependency level {{dependency}}.
+            entity: '{{payload.object_id}}'
+            framework: '{{framework_urn}}'
+            implementation_groups: '{{critical_groups}}'
+      - ref: open_standard
+        type: action
+        label: Open the core questionnaire
+        action_config:
+          type: create_object
+          model: entity_assessment
+          fields:
+            name: 'Due diligence: {{payload.object_repr}}'
+            description: Opened automatically on {{today}}.
+            entity: '{{payload.object_id}}'
+            framework: '{{framework_urn}}'
+            implementation_groups: '{{standard_groups}}'
+      - ref: date_urgent
+        type: action
+        label: Set the due date
+        action_config:
+          type: update_object
+          model: entity_assessment
+          id: '{{nodes.open_urgent.created_object_id}}'
+          fields:
+            due_date: '{{due_date}}'
+      - ref: date_standard
+        type: action
+        label: Set the due date
+        action_config:
+          type: update_object
+          model: entity_assessment
+          id: '{{nodes.open_standard.created_object_id}}'
+          fields:
+            due_date: '{{due_date}}'
+      - ref: tell_urgent
+        type: action
+        label: Escalate
+        action_config:
+          type: send_email
+          recipients: '{{urgent_emails}}'
+          subject: 'Critical third party added: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} was added on {{today}} at dependency level {{dependency}}. Its
+            assessment is due {{due_date}}.'
+      - ref: tell_standard
+        type: action
+        label: Notify
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Third party added: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} was added on {{today}}. Its assessment is due {{due_date}}.'
+      - ref: done
+        type: end
+      edges:
+      - source: on_entity
+        target: read_tier
+      - source: read_tier
+        target: route
+      - source: route
+        target: urgent_horizon
+        source_branch: critical
+      - source: route
+        target: standard_horizon
+        source_branch: standard
+      - source: urgent_horizon
+        target: open_urgent
+      - source: open_urgent
+        target: date_urgent
+      - source: date_urgent
+        target: tell_urgent
+      - source: tell_urgent
+        target: done
+      - source: standard_horizon
+        target: open_standard
+      - source: open_standard
+        target: date_standard
+      - source: date_standard
+        target: tell_standard
+      - source: tell_standard
+        target: done

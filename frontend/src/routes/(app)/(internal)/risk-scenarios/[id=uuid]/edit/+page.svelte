@@ -484,6 +484,10 @@
 										optionsDetailedUrlParameters={[
 											['scope_folder_id', page.data.scenario.folder.id]
 										]}
+										optionsInfoFields={{
+											fields: [{ field: 'category', translate: true }],
+											position: 'prefix'
+										}}
 										field="existing_applied_controls"
 										label={m.existingControls()}
 										helpText={m.existingControlsHelper()}
@@ -572,6 +576,10 @@
 										optionsDetailedUrlParameters={[
 											['scope_folder_id', page.data.scenario.folder.id]
 										]}
+										optionsInfoFields={{
+											fields: [{ field: 'category', translate: true }],
+											position: 'prefix'
+										}}
 										field="applied_controls"
 										label={m.extraAppliedControls()}
 										helpText={m.extraControlsHelper()}

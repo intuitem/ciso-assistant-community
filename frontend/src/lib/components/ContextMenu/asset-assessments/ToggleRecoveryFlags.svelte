@@ -49,7 +49,7 @@
 
 {#each flags as flag}
 	<ContextMenu.Item
-		class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-muted hover:bg-surface-50-950 data-disabled:opacity-50"
+		class="flex h-10 select-none items-center rounded-base py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-muted hover:bg-surface-50-950 data-disabled:opacity-50"
 		disabled={locked}
 		onclick={async () => await toggle(flag.field)}
 	>

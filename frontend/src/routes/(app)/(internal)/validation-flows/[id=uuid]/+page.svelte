@@ -128,7 +128,7 @@
 						<button
 							type="button"
 							onclick={() => openObservationModal('drop')}
-							class="btn preset-filled-surface-500"
+							class="btn preset-filled-surface-900-100"
 							data-testid="drop-button"
 						>
 							<i class="fa-solid fa-trash mr-2"></i>
@@ -161,7 +161,7 @@
 						<button
 							type="button"
 							onclick={() => openObservationModal('drop')}
-							class="btn preset-filled-surface-500"
+							class="btn preset-filled-surface-900-100"
 							data-testid="drop-button"
 						>
 							<i class="fa-solid fa-trash mr-2"></i>
@@ -179,7 +179,7 @@
 						<button
 							type="button"
 							onclick={() => openObservationModal('drop')}
-							class="btn preset-filled-surface-500"
+							class="btn preset-filled-surface-900-100"
 							data-testid="drop-button"
 						>
 							<i class="fa-solid fa-trash mr-2"></i>

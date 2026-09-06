@@ -217,9 +217,10 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Document revisions")
 
     @classmethod
-    def from_db(cls, db, field_names, values):
-        instance = super().from_db(db, field_names, values)
-        instance._loaded_content = instance.content
+    def from_db(cls, db, field_names, values, *, fetch_mode=None):
+        instance = super().from_db(db, field_names, values, fetch_mode=fetch_mode)
+        if "content" in field_names:
+            instance._loaded_content = instance.content
         return instance
 
     def save(self, *args, **kwargs):

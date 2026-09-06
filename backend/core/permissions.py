@@ -85,4 +85,5 @@ class FeatureFlagRequired(permissions.BasePermission):
         flag = getattr(view, "feature_flag", None)
         if not flag:
             return True
-        return ff_is_enabled(flag)
+        flags = (flag,) if isinstance(flag, str) else flag
+        return any(ff_is_enabled(f) for f in flags)

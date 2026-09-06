@@ -1,0 +1,46 @@
+urn: urn:intuitem:risk:library:workflow-compliance-validation-requested
+locale: en
+ref_id: workflow-compliance-validation-requested
+name: Validation requested — notify the approver
+description: 'A new validation request emails the approver with its deadline. The workflow never decides
+  anything: approvals stay human.'
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-compliance-validation-requested:workflow:validation-requested
+    schema_version: 1
+    ref_id: validation-requested
+    name: Validation requested — notify the approver
+    description: 'A new validation request emails the approver with its deadline. The workflow never decides
+      anything: approvals stay human.'
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: approvals@example.com
+      nodes:
+      - ref: on_request
+        type: trigger
+        label: Validation submitted
+        trigger_config:
+          type: internal_event
+          event_key: validationflow.created
+      - ref: notify
+        type: action
+        label: Email the approver
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Waiting for your decision: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} was submitted for validation on {{today}}.'
+      - ref: done
+        type: end
+      edges:
+      - source: on_request
+        target: notify
+      - source: notify
+        target: done

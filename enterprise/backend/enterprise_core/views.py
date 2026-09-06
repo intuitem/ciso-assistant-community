@@ -26,8 +26,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
-from core.views import BaseModelViewSet, GenericFilterSet, RoleFilter
-from core.utils import MAIN_ENTITY_DEFAULT_NAME
+from core.views import (
+    BaseModelViewSet,
+    ComplianceAssessmentViewSet,
+    GenericFilterSet,
+    RoleFilter,
+    SmartOrderingFilter,
+)
+from core.utils import MAIN_ENTITY_DEFAULT_NAME, get_respondent_scoped_folder_ids
 from iam.models import User, Role, UserGroup, RoleAssignment
 from tprm.models import Entity
 
@@ -38,8 +44,19 @@ import shutil
 from pathlib import Path
 import humanize
 
-from core.models import CustomEmailTemplate, CustomWordTemplate, CustomDocHtmlTemplate
+from core.models import (
+    Actor,
+    AppliedControl,
+    ComplianceAssessment,
+    CustomDocHtmlTemplate,
+    CustomEmailTemplate,
+    CustomWordTemplate,
+    FindingsAssessment,
+    RiskAssessment,
+    SecurityException,
+)
 from global_settings.models import GlobalSettings
+from resilience.models import BusinessImpactAnalysis
 from .models import ClientSettings
 from .serializers import (
     ClientSettingsReadSerializer,
@@ -527,7 +544,7 @@ class LogEntryViewSet(
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        SmartOrderingFilter,
     ]
     ordering = ["-timestamp"]
     ordering_fields = "__all__"
@@ -1233,3 +1250,170 @@ class ObjectAuditTrailView(APIView):
         if model_name == "user" and isinstance(changes, dict) and "password" in changes:
             return {**changes, "password": ["***", "***"]}
         return changes
+
+
+class TimelineEntriesView(APIView):
+    """
+    Aggregate feed for the insights timeline (Gantt) page.
+
+    Replaces six fetch-all list calls with one request returning, per model,
+    only the fields the timeline renders. Rows are scoped per model through
+    RoleAssignment.get_accessible_object_ids, the same kernel the list
+    endpoints use (superusers included), and compliance assessments
+    additionally get the respondent scoping of their list queryset.
+    """
+
+    ASSESSMENT_MODELS = [
+        (RiskAssessment, "risk_assessments"),
+        (BusinessImpactAnalysis, "business_impact_analyses"),
+        (FindingsAssessment, "findings_assessments"),
+    ]
+
+    def get(self, request):
+        user = request.user
+        actor_ids: set = set()
+        entries: list[dict] = []
+
+        def accessible_ids(model):
+            # Same kernel call as BaseModelViewSet.get_queryset: a queryset of
+            # the ids the user may view, usable directly in id__in filters.
+            return RoleAssignment.get_viewable_object_ids(user, model)
+
+        def owner_ids_map(model, field_name, object_ids):
+            """Map object id to its owning actor ids via the M2M through
+            table (one query per model, no per-row fan-out)."""
+            field = model._meta.get_field(field_name)
+            through = field.remote_field.through
+            source = f"{field.m2m_field_name()}_id"
+            target = f"{field.m2m_reverse_field_name()}_id"
+            mapping: dict = {}
+            for object_id, actor_id in through.objects.filter(
+                **{f"{source}__in": object_ids}
+            ).values_list(source, target):
+                mapping.setdefault(object_id, []).append(actor_id)
+                actor_ids.add(actor_id)
+            return mapping
+
+        # Applied controls: bar (start_date + eta) or milestone (eta only)
+        ac_ids = accessible_ids(AppliedControl)
+        ac_owners = owner_ids_map(AppliedControl, "owner", ac_ids)
+        for row in (
+            AppliedControl.objects.filter(id__in=ac_ids)
+            .order_by("created_at")
+            .values("id", "name", "start_date", "eta", "progress_field", "folder_id")
+        ):
+            entries.append(
+                {
+                    "model": "applied_controls",
+                    "id": row["id"],
+                    "name": row["name"],
+                    "folder": row["folder_id"],
+                    "start_date": row["start_date"],
+                    "eta": row["eta"],
+                    "progress_field": row["progress_field"],
+                    "owners": ac_owners.get(row["id"], []),
+                }
+            )
+
+        # Compliance assessments: eta/due_date milestone with progress.
+        # Progress reuses the bucketed bulk computation of the list endpoint
+        # (ComplianceAssessmentViewSet._get_optimized_object_data) so the
+        # rendered percentage matches ComplianceAssessmentListSerializer.
+        ca_qs = ComplianceAssessment.objects.filter(
+            id__in=accessible_ids(ComplianceAssessment)
+        )
+        respondent_folders = get_respondent_scoped_folder_ids(user)
+        if respondent_folders:
+            user_actors = Actor.get_all_for_user(user)
+            ca_qs = ca_qs.filter(
+                ~models.Q(folder_id__in=respondent_folders)
+                | models.Q(requirement_assignments__actor__in=user_actors)
+            ).distinct()
+        audits = list(ca_qs.select_related("folder").order_by("created_at"))
+        optimized = ComplianceAssessmentViewSet()._get_optimized_object_data(audits)
+        total_map = optimized.get("total_requirements", {})
+        assessed_map = optimized.get("assessed_requirements", {})
+        for audit in audits:
+            total = total_map.get(audit.id, 0)
+            assessed = assessed_map.get(audit.id, 0)
+            entries.append(
+                {
+                    "model": "compliance_assessments",
+                    "id": audit.id,
+                    "name": audit.name,
+                    "folder": audit.folder_id,
+                    "eta": audit.eta,
+                    "due_date": audit.due_date,
+                    "created_at": audit.created_at,
+                    # Same computation as ComplianceAssessmentListSerializer.get_progress
+                    "progress": int((assessed / total) * 100) if total else 0,
+                    # No owners: the compliance list serializer does not expose
+                    # authors, so the timeline never showed them (parity).
+                }
+            )
+
+        # Risk assessments, BIAs, findings assessments: eta/due_date milestone
+        for model, key in self.ASSESSMENT_MODELS:
+            ids = accessible_ids(model)
+            owners = owner_ids_map(model, "authors", ids)
+            for row in (
+                model.objects.filter(id__in=ids)
+                .order_by("created_at")
+                .values("id", "name", "eta", "due_date", "created_at", "folder_id")
+            ):
+                entries.append(
+                    {
+                        "model": key,
+                        "id": row["id"],
+                        "name": row["name"],
+                        "folder": row["folder_id"],
+                        "eta": row["eta"],
+                        "due_date": row["due_date"],
+                        "created_at": row["created_at"],
+                        "owners": owners.get(row["id"], []),
+                    }
+                )
+
+        # Security exceptions: expiration_date milestone
+        se_ids = accessible_ids(SecurityException)
+        se_owners = owner_ids_map(SecurityException, "owners", se_ids)
+        for row in (
+            SecurityException.objects.filter(id__in=se_ids)
+            .order_by("created_at")
+            .values("id", "name", "expiration_date", "created_at", "folder_id")
+        ):
+            entries.append(
+                {
+                    "model": "security_exceptions",
+                    "id": row["id"],
+                    "name": row["name"],
+                    "folder": row["folder_id"],
+                    "expiration_date": row["expiration_date"],
+                    "created_at": row["created_at"],
+                    "owners": se_owners.get(row["id"], []),
+                }
+            )
+
+        # Resolve actor display names once for every model (same strings as
+        # FieldsRelatedField's "str", i.e. str(actor)). Restricted to actors
+        # the requester can view, matching the related-field masking the list
+        # endpoints apply to owners/authors.
+        actor_qs = Actor.objects.filter(id__in=actor_ids)
+        try:
+            actor_qs = actor_qs.filter(id__in=accessible_ids(Actor))
+        except NotImplementedError, Permission.DoesNotExist:
+            # Model not IAM-scoped: list endpoints skip masking too.
+            pass
+        actor_labels = {
+            actor.id: str(actor)
+            for actor in actor_qs.select_related("user", "team", "entity")
+        }
+        for entry in entries:
+            if "owners" in entry:
+                entry["owners"] = [
+                    actor_labels[actor_id]
+                    for actor_id in entry["owners"]
+                    if actor_id in actor_labels
+                ]
+
+        return Response(entries)

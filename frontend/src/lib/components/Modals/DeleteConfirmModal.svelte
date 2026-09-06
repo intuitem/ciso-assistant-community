@@ -8,7 +8,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50-950 p-6 w-modal space-y-6';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-6 w-modal space-y-6';
 	const cHeader = 'text-xl font-medium text-surface-950-50';
 	const cForm = 'space-y-4';
 

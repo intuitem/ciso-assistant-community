@@ -267,13 +267,13 @@
 					/>
 				</label>
 				<button
-					class="btn btn-sm variant-filled-primary"
+					class="btn btn-sm preset-filled-primary-500"
 					disabled={busy || !newLocale || !newLangFile}
 					onclick={addLanguage}
 				>
 					{m.add()}
 				</button>
-				<button class="btn btn-sm variant-soft" onclick={() => (addingLang = false)}>
+				<button class="btn btn-sm preset-tonal" onclick={() => (addingLang = false)}>
 					{m.cancel()}
 				</button>
 			</div>
@@ -283,7 +283,7 @@
 	<!-- File card -->
 	<div class="space-y-4 rounded-xl border border-surface-200-800 bg-surface-50-950 p-6 shadow-sm">
 		{#if currentFileUrl}
-			<a href={currentFileUrl} target="_blank" rel="noopener" class="btn variant-filled-primary">
+			<a href={currentFileUrl} target="_blank" rel="noopener" class="btn preset-filled-primary-500">
 				<i class="fa-solid fa-download mr-2"></i>{m.download()}
 			</a>
 			{#if isPdf}
@@ -321,26 +321,30 @@
 		<div class="flex flex-wrap items-center gap-2 border-t border-surface-200-800 pt-4">
 			<input type="file" class="hidden" bind:this={fileInput} onchange={onFilePicked} />
 			{#if isDraft}
-				<button class="btn btn-sm variant-soft" disabled={busy} onclick={() => fileInput?.click()}>
+				<button class="btn btn-sm preset-tonal" disabled={busy} onclick={() => fileInput?.click()}>
 					<i class="fa-solid fa-file-arrow-up mr-2"></i>{m.replaceFile()}
 				</button>
-				<button class="btn btn-sm variant-filled-primary" disabled={busy} onclick={submitForReview}>
+				<button
+					class="btn btn-sm preset-filled-primary-500"
+					disabled={busy}
+					onclick={submitForReview}
+				>
 					{m.submitForReview()}
 				</button>
 			{:else if isInReview}
-				<button class="btn btn-sm variant-filled-success" disabled={busy} onclick={approve}>
+				<button class="btn btn-sm preset-filled-success-500" disabled={busy} onclick={approve}>
 					{m.approve()}
 				</button>
-				<button class="btn btn-sm variant-soft-error" disabled={busy} onclick={requestChanges}>
+				<button class="btn btn-sm preset-tonal-error" disabled={busy} onclick={requestChanges}>
 					{m.requestChanges()}
 				</button>
 			{:else if isValidated}
-				<button class="btn btn-sm variant-filled-success" disabled={busy} onclick={publish}>
+				<button class="btn btn-sm preset-filled-success-500" disabled={busy} onclick={publish}>
 					{m.publish()}
 				</button>
 			{:else if isPublished}
 				<button
-					class="btn btn-sm variant-filled-primary"
+					class="btn btn-sm preset-filled-primary-500"
 					disabled={busy}
 					onclick={() => fileInput?.click()}
 				>
@@ -348,7 +352,7 @@
 				</button>
 			{/if}
 			<button
-				class="btn btn-sm variant-soft-error ml-auto"
+				class="btn btn-sm preset-tonal-error ml-auto"
 				disabled={busy}
 				onclick={deleteDocument}
 			>

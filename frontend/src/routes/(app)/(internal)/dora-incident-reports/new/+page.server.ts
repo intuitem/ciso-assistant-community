@@ -1,10 +1,11 @@
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { defaultWriteFormAction } from '$lib/utils/actions';
-import type { Actions } from '@sveltejs/kit';
+import { redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 const URL_MODEL = 'dora-incident-reports';
@@ -20,7 +21,8 @@ async function fetchChoices(fetch: typeof globalThis.fetch, endpoint: string) {
 	}));
 }
 
-export const load: PageServerLoad = async ({ url, fetch }) => {
+export const load: PageServerLoad = async ({ url, fetch, locals }) => {
+	if (!locals.featureflags?.dora) redirect(302, '/');
 	const schema = modelSchema(URL_MODEL);
 	const model = getModelInfo(URL_MODEL);
 
@@ -64,12 +66,11 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 			let existingTypes: string[] = [];
 			if (prev.incident) {
 				try {
-					const existingRes = await fetch(`${BASE_API_URL}/${ENDPOINT}/?incident=${prev.incident}`);
-					if (existingRes.ok) {
-						const existingData = await existingRes.json();
-						const reports = existingData.results ?? existingData ?? [];
-						existingTypes = reports.map((r: any) => r.incident_submission);
-					}
+					const reports = await fetchAllPages(
+						fetch,
+						`${BASE_API_URL}/${ENDPOINT}/?incident=${prev.incident}`
+					);
+					existingTypes = reports.map((r: any) => r.incident_submission);
 				} catch {
 					// Continue without existing types
 				}
@@ -179,30 +180,12 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 		fetchChoices(fetch, `${base}/info_duration_service_downtime_actual_or_estimate/`)
 	]);
 
-	// Fetch users for contact fill helper
-	let userOptions: { id: string; label: string; email: string }[] = [];
-	try {
-		const usersRes = await fetch(`${BASE_API_URL}/users/`);
-		if (usersRes.ok) {
-			const usersData = await usersRes.json();
-			const results = usersData.results ?? usersData ?? [];
-			userOptions = results.map((u: any) => ({
-				id: u.id,
-				label: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email,
-				email: u.email || ''
-			}));
-		}
-	} catch {
-		// Optional
-	}
-
 	return {
 		form,
 		model,
 		mode: 'create' as const,
 		formAction: '?/create',
 		incidentRef,
-		userOptions,
 		selectOptions: {
 			incident_submission: submissionChoices,
 			report_currency: currencyChoices,
@@ -223,6 +206,7 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
+		if (!event.locals.featureflags?.dora) redirect(302, '/');
 		return defaultWriteFormAction({
 			event,
 			urlModel: URL_MODEL,

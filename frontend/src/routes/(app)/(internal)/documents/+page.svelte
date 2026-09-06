@@ -86,10 +86,10 @@
 				</div>
 			</div>
 			<div class="flex items-center gap-2">
-				<a href="/documents/new" class="btn btn-sm variant-filled-primary">
+				<a href="/documents/new" class="btn btn-sm preset-filled-primary-500">
 					<i class="fa-solid fa-file-circle-plus mr-2"></i>{m.addDocumentContainer()}
 				</a>
-				<a href="/document-containers" class="btn btn-sm variant-soft">
+				<a href="/document-containers" class="btn btn-sm preset-tonal">
 					<i class="fa-solid fa-table-list mr-2"></i>{m.manage()}
 				</a>
 			</div>
@@ -163,7 +163,7 @@
 			<i class="fa-solid fa-folder-open text-4xl opacity-50"></i>
 			<p class="font-medium">{m.noPublishedDocuments()}</p>
 			{#if hasFilters}
-				<button type="button" class="btn btn-sm variant-soft" onclick={clearFilters}>
+				<button type="button" class="btn btn-sm preset-tonal" onclick={clearFilters}>
 					<i class="fa-solid fa-rotate-left mr-2"></i>{m.clearFilters()}
 				</button>
 			{/if}
