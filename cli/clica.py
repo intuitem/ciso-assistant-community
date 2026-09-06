@@ -150,7 +150,9 @@ def flatten_frameworks_mapping(mapping) -> Dict[str, list[str]]:
                 if isinstance(framework, dict):
                     framework_name = framework.get("name")
                     framework_id = framework.get("id")
-                    if isinstance(framework_name, str) and isinstance(framework_id, str):
+                    if isinstance(framework_name, str) and isinstance(
+                        framework_id, str
+                    ):
                         flat.setdefault(framework_name, []).append(framework_id)
     return flat
 
@@ -169,9 +171,11 @@ def resolve_named_id(
         flat = flatten_frameworks_mapping(mapping)
         values = flat.get(name, [])
         if len(values) > 1:
-            raise ValueError(
-                f"Ambiguous framework name '{name}', found {len(values)}"
+            click.echo(
+                f"❌ Ambiguous framework name '{name}', found {len(values)}",
+                err=True,
             )
+            sys.exit(1)
         return values[0] if values else None
     else:
         flat = flatten_mapping(mapping)
