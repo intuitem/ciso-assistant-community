@@ -21,6 +21,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from serdes.domain_io import export_domain, import_objects, process_uploaded_file
 from serdes.utils import get_domain_export_objects
 from core.models import (
+    Answer,
     Asset,
     ComplianceAssessment,
     Evidence,
@@ -28,6 +29,7 @@ from core.models import (
     StoredLibrary,
 )
 from core.utils import build_initial_field_visibility
+from tprm.services import grant_respondent_access
 from iam.models import Folder, Role, RoleAssignment, User
 from tprm.models import (
     Contract,
@@ -364,13 +366,34 @@ class TestEntityAssessmentAuditRoundTrip:
         )
         imported_ea = EntityAssessment.objects.get(folder=imported)
 
-        # The audit came back, is flattened into the new domain, and the entity
-        # assessment still points at it.
+        # The audit came back in a rebuilt enclave under the new domain.
         imported_audit = imported_ea.compliance_assessment
         assert imported_audit is not None
-        assert imported_audit.folder == imported
+        assert imported_audit.folder.content_type == Folder.ContentType.ENCLAVE
+        assert imported_audit.folder.parent_folder == imported
+        assert imported_audit.folder.name == provider.name
         assert imported_audit.framework == framework_fixture
         assert imported_audit.requirement_assessments.count() == source_ra_count
+        assert set(
+            imported_audit.requirement_assessments.values_list("folder", flat=True)
+        ) == {imported_audit.folder_id}
+        assert set(
+            Answer.objects.filter(
+                requirement_assessment__compliance_assessment=imported_audit
+            ).values_list("folder", flat=True)
+        ) <= {imported_audit.folder_id}
+
+        # Granting a representative access must not reach beyond the enclave.
+        respondent = User.objects.create(email="rep@provider.test", is_third_party=True)
+        imported_ea.representatives.add(respondent)
+        grant_respondent_access(imported_ea)
+        granted = {
+            folder
+            for ra in RoleAssignment.get_role_assignments_from_user(respondent)
+            for folder in ra.perimeter_folders.all()
+        }
+        assert granted == {imported_audit.folder}
+        assert imported not in granted
 
         imported_evidence_names = [
             e.name
@@ -378,6 +401,57 @@ class TestEntityAssessmentAuditRoundTrip:
             for e in ra.evidences.all()
         ]
         assert any(name.startswith("Audit proof") for name in imported_evidence_names)
+
+    @pytest.mark.django_db
+    def test_successive_rounds_share_one_enclave(
+        self, root_folder, admin_user, framework_fixture
+    ):
+        """One workspace per entity, not per round: two assessments of the same
+        entity must come back sharing a single enclave."""
+        domain = Folder.objects.create(
+            name="Rounds Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        provider = Entity.objects.create(
+            name="Recurring Provider", ref_id="PROV-R", folder=domain
+        )
+        enclave = Folder.objects.create(
+            content_type=Folder.ContentType.ENCLAVE,
+            name=provider.name,
+            parent_folder=domain,
+        )
+        for round_name in ("Round 1", "Round 2"):
+            entity_assessment = EntityAssessment.objects.create(
+                name=round_name, folder=domain, entity=provider
+            )
+            audit = ComplianceAssessment.objects.create(
+                name=round_name,
+                framework=framework_fixture,
+                field_visibility=build_initial_field_visibility(framework_fixture),
+            )
+            audit.folder = enclave
+            audit.save()
+            entity_assessment.compliance_assessment = audit
+            entity_assessment.save()
+
+        response = export_domain(domain, admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        import_objects(
+            json_dump,
+            domain_name="Rounds Imported",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        imported = Folder.objects.get(
+            name="Rounds Imported", content_type=Folder.ContentType.DOMAIN
+        )
+        imported_eas = EntityAssessment.objects.filter(folder=imported)
+        assert imported_eas.count() == 2
+        enclaves = {ea.compliance_assessment.folder for ea in imported_eas}
+        assert len(enclaves) == 1
+        assert enclaves.pop().parent_folder == imported
 
 
 # ============ Flattened name collisions ============

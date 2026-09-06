@@ -31,6 +31,7 @@ from django.utils.text import slugify
 from rest_framework.exceptions import PermissionDenied
 
 from core.models import (
+    Answer,
     AppliedControl,
     Asset,
     AssetClass,
@@ -71,6 +72,7 @@ from iam.models import Folder, RoleAssignment, User
 from tprm.models import (
     Contract,
     Entity,
+    EntityAssessment,
     Solution,
 )
 
@@ -534,6 +536,7 @@ def import_objects(
 
             resolve_security_exception_m2m(objects, link_dump_database_ids)
             resolve_self_referencing_fks(objects, link_dump_database_ids)
+            restore_entity_assessment_enclaves(objects, link_dump_database_ids)
 
         return {
             "message": "Import successful",
@@ -1543,6 +1546,43 @@ def resolve_self_referencing_fks(
             if not parent_id:
                 continue
             model_cls.objects.filter(id=db_id).update(**{f"{field_name}_id": parent_id})
+
+
+def restore_entity_assessment_enclaves(
+    objects: List[dict], link_dump_database_ids: dict[str, Any]
+) -> None:
+    """Post-pass: move each imported questionnaire back into its entity's enclave.
+
+    Flattening leaves the audit in the domain folder, and `grant_respondent_access`
+    builds a recursive role assignment on `audit.folder` — so a representative
+    assigned afterwards would get the whole domain. Evidences stay behind: an
+    export carries no folders, so an enclave one can't be told from a domain one.
+    """
+    from tprm.services import enclave_folder
+
+    for obj in objects:
+        if obj["model"] != "tprm.entityassessment":
+            continue
+        db_id = link_dump_database_ids.get(obj["id"])
+        if not db_id:
+            continue
+        entity_assessment = (
+            EntityAssessment.objects.filter(id=db_id)
+            .select_related("compliance_assessment")
+            .first()
+        )
+        if entity_assessment is None or entity_assessment.compliance_assessment is None:
+            continue
+        audit = entity_assessment.compliance_assessment
+        enclave = enclave_folder(entity_assessment)
+        # .update(): Assessment.save would pull the folder back to the perimeter's.
+        ComplianceAssessment.objects.filter(id=audit.id).update(folder=enclave)
+        RequirementAssessment.objects.filter(compliance_assessment=audit).update(
+            folder=enclave
+        )
+        Answer.objects.filter(
+            requirement_assessment__compliance_assessment=audit
+        ).update(folder=enclave)
 
 
 def split_uuids_urns(ids: List[str]) -> Tuple[List[UUID], List[str]]:
