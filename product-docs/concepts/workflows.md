@@ -1,91 +1,105 @@
 ---
-description: Automation that reacts to what happens in the platform — on a schedule, on an event, on a webhook — and notifies, reads, creates or updates objects on your behalf
+description: "Automation that reacts to what happens in the platform, on a schedule, on an event or on a webhook, and notifies, reads, creates or updates objects on your behalf"
 ---
 
 # Workflows
 
-A **workflow** is a small automation you draw on a canvas: a trigger, some steps, and the connections between them. It runs inside CISO Assistant, on your data, as a user you nominate — so it can send the reminder nobody remembers to send, open the remediation control a non-compliant requirement needs, or post a summary of this week's audit progress to your team.
+Workflows automate what happens in CISO Assistant. A workflow reacts to something (a schedule, an object changing, an external system calling in, or you pressing a button), then runs a series of steps: read objects, create or update them, branch on a value, loop over a list, send an email, call an external system.
 
-It answers the question every GRC team eventually asks: _"why is a human still doing this by hand every Monday?"_
+You build workflows visually, on a canvas. No code is involved, and everything a workflow does is bounded by the permissions of the person who published it.
+
+<figure><img src="../.gitbook/assets/workflows-hero-builder.png" alt="The builder: the weekly digest template open, its loop step selected, the Triggers panel showing the enabled schedule"><figcaption><p>The builder: the weekly digest template open, its loop step selected, the Triggers panel showing the enabled schedule</p></figcaption></figure>
 
 {% hint style="info" %}
-**Workflows** (automation) and **Validations** (sign-off) are different things. A validation flow routes an object to a person for a decision; a workflow reacts to changes and does work. A workflow can tell you that an approval is waiting — it can never grant one. See [Validation flows](validation-flows.md).
+**Workflows** (automation) and **Validation flows** (sign-off) are different things. A validation flow routes an object to a person for a decision. A workflow reacts to changes and does work. A workflow can tell you that an approval is waiting, it can never grant one. See [Validation flows](validation-flows.md).
 {% endhint %}
 
-## Mental model
+## What you can automate
 
-```mermaid
-graph LR
-  DOM[Domain] -->|scopes| WF[Workflow]
-  WF -->|comprises| VER[Version]
-  VER -->|defines| STEP[Steps and connections]
-  VER -->|registers| TRG[Triggers]
-  TRG -->|start| RUN[Run]
-  RUN -.->|acts as| USER[Run-as user]
+| Pattern | Example |
+|---|---|
+| Digests | Every Monday, email the controls past their ETA |
+| Reactions | When a finding is created at high severity, open a remediation control and link it |
+| Sweeps | Every night, mark lapsed security exceptions as expired |
+| Intake | A scanner posts vulnerabilities to a URL and each one is recorded |
+| Outbound | When a control goes live, post to your ITSM or chat tool |
+| Provisioning | Create a domain, its groups and its first user in one run |
+
+Twenty-five ready-made workflows ship as [templates](../features/workflows/templates.md). Most people start by installing one and adapting it.
+
+
+## A workflow is a graph
+
+A workflow is a set of **steps** connected by **wires**. A run starts at a **trigger** step and follows the wires. Where a step has several outgoing wires, all of them run, in parallel. Where you want only one path, you use a Condition step, which picks exactly one of its branches.
+
+```
+[Monday 08:30] ──▶ [Read overdue controls] ──▶ [Loop] ──each──▶ [Log one line] ──┐
+                                                  ▲                                │
+                                                  └────────────────────────────────┘
+                                                  └──done──▶ [Email the digest] ──▶ [Stop run]
 ```
 
-A **workflow** lives in a domain, which fixes what it can ever see or touch. Its content is held in **versions**: you edit a draft, and publishing turns that draft into the published version — the only one that ever runs. Publishing also registers the version's **triggers**, the ways a run can start. Each **run** executes the steps in order, acting as the **run-as user**, so the automation holds exactly that person's permissions and nothing more.
+A path ends when it reaches a step with no outgoing wire, or a Stop run step. The difference matters: an unconnected step ends that path only, while Stop run ends the whole run, including paths still executing elsewhere.
 
-| User-facing | Internal | Notes |
-|---|---|---|
-| Workflow | `Workflow` | Lives in a domain; carries the name, the pause switch and the run time limit |
-| Workflow version | `WorkflowVersion` | Draft or published; publishing freezes the graph |
-| Step | `WorkflowNode` | A trigger, action, condition, loop or stop-run node on the canvas |
-| Trigger | `WorkflowTrigger` | The registered, switchable state of a trigger step, created on publish |
-| Run | `WorkflowInstance` | One execution, with its variables, step outputs and log |
-| Variables | `WorkflowVariable` | Named values the graph reads and writes |
-| Secrets | `WorkflowSecret` | Write-only values for outgoing HTTP calls |
+## Versions: draft, published, archived
 
-Workflows live at `/workflows`, and each one opens into the builder.
+A workflow has versions. At any time it has at most one **draft** and at most one **published** version. Older published versions are **archived**.
 
-## Draft and published
+| State | Editable | Runs automatically | Can be executed by hand |
+|---|---|---|---|
+| Draft | Yes | No | Yes, as you |
+| Published | No. Editing it creates a new draft | Yes, when its triggers are enabled | Yes, as its publisher |
+| Archived | No. Can be restored as a new draft | No | No |
 
-Everything you draw goes into a **draft**. The canvas saves as you work, and nothing about the draft can run automatically.
+Publishing is the moment a graph becomes real. It runs a set of [checks](../features/workflows/publish-checks.md), freezes the graph, registers its triggers and stamps the publisher as the version's **run identity**. The previously published version is archived. Runs that were already in flight keep executing their own frozen version.
 
-**Publish** turns the draft into the published version. It validates the whole graph first — every branch wired, every referenced step and secret present, every action's configuration accepted — and refuses with `The workflow cannot be published yet` if something is off. Once published, editing starts a new draft; the published version keeps running untouched until you publish again, and the builder shows **Needs republishing** while the two differ. **Discard draft** throws the draft away and returns to the published version.
+You can always edit a published workflow. The first change you make silently creates a new draft. The published version keeps running until you publish the draft, and you can discard the draft at any time to go back.
 
-This split is what makes a workflow safe to change: there is no state in which a half-edited graph is live.
-
-## What starts a run
-
-| Trigger | What it means | State on publish |
-|---|---|---|
-| **Manual** | Someone presses **Execute** in the builder | n/a — always available |
-| **Webhook** | An external system POSTs JSON to a URL | **Enabled** — it is a pull; someone must call it |
-| **Schedule** | A cron expression in a timezone you choose | **Disabled** |
-| **On event** | Something changed in the platform — an audit updated, a finding created | **Disabled** |
-
-Schedules and event triggers arrive **Disabled** on purpose: publishing a workflow — or importing one from a library — must never start a cron or an event storm by surprise. You arm each one deliberately in the **Triggers** panel, where you can also see **Last fired** and why a firing was skipped.
-
-Event triggers read the platform's own change log, so they cover a wide range of objects. Their filters let you narrow to what actually matters — a status that changed to a specific value, rather than every save.
-
-## What a workflow may do
-
-Steps come from a palette: read objects, create an object, update one, send an email, call an HTTP endpoint, compute a date, set variables, branch on a condition, loop over a list, and provision domains, users or group memberships.
-
-There is a line the engine will not cross, and it is worth stating plainly because it is what makes workflow-written data acceptable to an auditor:
-
-> **Automation may record that time passed, and may attach work, but it may not render the judgment.**
-
-Concretely, a workflow can move a requirement assessment to _In progress_, attach the control it just created, and set a due date — but it can never write the requirement's **result** or **score**. It can mark an evidence or an exception _expired_ — but never _approved_. It can create and link a treatment control on a risk scenario — but the **treatment** decision stays with the analyst. Approvals and revocations are not writable at all. The full list lives in [the workflow reference](../features/workflows.md).
-
-## Who a workflow runs as
-
-Publishing shows **Publish workflow** and the line _"Once published, this workflow runs as you, using these permissions"_. That is the **run-as user**: the run acts with that person's rights, checked live on every step, and reads exactly the rows the API would show them. A run can never touch anything outside its workflow's domain and the domains beneath it.
-
-If the run-as user loses a permission, the affected step fails and says so — the automation degrades into an error you can see, rather than quietly doing more than it should.
+<figure><img src="../.gitbook/assets/workflows-concepts-versions.png" alt="Workflow versions"><figcaption><p>Workflow versions</p></figcaption></figure>
 
 ## Runs
 
-Every execution is kept: which trigger started it, what the variables held, what each step returned, and where it stopped. From the **Runs** panel you can **Show on canvas** to replay the path visually, **Replay** a run, or pick one as **Use as reference data** so the builder can preview what `{{expressions}}` will resolve to while you edit.
+A **run** is one execution of one version. It has a status:
 
-## Two off switches
+| Status | Meaning |
+|---|---|
+| Active | Still executing, or waiting for an email to be delivered |
+| Completed | Every path finished, or a Stop run step was reached with no failure elsewhere |
+| Failed | A step failed, or the run hit its time limit |
 
-- **Disable workflow** pauses the whole thing. The builder shows **Paused**, and the hint says it plainly: _automatic triggers are disabled — manual runs still work._
-- Each trigger has its own **Enabled** / **Disabled** state, so you can arm the schedule and leave the event trigger off while you tune it.
+Each run keeps its **variables**, the **payload** that started it, the **output of every step**, and a **log** of everything that happened. You browse all of it from the Runs panel, replay it on the canvas, and pin a run as reference data so the builder can show you real values while you edit.
 
-## Where workflows come from
+## Data flows through expressions
 
-You draw them, or you install them. Libraries can carry workflows: the **Libraries** page has a **Workflows** tile, a library preview shows the graph before you commit, and installing one creates a workflow in the domain you choose. Imported workflows arrive as **drafts, divorced from the library** — they are yours to edit, they never update themselves underneath you, and their schedule and event triggers arrive disabled like any other. Nothing you install can act before you publish it and arm it.
+Steps exchange data through [expressions](../features/workflows/expressions.md): `{{today}}`, `{{payload.object_repr}}`, `{{nodes.fetch_late.count}}`, `{{item.name}}`. A step's settings are text with expressions inside. When the step runs, the expressions are replaced with values from the run.
 
-Workflows can also travel the other way: **Export as YAML** produces a library document you can review, version in git, or hand to another instance.
+**Variables** are named values declared on the workflow with a type and a default. A trigger can fill them from incoming data, a Set variables step can assign them, and conditions compare against them.
+
+**Secrets** are named credentials for HTTP calls. They are write-only and scoped to one workflow.
+
+## Scope and identity
+
+A workflow lives in a **domain**. Its runs can only see and change objects in that domain and its sub-domains. Every published version runs **as the person who published it**, with their permissions checked live at every step. Publishing grants nothing: you can automate exactly what you could do by hand, in the domain where the workflow lives.
+
+Read [Permissions and security](../features/workflows/permissions-and-security.md) for the full model.
+
+## Vocabulary
+
+| Term | Meaning |
+|---|---|
+| Step | A node on the canvas: trigger, Condition, Action, Loop or Stop run |
+| Wire | A connection between two steps |
+| Trigger | The step a run starts at |
+| Branch | One output of a Condition step, with its own conditions |
+| Ref | A step's identifier in expressions, derived from its label |
+| Run | One execution of a version |
+| Run identity | The user whose permissions a published version's runs use |
+| Reference run | The run pinned in the builder to show real data while editing |
+| Template | A ready-made workflow shipped as a library |
+
+## Where to go
+
+- [Building your first workflow](../guides/first-workflow.md): enable the feature and build one end to end.
+- [Workflow builder](../features/workflows/README.md): every part of the canvas, then triggers, steps, expressions, variables, runs, sharing and troubleshooting.
+- [Template catalog](../features/workflows/templates.md): the ready-made workflows and which one to start from.
+- [Permissions and security](../features/workflows/permissions-and-security.md): who a run acts as and what it can reach.

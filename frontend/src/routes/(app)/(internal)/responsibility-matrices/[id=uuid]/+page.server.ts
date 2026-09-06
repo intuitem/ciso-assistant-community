@@ -1,6 +1,7 @@
 import { getModelInfo } from '$lib/utils/crud';
 import { loadDetail } from '$lib/utils/load';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { nestedDeleteFormAction } from '$lib/utils/actions';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -34,21 +35,21 @@ export const load: PageServerLoad = async (event) => {
 	// when the user actually opens a drawer, and the PATCH response on
 	// update-activity returns the Read shape so we can rehydrate links
 	// without a separate pool.
-	const [activitiesRes, actorsRes, assignmentsRes, allActorsRes] = await Promise.all([
-		event.fetch(
+	const [activities, matrixActors, assignments, allActors] = await Promise.all([
+		fetchAllPages(
+			event.fetch,
 			`${BASE_API_URL}/pmbok/responsibility-matrix-activities/?matrix=${matrixId}&ordering=order`
-		),
-		event.fetch(
+		).catch(() => []),
+		fetchAllPages(
+			event.fetch,
 			`${BASE_API_URL}/pmbok/responsibility-matrix-actors/?matrix=${matrixId}&ordering=order`
-		),
-		event.fetch(`${BASE_API_URL}/pmbok/responsibility-assignments/?activity__matrix=${matrixId}`),
-		event.fetch(`${BASE_API_URL}/actors/?ordering=user__email`)
+		).catch(() => []),
+		fetchAllPages(
+			event.fetch,
+			`${BASE_API_URL}/pmbok/responsibility-assignments/?activity__matrix=${matrixId}`
+		).catch(() => []),
+		fetchAllPages(event.fetch, `${BASE_API_URL}/actors/?ordering=user__email`).catch(() => [])
 	]);
-
-	const activities = activitiesRes.ok ? ((await activitiesRes.json()).results ?? []) : [];
-	const matrixActors = actorsRes.ok ? ((await actorsRes.json()).results ?? []) : [];
-	const assignments = assignmentsRes.ok ? ((await assignmentsRes.json()).results ?? []) : [];
-	const allActors = allActorsRes.ok ? ((await allActorsRes.json()).results ?? []) : [];
 
 	const linkedObjectsForm = await superValidate(zod(linkedObjectsSchema), { errors: false });
 

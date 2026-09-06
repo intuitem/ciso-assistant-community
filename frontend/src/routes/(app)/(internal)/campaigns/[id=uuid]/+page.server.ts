@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { getModelInfo } from '$lib/utils/crud';
 import { loadDetail } from '$lib/utils/load';
 import {
@@ -39,11 +40,11 @@ export const load: PageServerLoad = async (event) => {
 		? `${BASE_API_URL}/entity-assessments/?compliance_assessment__campaign=${event.params.id}`
 		: `${BASE_API_URL}/compliance-assessments/?campaign=${event.params.id}`;
 
-	const [targetsRes, dashboardRes] = await Promise.all([
-		event.fetch(targetsUrl),
+	// Every target is rendered, and a campaign can exceed one page.
+	const [rows, dashboardRes] = await Promise.all([
+		fetchAllPages<Record<string, any>>(event.fetch, targetsUrl).catch(() => []),
 		event.fetch(`${BASE_API_URL}/campaigns/${event.params.id}/dashboard/`)
 	]);
-	const rows = targetsRes.ok ? ((await targetsRes.json()).results ?? []) : [];
 	const dashboard = dashboardRes.ok
 		? await dashboardRes.json()
 		: { trend: [], assignments: { per_status: {}, flagged: 0 } };

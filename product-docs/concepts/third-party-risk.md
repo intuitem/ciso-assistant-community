@@ -18,8 +18,42 @@ Four interlocking objects model the third-party landscape:
 The actual review of a third party is an **entity assessment**. It can:
 
 - Use a questionnaire — custom, or imported from a library (CAIQ, SIG, …).
-- Trigger an internal audit that lives in the entity's domain, so the third party can fill it in directly.
+- Trigger an audit that lives in the entity's third-party workspace, so the third party can fill it in directly.
 - Capture the residual risk you accept by working with this entity.
+
+### The third-party workspace
+
+The questionnaire behind an entity assessment is a real audit, and it lives in a folder of its own — a **third-party workspace** (an *enclave*, internally). The workspace is what makes the vendor's access safe: view rights granted there never reach up into the parent domain, so a representative sees their questionnaire and nothing else.
+
+Each third party gets **one workspace per domain**, named after the entity. Everything the vendor relationship accumulates — evidences, tasks, the respondent group, the representatives' access — sits in that one folder and carries across assessment rounds.
+
+{% hint style="warning" %}
+Instances created before this rule was introduced gave each *assessment* its own workspace, so a vendor assessed several times held several. Upgrading consolidates them automatically at startup: only folders move, so links, exports and history keep working. If an entity is skipped because of a conflict, support can replay it with `python manage.py consolidate_entity_workspaces --entity "<name>" --apply`; without `--apply` the command prints the plan and changes nothing.
+{% endhint %}
+
+### Revisions
+
+Reassessing a vendor is a **New revision**, from the entity assessment's page. It creates a fresh assessment for the same third party in the same workspace, with a questionnaire that carries over the previous round's answers, results and evidences — so the vendor confirms or corrects rather than starting from a blank form. Solutions, reviewers, authors and representatives come across too.
+
+Two things deliberately do not: the **criticality** rating and its inputs, which are a judgement to be made again each round, and the source assessment itself, which is left untouched as the record of the previous round.
+
+Because name and version identify an assessment within a domain, a revision needs a different name or a different version from the one it came from.
+
+### The register
+
+The entity list carries a **Last assessment** column — the most recent assessment for each third party, with its date and status — so the register answers "who is overdue for a review?" without opening anything. Third parties that have never been assessed are shown as **Never assessed**, and can be filtered on that.
+
+## External ratings
+
+Many organisations buy a continuous outside-in rating of their vendors. With the **external_ratings** [feature flag](../configuration/settings/feature-flags.md) on, entities gain an **External ratings** tab where those readings are recorded:
+
+- **Rating provider** — SecurityScorecard, Bitsight, CyberVadis, and so on. The list is yours to define through [terminology](terminology.md).
+- **Score** and **Scale maximum** — the value as the provider publishes it, plus the top of that provider's scale (100 for SecurityScorecard, 900 for Bitsight). Recording the scale is what lets scores from different providers be compared: a normalised 0–100 value is derived from the two.
+- **Grade** — the letter rating, when the provider publishes one.
+- **As of** — the date the provider published this reading.
+- **Link** and **Observation** — where the report lives, and what you make of it.
+
+Readings accumulate as history rather than overwriting each other — one per provider per day — so a vendor's trajectory is visible, not just its current number. Ratings sit alongside assessments rather than replacing them: an outside-in score is evidence, not an answer to a questionnaire.
 
 ## How the vendor answers the questionnaire
 
