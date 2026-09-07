@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 
+from core.permissions import FeatureFlagRequired
 from core.views import (
     BATCH_SIZE_LIMIT,
     BaseModelViewSet as AbstractBaseModelViewSet,
@@ -656,6 +657,8 @@ class EscalationThresholdViewSet(BaseModelViewSet):
 
 class DoraIncidentReportViewSet(BaseModelViewSet):
     model = DoraIncidentReport
+    feature_flag = "dora"
+    permission_classes = BaseModelViewSet.permission_classes + [FeatureFlagRequired]
     filterset_fields = ["incident", "incident_submission", "folder"]
     search_fields = ["incident__name", "incident_description"]
 

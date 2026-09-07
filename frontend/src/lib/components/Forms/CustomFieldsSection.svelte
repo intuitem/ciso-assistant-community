@@ -5,6 +5,7 @@
 	import Select from './Select.svelte';
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
 
@@ -43,10 +44,7 @@
 		const params = new URLSearchParams({ model, visible: 'true' });
 		if (folder) params.set('for_folder', folder);
 		try {
-			const res = await fetch(`/custom-fields/?${params.toString()}`);
-			if (!res.ok) return;
-			const data = await res.json();
-			definitions = data.results ?? data;
+			definitions = await fetchAllPages<Definition>(fetch, `/custom-fields/?${params.toString()}`);
 		} catch (e) {
 			console.error('Failed to load custom field definitions', e);
 		}
@@ -74,6 +72,15 @@
 				{#if def.field_type === 'text'}
 					<TextField
 						{form}
+						field={path}
+						label={def.label_localized}
+						helpText={def.help_text_localized}
+						required={def.required}
+					/>
+				{:else if def.field_type === 'url'}
+					<TextField
+						{form}
+						type="url"
 						field={path}
 						label={def.label_localized}
 						helpText={def.help_text_localized}

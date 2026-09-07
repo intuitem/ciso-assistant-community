@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import { formatDate } from '$lib/utils/datetime';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import { browser } from '$app/environment';
 	import {
 		getModalStore,
@@ -11,7 +12,7 @@
 	} from '$lib/components/Modals/stores';
 
 	type CommentParentType =
-		'requirement_assessment' | 'risk_scenario' | 'applied_control' | 'finding';
+		'requirement_assessment' | 'risk_scenario' | 'applied_control' | 'finding' | 'task_template';
 
 	interface CommentAuthor {
 		id: string;
@@ -106,13 +107,10 @@
 	async function fetchComments() {
 		loading = true;
 		try {
-			const res = await fetch(`/fe-api/comments?${parentType}=${parentId}&ordering=created_at`);
-			if (res.ok) {
-				const data = await res.json();
-				comments = data.results ?? [];
-			} else {
-				comments = [];
-			}
+			comments = await fetchAllPages<Comment>(
+				fetch,
+				`/fe-api/comments?${parentType}=${parentId}&ordering=created_at`
+			);
 		} catch {
 			comments = [];
 		} finally {

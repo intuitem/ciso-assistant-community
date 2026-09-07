@@ -40,6 +40,15 @@
 		field="evidences"
 		label={m.evidences()}
 	/>
+{:else if context === 'selectTaskTemplates'}
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="task-templates"
+		optionsExtraFields={[['folder', 'str']]}
+		field="task_templates"
+		label={m.taskTemplates()}
+	/>
 {:else if context === 'selectAppliedControls'}
 	<AutocompleteSelect
 		multiple
