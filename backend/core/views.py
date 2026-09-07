@@ -16354,7 +16354,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
             .select_related("folder")
-            .prefetch_related("applied_controls", "evidences")
+            .prefetch_related("applied_controls", "evidences", actor_prefetch("owner"))
             .order_by("ref_id")
         )
         metrics = findings_assessment.get_findings_metrics()

@@ -3160,6 +3160,7 @@
 	"lockedAssessment": "Évaluation verrouillée",
 	"lockedAssessmentMessage": "Cette évaluation est verrouillée.",
 	"assessmentInReviewMessage": "Cette évaluation est actuellement en revue et ne peut pas être modifiée.",
+	"readOnlyNoChangePermissionMessage": "Vous pouvez consulter cette évaluation mais vous n'avez pas la permission de la modifier.",
 	"lockedRiskScenarioMessage": "Ce scénario de risque ne peut pas être modifié, car l'analyse de risque parente est verrouillée.",
 	"lockedRequirementAssessmentMessage": "Cette exigence ne peut pas être modifiée, car son audit parent est verrouillé.",
 	"lockedFindingMessage": "Ce constat ne peut pas être modifié, car son classeur de constats parent est verrouillé.",
