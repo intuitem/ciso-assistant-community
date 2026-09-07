@@ -1,28 +1,22 @@
-// Audit report — English.
+// Audit report — full, English.
 //
-// SELF-CONTAINED ON PURPOSE. Every string a reader sees is in this file, so a
-// customer can download it, edit it and upload it back without knowing anything
-// about the rest of the system. The price is that `audit_report_fr.typ` is its twin:
-// layout changes belong in both, and a test renders each to catch drift.
+// SELF-CONTAINED ON PURPOSE — one document, one locale, no shared module. A
+// customer can download this file, edit it and upload it back without knowing
+// anything about the rest of the system, and customising it cannot affect the
+// other three. The price is deliberate duplication: a layout change belongs in
+// every sibling, and a test renders each to catch drift.
 //
 // The payload arrives as JSON on `sys.inputs.data`, built by
 // `core.generators.audit_context_for_typst`. Fields hidden from the reader's role
 // are ABSENT from the payload, not blanked — so optional reads go through
-// `field()` and optional sections through `shows()`. Never add a role check here:
-// redaction belongs in the context builder, because this file is overridable and
-// a guard living in it could be removed.
-//
-// Row values that are already localised (a requirement's result, a commitment's
-// state) are localised in Python; adding a third locale file means extending that
-// map too. Charts are PNGs written next to this file by the renderer.
+// `field()`. Never add a role check here: redaction belongs in the context
+// builder, because this file is overridable and a guard living in it could be
+// removed.
 
 #let d = json(bytes(sys.inputs.data))
 #let field(record, key, fallback: "-") = record.at(key, default: fallback)
 // Chrome strings come from the payload, never inlined here: one template serves
 // every locale once core.i18n_catalog backs `report_labels`.
-// Layout gate. Data the reader must not see is already absent from the payload
-// (core.generators.REPORT_PROFILES), so this only decides what gets drawn.
-#let shows(name) = name in d.sections
 #let shown(key) = key not in d.hidden_fields
 #let chart(name) = if name + ".png" in d.charts { image(name + ".png", width: 100%) }
 
@@ -134,6 +128,18 @@
         [*Implementation groups*], [#if d.igs != "" { d.igs } else { "All" }],
         [*Contributors*], [#d.contributors.replace("\n", ", ")],
       )
+      #v(1em)
+      // Cheap traceability: which render, of which audit.
+      #block(width: 100%)[
+        #set text(7.5pt, fill: muted)
+        #grid(
+          columns: (auto, 1fr),
+          row-gutter: 3pt,
+          column-gutter: 12pt,
+          [Generated at], [#d.generated_at],
+          [Document ID], [#raw(d.audit.id)],
+        )
+      ]
     ]
   ]
 ]
@@ -143,7 +149,7 @@
 #let r = d.at("req", default: none)
 #let total = if r != none { field(r, "total", fallback: 0) } else { 0 }
 
-#if shows("summary") and r != none [
+#if r != none [
   = Executive summary
   #table(
     columns: 5,
@@ -162,30 +168,25 @@
     [#r.not_assessed],
   )
 ]
-
-#if shows("summary") and r != none and total > 0 [
+#if r != none and total > 0 [
   #v(0.6em)
   Compliant on *#calc.round(100 * r.compliant / total, digits: 1)%* of
   #total assessed requirements. #field(d, "ac_count", fallback: 0) applied
   controls are linked to this audit.
 ]
-
-#if shows("charts") [
   #v(1em)
   #grid(
     columns: (1fr, 1fr),
     gutter: 1em,
     chart("compliance_donut"), chart("compliance_radar"),
   )
-]
-
-#if shows("scope") and d.audit.description != "-" [
+#if d.audit.description != "-" [
   == Scope
   #d.audit.description
 ]
 
 #let drifts = field(d, "drifts_per_domain", fallback: ())
-#if shows("drifts") and drifts.len() > 0 [
+#if drifts.len() > 0 [
   == Drifts per domain
   #table(
     columns: (1fr, auto),
@@ -199,7 +200,7 @@
 // -------------------------------------------------------------- category view
 
 #let categories = field(d, "category_scores", fallback: (:))
-#if shows("categories") and shown("score") and categories.len() > 0 [
+#if shown("score") and categories.len() > 0 [
   = Scores per category
 
   #table(
@@ -225,7 +226,7 @@
 // ------------------------------------------------------------------ controls
 
 #let p1 = field(d, "p1_controls", fallback: ())
-#if shows("controls") and p1.len() > 0 [
+#if p1.len() > 0 [
   = Priority controls
 
   #chart("chart_controls")
@@ -244,7 +245,6 @@
 
 // ------------------------------------------------------- detailed assessment
 
-#if shows("requirements") [
 #pagebreak(weak: true)
 = Detailed results
 
@@ -298,7 +298,7 @@
       #text(fill: muted)[#ra.description]
     ]
     #let answers = ra.at("answers", default: ())
-    #if shows("answers") and answers.len() > 0 [
+    #if answers.len() > 0 [
       #v(3pt)
       #for qa in answers [
         #text(weight: "semibold")[#qa.question] \
@@ -326,8 +326,6 @@
     ]
   ]
 ]
-]
-
 // ------------------------------------------------- commitments and tasks
 
 #let undertaking-table(rows) = table(
@@ -359,7 +357,6 @@
 )
 
 #let commitments = field(d, "commitments", fallback: ())
-#if shows("commitments") [
   #pagebreak(weak: true)
   = Commitments
 
@@ -368,34 +365,10 @@
   ] else [
     #text(fill: muted)[No commitments recorded.]
   ]
-]
-
 #let tasks = field(d, "tasks", fallback: ())
-#if shows("tasks") and tasks.len() > 0 [
+#if tasks.len() > 0 [
   = Tasks
   #undertaking-table(tasks)
 ]
 
 // ------------------------------------------------------------ signatures
-
-#if shows("signatures") [
-  #pagebreak(weak: true)
-  = Signatures
-
-  #par(justify: true)[By signing below, the parties agree to the compliance status and the commitments recorded in this document.]
-  #v(1.5em)
-
-  #grid(
-    columns: (1fr, 1fr),
-    gutter: 2em,
-    ..("For the assessed entity", "For the assessing organisation").map(party => [
-      #text(weight: "bold")[#party]
-      #v(2.5em)
-      #line(length: 100%, stroke: 0.5pt)
-      #text(8pt, fill: muted)[Name and role]
-      #v(2em)
-      #line(length: 100%, stroke: 0.5pt)
-      #text(8pt, fill: muted)[Signature — Date]
-    ]),
-  )
-]

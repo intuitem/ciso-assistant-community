@@ -69,6 +69,7 @@ from integrations.tasks import sync_object_to_integrations
 from webhooks.service import dispatch_webhook_event
 from .generators import (
     REPORT_PROFILES,
+    action_plan_context,
     audit_context_for_typst,
     gen_audit_context,
     inline_charts_for_docx,
@@ -4524,43 +4525,35 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             request.user, RiskAssessment
         )
         if UUID(pk) in object_ids_view:
-            context = {
-                "to_do": list(),
-                "in_progress": list(),
-                "on_hold": list(),
-                "active": list(),
-                "deprecated": list(),
-                "--": list(),
-            }
-            color_map = {
-                "to_do": "#FFF8F0",
-                "in_progress": "#392F5A",
-                "on_hold": "#F4D06F",
-                "active": "#9DD9D2",
-                "deprecated": "#ff8811",
-                "--": "#e5e7eb",
-            }
-            status = AppliedControl.Status.choices
-            risk_assessment_object: RiskAssessment = self.get_object()
-            risk_scenarios_objects = risk_assessment_object.risk_scenarios.all()
-            applied_controls = (
-                AppliedControl.objects.filter(risk_scenarios__in=risk_scenarios_objects)
+            risk_assessment: RiskAssessment = self.get_object()
+            scenarios = risk_assessment.risk_scenarios.all()
+            applied_controls = list(
+                AppliedControl.objects.filter(risk_scenarios__in=scenarios)
                 .distinct()
+                .prefetch_related("risk_scenarios", "owner")
                 .order_by("eta")
             )
-            for applied_control in applied_controls:
-                context[applied_control.status].append(
-                    applied_control
-                ) if applied_control.status else context["--"].append(applied_control)
-            data = {
-                "status_text": status,
-                "color_map": color_map,
-                "context": context,
-                "risk_assessment": risk_assessment_object,
+            scenario_ids = {scenario.id for scenario in scenarios}
+            linked = {
+                control.id: [
+                    str(scenario)
+                    for scenario in control.risk_scenarios.all()
+                    if scenario.id in scenario_ids
+                ]
+                for control in applied_controls
             }
-            html = render_to_string("core/risk_action_plan_pdf.html", data)
-            pdf_file = HTML(string=html).write_pdf()
-            response = HttpResponse(pdf_file, content_type="application/pdf")
+            lang = request.user.preferences.get("lang") or "en"
+            payload = action_plan_context(
+                risk_assessment, applied_controls, lang, linked
+            )
+            response = HttpResponse(
+                render_pdf(localized_template("action_plan", lang), payload),
+                content_type="application/pdf",
+            )
+            safe_name = slugify(risk_assessment.name) or "risk-assessment"
+            response["Content-Disposition"] = (
+                f'attachment; filename="{safe_name}_action_plan.pdf"'
+            )
             return response
         else:
             return Response({"error": "Permission denied"})
@@ -12148,18 +12141,24 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         annotate_tree_with_aggregated_scores(tree, audit)
 
-        lang = request.user.preferences.get("lang") or "en"
-        context = gen_audit_context(pk, tree, lang, assessments=assessments)
         profile = request.query_params.get("profile", "full")
         if profile not in REPORT_PROFILES:
             return Response(
                 {"error": "unknownProfile"}, status=status.HTTP_400_BAD_REQUEST
             )
+
+        lang = request.user.preferences.get("lang") or "en"
+        wants_charts = "charts" in REPORT_PROFILES[profile]["sections"]
+        context = gen_audit_context(
+            pk, tree, lang, assessments=assessments, charts=wants_charts
+        )
         payload, images = audit_context_for_typst(context, audit, role, lang, profile)
 
         response = HttpResponse(
             render_pdf(
-                localized_template("audit_report", lang), payload, images=images
+                localized_template(REPORT_PROFILES[profile]["template"], lang),
+                payload,
+                images=images,
             ),
             content_type="application/pdf",
         )
@@ -12374,33 +12373,32 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "deprecated": "#ff8811",
                 "--": "#e5e7eb",
             }
-            status = AppliedControl.Status.choices
-            compliance_assessment_object: ComplianceAssessment = self.get_object()
-            requirement_assessments_objects = (
-                compliance_assessment_object.get_requirement_assessments(
-                    include_non_assessable=True
-                )
-            )
-            applied_controls = (
-                AppliedControl.objects.filter(
-                    requirement_assessments__in=requirement_assessments_objects
-                )
+            audit: ComplianceAssessment = self.get_object()
+            assessments, _hidden = scoped_requirement_assessments(audit, request.user)
+            applied_controls = list(
+                AppliedControl.objects.filter(requirement_assessments__in=assessments)
                 .distinct()
+                .prefetch_related("requirement_assessments__requirement", "owner")
                 .order_by("eta")
             )
-            for applied_control in applied_controls:
-                context[applied_control.status].append(
-                    applied_control
-                ) if applied_control.status else context["--"].append(applied_control)
-            data = {
-                "status_text": status,
-                "color_map": color_map,
-                "context": context,
-                "compliance_assessment": compliance_assessment_object,
+            linked = {
+                control.id: [
+                    str(ra.requirement.display_short)
+                    for ra in control.requirement_assessments.all()
+                    if ra.compliance_assessment_id == audit.id
+                ]
+                for control in applied_controls
             }
-            html = render_to_string("core/action_plan_pdf.html", data)
-            pdf_file = HTML(string=html).write_pdf()
-            response = HttpResponse(pdf_file, content_type="application/pdf")
+            lang = request.user.preferences.get("lang") or "en"
+            payload = action_plan_context(audit, applied_controls, lang, linked)
+            response = HttpResponse(
+                render_pdf(localized_template("action_plan", lang), payload),
+                content_type="application/pdf",
+            )
+            safe_name = slugify(audit.name) or "audit"
+            response["Content-Disposition"] = (
+                f'attachment; filename="{safe_name}_action_plan.pdf"'
+            )
             return response
         else:
             return Response({"error": "Permission denied"})

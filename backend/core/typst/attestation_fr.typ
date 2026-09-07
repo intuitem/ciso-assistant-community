@@ -1,4 +1,4 @@
-// Rapport d'audit — complet, français.
+// Attestation à contresigner — français.
 //
 // SELF-CONTAINED ON PURPOSE — one document, one locale, no shared module. A
 // customer can download this file, edit it and upload it back without knowing
@@ -149,100 +149,18 @@
 #let r = d.at("req", default: none)
 #let total = if r != none { field(r, "total", fallback: 0) } else { 0 }
 
-#if r != none [
-  = Synthèse managériale
-  #table(
-    columns: 5,
-    align: center,
-    stroke: 0.5pt + rgb("#cbd5e1"),
-    fill: (_, y) => if y == 0 { rgb("#e8edf7") },
-    [*Conformes*],
-    [*Partiellement conformes*],
-    [*Non conformes*],
-    [*Non applicables*],
-    [*Non évaluées*],
-    [#r.compliant],
-    [#r.partially_compliant],
-    [#r.non_compliant],
-    [#r.not_applicable],
-    [#r.not_assessed],
-  )
-]
-#if r != none and total > 0 [
-  #v(0.6em)
-  Compliant on *#calc.round(100 * r.compliant / total, digits: 1)%* of
-  #total assessed requirements. #field(d, "ac_count", fallback: 0) applied
-  controls are linked to this audit.
-]
-  #v(1em)
-  #grid(
-    columns: (1fr, 1fr),
-    gutter: 1em,
-    chart("compliance_donut"), chart("compliance_radar"),
-  )
 #if d.audit.description != "-" [
   == Périmètre
   #d.audit.description
 ]
 
 #let drifts = field(d, "drifts_per_domain", fallback: ())
-#if drifts.len() > 0 [
-  == Écarts par domaine
-  #table(
-    columns: (1fr, auto),
-    stroke: 0.5pt + rgb("#cbd5e1"),
-    fill: (_, y) => if y == 0 { rgb("#e8edf7") },
-    [*Domaine*], [*Constats*],
-    ..drifts.map(x => (field(x, "name"), align(right)[#x.drift_count])).flatten(),
-  )
-]
-
 // -------------------------------------------------------------- category view
 
 #let categories = field(d, "category_scores", fallback: (:))
-#if shown("score") and categories.len() > 0 [
-  = Scores par catégorie
-
-  #table(
-    columns: (1fr, auto, auto, auto),
-    stroke: 0.5pt + rgb("#cbd5e1"),
-    fill: (_, y) => if y == 0 { rgb("#e8edf7") },
-    [*Catégorie*], [*Moyenne*], [*Évalués*], [*éléments*],
-    ..categories
-      .values()
-      .map(c => (
-        field(c, "name"),
-        align(right)[#field(c, "average_score", fallback: 0)],
-        align(right)[#field(c, "scored_count", fallback: 0)],
-        align(right)[#field(c, "item_count", fallback: 0)],
-      ))
-      .flatten(),
-  )
-
-  #v(0.8em)
-  #chart("category_radar")
-]
-
 // ------------------------------------------------------------------ controls
 
 #let p1 = field(d, "p1_controls", fallback: ())
-#if p1.len() > 0 [
-  = Mesures prioritaires
-
-  #chart("chart_controls")
-  #v(0.8em)
-
-  #table(
-    columns: (1fr, auto, auto),
-    stroke: 0.5pt + rgb("#cbd5e1"),
-    fill: (_, y) => if y == 0 { rgb("#e8edf7") },
-    [*Mesure*], [*Statut*], [*Catégorie*],
-    ..p1
-      .map(c => (field(c, "name"), field(c, "status"), field(c, "category")))
-      .flatten(),
-  )
-]
-
 // ------------------------------------------------------- detailed assessment
 
 #pagebreak(weak: true)
@@ -372,3 +290,23 @@
 ]
 
 // ------------------------------------------------------------ signatures
+
+  #pagebreak(weak: true)
+  = Signatures
+
+  #par(justify: true)[En signant ci-dessous, les parties reconnaissent l'état de conformité et les engagements consignés dans ce document.]
+  #v(1.5em)
+
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 2em,
+    ..("Pour l'entité évaluée", "Pour l'organisation évaluatrice").map(party => [
+      #text(weight: "bold")[#party]
+      #v(2.5em)
+      #line(length: 100%, stroke: 0.5pt)
+      #text(8pt, fill: muted)[Nom et fonction]
+      #v(2em)
+      #line(length: 100%, stroke: 0.5pt)
+      #text(8pt, fill: muted)[Signature — Date]
+    ]),
+  )

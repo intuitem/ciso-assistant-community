@@ -1,4 +1,4 @@
-// Rapport d'audit — complet, français.
+// Attestation to countersign — English.
 //
 // SELF-CONTAINED ON PURPOSE — one document, one locale, no shared module. A
 // customer can download this file, edit it and upload it back without knowing
@@ -23,14 +23,14 @@
 #let accent = rgb("#1e3a8a")
 #let muted = rgb("#6b7280")
 
-// Singulier : chaque badge qualifie une exigence. Les en-têtes du
-// tableau de synthèse sont au pluriel, ils surmontent des effectifs.
+// Row badges name one requirement; the summary headers sit above counts.
+// English does not inflect these, but the split matters in other locales.
 #let result-label = (
-  compliant: "Conforme",
-  partially_compliant: "Partiellement conforme",
-  non_compliant: "Non conforme",
-  not_applicable: "Non applicable",
-  not_assessed: "Non évaluée",
+  compliant: "Compliant",
+  partially_compliant: "Partially compliant",
+  non_compliant: "Non compliant",
+  not_applicable: "Not applicable",
+  not_assessed: "Not assessed",
 )
 
 // Keyed on the raw enum value, never the label: matching English substrings
@@ -95,7 +95,7 @@
           columns: (auto, 1fr),
           row-gutter: 8pt,
           column-gutter: 12pt,
-          [*Entité évaluée*],
+          [*Assessed entity*],
           [
             #party.entity#if party.ref_id != "" [ (#party.ref_id)]
             #if party.address != "" [
@@ -104,7 +104,7 @@
           ],
           ..if party.legal_identifiers.len() > 0 {
             (
-              [*Identifiants légaux*],
+              [*Legal identifiers*],
               party
                 .legal_identifiers
                 .map(pair => [#pair.label: #pair.value])
@@ -112,7 +112,7 @@
             )
           } else { () },
           ..if party.expiry_date != "-" {
-            ([*Date d'expiration*], [#party.expiry_date])
+            ([*Expiry date*], [#party.expiry_date])
           } else { () },
         )
         #v(0.6em)
@@ -123,10 +123,10 @@
         columns: (auto, 1fr),
         row-gutter: 8pt,
         column-gutter: 12pt,
-        [*Référence*], [#field(d.audit, "ref_id")],
+        [*Reference*], [#field(d.audit, "ref_id")],
         [*Date*], [#d.date],
-        [*Groupes d'implémentation*], [#if d.igs != "" { d.igs } else { "Tous" }],
-        [*Contributeurs*], [#d.contributors.replace("\n", ", ")],
+        [*Implementation groups*], [#if d.igs != "" { d.igs } else { "All" }],
+        [*Contributors*], [#d.contributors.replace("\n", ", ")],
       )
       #v(1em)
       // Cheap traceability: which render, of which audit.
@@ -136,8 +136,8 @@
           columns: (auto, 1fr),
           row-gutter: 3pt,
           column-gutter: 12pt,
-          [Généré le], [#d.generated_at],
-          [Identifiant du document], [#raw(d.audit.id)],
+          [Generated at], [#d.generated_at],
+          [Document ID], [#raw(d.audit.id)],
         )
       ]
     ]
@@ -149,107 +149,25 @@
 #let r = d.at("req", default: none)
 #let total = if r != none { field(r, "total", fallback: 0) } else { 0 }
 
-#if r != none [
-  = Synthèse managériale
-  #table(
-    columns: 5,
-    align: center,
-    stroke: 0.5pt + rgb("#cbd5e1"),
-    fill: (_, y) => if y == 0 { rgb("#e8edf7") },
-    [*Conformes*],
-    [*Partiellement conformes*],
-    [*Non conformes*],
-    [*Non applicables*],
-    [*Non évaluées*],
-    [#r.compliant],
-    [#r.partially_compliant],
-    [#r.non_compliant],
-    [#r.not_applicable],
-    [#r.not_assessed],
-  )
-]
-#if r != none and total > 0 [
-  #v(0.6em)
-  Compliant on *#calc.round(100 * r.compliant / total, digits: 1)%* of
-  #total assessed requirements. #field(d, "ac_count", fallback: 0) applied
-  controls are linked to this audit.
-]
-  #v(1em)
-  #grid(
-    columns: (1fr, 1fr),
-    gutter: 1em,
-    chart("compliance_donut"), chart("compliance_radar"),
-  )
 #if d.audit.description != "-" [
-  == Périmètre
+  == Scope
   #d.audit.description
 ]
 
 #let drifts = field(d, "drifts_per_domain", fallback: ())
-#if drifts.len() > 0 [
-  == Écarts par domaine
-  #table(
-    columns: (1fr, auto),
-    stroke: 0.5pt + rgb("#cbd5e1"),
-    fill: (_, y) => if y == 0 { rgb("#e8edf7") },
-    [*Domaine*], [*Constats*],
-    ..drifts.map(x => (field(x, "name"), align(right)[#x.drift_count])).flatten(),
-  )
-]
-
 // -------------------------------------------------------------- category view
 
 #let categories = field(d, "category_scores", fallback: (:))
-#if shown("score") and categories.len() > 0 [
-  = Scores par catégorie
-
-  #table(
-    columns: (1fr, auto, auto, auto),
-    stroke: 0.5pt + rgb("#cbd5e1"),
-    fill: (_, y) => if y == 0 { rgb("#e8edf7") },
-    [*Catégorie*], [*Moyenne*], [*Évalués*], [*éléments*],
-    ..categories
-      .values()
-      .map(c => (
-        field(c, "name"),
-        align(right)[#field(c, "average_score", fallback: 0)],
-        align(right)[#field(c, "scored_count", fallback: 0)],
-        align(right)[#field(c, "item_count", fallback: 0)],
-      ))
-      .flatten(),
-  )
-
-  #v(0.8em)
-  #chart("category_radar")
-]
-
 // ------------------------------------------------------------------ controls
 
 #let p1 = field(d, "p1_controls", fallback: ())
-#if p1.len() > 0 [
-  = Mesures prioritaires
-
-  #chart("chart_controls")
-  #v(0.8em)
-
-  #table(
-    columns: (1fr, auto, auto),
-    stroke: 0.5pt + rgb("#cbd5e1"),
-    fill: (_, y) => if y == 0 { rgb("#e8edf7") },
-    [*Mesure*], [*Statut*], [*Catégorie*],
-    ..p1
-      .map(c => (field(c, "name"), field(c, "status"), field(c, "category")))
-      .flatten(),
-  )
-]
-
 // ------------------------------------------------------- detailed assessment
 
 #pagebreak(weak: true)
-= Résultats détaillés
+= Detailed results
 
 #let ras = field(d, "requirement_assessments", fallback: ())
-#text(fill: muted)[#ras.len() exigences évaluables.]
+#text(fill: muted)[#ras.len() assessable requirements.]
 #v(0.6em)
 
 #for ra in ras [
@@ -281,9 +199,9 @@
 
     // Absent keys mean the reader's role may not see them — print nothing.
     #let meta = (
-      if "status" in ra { ([*Progression:* #ra.status],) } else { () }
+      if "status" in ra { ([*Progress:* #ra.status],) } else { () }
         + if "extended_result" in ra and ra.extended_result != "-" {
-          ([*Précision du résultat:* #ra.extended_result],)
+          ([*Result detail:* #ra.extended_result],)
         } else { () }
         + if "score" in ra and ra.score != none {
           ([*Score:* #ra.score#if field(ra, "max_score", fallback: none) != none [
@@ -313,16 +231,16 @@
     #let ra-tasks = ra.at("task_templates", default: ())
     #if ra-tasks.len() > 0 [
       #v(2pt)
-      #text(8pt, fill: accent)["Tâches": #ra-tasks.join(", ")]
+      #text(8pt, fill: accent)["Tasks": #ra-tasks.join(", ")]
     ]
     #let ra-evidences = ra.at("evidences", default: ())
     #if ra-evidences.len() > 0 [
       #v(2pt)
-      #text(8pt, fill: accent)["Preuves": #ra-evidences.join(", ")]
+      #text(8pt, fill: accent)["Evidences": #ra-evidences.join(", ")]
     ]
     #if field(ra, "applied_controls") != "-" [
       #v(2pt)
-      #text(8pt, fill: accent)["Mesures appliquées": #ra.applied_controls]
+      #text(8pt, fill: accent)["Applied controls": #ra.applied_controls]
     ]
   ]
 ]
@@ -332,10 +250,10 @@
   columns: (1fr, auto, auto, auto),
   stroke: 0.5pt + rgb("#cbd5e1"),
   fill: (_, y) => if y == 0 { rgb("#e8edf7") },
-  [*Engagement*],
-  [*Statut*],
-  [*Date d'engagement*],
-  [*Date actuelle*],
+  [*Undertaking*],
+  [*Status*],
+  [*Committed date*],
+  [*Current date*],
   ..rows
     .map(row => (
       [
@@ -349,7 +267,7 @@
       align(right)[
         #field(row, "current_date")
         #if row.at("has_slipped", default: false) [
-          #text(8pt, fill: rgb("#b91c1c"))[("reporté")]
+          #text(8pt, fill: rgb("#b91c1c"))[("slipped")]
         ]
       ],
     ))
@@ -358,17 +276,37 @@
 
 #let commitments = field(d, "commitments", fallback: ())
   #pagebreak(weak: true)
-  = Engagements
+  = Commitments
 
   #if commitments.len() > 0 [
     #undertaking-table(commitments)
   ] else [
-    #text(fill: muted)[Aucun engagement consigné.]
+    #text(fill: muted)[No commitments recorded.]
   ]
 #let tasks = field(d, "tasks", fallback: ())
 #if tasks.len() > 0 [
-  = Tâches
+  = Tasks
   #undertaking-table(tasks)
 ]
 
 // ------------------------------------------------------------ signatures
+
+  #pagebreak(weak: true)
+  = Signatures
+
+  #par(justify: true)[By signing below, the parties agree to the compliance status and the commitments recorded in this document.]
+  #v(1.5em)
+
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 2em,
+    ..("For the assessed entity", "For the assessing organisation").map(party => [
+      #text(weight: "bold")[#party]
+      #v(2.5em)
+      #line(length: 100%, stroke: 0.5pt)
+      #text(8pt, fill: muted)[Name and role]
+      #v(2em)
+      #line(length: 100%, stroke: 0.5pt)
+      #text(8pt, fill: muted)[Signature — Date]
+    ]),
+  )

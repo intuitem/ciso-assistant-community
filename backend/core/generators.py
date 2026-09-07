@@ -380,7 +380,76 @@ def _answer_rows(ra):
     return rows
 
 
-def gen_audit_context(id, tree, lang, assessments=None):
+# Status ordering and fills for the action plan, keyed on the raw enum so the
+# colour never depends on a localised label (house style, §9b).
+_ACTION_PLAN_STATUS_FILLS = {
+    "to_do": "#fff8f0",
+    "in_progress": "#e8e4f0",
+    "on_hold": "#fdf3d3",
+    "active": "#e3f4f2",
+    "deprecated": "#ffe8d6",
+    "--": "#f1f5f9",
+}
+
+
+def action_plan_context(assessment, controls, lang="en", linked=None):
+    """Payload for the action plan, grouped by status and sorted by ETA.
+
+    `assessment` is whatever the controls hang off — a compliance assessment or a
+    risk assessment; the template renders whichever subject it is given, so one
+    document serves both. `linked` maps a control id to the requirement or
+    scenario labels shown in the last column.
+
+    Deliberately narrow: an A4 page cannot carry nine columns legibly, so this
+    keeps what an action plan is actually read for — what, who, by when, against
+    which item — and drops CSF function, effort, cost and expiry date.
+    """
+    linked = linked or {}
+    states = dict(AppliedControl.Status.choices)
+    buckets = {key: [] for key in _ACTION_PLAN_STATUS_FILLS}
+
+    for control in controls:
+        buckets.setdefault(control.status or "--", []).append(
+            {
+                "name": control.name or "-",
+                "description": control.description or "-",
+                "category": control.get_category_display() or "-",
+                "owner": ", ".join(str(actor) for actor in control.owner.all()) or "-",
+                "eta": _date_str(control.eta),
+                "linked": linked.get(control.id, []),
+            }
+        )
+
+    groups = [
+        {
+            "status_key": key,
+            "status": str(states.get(key, "")) if key != "--" else "",
+            "fill": _ACTION_PLAN_STATUS_FILLS.get(key, "#f1f5f9"),
+            "controls": rows,
+        }
+        for key, rows in buckets.items()
+        if rows
+    ]
+
+    perimeter = getattr(assessment, "perimeter", None)
+    framework = getattr(assessment, "framework", None)
+    return {
+        "subject": {
+            "domain": str(assessment.folder) if assessment.folder else "-",
+            "perimeter": str(perimeter.name) if perimeter else "-",
+            "name": assessment.name or "-",
+            "version": str(assessment.version or "-"),
+            "framework": str(framework) if framework else "",
+        },
+        "id": str(assessment.id),
+        "date": now().strftime("%d/%m/%Y"),
+        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        "groups": groups,
+        "total": sum(len(g["controls"]) for g in groups),
+    }
+
+
+def gen_audit_context(id, tree, lang, assessments=None, charts=True):
     def count_category_results(data):
         def recursive_result_count(node_data):
             # Initialize result counts for this node
@@ -657,13 +726,15 @@ def gen_audit_context(id, tree, lang, assessments=None):
     ]
 
     custom_colors = ["#2196F3"]
-    spider_chart_buffer = plot_spider_chart(
-        spider_data,
-        colors=custom_colors,
+    # Charts are ~99% of this function's cost (matplotlib at dpi=300); a caller
+    # that drops them — the countersigned export does — should not pay for them.
+    spider_chart_buffer = (
+        plot_spider_chart(spider_data, colors=custom_colors) if charts else None
     )
-
-    category_radar_buffer = plot_category_radar(
-        category_scores, max_score=max_score, colors=custom_colors
+    category_radar_buffer = (
+        plot_category_radar(category_scores, max_score=max_score, colors=custom_colors)
+        if charts
+        else None
     )
     # `assessments` lets a caller pass a row-level-scoped set (see
     # `scoped_requirement_assessments`); without it every assessment is included.
@@ -762,15 +833,19 @@ def gen_audit_context(id, tree, lang, assessments=None):
         "#F4D06F",
         "#BFDBFE",
     ]
-    hbar_buffer = plot_horizontal_bar(ac_chart_data, colors=custom_colors)
-
-    completion_bar_buffer = plot_completion_bar(spider_data, colors=custom_colors)
-
-    donut_buffer = plot_donut(donut_data)
+    hbar_buffer = (
+        plot_horizontal_bar(ac_chart_data, colors=custom_colors) if charts else None
+    )
+    completion_bar_buffer = (
+        plot_completion_bar(spider_data, colors=custom_colors) if charts else None
+    )
+    donut_buffer = plot_donut(donut_data) if charts else None
     IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
     context = {
         "audit": _build_safe_audit_context(audit),
         "date": now().strftime("%d/%m/%Y"),
+        # Traceability on the cover: which render, of which audit.
+        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
         "contributors": f"{authors}\n{reviewers}",
         "req": aggregated,
         "compliance_donut": donut_buffer,
@@ -848,6 +923,9 @@ _FIELD_DERIVED_KEYS = {
 # template is overridable, so anything a reader must not see is removed here.
 REPORT_PROFILES = {
     "full": {
+        # Each profile has its own self-contained template per locale, so
+        # customising one cannot affect the others.
+        "template": "audit_report",
         # The reader's own role still applies on top; this is the ceiling.
         "role": "auditor",
         "discloses": (),
@@ -865,6 +943,7 @@ REPORT_PROFILES = {
         ),
     },
     "attestation": {
+        "template": "attestation",
         "role": "respondent",
         # The questionnaire deliberately withholds the auditor's verdict while the
         # respondent is answering (THIRD_PARTY_VISIBILITY marks `result` auditor-only).

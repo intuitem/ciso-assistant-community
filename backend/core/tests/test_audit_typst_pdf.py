@@ -23,7 +23,7 @@ from core.tests.test_audit_word_export import (  # noqa: F401  (fixtures)
 )
 
 
-def _context(audit_obj):
+def _tree(audit_obj):
     tree = get_sorted_requirement_nodes(
         RequirementNode.objects.filter(framework=audit_obj.framework).all(),
         RequirementAssessment.objects.filter(compliance_assessment=audit_obj).all(),
@@ -35,14 +35,20 @@ def _context(audit_obj):
         else audit_obj.framework.min_score,
     )
     annotate_tree_with_aggregated_scores(tree, audit_obj)
-    return gen_audit_context(audit_obj.id, tree, "en")
+    return tree
+
+
+def _context(audit_obj):
+    return gen_audit_context(audit_obj.id, _tree(audit_obj), "en")
 
 
 def _render(audit_obj, role, profile="full", lang="en"):
     payload, images = audit_context_for_typst(
         _context(audit_obj), audit_obj, role, lang, profile
     )
-    template = localized_template("audit_report", lang)
+    from core.generators import REPORT_PROFILES
+
+    template = localized_template(REPORT_PROFILES[profile]["template"], lang)
     return render_pdf(template, payload, images=images), payload
 
 
@@ -327,12 +333,13 @@ def test_locale_templates_do_not_drift(audit):
         )
 
 
-def test_unknown_locale_falls_back_whole(tmp_path):
+def test_unknown_locale_falls_back_whole():
     """No half-translated documents: an unauthored locale falls back entirely."""
-    assert localized_template("audit_report", "de") == "audit_report_en.typ"
-    assert localized_template("audit_report", "fr") == "audit_report_fr.typ"
-    assert localized_template("audit_report", "fr-CA") == "audit_report_fr.typ"
-    assert localized_template("audit_report", None) == "audit_report_en.typ"
+    for stem in ("audit_report", "attestation"):
+        assert localized_template(stem, "de") == f"{stem}_en.typ"
+        assert localized_template(stem, "fr") == f"{stem}_fr.typ"
+        assert localized_template(stem, "fr-CA") == f"{stem}_fr.typ"
+        assert localized_template(stem, None) == f"{stem}_en.typ"
 
 
 @pytest.mark.django_db
@@ -347,3 +354,26 @@ def test_french_result_badges_are_singular(audit):
     text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
     assert "Conforme" in text
     assert "Conformes" not in text, "badge picked up the plural aggregate label"
+
+
+@pytest.mark.django_db
+def test_charts_are_not_rendered_when_the_profile_drops_them(audit):
+    """Matplotlib is ~99% of the context phase; a profile without charts must not
+    pay for images it then discards."""
+    from unittest.mock import patch
+
+    with patch("core.generators.plot_donut") as donut:
+        gen_audit_context(str(audit.id), _tree(audit), "en", charts=False)
+    donut.assert_not_called()
+
+    with patch("core.generators.plot_donut", wraps=None) as donut:
+        gen_audit_context(str(audit.id), _tree(audit), "en", charts=True)
+    assert donut.called
+
+
+@pytest.mark.django_db
+def test_cover_carries_generation_timestamp_and_document_id(audit):
+    pdf, payload = _render(audit, "auditor", profile="attestation")
+    assert payload["generated_at"], "traceability needs a full timestamp"
+    text = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    assert str(audit.id) in text, "the audit uuid identifies the render"
