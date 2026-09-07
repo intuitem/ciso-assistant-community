@@ -422,6 +422,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     auditee_mode = serializers.BooleanField(
         source="value.auditee_mode", required=False, default=True
     )
+    quick_forms = serializers.BooleanField(
+        source="value.quick_forms", required=False, default=False
+    )
     advanced_analytics = serializers.BooleanField(
         source="value.advanced_analytics", required=False, default=True
     )

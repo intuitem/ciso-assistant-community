@@ -47,6 +47,7 @@ from core.models import (
     Incident,
     Perimeter,
     RiskAcceptance,
+    QuickFormResponse,
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
@@ -698,6 +699,19 @@ class ReadEntry:
         return [field for field in BASE_READ_FIELDS if field in columns] + self.fields
 
 
+def _quick_form_answers(response):
+    """Answers of a quick form response keyed by question node_id, in the
+    legacy {urn: value} vocabulary (choice URNs for choice questions)."""
+    from core.utils import build_answers_dict, extract_node_id
+
+    by_urn = build_answers_dict(
+        response.answers.select_related("question").prefetch_related(
+            "selected_choices"
+        )
+    )
+    return {extract_node_id(urn) or urn: value for urn, value in by_urn.items()}
+
+
 def _requirements_breakdown(assessment):
     """Total assessable requirement assessments and their count per result —
     stable shape: every result key present, zeroes included."""
@@ -800,6 +814,15 @@ READABLE_MODELS: dict[str, ReadEntry] = {
     "risk_assessment": ReadEntry(
         model=RiskAssessment,
         fields=["description", "ref_id", "status", "eta", "due_date"],
+    ),
+    "quick_form_response": ReadEntry(
+        model=QuickFormResponse,
+        fields=["description", "status", "eta", "due_date", "quick_form"],
+        computed={
+            "computed_outcome": lambda r: r.computed_outcome,
+            "score": lambda r: r.score,
+            "answers": _quick_form_answers,
+        },
     ),
     "entity_assessment": ReadEntry(
         model=EntityAssessment,

@@ -19077,6 +19077,7 @@ class QuestionViewSet(BaseModelViewSet):
     search_fields = ["text", "annotation"]
     filterset_fields = [
         "requirement_node",
+        "page",
         "type",
         "urn",
     ]
@@ -19085,7 +19086,9 @@ class QuestionViewSet(BaseModelViewSet):
         qs = (
             super()
             .get_queryset()
-            .select_related("requirement_node", "requirement_node__framework", "folder")
+            .select_related(
+                "requirement_node", "requirement_node__framework", "page", "folder"
+            )
             .prefetch_related("choices")
         )
         # Allow filtering by framework
@@ -19116,6 +19119,7 @@ class AnswerViewSet(BaseModelViewSet):
     search_fields = []
     filterset_fields = [
         "requirement_assessment",
+        "response",
         "question",
     ]
 
@@ -19460,3 +19464,223 @@ def metrics_view(request):
         )
 
     return HttpResponse(generate_latest(), content_type=CONTENT_TYPE_LATEST)
+
+
+# ---------------------------------------------------------------------------
+# Quick forms
+# ---------------------------------------------------------------------------
+
+
+class QuickFormViewSet(BaseModelViewSet):
+    """Read-only: quick forms are library content, authored in the library
+    builder and published through the loader."""
+
+    model = QuickForm
+    http_method_names = ["get", "head", "options"]
+    filterset_fields = ["folder", "library"]
+    search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("folder", "library")
+
+    @action(detail=True, methods=["get"], name="Quick form pages")
+    def pages(self, request, pk):
+        quick_form = self.get_object()
+        pages = (
+            QuickFormPage.objects.filter(quick_form=quick_form)
+            .select_related("folder", "quick_form")
+            .prefetch_related("questions__choices")
+            .order_by("order")
+        )
+        return Response(QuickFormPageReadSerializer(pages, many=True).data)
+
+
+class QuickFormPageViewSet(BaseModelViewSet):
+    model = QuickFormPage
+    http_method_names = ["get", "head", "options"]
+    filterset_fields = ["quick_form"]
+    search_fields = ["name", "description"]
+    ordering = ["order"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "quick_form")
+            .prefetch_related("questions__choices")
+        )
+
+
+class QuickFormResponseViewSet(BaseModelViewSet):
+    """Filled instances of a quick form. Regular RBAC only: respondents are
+    the notification audience, not a grant."""
+
+    model = QuickFormResponse
+    filterset_fields = ["folder", "quick_form", "status", "respondents", "reviewers"]
+    search_fields = ["name", "description"]
+    permission_overrides = {
+        "content": "view_quickformresponse",
+        "set_status": "change_quickformresponse",
+        "start": "change_quickformresponse",
+        "status": "view_quickformresponse",
+    }
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related("folder", "quick_form")
+            .prefetch_related("respondents", "reviewers")
+        )
+        if self.request.query_params.get("mine") in ("true", "1"):
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(respondents__in=user_actors).distinct()
+        return qs
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(QuickFormResponse.Status.choices))
+
+    @action(detail=True, methods=["get"], name="Quick form response content")
+    def content(self, request, pk):
+        """Everything the fill view needs in one call: ordered pages with
+        translated questions, the answers dict, hidden pages, progress,
+        score and outcome."""
+        from core.cel_service import evaluate_quick_form
+        from core.utils import build_answers_dict
+
+        response = self.get_object()
+        evaluation = evaluate_quick_form(response, persist=False)
+        hidden = set(evaluation["hidden_pages"])
+        pages = []
+        for page in (
+            QuickFormPage.objects.filter(quick_form_id=response.quick_form_id)
+            .prefetch_related("questions__choices")
+            .order_by("order")
+        ):
+            pages.append(
+                {
+                    "id": str(page.id),
+                    "urn": page.urn,
+                    "ref_id": page.ref_id,
+                    "name": page.get_name_translated,
+                    "description": page.get_description_translated,
+                    "order": page.order,
+                    "hidden": page.urn in hidden,
+                    "questions": page.get_questions_translated() or {},
+                }
+            )
+        answers = build_answers_dict(
+            response.answers.select_related("question").prefetch_related(
+                "selected_choices"
+            )
+        )
+        return Response(
+            {
+                "id": str(response.id),
+                "name": response.name,
+                "status": response.status,
+                "quick_form": {
+                    "id": str(response.quick_form_id),
+                    "name": response.quick_form.get_name_translated,
+                    "description": response.quick_form.get_description_translated,
+                    "outcomes_definition": response.quick_form.outcomes_definition,
+                    "scores_definition": response.quick_form.scores_definition,
+                },
+                "pages": pages,
+                "answers": answers,
+                "hidden_pages": evaluation["hidden_pages"],
+                "progress": evaluation["progress"],
+                "score": evaluation["score"],
+                "computed_outcome": evaluation["computed_outcome"],
+                "can_edit_answers": response.status
+                == QuickFormResponse.Status.IN_PROGRESS,
+                "started_at": response.started_at,
+                "submitted_at": response.submitted_at,
+                "observation": response.observation,
+            }
+        )
+
+    @action(detail=True, methods=["post"], name="Start quick form response")
+    def start(self, request, pk):
+        """Mark the response as started and notify the respondents. Idempotent
+        on the timestamp; notifications are sent on every call."""
+        from core.tasks import send_quick_form_started_notification
+
+        response = self.get_object()
+        if response.status != QuickFormResponse.Status.IN_PROGRESS:
+            return Response(
+                {"error": "responseNotInProgress"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if response.started_at is None:
+            response.started_at = timezone.now()
+            response.save(update_fields=["started_at"])
+        transaction.on_commit(
+            lambda pk=response.pk: send_quick_form_started_notification(pk)
+        )
+        return Response(QuickFormResponseReadSerializer(response).data)
+
+    # (from, to) -> config. check_completion: every visible required question
+    # must be answered. observation: "clear" drops it, "optional" keeps it.
+    TRANSITIONS = {
+        ("in_progress", "submitted"): {"check_completion": True, "observation": "clear"},
+        ("submitted", "closed"): {"observation": "optional"},
+        ("submitted", "in_progress"): {"observation": "optional"},
+    }
+
+    @action(detail=True, methods=["post"], url_path="set-status")
+    def set_status(self, request, pk):
+        from core.cel_service import evaluate_quick_form
+        from core.tasks import (
+            send_quick_form_reopened_notification,
+            send_quick_form_submitted_notification,
+        )
+
+        response = self.get_object()
+        new_status = request.data.get("status")
+        if new_status not in QuickFormResponse.Status.values:
+            return Response(
+                {"error": "invalidStatus"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        config = self.TRANSITIONS.get((response.status, new_status))
+        if config is None:
+            return Response(
+                {
+                    "error": "invalidTransition",
+                    "from": response.status,
+                    "to": new_status,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if config.get("check_completion"):
+            evaluation = evaluate_quick_form(response, persist=True)
+            if not evaluation["progress"]["complete"]:
+                return Response(
+                    {"error": "responseIncomplete", "progress": evaluation["progress"]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        observation = request.data.get("observation")
+        if config.get("observation") == "clear":
+            response.observation = None
+        elif observation is not None:
+            response.observation = observation
+
+        response.status = new_status
+        update_fields = ["status", "observation", "updated_at"]
+        if new_status == QuickFormResponse.Status.SUBMITTED:
+            response.submitted_at = timezone.now()
+            update_fields.append("submitted_at")
+        response.save(update_fields=update_fields)
+
+        if new_status == QuickFormResponse.Status.SUBMITTED:
+            transaction.on_commit(
+                lambda pk=response.pk: send_quick_form_submitted_notification(pk)
+            )
+        elif (
+            new_status == QuickFormResponse.Status.IN_PROGRESS
+            and response.started_at is not None
+        ):
+            transaction.on_commit(
+                lambda pk=response.pk: send_quick_form_reopened_notification(pk)
+            )
+        return Response(QuickFormResponseReadSerializer(response).data)

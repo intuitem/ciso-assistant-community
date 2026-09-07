@@ -125,16 +125,93 @@ def match_urn(urn_string):
         return None
 
 
-def _sync_questions_from_data(requirement_node, questions_data):
-    """Sync Question and QuestionChoice objects for a RequirementNode.
+def _translate_questions(owner) -> dict | None:
+    """Questions of a RequirementNode or QuickFormPage as the {urn: definition}
+    dict the frontend renderer consumes, translated to the active language."""
+    # Reuse the caller's prefetch when it covers choices too: calling
+    # prefetch_related() on the related manager discards
+    # _prefetched_objects_cache and re-queries once per owner.
+    prefetched = (getattr(owner, "_prefetched_objects_cache", None) or {}).get(
+        "questions"
+    )
+    if prefetched is not None and all(
+        "choices" in (getattr(q, "_prefetched_objects_cache", None) or {})
+        for q in prefetched
+    ):
+        questions_qs = prefetched
+    else:
+        questions_qs = owner.questions.prefetch_related("choices").all()
+    if not questions_qs:
+        return None
 
-    For new nodes this behaves like a pure create. For existing nodes it
+    current_lang = get_language()
+
+    def _translate_choice(choice):
+        tr = (choice.translations or {}).get(current_lang, {})
+        choice_data = {
+            "urn": choice.urn,
+            "value": tr.get("value", choice.value or ""),
+        }
+        description = tr.get("description", choice.description)
+        if description:
+            choice_data["description"] = description
+        if choice.add_score is not None:
+            choice_data["add_score"] = choice.add_score
+        if choice.compute_result is not None:
+            resolved = resolve_compute_result(choice.compute_result)
+            if resolved is not None:
+                choice_data["compute_result"] = resolved
+        if choice.color:
+            choice_data["color"] = choice.color
+        if choice.select_implementation_groups:
+            choice_data["select_implementation_groups"] = (
+                choice.select_implementation_groups
+            )
+        if choice.annotation:
+            choice_data["annotation"] = choice.annotation
+        return choice_data
+
+    result = {}
+    for question in questions_qs:
+        q_tr = (question.translations or {}).get(current_lang, {})
+        q_data = {
+            "type": question.type,
+            "text": q_tr.get("text", question.text or ""),
+            "weight": question.weight,
+        }
+        if not question.required:
+            q_data["required"] = False
+        if question.annotation:
+            q_data["annotation"] = question.annotation
+        if question.config is not None:
+            q_data["config"] = question.config
+        choices = [_translate_choice(c) for c in question.choices.all()]
+        if choices:
+            q_data["choices"] = choices
+        if question.depends_on:
+            q_data["depends_on"] = question.depends_on
+        result[question.urn] = q_data
+
+    return result if result else None
+
+
+def _sync_questions_from_data(owner, questions_data):
+    """Sync Question and QuestionChoice objects for a question owner.
+
+    The owner is either a RequirementNode (compliance questionnaire) or a
+    QuickFormPage (quick form): both expose a `questions` reverse relation
+    and a folder, and Question carries exactly one of the two parent FKs.
+
+    For new owners this behaves like a pure create. For existing owners it
     upserts questions by URN and choices by ref_id, then prunes stale rows.
     """
-    from core.models import Question, QuestionChoice
+    from core.models import Question, QuestionChoice, QuickFormPage
+
+    owner_field = "page" if isinstance(owner, QuickFormPage) else "requirement_node"
+    requirement_node = owner
 
     existing_questions = {
-        q.urn: q for q in requirement_node.questions.prefetch_related("choices").all()
+        q.urn: q for q in owner.questions.prefetch_related("choices").all()
     }
     incoming_urns = set()
 
@@ -155,6 +232,7 @@ def _sync_questions_from_data(requirement_node, questions_data):
             "depends_on": q_data.get("depends_on"),
             "order": order,
             "weight": q_data.get("weight", 1),
+            "required": q_data.get("required", True) is not False,
             "translations": q_data.get("translations"),
         }
 
@@ -165,10 +243,10 @@ def _sync_questions_from_data(requirement_node, questions_data):
             question.save()
         else:
             question = Question.objects.create(
-                requirement_node=requirement_node,
                 urn=q_urn,
                 folder=requirement_node.folder,
                 is_published=True,
+                **{owner_field: owner},
                 **question_fields,
             )
 
@@ -255,9 +333,7 @@ def _sync_questions_from_data(requirement_node, questions_data):
     # Delete questions whose URNs are no longer in the incoming data
     stale_urns = set(existing_questions.keys()) - incoming_urns
     if stale_urns:
-        Question.objects.filter(
-            requirement_node=requirement_node, urn__in=stale_urns
-        ).delete()
+        Question.objects.filter(**{owner_field: owner}, urn__in=stale_urns).delete()
 
 
 ########################### Referential objects #########################
@@ -902,6 +978,10 @@ class LibraryUpdater:
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
         self.metric_definitions = new_library_content.get("metric_definitions", [])
+
+        self.new_quick_forms = new_library_content.get("quick_forms")
+        if isinstance(self.new_quick_forms, dict):
+            self.new_quick_forms = [self.new_quick_forms]
 
     def update_dependencies(self) -> Union[str, None]:
         for dependency_urn in self.dependencies:
@@ -1690,6 +1770,103 @@ class LibraryUpdater:
                     if answers_to_create:
                         Answer.objects.bulk_create(answers_to_create, batch_size=500)
 
+    def update_quick_forms(self):
+        """Upsert quick forms, pages and questions by URN, prune what the new
+        version dropped, then reconcile every live response: seed answers for
+        new questions, drop selections that no longer exist, re-evaluate."""
+        for new_quick_form in self.new_quick_forms:
+            with transaction.atomic():
+                pages = new_quick_form.get("pages") or []
+                urn = new_quick_form["urn"].lower()
+                form_fields = {
+                    "urn": urn,
+                    "ref_id": new_quick_form.get("ref_id"),
+                    "name": new_quick_form.get("name"),
+                    "description": new_quick_form.get("description"),
+                    "annotation": new_quick_form.get("annotation"),
+                    "translations": new_quick_form.get("translations", {}),
+                    "outcomes_definition": new_quick_form.get("outcomes_definition")
+                    or [],
+                    "scores_definition": new_quick_form.get("scores_definition"),
+                    "urn_namespace": urn.split(":")[1]
+                    if urn.startswith("urn:")
+                    else "custom",
+                }
+                quick_form, _ = QuickForm.objects.update_or_create(
+                    urn=urn,
+                    defaults=form_fields,
+                    create_defaults={
+                        **self.referential_object_dict,
+                        **self.i18n_object_dict,
+                        **form_fields,
+                        "library": self.old_library,
+                    },
+                )
+
+                incoming_page_urns = set()
+                for order, page in enumerate(pages):
+                    page_urn = page["urn"].lower()
+                    incoming_page_urns.add(page_urn)
+                    page_fields = {
+                        "ref_id": page.get("ref_id"),
+                        "name": page.get("name"),
+                        "description": page.get("description"),
+                        "annotation": page.get("annotation"),
+                        "translations": page.get("translations", {}),
+                        "order": order,
+                        "visibility_expression": page.get("visibility_expression"),
+                    }
+                    page_object, _ = QuickFormPage.objects.update_or_create(
+                        quick_form=quick_form,
+                        urn=page_urn,
+                        defaults=page_fields,
+                        create_defaults={
+                            **self.referential_object_dict,
+                            **self.i18n_object_dict,
+                            **page_fields,
+                            "folder": Folder.get_root_folder(),
+                        },
+                    )
+                    questions = page.get("questions")
+                    _sync_questions_from_data(
+                        page_object, questions if isinstance(questions, dict) else {}
+                    )
+                # Dropped pages cascade to their questions and answers.
+                quick_form.pages.exclude(urn__in=incoming_page_urns).delete()
+
+                questions = list(
+                    Question.objects.filter(page__quick_form=quick_form).prefetch_related(
+                        "choices"
+                    )
+                )
+                for response in QuickFormResponse.objects.filter(quick_form=quick_form):
+                    existing_answers = {
+                        a.question_id: a
+                        for a in response.answers.prefetch_related("selected_choices")
+                    }
+                    for question in questions:
+                        answer = existing_answers.get(question.id)
+                        if answer is None:
+                            Answer.objects.create(
+                                response=response,
+                                question=question,
+                                folder=response.folder,
+                            )
+                            continue
+                        if question.type in (
+                            Question.Type.UNIQUE_CHOICE,
+                            Question.Type.MULTIPLE_CHOICE,
+                        ):
+                            valid_pks = {c.id for c in question.choices.all()}
+                            invalid = [
+                                c
+                                for c in answer.selected_choices.all()
+                                if c.id not in valid_pks
+                            ]
+                            if invalid:
+                                answer.selected_choices.remove(*invalid)
+                    response.recompute()
+
     def update_risk_matrices(self):
         for matrix in self.new_matrices:
             json_definition_keys = {
@@ -1851,6 +2028,9 @@ class LibraryUpdater:
         if self.new_matrices is not None:
             self.update_risk_matrices()
 
+        if self.new_quick_forms is not None:
+            self.update_quick_forms()
+
         if self.new_requirement_mapping_sets is not None:
             self.update_requirement_mapping_sets()
 
@@ -1940,6 +2120,9 @@ class LoadedLibrary(LibraryMixin):
             .distinct()
             .count()
             + BusinessImpactAnalysis.objects.filter(risk_matrix__library=self)
+            .distinct()
+            .count()
+            + QuickFormResponse.objects.filter(quick_form__library=self)
             .distinct()
             .count()
         )
@@ -3136,69 +3319,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_questions_translated(self) -> dict | None:
-        # Reuse the caller's prefetch when it covers choices too: calling
-        # prefetch_related() on the related manager discards
-        # _prefetched_objects_cache and re-queries once per node.
-        prefetched = (getattr(self, "_prefetched_objects_cache", None) or {}).get(
-            "questions"
-        )
-        if prefetched is not None and all(
-            "choices" in (getattr(q, "_prefetched_objects_cache", None) or {})
-            for q in prefetched
-        ):
-            questions_qs = prefetched
-        else:
-            questions_qs = self.questions.prefetch_related("choices").all()
-        if not questions_qs:
-            return None
-
-        current_lang = get_language()
-
-        def _translate_choice(choice):
-            tr = (choice.translations or {}).get(current_lang, {})
-            choice_data = {
-                "urn": choice.urn,
-                "value": tr.get("value", choice.value or ""),
-            }
-            description = tr.get("description", choice.description)
-            if description:
-                choice_data["description"] = description
-            if choice.add_score is not None:
-                choice_data["add_score"] = choice.add_score
-            if choice.compute_result is not None:
-                resolved = resolve_compute_result(choice.compute_result)
-                if resolved is not None:
-                    choice_data["compute_result"] = resolved
-            if choice.color:
-                choice_data["color"] = choice.color
-            if choice.select_implementation_groups:
-                choice_data["select_implementation_groups"] = (
-                    choice.select_implementation_groups
-                )
-            if choice.annotation:
-                choice_data["annotation"] = choice.annotation
-            return choice_data
-
-        result = {}
-        for question in questions_qs:
-            q_tr = (question.translations or {}).get(current_lang, {})
-            q_data = {
-                "type": question.type,
-                "text": q_tr.get("text", question.text or ""),
-                "weight": question.weight,
-            }
-            if question.annotation:
-                q_data["annotation"] = question.annotation
-            if question.config is not None:
-                q_data["config"] = question.config
-            choices = [_translate_choice(c) for c in question.choices.all()]
-            if choices:
-                q_data["choices"] = choices
-            if question.depends_on:
-                q_data["depends_on"] = question.depends_on
-            result[question.urn] = q_data
-
-        return result if result else None
+        return _translate_questions(self)
 
     def clean(self):
         """Validate the optional per-requirement scale override.
@@ -3331,6 +3452,93 @@ class RequirementNodeAttachment(AbstractBaseModel, FolderMixin):
         return f"Attachment for {self.requirement_node}"
 
 
+class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
+    """A standalone form: ordered pages of questions, no requirements, no
+    audit. Library-backed like Framework (authored in the library builder,
+    published through the library importer)."""
+
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="quick_forms",
+        verbose_name=_("Library"),
+    )
+    urn_namespace = models.CharField(
+        max_length=50,
+        default="custom",
+        verbose_name=_("URN namespace"),
+    )
+    outcomes_definition = models.JSONField(
+        default=list, blank=True, verbose_name=_("Outcomes definition")
+    )
+    scores_definition = models.JSONField(
+        blank=True, null=True, verbose_name=_("Scores definition")
+    )
+
+    fields_to_check = ["urn"]
+
+    class Meta:
+        verbose_name = _("Quick form")
+        verbose_name_plural = _("Quick forms")
+
+    def is_deletable(self) -> bool:
+        return not self.responses.exists()
+
+    @property
+    def score_bounds(self) -> tuple[int, int]:
+        definition = self.scores_definition or {}
+        min_score = definition.get("min", 0)
+        max_score = definition.get("max", 100)
+        try:
+            min_score, max_score = int(min_score), int(max_score)
+        except (TypeError, ValueError):
+            return 0, 100
+        return (min_score, max_score) if min_score < max_score else (0, 100)
+
+    @property
+    def score_aggregation(self) -> str:
+        aggregation = (self.scores_definition or {}).get("aggregation", "sum")
+        return aggregation if aggregation in ("sum", "mean") else "sum"
+
+    def __str__(self) -> str:
+        return f"{self.provider} - {self.get_name_translated}"
+
+
+class QuickFormPage(ReferentialObjectMixin, I18nObjectMixin):
+    """A flat, ordered grouping of questions inside a QuickForm. The
+    definition-side mirror of RequirementNode, without a tree and without
+    per-page state on the response side."""
+
+    quick_form = models.ForeignKey(
+        QuickForm,
+        on_delete=models.CASCADE,
+        related_name="pages",
+        verbose_name=_("Quick form"),
+    )
+    order = models.IntegerField(default=0, verbose_name=_("Order"))
+    visibility_expression = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Visibility expression"),
+        help_text=_("CEL expression; the page is hidden when it evaluates to false"),
+    )
+
+    fields_to_check = ["urn"]
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = _("Quick form page")
+        verbose_name_plural = _("Quick form pages")
+
+    def get_questions_translated(self) -> dict | None:
+        return _translate_questions(self)
+
+    def __str__(self) -> str:
+        return f"{self.quick_form}: {self.get_name_translated}"
+
+
 class Question(AbstractBaseModel, FolderMixin):
     class Type(models.TextChoices):
         TEXT = "text", _("Text")
@@ -3340,12 +3548,25 @@ class Question(AbstractBaseModel, FolderMixin):
         MULTIPLE_CHOICE = "multiple_choice", _("Multiple choice")
         DATE = "date", _("Date")
 
+    # Exactly one parent: a requirement node (compliance questionnaire) or a
+    # quick form page (quick form). Enforced by the CheckConstraint below.
     requirement_node = models.ForeignKey(
         RequirementNode,
         on_delete=models.CASCADE,
         related_name="questions",
         verbose_name=_("Requirement node"),
+        null=True,
+        blank=True,
     )
+    page = models.ForeignKey(
+        QuickFormPage,
+        on_delete=models.CASCADE,
+        related_name="questions",
+        verbose_name=_("Quick form page"),
+        null=True,
+        blank=True,
+    )
+    required = models.BooleanField(default=True, verbose_name=_("Required"))
     urn = models.CharField(max_length=255, unique=True, verbose_name=_("URN"))
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
@@ -3370,12 +3591,26 @@ class Question(AbstractBaseModel, FolderMixin):
         ordering = ["order"]
         verbose_name = _("Question")
         verbose_name_plural = _("Questions")
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(requirement_node__isnull=False, page__isnull=True)
+                    | Q(requirement_node__isnull=True, page__isnull=False)
+                ),
+                name="question_exactly_one_parent",
+            ),
+        ]
 
     @property
     def node_id(self) -> str | None:
         from core.utils import extract_node_id
 
         return extract_node_id(self.urn)
+
+    @property
+    def owner(self):
+        """The RequirementNode or QuickFormPage carrying this question."""
+        return self.page if self.page_id else self.requirement_node
 
     def __str__(self) -> str:
         return f"{self.ref_id or self.urn}: {self.text or ''}"
@@ -9876,12 +10111,102 @@ class RequirementAssignmentEvent(AbstractBaseModel, FolderMixin):
         return f"{self.assignment} - {self.event_type} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
+class QuickFormResponse(
+    NameDescriptionMixin, ETADueDateMixin, FolderMixin, AbstractBaseModel
+):
+    """One filled instance of a QuickForm. Owns its Answer rows directly
+    (there is no per-page state). Regular RBAC applies: respondents are an
+    informational list plus the notification audience, never a grant."""
+
+    class Status(models.TextChoices):
+        IN_PROGRESS = "in_progress", _("In progress")
+        SUBMITTED = "submitted", _("Submitted")
+        CLOSED = "closed", _("Closed")
+
+    quick_form = models.ForeignKey(
+        QuickForm,
+        on_delete=models.PROTECT,
+        related_name="responses",
+        verbose_name=_("Quick form"),
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.IN_PROGRESS,
+        verbose_name=_("Status"),
+    )
+    respondents = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        related_name="quick_form_responses_as_respondent",
+        verbose_name=_("Respondents"),
+    )
+    reviewers = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        related_name="quick_form_responses_as_reviewer",
+        verbose_name=_("Reviewers"),
+    )
+    computed_outcome = models.JSONField(
+        blank=True, null=True, verbose_name=_("Computed outcome")
+    )
+    score = models.IntegerField(blank=True, null=True, verbose_name=_("Score"))
+    started_at = models.DateTimeField(
+        blank=True, null=True, verbose_name=_("Started at")
+    )
+    submitted_at = models.DateTimeField(
+        blank=True, null=True, verbose_name=_("Submitted at")
+    )
+    observation = models.TextField(blank=True, null=True, verbose_name=_("Observation"))
+
+    fields_to_check = ["name", "quick_form"]
+
+    class Meta:
+        verbose_name = _("Quick form response")
+        verbose_name_plural = _("Quick form responses")
+
+    def seed_answers(self) -> None:
+        """One empty Answer per question of the form, like audits do at
+        creation, so progress counting and the renderer see every question."""
+        existing = set(self.answers.values_list("question_id", flat=True))
+        answers = [
+            Answer(response=self, question=question, folder_id=self.folder_id)
+            for question in Question.objects.filter(page__quick_form=self.quick_form)
+            if question.id not in existing
+        ]
+        if answers:
+            Answer.objects.bulk_create(answers, batch_size=1000)
+
+    def recompute(self) -> None:
+        """Re-evaluate page visibility, completion, score and outcomes from the
+        current answers. Called after every answer write (deferred once per
+        transaction) and after a library update touched the form."""
+        from core.cel_service import evaluate_quick_form
+
+        evaluate_quick_form(self)
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Answer(AbstractBaseModel, FolderMixin):
+    # Exactly one parent: a requirement assessment (compliance questionnaire)
+    # or a quick form response (quick form). Enforced by the CheckConstraint.
     requirement_assessment = models.ForeignKey(
         RequirementAssessment,
         on_delete=models.CASCADE,
         related_name="answers",
         verbose_name=_("Requirement assessment"),
+        null=True,
+        blank=True,
+    )
+    response = models.ForeignKey(
+        QuickFormResponse,
+        on_delete=models.CASCADE,
+        related_name="answers",
+        verbose_name=_("Quick form response"),
+        null=True,
+        blank=True,
     )
     question = models.ForeignKey(
         Question,
@@ -9898,9 +10223,24 @@ class Answer(AbstractBaseModel, FolderMixin):
     )
 
     class Meta:
+        # unique_together is NULL-blind, so the response side gets its own
+        # constraint below.
         unique_together = [("requirement_assessment", "question")]
         verbose_name = _("Answer")
         verbose_name_plural = _("Answers")
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(requirement_assessment__isnull=False, response__isnull=True)
+                    | Q(requirement_assessment__isnull=True, response__isnull=False)
+                ),
+                name="answer_exactly_one_parent",
+            ),
+            models.UniqueConstraint(
+                fields=["response", "question"],
+                name="answer_unique_per_response_question",
+            ),
+        ]
 
     @staticmethod
     def empty_value_q() -> Q:
@@ -9919,7 +10259,12 @@ class Answer(AbstractBaseModel, FolderMixin):
         )
 
     def __str__(self) -> str:
-        return f"Answer to {self.question} for {self.requirement_assessment}"
+        return f"Answer to {self.question} for {self.owner}"
+
+    @property
+    def owner(self):
+        """The RequirementAssessment or QuickFormResponse owning this answer."""
+        return self.response if self.response_id else self.requirement_assessment
 
     def get_choice_urns(self):
         """Return list of selected choice URNs for choice-type questions."""
@@ -9940,8 +10285,24 @@ class Answer(AbstractBaseModel, FolderMixin):
 
         _defer_once("_pending_cel_evaluations", ca.pk, _run)
 
+    def _defer_response_recompute(self):
+        response = self.response
+
+        def _run():
+            response.recompute()
+
+        _defer_once("_pending_quick_form_recomputes", response.pk, _run)
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
+
+        if self.response_id:
+            # Quick form branch: no audit, no implementation groups.
+            QuickFormResponse.objects.filter(pk=self.response_id).update(
+                updated_at=timezone.now()
+            )
+            self._defer_response_recompute()
+            return
 
         # Update parent compliance assessment timestamp
         ComplianceAssessment.objects.filter(
@@ -11257,6 +11618,11 @@ auditlog.register(
     RequirementAssignment,
     exclude_fields=common_exclude,
     m2m_fields={"actor", "requirement_assessments"},
+)
+auditlog.register(
+    QuickFormResponse,
+    exclude_fields=common_exclude,
+    m2m_fields={"respondents", "reviewers"},
 )
 auditlog.register(
     Preset,

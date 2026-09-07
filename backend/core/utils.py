@@ -1128,6 +1128,68 @@ def _is_question_visible(question, answers_by_urn, questions_by_urn=None, visite
     return False
 
 
+def apply_answers_dict(owner_field, owner, questions_by_urn, answers_data):
+    """Write a legacy `{question_urn: value}` dict onto the Answer rows of
+    *owner*, a RequirementAssessment (owner_field="requirement_assessment")
+    or a QuickFormResponse (owner_field="response").
+
+    Choice questions receive URNs (one string for unique_choice, a list for
+    multiple_choice) resolved into `selected_choices`; every other type
+    stores the raw value. Unknown question URNs and unknown choice URNs are
+    logged and skipped rather than rejected, matching the historical
+    requirement assessment write path.
+    """
+    from core.models import Answer, Question
+
+    for q_urn, answer_value in answers_data.items():
+        question = questions_by_urn.get(q_urn)
+        if not question:
+            logger.warning(
+                "Question URN not found, skipping answer",
+                q_urn=q_urn,
+                available_urns=list(questions_by_urn.keys()),
+            )
+            continue
+
+        answer, _created = Answer.objects.update_or_create(
+            **{owner_field: owner},
+            question=question,
+            defaults={"folder": owner.folder},
+        )
+
+        if question.type == Question.Type.UNIQUE_CHOICE:
+            if answer_value:
+                choice = question.choices.filter(urn=answer_value).first()
+                answer.selected_choices.set([choice] if choice else [])
+                if not choice:
+                    logger.warning(
+                        "Choice not found for answer", q_urn=q_urn, value=answer_value
+                    )
+            else:
+                answer.selected_choices.clear()
+            answer.value = None
+            answer.save(update_fields=["value"])
+        elif question.type == Question.Type.MULTIPLE_CHOICE:
+            if isinstance(answer_value, list) and answer_value:
+                choices = question.choices.filter(urn__in=answer_value)
+                found_identifiers = set(choices.values_list("urn", flat=True))
+                missing = set(answer_value) - found_identifiers
+                answer.selected_choices.set(choices)
+                if missing:
+                    logger.warning(
+                        "Some choices not found for answer",
+                        q_urn=q_urn,
+                        missing_values=list(missing),
+                    )
+            else:
+                answer.selected_choices.clear()
+            answer.value = None
+            answer.save(update_fields=["value"])
+        else:
+            answer.value = answer_value
+            answer.save(update_fields=["value"])
+
+
 def build_answers_dict(answers_qs):
     """Build {question.urn: answer_value} dict from Answer queryset for backward compat.
 
