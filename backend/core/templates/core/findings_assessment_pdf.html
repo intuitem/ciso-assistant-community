@@ -16,14 +16,11 @@
                 <p><strong>Domain:</strong> {{ findings_assessment.folder.name|default:"N/A" }}</p>
             </div>
             <div class="w-1/2">
-                {% if findings_assessment.owner.exists %}
-                <p><strong>Owners:</strong> {% for owner in findings_assessment.owner.all %}{{ owner.email }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-                {% endif %}
                 {% if findings_assessment.authors.exists %}
-                <p><strong>Authors:</strong> {% for author in findings_assessment.authors.all %}{{ author.email }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                <p><strong>Authors:</strong> {% for author in findings_assessment.authors.all %}{{ author }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
                 {% endif %}
                 {% if findings_assessment.reviewers.exists %}
-                <p><strong>Reviewers:</strong> {% for reviewer in findings_assessment.reviewers.all %}{{ reviewer.email }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                <p><strong>Reviewers:</strong> {% for reviewer in findings_assessment.reviewers.all %}{{ reviewer }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
                 {% endif %}
                 {% if findings_assessment.observation %}
                 <p><strong>Observation:</strong> {{ findings_assessment.observation|linebreaksbr }}</p>
@@ -140,7 +137,7 @@
                     <td class="border p-2 text-sm">{{ finding.name }}</td>
                     <td class="border p-2 text-sm capitalize">{{ finding.get_severity_display }}</td>
                     <td class="border p-2 text-sm capitalize">{{ finding.get_status_display }}</td>
-                    <td class="border p-2 text-sm">{{ finding.observation|default:"N/A"|truncatechars:100|linebreaksbr }}</td>
+                    <td class="border p-2 text-sm">{{ finding.observation|default:"N/A"|linebreaksbr }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -185,7 +182,7 @@
                     <p class="text-sm font-medium">Owner(s):</p>
                     <p class="text-sm text-gray-600">
                         {% if finding.owner.exists %}
-                            {% for owner in finding.owner.all %}{{ owner.email }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                            {% for owner in finding.owner.all %}{{ owner }}{% if not forloop.last %}, {% endif %}{% endfor %}
                         {% else %}
                             N/A
                         {% endif %}
