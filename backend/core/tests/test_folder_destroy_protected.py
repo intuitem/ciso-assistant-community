@@ -17,7 +17,7 @@ from ebios_rm.models import (
     RoTo,
     StrategicScenario,
 )
-from ebios_rm.tests.fixtures import *
+from ebios_rm.tests.fixtures import ebios_rm_matrix_fixture
 from iam.models import Folder, User, UserGroup
 from knox.models import AuthToken
 from rest_framework.test import APIClient
