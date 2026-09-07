@@ -939,6 +939,8 @@
 										onclick={() =>
 											(tocFilterResult = tocFilterResult === opt.value ? null : opt.value)}
 										title={opt.label}
+										aria-label="{opt.label}: {opt.count}"
+										aria-pressed={tocFilterResult === opt.value}
 									>
 										<span
 											class="inline-block w-1.5 h-1.5 rounded-full"

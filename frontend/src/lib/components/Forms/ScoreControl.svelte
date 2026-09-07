@@ -46,7 +46,10 @@
 		internal = value ?? min;
 	});
 
-	const definition = $derived((scoresDefinition ?? []).find((d) => d.score === internal));
+	// No definition for an unset score, even if the fallback `min` matches one
+	const definition = $derived(
+		value != null ? (scoresDefinition ?? []).find((d) => d.score === internal) : undefined
+	);
 	const definitionText = $derived(
 		isDoc ? (definition?.description_doc ?? definition?.description) : definition?.description
 	);
