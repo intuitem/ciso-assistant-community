@@ -205,7 +205,8 @@
 		}
 	}
 
-	// Patch a single field; refresh only when the backend recomputes derived fields
+	// Patch a single field; refresh only when the backend recomputes derived fields.
+	// Returns false when the backend rejected the write.
 	async function update(
 		requirementAssessment: Record<string, any>,
 		field: string,
@@ -219,7 +220,7 @@
 		// Reload to drop the optimistic value the backend rejected
 		if (!ok) {
 			if (invalidateAllBool) await invalidateAll();
-			return;
+			return false;
 		}
 
 		if (refresh && invalidateAllBool) {
@@ -229,6 +230,7 @@
 		if (requirementAssessment.updateForm && requirementAssessment.updateForm.data) {
 			requirementAssessment.updateForm.data[field] = value;
 		}
+		return true;
 	}
 
 	// Auditor view toggle: assessment (answers read-only) vs questions-only
@@ -1163,13 +1165,16 @@
 																	disabled={isReadOnly}
 																	size="sm"
 																	ariaLabel={m.result()}
-																	onChange={(newValue) => {
+																	onChange={async (newValue) => {
 																		const newResult =
 																			requirementAssessment.result === newValue
 																				? 'not_assessed'
 																				: newValue;
 																		requirementAssessment.result = newResult;
-																		update(requirementAssessment, 'result');
+																		const ok = await update(requirementAssessment, 'result');
+																		// N/A rows are excluded from (or anchored in) the global score
+																		if (ok && complianceAssessment.scoring_enabled)
+																			await refreshScores();
 																	}}
 																/>
 															{/if}
