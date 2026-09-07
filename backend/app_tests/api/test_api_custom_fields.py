@@ -288,6 +288,49 @@ class TestCustomFieldsAPI:
         filtered = authenticated_client.get(PROJECTS_URL, {"cf__tier": "gold"})
         assert project_id not in {p["id"] for p in filtered.json()["results"]}
 
+    def test_folder_move_enforces_destination_required_fields(
+        self, authenticated_client
+    ):
+        root = Folder.get_root_folder()
+        domain_a = Folder.objects.create(name="Domain A", parent_folder=root)
+        domain_b = Folder.objects.create(name="Domain B", parent_folder=root)
+        resp = authenticated_client.post(
+            CF_URL,
+            {
+                "model": "pmbok.project",
+                "key": "level",
+                "label": "Level",
+                "field_type": "text",
+                "required": True,
+                "folder": str(domain_b.id),
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_201_CREATED, resp.content
+
+        create = authenticated_client.post(
+            PROJECTS_URL, {"name": "Mover", "folder": str(domain_a.id)}, format="json"
+        )
+        assert create.status_code == status.HTTP_201_CREATED, create.content
+        project_id = create.json()["id"]
+
+        # No custom_fields key at all: the destination's required field must
+        # still be checked, otherwise the move lands in a state B forbids.
+        move = authenticated_client.patch(
+            f"{PROJECTS_URL}{project_id}/", {"folder": str(domain_b.id)}, format="json"
+        )
+        assert move.status_code == status.HTTP_400_BAD_REQUEST, move.content
+        assert "level" in move.json()["custom_fields"]
+
+        move = authenticated_client.patch(
+            f"{PROJECTS_URL}{project_id}/",
+            {"folder": str(domain_b.id), "custom_fields": {"level": "high"}},
+            format="json",
+        )
+        assert move.status_code == status.HTTP_200_OK, move.content
+        detail = authenticated_client.get(f"{PROJECTS_URL}{project_id}/")
+        assert detail.json()["custom_fields"] == {"level": "high"}
+
     def test_empty_for_folder_returns_global_definitions_only(
         self, authenticated_client
     ):

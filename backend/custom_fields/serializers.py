@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
-from iam.models import Folder
+from iam.models import Folder, RoleAssignment
 
 from .models import (
     SEARCHABLE_TYPES,
@@ -177,16 +177,26 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
     def validate(self, attrs):
         attrs = super().validate(attrs)
         raw = self.initial_data.get("custom_fields")
+        new_folder = attrs.get("folder")
+        folder = new_folder or (
+            getattr(self.instance, "folder", None) or Folder.get_root_folder()
+        )
         if raw is None:
             self._pending_custom_fields = None
+            # A folder move re-scopes which definitions apply (update() discards
+            # the values that stop applying), so the destination's required
+            # fields must hold even when the client sends no custom_fields.
+            if (
+                self.instance is not None
+                and new_folder is not None
+                and new_folder.id != RoleAssignment.get_iam_folder_id(self.instance)
+            ):
+                self._clean({}, new_folder)
             return attrs
         if not isinstance(raw, dict):
             raise serializers.ValidationError(
                 {"custom_fields": "Expected an object of {key: value}."}
             )
-        folder = attrs.get("folder") or (
-            getattr(self.instance, "folder", None) or Folder.get_root_folder()
-        )
         self._pending_custom_fields = self._clean(raw, folder)
         return attrs
 
@@ -256,7 +266,12 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
 
     @staticmethod
     def _is_empty(value) -> bool:
-        # Identity check for False so numeric 0 stays a real value.
+        """Whether ``value`` carries no information for a custom field.
+
+        Empty means ``None``, ``False``, or an empty string/list/dict. ``False``
+        is matched by identity rather than equality because ``0 == False`` in
+        Python, and a numeric field set to ``0`` is a value that must be kept.
+        """
         return (
             value is None
             or value is False
@@ -297,17 +312,14 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        old_folder_id = getattr(instance, "folder_id", None)
+        old_folder_id = RoleAssignment.get_iam_folder_id(instance)
         instance = super().update(instance, validated_data)
         # Values follow definition scope: moving the object to another folder
         # discards values whose definition no longer applies, so they don't
         # linger unreadable in forms while still matching cf__ filters.
-        if old_folder_id is not None and instance.folder_id != old_folder_id:
-            allowed = {
-                Folder.get_root_folder_id()
-            } | CustomFieldDefinition._ancestor_or_self_ids(instance.folder)
+        if RoleAssignment.get_iam_folder_id(instance) != old_folder_id:
             instance.custom_field_values.exclude(
-                definition__folder_id__in=allowed
+                definition__in=CustomFieldDefinition.for_object(instance)
             ).delete()
         self._apply(instance)
         return instance
