@@ -16402,9 +16402,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
             .select_related("folder")
-            .prefetch_related(
-                "applied_controls", "evidences", "owner", "filtering_labels"
-            )
+            .prefetch_related("applied_controls", "evidences", actor_prefetch("owner"))
             .order_by("ref_id")
         )
         lang = request.user.preferences.get("lang") or "en"

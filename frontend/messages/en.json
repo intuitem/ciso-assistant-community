@@ -3248,6 +3248,7 @@
 	"lockedRequirementAssessmentMessage": "This requirement cannot be modified because its parent audit is locked.",
 	"assessmentInReview": "Assessment In Review",
 	"assessmentInReviewMessage": "This assessment is currently in review and cannot be modified.",
+	"readOnlyNoChangePermissionMessage": "You can view this assessment but you don't have permission to edit it.",
 	"lockedFindingMessage": "This finding cannot be modified because its parent findings binder is locked.",
 	"parentAssessmentLocked": "The parent assessment is locked",
 	"impactEffortMatrixHint": "Hint: you can use right-click to quickly toggle the impact and effort estimates. Refresh the page to redraw the matrix",
