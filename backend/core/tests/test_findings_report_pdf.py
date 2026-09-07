@@ -170,3 +170,33 @@ def test_no_method_chain_is_broken_across_lines():
                 raise AssertionError(
                     f"{template.name}:{number} chain broken across lines: {line.strip()!r}"
                 )
+
+
+@pytest.mark.django_db
+def test_actors_are_named_and_observations_are_whole(assessment):
+    """Carried over from PR #4768, which fixed these on the HTML template this
+    report replaced: actors render as names (not emails) and observations are
+    not truncated."""
+    from iam.models import User
+
+    author = User.objects.create_user(
+        "author@tests.com", first_name="Ada", last_name="Author"
+    )
+    owner = User.objects.create_user(
+        "owner@tests.com", first_name="Olu", last_name="Owner"
+    )
+    assessment.authors.add(author.actor)
+
+    long_observation = "word " * 60
+    finding = _findings(assessment, [3])[0]
+    finding.observation = long_observation
+    finding.save()
+    finding.owner.add(owner.actor)
+
+    pdf, payload = _render(assessment)
+    assert payload["assessment"]["authors"] == "Ada Author"
+    assert payload["groups"][0]["findings"][0]["owners"] == "Olu Owner"
+
+    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    assert "…" not in text, "observation was truncated"
+    assert text.count("word") >= 60, "observation was cut short"

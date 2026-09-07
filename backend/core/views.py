@@ -4532,7 +4532,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             applied_controls = list(
                 AppliedControl.objects.filter(risk_scenarios__in=scenarios)
                 .distinct()
-                .prefetch_related("risk_scenarios", "owner")
+                .prefetch_related("risk_scenarios", actor_prefetch("owner"))
                 .order_by("eta")
             )
             scenario_ids = {scenario.id for scenario in scenarios}
@@ -12380,7 +12380,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             applied_controls = list(
                 AppliedControl.objects.filter(requirement_assessments__in=assessments)
                 .distinct()
-                .prefetch_related("requirement_assessments__requirement", "owner")
+                .prefetch_related(
+                    "requirement_assessments__requirement", actor_prefetch("owner")
+                )
                 .order_by("eta")
             )
             linked = {
@@ -16277,7 +16279,10 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             Finding.objects.filter(findings_assessment_id=pk)
             .select_related("folder")
             .prefetch_related(
-                "applied_controls", "evidences", "owner", "filtering_labels"
+                "applied_controls",
+                "evidences",
+                actor_prefetch("owner"),
+                "filtering_labels",
             )
             .order_by("ref_id")
         )
@@ -16853,7 +16858,11 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         incident = (
             Incident.objects.select_related("folder")
             .prefetch_related(
-                "owners", "entities", "assets", "threats", "qualifications"
+                actor_prefetch("owners"),
+                "entities",
+                "assets",
+                "threats",
+                "qualifications",
             )
             .get(id=pk)
         )
