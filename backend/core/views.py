@@ -1424,13 +1424,34 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         blockers more specifically (see EntityViewSet, ElementaryActionViewSet);
         the default here falls back to Django's own protected_objects so it
         stays accurate for whichever relation actually blocked the delete.
+
+        Only blockers the caller may view are named: delete_<model> doesn't
+        imply view_<other-model> (e.g. delete_folder without view_killchain),
+        so an unfiltered protected_objects would leak the existence/name of
+        objects the caller otherwise couldn't see.
         """
         # Django only raises ProtectedError with a non-empty protected_objects,
-        # so `names` is never empty here.
+        # so `protected_objects` is never empty here.
         protected_objects = list(error.protected_objects)
-        names = ", ".join(str(obj) for obj in protected_objects[:10])
-        if len(protected_objects) > 10:
+        visible_objects = [
+            obj for obj in protected_objects if self._is_visible_to_requester(obj)
+        ]
+
+        if not visible_objects:
+            return {
+                "detail": (
+                    f"Cannot delete this {instance._meta.verbose_name} "
+                    f"('{instance}'): it is still referenced by other objects. "
+                    "Remove those references first."
+                )
+            }
+
+        names = ", ".join(str(obj) for obj in visible_objects[:10])
+        if len(visible_objects) > 10:
             names += ", ..."
+        hidden_count = len(protected_objects) - len(visible_objects)
+        if hidden_count:
+            names += f", and {hidden_count} more you don't have access to"
         return {
             "detail": (
                 f"Cannot delete this {instance._meta.verbose_name} "
@@ -1438,6 +1459,18 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 f"({names}). Remove those references first."
             )
         }
+
+    def _is_visible_to_requester(self, obj) -> bool:
+        folder = Folder.get_folder(obj)
+        if folder is None:
+            return False
+        try:
+            perm = Permission.objects.get(codename=f"view_{obj._meta.model_name}")
+        except Permission.DoesNotExist:
+            return False
+        return RoleAssignment.is_access_allowed(
+            user=self.request.user, perm=perm, folder=folder
+        )
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
