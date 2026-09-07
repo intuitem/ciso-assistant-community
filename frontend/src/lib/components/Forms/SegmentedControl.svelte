@@ -1,9 +1,9 @@
 <script lang="ts">
 	/**
 	 * Fresh, controlled segmented control (no superForm dependency).
-	 * Inactive options stay neutral; hovering washes them with a soft tint of the
-	 * option color, and the selected one fills with that color. `colorMap` maps a
-	 * value to a hex color.
+	 * Inactive options stay neutral; hovering washes them with a translucent tint of
+	 * the option color (so it reads on both light and dark surfaces), and the
+	 * selected one fills with that color. `colorMap` maps a value to a hex color.
 	 */
 	interface Option {
 		value: string;
@@ -56,7 +56,7 @@
 <div
 	role="radiogroup"
 	aria-label={ariaLabel}
-	class="inline-flex flex-wrap items-center gap-1 rounded-lg bg-surface-100 p-1 ring-1 ring-surface-200/80 {disabled
+	class="inline-flex flex-wrap items-center gap-1 rounded-lg bg-surface-100-900 p-1 ring-1 ring-surface-200-800/80 {disabled
 		? 'opacity-50 pointer-events-none'
 		: ''} {className}"
 >
@@ -75,9 +75,13 @@
 			style:background-color={selected
 				? tint
 				: hover
-					? mix(tint, [255, 255, 255], 0.82)
+					? `color-mix(in srgb, ${tint} 18%, transparent)`
 					: undefined}
-			style:color={selected ? selectedFg(tint) : hover ? mix(tint, [0, 0, 0], 0.55) : undefined}
+			style:color={selected
+				? selectedFg(tint)
+				: hover
+					? `color-mix(in srgb, ${tint} 60%, currentColor)`
+					: undefined}
 			class="rounded-md font-medium whitespace-nowrap transition-colors duration-150 {sizeClasses} {selected
 				? 'shadow-sm'
 				: 'text-surface-500'}"

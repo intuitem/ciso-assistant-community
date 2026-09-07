@@ -589,8 +589,8 @@
 			cfg.raId,
 			cfg.key
 		)
-			? 'preset-tonal-primary border-primary-400'
-			: 'border-surface-300 hover:preset-tonal-surface'}"
+			? 'preset-tonal-primary border-primary-400-600'
+			: 'border-surface-300-700 hover:preset-tonal-surface'}"
 	>
 		<i class="fa-solid {cfg.icon} text-surface-500"></i>
 		<span class="font-medium">{cfg.label}</span>
@@ -610,7 +610,7 @@
 
 <!-- Related-object panel (controls / evidences): create/select + item list -->
 {#snippet detailPanel(cfg: Record<string, any>)}
-	<div class="card border border-surface-200 rounded-lg p-3 space-y-2">
+	<div class="card border border-surface-200-800 rounded-lg p-3 space-y-2">
 		{#if !shallow && !isReadOnly}
 			<div class="flex flex-row gap-2 items-center">
 				<button
@@ -635,18 +635,18 @@
 			<div class="flex flex-wrap gap-2">
 				{#each cfg.items as item}
 					<Anchor
-						class="inline-flex items-center gap-2 rounded-md border border-surface-200 bg-surface-50 px-2.5 py-1 text-sm text-surface-800 transition-colors hover:border-primary-300 hover:bg-primary-50"
+						class="inline-flex items-center gap-2 rounded-md border border-surface-200-800 bg-surface-50-950 px-2.5 py-1 text-sm text-surface-800-200 transition-colors hover:border-primary-300-700 hover:bg-primary-50-950"
 						href="{cfg.hrefBase}/{item.id}"
 						label={item.str}
 						data-testid={cfg.linkTestId}
 					>
-						<i class="fa-solid {cfg.itemIcon} text-surface-400"></i>
+						<i class="fa-solid {cfg.itemIcon} text-surface-400-600"></i>
 						<span class="truncate max-w-[18rem]">{item.str}</span>
 					</Anchor>
 				{/each}
 			</div>
 		{:else}
-			<p class="text-surface-400 italic text-sm">{cfg.emptyLabel}</p>
+			<p class="text-surface-400-600 italic text-sm">{cfg.emptyLabel}</p>
 		{/if}
 	</div>
 {/snippet}
@@ -747,10 +747,10 @@
 {/snippet}
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
-	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg w-full h-full space-y-3">
+	<div class="card px-6 py-4 bg-surface-50-950 flex flex-col shadow-lg w-full h-full space-y-3">
 		{#if !questionnaireOnly}
 			<div
-				class="sticky z-20 -mx-6 flex flex-col gap-2 border-b border-surface-200 bg-white/80 px-6 py-2.5 backdrop-blur"
+				class="sticky z-20 -mx-6 flex flex-col gap-2 border-b border-surface-200-800 bg-surface-50-950/80 px-6 py-2.5 backdrop-blur"
 				style="top: {stickyTop}px"
 				bind:clientHeight={headerHeight}
 			>
@@ -758,7 +758,7 @@
 				<div class="flex flex-row items-center justify-between gap-4">
 					<a
 						href="/compliance-assessments/{complianceAssessment.id}"
-						class="flex items-center space-x-2 text-primary-800 hover:text-primary-600 min-w-0"
+						class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400 min-w-0"
 						data-testid="back-to-audit"
 					>
 						<i class="fa-solid fa-arrow-left"></i>
@@ -830,11 +830,11 @@
 
 				<!-- Row 2: TOC toggle + audit progress analytics -->
 				{#if (!shallow && showToc) || (showResult && assessableTotal > 0) || (showScore && complianceAssessment.scoring_enabled)}
-					<div class="flex items-center gap-4 flex-wrap border-t border-surface-100 pt-2">
+					<div class="flex items-center gap-4 flex-wrap border-t border-surface-100-900 pt-2">
 						{#if !shallow && showToc}
 							<button
 								type="button"
-								class="btn btn-sm shrink-0 border font-medium preset-tonal-surface border-surface-300"
+								class="btn btn-sm shrink-0 border font-medium preset-tonal-surface border-surface-300-700"
 								onclick={() => (tocCollapsed = !tocCollapsed)}
 								aria-pressed={!tocCollapsed}
 							>
@@ -848,7 +848,7 @@
 									{m.progress()}: {assessedCount}/{assessableTotal}
 								</span>
 								<div
-									class="flex flex-1 h-5 overflow-hidden rounded-sm border border-surface-200 bg-surface-100"
+									class="flex flex-1 h-5 overflow-hidden rounded-sm border border-surface-200-800 bg-surface-100-900"
 									role="img"
 									aria-label="{m.progress()}: {assessedCount}/{assessableTotal}"
 								>
@@ -878,21 +878,21 @@
 						{#if showScore && complianceAssessment.scoring_enabled}
 							<div class="flex items-center gap-2 shrink-0 text-xs font-medium">
 								<span
-									class="inline-flex items-center gap-1 rounded-md bg-surface-100 px-2 py-1 text-surface-700"
+									class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
 								>
 									{m.score()}:
 									<span class="font-semibold">{fmtScore(auditScores?.implementation_score)}</span>
-									{#if auditScores?.max_score}<span class="text-surface-400"
+									{#if auditScores?.max_score}<span class="text-surface-400-600"
 											>/{auditScores.max_score}</span
 										>{/if}
 								</span>
 								{#if complianceAssessment.show_documentation_score}
 									<span
-										class="inline-flex items-center gap-1 rounded-md bg-surface-100 px-2 py-1 text-surface-700"
+										class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
 									>
 										{m.documentationScore()}:
 										<span class="font-semibold">{fmtScore(auditScores?.documentation_score)}</span>
-										{#if auditScores?.max_score}<span class="text-surface-400"
+										{#if auditScores?.max_score}<span class="text-surface-400-600"
 												>/{auditScores.max_score}</span
 											>{/if}
 									</span>
@@ -906,10 +906,10 @@
 		<!-- Read-only banner -->
 		{#if complianceAssessment.is_locked || complianceAssessment.status === 'in_review'}
 			<div
-				class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3 my-2"
+				class="card bg-warning-50-950 border border-warning-300-700 px-5 py-3 flex items-center space-x-3 my-2"
 			>
-				<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
-				<p class="text-yellow-800 font-medium">
+				<i class="fa-solid fa-lock text-warning-600-400 text-lg"></i>
+				<p class="text-warning-800-200 font-medium">
 					{complianceAssessment.is_locked
 						? m.lockedAssessmentMessage()
 						: m.assessmentInReviewMessage()}
@@ -920,20 +920,20 @@
 			{#if !shallow && !questionnaireOnly && showToc && !tocCollapsed}
 				<!-- Table of contents column (child of the card, toggled from the header) -->
 				<nav
-					class="hidden lg:block w-64 shrink-0 self-start sticky overflow-y-auto border-r border-surface-200 pr-2"
+					class="hidden lg:block w-64 shrink-0 self-start sticky overflow-y-auto border-r border-surface-200-800 pr-2"
 					style="top: {stickyTop + headerHeight}px; max-height: calc(100vh - {stickyTop +
 						headerHeight}px - 1rem)"
 				>
 					{#if showResult}
-						<div class="flex flex-wrap gap-1 pb-2 mb-1 border-b border-surface-200">
+						<div class="flex flex-wrap gap-1 pb-2 mb-1 border-b border-surface-200-800">
 							{#each resultCounts as opt}
 								{#if opt.count > 0}
 									<button
 										type="button"
 										class="px-2 py-1 text-[10px] rounded transition-colors flex items-center gap-1.5 {tocFilterResult ===
 										opt.value
-											? 'bg-surface-700 text-white font-semibold'
-											: 'bg-white text-surface-700 hover:bg-surface-100 border border-surface-200'}"
+											? 'bg-surface-700-300 text-surface-50-950 font-semibold'
+											: 'bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 border border-surface-200-800'}"
 										onclick={() =>
 											(tocFilterResult = tocFilterResult === opt.value ? null : opt.value)}
 										title={opt.label}
@@ -953,7 +953,7 @@
 							{#if section.isSection}
 								<button
 									type="button"
-									class="w-full text-left py-1 text-[10px] font-bold uppercase tracking-wide text-surface-400 mt-2 truncate hover:text-primary-700"
+									class="w-full text-left py-1 text-[10px] font-bold uppercase tracking-wide text-surface-400-600 mt-2 truncate hover:text-primary-700"
 									style="padding-left: {0.25 + (section.depth - 1) * 0.5}rem"
 									onclick={() => goToRequirement(section)}
 									title={section.title}
@@ -963,7 +963,7 @@
 							{:else}
 								<button
 									type="button"
-									class="w-full text-left py-1.5 pr-2 text-xs rounded-md transition-colors truncate flex items-center gap-1.5 text-surface-600 hover:bg-surface-100"
+									class="w-full text-left py-1.5 pr-2 text-xs rounded-md transition-colors truncate flex items-center gap-1.5 text-surface-600-400 hover:bg-surface-100-900"
 									style="padding-left: {0.25 + (section.depth - 1) * 0.5}rem"
 									onclick={() => goToRequirement(section)}
 									title={section.title}
@@ -994,7 +994,7 @@
 						<button
 							type="button"
 							onclick={() => toggleSectionCollapse(activeSection.id)}
-							class="flex w-full items-center gap-2 rounded-lg border border-orange-200 border-l-4 border-l-orange-400 bg-orange-50 px-3 py-2 text-left shadow-md"
+							class="flex w-full items-center gap-2 rounded-lg border border-orange-200 dark:border-orange-900 border-l-4 border-l-orange-400 bg-orange-50 dark:bg-orange-950/40 px-3 py-2 text-left shadow-md"
 						>
 							<i
 								class="fa-solid fa-chevron-down text-orange-500 text-xs transition-transform {collapsedSections[
@@ -1004,11 +1004,11 @@
 									: ''}"
 							></i>
 							{#if getRefId(activeSection)}
-								<span class="shrink-0 font-semibold text-sm text-orange-600"
+								<span class="shrink-0 font-semibold text-sm text-orange-600 dark:text-orange-300"
 									>{getRefId(activeSection)}</span
 								>
 							{/if}
-							<span class="font-semibold text-orange-800 truncate"
+							<span class="font-semibold text-orange-800 dark:text-orange-100 truncate"
 								>{getDisplayTitle(activeSection)}</span
 							>
 						</button>
@@ -1046,7 +1046,7 @@
 											type="button"
 											onclick={() => toggleSectionCollapse(requirementAssessment.id)}
 											aria-expanded={!collapsed}
-											class="flex w-full items-center gap-2 rounded-lg border border-orange-200 border-l-4 border-l-orange-400 bg-orange-50 px-3 py-2 text-left transition-colors hover:bg-orange-100/70"
+											class="flex w-full items-center gap-2 rounded-lg border border-orange-200 dark:border-orange-900 border-l-4 border-l-orange-400 bg-orange-50 dark:bg-orange-950/40 px-3 py-2 text-left transition-colors hover:bg-orange-100/70 dark:hover:bg-orange-900/40"
 										>
 											<i
 												class="fa-solid fa-chevron-down text-orange-500 text-xs transition-transform {collapsed
@@ -1054,12 +1054,13 @@
 													: ''}"
 											></i>
 											{#if getRefId(requirementAssessment)}
-												<span class="shrink-0 font-semibold text-sm text-orange-600"
+												<span
+													class="shrink-0 font-semibold text-sm text-orange-600 dark:text-orange-300"
 													>{getRefId(requirementAssessment)}</span
 												>
 											{/if}
 											<span
-												class="font-semibold text-orange-800 {row.depth > 1
+												class="font-semibold text-orange-800 dark:text-orange-100 {row.depth > 1
 													? 'text-sm'
 													: 'text-base'}">{getDisplayTitle(requirementAssessment)}</span
 											>
@@ -1073,7 +1074,7 @@
 											{/if}
 										</button>
 										{#if requirementAssessment.requirement.description && !collapsed}
-											<div class="text-sm text-surface-600 px-3 pt-1.5">
+											<div class="text-sm text-surface-600-400 px-3 pt-1.5">
 												<MarkdownRenderer content={requirementAssessment.requirement.description} />
 											</div>
 										{/if}
@@ -1081,7 +1082,7 @@
 								{:else}
 									<!-- Assessable requirement: compact card -->
 									<div
-										class="card border border-surface-200 rounded-xl p-4 space-y-3 shadow-sm"
+										class="card border border-surface-200-800 rounded-xl p-4 space-y-3 shadow-sm"
 										id="requirement-{requirementAssessment.id}"
 										data-toc
 										data-toc-title={getTitle(requirementAssessment)}
@@ -1104,12 +1105,12 @@
 															>{getRefId(requirementAssessment)}</span
 														>
 													{/if}
-													<span class="min-w-0 font-semibold text-base text-surface-900">
+													<span class="min-w-0 font-semibold text-base text-surface-900-50">
 														{getDisplayTitle(requirementAssessment)}
 													</span>
 													{#if typeof requirementAssessment.requirement?.weight === 'number' && Number.isFinite(requirementAssessment.requirement.weight) && requirementAssessment.requirement.weight !== 1}
 														<span
-															class="badge text-xs font-medium bg-indigo-100 text-indigo-800 shrink-0"
+															class="badge text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-100 shrink-0"
 														>
 															{m.requirementWeight()}: {requirementAssessment.requirement.weight}
 														</span>
@@ -1135,7 +1136,7 @@
 
 											<!-- Description -->
 											{#if requirementAssessment.requirement.description}
-												<div class="text-sm text-surface-700" data-testid="description">
+												<div class="text-sm text-surface-700-300" data-testid="description">
 													<MarkdownRenderer
 														content={requirementAssessment.requirement.description}
 													/>
@@ -1283,7 +1284,7 @@
 																	<i class="fa-solid fa-link"></i>
 																	{m.mappingInference()}
 																</p>
-																<span class="text-xs text-gray-500"
+																<span class="text-xs text-surface-500"
 																	><i class="fa-solid fa-circle-info"></i>
 																	{m.mappingInferenceHelpText()}</span
 																>
@@ -1398,7 +1399,7 @@
 											{/if}
 											{#if questionnaireMode && ((showResult && hasComputedResult(requirementAssessment.requirement.questions)) || (showScore && complianceAssessment.scoring_enabled && hasComputedScore(requirementAssessment.requirement.questions)))}
 												<div
-													class="mt-2 inline-flex w-fit flex-wrap items-center gap-x-8 gap-y-2 rounded-lg border border-surface-300 bg-surface-50 px-4 py-2.5 shadow-sm"
+													class="mt-2 inline-flex w-fit flex-wrap items-center gap-x-8 gap-y-2 rounded-lg border border-surface-300-700 bg-surface-50-950 px-4 py-2.5 shadow-sm"
 												>
 													{#if showResult && hasComputedResult(requirementAssessment.requirement.questions)}
 														<div class="flex flex-col gap-1">
@@ -1444,7 +1445,7 @@
 													{#if shallow}
 														{#if showAppliedControls}
 															{#if requirementAssessment.applied_controls.length === 0}
-																<p class="text-surface-400 italic text-sm">
+																<p class="text-surface-400-600 italic text-sm">
 																	{m.noAppliedControlYet()}
 																</p>
 															{:else}
@@ -1464,7 +1465,7 @@
 														{#if showEvidences}
 															{#if requirementAssessment.evidences.length === 0}
 																<p
-																	class="text-surface-400 italic text-sm"
+																	class="text-surface-400-600 italic text-sm"
 																	data-testid="no-evidence"
 																>
 																	{m.noEvidences()}
@@ -1543,7 +1544,7 @@
 																	class="text-xs font-semibold uppercase tracking-wide text-surface-500"
 																	>{m.observation()}</span
 																>
-																<div class="card border border-surface-200 rounded-lg p-3">
+																<div class="card border border-surface-200-800 rounded-lg p-3">
 																	<TableMarkdownField
 																		value={requirementAssessment.observation}
 																		disabled={isReadOnly}
@@ -1565,7 +1566,7 @@
 																class="text-primary-500"
 															/>
 														{:else}
-															<p class="text-surface-400 italic text-sm">{m.noObservation()}</p>
+															<p class="text-surface-400-600 italic text-sm">{m.noObservation()}</p>
 														{/if}
 													{/if}
 												</div>
