@@ -154,6 +154,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-file-code',
 					href: '/document-templates',
 					permissions: ['view_documenttemplate']
+				},
+				{
+					name: 'lbListLibraryBuilder',
+					fa_icon: 'fas fa-shapes',
+					href: '/experimental/library-builder',
+					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
 				}
 			]
 		},

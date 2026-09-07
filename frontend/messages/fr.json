@@ -1107,6 +1107,7 @@
 	"noThreatsMapped": "Aucune menace n'a été attachée. Pensez à lier les menaces à vos scénarios de risque pour une meilleure visibilité.",
 	"actionPlan": "Plan d'action",
 	"noStatus": "Pas de statut",
+	"restricted": "Restreint",
 	"actionPlanHelpText": "Le compteur correspond aux nombres d'exigences liées",
 	"matchingRequirements": "Exigences associées",
 	"incoming": "En approche",
@@ -2614,6 +2615,64 @@
 	"defaultUserGroupsWarning": "Appliqué une seule fois, à la création du compte. Modifier ou supprimer ce paramètre par la suite n'affecte pas les utilisateurs déjà provisionnés. Pour une appartenance aux groupes qui reste synchronisée dans le temps, utilisez plutôt le mappage des groupes IdP.",
 	"lastOccurrenceStatus": "Statut de la dernière occurrence",
 	"nextOccurrence": "Prochaine occurrence",
+	"scheduleDaily": "Quotidienne",
+	"scheduleWeekly": "Hebdomadaire",
+	"scheduleMonthly": "Mensuelle",
+	"scheduleYearly": "Annuelle",
+	"scheduleEveryNDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Tous les jours",
+				"countPlural=other": "Tous les {count} jours"
+			}
+		}
+	],
+	"scheduleEveryNWeeks": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Toutes les semaines",
+				"countPlural=other": "Toutes les {count} semaines"
+			}
+		}
+	],
+	"scheduleEveryNMonths": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Tous les mois",
+				"countPlural=other": "Tous les {count} mois"
+			}
+		}
+	],
+	"scheduleEveryNYears": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Tous les ans",
+				"countPlural=other": "Tous les {count} ans"
+			}
+		}
+	],
+	"dueInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "dans {count} jour",
+				"countPlural=other": "dans {count} jours"
+			}
+		}
+	],
+	"occurrenceHistory": "Historique des occurrences",
+	"noOccurrenceHistory": "Cette tâche n'a pas encore été exécutée.",
+	"moreUpcoming": "{count} autres à venir",
+	"allOccurrences": "Toutes les occurrences",
 	"taskTemplate": "Tâche",
 	"taskTemplates": "Tâches",
 	"noTaskTemplates": "Aucune tâche",
@@ -3419,6 +3478,7 @@
 	"dataWizardFindingsAssessmentDescription": "Importer un classeur de constats (pentest, audit interne, etc.)",
 	"dataWizardElementaryActionDescription": "Importer des actions élémentaires pour l'EBIOS RM (atelier 4)",
 	"dataWizardProcessingDescription": "Importer une liste de traitements, ou réimporter le classeur exporté d'un traitement pour recréer ses finalités, données personnelles et autres sous-objets",
+	"dataWizardEvidenceDescription": "Importer des définitions de preuves (nom, responsable, statut, expiration). Les fichiers et liens ne sont pas importés : ils sont ajoutés ensuite sous forme de révisions.",
 	"dataWizardOnConflict": "Si un enregistrement existe déjà",
 	"dataWizardOnConflictStop": "Arrêter",
 	"dataWizardOnConflictSkip": "Ignorer",
@@ -4347,7 +4407,8 @@
 	"taskNodeNewEvidence": "Preuves liées globalement à la tâche et partagées entre les occurrences. Vous pouvez ajouter une révision dans l'onglet 'Preuves' ci-dessous",
 	"statusUpdatedSuccessfully": "Statut mis à jour avec succès",
 	"observationUpdatedSuccessfully": "Observation mise à jour avec succès",
-	"taskTemplateEvidenceHelpText": "👉 Preuves attendues pour cette tâche.\n Cela sera lié à toutes les occurrences afin que vous puissiez soumettre des révisions pour chacune directement.",
+	"taskTemplateEvidenceHelpText": "Preuves attendues, liées à chaque occurrence pour y déposer une révision.\n✨ Saisissez un nouveau nom pour la créer dans le domaine de cette tâche.",
+	"createExpectedEvidence": "✨ Créer la preuve attendue « {name} »",
 	"unassigned": "Non assigné",
 	"addEvidenceRevisionFor": "Ajouter une révision pour :\n{evidenceName}",
 	"occurrenceDueDate": "Date d'échéance de l'occurrence",
@@ -4798,6 +4859,9 @@
 	"closeAssignmentConfirm": "Clôturer ce cycle de revue ? Le répondant ne pourra plus modifier ses réponses.",
 	"itemsFlaggedForChanges": "signalées à corriger",
 	"reopenAssignment": "Rouvrir",
+	"reopenAssignmentForEditing": "Rouvrir pour modification",
+	"forReview": "Pour revue",
+	"forEditing": "Pour modification",
 	"reviewerObservation": "Observation du relecteur",
 	"reviewerObservationPlaceholder": "Décrivez les modifications nécessaires...",
 	"assignmentSubmittedBanner": "Vos réponses ont été soumises et sont en cours de revue.",
