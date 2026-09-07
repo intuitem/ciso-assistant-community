@@ -1037,9 +1037,6 @@
 									{@const sectionCount = sectionInfo.counts[requirementAssessment.id] ?? 0}
 									<div
 										id="requirement-{requirementAssessment.id}"
-										data-toc
-										data-toc-title={getTitle(requirementAssessment)}
-										data-toc-level="0"
 										data-row-anchor
 										data-ra-id={requirementAssessment.id}
 										style:scroll-margin-top="{scrollOffset}px"
@@ -1086,9 +1083,6 @@
 									<div
 										class="card border border-surface-200-800 rounded-xl p-4 space-y-3 shadow-sm"
 										id="requirement-{requirementAssessment.id}"
-										data-toc
-										data-toc-title={getTitle(requirementAssessment)}
-										data-toc-level="0"
 										data-row-anchor
 										data-ra-id={requirementAssessment.id}
 										style:scroll-margin-top="{scrollOffset}px"

@@ -10,7 +10,7 @@
 	}
 
 	/**
-	 * Controlled score widget: optional toggle + slider + ring.
+	 * Controlled score widget: slider + ring.
 	 * `editable={false}` renders a read-only ring.
 	 */
 	interface Props {
@@ -21,9 +21,6 @@
 		step?: number;
 		scoresDefinition?: ScoreDefinition[];
 		editable?: boolean;
-		/** When provided, renders an on/off toggle wired to `onScoredChange`. */
-		scored?: boolean;
-		onScoredChange?: (scored: boolean) => void;
 		disabled?: boolean;
 		label?: string;
 		isDoc?: boolean;
@@ -36,16 +33,12 @@
 		step,
 		scoresDefinition = [],
 		editable = true,
-		scored,
-		onScoredChange,
 		disabled = false,
 		label,
 		isDoc = false
 	}: Props = $props();
 
 	const resolvedStep = $derived(step ?? (max === 100 ? 5 : 1));
-	const active = $derived(scored !== false);
-	const sliderDisabled = $derived(disabled || !active);
 
 	// Internal value; slider/ring react during drag
 	let internal = $state(value ?? min);
@@ -64,36 +57,16 @@
 		<span class="text-xs font-semibold text-surface-500 whitespace-nowrap">{label}</span>
 	{/if}
 
-	{#if scored !== undefined && onScoredChange}
-		<button
-			type="button"
-			role="switch"
-			aria-checked={active}
-			aria-label={label}
-			{disabled}
-			onclick={() => onScoredChange(!active)}
-			class="relative h-5 w-9 shrink-0 rounded-full transition-colors {active
-				? 'bg-primary-500'
-				: 'bg-surface-300'} {disabled ? 'opacity-50' : ''}"
-		>
-			<span
-				class="absolute top-0.5 size-4 rounded-full bg-white transition-all {active
-					? 'left-[18px]'
-					: 'left-0.5'}"
-			></span>
-		</button>
-	{/if}
-
 	{#if editable}
 		<input
 			data-testid="range-slider-input"
 			type="range"
-			class="input w-28 px-0 {sliderDisabled ? 'opacity-50' : ''}"
+			class="input w-28 px-0 {disabled ? 'opacity-50' : ''}"
 			bind:value={internal}
 			{min}
 			{max}
 			step={resolvedStep}
-			disabled={sliderDisabled}
+			{disabled}
 			oninput={() => onChange(internal)}
 		/>
 	{/if}
@@ -105,12 +78,12 @@
 				<Progress.CircleRange class={displayScoreColor(internal, max, false, min)} />
 			</Progress.Circle>
 			<div class="absolute inset-0 flex items-center justify-center">
-				<span class="text-xs font-bold">{active && value != null ? internal : '--'}</span>
+				<span class="text-xs font-bold">{value != null ? internal : '--'}</span>
 			</div>
 		</Progress>
 	</div>
 
-	{#if active && definition?.name}
+	{#if definition?.name}
 		<span class="text-xs text-surface-500 truncate max-w-[12rem]" title={definitionText}
 			>{definition.name}</span
 		>
