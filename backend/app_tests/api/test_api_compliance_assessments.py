@@ -184,6 +184,9 @@ class TestComplianceAssessmentsAuthenticated:
         perimeter2 = Perimeter.objects.create(
             name="test2", folder=Folder.objects.create(name="test2")
         )
+        # Framework has no Meta ordering, so all()[0]/all()[1] are
+        # nondeterministic on PostgreSQL — pin the import order explicitly.
+        frameworks = list(Framework.objects.order_by("created_at", "pk"))
 
         EndpointTestsQueries.Auth.update_object(
             test.client,
@@ -194,14 +197,14 @@ class TestComplianceAssessmentsAuthenticated:
                 "description": COMPLIANCE_ASSESSMENT_DESCRIPTION,
                 "version": COMPLIANCE_ASSESSMENT_VERSION,
                 "perimeter": perimeter,
-                "framework": Framework.objects.all()[0],
+                "framework": frameworks[0],
             },
             {
                 "name": "new " + COMPLIANCE_ASSESSMENT_NAME,
                 "description": "new " + COMPLIANCE_ASSESSMENT_DESCRIPTION,
                 "version": COMPLIANCE_ASSESSMENT_VERSION + ".1",
                 "perimeter": str(perimeter2.id),
-                "framework": str(Framework.objects.all()[1].id),
+                "framework": str(frameworks[1].id),
             },
             {
                 "perimeter": {
@@ -213,18 +216,18 @@ class TestComplianceAssessmentsAuthenticated:
                     },
                 },
                 "framework": {
-                    "id": str(Framework.objects.all()[0].id),
-                    "urn": Framework.objects.all()[0].urn,
-                    "str": str(Framework.objects.all()[0]),
+                    "id": str(frameworks[0].id),
+                    "urn": frameworks[0].urn,
+                    "str": str(frameworks[0]),
                     "implementation_groups_definition": None,
                     "outcomes_definition": [],
                     "reference_controls": [
                         {"id": str(rc["id"]), "str": rc["str"], "urn": rc["urn"]}
-                        for rc in Framework.objects.all()[0].reference_controls
+                        for rc in frameworks[0].reference_controls
                     ],
-                    "min_score": Framework.objects.all()[0].min_score,
-                    "max_score": Framework.objects.all()[0].max_score,
-                    "ref_id": str(Framework.objects.all()[0].ref_id),
+                    "min_score": frameworks[0].min_score,
+                    "max_score": frameworks[0].max_score,
+                    "ref_id": str(frameworks[0].ref_id),
                     "has_update": False,
                 },
             },

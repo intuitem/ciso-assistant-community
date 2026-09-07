@@ -1,5 +1,6 @@
 import { handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { getModelInfo } from '$lib/utils/crud';
 import { formatSelectFieldData } from '$lib/utils/load';
 import { m } from '$paraglide/messages';
@@ -31,13 +32,13 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const featureFlagDefaults = await fetch(`${BASE_API_URL}/settings/feature-flags/defaults/`)
 		.then((res) => (res.ok ? res.json() : {}))
 		.catch(() => ({}));
-	const webhookEndpoints = await fetch(`${BASE_API_URL}/webhooks/endpoints/`)
-		.then((res) => res.json())
-		.then((res) => res.results);
+	const webhookEndpoints = await fetchAllPages(fetch, `${BASE_API_URL}/webhooks/endpoints/`).catch(
+		() => []
+	);
 
-	const auditSinks = await fetch(`${BASE_API_URL}/webhooks/audit-sinks/`)
-		.then((res) => (res.ok ? res.json() : { results: [] }))
-		.then((res) => res.results ?? []);
+	const auditSinks = await fetchAllPages(fetch, `${BASE_API_URL}/webhooks/audit-sinks/`).catch(
+		() => []
+	);
 
 	const selectOptions: Record<string, any> = {};
 

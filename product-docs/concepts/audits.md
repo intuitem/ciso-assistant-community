@@ -141,9 +141,13 @@ See [Comments](../features/comments.md) for the full feature reference — proce
 
 Evidence justifies the status of a compliance requirement or proves that an applied control has been implemented. It can be a description, a link, or an uploaded file, and it can be attached to any number of applied controls or requirement assessments.
 
+## Raising findings
+
+With the **findings_from_requirements** [feature flag](../configuration/settings/feature-flags.md) on, a requirement assessment gains a **Findings** tab and a **Raise a finding** action, so a non-compliance is recorded without leaving the requirement. The audit's findings collect in a [findings binder](findings-assessments.md#raising-a-finding-from-a-requirement) created on first use.
+
 ## Related
 
 - [Applied controls](applied-controls.md)
-- [Findings assessments](findings-assessments.md)
+- [Findings binders](findings-assessments.md)
 - [Perimeters](perimeters.md)
 - [Vocabulary → Audit / Requirement / Evidence](../introduction/vocabulary.md)

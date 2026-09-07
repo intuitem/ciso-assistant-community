@@ -506,15 +506,27 @@ class EndpointTestsQueries:
                 and user_perm_reason != "outside_scope"
                 and len(response.json()["results"]) != 0
             ):
+                payload = response.json()
+                # The created object is the newest, so under the default
+                # created_at ordering it sits on the LAST page: fetch that page
+                # before scanning when the collection spans several pages.
+                if payload.get("next"):
+                    last_page_offset = max(
+                        payload["count"] - len(payload["results"]), 0
+                    )
+                    response = authenticated_client.get(
+                        url, {"offset": last_page_offset}
+                    )
+                    payload = response.json()
                 params = {**build_params, **test_params}
-                if len(response.json()["results"]) > 0 and item_search_field:
+                if len(payload["results"]) > 0 and item_search_field:
                     response_item = [
                         res
-                        for res in response.json()["results"]
+                        for res in payload["results"]
                         if res[item_search_field] == params[item_search_field]
                     ][0]
                 else:
-                    response_item = response.json()["results"][-1]
+                    response_item = payload["results"][-1]
                 for key, value in params.items():
                     if type(value) == dict and type(response_item[key]) == str:
                         assert json.loads(response_item[key]) == value, (
