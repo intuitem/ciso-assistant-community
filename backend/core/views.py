@@ -16045,19 +16045,18 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             return severity_chart_data
 
         def format_status_data(metrics):
+            # Colorblind-safe qualitative palette (Paul Tol's muted scheme) so no two
+            # statuses rely on a red-vs-green distinction to be told apart.
             status_mapping = {
-                "identified": {"localName": "identified", "color": "#F5C481"},
-                "confirmed": {"localName": "confirmed", "color": "#E6686D"},
-                "assigned": {"localName": "assigned", "color": "#fab998"},
-                "in_progress": {"localName": "inProgress", "color": "#fac858"},
-                "mitigated": {
-                    "localName": "mitigated",
-                    "color": "hsl(80deg, 80%, 60%)",
-                },
-                "resolved": {"localName": "resolved", "color": "hsl(120deg, 80%, 45%)"},
-                "closed": {"localName": "closed", "color": "hsl(120deg, 60%, 35%)"},
-                "dismissed": {"localName": "dismissed", "color": "#5470c6"},
-                "deprecated": {"localName": "deprecated", "color": "#91cc75"},
+                "identified": {"localName": "identified", "color": "#DDCC77"},
+                "confirmed": {"localName": "confirmed", "color": "#CC6677"},
+                "assigned": {"localName": "assigned", "color": "#88CCEE"},
+                "in_progress": {"localName": "inProgress", "color": "#44AA99"},
+                "mitigated": {"localName": "mitigated", "color": "#117733"},
+                "resolved": {"localName": "resolved", "color": "#AA4499"},
+                "closed": {"localName": "closed", "color": "#882255"},
+                "dismissed": {"localName": "dismissed", "color": "#999933"},
+                "deprecated": {"localName": "deprecated", "color": "#332288"},
                 "--": {"localName": "undefined", "color": "#CCCCCC"},
             }
 
