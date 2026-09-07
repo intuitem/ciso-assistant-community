@@ -17,7 +17,7 @@ from ebios_rm.models import (
     RoTo,
     StrategicScenario,
 )
-from ebios_rm.tests.fixtures import ebios_rm_matrix_fixture
+from ebios_rm.tests.fixtures import ebios_rm_matrix_fixture  # noqa: F401
 from iam.models import Folder, User, UserGroup
 from knox.models import AuthToken
 from rest_framework.test import APIClient
@@ -44,7 +44,8 @@ def admin_client():
 
 @pytest.mark.django_db
 def test_destroy_folder_blocked_by_kill_chain_returns_409(
-    admin_client, ebios_rm_matrix_fixture
+    admin_client,
+    ebios_rm_matrix_fixture,  # noqa: F811 -- pytest fixture, not a real redefinition
 ):
     domain = Folder.objects.create(
         name="CA-1797 domain",

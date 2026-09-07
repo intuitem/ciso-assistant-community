@@ -1425,6 +1425,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         the default here falls back to Django's own protected_objects so it
         stays accurate for whichever relation actually blocked the delete.
         """
+        # Django only raises ProtectedError with a non-empty protected_objects,
+        # so `names` is never empty here.
         protected_objects = list(error.protected_objects)
         names = ", ".join(str(obj) for obj in protected_objects[:10])
         if len(protected_objects) > 10:
@@ -1432,18 +1434,23 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return {
             "detail": (
                 f"Cannot delete this {instance._meta.verbose_name} "
-                f"('{instance}'): it is still referenced by other objects"
-                + (f" ({names})" if names else "")
-                + ". Remove those references first."
+                f"('{instance}'): it is still referenced by other objects "
+                f"({names}). Remove those references first."
             )
         }
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
-        instance = self.get_object()
         try:
             return super().destroy(request, *args, **kwargs)
         except ProtectedError as e:
+            # Collector.collect() raises ProtectedError before any row is
+            # deleted, so the instance is guaranteed to still exist here —
+            # fetch it only on this (already slow) error path rather than on
+            # every delete, to avoid an extra get_object() call/permission
+            # check on the success path (and extra lock-hold time for
+            # subclasses that wrap destroy() in a transaction, e.g. UserViewSet).
+            instance = self.get_object()
             return Response(
                 self.get_protected_error_response_data(instance, e),
                 status=status.HTTP_409_CONFLICT,
