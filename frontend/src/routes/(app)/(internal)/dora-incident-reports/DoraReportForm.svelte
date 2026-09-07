@@ -12,8 +12,9 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
-	import { superForm } from 'sveltekit-superforms';
+	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 	import { modelSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages.js';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -31,7 +32,6 @@
 		incidentRef?: { id: string; name: string } | null;
 		reportId?: string | null;
 		validation?: { valid: boolean; errors: string[] } | null;
-		userOptions?: { id: string; label: string; email: string }[];
 	}
 
 	let {
@@ -42,8 +42,7 @@
 		formAction,
 		incidentRef = null,
 		reportId = null,
-		validation = null,
-		userOptions = []
+		validation = null
 	}: Props = $props();
 
 	const schema = modelSchema('dora-incident-reports');
@@ -335,12 +334,36 @@
 		modalStore.trigger(modal);
 	}
 
+	// Fill contact fields from a lazily searched user picker (server-side search
+	// via /users/autocomplete instead of fetching every user up front).
+	const contactFillSchema = z.object({
+		primary_fill: z.array(z.string()).optional().nullable(),
+		secondary_fill: z.array(z.string()).optional().nullable()
+	});
+	const contactFillForm = superForm(defaults(zod(contactFillSchema)), {
+		SPA: true,
+		validators: zod(contactFillSchema),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false,
+		validationMethod: 'auto'
+	});
+	let primaryFillOptions: any[] | undefined = $state();
+	let secondaryFillOptions: any[] | undefined = $state();
+
 	// Fill contact fields from a selected user
-	function fillContact(prefix: 'primary' | 'secondary', userId: string) {
-		const user = userOptions.find((u) => u.id === userId);
+	function fillContact(prefix: 'primary' | 'secondary', userId: string, options?: any[]) {
+		if (!userId) return;
+		const user: any = (options ?? []).find((o: any) => String(o.value) === String(userId));
 		if (!user) return;
-		$formData[`${prefix}_contact_name`] = user.label;
-		$formData[`${prefix}_contact_email`] = user.email;
+		$formData[`${prefix}_contact_name`] =
+			`${user.first_name || ''} ${user.last_name || ''}`.trim() ||
+			user.str ||
+			user.email ||
+			user.label;
+		$formData[`${prefix}_contact_email`] = user.email || '';
 	}
 </script>
 
@@ -517,20 +540,18 @@
 
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
 						<div class="space-y-3">
-							<div class="flex items-center justify-between">
+							<div class="flex items-center justify-between gap-2">
 								<h3 class="font-medium text-sm text-surface-600-400">{m.doraPrimaryContact()}</h3>
-								<select
-									class="select text-xs w-auto max-w-48"
-									onchange={(e) => {
-										fillContact('primary', e.currentTarget.value);
-										e.currentTarget.value = '';
-									}}
-								>
-									<option value="">{safeTranslate('fillFromUser')}</option>
-									{#each userOptions as user}
-										<option value={user.id}>{user.label}</option>
-									{/each}
-								</select>
+								<AutocompleteSelect
+									form={contactFillForm}
+									field="primary_fill"
+									optionsEndpoint="users"
+									includeAllOptionFields
+									baseClass="w-56"
+									placeholder={safeTranslate('fillFromUser')}
+									bind:cachedOptions={primaryFillOptions}
+									onChange={(value) => fillContact('primary', value, primaryFillOptions)}
+								/>
 							</div>
 							<TextField form={_form} field="primary_contact_name" label={m.primaryContactName()} />
 							<TextField
@@ -546,20 +567,18 @@
 							/>
 						</div>
 						<div class="space-y-3">
-							<div class="flex items-center justify-between">
+							<div class="flex items-center justify-between gap-2">
 								<h3 class="font-medium text-sm text-surface-600-400">{m.doraSecondaryContact()}</h3>
-								<select
-									class="select text-xs w-auto max-w-48"
-									onchange={(e) => {
-										fillContact('secondary', e.currentTarget.value);
-										e.currentTarget.value = '';
-									}}
-								>
-									<option value="">{safeTranslate('fillFromUser')}</option>
-									{#each userOptions as user}
-										<option value={user.id}>{user.label}</option>
-									{/each}
-								</select>
+								<AutocompleteSelect
+									form={contactFillForm}
+									field="secondary_fill"
+									optionsEndpoint="users"
+									includeAllOptionFields
+									baseClass="w-56"
+									placeholder={safeTranslate('fillFromUser')}
+									bind:cachedOptions={secondaryFillOptions}
+									onChange={(value) => fillContact('secondary', value, secondaryFillOptions)}
+								/>
 							</div>
 							<TextField
 								form={_form}

@@ -59,6 +59,25 @@ Once an assignment leaves `draft`, its scope (assigned actors and requirements) 
 
 To change a locked assignment, a reviewer reopens it back to `draft` from any other state, which unlocks editing and reassignment. Respondents are notified by email of a reopening only when it comes from `in_progress` or `changes_requested`, the states where they were actively working; reopening a `submitted` or `closed` assignment stays silent.
 
+### Reviewing item by item
+
+The assignment status says where the round as a whole stands. Underneath it, each requirement carries its own **review state**, so a reviewer can be specific about what needs work instead of bouncing the whole assignment back with a note.
+
+Reading the respondent's answers, a reviewer has two buttons on every requirement:
+
+* **Request changes** — flags this item. The respondent sees a red banner on it pointing them at the comments for the detail.
+* the check button (**Mark as accepted**) — records that this one is settled.
+
+An item is therefore in one of four states: unreviewed, `changes_requested`, `resubmitted`, or `accepted`. The flags then follow the assignment's own transitions:
+
+* When the respondent hands back a `changes_requested` assignment, everything flagged becomes **Resubmitted** — it's been answered and is waiting for another look.
+* When the reviewer closes a `submitted` assignment, everything resubmitted becomes **Accepted**.
+* Every other transition leaves the flags alone. Reopening an assignment does not clear them: an accepted item records a verdict that was actually given, and re-flagging it is the reviewer's call, not a side effect.
+
+Sending an assignment back opens a dialog that says how many items are currently flagged, with a link to them — or tells you that none are, and that the respondent will only get the note you write. Flagging the items first is what turns "please fix this" into something actionable.
+
+Progress through the review is shown as a **Review progress** bar alongside completion, and the flagged count is surfaced on the [campaign](campaigns.md) dashboard so a reviewer can see across a whole round which questionnaires are waiting on rework.
+
 For review, if the auditors don't have the permissions to update the requirements compliance result, which will be the general case to keep consistent inputs from the respondent side, they can interact with comments on each one:\
 <br>
 

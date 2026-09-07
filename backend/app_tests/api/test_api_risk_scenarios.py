@@ -400,7 +400,10 @@ class TestRiskScenariosAuthenticated:
         risk_assessment = RiskAssessment.objects.create(
             name="test",
             perimeter=Perimeter.objects.create(name="test", folder=test.folder),
-            risk_matrix=RiskMatrix.objects.all()[0],
+            # Two matrices (3x3, 5x5) are imported above; RiskMatrix has no Meta
+            # ordering, so pin to the first import — the expected risk levels
+            # below are computed against the 3x3 grid.
+            risk_matrix=RiskMatrix.objects.order_by("created_at", "pk")[0],
         )
         threat = Threat.objects.create(name="test", folder=test.folder)
         threat2 = Threat.objects.create(name="test2", folder=test.folder)

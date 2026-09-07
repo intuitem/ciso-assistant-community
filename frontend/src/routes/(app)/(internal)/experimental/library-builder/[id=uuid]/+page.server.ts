@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
@@ -13,14 +14,10 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	// plus other drafts (a draft is a library document you can borrow from
 	// without publishing it first).
 	const [storedLibraries, drafts] = await Promise.all([
-		fetch(`${BASE_API_URL}/stored-libraries/?ordering=name`)
-			.then((r) => r.json())
-			.then((d) => d.results ?? d)
-			.catch(() => []),
-		fetch(`${BASE_API_URL}/library-drafts/?ordering=name`)
-			.then((r) => r.json())
-			.then((d) => d.results ?? d)
-			.catch(() => [])
+		fetchAllPages(fetch, `${BASE_API_URL}/stored-libraries/?ordering=name`).catch(() => []),
+		fetchAllPages<{ id: string }>(fetch, `${BASE_API_URL}/library-drafts/?ordering=name`).catch(
+			() => [] as { id: string }[]
+		)
 	]);
 	const otherDrafts = (drafts ?? []).filter((d: { id: string }) => d.id !== params.id);
 
