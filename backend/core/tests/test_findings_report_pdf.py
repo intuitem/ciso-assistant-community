@@ -201,3 +201,25 @@ def test_actors_are_named_and_observations_are_whole(assessment):
     text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
     assert "…" not in text, "observation was truncated"
     assert text.count("word") >= 60, "observation was cut short"
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "lang,category,status",
+    [("en", "Pentest", "In progress"), ("fr", "Test d'intrusion", "En cours")],
+)
+def test_assessment_category_and_status_are_localised(
+    assessment, lang, category, status
+):
+    """Both read Django's gettext catalog before; the raw keys travel now."""
+    assessment.category = "pentest"
+    assessment.status = "in_progress"
+    assessment.save()
+    _findings(assessment, [3])
+
+    pdf, payload = _render(assessment, lang)
+    assert payload["assessment"]["category_key"] == "pentest"
+    assert payload["assessment"]["status_key"] == "in_progress"
+
+    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    assert category in text and status in text

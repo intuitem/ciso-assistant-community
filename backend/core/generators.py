@@ -405,7 +405,6 @@ def action_plan_context(assessment, controls, lang="en", linked=None):
     which item — and drops CSF function, effort, cost and expiry date.
     """
     linked = linked or {}
-    states = dict(AppliedControl.Status.choices)
     buckets = {key: [] for key in _ACTION_PLAN_STATUS_FILLS}
 
     for control in controls:
@@ -413,7 +412,7 @@ def action_plan_context(assessment, controls, lang="en", linked=None):
             {
                 "name": control.name or "-",
                 "description": control.description or "-",
-                "category": control.get_category_display() or "-",
+                "category_key": control.category or "",
                 "owner": ", ".join(str(actor) for actor in control.owner.all()) or "-",
                 "eta": _date_str(control.eta),
                 "linked": linked.get(control.id, []),
@@ -423,7 +422,6 @@ def action_plan_context(assessment, controls, lang="en", linked=None):
     groups = [
         {
             "status_key": key,
-            "status": str(states.get(key, "")) if key != "--" else "",
             "fill": _ACTION_PLAN_STATUS_FILLS.get(key, "#f1f5f9"),
             "controls": rows,
         }
@@ -522,8 +520,8 @@ def findings_assessment_context(assessment, findings, lang="en"):
             "name": assessment.name or "-",
             "ref_id": assessment.ref_id or "-",
             "description": assessment.description or "",
-            "category": assessment.get_category_display() or "-",
-            "status": assessment.get_status_display() or "-",
+            "category_key": assessment.category or "--",
+            "status_key": assessment.status or "",
             "folder": str(assessment.folder) if assessment.folder else "-",
             "observation": getattr(assessment, "observation", "") or "",
             "authors": ", ".join(str(a) for a in assessment.authors.all()) or "-",
@@ -581,9 +579,9 @@ def incident_context(incident, timeline_entries, lang="en"):
         "incident": {
             "ref_id": incident.ref_id or "",
             "name": incident.name or "-",
-            "severity": incident.get_severity_display() or "-",
-            "status": incident.get_status_display() or "-",
-            "detection": incident.get_detection_display() or "-",
+            "severity_key": str(incident.severity or ""),
+            "status_key": incident.status or "",
+            "detection_key": incident.detection or "",
             "folder": str(incident.folder) if incident.folder else "-",
             "description": incident.description or "",
             "resolution": getattr(incident, "resolution", "") or "",
@@ -606,6 +604,156 @@ def incident_context(incident, timeline_entries, lang="en"):
             "mitigation": counts.get("mitigation", 0),
         },
         "timeline": entries,
+    }
+
+
+def risk_assessment_context(
+    assessment,
+    scenarios,
+    clusters,
+    swap_axes=False,
+    flip_vertical=False,
+    lang="en",
+    label_standard="ISO",
+    use_risk_category_label=False,
+):
+    """Payload for the risk assessment report.
+
+    The matrix is emitted once, already oriented: the four HTML variants existed
+    only to encode `swap_axes` x `flip_vertical`, which is a transform on the grid
+    rather than four layouts.
+    """
+    matrix = assessment.risk_matrix
+    definition = matrix.parse_json_translated()
+    grid = matrix.render_grid_as_colors()
+
+    rows = [
+        [
+            {
+                "name": str(cell.get("name", "")),
+                "hexcolor": cell.get("hexcolor", "#ffffff"),
+            }
+            for cell in row
+        ]
+        for row in grid
+    ]
+    y_axis = [
+        {"name": str(p.get("name", "")), "description": str(p.get("description", ""))}
+        for p in definition.get("probability", [])
+    ]
+    x_axis = [
+        {"name": str(i.get("name", "")), "description": str(i.get("description", ""))}
+        for i in definition.get("impact", [])
+    ]
+
+    y_type, x_type = "probability", "impact"
+    if swap_axes:
+        y_type, x_type = x_type, y_type
+
+    def orient(cells, y_labels, x_labels):
+        if swap_axes:
+            cells = [list(column) for column in zip(*cells)]
+            y_labels, x_labels = x_labels, y_labels
+        if not flip_vertical:
+            # Rows arrive lowest-first; a matrix reads with the worst row on top.
+            cells = list(reversed(cells))
+            y_labels = list(reversed(y_labels))
+        return cells, y_labels, x_labels
+
+    # The inherent-risk flag reaches here as the presence of its cluster: gate the
+    # matrix views and the per-scenario level on the same signal.
+    include_inherent = "inherent" in clusters
+
+    views = []
+    for key in ("inherent", "current", "residual"):
+        cluster = clusters.get(key)
+        if cluster is None:
+            continue
+        cells = [
+            [{**rows[r][c], "refs": sorted(cluster[r][c])} for c in range(len(rows[r]))]
+            for r in range(len(rows))
+        ]
+        oriented, y_labels, x_labels = orient(cells, y_axis, x_axis)
+        views.append(
+            {
+                "key": key,
+                "cells": oriented,
+                "y_axis": y_labels,
+                "x_axis": x_labels,
+                "y_type": y_type,
+                "x_type": x_type,
+            }
+        )
+
+    scenario_rows = []
+    for scenario in scenarios:
+        row = {
+            "ref_id": scenario.ref_id or "-",
+            "name": scenario.name or "-",
+            "description": getattr(scenario, "description", "") or "",
+            "qualifications": [
+                str(q) for q in getattr(scenario, "qualifications", _EMPTY).all()
+            ],
+            "assets": [a.name for a in scenario.assets.all()],
+            "threats": [t.get_name_translated for t in scenario.threats.all()],
+            "existing_controls": [
+                c.name for c in scenario.existing_applied_controls.all()
+            ],
+            "controls": [c.name for c in scenario.applied_controls.all()],
+            "treatment_key": scenario.treatment or "",
+            "justification": scenario.justification or "",
+            "strength_of_knowledge": str(scenario.strength_of_knowledge or "-"),
+            "current": _risk_level(scenario.get_current_risk()),
+            "residual": _risk_level(scenario.get_residual_risk()),
+        }
+        if include_inherent:
+            row["inherent"] = _risk_level(scenario.get_inherent_risk())
+        scenario_rows.append(row)
+
+    return {
+        "assessment": {
+            "name": assessment.name or "-",
+            "version": str(assessment.version or "-"),
+            "perimeter": str(assessment.perimeter) if assessment.perimeter else "-",
+            "folder": str(assessment.folder) if assessment.folder else "-",
+            "matrix": str(matrix),
+            "status_key": assessment.status or "",
+            "description": assessment.description or "",
+            "authors": ", ".join(str(a) for a in assessment.authors.all()) or "-",
+            "reviewers": ", ".join(str(r) for r in assessment.reviewers.all()) or "-",
+            "eta": _date_str(assessment.eta),
+            "due_date": _date_str(assessment.due_date),
+        },
+        "id": str(assessment.id),
+        "date": now().strftime("%d/%m/%Y"),
+        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        "include_inherent": include_inherent,
+        # `risk_matrix_labels`: ISO says "Impact", EBIOS says "Severity".
+        "label_standard": label_standard
+        if label_standard in ("ISO", "EBIOS")
+        else "ISO",
+        # `use_risk_category_label` renames qualifications to risk categories.
+        "use_risk_category_label": bool(use_risk_category_label),
+        "scenarios": scenario_rows,
+        "matrix_views": views,
+    }
+
+
+class _EmptyRelation:
+    @staticmethod
+    def all():
+        return []
+
+
+_EMPTY = _EmptyRelation()
+
+
+def _risk_level(level):
+    if not level:
+        return {"name": "-", "hexcolor": "#f1f5f9"}
+    return {
+        "name": str(level.get("name", "-")),
+        "hexcolor": level.get("hexcolor", "#f1f5f9"),
     }
 
 

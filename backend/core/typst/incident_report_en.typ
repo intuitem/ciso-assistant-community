@@ -10,6 +10,26 @@
 #let chip-fill = rgb("#dbeafe")
 #let chip-text = rgb("#1e40af")
 
+#let severity-label = (
+  "1": "Critical",
+  "2": "Major",
+  "3": "Moderate",
+  "4": "Minor",
+  "5": "Low",
+  "6": "Unknown",
+)
+#let incident-status-label = (
+  "new": "New",
+  "ongoing": "Ongoing",
+  "resolved": "Resolved",
+  "closed": "Closed",
+  "dismissed": "Dismissed",
+)
+#let detection-label = (
+  "internally_detected": "Internal",
+  "externally_detected": "External",
+)
+
 #let entry-label = (
   detection: "Detection",
   mitigation: "Mitigation",
@@ -69,9 +89,9 @@
         columns: (auto, 1fr),
         row-gutter: 8pt,
         column-gutter: 12pt,
-        [*Severity*], [#inc.severity],
-        [*Status*], [#inc.status],
-        [*Detection*], [#inc.detection],
+        [*Severity*], [#severity-label.at(inc.severity_key, default: "-")],
+        [*Status*], [#incident-status-label.at(inc.status_key, default: "-")],
+        [*Detection*], [#detection-label.at(inc.detection_key, default: "-")],
         [*Domain*], [#inc.folder],
         [*Owners*], [#inc.owners],
         [*Occurred at*], [#inc.occurred_at],

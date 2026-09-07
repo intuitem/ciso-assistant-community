@@ -72,6 +72,7 @@ from .generators import (
     action_plan_context,
     findings_assessment_context,
     incident_context,
+    risk_assessment_context,
     audit_context_for_typst,
     gen_audit_context,
     inline_charts_for_docx,
@@ -156,8 +157,6 @@ from rest_framework.exceptions import (
     ValidationError as DRFValidationError,
 )
 
-
-from weasyprint import HTML
 
 from core.helpers import *
 from core.models import (
@@ -4480,43 +4479,52 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         )
         if UUID(pk) in object_ids_view:
             risk_assessment = self.get_object()
-            context = RiskScenario.objects.filter(
-                risk_assessment=risk_assessment
-            ).order_by("ref_id")
-            for scenario in context:
+            scenarios = (
+                RiskScenario.objects.filter(risk_assessment=risk_assessment)
+                .prefetch_related(
+                    "threats",
+                    "assets",
+                    "applied_controls",
+                    "existing_applied_controls",
+                )
+                .order_by("ref_id")
+            )
+            for scenario in scenarios:
                 scenario.strength_of_knowledge = RiskScenario.DEFAULT_SOK_OPTIONS[
                     scenario.strength_of_knowledge
                 ]["name"]
+
             general_settings = GlobalSettings.objects.filter(name="general").first()
-            swap_axes = general_settings.value.get("risk_matrix_swap_axes", False)
-            flip_vertical = general_settings.value.get(
-                "risk_matrix_flip_vertical", False
-            )
-            matrix_settings = {
-                "swap_axes": "_swapaxes" if swap_axes else "",
-                "flip_vertical": "_vflip" if flip_vertical else "",
-            }
+            settings_value = general_settings.value if general_settings else {}
             ff_settings = GlobalSettings.objects.filter(
                 name=GlobalSettings.Names.FEATURE_FLAGS
             ).first()
-            if ff_settings is None:
-                feature_flags = {}
-            else:
-                feature_flags = ff_settings.value
-            data = {
-                "context": context,
-                "risk_assessment": risk_assessment,
-                "ri_clusters": build_scenario_clusters(
+            feature_flags = ff_settings.value if ff_settings else {}
+
+            lang = request.user.preferences.get("lang") or "en"
+            payload = risk_assessment_context(
+                risk_assessment,
+                scenarios,
+                build_scenario_clusters(
                     risk_assessment,
                     include_inherent=feature_flags.get("inherent_risk", False),
                 ),
-                "risk_matrix": risk_assessment.risk_matrix,
-                "settings": matrix_settings,
-                "feature_flags": feature_flags,
-            }
-            html = render_to_string("core/ra_pdf.html", data)
-            pdf_file = HTML(string=html).write_pdf()
-            response = HttpResponse(pdf_file, content_type="application/pdf")
+                swap_axes=settings_value.get("risk_matrix_swap_axes", False),
+                flip_vertical=settings_value.get("risk_matrix_flip_vertical", False),
+                lang=lang,
+                label_standard=settings_value.get("risk_matrix_labels", "ISO"),
+                use_risk_category_label=settings_value.get(
+                    "use_risk_category_label", False
+                ),
+            )
+            response = HttpResponse(
+                render_pdf(localized_template("risk_report", lang), payload),
+                content_type="application/pdf",
+            )
+            safe_name = slugify(risk_assessment.name) or "risk-assessment"
+            response["Content-Disposition"] = (
+                f'attachment; filename="{safe_name}_risk_report.pdf"'
+            )
             return response
         else:
             return Response({"error": "Permission denied"})

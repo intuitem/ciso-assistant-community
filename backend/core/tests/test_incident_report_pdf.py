@@ -143,3 +143,27 @@ def test_no_weasyprint_template_remains():
     assert not (
         TEMPLATE_DIR.parent / "templates" / "core" / "incident_pdf.html"
     ).exists()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "lang,severity,status,detection",
+    [
+        ("en", "Critical", "Ongoing", "Internal"),
+        ("fr", "Critique", "En cours", "Interne"),
+    ],
+)
+def test_incident_enums_are_localised(incident, lang, severity, status, detection):
+    incident.severity = 1
+    incident.status = "ongoing"
+    incident.detection = "internally_detected"
+    incident.save()
+    _entries(incident, ["detection"])
+
+    pdf, payload = _render(incident, lang)
+    assert payload["incident"]["severity_key"] == "1"
+    assert payload["incident"]["status_key"] == "ongoing"
+    assert payload["incident"]["detection_key"] == "internally_detected"
+
+    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    assert severity in text and status in text and detection in text

@@ -8,6 +8,24 @@
 #let muted = rgb("#6b7280")
 #let rule = rgb("#cbd5e1")
 
+#let assessment-status-label = (
+  "planned": "Planifié",
+  "in_progress": "En cours",
+  "in_review": "En revue",
+  "done": "Terminé",
+  "deprecated": "Déprécié",
+)
+#let category-label = (
+  "--": "Non défini",
+  "pentest": "Test d'intrusion",
+  "threat_hunting": "Chasse aux menaces",
+  "red_teaming": "Red teaming",
+  "audit": "Audit",
+  "self_identified": "Auto-identifié",
+  "posture": "Suivi de posture",
+  "responsible_disclosure": "Divulgation responsable",
+)
+
 #let severity-label = (
   critical: "Critique",
   high: "Élevée",
@@ -68,7 +86,7 @@
   #align(center + horizon)[
     #text(26pt, weight: "bold", fill: accent)[#d.assessment.name]
     #v(0.4em)
-    #text(14pt, fill: muted)[Rapport de constats — #d.assessment.category]
+    #text(14pt, fill: muted)[Rapport de constats — #category-label.at(d.assessment.category_key, default: d.assessment.category_key)]
     #if d.assessment.description != "" [
       #v(0.6em)
       #block(width: 75%)[#text(9.5pt, fill: muted)[#d.assessment.description]]
@@ -83,7 +101,7 @@
         column-gutter: 12pt,
         [*Référence*], [#d.assessment.ref_id],
         [*Domaine*], [#d.assessment.folder],
-        [*Statut*], [#d.assessment.status],
+        [*Statut*], [#assessment-status-label.at(d.assessment.status_key, default: "-")],
         [*Auteurs*], [#d.assessment.authors],
         [*Relecteurs*], [#d.assessment.reviewers],
         [*Date*], [#d.date],

@@ -52,7 +52,7 @@ def test_controls_are_grouped_by_status(audit):
     by_key = {g["status_key"]: g for g in payload["groups"]}
     assert set(by_key) == {"to_do", "active", "--"}
     assert len(by_key["to_do"]["controls"]) == 2
-    assert by_key["--"]["status"] == "", "an unset status has no label to translate"
+    assert "status" not in by_key["--"], "the raw key travels; the template names it"
     assert payload["total"] == 4
 
 
@@ -136,3 +136,34 @@ def test_owner_replaces_the_dropped_columns(audit):
     assert "owner" in row
     for dropped in ("csf_function", "effort", "cost", "expiry_date"):
         assert dropped not in row, f"{dropped} does not fit an A4 action plan"
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "lang,status,category",
+    [("en", "To do", "Technical"), ("fr", "À faire", "Technique")],
+)
+def test_status_and_category_are_localised_by_the_template(
+    audit, lang, status, category
+):
+    """`Status.choices` and `CATEGORY` read Django's gettext catalog, which is
+    fr-only and incomplete; the raw keys travel and each locale names them."""
+    control = _controls(audit, ["to_do"])[0]
+    control.category = "technical"
+    control.save()
+
+    pdf, payload = _render(audit, [control], lang=lang)
+    row = payload["groups"][0]["controls"][0]
+    assert row["category_key"] == "technical"
+    assert "category" not in row
+
+    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    assert status in text
+    assert category in text
+
+
+@pytest.mark.django_db
+def test_unset_status_group_is_named_by_the_template(audit):
+    pdf, _ = _render(audit, _controls(audit, ["--"]))
+    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    assert "No status" in text

@@ -7,6 +7,22 @@
 #let accent = rgb("#1e3a8a")
 #let muted = rgb("#6b7280")
 #let rule = rgb("#cbd5e1")
+#let status-label = (
+  to_do: "To do",
+  in_progress: "In progress",
+  on_hold: "On hold",
+  active: "Active",
+  degraded: "Degraded",
+  deprecated: "Deprecated",
+)
+#let category-label = (
+  policy: "Policy",
+  process: "Process",
+  technical: "Technical",
+  physical: "Physical",
+  procedure: "Procedure",
+)
+
 // Landscape: the table needs the width.
 #set page(
   paper: "a4",
@@ -69,7 +85,7 @@
     above: 1em,
   )[
     #text(weight: "bold")[
-      #if group.status != "" { group.status } else { "No status" }
+      #status-label.at(group.status_key, default: "No status")
       (#group.controls.len())
     ]
   ]
@@ -93,7 +109,7 @@
       .map(c => (
         [#c.name],
         [#text(8pt)[#c.description]],
-        [#c.category],
+        [#category-label.at(c.category_key, default: "-")],
         [#c.owner],
         [#c.eta],
         [#text(8pt)[#if c.linked.len() > 0 { c.linked.join(linebreak()) } else { "-" }]],
