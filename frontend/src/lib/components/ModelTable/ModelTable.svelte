@@ -68,7 +68,12 @@
 		hasPermissionAnywhere
 	} from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
-	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
+	import {
+		tableHandlers,
+		tableRefreshers,
+		tableStates,
+		tableColumnStates
+	} from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
@@ -391,11 +396,18 @@
 	let inFlight = $state(0);
 	let hasLoadedOnce = $state(false);
 	const isFetching = $derived(inFlight > 0 && !hasLoadedOnce);
+	let currentLoad: Promise<any[]> = Promise.resolve([]);
 
-	if (hasRemoteSource)
+	if (hasRemoteSource) {
+		// The trigger handler calls our reload synchronously before its first
+		// await, so once invalidate() returns, currentLoad is the new request.
+		$tableRefreshers[baseEndpoint] = () => {
+			handler.invalidate();
+			return currentLoad;
+		};
 		handler.onChange((state: State) => {
 			inFlight += 1;
-			return loadTableData({
+			currentLoad = loadTableData({
 				state,
 				URLModel,
 				endpoint: baseEndpoint,
@@ -423,7 +435,9 @@
 				inFlight -= 1;
 				if (inFlight === 0) hasLoadedOnce = true;
 			});
+			return currentLoad;
 		});
+	}
 
 	onMount(() => {
 		if (orderBy) {

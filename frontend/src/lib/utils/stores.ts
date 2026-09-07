@@ -88,6 +88,9 @@ export const createModalCache = {
 export const driverInstance = writable<Driver | null>(null);
 
 export const tableHandlers = writable<Record<string, DataHandler>>({});
+// Promise-returning refetch per table endpoint: DataHandler.invalidate() itself
+// returns void, so callers that need to wait for the rows use this instead.
+export const tableRefreshers = writable<Record<string, () => Promise<unknown>>>({});
 
 export const tableStates: Persisted<Record<string, { pageNumber: number; rowsPerPage: number }>> =
 	persisted('tableStates', {});

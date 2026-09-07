@@ -12,7 +12,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { buildCustomFieldFilters, listViewFields } from '$lib/utils/table';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { driverInstance, tableHandlers } from '$lib/utils/stores';
+	import { driverInstance, tableRefreshers } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import type { ActionData, PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -98,10 +98,12 @@
 				preset: res.ok ? 'success' : 'error'
 			});
 			if (res.ok) {
-				// The import is done at this point; refetch the rows of the table
-				// the action belongs to (the user may have navigated away since).
-				const handler = $tableHandlers[`/${model}`];
-				if (handler) handler.invalidate();
+				// Refetch the rows of the table the action belongs to (the user may
+				// have navigated away since) and wait for them, so the slot only
+				// frees once the new rows are on screen. loadTableData never
+				// rejects: a failed refetch toasts on its own and yields no rows.
+				const refresh = $tableRefreshers[`/${model}`];
+				if (refresh) await refresh();
 				else await invalidateAll();
 			}
 		} catch {
