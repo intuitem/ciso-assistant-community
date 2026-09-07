@@ -1,16 +1,5 @@
 // Plan d'action — français.
-//
-// SELF-CONTAINED ON PURPOSE — one document, one locale, no shared module. A
-// customer can download this file, edit it and upload it back without knowing
-// anything about the rest of the system, and customising it cannot affect the
-// other templates. The price is deliberate duplication: a layout change belongs
-// in every sibling, and a test renders each to catch drift.
-//
-// Un document, deux parents : `subject.framework` est vide pour une étude de
-// risque, et la dernière colonne liste ce que contient `linked`.
-//
-// The payload arrives as JSON on `sys.inputs.data`, built by
-// `core.generators.action_plan_context`.
+// Payload: `core.generators.action_plan_context` via sys.inputs.data.
 
 #let d = json(bytes(sys.inputs.data))
 #let field(record, key, fallback: "-") = record.at(key, default: fallback)
@@ -18,8 +7,7 @@
 #let accent = rgb("#1e3a8a")
 #let muted = rgb("#6b7280")
 #let rule = rgb("#cbd5e1")
-
-// Landscape: nine columns do not fit portrait (house style, §9b).
+// Landscape: the table needs the width.
 #set page(
   paper: "a4",
   flipped: true,
@@ -62,10 +50,7 @@
   #d.total au total.
 ]
 #v(0.6em)
-
-// Explicit fractions, never `auto`: with nine `auto` columns Typst sizes each to
-// its content and the row overflows the page, overlapping the neighbouring cell.
-// Fractions always sum to the available width, so nothing can collide.
+// Fractions, not auto: auto columns overflow and overlap.
 #let columns-spec = (
   2.4fr, // name
   4.2fr, // description — the column actually read
@@ -94,8 +79,7 @@
     stroke: 0.5pt + rule,
     fill: (_, y) => if y == 0 { rgb("#e8edf7") },
     align: left + top,
-    // `table.header` repeats on every page a long group spans; plain cells
-    // would leave continuation pages with no column titles.
+    // Repeats on every page.
     table.header(
       [*Nom*],
       [*Description*],

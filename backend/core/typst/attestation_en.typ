@@ -1,30 +1,13 @@
 // Attestation to countersign — English.
-//
-// SELF-CONTAINED ON PURPOSE — one document, one locale, no shared module. A
-// customer can download this file, edit it and upload it back without knowing
-// anything about the rest of the system, and customising it cannot affect the
-// other three. The price is deliberate duplication: a layout change belongs in
-// every sibling, and a test renders each to catch drift.
-//
-// The payload arrives as JSON on `sys.inputs.data`, built by
-// `core.generators.audit_context_for_typst`. Fields hidden from the reader's role
-// are ABSENT from the payload, not blanked — so optional reads go through
-// `field()`. Never add a role check here: redaction belongs in the context
-// builder, because this file is overridable and a guard living in it could be
-// removed.
+// Payload: `core.generators.audit_context_for_typst` via sys.inputs.data.
 
 #let d = json(bytes(sys.inputs.data))
 #let field(record, key, fallback: "-") = record.at(key, default: fallback)
-// Chrome strings come from the payload, never inlined here: one template serves
-// every locale once core.i18n_catalog backs `report_labels`.
 #let shown(key) = key not in d.hidden_fields
 #let chart(name) = if name + ".png" in d.charts { image(name + ".png", width: 100%) }
 
 #let accent = rgb("#1e3a8a")
 #let muted = rgb("#6b7280")
-
-// Row badges name one requirement; the summary headers sit above counts.
-// English does not inflect these, but the split matters in other locales.
 #let result-label = (
   compliant: "Compliant",
   partially_compliant: "Partially compliant",
@@ -32,9 +15,7 @@
   not_applicable: "Not applicable",
   not_assessed: "Not assessed",
 )
-
-// Keyed on the raw enum value, never the label: matching English substrings
-// mis-colours every other locale ("Conforme" contains no "compliant").
+// Keyed on the raw value: labels are localised.
 #let result-color(key) = (
   compliant: rgb("#dcfce7"),
   partially_compliant: rgb("#fef3c7"),
@@ -72,7 +53,7 @@
 #let party = d.at("counterparty", default: none)
 
 #page(header: none, footer: none)[
-  // Ragged on the cover: justified metadata hyphenates addresses mid-word.
+  // Ragged: justified metadata hyphenates addresses.
   #set par(justify: false)
   #align(center + horizon)[
     #text(26pt, weight: "bold", fill: accent)[#d.audit.name]
@@ -129,7 +110,6 @@
         [*Contributors*], [#d.contributors.replace("\n", ", ")],
       )
       #v(1em)
-      // Cheap traceability: which render, of which audit.
       #block(width: 100%)[
         #set text(7.5pt, fill: muted)
         #grid(
@@ -171,8 +151,7 @@
 #v(0.6em)
 
 #for ra in ras [
-  // Breakable on purpose: Typst silently discards content that overflows a
-  // non-breakable block, and `observation` is unbounded text.
+  // Breakable: Typst silently discards overflow from a fixed block.
   #block(
     breakable: true,
     above: 1em,
@@ -184,8 +163,7 @@
       columns: (1fr, auto),
       gutter: 8pt,
       text(weight: "bold")[#field(ra, "ref_id") — #field(ra, "name")],
-      // No badge at all when the verdict is not disclosed — an empty one reads
-      // as "no result recorded", which is a different statement.
+      // No badge rather than an empty one.
       if "result" in ra {
         box(
           fill: result-color(ra.at("result_key", default: "")),
@@ -196,8 +174,6 @@
     )
     #set text(9pt)
     #v(3pt)
-
-    // Absent keys mean the reader's role may not see them — print nothing.
     #let meta = (
       if "status" in ra { ([*Progress:* #ra.status],) } else { () }
         + if "extended_result" in ra and ra.extended_result != "-" {

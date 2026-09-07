@@ -449,6 +449,166 @@ def action_plan_context(assessment, controls, lang="en", linked=None):
     }
 
 
+# Severity is an IntegerChoices whose labels are lowercase keys ("critical"),
+# so the locale template maps them; the raw key also drives the badge colour.
+_SEVERITY_ORDER = [4, 3, 2, 1, 0, -1]
+_SEVERITY_KEYS = {
+    4: "critical",
+    3: "high",
+    2: "medium",
+    1: "low",
+    0: "info",
+    -1: "undefined",
+}
+
+_CLOSED_FINDING_STATUSES = (
+    "dismissed",
+    "mitigated",
+    "resolved",
+    "closed",
+    "deprecated",
+)
+
+
+def findings_assessment_context(assessment, findings, lang="en"):
+    """Payload for the findings report.
+
+    Findings are grouped by severity, worst first: a reader triages by severity,
+    and one block per page (what the HTML template did) turns fifty findings into
+    fifty pages.
+    """
+    metrics = assessment.get_findings_metrics()
+    severity_counts = metrics.get("severity_distribution", {})
+
+    rows = []
+    for finding in findings:
+        rows.append(
+            {
+                "ref_id": finding.ref_id or "-",
+                "name": finding.name or "-",
+                "severity_key": _SEVERITY_KEYS.get(finding.severity, "undefined"),
+                "status_key": finding.status or "--",
+                "description": finding.description or "",
+                "observation": getattr(finding, "observation", "") or "",
+                "owners": ", ".join(str(a) for a in finding.owner.all()) or "-",
+                "eta": _date_str(finding.eta),
+                "due_date": _date_str(finding.due_date),
+                "controls": [c.name for c in finding.applied_controls.all()],
+                "evidences": [e.name for e in finding.evidences.all()],
+                "labels": [str(label) for label in finding.filtering_labels.all()],
+            }
+        )
+
+    groups = [
+        {
+            "severity_key": _SEVERITY_KEYS[value],
+            "findings": [
+                row for row in rows if row["severity_key"] == _SEVERITY_KEYS[value]
+            ],
+        }
+        for value in _SEVERITY_ORDER
+    ]
+    groups = [group for group in groups if group["findings"]]
+
+    closed = sum(
+        count
+        for status, count in metrics.get("status_distribution", {}).items()
+        if status in _CLOSED_FINDING_STATUSES
+    )
+    total = metrics.get("total_count", 0)
+
+    return {
+        "assessment": {
+            "name": assessment.name or "-",
+            "ref_id": assessment.ref_id or "-",
+            "description": assessment.description or "",
+            "category": assessment.get_category_display() or "-",
+            "status": assessment.get_status_display() or "-",
+            "folder": str(assessment.folder) if assessment.folder else "-",
+            "observation": getattr(assessment, "observation", "") or "",
+            "authors": ", ".join(str(a) for a in assessment.authors.all()) or "-",
+            "reviewers": ", ".join(str(r) for r in assessment.reviewers.all()) or "-",
+        },
+        "id": str(assessment.id),
+        "date": now().strftime("%d/%m/%Y"),
+        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        "metrics": {
+            "total": total,
+            "closed": closed,
+            "open": total - closed,
+            "unresolved_important": metrics.get("unresolved_important_count", 0),
+        },
+        "severity_rows": [
+            {
+                "key": _SEVERITY_KEYS[value],
+                "count": severity_counts.get(_SEVERITY_KEYS[value], 0),
+            }
+            for value in _SEVERITY_ORDER
+        ],
+        "groups": groups,
+    }
+
+
+def _timestamp_str(value):
+    return value.strftime("%Y-%m-%d %H:%M:%S") if value else "-"
+
+
+def incident_context(incident, timeline_entries, lang="en"):
+    """Payload for the incident report.
+
+    The timeline is the substance: entries in chronological order, each keyed by
+    its raw `entry_type` so the locale template supplies the label and the accent
+    colour without depending on a translated string.
+    """
+    entries = []
+    for entry in timeline_entries:
+        entries.append(
+            {
+                "entry": entry.entry or "-",
+                "type_key": entry.entry_type or "observation",
+                "timestamp": _timestamp_str(entry.timestamp),
+                "author": str(entry.author) if entry.author else "",
+                "observation": entry.observation or "",
+                "evidences": [e.name for e in entry.evidences.all()],
+            }
+        )
+
+    counts = {}
+    for entry in entries:
+        counts[entry["type_key"]] = counts.get(entry["type_key"], 0) + 1
+
+    return {
+        "incident": {
+            "ref_id": incident.ref_id or "",
+            "name": incident.name or "-",
+            "severity": incident.get_severity_display() or "-",
+            "status": incident.get_status_display() or "-",
+            "detection": incident.get_detection_display() or "-",
+            "folder": str(incident.folder) if incident.folder else "-",
+            "description": incident.description or "",
+            "resolution": getattr(incident, "resolution", "") or "",
+            "is_bcp_activated": bool(incident.is_bcp_activated),
+            "owners": ", ".join(str(o) for o in incident.owners.all()) or "-",
+            "qualifications": [q.name for q in incident.qualifications.all()],
+            "entities": [e.name for e in incident.entities.all()],
+            "assets": [a.name for a in incident.assets.all()],
+            "threats": [t.name for t in incident.threats.all()],
+            "reported_at": _timestamp_str(incident.reported_at),
+            "occurred_at": _timestamp_str(incident.occurred_at),
+            "resolved_at": _timestamp_str(incident.resolved_at),
+        },
+        "id": str(incident.id),
+        "date": now().strftime("%d/%m/%Y"),
+        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        "counts": {
+            "total": len(entries),
+            "detection": counts.get("detection", 0),
+            "mitigation": counts.get("mitigation", 0),
+        },
+        "timeline": entries,
+    }
+
+
 def gen_audit_context(id, tree, lang, assessments=None, charts=True):
     def count_category_results(data):
         def recursive_result_count(node_data):

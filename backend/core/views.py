@@ -70,6 +70,8 @@ from webhooks.service import dispatch_webhook_event
 from .generators import (
     REPORT_PROFILES,
     action_plan_context,
+    findings_assessment_context,
+    incident_context,
     audit_context_for_typst,
     gen_audit_context,
     inline_charts_for_docx,
@@ -16274,7 +16276,9 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
             .select_related("folder")
-            .prefetch_related("applied_controls", "evidences")
+            .prefetch_related(
+                "applied_controls", "evidences", "owner", "filtering_labels"
+            )
             .order_by("ref_id")
         )
 
@@ -16393,59 +16397,17 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
             .select_related("folder")
-            .prefetch_related("applied_controls", "evidences")
+            .prefetch_related(
+                "applied_controls", "evidences", "owner", "filtering_labels"
+            )
             .order_by("ref_id")
         )
-        metrics = findings_assessment.get_findings_metrics()
-
-        # Calculate closed and open findings counts
-        closed_statuses = [
-            Finding.Status.DISMISSED,
-            Finding.Status.MITIGATED,
-            Finding.Status.RESOLVED,
-            Finding.Status.CLOSED,
-            Finding.Status.DEPRECATED,
-        ]
-        open_statuses = [
-            Finding.Status.UNDEFINED,
-            Finding.Status.IDENTIFIED,
-            Finding.Status.CONFIRMED,
-            Finding.Status.ASSIGNED,
-            Finding.Status.IN_PROGRESS,
-        ]
-
-        closed_findings_count = findings.filter(status__in=closed_statuses).count()
-        open_findings_count = findings.filter(status__in=open_statuses).count()
-
-        # Process status distribution with display names
-        status_choices = dict(Finding.Status.choices)
-        processed_status_distribution = []
-        for status, count in metrics["status_distribution"].items():
-            if count > 0:
-                display_name = status_choices.get(
-                    status, status.replace("_", " ").title()
-                )
-                processed_status_distribution.append(
-                    {"status": status, "display_name": display_name, "count": count}
-                )
-
-        context = {
-            "findings_assessment": findings_assessment,
-            "findings": findings,
-            "metrics": metrics,
-            "total_findings": metrics["total_count"],
-            "closed_findings_count": closed_findings_count,
-            "open_findings_count": open_findings_count,
-            "unresolved_important": metrics["unresolved_important_count"],
-            "severity_distribution": metrics["severity_distribution"],
-            "status_distribution": metrics["status_distribution"],
-            "processed_status_distribution": processed_status_distribution,
-            "finding_status_choices": dict(Finding.Status.choices),
-        }
-
-        html = render_to_string("core/findings_assessment_pdf.html", context)
-        pdf_file = HTML(string=html).write_pdf()
-        response = HttpResponse(pdf_file, content_type="application/pdf")
+        lang = request.user.preferences.get("lang") or "en"
+        payload = findings_assessment_context(findings_assessment, findings, lang)
+        response = HttpResponse(
+            render_pdf(localized_template("findings_report", lang), payload),
+            content_type="application/pdf",
+        )
         safe_name = slugify(findings_assessment.name) or "findings_assessment"
         response["Content-Disposition"] = (
             f'attachment; filename="{safe_name}_findings.pdf"'
@@ -16903,24 +16865,12 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             .order_by("timestamp")
         )
 
-        # Count timeline entry types
-        detection_count = timeline_entries.filter(
-            entry_type=TimelineEntry.EntryType.DETECTION
-        ).count()
-        mitigation_count = timeline_entries.filter(
-            entry_type=TimelineEntry.EntryType.MITIGATION
-        ).count()
-
-        context = {
-            "incident": incident,
-            "timeline_entries": timeline_entries,
-            "detection_count": detection_count,
-            "mitigation_count": mitigation_count,
-        }
-
-        html = render_to_string("core/incident_pdf.html", context)
-        pdf_file = HTML(string=html).write_pdf()
-        response = HttpResponse(pdf_file, content_type="application/pdf")
+        lang = request.user.preferences.get("lang") or "en"
+        payload = incident_context(incident, timeline_entries, lang)
+        response = HttpResponse(
+            render_pdf(localized_template("incident_report", lang), payload),
+            content_type="application/pdf",
+        )
         safe_name = slugify(incident.name) or "incident"
         response["Content-Disposition"] = (
             f'attachment; filename="{safe_name}_report.pdf"'
