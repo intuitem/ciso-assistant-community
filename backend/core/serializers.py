@@ -3426,6 +3426,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             fields = [
                 "id",
                 "urn",
+                "parent_urn",
                 "annotation",
                 "name",
                 "description",
