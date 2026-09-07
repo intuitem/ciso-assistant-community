@@ -6271,5 +6271,59 @@
 	"lastAssessmentStatus": "Last assessment status",
 	"lastAssessmentDate": "Last assessment date",
 	"resolveCommitmentBeforeRecurrence": "Resolve the commitment before making this task recurrent.",
-	"neverAssessed": "Never assessed"
+	"neverAssessed": "Never assessed",
+	"quickForm": "Quick form",
+	"quickForms": "Quick forms",
+	"quickFormResponse": "Quick form response",
+	"quickFormResponses": "Quick form responses",
+	"add-quickFormResponse": "New quick form response",
+	"respondents": "Respondents",
+	"startNow": "Start now",
+	"startNowHelpText": "Notify the respondents by email right away. Otherwise use the Start button on the response.",
+	"quickFormRespondentsHelpText": "People or teams expected to fill the form. They are notified when the response starts. Access is governed by their roles, not by this list.",
+	"quickFormReviewersHelpText": "Notified when the response is submitted. Defaults to you when left empty.",
+	"quickFormNotStarted": "Not started: respondents have not been notified yet.",
+	"quickFormStart": "Start and notify respondents",
+	"quickFormSubmit": "Submit",
+	"quickFormReopen": "Reopen",
+	"quickFormClose": "Close",
+	"quickFormIncomplete": "Answer every required question on every visible page before submitting.",
+	"quickFormAnsweredProgress": "{answered} of {total} questions answered",
+	"quickFormComplete": "All required questions are answered.",
+	"quickFormReopenPrompt": "Note for the respondents (optional)",
+	"quickFormReviewerObservation": "Reviewer note",
+	"quickFormHiddenPagesHint": "Some pages are hidden by earlier answers.",
+	"quickFormNoPages": "This form has no visible page.",
+	"computedOutcomes": "Outcomes",
+	"quickFormReadOnly": "This response is read-only in its current status.",
+	"pagesCount": "Pages",
+	"responsesCount": "Responses",
+	"lbDraftNoQuickForm": "No quick form in this library yet. Add one to author its pages and questions in the visual editor.",
+	"addQuickForm": "Add quick form",
+	"lbQuickFormPageTitle": "Library Builder — {name}",
+	"lbDraftPageCount": "{count} page(s)",
+	"builderAddPage": "Add page",
+	"builderAddPageBelow": "Add page below",
+	"builderRequired": "Required",
+	"lbCountQuickForms": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} quick form",
+				"countPlural=other": "{count} quick forms"
+			}
+		}
+	],
+	"builderPageStatus": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Page \u00b7 {count} question",
+				"countPlural=other": "Page \u00b7 {count} questions"
+			}
+		}
+	],
+	"lbDraftSimpleViewPackagedQuickForm": "This quick form is packaged as the library {urn} — switch to the full view for metadata, dependencies, imports and the other content types."
 }

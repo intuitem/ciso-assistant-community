@@ -356,6 +356,18 @@ export const navData = {
 					permissions: ['view_postureassessment']
 				},
 				{
+					name: 'quickFormResponses',
+					fa_icon: 'fa-solid fa-clipboard-question',
+					href: '/quick-form-responses',
+					permissions: ['view_quickformresponse']
+				},
+				{
+					name: 'quickForms',
+					fa_icon: 'fa-solid fa-file-lines',
+					href: '/quick-forms',
+					permissions: ['view_quickform']
+				},
+				{
 					name: 'evidences',
 					fa_icon: 'fa-solid fa-receipt',
 					href: '/evidences'

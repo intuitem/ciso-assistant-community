@@ -286,6 +286,17 @@
 						}}
 					/>
 				</label>
+				{#if builder.mode === 'quick_form'}
+					<label class="flex items-center gap-2 pt-5 text-xs text-surface-600-400 cursor-pointer">
+						<input
+							type="checkbox"
+							checked={question.required ?? true}
+							class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
+							onchange={(e) => saveField('required', e.currentTarget.checked)}
+						/>
+						{m.builderRequired()}
+					</label>
+				{/if}
 				<label class="block">
 					<span class="text-xs text-surface-600-400">{m.annotation()}</span>
 					<input

@@ -2089,6 +2089,22 @@ export const listViewFields = {
 			}
 		}
 	},
+	'quick-forms': {
+		head: ['name', 'description', 'provider', 'pages', 'quickFormResponses', 'domain'],
+		body: ['name', 'description', 'provider', 'pages_count', 'responses_count', 'folder'],
+		meta: ['id', 'urn'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
+	'quick-form-responses': {
+		head: ['name', 'quickForm', 'status', 'respondents', 'dueDate', 'domain'],
+		body: ['name', 'quick_form', 'status', 'respondents', 'due_date', 'folder'],
+		meta: ['id', 'status'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	'compliance-assessments': {
 		head: [
 			'ref_id',

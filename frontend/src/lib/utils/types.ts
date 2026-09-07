@@ -67,6 +67,8 @@ export const URL_MODEL = [
 	'roles',
 	'role-assignments',
 	'compliance-assessments',
+	'quick-forms',
+	'quick-form-responses',
 	'evidences',
 	'evidence-revisions',
 	'frameworks',

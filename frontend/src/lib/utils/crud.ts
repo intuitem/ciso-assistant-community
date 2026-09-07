@@ -1170,6 +1170,57 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reference_controls', urlModel: 'reference-controls' }
 		]
 	},
+	'quick-forms': {
+		name: 'quickform',
+		localName: 'quickForm',
+		localNamePlural: 'quickForms',
+		verboseName: 'Quick form',
+		verboseNamePlural: 'Quick forms',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'provider' },
+			{ field: 'folder' },
+			{ field: 'library' },
+			{ field: 'pages_count' },
+			{ field: 'responses_count' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' }
+		],
+		reverseForeignKeyFields: [{ field: 'quick_form', urlModel: 'quick-form-responses' }]
+	},
+	'quick-form-responses': {
+		name: 'quickformresponse',
+		localName: 'quickFormResponse',
+		localNamePlural: 'quickFormResponses',
+		verboseName: 'Quick form response',
+		verboseNamePlural: 'Quick form responses',
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'quick_form' },
+			{ field: 'folder' },
+			{ field: 'status' },
+			{ field: 'respondents' },
+			{ field: 'reviewers' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'score' },
+			{ field: 'observation' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'quick_form', urlModel: 'quick-forms' },
+			{ field: 'respondents', urlModel: 'actors', urlParams: 'is_third_party=false' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' }
+		],
+		selectFields: [{ field: 'status' }]
+	},
 	evidences: {
 		name: 'evidence',
 		localName: 'evidence',

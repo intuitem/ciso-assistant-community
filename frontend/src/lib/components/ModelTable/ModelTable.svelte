@@ -556,6 +556,8 @@
 				: hasPermissionAnywhere(user, `add_${model.name}`)
 			: false
 	);
+	// Library-managed content: authored in the library builder, never from the table.
+	const LIBRARY_MANAGED_URL_MODELS = ['quick-forms'];
 	let contextMenuCanEditObject = $derived(
 		(model
 			? canPerformActionOnObject({
@@ -572,7 +574,7 @@
 	let contextMenuDisplayEdit = $derived(
 		contextMenuCanEditObject &&
 			URLModel &&
-			!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel)
+			!['frameworks', 'risk-matrices', 'ebios-rm', ...LIBRARY_MANAGED_URL_MODELS].includes(URLModel)
 	);
 
 	let contextMenuCanDeleteObject = $derived(
@@ -906,7 +908,7 @@
 				{#if canSelectObject}
 					{@render selectButton?.()}
 				{/if}
-				{#if canCreateObject && !disableCreate}
+				{#if canCreateObject && !disableCreate && !LIBRARY_MANAGED_URL_MODELS.includes(URLModel)}
 					{@render addButton?.()}
 				{/if}
 			</div>

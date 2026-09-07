@@ -1443,6 +1443,18 @@ export const SecurityExceptionSchema = z.object({
 	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
+export const QuickFormResponseSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	quick_form: z.string(),
+	respondents: z.array(z.string().optional()).optional(),
+	reviewers: z.array(z.string().optional()).optional(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	observation: z.string().optional().nullable(),
+	start_now: z.boolean().default(false).optional()
+});
+
 export const FindingSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
@@ -2154,6 +2166,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'attack-paths': AttackPathSchema,
 	'operational-scenarios': operationalScenarioSchema,
 	'security-exceptions': SecurityExceptionSchema,
+	'quick-form-responses': QuickFormResponseSchema,
 	findings: FindingSchema,
 	'findings-assessments': FindingsAssessmentSchema,
 	'posture-assessments': PostureAssessmentSchema,
