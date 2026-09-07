@@ -5,9 +5,11 @@
 	import Select from './Select.svelte';
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
 	import { get } from 'svelte/store';
+	import { type SuperForm } from 'sveltekit-superforms';
 
 	interface Choice {
 		value: string;
@@ -42,7 +44,7 @@
 	// definitions load so a manual toggle isn't overridden by form edits.
 	let startOpen = $state(false);
 
-	const formData = form.form;
+	const formData = (form as SuperForm<Record<string, any>>).form;
 
 	// Drop values whose definition no longer applies (e.g. after a domain change),
 	// otherwise they linger in the payload and the API rejects them as unknown
@@ -83,11 +85,7 @@
 		const params = new URLSearchParams({ model, visible: 'true', for_folder: folder ?? '' });
 		let loaded: Definition[] | null = null;
 		try {
-			const res = await fetch(`/custom-fields/?${params.toString()}`);
-			if (res.ok) {
-				const data = await res.json();
-				loaded = data.results ?? data;
-			}
+			loaded = await fetchAllPages<Definition>(fetch, `/custom-fields/?${params.toString()}`);
 		} catch (e) {
 			console.error('Failed to load custom field definitions', e);
 		}
@@ -120,6 +118,15 @@
 				{#if def.field_type === 'text'}
 					<TextField
 						{form}
+						field={path}
+						label={def.label_localized}
+						helpText={def.help_text_localized}
+						required={def.required}
+					/>
+				{:else if def.field_type === 'url'}
+					<TextField
+						{form}
+						type="url"
 						field={path}
 						label={def.label_localized}
 						helpText={def.help_text_localized}

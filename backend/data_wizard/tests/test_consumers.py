@@ -9,6 +9,8 @@ Tests are grouped by consumer. Each group covers:
   - Conflict modes (STOP / SKIP / UPDATE) via process_records
 """
 
+from datetime import date
+
 import pytest
 from unittest.mock import patch, MagicMock
 
@@ -455,6 +457,74 @@ class TestEvidenceConsumer:
             {"name": "Audit Log", "folder": str(domain_folder.id)}
         )
         assert found.id == existing.id
+
+    def test_find_existing_is_scoped_to_the_folder(
+        self, base_context, domain_folder, other_folder
+    ):
+        Evidence.objects.create(name="Audit Log", folder=other_folder)
+        consumer = EvidenceRecordConsumer(base_context)
+        assert (
+            consumer.find_existing(
+                {"name": "Audit Log", "folder": str(domain_folder.id)}
+            )
+            is None
+        )
+
+    @pytest.mark.parametrize(
+        "raw,expected",
+        [
+            ("missing", "missing"),
+            ("MISSING", "missing"),
+            ("in_review", "in_review"),
+            ("In review", "in_review"),
+            ("approved", "approved"),
+        ],
+    )
+    def test_status_accepts_key_or_label(self, base_context, raw, expected):
+        consumer = EvidenceRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create({"name": "E", "status": raw}, None)
+        assert error is None
+        assert record_data["status"] == expected
+
+    def test_unknown_status_is_an_error(self, base_context):
+        consumer = EvidenceRecordConsumer(base_context)
+        _, error = consumer.prepare_create({"name": "E", "status": "nope"}, None)
+        assert error is not None and not error.is_warning
+
+    def test_blank_status_falls_back_to_the_model_default(self, base_context):
+        consumer = EvidenceRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create({"name": "E", "status": ""}, None)
+        assert error is None
+        assert "status" not in record_data
+
+    def test_expiry_date_is_normalized(self, base_context):
+        consumer = EvidenceRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create(
+            {"name": "E", "expiry_date": date(2027, 1, 31)}, None
+        )
+        assert record_data["expiry_date"] == "2027-01-31"
+
+    def test_owner_resolved_by_email(self, base_context, admin_user):
+        actor, _ = Actor.objects.get_or_create(user=admin_user)
+        consumer = EvidenceRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "E", "owner": admin_user.email.upper()}, None
+        )
+        assert error is None
+        assert record_data["owner"] == [actor.id]
+
+    def test_owner_column_present_but_blank_clears_the_m2m(self, base_context):
+        consumer = EvidenceRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create({"name": "E", "owner": ""}, None)
+        assert record_data["owner"] == []
+
+    def test_revision_content_is_not_imported(self, base_context):
+        """Definitions only: a link or attachment column must not reach the model."""
+        consumer = EvidenceRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create(
+            {"name": "E", "link": "https://example.com/x", "attachment": "x.pdf"}, None
+        )
+        assert "link" not in record_data and "attachment" not in record_data
 
 
 # ─────────────────────────────────────────────────────────────────────────────

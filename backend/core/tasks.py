@@ -1645,6 +1645,40 @@ def send_assignment_submitted_notification(assignment_id):
 
 
 @task()
+def send_assignment_reopened_notification(assignment_id, observation=""):
+    """Send notification when a RequirementAssignment is reset back to draft for editing."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    context = {
+        "assessment_name": ca.name,
+        "reviewer_observation": observation,
+    }
+
+    for actor in assignment.actor.all():
+        for email in actor.get_emails():
+            if email and check_email_configuration(email, [assignment]):
+                rendered = render_email_template(
+                    "assignment_reopened", context, recipient_email=email
+                )
+                if rendered:
+                    send_notification_email(
+                        rendered["subject"],
+                        rendered["body"],
+                        email,
+                        rendered.get("html_body"),
+                    )
+
+
+@task()
 def send_assignment_reviewed_notification(
     assignment_id, decision, reviewer_observation=""
 ):
@@ -1679,3 +1713,52 @@ def send_assignment_reviewed_notification(
                         email,
                         rendered.get("html_body"),
                     )
+
+
+def notify_audit_assignees(audit) -> list:
+    """Email everyone holding an assignment on *audit*. Returns the actors that failed."""
+    from django.utils.translation import gettext_lazy as _
+
+    failed = []
+    # Driven by the assignments, not by `authors`: an actor can be pointed at an
+    # assignment without being an author, and iterating authors skips them silently.
+    for assignment in audit.requirement_assignments.prefetch_related("actor"):
+        for actor in assignment.actor.all():
+            try:
+                specific = actor.specific
+                if not hasattr(specific, "mailing"):
+                    logger.warning(
+                        "Actor has no mailing method, skipping email",
+                        actor=actor,
+                        actor_type=type(specific).__name__,
+                    )
+                    continue
+                specific.mailing(
+                    email_template_name="tprm/third_party_email.html",
+                    subject=_(
+                        "CISO Assistant: A questionnaire has been assigned to you"
+                    ),
+                    object="auditee-assessments",
+                    object_id=assignment.id,
+                )
+            except Exception as e:
+                logger.error("Failed to send email", actor=actor, error=e)
+                failed.append(str(actor))
+    return failed
+
+
+@task()
+def notify_campaign_assignees(campaign_id):
+    """Send a campaign's notifications off the request thread: a fan-out is one SMTP round trip per audit."""
+    audits = ComplianceAssessment.objects.filter(campaign_id=campaign_id)
+    notified = failed = 0
+    for audit in audits:
+        errors = notify_audit_assignees(audit)
+        failed += len(errors)
+        notified += 1
+    logger.info(
+        "campaign notifications sent",
+        campaign_id=str(campaign_id),
+        audits=notified,
+        failed_actors=failed,
+    )

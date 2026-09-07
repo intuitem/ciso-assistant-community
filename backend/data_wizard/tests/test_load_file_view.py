@@ -16,16 +16,21 @@ Pattern mirrors tprm/test/test_views.py:
   - RBAC-layer classes: real knox token + startup(), no RBAC patch
 """
 
+import io
+
+import openpyxl
 import pytest
 
 from core.models import (
     AppliedControl,
     Asset,
+    Evidence,
     Incident,
     Perimeter,
     Policy,
     ReferenceControl,
     SecurityException,
+    TaskTemplate,
     Threat,
     Vulnerability,
 )
@@ -1750,3 +1755,172 @@ class TestTprmEntityResolutionByName:
         results = resp.json()["results"]
         assert results["entities"]["successful"] == 1, results["entities"]
         assert results["solutions"]["failed"] == 1, results["solutions"]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TaskTemplate `enabled` round-trip
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestTaskTemplateEnabledRoundTrip:
+    """`enabled` must survive export -> re-import, in both directions."""
+
+    def _summary(self, rows):
+        return make_excel_file({"Summary": rows}, "tasks.xlsx").read()
+
+    def test_import_sets_enabled_flag(self, api_client, domain_folder, all_accessible):
+        rows = [
+            {
+                "ref_id": "PC-1",
+                "name": "Retired control",
+                "is_recurrent": "Yes",
+                "schedule_frequency": "MONTHLY",
+                "schedule_interval": 1,
+                "enabled": "No",
+            },
+            {
+                "ref_id": "PC-2",
+                "name": "Live control",
+                "is_recurrent": "Yes",
+                "schedule_frequency": "MONTHLY",
+                "schedule_interval": 1,
+                "enabled": "Yes",
+            },
+        ]
+        resp = _post(
+            api_client,
+            self._summary(rows),
+            "tasks.xlsx",
+            "TaskTemplate",
+            domain_folder.id,
+        )
+        assert resp.status_code == 200
+        assert TaskTemplate.objects.get(ref_id="PC-1").enabled is False
+        assert TaskTemplate.objects.get(ref_id="PC-2").enabled is True
+
+    def test_export_emits_enabled_and_reimport_restores_it(
+        self, api_client, domain_folder, all_accessible
+    ):
+        TaskTemplate.objects.create(
+            ref_id="PC-3",
+            name="Retired control",
+            folder=domain_folder,
+            is_recurrent=True,
+            enabled=False,
+            schedule={"frequency": "MONTHLY", "interval": 1},
+        )
+        export = api_client.get("/api/task-templates/export_xlsx/")
+        assert export.status_code == 200
+
+        summary = openpyxl.load_workbook(io.BytesIO(export.content))["Summary"]
+        header = [c.value for c in summary[1]]
+        row = dict(zip(header, [c.value for c in summary[2]]))
+        assert row["enabled"] == "No"
+
+        # Flip it in the DB, then re-import the untouched export: the exported
+        # "No" has to win, otherwise the round-trip silently re-enables it.
+        TaskTemplate.objects.filter(ref_id="PC-3").update(enabled=True)
+        resp = _post(
+            api_client,
+            export.content,
+            "tasks.xlsx",
+            "TaskTemplate",
+            domain_folder.id,
+            HTTP_X_ON_CONFLICT="update",
+        )
+        assert resp.status_code == 200
+        assert TaskTemplate.objects.get(ref_id="PC-3").enabled is False
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence definitions + task-driven evidence creation, end to end
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestEvidenceImport:
+    def test_import_evidence_definitions(
+        self, api_client, domain_folder, all_accessible
+    ):
+        rows = [
+            {
+                "name": "Access review report",
+                "description": "quarterly export",
+                "status": "In review",
+                "expiry_date": "2027-01-31",
+            },
+            {
+                "name": "Firewall rule export",
+                "description": "",
+                "status": "missing",
+                "expiry_date": "",
+            },
+        ]
+        resp = _post(
+            api_client,
+            make_excel_file({"Sheet1": rows}, "evidences.xlsx").read(),
+            "evidences.xlsx",
+            "Evidence",
+            domain_folder.id,
+        )
+        assert resp.status_code == 200, resp.json()
+        first = Evidence.objects.get(name="Access review report")
+        assert first.status == "in_review"
+        assert str(first.expiry_date) == "2027-01-31"
+        assert first.folder_id == domain_folder.id
+        # Definitions only: nothing was deposited, so no revision is opened.
+        assert first.revisions.count() == 0
+        assert Evidence.objects.get(name="Firewall rule export").status == "missing"
+
+    def test_evidence_template_is_downloadable(self, api_client):
+        resp = api_client.get("/api/data-wizard/templates/Evidence/")
+        assert resp.status_code == 200
+
+    def test_task_import_creates_and_links_named_evidence(
+        self, api_client, domain_folder, all_accessible
+    ):
+        rows = [
+            {
+                "ref_id": "PC-1",
+                "name": "Firewall review",
+                "is_recurrent": "Yes",
+                "schedule_frequency": "MONTHLY",
+                "schedule_interval": 3,
+                "evidences": "Panorama export|Rule diff",
+            }
+        ]
+        resp = _post(
+            api_client,
+            make_excel_file({"Summary": rows}, "tasks.xlsx").read(),
+            "tasks.xlsx",
+            "TaskTemplate",
+            domain_folder.id,
+        )
+        assert resp.status_code == 200, resp.json()
+        template = TaskTemplate.objects.get(ref_id="PC-1")
+        assert sorted(e.name for e in template.evidences.all()) == [
+            "Panorama export",
+            "Rule diff",
+        ]
+        assert all(e.folder_id == domain_folder.id for e in template.evidences.all())
+
+    def test_task_import_reuses_an_evidence_already_defined(
+        self, api_client, domain_folder, all_accessible
+    ):
+        existing = Evidence.objects.create(
+            name="Panorama export", folder=domain_folder, status="approved"
+        )
+        rows = [{"ref_id": "PC-2", "name": "T", "evidences": "panorama export"}]
+        resp = _post(
+            api_client,
+            make_excel_file({"Summary": rows}, "tasks.xlsx").read(),
+            "tasks.xlsx",
+            "TaskTemplate",
+            domain_folder.id,
+        )
+        assert resp.status_code == 200, resp.json()
+        assert list(TaskTemplate.objects.get(ref_id="PC-2").evidences.all()) == [
+            existing
+        ]
+        assert Evidence.objects.filter(name__iexact="panorama export").count() == 1

@@ -13,7 +13,7 @@
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
-	import { getModelInfo, getMarkdownFields } from '$lib/utils/crud';
+	import { getModelInfo, getMarkdownFields, isFieldFlagEnabled } from '$lib/utils/crud';
 	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -76,6 +76,9 @@
 		displayModelTable?: boolean;
 		dateFieldsToFormat?: string[];
 		widgets?: import('svelte').Snippet;
+		/** Lets a caller keep the widget column out of the layout when its only
+		 * widget is behind a feature flag that is off. */
+		widgetsEnabled?: boolean;
 		actions?: import('svelte').Snippet;
 		disableCreate?: boolean;
 		disableEdit?: boolean;
@@ -108,6 +111,7 @@
 			'commission_date'
 		],
 		widgets,
+		widgetsEnabled = true,
 		actions,
 		disableCreate = false,
 		disableEdit = false,
@@ -123,6 +127,8 @@
 	// message key. Countries (data_location_*) are excluded on purpose: their
 	// ~250 labels have no message keys.
 	const translatedValueFieldSet = new Set([
+		'kind',
+		'status',
 		'roc_display',
 		'dora_ict_service_type',
 		'dora_data_sensitiveness',
@@ -140,12 +146,19 @@
 		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
 	};
 
+	// A field declared in flaggedFields disappears with its feature flag.
+	let visibleDetailViewFields = $derived(
+		data.model?.detailViewFields?.filter((fieldConfig) => {
+			const flag = data.model?.flaggedFields?.[fieldConfig.field];
+			return isFieldFlagEnabled(flag, page.data?.featureflags ?? {});
+		})
+	);
+
 	let filteredData = $derived(
-		data.model?.detailViewFields
+		visibleDetailViewFields
 			? Object.fromEntries(
 					Object.entries(data.data).filter(
-						([key, _]) =>
-							data.model.detailViewFields.filter((field) => field.field === key).length > 0
+						([key, _]) => visibleDetailViewFields.filter((field) => field.field === key).length > 0
 					)
 				)
 			: data.data
@@ -153,9 +166,9 @@
 
 	// Get ordered entries based on detailViewFields configuration
 	let orderedEntries = $derived(() => {
-		if (data.model?.detailViewFields) {
+		if (visibleDetailViewFields) {
 			// Return entries in the order specified by detailViewFields
-			return data.model.detailViewFields
+			return visibleDetailViewFields
 				.map((fieldConfig) => [fieldConfig.field, data.data[fieldConfig.field]])
 				.filter(([key, value]) => value !== undefined);
 		} else {
@@ -169,7 +182,7 @@
 		return data.model?.detailViewFields?.find((field) => field.field === fieldName);
 	};
 
-	let hasWidgets = $derived(!!widgets);
+	let hasWidgets = $derived(!!widgets && widgetsEnabled);
 	let relatedFieldNames = $derived(
 		new Set(data.model?.foreignKeyFields?.map((field) => field.field) ?? [])
 	);
@@ -1007,6 +1020,8 @@
 								deleteForm={model.deleteForm}
 								URLModel={urlmodel}
 								expectedCount={getExpectedCount(urlmodel, field)}
+								columnSelector={field?.columnSelector}
+								columnStateKey={`${data.urlModel}:${urlmodel}`}
 								fields={fieldsToUse}
 								defaultFilters={field.defaultFilters || {}}
 								extraBatchActions={tableBatchActions(field)}

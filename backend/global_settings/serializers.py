@@ -447,6 +447,16 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     posture_assessments = serializers.BooleanField(
         source="value.posture_assessments", required=False, default=False
     )
+    commitment_management = serializers.BooleanField(
+        source="value.commitment_management", required=False, default=False
+    )
+    findings_from_requirements = serializers.BooleanField(
+        source="value.findings_from_requirements", required=False, default=False
+    )
+    dora = serializers.BooleanField(source="value.dora", required=False, default=True)
+    external_ratings = serializers.BooleanField(
+        source="value.external_ratings", required=False, default=False
+    )
     jit_provisioning = serializers.BooleanField(
         source="value.jit_provisioning", required=False, default=False
     )

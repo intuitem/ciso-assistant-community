@@ -18,6 +18,7 @@ from core.models import (
     Actor,
     AppliedControl,
     Asset,
+    Evidence,
     FindingsAssessment,
     RiskAssessment,
     RiskMatrix,
@@ -483,3 +484,99 @@ class TestTaskTemplateEndpoint:
         # ref_id survives only if the BOM was stripped from the first header
         template = TaskTemplate.objects.get(name="Bom template")
         assert template.ref_id == "TT-1"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Expected evidence: resolve, else create in the task's domain
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestTaskTemplateEvidenceAutoCreate:
+    def test_unknown_evidence_is_created_in_the_task_folder(
+        self, base_context, domain_folder
+    ):
+        consumer = TaskTemplateRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "Firewall review", "evidences": "Panorama export"}, None
+        )
+        assert error is None, error and error.error
+        evidence = Evidence.objects.get(name="Panorama export")
+        assert evidence.folder_id == domain_folder.id
+        assert record_data["evidences"] == [evidence.id]
+
+    def test_existing_evidence_is_reused_not_duplicated(
+        self, base_context, domain_folder
+    ):
+        existing = Evidence.objects.create(name="Panorama export", folder=domain_folder)
+        consumer = TaskTemplateRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create(
+            {"name": "T", "evidences": "panorama EXPORT"}, None
+        )
+        assert record_data["evidences"] == [existing.id]
+        assert Evidence.objects.filter(name__iexact="panorama export").count() == 1
+
+    def test_several_names_are_split_and_deduplicated(
+        self, base_context, domain_folder
+    ):
+        consumer = TaskTemplateRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create(
+            {"name": "T", "evidences": "A|B,A"}, None
+        )
+        assert len(record_data["evidences"]) == 2
+        assert Evidence.objects.filter(name__in=["A", "B"]).count() == 2
+
+    def test_task_folder_wins_over_a_homonym_elsewhere(
+        self, base_context, domain_folder, other_folder
+    ):
+        Evidence.objects.create(name="Shared name", folder=other_folder)
+        local = Evidence.objects.create(name="Shared name", folder=domain_folder)
+        consumer = TaskTemplateRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create(
+            {"name": "T", "evidences": "Shared name"}, None
+        )
+        assert record_data["evidences"] == [local.id]
+
+    def test_blank_column_links_nothing_and_creates_nothing(
+        self, base_context, domain_folder
+    ):
+        before = Evidence.objects.count()
+        consumer = TaskTemplateRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create({"name": "T", "evidences": ""}, None)
+        assert record_data["evidences"] == []
+        assert Evidence.objects.count() == before
+
+    def test_created_evidence_has_no_revision(self, base_context, domain_folder):
+        """The task declares what is expected; the artifact arrives later."""
+        consumer = TaskTemplateRecordConsumer(base_context)
+        consumer.prepare_create({"name": "T", "evidences": "Deferred proof"}, None)
+        assert Evidence.objects.get(name="Deferred proof").revisions.count() == 0
+
+
+@pytest.mark.django_db
+class TestTaskTemplateEvidenceAuthorization:
+    """Import-time evidence creation is authorized too, but a refusal is a row
+    error rather than a 403 that discards the rest of the file."""
+
+    def test_row_is_refused_without_add_evidence(self, base_context, domain_folder):
+        from unittest.mock import patch
+        from core.models import Evidence
+        from iam.models import RoleAssignment
+
+        real = RoleAssignment.is_access_allowed
+
+        def deny_add_evidence(user, perm, folder=None):
+            if perm.codename == "add_evidence":
+                return False
+            return real(user=user, perm=perm, folder=folder)
+
+        before = Evidence.objects.count()
+        consumer = TaskTemplateRecordConsumer(base_context)
+        with patch.object(
+            RoleAssignment, "is_access_allowed", side_effect=deny_add_evidence
+        ):
+            _, error = consumer.prepare_create(
+                {"name": "T", "evidences": "Unauthorized proof"}, None
+            )
+        assert error is not None and not error.is_warning
+        assert Evidence.objects.count() == before

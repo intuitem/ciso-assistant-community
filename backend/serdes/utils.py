@@ -510,7 +510,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         Q(perimeter__in=perimeters) | Q(folder__in=folders)
     ).distinct()
     findings = Finding.objects.filter(
-        findings_assessment__in=findings_assessments
+        Q(folder__in=folders) | Q(findings_assessment__in=findings_assessments)
     ).distinct()
 
     risk_acceptances = RiskAcceptance.objects.filter(
@@ -526,14 +526,15 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     # incidents/campaigns/findings still make it into the dump (and into
     # loaded_libraries). Rebuild with fresh Q filters rather than queryset
     # union so the result plays nicely with .distinct().
+    campaigns = Campaign.objects.filter(folder__in=folders).distinct()
     entities = Entity.objects.filter(
         Q(folder__in=folders)
         | Q(stakeholders__in=stakeholders)
         | Q(ebios_rm_studies__in=ebios_rm_studies)
         | Q(incidents__in=incidents)
+        | Q(campaigns__in=campaigns)
     ).distinct()
 
-    campaigns = Campaign.objects.filter(folder__in=folders).distinct()
     frameworks = Framework.objects.filter(
         Q(folder__in=folders)
         | Q(complianceassessment__in=compliance_assessments)
@@ -607,6 +608,8 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(stakeholders__in=stakeholders)
         | Q(ebios_rm_studies__in=ebios_rm_studies)
         | Q(incidents__in=incidents)
+        # A third-party campaign's targets are only reachable through the campaign.
+        | Q(campaigns__in=campaigns)
         | Q(pk__in=required_entity_targets)
         | Q(pk__in=optional_entity_targets)
     ).distinct()

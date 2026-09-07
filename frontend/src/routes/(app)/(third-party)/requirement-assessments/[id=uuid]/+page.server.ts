@@ -27,20 +27,28 @@ export const load = (async ({ fetch, params }) => {
 
 	const tables: Record<string, any> = {};
 
-	for (const key of ['applied-controls', 'evidences'] as urlModel[]) {
-		const keyEndpoint = `${BASE_API_URL}/${key}/?requirement_assessments=${params.id}`;
-		const response = await fetch(keyEndpoint);
-		if (response.ok) {
-			const table: TableSource = {
-				head: headData(key),
-				body: [],
-				meta: []
-			};
-			tables[key] = table;
-		} else {
-			console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
-		}
-	}
+	// Only reachability is read — the rows come from the table's own request — so the
+	// probes ask for one row each and run together instead of four blocking round trips.
+	await Promise.all(
+		(['applied-controls', 'task-templates', 'evidences', 'findings'] as urlModel[]).map(
+			async (key) => {
+				// findings hang off the assessment itself; the others off its `requirement_assessments` m2m
+				const filter = key === 'findings' ? 'requirement_assessment' : 'requirement_assessments';
+				const keyEndpoint = `${BASE_API_URL}/${key}/?${filter}=${params.id}&limit=1`;
+				const response = await fetch(keyEndpoint);
+				if (response.ok) {
+					const table: TableSource = {
+						head: headData(key),
+						body: [],
+						meta: []
+					};
+					tables[key] = table;
+				} else {
+					console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
+				}
+			}
+		)
+	);
 
 	return {
 		requirementAssessment,

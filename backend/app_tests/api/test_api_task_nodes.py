@@ -8,6 +8,7 @@ from datetime import timedelta
 import pytest
 from django.utils import timezone
 from core.models import Evidence, EvidenceRevision, TaskNode, TaskTemplate
+from core.views import TaskTemplateViewSet
 from iam.models import Folder
 
 # ── Constants ──────────────────────────────────────────────────────────────
@@ -345,3 +346,186 @@ class TestTaskTemplateSavePruning:
         assert TaskNode.objects.filter(id=node_id).exists(), (
             "Completed node beyond end_date was incorrectly pruned"
         )
+
+
+# ── Sync horizon ──────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestSyncHorizon:
+    """The materialization horizon scales with the period, not the frequency."""
+
+    @pytest.mark.parametrize(
+        "frequency,interval",
+        [
+            ("DAILY", 1),
+            ("DAILY", 30),
+            ("WEEKLY", 1),
+            ("MONTHLY", 1),
+            ("MONTHLY", 3),
+            ("YEARLY", 1),
+            ("YEARLY", 10),
+        ],
+    )
+    def test_node_count_is_bounded_regardless_of_frequency(
+        self, authenticated_client, frequency, interval
+    ):
+        """A daily task and a ten-yearly one cost the same handful of rows."""
+        response = authenticated_client.post(
+            "/api/task-templates/",
+            {
+                "name": f"{frequency}-{interval}",
+                "folder": str(Folder.get_root_folder().id),
+                "is_recurrent": True,
+                "schedule": {"frequency": frequency, "interval": interval},
+            },
+            format="json",
+        )
+        assert response.status_code == 201
+        count = TaskNode.objects.filter(task_template_id=response.json()["id"]).count()
+        assert 1 <= count <= TaskTemplateViewSet.SYNC_MAX_OCCURRENCES + 1, (
+            f"{frequency}/{interval} materialized {count} nodes"
+        )
+
+    @pytest.mark.parametrize(
+        "frequency,interval",
+        [("DAILY", 45), ("WEEKLY", 1), ("MONTHLY", 1), ("MONTHLY", 2), ("MONTHLY", 3)],
+    )
+    def test_a_year_is_covered_when_the_period_allows(
+        self, authenticated_client, frequency, interval
+    ):
+        """Planning views read nodes without generating them, so the year must exist."""
+        response = authenticated_client.post(
+            "/api/task-templates/",
+            {
+                "name": f"{frequency}-{interval}-year",
+                "folder": str(Folder.get_root_folder().id),
+                "is_recurrent": True,
+                "schedule": {"frequency": frequency, "interval": interval},
+            },
+            format="json",
+        )
+        assert response.status_code == 201
+        today = timezone.localdate()
+        # The horizon spans the year; occurrences land on multiples of the period,
+        # so the last one sits within one period of the boundary rather than on it.
+        assert (
+            TaskTemplateViewSet._sync_end_date(
+                {"frequency": frequency, "interval": interval}, today
+            )
+            >= today + TaskTemplateViewSet.SYNC_MIN_HORIZON
+        ), f"{frequency}/{interval} horizon stops short of a year"
+        count = TaskNode.objects.filter(task_template_id=response.json()["id"]).count()
+        assert count > TaskTemplateViewSet.SYNC_AHEAD_OCCURRENCES + 1, (
+            f"{frequency}/{interval} produced only {count} nodes, "
+            "so the year-coverage minimum did not take effect"
+        )
+
+    def test_a_short_period_is_bounded_rather_than_covering_a_year(self):
+        """A daily task would be 365 rows; the occurrence budget wins over the year."""
+        today = timezone.localdate()
+        end = TaskTemplateViewSet._sync_end_date(
+            {"frequency": "DAILY", "interval": 1}, today
+        )
+        assert (end - today).days <= TaskTemplateViewSet.SYNC_MAX_OCCURRENCES + 1
+
+    def test_horizon_never_falls_below_the_minimum_for_a_long_period(self):
+        today = timezone.localdate()
+        assert (
+            TaskTemplateViewSet._sync_end_date(
+                {"frequency": "MONTHLY", "interval": 2}, today
+            )
+            >= today + TaskTemplateViewSet.SYNC_MIN_HORIZON
+        )
+
+    def test_horizon_stops_at_recurrence_end_date(self):
+        today = timezone.localdate()
+        end = today + timedelta(days=5)
+        assert (
+            TaskTemplateViewSet._sync_end_date(
+                {"frequency": "MONTHLY", "interval": 1, "end_date": str(end)}, today
+            )
+            == end
+        )
+
+    def test_horizon_is_capped_for_very_long_periods(self):
+        today = timezone.localdate()
+        assert (
+            TaskTemplateViewSet._sync_end_date(
+                {"frequency": "YEARLY", "interval": 10}, today
+            )
+            == today + TaskTemplateViewSet.SYNC_HORIZON_CAP
+        )
+
+    def test_horizon_tolerates_schedule_without_interval(self):
+        today = timezone.localdate()
+        # interval defaults to 1, so weekly reaches the one-year minimum
+        assert (
+            TaskTemplateViewSet._sync_end_date(
+                {"frequency": "WEEKLY", "days_of_week": [0]}, today
+            )
+            == today + TaskTemplateViewSet.SYNC_MIN_HORIZON
+        )
+
+
+# ── Disabled templates ────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestDisabledTemplate:
+    """A disabled template must not generate occurrences."""
+
+    def test_disabled_template_generates_no_nodes(self, authenticated_client):
+        response = authenticated_client.post(
+            "/api/task-templates/",
+            {
+                "name": "Retired control",
+                "folder": str(Folder.get_root_folder().id),
+                "is_recurrent": True,
+                "enabled": False,
+                "schedule": {"frequency": "MONTHLY", "interval": 1},
+            },
+            format="json",
+        )
+        assert response.status_code == 201
+        assert (
+            TaskNode.objects.filter(task_template_id=response.json()["id"]).count() == 0
+        )
+
+    def test_disabling_retires_pending_future_nodes(self, authenticated_client):
+        folder = Folder.get_root_folder()
+        start = _next_monday()
+        template = _make_weekly_template(folder, start)
+        authenticated_client.get(_calendar_url(start, start + timedelta(weeks=4)))
+        assert TaskNode.objects.filter(task_template=template).count() > 0
+
+        authenticated_client.patch(
+            f"/api/task-templates/{template.id}/",
+            {"enabled": False},
+            format="json",
+        )
+
+        assert (
+            TaskNode.objects.filter(
+                task_template=template, status="pending", due_date__gte=start
+            ).count()
+            == 0
+        )
+
+    def test_disabling_preserves_completed_nodes(self, authenticated_client):
+        folder = Folder.get_root_folder()
+        start = _next_monday()
+        template = _make_weekly_template(folder, start)
+        authenticated_client.get(_calendar_url(start, start + timedelta(weeks=4)))
+
+        node = TaskNode.objects.filter(task_template=template).first()
+        node.status = "completed"
+        node.save(update_fields=["status"])
+
+        authenticated_client.patch(
+            f"/api/task-templates/{template.id}/",
+            {"enabled": False},
+            format="json",
+        )
+
+        assert TaskNode.objects.filter(id=node.id).exists()

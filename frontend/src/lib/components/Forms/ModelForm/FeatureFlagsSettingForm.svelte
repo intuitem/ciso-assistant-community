@@ -83,7 +83,7 @@
 				},
 				{
 					field: 'follow_up',
-					label: m.followUp(),
+					label: m.findingsManagement(),
 					description: m.findingsAssessmentsDescription()
 				},
 				{
@@ -116,6 +116,11 @@
 					field: 'contracts',
 					label: m.contracts(),
 					description: m.contractsDescription()
+				},
+				{
+					field: 'external_ratings',
+					label: m.externalRatings(),
+					description: m.externalRatingsDescription()
 				},
 				{
 					field: 'validation_flows',
@@ -159,6 +164,11 @@
 					description: m.campaignsDescription()
 				},
 				{
+					field: 'findings_from_requirements',
+					label: m.findingsFromRequirements(),
+					description: m.findingsFromRequirementsDescription()
+				},
+				{
 					field: 'auditee_mode',
 					label: m.auditeeMode(),
 					description: m.auditeeModeDescription()
@@ -177,6 +187,16 @@
 					field: 'posture_assessments',
 					label: m.postureAssessments(),
 					description: m.postureAssessmentsDescription()
+				},
+				{
+					field: 'commitment_management',
+					label: m.commitmentManagement(),
+					description: m.commitmentManagementDescription()
+				},
+				{
+					field: 'dora',
+					label: m.dora(),
+					description: m.doraFlagDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},
