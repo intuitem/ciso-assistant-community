@@ -1155,6 +1155,7 @@
 	"secret": "Secret",
 	"key": "Clé",
 	"customFields": "Champs personnalisés",
+	"customFieldsLoadError": "Les champs personnalisés n'ont pas pu être chargés. Resélectionnez le domaine ou rouvrez le formulaire pour réessayer.",
 	"customFieldsDescription": "Définir des champs typés et filtrables sur les objets (projets, actifs et contrôles appliqués).",
 	"customField": "Champ personnalisé",
 	"addCustomField": "Ajouter un champ personnalisé",

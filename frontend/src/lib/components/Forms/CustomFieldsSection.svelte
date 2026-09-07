@@ -44,17 +44,24 @@
 	// definitions load so a manual toggle isn't overridden by form edits.
 	let startOpen = $state(false);
 
-	const formData = (form as SuperForm<Record<string, any>>).form;
+	/** Host form data; `custom_fields` is absent on create forms until a field mounts. */
+	type HostFormData = Record<string, unknown> & { custom_fields?: Record<string, unknown> };
 
-	// Drop values whose definition no longer applies (e.g. after a domain change),
-	// otherwise they linger in the payload and the API rejects them as unknown
-	// keys. Payload-only: absent keys never touch values stored server-side.
-	function pruneStaleValues(validKeys: Set<string>) {
+	/** The host form's superforms data store, read and pruned here. */
+	const formData = (form as SuperForm<HostFormData>).form;
+
+	/**
+	 * Drop values whose definition no longer applies (e.g. after a domain change),
+	 * otherwise they linger in the payload and the API rejects them as unknown keys.
+	 * Payload-only: absent keys never touch values stored server-side.
+	 */
+	function pruneStaleValues(definitions: Definition[]) {
+		const validKeys = new Set(definitions.map((definition) => definition.key));
 		const current = get(formData)?.custom_fields;
 		if (!current || !Object.keys(current).some((key) => !validKeys.has(key))) return;
 		formData.update(
-			(data: any) => {
-				if (data?.custom_fields) {
+			(data) => {
+				if (data.custom_fields) {
 					for (const key of Object.keys(data.custom_fields)) {
 						if (!validKeys.has(key)) delete data.custom_fields[key];
 					}
@@ -65,9 +72,16 @@
 		);
 	}
 
-	// `false` excluded: the checkbox binding fabricates it on mount.
-	const hasValue = (v: unknown) =>
-		v != null && v !== false && v !== '' && !(Array.isArray(v) && v.length === 0);
+	/**
+	 * Mirrors the API's `_is_empty`. `false` counts as empty because the checkbox
+	 * binding fabricates it on mount, so it never signals a value worth showing.
+	 */
+	const isEmptyValue = (v: unknown): boolean =>
+		v == null ||
+		v === false ||
+		v === '' ||
+		(Array.isArray(v) && v.length === 0) ||
+		(typeof v === 'object' && Object.keys(v).length === 0);
 
 	let loadSeq = 0;
 
@@ -90,14 +104,17 @@
 			console.error('Failed to load custom field definitions', e);
 		}
 		if (seq !== loadSeq) return;
-		// On failure render nothing rather than another folder's fields: the
-		// payload must only ever carry keys of currently rendered definitions.
-		definitions = loaded ?? [];
-		loadFailed = loaded === null;
-		pruneStaleValues(new Set(definitions.map((d) => d.key)));
+		if (loaded === null) {
+			// Render nothing rather than another folder's fields, but leave the
+			// values alone: nothing says which keys are still valid.
+			loadFailed = true;
+			return;
+		}
+		definitions = loaded;
+		pruneStaleValues(loaded);
 		startOpen =
-			definitions.some((d) => d.required) ||
-			Object.values(get(formData)?.custom_fields ?? {}).some(hasValue);
+			loaded.some((d) => d.required) ||
+			Object.values(get(formData)?.custom_fields ?? {}).some((v) => !isEmptyValue(v));
 	}
 
 	$effect(() => {
