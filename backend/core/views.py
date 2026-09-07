@@ -16045,8 +16045,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             return severity_chart_data
 
         def format_status_data(metrics):
-            # Colorblind-safe qualitative palette (Paul Tol's muted scheme) so no two
-            # statuses rely on a red-vs-green distinction to be told apart.
             status_mapping = {
                 "identified": {"localName": "identified", "color": "#DDCC77"},
                 "confirmed": {"localName": "confirmed", "color": "#CC6677"},
