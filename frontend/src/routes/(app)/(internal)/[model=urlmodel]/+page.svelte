@@ -56,8 +56,9 @@
 
 	// These actions run synchronously in the request (catalog pulls, bulk
 	// updates), so the page holds a single in-flight slot: a second click would
-	// start a second import. The lock is per model so that navigating to another
-	// list while a pull runs does not carry its loading state along.
+	// start a second import. Every button is disabled while the slot is taken;
+	// the loading bar and placeholder rows only show on the model the action
+	// belongs to, so navigating to another list does not carry them along.
 	const remoteActions = {
 		kev: {
 			model: 'security-advisories',
@@ -78,6 +79,7 @@
 	} as const;
 	type RemoteAction = keyof typeof remoteActions;
 	let runningAction = $state<RemoteAction | null>(null);
+	const isBusy = $derived(runningAction !== null);
 	const isSyncing = $derived(
 		runningAction !== null && remoteActions[runningAction].model === URLModel
 	);
@@ -85,21 +87,21 @@
 	async function runRemoteAction(action: RemoteAction) {
 		if (runningAction) return;
 		runningAction = action;
-		const { endpoint, failed } = remoteActions[action];
+		const { model, endpoint, failed } = remoteActions[action];
 		try {
 			const res = await fetch(endpoint, { method: 'POST' });
 			// A gateway error or a crashed passthrough does not carry the
 			// backend's detail/error shape, so fall back to a real message.
 			const result = await res.json().catch(() => ({}));
 			toastStore.trigger({
-				message: result.detail || result.error || (res.ok ? result.message : failed()),
+				message: result.detail || result.error || (res.ok ? m.done() : failed()),
 				preset: res.ok ? 'success' : 'error'
 			});
 			if (res.ok) {
-				// Refetch the rows through the table's own handler and wait for
-				// them, so the buttons only unlock once the new rows have landed.
-				const handler = $tableHandlers[`/${URLModel}`];
-				if (handler) await handler.invalidate();
+				// The import is done at this point; refetch the rows of the table
+				// the action belongs to (the user may have navigated away since).
+				const handler = $tableHandlers[`/${model}`];
+				if (handler) handler.invalidate();
 				else await invalidateAll();
 			}
 		} catch {
@@ -414,7 +416,7 @@
 										title={m.refreshDueDates()}
 										aria-label={m.refreshDueDates()}
 										data-testid="refresh-due-dates-button"
-										disabled={isSyncing}
+										disabled={isBusy}
 										onclick={() =>
 											confirmRemoteAction(
 												'refresh-due-dates',
@@ -461,7 +463,7 @@
 										title={m.syncKev()}
 										aria-label={m.syncKev()}
 										data-testid="sync-kev-button"
-										disabled={isSyncing}
+										disabled={isBusy}
 										onclick={() => confirmRemoteAction('kev', m.pullCatalog(), m.syncKev())}
 									>
 										{#if runningAction === 'kev'}
@@ -475,7 +477,7 @@
 										title={m.syncEuvd()}
 										aria-label={m.syncEuvd()}
 										data-testid="sync-euvd-button"
-										disabled={isSyncing}
+										disabled={isBusy}
 										onclick={() => confirmRemoteAction('euvd', m.pullCatalog(), m.syncEuvd())}
 									>
 										{#if runningAction === 'euvd'}
@@ -500,7 +502,7 @@
 										title={m.syncCweCatalog()}
 										aria-label={m.syncCweCatalog()}
 										data-testid="sync-cwe-button"
-										disabled={isSyncing}
+										disabled={isBusy}
 										onclick={() => runRemoteAction('cwe')}
 									>
 										{#if runningAction === 'cwe'}
