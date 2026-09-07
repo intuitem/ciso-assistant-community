@@ -1415,9 +1415,39 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         self._process_request_data(request)
         return super().partial_update(request, *args, **kwargs)
 
+    def get_protected_error_response_data(
+        self, instance, error: ProtectedError
+    ) -> dict:
+        """
+        Build the JSON body returned when a delete is blocked by an
+        on_delete=PROTECT foreign key. Override in a subclass to describe the
+        blockers more specifically (see EntityViewSet, ElementaryActionViewSet);
+        the default here falls back to Django's own protected_objects so it
+        stays accurate for whichever relation actually blocked the delete.
+        """
+        protected_objects = list(error.protected_objects)
+        names = ", ".join(str(obj) for obj in protected_objects[:10])
+        if len(protected_objects) > 10:
+            names += ", ..."
+        return {
+            "detail": (
+                f"Cannot delete this {instance._meta.verbose_name} "
+                f"('{instance}'): it is still referenced by other objects"
+                + (f" ({names})" if names else "")
+                + ". Remove those references first."
+            )
+        }
+
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
-        return super().destroy(request, *args, **kwargs)
+        instance = self.get_object()
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError as e:
+            return Response(
+                self.get_protected_error_response_data(instance, e),
+                status=status.HTTP_409_CONFLICT,
+            )
 
     @action(detail=False, methods=["post"], url_path="batch-action")
     def batch_action(self, request):
@@ -8308,21 +8338,6 @@ class FolderViewSet(BaseModelViewSet):
         """
         folder = serializer.save()
         Folder.create_default_ug_and_ra(folder)
-
-    def destroy(self, request, *args, **kwargs):
-        try:
-            return super().destroy(request, *args, **kwargs)
-        except ProtectedError:
-            return Response(
-                {
-                    "detail": (
-                        "Cannot delete this domain: it still contains elements "
-                        "referenced elsewhere (e.g. elementary actions used in an "
-                        "operating mode scenario). Remove those references first."
-                    )
-                },
-                status=status.HTTP_409_CONFLICT,
-            )
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
