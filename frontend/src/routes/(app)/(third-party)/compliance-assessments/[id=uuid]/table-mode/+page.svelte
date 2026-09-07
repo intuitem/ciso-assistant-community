@@ -183,7 +183,7 @@
 	// Patch fields; returns false on a rejected backend write
 	async function updateBulk(
 		requirementAssessment: Record<string, any>,
-		data: { [key: string]: string | number | boolean | null }
+		data: Record<string, unknown>
 	) {
 		const form = document.getElementById(
 			`tableModeForm-${requirementAssessment.id}`
@@ -633,7 +633,7 @@
 		{/if}
 		{#if cfg.items?.length}
 			<div class="flex flex-wrap gap-2">
-				{#each cfg.items as item}
+				{#each cfg.items as item (item.id)}
 					<Anchor
 						class="inline-flex items-center gap-2 rounded-md border border-surface-200-800 bg-surface-50-950 px-2.5 py-1 text-sm text-surface-800-200 transition-colors hover:border-primary-300-700 hover:bg-primary-50-950"
 						href="{cfg.hrefBase}/{item.id}"
@@ -852,7 +852,7 @@
 									role="img"
 									aria-label="{m.progress()}: {assessedCount}/{assessableTotal}"
 								>
-									{#each resultCounts as opt}
+									{#each resultCounts as opt (opt.value)}
 										{#if opt.count > 0}
 											{@const pct = (opt.count / assessableTotal) * 100}
 											<div
@@ -928,7 +928,7 @@
 				>
 					{#if showResult}
 						<div class="flex flex-wrap gap-1 pb-2 mb-1 border-b border-surface-200-800">
-							{#each resultCounts as opt}
+							{#each resultCounts as opt (opt.value)}
 								{#if opt.count > 0}
 									<button
 										type="button"
@@ -951,7 +951,7 @@
 						</div>
 					{/if}
 					<div class="space-y-0.5">
-						{#each filteredTocSections as section}
+						{#each filteredTocSections as section (section.id)}
 							{#if section.isSection}
 								<button
 									type="button"
@@ -1017,7 +1017,7 @@
 					</div>
 				{/if}
 				<ul data-testid="requirement-assessments" class="space-y-3">
-					{#each requirementAssessments as requirementAssessment, i}
+					{#each requirementAssessments as requirementAssessment, i (requirementAssessment.id)}
 						{@const row = sectionInfo.rows[i]}
 						{#if isRowVisible(i)}
 							<li class="list-none">
@@ -1446,7 +1446,7 @@
 																</p>
 															{:else}
 																<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
-																	{#each requirementAssessment.applied_controls as item}
+																	{#each requirementAssessment.applied_controls as item (item.id)}
 																		<Anchor
 																			class="anchor"
 																			href="/applied-controls/{item.id}"
@@ -1468,7 +1468,7 @@
 																</p>
 															{:else}
 																<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
-																	{#each requirementAssessment.evidences as item}
+																	{#each requirementAssessment.evidences as item (item.id)}
 																		<Anchor
 																			class="anchor"
 																			href="/evidences/{item.id}"
