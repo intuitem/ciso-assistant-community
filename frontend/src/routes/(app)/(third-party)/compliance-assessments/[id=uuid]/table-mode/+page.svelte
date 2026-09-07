@@ -904,7 +904,7 @@
 			</div>
 		{/if}
 		<!-- Read-only banner -->
-		{#if complianceAssessment.is_locked || complianceAssessment.status === 'in_review'}
+		{#if isReadOnly}
 			<div
 				class="card bg-warning-50-950 border border-warning-300-700 px-5 py-3 flex items-center space-x-3 my-2"
 			>
@@ -912,7 +912,9 @@
 				<p class="text-warning-800-200 font-medium">
 					{complianceAssessment.is_locked
 						? m.lockedAssessmentMessage()
-						: m.assessmentInReviewMessage()}
+						: complianceAssessment.status === 'in_review'
+							? m.assessmentInReviewMessage()
+							: m.readOnlyNoChangePermissionMessage()}
 				</p>
 			</div>
 		{/if}
