@@ -12,7 +12,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { buildCustomFieldFilters, listViewFields } from '$lib/utils/table';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { driverInstance } from '$lib/utils/stores';
+	import { driverInstance, tableHandlers } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import type { ActionData, PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -54,41 +54,68 @@
 		currentFilterSearch = data.urlSearch;
 	});
 
-	// A pull runs synchronously in the request, so both buttons stay locked until
-	// it settles: a second click would start a second import.
-	type SyncFeed = 'kev' | 'euvd';
-	let syncingFeed = $state<SyncFeed | null>(null);
-	const isSyncing = $derived(syncingFeed !== null);
+	// These actions run synchronously in the request (catalog pulls, bulk
+	// updates), so the page holds a single in-flight slot: a second click would
+	// start a second import. The lock is per model so that navigating to another
+	// list while a pull runs does not carry its loading state along.
+	const remoteActions = {
+		kev: {
+			model: 'security-advisories',
+			endpoint: '/security-advisories/sync-kev',
+			failed: m.syncKevFailed
+		},
+		euvd: {
+			model: 'security-advisories',
+			endpoint: '/security-advisories/sync-euvd',
+			failed: m.syncEuvdFailed
+		},
+		cwe: { model: 'cwes', endpoint: '/cwes/sync-catalog', failed: m.syncCweCatalogFailed },
+		'refresh-due-dates': {
+			model: 'vulnerabilities',
+			endpoint: '/vulnerabilities/refresh-due-dates',
+			failed: m.refreshDueDatesFailed
+		}
+	} as const;
+	type RemoteAction = keyof typeof remoteActions;
+	let runningAction = $state<RemoteAction | null>(null);
+	const isSyncing = $derived(
+		runningAction !== null && remoteActions[runningAction].model === URLModel
+	);
 
-	async function runSync(feed: SyncFeed) {
-		if (syncingFeed) return;
-		syncingFeed = feed;
+	async function runRemoteAction(action: RemoteAction) {
+		if (runningAction) return;
+		runningAction = action;
+		const { endpoint, failed } = remoteActions[action];
 		try {
-			const res = await fetch(`/security-advisories/sync-${feed}`, { method: 'POST' });
-			const result = await res.json();
+			const res = await fetch(endpoint, { method: 'POST' });
+			// A gateway error or a crashed passthrough does not carry the
+			// backend's detail/error shape, so fall back to a real message.
+			const result = await res.json().catch(() => ({}));
 			toastStore.trigger({
-				message: result.detail || result.error,
+				message: result.detail || result.error || (res.ok ? result.message : failed()),
 				preset: res.ok ? 'success' : 'error'
 			});
-			// Awaited so the buttons only unlock once the new rows have landed.
-			if (res.ok) await invalidateAll();
+			if (res.ok) {
+				// Refetch the rows through the table's own handler and wait for
+				// them, so the buttons only unlock once the new rows have landed.
+				const handler = $tableHandlers[`/${URLModel}`];
+				if (handler) await handler.invalidate();
+				else await invalidateAll();
+			}
 		} catch {
-			toastStore.trigger({
-				message: feed === 'kev' ? m.syncKevFailed() : m.syncEuvdFailed(),
-				preset: 'error'
-			});
+			toastStore.trigger({ message: failed(), preset: 'error' });
 		} finally {
-			syncingFeed = null;
+			runningAction = null;
 		}
 	}
 
-	function confirmSync(feed: SyncFeed) {
+	function confirmRemoteAction(action: RemoteAction, title: string, body: string) {
 		modalStore.trigger({
 			type: 'confirm',
-			title: m.pullCatalog(),
-			body: feed === 'kev' ? m.syncKev() : m.syncEuvd(),
+			title,
+			body,
 			response: (confirmed: boolean) => {
-				if (confirmed) runSync(feed);
+				if (confirmed) runRemoteAction(action);
 			}
 		});
 	}
@@ -383,37 +410,24 @@
 								{/if}
 								{#if URLModel === 'vulnerabilities'}
 									<button
-										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative disabled:opacity-50 disabled:cursor-not-allowed"
 										title={m.refreshDueDates()}
 										aria-label={m.refreshDueDates()}
 										data-testid="refresh-due-dates-button"
-										onclick={() => {
-											modalStore.trigger({
-												type: 'confirm',
-												title: m.refreshDueDates(),
-												body: m.refreshDueDatesConfirm(),
-												response: async (confirmed) => {
-													if (!confirmed) return;
-													try {
-														const res = await fetch('/vulnerabilities/refresh-due-dates', {
-															method: 'POST'
-														});
-														const result = await res.json();
-														toastStore.trigger({
-															message: result.detail || result.error,
-															preset: res.ok ? 'success' : 'error'
-														});
-														if (res.ok) invalidateAll();
-													} catch {
-														toastStore.trigger({
-															message: m.refreshDueDatesFailed(),
-															preset: 'error'
-														});
-													}
-												}
-											});
-										}}><i class="fa-solid fa-clock-rotate-left"></i></button
+										disabled={isSyncing}
+										onclick={() =>
+											confirmRemoteAction(
+												'refresh-due-dates',
+												m.refreshDueDates(),
+												m.refreshDueDatesConfirm()
+											)}
 									>
+										{#if runningAction === 'refresh-due-dates'}
+											<i class="fa-solid fa-spinner animate-spin"></i>
+										{:else}
+											<i class="fa-solid fa-clock-rotate-left"></i>
+										{/if}
+									</button>
 								{/if}
 								{#if URLModel === 'applied-controls'}
 									<a
@@ -448,9 +462,9 @@
 										aria-label={m.syncKev()}
 										data-testid="sync-kev-button"
 										disabled={isSyncing}
-										onclick={() => confirmSync('kev')}
+										onclick={() => confirmRemoteAction('kev', m.pullCatalog(), m.syncKev())}
 									>
-										{#if syncingFeed === 'kev'}
+										{#if runningAction === 'kev'}
 											<i class="fa-solid fa-spinner animate-spin"></i>
 										{:else}
 											🇺🇸
@@ -462,9 +476,9 @@
 										aria-label={m.syncEuvd()}
 										data-testid="sync-euvd-button"
 										disabled={isSyncing}
-										onclick={() => confirmSync('euvd')}
+										onclick={() => confirmRemoteAction('euvd', m.pullCatalog(), m.syncEuvd())}
 									>
-										{#if syncingFeed === 'euvd'}
+										{#if runningAction === 'euvd'}
 											<i class="fa-solid fa-spinner animate-spin"></i>
 										{:else}
 											🇪🇺
@@ -482,27 +496,19 @@
 								{/if}
 								{#if URLModel === 'cwes'}
 									<button
-										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative disabled:opacity-50 disabled:cursor-not-allowed"
 										title={m.syncCweCatalog()}
 										aria-label={m.syncCweCatalog()}
 										data-testid="sync-cwe-button"
-										onclick={async () => {
-											try {
-												const res = await fetch('/cwes/sync-catalog', { method: 'POST' });
-												const result = await res.json();
-												toastStore.trigger({
-													message: result.detail || result.error,
-													preset: res.ok ? 'success' : 'error'
-												});
-												if (res.ok) invalidateAll();
-											} catch {
-												toastStore.trigger({
-													message: m.syncCweCatalogFailed(),
-													preset: 'error'
-												});
-											}
-										}}><i class="fa-solid fa-satellite-dish"></i></button
+										disabled={isSyncing}
+										onclick={() => runRemoteAction('cwe')}
 									>
+										{#if runningAction === 'cwe'}
+											<i class="fa-solid fa-spinner animate-spin"></i>
+										{:else}
+											<i class="fa-solid fa-satellite-dish"></i>
+										{/if}
+									</button>
 								{/if}
 								{#if ['threats', 'reference-controls', 'metric-definitions'].includes(URLModel)}
 									{@const title =

@@ -362,13 +362,8 @@ test.describe('Security Advisories', () => {
 		});
 
 		await test.step('confirm the pull', async () => {
-			// The first-login welcome modal can land after the login fixture
-			// checked for it, and dismissing it clears the modal store — which
-			// would swallow the confirm modal opened by this click.
-			await expect(async () => {
-				await kevButton.click();
-				await expect(modal).toBeVisible({ timeout: 2_000 });
-			}).toPass({ timeout: 20_000 });
+			await kevButton.click();
+			await expect(modal).toBeVisible();
 			await modal.getByRole('button', { name: /confirm/i }).click();
 		});
 
