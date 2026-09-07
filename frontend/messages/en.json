@@ -2919,6 +2919,7 @@
 	"actor": "Actor",
 	"action": "Action",
 	"objectRepr": "Object",
+	"remoteAddr": "Source IP",
 	"value": "Value",
 	"displayValue": "Value",
 	"currentValue": "Current Value",
