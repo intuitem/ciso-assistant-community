@@ -8123,106 +8123,88 @@ class UserViewSet(BaseModelViewSet):
             )
         )
 
+    # Fields whose change on a direct administrator could end in a zero-admin
+    # lockout: group membership (stripping BI-UG-ADM) and the lifecycle fields
+    # that deactivate, now or on expiry.
+    LOCKOUT_SENSITIVE_FIELDS = ("user_groups", "is_active", "expiry_date")
+
     def update(self, request: Request, *args, **kwargs) -> Response:
         user = self.get_object()
-        # This form edits DIRECT group membership only, so the guard protects the
-        # last *directly*-managed (BI-UG-ADM) administrator — the lockout-proof
-        # anchor that SCIM/IdP can never reach and that must always exist.
-        # Admins inherited via an IdP group are managed by the IdP, not here, so
-        # they neither gate this check nor count toward it.
-        # Only relevant when the request actually rewrites group membership;
-        # a partial edit that omits user_groups can't strip the admin group.
+        # The checks themselves live in UserWriteSerializer
+        # (_enforce_last_admin_group, _enforce_last_active_admin) so that
+        # batch_action — which drives the serializer directly, never this
+        # method — is covered by the same guards. All this adds is the lock
+        # that keeps them from racing a concurrent admin removal into a
+        # zero-admin lockout.
+        # NOTE: select_for_update is a no-op on SQLite, which has no
+        # SELECT ... FOR UPDATE; the checks still hold there, only the race
+        # window stays open.
         if (
-            "user_groups" in request.data
+            any(field in request.data for field in self.LOCKOUT_SENSITIVE_FIELDS)
             and user.user_groups.filter(name="BI-UG-ADM").exists()
         ):
-            with transaction.atomic():
-                # Lock the admin group row so this check-then-act can't race a
-                # concurrent admin-membership change into a zero-admin lockout.
-                admin_group = (
-                    UserGroup.objects.select_for_update()
-                    .filter(name="BI-UG-ADM")
-                    .first()
-                )
-                direct_admin_count = User.objects.filter(
-                    user_groups__name="BI-UG-ADM"
-                ).count()
-                if direct_admin_count == 1 and admin_group is not None:
-                    new_user_groups = set(request.data["user_groups"])
-                    if str(admin_group.pk) not in new_user_groups:
-                        return Response(
-                            {"error": "attemptToRemoveOnlyAdminUserGroup"},
-                            status=status.HTTP_403_FORBIDDEN,
-                        )
-                return super().update(request, *args, **kwargs)
-
-        # Deactivation (or deferred deactivation via expiry_date) of a direct
-        # admin runs under the same admin-group lock, so the serializer's
-        # last-active-admin check can't race a concurrent deactivation into a
-        # zero-admin lockout.
-        if (
-            "is_active" in request.data or "expiry_date" in request.data
-        ) and user.user_groups.filter(name="BI-UG-ADM").exists():
             with transaction.atomic():
                 UserGroup.objects.select_for_update().filter(name="BI-UG-ADM").first()
                 return super().update(request, *args, **kwargs)
 
         return super().update(request, *args, **kwargs)
 
-    def destroy(self, request, *args, **kwargs):
-        user = self.get_object()
+    def _deny_destroy(self, guard: str, error_key: str, user) -> None:
+        """Log the denied deletion as a security event, then raise it. DRF
+        renders the dict detail as the response body, so the payload stays
+        `{"error": ...}` on both the single-object and batch paths."""
+        logger.warning(
+            "denied privileged user operation",
+            guard=guard,
+            requester=self.request.user.email,
+            target=user.email,
+        )
+        raise PermissionDenied({"error": error_key})
+
+    def perform_destroy(self, instance):
+        """Every deletion guard lives here, not in destroy(): batch_action calls
+        perform_destroy() directly, so a guard placed in destroy() would leave
+        POST /users/batch-action/ {"action": "delete"} as an unguarded path to
+        the very deletions this protects against."""
         # SCIM owns this account's lifecycle: identity fields are immutable via
         # the API (see UserWriteSerializer) and deprovisioning normally arrives
         # through SCIM. Manual deletion is the admin-only escape hatch for a
         # decommissioned SCIM integration, not a user-manager operation.
-        if user.is_scim_managed and not request.user.is_admin():
-            logger.warning(
-                "denied privileged user operation",
-                guard="scim_delete",
-                requester=request.user.email,
-                target=user.email,
-            )
-            return Response(
-                {"error": "onlyAdminCanDeleteScimAccount"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        if instance.is_scim_managed and not self.request.user.is_admin():
+            self._deny_destroy("scim_delete", "onlyAdminCanDeleteScimAccount", instance)
         # Deleting an administrator is a lifecycle operation on the admin
         # group's power: require the right that guards its membership, so the
         # deactivation guard (UserWriteSerializer) can't be bypassed by
         # reaching for the bigger hammer. Non-admin accounts stay deletable
         # with plain delete_user, consistent with their deactivation.
-        if user.is_admin() and not RoleAssignment.is_access_allowed(
-            user=request.user,
+        if instance.is_admin() and not RoleAssignment.is_access_allowed(
+            user=self.request.user,
             perm=UserWriteSerializer._change_usergroup_perm(),
             folder=Folder.get_root_folder(),
         ):
-            logger.warning(
-                "denied privileged user operation",
-                guard="admin_delete",
-                requester=request.user.email,
-                target=user.email,
-            )
-            return Response(
-                {"error": "deletingAdminAccountRequiresAdminRights"},
-                status=status.HTTP_403_FORBIDDEN,
+            self._deny_destroy(
+                "admin_delete", "deletingAdminAccountRequiresAdminRights", instance
             )
         # Protect the last direct (locally-managed) administrator — see update().
-        if user.user_groups.filter(name="BI-UG-ADM").exists():
+        if instance.user_groups.filter(name="BI-UG-ADM").exists():
             with transaction.atomic():
                 # Lock the admin group row so this check-then-act can't race a
                 # concurrent admin removal into a zero-admin lockout.
+                # NOTE: a no-op on SQLite, which has no SELECT ... FOR UPDATE;
+                # the check itself still holds, only the race window remains.
                 UserGroup.objects.select_for_update().filter(name="BI-UG-ADM").first()
                 direct_admin_count = User.objects.filter(
                     user_groups__name="BI-UG-ADM"
                 ).count()
                 if direct_admin_count == 1:
-                    return Response(
-                        {"error": "attemptToDeleteOnlyAdminAccountError"},
-                        status=status.HTTP_403_FORBIDDEN,
+                    self._deny_destroy(
+                        "last_admin_delete",
+                        "attemptToDeleteOnlyAdminAccountError",
+                        instance,
                     )
-                return super().destroy(request, *args, **kwargs)
+                return super().perform_destroy(instance)
 
-        return super().destroy(request, *args, **kwargs)
+        return super().perform_destroy(instance)
 
 
 class TranslatedNameOrderingFilter(SmartOrderingFilter):

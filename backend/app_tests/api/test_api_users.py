@@ -1193,6 +1193,137 @@ class TestUserPrivilegeEscalationGuards:
 
 
 @pytest.mark.django_db
+class TestBatchActionGuards:
+    """batch_action calls perform_destroy()/the serializer directly rather than
+    going through destroy()/update(), so every guard must hold on this path too
+    — otherwise POST /users/batch-action/ is an unguarded door to exactly the
+    deletions and demotions the single-object endpoints refuse."""
+
+    def test_user_manager_cannot_batch_delete_scim_account(self, escalation_env):
+        target = _make_scim_user("scim.batch@tests.com")
+
+        response = escalation_env.manager_client.post(
+            reverse("users-batch-action"),
+            {"action": "delete", "ids": [str(target.id)]},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["succeeded"] == []
+        assert (
+            response.json()["failed"][0]["error"]["error"]
+            == "onlyAdminCanDeleteScimAccount"
+        )
+        assert User.objects.filter(id=target.id).exists()
+
+    def test_user_manager_cannot_batch_delete_admin_account(self, escalation_env):
+        env = escalation_env
+        target = User.objects.create_user("batch.admin@tests.com", is_published=True)
+        env.admin_group.user_set.add(target)
+
+        response = env.manager_client.post(
+            reverse("users-batch-action"),
+            {"action": "delete", "ids": [str(target.id)]},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["succeeded"] == []
+        assert (
+            response.json()["failed"][0]["error"]["error"]
+            == "deletingAdminAccountRequiresAdminRights"
+        )
+        assert User.objects.filter(id=target.id).exists()
+
+    def test_last_admin_cannot_be_batch_deleted(self, escalation_env):
+        """The lockout guard, on the path that used to skip it entirely."""
+        env = escalation_env
+        last_admin = User.objects.get(email="admin@tests.com")
+
+        response = env.admin_client.post(
+            reverse("users-batch-action"),
+            {"action": "delete", "ids": [str(last_admin.id)]},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["succeeded"] == []
+        assert (
+            response.json()["failed"][0]["error"]["error"]
+            == "attemptToDeleteOnlyAdminAccountError"
+        )
+        assert User.objects.filter(id=last_admin.id).exists()
+
+    def test_user_manager_can_batch_delete_non_admin_user(self, escalation_env):
+        """The guards are targeted, not a blanket ban: routine offboarding
+        still works in batch."""
+        env = escalation_env
+        target = User.objects.create_user("batch.plain@tests.com", is_published=True)
+        env.reader_group.user_set.add(target)
+
+        response = env.manager_client.post(
+            reverse("users-batch-action"),
+            {"action": "delete", "ids": [str(target.id)]},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["failed"] == []
+        assert not User.objects.filter(id=target.id).exists()
+
+    def test_last_admin_group_cannot_be_batch_removed(self, escalation_env):
+        """remove_m2m on user_groups reaches the serializer, never
+        UserViewSet.update — so the last-admin check has to live there."""
+        env = escalation_env
+        last_admin = User.objects.get(email="admin@tests.com")
+
+        response = env.admin_client.post(
+            reverse("users-batch-action"),
+            {
+                "action": "remove_m2m",
+                "ids": [str(last_admin.id)],
+                "field": "user_groups",
+                "value": [str(env.admin_group.id)],
+            },
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["succeeded"] == []
+        assert (
+            response.json()["failed"][0]["error"]["error"]
+            == "attemptToRemoveOnlyAdminUserGroup"
+        )
+        last_admin.refresh_from_db()
+        assert last_admin.user_groups.filter(pk=env.admin_group.pk).exists()
+
+    def test_user_manager_cannot_batch_deactivate_admin(self, escalation_env):
+        """change_field on is_active goes through the serializer, so the
+        admin-lifecycle guard applies in batch as well."""
+        env = escalation_env
+        target = User.objects.create_user(
+            "batch.deactivate@tests.com", is_published=True
+        )
+        env.admin_group.user_set.add(target)
+
+        response = env.manager_client.post(
+            reverse("users-batch-action"),
+            {
+                "action": "change_field",
+                "ids": [str(target.id)],
+                "field": "is_active",
+                "value": False,
+            },
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["succeeded"] == []
+        target.refresh_from_db()
+        assert target.is_active is True
+
+
+@pytest.mark.django_db
 class TestExpiredUsersTaskLastAdminBackstop:
     """The nightly deactivate_expired_users task must never expire the
     deployment out of administration (expiry dates may predate the API guard)."""

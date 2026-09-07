@@ -299,6 +299,13 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         settings_object = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
 
+        # to_internal_value only builds a nested mapping for dotted sources it
+        # actually received, so `settings` is absent from a partial payload and
+        # `settings.advanced` from any payload carrying no SAML advanced field
+        # (an OIDC-only one, say). Normalize up front: the assignments below
+        # index into both.
+        validated_data.setdefault("settings", {}).setdefault("advanced", {})
+
         # The value dict is replaced wholesale below, so an omitted flag must
         # fall back to the stored state (like secret and jit_provisioning_
         # enabled already do): otherwise a payload that simply leaves out
@@ -340,8 +347,6 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         )
 
         validated_data["provider_id"] = validated_data.get("provider", "n/a")
-        if "settings" not in validated_data:
-            validated_data["settings"] = {}
         validated_data["settings"]["name"] = validated_data.get("provider", "n/a")
 
         # Use stored jit_provisioning_enabled and default_user_groups if not transmitted

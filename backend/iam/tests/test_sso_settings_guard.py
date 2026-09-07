@@ -43,9 +43,11 @@ def _make_scim_user(email):
 
 
 def _update(payload):
-    """Call update() the way save() does; `settings.advanced` must exist the
-    way to_internal_value's dotted sources would have built it."""
-    payload.setdefault("settings", {}).setdefault("advanced", {})
+    """Call update() with validated_data shaped the way to_internal_value builds
+    it: dotted sources produce nested mappings only for the fields actually
+    received, so a payload with no `settings.*` field carries no `settings` key
+    at all. Passing the payload through untouched keeps that true — update() is
+    responsible for normalizing it."""
     return SSOSettingsWriteSerializer().update(None, payload)
 
 
@@ -95,3 +97,45 @@ class TestSsoDisableGuard:
         _update({"is_enabled": False, "provider": "openid_connect"})
 
         assert _stored_value()["is_enabled"] is False
+
+
+@pytest.mark.django_db
+class TestNestedSettingsNormalization:
+    """update() indexes into settings["advanced"], which to_internal_value only
+    builds when the payload actually carried a `settings.advanced.*` field."""
+
+    def test_payload_without_any_settings_field_is_accepted(self):
+        """A partial payload: DRF skips defaults, so no dotted source fires and
+        `settings` is absent entirely."""
+        _make_sso_settings(is_enabled=True)
+
+        _update({"provider": "openid_connect"})
+
+        assert _stored_value()["settings"]["advanced"]["private_key"] == ""
+
+    def test_oidc_payload_without_advanced_fields_is_accepted(self):
+        """A full OIDC save: `oauth_pkce_enabled` has a default, so `settings`
+        exists — but `advanced` is SAML-only and stays absent."""
+        _make_sso_settings(is_enabled=True)
+
+        _update(
+            {
+                "provider": "openid_connect",
+                "settings": {"oauth_pkce_enabled": False, "server_url": "https://idp"},
+            }
+        )
+
+        assert _stored_value()["settings"]["advanced"]["private_key"] == ""
+        assert _stored_value()["settings"]["server_url"] == "https://idp"
+
+    def test_stored_private_key_survives_a_payload_that_omits_it(self):
+        """The fallback the indexing exists for: an omitted key must not be
+        wiped by a save that never mentions it."""
+        _make_sso_settings(is_enabled=True)
+        stored = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
+        stored.value["settings"] = {"advanced": {"private_key": "KEEP-ME"}}
+        stored.save()
+
+        _update({"provider": "saml"})
+
+        assert _stored_value()["settings"]["advanced"]["private_key"] == "KEEP-ME"

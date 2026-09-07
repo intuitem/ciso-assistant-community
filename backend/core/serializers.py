@@ -2316,6 +2316,38 @@ class UserWriteSerializer(BaseModelSerializer):
                     {"user_groups": ["missingPermissionToManageUserGroupMembership"]},
                 )
 
+    def _enforce_last_admin_group(self, attrs: dict) -> None:
+        """Stripping BI-UG-ADM from the last direct administrator would lock the
+        deployment out of administration, so it is blocked for everyone —
+        mirroring the delete and deactivation last-admin guards.
+
+        Direct membership only: this edits the DIRECT group list, so the anchor
+        it protects is the last *directly*-managed administrator, the one
+        SCIM/IdP can never reach and that must always exist. Admins inherited
+        via an IdP group are managed by the IdP, not here, so they neither gate
+        this check nor count toward it.
+
+        Lives here rather than in UserViewSet.update so batch_action's m2m
+        paths, which drive the serializer directly, are covered too; the view
+        only adds the admin-group lock around it. Runs after
+        _enforce_group_membership_rights, which folds memberships invisible to
+        the requester back into attrs — those must count as kept, not stripped.
+        """
+        if self.instance is None or "user_groups" not in attrs:
+            return
+        if not self.instance.user_groups.filter(name="BI-UG-ADM").exists():
+            return
+        if User.objects.filter(user_groups__name="BI-UG-ADM").count() > 1:
+            return
+        submitted = {str(group.pk) for group in attrs["user_groups"] or []}
+        if not UserGroup.objects.filter(name="BI-UG-ADM", pk__in=submitted).exists():
+            # Top-level "error" key, not a field-keyed one: same response body
+            # this returned from the view, and the same one UserGroupViewSet's
+            # remove-members returns for the mirror-image operation.
+            self._deny(
+                "last_admin_group", {"error": "attemptToRemoveOnlyAdminUserGroup"}
+            )
+
     # Lifecycle/auth-surface fields: deactivation (directly, or deferred via
     # expiry_date and the nightly deactivate_expired_users task) and the
     # local-login fallback.
@@ -2500,6 +2532,7 @@ class UserWriteSerializer(BaseModelSerializer):
         self._enforce_superuser_immutable()
         self._enforce_scim_managed_fields(attrs)
         self._enforce_group_membership_rights(attrs)
+        self._enforce_last_admin_group(attrs)
         self._enforce_last_active_admin(attrs)
         self._enforce_lifecycle_field_rights(attrs)
         self._enforce_email_change_rights(attrs)
