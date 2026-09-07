@@ -101,7 +101,8 @@ def test_cover_carries_traceability(assessment):
     _findings(assessment, [2])
     pdf, payload = _render(assessment)
     assert payload["generated_at"]
-    assert str(assessment.id) in pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    cover = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    assert str(assessment.id) in cover
 
 
 @pytest.mark.django_db

@@ -37,7 +37,13 @@ TODAY = date.today()
 
 
 def reset_domain():
-    Folder.objects.filter(name=DOMAIN_NAME).delete()
+    # `Folder.name` is not unique: match the exact slot we create in, or a
+    # nested folder sharing the name would be deleted with its contents.
+    Folder.objects.filter(
+        name=DOMAIN_NAME,
+        content_type=Folder.ContentType.DOMAIN,
+        parent_folder=Folder.get_root_folder(),
+    ).delete()
     return Folder.objects.create(
         name=DOMAIN_NAME,
         description="Seeded demo data for the audit posture / attestation PDF exports.",

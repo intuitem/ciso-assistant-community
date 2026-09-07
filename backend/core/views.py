@@ -12154,7 +12154,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         context = gen_audit_context(
             pk, tree, lang, assessments=assessments, charts=wants_charts
         )
-        payload, images = audit_context_for_typst(context, audit, role, lang, profile)
+        payload, images = audit_context_for_typst(
+            context, audit, role, lang, profile, assessments=assessments
+        )
 
         response = HttpResponse(
             render_pdf(

@@ -293,10 +293,13 @@ def test_long_observations_are_not_silently_dropped(audit):
 
 
 @pytest.mark.django_db
-def test_scoping_helper_matches_the_interactive_endpoint(audit, django_user_model):
+def test_scoping_helper_matches_the_interactive_endpoint(
+    admin_client, audit, django_user_model
+):
     """The PDF and `requirements_list` must scope rows the same way; an auditor with
     no respondent folders sees every assessment."""
     user = django_user_model.objects.filter(is_superuser=True).first()
+    assert user is not None, "without a superuser the scoping contract is not exercised"
     assessments, hidden_urns = scoped_requirement_assessments(audit, user)
     total = audit.get_requirement_assessments(include_non_assessable=True).count()
     assert len(assessments) == total
@@ -377,3 +380,28 @@ def test_cover_carries_generation_timestamp_and_document_id(audit):
     assert payload["generated_at"], "traceability needs a full timestamp"
     text = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
     assert str(audit.id) in text, "the audit uuid identifies the render"
+
+
+@pytest.mark.django_db
+def test_undertakings_follow_the_scoped_assessments(audit):
+    """Commitments and tasks must obey the same row-level scope as the rows: a
+    respondent must not see undertakings hanging off unassigned requirements."""
+    from core.generators import audit_undertakings
+
+    scoped = list(RequirementAssessment.objects.filter(compliance_assessment=audit))[:1]
+    all_commitments, all_tasks = audit_undertakings(audit, "en")
+    scoped_commitments, scoped_tasks = audit_undertakings(audit, "en", scoped)
+
+    assert len(scoped_commitments) <= len(all_commitments)
+    assert len(scoped_tasks) <= len(all_tasks)
+
+
+@pytest.mark.django_db
+def test_hidden_categories_drop_their_undertakings(audit):
+    """`applied_controls` hidden means no control commitments reach the payload."""
+    from core.generators import audit_undertakings
+
+    commitments, _ = audit_undertakings(
+        audit, "en", None, hidden={"applied_controls", "task_templates"}
+    )
+    assert commitments == []

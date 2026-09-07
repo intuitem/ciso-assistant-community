@@ -1170,14 +1170,22 @@ def _commitment_row(obj, lang, kind):
     }
 
 
-def audit_undertakings(audit, lang="en"):
+def audit_undertakings(audit, lang="en", assessments=None, hidden=()):
     """Applied controls and tasks attached to the audit, with commitment state.
 
     Returns ``(commitments, tasks)``: the first is everything carrying a live
     commitment — the promises a counterparty would countersign — the second is the
     task list regardless of commitment.
+
+    `assessments` must be the row-level-scoped set, or a respondent sees
+    undertakings hanging off requirements they were never assigned. `hidden`
+    drops whole categories the reader may not see.
     """
-    ras = audit.get_requirement_assessments(include_non_assessable=False)
+    ras = (
+        audit.get_requirement_assessments(include_non_assessable=False)
+        if assessments is None
+        else [ra for ra in assessments if ra.requirement.assessable]
+    )
     controls = (
         AppliedControl.objects.filter(requirement_assessments__in=ras)
         .distinct()
@@ -1190,6 +1198,11 @@ def audit_undertakings(audit, lang="en"):
         .prefetch_related("commitments")
         .order_by("name")
     )
+
+    if "applied_controls" in hidden:
+        controls = []
+    if "task_templates" in hidden:
+        task_templates = []
 
     tasks = [_commitment_row(t, lang, "task") for t in task_templates]
     commitments = [
@@ -1227,7 +1240,9 @@ def counterparty_context(audit):
     }
 
 
-def audit_context_for_typst(context, audit, role="auditor", lang="en", profile="full"):
+def audit_context_for_typst(
+    context, audit, role="auditor", lang="en", profile="full", assessments=None
+):
     """Split `gen_audit_context` output into a JSON payload and chart images.
 
     Fields hidden from `role` are dropped here rather than in the template:
@@ -1287,7 +1302,7 @@ def audit_context_for_typst(context, audit, role="auditor", lang="en", profile="
             images.pop(f"{name}.png", None)
 
     if {"commitments", "tasks"} & set(spec["sections"]):
-        commitments, tasks = audit_undertakings(audit, lang)
+        commitments, tasks = audit_undertakings(audit, lang, assessments, hidden)
         payload["commitments"] = commitments
         payload["tasks"] = tasks
 
