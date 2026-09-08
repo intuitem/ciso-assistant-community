@@ -517,3 +517,62 @@ class TestBatchAction:
         for finding in findings:
             finding.refresh_from_db()
             assert finding.folder == setup["other_domain"]
+
+
+class TestFindingsAssessmentPdf:
+    """The PDF report renders actors by name and does not cut observations short."""
+
+    @pytest.fixture
+    def report(self, setup):
+        from django.template.loader import render_to_string
+
+        author = User.objects.create_user(
+            "author@tests.com", first_name="Ada", last_name="Author"
+        )
+        reviewer = User.objects.create_user(
+            "reviewer@tests.com", first_name="Rey", last_name="Reviewer"
+        )
+        owner = User.objects.create_user(
+            "owner@tests.com", first_name="Olu", last_name="Owner"
+        )
+        binder = setup["binder"]
+        binder.authors.add(author.actor)
+        binder.reviewers.add(reviewer.actor)
+        long_observation = "word " * 60
+        finding = Finding.objects.create(
+            name="Weak password policy",
+            findings_assessment=binder,
+            folder=binder.folder,
+            observation=long_observation,
+        )
+        finding.owner.add(owner.actor)
+
+        html = render_to_string(
+            "core/findings_assessment_pdf.html",
+            {
+                "findings_assessment": binder,
+                "findings": Finding.objects.filter(findings_assessment=binder),
+                "metrics": binder.get_findings_metrics(),
+                "processed_status_distribution": [],
+                "finding_status_choices": dict(Finding.Status.choices),
+            },
+        )
+        return {"html": html, "observation": long_observation.strip()}
+
+    def test_authors_and_reviewers_are_named(self, report):
+        assert "Ada Author" in report["html"]
+        assert "Rey Reviewer" in report["html"]
+
+    def test_finding_owners_are_named(self, report):
+        assert "Olu Owner" in report["html"]
+
+    def test_observation_is_not_truncated(self, report):
+        assert "…" not in report["html"]
+        assert report["observation"] in report["html"]
+
+    def test_pdf_endpoint_renders(self, setup):
+        res = setup["client"].get(
+            f"/api/findings-assessments/{setup['binder'].id}/pdf/"
+        )
+        assert res.status_code == 200
+        assert res["Content-Type"] == "application/pdf"

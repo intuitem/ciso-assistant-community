@@ -14,7 +14,10 @@ COPY project.inlang .
 COPY . .
 COPY --from=enterprise_frontend / .
 
-RUN npm install -g pnpm
+# Install the exact pnpm version pinned by packageManager: a mismatched pnpm
+# delegates to the pinned version via @pnpm/exe, a native binary that needs
+# libatomic.so.1, which the DHI image doesn't ship.
+RUN npm install -g "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
 RUN pnpm install --frozen-lockfile
 RUN pnpm run build
 RUN pnpm prune

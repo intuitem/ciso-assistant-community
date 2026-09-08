@@ -2,6 +2,7 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import CommitmentPanel from '$lib/components/CommitmentPanel/CommitmentPanel.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import TaskOccurrencesPanel from '$lib/components/TaskOccurrences/TaskOccurrencesPanel.svelte';
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
 
@@ -27,19 +28,35 @@
 
 <DetailView
 	{data}
-	displayModelTable={data.data.is_recurrent}
 	exclude={[
+		// The occurrences panel now carries the schedule state, so leaving these in
+		// the field list would repeat it a column away.
 		...(data.data.is_recurrent
-			? ['observation', 'status']
-			: ['last_occurrence_status', 'next_occurrence']),
+			? [
+					'observation',
+					'status',
+					'next_occurrence',
+					'next_occurrence_status',
+					'last_occurrence_status'
+				]
+			: ['last_occurrence_status', 'next_occurrence', 'next_occurrence_status', 'task_date']),
 		...COMMITMENT_FIELDS
 	]}
-	widgetsEnabled={commitmentEnabled}
 >
 	{#snippet widgets()}
-		{#if commitmentEnabled}
-			<CommitmentPanel urlModel="task-templates" object={data.data} />
-		{/if}
+		<div class="flex flex-col gap-4">
+			{#if commitmentEnabled}
+				<CommitmentPanel urlModel="task-templates" object={data.data} />
+			{/if}
+			<TaskOccurrencesPanel
+				taskTemplateId={data.data.id}
+				isRecurrent={data.data.is_recurrent}
+				schedule={data.data.schedule}
+				past={data.pastOccurrences}
+				upcoming={data.upcomingOccurrences}
+				upcomingCount={data.upcomingCount}
+			/>
+		</div>
 	{/snippet}
 </DetailView>
 

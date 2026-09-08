@@ -1,6 +1,7 @@
 import { getModelInfo } from '$lib/utils/crud';
 import { loadDetail } from '$lib/utils/load';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { nestedDeleteFormAction } from '$lib/utils/actions';
@@ -13,12 +14,10 @@ export const load: PageServerLoad = async (event) => {
 	});
 
 	// Fetch attack paths for this strategic scenario
-	const attackPathsResponse = await event.fetch(
+	const attackPaths = await fetchAllPages<any>(
+		event.fetch,
 		`${BASE_API_URL}/ebios-rm/attack-paths/?strategic_scenario=${event.params.id}`
-	);
-	const attackPathsData = attackPathsResponse.ok
-		? await attackPathsResponse.json()
-		: { results: [] };
+	).catch(() => []);
 
 	// Fetch feared events for this strategic scenario
 	// If a focused_feared_event is set, only show that one feared event
@@ -39,7 +38,7 @@ export const load: PageServerLoad = async (event) => {
 
 	return {
 		...detailData,
-		attackPaths: attackPathsData.results || [],
+		attackPaths,
 		fearedEventsWithAssets: fearedEventsData,
 		isFocusedOnFearedEvent: !!focusedFearedEvent
 	};

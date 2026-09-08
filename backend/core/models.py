@@ -10514,6 +10514,11 @@ class TaskTemplate(
         verbose_name=_("Link"),
     )
 
+    # A resolved annotation is legitimately None when there is no such occurrence, so
+    # `None` cannot double as "not annotated" — that reading sent every template
+    # without a future node back to a per-row query.
+    _NOT_ANNOTATED = object()
+
     def _get_task_node_value(self, field, date_filter=None, order_by=None):
         queryset = TaskNode.objects.filter(task_template=self)
         if date_filter:
@@ -10523,8 +10528,8 @@ class TaskTemplate(
         return queryset.values_list(field, flat=True).first()
 
     def get_next_occurrence(self):
-        annotated = getattr(self, "next_occurrence", None)
-        if annotated is not None:
+        annotated = getattr(self, "next_occurrence", self._NOT_ANNOTATED)
+        if annotated is not self._NOT_ANNOTATED:
             return annotated
         if not self.is_recurrent:
             return self._get_task_node_value("due_date")
@@ -10536,8 +10541,8 @@ class TaskTemplate(
     def get_last_occurrence_status(self):
         if not self.is_recurrent:
             return None
-        annotated = getattr(self, "last_occurrence_status", None)
-        if annotated is not None:
+        annotated = getattr(self, "last_occurrence_status", self._NOT_ANNOTATED)
+        if annotated is not self._NOT_ANNOTATED:
             return annotated
         today = timezone.localdate()
         return self._get_task_node_value(
@@ -10545,8 +10550,8 @@ class TaskTemplate(
         )
 
     def get_next_occurrence_status(self):
-        annotated = getattr(self, "next_occurrence_status", None)
-        if annotated is not None:
+        annotated = getattr(self, "next_occurrence_status", self._NOT_ANNOTATED)
+        if annotated is not self._NOT_ANNOTATED:
             return annotated
         if not self.is_recurrent:
             return self._get_task_node_value("status")

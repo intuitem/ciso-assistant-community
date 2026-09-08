@@ -1,12 +1,15 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
-	const runsRes = await fetch(`${BASE_API_URL}/chat/questionnaire-runs/?ordering=-created_at`);
-	const runsData = await runsRes.json();
+	const runs = await fetchAllPages<any>(
+		fetch,
+		`${BASE_API_URL}/chat/questionnaire-runs/?ordering=-created_at`
+	);
 	return {
-		runs: runsData.results ?? runsData
+		runs
 	};
 }) satisfies PageServerLoad;
 

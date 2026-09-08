@@ -1645,6 +1645,40 @@ def send_assignment_submitted_notification(assignment_id):
 
 
 @task()
+def send_assignment_reopened_notification(assignment_id, observation=""):
+    """Send notification when a RequirementAssignment is reset back to draft for editing."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    context = {
+        "assessment_name": ca.name,
+        "reviewer_observation": observation,
+    }
+
+    for actor in assignment.actor.all():
+        for email in actor.get_emails():
+            if email and check_email_configuration(email, [assignment]):
+                rendered = render_email_template(
+                    "assignment_reopened", context, recipient_email=email
+                )
+                if rendered:
+                    send_notification_email(
+                        rendered["subject"],
+                        rendered["body"],
+                        email,
+                        rendered.get("html_body"),
+                    )
+
+
+@task()
 def send_assignment_reviewed_notification(
     assignment_id, decision, reviewer_observation=""
 ):

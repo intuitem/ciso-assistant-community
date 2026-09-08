@@ -90,28 +90,28 @@ export const load: PageServerLoad = async ({ fetch, parent, url }) => {
 	const approverParams = buildMultiParam('approver', approverUserIds);
 
 	const countEndpoints: Record<string, string> = {
-		appliedControls: buildEndpoint('/applied-controls', ownerParams, 'limit=0'),
-		tasks: buildEndpoint('/task-templates', assignedToParams, 'limit=0'),
-		complianceAssessments: buildEndpoint('/compliance-assessments', authorsParams, 'limit=0'),
-		riskAssessments: buildEndpoint('/risk-assessments', authorsParams, 'limit=0'),
-		riskScenarios: buildEndpoint('/risk-scenarios', ownerParams, 'limit=0'),
-		incidents: buildEndpoint('/incidents', ownersParams, 'limit=0'),
-		securityExceptions: buildEndpoint('/security-exceptions', ownersParams, 'limit=0'),
-		findingsAssessments: buildEndpoint('/findings-assessments', authorsParams, 'limit=0'),
-		findings: buildEndpoint('/findings', ownerParams, 'limit=0'),
-		organisationObjectives: buildEndpoint('/organisation-objectives', assignedToParams, 'limit=0'),
-		rightRequests: buildEndpoint('/privacy/right-requests', ownerParams, 'limit=0'),
-		metricInstances: buildEndpoint('/metrology/metric-instances', ownerParams, 'limit=0')
+		appliedControls: buildEndpoint('/applied-controls', ownerParams, 'limit=1'),
+		tasks: buildEndpoint('/task-templates', assignedToParams, 'limit=1'),
+		complianceAssessments: buildEndpoint('/compliance-assessments', authorsParams, 'limit=1'),
+		riskAssessments: buildEndpoint('/risk-assessments', authorsParams, 'limit=1'),
+		riskScenarios: buildEndpoint('/risk-scenarios', ownerParams, 'limit=1'),
+		incidents: buildEndpoint('/incidents', ownersParams, 'limit=1'),
+		securityExceptions: buildEndpoint('/security-exceptions', ownersParams, 'limit=1'),
+		findingsAssessments: buildEndpoint('/findings-assessments', authorsParams, 'limit=1'),
+		findings: buildEndpoint('/findings', ownerParams, 'limit=1'),
+		organisationObjectives: buildEndpoint('/organisation-objectives', assignedToParams, 'limit=1'),
+		rightRequests: buildEndpoint('/privacy/right-requests', ownerParams, 'limit=1'),
+		metricInstances: buildEndpoint('/metrology/metric-instances', ownerParams, 'limit=1')
 	};
 
 	// Fail closed: these sections are scoped to a resolved approver. Without an approver
 	// filter the endpoints would return every item in scope instead of the approver's own.
 	if (approverParams) {
-		countEndpoints.validationFlows = buildEndpoint('/validation-flows', approverParams, 'limit=0');
+		countEndpoints.validationFlows = buildEndpoint('/validation-flows', approverParams, 'limit=1');
 		countEndpoints.riskAcceptances = buildEndpoint(
 			'/risk-acceptances',
 			approverParams,
-			'state=submitted&limit=0'
+			'state=submitted&limit=1'
 		);
 	}
 
