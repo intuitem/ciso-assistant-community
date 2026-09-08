@@ -1,3 +1,4 @@
+import { evidenceMultipart } from '$lib/utils/evidence-files';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 
@@ -13,6 +14,20 @@ import { z } from 'zod';
 import { getSecureRedirect } from './helpers';
 
 type FormAction = 'create' | 'edit';
+
+export async function deleteEvidenceFile(event: RequestEvent) {
+	const parsed = z
+		.object({ revisionId: z.string().uuid(), fileId: z.string().uuid() })
+		.safeParse(Object.fromEntries(await event.request.formData()));
+	if (!parsed.success) return fail(400, { deleted: false });
+	const { revisionId, fileId } = parsed.data;
+	const response = await event.fetch(
+		`${BASE_API_URL}/evidence-revisions/${revisionId}/attachments/${fileId}/`,
+		{ method: 'DELETE' }
+	);
+	if (!response.ok) return fail(response.status, { deleted: false });
+	return { deleted: true };
+}
 
 function getHTTPMethod({
 	action,
@@ -155,6 +170,17 @@ export async function defaultWriteFormAction({
 		body: JSON.stringify(form.data)
 	};
 
+	// Send evidence metadata and all selected files atomically.
+	if (urlModel === 'evidences' || urlModel === 'evidence-revisions') {
+		const files = formData
+			.getAll('attachments')
+			.filter((value): value is File => value instanceof File && value.size > 0);
+		const legacy = fileFields.attachment;
+		if (legacy instanceof File && legacy.size > 0) files.unshift(legacy);
+		if (files.length) requestInitOptions.body = evidenceMultipart(form.data, files);
+		delete fileFields.attachments;
+		delete fileFields.attachment;
+	}
 	const res = await event.fetch(endpoint, requestInitOptions);
 
 	if (!res.ok) return await handleErrorResponse({ event, response: res, form });

@@ -9,7 +9,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
-import { nestedDeleteFormAction } from '$lib/utils/actions';
+import { deleteEvidenceFile } from '$lib/utils/actions';
 
 export const load: PageServerLoad = async (event) => {
 	return await loadDetail({
@@ -20,6 +20,7 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
+	deleteFile: deleteEvidenceFile,
 	deleteAttachment: async (event) => {
 		const formData = await event.request.formData();
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });

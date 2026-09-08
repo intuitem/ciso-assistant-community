@@ -37,6 +37,7 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     EvidenceRevision,
+    EvidenceAttachment,
     FindingsAssessment,
     Framework,
     LoadedLibrary,
@@ -76,6 +77,7 @@ from tprm.models import (
 
 from .serializers import ExportSerializer
 from .utils import (
+    domain_permission_model,
     build_dependency_graph,
     get_domain_export_objects,
     get_self_referencing_field,
@@ -87,6 +89,20 @@ from .utils import (
 logger = structlog.get_logger(__name__)
 
 BATCH_SIZE = 100  # Batch size for domain import validation / creation
+STAGED_ATTACHMENT_PATHS_KEY = "_staged_attachment_paths"
+
+
+def _delete_staged_attachments(paths: list[str]) -> None:
+    """Best-effort cleanup for files staged before domain import validation."""
+    for name in paths:
+        try:
+            default_storage.delete(name)
+        except Exception as exc:
+            logger.warning(
+                "Failed to delete staged domain attachment",
+                attachment=name,
+                error=str(exc),
+            )
 
 
 # --------------------------------------------------------------------------- #
@@ -111,7 +127,9 @@ def export_domain(
     for model in objects.keys():
         if not RoleAssignment.is_access_allowed(
             user=user,
-            perm=Permission.objects.get(codename=f"view_{model}"),
+            perm=Permission.objects.get(
+                codename=f"view_{domain_permission_model(model)}"
+            ),
             folder=instance,
         ):
             logger.error(
@@ -157,6 +175,16 @@ def export_domain(
                             file_content,
                         )
 
+            for item in objects.get("evidenceattachment", []):
+                if item.attachment and item.attachment.storage.exists(
+                    item.attachment.name
+                ):
+                    with item.attachment.open("rb") as file:
+                        zipf.writestr(
+                            f"attachments/evidence-attachments/{item.pk}_{item.filename()}",
+                            file.read(),
+                        )
+
         dumpfile_name = (
             f"ciso-assistant-{slugify(instance.name)}-domain-{timezone.now()}"
         )
@@ -194,6 +222,7 @@ def export_domain(
 
 def process_uploaded_file(dump_file: str | Path) -> Any:
     """Parse an uploaded domain zip and return its JSON payload."""
+    staged_attachment_paths: list[str] = []
     if not zipfile.is_zipfile(dump_file):
         logger.error("Invalid ZIP file format")
         raise ValidationError({"file": "invalidZipFileFormat"})
@@ -253,7 +282,37 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
                     parts = Path(attachment.filename).parts
                     zip_name = parts[-1]
 
-                    if "evidence-revisions" in parts:
+                    if "evidence-attachments" in parts:
+                        attachment_id, basename = zip_name[:36], zip_name[37:]
+                        if not basename or zip_name[36:37] != "_":
+                            continue
+                        attachment_hash = sha256(attachment_id.encode()).hexdigest()[
+                            :12
+                        ]
+                        matching = [
+                            x
+                            for x in json_dump["objects"]
+                            if x["model"] == "core.evidenceattachment"
+                            and x["id"] == attachment_hash
+                        ]
+                        if not matching:
+                            continue
+                        digest = sha256(content).hexdigest()
+                        for x in matching:
+                            expected_digest = x["fields"].get("attachment_hash")
+                            if expected_digest and expected_digest != digest:
+                                _delete_staged_attachments(staged_attachment_paths)
+                                raise ValidationError(
+                                    {"file": "evidenceAttachmentHashMismatch"}
+                                )
+                            x["fields"]["attachment_hash"] = digest
+                        new_name = default_storage.save(
+                            Path(basename).name, io.BytesIO(content)
+                        )
+                        staged_attachment_paths.append(new_name)
+                        for x in matching:
+                            x["fields"]["attachment"] = new_name
+                    elif "evidence-revisions" in parts:
                         # Exporter path: attachments/evidence-revisions/
                         #   {evidence_uuid}_v{version}_{basename}
                         m = revision_re.match(zip_name)
@@ -284,6 +343,7 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
                             )
                             continue
                         new_name = default_storage.save(basename, io.BytesIO(content))
+                        staged_attachment_paths.append(new_name)
                         for x in matching:
                             x["fields"]["attachment"] = new_name
                     else:
@@ -302,13 +362,17 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
                             )
                             continue
                         new_name = default_storage.save(zip_name, io.BytesIO(content))
+                        staged_attachment_paths.append(new_name)
                         if new_name != zip_name:
                             for x in matching:
                                 x["fields"]["attachment"] = new_name
 
+                except ValidationError:
+                    raise
                 except Exception:
                     logger.error("Error extracting attachment", exc_info=True)
 
+    json_dump[STAGED_ATTACHMENT_PATHS_KEY] = staged_attachment_paths
     return json_dump
 
 
@@ -412,9 +476,11 @@ def import_objects(
     required_libraries: list = []
     missing_libraries: list = []
     link_dump_database_ids: dict = {}
+    staged_attachment_paths = parsed_data.pop(STAGED_ATTACHMENT_PATHS_KEY, [])
 
     objects = parsed_data.get("objects")
     if not objects:
+        _delete_staged_attachments(staged_attachment_paths)
         logger.error("No objects found in the dump")
         raise ValidationError({"error": "No objects found in the dump"})
 
@@ -439,7 +505,9 @@ def import_objects(
         ):
             if not RoleAssignment.is_access_allowed(
                 user=user,
-                perm=Permission.objects.get(codename=f"add_{model._meta.model_name}"),
+                perm=Permission.objects.get(
+                    codename=f"add_{domain_permission_model(model._meta.model_name)}"
+                ),
                 folder=Folder.get_root_folder(),
             ):
                 error_dict[model._meta.model_name] = "permission_denied"
@@ -554,9 +622,11 @@ def import_objects(
         # Keep 403 semantics — don't let the broad Exception branch below
         # repackage a PermissionDenied into a generic ValidationError.
         logger.error(f"error: {e}")
+        _delete_staged_attachments(staged_attachment_paths)
         raise
     except Exception as e:
         logger.exception(f"Failed to import objects: {str(e)}")
+        _delete_staged_attachments(staged_attachment_paths)
         raise ValidationError({"non_field_errors": "errorOccuredDuringImport"})
 
 
@@ -851,6 +921,11 @@ def process_model_relationships(
         case "evidence":
             many_to_many_map_ids["owner_ids"] = get_mapped_ids(
                 _fields.pop("owner", []), link_dump_database_ids
+            )
+
+        case "evidenceattachment":
+            _fields["revision"] = EvidenceRevision.objects.get(
+                id=link_dump_database_ids[_fields["revision"]]
             )
 
         case "evidencerevision":

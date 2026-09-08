@@ -17,6 +17,7 @@ from core.models import (
     Campaign,
     Evidence,
     EvidenceRevision,
+    EvidenceAttachment,
     Finding,
     FindingsAssessment,
     Framework,
@@ -64,6 +65,7 @@ from core.serializers import (
     CampaignImportExportSerializer,
     EvidenceImportExportSerializer,
     EvidenceRevisionImportExportSerializer,
+    EvidenceAttachmentImportExportSerializer,
     FindingImportExportSerializer,
     FindingsAssessmentImportExportSerializer,
     IncidentImportExportSerializer,
@@ -185,6 +187,7 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
         Campaign: CampaignImportExportSerializer,
         Evidence: EvidenceImportExportSerializer,
         EvidenceRevision: EvidenceRevisionImportExportSerializer,
+        EvidenceAttachment: EvidenceAttachmentImportExportSerializer,
         Finding: FindingImportExportSerializer,
         FindingsAssessment: FindingsAssessmentImportExportSerializer,
         Incident: IncidentImportExportSerializer,
@@ -219,6 +222,11 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
     }
 
     return model_serializer_map.get(model, None)
+
+
+def domain_permission_model(model_name: str) -> str:
+    """Additional files inherit their revision's existing domain permissions."""
+    return "evidencerevision" if model_name == "evidenceattachment" else model_name
 
 
 def get_model_dependencies(
@@ -675,6 +683,9 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         "contract": contracts,
         "evidence": evidences,
         "evidencerevision": evidence_revisions,
+        "evidenceattachment": EvidenceAttachment.objects.filter(
+            revision__in=evidence_revisions
+        ),
         "perimeter": perimeters,
         "complianceassessment": compliance_assessments,
         "requirementassessment": requirement_assessments,

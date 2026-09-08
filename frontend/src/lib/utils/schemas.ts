@@ -616,6 +616,7 @@ export const CampaignSchema = z.object({
 export const EvidenceSchema = z.object({
 	...NameDescriptionMixin,
 	attachment: z.any().optional().nullable(),
+	attachments: z.array(z.any()).max(10).optional(),
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
@@ -644,6 +645,7 @@ export const EvidenceRevisionSchema = z.object({
 	evidence: z.string().uuid(),
 	task_node: z.string().uuid().nullable(),
 	attachment: z.any().optional().nullable(),
+	attachments: z.array(z.any()).max(10).optional(),
 	link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {

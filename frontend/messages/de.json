@@ -3597,5 +3597,10 @@
 	"attributeMappingGroups": "Attributzuordnung für Gruppen",
 	"attributeMappingGroupsHelpText": "Claim-Name(n), die die IdP-Gruppenmitgliedschaften des Benutzers enthalten. Hier gefundene Gruppen werden bei jeder Anmeldung mit IdP-Gruppen synchronisiert und gewähren die CISO-Assistant-Benutzergruppen, die ein Administrator ihnen zugeordnet hat.",
 	"jitProvisioning": "SSO-Auto-Provisionierung (JIT)",
-	"jitProvisioningDescription": "Aktiviert das automatische Erstellen von Konten bei der ersten SSO-Anmeldung und die Synchronisierung ihrer IdP-Gruppenmitgliedschaften, ohne dass SCIM erforderlich ist."
+	"jitProvisioningDescription": "Aktiviert das automatische Erstellen von Konten bei der ersten SSO-Anmeldung und die Synchronisierung ihrer IdP-Gruppenmitgliedschaften, ohne dass SCIM erforderlich ist.",
+	"attachments": "Anhänge",
+	"evidenceFilesHelp": "Bis zu 10 Dateien je Version auswählen. Neue Dateien werden dieser Version hinzugefügt.",
+	"evidenceFilesLimit": "Eine Version kann höchstens 10 Dateien enthalten.",
+	"evidenceFileDeleteFailed": "Die Datei konnte nicht gelöscht werden. Bitte erneut versuchen.",
+	"evidenceAttachmentHashMismatch": "Ein Nachweisanhang hat die Integritätsprüfung nicht bestanden."
 }

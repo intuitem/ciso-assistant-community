@@ -1,6 +1,6 @@
 <script lang="ts">
 	import HiddenInput from '../HiddenInput.svelte';
-	import FileInput from '../FileInput.svelte';
+	import EvidenceFilesInput from '../EvidenceFilesInput.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
@@ -27,19 +27,6 @@
 		object = {},
 		context
 	}: Props = $props();
-
-	function getFilename(path) {
-		if (!path) return '';
-
-		try {
-			// If it's a URL with query parameters
-			const withoutQuery = path.split('?')[0];
-			// Get the last part after the final slash (if any)
-			return decodeURIComponent(withoutQuery.split('/').pop());
-		} catch (e) {
-			return path; // Fallback to original string if anything fails
-		}
-	}
 </script>
 
 <HiddenInput {form} field="evidence" />
@@ -52,15 +39,9 @@
 	</div>
 {/if}
 
-<FileInput
+<EvidenceFilesInput
 	{form}
-	allowPaste={true}
-	helpText={object.attachment
-		? `${m.attachmentWarningText()}: ${getFilename(object.attachment)}`
-		: m.attachmentHelpText()}
-	field="attachment"
-	label={m.attachment()}
-	allowedExtensions={'*'}
+	existing={context === 'edit' ? (object.attachments?.length ?? (object.attachment ? 1 : 0)) : 0}
 />
 <TextField
 	{form}

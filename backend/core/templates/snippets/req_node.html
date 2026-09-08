@@ -73,18 +73,18 @@
           <div>{% trans "Associated evidence:" %}</div>
         </div>
         {% for evidence in node.direct_evidences %}
-          {% if evidence.last_revision and evidence.last_revision.attachment %}
+          {% for item in evidence.last_revision.attachment_items %}
             <li>
               <a
                 class="text-indigo-700 hover:text-indigo-500"
                 target="_blank"
-                href="evidences/{{ evidence.last_revision.attachment.name|basename }}"
-                >{{ evidence.name }}</a
+                href="evidences/{{ item.pk }}/{{ item.filename|urlencode }}"
+                >{{ evidence.name }} — {{ item.filename }}</a
               >
             </li>
-          {% else %}
+          {% empty %}
             <li>{{ evidence.name }}</li>
-          {% endif %}
+          {% endfor %}
         {% endfor %}
       </div>
     {% endif %}
@@ -107,18 +107,18 @@
           <div class="flex flex-col items-left w-1/2">
             {% for control in node.applied_controls %}
               {% for evidence in control.evidences %}
-                {% if evidence.last_revision and evidence.last_revision.attachment %}
+                {% for item in evidence.last_revision.attachment_items %}
                 <li>
                   <a
                     class="text-indigo-700 hover:text-indigo-500"
                     target="_blank"
-                    href="evidences/{{ evidence.last_revision.attachment.name|basename }}"
-                    >{{ control.measure.name }}/{{ evidence.name }}</a
+                    href="evidences/{{ item.pk }}/{{ item.filename|urlencode }}"
+                    >{{ control.measure.name }}/{{ evidence.name }} — {{ item.filename }}</a
                   >
                 </li>
-                {% else %}
+                {% empty %}
                   <li>{{ evidence.name }}</li>
-                {% endif %}
+                {% endfor %}
               {% endfor %}
             {% endfor %}
           </div>

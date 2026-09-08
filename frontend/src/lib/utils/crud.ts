@@ -1176,7 +1176,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'evidences',
 		verboseName: 'Evidence',
 		verboseNamePlural: 'Evidences',
-		fileFields: ['attachment'],
+		fileFields: ['attachment', 'attachments'],
 		foreignKeyFields: [
 			{
 				field: 'folder',
@@ -1246,7 +1246,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'evidenceRevisions',
 		verboseName: 'Evidence revision',
 		verboseNamePlural: 'Evidence revisions',
-		fileFields: ['attachment'],
+		fileFields: ['attachment', 'attachments'],
 		foreignKeyFields: [
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'task_node', urlModel: 'task-nodes' },
@@ -3865,7 +3865,8 @@ const FIELD_COMPONENT_MAP = {
 		attachment: EvidenceFileName
 	},
 	'evidence-revisions': {
-		attachment: EvidenceFileName
+		attachment: EvidenceFileName,
+		attachments: EvidenceFileName
 	},
 	'stored-libraries': {
 		locales: LanguageDisplay,

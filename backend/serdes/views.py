@@ -15,7 +15,9 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from core.pagination import CustomLimitOffsetPagination
-from core.models import EvidenceRevision
+from core.models import EvidenceRevision, EvidenceAttachment
+from core.evidence_files import get_backup_attachment
+from django.db.models import F
 from core.utils import compare_schema_versions
 from iam.models import User, Folder
 from serdes.serializers import LoadBackupSerializer
@@ -497,7 +499,7 @@ class FullRestoreView(APIView):
 
                         # Find the revision
                         try:
-                            revision = EvidenceRevision.objects.get(id=revision_id)
+                            revision = get_backup_attachment(revision_id)
                         except EvidenceRevision.DoesNotExist:
                             stats["errors"].append(
                                 {
@@ -636,30 +638,40 @@ class AttachmentMetadataView(APIView):
         )
 
         # Build queryset with filters
-        queryset = (
-            EvidenceRevision.objects.filter(attachment__isnull=False)
-            .exclude(attachment="")
-            .select_related("evidence", "folder")
+        queryset = EvidenceRevision.objects.filter(attachment__isnull=False).exclude(
+            attachment=""
+        )
+        additional = EvidenceAttachment.objects.annotate(
+            folder_id=F("revision__folder_id")
         )
 
         folder_id = request.query_params.get("folder")
         if folder_id:
             queryset = queryset.filter(folder_id=folder_id)
+            additional = additional.filter(folder_id=folder_id)
 
         created_after = request.query_params.get("created_after")
         if created_after:
             queryset = queryset.filter(created_at__gte=created_after)
+            additional = additional.filter(created_at__gte=created_after)
 
         created_before = request.query_params.get("created_before")
         if created_before:
             queryset = queryset.filter(created_at__lte=created_before)
+            additional = additional.filter(created_at__lte=created_before)
 
-        queryset = queryset.order_by("created_at", "id")
+        queryset = (
+            queryset.order_by()
+            .values("id", "created_at")
+            .union(additional.order_by().values("id", "created_at"))
+            .order_by("created_at", "id")
+        )
         paginator = CustomLimitOffsetPagination()
         paginated_queryset = paginator.paginate_queryset(queryset, request)
 
         results = []
-        for revision in paginated_queryset:
+        for row in paginated_queryset:
+            revision = get_backup_attachment(row["id"])
             try:
                 file_size = None
                 if revision.attachment and default_storage.exists(
@@ -756,9 +768,7 @@ class BatchDownloadAttachmentsView(APIView):
 
             for revision_id in revision_ids:
                 try:
-                    revision = EvidenceRevision.objects.select_related("evidence").get(
-                        id=revision_id
-                    )
+                    revision = get_backup_attachment(revision_id)
 
                     if not revision.attachment or not default_storage.exists(
                         revision.attachment.name
@@ -943,7 +953,7 @@ class BatchUploadAttachmentsView(APIView):
 
                     # Find the revision
                     try:
-                        revision = EvidenceRevision.objects.get(id=revision_id)
+                        revision = get_backup_attachment(revision_id)
                     except EvidenceRevision.DoesNotExist:
                         stats["errors"].append(
                             {

@@ -2699,7 +2699,34 @@ class RequirementNodeWriteSerializer(BaseModelSerializer):
         exclude = ["created_at", "updated_at"]
 
 
+from core.evidence_files import (
+    append_attachments,
+    attachment_metadata,
+    attachment_transaction,
+    MAX_EVIDENCE_FILES,
+)
+
+
+class EvidenceFilesMixin:
+    def validate_attachment(self, file):
+        return self.validate_attachments([file])[0] if file else file
+
+    def validate_attachments(self, files):
+        for file in files:
+            try:
+                validate_file_size(file)
+                validate_file_name(file)
+            except DjangoValidationError as exc:
+                raise serializers.ValidationError(exc.messages) from exc
+        return files
+
+
 class EvidenceReadSerializer(BaseModelSerializer):
+    attachments = serializers.SerializerMethodField()
+
+    def get_attachments(self, obj):
+        return attachment_metadata(obj.last_revision)
+
     path = PathField(read_only=True)
     attachment = serializers.SerializerMethodField()
     size = serializers.CharField(source="get_size")
@@ -2728,7 +2755,13 @@ class EvidenceReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class EvidenceWriteSerializer(BaseModelSerializer):
+class EvidenceWriteSerializer(EvidenceFilesMixin, BaseModelSerializer):
+    attachments = serializers.ListField(
+        child=serializers.FileField(),
+        max_length=MAX_EVIDENCE_FILES,
+        required=False,
+        write_only=True,
+    )
     applied_controls = serializers.PrimaryKeyRelatedField(
         many=True, queryset=AppliedControl.objects.all(), required=False
     )
@@ -2778,31 +2811,35 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         link = validated_data.pop("link", None)
         observation = validated_data.pop("observation", None)
 
-        evidence = super().create(validated_data)
-
-        # A revision stands for a deposited artifact. Opening an empty one just to
-        # have a row makes an evidence that holds nothing look like it holds
-        # something; a definition with no content stays revision-less until one
-        # is filed against it.
-        if attachment or link or observation:
-            EvidenceRevision.objects.get_or_create(
-                evidence=evidence,
-                defaults={
-                    "link": link,
-                    "attachment": attachment,
-                    "observation": observation,
-                },
-            )
-
+        files = validated_data.pop("attachments", [])
+        if attachment:
+            files.insert(0, attachment)
+        with attachment_transaction() as written:
+            evidence = super().create(validated_data)
+            if files or link or observation:
+                revision = EvidenceRevision.objects.create(
+                    evidence=evidence, link=link, observation=observation
+                )
+                append_attachments(revision, files, written)
+                if files:
+                    evidence.status = Evidence.Status.IN_REVIEW
         return evidence
 
     def update(self, instance, validated_data):
-        # Track old folder before update
+        # Uploads on an evidence edit append to its latest revision.
+        files = validated_data.pop("attachments", [])
         old_folder_id = instance.folder_id
 
         # Handle properly owner field cleaning
-        with transaction.atomic():
+        with attachment_transaction() as written:
+            instance = Evidence.objects.select_for_update().get(pk=instance.pk)
             instance = super().update(instance, validated_data)
+            if files:
+                revision = instance.last_revision or EvidenceRevision.objects.create(
+                    evidence=instance
+                )
+                append_attachments(revision, files, written)
+                instance.status = Evidence.Status.IN_REVIEW
 
             # Update all EvidenceRevisions' folder if the Evidence's folder changed
             if old_folder_id != instance.folder_id:
@@ -2818,6 +2855,7 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
         # Add revision fields to the response
         latest_revision = instance.last_revision
+        data["attachments"] = attachment_metadata(latest_revision)
         if latest_revision:
             data["link"] = latest_revision.link
             data["attachment"] = (
@@ -2847,6 +2885,11 @@ class EvidenceImportExportSerializer(BaseModelSerializer):
 
 
 class EvidenceRevisionReadSerializer(BaseModelSerializer):
+    attachments = serializers.SerializerMethodField()
+
+    def get_attachments(self, obj):
+        return attachment_metadata(obj)
+
     attachment = serializers.CharField(source="filename")
     size = serializers.CharField(source="get_size")
     evidence = FieldsRelatedField()
@@ -2859,7 +2902,33 @@ class EvidenceRevisionReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class EvidenceRevisionWriteSerializer(BaseModelSerializer):
+class EvidenceRevisionWriteSerializer(EvidenceFilesMixin, BaseModelSerializer):
+    attachments = serializers.ListField(
+        child=serializers.FileField(),
+        max_length=MAX_EVIDENCE_FILES,
+        required=False,
+        write_only=True,
+    )
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["attachments"] = attachment_metadata(instance)
+        return data
+
+    def update(self, instance, validated_data):
+        files = validated_data.pop("attachments", [])
+        with attachment_transaction() as written:
+            Evidence.objects.select_for_update().get(pk=instance.evidence_id)
+            instance = EvidenceRevision.objects.select_for_update().get(pk=instance.pk)
+            # Track a legacy primary-file replacement too, so a failed append
+            # cannot leave its bytes behind after the database rolls back.
+            if validated_data.get("attachment"):
+                instance.attachment = validated_data["attachment"]
+                validated_data["attachment"] = instance.attachment
+                written.append(instance.attachment)
+            instance = super().update(instance, validated_data)
+            return append_attachments(instance, files, written)
+
     class Meta:
         model = EvidenceRevision
         fields = "__all__"
@@ -2882,7 +2951,11 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        with transaction.atomic():
+        files = validated_data.pop("attachments", [])
+        attachment = validated_data.pop("attachment", None)
+        if attachment:
+            files.insert(0, attachment)
+        with attachment_transaction() as written:
             evidence = Evidence.objects.select_for_update().get(
                 pk=validated_data["evidence"].pk
             )
@@ -2892,7 +2965,23 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
             validated_data["version"] = (max_version or 0) + 1
             evidence.status = Evidence.Status.IN_REVIEW
             evidence.save()
-            return super().create(validated_data)
+            revision = super().create(validated_data)
+            return append_attachments(revision, files, written)
+
+
+class EvidenceAttachmentImportExportSerializer(serializers.ModelSerializer):
+    revision = HashSlugRelatedField(slug_field="pk", read_only=True)
+    attachment = serializers.CharField()
+
+    class Meta:
+        model = EvidenceAttachment
+        fields = [
+            "revision",
+            "attachment",
+            "attachment_hash",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
