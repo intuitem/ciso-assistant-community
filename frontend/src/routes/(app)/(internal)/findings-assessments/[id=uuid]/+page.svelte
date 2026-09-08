@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 	import type { PageData, ActionData } from './$types';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { page } from '$app/state';
@@ -6,7 +7,6 @@
 	import { m } from '$paraglide/messages';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
@@ -23,7 +23,6 @@
 	}
 
 	let { data, form }: Props = $props();
-	let exportPopupOpen = $state(false);
 	const modalStore: ModalStore = getModalStore();
 	const findings_assessment = $derived(data.data);
 
@@ -48,6 +47,46 @@
 			title: m.requestValidation()
 		};
 		modalStore.trigger(modal);
+	}
+
+	function buildExportGroups(): ExportGroup[] {
+		const id = data.data.id;
+		return [
+			{
+				titleKey: 'findingsAssessment',
+				options: [
+					{
+						titleKey: 'exportFindingsReport',
+						descriptionKey: 'exportFindingsReportDesc',
+						format: 'PDF' as const,
+						href: `/findings-assessments/${id}/export/pdf`,
+						testId: 'export-option-pdf'
+					},
+					{
+						titleKey: 'exportFindingsWorkbook',
+						descriptionKey: 'exportFindingsWorkbookDesc',
+						format: 'XLSX' as const,
+						href: `/findings-assessments/${id}/export/xlsx`,
+						testId: 'export-option-xlsx'
+					},
+					{
+						titleKey: 'exportFindingsMarkdown',
+						descriptionKey: 'exportFindingsMarkdownDesc',
+						format: 'MD' as const,
+						href: `/findings-assessments/${id}/export/md`,
+						testId: 'export-option-md'
+					}
+				]
+			}
+		];
+	}
+
+	function modalExport(): void {
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: { title: m.exportOptionsTitle(), groups: buildExportGroups() }
+		};
+		modalStore.trigger({ type: 'component', component: modalComponent });
 	}
 </script>
 
@@ -74,41 +113,14 @@
 					><i class="fa-solid fa-list-check mr-2"></i>{m.complianceAssessment()}</Anchor
 				>
 			{/if}
-			<Popover
-				open={exportPopupOpen}
-				onOpenChange={(e) => (exportPopupOpen = e.open)}
-				positioning={{ placement: 'bottom' }}
+			<button
+				type="button"
+				class="btn preset-filled-primary-500 w-full"
+				onclick={modalExport}
+				data-testid="export-button"
 			>
-				<Popover.Trigger class="btn preset-filled-primary-500 w-full">
-					<span data-testid="export-button">
-						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-					</span>
-				</Popover.Trigger>
-				<Popover.Positioner>
-					<Popover.Content
-						class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
-					>
-						<div>
-							<p class="block px-4 py-2 text-sm text-surface-950-50">{m.findingsAssessment()}</p>
-							<a
-								href="/findings-assessments/{data.data.id}/export/xlsx"
-								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-								>... {m.asXLSX()}</a
-							>
-							<a
-								href="/findings-assessments/{data.data.id}/export/md"
-								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-								>... {m.asMarkdown()}</a
-							>
-							<a
-								href="/findings-assessments/{data.data.id}/export/pdf"
-								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-								>... {m.asPDF()}</a
-							>
-						</div>
-					</Popover.Content>
-				</Popover.Positioner>
-			</Popover>
+				<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+			</button>
 			<Anchor
 				href={`${page.url.pathname}/action-plan`}
 				class="btn preset-filled-primary-500 h-fit"
