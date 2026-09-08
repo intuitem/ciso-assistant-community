@@ -118,6 +118,11 @@ class Entity(
         verbose_name=_("Legal identifiers"),
         help_text=_("Legal identifiers (LEI, EUID, VAT, DUNS, etc.)"),
     )
+    address = models.TextField(
+        blank=True,
+        verbose_name=_("Address"),
+        help_text=_("Postal address, as it should appear on formal documents"),
+    )
     country = models.CharField(
         max_length=3,
         choices=COUNTRY_CHOICES,
@@ -226,6 +231,12 @@ class EntityAssessment(Assessment):
         verbose_name=_("Conclusion"),
         blank=True,
         null=True,
+    )
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+        help_text=_("Date after which the conclusion is no longer considered valid"),
     )
     reference_link = models.URLField(
         blank=True,
