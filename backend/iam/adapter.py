@@ -7,14 +7,14 @@ from allauth.socialaccount.adapter import (
     MultipleObjectsReturned,
     warnings,
 )
+from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.models import app_settings
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.http import HttpResponseRedirect
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
 from rest_framework.authtoken.serializers import AuthTokenSerializer
-from rest_framework.response import Response
-from rest_framework.status import HTTP_401_UNAUTHORIZED
 
 import structlog
 
@@ -23,6 +23,16 @@ logger = structlog.get_logger(__name__)
 User = get_user_model()
 
 DEFAULT_ATTRIBUTE_MAPPING_GROUPS = ["groups"]
+
+
+def deny_social_login(reason: str):
+    """allauth discards whatever pre_social_login returns, so aborting has to
+    raise."""
+    logger.error("pre_social_login: login denied", reason=reason)
+    url = settings.HEADLESS_FRONTEND_URLS.get(
+        "socialaccount_login_error", f"{settings.CISO_ASSISTANT_URL}/login"
+    )
+    raise ImmediateHttpResponse(HttpResponseRedirect(url))
 
 
 class AccountAdapter(DefaultAccountAdapter):
@@ -66,9 +76,10 @@ class MFAAdapter(DefaultMFAAdapter):
 
         # Skip local MFA challenge for SSO logins — the IdP already
         # authenticated the user.
-        records = get_authentication_records(context.request)
-        if any(r.get("method") == "socialaccount" for r in records):
-            return False
+        if settings.MFA_SKIP_FOR_SSO:
+            records = get_authentication_records(context.request)
+            if any(r.get("method") == "socialaccount" for r in records):
+                return False
 
         return super().is_mfa_enabled(user, types=types)
 
@@ -82,34 +93,16 @@ class MFAAdapter(DefaultMFAAdapter):
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     @staticmethod
-    def _find_email_in_dict(data, _depth=0, _max_depth=5):
-        """Recursively search for an email in a dict or list, checking known keys at each level."""
-        if _depth >= _max_depth:
-            return None
-        if isinstance(data, dict):
-            email = data.get("email") or data.get("email_address")
-            if isinstance(email, str) and email:
-                return email
-            if isinstance(email, list):
-                candidate = next((e for e in email if isinstance(e, str) and e), None)
-                if candidate:
-                    return candidate
-            for value in data.values():
-                if isinstance(value, (dict, list)):
-                    email = SocialAccountAdapter._find_email_in_dict(
-                        value, _depth=_depth + 1, _max_depth=_max_depth
-                    )
-                    if email:
-                        return email
-        elif isinstance(data, list):
-            for item in data:
-                if isinstance(item, (dict, list)):
-                    email = SocialAccountAdapter._find_email_in_dict(
-                        item, _depth=_depth + 1, _max_depth=_max_depth
-                    )
-                    if email:
-                        return email
-        return None
+    def _claim_is_true(extra, claim):
+        for source in (extra, extra.get("userinfo") or {}, extra.get("id_token") or {}):
+            value = source.get(claim)
+            if isinstance(value, list):
+                value = value[0] if value else None
+            if isinstance(value, bool):
+                return value
+            if isinstance(value, str):
+                return value.strip().lower() in ("true", "1", "yes")
+        return False
 
     @staticmethod
     def _extract_claim_values(extra, claim_names):
@@ -155,14 +148,6 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 if candidate and "@" in candidate:
                     email_address = candidate
                     break
-        # Fallback: deep search in nested dicts (some IdPs nest email in sub-objects like "attributes")
-        if not email_address:
-            email_address = self._find_email_in_dict(extra)
-        # Fallback: first string value containing '@'
-        if not email_address:
-            email_address = next(
-                (v for v in extra.values() if isinstance(v, str) and "@" in v), None
-            )
         if isinstance(email_address, list):
             # We assume the first email is the primary one
             email_address = email_address[0] if email_address else None
@@ -173,9 +158,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 userinfo_keys=list(extra.get("userinfo", {}).keys()),
                 id_token_keys=list(extra.get("id_token", {}).keys()),
             )
-            return Response(
-                {"message": "Email not provided."}, status=HTTP_401_UNAUTHORIZED
-            )
+            deny_social_login("no email in extra_data")
         logger.debug(
             "pre_social_login: resolved email from IdP",
             idp_email=email_address,
@@ -206,6 +189,12 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 user_id=str(user.id),
                 is_active=user.is_active,
             )
+            if settings.SSO_REQUIRE_VERIFIED_EMAIL and not self._claim_is_true(
+                extra, "email_verified"
+            ):
+                deny_social_login(
+                    "IdP did not assert a verified email for an existing account"
+                )
             sociallogin.user = user
             sociallogin.connect(request, user)
             logger.info(
@@ -225,9 +214,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                     idp_email_repr=repr(email_address),
                     provider=sociallogin.account.provider,
                 )
-                return Response(
-                    {"message": "User not found."}, status=HTTP_401_UNAUTHORIZED
-                )
+                deny_social_login("user not found and JIT provisioning is off")
 
             user = User.objects.create_user(
                 email=email_address,

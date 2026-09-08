@@ -5,6 +5,7 @@ import logging
 import math
 import structlog
 import re
+import zipfile
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -16,6 +17,7 @@ from uuid import UUID
 
 import pandas as pd
 import structlog
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.db import IntegrityError, models
@@ -4002,6 +4004,24 @@ def normalize_df_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+MAX_IMPORT_SIZE = int(settings.ATTACHMENT_MAX_SIZE_MB) * 1000 * 1000
+MAX_UNCOMPRESSED_SIZE = 500 * 1024 * 1024
+MAX_COMPRESSION_RATIO = 100
+
+
+def is_within_decompression_limits(data: bytes) -> bool:
+    """xlsx is a zip; a small upload can still expand far past memory."""
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as zf:
+            uncompressed = sum(i.file_size for i in zf.infolist())
+            compressed = sum(i.compress_size for i in zf.infolist())
+    except zipfile.BadZipFile:
+        return True  # not a zip container (csv/xml), size cap already applied
+    if uncompressed > MAX_UNCOMPRESSED_SIZE:
+        return False
+    return compressed == 0 or uncompressed / compressed <= MAX_COMPRESSION_RATIO
+
+
 class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadFileSerializer
@@ -6244,8 +6264,36 @@ class LoadFileView(APIView):
                 {"error": "unsupportedFileFormat"}, status=status.HTTP_400_BAD_REQUEST
             )
 
+        if file_obj.size > MAX_IMPORT_SIZE:
+            logger.error("Import file too large", size=file_obj.size)
+            return Response(
+                {"error": "fileTooLarge"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Authorize before pulling the whole file into memory.
+        model_type = ModelType.from_string(request.META.get("HTTP_X_MODEL_TYPE"))
+        if model_type is None:
+            return Response(
+                {"error": "UnknownModelType"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        folder_id = request.META.get("HTTP_X_FOLDER_ID") or None
+        if not self._may_import(request, model_type, folder_id):
+            logger.warning(
+                "Unauthorized import attempt",
+                user=request.user,
+                model_type=model_type,
+                folder_id=folder_id,
+            )
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         # Read the file content
         file_data = file_obj.read()
+
+        if not is_within_decompression_limits(file_data):
+            logger.error("Import file failed decompression checks")
+            return Response(
+                {"error": "fileTooLarge"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Process the Excel file
         return self.process_excel_file(request, io.BytesIO(file_data))

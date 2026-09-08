@@ -2194,6 +2194,7 @@ class UserRolesOnFolderSerializer(BaseModelSerializer):
 class UserWriteSerializer(BaseModelSerializer):
     is_local = serializers.BooleanField(required=False)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
+    is_superuser = serializers.BooleanField(read_only=True)
     # Lives in `preferences`, not a column, so it is declared rather than derived.
     language = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
@@ -2430,6 +2431,15 @@ class RoleAssignmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RoleAssignment
         fields = "__all__"
+
+    def validate(self, data):
+        data = super().validate(data)
+        # The assignment's own folder says nothing about the folders it grants
+        # authority over, so each one is authorized separately.
+        action = "add" if self.instance is None else "change"
+        for folder in data.get("perimeter_folders", []):
+            self._check_object_perm(data, action, folder=folder)
+        return data
 
 
 class FolderWriteSerializer(BaseModelSerializer):

@@ -1170,20 +1170,6 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         if not self.model:
             return None
 
-        object_ids_view = None
-        if self.request.method == "GET":
-            if q := re.match(
-                r"/api/[\w-]+/([\w-]+/)?([0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}(,[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})+)",
-                self.request.path,
-            ):
-                """"get_queryset is called by Django even for an individual object via get_object
-                https://stackoverflow.com/questions/74048193/why-does-a-retrieve-request-end-up-calling-get-queryset"""
-                id = UUID(q.group(1))
-                if RoleAssignment.is_object_readable(self.request.user, self.model, id):
-                    return self.model.objects.filter(id=id)
-                else:
-                    return self.model.objects.none()
-
         object_ids_view = RoleAssignment.get_viewable_object_ids(
             self.request.user, self.model
         )
@@ -7829,15 +7815,19 @@ class ValidationFlowFilterSet(GenericFilterSet):
         if not value:
             return queryset
 
-        model_types = [m.strip() for m in value.split(",")]
+        # Raw client input reaches an ORM lookup, so it is restricted to the
+        # model's own m2m relations.
+        allowed = {f.name for f in ValidationFlow._meta.get_fields() if f.many_to_many}
+        model_types = [m.strip() for m in value.split(",") if m.strip()]
+        unknown = sorted(set(model_types) - allowed)
+        if unknown:
+            raise DRFValidationError({name: f"Unknown linked models: {unknown}"})
+
         filtered_qs = queryset
-
         for model_type in model_types:
-            # Use the field name with __isnull=False to check if objects are linked
-            filter_kwargs = {f"{model_type}__isnull": False}
-            filtered_qs = filtered_qs.filter(**filter_kwargs).distinct()
+            filtered_qs = filtered_qs.filter(**{f"{model_type}__isnull": False})
 
-        return filtered_qs
+        return filtered_qs.distinct()
 
     class Meta:
         model = ValidationFlow

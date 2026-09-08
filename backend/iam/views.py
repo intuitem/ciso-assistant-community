@@ -4,7 +4,12 @@ from datetime import timedelta
 import structlog
 from allauth.account.models import EmailAddress
 from allauth.mfa.models import Authenticator
-from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth import (
+    get_user_model,
+    login,
+    logout,
+    update_session_auth_hash,
+)
 from django.db import transaction
 from django.db.models import Q, Exists, OuterRef
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -59,6 +64,33 @@ from .serializers import (
 logger = structlog.get_logger(__name__)
 
 User = get_user_model()
+
+
+def current_token_digest(request):
+    auth_header = request.META.get("HTTP_AUTHORIZATION") or ""
+    if " " not in auth_header:
+        return None
+    return crypto.hash_token(auth_header.split(" ")[1])
+
+
+def revoke_auth_tokens(user, keep_digest=None, include_pats=True):
+    """Delete a user's knox tokens. Django sessions die on their own: changing
+    the password rotates the hash checked on every request."""
+    tokens = AuthToken.objects.filter(user=user)
+    if keep_digest:
+        tokens = tokens.exclude(digest=keep_digest)
+    if not include_pats:
+        tokens = tokens.exclude(
+            Exists(PersonalAccessToken.objects.filter(auth_token=OuterRef("pk")))
+        )
+    deleted_count, _ = tokens.delete()
+    logger.info(
+        "revoked auth tokens after password change",
+        user=user,
+        count=deleted_count,
+        include_pats=include_pats,
+    )
+    return deleted_count
 
 
 class LogoutView(views.APIView):
@@ -142,11 +174,13 @@ class PersonalAccessTokenViewSet(views.APIView):
         name = request.data.get("name")
         try:
             expiry_days = int(request.data.get("expiry", 30))
-            if expiry_days <= 0:
+            if not 0 < expiry_days <= settings.PAT_MAX_TTL_DAYS:
                 raise ValueError
         except TypeError, ValueError:
             return Response(
-                {"error": "Expiry must be a positive integer (days)."},
+                {
+                    "error": f"Expiry must be an integer between 1 and {settings.PAT_MAX_TTL_DAYS} days."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if token_limit_per_user is not None:
@@ -276,7 +310,8 @@ class SessionTokenView(views.APIView):
     """
 
     def post(self, request):
-        access_token = request.META.get("HTTP_AUTHORIZATION").split(" ")[1]
+        auth_header = request.META.get("HTTP_AUTHORIZATION") or ""
+        access_token = auth_header.split(" ")[1] if " " in auth_header else None
         if not access_token:
             return Response(
                 {"error": "No access token provided"}, status=HTTP_401_UNAUTHORIZED
@@ -407,6 +442,8 @@ class ResetPasswordConfirmView(views.APIView):
             if self.token_generator.check_token(user, token):
                 user.set_password(new_password)
                 user.save()
+                # Account recovery: revoke everything, PATs included.
+                revoke_auth_tokens(user)
                 return Response(status=status.HTTP_200_OK)
         return Response(
             data={"error": "The link is invalid or has expired."},
@@ -435,6 +472,11 @@ class ChangePasswordView(views.APIView):
             )
         user.set_password(new_password)
         user.save()
+        # Routine rotation: drop other sessions, keep this one and the PATs.
+        revoke_auth_tokens(
+            user, keep_digest=current_token_digest(request), include_pats=False
+        )
+        update_session_auth_hash(request, user)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -454,6 +496,8 @@ class SetPasswordView(views.APIView):
         user = serializer.validated_data.get("user")
         user.set_password(new_password)
         user.save()
+        # Admin containment: revoke everything, PATs included.
+        revoke_auth_tokens(user)
         try:
             email_address = EmailAddress.objects.get(user=user, primary=True)
             email_address.verified = True

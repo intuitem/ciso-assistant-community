@@ -239,6 +239,15 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		}
 		request.headers.set('Accept-Language', currentLang);
 
+		// Real client IP for backend-side throttling; append to any upstream chain.
+		try {
+			const chain = event.request.headers.get('x-forwarded-for');
+			const client = event.getClientAddress();
+			request.headers.set('x-forwarded-for', chain ? `${chain}, ${client}` : client);
+		} catch {
+			// getClientAddress is adapter-dependent.
+		}
+
 		const token = event.cookies.get('token');
 		const csrfToken = event.cookies.get('csrftoken');
 

@@ -15,12 +15,23 @@ from typing import Dict, List, Optional, Any
 from django.db.models import QuerySet
 from tprm.models import Entity, Contract, Solution
 from core.models import Asset
+from core.views import escape_csv_row
 
 
 logger = logging.getLogger(__name__)
 
 
 # Helper Functions
+
+
+class _CSVWriter:
+    """csv.writer wrapper applying formula-injection escaping to every row."""
+
+    def __init__(self, buffer):
+        self._writer = csv.writer(buffer)
+
+    def writerow(self, row):
+        self._writer.writerow(escape_csv_row(row))
 
 
 def compute_chain_depths(chain_rows):
@@ -227,7 +238,7 @@ def generate_b_01_01_main_entity(
         folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(["c0010", "c0020", "c0030", "c0040", "c0050", "c0060"])
@@ -279,7 +290,7 @@ def generate_b_01_02_entities(
         folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(
@@ -380,7 +391,7 @@ def generate_b_01_03_branches(
         folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(["c0010", "c0020", "c0030", "c0040"])
@@ -438,7 +449,7 @@ def generate_b_02_01_contracts(
         contracts: QuerySet of Contract objects
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(
@@ -520,7 +531,7 @@ def generate_b_02_02_ict_services(
         business_function_asset_ids: Set of asset IDs related to business functions (including children)
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers (18 columns)
     csv_writer.writerow(
@@ -742,7 +753,7 @@ def generate_b_02_03_intragroup_contracts(
         folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(["c0010", "c0020", "c0030"])
@@ -793,7 +804,7 @@ def generate_b_03_01_signing_entities(
         folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(["c0010", "c0020", "c0030"])
@@ -838,7 +849,7 @@ def generate_b_03_02_ict_providers(
         contracts: QuerySet of Contract objects with providers
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(["c0010", "c0020", "c0030"])
@@ -887,7 +898,7 @@ def generate_b_03_03_intragroup_providers(
         contracts: QuerySet of Contract objects
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(["c0010", "c0020", "c0031"])
@@ -941,7 +952,7 @@ def generate_b_04_01_service_users(
         folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(["c0010", "c0020", "c0030", "c0040"])
@@ -1017,7 +1028,7 @@ def generate_b_05_01_provider_details(
         contracts: QuerySet of Contract objects with providers
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers (DORA 4.0 Layout)
     csv_writer.writerow(
@@ -1181,7 +1192,7 @@ def generate_b_05_02_supply_chains(
         folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(
@@ -1327,7 +1338,7 @@ def generate_b_06_01_functions(
         business_functions: QuerySet of Asset objects with is_business_function=True
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(
@@ -1412,7 +1423,7 @@ def generate_b_07_01_assessment(
         contracts: QuerySet of Contract objects with solutions
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(
@@ -1522,7 +1533,7 @@ def generate_b_99_01_aggregation(
         business_functions: QuerySet of Asset objects with is_business_function=True
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     csv_writer.writerow(
         [
@@ -1625,7 +1636,7 @@ def generate_filing_indicators(zip_file, folder_prefix: str = "") -> None:
         zip_file: ZIP file object to write to
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(["templateID", "reported"])
@@ -1690,7 +1701,7 @@ def generate_parameters(
         entity_id: The identifier for the report (optional, will be computed if not provided)
     """
     csv_buffer = io.StringIO()
-    csv_writer = csv.writer(csv_buffer)
+    csv_writer = _CSVWriter(csv_buffer)
 
     # Write CSV headers
     csv_writer.writerow(["name", "value"])

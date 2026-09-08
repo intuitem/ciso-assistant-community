@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 import structlog
 from allauth.socialaccount.providers.saml.views import build_auth
 from django.conf import settings
+from django.contrib.auth import SESSION_KEY
 from django.contrib.auth import logout as auth_logout
 from django.http import HttpRequest, HttpResponseRedirect
 from django.views import View
@@ -36,6 +37,10 @@ def copy_slo_state_from_session_key(
     if source_session_key == request.session.session_key:
         return
     source_session = _get_session_store(source_session_key)
+    # The key is caller-supplied, so only the session's own user may drain it.
+    if source_session.get(SESSION_KEY) != str(request.user.pk):
+        logger.warning("Refused to copy single logout state from another user session")
+        return
     slo_state = source_session.get(SLO_SESSION_KEY)
     if not slo_state:
         return

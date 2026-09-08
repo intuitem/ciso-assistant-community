@@ -89,7 +89,8 @@ def _scim_error_response(detail, status_code, scim_type=None):
 
 class ServiceProviderConfigView(views.APIView):
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [FeatureFlagRequired]
+    feature_flag = "idp_groups"
     renderer_classes = [SCIMJSONRenderer, JSONRenderer]
     parser_classes = [SCIMJSONParser, JSONParser]
 
@@ -131,7 +132,8 @@ class SchemasView(views.APIView):
     """GET /Schemas — list every schema CISO Assistant supports."""
 
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [FeatureFlagRequired]
+    feature_flag = "idp_groups"
     renderer_classes = [SCIMJSONRenderer, JSONRenderer]
     parser_classes = [SCIMJSONParser, JSONParser]
 
@@ -146,7 +148,8 @@ class SchemaDetailView(views.APIView):
     """GET /Schemas/{urn} — single schema definition."""
 
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [FeatureFlagRequired]
+    feature_flag = "idp_groups"
     renderer_classes = [SCIMJSONRenderer, JSONRenderer]
     parser_classes = [SCIMJSONParser, JSONParser]
 
@@ -166,7 +169,8 @@ class ResourceTypesView(views.APIView):
     """GET /ResourceTypes — list every resource type the server exposes."""
 
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [FeatureFlagRequired]
+    feature_flag = "idp_groups"
     renderer_classes = [SCIMJSONRenderer, JSONRenderer]
     parser_classes = [SCIMJSONParser, JSONParser]
 
@@ -181,7 +185,8 @@ class ResourceTypeDetailView(views.APIView):
     """GET /ResourceTypes/{id} — single resource type."""
 
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [FeatureFlagRequired]
+    feature_flag = "idp_groups"
     renderer_classes = [SCIMJSONRenderer, JSONRenderer]
     parser_classes = [SCIMJSONParser, JSONParser]
 

@@ -35,6 +35,11 @@ LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
 DB_LOG = os.environ.get("DB_LOG", "").lower() == "true"
 
+
+def _env_flag(name: str, default: bool) -> bool:
+    return os.environ.get(name, str(default)).lower() in ("true", "1", "yes")
+
+
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
 FORCE_CREATE_ADMIN = os.environ.get("FORCE_CREATE_ADMIN", "False").lower() == "true"
 
@@ -537,6 +542,9 @@ AUTH_TOKEN_AUTO_REFRESH_MAX_TTL = (
     int(os.environ.get("AUTH_TOKEN_AUTO_REFRESH_MAX_TTL", default=60 * 60 * 10)) or None
 )  # absolute timeout for auto-refresh, defaults to 10 hours. token expires after this time even if the user is active
 
+PAT_MAX_TTL_DAYS = int(os.environ.get("PAT_MAX_TTL_DAYS", default="365"))
+logger.info("PAT_MAX_TTL_DAYS: %s", PAT_MAX_TTL_DAYS)
+
 
 CISO_ASSISTANT_SUPERUSER_EMAIL = os.environ.get("CISO_ASSISTANT_SUPERUSER_EMAIL")
 logger.info("CISO_ASSISTANT_SUPERUSER_EMAIL: %s", CISO_ASSISTANT_SUPERUSER_EMAIL)
@@ -829,7 +837,50 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
 ACCOUNT_REAUTHENTICATION_TIMEOUT = 24 * 60 * 60  # 24 hours
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# Number of trusted proxies in front of the backend (caddy + frontend = 2).
+# Left at 0, allauth ignores X-Forwarded-For and sees the frontend container as
+# the client for every login.
+ALLAUTH_TRUSTED_PROXY_COUNT = int(
+    os.environ.get("ALLAUTH_TRUSTED_PROXY_COUNT", default="0")
+)
+logger.info("ALLAUTH_TRUSTED_PROXY_COUNT: %s", ALLAUTH_TRUSTED_PROXY_COUNT)
+
+# With a shared client IP, allauth's default per-IP limits (login 30/m/ip) cap
+# the whole tenant, so they are relaxed until the proxy count is configured.
+# The per-key (per-username) limits are the credential-stuffing brake and hold
+# in both cases.
+_shared_client_ip = ALLAUTH_TRUSTED_PROXY_COUNT == 0
+ACCOUNT_RATE_LIMITS = {
+    "login": "1000/m/ip" if _shared_client_ip else "30/m/ip",
+    "login_failed": "300/m/ip,5/300s/key"
+    if _shared_client_ip
+    else "10/m/ip,5/300s/key",
+    "reset_password": "200/m/ip,5/m/key" if _shared_client_ip else "20/m/ip,5/m/key",
+    "reset_password_from_key": "200/m/ip" if _shared_client_ip else "20/m/ip",
+}
+
+# Only trust the proxy's protocol header when the backend really is behind one:
+# a directly reachable backend would otherwise let any client assert https.
+if _env_flag("TRUST_PROXY_SSL_HEADER", True):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Off by default: the frontend reaches the backend over plain http inside the
+# compose network, and a Secure cookie would be dropped on that hop.
+SESSION_COOKIE_SECURE = _env_flag("SESSION_COOKIE_SECURE", False)
+CSRF_COOKIE_SECURE = _env_flag("CSRF_COOKIE_SECURE", False)
+SESSION_COOKIE_SAMESITE = os.environ.get("SESSION_COOKIE_SAMESITE", "Lax")
+CSRF_COOKIE_SAMESITE = os.environ.get("CSRF_COOKIE_SAMESITE", "Lax")
+# TLS is terminated by the reverse proxy, which is where HSTS belongs; this is
+# for deployments that would rather emit it from the backend.
+SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", default="0"))
+
+# SSO logins skip the local MFA challenge, on the assumption the IdP enforced it.
+MFA_SKIP_FOR_SSO = _env_flag("MFA_SKIP_FOR_SSO", True)
+
+# Turn on when the IdP does not itself guarantee ownership of the asserted
+# address (multi-tenant or self-service directories): an unverified email would
+# otherwise be enough to take over an existing account with the same address.
+SSO_REQUIRE_VERIFIED_EMAIL = _env_flag("SSO_REQUIRE_VERIFIED_EMAIL", False)
 
 ACCOUNT_ADAPTER = "iam.adapter.AccountAdapter"
 SOCIALACCOUNT_ADAPTER = "iam.adapter.SocialAccountAdapter"
