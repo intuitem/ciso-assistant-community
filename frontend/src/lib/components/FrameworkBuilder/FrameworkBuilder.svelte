@@ -60,7 +60,7 @@
 	}: Props = $props();
 
 	const builder = createBuilderState(framework, requirementNodes, questions, editingDraft, {
-		...(apiTarget ? { apiTarget } : {}),
+		apiTarget: apiTarget ?? undefined,
 		mode
 	});
 	setBuilderContext(builder);
