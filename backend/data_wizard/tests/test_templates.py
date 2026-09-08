@@ -31,7 +31,7 @@ from core.models import (
     Vulnerability,
 )
 from ebios_rm.models import ElementaryAction
-from iam.models import Folder, User
+from iam.models import Folder, User, UserGroup
 from privacy.models import Processing
 from resilience.models import BusinessImpactAnalysis
 from tprm.models import Contract, Entity, EntityAssessment, Representative, Solution
@@ -274,6 +274,10 @@ class TestSimpleTemplates:
         acme = Folder.objects.get(name="ACME Corp", parent_folder=root_folder)
         it = Folder.objects.get(name="IT Department")
         assert it.parent_folder == acme
+        assert acme.create_iam_groups is True
+        assert it.create_iam_groups is False
+        assert UserGroup.objects.filter(folder=acme).exists()
+        assert not UserGroup.objects.filter(folder=it).exists()
 
     def test_security_exceptions_template(
         self, api_client, domain_folder, template_domains, all_accessible

@@ -845,6 +845,7 @@ Folders (domains) are the top-level organisational units in CISO Assistant. Impo
 * `name`\*
 * `description`
 * `domain` - name of the parent folder, must match exactly one existing folder name (case-insensitive)
+* `iam_group` - controls IAM group creation for the folder (equivalent to the `create_iam_groups` option): `yes` / `true` / `1` enables it, `no` / `false` / `0` disables it (case-insensitive); other values are ignored
 
 ### Template
 
@@ -855,6 +856,7 @@ Folders (domains) are the top-level organisational units in CISO Assistant. Impo
 * Conflict detection is performed by `name` + parent folder.
 * When `domain` is left blank the folder is attached to the root of the tenant.
 * An error is returned if `domain` matches more than one folder name.
+* Leaving `iam_group` blank does not change IAM group creation on an existing folder. Setting it to `no` / `false` / `0` on an existing folder removes its previously created IAM groups and role assignments, mirroring the folder edit form — this is rejected (and the row reported as an error) if users are already assigned to those groups.
 
 ***
 
