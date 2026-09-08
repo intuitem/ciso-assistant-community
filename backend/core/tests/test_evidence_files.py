@@ -66,12 +66,12 @@ def test_ten_files_one_revision_and_all_downloadable(client):
         assert content == str(index).encode()
         assert file["attachment_hash"] == hashlib.sha256(content).hexdigest()
 
-    response = client.get(
-        "/api/evidence-revisions/", {"evidence": str(evidence.pk)}
-    )
+    response = client.get("/api/evidence-revisions/", {"evidence": str(evidence.pk)})
     assert response.status_code == 200, response.data
     revision = next(
-        item for item in response.data["results"] if item["id"] == str(evidence.last_revision.pk)
+        item
+        for item in response.data["results"]
+        if item["id"] == str(evidence.last_revision.pk)
     )
     assert [item["filename"] for item in revision["attachments"]] == [
         f"file-{i}.txt" for i in range(10)
@@ -346,14 +346,13 @@ def test_domain_import_rejects_tampered_attachment_and_cleans_staged_files(
     exported = export_domain(folder, user).content
     source = io.BytesIO(exported)
     tampered = io.BytesIO()
-    with zipfile.ZipFile(source) as input_zip, zipfile.ZipFile(
-        tampered, "w", zipfile.ZIP_DEFLATED
-    ) as output_zip:
+    with (
+        zipfile.ZipFile(source) as input_zip,
+        zipfile.ZipFile(tampered, "w", zipfile.ZIP_DEFLATED) as output_zip,
+    ):
         data = json.loads(input_zip.read("data.json"))
         additional = next(
-            obj
-            for obj in data["objects"]
-            if obj["model"] == "core.evidenceattachment"
+            obj for obj in data["objects"] if obj["model"] == "core.evidenceattachment"
         )
         additional["fields"]["attachment_hash"] = "0" * 64
         for info in input_zip.infolist():
