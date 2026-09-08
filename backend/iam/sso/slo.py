@@ -9,6 +9,8 @@ from django.conf import settings
 from django.contrib.auth import logout as auth_logout
 from django.http import HttpRequest, HttpResponseRedirect
 from django.views import View
+from rest_framework import permissions, views
+from rest_framework.response import Response
 
 from iam.sso.models import SSOSettings
 
@@ -102,23 +104,70 @@ def _pop_slo_state(request: HttpRequest) -> dict | None:
     # The allauth headless session must die server-side no matter which
     # session yielded the SLO state — deleting only its cookie would leave
     # the session token replayable until expiry.
-    token_state = _pop_allauth_token_session(request)
+    token_state = pop_slo_state_from_sessions(
+        [request.COOKIES.get(ALLAUTH_SESSION_TOKEN_COOKIE_NAME)],
+        skip_session_key=request.session.session_key,
+    )
     return slo_state or token_state
 
 
-def _pop_allauth_token_session(request: HttpRequest) -> dict | None:
-    """Delete the allauth headless session referenced by the session-token
-    cookie, returning any SLO state it held."""
-    session_token = request.COOKIES.get(ALLAUTH_SESSION_TOKEN_COOKIE_NAME)
-    if not session_token or session_token == request.session.session_key:
-        return None
-
-    token_session = _get_session_store(session_token)
-    slo_state = token_session.get(SLO_SESSION_KEY)
-    token_session.delete(session_token)
-    if slo_state:
-        logger.info("Recovered single logout state from allauth session token")
+def pop_slo_state_from_sessions(
+    session_keys, skip_session_key: str | None = None
+) -> dict | None:
+    """Destroy the given sessions, returning the first SLO state found."""
+    slo_state = None
+    for session_key in session_keys:
+        if not session_key or session_key == skip_session_key:
+            continue
+        session = _get_session_store(session_key)
+        state = session.get(SLO_SESSION_KEY)
+        session.delete(session_key)
+        if state and not slo_state:
+            logger.info("Recovered single logout state from session")
+            slo_state = state
     return slo_state
+
+
+def build_idp_logout_url(request: HttpRequest, slo_state: dict | None) -> str | None:
+    """Return the IdP logout URL for a stashed SLO state, None to skip SLO."""
+    if not slo_state:
+        logger.info("No single logout state in session, skipping IdP logout")
+        return None
+    try:
+        sso_settings = SSOSettings.objects.get()
+        if not sso_settings.slo_enabled:
+            logger.info(
+                "Service provider-initiated single logout disabled, "
+                "skipping IdP logout",
+                provider=slo_state.get("provider"),
+            )
+            return None
+        if sso_settings.provider != slo_state.get("provider"):
+            logger.warning(
+                "SSO provider changed since login, skipping IdP logout",
+                stashed_provider=slo_state.get("provider"),
+                current_provider=sso_settings.provider,
+            )
+            return None
+        provider = sso_settings.get_provider(request)
+        logout_url = None
+        if slo_state["provider"] == "openid_connect":
+            logout_url = _build_oidc_logout_url(request, provider, slo_state)
+        elif slo_state["provider"] == "saml":
+            logout_url = _build_saml_logout_url(request, provider, slo_state)
+        if logout_url:
+            logger.info(
+                "Resolved IdP single logout URL",
+                provider=slo_state["provider"],
+            )
+            return logout_url
+        logger.warning(
+            "No IdP logout URL available, skipping IdP logout",
+            provider=slo_state["provider"],
+        )
+    except Exception as e:
+        logger.error("IdP single logout failed", exc_info=e)
+    return None
 
 
 def _redirect_with_logout_cookies(url: str) -> HttpResponseRedirect:
@@ -140,47 +189,30 @@ class IdPLogoutView(View):
     """
 
     def get(self, request):
-        fallback = get_post_logout_redirect_url()
         slo_state = _pop_slo_state(request)
         auth_logout(request)
-        if not slo_state:
-            logger.info(
-                "No single logout state in session, skipping IdP logout",
-                had_session_cookie=settings.SESSION_COOKIE_NAME in request.COOKIES,
-            )
-            return _redirect_with_logout_cookies(fallback)
-        try:
-            sso_settings = SSOSettings.objects.get()
-            if not sso_settings.slo_enabled:
-                logger.info(
-                    "Service provider-initiated single logout disabled, "
-                    "skipping IdP logout",
-                    provider=slo_state.get("provider"),
-                )
-                return _redirect_with_logout_cookies(fallback)
-            if sso_settings.provider != slo_state.get("provider"):
-                logger.warning(
-                    "SSO provider changed since login, skipping IdP logout",
-                    stashed_provider=slo_state.get("provider"),
-                    current_provider=sso_settings.provider,
-                )
-                return _redirect_with_logout_cookies(fallback)
-            provider = sso_settings.get_provider(request)
-            logout_url = None
-            if slo_state["provider"] == "openid_connect":
-                logout_url = _build_oidc_logout_url(request, provider, slo_state)
-            elif slo_state["provider"] == "saml":
-                logout_url = _build_saml_logout_url(request, provider, slo_state)
-            if logout_url:
-                logger.info(
-                    "Redirecting browser to IdP single logout",
-                    provider=slo_state["provider"],
-                )
-                return _redirect_with_logout_cookies(logout_url)
-            logger.warning(
-                "No IdP logout URL available, skipping IdP logout",
-                provider=slo_state["provider"],
-            )
-        except Exception as e:
-            logger.error("IdP single logout failed", exc_info=e)
-        return _redirect_with_logout_cookies(fallback)
+        logout_url = build_idp_logout_url(request, slo_state)
+        return _redirect_with_logout_cookies(
+            logout_url or get_post_logout_redirect_url()
+        )
+
+
+class IdPLogoutURLView(views.APIView):
+    """Resolve the IdP logout URL without sending the browser to the API.
+
+    The SvelteKit BFF calls this server-side and redirects the browser itself,
+    so SSO logout keeps working on deployments where the API is IP-restricted.
+    Session keys travel as headers because the API cookies are not forwarded.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        slo_state = pop_slo_state_from_sessions(
+            [
+                request.META.get("HTTP_X_ALLAUTH_SESSION_TOKEN"),
+                request.META.get("HTTP_X_SSO_SESSION_KEY"),
+            ]
+        )
+        logout_url = build_idp_logout_url(request, slo_state)
+        return Response({"logout_url": logout_url or get_post_logout_redirect_url()})
