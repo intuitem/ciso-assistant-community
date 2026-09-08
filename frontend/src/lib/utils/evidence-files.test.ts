@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { superValidate } from 'sveltekit-superforms/server';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { EvidenceSchema, EvidenceRevisionSchema } from './schemas';
-import { evidenceMultipart } from './evidence-files';
+import { evidenceFileDisplay, evidenceMultipart } from './evidence-files';
 
 describe('evidence multipart form submission', () => {
 	it('keeps ten selected files through form validation', async () => {
@@ -38,5 +38,21 @@ describe('evidence multipart form submission', () => {
 		expect(
 			body.getAll('attachments').every((file) => file instanceof File && file.name === 'same.txt')
 		).toBe(true);
+	});
+
+	it('shows every file of a revision with its own size', () => {
+		expect(
+			evidenceFileDisplay([
+				{ filename: 'audit.pdf', size: '112.7 KB' },
+				{ filename: 'report.docx', size: '395.4 KB' }
+			])
+		).toEqual([
+			{ filename: 'audit.pdf', size: '112.7 KB' },
+			{ filename: 'report.docx', size: '395.4 KB' }
+		]);
+	});
+
+	it('still renders a legacy single-file value', () => {
+		expect(evidenceFileDisplay('legacy.pdf')).toEqual([{ filename: 'legacy.pdf', size: null }]);
 	});
 });

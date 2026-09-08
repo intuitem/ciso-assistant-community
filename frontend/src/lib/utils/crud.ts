@@ -3865,7 +3865,8 @@ const FIELD_COMPONENT_MAP = {
 		attachment: EvidenceFileName
 	},
 	'evidence-revisions': {
-		attachment: EvidenceFileName
+		attachment: EvidenceFileName,
+		attachments: EvidenceFileName
 	},
 	'stored-libraries': {
 		locales: LanguageDisplay,

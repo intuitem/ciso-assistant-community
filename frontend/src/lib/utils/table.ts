@@ -2157,8 +2157,8 @@ export const listViewFields = {
 		}
 	},
 	'evidence-revisions': {
-		head: ['version', 'evidence', 'file', 'size', 'updatedAt'],
-		body: ['version', 'evidence', 'attachment', 'size', 'updated_at'],
+		head: ['version', 'evidence', 'attachments', 'updatedAt'],
+		body: ['version', 'evidence', 'attachments', 'updated_at'],
 		filters: {
 			filtering_labels: LABELS_FILTER
 		}

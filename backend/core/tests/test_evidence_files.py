@@ -66,6 +66,17 @@ def test_ten_files_one_revision_and_all_downloadable(client):
         assert content == str(index).encode()
         assert file["attachment_hash"] == hashlib.sha256(content).hexdigest()
 
+    response = client.get(
+        "/api/evidence-revisions/", {"evidence": str(evidence.pk)}
+    )
+    assert response.status_code == 200, response.data
+    revision = next(
+        item for item in response.data["results"] if item["id"] == str(evidence.last_revision.pk)
+    )
+    assert [item["filename"] for item in revision["attachments"]] == [
+        f"file-{i}.txt" for i in range(10)
+    ]
+
 
 def test_eleven_files_rejected_without_rows_or_files(client, settings):
     response = create(client, 11)
