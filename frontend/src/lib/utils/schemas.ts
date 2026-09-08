@@ -758,6 +758,7 @@ export const FeatureFlagsSchema = z.object({
 	data_breaches: z.boolean().optional(),
 	chat_mode: z.boolean().optional(),
 	auditee_mode: z.boolean().optional(),
+	quick_forms: z.boolean().optional(),
 	advanced_analytics: z.boolean().optional(),
 	comments: z.boolean().optional(),
 	journeys: z.boolean().optional(),

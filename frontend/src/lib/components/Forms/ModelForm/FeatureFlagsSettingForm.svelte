@@ -174,6 +174,11 @@
 					description: m.auditeeModeDescription()
 				},
 				{
+					field: 'quick_forms',
+					label: m.quickForms(),
+					description: m.quickFormsDescription()
+				},
+				{
 					field: 'advanced_analytics',
 					label: m.advancedAnalytics(),
 					description: m.advancedAnalyticsDescription()

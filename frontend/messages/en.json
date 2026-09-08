@@ -6274,6 +6274,7 @@
 	"neverAssessed": "Never assessed",
 	"quickForm": "Quick form",
 	"quickForms": "Quick forms",
+	"quickFormsDescription": "Standalone forms of ordered pages, filled without an audit: intake requests, pre-qualifications and light questionnaires.",
 	"quickFormResponse": "Quick form response",
 	"quickFormResponses": "Quick form responses",
 	"add-quickFormResponse": "New quick form response",
