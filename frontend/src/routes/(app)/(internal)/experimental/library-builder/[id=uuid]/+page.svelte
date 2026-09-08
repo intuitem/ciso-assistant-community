@@ -479,7 +479,7 @@
 						}
 					: {})
 			},
-			translations: { ...(item?.translations ?? {}) }
+			translations: { ...item?.translations }
 		};
 	}
 
