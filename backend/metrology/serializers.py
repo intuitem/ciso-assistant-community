@@ -1,3 +1,5 @@
+import json
+
 import jsonschema
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
@@ -43,6 +45,19 @@ VALUE_SCHEMA_BY_CATEGORY = {
     MetricDefinition.Category.QUALITATIVE: QUALITATIVE_VALUE_SCHEMA,
     MetricDefinition.Category.QUANTITATIVE: QUANTITATIVE_VALUE_SCHEMA,
 }
+
+
+def coerce_sample_value(value):
+    """Clients before 3.21.5 sent (and stored) the value as a JSON string."""
+    if not isinstance(value, str):
+        return value
+    try:
+        decoded = json.loads(value)
+    except json.JSONDecodeError, TypeError:
+        return value
+    # Only a dict is a legacy encoding; anything else stays a string so the
+    # value schema rejects it instead of slipping past the field's allow_null.
+    return decoded if isinstance(decoded, dict) else value
 
 
 # MetricDefinition serializers
@@ -162,6 +177,9 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
             validated_data["folder"] = validated_data["metric_instance"].folder
         return super().create(validated_data)
 
+    def validate_value(self, value):
+        return coerce_sample_value(value)
+
     def validate_timestamp(self, value):
         """Prevent creating samples with future timestamps"""
         from django.utils import timezone
@@ -178,7 +196,7 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
         if "value" in attrs:
             value = attrs["value"]
         elif self.instance is not None:
-            value = self.instance.value
+            value = coerce_sample_value(self.instance.value)
         else:
             value = CustomMetricSample._meta.get_field("value").get_default()
         if value is None:

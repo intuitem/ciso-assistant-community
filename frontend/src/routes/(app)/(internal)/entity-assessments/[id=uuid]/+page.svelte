@@ -4,6 +4,7 @@
 	import { deserialize } from '$app/forms';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import NewRevisionModal from '$lib/components/Modals/NewRevisionModal.svelte';
+	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { ModalComponent, ModalSettings } from '$lib/components/Modals/stores';
@@ -77,6 +78,40 @@
 		const modal: ModalSettings = { type: 'component', component: modalComponent };
 		modalStore.trigger(modal);
 	}
+
+	function buildExportGroups(): ExportGroup[] {
+		const auditId = data.data.compliance_assessment?.id;
+		if (!auditId) return [];
+		return [
+			{
+				titleKey: 'entityAssessment',
+				options: [
+					{
+						titleKey: 'exportAuditAttestation',
+						descriptionKey: 'exportAuditAttestationDesc',
+						format: 'PDF' as const,
+						href: `/compliance-assessments/${auditId}/export/posture-pdf?profile=attestation`,
+						testId: 'export-option-attestation-pdf'
+					},
+					{
+						titleKey: 'exportAuditPosture',
+						descriptionKey: 'exportAuditPostureDesc',
+						format: 'PDF' as const,
+						href: `/compliance-assessments/${auditId}/export/posture-pdf?profile=full`,
+						testId: 'export-option-posture-pdf'
+					}
+				]
+			}
+		];
+	}
+
+	function modalExport(): void {
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: { title: m.exportOptionsTitle(), groups: buildExportGroups() }
+		};
+		modalStore.trigger({ type: 'component', component: modalComponent });
+	}
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -124,6 +159,14 @@
 		{/snippet}
 		{#snippet actions()}
 			{#if data.data.compliance_assessment}
+				<button
+					type="button"
+					class="btn preset-filled-primary-500 h-fit"
+					onclick={modalExport}
+					data-testid="export-button"
+				>
+					<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+				</button>
 				<button
 					class="btn preset-filled-secondary-500 h-fit"
 					onclick={handleClone}

@@ -75,6 +75,7 @@ Why the lifecycle matters across the platform:
 - **Risk model** — _Current risk_ uses controls in `active` (and partly `degraded`); _residual risk_ also factors in controls in `to_do` / `in_progress` (the planned ones). Moving a control from `to_do` to `active` is what closes the gap between residual and current.
 - **Action plan** — the Kanban view and the Control Plan grid both swimlane by status. A control sitting in `on_hold` for too long is the signal to escalate.
 - **ETA enforcement** — when ETA passes and the status isn't `active`, the control is flagged overdue. Reaching `active` is what stops the clock.
+- **Commitments** — with [commitment management](commitments.md) enabled, a control carries the delivery date its owner has actually promised, separately from the ETA. The owner commits; someone else confirms delivery.
 - **Framework / audit roll-ups** — compliance percentages and analytics treat `active` as "in place" and `degraded` as a partial signal that wants follow-up. Other statuses don't contribute coverage.
 - **Deprecation** — preferred over deletion. A deprecated control keeps its history, evidence, and links to the requirements it once satisfied — useful for past-audit traceability — without polluting current views.
 
@@ -127,6 +128,6 @@ A **policy** is a specific type of applied control: a document describing what i
 
 - [Policies](policies.md)
 - [Audits](audits.md)
-- [Findings assessments](findings-assessments.md)
+- [Findings binders](findings-assessments.md)
 - [Philosophy → Decoupling principle](../introduction/philosophy.md)
 - [Vocabulary → Applied control / Reference control / Evidence](../introduction/vocabulary.md)

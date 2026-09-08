@@ -20,7 +20,7 @@ The list is long on purpose — to make the model concrete:
 
 - **Compliance**: audits / compliance assessments, requirement assessments, evidences.
 - **Risk**: risk assessments, risk scenarios, quantitative risk studies, EBIOS RM studies, business impact analyses, security exceptions.
-- **Operations**: applied controls, policies, tasks, incidents, findings, findings assessments.
+- **Operations**: applied controls, policies, tasks, incidents, findings, findings binders, commitments.
 - **Assets**: assets, contracts, entities, solutions, representatives.
 - **Privacy**: processings, personal-data inventories, right requests, data breaches.
 - **Project management**: projects, accreditations, responsibility matrices.
@@ -34,6 +34,12 @@ The domain hierarchy is not just for organising the UI — it actively shapes ac
 This is why the tree shape matters as much as the names: putting "France" and "Germany" under a "EMEA" parent isn't decorative — it's the lever that lets EMEA-level managers see across both without granting them individual roles per country.
 
 Permissions only flow **downward**: a role on a sub-domain does _not_ grant any access to the parent. If you need a role-holder to see across siblings, the role goes on the shared ancestor.
+
+### The one exception: third-party workspaces
+
+A **third-party workspace** — the folder holding a vendor's questionnaire, an *enclave* internally — is the one place where the tree deliberately stops conducting. Access granted there does not reach up: a representative with view rights on their workspace sees their questionnaire and nothing published in the domains above it. That containment is what makes it safe to give an external party an account on your instance at all.
+
+Each third party gets one workspace per domain. See [third-party risk](third-party-risk.md#the-third-party-workspace).
 
 The same inheritance also drives reporting: most dashboards and analytics roll up across a domain _and_ its descendants, so a leadership-level view on the parent domain is automatically the consolidated view across its sub-tree.
 
@@ -54,7 +60,7 @@ If you want to keep a specific object _out_ of the published view, the simplest 
 
 ## Why you sometimes see items from other domains
 
-Assessments routinely _compose_ objects across the tree. Risk assessments reference applied controls, threats, and assets; audits reference applied controls and evidences; findings assessments reference applied controls and the requirement assessments they remediate.
+Assessments routinely _compose_ objects across the tree. Risk assessments reference applied controls, threats, and assets; audits reference applied controls and evidences; findings binders reference applied controls and the requirement assessments they remediate.
 
 When you're working inside one assessment, the platform's selectors and pickers don't just show you what's in the assessment's own domain — they show you **everything you have access to**. So a risk scenario authored inside the _France_ domain can pull in:
 
