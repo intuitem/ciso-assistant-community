@@ -386,3 +386,17 @@ def test_assessment_status_is_localised_by_the_template(lang, expected):
     assert payload["assessment"]["status_key"] == "in_progress"
     assert "status" not in payload["assessment"]
     assert expected in _text(pdf)
+
+
+def test_each_template_declares_its_own_language():
+    """`lang` drives hyphenation: a French document set to `en` breaks words by
+    English rules. The suffix is the source of truth."""
+    import re
+
+    for template in sorted(TEMPLATE_DIR.glob("*.typ")):
+        expected = template.stem.rsplit("_", 1)[1]
+        match = re.search(r'#set text\([^)]*lang: "(\w+)"\)', template.read_text())
+        assert match, f"{template.name} sets no language"
+        assert match.group(1) == expected, (
+            f"{template.name} declares lang={match.group(1)!r}, expected {expected!r}"
+        )

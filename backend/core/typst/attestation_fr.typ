@@ -43,7 +43,7 @@
     )
   },
 )
-#set text(10pt, lang: "en")
+#set text(10pt, lang: "fr")
 #set par(justify: true)
 #show heading.where(level: 1): set text(15pt, fill: accent)
 #show heading.where(level: 2): set text(12pt, fill: accent)

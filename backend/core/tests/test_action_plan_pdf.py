@@ -167,3 +167,25 @@ def test_unset_status_group_is_named_by_the_template(audit):
     pdf, _ = _render(audit, _controls(audit, ["--"]))
     text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
     assert "No status" in text
+
+
+def test_every_status_has_a_fill_and_a_label_in_each_locale():
+    """A status missing from either map renders grey and unnamed — the `degraded`
+    gap review caught. Cross-check both against the model."""
+    import re
+
+    from core.generators import _ACTION_PLAN_STATUS_FILLS
+
+    statuses = {value for value, _ in AppliedControl.Status.choices}
+    assert statuses <= set(_ACTION_PLAN_STATUS_FILLS), (
+        f"no fill for {statuses - set(_ACTION_PLAN_STATUS_FILLS)}"
+    )
+
+    for name in ("action_plan_en.typ", "action_plan_fr.typ"):
+        src = (TEMPLATE_DIR / name).read_text()
+        block = src[src.index("#let status-label = (") :]
+        block = block[: block.index(")")]
+        labelled = set(re.findall(r"^\s*([a-z_]+):", block, re.M))
+        # `--` is named by the template's own default, not a key.
+        missing = {s for s in statuses if s != "--"} - labelled
+        assert not missing, f"{name} has no label for {missing}"

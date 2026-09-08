@@ -387,6 +387,7 @@ _ACTION_PLAN_STATUS_FILLS = {
     "in_progress": "#e8e4f0",
     "on_hold": "#fdf3d3",
     "active": "#e3f4f2",
+    "degraded": "#fde8e8",
     "deprecated": "#ffe8d6",
     "--": "#f1f5f9",
 }
