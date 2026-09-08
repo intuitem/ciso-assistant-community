@@ -8128,26 +8128,67 @@ class UserViewSet(BaseModelViewSet):
     # that deactivate, now or on expiry.
     LOCKOUT_SENSITIVE_FIELDS = ("user_groups", "is_active", "expiry_date")
 
-    def update(self, request: Request, *args, **kwargs) -> Response:
-        user = self.get_object()
-        # The checks themselves live in UserWriteSerializer
-        # (_enforce_last_admin_group, _enforce_last_active_admin) so that
-        # batch_action — which drives the serializer directly, never this
-        # method — is covered by the same guards. All this adds is the lock
-        # that keeps them from racing a concurrent admin removal into a
-        # zero-admin lockout.
-        # NOTE: select_for_update is a no-op on SQLite, which has no
-        # SELECT ... FOR UPDATE; the checks still hold there, only the race
-        # window stays open.
-        if (
-            any(field in request.data for field in self.LOCKOUT_SENSITIVE_FIELDS)
-            and user.user_groups.filter(name="BI-UG-ADM").exists()
-        ):
-            with transaction.atomic():
-                UserGroup.objects.select_for_update().filter(name="BI-UG-ADM").first()
-                return super().update(request, *args, **kwargs)
+    def perform_update(self, serializer):
+        """Authoritative pass on the last-admin invariants, under the admin-group
+        lock and in the same transaction as the write.
 
-        return super().update(request, *args, **kwargs)
+        UserWriteSerializer runs the same predicates during validation, but that
+        read happens before any lock is taken, so on its own it is check-then-act:
+        two concurrent requests stripping BI-UG-ADM from two *different* admins
+        both see a second admin still standing and both proceed, leaving none.
+
+        This lives in perform_update rather than update() because batch_action
+        calls it directly. A lock only excludes writers that take it, so leaving
+        the batch path outside would not merely leave batch writes unprotected —
+        it would let them slip past the lock a concurrent update() is holding.
+        NOTE: select_for_update is a no-op on SQLite, which has no
+        SELECT ... FOR UPDATE; the checks still hold there, only the window stays
+        open."""
+        instance = serializer.instance
+        attrs = serializer.validated_data
+        if not (
+            instance is not None
+            and any(field in attrs for field in self.LOCKOUT_SENSITIVE_FIELDS)
+            and instance.user_groups.filter(name="BI-UG-ADM").exists()
+        ):
+            return super().perform_update(serializer)
+
+        with transaction.atomic():
+            UserGroup.objects.select_for_update().filter(name="BI-UG-ADM").first()
+            if "user_groups" in attrs and UserWriteSerializer.strips_last_admin_group(
+                instance, attrs["user_groups"]
+            ):
+                self._deny_lockout(
+                    "last_admin_group",
+                    {"error": "attemptToRemoveOnlyAdminUserGroup"},
+                    instance,
+                )
+            offending = UserWriteSerializer.deactivates_last_active_admin(
+                instance, attrs
+            )
+            if offending:
+                self._deny_lockout(
+                    "last_active_admin",
+                    {
+                        field: ["attemptToDeactivateOnlyAdminAccountError"]
+                        for field in offending
+                    },
+                    instance,
+                )
+            return super().perform_update(serializer)
+
+    def _deny_lockout(self, guard: str, errors: dict, user) -> None:
+        """Log the refused write as a security event, then raise it. Raising
+        inside perform_update rolls the transaction back, and batch_action
+        collects the PermissionDenied into its per-object `failed` list."""
+        logger.warning(
+            "denied privileged user operation",
+            guard=guard,
+            errors=errors,
+            requester=self.request.user.email,
+            target=user.email,
+        )
+        raise PermissionDenied(errors)
 
     def _deny_destroy(self, guard: str, error_key: str, user) -> None:
         """Log the denied deletion as a security event, then raise it. DRF

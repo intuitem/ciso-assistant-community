@@ -2327,26 +2327,39 @@ class UserWriteSerializer(BaseModelSerializer):
         via an IdP group are managed by the IdP, not here, so they neither gate
         this check nor count toward it.
 
-        Lives here rather than in UserViewSet.update so batch_action's m2m
-        paths, which drive the serializer directly, are covered too; the view
-        only adds the admin-group lock around it. Runs after
-        _enforce_group_membership_rights, which folds memberships invisible to
-        the requester back into attrs — those must count as kept, not stripped.
+        Runs after _enforce_group_membership_rights, which folds memberships
+        invisible to the requester back into attrs — those must count as kept,
+        not stripped.
+
+        This is the fast fail, running before the lock: it reports a field-level
+        error on the common case. It is NOT authoritative — the check is
+        check-then-act, so UserViewSet.perform_update re-runs the predicate
+        under the admin-group lock, in the same transaction as the write.
         """
-        if self.instance is None or "user_groups" not in attrs:
+        if "user_groups" not in attrs:
             return
-        if not self.instance.user_groups.filter(name="BI-UG-ADM").exists():
-            return
-        if User.objects.filter(user_groups__name="BI-UG-ADM").count() > 1:
-            return
-        submitted = {str(group.pk) for group in attrs["user_groups"] or []}
-        if not UserGroup.objects.filter(name="BI-UG-ADM", pk__in=submitted).exists():
+        if self.strips_last_admin_group(self.instance, attrs["user_groups"]):
             # Top-level "error" key, not a field-keyed one: same response body
             # this returned from the view, and the same one UserGroupViewSet's
             # remove-members returns for the mirror-image operation.
             self._deny(
                 "last_admin_group", {"error": "attemptToRemoveOnlyAdminUserGroup"}
             )
+
+    @staticmethod
+    def strips_last_admin_group(instance, submitted_groups) -> bool:
+        """Would this membership write leave the deployment with no direct
+        administrator? Pure predicate, no raising, so UserViewSet.perform_update
+        can re-evaluate it under the BI-UG-ADM lock — the serializer reads it
+        before any lock is held, which is only good enough to fail fast."""
+        if instance is None:
+            return False
+        if not instance.user_groups.filter(name="BI-UG-ADM").exists():
+            return False
+        if User.objects.filter(user_groups__name="BI-UG-ADM").count() > 1:
+            return False
+        submitted = {str(group.pk) for group in submitted_groups or []}
+        return not UserGroup.objects.filter(name="BI-UG-ADM", pk__in=submitted).exists()
 
     # Lifecycle/auth-surface fields: deactivation (directly, or deferred via
     # expiry_date and the nightly deactivate_expired_users task) and the
@@ -2421,29 +2434,14 @@ class UserWriteSerializer(BaseModelSerializer):
         directly-managed administrator would lock the deployment out of
         administration, so it is blocked for everyone, mirroring the
         delete/group-removal last-admin guards. Reactivating and clearing an
-        expiry stay allowed. UserViewSet.update takes the admin-group lock
-        around this check; deactivate_expired_users carries the same backstop
-        for expiries that predate this guard."""
-        if self.instance is None:
-            return
-        offending = set()
-        if attrs.get("is_active") is False and self.instance.is_active:
-            offending.add("is_active")
-        if (
-            "expiry_date" in attrs
-            and attrs["expiry_date"] is not None
-            and attrs["expiry_date"] != self.instance.expiry_date
-        ):
-            offending.add("expiry_date")
+        expiry stay allowed. deactivate_expired_users carries the same backstop
+        for expiries that predate this guard.
+
+        Fast fail only, like _enforce_last_admin_group: the authoritative
+        re-check runs under the admin-group lock in
+        UserViewSet.perform_update."""
+        offending = self.deactivates_last_active_admin(self.instance, attrs)
         if not offending:
-            return
-        if not self.instance.user_groups.filter(name="BI-UG-ADM").exists():
-            return
-        if (
-            User.objects.filter(user_groups__name="BI-UG-ADM", is_active=True)
-            .exclude(pk=self.instance.pk)
-            .exists()
-        ):
             return
         self._deny(
             "last_active_admin",
@@ -2452,6 +2450,34 @@ class UserWriteSerializer(BaseModelSerializer):
                 for field in offending
             },
         )
+
+    @staticmethod
+    def deactivates_last_active_admin(instance, attrs: dict) -> set:
+        """Fields in *attrs* whose write would leave no active direct
+        administrator. Pure predicate, mirroring strips_last_admin_group, so the
+        view can re-evaluate it under the lock."""
+        if instance is None:
+            return set()
+        offending = set()
+        if attrs.get("is_active") is False and instance.is_active:
+            offending.add("is_active")
+        if (
+            "expiry_date" in attrs
+            and attrs["expiry_date"] is not None
+            and attrs["expiry_date"] != instance.expiry_date
+        ):
+            offending.add("expiry_date")
+        if not offending:
+            return set()
+        if not instance.user_groups.filter(name="BI-UG-ADM").exists():
+            return set()
+        if (
+            User.objects.filter(user_groups__name="BI-UG-ADM", is_active=True)
+            .exclude(pk=instance.pk)
+            .exists()
+        ):
+            return set()
+        return offending
 
     def _enforce_lifecycle_field_rights(self, attrs: dict) -> None:
         """Deactivating an administrator — directly, or deferred via

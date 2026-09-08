@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 from django.contrib.auth.models import Permission
@@ -6,6 +7,7 @@ from django.urls import reverse
 from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.test import APIClient
+from core.serializers import UserWriteSerializer
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
 
@@ -1321,6 +1323,112 @@ class TestBatchActionGuards:
         assert response.json()["succeeded"] == []
         target.refresh_from_db()
         assert target.is_active is True
+
+
+@pytest.mark.django_db
+class TestLastAdminWriteTimeRecheck:
+    """The serializer's last-admin checks read before any lock is held, so on
+    their own they are check-then-act: two concurrent requests stripping
+    BI-UG-ADM from two *different* admins would both see a second admin standing
+    and both proceed. UserViewSet.perform_update re-runs the predicates under
+    the admin-group lock, in the write's transaction.
+
+    These tests neutralize the serializer's copy of the check, standing in for a
+    concurrent request that committed in the window between it and the write,
+    and assert the write is still refused. A real thread race is not tested on
+    purpose: the test DB is SQLite, where select_for_update compiles to nothing,
+    so such a test would prove nothing here and would be timing-dependent in CI.
+    What matters and is deterministic is that the write-time pass is
+    authoritative rather than a duplicate of the validation-time one."""
+
+    def test_group_removal_refused_when_validation_passed_on_stale_data(
+        self, escalation_env
+    ):
+        env = escalation_env
+        last_admin = User.objects.get(email="admin@tests.com")
+
+        with patch.object(
+            UserWriteSerializer, "_enforce_last_admin_group", lambda self, attrs: None
+        ):
+            response = env.admin_client.patch(
+                reverse("users-detail", args=[last_admin.id]),
+                {"user_groups": []},
+                format="json",
+            )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.json()["error"] == "attemptToRemoveOnlyAdminUserGroup"
+        assert last_admin.user_groups.filter(pk=env.admin_group.pk).exists()
+
+    def test_batch_group_removal_refused_when_validation_passed_on_stale_data(
+        self, escalation_env
+    ):
+        """The path the lock previously did not cover at all — and, because a
+        lock only excludes writers that take it, the one that could slip past a
+        concurrent update() holding it."""
+        env = escalation_env
+        last_admin = User.objects.get(email="admin@tests.com")
+
+        with patch.object(
+            UserWriteSerializer, "_enforce_last_admin_group", lambda self, attrs: None
+        ):
+            response = env.admin_client.post(
+                reverse("users-batch-action"),
+                {
+                    "action": "remove_m2m",
+                    "ids": [str(last_admin.id)],
+                    "field": "user_groups",
+                    "value": [str(env.admin_group.id)],
+                },
+                format="json",
+            )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["succeeded"] == []
+        assert (
+            response.json()["failed"][0]["error"]["error"]
+            == "attemptToRemoveOnlyAdminUserGroup"
+        )
+        assert last_admin.user_groups.filter(pk=env.admin_group.pk).exists()
+
+    def test_deactivation_refused_when_validation_passed_on_stale_data(
+        self, escalation_env
+    ):
+        env = escalation_env
+        last_admin = User.objects.get(email="admin@tests.com")
+
+        with patch.object(
+            UserWriteSerializer, "_enforce_last_active_admin", lambda self, attrs: None
+        ):
+            response = env.admin_client.patch(
+                reverse("users-detail", args=[last_admin.id]),
+                {"is_active": False},
+                format="json",
+            )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.json()["is_active"] == [
+            "attemptToDeactivateOnlyAdminAccountError"
+        ]
+        last_admin.refresh_from_db()
+        assert last_admin.is_active is True
+
+    def test_ordinary_admin_writes_still_go_through(self, escalation_env):
+        """The re-check is targeted: writes that keep an administrator standing
+        are untouched by the lock path."""
+        env = escalation_env
+        spare = User.objects.create_user("spare.admin3@tests.com", is_published=True)
+        env.admin_group.user_set.add(spare)
+
+        response = env.admin_client.patch(
+            reverse("users-detail", args=[spare.id]),
+            {"is_active": False},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        spare.refresh_from_db()
+        assert spare.is_active is False
 
 
 @pytest.mark.django_db
