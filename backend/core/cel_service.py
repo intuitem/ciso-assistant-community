@@ -483,6 +483,142 @@ def _quick_form_score(response, context, snapshot, hidden_page_ids) -> int | Non
     return int(max(lo, min(hi, round(total))))
 
 
+_PROBE_VALUE_BY_TYPE = {
+    "boolean": False,
+    "number": 0,
+    "text": "",
+    "date": "",
+    "unique_choice": "",
+    "multiple_choice": "",
+}
+
+
+def _quick_form_probe(quick_form: dict) -> dict:
+    """A context with the real shape of `quick_form` but empty values.
+
+    Evaluating a rule against it proves the expression compiles, only touches
+    roots the quick-form evaluator actually provides, and only indexes page and
+    question node_ids that exist — the three ways an outcome rule silently never
+    fires at runtime.
+    """
+    from core.utils import extract_node_id
+
+    pages, answers = {}, {}
+    for page in quick_form.get("pages") or []:
+        node_id = extract_node_id(str(page.get("urn") or ""))
+        if node_id:
+            pages[node_id] = {"visible": True, "answered_count": 0, "total_count": 0}
+        for q_urn, question in (page.get("questions") or {}).items():
+            q_node_id = extract_node_id(str(q_urn))
+            if not q_node_id:
+                continue
+            q_type = str((question or {}).get("type") or "text")
+            answers[q_node_id] = {
+                "value": _PROBE_VALUE_BY_TYPE.get(q_type, ""),
+                "score": 0,
+                "selected_choices": [],
+                "weight": int((question or {}).get("weight") or 1),
+                "type": q_type,
+                "answered": False,
+            }
+    return {
+        "response": {
+            "score_sum": 0,
+            "score_max": 0,
+            "answered_count": 0,
+            "total_count": 0,
+            "complete": False,
+        },
+        "pages": pages,
+        "answers": answers,
+        "computed_outcomes": {
+            str(rule.get("ref_id")): {}
+            for rule in quick_form.get("outcomes_definition") or []
+            if rule.get("ref_id")
+        },
+        "hidden_pages": [],
+    }
+
+
+def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
+    """Check every page visibility expression and outcome rule of a quick form.
+
+    Returns a list of {where, ref_id, expression, error}; empty means every
+    expression is evaluable. Compilation alone is not enough — the common
+    mistake is a valid expression against the wrong context (`assessment.*`
+    instead of `response.*`), which raises at evaluation and is swallowed there.
+    """
+    probe = {k: _python_to_cel(v) for k, v in _quick_form_probe(quick_form).items()}
+    env = celpy.Environment()
+    errors = []
+
+    def _check(where, ref_id, expression):
+        if not expression:
+            return
+        try:
+            env.program(env.compile(expression)).evaluate(probe)
+        except Exception as e:
+            errors.append(
+                {
+                    "where": where,
+                    "ref_id": ref_id,
+                    "expression": expression,
+                    "error": str(e).split("\n")[0][:300],
+                }
+            )
+
+    for page in quick_form.get("pages") or []:
+        _check(
+            "page_visibility",
+            str(page.get("ref_id") or page.get("urn") or ""),
+            str(page.get("visibility_expression") or ""),
+        )
+    for rule in quick_form.get("outcomes_definition") or []:
+        _check(
+            "outcome",
+            str(rule.get("ref_id") or ""),
+            str(rule.get("expression") or ""),
+        )
+    return errors
+
+
+def _sync_outcome_rows(response, computed: dict) -> None:
+    """Reconcile QuickFormOutcome rows against the outcomes that currently fire.
+
+    Rows are matched by ref_id and left in place when they still fire, so
+    `fired_at` records when a classification was first reached rather than when
+    it was last recomputed.
+    """
+    from core.models import QuickFormOutcome
+
+    existing = {row.ref_id: row for row in response.outcomes.all()}
+    stale = set(existing) - set(computed)
+    if stale:
+        response.outcomes.filter(ref_id__in=stale).delete()
+
+    to_create = []
+    for ref_id, payload in (computed or {}).items():
+        label = str(payload.get("label") or payload.get("annotation") or ref_id)[:255]
+        color = str(payload.get("color") or "")[:50]
+        row = existing.get(ref_id)
+        if row is None:
+            to_create.append(
+                QuickFormOutcome(
+                    response=response,
+                    ref_id=ref_id,
+                    label=label,
+                    color=color,
+                    folder_id=response.folder_id,
+                )
+            )
+        elif row.label != label or row.color != color:
+            row.label = label
+            row.color = color
+            row.save(update_fields=["label", "color"])
+    if to_create:
+        QuickFormOutcome.objects.bulk_create(to_create, ignore_conflicts=True)
+
+
 def evaluate_quick_form(response, persist: bool = True) -> dict:
     """Evaluate page visibility, completion, score and outcome rules for a
     QuickFormResponse.
@@ -559,15 +695,23 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
     computed_outcome = computed if form.outcomes_definition else None
 
     score = _quick_form_score(response, context, snapshot, hidden_page_ids)
+    outcome_refs = ",".join(sorted(computed)) if computed else ""
 
     if persist and (
-        response.computed_outcome != computed_outcome or response.score != score
+        response.computed_outcome != computed_outcome
+        or response.score != score
+        or response.outcome_refs != outcome_refs
     ):
         QuickFormResponse.objects.filter(pk=response.pk).update(
-            computed_outcome=computed_outcome, score=score
+            computed_outcome=computed_outcome,
+            score=score,
+            outcome_refs=outcome_refs,
         )
+    if persist:
+        _sync_outcome_rows(response, computed)
     response.computed_outcome = computed_outcome
     response.score = score
+    response.outcome_refs = outcome_refs
 
     return {
         "context": context,

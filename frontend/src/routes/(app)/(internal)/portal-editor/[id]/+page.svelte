@@ -22,15 +22,16 @@
 		label: safeTranslate(urlParamModelVerboseName(model))
 	})).sort((a, b) => a.label.localeCompare(b.label));
 
+	let { data }: { data: PageData } = $props();
+
 	// Static in-app pages a 'navigate' tile can point at (no model behind them). The value
 	// is the route path minus the leading slash, so the viewer's goto(`/${target.model}`)
 	// reaches it unchanged.
-	const PAGE_DESTINATIONS = [
+	const PAGE_DESTINATIONS = $derived([
 		{ value: 'my-assignments', label: m.myAssignments() },
-		{ value: 'auditee-dashboard', label: m.auditDashboard() }
-	];
-
-	let { data }: { data: PageData } = $props();
+		{ value: 'auditee-dashboard', label: m.auditDashboard() },
+		...(data.quickFormsEnabled ? [{ value: 'my-requests', label: m.myRequests() }] : [])
+	]);
 	const toast = getToastStore();
 	let view = $state<'edit' | 'preview' | 'settings'>('edit');
 	let name = $state(data.portal.name);
@@ -103,7 +104,8 @@
 			| 'metric'
 			| 'certificationDocument'
 			| 'framework'
-			| 'assessment';
+			| 'assessment'
+			| 'quickForm';
 		target: Record<string, any>;
 	};
 	type Section = { title: string; description: string; items: Item[] };
@@ -128,7 +130,13 @@
 	const KINDS = $derived(
 		data.portal.is_public
 			? ['certificationDocument', 'framework', 'external']
-			: ['create', 'navigate', 'assessment', 'external']
+			: [
+					'create',
+					'navigate',
+					'assessment',
+					...(data.quickFormsEnabled ? ['quickForm'] : []),
+					'external'
+				]
 	);
 
 	const METRIC_SOURCES = [
@@ -144,7 +152,8 @@
 		metric: m.metric(),
 		certificationDocument: m.certificationDocument(),
 		framework: m.framework(),
-		assessment: m.questionnaire()
+		assessment: m.questionnaire(),
+		quickForm: m.quickForm()
 	};
 
 	// Bundle the shared option lists / data once for the section + tile editors.
@@ -160,6 +169,9 @@
 		kindLabels: KIND_LABELS,
 		snapshots: data.snapshots,
 		frameworks: data.frameworks,
+		quickForms: data.quickForms ?? [],
+		actors: data.actors ?? [],
+		publications: data.publications ?? [],
 		folders: data.folders,
 		personalFoldersEnabled,
 		docs
@@ -175,7 +187,8 @@
 		for (const sec of sections)
 			for (const it of sec.items) {
 				if (it.kind === 'navigate' && !it.target.model && fallback) it.target.model = fallback;
-				if (it.kind === 'assessment' && !it.id) it.id = crypto.randomUUID();
+				if ((it.kind === 'assessment' || it.kind === 'quickForm') && !it.id)
+					it.id = crypto.randomUUID();
 			}
 	});
 

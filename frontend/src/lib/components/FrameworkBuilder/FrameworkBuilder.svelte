@@ -754,6 +754,7 @@
 								outcomes={$frameworkStore.outcomes_definition ?? []}
 								onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
 								activeLanguage={$activeLanguageStore}
+								{mode}
 							/>
 
 							{#if mode === 'framework'}

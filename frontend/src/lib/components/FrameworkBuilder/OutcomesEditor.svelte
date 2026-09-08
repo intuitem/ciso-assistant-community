@@ -8,9 +8,12 @@
 		outcomes: OutcomeRule[];
 		onupdate: (rules: OutcomeRule[]) => void;
 		activeLanguage?: string | null;
+		/** Which evaluator the rules will run against — the two expose different
+		 * context roots, and a rule written for the wrong one silently never fires. */
+		mode?: 'framework' | 'quick_form';
 	}
 
-	let { outcomes, onupdate, activeLanguage = null }: Props = $props();
+	let { outcomes, onupdate, activeLanguage = null, mode = 'framework' }: Props = $props();
 
 	let rules: OutcomeRule[] = $state(outcomes.map((r) => ({ ...r })));
 	let expandedIndex: number | null = $state(null);
@@ -44,6 +47,87 @@
 		rules = copy;
 		persist();
 	});
+
+	const CEL_REFERENCE = $derived(
+		mode === 'quick_form'
+			? [
+					{
+						title: m.builderCelGroupResponse(),
+						rows: [
+							['response.score_sum', m.builderCelScoreSum()],
+							['response.score_max', m.builderCelScoreMax()],
+							['response.answered_count', m.builderCelAnsweredQuestions()],
+							['response.total_count', m.builderCelTotalQuestions()],
+							['response.complete', m.builderCelResponseComplete()]
+						]
+					},
+					{
+						title: m.builderCelGroupPages(),
+						rows: [
+							['pages["PAGE_ID"].visible', m.builderCelPageVisible()],
+							['pages["PAGE_ID"].answered_count', m.builderCelAnsweredQuestions()],
+							['pages["PAGE_ID"].total_count', m.builderCelTotalQuestions()]
+						],
+						hint: m.builderCelNodeIdHintQuickForm()
+					},
+					{
+						title: m.builderCelGroupAnswers(),
+						rows: [
+							['answers["Q_NODE_ID"].value', m.builderCelAnswerValue()],
+							['answers["Q_NODE_ID"].score', m.builderCelAnswerScore()],
+							['answers["Q_NODE_ID"].selected_choices', m.builderCelAnswerSelectedChoices()],
+							['answers["Q_NODE_ID"].weight', m.builderCelAnswerWeight()],
+							['answers["Q_NODE_ID"].type', m.builderCelAnswerType()],
+							['answers["Q_NODE_ID"].answered', m.builderCelAnswerAnswered()]
+						]
+					},
+					{
+						title: m.builderCelGroupOther(),
+						rows: [
+							['computed_outcomes', m.builderCelComputedOutcomes()],
+							['hidden_pages', m.builderCelHiddenPages()]
+						]
+					}
+				]
+			: [
+					{
+						title: m.builderCelGroupAssessment(),
+						rows: [
+							['assessment.score_sum', m.builderCelScoreSum()],
+							['assessment.score_max', m.builderCelScoreMax()],
+							['assessment.answered_count', m.builderCelAnsweredCount()],
+							['assessment.total_count', m.builderCelTotalCount()]
+						]
+					},
+					{
+						title: m.builderCelGroupRequirements(),
+						rows: [
+							['requirements["NODE_ID"].score', m.builderCelReqScore()],
+							['requirements["NODE_ID"].max_score', m.builderCelReqMaxScore()],
+							['requirements["NODE_ID"].result', m.builderCelReqResult()],
+							['requirements["NODE_ID"].status', m.builderCelReqStatus()]
+						],
+						hint: m.builderCelNodeIdHint()
+					},
+					{
+						title: m.builderCelGroupAnswers(),
+						rows: [
+							['answers["Q_NODE_ID"].score', m.builderCelAnswerScore()],
+							['answers["Q_NODE_ID"].value', m.builderCelAnswerValue()],
+							['answers["Q_NODE_ID"].selected_choices', m.builderCelAnswerSelectedChoices()],
+							['answers["Q_NODE_ID"].weight', m.builderCelAnswerWeight()],
+							['answers["Q_NODE_ID"].type', m.builderCelAnswerType()]
+						]
+					},
+					{
+						title: m.builderCelGroupOther(),
+						rows: [
+							['computed_outcomes', m.builderCelComputedOutcomes()],
+							['hidden_requirements', m.builderCelHiddenRequirements()]
+						]
+					}
+				]
+	);
 
 	// Split the hint message around its {trueLiteral} placeholder so we can render
 	// a real <code> element in the middle without resorting to {@html}. The NUL
@@ -149,7 +233,9 @@
 						<span class="text-xs text-surface-600-400">{m.builderCelExpression()}</span>
 						<textarea
 							value={rule.expression}
-							placeholder={m.builderCelExpressionPlaceholder()}
+							placeholder={mode === 'quick_form'
+								? m.builderCelExpressionPlaceholderQuickForm()
+								: m.builderCelExpressionPlaceholder()}
 							rows="2"
 							class="input w-full text-sm font-mono border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
 							onblur={(e) => {
@@ -235,89 +321,23 @@
 		<div
 			class="text-xs text-surface-600-400 bg-surface-50-950 border border-surface-200-800 rounded-lg p-3 font-mono space-y-3"
 		>
-			<div class="font-sans font-semibold text-surface-600-400">
-				{m.builderCelGroupAssessment()}
-			</div>
-			<div class="space-y-1 ml-2">
-				<div>
-					<span class="text-surface-700-300">assessment.score_sum</span> — {m.builderCelScoreSum()}
+			{#each CEL_REFERENCE as group, gi (group.title)}
+				<div
+					class="font-sans font-semibold text-surface-600-400 {gi > 0
+						? 'pt-1 border-t border-surface-200-800'
+						: ''}"
+				>
+					{group.title}
 				</div>
-				<div>
-					<span class="text-surface-700-300">assessment.score_max</span> — {m.builderCelScoreMax()}
+				<div class="space-y-1 ml-2">
+					{#each group.rows as [expr, description] (expr)}
+						<div><span class="text-surface-700-300">{expr}</span> — {description}</div>
+					{/each}
+					{#if group.hint}
+						<div class="text-surface-500 italic">{group.hint}</div>
+					{/if}
 				</div>
-				<div>
-					<span class="text-surface-700-300">assessment.answered_count</span> — {m.builderCelAnsweredCount()}
-				</div>
-				<div>
-					<span class="text-surface-700-300">assessment.total_count</span> — {m.builderCelTotalCount()}
-				</div>
-			</div>
-
-			<div
-				class="font-sans font-semibold text-surface-600-400 pt-1 border-t border-surface-200-800"
-			>
-				{m.builderCelGroupRequirements()}
-			</div>
-			<div class="space-y-1 ml-2">
-				<div>
-					<span class="text-surface-700-300">requirements["NODE_ID"].score</span> — {m.builderCelReqScore()}
-				</div>
-				<div>
-					<span class="text-surface-700-300">requirements["NODE_ID"].max_score</span> —
-					{m.builderCelReqMaxScore()}
-				</div>
-				<div>
-					<span class="text-surface-700-300">requirements["NODE_ID"].result</span> —
-					{m.builderCelReqResult()}
-				</div>
-				<div>
-					<span class="text-surface-700-300">requirements["NODE_ID"].status</span> —
-					{m.builderCelReqStatus()}
-				</div>
-				<div class="text-surface-500 italic">
-					{m.builderCelNodeIdHint()}
-				</div>
-			</div>
-
-			<div
-				class="font-sans font-semibold text-surface-600-400 pt-1 border-t border-surface-200-800"
-			>
-				{m.builderCelGroupAnswers()}
-			</div>
-			<div class="space-y-1 ml-2">
-				<div>
-					<span class="text-surface-700-300">answers["Q_NODE_ID"].score</span> — {m.builderCelAnswerScore()}
-				</div>
-				<div>
-					<span class="text-surface-700-300">answers["Q_NODE_ID"].value</span> — {m.builderCelAnswerValue()}
-				</div>
-				<div>
-					<span class="text-surface-700-300">answers["Q_NODE_ID"].selected_choices</span> —
-					{m.builderCelAnswerSelectedChoices()}
-				</div>
-				<div>
-					<span class="text-surface-700-300">answers["Q_NODE_ID"].weight</span> —
-					{m.builderCelAnswerWeight()}
-				</div>
-				<div>
-					<span class="text-surface-700-300">answers["Q_NODE_ID"].type</span> —
-					{m.builderCelAnswerType()}
-				</div>
-			</div>
-
-			<div
-				class="font-sans font-semibold text-surface-600-400 pt-1 border-t border-surface-200-800"
-			>
-				{m.builderCelGroupOther()}
-			</div>
-			<div class="space-y-1 ml-2">
-				<div>
-					<span class="text-surface-700-300">computed_outcomes</span> — {m.builderCelComputedOutcomes()}
-				</div>
-				<div>
-					<span class="text-surface-700-300">hidden_requirements</span> — {m.builderCelHiddenRequirements()}
-				</div>
-			</div>
+			{/each}
 		</div>
 	{/if}
 </div>

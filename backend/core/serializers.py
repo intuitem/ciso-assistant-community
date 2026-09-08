@@ -4039,7 +4039,7 @@ class AnswerWriteSerializer(BaseModelSerializer):
                 )
             from core.models import QuickFormResponse
 
-            if response.status != QuickFormResponse.Status.IN_PROGRESS:
+            if response.status != QuickFormResponse.Status.DRAFT:
                 raise serializers.ValidationError(
                     "Answers can only be modified while the response is in progress."
                 )
@@ -6467,12 +6467,46 @@ def _reject_entity_actors(actors):
     return actors
 
 
+class QuickFormPublicationWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = QuickFormPublication
+        exclude = ["created_at", "updated_at", "is_published"]
+
+    def validate_default_reviewers(self, value):
+        return _reject_entity_actors(value)
+
+
+class QuickFormPublicationReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    submission_folder = FieldsRelatedField()
+    quick_form = FieldsRelatedField(["id", "name", "urn"])
+    audience_groups = FieldsRelatedField(many=True)
+    default_reviewers = FieldsRelatedField(many=True)
+    responses_count = serializers.SerializerMethodField()
+
+    def get_responses_count(self, obj) -> int:
+        return obj.responses.count()
+
+    class Meta:
+        model = QuickFormPublication
+        fields = "__all__"
+
+
 class QuickFormResponseReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     quick_form = FieldsRelatedField(["id", "name", "urn"])
     respondents = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
+    assignee = FieldsRelatedField()
+    publication = FieldsRelatedField()
+    cloned_from = FieldsRelatedField(["id", "ref_id"])
     progress = serializers.SerializerMethodField()
+    is_deletable = serializers.SerializerMethodField()
+
+    def get_is_deletable(self, obj) -> bool:
+        # Answered per caller: a closed request is administrator-only.
+        request = self.context.get("request")
+        return obj.is_deletable(getattr(request, "user", None))
 
     def get_progress(self, obj):
         """Cheap list-view progress: answered vs seeded questions, ignoring
@@ -6524,7 +6558,7 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
         if (
             self.instance
             and attrs.get("answers")
-            and self.instance.status != QuickFormResponse.Status.IN_PROGRESS
+            and self.instance.status != QuickFormResponse.Status.DRAFT
         ):
             raise serializers.ValidationError(
                 {
@@ -6550,6 +6584,7 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
             ).prefetch_related("choices")
         }
         apply_answers_dict("response", instance, questions_by_urn, answers_data)
+        instance.refresh_title_from_answers()
 
     def create(self, validated_data):
         from core.tasks import send_quick_form_started_notification

@@ -164,6 +164,12 @@ router.register(r"questions", QuestionViewSet, basename="questions")
 router.register(r"question-choices", QuestionChoiceViewSet, basename="question-choices")
 router.register(r"answers", AnswerViewSet, basename="answers")
 router.register(r"quick-forms", QuickFormViewSet, basename="quick-forms")
+router.register(
+    r"quick-form-publications",
+    QuickFormPublicationViewSet,
+    basename="quick-form-publications",
+)
+router.register(r"my-requests", MyRequestViewSet, basename="my-requests")
 router.register(r"quick-form-pages", QuickFormPageViewSet, basename="quick-form-pages")
 router.register(
     r"quick-form-responses",

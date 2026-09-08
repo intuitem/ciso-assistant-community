@@ -356,10 +356,28 @@ export const navData = {
 					permissions: ['view_postureassessment']
 				},
 				{
+					name: 'myRequests',
+					fa_icon: 'fa-solid fa-hand',
+					href: '/my-requests',
+					permissions: []
+				},
+				{
+					name: 'requestQueue',
+					fa_icon: 'fa-solid fa-inbox',
+					href: '/requests',
+					permissions: ['view_quickformresponse']
+				},
+				{
 					name: 'quickFormResponses',
 					fa_icon: 'fa-solid fa-clipboard-question',
 					href: '/quick-form-responses',
 					permissions: ['view_quickformresponse']
+				},
+				{
+					name: 'quickFormPublications',
+					fa_icon: 'fa-solid fa-share-nodes',
+					href: '/quick-form-publications',
+					permissions: ['view_quickformpublication']
 				},
 				{
 					name: 'quickForms',

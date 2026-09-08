@@ -27,7 +27,8 @@
 			| 'metric'
 			| 'certificationDocument'
 			| 'framework'
-			| 'assessment';
+			| 'assessment'
+			| 'quickForm';
 		target: {
 			model?: string;
 			url?: string;
@@ -35,6 +36,7 @@
 			dest?: string;
 			folder?: string;
 			user_names?: boolean;
+			quick_form?: string;
 		};
 	}
 
@@ -43,6 +45,8 @@
 
 	let launching = $state(false);
 	let launchError = $state('');
+	// Set when a tile handed back an existing draft rather than creating a response.
+	let resumedRef = $state('');
 
 	function openCreate(model: string, title: string) {
 		const entry = data.createForms[model];
@@ -69,9 +73,13 @@
 		try {
 			const body = new FormData();
 			body.append('item', item.id ?? '');
-			const res = await fetch('?/launchAssessment', { method: 'POST', body });
+			const action = item.kind === 'quickForm' ? '?/launchQuickForm' : '?/launchAssessment';
+			const res = await fetch(action, { method: 'POST', body });
 			const result: any = deserialize(await res.text());
 			if (result.type === 'success' && result.data?.redirect) {
+				if (result.data.resumed && result.data.ref_id) {
+					resumedRef = result.data.ref_id;
+				}
 				await goto(result.data.redirect);
 			} else {
 				launchError = result.data?.error || m.assessmentLaunchFailed();
@@ -88,6 +96,7 @@
 			ref: AssessmentLaunchModal,
 			props: {
 				item: item.id ?? '',
+				action: item.kind === 'quickForm' ? '?/launchQuickForm' : '?/launchAssessment',
 				showName: !!item.target.user_names,
 				defaultName: item.title,
 				showDomain: !item.target.folder
@@ -105,7 +114,7 @@
 				label: URL_MODEL_MAP[item.target.model]?.localNamePlural ?? item.title,
 				breadcrumbAction: 'replace'
 			});
-		else if (item.kind === 'assessment') {
+		else if (item.kind === 'assessment' || item.kind === 'quickForm') {
 			// Launch directly only when nothing needs to be asked at click time.
 			if (!item.target.folder || item.target.user_names) openLaunchModal(item);
 			else launchAssessment(item);
@@ -113,6 +122,11 @@
 	}
 </script>
 
+{#if resumedRef}
+	<aside class="card preset-tonal-primary mb-6 p-4 text-sm">
+		<i class="fa-solid fa-rotate-left mr-2"></i>{m.quickFormResumedDraft({ ref: resumedRef })}
+	</aside>
+{/if}
 {#if launchError}
 	<aside class="card preset-tonal-error mb-6 p-4 text-sm">
 		<i class="fa-solid fa-triangle-exclamation mr-2"></i>{launchError}

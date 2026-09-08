@@ -34,6 +34,7 @@ from rest_framework.parsers import (
 from django.http import HttpResponse
 
 import django_filters as df
+from core.cel_service import validate_quick_form_expressions
 from core.excel import ExcelUploadHandler
 from core.helpers import get_sorted_requirement_nodes
 from core.models import (
@@ -1688,6 +1689,14 @@ class LibraryDraftViewSet(BaseModelViewSet):
             )
         except builder.BuilderError as e:
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+        # An outcome rule written against the wrong context compiles but raises at
+        # evaluation, where it is swallowed and logged — the rule would just never
+        # fire. Catch it while the author is still looking at it.
+        if expression_errors := validate_quick_form_expressions(new_quick_form):
+            return Response(
+                {"error": "invalidExpressions", "details": expression_errors},
+                status=HTTP_400_BAD_REQUEST,
+            )
         quick_forms = content["quick_forms"]
         quick_forms[quick_forms.index(quick_form)] = new_quick_form
         if shape_errors := builder.check_document_shape(content):

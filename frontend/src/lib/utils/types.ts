@@ -69,6 +69,7 @@ export const URL_MODEL = [
 	'compliance-assessments',
 	'quick-forms',
 	'quick-form-responses',
+	'quick-form-publications',
 	'evidences',
 	'evidence-revisions',
 	'frameworks',

@@ -11,14 +11,19 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.models import RequirementAssignment
+from core.models import Actor, QuickFormResponse, RequirementAssignment
 from core.permissions import FeatureFlagRequired
-from core.serializers import ComplianceAssessmentWriteSerializer
+from core.serializers import (
+    ComplianceAssessmentWriteSerializer,
+    QuickFormResponseWriteSerializer,
+)
 from core.views import (
     PERSONAL_FOLDER_SENTINEL,
     BaseModelViewSet,
+    entitled_quick_form_publications,
     escape_excel_formula,
     get_or_create_personal_folder,
+    start_quick_form_response,
 )
 from global_settings.utils import general_setting_is_enabled
 from iam.models import Folder, RoleAssignment
@@ -296,6 +301,129 @@ class PortalViewSet(CustomPortalsViewSet):
                 return Response({"redirect": f"/auditee-assessments/{assignment.id}"})
 
         return Response({"redirect": f"/compliance-assessments/{assessment.id}"})
+
+    @action(detail=True, methods=["post"], url_path="launch-quick-form")
+    def launch_quick_form(self, request, pk=None):
+        """Open the quick form wired on a 'quickForm' tile and hand back the route the
+        clicker should land on. The form and domain come from the author-stored tile
+        config, never the request body."""
+        portal = self._entitled_queryset(request).filter(pk=pk).first()
+        if portal is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        item = self._find_item(portal, request.data.get("item"))
+        if item is None or item.get("kind") != "quickForm":
+            return Response(
+                {"detail": "Tile not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        target = item.get("target") or {}
+
+        # A tile that names a publication defers to it entirely — form, domain,
+        # reviewers, drafts policy — so the two entry points cannot drift, and the
+        # audience becomes the authorisation in place of folder RBAC.
+        publication_id = target.get("publication")
+        if publication_id:
+            publication = (
+                entitled_quick_form_publications(request.user)
+                .filter(pk=publication_id)
+                .first()
+            )
+            if publication is None:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            response_object, resumed = start_quick_form_response(
+                request.user, publication
+            )
+            return Response(
+                {
+                    "redirect": f"/quick-form-responses/{response_object.id}",
+                    "resumed": resumed,
+                    "ref_id": response_object.ref_id,
+                }
+            )
+
+        quick_form_id = target.get("quick_form")
+        if not quick_form_id:
+            return Response(
+                {"detail": "Tile is misconfigured."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        folder, err = _resolve_launch_folder(request, target)
+        if err is not None:
+            return err
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_quickformresponse"),
+            folder=folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        # Actors are attached outside the serializer: its m2m visibility check is
+        # scoped to the caller, and a self-service requester typically cannot view
+        # any Actor at all — not even their own. Neither link is user input: the
+        # respondent is the caller, the reviewers come from the author-configured
+        # tile, so the check has nothing to protect here.
+        clicker = Actor.objects.filter(user=request.user, entity__isnull=True).first()
+
+        # Many submitted requests are the point of a self-service tile; many
+        # simultaneous half-filled drafts of the same form by the same person are
+        # not. Answers autosave, so an unfinished response is a draft to return to
+        # rather than something to start over — hand the requester theirs back.
+        if clicker is not None and not target.get("allow_multiple_drafts"):
+            draft = (
+                QuickFormResponse.objects.filter(
+                    quick_form_id=quick_form_id,
+                    folder=folder,
+                    status=QuickFormResponse.Status.DRAFT,
+                    respondents=clicker,
+                )
+                .order_by("-created_at")
+                .first()
+            )
+            if draft is not None:
+                return Response(
+                    {
+                        "redirect": f"/quick-form-responses/{draft.id}",
+                        "resumed": True,
+                        "ref_id": draft.ref_id,
+                    }
+                )
+
+        name = item.get("title") or ""
+        if target.get("user_names") and request.data.get("name"):
+            name = request.data.get("name")
+        data = {
+            "name": name.strip() or "Quick form",
+            "quick_form": quick_form_id,
+            "folder": str(folder.id),
+        }
+        serializer = QuickFormResponseWriteSerializer(
+            data=data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        reviewers = Actor.objects.filter(
+            id__in=target.get("reviewers") or [], entity__isnull=True
+        )
+
+        with transaction.atomic():
+            response_object = serializer.save()
+            if clicker is not None:
+                # How the requester finds their own request again (`?mine=true`).
+                response_object.respondents.set([clicker])
+            if reviewers:
+                # Overrides the serializer default, which is the creator — on a
+                # self-service tile that is the requester reviewing themselves.
+                response_object.reviewers.set(reviewers)
+
+        return Response(
+            {
+                "redirect": f"/quick-form-responses/{response_object.id}",
+                "resumed": False,
+                "ref_id": response_object.ref_id,
+            }
+        )
 
     @action(detail=True, methods=["post"])
     def duplicate(self, request, pk=None):

@@ -1,40 +1,87 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { error } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
+// A requester who filed through a publication holds no role on the domain their
+// response landed in, so the reviewer endpoints 403 them out of their own request.
+// Every call falls back to the audience-scoped surface, which authorises on
+// respondent membership. One page, two backends, the choice made in one place.
+const withFallback = async (
+	fetch: typeof globalThis.fetch,
+	primary: string,
+	fallback: string,
+	init?: RequestInit
+) => {
+	const res = await fetch(primary, init);
+	if (res.status !== 403 && res.status !== 404) return { res, ownSurface: false };
+	return { res: await fetch(fallback, init), ownSurface: true };
+};
+
 export const load = (async ({ fetch, params }) => {
-	const URLModel = 'quick-form-responses';
-	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
-	const [response, content] = await Promise.all([
-		fetch(endpoint).then((res) => res.json()),
-		fetch(`${endpoint}content/`).then((res) => res.json())
+	const own = `${BASE_API_URL}/my-requests/${params.id}/`;
+	const reviewer = `${BASE_API_URL}/quick-form-responses/${params.id}/`;
+	const [responseRes, contentRes] = await Promise.all([
+		withFallback(fetch, reviewer, own),
+		withFallback(fetch, `${reviewer}content/`, `${own}content/`)
 	]);
-	return { URLModel, response, content, title: response.name };
+	if (!responseRes.res.ok) error(responseRes.res.status === 404 ? 404 : 403, 'Request not found');
+	const response = await responseRes.res.json();
+	return {
+		URLModel: 'quick-form-responses',
+		response,
+		content: await contentRes.res.json(),
+		// True when the reviewer surface refused and the requester's own served it:
+		// the viewer is here as the person who filed this, not as its reviewer.
+		viewerIsRequester: responseRes.ownSurface,
+		title: response.name
+	};
 }) satisfies PageServerLoad;
+
+const json = (body: unknown) => ({
+	method: 'POST',
+	headers: { 'Content-Type': 'application/json' },
+	body: JSON.stringify(body)
+});
 
 export const actions: Actions = {
 	updateAnswers: async (event) => {
 		const { id, answers } = await event.request.json();
-		const res = await event.fetch(`${BASE_API_URL}/quick-form-responses/${id}/`, {
-			method: 'PATCH',
-			body: JSON.stringify({ answers })
-		});
+		const { res } = await withFallback(
+			event.fetch,
+			`${BASE_API_URL}/quick-form-responses/${id}/`,
+			`${BASE_API_URL}/my-requests/${id}/answers/`,
+			{
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ answers })
+			}
+		);
 		return { status: res.status, body: await res.json() };
 	},
 	setStatus: async (event) => {
-		const { id, status, observation } = await event.request.json();
-		const res = await event.fetch(`${BASE_API_URL}/quick-form-responses/${id}/set-status/`, {
-			method: 'POST',
-			body: JSON.stringify({ status, observation })
-		});
+		const { id, status, observation, resolution } = await event.request.json();
+		// The requester's only transition is submit; every other one is the reviewer's.
+		const fallback =
+			status === 'submitted'
+				? `${BASE_API_URL}/my-requests/${id}/submit/`
+				: `${BASE_API_URL}/quick-form-responses/${id}/set-status/`;
+		const { res } = await withFallback(
+			event.fetch,
+			`${BASE_API_URL}/quick-form-responses/${id}/set-status/`,
+			fallback,
+			json({ status, observation, resolution })
+		);
 		return { status: res.status, body: await res.json() };
 	},
-	start: async (event) => {
+	drop: async (event) => {
+		const { id, observation } = await event.request.json();
+		const res = await event.fetch(`${BASE_API_URL}/my-requests/${id}/drop/`, json({ observation }));
+		return { status: res.status, body: await res.json() };
+	},
+	clone: async (event) => {
 		const { id } = await event.request.json();
-		const res = await event.fetch(`${BASE_API_URL}/quick-form-responses/${id}/start/`, {
-			method: 'POST',
-			body: JSON.stringify({})
-		});
+		const res = await event.fetch(`${BASE_API_URL}/my-requests/${id}/clone/`, json({}));
 		return { status: res.status, body: await res.json() };
 	}
 };

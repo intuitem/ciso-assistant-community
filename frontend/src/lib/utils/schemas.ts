@@ -1444,6 +1444,19 @@ export const SecurityExceptionSchema = z.object({
 	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
+export const QuickFormPublicationSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	quick_form: z.string(),
+	submission_folder: z.string().optional().nullable(),
+	enabled: z.boolean().default(true).optional(),
+	audience_groups: z.array(z.string().optional()).optional(),
+	default_reviewers: z.array(z.string().optional()).optional(),
+	allow_multiple_drafts: z.boolean().default(false).optional(),
+	icon: z.string().optional(),
+	order: z.number().default(0).optional()
+});
+
 export const QuickFormResponseSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -2167,6 +2180,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'attack-paths': AttackPathSchema,
 	'operational-scenarios': operationalScenarioSchema,
 	'security-exceptions': SecurityExceptionSchema,
+	'quick-form-publications': QuickFormPublicationSchema,
 	'quick-form-responses': QuickFormResponseSchema,
 	findings: FindingSchema,
 	'findings-assessments': FindingsAssessmentSchema,

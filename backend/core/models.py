@@ -195,7 +195,9 @@ def _translate_questions(owner) -> dict | None:
     return result if result else None
 
 
-def _sync_questions_from_data(owner, questions_data):
+def _sync_questions_from_data(
+    owner, questions_data, protected_urns=None, protected_choice_urns=None
+):
     """Sync Question and QuestionChoice objects for a question owner.
 
     The owner is either a RequirementNode (compliance questionnaire) or a
@@ -204,6 +206,10 @@ def _sync_questions_from_data(owner, questions_data):
 
     For new owners this behaves like a pure create. For existing owners it
     upserts questions by URN and choices by ref_id, then prunes stale rows.
+    URNs in `protected_urns` (questions) and `protected_choice_urns` (choices)
+    are never pruned: deleting either cascades into answers that a decided
+    record depends on — a dropped choice silently empties the selection it was
+    part of.
     """
     # Question, QuestionChoice and QuickFormPage are module globals here: this
     # helper only runs after the module has finished loading.
@@ -270,7 +276,11 @@ def _sync_questions_from_data(owner, questions_data):
                 incoming_urns_choices.add(c_urn)
 
         # 2. Delete choices with URNs no longer in incoming data
-        stale_urns_choices = set(existing_choices_by_urn.keys()) - incoming_urns_choices
+        stale_urns_choices = (
+            set(existing_choices_by_urn.keys())
+            - incoming_urns_choices
+            - (protected_choice_urns or set())
+        )
         if stale_urns_choices:
             question.choices.filter(urn__in=stale_urns_choices).delete()
 
@@ -331,7 +341,9 @@ def _sync_questions_from_data(owner, questions_data):
                 )
 
     # Delete questions whose URNs are no longer in the incoming data
-    stale_urns = set(existing_questions.keys()) - incoming_urns
+    stale_urns = (
+        set(existing_questions.keys()) - incoming_urns - (protected_urns or set())
+    )
     if stale_urns:
         Question.objects.filter(**{owner_field: owner}, urn__in=stale_urns).delete()
 
@@ -1788,6 +1800,10 @@ class LibraryUpdater:
                     "outcomes_definition": new_quick_form.get("outcomes_definition")
                     or [],
                     "scores_definition": new_quick_form.get("scores_definition"),
+                    "ref_id_prefix": new_quick_form.get("ref_id_prefix") or "",
+                    "title_question_urn": (
+                        new_quick_form.get("title_question_urn") or ""
+                    ).lower(),
                     "urn_namespace": urn.split(":")[1]
                     if urn.startswith("urn:")
                     else "custom",
@@ -1801,6 +1817,28 @@ class LibraryUpdater:
                         **form_fields,
                         "library": self.old_library,
                     },
+                )
+
+                # Question URNs a submitted or closed response has answered.
+                # Computed before any sync, and protected from every prune below.
+                decided_question_urns = set(
+                    Answer.objects.filter(
+                        response__quick_form=quick_form,
+                        question__page__quick_form=quick_form,
+                    )
+                    .exclude(response__status=QuickFormResponse.Status.DRAFT)
+                    .values_list("question__urn", flat=True)
+                )
+                decided_choice_urns = set(
+                    QuestionChoice.objects.filter(
+                        choice_answers__response__quick_form=quick_form
+                    )
+                    .exclude(
+                        choice_answers__response__status=(
+                            QuickFormResponse.Status.DRAFT
+                        )
+                    )
+                    .values_list("urn", flat=True)
                 )
 
                 incoming_page_urns = set()
@@ -1829,17 +1867,40 @@ class LibraryUpdater:
                     )
                     questions = page.get("questions")
                     _sync_questions_from_data(
-                        page_object, questions if isinstance(questions, dict) else {}
+                        page_object,
+                        questions if isinstance(questions, dict) else {},
+                        protected_urns=decided_question_urns,
+                        protected_choice_urns=decided_choice_urns,
                     )
-                # Dropped pages cascade to their questions and answers.
-                quick_form.pages.exclude(urn__in=incoming_page_urns).delete()
+                # Dropped pages cascade to their questions and their answers, so a
+                # page a decided response answered is kept instead of pruned: its
+                # record is what the decision was made on.
+                prunable = quick_form.pages.exclude(urn__in=incoming_page_urns)
+                for stale_page in prunable:
+                    if decided_question_urns & {
+                        q.urn for q in stale_page.questions.all()
+                    }:
+                        logger.warning(
+                            "quick_form_page_kept_for_decided_responses",
+                            quick_form=quick_form.urn,
+                            page=stale_page.urn,
+                        )
+                        continue
+                    stale_page.delete()
 
                 questions = list(
                     Question.objects.filter(
                         page__quick_form=quick_form
                     ).prefetch_related("choices")
                 )
-                for response in QuickFormResponse.objects.filter(quick_form=quick_form):
+                # Only responses still being filled are reconciled. A submitted or
+                # closed response is the record a decision was made on: seeding new
+                # answers, dropping selections or recomputing its score and outcome
+                # would rewrite history a library upgrade has no business touching.
+                for response in QuickFormResponse.objects.filter(
+                    quick_form=quick_form,
+                    status=QuickFormResponse.Status.DRAFT,
+                ):
                     existing_answers = {
                         a.question_id: a
                         for a in response.answers.prefetch_related("selected_choices")
@@ -3476,6 +3537,26 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Scores definition")
     )
+    title_question_urn = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name=_("Title question"),
+        help_text=_(
+            "URN of the question whose answer names each response. Without it "
+            "every response from the same entry point carries the same name."
+        ),
+    )
+    ref_id_prefix = models.CharField(
+        max_length=8,
+        blank=True,
+        default="",
+        verbose_name=_("Reference ID prefix"),
+        help_text=_(
+            "Prefix for the human reference of each response (e.g. DER gives "
+            "DER.000042). Derived from the form's reference ID when left empty."
+        ),
+    )
 
     fields_to_check = ["urn"]
 
@@ -3485,6 +3566,15 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
 
     def is_deletable(self) -> bool:
         return not self.responses.exists()
+
+    @property
+    def resolved_ref_id_prefix(self) -> str:
+        """Author-set prefix, else the first alphanumeric run of the form's
+        ref_id upper-cased, else QF."""
+        if self.ref_id_prefix:
+            return self.ref_id_prefix.upper()
+        token = re.split(r"[^A-Za-z0-9]+", self.ref_id or "")[0] if self.ref_id else ""
+        return (token[:4].upper() or "QF") if token else "QF"
 
     @property
     def score_bounds(self) -> tuple[int, int]:
@@ -3537,6 +3627,77 @@ class QuickFormPage(ReferentialObjectMixin, I18nObjectMixin):
 
     def __str__(self) -> str:
         return f"{self.quick_form}: {self.get_name_translated}"
+
+
+class QuickFormPublication(NameDescriptionMixin, FolderMixin):
+    """A quick form made available to an audience: the deployment tier between the
+    library-backed form and a response.
+
+    It exists because none of this can live on `QuickForm` — that row is upserted by
+    URN on every library update and would be clobbered — and none of it belongs on a
+    response either, since it is per-(form, audience) policy rather than per-instance
+    state. Crucially it is also the *authorisation*: membership of `audience_groups`
+    is what lets a requester file a request, in place of folder-level
+    `add_quickformresponse` they will not have.
+    """
+
+    quick_form = models.ForeignKey(
+        "QuickForm",
+        on_delete=models.PROTECT,
+        related_name="publications",
+        verbose_name=_("Quick form"),
+    )
+    enabled = models.BooleanField(default=True, verbose_name=_("Enabled"))
+    audience_groups = models.ManyToManyField(
+        "iam.UserGroup",
+        blank=True,
+        related_name="quick_form_publications",
+        verbose_name=_("Audience groups"),
+        help_text=_("Groups that may file this request. Empty means every user."),
+    )
+    submission_folder = models.ForeignKey(
+        "iam.Folder",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="quick_form_submissions",
+        verbose_name=_("Submission domain"),
+        help_text=_(
+            "Where responses land. The publication's own domain when left empty."
+        ),
+    )
+    default_reviewers = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        related_name="quick_form_publications_as_reviewer",
+        verbose_name=_("Default reviewers"),
+    )
+    allow_multiple_drafts = models.BooleanField(
+        default=False,
+        verbose_name=_("Allow multiple drafts"),
+        help_text=_(
+            "Off: a requester with an unfinished draft is handed it back instead of "
+            "starting a new one. Submitted requests are never limited."
+        ),
+    )
+    icon = models.CharField(
+        max_length=64, blank=True, default="", verbose_name=_("Icon")
+    )
+    order = models.IntegerField(default=0, verbose_name=_("Order"))
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        ordering = ["order", "name"]
+        verbose_name = _("Quick form publication")
+        verbose_name_plural = _("Quick form publications")
+
+    @property
+    def target_folder(self):
+        return self.submission_folder or self.folder
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Question(AbstractBaseModel, FolderMixin):
@@ -10119,9 +10280,22 @@ class QuickFormResponse(
     informational list plus the notification audience, never a grant."""
 
     class Status(models.TextChoices):
-        IN_PROGRESS = "in_progress", _("In progress")
+        # `draft` rather than `in_progress`: the reviewer has an in-progress phase
+        # too (`in_review`), and one word cannot mean both in a state machine.
+        DRAFT = "draft", _("Draft")
         SUBMITTED = "submitted", _("Submitted")
+        IN_REVIEW = "in_review", _("In review")
         CLOSED = "closed", _("Closed")
+
+    class Resolution(models.TextChoices):
+        """How a closed request ended. Status says where it is; this says how it
+        finished, so the three terminal outcomes do not become three statuses that
+        behave identically — and so the queue is reportable."""
+
+        ACCEPTED = "accepted", _("Accepted")
+        REJECTED = "rejected", _("Rejected")
+        DROPPED = "dropped", _("Dropped")
+        AUTO = "auto", _("Closed automatically")
 
     quick_form = models.ForeignKey(
         QuickForm,
@@ -10132,8 +10306,35 @@ class QuickFormResponse(
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.IN_PROGRESS,
+        default=Status.DRAFT,
         verbose_name=_("Status"),
+    )
+    resolution = models.CharField(
+        max_length=20,
+        choices=Resolution.choices,
+        blank=True,
+        default="",
+        verbose_name=_("Resolution"),
+    )
+    assignee = models.ForeignKey(
+        "core.Actor",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="quick_form_responses_as_assignee",
+        verbose_name=_("Assignee"),
+        help_text=_(
+            "The reviewer who picked this up. `reviewers` is the pool and may be a "
+            "team; this is the one person working it."
+        ),
+    )
+    cloned_from = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="clones",
+        verbose_name=_("Cloned from"),
     )
     respondents = models.ManyToManyField(
         "core.Actor",
@@ -10150,6 +10351,12 @@ class QuickFormResponse(
     computed_outcome = models.JSONField(
         blank=True, null=True, verbose_name=_("Computed outcome")
     )
+    # Denormalized mirror of the fired outcome ref_ids, comma-joined and sorted.
+    # `computed_outcome` is a JSON blob: the API cannot filter it and the workflow
+    # engine only filters concrete columns, so routing and reporting need this.
+    outcome_refs = models.TextField(
+        blank=True, default="", verbose_name=_("Outcome refs")
+    )
     score = models.IntegerField(blank=True, null=True, verbose_name=_("Score"))
     started_at = models.DateTimeField(
         blank=True, null=True, verbose_name=_("Started at")
@@ -10158,12 +10365,112 @@ class QuickFormResponse(
         blank=True, null=True, verbose_name=_("Submitted at")
     )
     observation = models.TextField(blank=True, null=True, verbose_name=_("Observation"))
+    ref_id = models.CharField(
+        max_length=32,
+        null=True,
+        blank=True,
+        unique=True,
+        verbose_name=_("Reference ID"),
+    )
+    # Who pressed submit, as opposed to who created the row. Load-bearing for
+    # traceability and for keeping a submitter out of their own reviewer set.
+    publication = models.ForeignKey(
+        "QuickFormPublication",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="responses",
+        verbose_name=_("Publication"),
+        help_text=_("Set when the response was filed through a published entry point."),
+    )
+    submitted_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="submitted_quick_form_responses",
+        verbose_name=_("Submitted by"),
+    )
 
-    fields_to_check = ["name", "quick_form"]
+    # Intake records repeat by nature: many people file "Request a derogation"
+    # against the same form. Uniqueness belongs on the generated reference, as on
+    # Incident — never on (name, quick_form).
+    fields_to_check = ["ref_id"]
+
+    def is_deletable(self, user=None) -> bool:
+        """A draft can be deleted by whoever holds it. A submitted or in-review
+        request cannot: it is abandoned by dropping it, which leaves a record.
+
+        A closed request is a record and is administrator-only — the decision has
+        been made and neither the requester nor the reviewer may erase it. Without a
+        user this returns the conservative answer, which is what the UI shows when it
+        does not know who is asking.
+        """
+        if self.status == self.Status.DRAFT:
+            return True
+        if self.status == self.Status.CLOSED and user is not None:
+            return user.is_admin()
+        return False
 
     class Meta:
         verbose_name = _("Quick form response")
         verbose_name_plural = _("Quick form responses")
+
+    def get_default_ref_id(self) -> str:
+        """Next free reference for this form's prefix (DER.000001, DER.000002...)."""
+        prefix = self.quick_form.resolved_ref_id_prefix
+        last = (
+            QuickFormResponse.objects.filter(ref_id__startswith=f"{prefix}.")
+            .order_by("-ref_id")
+            .values_list("ref_id", flat=True)
+            .first()
+        )
+        suffix = 0
+        if last:
+            try:
+                suffix = int(last.split(".")[1])
+            except IndexError, ValueError:
+                suffix = 0
+        return f"{prefix}.{suffix + 1:06d}"
+
+    def save(self, *args, **kwargs):
+        # Mint the reference on creation only: later saves pass update_fields and
+        # would not persist it anyway. Retry on the unique collision two
+        # concurrent submissions can produce. Mirrors ValidationFlow.save.
+        from django.db import IntegrityError
+
+        if self._state.adding and not self.ref_id:
+            for attempt in range(3):
+                self.ref_id = self.get_default_ref_id()
+                try:
+                    with transaction.atomic():
+                        super().save(*args, **kwargs)
+                        return
+                except IntegrityError:
+                    if attempt == 2:
+                        raise
+                    self.ref_id = None
+        super().save(*args, **kwargs)
+
+    def refresh_title_from_answers(self) -> None:
+        """Name the response after the answer to the form's title question.
+
+        Applied while the response is still being filled, so the title tracks the
+        answer; a submitted response keeps the name it was submitted with. Does
+        nothing when the form nominates no title question.
+        """
+        urn = self.quick_form.title_question_urn
+        if not urn or self.status != self.Status.DRAFT:
+            return
+        answer = (
+            Answer.objects.filter(response=self, question__urn=urn)
+            .values_list("value", flat=True)
+            .first()
+        )
+        title = str(answer).strip() if isinstance(answer, str) else ""
+        if title and title != self.name:
+            QuickFormResponse.objects.filter(pk=self.pk).update(name=title[:255])
+            self.name = title[:255]
 
     def seed_answers(self) -> None:
         """One empty Answer per question of the form, like audits do at
@@ -10187,6 +10494,37 @@ class QuickFormResponse(
 
     def __str__(self) -> str:
         return self.name
+
+
+class QuickFormOutcome(AbstractBaseModel, FolderMixin):
+    """One outcome rule that currently fires on a response.
+
+    `QuickFormResponse.computed_outcome` is the live evaluation cache; these rows
+    are the queryable, countable projection of it — filterable through the API,
+    joinable for reporting, and carrying `fired_at` so a classification that drove
+    a decision keeps the moment it was reached. Reconciled (not rebuilt) on every
+    evaluation so `fired_at` survives a recompute that leaves the outcome standing.
+    """
+
+    response = models.ForeignKey(
+        QuickFormResponse,
+        on_delete=models.CASCADE,
+        related_name="outcomes",
+        verbose_name=_("Quick form response"),
+    )
+    ref_id = models.CharField(max_length=100, verbose_name=_("Reference ID"))
+    label = models.CharField(max_length=255, blank=True, verbose_name=_("Label"))
+    color = models.CharField(max_length=50, blank=True, verbose_name=_("Color"))
+    fired_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Fired at"))
+
+    class Meta:
+        ordering = ["ref_id"]
+        unique_together = [("response", "ref_id")]
+        verbose_name = _("Quick form outcome")
+        verbose_name_plural = _("Quick form outcomes")
+
+    def __str__(self) -> str:
+        return f"{self.ref_id} on {self.response_id}"
 
 
 class Answer(AbstractBaseModel, FolderMixin):

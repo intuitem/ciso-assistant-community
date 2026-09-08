@@ -815,7 +815,16 @@ READABLE_MODELS: dict[str, ReadEntry] = {
     ),
     "quick_form_response": ReadEntry(
         model=QuickFormResponse,
-        fields=["description", "status", "eta", "due_date", "quick_form"],
+        # `outcome_refs` is the filterable mirror of `computed_outcome`: `computed`
+        # entries below are output-only, and reads filter concrete columns only.
+        fields=[
+            "description",
+            "status",
+            "eta",
+            "due_date",
+            "quick_form",
+            "outcome_refs",
+        ],
         computed={
             "computed_outcome": lambda r: r.computed_outcome,
             "score": lambda r: r.score,

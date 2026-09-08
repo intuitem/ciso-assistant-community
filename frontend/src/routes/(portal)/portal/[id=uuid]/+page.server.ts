@@ -57,6 +57,21 @@ export const actions: Actions = {
 		}
 		return defaultWriteFormAction({ event, urlModel, action: 'create', doRedirect: false });
 	},
+	launchQuickForm: async ({ params, request, fetch }) => {
+		const data = await request.formData();
+		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/launch-quick-form/`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				item: data.get('item'),
+				folder: data.get('folder') || undefined,
+				name: data.get('name') || undefined
+			})
+		});
+		if (!res.ok) return fail(res.status, { error: await res.text() });
+		const { redirect } = await res.json();
+		return { redirect };
+	},
 	launchAssessment: async ({ params, request, fetch }) => {
 		const data = await request.formData();
 		const item = data.get('item');

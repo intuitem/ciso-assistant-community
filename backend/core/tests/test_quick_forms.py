@@ -268,7 +268,7 @@ class TestResponseLifecycle:
         form = _load(LIBRARY_V1)
         response = self._create_response(client, form, Folder.get_root_folder())
         assert response.answers.count() == 4
-        assert response.status == QuickFormResponse.Status.IN_PROGRESS
+        assert response.status == QuickFormResponse.Status.DRAFT
         creator_actor = Actor.objects.filter(user=user).first()
         if creator_actor is not None:
             assert list(response.reviewers.all()) == [creator_actor]
@@ -380,10 +380,10 @@ class TestResponseLifecycle:
         res = client.patch(url, {"answers": {Q_HEADCOUNT: 1}}, format="json")
         assert res.status_code == 400
 
-        # Reopen keeps the observation, closing is terminal.
+        # Request changes sends it back to the requester, keeping the observation.
         res = client.post(
             f"{url}set-status/",
-            {"status": "in_progress", "observation": "Please detail the scale"},
+            {"status": "draft", "observation": "Please detail the scale"},
             format="json",
         )
         assert res.status_code == 200
@@ -391,9 +391,29 @@ class TestResponseLifecycle:
         assert response.observation == "Please detail the scale"
         res = client.post(f"{url}set-status/", {"status": "submitted"}, format="json")
         assert res.status_code == 200
-        res = client.post(f"{url}set-status/", {"status": "closed"}, format="json")
+
+        # A reviewer may claim before deciding; claiming records the assignee.
+        res = client.post(f"{url}set-status/", {"status": "in_review"}, format="json")
         assert res.status_code == 200
-        res = client.post(f"{url}set-status/", {"status": "in_progress"}, format="json")
+        response.refresh_from_db()
+        assert response.assignee is not None
+
+        # Closing demands a resolution: status says where it is, resolution how it ended.
+        res = client.post(f"{url}set-status/", {"status": "closed"}, format="json")
+        assert res.status_code == 400
+        assert res.json()["error"] == "resolutionRequired"
+        res = client.post(
+            f"{url}set-status/",
+            {"status": "closed", "resolution": "accepted"},
+            format="json",
+        )
+        assert res.status_code == 200
+        response.refresh_from_db()
+        assert response.resolution == QuickFormResponse.Resolution.ACCEPTED
+        assert not response.is_deletable()
+
+        # Closed is terminal.
+        res = client.post(f"{url}set-status/", {"status": "draft"}, format="json")
         assert res.status_code == 400
         assert res.json()["error"] == "invalidTransition"
 

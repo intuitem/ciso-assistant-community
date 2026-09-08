@@ -19511,12 +19511,492 @@ class QuickFormPageViewSet(BaseModelViewSet):
         )
 
 
+def _outcome_sla_due_date(response):
+    """Earliest due date implied by the outcomes that fired.
+
+    An outcome rule may carry `sla_days`; every key on a rule other than
+    `expression`/`ref_id` passes through into `computed_outcome`, so this needs no
+    schema of its own. Returns None when no fired outcome declares one.
+    """
+    days = []
+    for payload in (response.computed_outcome or {}).values():
+        if not isinstance(payload, dict) or "sla_days" not in payload:
+            continue
+        try:
+            days.append(int(payload["sla_days"]))
+        except TypeError, ValueError:
+            continue
+    days = [d for d in days if d >= 0]
+    if not days:
+        return None
+    return (timezone.now() + timedelta(days=min(days))).date()
+
+
+def quick_form_response_content(response):
+    """Everything the fill view needs in one call: ordered pages with translated
+    questions, the answers dict, hidden pages, progress, score and outcome. Shared by
+    the reviewer surface and the requester's own, so the two cannot drift."""
+    from core.cel_service import evaluate_quick_form
+    from core.utils import build_answers_dict
+
+    evaluation = evaluate_quick_form(response, persist=False)
+    hidden = set(evaluation["hidden_pages"])
+    pages = []
+    for page in (
+        QuickFormPage.objects.filter(quick_form_id=response.quick_form_id)
+        .prefetch_related("questions__choices")
+        .order_by("order")
+    ):
+        pages.append(
+            {
+                "id": str(page.id),
+                "urn": page.urn,
+                "ref_id": page.ref_id,
+                "name": page.get_name_translated,
+                "description": page.get_description_translated,
+                "order": page.order,
+                "hidden": page.urn in hidden,
+                "questions": page.get_questions_translated() or {},
+            }
+        )
+    answers = build_answers_dict(
+        response.answers.select_related("question").prefetch_related("selected_choices")
+    )
+    return Response(
+        {
+            "id": str(response.id),
+            "name": response.name,
+            "status": response.status,
+            "quick_form": {
+                "id": str(response.quick_form_id),
+                "name": response.quick_form.get_name_translated,
+                "description": response.quick_form.get_description_translated,
+                "outcomes_definition": response.quick_form.outcomes_definition,
+                "scores_definition": response.quick_form.scores_definition,
+            },
+            "pages": pages,
+            "answers": answers,
+            "hidden_pages": evaluation["hidden_pages"],
+            "progress": evaluation["progress"],
+            "score": evaluation["score"],
+            "computed_outcome": evaluation["computed_outcome"],
+            "can_edit_answers": response.status == QuickFormResponse.Status.DRAFT,
+            "started_at": response.started_at,
+            "submitted_at": response.submitted_at,
+            "observation": response.observation,
+        }
+    )
+
+
+def my_request_row(r):
+    """One row of a requester's own list: enough to decide what to open next."""
+    return {
+        "id": str(r.id),
+        "ref_id": r.ref_id,
+        "name": r.name,
+        "status": r.status,
+        "resolution": r.resolution,
+        "quick_form": r.quick_form.name,
+        "publication": r.publication.name if r.publication_id else None,
+        "cloned_from": r.cloned_from.ref_id if r.cloned_from_id else None,
+        "score": r.score,
+        "computed_outcome": r.computed_outcome,
+        "progress": {
+            "answered_count": r.answers.exclude(Answer.empty_value_q()).count(),
+            "total_count": Question.objects.filter(
+                page__quick_form_id=r.quick_form_id
+            ).count(),
+        },
+        "due_date": r.due_date,
+        "submitted_at": r.submitted_at,
+        "updated_at": r.updated_at,
+    }
+
+
+def entitled_quick_form_publications(user):
+    """Publications `user` may file against: enabled, and either targeted at one of
+    their groups or untargeted.
+
+    Audience entitlement is the access control for filing a request, so this
+    deliberately bypasses IAM folder scoping — a requester is not expected to hold
+    any role on the domain their response lands in.
+    """
+    return (
+        QuickFormPublication.objects.filter(enabled=True)
+        .filter(
+            Q(audience_groups__in=user.user_groups.all())
+            | Q(audience_groups__isnull=True)
+        )
+        .select_related("quick_form", "folder", "submission_folder")
+        .distinct()
+        .order_by("order", "name")
+    )
+
+
+def start_quick_form_response(user, publication):
+    """Create `user`'s response for `publication`, or hand back the draft they
+    already have. Returns (response, resumed).
+
+    Built through the ORM rather than the write serializer: that serializer checks
+    `add_quickformresponse` on the target folder, the permission a requester is
+    precisely not expected to hold. Nothing here is user input — form, domain and
+    reviewers all come from the publication, and entitlement is the caller's job to
+    check before calling.
+    """
+    requester = Actor.objects.filter(user=user, entity__isnull=True).first()
+
+    if requester is not None and not publication.allow_multiple_drafts:
+        draft = (
+            QuickFormResponse.objects.filter(
+                publication=publication,
+                status=QuickFormResponse.Status.DRAFT,
+                respondents=requester,
+            )
+            .order_by("-created_at")
+            .first()
+        )
+        if draft is not None:
+            return draft, True
+
+    with transaction.atomic():
+        response = QuickFormResponse.objects.create(
+            name=publication.name,
+            quick_form=publication.quick_form,
+            folder=publication.target_folder,
+            publication=publication,
+            # Self-service has no "not started yet": the requester is filling it now,
+            # and there are no respondents to notify — they are the respondent.
+            started_at=timezone.now(),
+        )
+        response.seed_answers()
+        if requester is not None:
+            response.respondents.set([requester])
+        reviewers = list(publication.default_reviewers.all())
+        if reviewers:
+            response.reviewers.set(reviewers)
+    return response, False
+
+
+class MyRequestViewSet(viewsets.ViewSet):
+    """The requester's own surface, authorised by respondent membership.
+
+    Someone who files through a publication holds no `view`/`change`/`delete` on the
+    domain their response lands in — that is the whole point of the tier — so the
+    ordinary response viewset 403s them out of their own request. Every action here
+    resolves the row through `_own_response`, which is the authorisation: you may act
+    on a response you are a respondent on, and on no other.
+
+    Deliberately narrow. Reviewer transitions (claim, accept, reject, request changes)
+    are not reachable here; they stay on QuickFormResponseViewSet under ordinary
+    folder RBAC, because reviewers are privileged users by construction.
+    """
+
+    def _own_response(self, request, pk):
+        actors = Actor.get_all_for_user(request.user)
+        return (
+            QuickFormResponse.objects.filter(pk=pk, respondents__in=actors)
+            .select_related("quick_form", "folder", "publication")
+            .distinct()
+            .first()
+        )
+
+    def retrieve(self, request, pk=None):
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(QuickFormResponseReadSerializer(response).data)
+
+    @action(detail=True, name="Fill payload for the caller's own request")
+    def content(self, request, pk=None):
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return quick_form_response_content(response)
+
+    @action(detail=True, methods=["patch"], name="Answer the caller's own request")
+    def answers(self, request, pk=None):
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if response.status != QuickFormResponse.Status.DRAFT:
+            return Response(
+                {"error": "responseLocked"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        # Applied directly rather than through the write serializer: that serializer
+        # checks `change_quickformresponse` on the folder, which a requester does not
+        # hold. The authorisation here is respondent membership, already established.
+        from core.utils import apply_answers_dict
+
+        answers = request.data.get("answers") or {}
+        if not isinstance(answers, dict):
+            return Response(
+                {"answers": "must be an object keyed by URN"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        questions_by_urn = {
+            q.urn: q
+            for q in Question.objects.filter(
+                page__quick_form_id=response.quick_form_id
+            ).prefetch_related("choices")
+        }
+        unknown = set(answers) - set(questions_by_urn)
+        if unknown:
+            return Response(
+                {"answers": f"unknown question urn(s): {sorted(unknown)[:3]}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        with transaction.atomic():
+            apply_answers_dict("response", response, questions_by_urn, answers)
+            response.refresh_title_from_answers()
+        response.refresh_from_db()
+        return Response(quick_form_response_content(response).data)
+
+    @action(detail=True, methods=["post"], name="Submit the caller's own request")
+    def submit(self, request, pk=None):
+        from core.cel_service import evaluate_quick_form
+        from core.tasks import send_quick_form_submitted_notification
+
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if response.status != QuickFormResponse.Status.DRAFT:
+            return Response(
+                {"error": "invalidTransition", "from": response.status},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        evaluation = evaluate_quick_form(response, persist=True)
+        if not evaluation["progress"]["complete"]:
+            return Response(
+                {"error": "responseIncomplete", "progress": evaluation["progress"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        response.status = QuickFormResponse.Status.SUBMITTED
+        response.submitted_at = timezone.now()
+        response.submitted_by = request.user
+        response.observation = None
+        update_fields = [
+            "status",
+            "submitted_at",
+            "submitted_by",
+            "observation",
+            "updated_at",
+        ]
+        sla_due = _outcome_sla_due_date(response)
+        if sla_due is not None and (
+            response.due_date is None or sla_due < response.due_date
+        ):
+            response.due_date = sla_due
+            update_fields.append("due_date")
+        response.save(update_fields=update_fields)
+        transaction.on_commit(
+            lambda pk=response.pk: send_quick_form_submitted_notification(pk)
+        )
+        return Response(QuickFormResponseReadSerializer(response).data)
+
+    @action(detail=True, methods=["post"], name="Abandon the caller's own request")
+    def drop(self, request, pk=None):
+        """Drop is the requester abandoning their own request. It is not a rejection
+        — that verdict is the reviewer's — so it closes with its own resolution."""
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if response.status not in (
+            QuickFormResponse.Status.SUBMITTED,
+            QuickFormResponse.Status.IN_REVIEW,
+        ):
+            return Response(
+                {"error": "invalidTransition", "from": response.status},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        response.status = QuickFormResponse.Status.CLOSED
+        response.resolution = QuickFormResponse.Resolution.DROPPED
+        response.assignee = None
+        observation = request.data.get("observation")
+        if observation is not None:
+            response.observation = observation
+        response.save(
+            update_fields=[
+                "status",
+                "resolution",
+                "assignee",
+                "observation",
+                "updated_at",
+            ]
+        )
+        return Response(QuickFormResponseReadSerializer(response).data)
+
+    @action(detail=True, methods=["post"], name="Clone the caller's own request")
+    def clone(self, request, pk=None):
+        """A clone is a new request that happens to descend from an old one: all
+        answers copied, a fresh reference, and `cloned_from` recording the chain —
+        DER.000055 exists because DER.000012 was rejected. Contrast request-changes,
+        which reopens the *same* request and keeps its reference."""
+        source = self._own_response(request, pk)
+        if source is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        with transaction.atomic():
+            clone = QuickFormResponse.objects.create(
+                name=source.name,
+                description=source.description,
+                quick_form=source.quick_form,
+                folder=source.folder,
+                publication=source.publication,
+                cloned_from=source,
+            )
+            clone.seed_answers()
+            clone.respondents.set(source.respondents.all())
+            clone.reviewers.set(source.reviewers.all())
+            answers_by_question = {
+                a.question_id: a
+                for a in Answer.objects.filter(response=clone).select_related(
+                    "question"
+                )
+            }
+            through = []
+            for original in Answer.objects.filter(response=source).prefetch_related(
+                "selected_choices"
+            ):
+                target = answers_by_question.get(original.question_id)
+                if target is None:
+                    continue
+                target.value = original.value
+                target.save(update_fields=["value"])
+                for choice in original.selected_choices.all():
+                    through.append(
+                        Answer.selected_choices.through(
+                            answer_id=target.id, questionchoice_id=choice.id
+                        )
+                    )
+            if through:
+                Answer.selected_choices.through.objects.bulk_create(
+                    through, ignore_conflicts=True
+                )
+            clone.refresh_from_db()
+            clone.recompute()
+        return Response(
+            {
+                "redirect": f"/quick-form-responses/{clone.id}",
+                "ref_id": clone.ref_id,
+                "cloned_from": source.ref_id,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    def destroy(self, request, pk=None):
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if not response.is_deletable(request.user):
+            return Response(
+                {"error": "onlyDraftsCanBeDeleted", "status": response.status},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        response.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def list(self, request):
+        """The caller's own requests, drafts first. Not folder-scoped — this is the
+        only way back to a draft — and narrower than folder scoping in the other
+        direction: it can never surface someone else's request."""
+        actors = Actor.get_all_for_user(request.user)
+        responses = (
+            QuickFormResponse.objects.filter(respondents__in=actors)
+            .select_related("quick_form", "folder", "publication")
+            .distinct()
+        )
+        rank = {
+            QuickFormResponse.Status.DRAFT: 0,
+            QuickFormResponse.Status.SUBMITTED: 1,
+            QuickFormResponse.Status.IN_REVIEW: 2,
+            QuickFormResponse.Status.CLOSED: 3,
+        }
+        rows = sorted(
+            responses,
+            key=lambda r: (rank.get(r.status, 4), -(r.updated_at.timestamp())),
+        )
+        return Response([my_request_row(r) for r in rows])
+
+
+class QuickFormPublicationViewSet(BaseModelViewSet):
+    """Authoring CRUD is ordinary folder-scoped RBAC. The three audience actions
+    below are not: they are the elevated path that lets someone file and follow a
+    request without any role on the domain the response lands in.
+
+    They deliberately avoid `get_object()` and `get_queryset()` — both enforce the
+    folder scoping we are stepping around — and authorise on audience membership
+    instead, exactly as PortalViewSet does for entitled portals. `RBACPermissions.
+    has_permission` is a no-op, so no model-level gate fires on the way in.
+    """
+
+    model = QuickFormPublication
+    filterset_fields = ["folder", "quick_form", "enabled"]
+    search_fields = ["name", "description"]
+
+    def _entitled_queryset(self, request):
+        return entitled_quick_form_publications(request.user)
+
+    @action(detail=False, name="Publications the caller may file against")
+    def mine(self, request):
+        return Response(
+            [
+                {
+                    "id": str(publication.id),
+                    "name": publication.name,
+                    "description": publication.description,
+                    "icon": publication.icon,
+                    "quick_form": {
+                        "id": str(publication.quick_form_id),
+                        "name": publication.quick_form.name,
+                    },
+                    "domain": str(publication.target_folder),
+                }
+                for publication in self._entitled_queryset(request)
+            ]
+        )
+
+    @action(detail=True, methods=["post"], name="Start or resume a request")
+    def start(self, request, pk=None):
+        """Create the caller's response for this publication, or hand back the draft
+        they already have.
+
+        The elevated step: the row is built through the ORM rather than the write
+        serializer, because that serializer checks `add_quickformresponse` on the
+        target folder — the very permission a requester is not expected to hold.
+        Nothing here is user input: the form, the domain and the reviewers all come
+        from the publication, and entitlement was checked above.
+        """
+        publication = self._entitled_queryset(request).filter(pk=pk).first()
+        if publication is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        response_object, resumed = start_quick_form_response(request.user, publication)
+        return Response(
+            {
+                "redirect": f"/quick-form-responses/{response_object.id}",
+                "resumed": resumed,
+                "ref_id": response_object.ref_id,
+            }
+        )
+
+
 class QuickFormResponseViewSet(BaseModelViewSet):
     """Filled instances of a quick form. Regular RBAC only: respondents are
     the notification audience, not a grant."""
 
     model = QuickFormResponse
-    filterset_fields = ["folder", "quick_form", "status", "respondents", "reviewers"]
+    filterset_fields = [
+        "folder",
+        "quick_form",
+        "status",
+        "respondents",
+        "reviewers",
+        "assignee",
+        "resolution",
+        # Outcome rows are the queryable projection of `computed_outcome`, which is
+        # a JSON blob django-filter cannot reach.
+        "outcomes__ref_id",
+    ]
     search_fields = ["name", "description"]
     permission_overrides = {
         "content": "view_quickformresponse",
@@ -19537,69 +20017,30 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             qs = qs.filter(respondents__in=user_actors).distinct()
         return qs
 
+    def destroy(self, request, *args, **kwargs):
+        """Deletion is narrow by design. A draft may be deleted; a submitted or
+        in-review request may not — it is dropped, which leaves a record; a closed
+        one is administrator-only, because the decision has been made."""
+        response = self.get_object()
+        if not response.is_deletable(request.user):
+            return Response(
+                {
+                    "error": "closedRequestsAreAdminOnly"
+                    if response.status == QuickFormResponse.Status.CLOSED
+                    else "onlyDraftsCanBeDeleted",
+                    "status": response.status,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
+
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(QuickFormResponse.Status.choices))
 
     @action(detail=True, methods=["get"], name="Quick form response content")
     def content(self, request, pk):
-        """Everything the fill view needs in one call: ordered pages with
-        translated questions, the answers dict, hidden pages, progress,
-        score and outcome."""
-        from core.cel_service import evaluate_quick_form
-        from core.utils import build_answers_dict
-
-        response = self.get_object()
-        evaluation = evaluate_quick_form(response, persist=False)
-        hidden = set(evaluation["hidden_pages"])
-        pages = []
-        for page in (
-            QuickFormPage.objects.filter(quick_form_id=response.quick_form_id)
-            .prefetch_related("questions__choices")
-            .order_by("order")
-        ):
-            pages.append(
-                {
-                    "id": str(page.id),
-                    "urn": page.urn,
-                    "ref_id": page.ref_id,
-                    "name": page.get_name_translated,
-                    "description": page.get_description_translated,
-                    "order": page.order,
-                    "hidden": page.urn in hidden,
-                    "questions": page.get_questions_translated() or {},
-                }
-            )
-        answers = build_answers_dict(
-            response.answers.select_related("question").prefetch_related(
-                "selected_choices"
-            )
-        )
-        return Response(
-            {
-                "id": str(response.id),
-                "name": response.name,
-                "status": response.status,
-                "quick_form": {
-                    "id": str(response.quick_form_id),
-                    "name": response.quick_form.get_name_translated,
-                    "description": response.quick_form.get_description_translated,
-                    "outcomes_definition": response.quick_form.outcomes_definition,
-                    "scores_definition": response.quick_form.scores_definition,
-                },
-                "pages": pages,
-                "answers": answers,
-                "hidden_pages": evaluation["hidden_pages"],
-                "progress": evaluation["progress"],
-                "score": evaluation["score"],
-                "computed_outcome": evaluation["computed_outcome"],
-                "can_edit_answers": response.status
-                == QuickFormResponse.Status.IN_PROGRESS,
-                "started_at": response.started_at,
-                "submitted_at": response.submitted_at,
-                "observation": response.observation,
-            }
-        )
+        return quick_form_response_content(self.get_object())
 
     @action(detail=True, methods=["post"], name="Start quick form response")
     def start(self, request, pk):
@@ -19608,7 +20049,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         from core.tasks import send_quick_form_started_notification
 
         response = self.get_object()
-        if response.status != QuickFormResponse.Status.IN_PROGRESS:
+        if response.status != QuickFormResponse.Status.DRAFT:
             return Response(
                 {"error": "responseNotInProgress"}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -19620,15 +20061,44 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         )
         return Response(QuickFormResponseReadSerializer(response).data)
 
-    # (from, to) -> config. check_completion: every visible required question
-    # must be answered. observation: "clear" drops it, "optional" keeps it.
+    # (from, to) -> config, the whole lifecycle in one table.
+    #   check_completion: every visible required question must be answered
+    #   observation: "clear" drops it, "optional" keeps it
+    #   resolution: written to `resolution` when the request closes
+    #   actor: who may drive it — "requester" transitions are also reachable
+    #          through the audience-scoped MyRequestViewSet
+    #   unlocks: hands authoring back to the requester
     TRANSITIONS = {
-        ("in_progress", "submitted"): {
+        ("draft", "submitted"): {
             "check_completion": True,
             "observation": "clear",
+            "actor": "requester",
         },
-        ("submitted", "closed"): {"observation": "optional"},
-        ("submitted", "in_progress"): {"observation": "optional"},
+        # Claiming is optional: a quick decision should not require it first.
+        ("submitted", "in_review"): {"observation": "optional", "actor": "reviewer"},
+        ("submitted", "closed"): {"observation": "optional", "actor": "reviewer"},
+        ("submitted", "draft"): {
+            "observation": "optional",
+            "actor": "reviewer",
+            "unlocks": True,
+        },
+        ("in_review", "closed"): {"observation": "optional", "actor": "reviewer"},
+        ("in_review", "draft"): {
+            "observation": "optional",
+            "actor": "reviewer",
+            "unlocks": True,
+        },
+        # Release: back to the open queue, assignee cleared.
+        ("in_review", "submitted"): {"observation": "optional", "actor": "reviewer"},
+    }
+
+    # Reject is the reviewer's act, drop is the requester's; neither substitutes for
+    # the other, so they are separate resolutions on the same closing transition.
+    CLOSING_RESOLUTIONS = {
+        QuickFormResponse.Resolution.ACCEPTED,
+        QuickFormResponse.Resolution.REJECTED,
+        QuickFormResponse.Resolution.DROPPED,
+        QuickFormResponse.Resolution.AUTO,
     }
 
     @action(detail=True, methods=["post"], url_path="set-status")
@@ -19668,11 +20138,54 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         elif observation is not None:
             response.observation = observation
 
+        resolution = request.data.get("resolution") or ""
+        if new_status == QuickFormResponse.Status.CLOSED:
+            if resolution not in self.CLOSING_RESOLUTIONS:
+                return Response(
+                    {
+                        "error": "resolutionRequired",
+                        "choices": sorted(self.CLOSING_RESOLUTIONS),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            response.resolution = resolution
+        elif response.resolution:
+            # Reopening clears the verdict: the request is live again.
+            response.resolution = ""
+
         response.status = new_status
-        update_fields = ["status", "observation", "updated_at"]
+        update_fields = ["status", "resolution", "observation", "updated_at"]
+
+        if new_status == QuickFormResponse.Status.IN_REVIEW:
+            claimer = Actor.objects.filter(
+                user=request.user, entity__isnull=True
+            ).first()
+            if claimer is not None:
+                response.assignee = claimer
+                update_fields.append("assignee")
+        elif (
+            response.status != QuickFormResponse.Status.CLOSED
+            and response.assignee_id is not None
+        ):
+            # Released or sent back: nobody is working it any more.
+            response.assignee = None
+            update_fields.append("assignee")
+
         if new_status == QuickFormResponse.Status.SUBMITTED:
             response.submitted_at = timezone.now()
             update_fields.append("submitted_at")
+        if new_status == QuickFormResponse.Status.SUBMITTED:
+            # Who pressed submit, not who created the row: the two differ whenever a
+            # response is reassigned, and the reviewer set is derived against it.
+            response.submitted_by = request.user
+            update_fields.append("submitted_by")
+            sla_due = _outcome_sla_due_date(response)
+            # Most urgent wins, and an outcome never loosens a date a human set.
+            if sla_due is not None and (
+                response.due_date is None or sla_due < response.due_date
+            ):
+                response.due_date = sla_due
+                update_fields.append("due_date")
         response.save(update_fields=update_fields)
 
         if new_status == QuickFormResponse.Status.SUBMITTED:
@@ -19680,7 +20193,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                 lambda pk=response.pk: send_quick_form_submitted_notification(pk)
             )
         elif (
-            new_status == QuickFormResponse.Status.IN_PROGRESS
+            new_status == QuickFormResponse.Status.DRAFT
             and response.started_at is not None
         ):
             transaction.on_commit(

@@ -31,7 +31,9 @@
 			object: response
 		})
 	);
-	const canEditAnswers = $derived(canEdit && content.can_edit_answers);
+	const viewerIsRequester = $derived(!!data.viewerIsRequester);
+	// A requester edits their own draft; a reviewer edits by folder permission.
+	const canEditAnswers = $derived((viewerIsRequester || canEdit) && content.can_edit_answers);
 
 	let busy = $state(false);
 	let reopenObservation = $state('');
@@ -94,6 +96,9 @@
 		{/if}
 
 		<div class="flex flex-wrap items-center gap-4 text-sm">
+			{#if response.ref_id}
+				<span class="font-mono text-surface-500">{response.ref_id}</span>
+			{/if}
 			<span>
 				<i class="fa-solid fa-list-check mr-1 text-surface-500"></i>
 				{m.quickFormAnsweredProgress({
@@ -113,6 +118,15 @@
 			{/if}
 		</div>
 
+		{#if canEditAnswers}
+			<p class="text-xs text-surface-500">
+				<i class="fa-solid fa-cloud-arrow-up mr-1"></i>
+				{response.ref_id
+					? m.quickFormDraftSavedWithRef({ ref: response.ref_id })
+					: m.quickFormDraftSaved()}
+			</p>
+		{/if}
+
 		{#if content.computed_outcome && Object.keys(content.computed_outcome).length > 0}
 			<div class="flex flex-wrap items-center gap-2">
 				<span class="text-xs font-semibold uppercase tracking-wider text-surface-500"
@@ -129,7 +143,7 @@
 			</div>
 		{/if}
 
-		{#if response.observation && response.status === 'in_progress'}
+		{#if response.observation && response.status === 'draft'}
 			<div
 				class="rounded-lg border border-warning-300 bg-warning-50 dark:bg-warning-500/10 p-3 text-sm"
 			>
@@ -138,20 +152,10 @@
 			</div>
 		{/if}
 
-		{#if canEdit}
+		{#if viewerIsRequester}
+			<!-- The person who filed this. Submitting is theirs; deciding is not. -->
 			<div class="flex flex-wrap items-center gap-2 pt-1">
-				{#if response.status === 'in_progress' && !response.started_at}
-					<span class="text-sm text-surface-500">{m.quickFormNotStarted()}</span>
-					<button
-						type="button"
-						class="btn btn-sm preset-filled-primary-500"
-						disabled={busy}
-						onclick={() => post('start', {})}
-					>
-						<i class="fa-solid fa-paper-plane mr-1"></i>{m.quickFormStart()}
-					</button>
-				{/if}
-				{#if response.status === 'in_progress'}
+				{#if response.status === 'draft'}
 					<button
 						type="button"
 						class="btn btn-sm preset-filled-success-500"
@@ -159,13 +163,60 @@
 						title={content.progress?.complete ? m.quickFormComplete() : m.quickFormIncomplete()}
 						onclick={() => post('setStatus', { status: 'submitted' })}
 					>
-						<i class="fa-solid fa-check mr-1"></i>{m.quickFormSubmit()}
+						<i class="fa-solid fa-paper-plane mr-1"></i>{m.quickFormSubmit()}
+					</button>
+				{:else if response.status === 'submitted' || response.status === 'in_review'}
+					<button
+						type="button"
+						class="btn btn-sm preset-outlined-warning-500"
+						disabled={busy}
+						onclick={() => post('drop', { observation: null })}
+					>
+						<i class="fa-solid fa-ban mr-1"></i>{m.quickFormDrop()}
+					</button>
+				{/if}
+				<button
+					type="button"
+					class="btn btn-sm preset-tonal"
+					disabled={busy}
+					onclick={() => post('clone', {})}
+				>
+					<i class="fa-solid fa-copy mr-1"></i>{m.quickFormClone()}
+				</button>
+			</div>
+		{:else if canEdit}
+			<!-- The reviewer. Claiming is optional; a decision always carries a resolution. -->
+			<div class="flex flex-wrap items-center gap-2 pt-1">
+				{#if response.status === 'draft'}
+					<button
+						type="button"
+						class="btn btn-sm preset-filled-success-500"
+						disabled={busy || !content.progress?.complete}
+						title={content.progress?.complete ? m.quickFormComplete() : m.quickFormIncomplete()}
+						onclick={() => post('setStatus', { status: 'submitted' })}
+					>
+						<i class="fa-solid fa-paper-plane mr-1"></i>{m.quickFormSubmit()}
 					</button>
 				{/if}
 				{#if response.status === 'submitted'}
+					<button
+						type="button"
+						class="btn btn-sm preset-tonal-primary"
+						disabled={busy}
+						onclick={() => post('setStatus', { status: 'in_review' })}
+					>
+						<i class="fa-solid fa-hand mr-1"></i>{m.quickFormClaim()}
+					</button>
+				{/if}
+				{#if response.status === 'in_review' && response.assignee}
+					<span class="text-sm text-surface-500">
+						<i class="fa-solid fa-user-check mr-1"></i>{response.assignee.str}
+					</span>
+				{/if}
+				{#if response.status === 'submitted' || response.status === 'in_review'}
 					<input
 						type="text"
-						class="input text-sm max-w-xs"
+						class="input max-w-xs text-sm"
 						placeholder={m.quickFormReopenPrompt()}
 						bind:value={reopenObservation}
 					/>
@@ -174,17 +225,35 @@
 						class="btn btn-sm preset-outlined-warning-500"
 						disabled={busy}
 						onclick={() =>
-							post('setStatus', { status: 'in_progress', observation: reopenObservation || null })}
+							post('setStatus', { status: 'draft', observation: reopenObservation || null })}
 					>
-						<i class="fa-solid fa-rotate-left mr-1"></i>{m.quickFormReopen()}
+						<i class="fa-solid fa-rotate-left mr-1"></i>{m.quickFormRequestChanges()}
 					</button>
 					<button
 						type="button"
 						class="btn btn-sm preset-filled-success-500"
 						disabled={busy}
-						onclick={() => post('setStatus', { status: 'closed' })}
+						onclick={() =>
+							post('setStatus', {
+								status: 'closed',
+								resolution: 'accepted',
+								observation: reopenObservation || null
+							})}
 					>
-						<i class="fa-solid fa-lock mr-1"></i>{m.quickFormClose()}
+						<i class="fa-solid fa-check mr-1"></i>{m.quickFormAccept()}
+					</button>
+					<button
+						type="button"
+						class="btn btn-sm preset-outlined-error-500"
+						disabled={busy}
+						onclick={() =>
+							post('setStatus', {
+								status: 'closed',
+								resolution: 'rejected',
+								observation: reopenObservation || null
+							})}
+					>
+						<i class="fa-solid fa-xmark mr-1"></i>{m.quickFormReject()}
 					</button>
 				{/if}
 			</div>

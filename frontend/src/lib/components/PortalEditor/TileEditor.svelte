@@ -48,6 +48,7 @@
 		if (kind === 'certificationDocument') return { key: '', label: m.proof(), ph: '' };
 		if (kind === 'framework') return { key: 'snapshot', label: m.framework(), ph: '' };
 		if (kind === 'assessment') return { key: '', label: m.auditSetup(), ph: '' };
+		if (kind === 'quickForm') return { key: '', label: m.quickForm(), ph: '' };
 		return { key: 'url', label: m.url(), ph: kind === 'external' ? 'https://…' : '/incidents' };
 	}
 
@@ -142,6 +143,24 @@
 					class="input mt-1 rounded-md text-sm"
 				/>
 			{/if}
+		{:else if item.kind === 'quickForm'}
+			<select bind:value={item.target.publication} class="select rounded-md text-sm">
+				<option value="">⟡ {m.quickFormTileNoPublication()}</option>
+				{#each ctx.publications as p}<option value={p.id}>{p.name}</option>{/each}
+			</select>
+			{#if !item.target.publication}
+				<select bind:value={item.target.quick_form} required class="select mt-1 rounded-md text-sm">
+					<option value="">{m.quickForm()}…</option>
+					{#each ctx.quickForms as f}<option value={f.id}>{f.name}</option>{/each}
+				</select>
+				<select bind:value={item.target.folder} required class="select mt-1 rounded-md text-sm">
+					{#if ctx.personalFoldersEnabled}
+						<option value="__personal__">⟡ {m.mySpace()}</option>
+					{/if}
+					<option value="">⟡ {m.userChoosesDomain()}</option>
+					{#each ctx.folders as d}<option value={d.id}>{d.name}</option>{/each}
+				</select>
+			{/if}
 		{:else if item.kind === 'assessment'}
 			<select bind:value={item.target.framework} required class="select rounded-md text-sm">
 				<option value="">{m.framework()}…</option>
@@ -199,6 +218,40 @@
 		<textarea bind:value={item.description} rows="2" class="textarea rounded-md text-sm w-full"
 		></textarea>
 	</label>
+	{#if item.kind === 'quickForm' && item.target.publication}
+		<div class="w-full border-t border-surface-200-800 pt-2">
+			<p class="text-[10px] text-surface-400">{m.quickFormTilePublicationHint()}</p>
+		</div>
+	{/if}
+	{#if item.kind === 'quickForm' && !item.target.publication}
+		<div class="w-full space-y-2 border-t border-surface-200-800 pt-2">
+			<label class="flex items-center gap-2 text-[10px] text-surface-600-400">
+				<input type="checkbox" class="checkbox" bind:checked={item.target.user_names} />
+				{m.letUserNameResponse()}
+			</label>
+			<label class="flex items-center gap-2 text-[10px] text-surface-600-400">
+				<input type="checkbox" class="checkbox" bind:checked={item.target.allow_multiple_drafts} />
+				{m.quickFormAllowMultipleDrafts()}
+			</label>
+			<label class="block text-[10px] text-surface-500">
+				<span class="block">{m.reviewers()}</span>
+				<select
+					multiple
+					size="4"
+					class="select mt-1 w-full rounded-md text-sm"
+					value={item.target.reviewers ?? []}
+					onchange={(e) =>
+						(item.target.reviewers = [
+							...(e.currentTarget as HTMLSelectElement).selectedOptions
+						].map((o) => o.value))}
+				>
+					{#each ctx.actors as a (a.id)}<option value={a.id}>{a.name}</option>{/each}
+				</select>
+				<span class="mt-1 block text-[10px] text-surface-400">{m.quickFormTileReviewersHint()}</span
+				>
+			</label>
+		</div>
+	{/if}
 	{#if item.kind === 'assessment'}
 		<div class="w-full space-y-2 border-t border-surface-200-800 pt-2">
 			<label class="flex items-center gap-2 text-[10px] text-surface-600-400">

@@ -1192,6 +1192,37 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [{ field: 'quick_form', urlModel: 'quick-form-responses' }]
 	},
+	'quick-form-publications': {
+		name: 'quickformpublication',
+		localName: 'quickFormPublication',
+		localNamePlural: 'quickFormPublications',
+		verboseName: 'Quick form publication',
+		verboseNamePlural: 'Quick form publications',
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'quick_form' },
+			{ field: 'folder' },
+			{ field: 'submission_folder' },
+			{ field: 'enabled' },
+			{ field: 'audience_groups' },
+			{ field: 'default_reviewers' },
+			{ field: 'allow_multiple_drafts' },
+			{ field: 'responses_count' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{
+				field: 'submission_folder',
+				urlModel: 'folders',
+				urlParams: 'content_type=DO&content_type=GL'
+			},
+			{ field: 'quick_form', urlModel: 'quick-forms' },
+			{ field: 'audience_groups', urlModel: 'user-groups' },
+			{ field: 'default_reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' }
+		],
+		reverseForeignKeyFields: [{ field: 'publication', urlModel: 'quick-form-responses' }]
+	},
 	'quick-form-responses': {
 		name: 'quickformresponse',
 		localName: 'quickFormResponse',
@@ -1199,6 +1230,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Quick form response',
 		verboseNamePlural: 'Quick form responses',
 		detailViewFields: [
+			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'quick_form' },
@@ -1206,6 +1238,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'respondents' },
 			{ field: 'reviewers' },
+			{ field: 'submitted_by' },
 			{ field: 'eta', type: 'date' },
 			{ field: 'due_date', type: 'date' },
 			{ field: 'score' },
