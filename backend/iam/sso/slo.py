@@ -4,11 +4,16 @@ from importlib import import_module
 from urllib.parse import urlencode
 
 import structlog
-from allauth.socialaccount.providers.saml.views import build_auth
+from allauth.socialaccount.providers.saml.utils import (
+    build_saml_config,
+    prepare_django_request,
+)
 from django.conf import settings
 from django.contrib.auth import logout as auth_logout
 from django.http import HttpRequest, HttpResponseRedirect
+from django.urls import reverse
 from django.views import View
+from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from rest_framework import permissions, views
 from rest_framework.response import Response
 
@@ -87,8 +92,33 @@ def _build_oidc_logout_url(request, provider, slo_state) -> str | None:
     return f"{end_session_endpoint}?{urlencode(params)}"
 
 
+def _public_url(path: str) -> str:
+    return f"{settings.CISO_ASSISTANT_URL.rstrip('/')}{path}"
+
+
+def _build_public_saml_config(request, provider) -> dict:
+    """Build the SAML config with the SP URLs anchored on the public URL.
+
+    allauth derives them from the request host, which is the internal one on
+    BFF-issued calls; python3-saml then rejects the whole config.
+    """
+    org = provider.app.client_id
+    config = build_saml_config(request, provider.app.settings, org)
+    config["sp"]["assertionConsumerService"]["url"] = _public_url(
+        reverse("saml_acs", args=[org])
+    )
+    config["sp"]["singleLogoutService"]["url"] = _public_url(
+        reverse("saml_sls", args=[org])
+    )
+    if not provider.app.settings.get("sp", {}).get("entity_id"):
+        config["sp"]["entityId"] = _public_url(reverse("saml_metadata", args=[org]))
+    return config
+
+
 def _build_saml_logout_url(request, provider, slo_state) -> str | None:
-    auth = build_auth(request, provider)
+    auth = OneLogin_Saml2_Auth(
+        prepare_django_request(request), _build_public_saml_config(request, provider)
+    )
     return auth.logout(
         return_to=get_post_logout_redirect_url(),
         name_id=slo_state.get("name_id"),
