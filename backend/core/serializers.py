@@ -2832,7 +2832,7 @@ class EvidenceWriteSerializer(EvidenceFilesMixin, BaseModelSerializer):
 
         # Handle properly owner field cleaning
         with attachment_transaction() as written:
-            Evidence.objects.select_for_update().get(pk=instance.pk)
+            instance = Evidence.objects.select_for_update().get(pk=instance.pk)
             instance = super().update(instance, validated_data)
             if files:
                 revision = instance.last_revision or EvidenceRevision.objects.create(
@@ -2919,6 +2919,7 @@ class EvidenceRevisionWriteSerializer(EvidenceFilesMixin, BaseModelSerializer):
         files = validated_data.pop("attachments", [])
         with attachment_transaction() as written:
             Evidence.objects.select_for_update().get(pk=instance.evidence_id)
+            instance = EvidenceRevision.objects.select_for_update().get(pk=instance.pk)
             # Track a legacy primary-file replacement too, so a failed append
             # cannot leave its bytes behind after the database rolls back.
             if validated_data.get("attachment"):

@@ -6048,5 +6048,6 @@
 	"attachments": "Pièces jointes",
 	"evidenceFilesHelp": "Sélectionnez jusqu’à 10 fichiers par révision. Les nouveaux fichiers sont ajoutés à cette révision.",
 	"evidenceFilesLimit": "Une révision peut contenir au maximum 10 fichiers.",
-	"evidenceFileDeleteFailed": "Le fichier n’a pas pu être supprimé. Veuillez réessayer."
+	"evidenceFileDeleteFailed": "Le fichier n’a pas pu être supprimé. Veuillez réessayer.",
+	"evidenceAttachmentHashMismatch": "Une pièce jointe de preuve a échoué au contrôle d’intégrité."
 }

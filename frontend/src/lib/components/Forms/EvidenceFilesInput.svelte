@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { filesProxy, formFieldProxy } from 'sveltekit-superforms';
 	import { m } from '$paraglide/messages';
+	import { mergeEvidenceFiles } from '$lib/utils/evidence-files';
+	import { tick } from 'svelte';
 	let { form, existing = 0 }: { form: any; existing?: number } = $props();
 	const files = filesProxy(form, 'attachments');
 	const { errors } = formFieldProxy(form, 'attachments');
@@ -23,6 +25,16 @@
 		$files = transfer.files;
 		event.preventDefault();
 	}
+	async function selectFiles(event: Event) {
+		const target = event.currentTarget as HTMLInputElement;
+		const previous = [...selected];
+		const added = Array.from(target.files ?? []);
+		await tick();
+		const transfer = new DataTransfer();
+		for (const file of mergeEvidenceFiles(previous, added)) transfer.items.add(file);
+		$files = transfer.files;
+		target.value = '';
+	}
 </script>
 
 <svelte:document onpaste={paste} />
@@ -37,6 +49,7 @@
 		class="input"
 		bind:files={$files}
 		bind:this={input}
+		onchange={selectFiles}
 		aria-describedby="evidence-files-help"
 		aria-invalid={tooMany || !!$errors}
 		data-testid="form-input-attachments"

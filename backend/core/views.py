@@ -15772,8 +15772,8 @@ def generate_html(
     assessments_prefetched = assessments.select_related("requirement").prefetch_related(
         "answers__question",
         "answers__selected_choices",
-        "evidences",
-        "applied_controls__evidences",
+        "evidences__revisions__additional_attachments",
+        "applied_controls__evidences__revisions__additional_attachments",
     )
     assessment_by_urn = {a.requirement.urn: a for a in assessments_prefetched}
 

@@ -161,6 +161,8 @@ def test_legacy_single_upload_still_works(client):
 def test_delete_only_selected_and_cross_revision_id_rejected(
     client, django_capture_on_commit_callbacks
 ):
+    from django.core.files.storage import default_storage
+
     result = create(client, 3)
     assert result.status_code == 201, result.data
     first = files(client, result.data["id"])
@@ -169,13 +171,35 @@ def test_delete_only_selected_and_cross_revision_id_rejected(
     second = files(client, other.data["id"])
     base = f"/api/evidence-revisions/{first[0]['revision_id']}/attachments/"
     assert client.get(f"{base}{second[0]['id']}/").status_code == 404
+    deleted_name = EvidenceAttachment.objects.get(pk=first[1]["id"]).attachment.name
+    assert default_storage.exists(deleted_name)
     with django_capture_on_commit_callbacks(execute=True):
         response = client.delete(f"{base}{first[1]['id']}/")
     assert response.status_code == 204, response.data
+    assert not default_storage.exists(deleted_name)
     assert [f["id"] for f in files(client, result.data["id"])] == [
         first[0]["id"],
         first[2]["id"],
     ]
+
+
+def test_storage_delete_failure_does_not_break_attachment_deletion(
+    client, django_capture_on_commit_callbacks, monkeypatch
+):
+    result = create(client, 2)
+    attachment = files(client, result.data["id"])[1]
+    item = EvidenceAttachment.objects.get(pk=attachment["id"])
+
+    def fail_delete(name):
+        raise OSError("simulated delete failure")
+
+    monkeypatch.setattr(item.attachment.storage, "delete", fail_delete)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = client.delete(
+            f"/api/evidence-revisions/{attachment['revision_id']}/attachments/{attachment['id']}/"
+        )
+    assert response.status_code == 204, response.data
+    assert not EvidenceAttachment.objects.filter(pk=attachment["id"]).exists()
 
 
 def test_unprivileged_user_cannot_read_or_mutate(client):
@@ -304,6 +328,79 @@ def test_domain_zip_round_trip_includes_additional_files(client, tmp_path):
     for item in restored.last_revision.attachment_items():
         with item.attachment.open("rb") as file:
             assert hashlib.sha256(file.read()).hexdigest() == item.attachment_hash
+
+
+def test_domain_import_rejects_tampered_attachment_and_cleans_staged_files(
+    client, settings, tmp_path
+):
+    from django.forms import ValidationError
+
+    from serdes.domain_io import export_domain, process_uploaded_file
+
+    folder = Folder.objects.create(
+        name="Tampered evidence export", content_type=Folder.ContentType.DOMAIN
+    )
+    result = create(client, 3, folder=str(folder.pk))
+    assert result.status_code == 201, result.data
+    user = User.objects.get(email="files@example.com")
+    exported = export_domain(folder, user).content
+    source = io.BytesIO(exported)
+    tampered = io.BytesIO()
+    with zipfile.ZipFile(source) as input_zip, zipfile.ZipFile(
+        tampered, "w", zipfile.ZIP_DEFLATED
+    ) as output_zip:
+        data = json.loads(input_zip.read("data.json"))
+        additional = next(
+            obj
+            for obj in data["objects"]
+            if obj["model"] == "core.evidenceattachment"
+        )
+        additional["fields"]["attachment_hash"] = "0" * 64
+        for info in input_zip.infolist():
+            content = (
+                json.dumps(data).encode()
+                if info.filename == "data.json"
+                else input_zip.read(info)
+            )
+            output_zip.writestr(info, content)
+
+    archive = tmp_path / "tampered-domain.zip"
+    archive.write_bytes(tampered.getvalue())
+    files_before = {path for path in settings.MEDIA_ROOT.rglob("*") if path.is_file()}
+    with pytest.raises(ValidationError) as error:
+        process_uploaded_file(archive)
+    assert "evidenceAttachmentHashMismatch" in str(error.value)
+    files_after = {path for path in settings.MEDIA_ROOT.rglob("*") if path.is_file()}
+    assert files_after == files_before
+
+
+def test_domain_import_failure_cleans_staged_attachment_files(
+    client, monkeypatch, tmp_path
+):
+    from django.core.files.storage import default_storage
+    from django.forms import ValidationError
+
+    from serdes import domain_io
+
+    folder = Folder.objects.create(
+        name="Failed evidence import", content_type=Folder.ContentType.DOMAIN
+    )
+    result = create(client, 3, folder=str(folder.pk))
+    assert result.status_code == 201, result.data
+    user = User.objects.get(email="files@example.com")
+    archive = tmp_path / "failed-domain.zip"
+    archive.write_bytes(domain_io.export_domain(folder, user).content)
+    parsed = domain_io.process_uploaded_file(archive)
+    staged = list(parsed[domain_io.STAGED_ATTACHMENT_PATHS_KEY])
+    assert staged and all(default_storage.exists(name) for name in staged)
+
+    def fail_create(*args, **kwargs):
+        raise RuntimeError("simulated import failure")
+
+    monkeypatch.setattr(domain_io, "create_model_objects", fail_create)
+    with pytest.raises(ValidationError):
+        domain_io.import_objects(parsed, "Failed import", False, user)
+    assert all(not default_storage.exists(name) for name in staged)
 
 
 def test_reader_can_download_but_cannot_remove_or_append(client):

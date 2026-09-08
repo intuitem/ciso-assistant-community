@@ -6293,5 +6293,6 @@
 	"attachments": "Attachments",
 	"evidenceFilesHelp": "Select up to 10 files per revision. New files are added to this revision.",
 	"evidenceFilesLimit": "A revision can contain at most 10 files.",
-	"evidenceFileDeleteFailed": "The file could not be deleted. Please try again."
+	"evidenceFileDeleteFailed": "The file could not be deleted. Please try again.",
+	"evidenceAttachmentHashMismatch": "An evidence attachment failed its integrity check."
 }

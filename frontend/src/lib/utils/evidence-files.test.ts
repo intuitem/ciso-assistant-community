@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { superValidate } from 'sveltekit-superforms/server';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { EvidenceSchema, EvidenceRevisionSchema } from './schemas';
-import { evidenceFileDisplay, evidenceMultipart } from './evidence-files';
+import { evidenceFileDisplay, evidenceMultipart, mergeEvidenceFiles } from './evidence-files';
 
 describe('evidence multipart form submission', () => {
 	it('keeps ten selected files through form validation', async () => {
@@ -38,6 +38,13 @@ describe('evidence multipart form submission', () => {
 		expect(
 			body.getAll('attachments').every((file) => file instanceof File && file.name === 'same.txt')
 		).toBe(true);
+	});
+
+	it('keeps previous files when the picker is used repeatedly', () => {
+		const first = new File(['first'], 'first.txt');
+		const second = new File(['second'], 'second.txt');
+		const repeated = new File(['first again'], 'first.txt');
+		expect(mergeEvidenceFiles([first], [second, repeated])).toEqual([first, second, repeated]);
 	});
 
 	it('shows every file of a revision with its own size', () => {

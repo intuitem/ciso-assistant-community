@@ -89,6 +89,20 @@ from .utils import (
 logger = structlog.get_logger(__name__)
 
 BATCH_SIZE = 100  # Batch size for domain import validation / creation
+STAGED_ATTACHMENT_PATHS_KEY = "_staged_attachment_paths"
+
+
+def _delete_staged_attachments(paths: list[str]) -> None:
+    """Best-effort cleanup for files staged before domain import validation."""
+    for name in paths:
+        try:
+            default_storage.delete(name)
+        except Exception as exc:
+            logger.warning(
+                "Failed to delete staged domain attachment",
+                attachment=name,
+                error=str(exc),
+            )
 
 
 # --------------------------------------------------------------------------- #
@@ -208,6 +222,7 @@ def export_domain(
 
 def process_uploaded_file(dump_file: str | Path) -> Any:
     """Parse an uploaded domain zip and return its JSON payload."""
+    staged_attachment_paths: list[str] = []
     if not zipfile.is_zipfile(dump_file):
         logger.error("Invalid ZIP file format")
         raise ValidationError({"file": "invalidZipFileFormat"})
@@ -282,9 +297,19 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
                         ]
                         if not matching:
                             continue
+                        digest = sha256(content).hexdigest()
+                        for x in matching:
+                            expected_digest = x["fields"].get("attachment_hash")
+                            if expected_digest and expected_digest != digest:
+                                _delete_staged_attachments(staged_attachment_paths)
+                                raise ValidationError(
+                                    {"file": "evidenceAttachmentHashMismatch"}
+                                )
+                            x["fields"]["attachment_hash"] = digest
                         new_name = default_storage.save(
                             Path(basename).name, io.BytesIO(content)
                         )
+                        staged_attachment_paths.append(new_name)
                         for x in matching:
                             x["fields"]["attachment"] = new_name
                     elif "evidence-revisions" in parts:
@@ -318,6 +343,7 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
                             )
                             continue
                         new_name = default_storage.save(basename, io.BytesIO(content))
+                        staged_attachment_paths.append(new_name)
                         for x in matching:
                             x["fields"]["attachment"] = new_name
                     else:
@@ -336,13 +362,17 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
                             )
                             continue
                         new_name = default_storage.save(zip_name, io.BytesIO(content))
+                        staged_attachment_paths.append(new_name)
                         if new_name != zip_name:
                             for x in matching:
                                 x["fields"]["attachment"] = new_name
 
+                except ValidationError:
+                    raise
                 except Exception:
                     logger.error("Error extracting attachment", exc_info=True)
 
+    json_dump[STAGED_ATTACHMENT_PATHS_KEY] = staged_attachment_paths
     return json_dump
 
 
@@ -446,9 +476,11 @@ def import_objects(
     required_libraries: list = []
     missing_libraries: list = []
     link_dump_database_ids: dict = {}
+    staged_attachment_paths = parsed_data.pop(STAGED_ATTACHMENT_PATHS_KEY, [])
 
     objects = parsed_data.get("objects")
     if not objects:
+        _delete_staged_attachments(staged_attachment_paths)
         logger.error("No objects found in the dump")
         raise ValidationError({"error": "No objects found in the dump"})
 
@@ -590,9 +622,11 @@ def import_objects(
         # Keep 403 semantics — don't let the broad Exception branch below
         # repackage a PermissionDenied into a generic ValidationError.
         logger.error(f"error: {e}")
+        _delete_staged_attachments(staged_attachment_paths)
         raise
     except Exception as e:
         logger.exception(f"Failed to import objects: {str(e)}")
+        _delete_staged_attachments(staged_attachment_paths)
         raise ValidationError({"non_field_errors": "errorOccuredDuringImport"})
 
 

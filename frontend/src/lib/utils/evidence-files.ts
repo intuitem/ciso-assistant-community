@@ -11,6 +11,11 @@ export interface EvidenceFileDisplay {
 	size: string | null;
 }
 
+/** Keep prior selections when the file picker is opened more than once. */
+export function mergeEvidenceFiles(existing: Iterable<File>, added: Iterable<File>): File[] {
+	return [...existing, ...added];
+}
+
 /** Normalize legacy single-file and current multi-file API values for table cells. */
 export function evidenceFileDisplay(value: unknown): EvidenceFileDisplay[] {
 	if (typeof value === 'string' && value) return [{ filename: value, size: null }];

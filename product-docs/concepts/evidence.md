@@ -15,7 +15,7 @@ graph LR
   EVR -.->|produced by| TN[Task occurrence]
 ```
 
-Evidence is the shared substantiation surface — the same record can back an applied control, a requirement assessment, and a finding at the same time, which is why a single proof can satisfy many frameworks at once. Each evidence comprises a chain of revisions; the latest revision holds the current attachment (with its SHA-256 hash) or external link. When a recurring task produces evidence, the corresponding task occurrence is recorded on the revision so the audit trail goes both ways.
+Evidence is the shared substantiation surface — the same record can back an applied control, a requirement assessment, and a finding at the same time, which is why a single proof can satisfy many frameworks at once. Each evidence comprises a chain of revisions; the latest revision holds up to 10 attachments (each with its own SHA-256 hash) and an optional external link. When a recurring task produces evidence, the corresponding task occurrence is recorded on the revision so the audit trail goes both ways.
 
 | User-facing | Internal | Notes |
 |---|---|---|

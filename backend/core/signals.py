@@ -27,4 +27,16 @@ def delete_additional_evidence_attachment(sender, instance, **kwargs):
 
     if instance.attachment:
         storage, name = instance.attachment.storage, instance.attachment.name
-        transaction.on_commit(lambda: storage.delete(name))
+
+        def delete_file():
+            try:
+                storage.delete(name)
+            except Exception as exc:
+                logger.warning(
+                    "Failed to delete additional evidence attachment",
+                    attachment_id=instance.pk,
+                    revision_id=instance.revision_id,
+                    error=str(exc),
+                )
+
+        transaction.on_commit(delete_file)
