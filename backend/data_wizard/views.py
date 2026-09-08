@@ -1914,12 +1914,27 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         )
         self._record_side_effects("assets_created", assets)
 
-        applied_controls = _resolve_applied_controls(
-            record.get("applied_controls") or record.get("controls"),
-            context.folder,
-            self.request,
-        )
-        self._record_side_effects("applied_controls_created", applied_controls)
+        # With SKIP/STOP, a row matching an existing Finding never reaches the
+        # serializer — so resolving applied_controls unconditionally would
+        # create (and never link) a control for a row that's about to be
+        # discarded. Peek for that duplicate first, using only the raw
+        # ref_id/name (identical to what find_existing() will check again in
+        # process_records), and skip control resolution entirely when it's
+        # going to be skipped or stop the whole import anyway.
+        is_discarded_duplicate = self.on_conflict in (
+            ConflictMode.SKIP,
+            ConflictMode.STOP,
+        ) and self.find_existing({"ref_id": record.get("ref_id"), "name": name})
+
+        if is_discarded_duplicate:
+            applied_controls = SideObjects()
+        else:
+            applied_controls = _resolve_applied_controls(
+                record.get("applied_controls") or record.get("controls"),
+                context.folder,
+                self.request,
+            )
+            self._record_side_effects("applied_controls_created", applied_controls)
 
         finding_data = {
             "name": name,
