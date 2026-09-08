@@ -19623,7 +19623,10 @@ class QuickFormResponseViewSet(BaseModelViewSet):
     # (from, to) -> config. check_completion: every visible required question
     # must be answered. observation: "clear" drops it, "optional" keeps it.
     TRANSITIONS = {
-        ("in_progress", "submitted"): {"check_completion": True, "observation": "clear"},
+        ("in_progress", "submitted"): {
+            "check_completion": True,
+            "observation": "clear",
+        },
         ("submitted", "closed"): {"observation": "optional"},
         ("submitted", "in_progress"): {"observation": "optional"},
     }

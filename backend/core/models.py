@@ -205,8 +205,8 @@ def _sync_questions_from_data(owner, questions_data):
     For new owners this behaves like a pure create. For existing owners it
     upserts questions by URN and choices by ref_id, then prunes stale rows.
     """
-    from core.models import Question, QuestionChoice, QuickFormPage
-
+    # Question, QuestionChoice and QuickFormPage are module globals here: this
+    # helper only runs after the module has finished loading.
     owner_field = "page" if isinstance(owner, QuickFormPage) else "requirement_node"
     requirement_node = owner
 
@@ -1835,9 +1835,9 @@ class LibraryUpdater:
                 quick_form.pages.exclude(urn__in=incoming_page_urns).delete()
 
                 questions = list(
-                    Question.objects.filter(page__quick_form=quick_form).prefetch_related(
-                        "choices"
-                    )
+                    Question.objects.filter(
+                        page__quick_form=quick_form
+                    ).prefetch_related("choices")
                 )
                 for response in QuickFormResponse.objects.filter(quick_form=quick_form):
                     existing_answers = {
@@ -3493,7 +3493,7 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
         max_score = definition.get("max", 100)
         try:
             min_score, max_score = int(min_score), int(max_score)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return 0, 100
         return (min_score, max_score) if min_score < max_score else (0, 100)
 

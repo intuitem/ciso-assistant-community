@@ -97,19 +97,22 @@ objects:
 """.lstrip()
 
 # v2: a new question on page 1, the "Large" choice dropped.
-LIBRARY_V2 = LIBRARY_V1.replace("version: 1", "version: 2").replace(
-    f"""                - urn: {C_LARGE}
+LIBRARY_V2 = (
+    LIBRARY_V1.replace("version: 1", "version: 2")
+    .replace(
+        f"""                - urn: {C_LARGE}
                   value: Large
                   add_score: 80
 """,
-    "",
-).replace(
-    f"""            {Q_COMMENT}:
+        "",
+    )
+    .replace(
+        f"""            {Q_COMMENT}:
               type: text
               text: Anything else?
               required: false
 """,
-    f"""            {Q_COMMENT}:
+        f"""            {Q_COMMENT}:
               type: text
               text: Anything else?
               required: false
@@ -117,6 +120,7 @@ LIBRARY_V2 = LIBRARY_V1.replace("version: 1", "version: 2").replace(
               type: text
               text: Who is the DPO?
 """,
+    )
 )
 
 
@@ -182,7 +186,9 @@ class TestQuickFormImport:
         assert response.answers.count() == 5
         assert response.answers.filter(question__urn=f"{PAGE1}:question:dpo").exists()
         assert response.answers.get(question__urn=Q_SCALE).selected_choices.count() == 0
-        assert not Question.objects.get(urn=Q_SCALE).choices.filter(urn=C_LARGE).exists()
+        assert (
+            not Question.objects.get(urn=Q_SCALE).choices.filter(urn=C_LARGE).exists()
+        )
 
 
 @pytest.mark.django_db
@@ -214,7 +220,9 @@ class TestParentConstraints:
         question = Question.objects.get(urn=Q_HEADCOUNT)
         with pytest.raises(IntegrityError):
             with transaction.atomic():
-                Answer.objects.create(question=question, folder=Folder.get_root_folder())
+                Answer.objects.create(
+                    question=question, folder=Folder.get_root_folder()
+                )
         response = QuickFormResponse.objects.create(
             name="r", quick_form=form, folder=Folder.get_root_folder()
         )
@@ -224,7 +232,9 @@ class TestParentConstraints:
         with pytest.raises(IntegrityError):
             with transaction.atomic():
                 Answer.objects.create(
-                    question=question, response=response, folder=Folder.get_root_folder()
+                    question=question,
+                    response=response,
+                    folder=Folder.get_root_folder(),
                 )
 
     def test_form_with_responses_is_protected(self, app_config):
@@ -267,7 +277,9 @@ class TestResponseLifecycle:
         self, app_config, monkeypatch, django_capture_on_commit_callbacks
     ):
         user, client = _admin_client()
-        respondent = User.objects.create_user(email="resp@test.local", is_published=True)
+        respondent = User.objects.create_user(
+            email="resp@test.local", is_published=True
+        )
         actor, _ = Actor.objects.get_or_create(user=respondent)
         form = _load(LIBRARY_V1)
         sent = []
@@ -381,9 +393,7 @@ class TestResponseLifecycle:
         assert res.status_code == 200
         res = client.post(f"{url}set-status/", {"status": "closed"}, format="json")
         assert res.status_code == 200
-        res = client.post(
-            f"{url}set-status/", {"status": "in_progress"}, format="json"
-        )
+        res = client.post(f"{url}set-status/", {"status": "in_progress"}, format="json")
         assert res.status_code == 400
         assert res.json()["error"] == "invalidTransition"
 
@@ -464,7 +474,10 @@ class TestBuilderBridge:
             {"id": "tmp-c2", "question_id": "tmp-q2", "value": "No", "order": 1}
         )
         doc["framework_meta"]["outcomes_definition"] = [
-            {"ref_id": "big", "expression": 'answers["page-1:question:headcount"].value > 250'}
+            {
+                "ref_id": "big",
+                "expression": 'answers["page-1:question:headcount"].value > 250',
+            }
         ]
         res = client.put(
             f"{base}quick-form-editor/", {"editing_draft": doc}, format="json"
@@ -498,6 +511,11 @@ class TestBuilderBridge:
         assert live.pages.count() == 2
         assert Question.objects.filter(page__quick_form=live).count() == 2
         assert live.outcomes_definition[0]["ref_id"] == "big"
-        assert QuickFormPage.objects.get(
-            urn="urn:acme:risk:qf_page:vendor-intake:security"
-        ).questions.first().choices.count() == 2
+        assert (
+            QuickFormPage.objects.get(
+                urn="urn:acme:risk:qf_page:vendor-intake:security"
+            )
+            .questions.first()
+            .choices.count()
+            == 2
+        )

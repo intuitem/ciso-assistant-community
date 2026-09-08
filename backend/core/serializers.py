@@ -6495,9 +6495,7 @@ class QuickFormResponseReadSerializer(BaseModelSerializer):
 
 class QuickFormResponseWriteSerializer(BaseModelSerializer):
     answers = serializers.JSONField(required=False, write_only=True)
-    start_now = serializers.BooleanField(
-        required=False, write_only=True, default=False
-    )
+    start_now = serializers.BooleanField(required=False, write_only=True, default=False)
 
     class Meta:
         model = QuickFormResponse
@@ -6536,7 +6534,9 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
         if self.instance and "quick_form" in attrs:
             if attrs["quick_form"] != self.instance.quick_form:
                 raise serializers.ValidationError(
-                    {"quick_form": "The form of an existing response cannot be changed."}
+                    {
+                        "quick_form": "The form of an existing response cannot be changed."
+                    }
                 )
         return attrs
 

@@ -705,9 +705,7 @@ def _quick_form_answers(response):
     from core.utils import build_answers_dict, extract_node_id
 
     by_urn = build_answers_dict(
-        response.answers.select_related("question").prefetch_related(
-            "selected_choices"
-        )
+        response.answers.select_related("question").prefetch_related("selected_choices")
     )
     return {extract_node_id(urn) or urn: value for urn, value in by_urn.items()}
 

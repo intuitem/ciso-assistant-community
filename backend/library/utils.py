@@ -471,6 +471,7 @@ class QuickFormPageImporter:
         questions = self.page_data.get("questions")
         if questions is not None and not isinstance(questions, dict):
             return "questions must be an object keyed by URN"
+        return None
 
     def import_page(self, quick_form: QuickForm):
         # update_or_create scoped to the form: create on fresh loads, in-place
@@ -528,6 +529,7 @@ class QuickFormImporter:
                 f"{'s' if len(errors) > 1 else ''} detected, page {index + 1} "
                 f"has the following error : {error}"
             )
+        return None
 
     def import_quick_form(self, library_object: LoadedLibrary):
         urn = self.quick_form_data["urn"].lower()
@@ -1128,6 +1130,7 @@ class LibraryImporter:
                 f"{'s' if len(import_errors) > 1 else ''} detected, the "
                 f"{index + 1}{ordinal} quick form has the following error : {error}"
             )
+        return None
 
     def init(self) -> Union[str, None]:
         """missing_fields = self.REQUIRED_FIELDS - set(self._library_data.keys())

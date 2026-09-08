@@ -1727,7 +1727,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
             else {}
         )
         doc_pages = {
-            page["urn"]: page for page in quick_form.get("pages") or [] if page.get("urn")
+            page["urn"]: page
+            for page in quick_form.get("pages") or []
+            if page.get("urn")
         }
         added = [urn for urn in doc_pages if urn not in live_pages]
         removed = [urn for urn in live_pages if urn not in doc_pages]
