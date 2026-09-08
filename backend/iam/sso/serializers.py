@@ -299,12 +299,26 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         settings_object = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
 
-        # to_internal_value only builds a nested mapping for dotted sources it
-        # actually received, so `settings` is absent from a partial payload and
-        # `settings.advanced` from any payload carrying no SAML advanced field
-        # (an OIDC-only one, say). Normalize up front: the assignments below
-        # index into both.
-        validated_data.setdefault("settings", {}).setdefault("advanced", {})
+        # This method replaces the stored value wholesale, so it can only act on
+        # a complete representation. to_internal_value builds a nested mapping
+        # only for the dotted sources it actually received, so a payload that
+        # carries no `settings.advanced.*` field arrives without that mapping,
+        # and the assignments below index straight into it.
+        #
+        # Defaulting it to {} would be worse than the KeyError it replaces: the
+        # save would then succeed and silently drop every stored nested setting
+        # (idp, sp, attribute_mapping, every advanced flag) along with the
+        # top-level provider and client_id. Refuse the payload instead — an
+        # incomplete representation is a client error, not something to guess at.
+        #
+        # NOTE: this does not make partial payloads safe in general. One that
+        # happens to carry a single advanced field passes this check and still
+        # replaces everything else; merging over the stored value is the real
+        # fix, and a larger change than this guard.
+        if "advanced" not in validated_data.get("settings", {}):
+            raise serializers.ValidationError(
+                {"settings": "errorSsoSettingsPayloadIncomplete"}
+            )
 
         # The value dict is replaced wholesale below, so an omitted flag must
         # fall back to the stored state (like secret and jit_provisioning_
