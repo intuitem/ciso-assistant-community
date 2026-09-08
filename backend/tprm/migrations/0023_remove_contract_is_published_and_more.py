@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
         # 0021 (findings epic, merged from main) creates EntityScore WITH is_published,
         # since it was generated while AbstractBaseModel still carried the field;
         # this migration must run after it to drop that column too.
-        ("tprm", "0021_entityscore"),
+        ("tprm", "0022_entity_address_entityassessment_expiry_date"),
     ]
 
     operations = [

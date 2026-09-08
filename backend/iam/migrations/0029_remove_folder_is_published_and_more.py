@@ -213,7 +213,7 @@ class Migration(migrations.Migration):
         ("resilience", "0008_remove_assetassessment_is_published_and_more"),
         ("sec_intel", "0003_remove_cwe_is_published_and_more"),
         ("threat_modeling", "0002_remove_threatmodel_is_published_and_more"),
-        ("tprm", "0022_remove_contract_is_published_and_more"),
+        ("tprm", "0023_remove_contract_is_published_and_more"),
         ("webhooks", "0006_remove_webhookendpoint_is_published"),
         # The `("enterprise_core, "0004_remove_clientsettings_is_published")` dependency isn't added as it could break community edition migrations + this migration doesn't depend on any model in `enterprise_core` anyway.
     ]
