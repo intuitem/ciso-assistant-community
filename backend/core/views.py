@@ -10116,7 +10116,12 @@ class EvidenceFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
         ]
 
 
+from core.evidence_files import EvidenceMultipartParser
+from rest_framework.parsers import JSONParser, FormParser
+
+
 class EvidenceViewSet(BaseModelViewSet):
+    parser_classes = [JSONParser, EvidenceMultipartParser, FormParser]
     """
     API endpoint that allows evidences to be viewed or edited.
     """
@@ -10131,6 +10136,7 @@ class EvidenceViewSet(BaseModelViewSet):
             .select_related("folder")
             .prefetch_related(
                 "revisions",
+                "revisions__additional_attachments",
                 "applied_controls",
                 "requirement_assessments",
                 "security_exceptions",
@@ -10502,6 +10508,60 @@ class EvidenceViewSet(BaseModelViewSet):
 
 
 class EvidenceRevisionViewSet(BaseModelViewSet):
+    parser_classes = [JSONParser, EvidenceMultipartParser, FormParser]
+
+    @action(
+        methods=["get", "delete"],
+        detail=True,
+        url_path=r"attachments/(?P<file_id>[^/.]+)",
+    )
+    def file(self, request, pk, file_id):
+        revision = self.get_object()
+        if request.method == "DELETE":
+            if revision.pk not in RoleAssignment.get_changeable_object_ids(
+                request.user, EvidenceRevision
+            ):
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            if revision.evidence_id not in RoleAssignment.get_changeable_object_ids(
+                request.user, Evidence
+            ):
+                return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            if revision.pk not in RoleAssignment.get_viewable_object_ids(
+                request.user, EvidenceRevision
+            ):
+                return Response(status=status.HTTP_403_FORBIDDEN)
+        with transaction.atomic():
+            Evidence.objects.select_for_update().get(pk=revision.evidence_id)
+            revision = EvidenceRevision.objects.select_for_update().get(pk=revision.pk)
+            item = next(
+                (
+                    item
+                    for item in revision.attachment_items()
+                    if str(item.pk) == file_id
+                ),
+                None,
+            )
+            if item is None:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            if request.method == "DELETE":
+                name, storage = item.attachment.name, item.attachment.storage
+                if item == revision:
+                    revision.attachment = None
+                    revision.attachment_hash = None
+                    revision.save()
+                    transaction.on_commit(lambda: storage.delete(name))
+                else:
+                    item.delete()
+                revision.evidence.status = Evidence.Status.IN_REVIEW
+                revision.evidence.save(update_fields=["status", "updated_at"])
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            if not item.attachment.storage.exists(item.attachment.name):
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            return FileResponse(
+                item.attachment.open("rb"), as_attachment=True, filename=item.filename()
+            )
+
     """
     API endpoint that allows evidence revisions to be viewed or edited.
     """
@@ -10515,6 +10575,7 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
             super()
             .get_queryset()
             .select_related("evidence", "evidence__folder", "folder", "task_node")
+            .prefetch_related("additional_attachments")
         )
 
     @action(methods=["get"], detail=True)
@@ -13417,25 +13478,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             try:
                 with zipfile.ZipFile(temp_file, "w") as zipf:
                     for evidence in evidences:
-                        if (
-                            evidence.last_revision
-                            and evidence.last_revision.attachment
-                            and default_storage.exists(
-                                evidence.last_revision.attachment.name
-                            )
-                        ):
-                            with default_storage.open(
-                                evidence.last_revision.attachment.name
-                            ) as attachment_file:
-                                zipf.writestr(
-                                    os.path.join(
-                                        "evidences",
-                                        os.path.basename(
-                                            evidence.last_revision.attachment.name
-                                        ),
-                                    ),
-                                    attachment_file.read(),
-                                )
+                        if not evidence.last_revision:
+                            continue
+                        for item in evidence.last_revision.attachment_items():
+                            if item.attachment.storage.exists(item.attachment.name):
+                                with item.attachment.open("rb") as attachment_file:
+                                    zipf.writestr(
+                                        f"evidences/{item.pk}/{item.filename()}",
+                                        attachment_file.read(),
+                                    )
                     zipf.writestr("index.html", index_content)
 
                 # Seek to beginning for reading

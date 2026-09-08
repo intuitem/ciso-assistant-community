@@ -1,8 +1,8 @@
 from django.dispatch import receiver
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, post_delete
 from structlog import get_logger
 
-from core.models import EvidenceRevision
+from core.models import EvidenceAttachment, EvidenceRevision
 
 logger = get_logger(__name__)
 
@@ -19,3 +19,12 @@ def _delete_evidence_revision_attachment(sender, instance: EvidenceRevision, **k
                 evidence_id=instance.evidence_id,
                 error=str(e),
             )
+
+
+@receiver(post_delete, sender=EvidenceAttachment)
+def delete_additional_evidence_attachment(sender, instance, **kwargs):
+    from django.db import transaction
+
+    if instance.attachment:
+        storage, name = instance.attachment.storage, instance.attachment.name
+        transaction.on_commit(lambda: storage.delete(name))

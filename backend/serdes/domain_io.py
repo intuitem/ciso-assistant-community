@@ -37,6 +37,7 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     EvidenceRevision,
+    EvidenceAttachment,
     FindingsAssessment,
     Framework,
     LoadedLibrary,
@@ -76,6 +77,7 @@ from tprm.models import (
 
 from .serializers import ExportSerializer
 from .utils import (
+    domain_permission_model,
     build_dependency_graph,
     get_domain_export_objects,
     get_self_referencing_field,
@@ -111,7 +113,9 @@ def export_domain(
     for model in objects.keys():
         if not RoleAssignment.is_access_allowed(
             user=user,
-            perm=Permission.objects.get(codename=f"view_{model}"),
+            perm=Permission.objects.get(
+                codename=f"view_{domain_permission_model(model)}"
+            ),
             folder=instance,
         ):
             logger.error(
@@ -155,6 +159,16 @@ def export_domain(
                                 f"{os.path.basename(revision.attachment.name)}",
                             ),
                             file_content,
+                        )
+
+            for item in objects.get("evidenceattachment", []):
+                if item.attachment and item.attachment.storage.exists(
+                    item.attachment.name
+                ):
+                    with item.attachment.open("rb") as file:
+                        zipf.writestr(
+                            f"attachments/evidence-attachments/{item.pk}_{item.filename()}",
+                            file.read(),
                         )
 
         dumpfile_name = (
@@ -253,7 +267,27 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
                     parts = Path(attachment.filename).parts
                     zip_name = parts[-1]
 
-                    if "evidence-revisions" in parts:
+                    if "evidence-attachments" in parts:
+                        attachment_id, basename = zip_name[:36], zip_name[37:]
+                        if not basename or zip_name[36:37] != "_":
+                            continue
+                        attachment_hash = sha256(attachment_id.encode()).hexdigest()[
+                            :12
+                        ]
+                        matching = [
+                            x
+                            for x in json_dump["objects"]
+                            if x["model"] == "core.evidenceattachment"
+                            and x["id"] == attachment_hash
+                        ]
+                        if not matching:
+                            continue
+                        new_name = default_storage.save(
+                            Path(basename).name, io.BytesIO(content)
+                        )
+                        for x in matching:
+                            x["fields"]["attachment"] = new_name
+                    elif "evidence-revisions" in parts:
                         # Exporter path: attachments/evidence-revisions/
                         #   {evidence_uuid}_v{version}_{basename}
                         m = revision_re.match(zip_name)
@@ -439,7 +473,9 @@ def import_objects(
         ):
             if not RoleAssignment.is_access_allowed(
                 user=user,
-                perm=Permission.objects.get(codename=f"add_{model._meta.model_name}"),
+                perm=Permission.objects.get(
+                    codename=f"add_{domain_permission_model(model._meta.model_name)}"
+                ),
                 folder=Folder.get_root_folder(),
             ):
                 error_dict[model._meta.model_name] = "permission_denied"
@@ -851,6 +887,11 @@ def process_model_relationships(
         case "evidence":
             many_to_many_map_ids["owner_ids"] = get_mapped_ids(
                 _fields.pop("owner", []), link_dump_database_ids
+            )
+
+        case "evidenceattachment":
+            _fields["revision"] = EvidenceRevision.objects.get(
+                id=link_dump_database_ids[_fields["revision"]]
             )
 
         case "evidencerevision":

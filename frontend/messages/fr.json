@@ -6044,5 +6044,9 @@
 	"lastAssessmentStatus": "Statut de la dernière évaluation",
 	"lastAssessmentDate": "Date de la dernière évaluation",
 	"resolveCommitmentBeforeRecurrence": "Clôturez l’engagement avant de rendre cette tâche récurrente.",
-	"neverAssessed": "Jamais évaluée"
+	"neverAssessed": "Jamais évaluée",
+	"attachments": "Pièces jointes",
+	"evidenceFilesHelp": "Sélectionnez jusqu’à 10 fichiers par révision. Les nouveaux fichiers sont ajoutés à cette révision.",
+	"evidenceFilesLimit": "Une révision peut contenir au maximum 10 fichiers.",
+	"evidenceFileDeleteFailed": "Le fichier n’a pas pu être supprimé. Veuillez réessayer."
 }

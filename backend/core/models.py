@@ -5153,6 +5153,9 @@ class Evidence(
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.revisions.update(is_published=self.is_published)
+        EvidenceAttachment.objects.filter(revision__evidence=self).update(
+            is_published=self.is_published
+        )
 
     @property
     def last_revision(self):
@@ -5250,7 +5253,10 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
                 try:
                     old_instance = EvidenceRevision.objects.get(pk=self.pk)
                     # Check if attachment changed
-                    if old_instance.attachment != self.attachment:
+                    if (
+                        not self.attachment._committed
+                        or old_instance.attachment != self.attachment
+                    ):
                         should_compute_hash = True
                 except EvidenceRevision.DoesNotExist:
                     should_compute_hash = True
@@ -5261,7 +5267,9 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
                 try:
                     # Compute SHA256 hash using chunked reading to avoid OOM
                     hash_obj = hashlib.sha256()
-                    if default_storage.exists(self.attachment.name):
+                    if self.attachment._committed and default_storage.exists(
+                        self.attachment.name
+                    ):
                         with default_storage.open(self.attachment.name, "rb") as f:
                             for chunk in iter(
                                 lambda: f.read(1024 * 1024), b""
@@ -5291,6 +5299,12 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         super().save(*args, **kwargs)
 
+    def attachment_items(self):
+        """Return all files, retaining the primary attachment's legacy identity."""
+        if self.attachment:
+            yield self
+        yield from self.additional_attachments.all()
+
     def filename(self) -> str | None:
         if not self.attachment:
             return None
@@ -5309,6 +5323,58 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             return f"{size / 1024:.1f} KB"
         else:
             return f"{size / 1024 / 1024:.1f} MB"
+
+
+class EvidenceAttachment(AbstractBaseModel):
+    """Additional files belong to a revision and inherit its access perimeter."""
+
+    revision = models.ForeignKey(
+        EvidenceRevision,
+        on_delete=models.CASCADE,
+        related_name="additional_attachments",
+    )
+    attachment = models.FileField(
+        max_length=500, validators=[validate_file_size, validate_file_name]
+    )
+    attachment_hash = models.CharField(
+        max_length=64, blank=True, null=True, db_index=True
+    )
+
+    class Meta:
+        ordering = ["created_at", "id"]
+
+    def get_scope(self):
+        return (
+            type(self)
+            .objects.filter(revision_id=self.revision_id)
+            .order_by("created_at", "id")
+        )
+
+    @property
+    def folder(self):
+        return self.revision.folder
+
+    @property
+    def evidence_id(self):
+        return self.revision.evidence_id
+
+    @property
+    def version(self):
+        return self.revision.version
+
+    def filename(self):
+        return os.path.basename(self.attachment.name)
+
+    def get_size(self):
+        return EvidenceRevision.get_size(self)
+
+    def save(self, *args, **kwargs):
+        from core.evidence_files import hash_file
+
+        if self.attachment and not self.attachment._committed:
+            self.attachment_hash = hash_file(self.attachment)
+        self.is_published = self.revision.is_published
+        super().save(*args, **kwargs)
 
 
 class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
@@ -11234,6 +11300,7 @@ auditlog.register(
     EvidenceRevision,
     exclude_fields=common_exclude,
 )
+auditlog.register(EvidenceAttachment, exclude_fields=common_exclude)
 auditlog.register(
     OrganisationIssue,
     exclude_fields=common_exclude,
