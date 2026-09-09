@@ -333,6 +333,7 @@
 						label={m.appliedControls()}
 						optionsEndpoint="applied-controls"
 						optionsExtraFields={[['folder', 'str']]}
+						portalDropdown={true}
 						onChange={(value) => {
 							selectedAppliedControls = value || '';
 						}}
