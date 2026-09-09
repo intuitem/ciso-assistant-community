@@ -8834,6 +8834,7 @@ class ComplianceAssessment(Assessment):
                 Prefetch("applied_controls"),
                 Prefetch("security_exceptions"),
                 Prefetch("evidences"),
+                Prefetch("task_templates"),
                 Prefetch("requirement__reference_controls"),
                 Prefetch("requirement__threats"),
             )

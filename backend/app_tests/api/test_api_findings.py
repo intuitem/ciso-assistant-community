@@ -520,55 +520,13 @@ class TestBatchAction:
 
 
 class TestFindingsAssessmentPdf:
-    """The PDF report renders actors by name and does not cut observations short."""
+    """The report is rendered by Typst now, not a Django template.
 
-    @pytest.fixture
-    def report(self, setup):
-        from django.template.loader import render_to_string
-
-        author = User.objects.create_user(
-            "author@tests.com", first_name="Ada", last_name="Author"
-        )
-        reviewer = User.objects.create_user(
-            "reviewer@tests.com", first_name="Rey", last_name="Reviewer"
-        )
-        owner = User.objects.create_user(
-            "owner@tests.com", first_name="Olu", last_name="Owner"
-        )
-        binder = setup["binder"]
-        binder.authors.add(author.actor)
-        binder.reviewers.add(reviewer.actor)
-        long_observation = "word " * 60
-        finding = Finding.objects.create(
-            name="Weak password policy",
-            findings_assessment=binder,
-            folder=binder.folder,
-            observation=long_observation,
-        )
-        finding.owner.add(owner.actor)
-
-        html = render_to_string(
-            "core/findings_assessment_pdf.html",
-            {
-                "findings_assessment": binder,
-                "findings": Finding.objects.filter(findings_assessment=binder),
-                "metrics": binder.get_findings_metrics(),
-                "processed_status_distribution": [],
-                "finding_status_choices": dict(Finding.Status.choices),
-            },
-        )
-        return {"html": html, "observation": long_observation.strip()}
-
-    def test_authors_and_reviewers_are_named(self, report):
-        assert "Ada Author" in report["html"]
-        assert "Rey Reviewer" in report["html"]
-
-    def test_finding_owners_are_named(self, report):
-        assert "Olu Owner" in report["html"]
-
-    def test_observation_is_not_truncated(self, report):
-        assert "…" not in report["html"]
-        assert report["observation"] in report["html"]
+    The behavioural assertions that used to live here — actors named rather than
+    emailed, observations not truncated — moved to
+    `core/tests/test_findings_report_pdf.py`, where they run against the engine
+    that actually produces the PDF.
+    """
 
     def test_pdf_endpoint_renders(self, setup):
         res = setup["client"].get(
