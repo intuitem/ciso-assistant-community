@@ -38,6 +38,7 @@ from django.db.models import (
     ForeignKey,
     OneToOneField,
     ManyToManyField,
+    ProtectedError,
     QuerySet,
     Prefetch,
 )
@@ -1594,9 +1595,79 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         self._process_task_template_evidences(request)
         return super().partial_update(request, *args, **kwargs)
 
+    def get_protected_error_response_data(
+        self, instance, error: ProtectedError
+    ) -> dict:
+        """
+        Build the JSON body returned when a delete is blocked by an
+        on_delete=PROTECT foreign key. Override in a subclass to describe the
+        blockers more specifically (see EntityViewSet, ElementaryActionViewSet);
+        the default here falls back to Django's own protected_objects so it
+        stays accurate for whichever relation actually blocked the delete.
+
+        Only blockers the caller may view are named: delete_<model> doesn't
+        imply view_<other-model> (e.g. delete_folder without view_killchain),
+        so an unfiltered protected_objects would leak the existence/name of
+        objects the caller otherwise couldn't see.
+        """
+        # Django only raises ProtectedError with a non-empty protected_objects,
+        # so `protected_objects` is never empty here.
+        protected_objects = list(error.protected_objects)
+        visible_objects = [
+            obj for obj in protected_objects if self._is_visible_to_requester(obj)
+        ]
+
+        if not visible_objects:
+            return {
+                "detail": (
+                    f"Cannot delete this {instance._meta.verbose_name} "
+                    f"('{instance}'): it is still referenced by other objects. "
+                    "Remove those references first."
+                )
+            }
+
+        names = ", ".join(str(obj) for obj in visible_objects[:10])
+        if len(visible_objects) > 10:
+            names += ", ..."
+        hidden_count = len(protected_objects) - len(visible_objects)
+        if hidden_count:
+            names += f", and {hidden_count} more you don't have access to"
+        return {
+            "detail": (
+                f"Cannot delete this {instance._meta.verbose_name} "
+                f"('{instance}'): it is still referenced by other objects "
+                f"({names}). Remove those references first."
+            )
+        }
+
+    def _is_visible_to_requester(self, obj) -> bool:
+        folder = Folder.get_folder(obj)
+        if folder is None:
+            return False
+        try:
+            perm = Permission.objects.get(codename=f"view_{obj._meta.model_name}")
+        except Permission.DoesNotExist:
+            return False
+        return RoleAssignment.is_access_allowed(
+            user=self.request.user, perm=perm, folder=folder
+        )
+
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
-        return super().destroy(request, *args, **kwargs)
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError as e:
+            # Collector.collect() raises ProtectedError before any row is
+            # deleted, so the instance is guaranteed to still exist here —
+            # fetch it only on this (already slow) error path rather than on
+            # every delete, to avoid an extra get_object() call/permission
+            # check on the success path (and extra lock-hold time for
+            # subclasses that wrap destroy() in a transaction, e.g. UserViewSet).
+            instance = self.get_object()
+            return Response(
+                self.get_protected_error_response_data(instance, e),
+                status=status.HTTP_409_CONFLICT,
+            )
 
     @action(detail=False, methods=["post"], url_path="batch-action")
     def batch_action(self, request):
@@ -16151,18 +16222,15 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         def format_status_data(metrics):
             status_mapping = {
-                "identified": {"localName": "identified", "color": "#F5C481"},
-                "confirmed": {"localName": "confirmed", "color": "#E6686D"},
-                "assigned": {"localName": "assigned", "color": "#fab998"},
-                "in_progress": {"localName": "inProgress", "color": "#fac858"},
-                "mitigated": {
-                    "localName": "mitigated",
-                    "color": "hsl(80deg, 80%, 60%)",
-                },
-                "resolved": {"localName": "resolved", "color": "hsl(120deg, 80%, 45%)"},
-                "closed": {"localName": "closed", "color": "hsl(120deg, 60%, 35%)"},
-                "dismissed": {"localName": "dismissed", "color": "#5470c6"},
-                "deprecated": {"localName": "deprecated", "color": "#91cc75"},
+                "identified": {"localName": "identified", "color": "#DDCC77"},
+                "confirmed": {"localName": "confirmed", "color": "#CC6677"},
+                "assigned": {"localName": "assigned", "color": "#88CCEE"},
+                "in_progress": {"localName": "inProgress", "color": "#44AA99"},
+                "mitigated": {"localName": "mitigated", "color": "#117733"},
+                "resolved": {"localName": "resolved", "color": "#AA4499"},
+                "closed": {"localName": "closed", "color": "#882255"},
+                "dismissed": {"localName": "dismissed", "color": "#999933"},
+                "deprecated": {"localName": "deprecated", "color": "#332288"},
                 "--": {"localName": "undefined", "color": "#CCCCCC"},
             }
 

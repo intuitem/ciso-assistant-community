@@ -5,14 +5,12 @@ import django_filters as df
 from django.db import transaction
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from django.db.models import ProtectedError
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
-    HTTP_409_CONFLICT,
 )
 from iam.models import Folder, Permission, RoleAssignment
 from core.views import (
@@ -219,58 +217,49 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             | {NEVER_ASSESSED: _("Never assessed")}
         )
 
-    def destroy(self, request, *args, **kwargs):
+    def get_protected_error_response_data(self, instance, error):
         """
-        Convert Django's ProtectedError into a 409 Conflict with the list of
-        blocking references, so the frontend can render "this entity is used
-        as a subcontractor/recipient in N solutions" rather than a default 500.
-
         Both the subcontractor and recipient FKs on SolutionSubcontractor use
         on_delete=PROTECT, so deleting an Entity referenced by either role
-        raises ProtectedError. Collect blocking rows for both roles.
+        raises ProtectedError. Collect blocking rows for both roles so the
+        frontend can render "this entity is used as a subcontractor/recipient
+        in N solutions" rather than a generic message.
         """
-        instance = self.get_object()
-        try:
-            return super().destroy(request, *args, **kwargs)
-        except ProtectedError as exc:
-            as_subcontractor = instance.subcontracts.select_related("solution")
-            as_recipient = instance.subcontract_recipients.select_related("solution")
-            total_count = as_subcontractor.count() + as_recipient.count()
+        as_subcontractor = instance.subcontracts.select_related("solution")
+        as_recipient = instance.subcontract_recipients.select_related("solution")
+        total_count = as_subcontractor.count() + as_recipient.count()
 
-            # Combine both querysets, ordered by solution name, capped at 50.
-            blocking_rows = []
-            for row in as_subcontractor.order_by("solution__name")[:50]:
+        # Combine both querysets, ordered by solution name, capped at 50.
+        blocking_rows = []
+        for row in as_subcontractor.order_by("solution__name")[:50]:
+            blocking_rows.append(
+                {
+                    "id": str(row.id),
+                    "solution_id": str(row.solution_id),
+                    "solution_name": row.solution.name,
+                    "role": "subcontractor",
+                }
+            )
+        remaining = 50 - len(blocking_rows)
+        if remaining > 0:
+            for row in as_recipient.order_by("solution__name")[:remaining]:
                 blocking_rows.append(
                     {
                         "id": str(row.id),
                         "solution_id": str(row.solution_id),
                         "solution_name": row.solution.name,
-                        "role": "subcontractor",
+                        "role": "recipient",
                     }
                 )
-            remaining = 50 - len(blocking_rows)
-            if remaining > 0:
-                for row in as_recipient.order_by("solution__name")[:remaining]:
-                    blocking_rows.append(
-                        {
-                            "id": str(row.id),
-                            "solution_id": str(row.solution_id),
-                            "solution_name": row.solution.name,
-                            "role": "recipient",
-                        }
-                    )
 
-            return Response(
-                {
-                    "detail": (
-                        f"Cannot delete entity '{instance.name}' — it is "
-                        f"referenced in {total_count} subcontracting "
-                        f"chain row(s). Remove those references first."
-                    ),
-                    "blocking_subcontracts": blocking_rows,
-                },
-                status=HTTP_409_CONFLICT,
-            )
+        return {
+            "detail": (
+                f"Cannot delete entity '{instance.name}' — it is "
+                f"referenced in {total_count} subcontracting "
+                f"chain row(s). Remove those references first."
+            ),
+            "blocking_subcontracts": blocking_rows,
+        }
 
     def get_queryset(self):
         """Add annotations for default_criticality sorting and legal identifier search."""
