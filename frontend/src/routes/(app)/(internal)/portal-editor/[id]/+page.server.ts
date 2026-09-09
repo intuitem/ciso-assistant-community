@@ -1,5 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { patchJSON, unwrap } from '$lib/utils/portalApi';
+import { fetchAllPages } from '$lib/utils/pagination';
+import { patchJSON } from '$lib/utils/portalApi';
 import { PortalSettingsSchema } from '$lib/utils/schemas';
 import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
@@ -12,11 +13,13 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	if (!res.ok) error(res.status === 404 ? 404 : 500, 'Portal not found');
 	const portal = await res.json();
 	const [publicDocuments, snapshots, rawFrameworks, rawFolders] = await Promise.all([
-		fetch(`${BASE_API_URL}/public-documents/`).then(unwrap),
-		fetch(`${BASE_API_URL}/framework-snapshots/`).then(unwrap),
-		fetch(`${BASE_API_URL}/frameworks/`).then(unwrap),
-		fetch(`${BASE_API_URL}/folders/?content_type=DO`).then(unwrap)
-	]);
+		fetchAllPages(fetch, `${BASE_API_URL}/public-documents/`),
+		fetchAllPages(fetch, `${BASE_API_URL}/framework-snapshots/`),
+		fetchAllPages(fetch, `${BASE_API_URL}/frameworks/`),
+		fetchAllPages(fetch, `${BASE_API_URL}/folders/?content_type=DO`)
+	]).catch((e) => {
+		error(e?.status ?? 500, 'Failed to load portal data');
+	});
 	const frameworks = rawFrameworks.map((f: any) => ({
 		id: f.id,
 		name: f.name,

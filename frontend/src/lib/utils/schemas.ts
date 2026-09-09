@@ -643,7 +643,6 @@ export const EvidenceRevisionSchema = z.object({
 	folder: z.string().uuid(),
 	evidence: z.string().uuid(),
 	task_node: z.string().uuid().nullable(),
-	version: z.number().optional(),
 	attachment: z.any().optional().nullable(),
 	link: z
 		.string()
@@ -885,6 +884,7 @@ export const EntitiesSchema = z.object({
 		.optional(),
 	relationship: z.string().optional().array().optional(),
 	legal_identifiers: z.record(z.string(), z.string()).optional(),
+	address: z.string().optional(),
 	country: z.string().nullish(),
 	currency: z.string().nullish(),
 	dora_entity_type: z.string().nullish(),
@@ -930,6 +930,7 @@ export const EntityAssessmentSchema = z.object({
 	evidence: z.string().optional(),
 	criticality: z.number().optional().nullable(),
 	conclusion: z.string().optional().nullable(),
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	penetration: z.number().optional(),
 	dependency: z.number().optional(),
 	maturity: z.number().optional(),

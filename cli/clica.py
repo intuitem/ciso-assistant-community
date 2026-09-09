@@ -2,9 +2,11 @@
 from datetime import datetime
 import sys
 from pathlib import Path
+from urllib.parse import urlsplit
 import tempfile
 import hashlib
 import struct
+from urllib.parse import urljoin
 import click
 import requests
 import os
@@ -47,7 +49,7 @@ else:
     ic.disable()
 
 
-def ids_map(model, folder=None):
+def ids_map(model, folder=None, url_parameters=None):
     if not TOKEN:
         print(
             "No authentication token available. Please set PAT token in .clica.env.",
@@ -56,13 +58,23 @@ def ids_map(model, folder=None):
         sys.exit(1)
 
     my_map = dict()
-    url = f"{API_URL}/{model}/ids/"
+    if model == "frameworks":
+        url = f"{API_URL}/{model}"
+    else:
+        url = f"{API_URL}/{model}/ids/"
+    if isinstance(url_parameters, str):
+        url = urljoin(url, url_parameters)
     headers = {"Authorization": f"Token {TOKEN}"}
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
     if res.status_code != 200:
         print("something went wrong. check authentication.")
         sys.exit(1)
     data = res.json()
+    if model == "frameworks" and isinstance(data, dict):
+        next_url = data.get("next")
+        if isinstance(next_url, str) and next_url:
+            next_page = ids_map(model, None, next_url)
+            data.setdefault("results", []).extend(next_page.get("results") or [])
     if folder and isinstance(data, dict):
         my_map = data.get(folder)
     else:
@@ -74,7 +86,9 @@ def get_global_folder_id() -> Optional[str]:
     global GLOBAL_FOLDER_ID
     if GLOBAL_FOLDER_ID:
         return GLOBAL_FOLDER_ID
-    url = f"{API_URL}/folders/"
+    # Filter server-side: the API paginates, so scanning an unfiltered first
+    # page misses the root folder once more than a page of folders exists.
+    url = f"{API_URL}/folders/?content_type=GL"
     headers = {"Authorization": f"Token {TOKEN}"}
 
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
@@ -130,6 +144,22 @@ def flatten_mapping(mapping) -> Dict[str, str]:
     return flat
 
 
+def flatten_frameworks_mapping(mapping) -> Dict[str, list[str]]:
+    flat: Dict[str, list[str]] = {}
+    if isinstance(mapping, dict):
+        results = mapping.get("results")
+        if isinstance(results, list):
+            for framework in results:
+                if isinstance(framework, dict):
+                    framework_name = framework.get("name")
+                    framework_id = framework.get("id")
+                    if isinstance(framework_name, str) and isinstance(
+                        framework_id, str
+                    ):
+                        flat.setdefault(framework_name, []).append(framework_id)
+    return flat
+
+
 def resolve_named_id(
     model: str, name: Optional[str], *, folder: Optional[str] = None
 ) -> Optional[str]:
@@ -140,7 +170,18 @@ def resolve_named_id(
     mapping = ids_map(model, folder=folder)
     if not isinstance(mapping, dict):
         return None
-    flat = flatten_mapping(mapping)
+    if model == "frameworks":
+        flat = flatten_frameworks_mapping(mapping)
+        values = flat.get(name, [])
+        if len(values) > 1:
+            click.echo(
+                f"❌ Ambiguous framework name '{name}', found {len(values)}",
+                err=True,
+            )
+            sys.exit(1)
+        return values[0] if values else None
+    else:
+        flat = flatten_mapping(mapping)
     value = flat.get(name)
     if value:
         return value
@@ -305,9 +346,14 @@ DATA_WIZARD_COMMANDS = [
         "command": "import_evidences",
         "model_type": "Evidence",
         "help": (
-            "Import evidences from CSV/Excel.\n"
+            "Import evidence definitions from CSV/Excel.\n"
             "\nRequired columns: name\n\n"
-            "Optional columns: ref_id, description, filtering_labels, domain\n"
+            "Optional columns: description, domain, "
+            "status (draft/missing/in_review/approved/rejected/expired), "
+            "expiry_date, owner (semicolon-separated emails/team names), "
+            "filtering_labels\n"
+            "\nDefinitions only: attachments and links belong to a revision and are "
+            "not imported.\n"
             "\nConflict detection: by name + folder"
         ),
         "requires_folder": True,
@@ -641,7 +687,12 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_tasks",
         "model_type": "TaskTemplate",
-        "help": "Import task templates and past task node occurrences (multi-sheet Excel or CSV) using the Data Wizard backend.",
+        "help": (
+            "Import task templates and past task node occurrences (multi-sheet Excel "
+            "or CSV) using the Data Wizard backend.\n"
+            "\nNames in the 'evidences' column are matched in the task's domain and "
+            "created there when missing, so expected evidence is linked in one pass."
+        ),
         "requires_folder": False,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -913,8 +964,14 @@ def backup_full(dest_dir, batch_size, resume):
         all_metadata.extend(data["results"])
         url = data.get("next")
         if url and not url.startswith("http"):
-            # Convert relative URL to absolute
-            url = f"{API_URL}/serdes/attachment-metadata/{url}"
+            # Convert relative URL to absolute. The API returns
+            # path-relative next links ("/api/...?limit=..."), so join
+            # against the origin, not the endpoint.
+            if url.startswith("/"):
+                split = urlsplit(API_URL)
+                url = f"{split.scheme}://{split.netloc}{url}"
+            else:
+                url = f"{API_URL}/serdes/attachment-metadata/{url}"
 
     rprint(f"[cyan]Found {len(all_metadata)} total attachments[/cyan]")
 
