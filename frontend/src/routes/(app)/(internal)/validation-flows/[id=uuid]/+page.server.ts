@@ -22,6 +22,7 @@ export const actions: Actions = {
 
 		const updateData = {
 			status: 'accepted',
+			confirm_residual_risk: formData.get('confirm_residual_risk') === 'true',
 			event_notes
 		};
 

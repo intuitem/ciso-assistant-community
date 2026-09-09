@@ -16,6 +16,8 @@
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import RiskAcceptancesSection from '$lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
+	import RiskApprovals from '$lib/components/RiskApprovals/RiskApprovals.svelte';
+	import RiskApprovalStatus from '$lib/components/RiskApprovals/RiskApprovalStatus.svelte';
 
 	import { goto } from '$app/navigation';
 	import { openRiskAcceptanceModal } from '$lib/utils/riskAcceptance';
@@ -60,6 +62,19 @@
 			model: 'riskacceptance',
 			object: data.scenario
 		})
+	);
+	const canRequestApproval = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'add',
+			model: 'validationflow',
+			object: data.scenario
+		})
+	);
+	const riskOwnerApprovalsEnabled = $derived(
+		Boolean(
+			page.data.featureflags?.validation_flows && page.data.featureflags?.risk_owner_approvals
+		)
 	);
 	let color_map = $state({});
 	color_map['--'] = '#A9A9A9';
@@ -228,7 +243,17 @@
 					</button>
 				{/if}
 			{/if}
-			{#if canCreateAcceptance && !data.scenario.risk_assessment?.is_locked}
+			{#if riskOwnerApprovalsEnabled && canRequestApproval && data.approvalOptions.risk_tolerance_configured && data.approvalOptions.residual_risk_above_tolerance && !data.scenario.risk_assessment?.is_locked}
+				<button
+					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					onclick={() =>
+						document.getElementById('risk-approvals')?.scrollIntoView({ behavior: 'smooth' })}
+					data-testid="request-risk-acceptance-button"
+				>
+					<i class="fa-solid fa-signature mr-2"></i>
+					{m.requestRiskAcceptance()}
+				</button>
+			{:else if !riskOwnerApprovalsEnabled && canCreateAcceptance && !data.scenario.risk_assessment?.is_locked}
 				<button
 					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
 					onclick={() => modalRequestRiskAcceptance()}
@@ -313,6 +338,14 @@
 						{safeTranslate(data.scenario.treatment)}
 					</p>
 				</div>
+				{#if riskOwnerApprovalsEnabled && data.scenario.risk_approval_summary}
+					<div class="min-w-72 border-l border-surface-200-800 pl-4">
+						<p class="text-sm font-semibold text-surface-400-600 mb-1">
+							{m.riskApprovalStatus()}
+						</p>
+						<RiskApprovalStatus summary={data.scenario.risk_approval_summary} />
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -639,6 +672,19 @@
 			</div>
 		{/if}
 	</div>
+	{#if page.data.featureflags?.validation_flows && page.data.featureflags?.risk_owner_approvals}
+		<RiskApprovals
+			flows={data.riskApprovals}
+			approvers={data.approvalOptions.approvers}
+			managementApprovers={data.approvalOptions.management_approvers}
+			residualRiskAboveTolerance={data.approvalOptions.residual_risk_above_tolerance}
+			riskToleranceLabel={data.riskMatrix.risk?.[data.approvalOptions.risk_tolerance]?.name ??
+				String(data.approvalOptions.risk_tolerance)}
+			riskToleranceConfigured={data.approvalOptions.risk_tolerance_configured}
+			canRequest={canRequestApproval && !data.scenario.risk_assessment?.is_locked}
+			errorMessage={form?.approvalError}
+		/>
+	{/if}
 	{#if page.data?.featureflags?.comments}
 		<CommentsPanel parentType="risk_scenario" parentId={data.scenario.id} />
 	{/if}

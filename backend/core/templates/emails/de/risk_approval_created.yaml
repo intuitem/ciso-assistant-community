@@ -1,0 +1,13 @@
+subject: "CISO Assistant: ${risk_approval_stage} für ${risk_ref_id} angefordert"
+body: |
+  Hallo,
+
+  eine Risikofreigabe wurde dir zur Entscheidung zugewiesen:
+
+  - Risiko: ${risk_ref_id} – ${risk_name}
+  - Angeforderte Entscheidung: ${risk_approval_stage}
+  - Angefordert von: ${requester_name}
+  - Entscheidungsfrist: ${validation_deadline}
+  - Bereich: ${folder_name}
+
+  Bitte prüfe den eingereichten Stand: [Risikofreigabe öffnen](${validation_url})

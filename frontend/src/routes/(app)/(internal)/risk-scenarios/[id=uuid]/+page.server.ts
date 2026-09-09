@@ -11,6 +11,15 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 import { error, redirect } from '@sveltejs/kit';
 
+interface RiskApprovalFlow {
+	id: string;
+	ref_id: string;
+	status: string;
+	risk_approval_stage: 'assessment' | 'treatment' | 'residual_acceptance';
+	risk_approval_current: boolean;
+	approver?: { email?: string } | null;
+}
+
 export const load = (async ({ fetch, params, cookies, locals }) => {
 	const URLModel = 'risk-scenarios';
 	const baseEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
@@ -75,8 +84,39 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		.then((res) => res.json())
 		.then((res) => JSON.parse(res.json_definition));
 
+	const riskApprovalsEnabled = Boolean(
+		locals.featureflags?.validation_flows && locals.featureflags?.risk_owner_approvals
+	);
+	const approvalOptions = riskApprovalsEnabled
+		? await fetch(`${baseEndpoint}approval-options/`).then((res) =>
+				res.ok
+					? res.json()
+					: {
+							approvers: [],
+							management_approvers: [],
+							residual_risk_above_tolerance: false,
+							risk_tolerance: -1,
+							risk_tolerance_configured: false
+						}
+			)
+		: {
+				approvers: [],
+				management_approvers: [],
+				residual_risk_above_tolerance: false,
+				risk_tolerance: -1,
+				risk_tolerance_configured: false
+			};
+	const riskApprovals = riskApprovalsEnabled
+		? await fetchAllPages<RiskApprovalFlow>(
+				fetch,
+				`${BASE_API_URL}/validation-flows/?risk_scenario=${params.id}`
+			)
+		: [];
+
 	return {
 		scenario,
+		approvalOptions,
+		riskApprovals,
 		tables,
 		riskMatrix,
 		title: scenario.str,
@@ -85,6 +125,50 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
+	requestApproval: async (event) => {
+		if (
+			!event.locals.featureflags?.validation_flows ||
+			!event.locals.featureflags?.risk_owner_approvals
+		) {
+			return fail(403, { approvalError: m.riskApprovalFeatureDisabled() });
+		}
+		const input = await event.request.formData();
+		const parsed = z
+			.object({
+				approver: z.uuid(),
+				stage: z.enum(['assessment', 'treatment', 'residual_acceptance']),
+				notes: z.string().max(10000),
+				deadline: z.union([z.literal(''), z.iso.date()])
+			})
+			.safeParse(Object.fromEntries(input));
+		if (!parsed.success) return fail(400, { approvalError: m.riskApprovalInvalidRequest() });
+		const scenarioResponse = await event.fetch(
+			`${BASE_API_URL}/risk-scenarios/${event.params.id}/`
+		);
+		if (!scenarioResponse.ok)
+			return fail(scenarioResponse.status, { approvalError: m.anErrorOccurred() });
+		const scenario = await scenarioResponse.json();
+		const response = await event.fetch(`${BASE_API_URL}/validation-flows/`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				folder: scenario.folder.id,
+				risk_scenario: event.params.id,
+				risk_approval_stage: parsed.data.stage,
+				approver: parsed.data.approver,
+				request_notes: parsed.data.notes,
+				validation_deadline: parsed.data.deadline || null
+			})
+		});
+		if (!response.ok) {
+			const { validationFlowErrorMessage } = await import('$lib/utils/validationFlows');
+			return fail(response.status, {
+				approvalError: validationFlowErrorMessage(await response.json()) ?? m.anErrorOccurred()
+			});
+		}
+		setFlash({ type: 'success', message: m.riskApprovalRequested() }, event);
+		return { approvalRequested: true };
+	},
 	syncToActions: async (event) => {
 		const formData = await event.request.formData();
 

@@ -14,6 +14,7 @@ import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
 import LibraryOverview from '$lib/components/ModelTable/field/LibraryOverview.svelte';
 import MarkdownDescription from '$lib/components/ModelTable/field/MarkdownDescription.svelte';
+import RiskApprovalStatus from '$lib/components/RiskApprovals/RiskApprovalStatus.svelte';
 
 type GetOptionsParams = {
 	objects: any[];
@@ -520,7 +521,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		flaggedFields: {
 			inherent_proba: 'inherent_risk',
 			inherent_impact: 'inherent_risk',
-			inherent_level: 'inherent_risk'
+			inherent_level: 'inherent_risk',
+			risk_approval_summary: 'risk_owner_approvals'
 		},
 		foreignKeyFields: [
 			{ field: 'threats', urlModel: 'threats' },
@@ -3885,6 +3887,9 @@ const FIELD_COMPONENT_MAP = {
 	},
 	frameworks: {
 		name: FrameworkName
+	},
+	'risk-scenarios': {
+		risk_approval_summary: RiskApprovalStatus
 	},
 	workflows: {
 		trigger_types: TriggerTypesDisplay

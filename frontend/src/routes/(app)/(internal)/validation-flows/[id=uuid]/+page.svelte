@@ -11,6 +11,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import ValidationFlowActionModal from '$lib/components/Modals/ValidationFlowActionModal.svelte';
+	import RiskApprovalSnapshot from '$lib/components/RiskApprovals/RiskApprovalSnapshot.svelte';
 	import { deserialize } from '$app/forms';
 	import {
 		validationFlowErrorMessage,
@@ -44,6 +45,12 @@
 
 	const isApprover = String(user.id) === String(validation_flow.approver?.id);
 	const isRequester = String(user.id) === String(validation_flow.requester?.id);
+	const riskApprovalActionsEnabled = $derived(
+		!validation_flow.risk_scenario ||
+			Boolean(
+				page.data.featureflags?.validation_flows && page.data.featureflags?.risk_owner_approvals
+			)
+	);
 
 	type ActionType = 'approve' | 'reject' | 'revoke' | 'drop' | 'request_changes' | 'resubmit';
 
@@ -54,9 +61,12 @@
 				ref: ValidationFlowActionModal,
 				props: {
 					action,
-					onConfirm: async (notes: string) => {
+					requireResidualConfirmation:
+						action === 'approve' && validation_flow.risk_approval_stage === 'residual_acceptance',
+					onConfirm: async (notes: string, confirmResidualRisk?: boolean) => {
 						const formData = new FormData();
 						formData.append('notes', notes);
+						formData.append('confirm_residual_risk', String(confirmResidualRisk === true));
 						const response = await fetch(`?/${action}`, {
 							method: 'POST',
 							body: formData,
@@ -95,12 +105,17 @@
 				</span>
 			</div>
 			<div class="flex flex-col space-y-2">
-				{#if validation_flow.status === 'submitted' && isApprover}
+				{#if !riskApprovalActionsEnabled}
+					<div class="text-sm text-surface-600-400 italic">
+						{m.riskApprovalFeatureDisabled()}
+					</div>
+				{:else if validation_flow.status === 'submitted' && isApprover}
 					<!-- Approver actions for submitted status -->
 					<div class="flex flex-wrap gap-2">
 						<button
 							type="button"
 							onclick={() => openObservationModal('approve')}
+							disabled={validation_flow.risk_scenario && !validation_flow.risk_approval_current}
 							class="btn preset-filled-success-500"
 							data-testid="approve-button"
 						>
@@ -305,6 +320,24 @@
 		{/if}
 	</div>
 
+	{#if validation_flow.risk_scenario}
+		<section class="card p-6 bg-surface-50-950 space-y-3">
+			<h2 class="text-xl font-semibold">
+				{validation_flow.risk_approval_stage === 'assessment'
+					? m.riskApprovalAssessment()
+					: validation_flow.risk_approval_stage === 'residual_acceptance'
+						? m.riskApprovalResidualAcceptance()
+						: m.riskApprovalTreatment()}
+			</h2>
+			<Anchor class="anchor" href="/risk-scenarios/{validation_flow.risk_scenario.id}"
+				>{validation_flow.risk_scenario.str}</Anchor
+			>
+			{#if !validation_flow.risk_approval_current}<p class="preset-tonal-warning p-3">
+					{m.riskApprovalStale()}
+				</p>{/if}
+			<RiskApprovalSnapshot snapshot={validation_flow.risk_snapshot} />
+		</section>
+	{/if}
 	<!-- Associated Links Section -->
 	<div class="card px-6 py-4 bg-surface-50-950 shadow-lg mb-4">
 		<h2 class="text-xl font-semibold mb-4">{m.associatedObjects()}</h2>
@@ -398,6 +431,16 @@
 						<div class="text-sm text-surface-600-400">
 							<MarkdownRenderer content={event.event_notes} />
 						</div>
+					{/if}
+					{#if event.residual_risk_accepted}<p class="text-sm">
+							{m.riskApprovalResidualStatement()}
+						</p>{/if}
+					{#if event.risk_snapshot?.content}
+						<details class="mt-2">
+							<summary>{m.riskApprovalSnapshot()}</summary><RiskApprovalSnapshot
+								snapshot={event.risk_snapshot}
+							/>
+						</details>
 					{/if}
 				</div>
 			{/each}

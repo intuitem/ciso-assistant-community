@@ -65,6 +65,13 @@ export function validationFlowErrorMessage(body: any): string | undefined {
 /** Flattened view of everything a flow is about, across all its m2m buckets. */
 export function validationFlowLinkedObjects(flow: any): { key: string; item: any; href: string }[] {
 	const objects: { key: string; item: any; href: string }[] = [];
+	if (flow.risk_scenario) {
+		objects.push({
+			key: 'risk_scenarios',
+			item: flow.risk_scenario,
+			href: `/risk-scenarios/${flow.risk_scenario.id}`
+		});
+	}
 	for (const key of Object.keys(VALIDATION_FLOW_MODEL_URLS)) {
 		const value = flow[key];
 		if (!Array.isArray(value)) continue;

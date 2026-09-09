@@ -7,11 +7,19 @@
 	interface Props {
 		parent: any;
 		action: ActionType;
-		onConfirm: (notes: string) => Promise<void>;
+		onConfirm: (notes: string, confirmResidualRisk?: boolean) => Promise<void>;
+		requireResidualConfirmation?: boolean;
 		onSuccess: () => void;
 	}
 
-	let { parent, action, onConfirm, onSuccess }: Props = $props();
+	let {
+		parent,
+		action,
+		onConfirm,
+		onSuccess,
+		requireResidualConfirmation = false
+	}: Props = $props();
+	let confirmResidualRisk = $state(false);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -47,11 +55,11 @@
 	};
 
 	async function handleConfirm() {
-		if (isSubmitting) return;
+		if (isSubmitting || (requireResidualConfirmation && !confirmResidualRisk)) return;
 		isSubmitting = true;
 		errorMessage = '';
 		try {
-			await onConfirm(notes);
+			await onConfirm(notes, confirmResidualRisk);
 			parent.onClose();
 			onSuccess();
 		} catch (e) {
@@ -82,6 +90,12 @@
 		</header>
 
 		<div class="space-y-4">
+			{#if requireResidualConfirmation}
+				<label class="flex items-start gap-3">
+					<input type="checkbox" class="checkbox" bind:checked={confirmResidualRisk} />
+					<span>{m.riskApprovalResidualStatement()}</span>
+				</label>
+			{/if}
 			<div>
 				<label for="validation-notes" class="block text-sm font-medium mb-2">
 					{m.notes()}
@@ -119,7 +133,7 @@
 				type="button"
 				class="btn {actionColors[action]}"
 				onclick={handleConfirm}
-				disabled={isSubmitting}
+				disabled={isSubmitting || (requireResidualConfirmation && !confirmResidualRisk)}
 			>
 				{#if isSubmitting}
 					<i class="fa-solid fa-spinner fa-spin mr-2"></i>
