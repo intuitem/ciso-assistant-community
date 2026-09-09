@@ -67,7 +67,17 @@ from jinja2.sandbox import SandboxedEnvironment
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from webhooks.service import dispatch_webhook_event
-from .generators import gen_audit_context
+from .generators import (
+    REPORT_PROFILES,
+    action_plan_context,
+    findings_assessment_context,
+    incident_context,
+    risk_assessment_context,
+    audit_context_for_typst,
+    gen_audit_context,
+    inline_charts_for_docx,
+)
+from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField
 
 from django.utils import timezone, translation
@@ -147,8 +157,6 @@ from rest_framework.exceptions import (
     ValidationError as DRFValidationError,
 )
 
-
-from weasyprint import HTML
 
 from core.helpers import *
 from core.models import (
@@ -4471,43 +4479,52 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         )
         if UUID(pk) in object_ids_view:
             risk_assessment = self.get_object()
-            context = RiskScenario.objects.filter(
-                risk_assessment=risk_assessment
-            ).order_by("ref_id")
-            for scenario in context:
+            scenarios = (
+                RiskScenario.objects.filter(risk_assessment=risk_assessment)
+                .prefetch_related(
+                    "threats",
+                    "assets",
+                    "applied_controls",
+                    "existing_applied_controls",
+                )
+                .order_by("ref_id")
+            )
+            for scenario in scenarios:
                 scenario.strength_of_knowledge = RiskScenario.DEFAULT_SOK_OPTIONS[
                     scenario.strength_of_knowledge
                 ]["name"]
+
             general_settings = GlobalSettings.objects.filter(name="general").first()
-            swap_axes = general_settings.value.get("risk_matrix_swap_axes", False)
-            flip_vertical = general_settings.value.get(
-                "risk_matrix_flip_vertical", False
-            )
-            matrix_settings = {
-                "swap_axes": "_swapaxes" if swap_axes else "",
-                "flip_vertical": "_vflip" if flip_vertical else "",
-            }
+            settings_value = general_settings.value if general_settings else {}
             ff_settings = GlobalSettings.objects.filter(
                 name=GlobalSettings.Names.FEATURE_FLAGS
             ).first()
-            if ff_settings is None:
-                feature_flags = {}
-            else:
-                feature_flags = ff_settings.value
-            data = {
-                "context": context,
-                "risk_assessment": risk_assessment,
-                "ri_clusters": build_scenario_clusters(
+            feature_flags = ff_settings.value if ff_settings else {}
+
+            lang = request.user.preferences.get("lang") or "en"
+            payload = risk_assessment_context(
+                risk_assessment,
+                scenarios,
+                build_scenario_clusters(
                     risk_assessment,
                     include_inherent=feature_flags.get("inherent_risk", False),
                 ),
-                "risk_matrix": risk_assessment.risk_matrix,
-                "settings": matrix_settings,
-                "feature_flags": feature_flags,
-            }
-            html = render_to_string("core/ra_pdf.html", data)
-            pdf_file = HTML(string=html).write_pdf()
-            response = HttpResponse(pdf_file, content_type="application/pdf")
+                swap_axes=settings_value.get("risk_matrix_swap_axes", False),
+                flip_vertical=settings_value.get("risk_matrix_flip_vertical", False),
+                lang=lang,
+                label_standard=settings_value.get("risk_matrix_labels", "ISO"),
+                use_risk_category_label=settings_value.get(
+                    "use_risk_category_label", False
+                ),
+            )
+            response = HttpResponse(
+                render_pdf(localized_template("risk_report", lang), payload),
+                content_type="application/pdf",
+            )
+            safe_name = slugify(risk_assessment.name) or "risk-assessment"
+            response["Content-Disposition"] = (
+                f'attachment; filename="{safe_name}_risk_report.pdf"'
+            )
             return response
         else:
             return Response({"error": "Permission denied"})
@@ -4518,43 +4535,35 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             request.user, RiskAssessment
         )
         if UUID(pk) in object_ids_view:
-            context = {
-                "to_do": list(),
-                "in_progress": list(),
-                "on_hold": list(),
-                "active": list(),
-                "deprecated": list(),
-                "--": list(),
-            }
-            color_map = {
-                "to_do": "#FFF8F0",
-                "in_progress": "#392F5A",
-                "on_hold": "#F4D06F",
-                "active": "#9DD9D2",
-                "deprecated": "#ff8811",
-                "--": "#e5e7eb",
-            }
-            status = AppliedControl.Status.choices
-            risk_assessment_object: RiskAssessment = self.get_object()
-            risk_scenarios_objects = risk_assessment_object.risk_scenarios.all()
-            applied_controls = (
-                AppliedControl.objects.filter(risk_scenarios__in=risk_scenarios_objects)
+            risk_assessment: RiskAssessment = self.get_object()
+            scenarios = risk_assessment.risk_scenarios.all()
+            applied_controls = list(
+                AppliedControl.objects.filter(risk_scenarios__in=scenarios)
                 .distinct()
+                .prefetch_related("risk_scenarios", actor_prefetch("owner"))
                 .order_by("eta")
             )
-            for applied_control in applied_controls:
-                context[applied_control.status].append(
-                    applied_control
-                ) if applied_control.status else context["--"].append(applied_control)
-            data = {
-                "status_text": status,
-                "color_map": color_map,
-                "context": context,
-                "risk_assessment": risk_assessment_object,
+            scenario_ids = {scenario.id for scenario in scenarios}
+            linked = {
+                control.id: [
+                    str(scenario)
+                    for scenario in control.risk_scenarios.all()
+                    if scenario.id in scenario_ids
+                ]
+                for control in applied_controls
             }
-            html = render_to_string("core/risk_action_plan_pdf.html", data)
-            pdf_file = HTML(string=html).write_pdf()
-            response = HttpResponse(pdf_file, content_type="application/pdf")
+            lang = request.user.preferences.get("lang") or "en"
+            payload = action_plan_context(
+                risk_assessment, applied_controls, lang, linked
+            )
+            response = HttpResponse(
+                render_pdf(localized_template("action_plan", lang), payload),
+                content_type="application/pdf",
+            )
+            safe_name = slugify(risk_assessment.name) or "risk-assessment"
+            response["Content-Disposition"] = (
+                f'attachment; filename="{safe_name}_action_plan.pdf"'
+            )
             return response
         else:
             return Response({"error": "Permission denied"})
@@ -12088,8 +12097,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # children in place but the returned dict drops them).
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
-        context = gen_audit_context(pk, doc, tree, user_lang)
-        doc.render(context, jinja_env=SandboxedEnvironment())
+        context = gen_audit_context(pk, tree, user_lang)
+        doc.render(
+            inline_charts_for_docx(context, doc), jinja_env=SandboxedEnvironment()
+        )
         buffer_doc = io.BytesIO()
         doc.save(buffer_doc)
         buffer_doc.seek(0)
@@ -12100,6 +12111,73 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         response["Content-Disposition"] = "attachment; filename=exec_report.docx"
 
+        return response
+
+    @action(detail=True, name="Get audit posture PDF", url_path="posture-pdf")
+    def posture_pdf(self, request, pk):
+        """Audit posture as a PDF, redacted for the caller's viewer role."""
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
+        )
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        audit = self.get_object()
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        role = (
+            "respondent"
+            if respondent_folders and audit.folder_id in respondent_folders
+            else "auditor"
+        )
+
+        framework = audit.framework
+        # Object-level permission is not enough: a respondent sees only their
+        # assigned requirements, and CEL-hidden ones do not apply at all.
+        assessments, hidden_urns = scoped_requirement_assessments(audit, request.user)
+        nodes = RequirementNode.objects.filter(framework=framework)
+        if hidden_urns:
+            nodes = nodes.exclude(urn__in=hidden_urns)
+        tree = get_sorted_requirement_nodes(
+            list(nodes),
+            assessments,
+            audit.max_score if audit.max_score is not None else framework.max_score,
+            audit.min_score if audit.min_score is not None else framework.min_score,
+        )
+        # Don't reassign: empty top-level sections must survive for the charts.
+        filter_graph_by_implementation_groups(
+            tree, audit.selected_implementation_groups
+        )
+        annotate_tree_with_aggregated_scores(tree, audit)
+
+        profile = request.query_params.get("profile", "full")
+        if profile not in REPORT_PROFILES:
+            return Response(
+                {"error": "unknownProfile"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        lang = request.user.preferences.get("lang") or "en"
+        wants_charts = "charts" in REPORT_PROFILES[profile]["sections"]
+        context = gen_audit_context(
+            pk, tree, lang, assessments=assessments, charts=wants_charts
+        )
+        payload, images = audit_context_for_typst(
+            context, audit, role, lang, profile, assessments=assessments
+        )
+
+        response = HttpResponse(
+            render_pdf(
+                localized_template(REPORT_PROFILES[profile]["template"], lang),
+                payload,
+                images=images,
+            ),
+            content_type="application/pdf",
+        )
+        safe_name = slugify(audit.name) or "audit"
+        response["Content-Disposition"] = (
+            f'attachment; filename="{safe_name}_{profile}.pdf"'
+        )
         return response
 
     @action(detail=True, name="Get action plan CSV")
@@ -12307,33 +12385,34 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "deprecated": "#ff8811",
                 "--": "#e5e7eb",
             }
-            status = AppliedControl.Status.choices
-            compliance_assessment_object: ComplianceAssessment = self.get_object()
-            requirement_assessments_objects = (
-                compliance_assessment_object.get_requirement_assessments(
-                    include_non_assessable=True
-                )
-            )
-            applied_controls = (
-                AppliedControl.objects.filter(
-                    requirement_assessments__in=requirement_assessments_objects
-                )
+            audit: ComplianceAssessment = self.get_object()
+            assessments, _hidden = scoped_requirement_assessments(audit, request.user)
+            applied_controls = list(
+                AppliedControl.objects.filter(requirement_assessments__in=assessments)
                 .distinct()
+                .prefetch_related(
+                    "requirement_assessments__requirement", actor_prefetch("owner")
+                )
                 .order_by("eta")
             )
-            for applied_control in applied_controls:
-                context[applied_control.status].append(
-                    applied_control
-                ) if applied_control.status else context["--"].append(applied_control)
-            data = {
-                "status_text": status,
-                "color_map": color_map,
-                "context": context,
-                "compliance_assessment": compliance_assessment_object,
+            linked = {
+                control.id: [
+                    str(ra.requirement.display_short)
+                    for ra in control.requirement_assessments.all()
+                    if ra.compliance_assessment_id == audit.id
+                ]
+                for control in applied_controls
             }
-            html = render_to_string("core/action_plan_pdf.html", data)
-            pdf_file = HTML(string=html).write_pdf()
-            response = HttpResponse(pdf_file, content_type="application/pdf")
+            lang = request.user.preferences.get("lang") or "en"
+            payload = action_plan_context(audit, applied_controls, lang, linked)
+            response = HttpResponse(
+                render_pdf(localized_template("action_plan", lang), payload),
+                content_type="application/pdf",
+            )
+            safe_name = slugify(audit.name) or "audit"
+            response["Content-Disposition"] = (
+                f'attachment; filename="{safe_name}_action_plan.pdf"'
+            )
             return response
         else:
             return Response({"error": "Permission denied"})
@@ -16206,7 +16285,12 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
             .select_related("folder")
-            .prefetch_related("applied_controls", "evidences")
+            .prefetch_related(
+                "applied_controls",
+                "evidences",
+                actor_prefetch("owner"),
+                "filtering_labels",
+            )
             .order_by("ref_id")
         )
 
@@ -16325,59 +16409,15 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
             .select_related("folder")
-            .prefetch_related("applied_controls", "evidences")
+            .prefetch_related("applied_controls", "evidences", actor_prefetch("owner"))
             .order_by("ref_id")
         )
-        metrics = findings_assessment.get_findings_metrics()
-
-        # Calculate closed and open findings counts
-        closed_statuses = [
-            Finding.Status.DISMISSED,
-            Finding.Status.MITIGATED,
-            Finding.Status.RESOLVED,
-            Finding.Status.CLOSED,
-            Finding.Status.DEPRECATED,
-        ]
-        open_statuses = [
-            Finding.Status.UNDEFINED,
-            Finding.Status.IDENTIFIED,
-            Finding.Status.CONFIRMED,
-            Finding.Status.ASSIGNED,
-            Finding.Status.IN_PROGRESS,
-        ]
-
-        closed_findings_count = findings.filter(status__in=closed_statuses).count()
-        open_findings_count = findings.filter(status__in=open_statuses).count()
-
-        # Process status distribution with display names
-        status_choices = dict(Finding.Status.choices)
-        processed_status_distribution = []
-        for status, count in metrics["status_distribution"].items():
-            if count > 0:
-                display_name = status_choices.get(
-                    status, status.replace("_", " ").title()
-                )
-                processed_status_distribution.append(
-                    {"status": status, "display_name": display_name, "count": count}
-                )
-
-        context = {
-            "findings_assessment": findings_assessment,
-            "findings": findings,
-            "metrics": metrics,
-            "total_findings": metrics["total_count"],
-            "closed_findings_count": closed_findings_count,
-            "open_findings_count": open_findings_count,
-            "unresolved_important": metrics["unresolved_important_count"],
-            "severity_distribution": metrics["severity_distribution"],
-            "status_distribution": metrics["status_distribution"],
-            "processed_status_distribution": processed_status_distribution,
-            "finding_status_choices": dict(Finding.Status.choices),
-        }
-
-        html = render_to_string("core/findings_assessment_pdf.html", context)
-        pdf_file = HTML(string=html).write_pdf()
-        response = HttpResponse(pdf_file, content_type="application/pdf")
+        lang = request.user.preferences.get("lang") or "en"
+        payload = findings_assessment_context(findings_assessment, findings, lang)
+        response = HttpResponse(
+            render_pdf(localized_template("findings_report", lang), payload),
+            content_type="application/pdf",
+        )
         safe_name = slugify(findings_assessment.name) or "findings_assessment"
         response["Content-Disposition"] = (
             f'attachment; filename="{safe_name}_findings.pdf"'
@@ -16823,7 +16863,11 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         incident = (
             Incident.objects.select_related("folder")
             .prefetch_related(
-                "owners", "entities", "assets", "threats", "qualifications"
+                actor_prefetch("owners"),
+                "entities",
+                "assets",
+                "threats",
+                "qualifications",
             )
             .get(id=pk)
         )
@@ -16835,24 +16879,12 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             .order_by("timestamp")
         )
 
-        # Count timeline entry types
-        detection_count = timeline_entries.filter(
-            entry_type=TimelineEntry.EntryType.DETECTION
-        ).count()
-        mitigation_count = timeline_entries.filter(
-            entry_type=TimelineEntry.EntryType.MITIGATION
-        ).count()
-
-        context = {
-            "incident": incident,
-            "timeline_entries": timeline_entries,
-            "detection_count": detection_count,
-            "mitigation_count": mitigation_count,
-        }
-
-        html = render_to_string("core/incident_pdf.html", context)
-        pdf_file = HTML(string=html).write_pdf()
-        response = HttpResponse(pdf_file, content_type="application/pdf")
+        lang = request.user.preferences.get("lang") or "en"
+        payload = incident_context(incident, timeline_entries, lang)
+        response = HttpResponse(
+            render_pdf(localized_template("incident_report", lang), payload),
+            content_type="application/pdf",
+        )
         safe_name = slugify(incident.name) or "incident"
         response["Content-Disposition"] = (
             f'attachment; filename="{safe_name}_report.pdf"'
