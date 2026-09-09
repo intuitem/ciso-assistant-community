@@ -386,6 +386,23 @@ export const RISK_STAGE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+// Recomputed from the current date on every load, so the option list never goes stale.
+function buildYearOptions(lookbackYears = 6): Option[] {
+	const currentYear = new Date().getFullYear();
+	return Array.from({ length: lookbackYears }, (_, i) => {
+		const year = String(currentYear - i);
+		return { label: year, value: year };
+	});
+}
+
+export const EVIDENCE_REVISION_YEAR_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'year',
+		options: buildYearOptions()
+	}
+};
+
 export const COMPLIANCE_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2160,7 +2177,7 @@ export const listViewFields = {
 		head: ['version', 'evidence', 'file', 'size', 'updatedAt'],
 		body: ['version', 'evidence', 'attachment', 'size', 'updated_at'],
 		filters: {
-			filtering_labels: LABELS_FILTER
+			year: EVIDENCE_REVISION_YEAR_FILTER
 		}
 	},
 	'document-revisions': {

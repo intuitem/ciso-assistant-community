@@ -10572,13 +10572,24 @@ class EvidenceViewSet(BaseModelViewSet):
         return candidate
 
 
+class EvidenceRevisionFilterSet(GenericFilterSet):
+    # Revisions have no labels of their own (only the parent Evidence does), so
+    # this offers a year filter instead of the mismatched labels filter the
+    # frontend used to send here.
+    year = df.NumberFilter(field_name="created_at", lookup_expr="year")
+
+    class Meta:
+        model = EvidenceRevision
+        fields = ["evidence", "year"]
+
+
 class EvidenceRevisionViewSet(BaseModelViewSet):
     """
     API endpoint that allows evidence revisions to be viewed or edited.
     """
 
     model = EvidenceRevision
-    filterset_fields = ["evidence"]
+    filterset_class = EvidenceRevisionFilterSet
     ordering = ["-version"]
 
     def get_queryset(self):
