@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Any, List, Literal, Optional, Iterable, ClassVar
+from typing import Any, List, Literal, Optional, Iterable, ClassVar, Final
 from typing import TYPE_CHECKING, cast
 import itertools
 import secrets
@@ -104,6 +104,9 @@ def _get_root_folder() -> Optional[Folder]:
         return None
 
 
+_ENCLAVE_FOLDER_CONTENT_TYPE_STRING: Final[str] = "EN"
+
+
 class Folder(NameDescriptionMixin):
     """A folder is a container for other folders or any object
     Folders are organized in a tree structure, with a single root folder
@@ -183,7 +186,7 @@ class Folder(NameDescriptionMixin):
 
         ROOT = "GL", _("GLOBAL")
         DOMAIN = "DO", _("DOMAIN")
-        ENCLAVE = "EN", _("ENCLAVE")
+        ENCLAVE = _ENCLAVE_FOLDER_CONTENT_TYPE_STRING, _("ENCLAVE")
         PERSONAL = "PE", _("PERSONAL")
 
     content_type = models.CharField(
@@ -232,6 +235,16 @@ class Folder(NameDescriptionMixin):
 
         verbose_name = _("Folder")
         verbose_name_plural = _("Folders")
+
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    ~Q(content_type=_ENCLAVE_FOLDER_CONTENT_TYPE_STRING)
+                    | Q(default_role__isnull=True)
+                ),
+                name="enclave_default_role_must_be_null",
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.name.__str__()

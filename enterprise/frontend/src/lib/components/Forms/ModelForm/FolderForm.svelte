@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import { get } from 'svelte/store';
 	import * as m from '$paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
@@ -27,6 +28,8 @@
 		object = {},
 		model
 	}: Props = $props();
+
+	let displayDefaultRoleSelect = $derived(object.content_type !== "EN"); // We want to hide the `"default_role"`field `Select` for enclave folders.
 
 	onMount(() => {
 		const isEdit = Boolean(object?.id);
@@ -69,16 +72,18 @@
 		bind:cachedValue={formDataCache['parent_folder']}
 		label={m.parentDomain()}
 	/>
-	<AutocompleteSelect
-		{form}
-		translateOptions={false}
-		optionsEndpoint="roles"
-		field="default_role"
-		cacheLock={cacheLocks['default_role']}
-		bind:cachedValue={formDataCache['default_role']}
-		label={m.defaultRole()}
-		helpText={m.defaultRoleHelpText()}
-	/>
+	{#if displayDefaultRoleSelect}
+		<AutocompleteSelect
+			{form}
+			translateOptions={false}
+			optionsEndpoint="roles"
+			field="default_role"
+			cacheLock={cacheLocks['default_role']}
+			bind:cachedValue={formDataCache['default_role']}
+			label={m.defaultRole()}
+			helpText={m.defaultRoleHelpText()}
+		/>
+	{/if}
 	<AutocompleteSelect
 		multiple
 		{form}

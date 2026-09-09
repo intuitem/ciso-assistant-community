@@ -2591,9 +2591,8 @@ class RoleWriteSerializer(BaseModelSerializer):
         if (
             self.instance is not None
             and self.instance.default_role_folders.exists()
-            and any(
-                not permission.codename.startswith("view_")
-                for permission in permissions
+            and not all(
+                permission.codename.startswith("view_") for permission in permissions
             )
         ):
             raise serializers.ValidationError("roleUsedAsDefaultRoleMustStayViewOnly")

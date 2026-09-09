@@ -35,10 +35,13 @@ class FolderWriteSerializer(CommunityFolderWriteSerializer):
         # community serializer excludes it (fixed catalog default at the root).
         # The eligibility and enclave validators are inherited from the
         # community class and bind here, where the field is writable.
+        read_only_fields = ["content_type"]
         exclude = [
-            "builtin",
-            "content_type",
-            "descendants",
+            field_to_exclude
+            for field_to_exclude in CommunityFolderWriteSerializer.Meta.exclude
+            # The enterprise FolderWriteSerializer needs the "default_role" as it's configurable in the enterprise edition.
+            # (contrary to the community edition).
+            if field_to_exclude not in ["default_role", "content_type"]
         ]
 
     def validate_parent_folder(self, parent_folder):

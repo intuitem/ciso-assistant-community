@@ -22,4 +22,15 @@ class Migration(migrations.Migration):
                 to="iam.role",
             ),
         ),
+        migrations.AddConstraint(
+            model_name="folder",
+            constraint=models.CheckConstraint(
+                condition=models.Q(
+                    models.Q(("content_type", "EN"), _negated=True),
+                    ("default_role__isnull", True),
+                    _connector="OR",
+                ),
+                name="enclave_default_role_must_be_null",
+            ),
+        ),
     ]
