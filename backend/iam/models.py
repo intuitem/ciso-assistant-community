@@ -1270,7 +1270,10 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def is_admin(self) -> bool:
         from global_settings.utils import idp_group_role_inheritance_enabled
 
-        if self.user_groups.filter(name="BI-UG-ADM").exists():
+        # UserGroup.objects, not self.user_groups: the related manager inherits
+        # the viewset's visibility-filtered prefetch, which would hide exactly
+        # the membership this answer is about.
+        if UserGroup.objects.filter(user=self, name="BI-UG-ADM").exists():
             return True
         return (
             idp_group_role_inheritance_enabled()
