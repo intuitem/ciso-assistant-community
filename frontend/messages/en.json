@@ -458,6 +458,7 @@
 	"closingDateHelpText": "Actual date the objective was closed or completed",
 	"endDate": "End Date",
 	"attachment": "Attachment",
+	"attachmentHash": "Attachment hash",
 	"observation": "Observation",
 	"observationHelpText": "Additional notes and comments in markdown format",
 	"noObservation": "No observation",
