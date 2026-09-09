@@ -1716,74 +1716,72 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return accessible_folder_ids.union(root_queryset)
 
     @staticmethod
-    def _get_default_role_source_folder_ids(
+    def _get_default_role_folder_ids(
         principal: AbstractBaseUser | AnonymousUser | UserGroup,
     ) -> QuerySet[uuid.UUID]:
         """
-        Return the folder IDs from which the `principal` contributes to default-role audiences.
+        Return the folder IDs of the folder whose (non-NULL) `default_role` is granted to its audience.
 
         The audience of a folder's `default_role` is structural: the members of the standard
         (builtin) IAM groups of its strict descendants, enclave positions excluded. The usual
         exclusions therefore need no identity rules — service accounts hold direct role
         assignments and no group membership, so they never have source folders, and third
-        parties belong only to enclave groups, which are excluded positionally. The extra
-        `is_third_party` check below is defense-in-depth protecting that placement convention
-        against data that escaped it.
+        parties belong only to enclave groups, which are excluded positionally.
         """
+
+        if isinstance(principal, User) and principal.is_third_party:
+            # (Defense-in-depth protection) third-parties shouldn't be granted any `folder.default_role`.
+            # (as they should only have rights on `ENCLAVE` fodlers).
+            return []
+
         if isinstance(principal, UserGroup):
-            group_queryset = UserGroup.objects.filter(id=principal.id)
-        elif isinstance(principal, User):
-            user = principal
-            if user.is_third_party or not user.is_active:
-                return Folder.objects.none().values_list("id", flat=True)
-
-            from global_settings.utils import idp_group_role_inheritance_enabled
-
-            membership_query = Q(user=user)
-            if idp_group_role_inheritance_enabled():
-                membership_query |= Q(idp_groups__users=user)
-
-            group_queryset = UserGroup.objects.filter(membership_query)
+            role_assignments = RoleAssignment.objects.filter(user_group=principal)
         else:
-            return Folder.objects.none().values_list("id", flat=True)
+            role_assignments = RoleAssignment.get_role_assignments_from_user(principal)
 
-        # `.order_by()` clears the model's default ordering: these querysets are used
-        # in subqueries and unions, where SQLite rejects ORDER BY clauses.
-        return (
-            group_queryset.filter(builtin=True)
-            .exclude(folder__content_type=Folder.ContentType.ENCLAVE)
-            .exclude(folder__ancestors__content_type=Folder.ContentType.ENCLAVE)
-            .values_list("folder_id", flat=True)
-            .distinct()
-            .order_by()
+        directly_accessible_folder_ids = role_assignments.values_list(
+            "perimeter_folders__id", flat=True
+        ).distinct()
+
+        non_enclaved_directly_accessible_folder_ids = (
+            Folder.objects.filter(
+                id__in=directly_accessible_folder_ids,
+            )
+            .exclude(
+                content_type=Folder.ContentType.ENCLAVE,
+            )
+            .exclude(
+                ancestors__content_type=Folder.ContentType.ENCLAVE,
+            )
         )
+
+        default_role_folders = Folder.objects.filter(
+            descendants__in=Folder.objects.filter(
+                id__in=non_enclaved_directly_accessible_folder_ids
+            ),
+            default_role__isnull=False,
+        )
+
+        default_role_folder_ids = (
+            default_role_folders.values_list("id", flat=True).distinct().order_by()
+        )
+        return default_role_folder_ids
 
     @staticmethod
     def _get_default_role_allowed_folder_ids(
-        source_folder_ids: Iterable[uuid.UUID], permission: Permission
-    ) -> QuerySet[uuid.UUID]:
-        """
-        Return all folder IDs on which the `permission` is granted via the `Folder.default_role`
-        mechanism, for a principal whose audience source set is `source_folder_ids`
-        (see `_get_default_role_source_folder_ids`).
-        """
+        principal: AbstractBaseUser | AnonymousUser | UserGroup, permission: Permission
+    ) -> list[uuid.UUID]:
+        """Return the folder IDs on which the `permission` is granted via the `Folder.default_role` mechanism."""
 
-        # `source_folder_ids` comes positionally clean from `_get_default_role_source_folder_ids`;
-        # the enclave exclusion is kept here as a backstop for direct callers.
-        non_enclave_source_folder_ids = Folder.objects.filter(
-            id__in=source_folder_ids
-        ).exclude(content_type=Folder.ContentType.ENCLAVE)
+        default_role_folder_ids = RoleAssignment._get_default_role_folder_ids(principal)
 
-        default_role_folder_queryset = Folder.objects.filter(
-            descendants__in=non_enclave_source_folder_ids
-        ).distinct()
-        # `.order_by()` clears default ordering for use in subqueries and unions (SQLite).
-        default_role_allowed_folder_ids = (
-            default_role_folder_queryset.filter(default_role__permissions=permission)
+        default_role_allowed_folder_ids = list(
+            Folder.objects.filter(
+                id__in=default_role_folder_ids, default_role__permissions=permission
+            )
             .values_list("id", flat=True)
             .order_by()
         )
-
         return default_role_allowed_folder_ids
 
     @staticmethod
@@ -1808,25 +1806,24 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             "perimeter_folders__id", flat=True
         ).distinct()
 
-        default_role_source_folder_ids = (
-            RoleAssignment._get_default_role_source_folder_ids(user)
-        )
         default_role_allowed_folder_ids = (
-            RoleAssignment._get_default_role_allowed_folder_ids(
-                default_role_source_folder_ids, permission
-            )
+            RoleAssignment._get_default_role_allowed_folder_ids(user, permission)
         )
+        # Convert the materized `default_role_allowed_folder_ids` folder ID list to a queryset to avoid "parser stack overflow" SQL errors.
+        default_role_allowed_folder_ids_qs = Folder.objects.filter(
+            id__in=default_role_allowed_folder_ids
+        ).values_list("id", flat=True)
 
         # order_by() drops the default ordering Django 6.1 applies to unions.
         all_directly_accessible_folder_ids = directly_accessible_folder_ids.union(
-            default_role_allowed_folder_ids
+            default_role_allowed_folder_ids_qs
         ).order_by()
 
         direct_flat_folder_ids = flat_role_assignments.values_list(
             "perimeter_folders__id", flat=True
         ).distinct()
         all_direct_flat_folder_ids = direct_flat_folder_ids.union(
-            default_role_allowed_folder_ids
+            default_role_allowed_folder_ids_qs
         ).order_by()
 
         direct_recursive_folder_ids = recursive_role_assignments.values_list(
@@ -2178,12 +2175,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if permission_role_assignments.exists():
             return True
 
-        default_role_source_folder_ids = (
-            RoleAssignment._get_default_role_source_folder_ids(principal)
+        default_role_allowed_folder_ids = (
+            RoleAssignment._get_default_role_allowed_folder_ids(principal, permission)
         )
-        return RoleAssignment._get_default_role_allowed_folder_ids(
-            default_role_source_folder_ids, permission
-        ).exists()
+        return len(default_role_allowed_folder_ids) > 0
 
     @staticmethod
     def get_permissions(
@@ -2211,16 +2206,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         else:
             return {}
 
-        default_role_source_folder_ids = (
-            RoleAssignment._get_default_role_source_folder_ids(principal)
+        default_role_source_folder_ids = RoleAssignment._get_default_role_folder_ids(
+            principal
         )
         default_role_perm_name_pairs = (
-            Folder.objects.filter(
-                descendants__in=Folder.objects.filter(
-                    id__in=default_role_source_folder_ids
-                ),
-                default_role__isnull=False,
-            )
+            Folder.objects.filter(id__in=default_role_source_folder_ids)
             .values_list(
                 "default_role__permissions__codename",
                 "default_role__permissions__name",
@@ -2286,19 +2276,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 for folder in folders:
                     folder_id_to_codenames[str(folder.id)].update(codenames)
 
-        default_role_source_folder_ids = (
-            RoleAssignment._get_default_role_source_folder_ids(principal)
+        default_role_source_folder_ids = RoleAssignment._get_default_role_folder_ids(
+            principal
         )
-        default_role_folder_queryset = (
-            Folder.objects.filter(
-                descendants__in=Folder.objects.filter(
-                    id__in=default_role_source_folder_ids
-                ),
-                default_role__isnull=False,
-            )
-            .distinct()
-            .values_list("id", "default_role__permissions__codename")
-        )
+        default_role_folder_queryset = Folder.objects.filter(
+            id__in=default_role_source_folder_ids
+        ).values_list("id", "default_role__permissions__codename")
 
         for folder_id, codename in default_role_folder_queryset:
             if codename is not None:
