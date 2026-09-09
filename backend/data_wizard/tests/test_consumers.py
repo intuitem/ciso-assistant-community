@@ -19,6 +19,7 @@ from core.models import (
     AppliedControl,
     Asset,
     Evidence,
+    Finding,
     FindingsAssessment,
     Incident,
     Perimeter,
@@ -1247,6 +1248,171 @@ class TestFindingsAssessmentConsumer:
         assert result.failed == 1
         assert result.created == 0
         assert fa.findings.count() == 0
+
+    def test_applied_controls_resolved_by_ref_id_and_name(
+        self, domain_folder, admin_user
+    ):
+        ac1 = AppliedControl.objects.create(
+            name="Patch A", ref_id="AC-P1", folder=domain_folder
+        )
+        ac2 = AppliedControl.objects.create(name="Patch B", folder=domain_folder)
+        ctx = self._findings_context(domain_folder, admin_user)
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            ctx,
+            [
+                {
+                    "name": "SQL Injection",
+                    "ref_id": "FIND-AC",
+                    "applied_controls": "AC-P1|Patch B",
+                }
+            ],
+        )
+        assert result.created == 1
+        finding = Finding.objects.get(ref_id="FIND-AC")
+        assert set(finding.applied_controls.all()) == {ac1, ac2}
+
+    def test_skip_duplicate_does_not_create_orphaned_applied_control(
+        self, domain_folder, admin_user, all_accessible
+    ):
+        """A row that SKIP discards because its Finding already exists must
+        never create a new applied control for it — the control would be
+        created but never linked to anything."""
+        perimeter = Perimeter.objects.create(
+            name="Skip Dup Perimeter", folder=domain_folder
+        )
+        seed_ctx = self._findings_context(
+            domain_folder, admin_user, perimeter=perimeter
+        )
+        _run(
+            FindingsAssessmentRecordConsumer,
+            seed_ctx,
+            [{"name": "SQL Injection", "ref_id": "FIND-SKIP", "status": "identified"}],
+        )
+        fa = FindingsAssessment.objects.get(folder=domain_folder)
+
+        skip_ctx = self._findings_context(
+            domain_folder,
+            admin_user,
+            target_id=fa.id,
+            on_conflict=ConflictMode.SKIP,
+        )
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            skip_ctx,
+            [
+                {
+                    "name": "SQL Injection",
+                    "ref_id": "FIND-SKIP",
+                    "applied_controls": "Brand New Control",
+                }
+            ],
+        )
+        assert result.skipped == 1
+        assert result.created == 0
+        assert not AppliedControl.objects.filter(name="Brand New Control").exists()
+
+    def test_stop_duplicate_does_not_create_orphaned_applied_control(
+        self, domain_folder, admin_user, all_accessible
+    ):
+        """Same as above, but for STOP mode: the halted row must not leave an
+        unlinked applied control behind either."""
+        perimeter = Perimeter.objects.create(
+            name="Stop Dup Perimeter", folder=domain_folder
+        )
+        seed_ctx = self._findings_context(
+            domain_folder, admin_user, perimeter=perimeter
+        )
+        _run(
+            FindingsAssessmentRecordConsumer,
+            seed_ctx,
+            [{"name": "SQL Injection", "ref_id": "FIND-STOP", "status": "identified"}],
+        )
+        fa = FindingsAssessment.objects.get(folder=domain_folder)
+
+        stop_ctx = self._findings_context(
+            domain_folder,
+            admin_user,
+            target_id=fa.id,
+            on_conflict=ConflictMode.STOP,
+        )
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            stop_ctx,
+            [
+                {
+                    "name": "SQL Injection",
+                    "ref_id": "FIND-STOP",
+                    "applied_controls": "Another New Control",
+                }
+            ],
+        )
+        assert result.stopped is True
+        assert result.created == 0
+        assert not AppliedControl.objects.filter(name="Another New Control").exists()
+
+    def test_owner_resolved_by_user_email(self, domain_folder, admin_user):
+        actor, _ = Actor.objects.get_or_create(user=admin_user)
+        ctx = self._findings_context(domain_folder, admin_user)
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            ctx,
+            [
+                {
+                    "name": "SQL Injection",
+                    "ref_id": "FIND-OWN",
+                    "owner": admin_user.email,
+                }
+            ],
+        )
+        assert result.created == 1
+        finding = Finding.objects.get(ref_id="FIND-OWN")
+        assert list(finding.owner.all()) == [actor]
+
+    def test_empty_owner_column_clears_existing_owners(self, domain_folder, admin_user):
+        actor, _ = Actor.objects.get_or_create(user=admin_user)
+        perimeter = Perimeter.objects.create(
+            name="Owner Clear Perimeter", folder=domain_folder
+        )
+        seed_ctx = self._findings_context(
+            domain_folder, admin_user, perimeter=perimeter
+        )
+        _run(
+            FindingsAssessmentRecordConsumer,
+            seed_ctx,
+            [
+                {
+                    "name": "Initial",
+                    "ref_id": "FIND-CLR",
+                    "owner": admin_user.email,
+                    "status": "identified",
+                }
+            ],
+        )
+        finding = Finding.objects.get(ref_id="FIND-CLR")
+        assert list(finding.owner.all()) == [actor]
+
+        fa = FindingsAssessment.objects.get(folder=domain_folder)
+        update_ctx = self._findings_context(
+            domain_folder,
+            admin_user,
+            target_id=fa.id,
+            on_conflict=ConflictMode.UPDATE,
+        )
+        _run(
+            FindingsAssessmentRecordConsumer,
+            update_ctx,
+            [
+                {
+                    "name": "Initial",
+                    "ref_id": "FIND-CLR",
+                    "owner": "",
+                    "status": "identified",
+                }
+            ],
+        )
+        finding.refresh_from_db()
+        assert finding.owner.count() == 0
 
 
 # ─────────────────────────────────────────────────────────────────────────────
