@@ -76,7 +76,7 @@
 		<AutocompleteSelect
 			{form}
 			translateOptions={false}
-			optionsEndpoint="roles"
+			optionsEndpoint="roles?read_only=true"
 			field="default_role"
 			cacheLock={cacheLocks['default_role']}
 			bind:cachedValue={formDataCache['default_role']}

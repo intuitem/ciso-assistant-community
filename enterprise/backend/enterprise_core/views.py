@@ -4,7 +4,7 @@ from django.utils.formats import date_format
 import magic
 import structlog
 from django.db import models, transaction
-from django.db.models import CharField, Value, Case, When
+from django.db.models import CharField, Value, Case, When, Q
 from django.db.models.functions import Lower, Cast
 import django_filters as df
 from django.contrib.auth.models import Permission
@@ -281,6 +281,24 @@ class LicenseStatusView(APIView):
             return Response({"status": "expired", "days_expired": days_expired})
 
 
+class RoleFilterSet(GenericFilterSet):
+    read_only = df.BooleanFilter(method="filter_read_only")
+
+    class Meta:
+        model = Role
+        fields = ["builtin"]
+
+    def filter_read_only(self, queryset, name, value):
+        """
+        A role is read-only when none of its permissions is a non-view
+        permission. A role with no permissions at all counts as read-only.
+        """
+        has_write_permission = Q(permissions__codename__regex=r"^(?!view_)")
+        if value:
+            return queryset.exclude(has_write_permission)
+        return queryset.filter(has_write_permission).distinct()
+
+
 class RoleViewSet(BaseModelViewSet):
     """
     API endpoint that allows roles to be viewed or edited
@@ -288,6 +306,7 @@ class RoleViewSet(BaseModelViewSet):
 
     model = Role
     ordering_fields = ["name"]
+    filterset_class = RoleFilterSet
     filter_backends = [
         DjangoFilterBackend,
         RoleFilter,
