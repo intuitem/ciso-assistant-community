@@ -22,6 +22,9 @@ logger = structlog.get_logger(__name__)
 
 SLO_SESSION_KEY = "sso_slo_state"
 SLO_OWNER_SESSION_KEY = "sso_slo_owner"
+# The callback session only has to survive until the frontend hands its state
+# over to the allauth session, so it must not linger for SESSION_COOKIE_AGE.
+CALLBACK_SESSION_TTL = 600
 
 
 def _get_session_store(session_key: str):
@@ -80,6 +83,7 @@ def stash_oidc_slo_state(request: HttpRequest, id_token: str | None) -> None:
         "provider": "openid_connect",
         "id_token": id_token,
     }
+    request.session.set_expiry(CALLBACK_SESSION_TTL)
     logger.info("Stashed OIDC single logout state in session")
 
 
@@ -97,6 +101,7 @@ def stash_saml_slo_state(request: HttpRequest, auth, user) -> None:
         "name_id_nq": auth.get_nameid_nq(),
         "name_id_spnq": auth.get_nameid_spnq(),
     }
+    request.session.set_expiry(CALLBACK_SESSION_TTL)
     logger.info("Stashed SAML single logout state in session")
 
 

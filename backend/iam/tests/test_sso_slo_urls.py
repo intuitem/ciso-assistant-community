@@ -11,11 +11,13 @@ from rest_framework.test import APIClient
 from global_settings.models import GlobalSettings
 from iam.models import User
 from iam.sso.slo import (
+    CALLBACK_SESSION_TTL,
     SLO_OWNER_SESSION_KEY,
     SLO_SESSION_KEY,
     _build_public_saml_config,
     build_idp_logout_url,
     copy_slo_state_from_session_key,
+    stash_saml_slo_state,
 )
 
 PUBLIC_URL = "https://app.example.com"
@@ -274,3 +276,23 @@ def test_handoff_refuses_a_callback_session_owned_by_someone_else(sso_user):
     copy_slo_state_from_session_key(request, victim_key)
 
     assert SLO_SESSION_KEY not in request.session
+
+
+@pytest.mark.django_db
+@test_settings
+def test_saml_stash_stamps_the_owner_and_bounds_the_session_lifetime(sso_user):
+    """The callback session only carries state to the handoff, so it must not
+    live for SESSION_COOKIE_AGE."""
+    request = _handoff_request(sso_user)
+    auth = SimpleNamespace(
+        get_nameid=lambda: "user@example.com",
+        get_session_index=lambda: "_session_index",
+        get_nameid_format=lambda: None,
+        get_nameid_nq=lambda: None,
+        get_nameid_spnq=lambda: None,
+    )
+
+    stash_saml_slo_state(request, auth, sso_user)
+
+    assert request.session[SLO_OWNER_SESSION_KEY] == str(sso_user.pk)
+    assert 0 < request.session.get_expiry_age() <= CALLBACK_SESSION_TTL
