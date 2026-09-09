@@ -305,7 +305,7 @@ class TestFolderDescendants:
 @pytest.mark.django_db
 class TestFolderDefaultRole:
     """
-    When a `Folder` `F` has a non-NULL `F.default_role`, then if a user has a `RoleAssignment` assigned to a descendant folder of `F`.
+    When a `Folder` `F` has a non-NULL `F.default_role`, then if a user holds a standard-group grant on `F` or a descendant folder of `F`.
     He will be granted the permissions of the `F.default_role` `Role` on the `F` folder, example:
 
     - If the `A.default_role` is set to `Role(permissions=["view_appliedcontrol"])`.
@@ -552,46 +552,34 @@ class TestFolderDefaultRole:
     ):
         """Test that _get_default_role_allowed_folder_ids correctly identifies folders accessible via default_role."""
         assert not RoleAssignment._get_default_role_allowed_folder_ids(
-            [ctx.parent_folder.id], ctx.user_role_permission
-        ).exists(), (
-            "The user role not permission SHALL NOT be granted by the folder.default_role"
-        )
-        assert not RoleAssignment._get_default_role_allowed_folder_ids(
-            [ctx.folder.id], ctx.user_role_permission
-        ).exists(), (
-            "The user role not permission SHALL NOT be granted by the folder.default_role"
-        )
+            ctx.user, ctx.user_role_permission
+        ), "A permission absent from the default_role SHALL NOT be granted by it."
 
-        assert list(
-            RoleAssignment._get_default_role_allowed_folder_ids(
-                [ctx.folder.id], ctx.default_role_permission
-            )
+        assert RoleAssignment._get_default_role_allowed_folder_ids(
+            ctx.user, ctx.default_role_permission
         ) == [ctx.parent_folder.id], (
-            "The user default role permissions SHALL be granted by the folder.default_role"
-        )
-
-        assert not RoleAssignment._get_default_role_allowed_folder_ids(
-            [ctx.parent_folder.id], ctx.default_role_permission
-        ).exists(), (
-            "The folder.default_role SHALL only grant the default role for RoleAssignments not descendant folders (not on itself)."
+            "The default_role permissions SHALL be granted on the ancestor folder carrying it."
         )
 
         ctx.parent_folder.default_role = None
         ctx.parent_folder.save()
 
         assert not RoleAssignment._get_default_role_allowed_folder_ids(
-            [ctx.folder.id], ctx.default_role_permission
-        ).exists(), (
+            ctx.user, ctx.default_role_permission
+        ), (
             "The default role permission SHALL NOT be granted if there's no folder.default_role"
         )
 
+        # Membership is inclusive: a default_role on the folder the user's own
+        # group grants applies to them too — working ON the domain is working
+        # IN the domain.
         ctx.folder.default_role = ctx.default_role
         ctx.folder.save()
 
-        assert not RoleAssignment._get_default_role_allowed_folder_ids(
-            [ctx.parent_folder.id], ctx.default_role_permission
-        ).exists(), (
-            "The default role permission SHALL NOT be granted to ancestor folders."
+        assert RoleAssignment._get_default_role_allowed_folder_ids(
+            ctx.user, ctx.default_role_permission
+        ) == [ctx.folder.id], (
+            "The folder.default_role SHALL also be granted to the holders of grants on the folder itself (inclusive membership)."
         )
 
     def test_group_member_gets_default_role_access(
@@ -611,9 +599,10 @@ class TestFolderDefaultRole:
     def test_direct_role_assignment_gives_no_default_role_access(
         self, ctx: TestFolderDefaultRole.UserInfo
     ):
-        """The audience is structural: a principal holding only a DIRECT role assignment
-        (the machine path — service accounts) has no group membership, hence no audience
-        source folders, and receives nothing from any default role."""
+        """The audience is structural: only grants carried by standard (builtin) groups
+        contribute. A principal holding only a DIRECT role assignment (the machine path —
+        service accounts, least-privilege by design) receives nothing from any default
+        role: it reads exactly what its own assignment names, nothing ambient."""
         direct_user = User.objects.create_user(
             f"test_default_role_direct_{id(self)}@gmail.com"
         )
@@ -625,9 +614,9 @@ class TestFolderDefaultRole:
             )
             role_assignment.perimeter_folders.add(ctx.folder)
 
-            assert not RoleAssignment._get_default_role_source_folder_ids(
-                direct_user
-            ).exists(), "A direct role assignment MUST NOT contribute audience sources."
+            assert not RoleAssignment._get_default_role_allowed_folder_ids(
+                direct_user, ctx.default_role_permission
+            ), "A direct role assignment MUST NOT join any default-role audience."
             assert not RoleAssignment.is_access_allowed(
                 direct_user, ctx.default_role_permission, ctx.parent_folder
             ), (
@@ -645,9 +634,9 @@ class TestFolderDefaultRole:
         ctx.user.is_third_party = True
         ctx.user.save()
 
-        assert not RoleAssignment._get_default_role_source_folder_ids(
-            ctx.user
-        ).exists(), "A third-party user MUST NOT contribute audience sources."
+        assert not RoleAssignment._get_default_role_allowed_folder_ids(
+            ctx.user, ctx.default_role_permission
+        ), "A third-party user MUST NOT join any default-role audience."
         assert not RoleAssignment.is_access_allowed(
             ctx.user, ctx.default_role_permission, ctx.parent_folder
         ), "A third-party user MUST NOT receive default_role permissions."
@@ -679,14 +668,26 @@ class TestFolderDefaultRole:
         user = User.objects.create_user(
             f"test_default_role_enclave_user_{id(self)}@gmail.com"
         )
+        enclave_role = Role.objects.create(
+            name=f"test_default_role_enclave_role_{id(self)}"
+        )
+        enclave_role.permissions.set([ctx.user_role_permission])
         try:
+            # Give both groups real grants: the positional exclusion must hold even
+            # for builtin-group-carried assignments whose perimeter is enclaved.
+            for group, perimeter in ((enclave_group, enclave), (sub_group, sub_folder)):
+                role_assignment = RoleAssignment.objects.create(
+                    user_group=group, role=enclave_role, is_recursive=True
+                )
+                role_assignment.perimeter_folders.add(perimeter)
+
             user.user_groups.add(enclave_group)
             user.user_groups.add(sub_group)
 
-            assert not RoleAssignment._get_default_role_source_folder_ids(
-                user
-            ).exists(), (
-                "Groups on an enclave, or beneath one, MUST NOT contribute audience sources."
+            assert not RoleAssignment._get_default_role_allowed_folder_ids(
+                user, ctx.default_role_permission
+            ), (
+                "Groups on an enclave, or beneath one, MUST NOT join any default-role audience."
             )
             assert not RoleAssignment.is_access_allowed(
                 user, ctx.default_role_permission, ctx.parent_folder
@@ -695,27 +696,43 @@ class TestFolderDefaultRole:
             )
         finally:
             user.delete()
+            enclave_role.delete()
 
     def test_non_builtin_group_membership_contributes_nothing(
         self, ctx: TestFolderDefaultRole.UserInfo
     ):
-        """Only standard (builtin) IAM groups define the audience."""
+        """Only grants carried by standard (builtin) IAM groups define the audience:
+        a grant through a custom group gives exactly what it names, nothing ambient."""
         custom_group = UserGroup.objects.create(
             name=f"test_default_role_custom_group_{id(self)}",
             folder=ctx.folder,
             builtin=False,
         )
+        custom_role = Role.objects.create(
+            name=f"test_default_role_custom_role_{id(self)}"
+        )
+        custom_role.permissions.set([ctx.user_role_permission])
         user = User.objects.create_user(
             f"test_default_role_custom_group_user_{id(self)}@gmail.com"
         )
         try:
+            role_assignment = RoleAssignment.objects.create(
+                user_group=custom_group, role=custom_role, is_recursive=True
+            )
+            role_assignment.perimeter_folders.add(ctx.folder)
             user.user_groups.add(custom_group)
 
-            assert not RoleAssignment._get_default_role_source_folder_ids(
-                user
-            ).exists(), "Non-builtin groups MUST NOT contribute audience sources."
+            assert not RoleAssignment._get_default_role_allowed_folder_ids(
+                user, ctx.default_role_permission
+            ), "Non-builtin group grants MUST NOT join any default-role audience."
+            assert not RoleAssignment.is_access_allowed(
+                user, ctx.default_role_permission, ctx.parent_folder
+            ), (
+                "A custom-group-granted principal MUST NOT receive default_role permissions."
+            )
         finally:
             user.delete()
+            custom_role.delete()
 
     def test_ce_folder_serializer_does_not_expose_default_role(self):
         """The default role is not configurable through this serializer: it must

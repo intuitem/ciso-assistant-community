@@ -1465,7 +1465,7 @@
 	"phone": "Phone",
 	"role": "Role",
 	"defaultRole": "Default role",
-	"defaultRoleHelpText": "Role automatically granted, on this domain only (non-recursive), to the members of the IAM groups of its sub-domains (third-party workspaces excluded). Only roles limited to view permissions can be used.",
+	"defaultRoleHelpText": "Role automatically granted, on this domain only (non-recursive), to the members of the IAM groups of this domain and its sub-domains (third-party workspaces excluded). Only roles limited to view permissions can be used.",
 	"questions": "Questions",
 	"recipientEntity": "Recipient entity",
 	"financial": "Financial",

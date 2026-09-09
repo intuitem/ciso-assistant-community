@@ -22,17 +22,20 @@ A `RoleAssignment` is a tuple *(principal, role, perimeter folders, is_recursive
 The product uses the kernel in one specific way, through two provisioning modes that are duals of each other:
 
 - **`Folder.create_iam_groups` — recursive mode, downward.** Per-folder generated groups with role assignments recursive over the subtree. Membership is explicit: users are placed in groups to get rights.
-- **`Folder.default_role` — non-recursive mode, upward.** A nullable FK to a `Role`. The folder grants that role, **non-recursively, on itself only**, to its *member audience*.
+- **`Folder.default_role` — non-recursive mode, upward.** A nullable FK to a `Role`. The folder grants that role, **non-recursively, on itself only**, to its *members*.
 
-**The member audience is defined structurally**, not by identity:
+**The definition, structural and identity-free:**
 
-> The users who are members of the standard (builtin, generated) IAM groups of the folder's strict descendants, where the path from the group's folder up to the audience folder crosses no enclave boundary.
+> **Every domain has members: the people its own and its sub-domains' IAM groups grant roles to.**
+> **The default role is what the domain grants its members — on the domain itself.**
 
-The exclusions everyone expects fall out of the structure rather than being special cases:
+The mechanics are the same idea seen from the grant's side: **a role granted through a standard IAM group also carries the default role of its perimeter domain and of every domain above it** — a third-party workspace boundary stops the climb. The ambient right travels with the grant, not with the person: for everything the product provisions a group's assignment covers its own folder, and if an administrator points an extra assignment of a group at another branch, its members pick up that branch's default roles with it — the reach moved, and the ambient right moved along.
 
-- **Service accounts** hold direct role assignments and are never group members → never in any audience.
-- **Third parties** are members of enclave groups only, and enclave positions are outside the source set → never in any audience.
-- **Direct human assignments are forbidden** (validator below), so group membership is the only rights path for humans — which is what makes the audience definition truthful.
+Every exclusion is a corollary of the definition, never a special case:
+
+- **Service accounts** hold direct role assignments — no group grants them anything, so nothing carries anything: an integration reads exactly what its own assignment names (least privilege by design).
+- **Third parties** hold their grants inside third-party workspaces, where the climb stops → never members of any domain.
+- **Direct or custom-group grants** give exactly what they name, nothing ambient. Direct human assignments are forbidden outright (validator below): group membership is the only rights path for humans, which is what keeps "members" the whole story.
 
 **Defense-in-depth:** the audience evaluator additionally excludes `is_third_party` users. This protects the convention against data that predates or escapes the validators; it is a layer-1 backstop, not a kernel rule.
 
@@ -71,7 +74,7 @@ Two tenant-immutable builtin roles, whose permission lists live in `core/startup
 ## Edition split
 
 - **Community edition — the default role is hard-coded.** The root folder carries `BI-RL-CAT`, re-pinned by `startup()` at every boot; the folder serializer does not expose the field; no other folder ever carries a default role; and the upgrade migration writes no per-folder posture. Consequence for upgraded CE tenants: domain-level ambient visibility that `is_published` used to provide disappears — only the root catalog remains ambient. The roles endpoint is read-only in CE (it serves the default-role display); custom-role management is not a CE feature.
-- **Enterprise edition — the default role is configurable.** The folder form exposes the control under the validators above; a fresh install starts with the root row only; the upgrade migration additionally sets `BI-RL-MIG` on every non-leaf folder holding at least one published object of a legacy-list model. Custom-role create/update/delete (with per-folder group provisioning and license-seat enforcement) stays enterprise-only: the enterprise build registers its own roles viewset over the community read-only one.
+- **Enterprise edition — the default role is configurable.** The folder form exposes the control under the validators above; a fresh install starts with the root row only; the upgrade migration additionally sets `BI-RL-MIG` on every folder holding at least one published object of a legacy-list model. The control is a dial: administrators may replace any folder's default role with a narrower view-only role, or clear it — clearing the root's yields a fully explicit-grant posture with no ambient visibility anywhere. Custom-role create/update/delete (with per-folder group provisioning and license-seat enforcement) stays enterprise-only: the enterprise build registers its own roles viewset over the community read-only one.
 
 ## Consequences
 

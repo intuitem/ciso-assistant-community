@@ -115,23 +115,20 @@ def fill_default_roles(apps, schema_editor):
         Permission.objects.filter(codename__in=READER_MIGRATION_PERMISSIONS_LIST)
     )
 
-    non_leaf_folder_ids = set(
-        Folder.descendants.through.objects.values_list(
-            "from_folder_id", flat=True
-        ).distinct()
-    )
-
     root_folder = Folder.objects.filter(content_type="GL").first()
     assert root_folder is not None, "No root folder found in the database."
 
-    non_leaf_folder_ids.discard(root_folder.id)
-
+    # Candidates for the legacy posture: every folder except the root (which gets
+    # the catalog reader role above) and enclaves. Leaf folders qualify too:
+    # membership is inclusive, so a folder's default role reaches the holders of
+    # grants on the folder itself, not only on its descendants.
     # Enclave folders never carry a default role: they are visitor spaces that
     # receive explicit grants only (the write path rejects it as well), and any
     # such row would be inert anyway since audiences exclude enclave positions.
-    non_leaf_folder_ids -= set(
-        Folder.objects.filter(content_type="EN").values_list("id", flat=True)
+    candidate_folder_ids = set(
+        Folder.objects.exclude(content_type="EN").values_list("id", flat=True)
     )
+    candidate_folder_ids.discard(root_folder.id)
 
     root_folder.default_role = reader_catalog_role
     root_folder.save()
@@ -143,16 +140,16 @@ def fill_default_roles(apps, schema_editor):
         return
 
     # A module making the default role configurable is installed: assign the
-    # legacy migration role to every non-leaf folder that holds at least one
-    # published object of a legacy-list model, so upgraded tenants keep
-    # (approximately) what `is_published` exposed.
+    # legacy migration role to every folder that holds at least one published
+    # object of a legacy-list model, so upgraded tenants keep (approximately)
+    # what `is_published` exposed.
     affected_folder_ids = set()
     for model_config in READER_MIGRATION_MODEL_LIST:
         model = model_config.get_model(apps)
         real_model = model_config.get_real_model()
 
         if model is Folder:
-            # Every folder is `is_published=True` so including the `Folder` model in this loop would add every single non-leaf-folder to `affected_folder_ids` (as a folder it considered as being a is_published=True object within itself otherwise).
+            # Every folder is `is_published=True` so including the `Folder` model in this loop would add every single candidate folder to `affected_folder_ids` (as a folder is considered as being a is_published=True object within itself otherwise).
             continue
 
         try:
@@ -167,7 +164,7 @@ def fill_default_roles(apps, schema_editor):
 
         folder_ids = (
             model.objects.filter(
-                **{f"{iam_folder_field}__in": non_leaf_folder_ids}, is_published=True
+                **{f"{iam_folder_field}__in": candidate_folder_ids}, is_published=True
             )
             .values_list(iam_folder_field, flat=True)
             .distinct()

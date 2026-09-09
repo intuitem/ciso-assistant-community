@@ -1719,17 +1719,33 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     def _get_default_role_folder_ids(
         principal: AbstractBaseUser | AnonymousUser | UserGroup,
     ) -> QuerySet[uuid.UUID]:
-        """Return the folder IDs of the folder whose (non-NULL) `default_role` is granted to its audience."""
+        """
+        Return the folder IDs of the folders whose (non-NULL) `default_role` is granted to its audience.
+
+        The audience is defined by the grants carried by the standard (builtin) IAM groups:
+        only assignments held through such a group make their perimeter folders contribute,
+        and a folder's audience includes the holders of grants on the folder itself as well
+        as on its descendants (membership is inclusive).
+        Principals granted any other way get exactly what their own assignment names and
+        nothing ambient — service accounts (direct assignments, least-privilege by design)
+        and direct or custom-group grants are therefore excluded structurally, and third
+        parties positionally (their groups live in ENCLAVE folders).
+        """
 
         if isinstance(principal, User) and principal.is_third_party:
             # (Defense-in-depth protection) third-parties shouldn't be granted any `folder.default_role`.
-            # (as they should only have rights on `ENCLAVE` fodlers).
+            # (as they should only have rights on `ENCLAVE` folders).
             return []
 
         if isinstance(principal, UserGroup):
             role_assignments = RoleAssignment.objects.filter(user_group=principal)
         else:
             role_assignments = RoleAssignment.get_role_assignments_from_user(principal)
+
+        # Only grants carried by standard (builtin) groups define the audience: a direct
+        # assignment (the service-account path) or a custom-group grant must never widen
+        # into ambient visibility.
+        role_assignments = role_assignments.filter(user_group__builtin=True)
 
         directly_accessible_folder_ids = role_assignments.values_list(
             "perimeter_folders__id", flat=True
@@ -1747,10 +1763,16 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             )
         )
 
+        # Membership is inclusive: a grant on the folder itself makes its holder a
+        # member too, not only grants on strict descendants — someone working ON
+        # the domain is working IN the domain.
         default_role_folders = Folder.objects.filter(
-            descendants__in=Folder.objects.filter(
-                id__in=non_enclaved_directly_accessible_folder_ids
-            ),
+            Q(
+                descendants__in=Folder.objects.filter(
+                    id__in=non_enclaved_directly_accessible_folder_ids
+                )
+            )
+            | Q(id__in=non_enclaved_directly_accessible_folder_ids),
             default_role__isnull=False,
         )
 

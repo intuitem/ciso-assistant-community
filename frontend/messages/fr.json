@@ -1495,7 +1495,7 @@
 	"phone": "Téléphone",
 	"role": "Rôle",
 	"defaultRole": "Rôle par défaut",
-	"defaultRoleHelpText": "Rôle accordé automatiquement, sur ce domaine uniquement (non récursif), aux membres des groupes IAM de ses sous-domaines (espaces tiers exclus). Seuls les rôles limités à des permissions de lecture peuvent être utilisés.",
+	"defaultRoleHelpText": "Rôle accordé automatiquement, sur ce domaine uniquement (non récursif), aux membres des groupes IAM de ce domaine et de ses sous-domaines (espaces tiers exclus). Seuls les rôles limités à des permissions de lecture peuvent être utilisés.",
 	"questions": "Questions",
 	"recipientEntity": "Entité destinataire",
 	"financial": "Financier",

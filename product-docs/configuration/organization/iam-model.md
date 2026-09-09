@@ -126,19 +126,20 @@ The following schematic illustrates the fundamental concepts of IAM in CISO Assi
 
 ### 6. Default role mechanism
 
-A domain can carry a **default role**. Users who are members of the standard IAM groups of its sub-domains are granted that role's permissions on the domain itself — never recursively, and only on that domain.
+Every domain has **members**: the people its own and its sub-domains' IAM groups grant roles to. A domain can carry a **default role** — the role it grants its members, on the domain itself: never recursively, and only there.
 
-For example: if the **Domain** domain has the **Reader catalog** default role, then a user holding any role on its sub-domain **ChildDomain** is granted **Reader catalog** on **Domain**.
+For example: if the **Domain** domain has the **Reader catalog** default role, then a user granted any role on **Domain** itself or on its sub-domain **ChildDomain** through the IAM groups is a member of **Domain**, and receives **Reader catalog** on it.
 
-The audience is structural, so three kinds of principals are never part of it:
+Who is *not* a member follows from the definition — no exception list to remember:
 
-* memberships in **enclave** groups don't count (enclaves are visitor spaces), which also means third parties — who belong only to enclave groups — never receive anything from a default role;
-* **service accounts** hold direct role assignments rather than group memberships, so they never receive anything from a default role either;
+* **third parties** hold their grants inside third-party workspaces, which are not the domain's groups → never members;
+* **service accounts** hold direct role assignments — no group grants them anything, so they read exactly what their own assignment names (least privilege by design);
+* a grant made outside the IAM groups (a direct assignment) gives exactly what it names, nothing ambient;
 * deactivated users cannot sign in and therefore exercise no permission at all.
 
 Only roles containing view permissions can be used as a default role, and enclave domains cannot carry one.
 
-Configuring default roles is an **enterprise** capability: the domain form exposes the control there. In the community edition, the default role exists only on the root domain, fixed to **Reader catalog**, and cannot be changed.
+Configuring default roles is an **enterprise** capability: the domain form exposes the control there, and it can be tuned per domain — set to a narrower view-only role, or **cleared entirely** for domains that should share nothing ambiently. Clearing the root domain's default role gives the instance an **explicit-grant policy**: no ambient visibility at all, every access traceable to an assigned role. In the community edition, the default role exists only on the root domain, fixed to **Reader catalog**, and cannot be changed.
 
 #### Can I make an object visible to all users without attaching it to global?
 
