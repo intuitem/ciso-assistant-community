@@ -1719,15 +1719,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     def _get_default_role_folder_ids(
         principal: AbstractBaseUser | AnonymousUser | UserGroup,
     ) -> QuerySet[uuid.UUID]:
-        """
-        Return the folder IDs of the folder whose (non-NULL) `default_role` is granted to its audience.
-
-        The audience of a folder's `default_role` is structural: the members of the standard
-        (builtin) IAM groups of its strict descendants, enclave positions excluded. The usual
-        exclusions therefore need no identity rules — service accounts hold direct role
-        assignments and no group membership, so they never have source folders, and third
-        parties belong only to enclave groups, which are excluded positionally.
-        """
+        """Return the folder IDs of the folder whose (non-NULL) `default_role` is granted to its audience."""
 
         if isinstance(principal, User) and principal.is_third_party:
             # (Defense-in-depth protection) third-parties shouldn't be granted any `folder.default_role`.
@@ -2184,7 +2176,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     def get_permissions(
         principal: AbstractBaseUser | AnonymousUser | UserGroup,
     ) -> dict[str, dict[str, str]]:
-        """Get all permissions attached to a user/group (direct or indirect).
+        """
+        Get all permissions attached to a user/group (direct or indirect).
 
         Returns: {codename: {"str": Permission.name}}
         """
