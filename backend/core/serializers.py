@@ -2354,7 +2354,7 @@ class UserWriteSerializer(BaseModelSerializer):
         before any lock is held, which is only good enough to fail fast."""
         if instance is None:
             return False
-        if not instance.user_groups.filter(name="BI-UG-ADM").exists():
+        if not UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists():
             return False
         if User.objects.filter(user_groups__name="BI-UG-ADM").count() > 1:
             return False
@@ -2469,7 +2469,7 @@ class UserWriteSerializer(BaseModelSerializer):
             offending.add("expiry_date")
         if not offending:
             return set()
-        if not instance.user_groups.filter(name="BI-UG-ADM").exists():
+        if not UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists():
             return set()
         if (
             User.objects.filter(user_groups__name="BI-UG-ADM", is_active=True)
@@ -2517,6 +2517,30 @@ class UserWriteSerializer(BaseModelSerializer):
             },
         )
 
+    @staticmethod
+    def _is_sso_only(user) -> bool:
+        """No local password path exists for this account, so the IdP assertion
+        is the whole identity binding and its email is the only thing tying the
+        two together.
+
+        Deliberately not `not user.is_local`: that property also folds in
+        `is_active`, so it reads False for a merely *deactivated* plain local
+        account — which would make a routine offboarded user's email
+        admin-only for no security reason.
+        """
+        if user.keep_local_login:
+            return False
+        from global_settings.models import GlobalSettings
+
+        sso_settings = (
+            GlobalSettings.objects.filter(name=GlobalSettings.Names.SSO)
+            .values_list("value", flat=True)
+            .first()
+        ) or {}
+        return bool(sso_settings.get("is_enabled")) and bool(
+            sso_settings.get("force_sso")
+        )
+
     def _enforce_email_change_rights(self, attrs: dict) -> None:
         """The SSO adapter maps logins to accounts by email, so rewriting a
         user's email re-binds their identity: with SSO it hands the account to
@@ -2542,7 +2566,7 @@ class UserWriteSerializer(BaseModelSerializer):
         idp_bound = (
             self.instance.is_scim_managed
             or self.instance.is_jit_provisioned
-            or not self.instance.is_local
+            or self._is_sso_only(self.instance)
         )
         if idp_bound and not request.user.is_admin():
             self._deny(
@@ -2616,7 +2640,10 @@ class UserWriteSerializer(BaseModelSerializer):
 
         user_groups_data = validated_data.get("user_groups")
         if user_groups_data is not None:
-            initial_groups = set(instance.user_groups.all())
+            # UserGroup.objects, not instance.user_groups.all(): the latter is the
+            # viewset's visibility-filtered prefetch, which would under-report the
+            # previous memberships in this audit line.
+            initial_groups = set(UserGroup.objects.filter(user=instance))
             new_groups = set(group for group in user_groups_data)
 
             if initial_groups != new_groups:

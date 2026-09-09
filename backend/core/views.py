@@ -8158,7 +8158,7 @@ class UserViewSet(BaseModelViewSet):
         if not (
             instance is not None
             and any(field in attrs for field in self.LOCKOUT_SENSITIVE_FIELDS)
-            and instance.user_groups.filter(name="BI-UG-ADM").exists()
+            and UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists()
         ):
             return super().perform_update(serializer)
 
@@ -8203,13 +8203,15 @@ class UserViewSet(BaseModelViewSet):
         """Log the denied deletion as a security event, then raise it. DRF
         renders the dict detail as the response body, so the payload stays
         `{"error": ...}` on both the single-object and batch paths."""
+        errors = {"error": error_key}
         logger.warning(
             "denied privileged user operation",
             guard=guard,
+            errors=errors,
             requester=self.request.user.email,
             target=user.email,
         )
-        raise PermissionDenied({"error": error_key})
+        raise PermissionDenied(errors)
 
     def perform_destroy(self, instance):
         """Every deletion guard lives here, not in destroy(): batch_action calls
@@ -8236,7 +8238,7 @@ class UserViewSet(BaseModelViewSet):
                 "admin_delete", "deletingAdminAccountRequiresAdminRights", instance
             )
         # Protect the last direct (locally-managed) administrator — see update().
-        if instance.user_groups.filter(name="BI-UG-ADM").exists():
+        if UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists():
             with transaction.atomic():
                 # Lock the admin group row so this check-then-act can't race a
                 # concurrent admin removal into a zero-admin lockout.

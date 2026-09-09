@@ -1195,6 +1195,144 @@ class TestUserPrivilegeEscalationGuards:
 
 
 @pytest.mark.django_db
+class TestBlindUserManagerGuards:
+    """The same guards, exercised by a user manager who cannot *see* the admin
+    group. Every persona above holds view_usergroup at the root, so the
+    admin-account guards were only ever tested against a requester for whom
+    BI-UG-ADM is visible.
+
+    That distinction is load-bearing: UserViewSet.get_queryset prefetches
+    user_groups filtered to the requester's viewable groups, and Django keeps
+    that filtered queryset in the prefetch cache, so
+    `instance.user_groups.filter(...)` clones it and inherits the filter rather
+    than hitting the DB clean. Every guard that asked the relation "is this
+    target an administrator?" therefore answered *no* for a requester who
+    cannot see the group — silently opening deactivation, expiry, deletion and
+    the local-login fallback on administrator accounts, up to and including
+    deleting the last one. The predicates query UserGroup.objects directly for
+    exactly this reason; these tests are what keeps them there."""
+
+    BLIND = ["add_user", "change_user", "delete_user", "view_user"]
+
+    @pytest.fixture
+    def blind_manager(self, app_config, authenticated_client):
+        """A user manager without view_usergroup, so no group is visible to it.
+        `authenticated_client` guarantees a global admin exists to target."""
+        return _make_user_manager("blind.guarded@tests.com", self.BLIND)
+
+    def test_blind_manager_sees_no_user_group(self, blind_manager):
+        """The precondition the guards used to trip over."""
+        assert not list(
+            RoleAssignment.get_viewable_object_ids(blind_manager, UserGroup)
+        )
+
+    def test_is_admin_survives_the_visibility_filtered_prefetch(self, blind_manager):
+        """The mechanism, pinned directly: a User loaded through the viewset's
+        prefetch must still know it is an administrator."""
+        from django.db.models import Prefetch
+
+        admin_group = UserGroup.objects.get(name="BI-UG-ADM")
+        target = User.objects.create_user(
+            "prefetched.admin@tests.com", is_published=True
+        )
+        admin_group.user_set.add(target)
+
+        viewable = RoleAssignment.get_viewable_object_ids(blind_manager, UserGroup)
+        tainted = User.objects.prefetch_related(
+            Prefetch("user_groups", queryset=UserGroup.objects.filter(id__in=viewable))
+        ).get(pk=target.pk)
+
+        assert list(tainted.user_groups.all()) == []
+        assert tainted.is_admin() is True
+
+    def test_blind_manager_cannot_deactivate_admin(self, blind_manager):
+        admin_group = UserGroup.objects.get(name="BI-UG-ADM")
+        target = User.objects.create_user("blind.target1@tests.com", is_published=True)
+        admin_group.user_set.add(target)
+
+        response = _client_for(blind_manager).patch(
+            reverse("users-detail", args=[target.id]),
+            {"is_active": False},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert (
+            "adminAccountLifecycleChangeRequiresAdminRights"
+            in response.json()["is_active"]
+        )
+        target.refresh_from_db()
+        assert target.is_active is True
+
+    def test_blind_manager_cannot_expire_the_last_admin(self, blind_manager):
+        only_admin = User.objects.get(email="admin@tests.com")
+
+        response = _client_for(blind_manager).patch(
+            reverse("users-detail", args=[only_admin.id]),
+            {"expiry_date": "2020-01-01"},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        only_admin.refresh_from_db()
+        assert only_admin.expiry_date is None
+
+    def test_blind_manager_cannot_enable_local_login_on_admin(self, blind_manager):
+        admin_group = UserGroup.objects.get(name="BI-UG-ADM")
+        target = User.objects.create_user("blind.target2@tests.com", is_published=True)
+        admin_group.user_set.add(target)
+
+        response = _client_for(blind_manager).patch(
+            reverse("users-detail", args=[target.id]),
+            {"keep_local_login": True},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        target.refresh_from_db()
+        assert target.keep_local_login is False
+
+    def test_blind_manager_cannot_delete_admin(self, blind_manager):
+        admin_group = UserGroup.objects.get(name="BI-UG-ADM")
+        target = User.objects.create_user("blind.target3@tests.com", is_published=True)
+        admin_group.user_set.add(target)
+
+        response = _client_for(blind_manager).delete(
+            reverse("users-detail", args=[target.id])
+        )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.json()["error"] == "deletingAdminAccountRequiresAdminRights"
+        assert User.objects.filter(id=target.id).exists()
+
+    def test_blind_manager_cannot_delete_the_last_admin(self, blind_manager):
+        """The worst outcome of the visibility-filtered read: a complete,
+        unrecoverable admin lockout."""
+        only_admin = User.objects.get(email="admin@tests.com")
+
+        response = _client_for(blind_manager).delete(
+            reverse("users-detail", args=[only_admin.id])
+        )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert User.objects.filter(id=only_admin.id).exists()
+
+    def test_blind_manager_can_still_offboard_a_plain_user(self, blind_manager):
+        """The guards stay targeted: routine offboarding is unaffected."""
+        target = User.objects.create_user("blind.plain@tests.com", is_published=True)
+
+        response = _client_for(blind_manager).patch(
+            reverse("users-detail", args=[target.id]),
+            {"is_active": False},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        target.refresh_from_db()
+        assert target.is_active is False
+
+
+@pytest.mark.django_db
 class TestBatchActionGuards:
     """batch_action calls perform_destroy()/the serializer directly rather than
     going through destroy()/update(), so every guard must hold on this path too

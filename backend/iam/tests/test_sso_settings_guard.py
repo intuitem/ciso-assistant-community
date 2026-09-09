@@ -51,10 +51,7 @@ def _update(payload):
 
 
 def _complete(**overrides):
-    """A payload shaped the way to_internal_value builds one for a form that did
-    submit SAML advanced fields, so `settings.advanced` exists. update() requires
-    that mapping and rejects anything without it, so the guard tests below have
-    to clear that bar before they can exercise what they are actually about."""
+    """A payload shaped the way to_internal_value builds one for a form save."""
     payload = {
         "provider": "openid_connect",
         "settings": {"advanced": {"want_assertion_signed": True}},
@@ -137,61 +134,56 @@ def _make_saml_settings():
 
 
 @pytest.mark.django_db
-class TestIncompletePayloadIsRejected:
-    """update() replaces the stored value wholesale, so it requires the nested
-    `settings.advanced` mapping that to_internal_value only builds for payloads
-    actually carrying a `settings.advanced.*` field. Defaulting that mapping
-    instead of refusing would turn a loud failure into a silent one: the save
-    proceeds and drops every stored setting the payload left out.
+class TestPartialPayloadPreservesStoredSections:
+    """update() replaces the stored value wholesale, and to_internal_value builds
+    a nested mapping only for the dotted sources a payload actually carries. So
+    every real save is "partial" in some section: an OIDC form save renders no
+    SAML accordion and therefore sends no `settings.advanced.*` at all. The
+    sections the payload omits are merged back from the stored value instead of
+    being dropped.
     """
 
-    def test_payload_without_any_settings_field_is_rejected(self):
-        """A narrow API PATCH (`{"is_enabled": false}`): DRF skips field
-        defaults when partial, so no dotted source fires and `settings` is
-        absent entirely."""
+    def test_oidc_shaped_save_is_accepted(self):
+        """The shape a real OIDC form save produces — no `settings.advanced.*`
+        field anywhere. It must save, not 400."""
         _make_saml_settings()
 
-        with pytest.raises(drf_serializers.ValidationError) as excinfo:
-            _update({"is_enabled": False})
-
-        assert "errorSsoSettingsPayloadIncomplete" in str(excinfo.value)
-
-    def test_payload_without_advanced_mapping_is_rejected(self):
-        """`settings` present (a dotted OIDC source fired) but `advanced` still
-        absent — the case that used to raise KeyError."""
-        _make_saml_settings()
-
-        with pytest.raises(drf_serializers.ValidationError) as excinfo:
-            _update(
-                {
-                    "provider": "openid_connect",
-                    "settings": {
-                        "oauth_pkce_enabled": False,
-                        "server_url": "https://idp",
-                    },
-                }
-            )
-
-        assert "errorSsoSettingsPayloadIncomplete" in str(excinfo.value)
-
-    def test_rejected_payload_leaves_the_stored_config_untouched(self):
-        """The point of refusing: nothing is written, so a partial call cannot
-        strand SSO-only users behind a wiped-but-still-enabled configuration."""
-        _make_saml_settings()
-
-        with pytest.raises(drf_serializers.ValidationError):
-            _update({"is_enabled": False})
+        _update(
+            {
+                "provider": "openid_connect",
+                "client_id": "oidc-client",
+                "settings": {
+                    "server_url": "https://idp",
+                    "oauth_pkce_enabled": True,
+                },
+            }
+        )
 
         stored = _stored_value()
-        assert stored["provider"] == "saml"
-        assert stored["client_id"] == "stored-client"
-        assert stored["settings"]["idp"]["entity_id"] == "STORED-IDP"
+        assert stored["provider"] == "openid_connect"
+        assert stored["settings"]["server_url"] == "https://idp"
+
+    def test_omitted_sections_keep_their_stored_contents(self):
+        """The point of merging: a payload that touches one section must not
+        wipe the others."""
+        _make_saml_settings()
+
+        _update(
+            {
+                "provider": "saml",
+                "settings": {"idp": {"entity_id": "NEW-IDP"}},
+            }
+        )
+
+        stored = _stored_value()
+        assert stored["settings"]["idp"]["entity_id"] == "NEW-IDP"
         assert stored["settings"]["sp"]["entity_id"] == "STORED-SP"
         assert stored["settings"]["advanced"]["signature_algorithm"] == "rsa-sha256"
+        assert stored["settings"]["advanced"]["private_key"] == "STORED-PRIVATE-KEY"
 
-    def test_payload_carrying_the_advanced_mapping_is_accepted(self):
-        """The complete shape a real form save produces still goes through, and
-        the stored private key is still restored when omitted."""
+    def test_omitted_leaves_within_a_touched_section_are_kept(self):
+        """Merging descends one level, so sending one advanced flag does not
+        drop the rest of `advanced` — the SP private key above all."""
         _make_saml_settings()
 
         _update(
@@ -204,3 +196,34 @@ class TestIncompletePayloadIsRejected:
         stored = _stored_value()
         assert stored["settings"]["advanced"]["signature_algorithm"] == "rsa-sha512"
         assert stored["settings"]["advanced"]["private_key"] == "STORED-PRIVATE-KEY"
+
+    def test_narrow_patch_keeps_provider_and_client_id(self):
+        """A payload carrying no `settings.*` field at all (a narrow API PATCH):
+        the top-level fields it omits fall back to the stored value rather than
+        resetting to a default, exactly like is_enabled."""
+        _make_saml_settings()
+
+        _update({"is_enabled": False})
+
+        stored = _stored_value()
+        assert stored["is_enabled"] is False
+        assert stored["provider"] == "saml"
+        assert stored["provider_id"] == "saml"
+        assert stored["client_id"] == "stored-client"
+        assert stored["settings"]["idp"]["entity_id"] == "STORED-IDP"
+        assert stored["settings"]["sp"]["entity_id"] == "STORED-SP"
+        assert stored["settings"]["advanced"]["private_key"] == "STORED-PRIVATE-KEY"
+
+    def test_first_save_on_an_empty_settings_dict_works(self):
+        """A fresh deployment has no nested sections stored at all; the
+        private-key restore must not trip over the missing `advanced`."""
+        GlobalSettings.objects.update_or_create(
+            name=GlobalSettings.Names.SSO,
+            defaults={"value": {"is_enabled": False, "settings": {}}},
+        )
+
+        _update({"provider": "openid_connect", "settings": {"server_url": "https://x"}})
+
+        stored = _stored_value()
+        assert stored["settings"]["server_url"] == "https://x"
+        assert stored["settings"]["advanced"]["private_key"] == ""

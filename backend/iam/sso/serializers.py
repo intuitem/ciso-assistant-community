@@ -21,6 +21,25 @@ class SSOSettingsReadSerializer(BaseModelSerializer):
         fields = ["id", "name", "provider", "is_enabled", "force_sso", "slo_enabled"]
 
 
+def _merge_settings(stored: dict, incoming: dict) -> dict:
+    """Overlay *incoming* on *stored*, descending one level into the nested
+    sections (`idp`, `sp`, `attribute_mapping`, `advanced`).
+
+    One level is exactly right: those sections are the only nesting the dotted
+    `source=` declarations produce, and their leaves are scalars a payload
+    legitimately overwrites. A section the payload does not mention keeps its
+    stored contents; a section it does mention keeps the stored leaves it did
+    not send (the SP private key being the one that matters most).
+    """
+    merged = dict(stored)
+    for key, value in incoming.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = {**merged[key], **value}
+        else:
+            merged[key] = value
+    return merged
+
+
 class SSOSettingsWriteSerializer(BaseModelSerializer):
     is_enabled = serializers.BooleanField(
         required=False,
@@ -299,26 +318,23 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         settings_object = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
 
-        # This method replaces the stored value wholesale, so it can only act on
-        # a complete representation. to_internal_value builds a nested mapping
-        # only for the dotted sources it actually received, so a payload that
-        # carries no `settings.advanced.*` field arrives without that mapping,
-        # and the assignments below index straight into it.
+        # The stored value is replaced wholesale at the end of this method, and
+        # to_internal_value builds a nested mapping only for the dotted sources
+        # it actually received. A payload that omits a whole section therefore
+        # arrives without it — an OIDC save carries no `settings.advanced.*`
+        # (the SAML accordion is not rendered), a SAML save no
+        # `settings.server_url` — and a wholesale replace would drop every
+        # setting that section holds, including the SP private key.
         #
-        # Defaulting it to {} would be worse than the KeyError it replaces: the
-        # save would then succeed and silently drop every stored nested setting
-        # (idp, sp, attribute_mapping, every advanced flag) along with the
-        # top-level provider and client_id. Refuse the payload instead — an
-        # incomplete representation is a client error, not something to guess at.
-        #
-        # NOTE: this does not make partial payloads safe in general. One that
-        # happens to carry a single advanced field passes this check and still
-        # replaces everything else; merging over the stored value is the real
-        # fix, and a larger change than this guard.
-        if "advanced" not in validated_data.get("settings", {}):
-            raise serializers.ValidationError(
-                {"settings": "errorSsoSettingsPayloadIncomplete"}
-            )
+        # So overlay the sections the payload does carry on top of the stored
+        # ones instead of replacing the lot. `advanced` is then guaranteed to
+        # exist for the private-key restore below, without inventing a
+        # completeness requirement no real form save can meet.
+        validated_data["settings"] = _merge_settings(
+            settings_object.value.get("settings") or {},
+            validated_data.get("settings") or {},
+        )
+        validated_data["settings"].setdefault("advanced", {})
 
         # The value dict is replaced wholesale below, so an omitted flag must
         # fall back to the stored state (like secret and jit_provisioning_
@@ -360,8 +376,16 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
             )
         )
 
-        validated_data["provider_id"] = validated_data.get("provider", "n/a")
-        validated_data["settings"]["name"] = validated_data.get("provider", "n/a")
+        # Same class as is_enabled above: an omitted top-level field must fall
+        # back to the stored value, not reset the configuration to a default.
+        validated_data["provider"] = validated_data.get(
+            "provider", settings_object.value.get("provider", "n/a")
+        )
+        validated_data["client_id"] = validated_data.get(
+            "client_id", settings_object.value.get("client_id", "")
+        )
+        validated_data["provider_id"] = validated_data["provider"]
+        validated_data["settings"]["name"] = validated_data["provider"]
 
         # Use stored jit_provisioning_enabled and default_user_groups if not transmitted
         validated_data["jit_provisioning_enabled"] = validated_data.get(
