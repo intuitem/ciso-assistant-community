@@ -56,6 +56,7 @@ dependencies = [
     "markdown>=3.10.2,<4",
     "rapidfuzz>=3.14.3,<4",
     "cronsim>=2.6,<3",
+    "typst>=0.15.0",
 ]
 
 [dependency-groups]
