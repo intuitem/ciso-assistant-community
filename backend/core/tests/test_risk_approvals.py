@@ -24,7 +24,7 @@ from core.risk_approvals import (
 from core.serializers import ValidationFlowReadSerializer, ValidationFlowWriteSerializer
 from global_settings.models import GlobalSettings
 from global_settings.utils import clear_feature_flags_cache
-from iam.models import Folder, User
+from iam.models import Folder, RoleAssignment, User
 from test_fixtures import RISK_MATRIX_JSON_DEFINITION
 
 
@@ -478,8 +478,41 @@ def test_api_create_filter_decide_and_preserve_history(setup_risk):
 
 
 @pytest.mark.django_db
-def test_api_options_and_cross_domain_access(setup_risk):
+def test_candidate_lists_are_limited_to_visible_user_ids(setup_risk):
     r = setup_risk
+    hidden_candidate = User.objects.create_superuser(email="hidden@example.test")
+    r.scenario.owner.add(hidden_candidate.actor)
+
+    visible_user_ids = {r.owner.pk}
+
+    assert [
+        item["id"] for item in approval_candidates(r.scenario, visible_user_ids)
+    ] == [str(r.owner.pk)]
+    assert [
+        item["id"]
+        for item in management_approval_candidates(r.scenario, visible_user_ids)
+    ] == [str(r.owner.pk)]
+
+
+@pytest.mark.django_db
+def test_api_options_and_cross_domain_access(setup_risk, monkeypatch):
+    r = setup_risk
+    hidden_candidate = User.objects.create_superuser(email="hidden@example.test")
+    r.scenario.owner.add(hidden_candidate.actor)
+
+    original_get_viewable_object_ids = RoleAssignment.get_viewable_object_ids
+
+    def get_viewable_object_ids(user, model, folder=None):
+        if model is User:
+            return [r.requester.pk, r.owner.pk]
+        return original_get_viewable_object_ids(user, model, folder)
+
+    monkeypatch.setattr(
+        RoleAssignment,
+        "get_viewable_object_ids",
+        staticmethod(get_viewable_object_ids),
+    )
+
     client = APIClient()
     client.force_authenticate(r.requester)
     url = f"/api/risk-scenarios/{r.scenario.pk}/approval-options/"
@@ -487,6 +520,12 @@ def test_api_options_and_cross_domain_access(setup_risk):
     assert response.status_code == 200, response.data
     assert str(r.owner.pk) in [user["id"] for user in response.data["approvers"]]
     assert str(r.requester.pk) in [
+        user["id"] for user in response.data["management_approvers"]
+    ]
+    assert str(hidden_candidate.pk) not in [
+        user["id"] for user in response.data["approvers"]
+    ]
+    assert str(hidden_candidate.pk) not in [
         user["id"] for user in response.data["management_approvers"]
     ]
     assert response.data["residual_risk_above_tolerance"] is False

@@ -20,6 +20,14 @@ interface RiskApprovalFlow {
 	approver?: { email?: string } | null;
 }
 
+const EMPTY_APPROVAL_OPTIONS = {
+	approvers: [],
+	management_approvers: [],
+	residual_risk_above_tolerance: false,
+	risk_tolerance: -1,
+	risk_tolerance_configured: false
+};
+
 export const load = (async ({ fetch, params, cookies, locals }) => {
 	const URLModel = 'risk-scenarios';
 	const baseEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
@@ -87,31 +95,21 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 	const riskApprovalsEnabled = Boolean(
 		locals.featureflags?.validation_flows && locals.featureflags?.risk_owner_approvals
 	);
-	const approvalOptions = riskApprovalsEnabled
-		? await fetch(`${baseEndpoint}approval-options/`).then((res) =>
-				res.ok
-					? res.json()
-					: {
-							approvers: [],
-							management_approvers: [],
-							residual_risk_above_tolerance: false,
-							risk_tolerance: -1,
-							risk_tolerance_configured: false
-						}
+	const approvalOptionsPromise = riskApprovalsEnabled
+		? fetch(`${baseEndpoint}approval-options/`).then((res) =>
+				res.ok ? res.json() : EMPTY_APPROVAL_OPTIONS
 			)
-		: {
-				approvers: [],
-				management_approvers: [],
-				residual_risk_above_tolerance: false,
-				risk_tolerance: -1,
-				risk_tolerance_configured: false
-			};
-	const riskApprovals = riskApprovalsEnabled
-		? await fetchAllPages<RiskApprovalFlow>(
+		: Promise.resolve(EMPTY_APPROVAL_OPTIONS);
+	const riskApprovalsPromise = riskApprovalsEnabled
+		? fetchAllPages<RiskApprovalFlow>(
 				fetch,
 				`${BASE_API_URL}/validation-flows/?risk_scenario=${params.id}`
 			)
-		: [];
+		: Promise.resolve([]);
+	const [approvalOptions, riskApprovals] = await Promise.all([
+		approvalOptionsPromise,
+		riskApprovalsPromise
+	]);
 
 	return {
 		scenario,

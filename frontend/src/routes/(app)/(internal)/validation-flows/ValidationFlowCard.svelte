@@ -126,10 +126,12 @@
 
 		{#if linkedObjects.length}
 			<div class="flex flex-col gap-1">
-				{#each linkedObjects.slice(0, 3) as { key, item, href }}
+				{#each linkedObjects.slice(0, 3) as { key, item, href } (`${key}:${item.id}`)}
 					<div class="flex items-baseline gap-2 min-w-0">
 						<span class="text-xs text-surface-500 whitespace-nowrap">{modelLabels[key]}</span>
-						<Anchor {href} class="anchor text-sm truncate">{item.str}</Anchor>
+						<Anchor {href} class="anchor text-sm truncate">
+							{item.str ?? item.ref_id ?? item.name}
+						</Anchor>
 					</div>
 				{/each}
 				{#if linkedObjects.length > 3}

@@ -5,6 +5,7 @@ export type ValidationFlowAction =
 	'approve' | 'reject' | 'request_changes' | 'drop' | 'revoke' | 'resubmit';
 
 export const VALIDATION_FLOW_MODEL_URLS: Record<string, string> = {
+	risk_scenarios: 'risk-scenarios',
 	compliance_assessments: 'compliance-assessments',
 	risk_assessments: 'risk-assessments',
 	business_impact_analysis: 'business-impact-analysis',
@@ -22,6 +23,7 @@ export const VALIDATION_FLOW_MODEL_URLS: Record<string, string> = {
 
 export function validationFlowModelLabels(): Record<string, string> {
 	return {
+		risk_scenarios: m.riskScenarios(),
 		compliance_assessments: m.complianceAssessments(),
 		risk_assessments: m.riskAssessments(),
 		business_impact_analysis: m.businessImpactAnalysis(),
@@ -65,7 +67,7 @@ export function validationFlowErrorMessage(body: any): string | undefined {
 /** Flattened view of everything a flow is about, across all its m2m buckets. */
 export function validationFlowLinkedObjects(flow: any): { key: string; item: any; href: string }[] {
 	const objects: { key: string; item: any; href: string }[] = [];
-	if (flow.risk_scenario) {
+	if (flow.risk_scenario && !flow.risk_approval_stage) {
 		objects.push({
 			key: 'risk_scenarios',
 			item: flow.risk_scenario,

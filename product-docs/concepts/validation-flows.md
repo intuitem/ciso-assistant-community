@@ -104,9 +104,9 @@ owners and dates, and the residual risk. If the residual level is at or below th
 risk assessment's configured tolerance, the approved treatment completes the
 workflow without a separate risk-acceptance decision. If the residual level is
 above tolerance, a third decision is required from a named user who can approve
-risk acceptances in the scenario's domain. This authority can be assigned to the
-organisation's senior-management group without hard-coding an organisational
-title. Treatment approval cannot be requested until the assessment has a risk
+risk acceptances in the scenario's domain. Organisations can assign this
+permission to the appropriate role without hard-coding an organisational title.
+Treatment approval cannot be requested until the assessment has a risk
 tolerance. The decision does not prove implementation or effectiveness, and does
 not change a `mitigate` decision to `accept`.
 
@@ -121,7 +121,7 @@ decisions remain visible and cannot be edited or deleted through the flow API.
 The scenario and other scenarios in the study remain editable.
 
 These approval steps are an organisational workflow choice. They support
-risk-owner approval of treatment plans and management escalation of residual
+risk-owner approval of treatment plans and authorised acceptance of residual
 risks above tolerance; they do not imply that ISO 27001 mandates this particular
 software sequence.
 

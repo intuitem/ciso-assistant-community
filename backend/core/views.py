@@ -7311,10 +7311,18 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
         if not risk_approvals_enabled():
             raise PermissionDenied("riskApprovalFeatureDisabled")
         scenario = self.get_object()
+
+        visible_user_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, User)
+        )
+        visible_user_ids.add(request.user.id)
+
         return Response(
             {
-                "approvers": approval_candidates(scenario),
-                "management_approvers": management_approval_candidates(scenario),
+                "approvers": approval_candidates(scenario, visible_user_ids),
+                "management_approvers": management_approval_candidates(
+                    scenario, visible_user_ids
+                ),
                 "residual_risk_above_tolerance": residual_risk_above_tolerance(
                     scenario
                 ),

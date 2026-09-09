@@ -64,22 +64,29 @@ def residual_risk_above_tolerance(scenario):
     return tolerance >= 0 and scenario.residual_level > tolerance
 
 
-def approval_candidates(scenario):
+def _active_candidate_users(user_ids=None):
+    users = User.objects.filter(is_active=True)
+    if user_ids is not None:
+        users = users.filter(pk__in=user_ids)
+    return users.order_by("email")
+
+
+def approval_candidates(scenario, user_ids=None):
     """Return active named users allowed to approve the scenario."""
     # Resolve teams and entity representatives through the application's actor
     # rules. The actual decision still belongs to one named, authorised user.
     return [
         {"id": str(user.pk), "email": user.email, "name": str(user)}
-        for user in User.objects.filter(is_active=True).order_by("email")
+        for user in _active_candidate_users(user_ids)
         if owner_can_approve(scenario, user)
     ]
 
 
-def management_approval_candidates(scenario):
+def management_approval_candidates(scenario, user_ids=None):
     """Return users authorised to accept an above-tolerance residual risk."""
     return [
         {"id": str(user.pk), "email": user.email, "name": str(user)}
-        for user in User.objects.filter(is_active=True).order_by("email")
+        for user in _active_candidate_users(user_ids)
         if management_can_accept(scenario, user)
     ]
 
