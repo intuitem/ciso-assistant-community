@@ -31,16 +31,16 @@ logger = structlog.get_logger(__name__)
 
 class FolderWriteSerializer(CommunityFolderWriteSerializer):
     class Meta(CommunityFolderWriteSerializer.Meta):
-        # The default role is configurable in the enterprise edition only; the
-        # community serializer excludes it (fixed catalog default at the root).
-        # The eligibility and enclave validators are inherited from the
-        # community class and bind here, where the field is writable.
+        # The default role is only editable (by ysers) in the enterprise edition.
+        # As it would be kind of useless in community edition (as only the `root_folder.default_role` have an impact).
         read_only_fields = ["content_type"]
         exclude = [
             field_to_exclude
             for field_to_exclude in CommunityFolderWriteSerializer.Meta.exclude
-            # The enterprise FolderWriteSerializer needs the "default_role" as it's configurable in the enterprise edition.
+            # The enterprise FolderWriteSerializer needs the "default_role" as it's editable in the enterprise edition.
             # (contrary to the community edition).
+            # We also need to return the `content_type` as it's used to hide the `default_role` frontend `Select` from the `FolderForm` for `ENCLAVE` folders.
+            # (`ENCLAVE` folders are not permitted to have a non-NULL `default_role`).
             if field_to_exclude not in ["default_role", "content_type"]
         ]
 
