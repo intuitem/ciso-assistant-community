@@ -1,10 +1,20 @@
-import pytest
+from importlib import import_module
 from types import SimpleNamespace
 
+import pytest
+from django.conf import settings
+from django.contrib.auth import SESSION_KEY as AUTH_USER_SESSION_KEY
 from django.test import RequestFactory, override_settings
+from knox.models import AuthToken
+from rest_framework.test import APIClient
 
 from global_settings.models import GlobalSettings
-from iam.sso.slo import _build_public_saml_config, build_idp_logout_url
+from iam.models import User
+from iam.sso.slo import (
+    SLO_SESSION_KEY,
+    _build_public_saml_config,
+    build_idp_logout_url,
+)
 
 PUBLIC_URL = "https://app.example.com"
 IDP_SLO_URL = "https://idp.example.com/slo"
@@ -88,3 +98,110 @@ def test_saml_logout_url_resolved_for_a_call_on_the_internal_host():
     assert logout_url is not None
     assert logout_url.startswith(f"{IDP_SLO_URL}?")
     assert "SAMLRequest=" in logout_url
+
+
+# --- IdPLogoutURLView -------------------------------------------------------
+
+LOGOUT_URL_ENDPOINT = "/api/iam/sso/logout-url/"
+
+
+def _session_store():
+    return import_module(settings.SESSION_ENGINE).SessionStore
+
+
+def _make_session(user, slo_state=None) -> str:
+    """A logged-in Django session for `user`, optionally holding SLO state."""
+    session = _session_store()()
+    session[AUTH_USER_SESSION_KEY] = str(user.pk)
+    if slo_state:
+        session[SLO_SESSION_KEY] = slo_state
+    session.create()
+    return session.session_key
+
+
+def _session_exists(session_key: str) -> bool:
+    return _session_store()(session_key=session_key).exists(session_key)
+
+
+def _client_for(user) -> APIClient:
+    client = APIClient()
+    _, token = AuthToken.objects.create(user=user)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+    return client
+
+
+@pytest.fixture
+def sso_user(db):
+    return User.objects.create_user(email="sso@example.com")
+
+
+@pytest.mark.django_db
+@test_settings
+def test_logout_url_view_resolves_idp_url_and_destroys_both_sessions(sso_user):
+    _make_saml_sso_settings()
+    allauth_key = _make_session(sso_user, SLO_STATE)
+    callback_key = _make_session(sso_user, SLO_STATE)
+
+    res = _client_for(sso_user).post(
+        LOGOUT_URL_ENDPOINT,
+        HTTP_HOST=INTERNAL_HOST,
+        HTTP_X_ALLAUTH_SESSION_TOKEN=allauth_key,
+        HTTP_X_SSO_SESSION_KEY=callback_key,
+    )
+
+    assert res.status_code == 200
+    assert res.json()["logout_url"].startswith(f"{IDP_SLO_URL}?")
+    assert not _session_exists(allauth_key)
+    assert not _session_exists(callback_key)
+
+
+@pytest.mark.django_db
+@test_settings
+def test_logout_url_view_returns_null_when_no_slo_state(sso_user):
+    _make_saml_sso_settings()
+    allauth_key = _make_session(sso_user)
+
+    res = _client_for(sso_user).post(
+        LOGOUT_URL_ENDPOINT,
+        HTTP_HOST=INTERNAL_HOST,
+        HTTP_X_ALLAUTH_SESSION_TOKEN=allauth_key,
+    )
+
+    assert res.status_code == 200
+    assert res.json() == {"logout_url": None}
+    assert not _session_exists(allauth_key)
+
+
+@pytest.mark.django_db
+@test_settings
+def test_logout_url_view_ignores_sessions_of_other_users(sso_user):
+    """A leaked session key must not let a caller log its owner out or read
+    their SLO material."""
+    _make_saml_sso_settings()
+    victim = User.objects.create_user(email="victim@example.com")
+    victim_key = _make_session(victim, SLO_STATE)
+
+    res = _client_for(sso_user).post(
+        LOGOUT_URL_ENDPOINT,
+        HTTP_HOST=INTERNAL_HOST,
+        HTTP_X_SSO_SESSION_KEY=victim_key,
+    )
+
+    assert res.status_code == 200
+    assert res.json() == {"logout_url": None}
+    assert _session_exists(victim_key)
+
+
+@pytest.mark.django_db
+@test_settings
+def test_logout_url_view_requires_authentication(sso_user):
+    session_key = _make_session(sso_user, SLO_STATE)
+
+    res = APIClient().post(
+        LOGOUT_URL_ENDPOINT,
+        HTTP_HOST=INTERNAL_HOST,
+        HTTP_X_SSO_SESSION_KEY=session_key,
+    )
+
+    assert res.status_code == 401
+    assert _session_exists(session_key)
