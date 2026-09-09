@@ -42,6 +42,19 @@ async function endAllauthSession(fetch: Fetch): Promise<boolean> {
 	return false;
 }
 
+// Nothing else in the logout flow revokes it: allauth ends the Django session,
+// not the token, so a captured token would stay valid for its whole TTL.
+async function revokeAccessToken(fetch: Fetch): Promise<boolean> {
+	try {
+		const res = await fetch(`${BASE_API_URL}/iam/logout/`, { method: 'POST' });
+		if (res.ok) return true;
+		logger.error('Failed to revoke the access token', { status: res.status });
+	} catch (error) {
+		logger.error('Failed to revoke the access token', { error });
+	}
+	return false;
+}
+
 export const GET = async ({ locals }) => {
 	if (!locals.user) {
 		redirect(302, `/login?next=/home`);
@@ -60,6 +73,9 @@ export const POST = async ({ fetch, cookies, locals }) => {
 		// Local user, or the SSO logout endpoint failed: end the allauth session here.
 		await endAllauthSession(fetch);
 	}
+
+	// Last, since the calls above authenticate with it.
+	await revokeAccessToken(fetch);
 
 	cookies.delete('token', { path: '/' });
 	cookies.delete('allauth_session_token', { path: '/' });
