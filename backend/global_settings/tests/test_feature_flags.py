@@ -31,6 +31,24 @@ def flags_row(db):
     return gs
 
 
+@pytest.fixture
+def no_flags_row(db):
+    """Startup seeds a row with the declared defaults, so the missing-row path is
+    arranged rather than assumed.
+
+    Raw SQL: the ORM's cascade reaches SSOSettings, a GlobalSettings subclass whose
+    table the community edition never migrates.
+    """
+    from django.db import connection
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"DELETE FROM {GlobalSettings._meta.db_table} WHERE name = %s",
+            [GlobalSettings.Names.FEATURE_FLAGS],
+        )
+    clear_feature_flags_cache()
+
+
 def test_returns_flag_value(flags_row):
     assert ff_is_enabled("incidents") is True
     assert ff_is_enabled("xrays") is False
@@ -40,7 +58,7 @@ def test_unknown_flag_returns_false(flags_row):
     assert ff_is_enabled("does_not_exist") is False
 
 
-def test_missing_row_returns_false(db):
+def test_missing_row_returns_false(no_flags_row):
     assert not GlobalSettings.objects.filter(
         name=GlobalSettings.Names.FEATURE_FLAGS
     ).exists()
@@ -64,7 +82,7 @@ def test_flag_lookups_are_cached(flags_row, django_assert_num_queries):
         assert ff_is_enabled("does_not_exist") is False
 
 
-def test_missing_row_is_cached(db, django_assert_num_queries):
+def test_missing_row_is_cached(no_flags_row, django_assert_num_queries):
     ff_is_enabled("incidents")  # warm the cache with the missing-row state
     with django_assert_num_queries(0):
         assert ff_is_enabled("incidents") is False
@@ -112,3 +130,24 @@ def test_supported_flags_derived_from_serializer():
     assert supported == declared
     assert "incidents" in supported
     assert "idp_groups" not in supported
+
+
+def test_startup_seeds_declared_defaults(no_flags_row):
+    """The flag a release adds is absent from an existing row, and a missing key reads
+    False whatever the field declares — startup fills the gap."""
+    from core.startup import seed_feature_flag_defaults
+
+    seed_feature_flag_defaults()
+    row = GlobalSettings.objects.get(name=GlobalSettings.Names.FEATURE_FLAGS)
+    assert set(get_supported_feature_flags()) <= set(row.value)
+    assert ff_is_enabled("incidents") is True
+
+
+def test_startup_leaves_an_explicit_choice_alone(flags_row):
+    from core.startup import seed_feature_flag_defaults
+
+    seed_feature_flag_defaults()
+    flags_row.refresh_from_db()
+    # `xrays` defaults to True in the serializer but was turned off in the row.
+    assert flags_row.value["xrays"] is False
+    assert ff_is_enabled("xrays") is False

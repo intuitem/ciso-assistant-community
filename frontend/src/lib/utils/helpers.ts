@@ -472,6 +472,7 @@ export const VISIBILITY_FIELDS = [
 	'score',
 	'documentation_score',
 	'applied_controls',
+	'task_templates',
 	'evidences',
 	'observation',
 	'comments'
@@ -537,6 +538,7 @@ export function getFieldVisibility(
 	showDocumentationScore: boolean;
 	showObservation: boolean;
 	showAppliedControls: boolean;
+	showTaskTemplates: boolean;
 	showEvidences: boolean;
 	showRespondentAlignment: boolean;
 	showComments: boolean;
@@ -550,6 +552,7 @@ export function getFieldVisibility(
 		showDocumentationScore: isFieldVisible(complianceAssessment, 'documentation_score', viewerRole),
 		showObservation: isFieldVisible(complianceAssessment, 'observation', viewerRole),
 		showAppliedControls: isFieldVisible(complianceAssessment, 'applied_controls', viewerRole),
+		showTaskTemplates: isFieldVisible(complianceAssessment, 'task_templates', viewerRole),
 		showEvidences: isFieldVisible(complianceAssessment, 'evidences', viewerRole),
 		showRespondentAlignment: isFieldVisible(
 			complianceAssessment,

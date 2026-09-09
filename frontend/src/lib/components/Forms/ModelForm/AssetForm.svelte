@@ -39,6 +39,8 @@
 		data = {}
 	}: Props = $props();
 
+	let doraEnabled = $derived(!!page.data?.featureflags?.dora);
+
 	const { value: folderId } = formFieldProxy(form, 'folder');
 
 	type SecurityObjectiveScale = keyof typeof SECURITY_OBJECTIVE_SCALE_MAP;
@@ -229,7 +231,7 @@
 		</div>
 	</Dropdown>
 {/if}
-{#if data.type === 'PR'}
+{#if data.type === 'PR' && doraEnabled}
 	<Dropdown
 		open={false}
 		style="hover:text-purple-700"

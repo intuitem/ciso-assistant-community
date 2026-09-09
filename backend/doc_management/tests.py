@@ -28,6 +28,30 @@ class TestSafeUrlFetcher:
 
 
 @pytest.mark.django_db
+class TestDeferredContent:
+    def test_content_not_fetched_when_deferred(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+        from doc_management.models import DocumentRevision
+
+        folder = Folder.objects.create(
+            name="DF", parent_folder=Folder.get_root_folder()
+        )
+        s = ManagedDocumentWriteSerializer(
+            data={"folder": str(folder.id), "locale": "en", "name": "Deferred"},
+            context={},
+        )
+        s.is_valid(raise_exception=True)
+        doc = s.save()
+        rev_id = doc.revisions.first().id
+
+        with CaptureQueriesContext(connection) as ctx:
+            rev = DocumentRevision.objects.only("id").get(id=rev_id)
+        assert len(ctx) == 1
+        assert "content" not in rev.__dict__
+
+
+@pytest.mark.django_db
 class TestContainerGrouping:
     """Stream A: documents group under a DocumentContainer, per-locale lifecycle.
 

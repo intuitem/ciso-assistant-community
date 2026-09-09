@@ -11,6 +11,7 @@ type SidebarBackendKeys = {
 	vulnerabilities: boolean;
 	compliance: boolean;
 	campaigns: boolean;
+	commitment_management: boolean;
 	tprm: boolean;
 	privacy: boolean;
 	experimental: boolean;
@@ -53,6 +54,7 @@ type SidebarFrontendKeys = {
 	tasksReview: boolean;
 	riskAcceptances: boolean;
 	securityExceptions: boolean;
+	findings: boolean;
 	followUp: boolean;
 	ebiosRM: boolean;
 	scoringAssistant: boolean;
@@ -88,6 +90,7 @@ type SidebarFrontendKeys = {
 	idpGroups: boolean;
 	serviceAccounts: boolean;
 	postureAssessments: boolean;
+	commitments: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -100,6 +103,7 @@ export function getSidebarVisibleItems(
 		tasksReview: featureFlags?.control_plan ?? true,
 		riskAcceptances: featureFlags?.risk_acceptances ?? false,
 		securityExceptions: featureFlags?.exceptions ?? false,
+		findings: featureFlags?.follow_up ?? false,
 		followUp: featureFlags?.follow_up ?? false,
 		ebiosRM: featureFlags?.ebiosrm ?? false,
 		scoringAssistant: featureFlags?.scoring_assistant ?? false,
@@ -135,6 +139,7 @@ export function getSidebarVisibleItems(
 		idpGroups: (featureFlags?.idp_groups || featureFlags?.jit_provisioning) ?? false,
 		serviceAccounts: featureFlags?.service_accounts ?? false,
 		postureAssessments: featureFlags?.posture_assessments ?? false,
+		commitments: featureFlags?.commitment_management ?? false,
 		documents: featureFlags?.document_management ?? true,
 		documentTemplates: featureFlags?.document_management ?? true,
 		objectClassifications: featureFlags?.document_management ?? true

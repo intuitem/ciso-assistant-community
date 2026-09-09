@@ -8,6 +8,7 @@ Supports both French and English ARM exports with variant sheet/column names.
 """
 
 import logging
+import unicodedata
 from io import BytesIO
 
 from openpyxl import load_workbook
@@ -24,7 +25,9 @@ SHEET_VARIANTS = {
     # Workshop 1 - Scope & Security Baseline
     "business_values": [
         "1 - Base de valeurs métier",
+        "1 - Valeurs métier",
         "1 - Business values",
+        "1 - Business assets",
         "1 - Primary assets",
     ],
     "missions": [
@@ -33,6 +36,7 @@ SHEET_VARIANTS = {
     ],
     "feared_events": [
         "1 - Base d'évènements redoutés",
+        "1 - Évènements redoutés",
         "1 - Feared events",
     ],
     "supporting_assets": [
@@ -41,7 +45,9 @@ SHEET_VARIANTS = {
     ],
     "impact_level_scale": [
         "1 - Échelle de niveau d'impact",
+        "1 - Échelle de gravité",
         "1 - Impact level scale",
+        "1 - Severity scale",
     ],
     "complementary_measures": [
         "1 - Mesures complémentaires",
@@ -92,13 +98,29 @@ COLUMN_VARIANTS = {
     "selected_check": ["✓/❒", "✓", "Selected"],
     # Workshop 1
     "mission": ["Mission"],
-    "gravity_level": ["Niveau de gravité", "Gravity level", "Severity level"],
+    "gravity_level": [
+        "Niveau de gravité",
+        "Gravity level",
+        "Severity level",
+        "Nom",
+        "Name",
+    ],
     "level": ["Niveau", "Level"],
     "supporting_assets": ["Biens supports", "Supporting assets"],
     "parent_asset": ["Bien support parent", "Parent supporting asset", "Parent asset"],
     "feared_event": ["Évènement redouté", "Feared event"],
-    "retained_gravity": ["Gravité retenue", "Retained gravity", "Selected gravity"],
-    "business_values": ["Valeurs métier", "Business values", "Primary assets"],
+    "retained_gravity": [
+        "Gravité retenue",
+        "Retained gravity",
+        "Retained severity",
+        "Selected gravity",
+    ],
+    "business_values": [
+        "Valeurs métier",
+        "Business values",
+        "Business assets",
+        "Primary assets",
+    ],
     "impacts": ["Impacts"],
     # Workshop 2 - RoTo couples
     "risk_origin": ["Source de risque", "Risk origin", "RO", "Risk Origin"],
@@ -116,8 +138,13 @@ COLUMN_VARIANTS = {
     "cyber_maturity": ["Maturité cyber", "Cyber maturity", "Maturity"],
     "trust": ["Confiance", "Trust"],
     "exposure": ["Exposition", "Exposure"],
-    "reliability": ["Fiabilité", "Reliability"],
-    "danger_level": ["Niveau de menace", "Danger level", "Threat level"],
+    "reliability": ["Fiabilité cyber", "Cyber reliability", "Fiabilité", "Reliability"],
+    "danger_level": [
+        "Niveau de danger",
+        "Niveau de menace",
+        "Danger level",
+        "Threat level",
+    ],
     # Workshop 3 - Strategic scenarios
     "scenario_name": ["Scénario stratégique", "Strategic scenario", "Scenario"],
     "attack_path": ["Chemin d'attaque", "Attack path"],
@@ -131,13 +158,19 @@ COLUMN_VARIANTS = {
 }
 
 
+def normalize_label(text) -> str:
+    """Lowercase, strip accents and collapse whitespace for tolerant matching."""
+    decomposed = unicodedata.normalize("NFKD", str(text or ""))
+    stripped = "".join(c for c in decomposed if not unicodedata.combining(c))
+    return " ".join(stripped.replace("\u2019", "'").lower().split())
+
+
 def find_sheet(workbook, sheet_key: str):
     """
     Find a sheet in the workbook by trying all variant names.
 
-    Args:
-        workbook: openpyxl Workbook object
-        sheet_key: Logical sheet key from SHEET_VARIANTS
+    Falls back to accent-insensitive prefix matching, since ARM truncates sheet
+    names to Excel's 31-character limit.
 
     Returns:
         Tuple of (sheet, sheet_name) or (None, None) if not found
@@ -152,11 +185,50 @@ def find_sheet(workbook, sheet_key: str):
             logger.debug(f"[ARM] Found sheet '{variant}' for key '{sheet_key}'")
             return workbook[variant], variant
 
+    normalized = [(normalize_label(name), name) for name in workbook.sheetnames]
+    for variant in variants:
+        target = normalize_label(variant)
+        for candidate, name in normalized:
+            if candidate == target or target.startswith(candidate):
+                logger.info(f"[ARM] Matched sheet '{name}' for key '{sheet_key}'")
+                return workbook[name], name
+
     logger.warning(
         f"[ARM] No sheet found for key '{sheet_key}'. "
         f"Tried: {variants}. Available: {workbook.sheetnames}"
     )
     return None, None
+
+
+# Header labels that identify a workshop 1 security-measure sheet. ARM names
+# those sheets after the referential itself, so they cannot be matched by name.
+MEASURE_SHEET_SIGNATURE = [
+    ("ref.", "ref"),
+    ("nom", "name"),
+    ("reduction de la gravite", "severity reduction"),
+    ("statut", "status"),
+]
+
+
+def find_measure_sheets(workbook) -> list[str]:
+    """Return workshop 1 sheet names holding security measures."""
+    sheet, sheet_name = find_sheet(workbook, "complementary_measures")
+    if sheet is not None:
+        return [sheet_name]
+
+    matches = []
+    for name in workbook.sheetnames:
+        if not name.startswith("1 - "):
+            continue
+        headers = {normalize_label(cell.value) for cell in workbook[name][1]}
+        if all(
+            any(label in headers for label in group)
+            for group in MEASURE_SHEET_SIGNATURE
+        ):
+            matches.append(name)
+
+    logger.info(f"[ARM] Detected security measure sheets: {matches}")
+    return matches
 
 
 def get_col(row: dict, col_key: str, default=None):
@@ -365,6 +437,8 @@ def build_gravity_scale_mapping(workbook) -> dict[str, int]:
     for row in get_sheet_rows(workbook, "impact_level_scale"):
         gravity_name = get_col(row, "gravity_level")
         niveau = get_col(row, "level")
+        if isinstance(gravity_name, str):
+            gravity_name = gravity_name.strip()
         if gravity_name and niveau is not None:
             try:
                 mapping[gravity_name.lower().strip()] = int(niveau) - 1
@@ -449,19 +523,22 @@ def extract_feared_events(workbook, gravity_mapping: dict[str, int]) -> list[dic
 
 
 def extract_applied_controls(workbook) -> list[dict]:
-    """Extract applied controls from complementary measures sheet."""
+    """Extract applied controls from the security measure sheets."""
     controls = []
-    for row in get_sheet_rows(workbook, "complementary_measures"):
-        name = get_col(row, "name")
-        if not name:
-            continue
-        controls.append(
-            {
-                "name": name.strip(),
-                "description": (get_col(row, "description") or "").strip(),
-                "ref_id": (get_col(row, "ref_id") or "").strip(),
-            }
-        )
+    seen = set()
+    for sheet_name in find_measure_sheets(workbook):
+        for row in get_sheet_data(workbook, sheet_name):
+            name = get_col(row, "name")
+            if not name or name.strip().lower() in seen:
+                continue
+            seen.add(name.strip().lower())
+            controls.append(
+                {
+                    "name": name.strip(),
+                    "description": (get_col(row, "description") or "").strip(),
+                    "ref_id": (get_col(row, "ref_id") or "").strip(),
+                }
+            )
     return controls
 
 
@@ -690,7 +767,7 @@ def extract_strategic_scenarios(workbook) -> list[dict]:
 
     # Find "Nom" column (appears multiple times - scenario name and attack path name)
     for i, h in enumerate(sub_headers):
-        if h and h.strip().lower() == "nom":
+        if h and h.strip().lower() in ("nom", "name"):
             if attack_path_name_col is None:
                 attack_path_name_col = i
 
@@ -803,6 +880,14 @@ def process_arm_file(file_content: bytes) -> dict:
 
     # Extract Workshop 4 data
     result["elementary_actions"] = extract_elementary_actions(workbook)
+
+    result["missing_sheets"] = [
+        key
+        for key in SHEET_VARIANTS
+        if key != "complementary_measures" and find_sheet(workbook, key)[0] is None
+    ]
+    if not result["applied_controls"]:
+        result["missing_sheets"].append("security_measures")
 
     logger.info(
         f"Extracted from ARM file: "

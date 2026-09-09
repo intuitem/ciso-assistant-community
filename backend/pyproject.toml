@@ -7,8 +7,8 @@ requires-python = ">=3.14,<4"
 readme = "README.md"
 
 dependencies = [
-    "django>=6.0.4,<7",
-    "weasyprint>=68.0,<70",
+    "django>=6.1,<7",
+    "weasyprint>=68.1,<70",
     "psycopg[binary]>=3.3,<4",
     "gunicorn>=23.0.0,<27",
     "django-filter>=25.2,<27",
@@ -56,6 +56,7 @@ dependencies = [
     "markdown>=3.10.2,<4",
     "rapidfuzz>=3.14.3,<4",
     "cronsim>=2.6,<3",
+    "typst>=0.15.0",
 ]
 
 [dependency-groups]
