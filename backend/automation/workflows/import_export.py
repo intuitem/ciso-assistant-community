@@ -374,7 +374,7 @@ def import_workflow(data, folder, user=None, source_version=None, secrets=None):
     lands in the builder.
     """
     _validate_structure(data)
-    warnings = []
+    warnings = _unknown_key_warnings(data)
     with transaction.atomic():
         name = _free_name(Workflow, str(data["name"]).strip(), folder)
         if name != str(data["name"]).strip():
@@ -418,8 +418,109 @@ def import_workflow(data, folder, user=None, source_version=None, secrets=None):
 def validate_workflow_document(data):
     """Public structural validation of one workflow object (the library
     pipeline validates entries without importing them). Raises
-    WorkflowImportError on bad shape."""
+    WorkflowImportError on bad shape; returns warnings for keys that are
+    well-formed but unread."""
     _validate_structure(data)
+    return _unknown_key_warnings(data)
+
+
+# The keys each level of a workflow document may carry. Anything else is dropped
+# silently by the builders below, and a dropped key is not harmless: writing a
+# branch's conditions under `groups` instead of `condition_groups` leaves a branch
+# with no conditions, which matches everything. Unknown keys warn rather than raise,
+# so a document from a newer version still imports.
+KNOWN_KEYS = {
+    "document": {
+        "urn",
+        "schema_version",
+        "ref_id",
+        "name",
+        "description",
+        "graph",
+        "secrets",
+        "source_urn",
+        "source_version",
+        "version",
+    },
+    "graph": {"nodes", "edges", "variables"},
+    "variable": {"key", "type", "default_value"},
+    "node": {
+        "ref",
+        "type",
+        "label",
+        "action_config",
+        "loop_config",
+        "trigger_config",
+        "input_mapping",
+        "output_mapping",
+        "event_key",
+        "filters",
+        "position",
+        "retry",
+        "task_template",
+        "subprocess_workflow",
+        "branches",
+    },
+    "retry": {"max_attempts", "delay_seconds", "backoff"},
+    "edge": {"source", "target", "label", "source_branch", "source_port"},
+    "branch": {"name", "is_default", "order", "condition_groups"},
+    "condition_group": {"operator", "order", "conditions", "children"},
+    "condition": {"variable", "op", "value", "order"},
+}
+
+
+def _unknown_key_warnings(data):
+    """Warn about keys no builder reads, at every level of the document.
+
+    Cheap to compute and worth the noise: the failure it catches is silent and
+    fails open — a mistyped structural key produces a workflow that imports clean,
+    validates clean and then behaves wrongly.
+    """
+    warnings = []
+
+    def check(obj, kind, where):
+        if not isinstance(obj, dict):
+            return
+        unknown = sorted(set(obj) - KNOWN_KEYS[kind])
+        if unknown:
+            warnings.append(
+                f"{where}: unknown key(s) {', '.join(unknown)} — ignored. "
+                f"Expected one of: {', '.join(sorted(KNOWN_KEYS[kind]))}"
+            )
+
+    def walk_groups(groups, where):
+        if not isinstance(groups, list):
+            return
+        for index, group in enumerate(groups):
+            at = f"{where}.condition_groups[{index}]"
+            check(group, "condition_group", at)
+            if isinstance(group, dict):
+                for c_index, condition in enumerate(group.get("conditions") or []):
+                    check(condition, "condition", f"{at}.conditions[{c_index}]")
+                walk_groups(group.get("children") or [], at)
+
+    check(data, "document", "document")
+    graph = data.get("graph")
+    if not isinstance(graph, dict):
+        return warnings
+    check(graph, "graph", "graph")
+    for index, variable in enumerate(graph.get("variables") or []):
+        check(variable, "variable", f"graph.variables[{index}]")
+    for index, edge in enumerate(graph.get("edges") or []):
+        check(edge, "edge", f"graph.edges[{index}]")
+    for index, node in enumerate(graph.get("nodes") or []):
+        ref = node.get("ref") if isinstance(node, dict) else None
+        at = f"node '{ref}'" if ref else f"graph.nodes[{index}]"
+        check(node, "node", at)
+        if not isinstance(node, dict):
+            continue
+        check(node.get("retry"), "retry", f"{at}.retry")
+        for b_index, branch in enumerate(node.get("branches") or []):
+            b_at = f"{at}.branches[{b_index}]"
+            check(branch, "branch", b_at)
+            if isinstance(branch, dict):
+                walk_groups(branch.get("condition_groups") or [], b_at)
+    return warnings
 
 
 def _validate_structure(data):

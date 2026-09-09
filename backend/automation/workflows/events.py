@@ -37,6 +37,19 @@ COALESCE_WINDOW = timedelta(minutes=5)
 
 CUD_ACTIONS = ["created", "updated", "deleted"]
 
+# Events a model emits itself, beyond create/update/delete. A CUD event cannot say
+# "this request was submitted": answering a question saves the row too, so a trigger
+# would fire on every keystroke's worth of progress and have to filter by status.
+# A named key makes the trigger say what it means, which is what a starter workflow
+# has to teach.
+CUSTOM_EVENTS = [
+    {
+        "key": "quickformresponse.submitted",
+        "model": "quickformresponse",
+        "action": "submitted",
+    },
+]
+
 VALID_FILTER_OPS = {choice[0] for choice in Condition.Operator.choices}
 MAX_FILTER_DEPTH = 5
 
@@ -80,6 +93,7 @@ def event_key_catalog():
                     "action": action,
                 }
             )
+    keys.extend(CUSTOM_EVENTS)
     return keys
 
 

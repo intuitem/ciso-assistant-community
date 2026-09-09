@@ -19532,6 +19532,36 @@ def _outcome_sla_due_date(response):
     return (timezone.now() + timedelta(days=min(days))).date()
 
 
+def emit_quick_form_submitted(response):
+    """Announce a submitted request to the workflow engine.
+
+    A CUD event cannot express this: answering a question saves the row too, so a
+    trigger on `quickformresponse.updated` fires throughout the fill and has to
+    filter by status. Deferred to commit so a run never reads a half-written row.
+    """
+    from automation.workflows.events import dispatch_internal_event
+
+    payload = {
+        "id": str(response.id),
+        "ref_id": response.ref_id,
+        "name": response.name,
+        "quick_form": str(response.quick_form_id),
+        "publication": str(response.publication_id)
+        if response.publication_id
+        else None,
+        "outcome_refs": response.outcome_refs,
+        "score": response.score,
+        "submitted_by": str(response.submitted_by_id)
+        if response.submitted_by_id
+        else None,
+    }
+    transaction.on_commit(
+        lambda: dispatch_internal_event(
+            "quickformresponse.submitted", payload, response.folder_id
+        )
+    )
+
+
 def quick_form_response_content(response):
     """Everything the fill view needs in one call: ordered pages with translated
     questions, the answers dict, hidden pages, progress, score and outcome. Shared by
@@ -19577,6 +19607,7 @@ def quick_form_response_content(response):
             "pages": pages,
             "answers": answers,
             "hidden_pages": evaluation["hidden_pages"],
+            "missing_required": evaluation["missing_required"],
             "progress": evaluation["progress"],
             "score": evaluation["score"],
             "computed_outcome": evaluation["computed_outcome"],
@@ -19767,7 +19798,11 @@ class MyRequestViewSet(viewsets.ViewSet):
         evaluation = evaluate_quick_form(response, persist=True)
         if not evaluation["progress"]["complete"]:
             return Response(
-                {"error": "responseIncomplete", "progress": evaluation["progress"]},
+                {
+                    "error": "responseIncomplete",
+                    "progress": evaluation["progress"],
+                    "missing_required": evaluation["missing_required"],
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         response.status = QuickFormResponse.Status.SUBMITTED
@@ -19788,6 +19823,7 @@ class MyRequestViewSet(viewsets.ViewSet):
             response.due_date = sla_due
             update_fields.append("due_date")
         response.save(update_fields=update_fields)
+        emit_quick_form_submitted(response)
         transaction.on_commit(
             lambda pk=response.pk: send_quick_form_submitted_notification(pk)
         )
@@ -20034,6 +20070,68 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             )
         return super().destroy(request, *args, **kwargs)
 
+    @action(detail=True, url_path="suggested-actions", name="Supervised actions")
+    def suggested_actions(self, request, pk):
+        """Manual workflows offered for this request.
+
+        The reactive path decides for itself; this is the other half — the reviewer
+        has read the request and commits to a sequence. The outcomes its own answers
+        produced are what select which sequences are worth offering, so the list is a
+        suggestion rather than a menu.
+        """
+        from automation.workflows.supervised import suggested_actions
+
+        response = self.get_object()
+        folder_ids = [f.id for f in response.folder.get_parent_folders()] + [
+            response.folder_id
+        ]
+        return Response(suggested_actions(response, "quick_form_response", folder_ids))
+
+    @action(detail=True, methods=["post"], url_path="run-action", name="Run an action")
+    def run_action(self, request, pk):
+        """Run one of the offered sequences against this request.
+
+        Only a version this request actually offers may be started, so the endpoint
+        cannot be used to point an arbitrary workflow at an arbitrary object.
+        """
+        from automation.workflows.engine import EngineError
+        from automation.workflows.models import WorkflowNode, WorkflowVersion
+        from automation.workflows.supervised import (
+            run_supervised_action,
+            suggested_actions,
+        )
+
+        response = self.get_object()
+        folder_ids = [f.id for f in response.folder.get_parent_folders()] + [
+            response.folder_id
+        ]
+        offered = suggested_actions(response, "quick_form_response", folder_ids)
+        wanted = str(request.data.get("version") or "")
+        match = next((o for o in offered if o["version"] == wanted), None)
+        if match is None:
+            return Response(
+                {"error": "actionNotOffered"}, status=status.HTTP_404_NOT_FOUND
+            )
+        try:
+            instance = run_supervised_action(
+                response,
+                "quick_form_response",
+                WorkflowVersion.objects.get(pk=match["version"]),
+                WorkflowNode.objects.get(pk=match["entry_node"]),
+                request.user,
+            )
+        except EngineError as e:
+            return Response(
+                {"error": e.user_message}, status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(
+            {
+                "instance": str(instance.id),
+                "status": instance.status,
+                "workflow": match["name"],
+            }
+        )
+
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(QuickFormResponse.Status.choices))
@@ -20129,7 +20227,11 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             evaluation = evaluate_quick_form(response, persist=True)
             if not evaluation["progress"]["complete"]:
                 return Response(
-                    {"error": "responseIncomplete", "progress": evaluation["progress"]},
+                    {
+                        "error": "responseIncomplete",
+                        "progress": evaluation["progress"],
+                        "missing_required": evaluation["missing_required"],
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         observation = request.data.get("observation")
@@ -20189,6 +20291,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         response.save(update_fields=update_fields)
 
         if new_status == QuickFormResponse.Status.SUBMITTED:
+            emit_quick_form_submitted(response)
             transaction.on_commit(
                 lambda pk=response.pk: send_quick_form_submitted_notification(pk)
             )

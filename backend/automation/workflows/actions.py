@@ -1195,6 +1195,16 @@ _ASSESSMENT_STATUSES = frozenset(
 )
 
 UPDATABLE_MODELS: dict[str, UpdateEntry] = {
+    # Triage, not judgment. A run may widen the reviewer pool, tighten the date and
+    # leave a note; `status` and `resolution` are absent on purpose — the request
+    # lifecycle lives in set_status, outside save(), and accepting or rejecting is a
+    # verdict with consequences. Auto-closing the "nothing further needed" outcomes
+    # is worth having later, but as an explicit capability rather than a field write.
+    "quick_form_response": UpdateEntry(
+        model=QuickFormResponse,
+        fields=["due_date", "eta", "observation", "description"],
+        m2m_fields={"reviewers": _ACTOR, "respondents": _ACTOR},
+    ),
     "applied_control": UpdateEntry(
         model=AppliedControl,
         fields=[

@@ -713,9 +713,22 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
     response.score = score
     response.outcome_refs = outcome_refs
 
+    # Which required questions are still blank, so a caller can say *what* is
+    # missing rather than only that something is. Visibility is already resolved
+    # here; making the client work it out again would duplicate depends_on.
+    missing_required = [
+        entry["question"].urn
+        for entry in snapshot["per_question"].values()
+        if entry["question"].required
+        and entry["visible"]
+        and entry["page_id"] not in hidden_page_ids
+        and not entry["answered"]
+    ]
+
     return {
         "context": context,
         "hidden_pages": sorted(hidden_page_urns),
+        "missing_required": missing_required,
         "progress": {
             "answered_count": context["response"]["answered_count"],
             "total_count": context["response"]["total_count"],
