@@ -11,9 +11,11 @@ from rest_framework.test import APIClient
 from global_settings.models import GlobalSettings
 from iam.models import User
 from iam.sso.slo import (
+    SLO_OWNER_SESSION_KEY,
     SLO_SESSION_KEY,
     _build_public_saml_config,
     build_idp_logout_url,
+    copy_slo_state_from_session_key,
 )
 
 PUBLIC_URL = "https://app.example.com"
@@ -119,6 +121,16 @@ def _make_session(user, slo_state=None) -> str:
     return session.session_key
 
 
+def _make_saml_callback_session(user, slo_state=None) -> str:
+    """The session `finish_acs` leaves behind: an owner stamp, no Django login."""
+    session = _session_store()()
+    session[SLO_OWNER_SESSION_KEY] = str(user.pk)
+    if slo_state:
+        session[SLO_SESSION_KEY] = slo_state
+    session.create()
+    return session.session_key
+
+
 def _session_exists(session_key: str) -> bool:
     return _session_store()(session_key=session_key).exists(session_key)
 
@@ -174,6 +186,25 @@ def test_logout_url_view_returns_null_when_no_slo_state(sso_user):
 
 @pytest.mark.django_db
 @test_settings
+def test_logout_url_view_accepts_the_saml_callback_session(sso_user):
+    """`finish_acs` performs no Django login, so the callback session is owned
+    through its stamp only."""
+    _make_saml_sso_settings()
+    callback_key = _make_saml_callback_session(sso_user, SLO_STATE)
+
+    res = _client_for(sso_user).post(
+        LOGOUT_URL_ENDPOINT,
+        HTTP_HOST=INTERNAL_HOST,
+        HTTP_X_SSO_SESSION_KEY=callback_key,
+    )
+
+    assert res.status_code == 200
+    assert res.json()["logout_url"].startswith(f"{IDP_SLO_URL}?")
+    assert not _session_exists(callback_key)
+
+
+@pytest.mark.django_db
+@test_settings
 def test_logout_url_view_ignores_sessions_of_other_users(sso_user):
     """A leaked session key must not let a caller log its owner out or read
     their SLO material."""
@@ -205,3 +236,41 @@ def test_logout_url_view_requires_authentication(sso_user):
 
     assert res.status_code == 401
     assert _session_exists(session_key)
+
+
+# --- SLO state handoff ------------------------------------------------------
+
+
+def _handoff_request(user):
+    """A session-token call: the caller's own fresh session, plus its user."""
+    request = RequestFactory().post("/api/iam/session-token/")
+    session = _session_store()()
+    session.create()
+    request.session = session
+    request.user = user
+    return request
+
+
+@pytest.mark.django_db
+@test_settings
+def test_handoff_copies_the_callers_own_callback_session(sso_user):
+    callback_key = _make_saml_callback_session(sso_user, SLO_STATE)
+    request = _handoff_request(sso_user)
+
+    copy_slo_state_from_session_key(request, callback_key)
+
+    assert request.session[SLO_SESSION_KEY] == SLO_STATE
+
+
+@pytest.mark.django_db
+@test_settings
+def test_handoff_refuses_a_callback_session_owned_by_someone_else(sso_user):
+    """A leaked session key must not let a caller lift someone else's SLO
+    material into their own session."""
+    victim = User.objects.create_user(email="victim2@example.com")
+    victim_key = _make_saml_callback_session(victim, SLO_STATE)
+    request = _handoff_request(sso_user)
+
+    copy_slo_state_from_session_key(request, victim_key)
+
+    assert SLO_SESSION_KEY not in request.session

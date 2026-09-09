@@ -21,11 +21,22 @@ from iam.sso.models import SSOSettings
 logger = structlog.get_logger(__name__)
 
 SLO_SESSION_KEY = "sso_slo_state"
+SLO_OWNER_SESSION_KEY = "sso_slo_owner"
 
 
 def _get_session_store(session_key: str):
     engine = import_module(settings.SESSION_ENGINE)
     return engine.SessionStore(session_key=session_key)
+
+
+def _session_owner_pk(session) -> str | None:
+    """The user a session belongs to, or None when it belongs to nobody.
+
+    The SAML callback session holds no Django login, so `finish_acs` stamps the
+    owner next to the SLO state; OIDC and allauth sessions carry the usual
+    `_auth_user_id`.
+    """
+    return session.get(AUTH_USER_SESSION_KEY) or session.get(SLO_OWNER_SESSION_KEY)
 
 
 def _public_url(path: str) -> str:
@@ -39,12 +50,21 @@ def get_post_logout_redirect_url() -> str:
 def copy_slo_state_from_session_key(
     request: HttpRequest, source_session_key: str | None
 ) -> None:
-    """Copy SLO state from the callback session into the allauth session."""
+    """Copy SLO state from the callback session into the allauth session.
+
+    The caller must own the source session, so a leaked session key cannot be
+    used to lift someone else's SLO material into one's own session.
+    """
     if not source_session_key or request.session.get(SLO_SESSION_KEY):
         return
     if source_session_key == request.session.session_key:
         return
+    if not request.user.is_authenticated:
+        return
     source_session = _get_session_store(source_session_key)
+    if _session_owner_pk(source_session) != str(request.user.pk):
+        logger.warning("Callback session does not belong to the caller, ignoring it")
+        return
     slo_state = source_session.get(SLO_SESSION_KEY)
     if not slo_state:
         return
@@ -63,8 +83,12 @@ def stash_oidc_slo_state(request: HttpRequest, id_token: str | None) -> None:
     logger.info("Stashed OIDC single logout state in session")
 
 
-def stash_saml_slo_state(request: HttpRequest, auth) -> None:
-    """Keep the SAML session identifiers needed for SP-initiated logout."""
+def stash_saml_slo_state(request: HttpRequest, auth, user) -> None:
+    """Keep the SAML session identifiers needed for SP-initiated logout.
+
+    `finish_acs` performs no Django login, so the owner is stamped explicitly.
+    """
+    request.session[SLO_OWNER_SESSION_KEY] = str(user.pk)
     request.session[SLO_SESSION_KEY] = {
         "provider": "saml",
         "name_id": auth.get_nameid(),
@@ -147,7 +171,7 @@ def pop_slo_state_from_sessions(
         if not session.exists(session_key):
             logger.info("Session not found, nothing to destroy", session=label)
             continue
-        if session.get(AUTH_USER_SESSION_KEY) != str(owner_pk):
+        if _session_owner_pk(session) != str(owner_pk):
             logger.warning(
                 "Session does not belong to the caller, leaving it untouched",
                 session=label,
