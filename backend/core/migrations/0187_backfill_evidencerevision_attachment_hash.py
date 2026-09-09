@@ -10,9 +10,11 @@ logger = logging.getLogger(__name__)
 def backfill_attachment_hash(apps, schema_editor):
     EvidenceRevision = apps.get_model("core", "EvidenceRevision")
 
-    revisions = EvidenceRevision.objects.exclude(attachment="").exclude(
-        attachment__isnull=True
-    ).filter(attachment_hash__isnull=True)
+    revisions = (
+        EvidenceRevision.objects.exclude(attachment="")
+        .exclude(attachment__isnull=True)
+        .filter(attachment_hash__isnull=True)
+    )
 
     for revision in revisions:
         if not default_storage.exists(revision.attachment.name):
