@@ -707,7 +707,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8
       ref_id: A.8.3
       name: External reporting
-      description: Report externally on AI system activities as required.
+      description: Enable relevant parties to report negative effects.
       implementation_groups:
       - controls
     - urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.4
