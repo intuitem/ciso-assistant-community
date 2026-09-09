@@ -29,7 +29,7 @@
 		model
 	}: Props = $props();
 
-	let displayDefaultRoleSelect = $derived(object.content_type !== "EN"); // We want to hide the `"default_role"`field `Select` for enclave folders.
+	let displayDefaultRoleSelect = $derived(object.content_type !== 'EN'); // We want to hide the `"default_role"`field `Select` for enclave folders.
 
 	onMount(() => {
 		const isEdit = Boolean(object?.id);
