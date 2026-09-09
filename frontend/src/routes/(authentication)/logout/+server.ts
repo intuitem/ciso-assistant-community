@@ -1,4 +1,4 @@
-import { error, redirect, type Cookies } from '@sveltejs/kit';
+import { redirect, type Cookies } from '@sveltejs/kit';
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
 import { logger } from '$lib/server/logger';
 
@@ -28,6 +28,20 @@ async function resolveIdPLogoutUrl(fetch: Fetch, cookies: Cookies): Promise<IdPL
 	}
 }
 
+// Best-effort: the browser is signed out either way, so a failure here must
+// never strand the user with their cookies still set.
+async function endAllauthSession(fetch: Fetch): Promise<boolean> {
+	try {
+		const res = await fetch(`${ALLAUTH_API_URL}/auth/session`, { method: 'DELETE' });
+		const { meta } = await res.json();
+		if (meta?.is_authenticated === false) return true;
+		logger.error('Failed to end the allauth session', { status: res.status });
+	} catch (error) {
+		logger.error('Failed to end the allauth session', { error });
+	}
+	return false;
+}
+
 export const GET = async ({ locals }) => {
 	if (!locals.user) {
 		redirect(302, `/login?next=/home`);
@@ -43,14 +57,8 @@ export const POST = async ({ fetch, cookies, locals }) => {
 	if (idpLogout?.ok) {
 		if (idpLogout.url) target = idpLogout.url;
 	} else {
-		// Local user, or the SSO logout endpoint failed: end the allauth session
-		// directly rather than clearing cookies over a session that is still alive.
-		const res = await fetch(`${ALLAUTH_API_URL}/auth/session`, { method: 'DELETE' });
-		const response = await res.json();
-		if (response.meta?.is_authenticated !== false) {
-			logger.error('Failed to end the allauth session', { status: res.status });
-			error(400, 'Failed to end the session');
-		}
+		// Local user, or the SSO logout endpoint failed: end the allauth session here.
+		await endAllauthSession(fetch);
 	}
 
 	cookies.delete('token', { path: '/' });
