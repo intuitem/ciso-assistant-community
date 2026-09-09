@@ -32,6 +32,19 @@
 		})
 	);
 	const viewerIsRequester = $derived(!!data.viewerIsRequester);
+	const suggestedActions = $derived((data.suggestedActions ?? []) as any[]);
+
+	// "Why can't I submit?" has to be answerable from the screen. The server resolves
+	// visibility, so it tells us which required questions are still blank.
+	const missingRequired = $derived(
+		((content.missing_required ?? []) as string[]).map((urn) => {
+			for (const page of content.pages ?? []) {
+				const q = page.questions?.[urn];
+				if (q) return { urn, page: page.name, text: q.text || urn };
+			}
+			return { urn, page: '', text: urn };
+		})
+	);
 	// A requester edits their own draft; a reviewer edits by folder permission.
 	const canEditAnswers = $derived((viewerIsRequester || canEdit) && content.can_edit_answers);
 
@@ -118,6 +131,26 @@
 			{/if}
 		</div>
 
+		{#if canEditAnswers && missingRequired.length}
+			<aside
+				class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950/40"
+			>
+				<div class="font-medium text-amber-900 dark:text-amber-200">
+					<i class="fa-solid fa-circle-exclamation mr-1"></i>
+					{m.quickFormMissingRequired({ count: missingRequired.length })}
+				</div>
+				<ul class="mt-1 list-inside list-disc text-xs text-amber-800 dark:text-amber-300">
+					{#each missingRequired as q (q.urn)}
+						<li>
+							{q.text}{#if q.page}<span class="text-amber-600 dark:text-amber-400">
+									&nbsp;— {q.page}</span
+								>{/if}
+						</li>
+					{/each}
+				</ul>
+			</aside>
+		{/if}
+
 		{#if canEditAnswers}
 			<p class="text-xs text-surface-500">
 				<i class="fa-solid fa-cloud-arrow-up mr-1"></i>
@@ -185,6 +218,28 @@
 				</button>
 			</div>
 		{:else if canEdit}
+			{#if suggestedActions.length}
+				<!-- Supervised automation: the outcomes suggest, the reviewer commits, the
+				     workflow executes. Offered only when the answers make them relevant. -->
+				<div class="flex flex-wrap items-center gap-2 pt-1">
+					<span class="text-xs font-semibold uppercase tracking-wider text-surface-500">
+						{m.quickFormSuggestedActions()}
+					</span>
+					{#each suggestedActions as sa (sa.version)}
+						<button
+							type="button"
+							class="btn btn-sm preset-tonal-primary"
+							disabled={busy}
+							title={sa.because
+								? m.quickFormActionBecause({ outcome: sa.because })
+								: (sa.description ?? '')}
+							onclick={() => post('runAction', { version: sa.version })}
+						>
+							<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>{sa.label}
+						</button>
+					{/each}
+				</div>
+			{/if}
 			<!-- The reviewer. Claiming is optional; a decision always carries a resolution. -->
 			<div class="flex flex-wrap items-center gap-2 pt-1">
 				{#if response.status === 'draft'}

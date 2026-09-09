@@ -27,7 +27,11 @@ export const load = (async ({ fetch, params }) => {
 	]);
 	if (!responseRes.res.ok) error(responseRes.res.status === 404 ? 404 : 403, 'Request not found');
 	const response = await responseRes.res.json();
+	// Supervised actions are a reviewer's affordance; a requester's call 403s and the
+	// list is simply empty for them.
+	const actionsRes = await fetch(`${reviewer}suggested-actions/`);
 	return {
+		suggestedActions: actionsRes.ok ? await actionsRes.json() : [],
 		URLModel: 'quick-form-responses',
 		response,
 		content: await contentRes.res.json(),
@@ -82,6 +86,14 @@ export const actions: Actions = {
 	clone: async (event) => {
 		const { id } = await event.request.json();
 		const res = await event.fetch(`${BASE_API_URL}/my-requests/${id}/clone/`, json({}));
+		return { status: res.status, body: await res.json() };
+	},
+	runAction: async (event) => {
+		const { id, version } = await event.request.json();
+		const res = await event.fetch(
+			`${BASE_API_URL}/quick-form-responses/${id}/run-action/`,
+			json({ version })
+		);
 		return { status: res.status, body: await res.json() };
 	}
 };
