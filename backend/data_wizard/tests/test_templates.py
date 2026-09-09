@@ -433,7 +433,20 @@ class TestAssessmentTemplates:
         template_domains,
         template_perimeter,
         all_accessible,
+        root_folder,
     ):
+        web_control = AppliedControl.objects.create(
+            name="Web frontend TLS hardening",
+            ref_id="AC-WEB-001",
+            folder=domain_folder,
+        )
+        k8s_control = AppliedControl.objects.create(
+            name="Kubernetes Hardening", folder=domain_folder
+        )
+        owner_user = User.objects.create_user("jane.doe@company.com", is_published=True)
+        owner_user.folder = root_folder
+        owner_user.save()
+
         resp = _post_template(
             api_client,
             "findings_assessment_template.xlsx",
@@ -453,7 +466,13 @@ class TestAssessmentTemplates:
         assert first.asset.name == "web frontend"
         assert first.asset.folder == domain_folder
         assert first.asset.type == Asset.Type.SUPPORT
+        assert list(first.applied_controls.all()) == [web_control]
+        assert list(first.owner.all()) == [owner_user.actor]
         assert results["details"]["assets_created"] == 3
+
+        third = Finding.objects.get(ref_id="F.07")
+        assert list(third.applied_controls.all()) == [k8s_control]
+        assert third.owner.count() == 0
 
     def test_risk_assessment_template(
         self,
