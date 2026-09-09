@@ -26,7 +26,6 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     Framework,
-    Question,
     StoredLibrary,
 )
 from core.utils import build_initial_field_visibility
@@ -132,12 +131,16 @@ def tprm_domain(root_folder):
 
 @pytest.fixture
 def framework_fixture():
+    """A questionnaire framework: its requirements carry library-backed
+    questions, so answers exercise the question / choice URN references."""
     library = StoredLibrary.objects.filter(
-        urn="urn:intuitem:risk:library:iso27001-2022"
+        urn="urn:intuitem:risk:library:enisa-sme-cra-maturity"
     ).last()
     assert library is not None
     library.load()
-    return Framework.objects.get(urn="urn:intuitem:risk:framework:iso27001-2022")
+    return Framework.objects.get(
+        urn="urn:intuitem:risk:framework:enisa-sme-cra-maturity"
+    )
 
 
 @pytest.fixture
@@ -343,18 +346,25 @@ class TestEntityAssessmentAuditRoundTrip:
         requirement_assessment = audit.requirement_assessments.first()
         evidence = Evidence.objects.create(name="Audit proof", folder=enclave)
         requirement_assessment.evidences.add(evidence)
-        question = Question.objects.create(
-            requirement_node=requirement_assessment.requirement,
-            urn="urn:test:question:audit-roundtrip",
-            text="Who signed off?",
+        # Answer a real library-backed question: questions and their choices
+        # travel as URN references, never as exported rows.
+        answered_ra = (
+            audit.requirement_assessments.filter(requirement__questions__isnull=False)
+            .distinct()
+            .first()
         )
-        Answer.objects.create(
-            requirement_assessment=requirement_assessment,
-            question=question,
-            value="the provider",
-            folder=enclave,
+        question = answered_ra.requirement.questions.first()
+        choice = question.choices.first()
+        # create_requirement_assessments() already seeded an empty answer per
+        # question, so fill one in rather than adding a duplicate row.
+        answer = Answer.objects.get(
+            requirement_assessment=answered_ra, question=question
         )
+        answer.selected_choices.set([choice])
         source_ra_count = audit.requirement_assessments.count()
+        source_answer_count = Answer.objects.filter(
+            requirement_assessment__compliance_assessment=audit
+        ).count()
 
         assert audit.perimeter is None
         assert source_ra_count > 0
@@ -392,10 +402,15 @@ class TestEntityAssessmentAuditRoundTrip:
         imported_answers = Answer.objects.filter(
             requirement_assessment__compliance_assessment=imported_audit
         )
-        assert imported_answers.count() == 1
+        assert imported_answers.count() == source_answer_count
         assert set(imported_answers.values_list("folder", flat=True)) == {
             imported_audit.folder_id
         }
+        # The question and its selected choice resolved from their library URNs.
+        imported_answer = imported_answers.get(question__urn=question.urn)
+        assert list(imported_answer.selected_choices.values_list("urn", flat=True)) == [
+            choice.urn
+        ]
 
         # Granting a representative access must not reach beyond the enclave.
         respondent = User.objects.create(email="rep@provider.test", is_third_party=True)
