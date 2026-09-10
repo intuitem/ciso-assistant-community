@@ -1735,7 +1735,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             role_assignments = RoleAssignment.get_role_assignments_from_user(principal)
 
         # Only role assignments linked to a (obviously non-NULL) `UserGroup(builtin=True)` can grant the `default_role`.
-        # (This prevents service accounts (`ServiceAccount`) to be granted default roles (as their role assignments can't have a non-NULL `role_assignment.user_group`)).
+        # (This prevents default roles from being granted to service accounts (`ServiceAccount`) (as their role assignments can't have a non-NULL `role_assignment.user_group`)).
         # (This also prevent custom user groups from granting default roles).
         audience_role_assignments = role_assignments.filter(user_group__builtin=True)
 
