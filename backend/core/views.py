@@ -160,6 +160,13 @@ from rest_framework.exceptions import (
 
 
 from core.helpers import *
+from core.answer_attachments import (
+    AttachmentError,
+    add_attachment,
+    attachments_for,
+    promote_to_evidence,
+)
+from core.answer_attachments import serialize as serialize_attachment
 from core.models import (
     Commitment,
     AppliedControl,
@@ -19576,12 +19583,70 @@ class QuickFormViewSet(BaseModelViewSet):
     builder and published through the loader."""
 
     model = QuickForm
-    http_method_names = ["get", "head", "options"]
+    # POST is allowed only so the `preview` action can take an answers body:
+    # http_method_names is enforced before the action is dispatched, so leaving it out
+    # 405s the preview. Creating a quick form stays closed, below.
+    http_method_names = ["get", "head", "options", "post"]
     filterset_fields = ["folder", "library"]
     search_fields = ["name", "description", "ref_id"]
 
     def get_queryset(self):
         return super().get_queryset().select_related("folder", "library")
+
+    def create(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @action(detail=True, methods=["post"], name="Preview a published form")
+    def preview(self, request, pk):
+        """Answer a published form without creating a response.
+
+        Same evaluator as the draft preview — the live rows are turned back into the
+        document shape it takes — so an author checking a published form and one
+        checking a draft are looking at the same rules.
+        """
+        from core.cel_service import evaluate_quick_form_document
+
+        quick_form = self.get_object()
+        pages = []
+        for page in (
+            QuickFormPage.objects.filter(quick_form=quick_form)
+            .prefetch_related("questions__choices")
+            .order_by("order")
+        ):
+            pages.append(
+                {
+                    "urn": page.urn,
+                    "ref_id": page.ref_id,
+                    "name": page.get_name_translated,
+                    "description": page.get_description_translated,
+                    "visibility_expression": page.visibility_expression,
+                    "questions": page.get_questions_translated() or {},
+                }
+            )
+        document = {
+            "urn": quick_form.urn,
+            "pages": pages,
+            "outcomes_definition": quick_form.outcomes_definition or [],
+            "scores_definition": quick_form.scores_definition,
+        }
+        answers = request.data.get("answers")
+        evaluation = evaluate_quick_form_document(
+            document, answers if isinstance(answers, dict) else {}
+        )
+        hidden = set(evaluation["hidden_pages"])
+        return Response(
+            {
+                "name": quick_form.get_name_translated,
+                "description": quick_form.get_description_translated,
+                "outcomes_definition": document["outcomes_definition"],
+                "pages": [{**page, "hidden": page["urn"] in hidden} for page in pages],
+                "hidden_pages": evaluation["hidden_pages"],
+                "missing_required": evaluation["missing_required"],
+                "progress": evaluation["progress"],
+                "score": evaluation["score"],
+                "computed_outcome": evaluation["computed_outcome"],
+            }
+        )
 
     @action(detail=True, methods=["get"], name="Quick form pages")
     def pages(self, request, pk):
@@ -19692,6 +19757,7 @@ def quick_form_response_content(response):
     answers = build_answers_dict(
         response.answers.select_related("question").prefetch_related("selected_choices")
     )
+    attachments = attachments_for(response.answers.all())
     return Response(
         {
             "id": str(response.id),
@@ -19706,6 +19772,7 @@ def quick_form_response_content(response):
             },
             "pages": pages,
             "answers": answers,
+            "attachments": attachments,
             "hidden_pages": evaluation["hidden_pages"],
             "missing_required": evaluation["missing_required"],
             "progress": evaluation["progress"],
@@ -19928,6 +19995,76 @@ class MyRequestViewSet(viewsets.ViewSet):
             lambda pk=response.pk: send_quick_form_submitted_notification(pk)
         )
         return Response(QuickFormResponseReadSerializer(response).data)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="attachments",
+        parser_classes=[MultiPartParser, FormParser],
+        name="Attach a file to the caller's own request",
+    )
+    def attachments(self, request, pk=None):
+        """Same upload rules as the reviewer path; the gate is respondent
+        membership rather than folder RBAC, and only a draft accepts files."""
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if response.status != QuickFormResponse.Status.DRAFT:
+            return Response(
+                {"error": "responseLocked"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        answer = (
+            Answer.objects.filter(
+                response=response, question__urn=request.data.get("question")
+            )
+            .select_related("question")
+            .first()
+        )
+        if answer is None:
+            return Response(
+                {"error": "unknownQuestion"}, status=status.HTTP_404_NOT_FOUND
+            )
+        upload = request.FILES.get("file")
+        if upload is None:
+            return Response({"error": "noFile"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            attachment = add_attachment(answer, upload, request.user)
+        except AttachmentError as e:
+            return Response(
+                {"error": e.code, "detail": e.detail},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        response.recompute()
+        return Response(
+            serialize_attachment(attachment), status=status.HTTP_201_CREATED
+        )
+
+    @action(
+        detail=True,
+        methods=["delete"],
+        url_path=r"attachments/(?P<attachment_id>[^/.]+)",
+        name="Remove a file from the caller's own request",
+    )
+    def remove_attachment(self, request, pk=None, attachment_id=None):
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if response.status != QuickFormResponse.Status.DRAFT:
+            return Response(
+                {"error": "responseLocked"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        attachment = AnswerAttachment.objects.filter(
+            id=attachment_id, answer__response=response
+        ).first()
+        if attachment is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if attachment.promoted_to_id:
+            return Response(
+                {"error": "alreadyPromoted"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        attachment.delete()
+        response.recompute()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["post"], name="Abandon the caller's own request")
     def drop(self, request, pk=None):
@@ -20169,6 +20306,89 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return super().destroy(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="attachments",
+        parser_classes=[MultiPartParser, FormParser],
+        name="Attach a file to an answer",
+    )
+    def attachments(self, request, pk):
+        """Reviewer-side upload. The requester's equivalent lives on
+        MyRequestViewSet; only the gate differs, the rules are shared."""
+        response = self.get_object()
+        answer = (
+            Answer.objects.filter(
+                response=response, question__urn=request.data.get("question")
+            )
+            .select_related("question")
+            .first()
+        )
+        if answer is None:
+            return Response(
+                {"error": "unknownQuestion"}, status=status.HTTP_404_NOT_FOUND
+            )
+        upload = request.FILES.get("file")
+        if upload is None:
+            return Response({"error": "noFile"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            attachment = add_attachment(answer, upload, request.user)
+        except AttachmentError as e:
+            return Response(
+                {"error": e.code, "detail": e.detail},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        response.recompute()
+        return Response(
+            serialize_attachment(attachment), status=status.HTTP_201_CREATED
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path=r"attachments/(?P<attachment_id>[^/.]+)/promote",
+        name="Promote an attachment to evidence",
+    )
+    def promote_attachment(self, request, pk, attachment_id=None):
+        """A reviewer decides this file is worth keeping. Creates the evidence and
+        its first revision; on an audit answer it also lands on the requirement."""
+        response = self.get_object()
+        attachment = AnswerAttachment.objects.filter(
+            id=attachment_id, answer__response=response
+        ).first()
+        if attachment is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        evidence, created = promote_to_evidence(attachment, request.user)
+        return Response(
+            {
+                "evidence": str(evidence.id),
+                "name": evidence.name,
+                "created": created,
+            }
+        )
+
+    @action(
+        detail=True,
+        methods=["delete"],
+        url_path=r"attachments/(?P<attachment_id>[^/.]+)",
+        name="Remove an attachment",
+    )
+    def remove_attachment(self, request, pk, attachment_id=None):
+        response = self.get_object()
+        attachment = AnswerAttachment.objects.filter(
+            id=attachment_id, answer__response=response
+        ).first()
+        if attachment is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if attachment.promoted_to_id:
+            # The evidence now depends on these bytes.
+            return Response(
+                {"error": "alreadyPromoted"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        attachment.delete()
+        response.recompute()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, url_path="suggested-actions", name="Supervised actions")
     def suggested_actions(self, request, pk):

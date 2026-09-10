@@ -38,6 +38,12 @@ export const navData = {
 					]
 				},
 				{
+					name: 'myRequests',
+					fa_icon: 'fa-solid fa-hand',
+					href: '/my-requests',
+					permissions: []
+				},
+				{
 					name: 'myAssignments',
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',
@@ -156,6 +162,12 @@ export const navData = {
 					permissions: ['view_documenttemplate']
 				},
 				{
+					name: 'quickForms',
+					fa_icon: 'fa-solid fa-share-nodes',
+					href: '/quick-forms',
+					permissions: ['view_quickformpublication']
+				},
+				{
 					name: 'lbListLibraryBuilder',
 					fa_icon: 'fas fa-shapes',
 					href: '/experimental/library-builder',
@@ -267,6 +279,12 @@ export const navData = {
 					href: '/risk-acceptances'
 				},
 				{
+					name: 'requests',
+					fa_icon: 'fa-solid fa-inbox',
+					href: '/requests',
+					permissions: ['view_quickformresponse']
+				},
+				{
 					name: 'validationFlows',
 					fa_icon: 'fa-solid fa-clipboard-check',
 					href: '/validation-flows',
@@ -354,36 +372,6 @@ export const navData = {
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/posture-assessments',
 					permissions: ['view_postureassessment']
-				},
-				{
-					name: 'myRequests',
-					fa_icon: 'fa-solid fa-hand',
-					href: '/my-requests',
-					permissions: []
-				},
-				{
-					name: 'requestQueue',
-					fa_icon: 'fa-solid fa-inbox',
-					href: '/requests',
-					permissions: ['view_quickformresponse']
-				},
-				{
-					name: 'quickFormResponses',
-					fa_icon: 'fa-solid fa-clipboard-question',
-					href: '/quick-form-responses',
-					permissions: ['view_quickformresponse']
-				},
-				{
-					name: 'quickFormPublications',
-					fa_icon: 'fa-solid fa-share-nodes',
-					href: '/quick-form-publications',
-					permissions: ['view_quickformpublication']
-				},
-				{
-					name: 'quickForms',
-					fa_icon: 'fa-solid fa-file-lines',
-					href: '/quick-forms',
-					permissions: ['view_quickform']
 				},
 				{
 					name: 'evidences',

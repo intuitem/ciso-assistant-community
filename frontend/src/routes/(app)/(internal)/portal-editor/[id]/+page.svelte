@@ -4,6 +4,7 @@
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
 	import SectionEditor from '$lib/components/PortalEditor/SectionEditor.svelte';
+	import { countIncompleteTiles } from '$lib/components/PortalEditor/tile-validation';
 	import PortalSettingsPanel from '$lib/components/PortalEditor/PortalSettingsPanel.svelte';
 	import { SCAFFOLDABLE_MODELS } from '$lib/utils/modelTargets';
 	import { urlParamModelVerboseName } from '$lib/utils/crud';
@@ -152,15 +153,14 @@
 		metric: m.metric(),
 		certificationDocument: m.certificationDocument(),
 		framework: m.framework(),
-		assessment: m.questionnaire(),
+		// The platform calls a ComplianceAssessment an Audit everywhere else, and this
+		// tile's own target field is already labelled "Audit setup". "Questionnaire" here
+		// only collided with the quick form below it.
+		assessment: m.complianceAssessment(),
 		quickForm: m.quickForm()
 	};
 
 	// Bundle the shared option lists / data once for the section + tile editors.
-	const personalFoldersEnabled = $derived(
-		!!page.data?.settings?.personal_folders && !!page.data?.settings?.personal_folders_parent
-	);
-
 	const ctx = $derived({
 		modelOptions,
 		pageDestinations: PAGE_DESTINATIONS,
@@ -172,12 +172,13 @@
 		quickForms: data.quickForms ?? [],
 		actors: data.actors ?? [],
 		publications: data.publications ?? [],
-		folders: data.folders,
-		personalFoldersEnabled,
 		docs
 	});
 
 	const payload = $derived(JSON.stringify({ sections }));
+	// A tile with no target 400s for every clicker, so saving one is never what the
+	// author meant. The backend rejects it too; this is what stops them getting there.
+	const incompleteTiles = $derived(countIncompleteTiles(sections));
 
 	// 'navigate' targets a model (mandatory) — backfill any tile that lacks one so the
 	// select is never silently empty. 'assessment' tiles need a stable id so a click can
@@ -355,6 +356,13 @@
 	<div
 		class="fixed bottom-0 right-0 left-64 flex items-center justify-end gap-3 border-t border-surface-200-800 bg-surface-50-950/90 px-8 py-3 backdrop-blur"
 	>
+		{#if incompleteTiles > 0}
+			<p class="mr-auto text-sm text-error-600 dark:text-error-400">
+				<i class="fa-solid fa-circle-exclamation mr-1"></i>{m.portalTileIncompleteCount({
+					count: incompleteTiles
+				})}
+			</p>
+		{/if}
 		<form method="POST" action="?/setStatus" use:enhance={savedToastEnhance(toast)}>
 			<input
 				type="hidden"
@@ -371,7 +379,13 @@
 			use:enhance={savedToastEnhance(toast, { reset: false })}
 		>
 			<input type="hidden" name="payload" value={payload} />
-			<button class="btn preset-filled-primary-500">
+			<button
+				class="btn preset-filled-primary-500"
+				disabled={incompleteTiles > 0}
+				title={incompleteTiles > 0
+					? m.portalTileIncompleteCount({ count: incompleteTiles })
+					: undefined}
+			>
 				<i class="fa-solid fa-floppy-disk mr-1"></i>{m.save()}
 			</button>
 		</form>

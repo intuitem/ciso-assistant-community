@@ -85,12 +85,28 @@
 		<label class="text-sm font-semibold" for={field}>{label}</label>
 	{/if}
 
-	<div class="control whitespace-pre-line">
+	<ul class="control flex flex-col gap-4 whitespace-pre-line">
 		{#each Object.entries(questions) as [urn, question]}
 			<!-- Only render if visible according to depends_on -->
 			{#if isQuestionVisible(question, internalAnswers, questions)}
-				<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
-					<p class="font-semibold p-2">{question.text} ({safeTranslate(question.type)})</p>
+				<li
+					class="flex flex-col justify-between gap-2 rounded-xl border border-surface-200-800 bg-surface-50-950 px-4 py-3"
+				>
+					<p class="flex flex-wrap items-baseline gap-x-2 font-semibold">
+						<span>{question.text}</span>
+						{#if question.required === false}
+							<span class="text-xs font-normal text-surface-400">{m.optional()}</span>
+						{:else}
+							<!-- Mandatory is the norm here, so the marker has to be findable at a
+							     glance rather than inferred from the absence of a note. -->
+							<span class="text-sm font-bold text-error-500" title={m.required()}>*</span>
+						{/if}
+						<!-- The widget already says what it is; the type belongs as a quiet aside,
+						     not as half the label. -->
+						<span class="text-[11px] font-normal uppercase tracking-wide text-surface-400"
+							>{safeTranslate(question.type)}</span
+						>
+					</p>
 
 					{#if shallow}
 						{#if Array.isArray(internalAnswers[urn]) && internalAnswers[urn].length > 0}
@@ -130,14 +146,14 @@
 								}}
 							/>
 						{:else}
-							<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
+							<div class="flex flex-col gap-1.5 rounded-lg border border-surface-200-800 p-1.5">
 								{#each question.choices as option}
 									{@const selected = internalAnswers[urn] === option.urn}
 									<button
 										type="button"
 										name="question"
 										{disabled}
-										class="shadow-sm p-1 rounded-base border border-surface-300-700 transition-all duration-150
+										class="rounded-base border border-surface-300-700 px-3 py-2 text-left shadow-sm transition-all duration-150
 											{selected
 											? 'preset-filled-primary-500 rounded-base'
 											: 'bg-surface-100-900 rounded-base hover:bg-surface-300-700'}
@@ -177,7 +193,7 @@
 							</div>
 						{/if}
 					{:else if question.type === 'multiple_choice'}
-						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
+						<div class="flex flex-col gap-1.5 rounded-lg border border-surface-200-800 p-1.5">
 							{#each question.choices as option}
 								{@const selected =
 									Array.isArray(internalAnswers[urn]) && internalAnswers[urn].includes(option.urn)}
@@ -185,7 +201,7 @@
 									type="button"
 									name="question"
 									{disabled}
-									class="shadow-sm p-1 rounded-base border border-surface-300-700 transition-all duration-150
+									class="rounded-base border border-surface-300-700 px-3 py-2 text-left shadow-sm transition-all duration-150
 										{selected
 										? 'preset-filled-primary-500 rounded-base'
 										: 'bg-surface-100-900 rounded-base hover:bg-surface-300-700'}
@@ -224,14 +240,14 @@
 							onchange={(e) => onChange(urn, internalAnswers[urn])}
 						/>
 					{:else if question.type === 'boolean'}
-						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
+						<div class="flex flex-col gap-1.5 rounded-lg border border-surface-200-800 p-1.5">
 							{#each [{ value: true, label: m.yes() }, { value: false, label: m.no() }] as option}
 								{@const selected = internalAnswers[urn] === option.value}
 								<button
 									type="button"
 									name="question"
 									{disabled}
-									class="shadow-sm p-1 rounded-base border border-surface-300-700 transition-all duration-150
+									class="rounded-base border border-surface-300-700 px-3 py-2 text-left shadow-sm transition-all duration-150
 										{selected
 										? 'preset-filled-primary-500 rounded-base'
 										: 'bg-surface-100-900 rounded-base hover:bg-surface-300-700'}
@@ -324,7 +340,7 @@
 				</li>
 			{/if}
 		{/each}
-	</div>
+	</ul>
 
 	{#if helpText}
 		<p class="text-sm text-surface-600-400">{helpText}</p>

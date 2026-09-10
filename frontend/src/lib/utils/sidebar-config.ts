@@ -84,11 +84,9 @@ type SidebarFrontendKeys = {
 	rightRequests: boolean;
 	dataBreaches: boolean;
 	auditDashboard: boolean;
-	quickForms: boolean;
-	quickFormResponses: boolean;
 	quickFormPublications: boolean;
 	myRequests: boolean;
-	requestQueue: boolean;
+	requests: boolean;
 	presets: boolean;
 	securityAdvisories: boolean;
 	cwes: boolean;
@@ -138,11 +136,9 @@ export function getSidebarVisibleItems(
 		rightRequests: featureFlags?.right_requests ?? true,
 		dataBreaches: featureFlags?.data_breaches ?? true,
 		auditDashboard: featureFlags?.auditee_mode ?? false,
-		quickForms: featureFlags?.quick_forms ?? false,
-		quickFormResponses: featureFlags?.quick_forms ?? false,
 		quickFormPublications: featureFlags?.quick_forms ?? false,
 		myRequests: featureFlags?.quick_forms ?? false,
-		requestQueue: featureFlags?.quick_forms ?? false,
+		requests: featureFlags?.quick_forms ?? false,
 		presets: featureFlags?.journeys ?? true,
 		securityAdvisories: featureFlags?.security_advisories ?? true,
 		cwes: featureFlags?.cwes ?? true,

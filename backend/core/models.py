@@ -3708,6 +3708,7 @@ class Question(AbstractBaseModel, FolderMixin):
         UNIQUE_CHOICE = "unique_choice", _("Unique choice")
         MULTIPLE_CHOICE = "multiple_choice", _("Multiple choice")
         DATE = "date", _("Date")
+        FILE = "file", _("File")
 
     # Exactly one parent: a requirement node (compliance questionnaire) or a
     # quick form page (quick form). Enforced by the CheckConstraint below.
@@ -10495,6 +10496,57 @@ class QuickFormResponse(
 
     def __str__(self) -> str:
         return self.name
+
+
+class AnswerAttachment(AbstractBaseModel, FolderMixin):
+    """A file someone attached while answering a question.
+
+    Hangs off `Answer`, which already carries the XOR parent, so this serves both a
+    quick form request and an audit questionnaire without knowing the difference.
+
+    Deliberately not an `Evidence`. Evidence is folder-scoped and governed, and the
+    people who answer questions — a requester, an auditee — usually hold no
+    permission on the folder the answer lives in. Uploading is cheap and reversible;
+    promoting to Evidence is a reviewer's act, recorded in `promoted_to`.
+    """
+
+    answer = models.ForeignKey(
+        "Answer",
+        on_delete=models.CASCADE,
+        related_name="attachments",
+        verbose_name=_("Answer"),
+    )
+    file = models.FileField(upload_to="answer_attachments", verbose_name=_("File"))
+    filename = models.CharField(max_length=255, verbose_name=_("File name"))
+    size = models.PositiveIntegerField(default=0, verbose_name=_("Size"))
+    mime_type = models.CharField(max_length=127, blank=True, default="")
+    #: sha256 of the bytes. Stored from the start so the evidence de-duplication
+    #: work has something to match on when batch promotion arrives.
+    file_hash = models.CharField(max_length=64, blank=True, default="", db_index=True)
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="answer_attachments",
+        verbose_name=_("Uploaded by"),
+    )
+    promoted_to = models.ForeignKey(
+        "Evidence",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="promoted_from_answers",
+        verbose_name=_("Promoted to evidence"),
+    )
+
+    class Meta:
+        ordering = ["created_at"]
+        verbose_name = _("Answer attachment")
+        verbose_name_plural = _("Answer attachments")
+
+    def __str__(self) -> str:
+        return self.filename
 
 
 class QuickFormOutcome(AbstractBaseModel, FolderMixin):

@@ -2,6 +2,12 @@
 	import { m } from '$paraglide/messages';
 	import IconPicker from '$lib/components/IconPicker/IconPicker.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
+	import { tileIssue } from './tile-validation';
 
 	type Item = {
 		id?: string;
@@ -34,6 +40,38 @@
 		onUpload: (item: Item, e: Event) => void;
 	} = $props();
 
+	// Both pickers bind to a SuperForm field; a tile is plain state, so back it with an
+	// SPA form per tile and mirror the values back out. Seeded once — the each block is
+	// keyed on the item, so an instance stays with the tile it was built from.
+	// Both are optional by design: an empty domain means the clicker picks one, and no
+	// reviewer means the requester reviews their own. A required schema would mark them
+	// with an asterisk and, for reviewers, impose minSelect: 1.
+	const tileSchema = z.object({
+		folder: z.string().optional(),
+		reviewers: z.array(z.string()).optional()
+	});
+	const tileForm = superForm(
+		defaults(
+			{ folder: item.target.folder ?? '', reviewers: item.target.reviewers ?? [] },
+			zod(tileSchema)
+		),
+		{
+			// Every tile carries one of these; without distinct ids superforms treats them
+			// as the same form.
+			id: `tile-${crypto.randomUUID()}`,
+			dataType: 'json',
+			taintedMessage: false,
+			validators: zod(tileSchema),
+			SPA: true
+		}
+	);
+
+	// The whole actor list is already fetched once by the page loader, and this editor
+	// renders per tile — an optionsEndpoint here would be one /actors round-trip per tile.
+	const actorOptions = $derived(
+		(ctx.actors ?? []).map((a: any) => ({ label: a.name, value: a.id }))
+	);
+
 	function toggleIg(refId: string) {
 		const list: string[] = item.target.implementation_groups ?? [];
 		item.target.implementation_groups = list.includes(refId)
@@ -48,15 +86,20 @@
 		if (kind === 'certificationDocument') return { key: '', label: m.proof(), ph: '' };
 		if (kind === 'framework') return { key: 'snapshot', label: m.framework(), ph: '' };
 		if (kind === 'assessment') return { key: '', label: m.auditSetup(), ph: '' };
-		if (kind === 'quickForm') return { key: '', label: m.quickForm(), ph: '' };
+		if (kind === 'quickForm') return { key: '', label: m.quickFormTileSource(), ph: '' };
 		return { key: 'url', label: m.url(), ph: kind === 'external' ? 'https://…' : '/incidents' };
 	}
 
 	const tf = $derived(targetField(item.kind));
+	const issue = $derived(tileIssue(item));
 	const fw = $derived(ctx.frameworks.find((f: any) => f.id === item.target.framework));
 </script>
 
-<div class="flex flex-wrap items-end gap-2 rounded-lg border border-surface-200-800 p-3">
+<div
+	class="flex flex-wrap items-end gap-2 rounded-lg border p-3 {issue
+		? 'border-error-400 bg-error-50/40 dark:bg-error-950/20'
+		: 'border-surface-200-800'}"
+>
 	<label class="text-[10px] text-surface-500">
 		<span class="block">{m.icon()}</span>
 		<IconPicker bind:value={item.icon} showInput={false} />
@@ -146,20 +189,18 @@
 		{:else if item.kind === 'quickForm'}
 			<select bind:value={item.target.publication} class="select rounded-md text-sm">
 				<option value="">⟡ {m.quickFormTileNoPublication()}</option>
-				{#each ctx.publications as p}<option value={p.id}>{p.name}</option>{/each}
+				<optgroup label={m.quickFormPublications()}>
+					{#each ctx.publications as p}<option value={p.id}>{p.name}</option>{/each}
+				</optgroup>
 			</select>
 			{#if !item.target.publication}
 				<select bind:value={item.target.quick_form} required class="select mt-1 rounded-md text-sm">
-					<option value="">{m.quickForm()}…</option>
+					<option value="">{m.quickFormTileSelectForm()}</option>
 					{#each ctx.quickForms as f}<option value={f.id}>{f.name}</option>{/each}
 				</select>
-				<select bind:value={item.target.folder} required class="select mt-1 rounded-md text-sm">
-					{#if ctx.personalFoldersEnabled}
-						<option value="__personal__">⟡ {m.mySpace()}</option>
-					{/if}
-					<option value="">⟡ {m.userChoosesDomain()}</option>
-					{#each ctx.folders as d}<option value={d.id}>{d.name}</option>{/each}
-				</select>
+				<p class="mt-1 text-[10px] font-normal text-amber-600 dark:text-amber-400">
+					<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.quickFormTileInlineHint()}
+				</p>
 			{/if}
 		{:else if item.kind === 'assessment'}
 			<select bind:value={item.target.framework} required class="select rounded-md text-sm">
@@ -167,14 +208,7 @@
 				{#each ctx.frameworks as f}<option value={f.id}>{f.name}</option>{/each}
 			</select>
 			<div class="mt-1 flex gap-1">
-				<select bind:value={item.target.folder} required class="select grow rounded-md text-sm">
-					{#if ctx.personalFoldersEnabled}
-						<option value="__personal__">⟡ {m.mySpace()}</option>
-					{/if}
-					<option value="">⟡ {m.userChoosesDomain()}</option>
-					{#each ctx.folders as d}<option value={d.id}>{d.name}</option>{/each}
-				</select>
-				<select bind:value={item.target.mode} class="select rounded-md text-sm">
+				<select bind:value={item.target.mode} class="select grow rounded-md text-sm">
 					<option value="full">{m.fullAudit()}</option>
 					<option value="auditee">{m.auditeeMode()}</option>
 				</select>
@@ -202,6 +236,11 @@
 			/>
 		{/if}
 	</label>
+	{#if issue}
+		<p class="w-full text-[10px] text-error-600 dark:text-error-400">
+			<i class="fa-solid fa-circle-exclamation mr-1"></i>{issue}
+		</p>
+	{/if}
 	<label class="text-[10px] text-surface-500">
 		<span class="block">{m.group()}</span>
 		<select
@@ -225,6 +264,14 @@
 	{/if}
 	{#if item.kind === 'quickForm' && !item.target.publication}
 		<div class="w-full space-y-2 border-t border-surface-200-800 pt-2">
+			<FolderTreeSelect
+				form={tileForm}
+				field="folder"
+				nullable
+				label={m.domain()}
+				helpText={m.portalTileDomainHint()}
+				onChange={(v) => (item.target.folder = v ?? '')}
+			/>
 			<label class="flex items-center gap-2 text-[10px] text-surface-600-400">
 				<input type="checkbox" class="checkbox" bind:checked={item.target.user_names} />
 				{m.letUserNameResponse()}
@@ -233,27 +280,28 @@
 				<input type="checkbox" class="checkbox" bind:checked={item.target.allow_multiple_drafts} />
 				{m.quickFormAllowMultipleDrafts()}
 			</label>
-			<label class="block text-[10px] text-surface-500">
-				<span class="block">{m.reviewers()}</span>
-				<select
-					multiple
-					size="4"
-					class="select mt-1 w-full rounded-md text-sm"
-					value={item.target.reviewers ?? []}
-					onchange={(e) =>
-						(item.target.reviewers = [
-							...(e.currentTarget as HTMLSelectElement).selectedOptions
-						].map((o) => o.value))}
-				>
-					{#each ctx.actors as a (a.id)}<option value={a.id}>{a.name}</option>{/each}
-				</select>
-				<span class="mt-1 block text-[10px] text-surface-400">{m.quickFormTileReviewersHint()}</span
-				>
-			</label>
+			<AutocompleteSelect
+				form={tileForm}
+				field="reviewers"
+				multiple
+				options={actorOptions}
+				translateOptions={false}
+				label={m.reviewers()}
+				helpText={m.quickFormTileReviewersHint()}
+				onChange={(v) => (item.target.reviewers = v ?? [])}
+			/>
 		</div>
 	{/if}
 	{#if item.kind === 'assessment'}
 		<div class="w-full space-y-2 border-t border-surface-200-800 pt-2">
+			<FolderTreeSelect
+				form={tileForm}
+				field="folder"
+				nullable
+				label={m.domain()}
+				helpText={m.portalTileDomainHint()}
+				onChange={(v) => (item.target.folder = v ?? '')}
+			/>
 			<label class="flex items-center gap-2 text-[10px] text-surface-600-400">
 				<input type="checkbox" class="checkbox" bind:checked={item.target.user_names} />
 				{m.letUserNameAudit()}

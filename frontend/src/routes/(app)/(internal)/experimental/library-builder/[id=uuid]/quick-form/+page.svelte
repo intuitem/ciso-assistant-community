@@ -47,7 +47,10 @@
 
 	const links = $derived({
 		back: `/experimental/library-builder/${draft.id}`,
-		preview: null
+		// Shows the saved draft: the builder saves explicitly, so save before previewing.
+		preview: `/experimental/library-builder/${draft.id}/quick-form/preview?quick_form_urn=${encodeURIComponent(
+			editorData.quick_form_urn
+		)}`
 	});
 </script>
 

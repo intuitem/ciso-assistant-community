@@ -91,6 +91,11 @@
 		}
 	}
 
+	// A tile wired to a publication takes its domain from that publication, so asking
+	// the clicker for one is both meaningless and a hard block: the audience is
+	// authorised without folder rights, so their domain picker is typically empty.
+	const needsDomain = (item: PortalItem) => !item.target.publication && !item.target.folder;
+
 	function openLaunchModal(item: PortalItem) {
 		const component: ModalComponent = {
 			ref: AssessmentLaunchModal,
@@ -99,7 +104,7 @@
 				action: item.kind === 'quickForm' ? '?/launchQuickForm' : '?/launchAssessment',
 				showName: !!item.target.user_names,
 				defaultName: item.title,
-				showDomain: !item.target.folder
+				showDomain: needsDomain(item)
 			}
 		};
 		const modal: ModalSettings = { type: 'component', component, title: item.title };
@@ -116,7 +121,7 @@
 			});
 		else if (item.kind === 'assessment' || item.kind === 'quickForm') {
 			// Launch directly only when nothing needs to be asked at click time.
-			if (!item.target.folder || item.target.user_names) openLaunchModal(item);
+			if (needsDomain(item) || item.target.user_names) openLaunchModal(item);
 			else launchAssessment(item);
 		}
 	}

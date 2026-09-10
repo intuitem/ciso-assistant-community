@@ -44,6 +44,12 @@
 	const sliderMax = $derived(Number((question.config as { max?: number } | null)?.max ?? 100));
 	const sliderStep = $derived(Number((question.config as { step?: number } | null)?.step ?? 1));
 
+	const fileConfig = $derived((question.config as Record<string, unknown> | null) ?? {});
+	const fileMultiple = $derived(!!fileConfig.multiple);
+	const fileMaxFiles = $derived(Number(fileConfig.max_files ?? 1));
+	const fileMaxSize = $derived(Number(fileConfig.max_size_mb ?? 10));
+	const fileAccept = $derived(String(fileConfig.accept ?? ''));
+
 	// Real-time mirror of the publish-time slider validation in `builder-state.ts`,
 	// so authors see the problem while editing instead of only when they click
 	// Publish. Saves still go through — blocking autosave on transient invalid
@@ -209,6 +215,57 @@
 						/>
 					</label>
 				</div>
+			{/if}
+
+			{#if currentVariant === 'file'}
+				<div class="flex flex-wrap items-center gap-3">
+					<label class="flex items-center gap-1.5">
+						<input
+							type="checkbox"
+							class="checkbox"
+							checked={fileMultiple}
+							onchange={(e) =>
+								patchConfig({
+									multiple: e.currentTarget.checked,
+									max_files: e.currentTarget.checked ? Math.max(fileMaxFiles, 2) : 1
+								})}
+						/>
+						<span class="text-xs text-surface-600-400">{m.builderFileMultiple()}</span>
+					</label>
+					{#if fileMultiple}
+						<label class="flex items-center gap-1.5">
+							<span class="text-xs text-surface-600-400">{m.builderFileMaxFiles()}</span>
+							<input
+								type="number"
+								min="1"
+								class="input w-20 text-xs"
+								value={fileMaxFiles}
+								onchange={(e) => patchConfig({ max_files: Number(e.currentTarget.value) })}
+							/>
+						</label>
+					{/if}
+					<label class="flex items-center gap-1.5">
+						<span class="text-xs text-surface-600-400">{m.builderFileMaxSize()}</span>
+						<input
+							type="number"
+							min="1"
+							class="input w-20 text-xs"
+							value={fileMaxSize}
+							onchange={(e) => patchConfig({ max_size_mb: Number(e.currentTarget.value) })}
+						/>
+					</label>
+					<label class="flex items-center gap-1.5">
+						<span class="text-xs text-surface-600-400">{m.builderFileAccept()}</span>
+						<input
+							type="text"
+							class="input w-40 text-xs"
+							placeholder=".pdf,.docx"
+							value={fileAccept}
+							onchange={(e) => patchConfig({ accept: e.currentTarget.value })}
+						/>
+					</label>
+				</div>
+				<p class="text-[10px] text-surface-500">{m.builderFileHint()}</p>
 			{/if}
 
 			{#if sliderConfigError}

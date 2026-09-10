@@ -952,6 +952,16 @@
 				{/if}
 			{/if}
 			{@render actions?.()}
+			{#if data.urlModel === 'quick-forms'}
+				<!-- Answering a form is the only way to see what its conditions and outcomes
+				     actually do; the same preview serves drafts in the builder. -->
+				<a
+					class="btn preset-filled-primary-500 h-fit"
+					href={`/quick-forms/${data.data?.id}/preview`}
+				>
+					<i class="fa-solid fa-eye mr-2"></i>{m.preview()}
+				</a>
+			{/if}
 			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} folderId={objectDomain} />
 		</div>
 	</div>

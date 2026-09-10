@@ -357,7 +357,12 @@ class PortalViewSet(CustomPortalsViewSet):
             perm=Permission.objects.get(codename="add_quickformresponse"),
             folder=folder,
         ):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            # An inline tile borrows folder RBAC, so an author can wire a domain their
+            # audience cannot reach. Say so instead of failing anonymously.
+            return Response(
+                {"detail": f"No permission to file a request in '{folder.name}'."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         # Actors are attached outside the serializer: its m2m visibility check is
         # scoped to the caller, and a self-service requester typically cannot view

@@ -1231,6 +1231,9 @@ def _build_answer_context(questions_qs, answers_qs):
             pks = {c.id for c in a.selected_choices.all()}
             selected_choice_pks_by_qid[a.question_id] = pks
             has_answer_by_qid[a.question_id] = len(pks) > 0
+        elif q_type == Question.Type.FILE:
+            # A file question is answered by uploading, not by writing a value.
+            has_answer_by_qid[a.question_id] = a.attachments.exists()
         else:
             has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
 

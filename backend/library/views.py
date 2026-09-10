@@ -1708,6 +1708,63 @@ class LibraryDraftViewSet(BaseModelViewSet):
         draft.save(update_fields=["content", "updated_at"])
         return Response({"status": "ok", "quick_form_urn": new_quick_form["urn"]})
 
+    @action(detail=True, methods=["post"], url_path="quick-form-fill-preview")
+    def quick_form_fill_preview(self, request, pk):
+        """The form as a respondent would meet it, straight from the draft.
+
+        Distinct from `quick-form-editor-preview`, which diffs the draft against the
+        live rows: this renders the pages and evaluates the real conditional
+        visibility, scoring and outcome rules against trial answers, so an author can
+        see what their logic actually does before publishing anything. Nothing is
+        stored — the answers live in the request body.
+        """
+        from core.cel_service import evaluate_quick_form_document
+
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        quick_form, error = self._pick_quick_form(
+            content, request.data.get("quick_form_urn")
+        )
+        if error is not None:
+            return error
+        editor_doc = request.data.get("editing_draft")
+        if isinstance(editor_doc, dict):
+            try:
+                quick_form = qf_editor.editor_doc_to_quick_form_object(
+                    editor_doc, existing=quick_form
+                )
+            except builder.BuilderError as e:
+                return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        answers = request.data.get("answers")
+        evaluation = evaluate_quick_form_document(
+            quick_form, answers if isinstance(answers, dict) else {}
+        )
+        hidden = set(evaluation["hidden_pages"])
+        return Response(
+            {
+                "name": quick_form.get("name") or "",
+                "description": quick_form.get("description") or "",
+                "outcomes_definition": quick_form.get("outcomes_definition") or [],
+                "pages": [
+                    {
+                        "urn": page.get("urn"),
+                        "ref_id": page.get("ref_id"),
+                        "name": page.get("name") or "",
+                        "description": page.get("description") or "",
+                        "hidden": page.get("urn") in hidden,
+                        "questions": page.get("questions") or {},
+                    }
+                    for page in quick_form.get("pages") or []
+                ],
+                "hidden_pages": evaluation["hidden_pages"],
+                "missing_required": evaluation["missing_required"],
+                "progress": evaluation["progress"],
+                "score": evaluation["score"],
+                "computed_outcome": evaluation["computed_outcome"],
+            }
+        )
+
     @action(detail=True, methods=["post"], url_path="quick-form-editor-preview")
     def quick_form_editor_preview(self, request, pk):
         """What would change on the live quick form if the draft were

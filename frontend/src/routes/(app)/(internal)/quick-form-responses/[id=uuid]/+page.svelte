@@ -88,7 +88,7 @@
 </script>
 
 <div class="max-w-4xl mx-auto space-y-4 p-4">
-	<div class="card p-4 space-y-3">
+	<div class="card bg-surface-50-950 shadow-sm p-4 space-y-3">
 		<div class="flex flex-wrap items-start justify-between gap-3">
 			<div class="min-w-0">
 				<h1 class="text-xl font-semibold truncate">{response.name}</h1>
@@ -316,7 +316,9 @@
 	</div>
 
 	{#if visiblePages.length === 0}
-		<div class="card p-6 text-center text-surface-500">{m.quickFormNoPages()}</div>
+		<div class="card bg-surface-50-950 shadow-sm p-6 text-center text-surface-500">
+			{m.quickFormNoPages()}
+		</div>
 	{:else}
 		<!-- Stepper -->
 		<ol class="flex flex-wrap items-center gap-2 text-sm">
@@ -337,7 +339,7 @@
 
 		{#if currentPage}
 			{#key currentPage.urn}
-				<div class="card p-4 space-y-4">
+				<div class="card bg-surface-50-950 shadow-sm p-4 space-y-4">
 					<div>
 						<h2 class="text-lg font-semibold">{currentPage.name}</h2>
 						{#if currentPage.description}
