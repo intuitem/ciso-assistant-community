@@ -551,18 +551,24 @@ def detect_sync_sources(ebios_rm_study):
         )
 
     # Level 1: selected operational scenarios (full EBIOS)
-    selected_os = [
-        os for os in ebios_rm_study.operational_scenarios.all() if os.is_selected
-    ]
+    all_os = list(ebios_rm_study.operational_scenarios.all())
+    selected_os = [os for os in all_os if os.is_selected]
     if selected_os:
         result["operational_scenarios"] = selected_os
-        for os_obj in selected_os:
-            _cover_feared_events(os_obj.ro_to)
-            covered_ss_ids.add(os_obj.attack_path.strategic_scenario_id)
+
+    # Any attack path that already has an operational scenario (selected or
+    # not) was already reviewed at the finest granularity in workshop 4, so
+    # neither it, its strategic scenario, nor its feared events must fall
+    # back to a coarser sync level below — even when the scenario ended up
+    # deselected there.
+    covered_ap_ids = set()
+    for os_obj in all_os:
+        covered_ap_ids.add(os_obj.attack_path_id)
+        covered_ss_ids.add(os_obj.attack_path.strategic_scenario_id)
+        _cover_feared_events(os_obj.ro_to)
 
     # Level 2: selected attack paths not covered by an operational scenario
     selected_ap = list(ebios_rm_study.attackpath_set.filter(is_selected=True))
-    covered_ap_ids = {os_obj.attack_path_id for os_obj in selected_os}
     uncovered_ap = [ap for ap in selected_ap if ap.id not in covered_ap_ids]
     if uncovered_ap:
         result["attack_paths"] = uncovered_ap
