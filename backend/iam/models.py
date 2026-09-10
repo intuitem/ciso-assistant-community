@@ -1737,17 +1737,17 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         # Only role assignments linked to a (obviously non-NULL) `UserGroup(builtin=True)` can grant the `default_role`.
         # (This prevents default roles from being granted to service accounts (`ServiceAccount`) (as their role assignments can't have a non-NULL `role_assignment.user_group`)).
         # (This also prevent custom user groups from granting default roles).
-        audience_role_assignments = role_assignments.filter(user_group__builtin=True)
+        membership_role_assignments = role_assignments.filter(user_group__builtin=True)
 
-        # Represent the `directly_accessible_folder_ids` of the `audience_role_assignments`.
-        audience_folder_ids = audience_role_assignments.values_list(
+        # Represent the `directly_accessible_folder_ids` of the `membership_role_assignments`.
+        membership_folder_ids = membership_role_assignments.values_list(
             "perimeter_folders__id", flat=True
         ).distinct()
 
         # Enclaved folders are excluded from the `default_role` mechanism (we don't want third-parties to be granted default roles).
         all_default_role_folder_ids = (
             Folder.objects.filter(
-                id__in=audience_folder_ids,
+                id__in=membership_folder_ids,
             )
             .exclude(
                 content_type=Folder.ContentType.ENCLAVE,
@@ -1757,7 +1757,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             )
         )
 
-        # A user is a part of the folder's audience ONLY IF he has an "audience role assignment" on its folder subtree.
+        # A user is a folder's member ONLY IF he has an "membership role assignment" on its folder subtree.
         default_role_folders = Folder.objects.filter(
             Q(descendants__in=Folder.objects.filter(id__in=all_default_role_folder_ids))
             | Q(id__in=all_default_role_folder_ids),
