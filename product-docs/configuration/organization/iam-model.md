@@ -128,7 +128,7 @@ The following schematic illustrates the fundamental concepts of IAM in CISO Assi
 
 Every domain has **members**: the people its own and its sub-domains' IAM groups grant roles to. A domain can carry a **default role** — the role it grants its members, on the domain itself: never recursively, and only there.
 
-For example: if the **Domain** domain has the **Reader catalog** default role, then a user granted any role on **Domain** itself or on its sub-domain **ChildDomain** through the IAM groups is a member of **Domain**, and receives **Reader catalog** on it.
+For example: if the **Domain** domain has the **Baseline reader** default role, then a user granted any role on **Domain** itself or on its sub-domain **ChildDomain** through the IAM groups is a member of **Domain**, and receives **Baseline reader** on it.
 
 Who is *not* a member follows from the definition — no exception list to remember:
 
@@ -139,7 +139,7 @@ Who is *not* a member follows from the definition — no exception list to remem
 
 Only roles containing view permissions can be used as a default role, and enclave domains cannot carry one.
 
-Configuring default roles is an **enterprise** capability: the domain form exposes the control there, and it can be tuned per domain — set to a narrower view-only role, or **cleared entirely** for domains that should share nothing ambiently. Clearing the root domain's default role gives the instance an **explicit-grant policy**: no ambient visibility at all, every access traceable to an assigned role. In the community edition, the default role exists only on the root domain, fixed to **Reader catalog**, and cannot be changed.
+Configuring default roles is an **enterprise** capability: the domain form exposes the control there, and it can be tuned per domain — set to a narrower view-only role, or **cleared entirely** for domains that should share nothing ambiently. Clearing the root domain's default role gives the instance an **explicit-grant policy**: no ambient visibility at all, every access traceable to an assigned role. In the community edition, the default role exists only on the root domain, fixed to **Baseline reader**, and cannot be changed.
 
 #### Can I make an object visible to all users without attaching it to global?
 

@@ -292,11 +292,15 @@ class RoleFilterSet(GenericFilterSet):
         """
         A role is read-only when none of its permissions is a non-view
         permission. A role with no permissions at all counts as read-only.
+
+        No regex here: the negative lookahead this used to rely on is not
+        supported by PostgreSQL's POSIX regexes (it only worked on SQLite,
+        whose regex operator is Python-backed).
         """
-        has_write_permission = Q(permissions__codename__regex=r"^(?!view_)")
+        write_permissions = Permission.objects.exclude(codename__startswith="view_")
         if value:
-            return queryset.exclude(has_write_permission)
-        return queryset.filter(has_write_permission).distinct()
+            return queryset.exclude(permissions__in=write_permissions)
+        return queryset.filter(permissions__in=write_permissions).distinct()
 
 
 class RoleViewSet(BaseModelViewSet):

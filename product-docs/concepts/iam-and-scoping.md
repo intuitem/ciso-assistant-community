@@ -47,9 +47,9 @@ The same inheritance also drives reporting: most dashboards and analytics roll u
 
 Every domain has **members**: the people its own and its sub-domains' IAM groups grant roles to. A domain can carry a **default role** — and the default role is what the domain grants its members, **on the domain itself** (and only there: the grant is never recursive).
 
-For example: if the **EMEA** domain has the _Reader catalog_ default role, then a user granted any role on **EMEA** or **EMEA/France** through the IAM groups is a member of EMEA, and can view EMEA's catalog objects. The grant never extends downward: EMEA's default role gives nothing on **EMEA/France** — what members see there comes from their own roles.
+For example: if the **EMEA** domain has the _Baseline reader_ default role, then a user granted any role on **EMEA** or **EMEA/France** through the IAM groups is a member of EMEA, and can view EMEA's catalog objects. The grant never extends downward: EMEA's default role gives nothing on **EMEA/France** — what members see there comes from their own roles.
 
-By default, the global domain (the root) carries the **Reader catalog** default role, which grants view access to catalog objects. Everyone in the organization is a member under the root, so everyone can read the root-level catalog.
+By default, the global domain (the root) carries the **Baseline reader** default role, which grants view access to catalog objects. Everyone in the organization is a member under the root, so everyone can read the root-level catalog.
 
 Some objects exist to be **shared**. Frameworks, threats, risk matrices, reference controls, and other catalogue-style items wouldn't be useful if they were trapped in a single domain — every team needs to be able to pull from the same shared library. That's why catalog objects (usually stored in the root domain) are viewable by everyone in the organization.
 
@@ -57,7 +57,7 @@ Who is *not* a member, and why: third parties hold their grants inside third-par
 
 The default role is a dial, not a law. In the enterprise edition, each domain's default role can be **tuned**: replaced by a narrower view-only role (a custom role listing exactly the object types this domain shares), or **removed entirely** — a domain with no default role shares nothing ambiently, and its members see exactly what their own roles grant. Removing the *root* domain's default role goes all the way: the instance then runs an **explicit-grant policy**, where nothing is ambient — even the catalog is visible only to those whose roles name it. It's one field on the domain, so tightening takes effect immediately and is just as easy to revert.
 
-Configuring default roles is an **enterprise** capability. In the community edition, the default role exists only on the root domain, fixed to _Reader catalog_ — it cannot be changed, and no other domain carries one.
+Configuring default roles is an **enterprise** capability. In the community edition, the default role exists only on the root domain, fixed to _Baseline reader_ — it cannot be changed, and no other domain carries one.
 
 ## Why you sometimes see items from other domains
 
@@ -66,7 +66,7 @@ Assessments routinely _compose_ objects across the tree. Risk assessments refere
 When you're working inside one assessment, the platform's selectors and pickers don't just show you what's in the assessment's own domain — they show you **everything you have access to**. So a risk scenario authored inside the _France_ domain can pull in:
 
 - A shared applied control attached to the _EMEA_ parent domain (you can see it because of inheritance).
-- A threat from the global library (you can see it because the root domain usually has a "reader catalog" default role).
+- A threat from the global library (you can see it because the root domain usually has a "baseline reader" default role).
 - An asset attached to a sibling _Germany_ domain (if your role gives you access there).
 
 This is by design — composing across the organisation is the whole point of a centralised GRC platform — but it can be disorienting on day one. The rule is consistent: you see what you have access to, regardless of which domain you started on.

@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 import itertools
 
+from django.conf import settings
 from django.db import migrations, models
 from django.db.models.deletion import SET_NULL
 from django.apps import apps as django_apps
@@ -101,6 +102,13 @@ def fill_default_roles(apps, schema_editor):
 
     root_folder.default_role = baseline_reader_role
     root_folder.save()
+
+    if not getattr(settings, "CONFIGURABLE_DEFAULT_ROLE", False):
+        # Nothing installed makes the default role configurable here: it exists
+        # on the root folder only (pinned by startup()); no other folder receives
+        # one. Folder trees are one level deep in that case, so root-only
+        # ambience reproduces exactly what `is_published` used to expose.
+        return
 
     # A module making the default role configurable is installed: assign the
     # baseline reader role to every folder that holds at least one published

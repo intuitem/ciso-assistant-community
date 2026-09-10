@@ -582,6 +582,40 @@ class TestFolderDefaultRole:
             "The folder.default_role SHALL also be granted to the holders of grants on the folder itself (inclusive membership)."
         )
 
+    def test_folder_serializer_does_not_expose_default_role(self):
+        """The default role is not configurable through this serializer: it must
+        not expose the field at all. (A subclass may reopen it and inherits the
+        validators.)"""
+        from core.serializers import FolderWriteSerializer
+
+        assert "default_role" not in FolderWriteSerializer().fields
+
+    def test_startup_pins_root_default_role(self):
+        """Without the configurability setting, the root folder's default role is
+        hard-coded to the baseline reader role: startup() re-pins it at every boot."""
+        from django.apps import apps as django_apps
+
+        from core.startup import startup
+
+        root_folder = Folder.get_root_folder()
+        original_default_role = root_folder.default_role
+        root_folder.default_role = None
+        root_folder.save()
+        try:
+            migratable = [
+                c for c in django_apps.get_app_configs() if c.models_module is not None
+            ]
+            startup(sender=migratable[-1])
+
+            root_folder.refresh_from_db()
+            assert root_folder.default_role is not None
+            assert root_folder.default_role.name == "BI-RL-BSL", (
+                "startup() MUST re-pin the baseline reader role on the root folder."
+            )
+        finally:
+            root_folder.default_role = original_default_role
+            root_folder.save()
+
     def test_group_member_gets_default_role_access(
         self, ctx: TestFolderDefaultRole.UserInfo
     ):

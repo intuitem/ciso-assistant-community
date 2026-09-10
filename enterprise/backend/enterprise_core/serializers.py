@@ -33,7 +33,14 @@ class FolderWriteSerializer(CommunityFolderWriteSerializer):
     BUILTIN_EDITABLE_FIELDS = {"name", "default_role"}
 
     class Meta(CommunityFolderWriteSerializer.Meta):
-        pass
+        # The default role is configurable here only; the community serializer
+        # excludes it (fixed baseline on the root). The eligibility and enclave
+        # validators are inherited from the community class and bind here.
+        exclude = [
+            field
+            for field in CommunityFolderWriteSerializer.Meta.exclude
+            if field != "default_role"
+        ]
 
     def validate_parent_folder(self, parent_folder):
         """

@@ -30,8 +30,6 @@
 		model
 	}: Props = $props();
 
-	let isRootFolder = $derived(object.content_type === 'GL');
-
 	onMount(() => {
 		const isEdit = Boolean(object?.id);
 		if (!isEdit && form.data?.create_iam_groups !== true) {
@@ -63,18 +61,6 @@
 		field="create_missing_asset_classes"
 		label={m.createMissingAssetClasses()}
 		helpText={m.createMissingAssetClassesHelpText()}
-	/>
-{:else if isRootFolder}
-	<AutocompleteSelect
-		{form}
-		translateOptions={false}
-		optionsEndpoint="roles?read_only=true"
-		field="default_role"
-		nullable={true}
-		cacheLock={cacheLocks['default_role']}
-		bind:cachedValue={formDataCache['default_role']}
-		label={m.defaultRole()}
-		helpText={m.defaultRoleHelpText()}
 	/>
 {:else}
 	<AutocompleteSelect
