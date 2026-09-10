@@ -4,7 +4,7 @@ from django.utils.formats import date_format
 import magic
 import structlog
 from django.db import models, transaction
-from django.db.models import CharField, Value, Case, When, Q
+from django.db.models import CharField, Value, Case, When
 from django.db.models.functions import Lower, Cast
 import django_filters as df
 from django.contrib.auth.models import Permission
