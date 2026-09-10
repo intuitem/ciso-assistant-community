@@ -129,9 +129,6 @@ class Folder(NameDescriptionMixin):
 
         pass
 
-    _CACHED_ROOT_FOLDER: ClassVar[Optional[Folder]] = None
-    """**WARNING:** Caching the root folder assumes it can't be deleted."""
-
     class InconsistencyError(Exception):
         """Exception raised during `Folder.save` execution if an attempt to save an inconsistent(invalid) folder is made."""
 
@@ -140,25 +137,17 @@ class Folder(NameDescriptionMixin):
     @staticmethod
     def _init_root_folder():
         """Initialize (create) and cache the root `Folder` if it doesn't exist yet."""
-        root_folder, _ = Folder.objects.get_or_create(
+        Folder.objects.get_or_create(
             content_type=Folder.ContentType.ROOT,
             builtin=True,
             defaults={"name": "Global"},
         )
 
-        Folder._CACHED_ROOT_FOLDER = root_folder
-
     @staticmethod
     def get_root_folder() -> Optional[Folder]:
         """Return the root `Folder`."""
 
-        cached_root_folder = Folder._CACHED_ROOT_FOLDER
-        if cached_root_folder is not None:
-            return cached_root_folder
-
-        root_folder = _get_root_folder()
-        Folder._CACHED_ROOT_FOLDER = root_folder
-        return root_folder
+        return _get_root_folder()
 
     @staticmethod
     def get_root_folder_id() -> uuid.UUID | None:
@@ -267,9 +256,7 @@ class Folder(NameDescriptionMixin):
         try:
             Folder.objects.select_for_update().get(pk=root_folder_id)
         except Folder.DoesNotExist:
-            # Invalidate the `Folder._CACHED_ROOT_FOLDER` cached value if it's stale.
-            # (For example `Folder._CACHED_ROOT_FOLDER` can become stale after pytest flushes the DB)
-            Folder._CACHED_ROOT_FOLDER = None
+            pass
 
     def _update_descendants_at_creation(self):
         """Update the `ancestor.descendants` `ManyToManyField` for each `ancestor` of the newly created `self` `Folder` instance."""

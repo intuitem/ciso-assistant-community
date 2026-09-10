@@ -169,7 +169,7 @@ READER_PERMISSIONS_LIST = [
     "view_agentaction",
 ]
 
-READER_CATALOG_PERMISSIONS_LIST = [
+BASELINE_READER_PERMISSIONS_LIST = [
     "view_securityadvisory",
     "view_cwe",
     "view_technique",
@@ -213,25 +213,6 @@ READER_CATALOG_PERMISSIONS_LIST = [
     "view_requirementmapping",
     "view_requirementmappingset",
 ]
-
-READER_MIGRATION_REMOVED_PERMISSIONS_LIST = {
-    "view_tactic",
-    "view_metricinstance",
-    "view_riskmatrix",
-    "view_framework",
-    "view_question",
-    "view_questionchoice",
-    "view_requirementnode",
-    "view_entity",
-    "view_documenttemplate",
-    "view_customfielddefinition",
-    "view_organisationobjective",
-    "view_organisationissue",
-}
-
-READER_MIGRATION_PERMISSIONS_LIST = list(
-    set(READER_CATALOG_PERMISSIONS_LIST) - READER_MIGRATION_REMOVED_PERMISSIONS_LIST
-)
 
 APPROVER_PERMISSIONS_LIST = [
     "view_customfielddefinition",
@@ -2188,8 +2169,7 @@ def startup(sender=None, **kwargs):
     # Sync builtin role permissions — all permission rows exist at this point
     for name, perm_list in (
         ("BI-RL-AUD", READER_PERMISSIONS_LIST),
-        ("BI-RL-MIG", READER_MIGRATION_PERMISSIONS_LIST),
-        ("BI-RL-CAT", READER_CATALOG_PERMISSIONS_LIST),
+        ("BI-RL-BSL", BASELINE_READER_PERMISSIONS_LIST),
         ("BI-RL-APP", APPROVER_PERMISSIONS_LIST),
         ("BI-RL-ANA", ANALYST_PERMISSIONS_LIST),
         ("BI-RL-DMA", DOMAIN_MANAGER_PERMISSIONS_LIST),
@@ -2203,17 +2183,7 @@ def startup(sender=None, **kwargs):
     ):
         role, _ = Role.objects.get_or_create(name=name, builtin=True)
         role.permissions.set(Permission.objects.filter(codename__in=perm_list))
-    # When nothing installed makes the default role configurable, it is
-    # hard-coded: the root folder carries the catalog reader role and nothing
-    # else is configurable (the folder serializer excludes the field).
-    # Re-pinning it at every boot is what makes it hard-coded rather than
-    # merely seeded.
-    if not getattr(settings, "CONFIGURABLE_DEFAULT_ROLE", False):
-        root_folder = Folder.get_root_folder()
-        reader_catalog_role = Role.objects.get(name="BI-RL-CAT")
-        if root_folder.default_role_id != reader_catalog_role.id:
-            root_folder.default_role = reader_catalog_role
-            root_folder.save()
+
     # backfill builtin groups (e.g. technical tester) on pre-existing domains
     for folder in Folder.objects.filter(
         content_type=Folder.ContentType.DOMAIN, create_iam_groups=True

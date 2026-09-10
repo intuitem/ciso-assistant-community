@@ -27,7 +27,7 @@ class ModelConfig:
 
 
 def fill_default_roles(apps, schema_editor):
-    READER_CATALOG_MODEL_LIST = [
+    BASELINE_READER_MODEL_LIST = [
         ModelConfig("view_securityadvisory", "sec_intel", "SecurityAdvisory"),
         ModelConfig("view_cwe", "sec_intel", "CWE"),
         ModelConfig("view_technique", "sec_intel", "Technique"),
@@ -72,54 +72,24 @@ def fill_default_roles(apps, schema_editor):
         ModelConfig("view_requirementmappingset", "core", "RequirementMappingSet"),
     ]
 
-    # Copied from `core/startup.py` (`READER_MIGRATION_REMOVED_PERMISSIONS_LIST`)
-    READER_MIGRATION_REMOVED_PERMISSIONS_LIST = {
-        "view_tactic",
-        "view_metricinstance",
-        "view_riskmatrix",
-        "view_framework",
-        "view_question",
-        "view_questionchoice",
-        "view_requirementnode",
-        "view_entity",
-        "view_documenttemplate",
-        "view_customfielddefinition",
-    }
-
-    READER_MIGRATION_MODEL_LIST = [
-        model_config
-        for model_config in READER_CATALOG_MODEL_LIST
-        if model_config.view_permission not in READER_MIGRATION_REMOVED_PERMISSIONS_LIST
-    ]
-
-    READER_CATALOG_PERMISSIONS_LIST = [
-        model_config.view_permission for model_config in READER_CATALOG_MODEL_LIST
-    ]
-    READER_MIGRATION_PERMISSIONS_LIST = [
-        model_config.view_permission for model_config in READER_MIGRATION_MODEL_LIST
+    BASELINE_READER_PERMISSIONS_LIST = [
+        model_config.view_permission for model_config in BASELINE_READER_MODEL_LIST
     ]
 
     Permission = apps.get_model("auth", "Permission")
     Folder = apps.get_model("iam", "Folder")
     Role = apps.get_model("iam", "Role")
 
-    reader_catalog_role, _ = Role.objects.get_or_create(name="BI-RL-CAT", builtin=True)
-    reader_catalog_role.permissions.set(
-        Permission.objects.filter(codename__in=READER_CATALOG_PERMISSIONS_LIST)
-    )
-
-    reader_migration_role, _ = Role.objects.get_or_create(
-        name="BI-RL-MIG", builtin=True
-    )
-    reader_migration_role.permissions.set(
-        Permission.objects.filter(codename__in=READER_MIGRATION_PERMISSIONS_LIST)
+    baseline_reader_role, _ = Role.objects.get_or_create(name="BI-RL-BSL", builtin=True)
+    baseline_reader_role.permissions.set(
+        Permission.objects.filter(codename__in=BASELINE_READER_PERMISSIONS_LIST)
     )
 
     root_folder = Folder.objects.filter(content_type="GL").first()
     assert root_folder is not None, "No root folder found in the database."
 
     # Candidates for the legacy posture: every folder except the root (which gets
-    # the catalog reader role above) and enclaves. Leaf folders qualify too:
+    # the baseline reader role above) and enclaves. Leaf folders qualify too:
     # membership is inclusive, so a folder's default role reaches the holders of
     # grants on the folder itself, not only on its descendants.
     # Enclave folders never carry a default role: they are visitor spaces that
@@ -130,21 +100,14 @@ def fill_default_roles(apps, schema_editor):
     )
     candidate_folder_ids.discard(root_folder.id)
 
-    root_folder.default_role = reader_catalog_role
+    root_folder.default_role = baseline_reader_role
     root_folder.save()
 
-    if not getattr(settings, "CONFIGURABLE_DEFAULT_ROLE", False):
-        # Nothing installed makes the default role configurable here: it exists
-        # on the root folder only (pinned to the catalog reader role by
-        # startup()); no other folder receives one.
-        return
-
     # A module making the default role configurable is installed: assign the
-    # legacy migration role to every folder that holds at least one published
-    # object of a legacy-list model, so upgraded tenants keep (approximately)
-    # what `is_published` exposed.
+    # baseline reader role to every folder that holds at least one published
+    # object, so upgraded tenants keep (approximately) what `is_published` exposed.
     affected_folder_ids = set()
-    for model_config in READER_MIGRATION_MODEL_LIST:
+    for model_config in BASELINE_READER_MODEL_LIST:
         model = model_config.get_model(apps)
         real_model = model_config.get_real_model()
 
@@ -175,7 +138,7 @@ def fill_default_roles(apps, schema_editor):
     # Batch by 1_000 to avoid crashes due to overly large SQL requests.
     for affected_folder_ids_batch in itertools.batched(affected_folder_ids, 1_000):
         Folder.objects.filter(id__in=affected_folder_ids_batch).update(
-            default_role=reader_migration_role
+            default_role=baseline_reader_role
         )
 
 

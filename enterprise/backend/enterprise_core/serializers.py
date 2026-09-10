@@ -30,18 +30,16 @@ logger = structlog.get_logger(__name__)
 
 
 class FolderWriteSerializer(CommunityFolderWriteSerializer):
+    BUILTIN_EDITABLE_FIELDS = {"name", "default_role"}
+
     class Meta(CommunityFolderWriteSerializer.Meta):
-        # The default role is only editable (by ysers) in the enterprise edition.
-        # As it would be kind of useless in community edition (as only the `root_folder.default_role` have an impact).
         read_only_fields = ["content_type"]
         exclude = [
             field_to_exclude
             for field_to_exclude in CommunityFolderWriteSerializer.Meta.exclude
-            # The enterprise FolderWriteSerializer needs the "default_role" as it's editable in the enterprise edition.
-            # (contrary to the community edition).
-            # We also need to return the `content_type` as it's used to hide the `default_role` frontend `Select` from the `FolderForm` for `ENCLAVE` folders.
+            # We need to return the `content_type` as it's used to hide the `default_role` frontend `Select` from the `FolderForm` for `ENCLAVE` folders (in enterprise edition).
             # (`ENCLAVE` folders are not permitted to have a non-NULL `default_role`).
-            if field_to_exclude not in ["default_role", "content_type"]
+            if field_to_exclude not in ["content_type"]
         ]
 
     def validate_parent_folder(self, parent_folder):

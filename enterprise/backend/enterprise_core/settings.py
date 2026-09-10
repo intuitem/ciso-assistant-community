@@ -54,15 +54,6 @@ MODULES["enterprise_core"] = {  # noqa: F405
 
 INSTALLED_APPS.append("enterprise_core")  # noqa: F405
 
-CONFIGURABLE_DEFAULT_ROLE = True
-"""
-If set to `True` folders the `Folder.default_role` is editable by users.
-
-Otherwise, `Folder.default_role` is considered as immutable by user.
-
-(And the `root_folder.default_role` is set to the "reader catalog" role at startup)
-"""
-
 # --- License ---
 LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 1))
 LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")

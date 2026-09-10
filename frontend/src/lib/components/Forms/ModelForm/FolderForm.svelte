@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import * as m from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import FileInput from '../FileInput.svelte';
 	import Checkbox from '../Checkbox.svelte';
@@ -29,6 +29,8 @@
 		object = {},
 		model
 	}: Props = $props();
+
+	let isRootFolder = $derived(object.content_type === 'GL');
 
 	onMount(() => {
 		const isEdit = Boolean(object?.id);
@@ -61,6 +63,18 @@
 		field="create_missing_asset_classes"
 		label={m.createMissingAssetClasses()}
 		helpText={m.createMissingAssetClassesHelpText()}
+	/>
+{:else if isRootFolder}
+	<AutocompleteSelect
+		{form}
+		translateOptions={false}
+		optionsEndpoint="roles?read_only=true"
+		field="default_role"
+		nullable={true}
+		cacheLock={cacheLocks['default_role']}
+		bind:cachedValue={formDataCache['default_role']}
+		label={m.defaultRole()}
+		helpText={m.defaultRoleHelpText()}
 	/>
 {:else}
 	<AutocompleteSelect

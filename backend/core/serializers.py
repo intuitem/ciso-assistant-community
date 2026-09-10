@@ -2800,22 +2800,17 @@ class RoleAssignmentWriteSerializer(BaseModelSerializer):
 
 
 class FolderWriteSerializer(BaseModelSerializer):
+    BUILTIN_EDITABLE_FIELDS = {"default_role"}
+
     class Meta:
         model = Folder
         exclude = [
             "builtin",
             "content_type",
             "descendants",
-            # The default role is not configurable through this serializer: the
-            # root folder carries the catalog reader role, pinned by startup(),
-            # and no other folder gets one. A subclass may reopen the field
-            # (and inherits the validator below).
-            "default_role",
         ]
 
     def validate_default_role(self, default_role):
-        # Only runs where the field is writable — i.e. through a subclass that
-        # reopens it.
         if default_role is None:
             return default_role
 

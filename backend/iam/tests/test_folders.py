@@ -742,32 +742,6 @@ class TestFolderDefaultRole:
 
         assert "default_role" not in FolderWriteSerializer().fields
 
-    def test_ce_startup_pins_root_default_role(self):
-        """In the community edition the root folder's default role is hard-coded
-        to the catalog reader role: startup() re-pins it at every boot."""
-        from django.apps import apps as django_apps
-
-        from core.startup import startup
-
-        root_folder = Folder.get_root_folder()
-        original_default_role = root_folder.default_role
-        root_folder.default_role = None
-        root_folder.save()
-        try:
-            migratable = [
-                c for c in django_apps.get_app_configs() if c.models_module is not None
-            ]
-            startup(sender=migratable[-1])
-
-            root_folder.refresh_from_db()
-            assert root_folder.default_role is not None
-            assert root_folder.default_role.name == "BI-RL-CAT", (
-                "startup() MUST re-pin the catalog reader role on the root folder in CE."
-            )
-        finally:
-            root_folder.default_role = original_default_role
-            root_folder.save()
-
     def test_default_role_must_be_view_only(self, ctx: TestFolderDefaultRole.UserInfo):
         """A role carrying any non-view permission is rejected as a default role.
 

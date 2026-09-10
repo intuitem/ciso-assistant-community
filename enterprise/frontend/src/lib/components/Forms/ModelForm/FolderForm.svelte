@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
-	import { get } from 'svelte/store';
-	import * as m from '$paraglide/messages.js';
+	import * as m from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
@@ -30,6 +29,8 @@
 	}: Props = $props();
 
 	let displayDefaultRoleSelect = $derived(object.content_type !== 'EN'); // We want to hide the `"default_role"`field `Select` for enclave folders.
+
+	let isRootFolder = $derived(object.content_type === 'GL');
 
 	onMount(() => {
 		const isEdit = Boolean(object?.id);
@@ -63,6 +64,18 @@
 		label={m.createMissingAssetClasses()}
 		helpText={m.createMissingAssetClassesHelpText()}
 	/>
+{:else if isRootFolder}
+	<AutocompleteSelect
+		{form}
+		translateOptions={false}
+		optionsEndpoint="roles?read_only=true"
+		field="default_role"
+		nullable={true}
+		cacheLock={cacheLocks['default_role']}
+		bind:cachedValue={formDataCache['default_role']}
+		label={m.defaultRole()}
+		helpText={m.defaultRoleHelpText()}
+	/>
 {:else}
 	<FolderTreeSelect
 		{form}
@@ -78,6 +91,7 @@
 			translateOptions={false}
 			optionsEndpoint="roles?read_only=true"
 			field="default_role"
+			nullable={true}
 			cacheLock={cacheLocks['default_role']}
 			bind:cachedValue={formDataCache['default_role']}
 			label={m.defaultRole()}

@@ -51,11 +51,11 @@ def auditee(domain):
 
 @pytest.fixture
 def root_catalog_default_role():
-    """Ensure the root folder carries the BI-RL-CAT default role, independently of
+    """Ensure the root folder carries the BI-RL-BSL default role, independently of
     whether the data migration that seeds it has run in this test database."""
     root_folder = Folder.get_root_folder()
     original_default_role = root_folder.default_role
-    root_folder.default_role = Role.objects.get(name="BI-RL-CAT")
+    root_folder.default_role = Role.objects.get(name="BI-RL-BSL")
     root_folder.save()
     yield
     root_folder.default_role = original_default_role
@@ -91,7 +91,7 @@ class TestUserPartitionFilter:
         assert "applied_control" in allowed
         assert "risk_scenario" not in allowed
 
-        # The `"BI-RL-CAT"` `root_folder.default_role` grants any non-third-party user the `"view_asset"` `Role`` on the root folder.
+        # The `"BI-RL-BSL"` `root_folder.default_role` grants any non-third-party user the `"view_asset"` `Role`` on the root folder.
         assert "asset" in allowed
         partition = rag._user_partition_filter(ReadScope(auditee), None, None)
         asset_folders = {
