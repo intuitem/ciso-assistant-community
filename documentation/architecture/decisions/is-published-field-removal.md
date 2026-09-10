@@ -54,7 +54,7 @@ Every exclusion is a corollary of the definition, never a special case:
 
 ### Orthogonal — account lifecycle
 
-`is_active` is not an access rule. Authentication refuses inactive users a session, so request-time resolution never sees them; roster-style displays (member lists, seat counting) filter on it explicitly. Expiry-driven deactivation inherits the same story via the scheduled task.
+`is_active` is not an access rule. Authentication refuses inactive users a session, so request-time resolution never sees them; member-list displays (folder members, seat counting) filter on it explicitly. Expiry-driven deactivation inherits the same story via the scheduled task.
 
 ## Formal properties (each is a conformance test)
 

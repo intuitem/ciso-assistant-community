@@ -143,7 +143,7 @@ Configuring default roles is an **enterprise** capability: the domain form expos
 
 #### Can I make an object visible to all users without attaching it to global?
 
-You can attach this object to a subdomain (e.g. named "published"), and add every user in the group corresponding to reader role on the subdomain. This does not rely on the publication mechanism, and is more generic.
+Yes — the shelf pattern: attach the object to a sub-domain (e.g. named "shared"), and add the intended readers to that sub-domain's reader group. This uses ordinary role assignments only, works for any object type, and the audience is exactly the group's member list — explicit and auditable.
 
 ### 7. Accounting: Full Audit and Traceability <a href="#ember965" id="ember965"></a>
 

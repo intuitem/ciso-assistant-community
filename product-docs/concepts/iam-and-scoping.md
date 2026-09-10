@@ -1,5 +1,5 @@
 ---
-description: How IAM, the domain hierarchy, publication, and cross-domain visibility shape what each user sees
+description: How IAM, the domain hierarchy, default roles, and cross-domain visibility shape what each user sees
 ---
 
 # IAM and scoping
@@ -37,7 +37,7 @@ Permissions only flow **downward**: a role on a sub-domain does _not_ grant any 
 
 ### The one exception: third-party workspaces
 
-A **third-party workspace** — the folder holding a vendor's questionnaire, an *enclave* internally — is the one place where the tree deliberately stops conducting. Access granted there does not reach up: a representative with view rights on their workspace sees their questionnaire and nothing published in the domains above it. That containment is what makes it safe to give an external party an account on your instance at all.
+A **third-party workspace** — the folder holding a vendor's questionnaire, an *enclave* internally — is the one place where the tree deliberately stops conducting. Access granted there does not reach up: a representative with view rights on their workspace sees their questionnaire and nothing the domains above it share. That containment is what makes it safe to give an external party an account on your instance at all.
 
 Each third party gets one workspace per domain. See [third-party risk](third-party-risk.md#the-third-party-workspace).
 
