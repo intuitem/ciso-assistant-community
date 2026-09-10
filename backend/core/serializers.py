@@ -2803,10 +2803,10 @@ class FolderWriteSerializer(BaseModelSerializer):
     BUILTIN_EDITABLE_FIELDS = {"default_role"}
 
     class Meta:
+        read_only_fields = ["content_type"]
         model = Folder
         exclude = [
             "builtin",
-            "content_type",
             "descendants",
         ]
 

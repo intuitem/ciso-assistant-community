@@ -33,14 +33,7 @@ class FolderWriteSerializer(CommunityFolderWriteSerializer):
     BUILTIN_EDITABLE_FIELDS = {"name", "default_role"}
 
     class Meta(CommunityFolderWriteSerializer.Meta):
-        read_only_fields = ["content_type"]
-        exclude = [
-            field_to_exclude
-            for field_to_exclude in CommunityFolderWriteSerializer.Meta.exclude
-            # We need to return the `content_type` as it's used to hide the `default_role` frontend `Select` from the `FolderForm` for `ENCLAVE` folders (in enterprise edition).
-            # (`ENCLAVE` folders are not permitted to have a non-NULL `default_role`).
-            if field_to_exclude not in ["content_type"]
-        ]
+        pass
 
     def validate_parent_folder(self, parent_folder):
         """
