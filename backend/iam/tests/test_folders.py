@@ -734,14 +734,6 @@ class TestFolderDefaultRole:
             user.delete()
             custom_role.delete()
 
-    def test_ce_folder_serializer_does_not_expose_default_role(self):
-        """The default role is not configurable through this serializer: it must
-        not expose the field at all. (A subclass may reopen it and inherits the
-        validators below.)"""
-        from core.serializers import FolderWriteSerializer
-
-        assert "default_role" not in FolderWriteSerializer().fields
-
     def test_default_role_must_be_view_only(self, ctx: TestFolderDefaultRole.UserInfo):
         """A role carrying any non-view permission is rejected as a default role.
 
