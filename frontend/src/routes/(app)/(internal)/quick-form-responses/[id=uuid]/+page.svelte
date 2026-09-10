@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import Question from '$lib/components/Forms/Question.svelte';
@@ -32,6 +33,10 @@
 		})
 	);
 	const viewerIsRequester = $derived(!!data.viewerIsRequester);
+	// The server decides: holds the approve right, and isn't the person who filed this
+	// (unless self-validation is enabled instance-wide). Offering a button the server
+	// will refuse is worse than not offering it.
+	const canReview = $derived(!!content.can_review);
 	const suggestedActions = $derived((data.suggestedActions ?? []) as any[]);
 
 	// "Why can't I submit?" has to be answerable from the screen. The server resolves
@@ -51,6 +56,16 @@
 	let busy = $state(false);
 	let reopenObservation = $state('');
 
+	// The backend's status and error code travel inside the action's payload, not the
+	// HTTP response. Returns a ready-to-show message, or null when the call succeeded.
+	function actionError(result: any): string | null {
+		const data = result?.type === 'success' || result?.type === 'failure' ? result.data : null;
+		const status = data?.status;
+		if (typeof status !== 'number' || status < 400) return null;
+		const code = data?.body?.error ?? data?.body?.detail;
+		return typeof code === 'string' ? safeTranslate(code) : safeTranslate('anErrorOccurred');
+	}
+
 	async function post(action: string, body: Record<string, unknown>) {
 		busy = true;
 		try {
@@ -58,15 +73,11 @@
 				method: 'POST',
 				body: JSON.stringify({ id: response.id, ...body })
 			});
-			const result = await res.json();
-			// SvelteKit wraps action data; the backend status travels in the body.
-			const payload = result?.data ? JSON.parse(result.data) : null;
-			const status = Array.isArray(payload) ? payload[payload[0]?.status] : null;
-			if (!res.ok || (typeof status === 'number' && status >= 400)) {
-				const detail = Array.isArray(payload) ? payload[payload[0]?.body] : null;
-				const errorKey = detail && typeof detail === 'object' ? Object.values(detail)[0] : null;
+			const result: any = deserialize(await res.text());
+			const failure = actionError(result);
+			if (!res.ok || failure) {
 				toastStore.trigger({
-					message: safeTranslate(String(errorKey ?? 'anErrorOccurred')),
+					message: failure ?? safeTranslate('anErrorOccurred'),
 					background: 'preset-filled-error-500'
 				});
 			}
@@ -78,6 +89,24 @@
 
 	async function saveAnswer(urn: string, value: unknown) {
 		await post('updateAnswers', { answers: { [urn]: value } });
+	}
+
+	// A file question is answered by uploading, so the upload has to go through the
+	// multipart action rather than the JSON answers patch.
+	async function uploadAttachment(urn: string, file: File) {
+		const body = new FormData();
+		body.append('id', response.id);
+		body.append('question', urn);
+		body.append('file', file);
+		const res = await fetch('?/uploadAttachment', { method: 'POST', body });
+		const result: any = deserialize(await res.text());
+		const failure = actionError(result);
+		if (failure) throw new Error(failure);
+		await invalidateAll();
+	}
+
+	async function removeAttachment(_urn: string, attachmentId: string) {
+		await post('removeAttachment', { attachmentId });
 	}
 
 	const statusColor: Record<string, string> = {
@@ -185,7 +214,10 @@
 			</div>
 		{/if}
 
-		{#if viewerIsRequester}
+		<!-- Someone who may edit but not decide is on the asking side of this request,
+		     even though folder rights got them here: they get submit/drop/clone, not the
+		     verdict. -->
+		{#if viewerIsRequester || (canEdit && !canReview)}
 			<!-- The person who filed this. Submitting is theirs; deciding is not. -->
 			<div class="flex flex-wrap items-center gap-2 pt-1">
 				{#if response.status === 'draft'}
@@ -217,7 +249,7 @@
 					<i class="fa-solid fa-copy mr-1"></i>{m.quickFormClone()}
 				</button>
 			</div>
-		{:else if canEdit}
+		{:else if canEdit && canReview}
 			{#if suggestedActions.length}
 				<!-- Supervised automation: the outcomes suggest, the reviewer commits, the
 				     workflow executes. Offered only when the answers make them relevant. -->
@@ -243,15 +275,10 @@
 			<!-- The reviewer. Claiming is optional; a decision always carries a resolution. -->
 			<div class="flex flex-wrap items-center gap-2 pt-1">
 				{#if response.status === 'draft'}
-					<button
-						type="button"
-						class="btn btn-sm preset-filled-success-500"
-						disabled={busy || !content.progress?.complete}
-						title={content.progress?.complete ? m.quickFormComplete() : m.quickFormIncomplete()}
-						onclick={() => post('setStatus', { status: 'submitted' })}
-					>
-						<i class="fa-solid fa-paper-plane mr-1"></i>{m.quickFormSubmit()}
-					</button>
+					<!-- Sent back: the ball is with the requester, and submitting is theirs. -->
+					<span class="text-sm text-surface-500">
+						<i class="fa-solid fa-hourglass-half mr-1"></i>{m.quickFormAwaitingRequester()}
+					</span>
 				{/if}
 				{#if response.status === 'submitted'}
 					<button
@@ -350,6 +377,10 @@
 						<p class="text-xs text-surface-500">{m.quickFormReadOnly()}</p>
 					{/if}
 					<Question
+						attachments={content.attachments ?? {}}
+						attachmentHref={(a) => `/quick-form-responses/${response.id}/attachments/${a.id}`}
+						onUpload={canEditAnswers ? uploadAttachment : undefined}
+						onRemoveAttachment={canEditAnswers ? removeAttachment : undefined}
 						questions={currentPage.questions ?? {}}
 						initialValue={content.answers ?? {}}
 						field="answers"

@@ -6565,6 +6565,14 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
                     "answers": "Answers can only be modified while the response is in progress."
                 }
             )
+        # The content of a request belongs to whoever is asking. A reviewer with change
+        # rights on the domain sends it back with a note; they do not answer it for you.
+        if self.instance and attrs.get("answers") is not None:
+            request = self.context.get("request")
+            if request is not None and not self.instance.is_requester(request.user):
+                raise serializers.ValidationError(
+                    {"answers": "Only the requester can change the answers."}
+                )
         if self.instance and "quick_form" in attrs:
             if attrs["quick_form"] != self.instance.quick_form:
                 raise serializers.ValidationError(

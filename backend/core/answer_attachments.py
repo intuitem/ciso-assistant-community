@@ -152,6 +152,24 @@ def promote_to_evidence(attachment, user):
     return evidence, True
 
 
+def answer_for_upload(response, question_urn):
+    """The Answer row a file attaches to, created on demand.
+
+    Answer rows are written lazily, only when a value is submitted, so a question whose
+    only answer *is* a file has no row for the upload to hang off. Attaching is
+    answering, so create it here rather than refusing.
+    """
+    question = Question.objects.filter(
+        page__quick_form_id=response.quick_form_id, urn=question_urn
+    ).first()
+    if question is None:
+        return None
+    answer, _ = Answer.objects.get_or_create(
+        response=response, question=question, defaults={"folder": response.folder}
+    )
+    return answer
+
+
 def serialize(attachment):
     return {
         "id": str(attachment.id),
@@ -166,6 +184,65 @@ def serialize(attachment):
         if attachment.promoted_to_id
         else None,
     }
+
+
+#: Types a browser may render in-tab without handing the uploader script execution in
+#: the reviewer's origin. Everything else downloads. Deliberately excludes SVG and any
+#: HTML/XML flavour: both execute script, and the person who uploaded the file is by
+#: construction less trusted than the reviewer who opens it.
+INLINE_SAFE_TYPES = {
+    "application/pdf",
+    "image/png",
+    "image/jpeg",
+    "image/gif",
+    "image/webp",
+    "text/plain",
+}
+
+
+def _safe_filename_header(disposition, filename):
+    """A Content-Disposition value that a filename cannot break out of."""
+    from urllib.parse import quote
+
+    ascii_name = "".join(
+        c
+        for c in filename.encode("ascii", "ignore").decode("ascii")
+        # Control characters would let a filename shape the header itself; a quote
+        # would close the quoted-string early.
+        if c.isprintable() and c not in '"\\'
+    ).strip()
+    ascii_name = ascii_name or "attachment"
+    # RFC 5987 for the real name; the quoted form is the fallback for old clients.
+    return (
+        f"{disposition}; filename=\"{ascii_name}\"; filename*=UTF-8''{quote(filename)}"
+    )
+
+
+def serve(attachment):
+    """Stream one attachment back.
+
+    The stored `mime_type` came from the uploading client and is not evidence of
+    anything, so the type is re-derived from the extension and then allowlisted: a type
+    we are not prepared to render becomes an octet-stream download. `nosniff` stops the
+    browser second-guessing that, and the sandbox CSP neuters active content even
+    inside the formats we do render.
+    """
+    import mimetypes
+
+    from django.http import FileResponse
+
+    guessed = mimetypes.guess_type(attachment.filename)[0]
+    inline = guessed in INLINE_SAFE_TYPES
+    content_type = guessed if inline else "application/octet-stream"
+
+    body = FileResponse(attachment.file, content_type=content_type)
+    body["Content-Disposition"] = _safe_filename_header(
+        "inline" if inline else "attachment", attachment.filename
+    )
+    body["X-Content-Type-Options"] = "nosniff"
+    body["Content-Security-Policy"] = "sandbox; default-src 'none'; object-src 'none'"
+    body["Referrer-Policy"] = "no-referrer"
+    return body
 
 
 def attachments_for(answers_qs):

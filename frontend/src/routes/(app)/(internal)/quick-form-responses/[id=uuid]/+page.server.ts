@@ -88,6 +88,32 @@ export const actions: Actions = {
 		const res = await event.fetch(`${BASE_API_URL}/my-requests/${id}/clone/`, json({}));
 		return { status: res.status, body: await res.json() };
 	},
+	// Multipart has to be consumed and rebuilt: forwarding the raw stream loses the
+	// boundary. handleFetch already exempts multipart from its JSON Content-Type.
+	uploadAttachment: async (event) => {
+		const incoming = await event.request.formData();
+		const body = new FormData();
+		body.append('question', String(incoming.get('question') ?? ''));
+		body.append('file', incoming.get('file') as File);
+		const id = String(incoming.get('id') ?? '');
+		const { res } = await withFallback(
+			event.fetch,
+			`${BASE_API_URL}/quick-form-responses/${id}/attachments/`,
+			`${BASE_API_URL}/my-requests/${id}/attachments/`,
+			{ method: 'POST', body }
+		);
+		return { status: res.status, body: await res.json() };
+	},
+	removeAttachment: async (event) => {
+		const { id, attachmentId } = await event.request.json();
+		const { res } = await withFallback(
+			event.fetch,
+			`${BASE_API_URL}/quick-form-responses/${id}/attachments/${attachmentId}/`,
+			`${BASE_API_URL}/my-requests/${id}/attachments/${attachmentId}/`,
+			{ method: 'DELETE' }
+		);
+		return { status: res.status, body: res.status === 204 ? null : await res.json() };
+	},
 	runAction: async (event) => {
 		const { id, version } = await event.request.json();
 		const res = await event.fetch(

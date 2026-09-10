@@ -161,12 +161,14 @@ from rest_framework.exceptions import (
 
 from core.helpers import *
 from core.answer_attachments import (
+    answer_for_upload,
     AttachmentError,
     add_attachment,
     attachments_for,
     promote_to_evidence,
 )
 from core.answer_attachments import serialize as serialize_attachment
+from core.answer_attachments import serve as serve_attachment
 from core.models import (
     Commitment,
     AppliedControl,
@@ -19727,7 +19729,23 @@ def emit_quick_form_submitted(response):
     )
 
 
-def quick_form_response_content(response):
+def _can_review(user, response):
+    """Holds the narrow approve right on the folder, and — unless self-validation is
+    enabled instance-wide — is not the person who filed the request."""
+    if not RoleAssignment.is_access_allowed(
+        user=user,
+        perm=Permission.objects.get(codename="approve_quickformresponse"),
+        folder=response.folder,
+    ):
+        return False
+    if general_setting_is_enabled("allow_self_validation"):
+        return True
+    if response.submitted_by_id == user.id:
+        return False
+    return not response.respondents.filter(user=user, entity__isnull=True).exists()
+
+
+def quick_form_response_content(response, user=None):
     """Everything the fill view needs in one call: ordered pages with translated
     questions, the answers dict, hidden pages, progress, score and outcome. Shared by
     the reviewer surface and the requester's own, so the two cannot drift."""
@@ -19778,7 +19796,11 @@ def quick_form_response_content(response):
             "progress": evaluation["progress"],
             "score": evaluation["score"],
             "computed_outcome": evaluation["computed_outcome"],
-            "can_edit_answers": response.status == QuickFormResponse.Status.DRAFT,
+            "can_edit_answers": response.status == QuickFormResponse.Status.DRAFT
+            and (user is None or response.is_requester(user)),
+            # Whether this viewer may decide. Computed here so the action bar shows
+            # what the server will actually accept instead of 403ing on click.
+            "can_review": _can_review(user, response) if user is not None else False,
             "started_at": response.started_at,
             "submitted_at": response.submitted_at,
             "observation": response.observation,
@@ -19909,7 +19931,7 @@ class MyRequestViewSet(viewsets.ViewSet):
         response = self._own_response(request, pk)
         if response is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        return quick_form_response_content(response)
+        return quick_form_response_content(response, request.user)
 
     @action(detail=True, methods=["patch"], name="Answer the caller's own request")
     def answers(self, request, pk=None):
@@ -19947,7 +19969,7 @@ class MyRequestViewSet(viewsets.ViewSet):
             apply_answers_dict("response", response, questions_by_urn, answers)
             response.refresh_title_from_answers()
         response.refresh_from_db()
-        return Response(quick_form_response_content(response).data)
+        return Response(quick_form_response_content(response, request.user).data)
 
     @action(detail=True, methods=["post"], name="Submit the caller's own request")
     def submit(self, request, pk=None):
@@ -20013,13 +20035,7 @@ class MyRequestViewSet(viewsets.ViewSet):
             return Response(
                 {"error": "responseLocked"}, status=status.HTTP_400_BAD_REQUEST
             )
-        answer = (
-            Answer.objects.filter(
-                response=response, question__urn=request.data.get("question")
-            )
-            .select_related("question")
-            .first()
-        )
+        answer = answer_for_upload(response, request.data.get("question"))
         if answer is None:
             return Response(
                 {"error": "unknownQuestion"}, status=status.HTTP_404_NOT_FOUND
@@ -20038,6 +20054,23 @@ class MyRequestViewSet(viewsets.ViewSet):
         return Response(
             serialize_attachment(attachment), status=status.HTTP_201_CREATED
         )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=r"attachments/(?P<attachment_id>[^/.]+)/download",
+        name="Read back a file on the caller's own request",
+    )
+    def download_attachment(self, request, pk=None, attachment_id=None):
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        attachment = AnswerAttachment.objects.filter(
+            id=attachment_id, answer__response=response
+        ).first()
+        if attachment is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return serve_attachment(attachment)
 
     @action(
         detail=True,
@@ -20318,13 +20351,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         """Reviewer-side upload. The requester's equivalent lives on
         MyRequestViewSet; only the gate differs, the rules are shared."""
         response = self.get_object()
-        answer = (
-            Answer.objects.filter(
-                response=response, question__urn=request.data.get("question")
-            )
-            .select_related("question")
-            .first()
-        )
+        answer = answer_for_upload(response, request.data.get("question"))
         if answer is None:
             return Response(
                 {"error": "unknownQuestion"}, status=status.HTTP_404_NOT_FOUND
@@ -20367,6 +20394,23 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                 "created": created,
             }
         )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=r"attachments/(?P<attachment_id>[^/.]+)/download",
+        name="Open a file attached to this request",
+    )
+    def download_attachment(self, request, pk, attachment_id=None):
+        """Reading the evidence a request rests on is the reviewer's whole job, so it
+        needs no more than the view right `get_object` already established."""
+        response = self.get_object()
+        attachment = AnswerAttachment.objects.filter(
+            id=attachment_id, answer__response=response
+        ).first()
+        if attachment is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return serve_attachment(attachment)
 
     @action(
         detail=True,
@@ -20422,6 +20466,10 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         )
 
         response = self.get_object()
+        # A supervised sequence acts on the request the way a decision does — same gate.
+        denied = self._deciding_denied(request, response)
+        if denied is not None:
+            return denied
         folder_ids = [f.id for f in response.folder.get_parent_folders()] + [
             response.folder_id
         ]
@@ -20458,7 +20506,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Quick form response content")
     def content(self, request, pk):
-        return quick_form_response_content(self.get_object())
+        return quick_form_response_content(self.get_object(), request.user)
 
     @action(detail=True, methods=["post"], name="Start quick form response")
     def start(self, request, pk):
@@ -20519,6 +20567,28 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         QuickFormResponse.Resolution.AUTO,
     }
 
+    def _deciding_denied(self, request, response):
+        """Reviewer transitions need the narrow `approve` right, and — unless an admin
+        has enabled self-validation instance-wide — must not be taken by the person who
+        filed the request. Returns an error Response, or None when the act is allowed."""
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="approve_quickformresponse"),
+            folder=response.folder,
+        ):
+            return Response(
+                {"error": "approvalPermissionRequired"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if response.is_requester(request.user) and not general_setting_is_enabled(
+            "allow_self_validation"
+        ):
+            return Response(
+                {"error": "selfValidationNotAllowed"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return None
+
     @action(detail=True, methods=["post"], url_path="set-status")
     def set_status(self, request, pk):
         from core.cel_service import evaluate_quick_form
@@ -20542,6 +20612,18 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                     "to": new_status,
                 },
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        if config.get("actor") == "reviewer":
+            denied = self._deciding_denied(request, response)
+            if denied is not None:
+                return denied
+        elif config.get("actor") == "requester" and not response.is_requester(
+            request.user
+        ):
+            # Folder rights let a reviewer read and route a request, not put it forward
+            # on someone else's behalf.
+            return Response(
+                {"error": "onlyRequesterCanSubmit"}, status=status.HTTP_403_FORBIDDEN
             )
         if config.get("check_completion"):
             evaluation = evaluate_quick_form(response, persist=True)

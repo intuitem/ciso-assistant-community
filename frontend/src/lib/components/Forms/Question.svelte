@@ -17,6 +17,12 @@
 		helpText?: string;
 		onChange?: (urn: string, newAnswer: any) => void;
 		disabled?: boolean;
+		/** {question urn: [attachment]} — file questions are answered by uploading. */
+		attachments?: Record<string, any[]>;
+		onUpload?: (urn: string, file: File) => Promise<void> | void;
+		onRemoveAttachment?: (urn: string, attachmentId: string) => Promise<void> | void;
+		/** Where to open an attached file. Absent on surfaces that store nothing. */
+		attachmentHref?: (attachment: any) => string;
 	}
 
 	let {
@@ -29,8 +35,35 @@
 		field,
 		helpText,
 		onChange = () => {},
-		disabled = false
+		disabled = false,
+		attachments = {},
+		onUpload,
+		onRemoveAttachment,
+		attachmentHref
 	}: Props = $props();
+
+	let uploading = $state<Record<string, boolean>>({});
+	let uploadError = $state<Record<string, string>>({});
+
+	const humanSize = (bytes: number) =>
+		bytes >= 1024 * 1024
+			? `${(bytes / 1024 / 1024).toFixed(1)} MB`
+			: `${Math.max(1, Math.round(bytes / 1024))} KB`;
+
+	async function handleFiles(urn: string, input: HTMLInputElement) {
+		if (!onUpload) return;
+		const files = [...(input.files ?? [])];
+		input.value = '';
+		uploadError[urn] = '';
+		uploading[urn] = true;
+		try {
+			for (const file of files) await onUpload(urn, file);
+		} catch (e) {
+			uploadError[urn] = e instanceof Error ? e.message : String(e);
+		} finally {
+			uploading[urn] = false;
+		}
+	}
 
 	const { value } = form ? formFieldProxy(form, field) : {};
 
@@ -67,6 +100,17 @@
 	function saveTextAnswer(urn: string) {
 		internalAnswers[urn] = questionBuffers[urn];
 		onChange(urn, internalAnswers[urn]);
+	}
+
+	// Leaving the field commits it. The check/cross buttons stay for anyone who wants
+	// them, but nothing typed is lost by clicking elsewhere — which is what every
+	// surface using this component tells the respondent.
+	function commitOnBlur(urn: string, event: FocusEvent) {
+		const next = event.relatedTarget as HTMLElement | null;
+		// Clicking the revert button blurs the field first; committing here would save
+		// the very text that button exists to discard.
+		if (next?.dataset?.answerAction === 'revert') return;
+		if (questionBuffers[urn] !== (internalAnswers[urn] ?? '')) saveTextAnswer(urn);
 	}
 
 	function resetTextAnswer(urn: string) {
@@ -315,6 +359,7 @@
 									class="input w-full {_class}"
 									{disabled}
 									bind:value={questionBuffers[urn]}
+									onblur={(e) => commitOnBlur(urn, e)}
 								></textarea>
 								{#if !disabled && questionBuffers[urn] !== (internalAnswers[urn] || '')}
 									<button
@@ -329,6 +374,7 @@
 										class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
 										onclick={() => resetTextAnswer(urn)}
 										type="button"
+										data-answer-action="revert"
 										aria-label="Reset observation"
 									>
 										<i class="fa-solid fa-xmark opacity-70"></i>
@@ -336,6 +382,80 @@
 								{/if}
 							</div>
 						{/if}
+					{:else if question.type === 'file'}
+						{@const files = attachments[urn] ?? []}
+						{@const fileLimit = question.config?.multiple
+							? Number(question.config?.max_files) || Infinity
+							: 1}
+						<div class="flex flex-col gap-2">
+							{#if files.length}
+								<ul class="flex flex-col gap-1">
+									{#each files as file (file.id)}
+										<li
+											class="flex items-center gap-2 rounded-lg border border-surface-200-800 bg-surface-100-900 px-3 py-2 text-sm"
+										>
+											<i class="fa-solid fa-paperclip text-surface-400"></i>
+											{#if attachmentHref}
+												<a
+													class="anchor min-w-0 grow truncate"
+													href={attachmentHref(file)}
+													target="_blank"
+													rel="noopener"
+													title={m.openFile()}>{file.filename}</a
+												>
+											{:else}
+												<span class="min-w-0 grow truncate">{file.filename}</span>
+											{/if}
+											<span class="shrink-0 text-xs text-surface-400">{humanSize(file.size)}</span>
+											{#if file.promoted_to}
+												<span class="shrink-0 text-xs text-emerald-600" title={m.evidence()}>
+													<i class="fa-solid fa-circle-check"></i>
+												</span>
+											{/if}
+											{#if !disabled && onRemoveAttachment}
+												<button
+													type="button"
+													class="shrink-0 text-surface-400 hover:text-error-500"
+													aria-label={m.delete()}
+													onclick={() => onRemoveAttachment?.(urn, file.id)}
+												>
+													<i class="fa-solid fa-xmark"></i>
+												</button>
+											{/if}
+										</li>
+									{/each}
+								</ul>
+							{/if}
+							{#if onUpload && !disabled && files.length >= fileLimit}
+								<p class="text-xs text-surface-400">
+									{m.fileLimitReached({ count: fileLimit })}
+								</p>
+							{:else if onUpload && !disabled}
+								<label
+									class="flex w-fit cursor-pointer items-center gap-2 rounded-base border border-surface-300-700 bg-surface-100-900 px-3 py-2 text-sm shadow-sm hover:bg-surface-200-800"
+								>
+									{#if uploading[urn]}
+										<i class="fa-solid fa-spinner fa-spin"></i>
+									{:else}
+										<i class="fa-solid fa-arrow-up-from-bracket"></i>
+									{/if}
+									<span>{m.addFile()}</span>
+									<input
+										type="file"
+										class="hidden"
+										multiple={question.config?.multiple ?? false}
+										accept={question.config?.accept || undefined}
+										disabled={uploading[urn]}
+										onchange={(e) => handleFiles(urn, e.currentTarget)}
+									/>
+								</label>
+							{:else if !files.length}
+								<p class="text-xs italic text-surface-400">{m.uploadUnavailableHere()}</p>
+							{/if}
+							{#if uploadError[urn]}
+								<p class="text-xs text-error-500">{uploadError[urn]}</p>
+							{/if}
+						</div>
 					{/if}
 				</li>
 			{/if}

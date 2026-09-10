@@ -10417,6 +10417,26 @@ class QuickFormResponse(
     class Meta:
         verbose_name = _("Quick form response")
         verbose_name_plural = _("Quick form responses")
+        permissions = [
+            (
+                "approve_quickformresponse",
+                "Can decide on a request (close, send back, take in review)",
+            )
+        ]
+
+    def is_requester(self, user) -> bool:
+        """Whoever is on the asking side of this request.
+
+        `submitted_by` rather than `created_by`: a clone or a reassignment moves
+        authorship, and the question is who put this forward. A draft with neither a
+        submitter nor a respondent is unclaimed — a row created straight from the
+        table — so it belongs to whoever can reach it.
+        """
+        if self.submitted_by_id == user.id:
+            return True
+        if self.respondents.filter(user=user, entity__isnull=True).exists():
+            return True
+        return self.submitted_by_id is None and not self.respondents.exists()
 
     def get_default_ref_id(self) -> str:
         """Next free reference for this form's prefix (DER.000001, DER.000002...)."""

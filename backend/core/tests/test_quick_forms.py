@@ -380,8 +380,20 @@ class TestResponseLifecycle:
         res = client.patch(url, {"answers": {Q_HEADCOUNT: 1}}, format="json")
         assert res.status_code == 400
 
+        # From here the reviewer acts, and it cannot be the same person: whoever
+        # submitted a request is barred from deciding on it.
+        assert (
+            client.post(
+                f"{url}set-status/",
+                {"status": "closed", "resolution": "accepted"},
+                format="json",
+            ).status_code
+            == 403
+        )
+        _, reviewer = _admin_client("qf-reviewer@test.local")
+
         # Request changes sends it back to the requester, keeping the observation.
-        res = client.post(
+        res = reviewer.post(
             f"{url}set-status/",
             {"status": "draft", "observation": "Please detail the scale"},
             format="json",
@@ -393,16 +405,16 @@ class TestResponseLifecycle:
         assert res.status_code == 200
 
         # A reviewer may claim before deciding; claiming records the assignee.
-        res = client.post(f"{url}set-status/", {"status": "in_review"}, format="json")
+        res = reviewer.post(f"{url}set-status/", {"status": "in_review"}, format="json")
         assert res.status_code == 200
         response.refresh_from_db()
         assert response.assignee is not None
 
         # Closing demands a resolution: status says where it is, resolution how it ended.
-        res = client.post(f"{url}set-status/", {"status": "closed"}, format="json")
+        res = reviewer.post(f"{url}set-status/", {"status": "closed"}, format="json")
         assert res.status_code == 400
         assert res.json()["error"] == "resolutionRequired"
-        res = client.post(
+        res = reviewer.post(
             f"{url}set-status/",
             {"status": "closed", "resolution": "accepted"},
             format="json",
@@ -413,7 +425,7 @@ class TestResponseLifecycle:
         assert not response.is_deletable()
 
         # Closed is terminal.
-        res = client.post(f"{url}set-status/", {"status": "draft"}, format="json")
+        res = reviewer.post(f"{url}set-status/", {"status": "draft"}, format="json")
         assert res.status_code == 400
         assert res.json()["error"] == "invalidTransition"
 
@@ -539,3 +551,160 @@ class TestBuilderBridge:
             .choices.count()
             == 2
         )
+
+
+def _role_client(email, role_code, folder):
+    """A user holding one built-in role on `folder`, with an authenticated client."""
+    from iam.models import Role, RoleAssignment
+
+    user = User.objects.create_user(email=email, is_published=True)
+    user.folder = Folder.get_root_folder()
+    user.save()
+    group = UserGroup.objects.create(name=f"grp-{email}", folder=folder)
+    group.user_set.add(user)
+    assignment = RoleAssignment.objects.create(
+        user_group=group,
+        role=Role.objects.get(name=role_code),
+        folder=Folder.get_root_folder(),
+        is_recursive=True,
+    )
+    assignment.perimeter_folders.add(folder)
+    token = AuthToken.objects.create(user=user)
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token[1]}")
+    return user, client
+
+
+@pytest.mark.django_db
+def test_requester_cannot_decide_on_their_own_request(app_config):
+    """Separation of duties: whoever submitted a request may not close it, whatever
+    folder rights they hold — unless an admin turns on self-validation."""
+    from global_settings.models import GlobalSettings
+
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-sod", parent_folder=Folder.get_root_folder()
+    )
+
+    analyst, analyst_client = _role_client("qf-analyst@test.local", "BI-RL-ANA", folder)
+    response = QuickFormResponse.objects.create(
+        name="self-filed",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.SUBMITTED,
+        submitted_by=analyst,
+    )
+    url = f"/api/quick-form-responses/{response.id}/set-status/"
+    payload = {"status": "closed", "resolution": "accepted"}
+
+    res = analyst_client.post(url, payload, format="json")
+    assert res.status_code == 403, res.json()
+    assert res.json()["error"] == "selfValidationNotAllowed"
+
+    # A different analyst on the same domain is unaffected.
+    _, other_client = _role_client("qf-other@test.local", "BI-RL-ANA", folder)
+    assert other_client.post(url, payload, format="json").status_code == 200, (
+        "a colleague must still be able to decide"
+    )
+
+    # And the requester's own view says so, rather than offering a doomed button.
+    content = analyst_client.get(
+        f"/api/quick-form-responses/{response.id}/content/"
+    ).json()
+    assert content["can_review"] is False
+
+
+@pytest.mark.django_db
+def test_self_validation_setting_reopens_the_door(app_config):
+    """The instance-wide escape hatch, for organisations too small to separate."""
+    from global_settings.models import GlobalSettings
+
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-sod2", parent_folder=Folder.get_root_folder()
+    )
+    analyst, client = _role_client("qf-solo@test.local", "BI-RL-ANA", folder)
+    response = QuickFormResponse.objects.create(
+        name="solo",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.SUBMITTED,
+        submitted_by=analyst,
+    )
+    gs, _ = GlobalSettings.objects.get_or_create(name="general", defaults={"value": {}})
+    gs.value = {**(gs.value or {}), "allow_self_validation": True}
+    gs.save()
+
+    res = client.post(
+        f"/api/quick-form-responses/{response.id}/set-status/",
+        {"status": "closed", "resolution": "accepted"},
+        format="json",
+    )
+    assert res.status_code == 200, res.json()
+
+
+@pytest.mark.django_db
+def test_deciding_needs_the_approve_permission(app_config):
+    """Reader may look at a request but not act on it."""
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-sod3", parent_folder=Folder.get_root_folder()
+    )
+    author, _ = _role_client("qf-author@test.local", "BI-RL-ANA", folder)
+    response = QuickFormResponse.objects.create(
+        name="readable",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.SUBMITTED,
+        submitted_by=author,
+    )
+    # BI-RL-AUD carries the reader permission list: view without approve.
+    _, reader_client = _role_client("qf-reader@test.local", "BI-RL-AUD", folder)
+    res = reader_client.post(
+        f"/api/quick-form-responses/{response.id}/set-status/",
+        {"status": "closed", "resolution": "accepted"},
+        format="json",
+    )
+    assert res.status_code in (403, 404), res.status_code
+
+
+@pytest.mark.django_db
+def test_only_the_requester_owns_the_content(app_config):
+    """A reviewer sends a request back with a note; they do not answer it for you,
+    and they do not resubmit it on your behalf — whatever folder rights they hold."""
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-content", parent_folder=Folder.get_root_folder()
+    )
+    requester, _ = _role_client("qf-asker@test.local", "BI-RL-ANA", folder)
+    asker_actor = Actor.objects.filter(user=requester, entity__isnull=True).first()
+
+    response = QuickFormResponse.objects.create(
+        name="theirs",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.DRAFT,
+        submitted_by=requester,
+    )
+    if asker_actor:
+        response.respondents.add(asker_actor)
+
+    # A global administrator, who is not the requester.
+    _, admin = _admin_client("qf-content-admin@test.local")
+    url = f"/api/quick-form-responses/{response.id}/"
+
+    res = admin.patch(url, {"answers": {Q_HEADCOUNT: 42}}, format="json")
+    assert res.status_code == 400, res.json()
+    assert "answers" in res.json()
+
+    res = admin.post(f"{url}set-status/", {"status": "submitted"}, format="json")
+    assert res.status_code == 403, res.json()
+    assert res.json()["error"] == "onlyRequesterCanSubmit"
+
+    # And the admin's own view of the request says the content is not theirs to touch.
+    content = admin.get(f"{url}content/").json()
+    assert content["can_edit_answers"] is False

@@ -106,6 +106,11 @@
 		const current = (question.config as Record<string, unknown> | null) ?? { widget: 'slider' };
 		saveField('config', { ...current, ...patch });
 	}
+
+	function patchConfig(patch: Record<string, unknown>) {
+		const current = (question.config as Record<string, unknown> | null) ?? {};
+		saveField('config', { ...current, ...patch });
+	}
 </script>
 
 <div class="group flex items-start gap-1">
