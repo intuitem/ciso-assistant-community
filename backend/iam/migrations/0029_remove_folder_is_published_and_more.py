@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 import itertools
 
-from django.conf import settings
 from django.db import migrations, models
 from django.db.models.deletion import SET_NULL
 from django.apps import apps as django_apps
