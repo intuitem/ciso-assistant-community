@@ -4,9 +4,13 @@ import { logger } from '$lib/server/logger';
 
 type Fetch = typeof globalThis.fetch;
 
-// `url` is the IdP logout URL, or null when the backend ended the SSO sessions
-// and no IdP round-trip is needed.
-type IdPLogoutResolution = { ok: true; url: string | null } | { ok: false };
+// A logout leg must never hang: the IdP discovery call behind logout-url/ can
+// stall, and a dead-end here leaves the user logged in.
+const LOGOUT_CALL_TIMEOUT_MS = 10_000;
+
+// `url` is the IdP logout URL, or null when no IdP round-trip is needed.
+type IdPLogoutResolution =
+	{ ok: true; url: string | null; allauthSessionEnded: boolean } | { ok: false };
 
 // Resolved server-side so SSO logout keeps working when the API is not
 // reachable from the browser (IP-restricted deployments).
@@ -18,10 +22,18 @@ async function resolveIdPLogoutUrl(fetch: Fetch, cookies: Cookies): Promise<IdPL
 	if (ssoSessionKey) headers['X-SSO-Session-Key'] = ssoSessionKey;
 
 	try {
-		const res = await fetch(`${BASE_API_URL}/iam/sso/logout-url/`, { method: 'POST', headers });
+		const res = await fetch(`${BASE_API_URL}/iam/sso/logout-url/`, {
+			method: 'POST',
+			headers,
+			signal: AbortSignal.timeout(LOGOUT_CALL_TIMEOUT_MS)
+		});
 		if (!res.ok) throw new Error(`status ${res.status}`);
-		const { logout_url } = await res.json();
-		return { ok: true, url: typeof logout_url === 'string' && logout_url ? logout_url : null };
+		const { logout_url, allauth_session_ended } = await res.json();
+		return {
+			ok: true,
+			url: typeof logout_url === 'string' && logout_url ? logout_url : null,
+			allauthSessionEnded: allauth_session_ended === true
+		};
 	} catch (error) {
 		logger.error('Failed to resolve IdP logout URL', { error });
 		return { ok: false };
@@ -32,7 +44,10 @@ async function resolveIdPLogoutUrl(fetch: Fetch, cookies: Cookies): Promise<IdPL
 // never strand the user with their cookies still set.
 async function endAllauthSession(fetch: Fetch): Promise<boolean> {
 	try {
-		const res = await fetch(`${ALLAUTH_API_URL}/auth/session`, { method: 'DELETE' });
+		const res = await fetch(`${ALLAUTH_API_URL}/auth/session`, {
+			method: 'DELETE',
+			signal: AbortSignal.timeout(LOGOUT_CALL_TIMEOUT_MS)
+		});
 		const { meta } = await res.json();
 		if (meta?.is_authenticated === false) return true;
 		logger.error('Failed to end the allauth session', { status: res.status });
@@ -46,7 +61,10 @@ async function endAllauthSession(fetch: Fetch): Promise<boolean> {
 // not the token, so a captured token would stay valid for its whole TTL.
 async function revokeAccessToken(fetch: Fetch): Promise<boolean> {
 	try {
-		const res = await fetch(`${BASE_API_URL}/iam/logout/`, { method: 'POST' });
+		const res = await fetch(`${BASE_API_URL}/iam/logout/`, {
+			method: 'POST',
+			signal: AbortSignal.timeout(LOGOUT_CALL_TIMEOUT_MS)
+		});
 		if (res.ok) return true;
 		logger.error('Failed to revoke the access token', { status: res.status });
 	} catch (error) {
@@ -67,10 +85,11 @@ export const POST = async ({ fetch, cookies, locals }) => {
 	let target = '/login';
 
 	const idpLogout = isSSOUser ? await resolveIdPLogoutUrl(fetch, cookies) : null;
-	if (idpLogout?.ok) {
-		if (idpLogout.url) target = idpLogout.url;
-	} else {
-		// Local user, or the SSO logout endpoint failed: end the allauth session here.
+	if (idpLogout?.ok && idpLogout.url) target = idpLogout.url;
+
+	// A 200 from logout-url/ is not proof the allauth session is gone: it only
+	// ends the sessions whose keys it was given and whose owner is the caller.
+	if (!idpLogout?.ok || !idpLogout.allauthSessionEnded) {
 		await endAllauthSession(fetch);
 	}
 

@@ -165,6 +165,7 @@ def test_logout_url_view_resolves_idp_url_and_destroys_both_sessions(sso_user):
 
     assert res.status_code == 200
     assert res.json()["logout_url"].startswith(f"{IDP_SLO_URL}?")
+    assert res.json()["allauth_session_ended"] is True
     assert not _session_exists(allauth_key)
     assert not _session_exists(callback_key)
 
@@ -182,7 +183,7 @@ def test_logout_url_view_returns_null_when_no_slo_state(sso_user):
     )
 
     assert res.status_code == 200
-    assert res.json() == {"logout_url": None}
+    assert res.json() == {"logout_url": None, "allauth_session_ended": True}
     assert not _session_exists(allauth_key)
 
 
@@ -202,6 +203,7 @@ def test_logout_url_view_accepts_the_saml_callback_session(sso_user):
 
     assert res.status_code == 200
     assert res.json()["logout_url"].startswith(f"{IDP_SLO_URL}?")
+    assert res.json()["allauth_session_ended"] is False
     assert not _session_exists(callback_key)
 
 
@@ -221,7 +223,7 @@ def test_logout_url_view_ignores_sessions_of_other_users(sso_user):
     )
 
     assert res.status_code == 200
-    assert res.json() == {"logout_url": None}
+    assert res.json() == {"logout_url": None, "allauth_session_ended": False}
     assert _session_exists(victim_key)
 
 

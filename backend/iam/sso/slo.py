@@ -22,6 +22,7 @@ logger = structlog.get_logger(__name__)
 
 SLO_SESSION_KEY = "sso_slo_state"
 SLO_OWNER_SESSION_KEY = "sso_slo_owner"
+ALLAUTH_SESSION_LABEL = "allauth_session_token"
 # The callback session only has to survive until the frontend hands its state
 # over to the allauth session, so it must not linger for SESSION_COOKIE_AGE.
 CALLBACK_SESSION_TTL = 600
@@ -158,15 +159,16 @@ def _build_saml_logout_url(request, provider, slo_state) -> str | None:
 
 def pop_slo_state_from_sessions(
     session_keys: dict[str, str | None], owner_pk
-) -> dict | None:
+) -> tuple[dict | None, set[str]]:
     """Destroy the caller's sessions named in `session_keys`, returning the
-    first SLO state found.
+    first SLO state found and the labels actually destroyed.
 
     Every session must die server-side, whichever one yielded the SLO state:
     deleting only its cookie would leave the key replayable until expiry.
     Sessions that do not belong to `owner_pk` are left untouched, so a caller
     cannot log someone else out or read their SLO material by guessing a key.
     """
+    destroyed = set()
     slo_state = None
     for label, session_key in session_keys.items():
         if not session_key:
@@ -184,10 +186,11 @@ def pop_slo_state_from_sessions(
             continue
         state = session.get(SLO_SESSION_KEY)
         session.delete(session_key)
+        destroyed.add(label)
         if state and not slo_state:
             logger.info("Recovered single logout state from session", session=label)
             slo_state = state
-    return slo_state
+    return slo_state, destroyed
 
 
 def build_idp_logout_url(request: HttpRequest, slo_state: dict | None) -> str | None:
@@ -238,19 +241,24 @@ class IdPLogoutURLView(views.APIView):
     The SvelteKit BFF calls this server-side and redirects the browser itself,
     so SSO logout keeps working on deployments where the API is IP-restricted.
     Session keys travel as headers because the API cookies are not forwarded.
-    `logout_url` is null when no IdP round-trip is needed.
+    `logout_url` is null when no IdP round-trip is needed, and
+    `allauth_session_ended` tells the caller whether it still has to end that
+    session itself.
     """
 
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        slo_state = pop_slo_state_from_sessions(
+        slo_state, destroyed = pop_slo_state_from_sessions(
             {
-                "allauth_session_token": request.META.get(
-                    "HTTP_X_ALLAUTH_SESSION_TOKEN"
-                ),
+                ALLAUTH_SESSION_LABEL: request.META.get("HTTP_X_ALLAUTH_SESSION_TOKEN"),
                 "sso_session_key": request.META.get("HTTP_X_SSO_SESSION_KEY"),
             },
             owner_pk=request.user.pk,
         )
-        return Response({"logout_url": build_idp_logout_url(request, slo_state)})
+        return Response(
+            {
+                "logout_url": build_idp_logout_url(request, slo_state),
+                "allauth_session_ended": ALLAUTH_SESSION_LABEL in destroyed,
+            }
+        )
