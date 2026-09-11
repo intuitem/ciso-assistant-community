@@ -498,6 +498,7 @@ class SCIMGroupViewSet(ViewSet):
         # Auto-create on first push: the group grants nothing until an admin
         # wires its user_groups, so accepting unknown groups is safe.
         idp_group, created = IdPGroup.objects.get_or_create(name=display_name)
+        _mark_scim_sourced(idp_group)
         _add_members(idp_group, _member_ids(data.get("members", [])))
         logger.info(
             "SCIM: group provisioned",
@@ -629,7 +630,10 @@ class SCIMGroupViewSet(ViewSet):
             elif action == "set":
                 _set_members(idp_group, ids)
             elif action == "clear":
-                idp_group.users.clear()
+                scim_managed = idp_group.users.filter(is_scim_managed=True)
+                if scim_managed.exists():
+                    idp_group.users.remove(*scim_managed)
+                _mark_scim_sourced(idp_group)
 
         return _scim_response(scim_group_to_dict(idp_group, request))
 
@@ -823,16 +827,24 @@ def _resolve_user_ids(ids):
     )
 
 
+def _mark_scim_sourced(idp_group):
+    if idp_group.source != IdPGroup.Source.SCIM:
+        idp_group.source = IdPGroup.Source.SCIM
+        idp_group.save(update_fields=["source"])
+
+
 def _add_members(idp_group, ids):
     valid = _resolve_user_ids(ids)
     if valid:
         idp_group.users.add(*valid)
+        _mark_scim_sourced(idp_group)
 
 
 def _remove_members(idp_group, ids):
     valid = _resolve_user_ids(ids)
     if valid:
         idp_group.users.remove(*valid)
+        _mark_scim_sourced(idp_group)
 
 
 def _set_members(idp_group, ids):
@@ -849,7 +861,17 @@ def _set_members(idp_group, ids):
             requested=len(ids),
         )
         return
-    idp_group.users.set(resolved)
+    current_scim_managed = set(
+        idp_group.users.filter(is_scim_managed=True).values_list("id", flat=True)
+    )
+    resolved_set = set(resolved)
+    to_remove = current_scim_managed - resolved_set
+    to_add = resolved_set - current_scim_managed
+    if to_remove:
+        idp_group.users.remove(*to_remove)
+    if to_add:
+        idp_group.users.add(*to_add)
+    _mark_scim_sourced(idp_group)
 
 
 def _update_user_from_scim_data(user, data):

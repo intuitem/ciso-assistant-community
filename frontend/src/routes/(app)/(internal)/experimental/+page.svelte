@@ -14,22 +14,10 @@
 		tags={['analysis', 'audit']}
 	/>
 	<Article
-		title={m.findings()}
-		desc={m.findingsExplorer()}
-		link="/findings"
-		tags={['analysis', 'findings']}
-	/>
-	<Article
 		title="Batch Creation"
 		desc="Create multiple assets, entities, or feared events at once from a simple text list"
 		link="/experimental/batch-create"
 		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
-	/>
-	<Article
-		title={m.lbListLibraryBuilder()}
-		desc={m.lbListCardDesc()}
-		link="/experimental/library-builder"
-		tags={['libraries', 'builder', 'packager']}
 	/>
 	<Article
 		title="Bulk evidence upload"

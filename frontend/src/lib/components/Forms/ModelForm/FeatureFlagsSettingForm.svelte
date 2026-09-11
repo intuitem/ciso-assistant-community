@@ -83,7 +83,7 @@
 				},
 				{
 					field: 'follow_up',
-					label: m.followUp(),
+					label: m.findingsManagement(),
 					description: m.findingsAssessmentsDescription()
 				},
 				{
@@ -118,9 +118,19 @@
 					description: m.contractsDescription()
 				},
 				{
+					field: 'external_ratings',
+					label: m.externalRatings(),
+					description: m.externalRatingsDescription()
+				},
+				{
 					field: 'validation_flows',
 					label: m.validationFlows(),
 					description: m.validationFlowsDescription()
+				},
+				{
+					field: 'workflows',
+					label: m.workflows(),
+					description: m.workflowsFlagDescription()
 				},
 				{
 					field: 'policy_documents',
@@ -154,6 +164,11 @@
 					description: m.campaignsDescription()
 				},
 				{
+					field: 'findings_from_requirements',
+					label: m.findingsFromRequirements(),
+					description: m.findingsFromRequirementsDescription()
+				},
+				{
 					field: 'auditee_mode',
 					label: m.auditeeMode(),
 					description: m.auditeeModeDescription()
@@ -172,6 +187,16 @@
 					field: 'posture_assessments',
 					label: m.postureAssessments(),
 					description: m.postureAssessmentsDescription()
+				},
+				{
+					field: 'commitment_management',
+					label: m.commitmentManagement(),
+					description: m.commitmentManagementDescription()
+				},
+				{
+					field: 'dora',
+					label: m.dora(),
+					description: m.doraFlagDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},
@@ -270,6 +295,11 @@
 					field: 'idp_groups',
 					label: m.idpGroups(),
 					description: m.idpGroupsDescription()
+				},
+				{
+					field: 'jit_provisioning',
+					label: m.jitProvisioning(),
+					description: m.jitProvisioningDescription()
 				},
 				{
 					field: 'service_accounts',
@@ -462,19 +492,19 @@
 		<div class="flex flex-wrap items-center gap-2 ml-auto">
 			<button
 				type="button"
-				class="btn btn-sm variant-soft-primary"
+				class="btn btn-sm preset-tonal-primary"
 				onclick={() => setFields(allFields, true)}
 			>
 				<i class="fa-solid fa-check-double mr-1"></i>{m.enableAll()}
 			</button>
 			<button
 				type="button"
-				class="btn btn-sm variant-soft"
+				class="btn btn-sm preset-tonal"
 				onclick={() => setFields(allFields, false)}
 			>
 				<i class="fa-solid fa-xmark mr-1"></i>{m.disableAll()}
 			</button>
-			<button type="button" class="btn btn-sm variant-soft" onclick={resetToDefaults}>
+			<button type="button" class="btn btn-sm preset-tonal" onclick={resetToDefaults}>
 				<i class="fa-solid fa-rotate-left mr-1"></i>{m.resetToDefaults()}
 			</button>
 
@@ -484,7 +514,7 @@
 			{#each PRESETS as preset}
 				<button
 					type="button"
-					class="btn btn-sm variant-ghost-primary"
+					class="btn btn-sm preset-outlined-primary-500"
 					title={preset.description}
 					onclick={() => applyPreset(preset.on)}
 				>
@@ -513,7 +543,7 @@
 					>
 					<button
 						type="button"
-						class="btn btn-sm variant-soft-primary"
+						class="btn btn-sm preset-tonal-primary"
 						title={m.enableAll()}
 						onclick={() => setFields(groupFields, true)}
 					>
@@ -521,7 +551,7 @@
 					</button>
 					<button
 						type="button"
-						class="btn btn-sm variant-soft"
+						class="btn btn-sm preset-tonal"
 						title={m.disableAll()}
 						onclick={() => setFields(groupFields, false)}
 					>

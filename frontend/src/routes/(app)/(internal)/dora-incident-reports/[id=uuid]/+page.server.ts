@@ -4,7 +4,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { defaultWriteFormAction } from '$lib/utils/actions';
-import type { Actions } from '@sveltejs/kit';
+import { redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 const URL_MODEL = 'dora-incident-reports';
@@ -20,7 +20,8 @@ async function fetchChoices(fetch: typeof globalThis.fetch, endpoint: string) {
 	}));
 }
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+export const load: PageServerLoad = async ({ params, fetch, locals }) => {
+	if (!locals.featureflags?.dora) redirect(302, '/');
 	const schema = modelSchema(URL_MODEL);
 	const model = getModelInfo(URL_MODEL);
 
@@ -81,30 +82,12 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		fetchChoices(fetch, `${base}/info_duration_service_downtime_actual_or_estimate/`)
 	]);
 
-	// Fetch users for contact fill helper
-	let userOptions: { id: string; label: string; email: string }[] = [];
-	try {
-		const usersRes = await fetch(`${BASE_API_URL}/users/`);
-		if (usersRes.ok) {
-			const usersData = await usersRes.json();
-			const results = usersData.results ?? usersData ?? [];
-			userOptions = results.map((u: any) => ({
-				id: u.id,
-				label: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email,
-				email: u.email || ''
-			}));
-		}
-	} catch {
-		// Optional
-	}
-
 	return {
 		form,
 		model,
 		object,
 		incidentRef,
 		validation,
-		userOptions,
 		reportId: params.id,
 		mode: 'edit' as const,
 		formAction: '?/update',
@@ -128,13 +111,15 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 export const actions: Actions = {
 	update: async (event) => {
+		if (!event.locals.featureflags?.dora) redirect(302, '/');
 		return defaultWriteFormAction({
 			event,
 			urlModel: URL_MODEL,
 			action: 'edit'
 		});
 	},
-	markSubmitted: async ({ fetch, params }) => {
+	markSubmitted: async ({ fetch, params, locals }) => {
+		if (!locals.featureflags?.dora) redirect(302, '/');
 		const endpoint = `${BASE_API_URL}/${ENDPOINT}/${params.id}/`;
 		const res = await fetch(endpoint, {
 			method: 'PATCH',

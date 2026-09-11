@@ -68,9 +68,16 @@ def run_due_schedules(now=None):
     at most once per occurrence. Returns the instances that were started."""
     from django.utils import timezone
 
+    from global_settings.utils import ff_is_enabled
+
     from .engine import EngineError, create_instance
     from .models import WorkflowInstance, WorkflowNode, WorkflowTrigger
     from .tasks import run_instance_task
+
+    if not ff_is_enabled("workflows"):
+        # Flag off means off: registrations stay put (next_run_at untouched),
+        # nothing fires until the feature is enabled again.
+        return []
 
     now = now or timezone.now()
     due = WorkflowTrigger.objects.filter(

@@ -55,8 +55,10 @@ services:
       dockerfile: ../enterprise/frontend/Dockerfile
       additional_contexts:
         enterprise_frontend: ./frontend
+      # DHI via the GHCR mirror; see frontend/Dockerfile for why not dhi.io
       args:
-        NODE_IMAGE: ${NODE_IMAGE:-node:24-slim}
+        NODE_BUILD_IMAGE: ${NODE_BUILD_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-node:24-dev}
+        NODE_RUNTIME_IMAGE: ${NODE_RUNTIME_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-node:24}
     depends_on:
       - backend
     restart: always

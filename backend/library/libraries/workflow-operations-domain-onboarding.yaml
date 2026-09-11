@@ -1,0 +1,83 @@
+urn: urn:intuitem:risk:library:workflow-operations-domain-onboarding
+locale: en
+ref_id: workflow-operations-domain-onboarding
+name: Domain onboarding pack
+description: Creates a domain with its default groups, provisions a user, and puts that user in the domain's
+  analyst group. Fill the variables, then run it manually for each new team.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-domain-onboarding:workflow:domain-onboarding
+    schema_version: 1
+    ref_id: domain-onboarding
+    name: Domain onboarding pack
+    description: Creates a domain with its default groups, provisions a user, and puts that user in the
+      domain's analyst group. Fill the variables, then run it manually for each new team.
+    graph:
+      variables:
+      - key: domain_name
+        type: string
+        default_value: New department
+      - key: user_email
+        type: string
+        default_value: newcomer@example.com
+      - key: user_first_name
+        type: string
+        default_value: ''
+      - key: user_last_name
+        type: string
+        default_value: ''
+      nodes:
+      - ref: manual
+        type: trigger
+        label: Run it for a new team
+        trigger_config:
+          type: manual
+      - ref: make_domain
+        type: action
+        label: Create the domain
+        action_config:
+          type: provision_folder
+          name: '{{domain_name}}'
+          create_default_groups: true
+      - ref: make_user
+        type: action
+        label: Create the user
+        action_config:
+          type: provision_user
+          email: '{{user_email}}'
+          first_name: '{{user_first_name}}'
+          last_name: '{{user_last_name}}'
+          send_onboarding_email: true
+      - ref: add_to_group
+        type: action
+        label: Add them as analyst
+        action_config:
+          type: manage_group_membership
+          user: '{{user_email}}'
+          folder: '{{nodes.make_domain.folder_id}}'
+          builtin_group: BI-UG-ANA
+          operation: add
+      - ref: report
+        type: action
+        label: Log the result
+        action_config:
+          type: log
+          message: '{{nodes.make_domain.folder_name}} ready on {{today}} for {{nodes.make_user.user_email}}'
+      - ref: done
+        type: end
+      edges:
+      - source: manual
+        target: make_domain
+      - source: make_domain
+        target: make_user
+      - source: make_user
+        target: add_to_group
+      - source: add_to_group
+        target: report
+      - source: report
+        target: done

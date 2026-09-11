@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 
@@ -44,136 +46,145 @@
 		return data;
 	}
 
-	onMount(async () => {
-		const echarts = await import('echarts');
-		let calendar_chart = echarts.init(
-			document.getElementById(chart_id),
-			document.documentElement.classList.contains('dark') ? 'dark' : null,
-			{ renderer: 'svg' }
-		);
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			const echarts = await import('echarts');
+			if (!active) return;
+			const el = document.getElementById(chart_id);
+			if (!el) return;
+			const chartData: Array<[string, number]> = data.length > 0 ? data : generateSampleData(year);
+			dispose = mountThemeAwareChart(
+				echarts,
+				el,
+				() => {
+					const today = new Date().toISOString().split('T')[0];
 
-		const chartData = data.length > 0 ? data : generateSampleData(year);
-		const today = new Date().toISOString().split('T')[0];
+					// Localized short month/day names for the calendar axis labels.
+					const locale = getLocale();
+					const monthNames = Array.from({ length: 12 }, (_, i) =>
+						new Date(2024, i, 1).toLocaleDateString(locale, { month: 'short' })
+					);
+					// dayLabel.nameMap is indexed Sunday(0)..Saturday(6); 2024-01-07 is a Sunday.
+					const dayNames = Array.from({ length: 7 }, (_, i) =>
+						new Date(2024, 0, 7 + i).toLocaleDateString(locale, { weekday: 'short' })
+					);
 
-		// Localized short month/day names for the calendar axis labels.
-		const locale = getLocale();
-		const monthNames = Array.from({ length: 12 }, (_, i) =>
-			new Date(2024, i, 1).toLocaleDateString(locale, { month: 'short' })
-		);
-		// dayLabel.nameMap is indexed Sunday(0)..Saturday(6); 2024-01-07 is a Sunday.
-		const dayNames = Array.from({ length: 7 }, (_, i) =>
-			new Date(2024, 0, 7 + i).toLocaleDateString(locale, { weekday: 'short' })
-		);
-
-		const option = {
-			title: {
-				text: title,
-				textStyle: {
-					fontWeight: 'bold',
-					fontSize: 16
+					const option = {
+						title: {
+							text: title,
+							textStyle: {
+								fontWeight: 'bold',
+								fontSize: 16
+							},
+							left: 'center',
+							top: 10
+						},
+						tooltip: {
+							formatter: function (params: any) {
+								const date = new Date(params.value[0]);
+								const value = params.value[1];
+								return `${date.toLocaleDateString(locale)}<br/>${m.activitiesCount()}: ${value}`;
+							}
+						},
+						visualMap: {
+							min: 0,
+							max: 10,
+							type: 'piecewise',
+							orient: 'horizontal',
+							left: 'center',
+							top: title ? 50 : 20,
+							pieces: [
+								{ min: 0, max: 0, color: colorRange[0] },
+								{ min: 1, max: 2, color: colorRange[1] },
+								{ min: 3, max: 5, color: colorRange[2] },
+								{ min: 6, max: 8, color: colorRange[3] },
+								{ min: 9, max: 10, color: colorRange[4] }
+							],
+							show: false
+						},
+						calendar: {
+							top: title ? 100 : 70,
+							left: 30,
+							right: 30,
+							bottom: 20,
+							cellSize: ['auto', 20],
+							range: year,
+							itemStyle: {
+								borderWidth: 0.5,
+								borderColor: document.documentElement.classList.contains('dark')
+									? '#1e293b'
+									: '#fff'
+							},
+							yearLabel: { show: false },
+							monthLabel: {
+								nameMap: monthNames,
+								fontSize: 12
+							},
+							dayLabel: {
+								fontSize: 10,
+								nameMap: dayNames,
+								firstDay: 1
+							}
+						},
+						series: [
+							{
+								type: 'heatmap',
+								coordinateSystem: 'calendar',
+								data: chartData
+							},
+							{
+								type: 'effectScatter',
+								coordinateSystem: 'calendar',
+								data: year === new Date().getFullYear() ? [[today, 0]] : [],
+								symbolSize: function (val: any) {
+									return 15;
+								},
+								itemStyle: {
+									color: 'transparent',
+									borderColor: '#1f2937',
+									borderWidth: 2
+								},
+								zlevel: 1
+							}
+						]
+					};
+					return option;
 				},
-				left: 'center',
-				top: 10
-			},
-			tooltip: {
-				formatter: function (params: any) {
-					const date = new Date(params.value[0]);
-					const value = params.value[1];
-					return `${date.toLocaleDateString(locale)}<br/>${m.activitiesCount()}: ${value}`;
-				}
-			},
-			visualMap: {
-				min: 0,
-				max: 10,
-				type: 'piecewise',
-				orient: 'horizontal',
-				left: 'center',
-				top: title ? 50 : 20,
-				pieces: [
-					{ min: 0, max: 0, color: colorRange[0] },
-					{ min: 1, max: 2, color: colorRange[1] },
-					{ min: 3, max: 5, color: colorRange[2] },
-					{ min: 6, max: 8, color: colorRange[3] },
-					{ min: 9, max: 10, color: colorRange[4] }
-				],
-				show: false
-			},
-			calendar: {
-				top: title ? 100 : 70,
-				left: 30,
-				right: 30,
-				bottom: 20,
-				cellSize: ['auto', 20],
-				range: year,
-				itemStyle: {
-					borderWidth: 0.5,
-					borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
-				},
-				yearLabel: { show: false },
-				monthLabel: {
-					nameMap: monthNames,
-					fontSize: 12
-				},
-				dayLabel: {
-					fontSize: 10,
-					nameMap: dayNames,
-					firstDay: 1
-				}
-			},
-			series: [
 				{
-					type: 'heatmap',
-					coordinateSystem: 'calendar',
-					data: chartData
-				},
-				{
-					type: 'effectScatter',
-					coordinateSystem: 'calendar',
-					data: year === new Date().getFullYear() ? [[today, 0]] : [],
-					symbolSize: function (val: any) {
-						return 15;
-					},
-					itemStyle: {
-						color: 'transparent',
-						borderColor: '#1f2937',
-						borderWidth: 2
-					},
-					zlevel: 1
+					// re-attached after every theme flip, since a re-init drops instance listeners
+					onChart: (chart) =>
+						chart.on('click', function (params: any) {
+							if (params.componentType === 'series') {
+								let clickedDate: string;
+								let clickedValue: number;
+
+								if (params.seriesType === 'heatmap') {
+									// Regular heatmap cell click
+									clickedDate = params.value[0];
+									clickedValue = params.value[1];
+								} else if (params.seriesType === 'effectScatter') {
+									// Current day marker click - find the corresponding value from chartData
+									clickedDate = params.value[0];
+									const dataPoint = chartData.find(([date]) => date === clickedDate);
+									clickedValue = dataPoint ? dataPoint[1] : 0;
+								} else {
+									return;
+								}
+
+								if (onDateClick) {
+									onDateClick(clickedDate, clickedValue);
+								}
+							}
+						})
 				}
-			]
+			);
+		})();
+		return () => {
+			active = false;
+			dispose?.();
 		};
-
-		option.backgroundColor = 'transparent';
-		calendar_chart.setOption(option);
-
-		window.addEventListener('resize', function () {
-			calendar_chart.resize();
-		});
-
-		// Add click event handler
-		calendar_chart.on('click', function (params: any) {
-			if (params.componentType === 'series') {
-				let clickedDate: string;
-				let clickedValue: number;
-
-				if (params.seriesType === 'heatmap') {
-					// Regular heatmap cell click
-					clickedDate = params.value[0];
-					clickedValue = params.value[1];
-				} else if (params.seriesType === 'effectScatter') {
-					// Current day marker click - find the corresponding value from chartData
-					clickedDate = params.value[0];
-					const dataPoint = chartData.find(([date]) => date === clickedDate);
-					clickedValue = dataPoint ? dataPoint[1] : 0;
-				} else {
-					return;
-				}
-
-				if (onDateClick) {
-					onDateClick(clickedDate, clickedValue);
-				}
-			}
-		});
 	});
 </script>
 

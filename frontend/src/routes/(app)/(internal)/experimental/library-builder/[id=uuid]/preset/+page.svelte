@@ -94,7 +94,7 @@
 	let loading = $state(true);
 	let saving = $state(false);
 	function triggerError(message: string) {
-		toastStore.trigger({ message, background: 'variant-filled-error' });
+		toastStore.trigger({ message, background: 'preset-filled-error-500' });
 	}
 	let confirmDiscard = $state(false);
 	let isReadOnly = $derived(!data.preset.is_user_authored);

@@ -2,6 +2,7 @@
 	import { m } from '$paraglide/messages';
 	import { getModalStore, type ModalStore } from './stores';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import { onMount } from 'svelte';
 
 	function translateOption(option: { label: string; value: string }): string {
@@ -10,7 +11,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50-950 p-6 w-modal space-y-6';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-6 w-modal space-y-6';
 	const cHeader = 'text-xl font-medium text-surface-950-50';
 
 	interface Props {
@@ -90,7 +91,10 @@
 				const res = await fetch(`/${optionsEndpoint}`);
 				if (res.ok) {
 					const data = await res.json();
-					options = withDoubleDash(parseOptions(data));
+					// Choice endpoints return dicts and stay as-is; paginated list endpoints
+					// with more than one page need the remaining pages fetched.
+					const items = data?.next ? await fetchAllPages(fetch, `/${optionsEndpoint}`) : data;
+					options = withDoubleDash(parseOptions(items));
 				}
 			} catch (e) {
 				console.error('Failed to fetch options', e);

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -21,7 +22,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
-	import { Popover, Progress } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
@@ -33,8 +34,6 @@
 	import { invalidateAll } from '$app/navigation';
 
 	let { data, form } = $props();
-
-	let exportPopupOpen = $state(false);
 
 	const showRisks = true;
 	const useBubbles = data.useBubbles;
@@ -223,6 +222,65 @@
 		'applied_controls',
 		'residual_level'
 	];
+
+	function buildExportGroups(): ExportGroup[] {
+		const id = risk_assessment.id;
+		return [
+			{
+				titleKey: 'riskAssessment',
+				options: [
+					{
+						titleKey: 'exportRiskReport',
+						descriptionKey: 'exportRiskReportDesc',
+						format: 'PDF' as const,
+						href: `/risk-assessments/${id}/export/pdf`,
+						testId: 'export-option-pdf'
+					},
+					{
+						titleKey: 'exportRiskScenariosData',
+						descriptionKey: 'exportRiskScenariosDataDesc',
+						format: 'CSV' as const,
+						href: `/risk-assessments/${id}/export/csv`,
+						testId: 'export-option-csv'
+					},
+					{
+						titleKey: 'exportRiskScenariosWorkbook',
+						descriptionKey: 'exportRiskScenariosWorkbookDesc',
+						format: 'XLSX' as const,
+						href: `/risk-assessments/${id}/export/xlsx`,
+						testId: 'export-option-xlsx'
+					}
+				]
+			},
+			{
+				titleKey: 'actionPlan',
+				options: [
+					{
+						titleKey: 'exportStatusGroupedReport',
+						descriptionKey: 'exportStatusGroupedReportDesc',
+						format: 'PDF' as const,
+						href: `/risk-assessments/${id}/action-plan/export/pdf`,
+						testId: 'export-option-ap-pdf'
+					},
+					{
+						titleKey: 'exportControlsWorkbook',
+						descriptionKey: 'exportControlsWorkbookDesc',
+						format: 'XLSX' as const,
+						href: `/risk-assessments/${id}/action-plan/export/excel`,
+						testId: 'export-option-ap-xlsx'
+					}
+				]
+			}
+		];
+	}
+
+	function modalExport(): void {
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: { title: m.exportOptionsTitle(), groups: buildExportGroups() }
+		};
+		modalStore.trigger({ type: 'component', component: modalComponent });
+	}
 </script>
 
 <main class="grow main">
@@ -323,48 +381,14 @@
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
-					<Popover open={exportPopupOpen} onOpenChange={(e) => (exportPopupOpen = e.open)}>
-						<Popover.Trigger class="btn preset-filled-primary-500 w-full">
-							<span data-testid="export-button">
-								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-							</span>
-						</Popover.Trigger>
-						<Popover.Positioner>
-							<Popover.Content>
-								<div
-									class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
-								>
-									<p class="block px-4 py-2 text-sm text-surface-950-50">{m.riskAssessment()}</p>
-									<a
-										href="/risk-assessments/{risk_assessment.id}/export/pdf"
-										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-										>... {m.asPDF()}</a
-									>
-									<a
-										href="/risk-assessments/{risk_assessment.id}/export/csv"
-										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-										>... {m.asCSV()}</a
-									>
-									<a
-										href="/risk-assessments/{risk_assessment.id}/export/xlsx"
-										class="block px-4 py-2 text-sm text-surface-950-50 border-b hover:bg-surface-200-800"
-										>... {m.asXLSX()}</a
-									>
-									<p class="block px-4 py-2 text-sm text-surface-950-50">{m.actionPlan()}</p>
-									<a
-										href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
-										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-										>... {m.asPDF()}</a
-									>
-									<a
-										href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"
-										class="block px-4 py-2 text-sm text-surface-950-50 border-b hover:bg-surface-200-800"
-										>... {m.asXLSX()}</a
-									>
-								</div>
-							</Popover.Content>
-						</Popover.Positioner>
-					</Popover>
+					<button
+						type="button"
+						class="btn preset-filled-primary-500 w-full"
+						onclick={modalExport}
+						data-testid="export-button"
+					>
+						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					</button>
 					{#if canEditObject}
 						<Anchor
 							href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"

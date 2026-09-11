@@ -95,6 +95,11 @@ export const navData = {
 					href: '/user-groups'
 				},
 				{
+					name: 'idpGroups',
+					fa_icon: 'fa-solid fa-id-badge',
+					href: '/idp-groups'
+				},
+				{
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
@@ -149,6 +154,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-file-code',
 					href: '/document-templates',
 					permissions: ['view_documenttemplate']
+				},
+				{
+					name: 'lbListLibraryBuilder',
+					fa_icon: 'fas fa-shapes',
+					href: '/experimental/library-builder',
+					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
 				}
 			]
 		},
@@ -214,6 +225,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-table-columns',
 					href: '/tasks-review',
 					permissions: ['view_appliedcontrol']
+				},
+				{
+					name: 'workflows',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/workflows',
+					permissions: ['view_workflow']
 				}
 			]
 		},
@@ -261,8 +278,19 @@ export const navData = {
 					href: '/security-exceptions'
 				},
 				{
+					name: 'findings',
+					fa_icon: 'fas fa-bug',
+					href: '/findings'
+				},
+				{
+					name: 'commitments',
+					fa_icon: 'fa-solid fa-handshake',
+					href: '/commitments',
+					permissions: ['view_commitment']
+				},
+				{
 					name: 'followUp',
-					fa_icon: 'fa-solid fa-clipboard-list',
+					fa_icon: 'fas fa-th-list',
 					href: '/findings-assessments'
 				}
 			]

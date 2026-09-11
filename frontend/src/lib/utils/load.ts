@@ -1,6 +1,7 @@
 import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
 import {
 	getModelInfo,
+	MODEL_FEATURE_FLAGS,
 	urlParamModelVerboseName,
 	type ModelMapEntry,
 	type SelectField,
@@ -150,6 +151,11 @@ export const loadDetail = async ({ event, model, id }) => {
 		const initialData = {};
 		await Promise.all(
 			model.reverseForeignKeyFields
+				// Flag from the reverse FK when it declares one, else from the model.
+				.filter((m) => {
+					const flag = m?.featureFlag ?? MODEL_FEATURE_FLAGS[m.urlModel];
+					return !flag || event.locals.featureflags?.[flag];
+				})
 				.filter(
 					(m) =>
 						!m?.folderPermsNeeded ||
@@ -165,10 +171,17 @@ export const loadDetail = async ({ event, model, id }) => {
 				)
 				.map(async (e) => {
 					const tableFieldsRef = listViewFields[e.urlModel];
-					const tableFields = {
-						head: [...tableFieldsRef.head],
-						body: [...tableFieldsRef.body]
-					};
+					// A table offering the column picker needs the optional columns in its head:
+					// that head is the universe the picker chooses from.
+					const tableFields = e.columnSelector
+						? {
+								head: [...tableFieldsRef.head, ...(tableFieldsRef.optionalFields?.head ?? [])],
+								body: [...tableFieldsRef.body, ...(tableFieldsRef.optionalFields?.body ?? [])]
+							}
+						: {
+								head: [...tableFieldsRef.head],
+								body: [...tableFieldsRef.body]
+							};
 					const index = tableFields.body.indexOf(e.field);
 					if (index > -1) {
 						tableFields.head.splice(index, 1);

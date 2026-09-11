@@ -644,14 +644,14 @@
 						     identity committed (frozen), by decision or by proof; the
 						     packager/ref_id fields show the (frozen) hint. -->
 						{#if !draft.identity_locked}
-							<span class="badge variant-ghost-surface text-xs">{m.lbListDraft()}</span>
+							<span class="badge preset-outlined-surface-500 text-xs">{m.lbListDraft()}</span>
 						{:else if draft.has_unpublished_changes}
-							<span class="badge variant-filled-warning text-xs">
+							<span class="badge preset-filled-warning-500 text-xs">
 								<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
 								></i>{m.lbListPublishedModified()}
 							</span>
 						{:else}
-							<span class="badge variant-filled-success text-xs">
+							<span class="badge preset-filled-success-500 text-xs">
 								<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
 								></i>{m.lbListPublished()}
 							</span>
@@ -692,7 +692,7 @@
 				{#if primaryKind}
 					<button
 						type="button"
-						class="btn btn-sm variant-ghost-surface"
+						class="btn btn-sm preset-outlined-surface-500"
 						onclick={() => setView(view === 'simple' ? 'full' : 'simple')}
 						title={view === 'simple' ? m.lbDraftFullViewTitle() : m.lbDraftSimpleViewTitle()}
 					>
@@ -705,18 +705,18 @@
 				{/if}
 				<button
 					type="button"
-					class="btn btn-sm variant-ghost-surface"
+					class="btn btn-sm preset-outlined-surface-500"
 					onclick={validateDraft}
 					disabled={validating}
 				>
 					<i class="fa-solid fa-list-check mr-1" aria-hidden="true"></i>{m.validate()}
 				</button>
-				<button type="button" class="btn btn-sm variant-ghost-surface" onclick={exportYaml}>
+				<button type="button" class="btn btn-sm preset-outlined-surface-500" onclick={exportYaml}>
 					<i class="fa-solid fa-file-arrow-down mr-1" aria-hidden="true"></i>{m.exportYaml()}
 				</button>
 				<button
 					type="button"
-					class="btn btn-sm variant-filled-primary"
+					class="btn btn-sm preset-filled-primary-500"
 					onclick={() => publish()}
 					disabled={publishing}
 				>
@@ -792,7 +792,7 @@
 				{#each scoreConflict.strategies ?? [] as strategy}
 					<button
 						type="button"
-						class="btn btn-sm variant-ghost-warning"
+						class="btn btn-sm preset-outlined-warning-500"
 						onclick={() => publish({ strategy: strategy.action, _presetChecked: true })}
 					>
 						{strategy.name}
@@ -930,7 +930,7 @@
 					<div class="flex items-center justify-end gap-2 pt-1 mt-auto">
 						<button
 							type="button"
-							class="btn btn-sm variant-filled-primary"
+							class="btn btn-sm preset-filled-primary-500"
 							onclick={saveMeta}
 							disabled={savingMeta || !metaDirty}
 						>
@@ -1015,7 +1015,7 @@
 					</div>
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={importObjects}
 						disabled={!importSource || importing}
 					>
@@ -1081,13 +1081,16 @@
 								</div>
 							</div>
 							<div class="flex items-center gap-1 shrink-0">
-								<a href={frameworkEditorHref(framework)} class="btn btn-sm variant-filled-primary">
+								<a
+									href={frameworkEditorHref(framework)}
+									class="btn btn-sm preset-filled-primary-500"
+								>
 									<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
 									{m.lbDraftEditVisually()}
 								</a>
 								<button
 									type="button"
-									class="btn btn-sm variant-ghost-error"
+									class="btn btn-sm preset-outlined-error-500"
 									onclick={() => deleteObject(framework)}
 									aria-label={m.lbDraftDeleteFramework()}
 								>
@@ -1107,7 +1110,7 @@
 					</p>
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={addFramework}
 						disabled={addingFramework}
 					>
@@ -1153,13 +1156,13 @@
 								</div>
 							</div>
 							<div class="flex items-center gap-1 shrink-0">
-								<a href={matrixEditorHref(matrix)} class="btn btn-sm variant-filled-primary">
+								<a href={matrixEditorHref(matrix)} class="btn btn-sm preset-filled-primary-500">
 									<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
 									{m.lbDraftEditVisually()}
 								</a>
 								<button
 									type="button"
-									class="btn btn-sm variant-ghost-error"
+									class="btn btn-sm preset-outlined-error-500"
 									onclick={() => deleteObject(matrix)}
 									aria-label={m.lbDraftDeleteMatrix()}
 								>
@@ -1177,7 +1180,7 @@
 					<p class="text-sm text-surface-500 max-w-md">{m.lbDraftNoMatrix()}</p>
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={addMatrix}
 						disabled={addingMatrix}
 					>
@@ -1203,14 +1206,14 @@
 					<div class="flex items-center gap-1">
 						<a
 							href="/experimental/library-builder/{draft.id}/preset"
-							class="btn btn-sm variant-filled-primary"
+							class="btn btn-sm preset-filled-primary-500"
 						>
 							<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
 							{m.lbDraftEditJourney()}
 						</a>
 						<button
 							type="button"
-							class="btn btn-sm variant-ghost-error"
+							class="btn btn-sm preset-outlined-error-500"
 							onclick={deletePreset}
 							aria-label={m.lbDraftRemovePreset()}
 						>
@@ -1248,7 +1251,7 @@
 					</p>
 					<a
 						href="/experimental/library-builder/{draft.id}/preset"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 					>
 						<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>
 						{m.lbDraftCreateJourney()}
@@ -1274,7 +1277,7 @@
 					{#if kind.items.length > 0}
 						<button
 							type="button"
-							class="btn btn-sm variant-ghost-primary"
+							class="btn btn-sm preset-outlined-primary-500"
 							onclick={() => openLeafForm(kind.field)}
 						>
 							<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>
@@ -1342,14 +1345,14 @@
 						<div class="md:col-span-3 flex justify-end gap-2">
 							<button
 								type="button"
-								class="btn btn-sm variant-ghost-surface"
+								class="btn btn-sm preset-outlined-surface-500"
 								onclick={() => (leafForm = null)}
 							>
 								{m.cancel()}
 							</button>
 							<button
 								type="button"
-								class="btn btn-sm variant-filled-primary"
+								class="btn btn-sm preset-filled-primary-500"
 								onclick={saveLeafForm}
 								disabled={savingLeaf || (!leafForm.urn && !leafForm.values.ref_id.trim())}
 							>
@@ -1390,7 +1393,7 @@
 										<td class="space-x-1 text-right">
 											<button
 												type="button"
-												class="btn-icon btn-icon-sm variant-ghost-surface"
+												class="btn-icon btn-icon-sm preset-outlined-surface-500"
 												onclick={() => openLeafForm(kind.field, item)}
 												aria-label={m.edit()}
 											>
@@ -1398,7 +1401,7 @@
 											</button>
 											<button
 												type="button"
-												class="btn-icon btn-icon-sm variant-ghost-error"
+												class="btn-icon btn-icon-sm preset-outlined-error-500"
 												onclick={() => deleteObject(item)}
 												aria-label={m.delete()}
 											>
@@ -1418,7 +1421,7 @@
 						<p class="text-sm text-surface-500">{m.lbDraftNoneYet()}</p>
 						<button
 							type="button"
-							class="btn btn-sm variant-filled-primary"
+							class="btn btn-sm preset-filled-primary-500"
 							onclick={() => openLeafForm(kind.field)}
 						>
 							<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>
@@ -1454,7 +1457,7 @@
 							</div>
 							<button
 								type="button"
-								class="btn btn-sm variant-ghost-error shrink-0"
+								class="btn btn-sm preset-outlined-error-500 shrink-0"
 								onclick={() => deleteObject(mappingSet)}
 								aria-label={m.lbDraftDeleteMappingSet()}
 							>
@@ -1483,7 +1486,7 @@
 							</div>
 							<button
 								type="button"
-								class="btn btn-sm variant-ghost-error shrink-0"
+								class="btn btn-sm preset-outlined-error-500 shrink-0"
 								onclick={() => deleteObject(metric)}
 								aria-label={m.lbDraftDeleteMetricDefinition()}
 							>
