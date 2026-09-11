@@ -57,7 +57,7 @@ export const load: PageServerLoad = async (event) => {
 			// Gracefully degrade
 		}
 
-		const working = pickWorkingRevision(revisions, document.current_revision?.id);
+		const working = pickWorkingRevision(revisions);
 		try {
 			if (working) {
 				const fullRes = await fetch(`${BASE_API_URL}/document-revisions/${working.id}/`);

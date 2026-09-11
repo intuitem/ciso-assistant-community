@@ -311,7 +311,7 @@
 			return;
 		}
 
-		const target = pickWorkingRevision(revisions, document.current_revision?.id);
+		const target = pickWorkingRevision(revisions);
 		if (!target) return;
 
 		const fullRes = await proxyGet({ _action: 'revision', revision_id: target.id });
