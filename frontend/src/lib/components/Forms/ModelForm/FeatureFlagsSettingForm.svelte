@@ -175,8 +175,8 @@
 				},
 				{
 					field: 'quick_forms',
-					label: m.quickForms(),
-					description: m.quickFormsDescription()
+					label: m.formsAndRequests(),
+					description: m.formsAndRequestsDescription()
 				},
 				{
 					field: 'advanced_analytics',

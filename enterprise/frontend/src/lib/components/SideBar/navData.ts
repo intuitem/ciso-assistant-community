@@ -39,6 +39,12 @@ export const navData = {
 					]
 				},
 				{
+					name: 'myRequests',
+					fa_icon: 'fa-solid fa-hand',
+					href: '/my-requests',
+					permissions: ['view_quickformresponse']
+				},
+				{
 					name: 'myAssignments',
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',
@@ -210,6 +216,12 @@ export const navData = {
 					permissions: ['view_documenttemplate']
 				},
 				{
+					name: 'quickForms',
+					fa_icon: 'fa-solid fa-clipboard-question',
+					href: '/quick-forms',
+					permissions: ['view_quickformpublication']
+				},
+				{
 					name: 'lbListLibraryBuilder',
 					fa_icon: 'fas fa-shapes',
 					href: '/experimental/library-builder',
@@ -314,6 +326,12 @@ export const navData = {
 					name: 'riskAcceptances',
 					fa_icon: 'fa-solid fa-signature',
 					href: '/risk-acceptances'
+				},
+				{
+					name: 'requestQueue',
+					fa_icon: 'fa-solid fa-inbox',
+					href: '/requests',
+					permissions: ['view_quickformresponse']
 				},
 				{
 					name: 'validationFlows',

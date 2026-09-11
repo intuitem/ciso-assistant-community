@@ -6372,6 +6372,8 @@
 	"neverAssessed": "Never assessed",
 	"quickForm": "Quick form",
 	"quickForms": "Quick forms",
+	"formsAndRequests": "Forms and Requests",
+	"formsAndRequestsDescription": "Standalone forms filled outside an audit, and the requests they raise",
 	"quickFormSubmissionFolderHelpText": "Where responses land. The publication's own domain when left empty.",
 	"quickFormAudienceHelpText": "Groups that may file this request. Empty means every user.",
 	"quickFormAllowMultipleDraftsHelpText": "Off: a requester with an unfinished draft is handed it back instead of starting a new one. Submitted requests are never limited.",

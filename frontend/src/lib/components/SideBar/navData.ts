@@ -163,7 +163,7 @@ export const navData = {
 				},
 				{
 					name: 'quickForms',
-					fa_icon: 'fa-solid fa-share-nodes',
+					fa_icon: 'fa-solid fa-clipboard-question',
 					href: '/quick-forms',
 					permissions: ['view_quickformpublication']
 				},

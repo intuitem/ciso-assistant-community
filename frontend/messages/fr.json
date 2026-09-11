@@ -6125,6 +6125,8 @@
 	"neverAssessed": "Jamais évaluée",
 	"quickForm": "Formulaire rapide",
 	"quickForms": "Formulaires rapides",
+	"formsAndRequests": "Formulaires et demandes",
+	"formsAndRequestsDescription": "Formulaires autonomes remplis hors audit, et les demandes qui en découlent",
 	"quickFormSubmissionFolderHelpText": "Où atterrissent les réponses. Le domaine de la publication si vide.",
 	"quickFormAudienceHelpText": "Groupes autorisés à déposer cette demande. Vide signifie tous les utilisateurs.",
 	"quickFormAllowMultipleDraftsHelpText": "Désactivé : un demandeur ayant un brouillon en cours le retrouve au lieu d'en créer un nouveau. Les demandes déposées ne sont jamais limitées.",
