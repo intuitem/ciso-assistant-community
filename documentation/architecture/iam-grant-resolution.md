@@ -180,6 +180,16 @@ The read cost is pinned too: `TestVerdictQueryBudget` (in
 `backend/iam/tests/test_folders.py`) asserts a verdict costs exactly 3 queries
 — the feature-flag read, the grant-pairs union, the verdict itself.
 
+The model itself is pinned by `test_materialized_model_equivalence` (same
+file as the oracle): the dynamic spec equals the **materialized model** —
+virtual grants written down as explicit non-recursive assignments, evaluated
+by pure role-assignment semantics — plus exactly one read-time backstop (a
+third party never receives virtual grants, however misplaced), and the
+backstop's delta is exactly those would-be grants, nothing else. Any layer-2
+evolution of the audience rule must keep this equivalence green or amend the
+materialized model consciously; if the virtual rows are ever materialized for
+real, `materialize_virtual_assignments` is the projector's specification.
+
 ## Function reference
 
 | Function | Contract | Calls |

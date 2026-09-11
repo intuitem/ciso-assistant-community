@@ -505,3 +505,135 @@ def test_focus_and_base_folder_match_oracle(seed, clean_root):
                 finally:
                     if token is not None:
                         focus_folder_id_var.reset(token)
+
+
+# ---------------------------------------------------------------------------
+# The materialized model: virtual groups written down as explicit assignments
+# ---------------------------------------------------------------------------
+
+
+def materialize_virtual_assignments(world: World) -> set:
+    """The eager twin of the ambient branch: one virtual, non-recursive,
+    group-carried assignment (group, folder.default_role, {folder}) for every
+    builtin group holding a stored assignment on a non-enclave-tainted
+    perimeter, for every ancestor-or-self of that perimeter carrying a default
+    role. Verbatim, the rows a write-time projector would have to store."""
+    virtual = set()
+    for kind, principal_id, _role_id, perimeters, _recursive in world.assignments:
+        if kind != "group" or not world.group_builtin[principal_id]:
+            continue
+        for perimeter_id in perimeters:
+            if world.under_enclave(perimeter_id):
+                continue
+            for folder_id in (perimeter_id, *world.ancestors(perimeter_id)):
+                default_role_id = world.default_role.get(folder_id)
+                if default_role_id is not None:
+                    virtual.add(
+                        (
+                            "group",
+                            principal_id,
+                            default_role_id,
+                            frozenset({folder_id}),
+                            False,
+                        )
+                    )
+    return virtual
+
+
+def materialized_covered_folders(world, user_id, codename, *, with_backstop):
+    """Pure role-assignment evaluation over stored ∪ virtual assignments — no
+    ambient branch, no audience rule at read time. `with_backstop` applies the
+    read-time third-party exclusion to the virtual rows (the defense-in-depth
+    the dynamic implementation keeps)."""
+    is_third_party, is_active = world.user_flags[user_id]
+    if not is_active:
+        return set()
+    rows = list(world.assignments)
+    if not (with_backstop and is_third_party):
+        rows += list(materialize_virtual_assignments(world))
+    covered = set()
+    for kind, principal_id, role_id, perimeters, recursive in rows:
+        reaches = (kind == "user" and principal_id == user_id) or (
+            kind == "group" and principal_id in world.memberships[user_id]
+        )
+        if not reaches or codename not in world.role_perms[role_id]:
+            continue
+        for perimeter_id in perimeters:
+            covered.add(perimeter_id)
+            if recursive:
+                covered |= world.descendants(perimeter_id)
+    return covered
+
+
+def _virtual_coverage(world, virtual_rows, user_id, codename):
+    """Folders the virtual rows alone grant to the user (active gate aside)."""
+    return {
+        folder_id
+        for _kind, group_id, role_id, perimeters, _rec in virtual_rows
+        if group_id in world.memberships[user_id]
+        and codename in world.role_perms[role_id]
+        for folder_id in perimeters
+    }
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("seed", [0, 1, 2])
+def test_materialized_model_equivalence(seed, clean_root):
+    """The dynamic spec IS the materialized model plus one read-time backstop.
+
+    With the resolver ⟺ oracle tests above, transitivity extends these
+    theorems to the implementation itself:
+
+    1. dynamic coverage == pure-RA evaluation over stored ∪ virtual rows with
+       the third-party backstop, for every user × permission;
+    2. the derivation rule and the virtual rows grant identical folders for
+       every non-third-party user (the two formulations of "ambient");
+    3. dropping the backstop changes outcomes ONLY by adding a third party's
+       would-be ambient grants — the delta IS the defense-in-depth, nothing
+       else — and the misplaced-third-party archetype actually exercises it.
+    """
+    rng = random.Random(seed)
+    world, folders, users, permissions, _named = build_world(
+        rng, f"mat{seed}", clean_root
+    )
+    virtual_rows = materialize_virtual_assignments(world)
+
+    backstop_exercised = False
+    for user in users:
+        is_third_party, is_active = world.user_flags[user.id]
+        for codename in permissions:
+            dynamic = world.covered_folders(user.id, codename)
+
+            eager = materialized_covered_folders(
+                world, user.id, codename, with_backstop=True
+            )
+            assert dynamic == eager, (
+                f"seed={seed} user={user.email} perm={codename}: dynamic spec "
+                f"!= materialized model + backstop "
+                f"(extra={eager - dynamic}, missing={dynamic - eager})"
+            )
+
+            virtual_coverage = _virtual_coverage(world, virtual_rows, user.id, codename)
+            if not is_third_party and is_active:
+                assert (
+                    world.ambient_covered_folders(user.id, codename) == virtual_coverage
+                ), (
+                    f"seed={seed} user={user.email} perm={codename}: the "
+                    f"derivation rule and the virtual rows disagree"
+                )
+
+            unguarded = materialized_covered_folders(
+                world, user.id, codename, with_backstop=False
+            )
+            if is_active:
+                assert unguarded == dynamic | virtual_coverage, (
+                    f"seed={seed} user={user.email} perm={codename}: the "
+                    f"backstop-less delta is not exactly the virtual grants"
+                )
+            if is_third_party and unguarded - dynamic:
+                backstop_exercised = True
+
+    assert backstop_exercised, (
+        "the misplaced third party never exercised the backstop — "
+        "the seeded world is too weak for theorem 3"
+    )
