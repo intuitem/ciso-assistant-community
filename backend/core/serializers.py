@@ -4745,9 +4745,14 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
             "folder",
             "status",
             "result",
+            "extended_result",
             "score",
             "is_scored",
             "is_score_overridden",
+            "documentation_score",
+            "target_score",
+            "respondent_alignment",
+            "review_state",
             "observation",
             "compliance_assessment",
             "requirement",
@@ -4976,6 +4981,9 @@ class TaskTemplateImportExportSerializer(BaseModelSerializer):
     compliance_assessments = HashSlugRelatedField(
         slug_field="pk", read_only=True, many=True
     )
+    requirement_assessments = HashSlugRelatedField(
+        slug_field="pk", read_only=True, many=True
+    )
     risk_assessments = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     findings_assessment = HashSlugRelatedField(
         slug_field="pk", read_only=True, many=True
@@ -4997,6 +5005,7 @@ class TaskTemplateImportExportSerializer(BaseModelSerializer):
             "assets",
             "applied_controls",
             "compliance_assessments",
+            "requirement_assessments",
             "risk_assessments",
             "findings_assessment",
             "created_at",

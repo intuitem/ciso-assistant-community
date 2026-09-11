@@ -31,6 +31,7 @@ from core.models import (
     FindingsAssessment,
     Framework,
     Perimeter,
+    RequirementAssessment,
     StoredLibrary,
     TaskTemplate,
 )
@@ -352,6 +353,15 @@ class TestEntityAssessmentAuditRoundTrip:
         requirement_assessment = audit.requirement_assessments.first()
         evidence = Evidence.objects.create(name="Audit proof", folder=enclave)
         requirement_assessment.evidences.add(evidence)
+        # The reviewer's verdict on the respondent's answer, and the scores it
+        # drives: plain fields, but the point of running the questionnaire.
+        RequirementAssessment.objects.filter(pk=requirement_assessment.pk).update(
+            respondent_alignment=RequirementAssessment.RespondentAlignment.NO,
+            review_state=RequirementAssessment.ReviewState.CHANGES_REQUESTED,
+            documentation_score=3,
+            target_score=4,
+        )
+        requirement_assessment.refresh_from_db()
         # Answer a real library-backed question: questions and their choices
         # travel as URN references, never as exported rows.
         answered_ra = (
@@ -407,6 +417,21 @@ class TestEntityAssessmentAuditRoundTrip:
         assert set(
             imported_audit.requirement_assessments.values_list("folder", flat=True)
         ) == {imported_audit.folder_id}
+
+        # The reviewer's verdict and the scores it drives are plain fields, and
+        # dropping them would lose the outcome of running the questionnaire.
+        reviewed = imported_audit.requirement_assessments.get(
+            requirement__urn=requirement_assessment.requirement.urn
+        )
+        assert (
+            reviewed.respondent_alignment
+            == RequirementAssessment.RespondentAlignment.NO
+        )
+        assert (
+            reviewed.review_state == RequirementAssessment.ReviewState.CHANGES_REQUESTED
+        )
+        assert reviewed.documentation_score == 3
+        assert reviewed.target_score == 4
         imported_answers = Answer.objects.filter(
             requirement_assessment__compliance_assessment=imported_audit
         )
@@ -1114,10 +1139,15 @@ class TestExportedEnclaves:
         entity_assessment.compliance_assessment = audit
         entity_assessment.save()
 
+        audit.create_requirement_assessments()
+        requirement_assessment = audit.requirement_assessments.first()
+
         vendor_task = TaskTemplate.objects.create(
             name="Gather SOC 2 report", folder=enclave
         )
         vendor_task.compliance_assessments.add(audit)
+        # A task is usually raised from one requirement, not the whole audit.
+        vendor_task.requirement_assessments.add(requirement_assessment)
         internal_task = TaskTemplate.objects.create(
             name="Chase the vendor", folder=domain
         )
@@ -1150,6 +1180,12 @@ class TestExportedEnclaves:
         # The vendor's task follows its enclave, the internal one stays out of it.
         assert imported_tasks["Gather SOC 2 report"].folder == imported_audit.folder
         assert imported_tasks["Chase the vendor"].folder == imported
+
+        # The requirement it was raised from is what makes it actionable, so the
+        # link has to come back too, pointing at the imported requirement.
+        linked = imported_tasks["Gather SOC 2 report"].requirement_assessments.all()
+        assert linked.count() == 1
+        assert linked.first().compliance_assessment == imported_audit
 
     @pytest.mark.django_db
     def test_enclave_evidence_lands_in_the_enclave_without_inference(

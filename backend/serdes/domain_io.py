@@ -1273,6 +1273,7 @@ def process_model_relationships(
                 "assets",
                 "applied_controls",
                 "compliance_assessments",
+                "requirement_assessments",
                 "risk_assessments",
                 "findings_assessment",
             ):
@@ -1520,6 +1521,11 @@ def set_many_to_many_relations(
                     "compliance_assessments_ids",
                     ComplianceAssessment,
                     "compliance_assessments",
+                ),
+                (
+                    "requirement_assessments_ids",
+                    RequirementAssessment,
+                    "requirement_assessments",
                 ),
                 ("risk_assessments_ids", RiskAssessment, "risk_assessments"),
                 (
