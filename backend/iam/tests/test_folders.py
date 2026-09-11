@@ -848,13 +848,22 @@ class TestFolderDefaultRole:
 
 @pytest.mark.django_db
 class TestVerdictQueryBudget:
-    """Pin the verdict query budget — 3 queries:
+    """Pin the verdict query budget.
+
+    Both checks share the first two queries:
 
     1. the feature-flag read (IdP-group role inheritance) inside
        `get_role_assignments_from_user`;
     2. the grant-pairs union: the WHOLE grant set (both branches, audience
-       rule inlined) in one round trip;
-    3. the verdict itself (coverage over flat literal id lists).
+       rule inlined) in one round trip.
+
+    The point check (`is_access_allowed`, outside focus mode) then answers
+    from that materialized `GrantFolderSet` in Python when the folder is a
+    direct (non-)recursive grant — 2 queries total — and only pays a third
+    query, anchored at the folder itself (`folder.ancestors.filter(id__in=...)`),
+    when it must walk up to find a covering recursive grant. The bulk check
+    (`get_allowed_folder_ids`) always evaluates coverage over every folder in
+    one more query — 3 total.
 
     A regression here means a query crept back into the hot path
     (`is_access_allowed` runs on every request)."""
@@ -886,7 +895,9 @@ class TestVerdictQueryBudget:
 
     def test_point_check_budget(self, query_budget_world, django_assert_num_queries):
         user, permission, domain = query_budget_world
-        with django_assert_num_queries(3):
+        # `domain` is a direct non-recursive grant here, so this resolves from
+        # the materialized `GrantFolderSet` alone — no ancestor query needed.
+        with django_assert_num_queries(2):
             assert RoleAssignment.is_access_allowed(user, permission, domain)
 
     def test_bulk_verdict_budget(self, query_budget_world, django_assert_num_queries):

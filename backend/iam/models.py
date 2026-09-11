@@ -1501,11 +1501,29 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             )
             return stored_assignments.exists()
 
-        return (
-            RoleAssignment.get_allowed_folder_ids(user, perm)
-            .filter(id=folder.id)
-            .exists()
-        )
+        focused_folder_id = Folder.get_focused_folder_id()
+        if focused_folder_id is not None:
+            is_folder_focused = (
+                folder.id == focused_folder_id
+                or folder.ancestors.filter(id=focused_folder_id).exists()
+            )
+            # We don't want the focus mode to hide the root folder (when the user has access to it).
+            # As it would hide import global objects (see PR #4470).
+            # So we don't return `False` if the `folder` is the root folder.
+            if (not is_folder_focused) and (not folder.is_root()):
+                return False
+
+        grant_folder_set = RoleAssignment._get_grant_folder_set(user, perm)
+        non_recursive_ids = set(grant_folder_set.non_recursive_grant_folder_ids)
+        recursive_ids = set(grant_folder_set.recursive_grant_folder_ids)
+
+        if folder.id in non_recursive_ids or folder.id in recursive_ids:
+            return True
+
+        if not recursive_ids:
+            return False
+
+        return folder.ancestors.filter(id__in=recursive_ids).exists()
 
     @staticmethod
     def is_object_accessible(
