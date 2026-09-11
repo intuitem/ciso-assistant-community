@@ -4574,8 +4574,17 @@ class AnswerWriteSerializer(BaseModelSerializer):
             elif q_type == Question.Type.OBJECT_REFERENCE:
                 from core.object_references import ReferenceError_, validate_ids
 
-                owner = self.instance.owner if self.instance else None
-                folder = getattr(owner, "folder", None) or question.folder
+                # The answer's owner, never the question's folder: library questions
+                # live in the root folder, so falling back to it would admit every
+                # object there — the scope check is the whole point of this branch.
+                owner = (
+                    self.instance.owner
+                    if self.instance
+                    else attrs.get("response") or attrs.get("requirement_assessment")
+                )
+                folder = getattr(owner, "folder", None)
+                if folder is None:
+                    raise serializers.ValidationError({"value": "unknownAnswerOwner"})
                 request = self.context.get("request")
                 try:
                     attrs["value"] = validate_ids(

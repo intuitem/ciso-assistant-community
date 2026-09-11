@@ -554,7 +554,7 @@ class QuickFormImporter:
                 # re-import but dropped on first load silently works only for authors
                 # who happened to publish twice.
                 ref_id_prefix=self.quick_form_data.get("ref_id_prefix") or "",
-                title_question_urn=(
+                title_question_urn=str(
                     self.quick_form_data.get("title_question_urn") or ""
                 ).lower(),
                 outcomes_definition=self.quick_form_data.get("outcomes_definition")

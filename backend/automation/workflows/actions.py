@@ -638,6 +638,7 @@ class CreateObjectAction(BaseAction):
 
         obj = None
         created = True
+        folder = _creation_folder(instance)
         if config.get("upsert"):
             match_field = entry.get("match_on", "name")
             match_value = kwargs.get(match_field)
@@ -645,7 +646,7 @@ class CreateObjectAction(BaseAction):
                 raise ActionError(f"create_object: upsert requires '{match_field}'")
             obj = (
                 entry["model"]
-                .objects.filter(folder=instance.folder, **{match_field: match_value})
+                .objects.filter(folder=folder, **{match_field: match_value})
                 .first()
             )
 
@@ -658,9 +659,7 @@ class CreateObjectAction(BaseAction):
             else:
                 if named and not kwargs.get("name"):
                     raise ActionError("create_object: 'name' is required")
-                obj = entry["model"].objects.create(
-                    folder=_creation_folder(instance), **kwargs
-                )
+                obj = entry["model"].objects.create(folder=folder, **kwargs)
         except ValidationError as e:
             raise ActionError(f"create_object: {'; '.join(e.messages)}")
         if created:
@@ -705,7 +704,7 @@ def _triggering_object(instance):
 
     payload = instance.payload or {}
     variables = instance.variables or {}
-    pk = payload.get("id") or variables.get("request_id")
+    pk = payload.get("id") or payload.get("object_id") or variables.get("request_id")
     # The event key names the model: `quickformresponse.closed` -> quickformresponse.
     key = getattr(instance.trigger_registration, "event_key", "") or ""
     model_name = key.split(".")[0] if "." in key else None

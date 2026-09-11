@@ -11,10 +11,11 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	// may be entitled to several portals offering unrelated things. We only link back to
 	// the portals, and only when the user can actually file something.
 	// `fetch` resolves for HTTP errors, so an error body would arrive as the array.
+	// Paginated routes answer with an envelope, custom actions with a bare array.
 	const asList = async (res: Response) => {
 		if (!res.ok) error(res.status, 'Failed to load your requests');
 		const body = await res.json();
-		return Array.isArray(body) ? body : [];
+		return Array.isArray(body) ? body : (body?.results ?? []);
 	};
 	const [requests, publications, portals] = await Promise.all([
 		fetch(`${BASE_API_URL}/my-requests/`).then(asList),

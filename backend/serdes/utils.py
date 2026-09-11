@@ -60,6 +60,8 @@ from tprm.models import (
 
 from core.serializers import (
     AnswerImportExportSerializer,
+    QuickFormImportExportSerializer,
+    QuickFormResponseImportExportSerializer,
     FolderImportExportSerializer,
     AssetImportExportSerializer,
     AppliedControlImportExportSerializer,

@@ -3931,6 +3931,7 @@
 	"builderReferenceHint": "The respondent picks an existing object; only objects in the domain the request lands in are offered.",
 	"objectReferenceSearch": "Search objects…",
 	"objectReferenceNone": "Nothing selected",
+	"unknownAnswerOwner": "This answer has no owner, so its references cannot be checked.",
 	"unknownReferenceModel": "This question points at a type of object the platform cannot resolve.",
 	"referenceMustBeListOfIds": "Object references must be a list of identifiers.",
 	"onlyOneObjectAllowed": "This question accepts a single object.",

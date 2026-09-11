@@ -95,8 +95,17 @@
 		}
 	}
 
+	// One write at a time per question. Controls stay enabled while a save is in
+	// flight, so two edits can overlap and the older reply would land last.
+	const saveChain: Record<string, Promise<unknown>> = {};
+
 	async function saveAnswer(urn: string, value: unknown) {
-		await post('updateAnswers', { answers: { [urn]: value } });
+		const previous = saveChain[urn] ?? Promise.resolve();
+		const next = previous
+			.catch(() => {})
+			.then(() => post('updateAnswers', { answers: { [urn]: value } }));
+		saveChain[urn] = next;
+		return next;
 	}
 
 	// Files go through the multipart action, not the JSON answers patch.

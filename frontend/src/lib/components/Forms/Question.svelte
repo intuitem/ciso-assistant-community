@@ -54,13 +54,19 @@
 	let refResults = $state<Record<string, any[]>>({});
 	let refBusy = $state<Record<string, boolean>>({});
 
+	// Typing fires a search per keystroke and they can land out of order; only the
+	// newest one may write.
+	const refSeq: Record<string, number> = {};
+
 	async function searchReferences(urn: string) {
 		if (!onSearchReferences) return;
+		const seq = (refSeq[urn] = (refSeq[urn] ?? 0) + 1);
 		refBusy[urn] = true;
 		try {
-			refResults[urn] = await onSearchReferences(urn, refSearch[urn] ?? '');
+			const results = await onSearchReferences(urn, refSearch[urn] ?? '');
+			if (seq === refSeq[urn]) refResults[urn] = results;
 		} finally {
-			refBusy[urn] = false;
+			if (seq === refSeq[urn]) refBusy[urn] = false;
 		}
 	}
 

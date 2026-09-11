@@ -1,5 +1,7 @@
 """Questions that point at an object already in the platform."""
 
+import uuid
+
 from django.apps import apps
 from django.db.models import Q
 
@@ -74,6 +76,15 @@ def validate_ids(question, folder, ids, user=None):
         raise ReferenceError_(
             "referenceMustBeListOfIds", "object references must be a list of ids"
         )
+    # Parsed before the query: a malformed value reaching a UUID `id__in` lookup raises
+    # Django's ValidationError, which callers of this function do not catch.
+    for i in ids:
+        try:
+            uuid.UUID(i)
+        except ValueError, AttributeError, TypeError:
+            raise ReferenceError_(
+                "referenceMustBeListOfIds", f"not a uuid: {i}"
+            ) from None
     if not multiple and len(ids) > 1:
         raise ReferenceError_(
             "onlyOneObjectAllowed", "this question accepts a single object"

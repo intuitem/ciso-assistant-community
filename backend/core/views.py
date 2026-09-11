@@ -181,6 +181,7 @@ from core.models import (
     Terminology,
     Team,
 )
+from core.pagination import CustomLimitOffsetPagination
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     build_answers_dict,
@@ -20354,22 +20355,29 @@ class MyRequestViewSet(viewsets.ViewSet):
         only way back to a draft — and narrower than folder scoping in the other
         direction: it can never surface someone else's request."""
         actors = Actor.get_all_for_user(request.user)
+        # Ordered in the database so the rows a page contains are stable: sorting the
+        # page after slicing would give a different answer per offset.
         responses = (
             QuickFormResponse.objects.filter(respondents__in=actors)
             .select_related("quick_form", "folder", "publication")
             .distinct()
+            .annotate(
+                status_rank=Case(
+                    When(status=QuickFormResponse.Status.DRAFT, then=Value(0)),
+                    When(status=QuickFormResponse.Status.SUBMITTED, then=Value(1)),
+                    When(status=QuickFormResponse.Status.IN_REVIEW, then=Value(2)),
+                    When(status=QuickFormResponse.Status.CLOSED, then=Value(3)),
+                    default=Value(4),
+                    output_field=IntegerField(),
+                )
+            )
+            .order_by("status_rank", "-updated_at")
         )
-        rank = {
-            QuickFormResponse.Status.DRAFT: 0,
-            QuickFormResponse.Status.SUBMITTED: 1,
-            QuickFormResponse.Status.IN_REVIEW: 2,
-            QuickFormResponse.Status.CLOSED: 3,
-        }
-        rows = sorted(
-            responses,
-            key=lambda r: (rank.get(r.status, 4), -(r.updated_at.timestamp())),
+        paginator = CustomLimitOffsetPagination()
+        page = paginator.paginate_queryset(responses, request, view=self)
+        return paginator.get_paginated_response(
+            [my_request_row(r) for r in (page if page is not None else responses)]
         )
-        return Response([my_request_row(r) for r in rows])
 
 
 class QuickFormPublicationViewSet(BaseModelViewSet):
