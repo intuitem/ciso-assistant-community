@@ -1518,6 +1518,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 overwrite=bool(request.data.get("overwrite")),
             )
         except builder.BuilderError as e:
+            # Author-facing validation text by construction — see BuilderError.
+            logger.warning("Builder rejected the draft", error=e)
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
         dependencies = set(draft.dependencies or []) | set(extraction["dependencies"])
         dependencies.discard(draft.effective_urn)
@@ -1688,6 +1690,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 editor_doc, existing=quick_form
             )
         except builder.BuilderError as e:
+            # Author-facing validation text by construction — see BuilderError.
+            logger.warning("Builder rejected the draft", error=e)
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
         # An outcome rule written against the wrong context compiles but raises at
         # evaluation, where it is swallowed and logged — the rule would just never
@@ -1734,6 +1738,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
                     editor_doc, existing=quick_form
                 )
             except builder.BuilderError as e:
+                # Author-facing validation text by construction — see BuilderError.
+                logger.warning("Builder rejected the draft", error=e)
                 return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
         answers = request.data.get("answers")
@@ -1783,6 +1789,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
                     editor_doc, existing=quick_form
                 )
             except builder.BuilderError as e:
+                # Author-facing validation text by construction — see BuilderError.
+                logger.warning("Builder rejected the draft", error=e)
                 return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
         quick_form_urn = str(quick_form.get("urn", "")).lower()
@@ -1916,6 +1924,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 editor_doc, existing=framework
             )
         except builder.BuilderError as e:
+            # Author-facing validation text by construction — see BuilderError.
+            logger.warning("Builder rejected the draft", error=e)
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
         frameworks = content["frameworks"]
         frameworks[frameworks.index(framework)] = new_framework
@@ -2000,6 +2010,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
                     editor_doc, existing=framework
                 )
             except builder.BuilderError as e:
+                # Author-facing validation text by construction — see BuilderError.
+                logger.warning("Builder rejected the draft", error=e)
                 return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
         framework_urn = str(framework.get("urn", "")).lower()
@@ -2425,6 +2437,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
             try:
                 base = builder.leaf_object_base(draft.effective_urn, field)
             except builder.BuilderError as e:
+                # Author-facing validation text by construction — see BuilderError.
+                logger.warning("Builder rejected the draft", error=e)
                 return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
             if field in builder.SINGLETON_OBJECT_FIELDS:
                 # The single object of its kind takes the bare family URN,
