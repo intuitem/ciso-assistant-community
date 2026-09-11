@@ -1870,6 +1870,22 @@ class ProvisionFolderAction(BaseAction):
         }
 
 
+def _deactivates_last_active_admin(user) -> bool:
+    """Would deactivating *user* leave no active direct administrator? Direct
+    BI-UG-ADM membership only, matching
+    UserWriteSerializer.deactivates_last_active_admin: admins inherited from an
+    IdP group are managed by the IdP and cannot be the lockout-proof anchor."""
+    from iam.models import User, UserGroup
+
+    if not UserGroup.objects.filter(user=user, name="BI-UG-ADM").exists():
+        return False
+    return (
+        not User.objects.filter(user_groups__name="BI-UG-ADM", is_active=True)
+        .exclude(pk=user.pk)
+        .exists()
+    )
+
+
 @register
 class ProvisionUserAction(BaseAction):
     action_type = "provision_user"
@@ -1900,6 +1916,19 @@ class ProvisionUserAction(BaseAction):
                     email, None, mailing=False, initial_group=None, **fields
                 )
         else:
+            # SCIM owns the identity fields of a SCIM-managed account: writing
+            # them here is drift the next sync overwrites at best, and the
+            # email-rebinding attack surface at worst. Mirrors
+            # UserWriteSerializer._enforce_scim_managed_fields, which refuses
+            # the same write through the API.
+            if user.is_scim_managed and any(
+                value and value != (getattr(user, key) or "")
+                for key, value in fields.items()
+            ):
+                raise ActionError(
+                    "provision_user: the names of a SCIM-managed account are "
+                    "written through SCIM, not here"
+                )
             for key, value in fields.items():
                 if value:
                     setattr(user, key, value)
@@ -1910,6 +1939,14 @@ class ProvisionUserAction(BaseAction):
             user.is_active = _as_bool(
                 render(config["is_active"], _render_context(instance))
             )
+            # Last-admin protection (mirrors manage_group_membership above and
+            # the API-side guards): deactivating the final active administrator
+            # locks the platform out, so no workflow may do it whatever its
+            # author's rights. Reactivation is always allowed.
+            if not user.is_active and _deactivates_last_active_admin(user):
+                raise ActionError(
+                    "provision_user: cannot deactivate the last administrator"
+                )
         user.save()
         return {"user_id": str(user.id), "user_email": user.email, "created": created}
 

@@ -517,3 +517,20 @@ class TestBatchAction:
         for finding in findings:
             finding.refresh_from_db()
             assert finding.folder == setup["other_domain"]
+
+
+class TestFindingsAssessmentPdf:
+    """The report is rendered by Typst now, not a Django template.
+
+    The behavioural assertions that used to live here — actors named rather than
+    emailed, observations not truncated — moved to
+    `core/tests/test_findings_report_pdf.py`, where they run against the engine
+    that actually produces the PDF.
+    """
+
+    def test_pdf_endpoint_renders(self, setup):
+        res = setup["client"].get(
+            f"/api/findings-assessments/{setup['binder'].id}/pdf/"
+        )
+        assert res.status_code == 200
+        assert res["Content-Type"] == "application/pdf"
