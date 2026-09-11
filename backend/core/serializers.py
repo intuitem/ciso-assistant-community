@@ -4206,6 +4206,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 validated_data.pop("is_scored", None)
 
             was_overridden = instance.is_score_overridden
+            previous_alignment = instance.respondent_alignment
             instance = super().update(instance, validated_data)
 
             # Override turned off: resync score from answers below.
@@ -4318,20 +4319,21 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "in_progress": RequirementAssessment.Result.PARTIALLY_COMPLIANT,
                 "not_applicable": RequirementAssessment.Result.NOT_APPLICABLE,
             }
-            # Skip auto-map when the auditor explicitly sets result in the same
-            # request: SuperForm round-trips the existing respondent_alignment
-            # on every submit, and we must not clobber an auditor-edited result
-            # (or zero it to NOT_ASSESSED if the respondent never answered).
+            # Only an actual change drives the result. SuperForm round-trips the
+            # existing respondent_alignment on every submit, so re-applying it
+            # would clobber an auditor-edited result (or zero it out when the
+            # respondent never answered). Blank and null mean the same thing.
             if (
                 "respondent_alignment" in validated_data
                 and "result" not in validated_data
                 and not requirement_has_questions
             ):
-                new_alignment = validated_data.get("respondent_alignment")
-                if new_alignment and new_alignment in ALIGNMENT_TO_RESULT:
+                new_alignment = validated_data.get("respondent_alignment") or None
+                changed = new_alignment != (previous_alignment or None)
+                if changed and new_alignment in ALIGNMENT_TO_RESULT:
                     instance.result = ALIGNMENT_TO_RESULT[new_alignment]
                     instance.save(update_fields=["result"])
-                elif not new_alignment:
+                elif changed and not new_alignment:
                     # Deselection: reset result and scores so the RA is truly
                     # unassessed (progress() flags an RA as assessed when score
                     # is set, even if result is NOT_ASSESSED).

@@ -1,13 +1,19 @@
 import { BASE_API_URL, DEFAULT_LANGUAGE } from '$lib/utils/constants';
 import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
 import type { User } from '$lib/utils/types';
-import { redirect, type Handle, type HandleFetch, type RequestEvent } from '@sveltejs/kit';
+import {
+	redirect,
+	type Handle,
+	type HandleFetch,
+	type HandleServerError,
+	type RequestEvent
+} from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 
 import { loadFeatureFlags } from '$lib/feature-flags';
 import { logger, installJsonConsole } from '$lib/server/logger';
 import { paraglideMiddleware } from '$paraglide/server';
-import { defineCustomServerStrategy } from '$paraglide/runtime';
+import { defineCustomServerStrategy, toLocale } from '$paraglide/runtime';
 
 // Runs once at server start. When LOG_FORMAT=json, routes the whole SSR stdout
 // stream (including not-yet-migrated console.* call sites) through JSON output.
@@ -156,6 +162,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
+	// No route matched: the 404 page needs no session, CSRF or locale, and without
+	// this each unmatched path costs two backend round-trips. route.id is set by now.
+	if (!event.route.id) {
+		event.locals.featureFlags = loadFeatureFlags();
+		// %lang% is an unescaped HTML attribute and LOCALE is not httpOnly, so the
+		// cookie must be validated here the way paraglide would on the normal path.
+		const locale = toLocale(event.cookies.get('LOCALE')) ?? DEFAULT_LANGUAGE;
+		return resolve(event, {
+			transformPageChunk: ({ html }) => html.replace('%lang%', locale).replace('%theme%', '')
+		});
+	}
+
 	const localeForRequest = await ensureDefaultLocale(event);
 	fallbackLocaleStore.set(event.request, localeForRequest);
 
@@ -225,6 +243,22 @@ export const handle: Handle = async ({ event, resolve }) => {
 			}
 		});
 	});
+};
+
+// Replaces SvelteKit's default error logger, which printed every unmatched path
+// as a two-line stderr entry. A 404 on a path that was never a route is not an
+// application error: vulnerability scanners alone can produce tens of thousands
+// of those lines. Real failures still go out through the structured logger.
+export const handleError: HandleServerError = ({ error, status, message, event }) => {
+	if (status !== 404) {
+		logger.error('unhandled_server_error', {
+			status,
+			method: event.request.method,
+			path: event.url.pathname,
+			error
+		});
+	}
+	return { message };
 };
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
