@@ -298,3 +298,25 @@ def test_saml_stash_stamps_the_owner_and_bounds_the_session_lifetime(sso_user):
 
     assert request.session[SLO_OWNER_SESSION_KEY] == str(sso_user.pk)
     assert 0 < request.session.get_expiry_age() <= CALLBACK_SESSION_TTL
+
+
+@pytest.mark.django_db
+@test_settings
+def test_session_token_clears_the_callback_ttl(sso_user):
+    """Same-hostname deployments forward the browser cookies to session-token/,
+    so the allauth session must not inherit the callback session's short TTL."""
+    callback_key = _make_saml_callback_session(sso_user, SLO_STATE)
+    session = _session_store()(session_key=callback_key)
+    session.set_expiry(CALLBACK_SESSION_TTL)
+    session.save()
+
+    res = _client_for(sso_user).post(
+        "/api/iam/session-token/",
+        HTTP_HOST=INTERNAL_HOST,
+        HTTP_COOKIE=f"sessionid={callback_key}",
+    )
+
+    assert res.status_code == 200
+    allauth_session = _session_store()(session_key=res.json()["token"])
+    assert allauth_session.get_expiry_age() > CALLBACK_SESSION_TTL
+    assert allauth_session.get(SLO_SESSION_KEY) == SLO_STATE
