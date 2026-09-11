@@ -10,7 +10,11 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
+from core.base_models import (
+    AbstractBaseModel,
+    ETADueDateMixin,
+    NameDescriptionMixin,
+)
 from core.models import (
     Actor,
     AppliedControl,
@@ -659,6 +663,8 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["ebios_rm_study", "entity", "category"]
 
+    IAM_SCOPE_FIELD = "entity"
+
     class Meta:
         verbose_name = _("Stakeholder")
         verbose_name_plural = _("Stakeholders")
@@ -909,7 +915,6 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         EXPLOIT = 3, "ebiosExploitation"
 
     ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
-    is_published = models.BooleanField(_("published"), default=True)
     threat = models.ForeignKey(
         Threat,
         on_delete=models.SET_NULL,

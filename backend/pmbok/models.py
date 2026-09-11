@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin
 from core.models import (
     FilteringLabelMixin,
     FindingsAssessment,
@@ -18,7 +18,10 @@ from core.models import (
 from crq.models import QuantitativeRiskStudy
 from ebios_rm.models import EbiosRMStudy
 from tprm.models import Entity, EntityAssessment
-from core.base_models import AbstractBaseModel, NameDescriptionMixin
+from core.base_models import (
+    AbstractBaseModel,
+    NameDescriptionMixin,
+)
 from custom_fields.host import CustomFieldsMixin
 from global_settings.models import GlobalSettings
 
@@ -363,7 +366,7 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin, CustomFieldsMixin
             BuiltinMetricSample.update_or_create_snapshot(self.folder)
 
 
-class ResponsibilityRole(NameDescriptionFolderMixin, PublishInRootFolderMixin):
+class ResponsibilityRole(NameDescriptionFolderMixin):
     class Taxonomy(models.TextChoices):
         RACI = "raci", "RACI"
         RASCI = "rasci", "RASCI"
@@ -474,7 +477,6 @@ class ResponsibilityRole(NameDescriptionFolderMixin, PublishInRootFolderMixin):
         },
     ]
 
-    is_published = models.BooleanField(default=True)
     code = models.CharField(
         max_length=8,
         help_text="Short letter shown in matrix cells (e.g. 'R', 'A', 'C', 'I')",
@@ -513,7 +515,6 @@ class ResponsibilityRole(NameDescriptionFolderMixin, PublishInRootFolderMixin):
                     "color": role["color"],
                     "builtin": True,
                     "is_visible": True,
-                    "is_published": True,
                     "folder": root,
                 },
             )

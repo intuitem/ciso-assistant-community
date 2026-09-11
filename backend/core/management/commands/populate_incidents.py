@@ -195,7 +195,6 @@ class Command(BaseCommand):
                 severity=severity,
                 detection=detection,
                 reported_at=reported_at,
-                is_published=True,
             )
 
             # Randomly assign owners (0-3 actors)

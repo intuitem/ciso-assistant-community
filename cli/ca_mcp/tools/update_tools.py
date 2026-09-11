@@ -28,7 +28,6 @@ async def update_asset(
     ref_id: str = None,
     observation: str = None,
     reference_link: str = None,
-    is_published: bool = None,
     is_business_function: bool = None,
     folder_id: str = None,
     parent_assets: list = None,
@@ -63,7 +62,6 @@ async def update_asset(
         ref_id: Reference ID
         observation: Observation text
         reference_link: External URL (e.g. Jira ticket)
-        is_published: Published flag
         is_business_function: Business function flag
         folder_id: Folder ID/name
         parent_assets: List of parent asset IDs/names (replaces existing)
@@ -109,8 +107,6 @@ async def update_asset(
             payload["observation"] = observation
         if reference_link is not None:
             payload["reference_link"] = reference_link
-        if is_published is not None:
-            payload["is_published"] = is_published
         if is_business_function is not None:
             payload["is_business_function"] = is_business_function
         if dora_licenced_activity is not None:
@@ -1041,7 +1037,6 @@ async def update_task_template(
     status: str = None,
     observation: str = None,
     evidences: list = None,
-    is_published: bool = None,
     task_date: str = None,
     is_recurrent: bool = None,
     ref_id: str = None,
@@ -1065,7 +1060,6 @@ async def update_task_template(
         status: Status
         observation: Observation text
         evidences: Array of evidence UUIDs
-        is_published: Published flag
         task_date: Task date (YYYY-MM-DD)
         is_recurrent: Recurrent flag
         ref_id: Reference ID
@@ -1097,8 +1091,6 @@ async def update_task_template(
             payload["observation"] = observation
         if evidences is not None:
             payload["evidences"] = evidences
-        if is_published is not None:
-            payload["is_published"] = is_published
         if task_date is not None:
             payload["task_date"] = task_date
         if is_recurrent is not None:

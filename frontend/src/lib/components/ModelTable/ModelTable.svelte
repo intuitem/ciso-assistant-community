@@ -206,7 +206,7 @@
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
-	const BUILTIN_EDITABLE_URL_MODELS = ['terminologies', 'entities', 'asset-class'];
+	const BUILTIN_EDITABLE_URL_MODELS = ['terminologies', 'entities', 'asset-class', 'folders'];
 	// A field's flag(s) can be a single flag name or a list (shown if ANY is on).
 	// Hidden only once every listed flag is a known, explicitly-false feature flag.
 	function isFieldHiddenByFeatureFlags(

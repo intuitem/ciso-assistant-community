@@ -222,7 +222,6 @@ export interface Perimeter {
 	lc_status: string;
 	created_at: string;
 	updated_at: string;
-	is_published: boolean;
 	name: string;
 	description?: string;
 	ref_id?: string;

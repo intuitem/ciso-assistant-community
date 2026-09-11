@@ -115,7 +115,6 @@ _UNMAPPABLE_FIELDS = {
     "created_at",
     "updated_at",
     "folder",
-    "is_published",
     "urn",
     "locale",
     "default_locale",
