@@ -160,15 +160,6 @@ class Folder(NameDescriptionMixin):
     def get_focused_folder_id() -> Optional[uuid.UUID]:
         return focus_folder_id_var.get()
 
-    @staticmethod
-    def get_focused_folder() -> Optional[Folder]:
-        focused_folder_id = Folder.get_focused_folder_id()
-        if focused_folder_id is None:
-            return
-
-        focused_folder = Folder.objects.filter(id=focused_folder_id).first()
-        return focused_folder
-
     class ContentType(models.TextChoices):
         """content type for a folder"""
 
@@ -1489,7 +1480,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         )
 
     @staticmethod
-    def _scope_q(base_folder: Folder) -> Q:
+    def _scope_q(base_folder_id: uuid.UUID) -> Q:
         """
         The scope predicate: a folder is in scope when it is the base folder
         itself or one of its descendants.
@@ -1499,7 +1490,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         multi-valued `ancestors` relation, and a single filter call would
         require one ancestor row to satisfy both at once.
         """
-        return Q(id=base_folder.id) | Q(ancestors=base_folder.id)
+        return Q(id=base_folder_id) | Q(ancestors=base_folder_id)
 
     @staticmethod
     def is_access_allowed(
@@ -1695,9 +1686,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     ) -> GrantFolderSet:
         """
         The verdict projection of `_get_grant_sources`: flat folder-id lists
-        split by recursion kind. Ambient default-role folders join the
-        non-recursive bucket, never the recursive one — the structural
-        enforcement of "default roles never cascade."
+        split by recursion kind, fetched in one round trip as a top-level
+        union of (folder id, is_recursive) pairs and materialized immediately
+        (the PostgreSQL parser hazard is unions inside subqueries — only flat
+        literal id lists reach the verdict SQL). Ambient default-role folders
+        carry is_recursive=False, so they land in the non-recursive bucket by
+        data shape — the structural enforcement of "default roles never
+        cascade."
         """
         if not isinstance(user, User):
             return GrantFolderSet.none()
@@ -1708,35 +1703,34 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             user, permission
         )
 
-        def perimeter_folder_ids(
-            assignments: QuerySet[RoleAssignment],
-        ) -> list[uuid.UUID]:
-            # A perimeter-less assignment projects a NULL folder id — inert in
-            # an IN list, dropped here to keep the literals clean. order_by()
-            # keeps the model's default ordering out of the DISTINCT projection.
-            return [
-                folder_id
-                for folder_id in assignments.order_by()
-                .values_list("perimeter_folders__id", flat=True)
-                .distinct()
-                if folder_id is not None
-            ]
+        # `.order_by()` on both sides (SQLite rejects ORDER BY in the members)
+        # and on the union (Django 6.1 applies a default ordering to unions).
+        explicit_pairs = role_assignments.order_by().values_list(
+            "perimeter_folders__id", "is_recursive"
+        )
+        ambient_pairs = (
+            ambient_folders.annotate(
+                grant_is_recursive=Value(False, output_field=BooleanField())
+            )
+            .order_by()
+            .values_list("id", "grant_is_recursive")
+        )
+        grant_pairs = explicit_pairs.union(ambient_pairs).order_by()
 
-        non_recursive_assignment_folder_ids = perimeter_folder_ids(
-            role_assignments.filter(is_recursive=False)
-        )
-        recursive_grant_folder_ids = perimeter_folder_ids(
-            role_assignments.filter(is_recursive=True)
-        )
-        ambient_folder_ids = list(
-            ambient_folders.values_list("id", flat=True).order_by()
-        )
+        non_recursive_grant_folder_ids: list[uuid.UUID] = []
+        recursive_grant_folder_ids: list[uuid.UUID] = []
+        for folder_id, is_recursive in grant_pairs:
+            if folder_id is None:
+                # A perimeter-less assignment projects a NULL folder id —
+                # inert in an IN list, dropped to keep the literals clean.
+                continue
+            if is_recursive:
+                recursive_grant_folder_ids.append(folder_id)
+            else:
+                non_recursive_grant_folder_ids.append(folder_id)
 
-        # Default roles are non-recursive by design, so the ambient folders join
-        # the non-recursive bucket, never the recursive one.
         return GrantFolderSet(
-            non_recursive_grant_folder_ids=non_recursive_assignment_folder_ids
-            + ambient_folder_ids,
+            non_recursive_grant_folder_ids=non_recursive_grant_folder_ids,
             recursive_grant_folder_ids=recursive_grant_folder_ids,
         )
 
@@ -1823,39 +1817,40 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         grant_folder_set = RoleAssignment._get_grant_folder_set(user, permission)
 
-        focused_folder = Folder.get_focused_folder()
+        # Only ids are needed for the clamp; never fetch the Folder rows.
+        focused_folder_id = Folder.get_focused_folder_id()
 
-        effective_base_folder = base_folder
+        effective_base_folder_id = base_folder.id if base_folder is not None else None
 
-        if focused_folder is not None:
+        if focused_folder_id is not None:
             if base_folder is None:
-                effective_base_folder = focused_folder
+                effective_base_folder_id = focused_folder_id
 
-            elif base_folder != focused_folder:
-                # We only keep `base_folder` as the `effective_focused_folder` if it's a descendant of `focused_folder`
+            elif base_folder.id != focused_folder_id:
                 base_is_descendant_of_focus = base_folder.ancestors.filter(
-                    pk=focused_folder.pk
+                    pk=focused_folder_id
                 ).exists()
 
                 if base_is_descendant_of_focus:
-                    effective_base_folder = base_folder
-                elif focus_is_descendant_of_base := focused_folder.ancestors.filter(
-                    pk=base_folder.pk
+                    # `base_folder` is the narrower scope.
+                    effective_base_folder_id = base_folder.id
+                elif Folder.objects.filter(
+                    id=focused_folder_id, ancestors=base_folder.id
                 ).exists():
-                    # If `focused_folder` is a descendant of `base_folder`, the effective focus folder is narrowed down to `focused_folder`.
-                    effective_base_folder = focused_folder
+                    # The focused folder is the narrower scope.
+                    effective_base_folder_id = focused_folder_id
                 else:
-                    # `base_folder` and `focused_folder` are in disjoint folder subtrees.
-                    # Which means their intersection is empty (so we return an empty queryset for it).
+                    # `base_folder` and the focused folder are in disjoint
+                    # subtrees: their intersection is empty.
                     return Folder.objects.none().values_list("id", flat=True)
 
         covered_folders = Folder.objects.filter(
             RoleAssignment._coverage_q(grant_folder_set)
         )
 
-        if effective_base_folder is not None:
-            scope_q = RoleAssignment._scope_q(effective_base_folder)
-            if focused_folder is not None:
+        if effective_base_folder_id is not None:
+            scope_q = RoleAssignment._scope_q(effective_base_folder_id)
+            if focused_folder_id is not None:
                 # In focus mode a covered root stays reachable even though it
                 # sits outside the focused subtree: hiding it would hide the
                 # global objects it scopes (#4470). Root has no ancestors, so

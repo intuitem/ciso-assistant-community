@@ -46,6 +46,11 @@ flowchart TB
     IAA["is_access_allowed"]
   end
 
+  subgraph SCOPE["object → folder resolution"]
+    GIFI["get_iam_folder_id"]
+    GIFF["get_iam_folder_field"]
+  end
+
   subgraph BULK["the verdict — one evaluation site"]
     GVOI["get_viewable / changeable /<br/>deletable_object_ids"]
     GAI["_get_accessible_ids"]
@@ -76,11 +81,6 @@ flowchart TB
 
   subgraph AMBIENT["the virtual branch — ambient default roles"]
     DRF["_get_default_role_folder_ids<br/>(the audience rule)"]:::amb
-  end
-
-  subgraph SCOPE["object → folder resolution"]
-    GIFI["get_iam_folder_id"]
-    GIFF["get_iam_folder_field"]
   end
 
   RATBL[("RoleAssignment table")]:::data
@@ -164,8 +164,9 @@ rather than drawn.
    The two predicates must stay in **chained** `.filter()` calls: both join
    the multi-valued `ancestors` relation, and a single call would force one
    ancestor row to satisfy both. `GrantFolderSet` carries materialized flat id
-   lists, so no union or subquery ever reaches the verdict SQL (PostgreSQL
-   parser-depth safety).
+   lists, fetched in **one round trip** — a top-level union of
+   (folder id, is_recursive) pairs — so only literal id lists ever reach the
+   verdict SQL (the PostgreSQL parser hazard is unions inside subqueries).
 4. **Raw `RoleAssignment` queries are for write-capability or conservative
    fast paths only.** Any *view*-access answer computed from the table alone
    misses virtual grants; a raw query is acceptable only where a false negative
@@ -175,6 +176,9 @@ These invariants are executable: `backend/iam/tests/test_access_oracle.py`
 checks the resolver against a brute-force plain-Python oracle over seeded
 worlds (point ⟺ bulk ⟺ listings, focus and base-folder clamps included).
 A refactor of this subsystem should leave that file untouched and green.
+The read cost is pinned too: `TestVerdictQueryBudget` (in
+`backend/iam/tests/test_folders.py`) asserts a verdict costs exactly 3 queries
+— the feature-flag read, the grant-pairs union, the verdict itself.
 
 ## Function reference
 
@@ -192,7 +196,7 @@ A refactor of this subsystem should leave that file untouched and green.
 | **The meeting point** | | |
 | `_get_grant_sources` | The single function where the two grant sources are enumerated, as a (stored assignments, virtual default-role folders) pair of branch querysets. Principal dispatch lives here (`User` → effective assignment set, `UserGroup` → its own assignments); the optional permission filter is applied per branch. | `get_role_assignments_from_user` · `_get_default_role_folder_ids` |
 | **The two projections** | | |
-| `_get_grant_folder_set` | Verdict projection: flat folder-id lists split by recursion kind; virtual folders join the non-recursive bucket (invariant 2). Materialized — the verdict path carries no querysets. | `_resolve_permission` · `_get_grant_sources` |
+| `_get_grant_folder_set` | Verdict projection: flat folder-id lists split by recursion kind, fetched in one round trip (top-level union of (folder id, is_recursive) pairs); virtual folders join the non-recursive bucket (invariant 2). Materialized — the verdict path carries no querysets. | `_resolve_permission` · `_get_grant_sources` |
 | `_get_effective_grant_rows` | Listing projection: one row per (folder, codename, name, is_recursive) a grant names, unexpanded; NULL-perimeter rows preserved for parity. The permission-filtered form is for existence checks, not projection. | `_get_grant_sources` |
 | **The stored branch — explicit assignments** | | |
 | `get_role_assignments_from_user` | Effective assignments: direct ∪ group-carried ∪ IdP-mapped; inactive users get none. | — |

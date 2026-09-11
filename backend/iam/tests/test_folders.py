@@ -844,3 +844,55 @@ class TestFolderDefaultRole:
             assert serializer.is_valid(), serializer.errors
         finally:
             unused_role.delete()
+
+
+@pytest.mark.django_db
+class TestVerdictQueryBudget:
+    """Pin the verdict query budget — 3 queries:
+
+    1. the feature-flag read (IdP-group role inheritance) inside
+       `get_role_assignments_from_user`;
+    2. the grant-pairs union: the WHOLE grant set (both branches, audience
+       rule inlined) in one round trip;
+    3. the verdict itself (coverage over flat literal id lists).
+
+    A regression here means a query crept back into the hot path
+    (`is_access_allowed` runs on every request)."""
+
+    @pytest.fixture
+    def query_budget_world(self):
+        root_folder = Folder.get_root_folder()
+        domain = Folder.objects.create(
+            name="query-budget-domain",
+            parent_folder=root_folder,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        # select_related keeps the lazy content_type fetch out of the budget.
+        permission = Permission.objects.select_related("content_type").get(
+            codename="view_appliedcontrol"
+        )
+        role = Role.objects.create(name="query-budget-role", folder=root_folder)
+        role.permissions.add(permission)
+        group = UserGroup.objects.create(
+            name="query-budget-group", folder=domain, builtin=True
+        )
+        role_assignment = RoleAssignment.objects.create(
+            user_group=group, role=role, is_recursive=False, folder=root_folder
+        )
+        role_assignment.perimeter_folders.add(domain)
+        user = User.objects.create_user("query-budget-user@tests.com")
+        user.user_groups.add(group)
+        return user, permission, domain
+
+    def test_point_check_budget(self, query_budget_world, django_assert_num_queries):
+        user, permission, domain = query_budget_world
+        with django_assert_num_queries(3):
+            assert RoleAssignment.is_access_allowed(user, permission, domain)
+
+    def test_bulk_verdict_budget(self, query_budget_world, django_assert_num_queries):
+        user, permission, domain = query_budget_world
+        with django_assert_num_queries(3):
+            allowed_folder_ids = list(
+                RoleAssignment.get_allowed_folder_ids(user, permission)
+            )
+        assert domain.id in allowed_folder_ids
