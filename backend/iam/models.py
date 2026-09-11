@@ -1725,7 +1725,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         - `perm_name`: Permission name (`permission.name`).
         - `is_recursive`: Is the permission granted to the `descendants` of the `folder_id` `Folder`.
 
-        **WARNING:** `perm_codename` and `perm_name` can be `None` (if a `Role` has no permissions, of course that's a rare (but yet theorically possible) edge case).
+        **WARNING:** Rare (but yet theorically possible) edge case to keep in mind.
+
+        - `folder_id` can be `None` (if a `RoleAssignment` has no `perimeter_folders`).
+        - `perm_codename` and `perm_name` can be `None` (if a `Role` has no permissions)
         """
         role_assignments, default_role_folders = (
             RoleAssignment._get_permission_grant_sources(principal, permission)
