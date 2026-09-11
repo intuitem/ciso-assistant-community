@@ -432,7 +432,7 @@ def import_objects(
         # domain tree that would smuggle sub-domains past the Pro gating.
         if any(
             obj["model"] == "iam.folder"
-            and obj["fields"].get("content_type") != Folder.ContentType.ENCLAVE
+            and obj.get("fields", {}).get("content_type") != Folder.ContentType.ENCLAVE
             for obj in objects
         ):
             logger.error("Dump contains a domain")
@@ -716,10 +716,15 @@ def dedup_clashing_fields(
         current = fields.get(field)
         if errors is None or not isinstance(current, str):
             continue
+        # Values are still raw dump JSON here, so a DateField's is a str too:
+        # only the model's own field type says a suffix means anything.
+        model_field = model._meta.get_field(field)
+        if not isinstance(model_field, (models.CharField, models.TextField)):
+            continue
         if any(getattr(err, "code", None) == "max_length" for err in errors):
             continue
         suffix = f" {uuid.uuid4()}"
-        max_length = model._meta.get_field(field).max_length
+        max_length = model_field.max_length
         if max_length:
             if max_length <= len(suffix):
                 suffix = f" {uuid.uuid4().hex[:8]}"[:max_length]
