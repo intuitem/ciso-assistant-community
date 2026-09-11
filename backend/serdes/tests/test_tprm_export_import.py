@@ -632,6 +632,47 @@ class TestCrossDomainCampaignScope:
             .exists()
         )
 
+    @pytest.mark.django_db
+    def test_foreign_binder_on_an_in_domain_audit_does_not_travel(
+        self, root_folder, framework_fixture
+    ):
+        """Reaching binders through the audits they point at is only for the
+        enclave case, where the audit has dropped its perimeter. Another domain
+        keeping a binder against one of our audits must stay there."""
+        domain = Folder.objects.create(
+            name="Binder Domain",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        security_domain = Folder.objects.create(
+            name="Security Domain",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+
+        audit = ComplianceAssessment.objects.create(
+            name="In-domain audit",
+            framework=framework_fixture,
+            folder=domain,
+            field_visibility=build_initial_field_visibility(framework_fixture),
+        )
+        foreign_binder = FindingsAssessment.objects.create(
+            name="Pentest binder",
+            folder=security_domain,
+            compliance_assessment=audit,
+        )
+        foreign_finding = Finding.objects.create(
+            name="Foreign finding",
+            folder=security_domain,
+            findings_assessment=foreign_binder,
+        )
+
+        data = get_domain_export_objects(domain)
+
+        assert audit in data["complianceassessment"]
+        assert foreign_binder not in data["findingsassessment"]
+        assert foreign_finding not in data["finding"]
+
 
 # ============ Questionnaire evidence placement ============
 
@@ -1124,12 +1165,13 @@ class TestExportedEnclaves:
         assert imported_evidence("Internal file").folder == imported
 
     @pytest.mark.django_db
-    def test_domain_hosted_audit_is_left_where_the_dump_put_it(
+    def test_domain_hosted_audit_from_a_mixed_dump_is_isolated(
         self, root_folder, admin_user, framework_fixture
     ):
-        """An enclave-aware dump is authoritative: an audit deliberately kept in
-        a domain folder must not be quietly moved into an enclave, or the round
-        trip stops being an identity."""
+        """An enclave-aware dump can still carry a pre-enclave questionnaire, so
+        the repair is decided per assessment: the migrated audit keeps its
+        enclave, and the flat one gets isolated instead of being skipped because
+        the dump happened to contain a folder row."""
         domain = Folder.objects.create(
             name="Mixed Source",
             content_type=Folder.ContentType.DOMAIN,
@@ -1157,7 +1199,7 @@ class TestExportedEnclaves:
         enclaved_ea.compliance_assessment = enclaved_audit
         enclaved_ea.save()
 
-        # One audit left in the domain on purpose.
+        # One audit still flat in the domain, as a pre-enclave instance left it.
         domain_ea = EntityAssessment.objects.create(
             name="Domain assessment", folder=domain, entity=provider
         )
@@ -1190,7 +1232,11 @@ class TestExportedEnclaves:
             imported_audits["Enclaved assessment"].folder.content_type
             == Folder.ContentType.ENCLAVE
         )
-        assert imported_audits["Domain assessment"].folder == imported
+        # Left in `imported`, grant_respondent_access would build a recursive
+        # assignment on the whole domain.
+        repaired = imported_audits["Domain assessment"].folder
+        assert repaired.content_type == Folder.ContentType.ENCLAVE
+        assert repaired.parent_folder == imported
 
     @pytest.mark.django_db
     def test_audit_arriving_outside_an_enclave_is_isolated(

@@ -1611,15 +1611,17 @@ def restore_entity_assessment_enclaves(
     `grant_respondent_access` builds a recursive assignment on `audit.folder`,
     which would hand the respondent everything.
 
-    A dump that does carry folders came from an enclave-aware export, so its
-    placement is the source of truth and nothing here may second-guess it: an
-    audit deliberately kept in a domain folder stays there, or the round trip
-    would silently move data.
+    Decided per assessment, not per dump: an enclave-aware export can still carry
+    pre-enclave questionnaires next to migrated ones, and skipping the repair for
+    all of them because some enclave travelled would leave those respondents with
+    the whole domain. An audit that did arrive in an enclave keeps that placement.
+
+    Only the questionnaire itself moves. Evidence and tasks from a pre-enclave
+    dump stay in the domain folder: everything there shares one folder, so
+    nothing tells the respondent's uploads from the organisation's, and sweeping
+    them into the enclave would hand internal evidence to the third party.
     """
     from tprm.services import enclave_folder
-
-    if any(obj["model"] == "iam.folder" for obj in objects):
-        return
 
     for obj in objects:
         if obj["model"] != "tprm.entityassessment":
