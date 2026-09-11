@@ -70,11 +70,11 @@ def _enterprise_flags(monkeypatch):
 
 
 def _stored_grant_assignments(user, permission):
-    """The stored branch of `RoleAssignment._get_grant_sources`, restricted to
+    """The stored branch of `RoleAssignment._get_permission_grant_sources`, restricted to
     the given permission (a `Permission` or a `(prefix, model)` pair) — the
     successor of the deleted `_get_role_assignments_from_permission`."""
     permission = RoleAssignment._resolve_permission(permission)
-    role_assignments, _ambient_folders = RoleAssignment._get_grant_sources(
+    role_assignments, _ambient_folders = RoleAssignment._get_permission_grant_sources(
         user, permission
     )
     return role_assignments

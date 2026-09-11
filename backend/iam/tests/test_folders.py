@@ -303,11 +303,11 @@ class TestFolderDescendants:
 
 
 def _ambient_grant_folder_ids(principal, permission) -> list:
-    """The ambient branch of `RoleAssignment._get_grant_sources`, projected to
+    """The ambient branch of `RoleAssignment._get_permission_grant_sources`, projected to
     folder ids: the folders whose default role grants `permission` to the
     principal. Boundary tests assert on this branch alone — the stored branch
     would mask a leak."""
-    _role_assignments, ambient_folders = RoleAssignment._get_grant_sources(
+    _role_assignments, ambient_folders = RoleAssignment._get_permission_grant_sources(
         principal, permission
     )
     return list(ambient_folders.values_list("id", flat=True).order_by())
