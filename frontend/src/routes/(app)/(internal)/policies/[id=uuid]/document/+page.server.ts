@@ -1,5 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { fetchAllPages } from '$lib/utils/pagination';
+import { pickWorkingRevision } from '$lib/utils/documentRevisions';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -56,23 +57,11 @@ export const load: PageServerLoad = async (event) => {
 			// Gracefully degrade
 		}
 
-		// Load current draft or current_revision content
-		const draft = revisions.find((r: any) => r.status === 'draft');
+		// Load the revision the lifecycle acts on (newest under review, else published)
+		const working = pickWorkingRevision(revisions, document.current_revision?.id);
 		try {
-			if (draft) {
-				const fullRes = await fetch(`${BASE_API_URL}/document-revisions/${draft.id}/`);
-				if (fullRes.ok) {
-					currentRevision = await fullRes.json();
-				}
-			} else if (document.current_revision?.id) {
-				const fullRes = await fetch(
-					`${BASE_API_URL}/document-revisions/${document.current_revision.id}/`
-				);
-				if (fullRes.ok) {
-					currentRevision = await fullRes.json();
-				}
-			} else if (revisions.length > 0) {
-				const fullRes = await fetch(`${BASE_API_URL}/document-revisions/${revisions[0].id}/`);
+			if (working) {
+				const fullRes = await fetch(`${BASE_API_URL}/document-revisions/${working.id}/`);
 				if (fullRes.ok) {
 					currentRevision = await fullRes.json();
 				}

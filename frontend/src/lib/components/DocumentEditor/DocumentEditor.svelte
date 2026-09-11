@@ -7,6 +7,7 @@
 	import DocumentLinkModal from './DocumentLinkModal.svelte';
 	import { documentTypeLabel } from '$lib/utils/documentTypes';
 	import { fetchAllPages } from '$lib/utils/pagination';
+	import { pickWorkingRevision, APPROVED_REVISION_STATUSES } from '$lib/utils/documentRevisions';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
@@ -15,6 +16,9 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import { LOCALE_MAP } from '$lib/utils/locales';
+	import { getToastStore } from '$lib/components/Toast/stores';
+	import { page } from '$app/state';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 
 	interface Props {
 		parent: any;
@@ -27,6 +31,11 @@
 	let { parent, data, proxyBase, backHref, createParentField = 'policy' }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
+	const toastStore = getToastStore();
+
+	function notifyError(message: string) {
+		toastStore.trigger({ message, preset: 'error' });
+	}
 
 	let policy = $derived(parent);
 	let document = $state(data.document);
@@ -80,7 +89,10 @@
 		// Release the lock on the revision we're navigating away from (onDestroy's
 		// releaseLock won't fire — this component is reused, not remounted).
 		if (hasLock && currentRevision?.id) {
-			proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id }).catch(() => {});
+			proxyPost(
+				{ _action: 'stop-editing', revision_id: currentRevision.id },
+				{ notify: false }
+			).catch(() => {});
 		}
 		stopHeartbeat();
 		hasLock = false;
@@ -145,17 +157,40 @@
 	// All API calls go through the +server.ts proxy
 	const proxyUrl = proxyBase;
 
-	async function proxyPost(body: Record<string, any>) {
-		return fetch(proxyUrl, {
+	async function reportFailure(res: Response) {
+		const data = await res
+			.clone()
+			.json()
+			.catch(() => null);
+		notifyError(data?.detail || data?.error || data?.message || m.error());
+	}
+
+	/**
+	 * Callers only ever branch on `res.ok`, so a rejected lifecycle transition
+	 * (403 from RBAC, 400 from a status guard) would otherwise fail in silence.
+	 * Pass `notify: false` when the caller renders the failure itself, or when
+	 * the call is best-effort cleanup the user never asked for.
+	 */
+	async function proxyPost(body: Record<string, any>, { notify = true } = {}) {
+		const res = await fetch(proxyUrl, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(body)
 		});
+		if (!res.ok && notify) await reportFailure(res);
+		return res;
 	}
 
 	async function proxyGet(params: Record<string, string>) {
 		const qs = new URLSearchParams(params).toString();
 		return fetch(`${proxyUrl}?${qs}`);
+	}
+
+	async function proxyDelete(params: Record<string, string>) {
+		const qs = new URLSearchParams(params).toString();
+		const res = await fetch(`${proxyUrl}?${qs}`, { method: 'DELETE' });
+		if (!res.ok) await reportFailure(res);
+		return res;
 	}
 
 	// --- Document references (E.2) --------------------------------------------
@@ -212,7 +247,10 @@
 		if (locale === currentLocale) return;
 		// Release lock on current revision
 		if (currentRevision?.id && hasLock) {
-			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
+			await proxyPost(
+				{ _action: 'stop-editing', revision_id: currentRevision.id },
+				{ notify: false }
+			);
 			hasLock = false;
 			stopHeartbeat();
 		}
@@ -239,7 +277,10 @@
 		showLocalePicker = false;
 		// Release lock on current revision before switching to template selector
 		if (currentRevision?.id && hasLock) {
-			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
+			await proxyPost(
+				{ _action: 'stop-editing', revision_id: currentRevision.id },
+				{ notify: false }
+			);
 			hasLock = false;
 			stopHeartbeat();
 		}
@@ -274,8 +315,7 @@
 			return;
 		}
 
-		const activeStatuses = ['draft', 'change_requested', 'in_review', 'validated'];
-		const target = revisions.find((r: any) => activeStatuses.includes(r.status)) ?? revisions[0];
+		const target = pickWorkingRevision(revisions, document.current_revision?.id);
 		if (!target) return;
 
 		const fullRes = await proxyGet({ _action: 'revision', revision_id: target.id });
@@ -294,13 +334,16 @@
 		saveConflict = '';
 		if (saveTimeout) clearTimeout(saveTimeout);
 		try {
-			const res = await proxyPost({
-				_action: 'save-revision',
-				revision_id: currentRevision.id,
-				content,
-				change_summary: changeSummary,
-				expected_updated_at: lastLoadedAt
-			});
+			const res = await proxyPost(
+				{
+					_action: 'save-revision',
+					revision_id: currentRevision.id,
+					content,
+					change_summary: changeSummary,
+					expected_updated_at: lastLoadedAt
+				},
+				{ notify: false }
+			);
 			if (res.ok) {
 				currentRevision = await res.json();
 				lastLoadedAt = currentRevision.updated_at || '';
@@ -330,7 +373,10 @@
 		if (!saveOk) return;
 		// Release lock before transitioning — revision won't be editable in in_review
 		if (hasLock) {
-			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
+			await proxyPost(
+				{ _action: 'stop-editing', revision_id: currentRevision.id },
+				{ notify: false }
+			);
 			hasLock = false;
 			stopHeartbeat();
 		}
@@ -413,8 +459,7 @@
 
 	function deleteRevision(revisionId: string) {
 		confirmAndDelete(m.deleteRevision(), m.deleteRevisionConfirmation(), async () => {
-			const qs = new URLSearchParams({ _type: 'revision', id: revisionId }).toString();
-			const res = await fetch(`${proxyUrl}?${qs}`, { method: 'DELETE' });
+			const res = await proxyDelete({ _type: 'revision', id: revisionId });
 			if (res.ok) {
 				await refreshData();
 			}
@@ -425,8 +470,7 @@
 		if (!document) return;
 		confirmAndDelete(m.deleteDocumentTitle(), m.deleteDocumentConfirmation(), async () => {
 			const deletedLocale = currentLocale;
-			const qs = new URLSearchParams({ _type: 'document', id: document.id }).toString();
-			const res = await fetch(`${proxyUrl}?${qs}`, { method: 'DELETE' });
+			const res = await proxyDelete({ _type: 'document', id: document.id });
 			if (res.ok) {
 				// Release lock state
 				hasLock = false;
@@ -480,7 +524,10 @@
 	async function loadRevision(revisionId: string) {
 		// Release lock on previous revision
 		if (hasLock && currentRevision?.id) {
-			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
+			await proxyPost(
+				{ _action: 'stop-editing', revision_id: currentRevision.id },
+				{ notify: false }
+			);
 		}
 		hasLock = false;
 		const res = await proxyGet({ _action: 'revision', revision_id: revisionId });
@@ -672,6 +719,36 @@
 			showDiff = false;
 		}
 	}
+
+	// Lifecycle transitions are POSTs, which RBACPermissions maps to
+	// `add_documentrevision` on the revision's folder.
+	let canTransition = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'add',
+			model: 'documentrevision',
+			object: currentRevision ?? document ?? parent
+		})
+	);
+	// The two delete buttons hit different endpoints, so they need different perms:
+	// the trash in the version history deletes a DocumentRevision, the toolbar
+	// button deletes the whole locale variant (a ManagedDocument).
+	let canDeleteRevision = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'delete',
+			model: 'documentrevision',
+			object: currentRevision ?? document ?? parent
+		})
+	);
+	let canDeleteDocument = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'delete',
+			model: 'manageddocument',
+			object: document ?? parent
+		})
+	);
 
 	let isDraft = $derived(currentRevision?.status === 'draft');
 	let isChangeRequested = $derived(currentRevision?.status === 'change_requested');
@@ -950,32 +1027,57 @@
 						<span class="ml-1">{m.save()}</span>
 					{/if}
 				</button>
-				<button class="btn btn-sm preset-filled-warning-500" onclick={() => submitForReview()}>
+				<button
+					class="btn btn-sm preset-filled-warning-500"
+					disabled={!canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={() => submitForReview()}
+				>
 					<i class="fa-solid fa-paper-plane"></i>
 					<span class="ml-1 hidden lg:inline">{m.submitForReview()}</span>
 				</button>
 			{/if}
 
 			{#if isInReview}
-				<button class="btn btn-sm preset-filled-success-500" onclick={() => approve()}>
+				<button
+					class="btn btn-sm preset-filled-success-500"
+					disabled={!canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={() => approve()}
+				>
 					<i class="fa-solid fa-check"></i>
 					<span class="ml-1">{m.approve()}</span>
 				</button>
-				<button class="btn btn-sm preset-filled-error-500" onclick={() => requestChanges()}>
+				<button
+					class="btn btn-sm preset-filled-error-500"
+					disabled={!canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={() => requestChanges()}
+				>
 					<i class="fa-solid fa-rotate-left"></i>
 					<span class="ml-1 hidden lg:inline">{m.requestChanges()}</span>
 				</button>
 			{/if}
 
 			{#if currentRevision?.status === 'validated'}
-				<button class="btn btn-sm preset-filled-success-500" onclick={() => publishRevision()}>
+				<button
+					class="btn btn-sm preset-filled-success-500"
+					disabled={!canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={() => publishRevision()}
+				>
 					<i class="fa-solid fa-upload"></i>
 					<span class="ml-1">{m.publish()}</span>
 				</button>
 			{/if}
 
 			{#if !hasActiveRevision && document}
-				<button class="btn btn-sm preset-filled-primary-500" onclick={() => createNewDraft()}>
+				<button
+					class="btn btn-sm preset-filled-primary-500"
+					disabled={!canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={() => createNewDraft()}
+				>
 					<i class="fa-solid fa-plus"></i>
 					<span class="ml-1 hidden lg:inline">{m.createNewDraft()}</span>
 				</button>
@@ -984,8 +1086,9 @@
 			{#if document}
 				<button
 					class="btn btn-sm preset-tonal-error"
+					disabled={!canDeleteDocument}
 					onclick={() => deleteDocument()}
-					title={m.deleteDocumentAndRevisions()}
+					title={canDeleteDocument ? m.deleteDocumentAndRevisions() : m.permissionDenied()}
 				>
 					<i class="fa-solid fa-trash"></i>
 				</button>
@@ -1446,7 +1549,14 @@
 									</div>
 									{#if revision.author}
 										<p class="text-xs text-surface-500 truncate">
+											<i class="fa-solid fa-pen text-[9px] opacity-70"></i>
 											{revision.author.str || revision.author.email || ''}
+										</p>
+									{/if}
+									{#if revision.reviewer && APPROVED_REVISION_STATUSES.includes(revision.status)}
+										<p class="text-xs text-surface-500 truncate">
+											<i class="fa-solid fa-circle-check text-[9px] opacity-70"></i>
+											{m.approvedBy()}: {revision.reviewer.str || revision.reviewer.email || ''}
 										</p>
 									{/if}
 									{#if revision.change_summary}
@@ -1463,7 +1573,7 @@
 												minute: '2-digit'
 											})}
 										</p>
-										{#if revision.status === 'draft' || revision.status === 'deprecated'}
+										{#if (revision.status === 'draft' || revision.status === 'deprecated') && canDeleteRevision}
 											<button
 												class="text-[10px] text-surface-500 hover:text-red-500 transition-colors p-0.5"
 												onclick={(e) => {

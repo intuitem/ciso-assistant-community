@@ -1,7 +1,13 @@
 import { BASE_API_URL, DEFAULT_LANGUAGE } from '$lib/utils/constants';
 import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
 import type { User } from '$lib/utils/types';
-import { redirect, type Handle, type HandleFetch, type RequestEvent } from '@sveltejs/kit';
+import {
+	redirect,
+	type Handle,
+	type HandleFetch,
+	type HandleServerError,
+	type RequestEvent
+} from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 
 import { loadFeatureFlags } from '$lib/feature-flags';
@@ -225,6 +231,22 @@ export const handle: Handle = async ({ event, resolve }) => {
 			}
 		});
 	});
+};
+
+// Replaces SvelteKit's default error logger, which printed every unmatched path
+// as a two-line stderr entry. A 404 on a path that was never a route is not an
+// application error: vulnerability scanners alone can produce tens of thousands
+// of those lines. Real failures still go out through the structured logger.
+export const handleError: HandleServerError = ({ error, status, message, event }) => {
+	if (status !== 404) {
+		logger.error('unhandled_server_error', {
+			status,
+			method: event.request.method,
+			path: event.url.pathname,
+			error
+		});
+	}
+	return { message };
 };
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
