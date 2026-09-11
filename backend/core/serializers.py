@@ -4204,6 +4204,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 validated_data.pop("is_scored", None)
 
             was_overridden = instance.is_score_overridden
+            previous_alignment = instance.respondent_alignment
             instance = super().update(instance, validated_data)
 
             # Override turned off: resync score from answers below.
@@ -4329,7 +4330,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 if new_alignment and new_alignment in ALIGNMENT_TO_RESULT:
                     instance.result = ALIGNMENT_TO_RESULT[new_alignment]
                     instance.save(update_fields=["result"])
-                elif not new_alignment:
+                elif not new_alignment and previous_alignment:
                     # Deselection: reset result and scores so the RA is truly
                     # unassessed (progress() flags an RA as assessed when score
                     # is set, even if result is NOT_ASSESSED).
