@@ -1052,12 +1052,12 @@ class TestExportedEnclaves:
         assert imported_evidence("Internal file").folder == imported
 
     @pytest.mark.django_db
-    def test_legacy_dump_without_enclaves_still_isolates_the_audit(
+    def test_audit_arriving_outside_an_enclave_is_isolated(
         self, root_folder, admin_user, framework_fixture
     ):
-        """Dumps predating schema 3 carry no folders, so their questionnaires
-        would land flat in the domain — where grant_respondent_access would hand
-        the respondent everything. The fallback puts them back in an enclave."""
+        """A dump taken before enclaves were exported carries no folders, so its
+        questionnaire lands flat in the domain, where grant_respondent_access
+        would hand the respondent everything. It must be put back in one."""
         domain = Folder.objects.create(
             name="Legacy Source",
             content_type=Folder.ContentType.DOMAIN,
@@ -1087,7 +1087,6 @@ class TestExportedEnclaves:
         response = export_domain(domain, admin_user)
         json_dump = process_uploaded_file(io.BytesIO(response.content))
         # Drop the folders: that is exactly what an older dump looks like.
-        json_dump["meta"]["schema_version"] = 2
         json_dump["objects"] = [
             obj for obj in json_dump["objects"] if obj["model"] != "iam.folder"
         ]

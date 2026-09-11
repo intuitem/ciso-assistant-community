@@ -666,12 +666,10 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     ).distinct()
 
     return {
-        # Folder is deliberately NOT exported. The domain tree is flattened on
-        # import: all `folder` FKs are remapped to the newly-created
-        # base_folder by create_batch's generic folder handler. Keeping
-        # Folder out of the dump is what makes the re-import possible — the
-        # guard in import_objects rejects dumps that *do* contain Folder rows
-        # (e.g. full DB backups), not our own domain exports.
+        # Enclaves only: they carry what a third party may see, so re-deriving
+        # it on import could only approximate. Domain folders stay out and are
+        # flattened onto base_folder, which is what keeps sub-domains a Pro
+        # feature; import_objects rejects any dump carrying one.
         "folder": enclaves,
         "loadedlibrary": loaded_libraries,
         "vulnerability": vulnerabilities,

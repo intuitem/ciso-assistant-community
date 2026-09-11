@@ -677,15 +677,20 @@ def create_model_objects(
         )
 
 
-def imported_folder(folder_hash: Any, link_dump_database_ids: dict[str, Any]) -> Folder:
+def imported_folder(
+    folder_hash: Any,
+    link_dump_database_ids: dict[str, Any],
+    cache: dict[Any, Folder | None],
+) -> Folder:
     """Where an exported object belongs: its enclave if one travelled, else the
-    new base folder. Domain folders never travel, so they flatten."""
+    new base folder. Domain folders never travel, so they flatten. `cache` keeps
+    this to one query per enclave rather than one per row."""
     mapped = link_dump_database_ids.get(folder_hash)
-    if mapped:
-        enclave = Folder.objects.filter(id=mapped).first()
-        if enclave:
-            return enclave
-    return link_dump_database_ids.get("base_folder")
+    if not mapped:
+        return link_dump_database_ids.get("base_folder")
+    if mapped not in cache:
+        cache[mapped] = Folder.objects.filter(id=mapped).first()
+    return cache[mapped] or link_dump_database_ids.get("base_folder")
 
 
 def dedup_clashing_fields(
@@ -734,6 +739,7 @@ def create_batch(
     with transaction.atomic():
         try:
             objects_creation_data = []
+            folder_cache: dict[Any, Folder | None] = {}
 
             for obj in batch:
                 obj_id = obj.get("id")
@@ -746,7 +752,7 @@ def create_batch(
 
                 if fields.get("folder"):
                     fields["folder"] = imported_folder(
-                        fields["folder"], link_dump_database_ids
+                        fields["folder"], link_dump_database_ids, folder_cache
                     )
 
                 many_to_many_map_ids: dict = {}
@@ -1593,14 +1599,15 @@ def resolve_self_referencing_fks(
 def restore_entity_assessment_enclaves(
     objects: List[dict], link_dump_database_ids: dict[str, Any]
 ) -> None:
-    """Fallback for dumps predating exported enclaves.
+    """Put questionnaires that arrived outside an enclave back into one.
 
-    Since schema 3 the enclave travels and every object lands in it directly.
-    Older dumps carry no folders, so their questionnaires arrive flat in the
-    domain — and `grant_respondent_access` builds a recursive assignment on
-    `audit.folder`, which would hand the respondent the whole domain. Move those
-    audits into an enclave. Evidence is left where the dump put it: an old dump
-    cannot say whether a file was the vendor's or the internal team's.
+    An enclave now travels with the export, so most audits land in theirs
+    directly. This catches the ones that cannot: dumps taken before enclaves
+    were exported, and audits that were sitting in a domain folder at the
+    source. Either way `grant_respondent_access` builds a recursive assignment
+    on `audit.folder`, so leaving one in the domain would hand the respondent
+    everything. Evidence is left where the dump put it: nothing here can tell
+    whether a file was the vendor's or the internal team's.
     """
     from tprm.services import enclave_folder
 
