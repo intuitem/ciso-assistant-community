@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from datetime import timedelta
 from typing import Any, List, Literal, Optional, Iterable, Final
 from typing import TYPE_CHECKING, cast
-import itertools
 import secrets
 import uuid
 from allauth.account.models import EmailAddress
@@ -19,7 +18,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _, override as translation_override
 from django.urls.base import reverse_lazy
-from django.db.models import Q, F, QuerySet, Case, When
+from django.db.models import Q, F, QuerySet, Case, When, Value, BooleanField
 from knox.models import AuthToken
 
 from core.utils import (
@@ -1360,23 +1359,26 @@ class Role(NameDescriptionMixin, FolderMixin):
 
 
 @dataclass
-class AllowedFolderSet:
-    directly_accessible_folder_ids: Iterable[uuid.UUID]
+class GrantFolderSet:
     """
-    The "direct folders" are the ones stored in the `RoleAssignment.perimeter_folders` field.
-    These folders have roles (`RoleAssignment.role`) being directly assigned to them.
+    The folders on which a user's grants sit, for one permission — unexpanded:
+    a recursive grant appears here as its perimeter folder, not its subtree.
+    Expansion is `_coverage_q`'s job, applied to one folder (point check) or to
+    all folders (bulk check).
+    """
 
-    In opposition to the indirect (recursive) folders which permission was granted due to a `Role` assigned on one of its ancestor folders.
-    """
-    direct_flat_folder_ids: Iterable[uuid.UUID]
-    """A "flat" `folder` (in this context) is a folder linked to a "flat" `RoleAssignment` (non-recursive)."""
-    direct_recursive_folder_ids: Iterable[uuid.UUID]
-    """A direct recursive folder, is a direct folder of a recursive `RoleAssignment`."""
+    non_recursive_grant_folder_ids: Iterable[uuid.UUID]
+    """Perimeters of the non-recursive grants: non-recursive role assignments AND the
+    ambient default-role folders (default roles are non-recursive by design). A grant
+    here covers exactly its folder."""
+    recursive_grant_folder_ids: Iterable[uuid.UUID]
+    """Perimeters of the recursive role assignments only — never ambient. A grant here
+    covers its folder and the whole subtree below it."""
 
     @staticmethod
-    def none() -> AllowedFolderSet:
+    def none() -> GrantFolderSet:
         _none = Folder.objects.none().values_list("id", flat=True)
-        return AllowedFolderSet(_none, _none, _none)
+        return GrantFolderSet(_none, _none)
 
 
 class RoleAssignment(NameDescriptionMixin, FolderMixin):
@@ -1482,6 +1484,41 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return role_assignments
 
     @staticmethod
+    def _coverage_q(grant_folder_set: GrantFolderSet) -> Q:
+        """
+        The coverage predicate, stated once: a folder is covered when a
+        non-recursive grant (an assignment or a default role) names it, or a
+        recursive grant names it or one of its ancestors. The point check
+        applies it to one folder, the bulk check to all folders — the same
+        rule evaluated in both directions.
+
+        The id sets are materialized into flat literal INs on purpose: they are
+        small by nature (a user's perimeter folders plus default-role folders),
+        and inlining them keeps unions out of subqueries — the shape that
+        overflowed PostgreSQL's parser before.
+        """
+        non_recursive_ids = list(grant_folder_set.non_recursive_grant_folder_ids)
+        recursive_ids = list(grant_folder_set.recursive_grant_folder_ids)
+        return (
+            Q(id__in=non_recursive_ids)
+            | Q(id__in=recursive_ids)
+            | Q(ancestors__in=recursive_ids)
+        )
+
+    @staticmethod
+    def _scope_q(base_folder: Folder) -> Q:
+        """
+        The scope predicate: a folder is in scope when it is the base folder
+        itself or one of its descendants.
+
+        Scope is independent of coverage — combine them with chained
+        `.filter()` calls, never inside a single `Q`: both predicates join the
+        multi-valued `ancestors` relation, and a single filter call would
+        require one ancestor row to satisfy both at once.
+        """
+        return Q(id=base_folder.id) | Q(ancestors=base_folder.id)
+
+    @staticmethod
     def is_access_allowed(
         user: AbstractBaseUser | AnonymousUser,
         perm: Permission,
@@ -1515,20 +1552,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             if (not is_folder_focused) and (not folder.is_root()):
                 return False
 
-        allowed_folder_set = RoleAssignment._get_directly_allowed_folder_ids(user, perm)
+        grant_folder_set = RoleAssignment._get_grant_folder_set(user, perm)
 
-        direct_flat_folder_id_set = set(allowed_folder_set.direct_flat_folder_ids)
-        direct_recursive_folder_id_set = set(
-            allowed_folder_set.direct_recursive_folder_ids
+        return (
+            Folder.objects.filter(id=folder.id)
+            .filter(RoleAssignment._coverage_q(grant_folder_set))
+            .exists()
         )
-
-        is_directly_accessible = folder.id in direct_flat_folder_id_set
-        is_indirectly_accessible = any(
-            parent_folder.id in direct_recursive_folder_id_set
-            for parent_folder in folder.get_parent_folders(include_self=True)
-        )
-
-        return is_directly_accessible or is_indirectly_accessible
 
     @staticmethod
     def is_object_accessible(
@@ -1537,43 +1567,40 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         model: type[models.Model],
         id: uuid.UUID,
     ) -> bool:
-        from core.models import Actor, FilteringLabel
+        """
+        Return `True` if the `user` has the (`perm_prefix`, `model`) permission on
+        the specific object identified by `id`.
+
+        This method's own job is only to resolve the object to its governing
+        folder (existence, Actor delegation, IAM scope); the actual access verdict
+        — both grant sources, focus mode, the special cases — is delegated to
+        `is_access_allowed`, so the two methods cannot drift.
+        """
+        from core.models import Actor
 
         if not isinstance(user, User):
             return False
 
         if model is Permission:
+            # Early out before a pointless fetch (`Permission` has an int pk).
             return perm_prefix == "view"
 
         obj = model.objects.filter(id=id).first()
         if obj is None:
+            # A missing object answers like a forbidden one: ids stay unprobeable.
             return False
 
         if model is Actor:
             if not isinstance(obj, Actor):
                 raise AssertionError("Unreachable.")
 
+            # Delegates follow their delegatees: check the wrapped User/Team/Entity.
             obj = obj.specific
             model = type(obj)
 
-        if perm_prefix == "add" and model is FilteringLabel:
-            return RoleAssignment.get_allowed_folder_ids(
-                user, (perm_prefix, FilteringLabel)
-            ).exists()
-
         permission = RoleAssignment._resolve_permission((perm_prefix, model))
 
-        allowed_folder_set = RoleAssignment._get_directly_allowed_folder_ids(
-            user, permission
-        )
-
-        directly_accessible_folder_id_set = set(
-            allowed_folder_set.directly_accessible_folder_ids
-        )
-        direct_recursive_folder_id_set = set(
-            allowed_folder_set.direct_recursive_folder_ids
-        )
-
+        # Components follow their aggregate root: resolve the governing folder.
         iam_scope_folder_id = RoleAssignment.get_iam_folder_id(obj)
 
         if not isinstance(iam_scope_folder_id, uuid.UUID):
@@ -1583,127 +1610,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         iam_folder = Folder.objects.get(id=iam_scope_folder_id)
 
-        folder_queryset = Folder.objects.filter(id=iam_scope_folder_id)
-        folder_chain_queryset = iam_folder.ancestors.all().union(folder_queryset)
-        folder_chain_ids_queryset = folder_chain_queryset.values_list("id", flat=True)
-
-        folder_chain_id_set = set(folder_chain_ids_queryset)
-
-        focused_folder_id = Folder.get_focused_folder_id()
-
-        if focused_folder_id is not None:
-            is_object_focused = focused_folder_id in folder_chain_ids_queryset
-
-            if (not is_object_focused) and (not iam_folder.is_root()):
-                return False
-
-        is_directly_accessible = iam_folder.id in directly_accessible_folder_id_set
-        is_indirectly_accessible = bool(
-            direct_recursive_folder_id_set & folder_chain_id_set
-        )
-        is_accessible = is_directly_accessible or is_indirectly_accessible
-
-        return is_accessible
+        return RoleAssignment.is_access_allowed(user, permission, iam_folder)
 
     @staticmethod
     def is_object_readable(
         user: AbstractBaseUser | AnonymousUser, model: type[models.Model], id: uuid.UUID
     ) -> bool:
         return RoleAssignment.is_object_accessible(user, "view", model, id)
-
-    @staticmethod
-    def _get_focus_accessible_folder_ids(
-        focus_folder_id: uuid.UUID,
-        folder_ids: Iterable[uuid.UUID],
-    ) -> QuerySet[uuid.UUID]:
-        """Filter out folders excluded by the focus mode."""
-
-        folders = Folder.objects.filter(id__in=folder_ids)
-        focused_folders = folders.filter(
-            Q(ancestors=focus_folder_id) | Q(id=focus_folder_id)
-        )
-        focused_folder_ids = focused_folders.values_list("id", flat=True).distinct()
-
-        return focused_folder_ids
-
-    @staticmethod
-    def _filter_accessible_folder_ids_by_base_folder(
-        base_folder: Folder,
-        is_focus_mode: bool,
-        direct_flat_folder_ids: Iterable[uuid.UUID],
-        direct_recursive_folder_ids: Iterable[uuid.UUID],
-    ) -> QuerySet[uuid.UUID]:
-        """
-        Return the accessible folder IDs rooted from the `base_folder` `Folder` from the direct flat and direct recursive folder IDs.
-
-        `direct_flat_folder_ids` is list of Folder IDs (`Folder.id`) from non-recursive role assignments folders (`RoleAssignment.perimeter_folders`).
-
-        `direct_recursive_folder_ids` is list of Folder IDs from recursive role assignments folders.
-        """
-
-        root_folder_id = Folder.get_root_folder_id()
-
-        # We add the root folder to the return value (when users are in focus mode (`is_focus_mode is True`)).
-        # It's better better for UX as preventing users in focus mode to access the root folder prevent them from seeing tons important global objects.
-        root_queryset = Folder.objects.none()
-        if is_focus_mode:
-            if root_folder_id is not None:
-                is_root_accessible = (root_folder_id in direct_flat_folder_ids) or (
-                    root_folder_id in direct_recursive_folder_ids
-                )
-            else:
-                is_root_accessible = False
-
-            if is_root_accessible:
-                root_queryset = Folder.objects.filter(id=root_folder_id)
-
-        root_queryset = root_queryset.values_list("id", flat=True)
-
-        direct_recursive_folders = Folder.objects.filter(
-            id__in=direct_recursive_folder_ids
-        )
-
-        # `True` if the user has the `perm_codename` permission on the focus folder itself OR an ancestor `Folder` of the `base_folder`.
-        is_whole_focus_folder_tree_accessible = direct_recursive_folders.filter(
-            Q(id=base_folder.id) | Q(descendants=base_folder.id)
-        ).exists()
-
-        if is_whole_focus_folder_tree_accessible:
-            # A non-strict folder supertree of the `base_folder` tree is accessible
-            # Therefore all the focused folder tree can be accessed.
-            base_folder_tree = Folder.objects.filter(id=base_folder.id).union(
-                Folder.objects.filter(ancestors=base_folder.id)
-            )
-
-            accessible_folder_ids = base_folder_tree.values_list("id", flat=True)
-            return accessible_folder_ids.union(root_queryset)
-
-        accessible_direct_flat_folder_ids = (
-            RoleAssignment._get_focus_accessible_folder_ids(
-                base_folder.id, direct_flat_folder_ids
-            )
-        )
-        accessible_direct_recursive_folder_ids = (
-            RoleAssignment._get_focus_accessible_folder_ids(
-                base_folder.id, direct_recursive_folder_ids
-            )
-        )
-        directly_accessible_folder_ids = accessible_direct_flat_folder_ids.union(
-            accessible_direct_recursive_folder_ids
-        )
-
-        indirectly_accessible_folders = Folder.objects.filter(
-            ancestors__in=accessible_direct_recursive_folder_ids
-        )
-        indirectly_accessible_folder_ids = indirectly_accessible_folders.values_list(
-            "id", flat=True
-        )
-
-        accessible_folder_ids = directly_accessible_folder_ids.union(
-            indirectly_accessible_folder_ids
-        )
-
-        return accessible_folder_ids.union(root_queryset)
 
     @staticmethod
     def _get_default_role_folder_ids(
@@ -1726,7 +1639,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         # (This also prevent custom user groups from granting default roles).
         membership_role_assignments = role_assignments.filter(user_group__builtin=True)
 
-        # Represent the `directly_accessible_folder_ids` of the `membership_role_assignments`.
+        # Perimeter folder ids of the membership-carrying assignments.
         membership_folder_ids = membership_role_assignments.values_list(
             "perimeter_folders__id", flat=True
         ).distinct()
@@ -1774,12 +1687,18 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return default_role_allowed_folder_ids
 
     @staticmethod
-    def _get_directly_allowed_folder_ids(
+    def _get_grant_folder_set(
         user: AbstractBaseUser | AnonymousUser,
         permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
-    ) -> AllowedFolderSet:
+    ) -> GrantFolderSet:
+        """
+        Return the `GrantFolderSet` of the `user` for the `permission` — the single
+        place where the two grant sources meet: explicit role assignments (split by
+        recursion kind) and the ambient default-role folders (merged into the
+        non-recursive bucket). Every access primitive consumes this.
+        """
         if not isinstance(user, User):
-            return AllowedFolderSet.none()
+            return GrantFolderSet.none()
 
         permission = RoleAssignment._resolve_permission(permission)
 
@@ -1787,43 +1706,98 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             user, permission
         )
 
-        flat_role_assignments = user_role_assignments.filter(is_recursive=False)
-        # A "flat" `RoleAssignment` is a non-recursive `RoleAssignment`.
+        non_recursive_role_assignments = user_role_assignments.filter(
+            is_recursive=False
+        )
         recursive_role_assignments = user_role_assignments.filter(is_recursive=True)
 
-        directly_accessible_folder_ids = user_role_assignments.values_list(
+        # Perimeters of the user's explicit assignments, split by kind.
+        non_recursive_assignment_folder_ids = (
+            non_recursive_role_assignments.values_list(
+                "perimeter_folders__id", flat=True
+            ).distinct()
+        )
+        recursive_grant_folder_ids = recursive_role_assignments.values_list(
             "perimeter_folders__id", flat=True
         ).distinct()
 
-        default_role_allowed_folder_ids = (
-            RoleAssignment._get_default_role_allowed_folder_ids(user, permission)
+        # The ambient grant source: folders whose default_role carries the permission.
+        default_role_folder_ids = RoleAssignment._get_default_role_allowed_folder_ids(
+            user, permission
         )
-        # Convert the materized `default_role_allowed_folder_ids` folder ID list to a queryset to avoid "parser stack overflow" SQL errors.
-        default_role_allowed_folder_ids_qs = Folder.objects.filter(
-            id__in=default_role_allowed_folder_ids
+        # Convert the materialized folder ID list back to a queryset to avoid
+        # "parser stack overflow" SQL errors on PostgreSQL.
+        default_role_folder_ids_qs = Folder.objects.filter(
+            id__in=default_role_folder_ids
         ).values_list("id", flat=True)
 
+        # Default roles are non-recursive by design, so the ambient folders join
+        # the non-recursive bucket, never the recursive one.
         # order_by() drops the default ordering Django 6.1 applies to unions.
-        all_directly_accessible_folder_ids = directly_accessible_folder_ids.union(
-            default_role_allowed_folder_ids_qs
+        non_recursive_grant_folder_ids = non_recursive_assignment_folder_ids.union(
+            default_role_folder_ids_qs
         ).order_by()
 
-        direct_flat_folder_ids = flat_role_assignments.values_list(
-            "perimeter_folders__id", flat=True
-        ).distinct()
-        all_direct_flat_folder_ids = direct_flat_folder_ids.union(
-            default_role_allowed_folder_ids_qs
-        ).order_by()
-
-        direct_recursive_folder_ids = recursive_role_assignments.values_list(
-            "perimeter_folders__id", flat=True
-        ).distinct()
-
-        return AllowedFolderSet(
-            directly_accessible_folder_ids=all_directly_accessible_folder_ids,
-            direct_flat_folder_ids=all_direct_flat_folder_ids,
-            direct_recursive_folder_ids=direct_recursive_folder_ids,
+        return GrantFolderSet(
+            non_recursive_grant_folder_ids=non_recursive_grant_folder_ids,
+            recursive_grant_folder_ids=recursive_grant_folder_ids,
         )
+
+    @staticmethod
+    def _get_effective_grant_rows(
+        principal: AbstractBaseUser | AnonymousUser | UserGroup,
+        permission: Permission | None = None,
+    ) -> QuerySet:
+        """
+        The effective-grant relation of a principal: one row per
+        (folder_id, codename, name, is_recursive) that a grant names — explicit
+        assignments at their perimeter folders (folder_id may be NULL for an
+        assignment with no perimeter, preserved for listing parity), and ambient
+        default roles at their folder (never recursive).
+
+        Unexpanded: recursive coverage is the consumer's job. Besides
+        `_get_grant_folder_set`, this is the only place where the two grant
+        sources meet; the permission listings are projections of it.
+
+        When `permission` is given, the relation is restricted to grants whose
+        role holds it — rows still list every codename of the matching roles,
+        so the filtered form is for existence checks, not for projection.
+        """
+        if isinstance(principal, User):
+            role_assignments = RoleAssignment.get_role_assignments_from_user(principal)
+        elif isinstance(principal, UserGroup):
+            role_assignments = RoleAssignment.objects.filter(user_group=principal)
+        else:
+            role_assignments = RoleAssignment.objects.none()
+
+        ambient_folders = Folder.objects.filter(
+            id__in=RoleAssignment._get_default_role_folder_ids(principal)
+        )
+
+        if permission is not None:
+            role_assignments = role_assignments.filter(role__permissions=permission)
+            ambient_folders = ambient_folders.filter(
+                default_role__permissions=permission
+            )
+
+        explicit_rows = role_assignments.values_list(
+            "perimeter_folders__id",
+            "role__permissions__codename",
+            "role__permissions__name",
+            "is_recursive",
+        )
+        ambient_rows = ambient_folders.annotate(
+            grant_is_recursive=Value(False, output_field=BooleanField())
+        ).values_list(
+            "id",
+            "default_role__permissions__codename",
+            "default_role__permissions__name",
+            "grant_is_recursive",
+        )
+
+        # `.order_by()` on both sides (SQLite rejects ORDER BY in the members)
+        # and on the union (Django 6.1 applies a default ordering to unions).
+        return explicit_rows.order_by().union(ambient_rows.order_by()).order_by()
 
     @staticmethod
     def get_allowed_folder_ids(
@@ -1863,16 +1837,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if not isinstance(user, User):
             return Folder.objects.none().values_list("id", flat=True)
 
-        allowed_folder_set = RoleAssignment._get_directly_allowed_folder_ids(
-            user, permission
-        )
-
-        directly_accessible_folder_ids = (
-            allowed_folder_set.directly_accessible_folder_ids
-        )
-
-        direct_flat_folder_ids = allowed_folder_set.direct_flat_folder_ids
-        direct_recursive_folder_ids = allowed_folder_set.direct_recursive_folder_ids
+        grant_folder_set = RoleAssignment._get_grant_folder_set(user, permission)
 
         focused_folder = Folder.get_focused_folder()
 
@@ -1900,30 +1865,31 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     # Which means their intersection is empty (so we return an empty queryset for it).
                     return Folder.objects.none().values_list("id", flat=True)
 
-        # Folder ID of the focused folder (when the user is in `Focus mode`)
+        covered_folders = Folder.objects.filter(
+            RoleAssignment._coverage_q(grant_folder_set)
+        )
+
         if effective_base_folder is not None:
-            is_focus_mode = focused_folder is not None
+            scope_q = RoleAssignment._scope_q(effective_base_folder)
+            if focused_folder is not None:
+                # In focus mode a covered root stays reachable even though it
+                # sits outside the focused subtree: hiding it would hide the
+                # global objects it scopes (#4470). Root has no ancestors, so
+                # OR-ing its id into the scope leaves coverage as the only
+                # condition it must still meet.
+                root_folder_id = Folder.get_root_folder_id()
+                if root_folder_id is not None:
+                    scope_q |= Q(id=root_folder_id)
+            covered_folders = covered_folders.filter(scope_q)
 
-            return RoleAssignment._filter_accessible_folder_ids_by_base_folder(
-                effective_base_folder,
-                is_focus_mode,
-                direct_flat_folder_ids,
-                direct_recursive_folder_ids,
-            )
-
-        indirectly_accessible_folders = Folder.objects.filter(
-            ancestors__in=direct_recursive_folder_ids
+        return (
+            covered_folders.values_list("id", flat=True)
+            # The ancestors joins can duplicate rows; consumers expect a set.
+            .distinct()
+            # order_by() clears the model's default ordering, which would
+            # reference a column absent from the selected values in subqueries.
+            .order_by()
         )
-        indirectly_accessible_folder_ids = indirectly_accessible_folders.values_list(
-            "id", flat=True
-        )
-
-        # order_by() drops the default ordering Django 6.1 applies to unions:
-        # it would reference a column absent from the selected values.
-        accessible_folder_ids = directly_accessible_folder_ids.union(
-            indirectly_accessible_folder_ids
-        ).order_by()
-        return accessible_folder_ids
 
     @staticmethod
     def _get_actor_accessible_ids_by_perm(
@@ -2147,27 +2113,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         Or return `False` otherwise.
         """
-        if isinstance(principal, User):
-            user = principal
-            role_assignments = RoleAssignment.get_role_assignments_from_user(user)
-        elif isinstance(principal, UserGroup):
-            user_group = principal
-            role_assignments = RoleAssignment.objects.filter(user_group=user_group)
-        else:
+        if not isinstance(principal, (User, UserGroup)):
             return False
 
         permission = Permission.objects.get(codename=codename)
-
-        permission_role_assignments = role_assignments.filter(
-            role__permissions=permission
-        )
-        if permission_role_assignments.exists():
-            return True
-
-        default_role_allowed_folder_ids = (
-            RoleAssignment._get_default_role_allowed_folder_ids(principal, permission)
-        )
-        return len(default_role_allowed_folder_ids) > 0
+        return RoleAssignment._get_effective_grant_rows(principal, permission).exists()
 
     @staticmethod
     def get_permissions(
@@ -2179,48 +2129,16 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Returns: {codename: {"str": Permission.name}}
         """
 
-        if isinstance(principal, User):
-            user = principal
-
-            role_assigments = RoleAssignment.get_role_assignments_from_user(user)
-            perm_name_pairs = role_assigments.values_list(
-                "role__permissions__codename", "role__permissions__name"
-            ).distinct()
-
-        elif isinstance(principal, UserGroup):
-            user_group = principal
-            role_assigments = RoleAssignment.objects.filter(user_group=user_group)
-            perm_name_pairs = role_assigments.values_list(
-                "role__permissions__codename", "role__permissions__name"
-            ).distinct()
-        else:
+        if not isinstance(principal, (User, UserGroup)):
             return {}
 
-        default_role_source_folder_ids = RoleAssignment._get_default_role_folder_ids(
-            principal
-        )
-        default_role_perm_name_pairs = (
-            Folder.objects.filter(id__in=default_role_source_folder_ids)
-            .values_list(
-                "default_role__permissions__codename",
-                "default_role__permissions__name",
-            )
-            .distinct()
-            .order_by()
-        )
-
-        # We add `.order_by()` at the end of these `QuerySet` as SQLite doesn't support `ORDER BY` clauses in subqueries,
-        # and on the union itself to drop the default ordering Django 6.1 applies to unions.
-        perm_name_pairs = (
-            perm_name_pairs.order_by().union(default_role_perm_name_pairs).order_by()
-        )
-
         return {
-            perm_codename: {"str": perm_name}
-            for perm_codename, perm_name in perm_name_pairs
-            # `perm_codename` can be `None` if a `Role` has no permission (`role.permissions.count() == 0`).
-            # In such case `"role__permissions__codename"` would return `None`.
-            if perm_codename is not None
+            codename: {"str": name}
+            for _folder_id, codename, name, _is_recursive in (
+                RoleAssignment._get_effective_grant_rows(principal)
+            )
+            # `codename` can be `None` for a `Role` with no permission.
+            if codename is not None
         }
 
     @classmethod
@@ -2237,45 +2155,36 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Returns: dict[str(folder_id)] -> set[codename]
         """
 
-        if isinstance(principal, User):
-            user = principal
-            role_assignments = RoleAssignment.get_role_assignments_from_user(user)
-        elif isinstance(principal, UserGroup):
-            user_group = principal
-            role_assignments = RoleAssignment.objects.filter(user_group=user_group)
-        else:
+        if not isinstance(principal, (User, UserGroup)):
             return {}
 
-        folder_id_to_codenames: dict[str, set[str]] = defaultdict(set)
-
-        # Execute `O(N)` queries (with `N` being the sum of `perimeter_folders`).
-        # That's "fine" as a `User`/`UserGroup` never have a big quantity of RoleAssigment)
-        # And `RoleAssigment` never even have multiple folders in `perimeter_folders`.
-        for role_assignment in role_assignments:
-            codenames = role_assignment.role.permissions.values_list(
-                "codename", flat=True
+        rows = [
+            (folder_id, codename, row_is_recursive)
+            for folder_id, codename, _name, row_is_recursive in (
+                RoleAssignment._get_effective_grant_rows(principal)
             )
+            if folder_id is not None and codename is not None
+        ]
 
-            for perimeter_folder in role_assignment.perimeter_folders.all():
-                folders = [perimeter_folder]
-                if role_assignment.is_recursive and is_recursive:
-                    folders = itertools.chain(
-                        folders, perimeter_folder.descendants.all()
-                    )
+        folder_id_to_codenames: dict[str, set[str]] = defaultdict(set)
+        for folder_id, codename, _row_is_recursive in rows:
+            folder_id_to_codenames[str(folder_id)].add(codename)
 
-                for folder in folders:
-                    folder_id_to_codenames[str(folder.id)].update(codenames)
-
-        default_role_source_folder_ids = RoleAssignment._get_default_role_folder_ids(
-            principal
-        )
-        default_role_folder_queryset = Folder.objects.filter(
-            id__in=default_role_source_folder_ids
-        ).values_list("id", "default_role__permissions__codename")
-
-        for folder_id, codename in default_role_folder_queryset:
-            if codename is not None:
-                folder_id_to_codenames[str(folder_id)].add(codename)
+        if is_recursive:
+            recursive_folder_ids = {
+                folder_id
+                for folder_id, _c, row_is_recursive in rows
+                if row_is_recursive
+            }
+            descendants_map: dict = defaultdict(set)
+            for from_id, to_id in Folder.descendants.through.objects.filter(
+                from_folder_id__in=recursive_folder_ids
+            ).values_list("from_folder_id", "to_folder_id"):
+                descendants_map[from_id].add(to_id)
+            for folder_id, codename, row_is_recursive in rows:
+                if row_is_recursive:
+                    for descendant_id in descendants_map.get(folder_id, ()):
+                        folder_id_to_codenames[str(descendant_id)].add(codename)
 
         return folder_id_to_codenames
 

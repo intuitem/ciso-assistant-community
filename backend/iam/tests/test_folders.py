@@ -314,42 +314,43 @@ class TestFolderDefaultRole:
     - Then the `USER` `User` will have the `"view_appliedcontrol"` permission on `A` (and will therefore be able to view all the `AppliedControl` objects in the `A` folder).
     """
 
-    NOT_CALLED = "The `RoleAssignment._get_default_role_allowed_folder_ids` function MUST be called by the above function, as it's the safe way for IAM functions to get the accessible folder IDs from a default_role."
+    NOT_CALLED = "The `RoleAssignment._get_default_role_folder_ids` function MUST be called by the above function, as it's the safe way for IAM functions to get the accessible folder IDs from a default_role."
 
     CALL_COUNT = 0
     """Count how much time the `RoleAssignment._get_default_role_allowed_folder_ids` function has been called."""
 
     @pytest.fixture(autouse=True)
     def _monkeypatch_default_role(self):
-        """Monkeypatch `RoleAssignment._get_default_role_allowed_folder_ids` to track calls during test."""
-        _get_default_role_allowed_folder_ids_original = (
-            RoleAssignment._get_default_role_allowed_folder_ids
+        """Monkeypatch `RoleAssignment._get_default_role_folder_ids` — the audience
+        evaluator both ambient paths (`_get_grant_folder_set` and the effective-grant
+        relation) go through — to track that IAM entry points consult it."""
+        _get_default_role_folder_ids_original = (
+            RoleAssignment._get_default_role_folder_ids
         )
 
-        def _get_default_role_allowed_folder_ids_wrapper(*args, **kwargs):
+        def _get_default_role_folder_ids_wrapper(*args, **kwargs):
             TestFolderDefaultRole.CALL_COUNT += 1
-            return _get_default_role_allowed_folder_ids_original(*args, **kwargs)
+            return _get_default_role_folder_ids_original(*args, **kwargs)
 
-        # Monkeypatch `RoleAssignment._get_default_role_allowed_folder_ids` to increment `CALL_COUNT` each time it's called.
-        RoleAssignment._get_default_role_allowed_folder_ids = (
-            _get_default_role_allowed_folder_ids_wrapper
+        RoleAssignment._get_default_role_folder_ids = (
+            _get_default_role_folder_ids_wrapper
         )
 
         yield
 
         # Restore the original method
-        RoleAssignment._get_default_role_allowed_folder_ids = (
-            _get_default_role_allowed_folder_ids_original
+        RoleAssignment._get_default_role_folder_ids = (
+            _get_default_role_folder_ids_original
         )
 
     @staticmethod
     def _test_and_reset_call_count() -> bool:
-        """Return `true` if the `RoleAssignment._get_default_role_allowed_folder_ids` was called (and reset the `CALL_COUNT` after)."""
+        """Return `true` if the `RoleAssignment._get_default_role_folder_ids` was called (and reset the `CALL_COUNT` after)."""
         call_count = TestFolderDefaultRole.CALL_COUNT
         TestFolderDefaultRole.CALL_COUNT = 0
 
         assert call_count > 0, (
-            "The `RoleAssignment._get_default_role_allowed_folder_ids` function MUST be called by the above function, as it's the safe way for IAM functions to get the accessible folder IDs from a default_role."
+            "The `RoleAssignment._get_default_role_folder_ids` function MUST be called by the above function, as it's the safe way for IAM functions to get the accessible folder IDs from a default_role."
         )
 
     @dataclass(frozen=True)
@@ -438,12 +439,10 @@ class TestFolderDefaultRole:
             root_folder.default_role = original_root_default_role
             root_folder.save()
 
-    def test_get_directly_allowed_folder_ids(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that _get_directly_allowed_folder_ids calls _get_default_role_allowed_folder_ids."""
+    def test_get_grant_folder_set(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that _get_grant_folder_set calls _get_default_role_allowed_folder_ids."""
 
-        RoleAssignment._get_directly_allowed_folder_ids(
-            ctx.user, ctx.default_role_permission
-        )
+        RoleAssignment._get_grant_folder_set(ctx.user, ctx.default_role_permission)
         self._test_and_reset_call_count()
 
     def test_has_permission_anywhere(self, ctx: TestFolderDefaultRole.UserInfo):

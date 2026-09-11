@@ -1848,6 +1848,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_role",
     "delete_role",
     "view_permission",
+    "view_roleassignment",
     # integrations
     "add_integrationconfiguration",
     "view_integrationconfiguration",

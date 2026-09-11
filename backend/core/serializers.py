@@ -2788,6 +2788,12 @@ class PermissionWriteSerializer(BaseModelSerializer):
 
 
 class RoleAssignmentReadSerializer(BaseModelSerializer):
+    user = FieldsRelatedField()
+    user_group = FieldsRelatedField()
+    role = FieldsRelatedField()
+    perimeter_folders = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+
     class Meta:
         model = RoleAssignment
         fields = "__all__"
