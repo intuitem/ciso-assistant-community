@@ -708,3 +708,210 @@ def test_only_the_requester_owns_the_content(app_config):
     # And the admin's own view of the request says the content is not theirs to touch.
     content = admin.get(f"{url}content/").json()
     assert content["can_edit_answers"] is False
+
+
+@pytest.mark.django_db
+def test_release_does_not_make_the_reviewer_the_requester(app_config):
+    """`in_review -> submitted` puts a claimed request back on the queue. It is not a
+    submission: recording the reviewer as `submitted_by` would bar them from ever
+    deciding it, because separation of duties reads exactly that field."""
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-release", parent_folder=Folder.get_root_folder()
+    )
+    requester, _ = _role_client("qf-rel-asker@test.local", "BI-RL-ANA", folder)
+    reviewer, reviewer_client = _role_client(
+        "qf-rel-rev@test.local", "BI-RL-ANA", folder
+    )
+    response = QuickFormResponse.objects.create(
+        name="released",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.SUBMITTED,
+        submitted_by=requester,
+    )
+    submitted_at = response.submitted_at
+    url = f"/api/quick-form-responses/{response.id}/set-status/"
+
+    assert (
+        reviewer_client.post(url, {"status": "in_review"}, format="json").status_code
+        == 200
+    )
+    assert (
+        reviewer_client.post(url, {"status": "submitted"}, format="json").status_code
+        == 200
+    )
+
+    response.refresh_from_db()
+    assert response.submitted_by_id == requester.id, "release must not steal authorship"
+    assert response.submitted_at == submitted_at, "release must not restamp submission"
+
+    # And the reviewer can still decide the request they just released.
+    res = reviewer_client.post(
+        url, {"status": "closed", "resolution": "accepted"}, format="json"
+    )
+    assert res.status_code == 200, res.json()
+
+
+@pytest.mark.django_db
+def test_reviewer_cannot_drop_or_auto_close(app_config):
+    """`drop` is the requester's word and `auto` means nobody decided."""
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-res", parent_folder=Folder.get_root_folder()
+    )
+    author, _ = _role_client("qf-res-asker@test.local", "BI-RL-ANA", folder)
+    _, reviewer = _role_client("qf-res-rev@test.local", "BI-RL-ANA", folder)
+    response = QuickFormResponse.objects.create(
+        name="resolutions",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.SUBMITTED,
+        submitted_by=author,
+    )
+    url = f"/api/quick-form-responses/{response.id}/set-status/"
+    for refused in ("dropped", "auto"):
+        res = reviewer.post(
+            url, {"status": "closed", "resolution": refused}, format="json"
+        )
+        assert res.status_code == 400, f"{refused} should not be a reviewer's to set"
+    assert (
+        reviewer.post(
+            url, {"status": "closed", "resolution": "rejected"}, format="json"
+        ).status_code
+        == 200
+    )
+
+
+@pytest.mark.django_db
+def test_a_closed_request_cannot_gain_attachments(app_config):
+    """Attaching re-scores the response, which moves the outcome the decision rested on."""
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-closed-att", parent_folder=Folder.get_root_folder()
+    )
+    author, _ = _role_client("qf-att-asker@test.local", "BI-RL-ANA", folder)
+    _, reviewer = _role_client("qf-att-rev@test.local", "BI-RL-ANA", folder)
+    response = QuickFormResponse.objects.create(
+        name="decided",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.CLOSED,
+        resolution=QuickFormResponse.Resolution.ACCEPTED,
+        submitted_by=author,
+    )
+    res = reviewer.post(
+        f"/api/quick-form-responses/{response.id}/attachments/",
+        {"question": Q_COMMENT},
+        format="multipart",
+    )
+    assert res.status_code == 400, res.json()
+    assert res.json()["error"] == "responseClosed"
+
+
+SCORING_LIBRARY = """
+urn: urn:test:risk:library:score-parity
+locale: en
+ref_id: score-parity
+name: Score parity
+description: Mean scoring across scorable and non-scorable questions
+copyright: Test
+version: 1
+publication_date: 2026-09-11
+provider: test-provider
+packager: test
+objects:
+  quick_forms:
+    - urn: urn:test:risk:quick_form:score-parity
+      ref_id: score-parity
+      name: Score parity
+      description: Two scorable questions and two that carry no score
+      scores_definition:
+        min: 0
+        max: 100
+        aggregation: mean
+      pages:
+        - urn: urn:test:risk:qf_page:score-parity:only
+          ref_id: only
+          name: Only page
+          order: 1
+          questions:
+            urn:test:risk:qf_page:score-parity:only:question:a:
+              type: unique_choice
+              text: A
+              order: 1
+              choices:
+                - urn: urn:test:risk:qf_page:score-parity:only:question:a:choice:1
+                  value: five
+                  add_score: 5
+            urn:test:risk:qf_page:score-parity:only:question:b:
+              type: unique_choice
+              text: B
+              order: 2
+              choices:
+                - urn: urn:test:risk:qf_page:score-parity:only:question:b:choice:1
+                  value: five
+                  add_score: 5
+            urn:test:risk:qf_page:score-parity:only:question:c:
+              type: text
+              text: C
+              order: 3
+            urn:test:risk:qf_page:score-parity:only:question:d:
+              type: text
+              text: D
+              order: 4
+"""
+
+
+@pytest.mark.django_db
+def test_preview_score_matches_the_persisted_score(app_config):
+    """The preview divided a mean by every visible question; the live path divides by
+    the weight of the ones that actually scored. Two scorable questions worth 5 each,
+    plus two text questions, must read 5 on both paths — not 3 on one of them."""
+    from core.cel_service import evaluate_quick_form, evaluate_quick_form_document
+    from core.utils import apply_answers_dict
+
+    # Not `_load`: that helper returns the DPIA fixture's form by a fixed urn.
+    stored, error = StoredLibrary.store_library_content(SCORING_LIBRARY.encode("utf-8"))
+    assert error is None, error
+    assert stored.load() is None
+    form = QuickForm.objects.get(urn="urn:test:risk:quick_form:score-parity")
+    folder = Folder.objects.create(
+        name="qf-score", parent_folder=Folder.get_root_folder()
+    )
+    response = QuickFormResponse.objects.create(
+        name="scored", quick_form=form, folder=folder
+    )
+    base = "urn:test:risk:qf_page:score-parity:only:question"
+    answers = {
+        f"{base}:a": f"{base}:a:choice:1",
+        f"{base}:b": f"{base}:b:choice:1",
+        f"{base}:c": "free text",
+        f"{base}:d": "more free text",
+    }
+    questions = {q.urn: q for q in Question.objects.filter(page__quick_form=form)}
+    apply_answers_dict("response", response, questions, answers)
+
+    live = evaluate_quick_form(response, persist=False)["score"]
+    preview = evaluate_quick_form_document(
+        {
+            "urn": form.urn,
+            "scores_definition": form.scores_definition,
+            "pages": [
+                {
+                    "urn": p.urn,
+                    "ref_id": p.ref_id,
+                    "name": p.name,
+                    "order": p.order,
+                    "questions": p.get_questions_translated() or {},
+                }
+                for p in form.pages.all().order_by("order")
+            ],
+        },
+        answers,
+    )["score"]
+    assert live == preview, f"preview {preview} disagrees with live {live}"
+    assert live == 5, f"mean of two 5s is 5, got {live}"

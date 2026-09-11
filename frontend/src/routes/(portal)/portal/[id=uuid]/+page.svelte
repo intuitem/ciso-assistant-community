@@ -91,9 +91,8 @@
 		}
 	}
 
-	// A tile wired to a publication takes its domain from that publication, so asking
-	// the clicker for one is both meaningless and a hard block: the audience is
-	// authorised without folder rights, so their domain picker is typically empty.
+	// A publication carries its own domain, and its audience holds no folder rights —
+	// asking them to pick one is a hard block.
 	const needsDomain = (item: PortalItem) => !item.target.publication && !item.target.folder;
 
 	function openLaunchModal(item: PortalItem) {

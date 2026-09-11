@@ -41,12 +41,10 @@
 		onUpload: (item: Item, e: Event) => void;
 	} = $props();
 
-	// Both pickers bind to a SuperForm field; a tile is plain state, so back it with an
-	// SPA form per tile and mirror the values back out. Seeded once — the each block is
-	// keyed on the item, so an instance stays with the tile it was built from.
-	// Both are optional by design: an empty domain means the clicker picks one, and no
-	// reviewer means the requester reviews their own. A required schema would mark them
-	// with an asterisk and, for reviewers, impose minSelect: 1.
+	// Both pickers need a SuperForm field; a tile is plain state. Seeded once — the
+	// each block is keyed on the item, so an instance stays with its tile.
+	// Optional by design: empty domain means the clicker picks, no reviewer means the
+	// requester reviews their own. Required would also impose minSelect: 1.
 	const tileSchema = z.object({
 		folder: z.string().optional(),
 		reviewers: z.array(z.string()).optional()
@@ -67,14 +65,11 @@
 		}
 	);
 
-	// The whole actor list is already fetched once by the page loader, and this editor
-	// renders per tile — an optionsEndpoint here would be one /actors round-trip per tile.
+	// Static options: the loader already fetched every actor, and this renders per tile.
 	const actorOptions = $derived(
 		(ctx.actors ?? []).map((a: any) => ({
 			label: a.name,
 			value: a.id,
-			// A team named "Security" and a person named "Security" are different
-			// reviewers; the picker has to say which one you just chose.
 			infoString: a.type
 				? {
 						string: safeTranslate(a.type),

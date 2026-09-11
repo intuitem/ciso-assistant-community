@@ -1,12 +1,7 @@
 """Uploading files against an answer, and promoting them to evidence.
 
-The two acts are deliberately separate. Uploading is done by whoever answers the
-question — a requester on a quick form, an auditee on an audit — and those people
-normally hold no permission on the folder the answer lives in. Promotion creates an
-`Evidence`, which is governed and folder-scoped, and is therefore a reviewer's act.
-
-Shared by every surface so the rules cannot drift: the callers differ only in how
-they establish that this person may touch this answer.
+Uploading is the answerer's act, promotion the reviewer's: the second creates a governed,
+folder-scoped `Evidence` and the first must not require folder rights.
 """
 
 import hashlib
@@ -16,8 +11,7 @@ from django.db import transaction
 
 from core.models import Answer, AnswerAttachment, Evidence, EvidenceRevision, Question
 
-#: Refused outright. Everything an office worker attaches is fine; executables are
-#: not, and a content sniff is cheap insurance against a renamed extension.
+#: Extension and magic are both checked — a renamed .exe is still an .exe.
 BLOCKED_EXTENSIONS = {
     ".exe",
     ".dll",
@@ -105,12 +99,8 @@ def add_attachment(answer, upload, user):
 
 
 def promote_to_evidence(attachment, user):
-    """Turn an attachment into an `Evidence` with its first revision.
-
-    Idempotent: an attachment already promoted returns its evidence rather than
-    making a second one. On the audit side the new evidence is also linked to the
-    requirement assessment, which is where an auditor expects to find it.
-    """
+    """Attachment -> Evidence, idempotent. On the audit side it also lands on the
+    requirement assessment."""
     if attachment.promoted_to_id:
         return attachment.promoted_to, False
 
@@ -153,12 +143,8 @@ def promote_to_evidence(attachment, user):
 
 
 def answer_for_upload(response, question_urn):
-    """The Answer row a file attaches to, created on demand.
-
-    Answer rows are written lazily, only when a value is submitted, so a question whose
-    only answer *is* a file has no row for the upload to hang off. Attaching is
-    answering, so create it here rather than refusing.
-    """
+    """The Answer row a file attaches to. Created on demand: a file question has no
+    value, so nothing else would have made one."""
     question = Question.objects.filter(
         page__quick_form_id=response.quick_form_id, urn=question_urn
     ).first()
@@ -186,10 +172,8 @@ def serialize(attachment):
     }
 
 
-#: Types a browser may render in-tab without handing the uploader script execution in
-#: the reviewer's origin. Everything else downloads. Deliberately excludes SVG and any
-#: HTML/XML flavour: both execute script, and the person who uploaded the file is by
-#: construction less trusted than the reviewer who opens it.
+#: Safe to render in-tab. Excludes SVG and HTML/XML: both execute script, and the
+#: uploader is less trusted than the reviewer who opens it.
 INLINE_SAFE_TYPES = {
     "application/pdf",
     "image/png",
@@ -219,14 +203,8 @@ def _safe_filename_header(disposition, filename):
 
 
 def serve(attachment):
-    """Stream one attachment back.
-
-    The stored `mime_type` came from the uploading client and is not evidence of
-    anything, so the type is re-derived from the extension and then allowlisted: a type
-    we are not prepared to render becomes an octet-stream download. `nosniff` stops the
-    browser second-guessing that, and the sandbox CSP neuters active content even
-    inside the formats we do render.
-    """
+    """Stream one attachment back. The stored `mime_type` is the client's claim, so the
+    type is re-derived and allowlisted; anything else downloads."""
     import mimetypes
 
     from django.http import FileResponse

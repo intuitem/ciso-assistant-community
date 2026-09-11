@@ -2,9 +2,8 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-// Streams one answer attachment back to the browser. The reviewer surface is tried
-// first and the requester's own is the fallback, exactly as the page itself does:
-// someone who filed a request holds no folder rights on it.
+// Reviewer surface first, requester's own as fallback: a requester holds no folder
+// rights on their own request.
 export const GET: RequestHandler = async ({ fetch, params, locals }) => {
 	// +server.ts handlers do not run the parent layout's load, so this route carries its
 	// own session check rather than inheriting one.
@@ -17,9 +16,7 @@ export const GET: RequestHandler = async ({ fetch, params, locals }) => {
 	for (const path of paths) {
 		const res = await fetch(path);
 		if (res.ok) {
-			// Pass the body through untouched; only the headers that describe it travel.
-			// Forwarded verbatim, including the headers that stop an uploaded file from
-			// executing in this origin — dropping them here would undo the backend's work.
+			// Forwarded verbatim, including the headers that stop the file executing here.
 			const headers = new Headers();
 			for (const h of [
 				'content-type',

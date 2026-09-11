@@ -71,7 +71,6 @@
 		if (current.includes(option.id)) next = current.filter((id) => id !== option.id);
 		else next = multiple ? [...current, option.id] : [option.id];
 		internalAnswers[urn] = next;
-		// Keep the label visible immediately; the server resends it on the next load.
 		const known = [...(references[urn] ?? []), ...(refResults[urn] ?? [])];
 		references[urn] = next.map(
 			(id) => known.find((o) => o.id === id) ?? { id, label: id, folder: null }
@@ -140,13 +139,10 @@
 		onChange(urn, internalAnswers[urn]);
 	}
 
-	// Leaving the field commits it. The check/cross buttons stay for anyone who wants
-	// them, but nothing typed is lost by clicking elsewhere — which is what every
-	// surface using this component tells the respondent.
+	// Leaving the field commits it; the check/cross buttons stay as a shortcut.
 	function commitOnBlur(urn: string, event: FocusEvent) {
 		const next = event.relatedTarget as HTMLElement | null;
-		// Clicking the revert button blurs the field first; committing here would save
-		// the very text that button exists to discard.
+		// Revert blurs the field first; committing would save what it exists to discard.
 		if (next?.dataset?.answerAction === 'revert') return;
 		if (questionBuffers[urn] !== (internalAnswers[urn] ?? '')) saveTextAnswer(urn);
 	}
@@ -179,12 +175,8 @@
 						{#if question.required === false}
 							<span class="text-xs font-normal text-surface-400">{m.optional()}</span>
 						{:else}
-							<!-- Mandatory is the norm here, so the marker has to be findable at a
-							     glance rather than inferred from the absence of a note. -->
 							<span class="text-sm font-bold text-error-500" title={m.required()}>*</span>
 						{/if}
-						<!-- The widget already says what it is; the type belongs as a quiet aside,
-						     not as half the label. -->
 						<span class="text-[11px] font-normal uppercase tracking-wide text-surface-400"
 							>{safeTranslate(question.type)}</span
 						>

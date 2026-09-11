@@ -1,23 +1,9 @@
-"""Questions that point at an object already in the platform.
-
-A derogation that does not say what it derogates from produces an exception attached to
-nothing. The reverse `security_exceptions` relation lives on AppliedControl,
-RequirementAssessment, Asset, RiskScenario and Vulnerability, so the form has to capture
-which one — and it has to capture it as an id, not as prose a reviewer retypes.
-
-The hard part is authorisation. A requester filing through a publication holds no role on
-the domain their request lands in, so the ordinary autocomplete endpoints are closed to
-them. Options are therefore served from a narrow, deliberate surface: only the model the
-author's question names, only within the folder the request lands in and its ancestors.
-Asking the question is what discloses the list; nothing else widens.
-"""
+"""Questions that point at an object already in the platform."""
 
 from django.apps import apps
 from django.db.models import Q
 
-#: What a question may point at. Deliberately short: every entry is something a
-#: SecurityException can hang off, plus the two scoping objects a framing request needs.
-#: Adding a model here widens what a requester can enumerate, so it is a decision.
+#: Widening this widens what a requester may enumerate.
 REFERENCEABLE = {
     "applied_control": {"model": "core.AppliedControl", "label": "name"},
     "asset": {"model": "core.Asset", "label": "name"},
@@ -29,7 +15,12 @@ REFERENCEABLE = {
 
 
 class ReferenceError_(Exception):
-    """Raised for a question whose config names something we will not resolve."""
+    """`code` goes in the response, `detail` in the log — never exception text."""
+
+    def __init__(self, code: str, detail: str = ""):
+        self.code = code
+        self.detail = detail
+        super().__init__(detail or code)
 
 
 def config_for(question):
@@ -37,22 +28,14 @@ def config_for(question):
     key = config.get("model")
     entry = REFERENCEABLE.get(key)
     if entry is None:
-        raise ReferenceError_(f"unknown reference model '{key}'")
+        raise ReferenceError_(
+            "unknownReferenceModel", f"unknown reference model '{key}'"
+        )
     return key, entry, bool(config.get("multiple"))
 
 
 def _queryset(entry, folder, user=None):
-    """Objects this caller may point at from a request in `folder`.
-
-    Two rules, and the second one matters more than it looks. The folder chain bounds
-    the answer to things the request could plausibly concern. The caller's own view
-    permission then bounds it to things they were already entitled to see — without
-    that, asking a question would hand a requester the names of every object in every
-    ancestor folder up to the root, which is a disclosure the author never made.
-
-    The request's own folder is always included: whatever lives there belongs to the
-    request, and a personal space would otherwise offer nothing at all.
-    """
+    """Bounded by the folder chain and by what the caller may already view."""
     from iam.models import RoleAssignment
 
     model = apps.get_model(entry["model"])
@@ -85,16 +68,16 @@ def _row(obj, label_field):
 
 
 def validate_ids(question, folder, ids, user=None):
-    """Every id must name an object of the configured model within reach of the request.
-
-    Without this an answer is an arbitrary UUID, and the label lookup that renders it
-    would happily read back rows the requester was never entitled to see.
-    """
+    """Reject ids the caller could not have been offered."""
     key, entry, multiple = config_for(question)
     if not isinstance(ids, list) or any(not isinstance(i, str) for i in ids):
-        raise ReferenceError_("object references must be a list of ids")
+        raise ReferenceError_(
+            "referenceMustBeListOfIds", "object references must be a list of ids"
+        )
     if not multiple and len(ids) > 1:
-        raise ReferenceError_("this question accepts a single object")
+        raise ReferenceError_(
+            "onlyOneObjectAllowed", "this question accepts a single object"
+        )
     if not ids:
         return []
     found = set(
@@ -105,13 +88,14 @@ def validate_ids(question, folder, ids, user=None):
     )
     unknown = [i for i in ids if i not in found]
     if unknown:
-        raise ReferenceError_(f"unreachable object reference: {unknown[0]}")
+        raise ReferenceError_(
+            "unreachableObjectReference", f"unreachable object reference: {unknown[0]}"
+        )
     return ids
 
 
 def labels_for(question, folder, ids, user=None):
-    """Resolve stored ids back to something a human reads. Scoped the same way as the
-    options, so a stale id that has since moved out of reach simply stops resolving."""
+    """Ids back to labels, scoped like the options: an out-of-reach id stops resolving."""
     if not ids:
         return []
     _key, entry, _multiple = config_for(question)

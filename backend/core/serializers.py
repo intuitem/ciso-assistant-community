@@ -4218,7 +4218,10 @@ class AnswerWriteSerializer(BaseModelSerializer):
                         user=getattr(request, "user", None),
                     )
                 except ReferenceError_ as e:
-                    raise serializers.ValidationError({"value": str(e)})
+                    # The code, not the exception text: the response is translatable and
+                    # carries nothing the caller did not already send.
+                    logger.warning("Rejected object reference", error=e)
+                    raise serializers.ValidationError({"value": e.code})
             elif q_type == Question.Type.BOOLEAN:
                 if value is not None and not isinstance(value, bool):
                     raise serializers.ValidationError(
@@ -4943,6 +4946,11 @@ class ProducedFromMixin(serializers.Serializer):
 class SecurityExceptionReadSerializer(
     ProducedFromMixin, CustomFieldsSerializerMixin, BaseModelSerializer
 ):
+    # Two bases declare FLAGGED_FIELDS and the MRO picks a winner silently. Stating it
+    # here means a future change to the base order cannot quietly drop custom-field
+    # flagging on this serializer.
+    FLAGGED_FIELDS = CustomFieldsSerializerMixin.FLAGGED_FIELDS
+
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     owners = FieldsRelatedField(many=True)

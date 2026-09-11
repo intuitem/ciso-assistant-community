@@ -370,12 +370,23 @@ class PortalViewSet(CustomPortalsViewSet):
         # respondent is the caller, the reviewers come from the author-configured
         # tile, so the check has nothing to protect here.
         clicker = Actor.objects.filter(user=request.user, entity__isnull=True).first()
+        with transaction.atomic():
+            return self._launch_or_resume(request, item, target, folder, clicker)
+
+    def _launch_or_resume(self, request, item, target, folder, clicker):
+        """The draft check and the create, under one transaction so the lock holds
+        across both."""
 
         # Many submitted requests are the point of a self-service tile; many
         # simultaneous half-filled drafts of the same form by the same person are
         # not. Answers autosave, so an unfinished response is a draft to return to
         # rather than something to start over — hand the requester theirs back.
         if clicker is not None and not target.get("allow_multiple_drafts"):
+            # Serialised on the clicker's own Actor row and held until the create
+            # commits: otherwise a double click has both requests find no draft and
+            # make one each, and `respondents` being an M2M means no unique constraint
+            # can catch it afterwards.
+            Actor.objects.select_for_update().filter(pk=clicker.pk).first()
             draft = (
                 QuickFormResponse.objects.filter(
                     quick_form_id=quick_form_id,
@@ -412,15 +423,14 @@ class PortalViewSet(CustomPortalsViewSet):
             id__in=target.get("reviewers") or [], entity__isnull=True
         )
 
-        with transaction.atomic():
-            response_object = serializer.save()
-            if clicker is not None:
-                # How the requester finds their own request again (`?mine=true`).
-                response_object.respondents.set([clicker])
-            if reviewers:
-                # Overrides the serializer default, which is the creator — on a
-                # self-service tile that is the requester reviewing themselves.
-                response_object.reviewers.set(reviewers)
+        response_object = serializer.save()
+        if clicker is not None:
+            # How the requester finds their own request again (`?mine=true`).
+            response_object.respondents.set([clicker])
+        if reviewers:
+            # Overrides the serializer default, which is the creator — on a
+            # self-service tile that is the requester reviewing themselves.
+            response_object.reviewers.set(reviewers)
 
         return Response(
             {

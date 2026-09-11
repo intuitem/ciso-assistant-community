@@ -42,11 +42,9 @@
 	async function evaluate() {
 		busy = true;
 		try {
-			const res = await fetch('?/evaluate', {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ urn: data.quickFormUrn ?? null, answers })
-			});
+			const body = new FormData();
+			body.append('payload', JSON.stringify({ answers }));
+			const res = await fetch('?/evaluate', { method: 'POST', body });
 			const result: any = deserialize(await res.text());
 			if (result.type === 'success' && result.data) view = result.data;
 		} finally {
@@ -54,9 +52,11 @@
 		}
 	}
 
-	// The shared renderer hands back the whole answers map for its page.
-	function onQuestionChange(_field: string, value: Record<string, unknown>) {
-		answers = { ...answers, ...(value ?? {}) };
+	// The renderer hands back one answer at a time — `(urn, value)`, not a map. Spreading
+	// it merged array indices into the answers object, so the payload never carried a
+	// single valid question urn and the rail sat at zero.
+	function onQuestionChange(urn: string, value: unknown) {
+		answers = { ...answers, [urn]: value };
 		evaluate();
 	}
 

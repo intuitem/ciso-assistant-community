@@ -66,10 +66,8 @@
 	</div>
 
 	<div class="space-y-3 pl-6">
-		<!-- Keyed on the item object so reordering moves the editor with its tile;
-		     unkeyed, instances keep their index and the per-tile form state built
-		     from `item` would land on a neighbour. Item ids are optional, the
-		     object reference is not. -->
+		<!-- Keyed on the object: ids are optional, and unkeyed the per-tile form state
+		     would land on a neighbour when reordering. -->
 		{#each section.items as item, ii (item)}
 			<TileEditor
 				{item}

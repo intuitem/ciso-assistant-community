@@ -711,8 +711,6 @@
 														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
 																{#if key === 'produced_from'}
-																	<!-- Each entry names its own model, so the route is derived per
-																	     entry rather than from a single urlModel on the field. -->
 																	{@const producedUrlModel = urlModelForDjangoName(val.model)}
 																	{#if producedUrlModel}
 																		<Anchor

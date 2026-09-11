@@ -2,12 +2,8 @@ import { m } from '$paraglide/messages';
 
 type Tile = { kind: string; target?: Record<string, any> };
 
-/**
- * What a tile needs before anyone can click it. `required` on the editor's selects is
- * decorative — the design is saved as a JSON payload, never as a native form submit —
- * so completeness is checked here and, authoritatively, by validate_content in
- * portals/serializers.py.
- */
+/** What a tile needs before anyone can click it. `required` on the selects is
+ *  decorative: the design saves as JSON, never as a native form submit. */
 export function tileMissingField(item: Tile): string | null {
 	const t = item.target ?? {};
 	switch (item.kind) {

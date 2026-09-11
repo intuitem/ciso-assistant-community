@@ -34,8 +34,7 @@
 		})
 	);
 	const viewerIsRequester = $derived(!!data.viewerIsRequester);
-	// The other direction from an object-reference answer: not what the request points
-	// at, but what it caused to exist once it was accepted.
+	// Not what the request points at — what it caused to exist.
 	const producedObjects = $derived(
 		((content.produced_objects ?? []) as any[]).map((entry) => ({
 			...entry,
@@ -45,9 +44,7 @@
 				: null
 		}))
 	);
-	// The server decides: holds the approve right, and isn't the person who filed this
-	// (unless self-validation is enabled instance-wide). Offering a button the server
-	// will refuse is worse than not offering it.
+	// The server decides; offering a button it will refuse is worse than hiding it.
 	const canReview = $derived(!!content.can_review);
 	const suggestedActions = $derived((data.suggestedActions ?? []) as any[]);
 
@@ -68,8 +65,7 @@
 	let busy = $state(false);
 	let reopenObservation = $state('');
 
-	// The backend's status and error code travel inside the action's payload, not the
-	// HTTP response. Returns a ready-to-show message, or null when the call succeeded.
+	// The backend status travels in the action payload, not the HTTP response.
 	function actionError(result: any): string | null {
 		const data = result?.type === 'success' || result?.type === 'failure' ? result.data : null;
 		const status = data?.status;
@@ -103,8 +99,7 @@
 		await post('updateAnswers', { answers: { [urn]: value } });
 	}
 
-	// A file question is answered by uploading, so the upload has to go through the
-	// multipart action rather than the JSON answers patch.
+	// Files go through the multipart action, not the JSON answers patch.
 	async function uploadAttachment(urn: string, file: File) {
 		const body = new FormData();
 		body.append('id', response.id);
@@ -258,9 +253,7 @@
 			</div>
 		{/if}
 
-		<!-- Someone who may edit but not decide is on the asking side of this request,
-		     even though folder rights got them here: they get submit/drop/clone, not the
-		     verdict. -->
+		<!-- Editable but not decidable means they are on the asking side. -->
 		{#if viewerIsRequester || (canEdit && !canReview)}
 			<!-- The person who filed this. Submitting is theirs; deciding is not. -->
 			<div class="flex flex-wrap items-center gap-2 pt-1">
@@ -319,7 +312,6 @@
 			<!-- The reviewer. Claiming is optional; a decision always carries a resolution. -->
 			<div class="flex flex-wrap items-center gap-2 pt-1">
 				{#if response.status === 'draft'}
-					<!-- Sent back: the ball is with the requester, and submitting is theirs. -->
 					<span class="text-sm text-surface-500">
 						<i class="fa-solid fa-hourglass-half mr-1"></i>{m.quickFormAwaitingRequester()}
 					</span>

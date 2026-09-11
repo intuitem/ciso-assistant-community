@@ -327,8 +327,6 @@ CREATABLE_MODELS = {
             "status",
             "observation",
         ],
-        # An exception raised from an approved request should name the person who
-        # approved it; without this the register says nobody did.
         "fk_fields": {"approver": (User, "users")},
     },
     "entity": {
@@ -676,25 +674,16 @@ class CreateObjectAction(BaseAction):
 
 
 def _creation_folder(instance):
-    """Where an object a run creates should live.
-
-    The triggering object's folder when there is one, the instance's otherwise. A
-    derogation raised for one domain belongs in that domain: planting it in the
-    workflow's folder scopes it wrongly, and where the request came from a personal
-    space it publishes sandbox content to whoever can see the workflow.
-    """
+    """The triggering object's folder when there is one: an object created because of X
+    belongs where X lives, not where the workflow does."""
     trigger_obj = _triggering_object(instance)
     folder = getattr(trigger_obj, "folder", None)
     return folder or instance.folder
 
 
 def _record_provenance(instance, obj):
-    """Tell the object that triggered this run what it just caused to exist.
-
-    Duck-typed on purpose: the engine stays ignorant of quick forms, and a model that
-    wants provenance opts in by defining `record_produced_object`. Best-effort — a run
-    that produced a real object must not fail because the bookkeeping did.
-    """
+    """Tell the triggering object what it caused. Duck-typed so the engine stays
+    ignorant; best-effort so bookkeeping never fails a run."""
     import structlog
 
     try:
@@ -711,12 +700,7 @@ def _record_provenance(instance, obj):
 
 
 def _triggering_object(instance):
-    """The object a run is about, when there is one.
-
-    Internal events carry it as `payload.id` alongside the event key that names its
-    model; supervised runs carry it as a seeded variable. Anything else — scheduled,
-    webhook — is about nothing in particular and gets None.
-    """
+    """The object a run is about, or None for scheduled and webhook runs."""
     from django.apps import apps
 
     payload = instance.payload or {}
@@ -1161,9 +1145,7 @@ def _serialize_read_row(obj, fields, computed=None):
         elif isinstance(value, (datetime.datetime, datetime.date)):
             value = value.isoformat()
         elif isinstance(value, Model):
-            # A related object reaches a template as a row, not as an instance: the id
-            # is what an `update_object` downstream can actually use, and the whole
-            # payload has to survive being stored as JSON on the run.
+            # A row, not an instance: the id is what a downstream action can use.
             value = {"id": str(value.pk), "str": str(value)}
         row[field] = value
     if computed:

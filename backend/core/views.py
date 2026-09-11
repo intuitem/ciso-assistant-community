@@ -19700,15 +19700,10 @@ def _outcome_sla_due_date(response):
 
 
 def emit_quick_form_event(response, action):
-    """Announce a request reaching a lifecycle point to the workflow engine.
+    """Announce a lifecycle point to the workflow engine.
 
-    A CUD event cannot express these: answering a question saves the row too, so a
-    trigger on `quickformresponse.updated` fires throughout the fill and has to filter by
-    status. Deferred to commit so a run never reads a half-written row.
-
-    `quick_form_ref` and `quick_form_urn` travel alongside the id because a workflow
-    condition has to name a form in a way that survives being exported and loaded
-    somewhere else; a primary key does not.
+    A CUD event cannot express these: answering saves the row too. Deferred to commit.
+    `quick_form_ref`/`_urn` travel with the id because a pk does not survive export.
     """
     from automation.workflows.events import dispatch_internal_event
 
@@ -19743,12 +19738,7 @@ def emit_quick_form_submitted(response):
 
 
 def _reference_labels(response, user=None):
-    """{question urn: [{id, label, folder}]} for every object-reference answer.
-
-    Stored answers are ids; a reviewer needs the name. Resolved through the same folder
-    scope the picker used, so an object that has since moved out of reach degrades to its
-    raw id rather than leaking a name from somewhere else.
-    """
+    """{question urn: [{id, label, folder}]}, scoped like the picker."""
     from core.object_references import ReferenceError_, labels_for
 
     out = {}
@@ -19765,13 +19755,8 @@ def _reference_labels(response, user=None):
 
 
 def _self_validation_allowed(response) -> bool:
-    """Whether the requester may also decide this one.
-
-    The instance-wide setting is the escape hatch for organisations too small to
-    separate the two roles. It deliberately stops at a personal folder: a personal space
-    grants its owner the analyst role over their own sandbox, so allowing it there would
-    let anyone raise and approve a governed record with nobody else ever seeing it.
-    """
+    """The escape hatch for small organisations. Never in a personal folder: its owner
+    holds analyst there, so they would raise and approve unseen."""
     from iam.models import Folder
 
     if response.folder.content_type == Folder.ContentType.PERSONAL:
@@ -19780,8 +19765,7 @@ def _self_validation_allowed(response) -> bool:
 
 
 def _can_review(user, response):
-    """Holds the narrow approve right on the folder, and — unless self-validation is
-    enabled instance-wide — is not the person who filed the request."""
+    """Holds `approve` on the folder and is not the requester."""
     if not RoleAssignment.is_access_allowed(
         user=user,
         perm=Permission.objects.get(codename="approve_quickformresponse"),
@@ -19916,20 +19900,25 @@ def start_quick_form_response(user, publication):
     """
     requester = Actor.objects.filter(user=user, entity__isnull=True).first()
 
-    if requester is not None and not publication.allow_multiple_drafts:
-        draft = (
-            QuickFormResponse.objects.filter(
-                publication=publication,
-                status=QuickFormResponse.Status.DRAFT,
-                respondents=requester,
-            )
-            .order_by("-created_at")
-            .first()
-        )
-        if draft is not None:
-            return draft, True
-
     with transaction.atomic():
+        if requester is not None and not publication.allow_multiple_drafts:
+            # Inside the transaction, and serialised on the requester's own Actor row.
+            # A double click, or a tile clicked in two tabs, otherwise has both requests
+            # find no draft and create one each — and `respondents` is an M2M, so no
+            # unique constraint can catch it afterwards.
+            Actor.objects.select_for_update().filter(pk=requester.pk).first()
+            draft = (
+                QuickFormResponse.objects.filter(
+                    publication=publication,
+                    status=QuickFormResponse.Status.DRAFT,
+                    respondents=requester,
+                )
+                .order_by("-created_at")
+                .first()
+            )
+            if draft is not None:
+                return draft, True
+
         response = QuickFormResponse.objects.create(
             name=publication.name,
             quick_form=publication.quick_form,
@@ -20115,13 +20104,7 @@ class MyRequestViewSet(viewsets.ViewSet):
         name="Objects an object-reference question may point at",
     )
     def reference_options(self, request, pk=None):
-        """Options for one object-reference question on this request.
-
-        Deliberately narrow: only the model the author's question names, only within the
-        folder the request lands in and its ancestors. This is the one place a requester
-        with no role on that domain learns any object name, and asking the question is
-        what authorised it.
-        """
+        """Options for one object-reference question on this request."""
         from core.object_references import ReferenceError_, options_for
 
         response = self._own_response(request, pk)
@@ -20146,10 +20129,8 @@ class MyRequestViewSet(viewsets.ViewSet):
                 )
             )
         except ReferenceError_ as e:
-            return Response(
-                {"error": "badReferenceConfig", "detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            logger.warning("Bad object-reference question config", error=e)
+            return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         detail=True,
@@ -20448,6 +20429,11 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         """Reviewer-side upload. The requester's equivalent lives on
         MyRequestViewSet; only the gate differs, the rules are shared."""
         response = self.get_object()
+        if response.status == QuickFormResponse.Status.CLOSED:
+            # Attaching re-scores, moving the outcome the decision rested on.
+            return Response(
+                {"error": "responseClosed"}, status=status.HTTP_400_BAD_REQUEST
+            )
         answer = answer_for_upload(response, request.data.get("question"))
         if answer is None:
             return Response(
@@ -20499,13 +20485,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         name="Objects an object-reference question may point at",
     )
     def reference_options(self, request, pk):
-        """Options for one object-reference question on this request.
-
-        Deliberately narrow: only the model the author's question names, only within the
-        folder the request lands in and its ancestors. This is the one place a requester
-        with no role on that domain learns any object name, and asking the question is
-        what authorised it.
-        """
+        """Options for one object-reference question on this request."""
         from core.object_references import ReferenceError_, options_for
 
         response = self.get_object()
@@ -20530,10 +20510,8 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                 )
             )
         except ReferenceError_ as e:
-            return Response(
-                {"error": "badReferenceConfig", "detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            logger.warning("Bad object-reference question config", error=e)
+            return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         detail=True,
@@ -20542,8 +20520,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         name="Open a file attached to this request",
     )
     def download_attachment(self, request, pk, attachment_id=None):
-        """Reading the evidence a request rests on is the reviewer's whole job, so it
-        needs no more than the view right `get_object` already established."""
+        """Needs no more than the view right `get_object` established."""
         response = self.get_object()
         attachment = AnswerAttachment.objects.filter(
             id=attachment_id, answer__response=response
@@ -20560,6 +20537,10 @@ class QuickFormResponseViewSet(BaseModelViewSet):
     )
     def remove_attachment(self, request, pk, attachment_id=None):
         response = self.get_object()
+        if response.status == QuickFormResponse.Status.CLOSED:
+            return Response(
+                {"error": "responseClosed"}, status=status.HTTP_400_BAD_REQUEST
+            )
         attachment = AnswerAttachment.objects.filter(
             id=attachment_id, answer__response=response
         ).first()
@@ -20578,12 +20559,10 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         detail=False, url_path="awaiting-conversion", name="Accepted but unconverted"
     )
     def awaiting_conversion(self, request):
-        """Accepted requests that produced nothing — the reconciliation worklist.
+        """Accepted requests that produced nothing: the reconciliation worklist.
 
-        An engine that is down does not raise, it is absent: the event is dispatched
-        fire-and-forget, so a run that never started leaves no trace anywhere. This is
-        the only way to find those, and it reads the outcome rather than the machinery,
-        so it stays true however the conversion was supposed to happen.
+        A run that never started leaves no trace, so this reads the outcome rather than
+        the machinery.
         """
         from django.contrib.contenttypes.models import ContentType
 
@@ -20745,17 +20724,17 @@ class QuickFormResponseViewSet(BaseModelViewSet):
 
     # Reject is the reviewer's act, drop is the requester's; neither substitutes for
     # the other, so they are separate resolutions on the same closing transition.
-    CLOSING_RESOLUTIONS = {
+    #: What a *reviewer* may put on a closing transition. The model defines four
+    #: resolutions, but only two are a person's to choose here: `DROPPED` belongs to the
+    #: requester and is set by `MyRequestViewSet.drop`, and `AUTO` means no person
+    #: decided, so a person selecting it would be a lie in the register.
+    REVIEWER_RESOLUTIONS = {
         QuickFormResponse.Resolution.ACCEPTED,
         QuickFormResponse.Resolution.REJECTED,
-        QuickFormResponse.Resolution.DROPPED,
-        QuickFormResponse.Resolution.AUTO,
     }
 
     def _deciding_denied(self, request, response):
-        """Reviewer transitions need the narrow `approve` right, and — unless an admin
-        has enabled self-validation instance-wide — must not be taken by the person who
-        filed the request. Returns an error Response, or None when the act is allowed."""
+        """Error Response when this person may not decide, else None."""
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="approve_quickformresponse"),
@@ -20829,11 +20808,11 @@ class QuickFormResponseViewSet(BaseModelViewSet):
 
         resolution = request.data.get("resolution") or ""
         if new_status == QuickFormResponse.Status.CLOSED:
-            if resolution not in self.CLOSING_RESOLUTIONS:
+            if resolution not in self.REVIEWER_RESOLUTIONS:
                 return Response(
                     {
                         "error": "resolutionRequired",
-                        "choices": sorted(self.CLOSING_RESOLUTIONS),
+                        "choices": sorted(self.REVIEWER_RESOLUTIONS),
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -20842,6 +20821,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             # Reopening clears the verdict: the request is live again.
             response.resolution = ""
 
+        previous_status = response.status
         response.status = new_status
         update_fields = ["status", "resolution", "observation", "updated_at"]
 
@@ -20870,14 +20850,18 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             response.assignee = None
             update_fields.append("assignee")
 
-        if new_status == QuickFormResponse.Status.SUBMITTED:
+        # A release (`in_review -> submitted`) is not a submission: recording the
+        # reviewer as `submitted_by` would bar them from ever deciding it.
+        is_real_submission = (
+            new_status == QuickFormResponse.Status.SUBMITTED
+            and previous_status == QuickFormResponse.Status.DRAFT
+        )
+        if is_real_submission:
             response.submitted_at = timezone.now()
-            update_fields.append("submitted_at")
-        if new_status == QuickFormResponse.Status.SUBMITTED:
             # Who pressed submit, not who created the row: the two differ whenever a
             # response is reassigned, and the reviewer set is derived against it.
             response.submitted_by = request.user
-            update_fields.append("submitted_by")
+            update_fields += ["submitted_at", "submitted_by"]
             sla_due = _outcome_sla_due_date(response)
             # Most urgent wins, and an outcome never loosens a date a human set.
             if sla_due is not None and (
@@ -20887,7 +20871,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                 update_fields.append("due_date")
         response.save(update_fields=update_fields)
 
-        if new_status == QuickFormResponse.Status.SUBMITTED:
+        if is_real_submission:
             emit_quick_form_submitted(response)
             transaction.on_commit(
                 lambda pk=response.pk: send_quick_form_submitted_notification(pk)

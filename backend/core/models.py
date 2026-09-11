@@ -10278,14 +10278,8 @@ class RequirementAssignmentEvent(AbstractBaseModel, FolderMixin):
 class ProducedObjectLink(AbstractBaseModel):
     """Which thing caused which other thing to exist.
 
-    Both ends are generic so the answer works in either direction with one indexed
-    query. The forward direction (what did this request produce?) could have been a JSON
-    list on the source — and was, briefly — but `JSONField.contains` is unsupported on
-    SQLite, so the reverse direction would have been a table scan on the only deployment
-    where it hurts. One small indexed table answers both.
-
-    Written by the workflow engine when an action creates something; see
-    `QuickFormResponse.record_produced_object`.
+    A table rather than a JSON list on the source: `JSONField.contains` is unsupported on
+    SQLite, so the reverse lookup would have been a scan.
     """
 
     source_content_type = models.ForeignKey(
@@ -10325,7 +10319,6 @@ class ProducedObjectLink(AbstractBaseModel):
             )
         ]
         indexes = [
-            # Forward: what did this produce. Reverse: what produced this.
             models.Index(fields=["source_content_type", "source_object_id"]),
             models.Index(fields=["content_type", "object_id"]),
         ]
@@ -10349,7 +10342,7 @@ class ProducedObjectLink(AbstractBaseModel):
 
     @classmethod
     def produced_by(cls, target):
-        """The links naming what caused `target` to exist — the reverse direction."""
+        """What caused `target` to exist."""
         from django.contrib.contenttypes.models import ContentType
 
         return cls.objects.filter(
@@ -10367,7 +10360,7 @@ class ProducedObjectLink(AbstractBaseModel):
         ).select_related("content_type")
 
     def describe(self, obj) -> dict:
-        """A row the UI can render and link: identity, label, and its model name."""
+        """A row the UI can render and link."""
         if obj is None:
             return {}
         ref_id = getattr(obj, "ref_id", "") or ""
@@ -10448,9 +10441,7 @@ class QuickFormResponse(
         related_name="clones",
         verbose_name=_("Cloned from"),
     )
-    # A generic foreign key does not cascade, so deleting a request would leave its
-    # provenance rows behind. This makes the source half clean up after itself; the
-    # target half is guarded by resolving through the GFK, which yields None.
+    # GFKs do not cascade; this cleans up the source half on delete.
     produced_links = GenericRelation(
         "core.ProducedObjectLink",
         content_type_field="source_content_type",
@@ -10556,15 +10547,12 @@ class QuickFormResponse(
         ]
 
     def record_produced_object(self, obj, source: str = "") -> bool:
-        """Record that this request caused `obj` to exist. Idempotent on the pair, so a
-        retried run or a supervised re-run after a partial reactive one cannot
-        double-count. True when the link was new."""
+        """Idempotent on the pair, so a retry cannot double-count. True when new."""
         return ProducedObjectLink.record(self, obj, source_label=source)
 
     @property
     def produced_objects(self) -> list[dict]:
-        """What this request caused to exist, newest last. Same shape the JSON column
-        held, so nothing downstream had to learn a new one."""
+        """What this request caused to exist, newest last."""
         return [
             link.describe(link.target_object)
             for link in ProducedObjectLink.produced_from(self).order_by("created_at")
@@ -10573,8 +10561,7 @@ class QuickFormResponse(
 
     @property
     def awaiting_conversion(self) -> bool:
-        """Accepted, but nothing was ever produced. The worklist of silent failures:
-        an engine that is down does not error, it is absent."""
+        """Accepted but produced nothing — an engine that is down is absent, not loud."""
         return (
             self.status == self.Status.CLOSED
             and self.resolution == self.Resolution.ACCEPTED
@@ -10582,19 +10569,14 @@ class QuickFormResponse(
         )
 
     def is_requester(self, user) -> bool:
-        """Whoever is on the asking side of this request.
+        """Whoever is on the asking side.
 
-        `submitted_by` rather than `created_by`: a clone or a reassignment moves
-        authorship, and the question is who put this forward. A draft with neither a
-        submitter nor a respondent is unclaimed — a row created straight from the
-        table — so it belongs to whoever can reach it.
+        `submitted_by` not `created_by`: clone and reassign move authorship. A draft with
+        neither submitter nor respondent is unclaimed and belongs to whoever can reach it.
         """
         if self.submitted_by_id == user.id:
             return True
-        # The same actor set `MyRequestViewSet._own_response` uses to decide who may
-        # fill this. The two must agree: anyone who can put a request forward — through
-        # a team they belong to, or an entity they represent — is on the asking side of
-        # it, and must not also be the one who decides it.
+        # Same actor set as `_own_response`: whoever may fill it is on the asking side.
         if self.respondents.filter(
             pk__in=[a.pk for a in Actor.get_all_for_user(user)]
         ).exists():
@@ -10654,8 +10636,10 @@ class QuickFormResponse(
         )
         title = str(answer).strip() if isinstance(answer, str) else ""
         if title and title != self.name:
-            QuickFormResponse.objects.filter(pk=self.pk).update(name=title[:255])
-            self.name = title[:255]
+            # `.update()` skips validation, so the width has to come from the column.
+            limit = self._meta.get_field("name").max_length
+            QuickFormResponse.objects.filter(pk=self.pk).update(name=title[:limit])
+            self.name = title[:limit]
 
     def seed_answers(self) -> None:
         """One empty Answer per question of the form, like audits do at

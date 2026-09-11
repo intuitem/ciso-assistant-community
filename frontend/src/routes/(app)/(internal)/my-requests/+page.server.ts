@@ -10,9 +10,15 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	// are grouped and what they are called is a portal's editorial decision, and a user
 	// may be entitled to several portals offering unrelated things. We only link back to
 	// the portals, and only when the user can actually file something.
+	// `fetch` resolves for HTTP errors, so an error body would arrive as the array.
+	const asList = async (res: Response) => {
+		if (!res.ok) error(res.status, 'Failed to load your requests');
+		const body = await res.json();
+		return Array.isArray(body) ? body : [];
+	};
 	const [requests, publications, portals] = await Promise.all([
-		fetch(`${BASE_API_URL}/my-requests/`).then((r) => r.json()),
-		fetch(`${BASE_API_URL}/quick-form-publications/mine/`).then((r) => r.json()),
+		fetch(`${BASE_API_URL}/my-requests/`).then(asList),
+		fetch(`${BASE_API_URL}/quick-form-publications/mine/`).then(asList),
 		fetch(`${BASE_API_URL}/portals/mine/`).then((r) => (r.ok ? r.json() : []))
 	]).catch((e) => {
 		error(e?.status ?? 500, 'Failed to load your requests');
@@ -23,11 +29,18 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	};
 };
 
-const act = async (fetch: typeof globalThis.fetch, id: string, path: string, method = 'POST') => {
+const act = async (
+	fetch: typeof globalThis.fetch,
+	id: string,
+	path: string,
+	// Only these two are meant, and only one takes a body.
+	method: 'POST' | 'DELETE' = 'POST'
+) => {
 	const res = await fetch(`${BASE_API_URL}/my-requests/${id}/${path}`, {
 		method,
-		headers: { 'Content-Type': 'application/json' },
-		body: method === 'DELETE' ? undefined : JSON.stringify({})
+		...(method === 'POST'
+			? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }
+			: {})
 	});
 	if (!res.ok) return fail(res.status, { error: await res.text() });
 	return res.status === 204 ? { deleted: true } : await res.json();

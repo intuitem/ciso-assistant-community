@@ -681,7 +681,18 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
 
     def build_context(hidden_page_urns, computed_outcomes):
         answer_ctx, page_ctx = {}, {}
-        totals = {"sum": 0, "max": 0, "answered": 0, "total": 0, "missing": 0}
+        # `weight` is the mean's divisor: the summed weight of the questions that
+        # actually scored, matching `_quick_form_score`. Dividing by `total` instead
+        # counted text and file questions and made the preview disagree with the live
+        # response on any form that mixes scorable and non-scorable questions.
+        totals = {
+            "sum": 0,
+            "max": 0,
+            "answered": 0,
+            "total": 0,
+            "missing": 0,
+            "weight": 0,
+        }
         for page in pages:
             node_id = extract_node_id(str(page.get("urn") or "")) or page.get("ref_id")
             stats = {"answered_count": 0, "total_count": 0}
@@ -702,6 +713,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                     totals["max"] += max_score_of(entry)
                     if answered:
                         totals["sum"] += score_of(entry)
+                        totals["weight"] += int(entry.get("weight") or 1)
                 q_node_id = extract_node_id(entry["urn"])
                 if q_node_id:
                     answer_ctx[q_node_id] = {
@@ -725,6 +737,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
             "response": {
                 "score_sum": totals["sum"],
                 "score_max": totals["max"],
+                "score_weight": totals["weight"],
                 "answered_count": totals["answered"],
                 "total_count": totals["total"],
                 "complete": totals["missing"] == 0,
@@ -781,8 +794,12 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         lo, hi = 0, 100
     raw = context["response"]["score_sum"]
     aggregation = definition.get("aggregation", "sum")
-    if aggregation == "mean" and context["response"]["total_count"]:
-        raw = raw / context["response"]["total_count"]
+    if aggregation == "mean":
+        # The same divisor `_quick_form_score` uses: the summed weight of the scorable
+        # answered questions, not the count of every visible one. Dividing by the count
+        # made the preview disagree with the live response on any form that mixes
+        # scorable and non-scorable questions, or uses a weight other than 1.
+        raw = raw / (context["response"]["score_weight"] or 1)
     score = (
         int(max(lo, min(hi, round(raw))))
         if context["response"]["complete"] and context["response"]["score_max"]

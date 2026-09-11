@@ -17,8 +17,6 @@ A manual trigger declares what it applies to:
 select which sequences are worth offering, and the reviewer chooses.
 """
 
-from django.db.models import Q
-
 from .models import WorkflowNode, WorkflowVersion
 
 #: Object kinds a supervised action may target. Keyed by the string an author

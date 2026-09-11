@@ -1200,9 +1200,7 @@ def apply_answers_dict(owner_field, owner, questions_by_urn, answers_data, user=
                     question, owner.folder, [str(i) for i in ids], user=user
                 )
             except ReferenceError_ as e:
-                logger.warning(
-                    "Rejected object reference answer", q_urn=q_urn, error=str(e)
-                )
+                logger.warning("Rejected object reference answer", q_urn=q_urn, error=e)
                 answer.value = []
             answer.save(update_fields=["value"])
         else:

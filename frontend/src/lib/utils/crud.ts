@@ -4141,9 +4141,7 @@ export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
 	return map;
 };
 
-/** Route segment for a Django model name (`securityexception` -> `security-exceptions`).
- *  Derived from URL_MODEL_MAP rather than a second table, so a model that gains a route
- *  gains this for free. Returns null when nothing claims that name. */
+/** Django model name -> route segment, derived from URL_MODEL_MAP. */
 export const urlModelForDjangoName = (name: string): string | null => {
 	const hit = Object.entries(URL_MODEL_MAP).find(([, entry]) => entry.name === name);
 	return hit ? hit[0] : null;

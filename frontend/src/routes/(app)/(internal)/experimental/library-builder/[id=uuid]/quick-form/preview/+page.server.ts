@@ -25,7 +25,9 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 
 export const actions: Actions = {
 	evaluate: async ({ fetch, params, request }) => {
-		const { urn, answers } = await request.json();
+		// A form action only accepts form-encoded bodies; `request.json()` here answers
+		// 415 and the live evaluation never runs. The payload travels as one field.
+		const { urn, answers } = JSON.parse(String((await request.formData()).get('payload') ?? '{}'));
 		const res = await preview(fetch, params.id, urn, answers ?? {});
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return await res.json();
