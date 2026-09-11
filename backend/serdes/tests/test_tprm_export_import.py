@@ -673,6 +673,63 @@ class TestCrossDomainCampaignScope:
         assert foreign_binder not in data["findingsassessment"]
         assert foreign_finding not in data["finding"]
 
+    @pytest.mark.django_db
+    def test_foreign_binder_on_an_enclave_audit_does_not_travel(
+        self, root_folder, framework_fixture
+    ):
+        """The enclave audit does travel, but that must not become a handle on a
+        binder another domain keeps: only a binder living in the enclave is the
+        questionnaire's."""
+        domain = Folder.objects.create(
+            name="Enclave Binder Domain",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        security_domain = Folder.objects.create(
+            name="Security Binder Domain",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        provider = Entity.objects.create(
+            name="Binder Provider", ref_id="PROV-B", folder=domain
+        )
+        entity_assessment = EntityAssessment.objects.create(
+            name="Binder assessment", folder=domain, entity=provider
+        )
+        enclave = Folder.objects.create(
+            content_type=Folder.ContentType.ENCLAVE,
+            name=provider.name,
+            parent_folder=domain,
+        )
+        audit = ComplianceAssessment.objects.create(
+            name="Enclave binder audit",
+            framework=framework_fixture,
+            field_visibility=build_initial_field_visibility(framework_fixture),
+        )
+        audit.folder = enclave
+        audit.save()
+        entity_assessment.compliance_assessment = audit
+        entity_assessment.save()
+
+        own_binder = FindingsAssessment.objects.create(
+            name="Questionnaire binder", folder=enclave, compliance_assessment=audit
+        )
+        foreign_binder = FindingsAssessment.objects.create(
+            name="Foreign binder", folder=security_domain, compliance_assessment=audit
+        )
+        foreign_finding = Finding.objects.create(
+            name="Foreign enclave finding",
+            folder=security_domain,
+            findings_assessment=foreign_binder,
+        )
+
+        data = get_domain_export_objects(domain)
+
+        assert audit in data["complianceassessment"]
+        assert own_binder in data["findingsassessment"]
+        assert foreign_binder not in data["findingsassessment"]
+        assert foreign_finding not in data["finding"]
+
 
 # ============ Questionnaire evidence placement ============
 

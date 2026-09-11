@@ -530,12 +530,10 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     findings_assessments = FindingsAssessment.objects.filter(
         Q(perimeter__in=perimeters)
         | Q(folder__in=folders)
+        # An enclave binder is in no perimeter (the audit drops its own), so the
+        # folder is what reaches it. Never reach one through the audit it points
+        # at: the binder's own folder is the only thing saying it is ours.
         | Q(folder__in=enclaves)
-        # A binder raised from an enclave audit and left outside the enclave:
-        # the audit drops its perimeter, so only the audit itself can reach it.
-        # Never widen to every in-domain audit — that drags in binders another
-        # domain keeps against our audits.
-        | Q(compliance_assessment__folder__in=enclaves)
     ).distinct()
     findings = Finding.objects.filter(
         Q(folder__in=folders)
