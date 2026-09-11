@@ -429,10 +429,12 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         .filter(content_type=Folder.ContentType.DOMAIN)
         .distinct()
     )
-    # Campaigns reach perimeters outside `folders`, so the full perimeter scope
-    # has to exist before anything filters on it.
     campaigns = Campaign.objects.filter(folder__in=folders).distinct()
-    perimeters = Perimeter.objects.filter(
+    perimeters = Perimeter.objects.filter(folder__in=folders).distinct()
+    # Campaign.perimeters is unrestricted, so a campaign can target another
+    # domain. Export those rows so its M2M resolves, but never scope the
+    # assessments below on them or the dump swallows that domain's data.
+    exported_perimeters = Perimeter.objects.filter(
         Q(folder__in=folders) | Q(campaigns__in=campaigns)
     ).distinct()
 
@@ -677,7 +679,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         "contract": contracts,
         "evidence": evidences,
         "evidencerevision": evidence_revisions,
-        "perimeter": perimeters,
+        "perimeter": exported_perimeters,
         "complianceassessment": compliance_assessments,
         "requirementassessment": requirement_assessments,
         "answer": answers,

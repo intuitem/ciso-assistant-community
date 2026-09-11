@@ -1552,8 +1552,8 @@ def restore_entity_assessment_enclaves(
 
     Flattening leaves the audit in the domain folder, and `grant_respondent_access`
     builds a recursive role assignment on `audit.folder` — so a representative
-    assigned afterwards would get the whole domain. Evidences stay behind: an
-    export carries no folders, so an enclave one can't be told from a domain one.
+    assigned afterwards would get the whole domain. Evidence the questionnaire
+    owns follows it; evidence shared with the domain stays put.
     """
     from tprm.services import enclave_folder
 
@@ -1580,6 +1580,30 @@ def restore_entity_assessment_enclaves(
         Answer.objects.filter(
             requirement_assessment__compliance_assessment=audit
         ).update(folder=enclave)
+        # Evidence this questionnaire owns follows it: the respondent's grant is
+        # recursive on the enclave alone, so anything left behind reads as a 403.
+        # Shared evidence stays in the domain, out of the third party's view.
+        owned_evidence = (
+            Evidence.objects.filter(
+                requirement_assessments__compliance_assessment=audit
+            )
+            .exclude(
+                requirement_assessments__compliance_assessment__in=(
+                    ComplianceAssessment.objects.exclude(pk=audit.pk)
+                )
+            )
+            .exclude(applied_controls__isnull=False)
+            .exclude(findings__isnull=False)
+            .exclude(findings_assessments__isnull=False)
+            .exclude(contracts__isnull=False)
+            .exclude(entityassessment__isnull=False)
+            .distinct()
+        )
+        owned_evidence_ids = list(owned_evidence.values_list("pk", flat=True))
+        Evidence.objects.filter(pk__in=owned_evidence_ids).update(folder=enclave)
+        EvidenceRevision.objects.filter(evidence__in=owned_evidence_ids).update(
+            folder=enclave
+        )
 
 
 def split_uuids_urns(ids: List[str]) -> Tuple[List[UUID], List[str]]:

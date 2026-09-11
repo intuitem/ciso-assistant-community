@@ -22,10 +22,13 @@ from serdes.domain_io import export_domain, import_objects, process_uploaded_fil
 from serdes.utils import get_domain_export_objects
 from core.models import (
     Answer,
+    AppliedControl,
     Asset,
+    Campaign,
     ComplianceAssessment,
     Evidence,
     Framework,
+    Perimeter,
     StoredLibrary,
 )
 from core.utils import build_initial_field_visibility
@@ -567,3 +570,138 @@ class TestFlattenedNameCollision:
         )
         assert len(set(names)) == 2
         assert all(len(name) <= max_length for name in names)
+
+
+# ============ Cross-domain scope ============
+
+
+class TestCrossDomainCampaignScope:
+    @pytest.mark.django_db
+    def test_campaign_perimeter_does_not_drag_another_domain(
+        self, root_folder, framework_fixture
+    ):
+        """Campaign.perimeters is unrestricted, so a campaign can target another
+        domain. Its perimeter row travels so the M2M resolves on import, but that
+        domain's assessments must never enter the export."""
+        domain_d = Folder.objects.create(
+            name="Campaign Domain",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        domain_e = Folder.objects.create(
+            name="Foreign Domain",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+
+        foreign_perimeter = Perimeter.objects.create(
+            name="Foreign Perimeter", folder=domain_e
+        )
+        foreign_audit = ComplianceAssessment.objects.create(
+            name="Foreign audit",
+            framework=framework_fixture,
+            perimeter=foreign_perimeter,
+            folder=domain_e,
+            field_visibility=build_initial_field_visibility(framework_fixture),
+        )
+        foreign_audit.create_requirement_assessments()
+
+        campaign = Campaign.objects.create(name="Cross campaign", folder=domain_d)
+        campaign.perimeters.add(foreign_perimeter)
+
+        data = get_domain_export_objects(domain_d)
+
+        assert campaign in data["campaign"]
+        # The perimeter row travels: the campaign's M2M has to resolve on import.
+        assert foreign_perimeter in data["perimeter"]
+        # Nothing else from the foreign domain does.
+        assert foreign_audit not in data["complianceassessment"]
+        assert (
+            not data["requirementassessment"]
+            .filter(compliance_assessment=foreign_audit)
+            .exists()
+        )
+        assert (
+            not data["answer"]
+            .filter(requirement_assessment__compliance_assessment=foreign_audit)
+            .exists()
+        )
+
+
+# ============ Questionnaire evidence placement ============
+
+
+class TestQuestionnaireEvidencePlacement:
+    @pytest.mark.django_db
+    def test_owned_evidence_moves_to_enclave_shared_evidence_stays(
+        self, root_folder, admin_user, framework_fixture
+    ):
+        """A respondent is granted the enclave only, so evidence the
+        questionnaire owns must land there. Evidence shared with the domain stays
+        put, otherwise the import would expose it to the third party."""
+        domain = Folder.objects.create(
+            name="Evidence Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        provider = Entity.objects.create(
+            name="Evidence Provider", ref_id="PROV-E", folder=domain
+        )
+        entity_assessment = EntityAssessment.objects.create(
+            name="Evidence assessment", folder=domain, entity=provider
+        )
+        audit = ComplianceAssessment.objects.create(
+            name="Evidence audit",
+            framework=framework_fixture,
+            perimeter=entity_assessment.perimeter,
+            field_visibility=build_initial_field_visibility(framework_fixture),
+        )
+        enclave = Folder.objects.create(
+            content_type=Folder.ContentType.ENCLAVE,
+            name=provider.name,
+            parent_folder=domain,
+        )
+        audit.folder = enclave
+        audit.save()
+        audit.create_requirement_assessments()
+        entity_assessment.compliance_assessment = audit
+        entity_assessment.save()
+
+        requirement_assessment = audit.requirement_assessments.first()
+        owned = Evidence.objects.create(name="Questionnaire proof", folder=enclave)
+        shared = Evidence.objects.create(name="Shared proof", folder=domain)
+        requirement_assessment.evidences.add(owned, shared)
+        # The shared one is also a domain control's evidence, so it must not
+        # follow the questionnaire into the enclave.
+        control = AppliedControl.objects.create(name="Domain control", folder=domain)
+        control.evidences.add(shared)
+
+        response = export_domain(domain, admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        import_objects(
+            json_dump,
+            domain_name="Evidence Imported",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        imported = Folder.objects.get(
+            name="Evidence Imported", content_type=Folder.ContentType.DOMAIN
+        )
+        imported_audit = EntityAssessment.objects.get(
+            folder=imported
+        ).compliance_assessment
+        assert imported_audit.folder.content_type == Folder.ContentType.ENCLAVE
+
+        def imported_evidence(prefix):
+            return (
+                Evidence.objects.filter(
+                    name__startswith=prefix,
+                    requirement_assessments__compliance_assessment=imported_audit,
+                )
+                .distinct()
+                .get()
+            )
+
+        assert imported_evidence("Questionnaire proof").folder == imported_audit.folder
+        assert imported_evidence("Shared proof").folder == imported
