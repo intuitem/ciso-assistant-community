@@ -422,13 +422,19 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     Returns:
         A dictionary mapping model names to QuerySets of related objects;
     """
+    sub_folders = [f.id for f in domain.get_sub_folders()]
     folders = (
-        Folder.objects.filter(
-            Q(id=domain.id) | Q(id__in=[f.id for f in domain.get_sub_folders()])
-        )
+        Folder.objects.filter(Q(id=domain.id) | Q(id__in=sub_folders))
         .filter(content_type=Folder.ContentType.DOMAIN)
         .distinct()
     )
+    # Enclaves travel, domains do not: they carry which objects a third party is
+    # allowed to see, and re-deriving that on import can only ever approximate.
+    # Keeping DOMAIN folders out is what still flattens sub-domains away.
+    enclaves = Folder.objects.filter(
+        id__in=sub_folders, content_type=Folder.ContentType.ENCLAVE
+    ).distinct()
+
     campaigns = Campaign.objects.filter(folder__in=folders).distinct()
     perimeters = Perimeter.objects.filter(folder__in=folders).distinct()
     # Campaign.perimeters is unrestricted, so a campaign can target another
@@ -478,6 +484,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     compliance_assessments = ComplianceAssessment.objects.filter(
         Q(perimeter__in=perimeters)
         | Q(folder__in=folders)
+        | Q(folder__in=enclaves)
         | Q(ebios_rm_studies__in=ebios_rm_studies)
         | Q(pk__in=entity_assessments.values("compliance_assessment"))
     ).distinct()
@@ -626,8 +633,11 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
 
     evidences = Evidence.objects.filter(
         Q(folder__in=folders)
+        | Q(folder__in=enclaves)
         | Q(applied_controls__in=applied_controls)
         | Q(requirement_assessments__in=requirement_assessments)
+        # Attached straight to an audit: an enclave one is in no exported folder.
+        | Q(compliance_assessments__in=compliance_assessments)
         | Q(findings__in=findings)
         | Q(findings_assessments__in=findings_assessments)
         | Q(entityassessment__in=entity_assessments)
@@ -635,7 +645,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     ).distinct()
 
     evidence_revisions = EvidenceRevision.objects.filter(
-        Q(folder__in=folders) | Q(evidence__in=evidences)
+        Q(folder__in=folders) | Q(folder__in=enclaves) | Q(evidence__in=evidences)
     )
 
     loaded_libraries = LoadedLibrary.objects.filter(
@@ -662,7 +672,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         # Folder out of the dump is what makes the re-import possible — the
         # guard in import_objects rejects dumps that *do* contain Folder rows
         # (e.g. full DB backups), not our own domain exports.
-        # "folder": folders,
+        "folder": enclaves,
         "loadedlibrary": loaded_libraries,
         "vulnerability": vulnerabilities,
         "framework": frameworks,

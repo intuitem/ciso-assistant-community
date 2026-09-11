@@ -427,11 +427,14 @@ def import_objects(
 
     try:
         models_map = get_models_map(objects)
-        # Our own domain exports never contain Folder rows (see the comment
-        # in serdes.utils.get_domain_export_objects). This guard only rejects
-        # dumps from elsewhere — e.g. a full DB backup mistakenly uploaded
-        # here.
-        if Folder in models_map.values():
+        # A domain export carries its enclaves and nothing else folder-wise, so
+        # any other folder means this is a foreign dump — a full DB backup, or a
+        # domain tree that would smuggle sub-domains past the Pro gating.
+        if any(
+            obj["model"] == "iam.folder"
+            and obj["fields"].get("content_type") != Folder.ContentType.ENCLAVE
+            for obj in objects
+        ):
             logger.error("Dump contains a domain")
             raise ValidationError({"error": "Dump contains a domain"})
 
@@ -674,31 +677,51 @@ def create_model_objects(
         )
 
 
+def imported_folder(folder_hash: Any, link_dump_database_ids: dict[str, Any]) -> Folder:
+    """Where an exported object belongs: its enclave if one travelled, else the
+    new base folder. Domain folders never travel, so they flatten."""
+    mapped = link_dump_database_ids.get(folder_hash)
+    if mapped:
+        enclave = Folder.objects.filter(id=mapped).first()
+        if enclave:
+            return enclave
+    return link_dump_database_ids.get("base_folder")
+
+
 def dedup_clashing_fields(
     model: type[models.Model], fields: dict[str, Any], error: ValidationError
 ) -> List[str]:
-    """Suffix the fields_to_check values `error` reports as taken, in place.
+    """Suffix one clashing fields_to_check value, in place.
 
-    Returns the fields changed. Dates / FKs / enums (e.g. TaskNode.fields_to_check
-    = ["task_template", "due_date"]), fields the model's own clean() rejected for
-    another reason, and over-long values are left alone: a UUID would corrupt the
-    first two and only push the third further past max_length.
+    Returns the fields changed. Only one eligible field is suffixed, `name`
+    first: making one value unique makes the tuple unique, while clean() reports
+    every field it re-checks alone — so suffixing them all would stamp a UUID
+    onto ComplianceAssessment.version, which always collides on "1.0", and
+    starting from fields_to_check order would mangle ref_id and leave two rows
+    reading identically in list views. Dates / FKs / enums (e.g.
+    TaskNode.fields_to_check = ["task_template", "due_date"]), fields the model's
+    own clean() rejected for another reason, and over-long values are left alone.
     """
-    checkable = set(getattr(model, "fields_to_check", []) or [])
-    changed = []
-    for field, errors in getattr(error, "error_dict", {}).items():
+    error_dict = getattr(error, "error_dict", {})
+    candidates = list(getattr(model, "fields_to_check", []) or [])
+    if "name" in candidates:
+        candidates = ["name"] + [field for field in candidates if field != "name"]
+    for field in candidates:
+        errors = error_dict.get(field)
         current = fields.get(field)
-        if field not in checkable or not isinstance(current, str):
+        if errors is None or not isinstance(current, str):
             continue
         if any(getattr(err, "code", None) == "max_length" for err in errors):
             continue
         suffix = f" {uuid.uuid4()}"
         max_length = model._meta.get_field(field).max_length
         if max_length:
-            current = current[: max_length - len(suffix)]
+            if max_length <= len(suffix):
+                suffix = f" {uuid.uuid4().hex[:8]}"[:max_length]
+            current = current[: max(0, max_length - len(suffix))]
         fields[field] = f"{current}{suffix}"
-        changed.append(field)
-    return changed
+        return [field]
+    return []
 
 
 def create_batch(
@@ -722,7 +745,9 @@ def create_batch(
                     continue
 
                 if fields.get("folder"):
-                    fields["folder"] = link_dump_database_ids.get("base_folder")
+                    fields["folder"] = imported_folder(
+                        fields["folder"], link_dump_database_ids
+                    )
 
                 many_to_many_map_ids: dict = {}
                 fields = process_model_relationships(
@@ -736,10 +761,19 @@ def create_batch(
                 try:
                     model(**fields).clean()
                 except ValidationError as e:
-                    # Anything left after the dedup isn't a name collision we can
-                    # paper over, so let it abort the import.
                     dedup_clashing_fields(model, fields, e)
-                    model(**fields).clean()
+                    try:
+                        model(**fields).clean()
+                    except ValidationError as retry_err:
+                        # Not a name collision we can paper over. bulk_create()
+                        # never re-validates, so abort rather than persist it.
+                        logger.warning(
+                            "Import validation still failing after UUID dedup",
+                            model=model._meta.model_name,
+                            obj_id=obj_id,
+                            errors=getattr(retry_err, "error_dict", {}),
+                        )
+                        raise
 
                 logger.debug("Creating object", fields=fields)
                 objects_creation_data.append(
@@ -826,6 +860,10 @@ def process_model_relationships(
     logger.debug("Processing model relationships", model=model_name, _fields=_fields)
 
     match model_name:
+        case "folder":
+            # Only enclaves travel, and their domain parent stayed behind.
+            _fields["parent_folder"] = link_dump_database_ids.get("base_folder")
+
         case "asset":
             many_to_many_map_ids["parent_ids"] = get_mapped_ids(
                 _fields.pop("parent_assets", []), link_dump_database_ids
@@ -854,6 +892,9 @@ def process_model_relationships(
                 id=link_dump_database_ids.get(_fields["perimeter"])
             ).first()
             _fields["framework"] = Framework.objects.get(urn=_fields["framework"])
+            many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
+                _fields.pop("evidences", []), link_dump_database_ids
+            )
 
         case "appliedcontrol":
             many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
@@ -1262,6 +1303,10 @@ def set_many_to_many_relations(
                 logger.debug("Setting parent assets", asset=obj, parent_ids=parent_ids)
                 obj.parent_assets.set(Asset.objects.filter(id__in=parent_ids))
 
+        case "complianceassessment":
+            if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
+                obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+
         case "appliedcontrol":
             if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
                 obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
@@ -1548,12 +1593,14 @@ def resolve_self_referencing_fks(
 def restore_entity_assessment_enclaves(
     objects: List[dict], link_dump_database_ids: dict[str, Any]
 ) -> None:
-    """Post-pass: move each imported questionnaire back into its entity's enclave.
+    """Fallback for dumps predating exported enclaves.
 
-    Flattening leaves the audit in the domain folder, and `grant_respondent_access`
-    builds a recursive role assignment on `audit.folder` — so a representative
-    assigned afterwards would get the whole domain. Evidence the questionnaire
-    owns follows it; evidence shared with the domain stays put.
+    Since schema 3 the enclave travels and every object lands in it directly.
+    Older dumps carry no folders, so their questionnaires arrive flat in the
+    domain — and `grant_respondent_access` builds a recursive assignment on
+    `audit.folder`, which would hand the respondent the whole domain. Move those
+    audits into an enclave. Evidence is left where the dump put it: an old dump
+    cannot say whether a file was the vendor's or the internal team's.
     """
     from tprm.services import enclave_folder
 
@@ -1571,6 +1618,8 @@ def restore_entity_assessment_enclaves(
         if entity_assessment is None or entity_assessment.compliance_assessment is None:
             continue
         audit = entity_assessment.compliance_assessment
+        if audit.folder.content_type == Folder.ContentType.ENCLAVE:
+            continue
         enclave = enclave_folder(entity_assessment)
         # .update(): Assessment.save would pull the folder back to the perimeter's.
         ComplianceAssessment.objects.filter(id=audit.id).update(folder=enclave)
@@ -1580,30 +1629,6 @@ def restore_entity_assessment_enclaves(
         Answer.objects.filter(
             requirement_assessment__compliance_assessment=audit
         ).update(folder=enclave)
-        # Evidence this questionnaire owns follows it: the respondent's grant is
-        # recursive on the enclave alone, so anything left behind reads as a 403.
-        # Shared evidence stays in the domain, out of the third party's view.
-        owned_evidence = (
-            Evidence.objects.filter(
-                requirement_assessments__compliance_assessment=audit
-            )
-            .exclude(
-                requirement_assessments__compliance_assessment__in=(
-                    ComplianceAssessment.objects.exclude(pk=audit.pk)
-                )
-            )
-            .exclude(applied_controls__isnull=False)
-            .exclude(findings__isnull=False)
-            .exclude(findings_assessments__isnull=False)
-            .exclude(contracts__isnull=False)
-            .exclude(entityassessment__isnull=False)
-            .distinct()
-        )
-        owned_evidence_ids = list(owned_evidence.values_list("pk", flat=True))
-        Evidence.objects.filter(pk__in=owned_evidence_ids).update(folder=enclave)
-        EvidenceRevision.objects.filter(evidence__in=owned_evidence_ids).update(
-            folder=enclave
-        )
 
 
 def split_uuids_urns(ids: List[str]) -> Tuple[List[UUID], List[str]]:

@@ -3824,6 +3824,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
 class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
     framework = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
@@ -3851,6 +3852,7 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "target_score",
             "anchor_na_to_target",
             "field_visibility",
+            "evidences",
             "created_at",
             "updated_at",
         ]

@@ -30,6 +30,7 @@ from core.models import (
     Framework,
     Perimeter,
     StoredLibrary,
+    TaskTemplate,
 )
 from core.utils import build_initial_field_visibility
 from tprm.services import grant_respondent_access
@@ -391,12 +392,14 @@ class TestEntityAssessmentAuditRoundTrip:
         )
         imported_ea = EntityAssessment.objects.get(folder=imported)
 
-        # The audit came back in a rebuilt enclave under the new domain.
+        # The audit came back in its own enclave, carried by the dump rather
+        # than rebuilt: same name, re-parented under the new domain.
         imported_audit = imported_ea.compliance_assessment
         assert imported_audit is not None
         assert imported_audit.folder.content_type == Folder.ContentType.ENCLAVE
         assert imported_audit.folder.parent_folder == imported
-        assert imported_audit.folder.name == provider.name
+        assert imported_audit.folder.name == enclave.name
+        assert imported_audit.folder != enclave
         assert imported_audit.framework == framework_fixture
         assert imported_audit.requirement_assessments.count() == source_ra_count
         assert set(
@@ -670,11 +673,31 @@ class TestQuestionnaireEvidencePlacement:
         requirement_assessment = audit.requirement_assessments.first()
         owned = Evidence.objects.create(name="Questionnaire proof", folder=enclave)
         shared = Evidence.objects.create(name="Shared proof", folder=domain)
-        requirement_assessment.evidences.add(owned, shared)
+        # Also the assessment's own summary evidence: still the questionnaire's,
+        # so being pointed at by *this* entity assessment must not hold it back.
+        summary = Evidence.objects.create(name="Summary proof", folder=enclave)
+        entity_assessment.evidence = summary
+        entity_assessment.save()
+        requirement_assessment.evidences.add(owned, shared, summary)
         # The shared one is also a domain control's evidence, so it must not
         # follow the questionnaire into the enclave.
         control = AppliedControl.objects.create(name="Domain control", folder=domain)
         control.evidences.add(shared)
+        # Shared with an internal task instead: also has to stay behind.
+        task_shared = Evidence.objects.create(name="Task proof", folder=domain)
+        requirement_assessment.evidences.add(task_shared)
+        task = TaskTemplate.objects.create(name="Internal task", folder=domain)
+        task.evidences.add(task_shared)
+        # Attached straight to the audit, never through a requirement: it lives
+        # in the enclave, which no exported folder covers.
+        direct = Evidence.objects.create(name="Direct proof", folder=enclave)
+        audit.evidences.add(direct)
+        # Homonyms across the boundary: dedup fires in the flat folder, but the
+        # one landing in the enclave must not keep a UUID the respondent sees.
+        enclave_dup = Evidence.objects.create(name="Duplicate proof", folder=enclave)
+        requirement_assessment.evidences.add(enclave_dup)
+        domain_dup = Evidence.objects.create(name="Duplicate proof", folder=domain)
+        control.evidences.add(domain_dup)
 
         response = export_domain(domain, admin_user)
         json_dump = process_uploaded_file(io.BytesIO(response.content))
@@ -704,4 +727,385 @@ class TestQuestionnaireEvidencePlacement:
             )
 
         assert imported_evidence("Questionnaire proof").folder == imported_audit.folder
+        assert imported_evidence("Summary proof").folder == imported_audit.folder
         assert imported_evidence("Shared proof").folder == imported
+        assert imported_evidence("Task proof").folder == imported
+
+        imported_direct = Evidence.objects.filter(
+            name__startswith="Direct proof", compliance_assessments=imported_audit
+        ).distinct()
+        assert imported_direct.count() == 1
+        assert imported_direct.get().folder == imported_audit.folder
+
+        # Exact name: dedup happened in the flat folder, the enclave frees it.
+        assert Evidence.objects.filter(
+            name="Duplicate proof", folder=imported_audit.folder
+        ).exists()
+
+    @pytest.mark.django_db
+    def test_assessment_only_evidence_stays_in_the_domain(
+        self, root_folder, admin_user, framework_fixture
+    ):
+        """EntityAssessment.evidence is often an internal analysis the vendor
+        never sees. Being pointed at by the assessment is not, on its own, a
+        reason to move it into the respondent's enclave."""
+        domain = Folder.objects.create(
+            name="Internal Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        provider = Entity.objects.create(
+            name="Internal Provider", ref_id="PROV-I", folder=domain
+        )
+        entity_assessment = EntityAssessment.objects.create(
+            name="Internal assessment", folder=domain, entity=provider
+        )
+        audit = ComplianceAssessment.objects.create(
+            name="Internal questionnaire",
+            framework=framework_fixture,
+            field_visibility=build_initial_field_visibility(framework_fixture),
+        )
+        audit.folder = Folder.objects.create(
+            content_type=Folder.ContentType.ENCLAVE,
+            name=provider.name,
+            parent_folder=domain,
+        )
+        audit.save()
+        audit.create_requirement_assessments()
+        entity_assessment.compliance_assessment = audit
+        # Referenced by the assessment only: never joined to the questionnaire.
+        internal = Evidence.objects.create(name="Internal analysis", folder=domain)
+        entity_assessment.evidence = internal
+        entity_assessment.save()
+
+        response = export_domain(domain, admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        import_objects(
+            json_dump,
+            domain_name="Internal Imported",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        imported = Folder.objects.get(
+            name="Internal Imported", content_type=Folder.ContentType.DOMAIN
+        )
+        imported_ea = EntityAssessment.objects.get(folder=imported)
+        assert imported_ea.compliance_assessment.folder != imported
+        assert imported_ea.evidence is not None
+        assert imported_ea.evidence.folder == imported
+
+    @pytest.mark.django_db
+    def test_same_named_audits_keep_their_version(
+        self, root_folder, admin_user, framework_fixture
+    ):
+        """clean() flags every fields_to_check field it re-checks alone, and
+        version is always "1.0", so dedup must suffix the name only."""
+        domain = Folder.objects.create(
+            name="Version Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        for ref in ("A", "B"):
+            provider = Entity.objects.create(
+                name=f"Version Provider {ref}", ref_id=f"P-{ref}", folder=domain
+            )
+            entity_assessment = EntityAssessment.objects.create(
+                name=f"Assessment {ref}", folder=domain, entity=provider
+            )
+            audit = ComplianceAssessment.objects.create(
+                name="Security questionnaire",
+                framework=framework_fixture,
+                field_visibility=build_initial_field_visibility(framework_fixture),
+            )
+            audit.folder = Folder.objects.create(
+                content_type=Folder.ContentType.ENCLAVE,
+                name=provider.name,
+                parent_folder=domain,
+            )
+            audit.save()
+            entity_assessment.compliance_assessment = audit
+            entity_assessment.save()
+
+        response = export_domain(domain, admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        import_objects(
+            json_dump,
+            domain_name="Version Imported",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        imported = Folder.objects.get(
+            name="Version Imported", content_type=Folder.ContentType.DOMAIN
+        )
+        imported_audits = ComplianceAssessment.objects.filter(
+            folder__parent_folder=imported
+        )
+        assert imported_audits.count() == 2
+        assert set(imported_audits.values_list("version", flat=True)) == {"1.0"}
+        # Deduped against the flat folder, but they end up in separate enclaves:
+        # both keep the title they were exported with.
+        assert set(imported_audits.values_list("name", flat=True)) == {
+            "Security questionnaire"
+        }
+        assert len({audit.folder_id for audit in imported_audits}) == 2
+
+    @pytest.mark.django_db
+    def test_evidence_shared_between_rounds_follows_the_common_enclave(
+        self, root_folder, admin_user, framework_fixture
+    ):
+        """Successive rounds for one entity share an enclave and can share
+        evidence (baseline reuse). Belonging to a second questionnaire of the
+        same workspace must not strand it in the domain."""
+        domain = Folder.objects.create(
+            name="Rounds Evidence Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        provider = Entity.objects.create(
+            name="Rounds Provider", ref_id="PROV-RR", folder=domain
+        )
+        enclave = Folder.objects.create(
+            content_type=Folder.ContentType.ENCLAVE,
+            name=provider.name,
+            parent_folder=domain,
+        )
+        reused = Evidence.objects.create(name="Reused proof", folder=enclave)
+
+        for round_name in ("Round 1", "Round 2"):
+            entity_assessment = EntityAssessment.objects.create(
+                name=round_name, folder=domain, entity=provider
+            )
+            audit = ComplianceAssessment.objects.create(
+                name=round_name,
+                framework=framework_fixture,
+                field_visibility=build_initial_field_visibility(framework_fixture),
+            )
+            audit.folder = enclave
+            audit.save()
+            audit.create_requirement_assessments()
+            entity_assessment.compliance_assessment = audit
+            entity_assessment.save()
+            audit.requirement_assessments.first().evidences.add(reused)
+
+        response = export_domain(domain, admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        import_objects(
+            json_dump,
+            domain_name="Rounds Evidence Imported",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        imported = Folder.objects.get(
+            name="Rounds Evidence Imported", content_type=Folder.ContentType.DOMAIN
+        )
+        imported_enclaves = {
+            entity_assessment.compliance_assessment.folder
+            for entity_assessment in EntityAssessment.objects.filter(folder=imported)
+        }
+        assert len(imported_enclaves) == 1
+        common_enclave = imported_enclaves.pop()
+
+        imported_reused = (
+            Evidence.objects.filter(
+                name__startswith="Reused proof",
+                requirement_assessments__compliance_assessment__folder=common_enclave,
+            )
+            .distinct()
+            .get()
+        )
+        assert imported_reused.folder == common_enclave
+
+
+# ============ Exported enclaves ============
+
+
+class TestExportedEnclaves:
+    @pytest.mark.django_db
+    def test_enclaves_travel_but_domains_do_not(self, root_folder, framework_fixture):
+        """Enclaves carry who may see what, so they are exported. Domain folders
+        are not: that is what still flattens sub-domains away on Community."""
+        domain = Folder.objects.create(
+            name="Carried Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        sub_domain = Folder.objects.create(
+            name="Carried Sub",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=domain,
+        )
+        enclave = Folder.objects.create(
+            name="Carried Enclave",
+            content_type=Folder.ContentType.ENCLAVE,
+            parent_folder=domain,
+        )
+
+        data = get_domain_export_objects(domain)
+
+        assert enclave in data["folder"]
+        assert domain not in data["folder"]
+        assert sub_domain not in data["folder"]
+
+    @pytest.mark.django_db
+    def test_dump_carrying_a_domain_folder_is_rejected(self, root_folder, admin_user):
+        """The guard still refuses a foreign dump: only enclaves may travel."""
+        parsed = {
+            "meta": {
+                "media_version": settings.VERSION,
+                "schema_version": settings.SCHEMA_VERSION,
+                "exported_at": "2026-01-01T00:00:00Z",
+            },
+            "objects": [
+                {
+                    "model": "iam.folder",
+                    "id": "aaaaaaaaaaaa",
+                    "fields": {
+                        "name": "Smuggled domain",
+                        "content_type": Folder.ContentType.DOMAIN,
+                        "parent_folder": None,
+                    },
+                }
+            ],
+        }
+
+        with pytest.raises(DjangoValidationError) as exc_info:
+            import_objects(
+                parsed,
+                domain_name="Rejected",
+                load_missing_libraries=True,
+                user=admin_user,
+            )
+        assert "Dump contains a domain" in str(exc_info.value)
+        assert not Folder.objects.filter(name="Rejected").exists()
+
+    @pytest.mark.django_db
+    def test_enclave_evidence_lands_in_the_enclave_without_inference(
+        self, root_folder, admin_user, framework_fixture
+    ):
+        """No ownership is derived any more: an evidence sitting in the enclave
+        goes back to the enclave, one sitting in the domain stays in the domain,
+        even when both hang off the same requirement."""
+        domain = Folder.objects.create(
+            name="Carried Evidence Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        provider = Entity.objects.create(
+            name="Carried Provider", ref_id="PROV-C", folder=domain
+        )
+        entity_assessment = EntityAssessment.objects.create(
+            name="Carried assessment", folder=domain, entity=provider
+        )
+        enclave = Folder.objects.create(
+            content_type=Folder.ContentType.ENCLAVE,
+            name=provider.name,
+            parent_folder=domain,
+        )
+        audit = ComplianceAssessment.objects.create(
+            name="Carried audit",
+            framework=framework_fixture,
+            field_visibility=build_initial_field_visibility(framework_fixture),
+        )
+        audit.folder = enclave
+        audit.save()
+        audit.create_requirement_assessments()
+        entity_assessment.compliance_assessment = audit
+        entity_assessment.save()
+
+        requirement_assessment = audit.requirement_assessments.first()
+        in_enclave = Evidence.objects.create(name="Vendor file", folder=enclave)
+        in_domain = Evidence.objects.create(name="Internal file", folder=domain)
+        requirement_assessment.evidences.add(in_enclave, in_domain)
+
+        response = export_domain(domain, admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        import_objects(
+            json_dump,
+            domain_name="Carried Evidence Imported",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        imported = Folder.objects.get(
+            name="Carried Evidence Imported", content_type=Folder.ContentType.DOMAIN
+        )
+        imported_audit = EntityAssessment.objects.get(
+            folder=imported
+        ).compliance_assessment
+        imported_enclave = imported_audit.folder
+        assert imported_enclave.content_type == Folder.ContentType.ENCLAVE
+
+        def imported_evidence(name):
+            return (
+                Evidence.objects.filter(
+                    name=name,
+                    requirement_assessments__compliance_assessment=imported_audit,
+                )
+                .distinct()
+                .get()
+            )
+
+        assert imported_evidence("Vendor file").folder == imported_enclave
+        assert imported_evidence("Internal file").folder == imported
+
+    @pytest.mark.django_db
+    def test_legacy_dump_without_enclaves_still_isolates_the_audit(
+        self, root_folder, admin_user, framework_fixture
+    ):
+        """Dumps predating schema 3 carry no folders, so their questionnaires
+        would land flat in the domain — where grant_respondent_access would hand
+        the respondent everything. The fallback puts them back in an enclave."""
+        domain = Folder.objects.create(
+            name="Legacy Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        provider = Entity.objects.create(
+            name="Legacy Provider", ref_id="PROV-L", folder=domain
+        )
+        entity_assessment = EntityAssessment.objects.create(
+            name="Legacy assessment", folder=domain, entity=provider
+        )
+        audit = ComplianceAssessment.objects.create(
+            name="Legacy audit",
+            framework=framework_fixture,
+            field_visibility=build_initial_field_visibility(framework_fixture),
+        )
+        audit.folder = Folder.objects.create(
+            content_type=Folder.ContentType.ENCLAVE,
+            name=provider.name,
+            parent_folder=domain,
+        )
+        audit.save()
+        audit.create_requirement_assessments()
+        entity_assessment.compliance_assessment = audit
+        entity_assessment.save()
+
+        response = export_domain(domain, admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        # Drop the folders: that is exactly what an older dump looks like.
+        json_dump["meta"]["schema_version"] = 2
+        json_dump["objects"] = [
+            obj for obj in json_dump["objects"] if obj["model"] != "iam.folder"
+        ]
+        import_objects(
+            json_dump,
+            domain_name="Legacy Imported",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        imported = Folder.objects.get(
+            name="Legacy Imported", content_type=Folder.ContentType.DOMAIN
+        )
+        imported_audit = EntityAssessment.objects.get(
+            folder=imported
+        ).compliance_assessment
+        assert imported_audit.folder.content_type == Folder.ContentType.ENCLAVE
+        assert imported_audit.folder.parent_folder == imported
+        assert set(
+            imported_audit.requirement_assessments.values_list("folder", flat=True)
+        ) == {imported_audit.folder_id}
