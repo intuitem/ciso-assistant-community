@@ -57,7 +57,6 @@ export const load: PageServerLoad = async (event) => {
 			// Gracefully degrade
 		}
 
-		// Load the revision the lifecycle acts on (newest under review, else published)
 		const working = pickWorkingRevision(revisions, document.current_revision?.id);
 		try {
 			if (working) {

@@ -57,8 +57,7 @@
 	};
 
 	let status = $derived(currentRevision?.status as string | undefined);
-	// Lifecycle transitions are POSTs, which RBACPermissions maps to
-	// `add_documentrevision` on the revision's folder.
+	// RBACPermissions maps POST to add_<model>, hence add_documentrevision here.
 	let canTransition = $derived(
 		canPerformActionOnObject({
 			user: page.data.user,
@@ -67,8 +66,7 @@
 			object: currentRevision ?? document ?? parent
 		})
 	);
-	// The delete button removes the whole locale variant (a ManagedDocument),
-	// so it needs delete on that model, not on DocumentRevision.
+	// Deletes the whole locale variant, not a revision.
 	let canDeleteDocument = $derived(
 		canPerformActionOnObject({
 			user: page.data.user,

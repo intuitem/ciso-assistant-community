@@ -1331,7 +1331,6 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         content_html = mark_safe(self._inline_images(content_html, set(accessible_ids)))
 
         author_name = str(revision.author) if revision.author else ""
-        # Who approved the revision — distinct from who drafted it.
         reviewer_name = str(revision.reviewer) if revision.reviewer else ""
         doc = revision.document
         container = getattr(doc, "container", None)

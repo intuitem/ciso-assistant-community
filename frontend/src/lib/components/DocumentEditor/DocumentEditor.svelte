@@ -165,12 +165,8 @@
 		notifyError(data?.detail || data?.error || data?.message || m.error());
 	}
 
-	/**
-	 * Callers only ever branch on `res.ok`, so a rejected lifecycle transition
-	 * (403 from RBAC, 400 from a status guard) would otherwise fail in silence.
-	 * Pass `notify: false` when the caller renders the failure itself, or when
-	 * the call is best-effort cleanup the user never asked for.
-	 */
+	// Callers only branch on res.ok, so a refused transition would fail silently.
+	// notify:false = the caller renders it itself, or it is best-effort cleanup.
 	async function proxyPost(body: Record<string, any>, { notify = true } = {}) {
 		const res = await fetch(proxyUrl, {
 			method: 'POST',
@@ -720,8 +716,7 @@
 		}
 	}
 
-	// Lifecycle transitions are POSTs, which RBACPermissions maps to
-	// `add_documentrevision` on the revision's folder.
+	// RBACPermissions maps POST to add_<model>, hence add_documentrevision here.
 	let canTransition = $derived(
 		canPerformActionOnObject({
 			user: page.data.user,
@@ -730,9 +725,7 @@
 			object: currentRevision ?? document ?? parent
 		})
 	);
-	// The two delete buttons hit different endpoints, so they need different perms:
-	// the trash in the version history deletes a DocumentRevision, the toolbar
-	// button deletes the whole locale variant (a ManagedDocument).
+	// The two delete buttons hit different endpoints, hence different perms.
 	let canDeleteRevision = $derived(
 		canPerformActionOnObject({
 			user: page.data.user,

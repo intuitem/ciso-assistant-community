@@ -162,6 +162,16 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
+	// No route matched: the 404 page needs no session, CSRF or locale, and without
+	// this each unmatched path costs two backend round-trips. route.id is set by now.
+	if (!event.route.id) {
+		event.locals.featureFlags = loadFeatureFlags();
+		const locale = event.cookies.get('LOCALE') || DEFAULT_LANGUAGE;
+		return resolve(event, {
+			transformPageChunk: ({ html }) => html.replace('%lang%', locale).replace('%theme%', '')
+		});
+	}
+
 	const localeForRequest = await ensureDefaultLocale(event);
 	fallbackLocaleStore.set(event.request, localeForRequest);
 

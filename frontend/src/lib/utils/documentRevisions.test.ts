@@ -18,8 +18,7 @@ describe('pickWorkingRevision', () => {
 	});
 
 	it('picks an in-review successor over the published current revision', () => {
-		// Regression: the successor used to stay hidden behind the published v1,
-		// leaving no way to approve it (#4779).
+		// #4779: the successor used to stay hidden behind the published v1.
 		const revisions = [rev(2, 'in_review'), rev(1, 'published')];
 		expect(pickWorkingRevision(revisions, 'v1')?.id).toBe('v2');
 	});
