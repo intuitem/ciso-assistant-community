@@ -3824,6 +3824,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
 class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
     framework = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
@@ -3851,6 +3852,7 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "target_score",
             "anchor_na_to_target",
             "field_visibility",
+            "evidences",
             "created_at",
             "updated_at",
         ]
@@ -4743,9 +4745,14 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
             "folder",
             "status",
             "result",
+            "extended_result",
             "score",
             "is_scored",
             "is_score_overridden",
+            "documentation_score",
+            "target_score",
+            "respondent_alignment",
+            "review_state",
             "observation",
             "compliance_assessment",
             "requirement",
@@ -4790,6 +4797,7 @@ class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
     evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    compliance_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
         model = FindingsAssessment
@@ -4808,6 +4816,7 @@ class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
             "folder",
             "perimeter",
             "evidences",
+            "compliance_assessment",
             "created_at",
             "updated_at",
         ]
@@ -4972,6 +4981,9 @@ class TaskTemplateImportExportSerializer(BaseModelSerializer):
     compliance_assessments = HashSlugRelatedField(
         slug_field="pk", read_only=True, many=True
     )
+    requirement_assessments = HashSlugRelatedField(
+        slug_field="pk", read_only=True, many=True
+    )
     risk_assessments = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     findings_assessment = HashSlugRelatedField(
         slug_field="pk", read_only=True, many=True
@@ -4993,6 +5005,7 @@ class TaskTemplateImportExportSerializer(BaseModelSerializer):
             "assets",
             "applied_controls",
             "compliance_assessments",
+            "requirement_assessments",
             "risk_assessments",
             "findings_assessment",
             "created_at",
