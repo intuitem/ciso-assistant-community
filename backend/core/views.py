@@ -38,6 +38,7 @@ from django.db.models import (
     ForeignKey,
     OneToOneField,
     ManyToManyField,
+    ProtectedError,
     QuerySet,
     Prefetch,
 )
@@ -67,7 +68,17 @@ from jinja2.sandbox import SandboxedEnvironment
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from webhooks.service import dispatch_webhook_event
-from .generators import gen_audit_context
+from .generators import (
+    REPORT_PROFILES,
+    action_plan_context,
+    findings_assessment_context,
+    incident_context,
+    risk_assessment_context,
+    audit_context_for_typst,
+    gen_audit_context,
+    inline_charts_for_docx,
+)
+from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField
 
 from django.utils import timezone, translation
@@ -147,8 +158,6 @@ from rest_framework.exceptions import (
     ValidationError as DRFValidationError,
 )
 
-
-from weasyprint import HTML
 
 from core.helpers import *
 from core.models import (
@@ -1586,9 +1595,79 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         self._process_task_template_evidences(request)
         return super().partial_update(request, *args, **kwargs)
 
+    def get_protected_error_response_data(
+        self, instance, error: ProtectedError
+    ) -> dict:
+        """
+        Build the JSON body returned when a delete is blocked by an
+        on_delete=PROTECT foreign key. Override in a subclass to describe the
+        blockers more specifically (see EntityViewSet, ElementaryActionViewSet);
+        the default here falls back to Django's own protected_objects so it
+        stays accurate for whichever relation actually blocked the delete.
+
+        Only blockers the caller may view are named: delete_<model> doesn't
+        imply view_<other-model> (e.g. delete_folder without view_killchain),
+        so an unfiltered protected_objects would leak the existence/name of
+        objects the caller otherwise couldn't see.
+        """
+        # Django only raises ProtectedError with a non-empty protected_objects,
+        # so `protected_objects` is never empty here.
+        protected_objects = list(error.protected_objects)
+        visible_objects = [
+            obj for obj in protected_objects if self._is_visible_to_requester(obj)
+        ]
+
+        if not visible_objects:
+            return {
+                "detail": (
+                    f"Cannot delete this {instance._meta.verbose_name} "
+                    f"('{instance}'): it is still referenced by other objects. "
+                    "Remove those references first."
+                )
+            }
+
+        names = ", ".join(str(obj) for obj in visible_objects[:10])
+        if len(visible_objects) > 10:
+            names += ", ..."
+        hidden_count = len(protected_objects) - len(visible_objects)
+        if hidden_count:
+            names += f", and {hidden_count} more you don't have access to"
+        return {
+            "detail": (
+                f"Cannot delete this {instance._meta.verbose_name} "
+                f"('{instance}'): it is still referenced by other objects "
+                f"({names}). Remove those references first."
+            )
+        }
+
+    def _is_visible_to_requester(self, obj) -> bool:
+        folder = Folder.get_folder(obj)
+        if folder is None:
+            return False
+        try:
+            perm = Permission.objects.get(codename=f"view_{obj._meta.model_name}")
+        except Permission.DoesNotExist:
+            return False
+        return RoleAssignment.is_access_allowed(
+            user=self.request.user, perm=perm, folder=folder
+        )
+
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
-        return super().destroy(request, *args, **kwargs)
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError as e:
+            # Collector.collect() raises ProtectedError before any row is
+            # deleted, so the instance is guaranteed to still exist here —
+            # fetch it only on this (already slow) error path rather than on
+            # every delete, to avoid an extra get_object() call/permission
+            # check on the success path (and extra lock-hold time for
+            # subclasses that wrap destroy() in a transaction, e.g. UserViewSet).
+            instance = self.get_object()
+            return Response(
+                self.get_protected_error_response_data(instance, e),
+                status=status.HTTP_409_CONFLICT,
+            )
 
     @action(detail=False, methods=["post"], url_path="batch-action")
     def batch_action(self, request):
@@ -4471,43 +4550,52 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         )
         if UUID(pk) in object_ids_view:
             risk_assessment = self.get_object()
-            context = RiskScenario.objects.filter(
-                risk_assessment=risk_assessment
-            ).order_by("ref_id")
-            for scenario in context:
+            scenarios = (
+                RiskScenario.objects.filter(risk_assessment=risk_assessment)
+                .prefetch_related(
+                    "threats",
+                    "assets",
+                    "applied_controls",
+                    "existing_applied_controls",
+                )
+                .order_by("ref_id")
+            )
+            for scenario in scenarios:
                 scenario.strength_of_knowledge = RiskScenario.DEFAULT_SOK_OPTIONS[
                     scenario.strength_of_knowledge
                 ]["name"]
+
             general_settings = GlobalSettings.objects.filter(name="general").first()
-            swap_axes = general_settings.value.get("risk_matrix_swap_axes", False)
-            flip_vertical = general_settings.value.get(
-                "risk_matrix_flip_vertical", False
-            )
-            matrix_settings = {
-                "swap_axes": "_swapaxes" if swap_axes else "",
-                "flip_vertical": "_vflip" if flip_vertical else "",
-            }
+            settings_value = general_settings.value if general_settings else {}
             ff_settings = GlobalSettings.objects.filter(
                 name=GlobalSettings.Names.FEATURE_FLAGS
             ).first()
-            if ff_settings is None:
-                feature_flags = {}
-            else:
-                feature_flags = ff_settings.value
-            data = {
-                "context": context,
-                "risk_assessment": risk_assessment,
-                "ri_clusters": build_scenario_clusters(
+            feature_flags = ff_settings.value if ff_settings else {}
+
+            lang = request.user.preferences.get("lang") or "en"
+            payload = risk_assessment_context(
+                risk_assessment,
+                scenarios,
+                build_scenario_clusters(
                     risk_assessment,
                     include_inherent=feature_flags.get("inherent_risk", False),
                 ),
-                "risk_matrix": risk_assessment.risk_matrix,
-                "settings": matrix_settings,
-                "feature_flags": feature_flags,
-            }
-            html = render_to_string("core/ra_pdf.html", data)
-            pdf_file = HTML(string=html).write_pdf()
-            response = HttpResponse(pdf_file, content_type="application/pdf")
+                swap_axes=settings_value.get("risk_matrix_swap_axes", False),
+                flip_vertical=settings_value.get("risk_matrix_flip_vertical", False),
+                lang=lang,
+                label_standard=settings_value.get("risk_matrix_labels", "ISO"),
+                use_risk_category_label=settings_value.get(
+                    "use_risk_category_label", False
+                ),
+            )
+            response = HttpResponse(
+                render_pdf(localized_template("risk_report", lang), payload),
+                content_type="application/pdf",
+            )
+            safe_name = slugify(risk_assessment.name) or "risk-assessment"
+            response["Content-Disposition"] = (
+                f'attachment; filename="{safe_name}_risk_report.pdf"'
+            )
             return response
         else:
             return Response({"error": "Permission denied"})
@@ -4518,43 +4606,35 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             request.user, RiskAssessment
         )
         if UUID(pk) in object_ids_view:
-            context = {
-                "to_do": list(),
-                "in_progress": list(),
-                "on_hold": list(),
-                "active": list(),
-                "deprecated": list(),
-                "--": list(),
-            }
-            color_map = {
-                "to_do": "#FFF8F0",
-                "in_progress": "#392F5A",
-                "on_hold": "#F4D06F",
-                "active": "#9DD9D2",
-                "deprecated": "#ff8811",
-                "--": "#e5e7eb",
-            }
-            status = AppliedControl.Status.choices
-            risk_assessment_object: RiskAssessment = self.get_object()
-            risk_scenarios_objects = risk_assessment_object.risk_scenarios.all()
-            applied_controls = (
-                AppliedControl.objects.filter(risk_scenarios__in=risk_scenarios_objects)
+            risk_assessment: RiskAssessment = self.get_object()
+            scenarios = risk_assessment.risk_scenarios.all()
+            applied_controls = list(
+                AppliedControl.objects.filter(risk_scenarios__in=scenarios)
                 .distinct()
+                .prefetch_related("risk_scenarios", actor_prefetch("owner"))
                 .order_by("eta")
             )
-            for applied_control in applied_controls:
-                context[applied_control.status].append(
-                    applied_control
-                ) if applied_control.status else context["--"].append(applied_control)
-            data = {
-                "status_text": status,
-                "color_map": color_map,
-                "context": context,
-                "risk_assessment": risk_assessment_object,
+            scenario_ids = {scenario.id for scenario in scenarios}
+            linked = {
+                control.id: [
+                    str(scenario)
+                    for scenario in control.risk_scenarios.all()
+                    if scenario.id in scenario_ids
+                ]
+                for control in applied_controls
             }
-            html = render_to_string("core/risk_action_plan_pdf.html", data)
-            pdf_file = HTML(string=html).write_pdf()
-            response = HttpResponse(pdf_file, content_type="application/pdf")
+            lang = request.user.preferences.get("lang") or "en"
+            payload = action_plan_context(
+                risk_assessment, applied_controls, lang, linked
+            )
+            response = HttpResponse(
+                render_pdf(localized_template("action_plan", lang), payload),
+                content_type="application/pdf",
+            )
+            safe_name = slugify(risk_assessment.name) or "risk-assessment"
+            response["Content-Disposition"] = (
+                f'attachment; filename="{safe_name}_action_plan.pdf"'
+            )
             return response
         else:
             return Response({"error": "Permission denied"})
@@ -8123,60 +8203,131 @@ class UserViewSet(BaseModelViewSet):
             )
         )
 
-    def update(self, request: Request, *args, **kwargs) -> Response:
-        user = self.get_object()
-        # This form edits DIRECT group membership only, so the guard protects the
-        # last *directly*-managed (BI-UG-ADM) administrator — the lockout-proof
-        # anchor that SCIM/IdP can never reach and that must always exist.
-        # Admins inherited via an IdP group are managed by the IdP, not here, so
-        # they neither gate this check nor count toward it.
-        # Only relevant when the request actually rewrites group membership;
-        # a partial edit that omits user_groups can't strip the admin group.
-        if (
-            "user_groups" in request.data
-            and user.user_groups.filter(name="BI-UG-ADM").exists()
+    # Fields whose change on a direct administrator could end in a zero-admin
+    # lockout: group membership (stripping BI-UG-ADM) and the lifecycle fields
+    # that deactivate, now or on expiry.
+    LOCKOUT_SENSITIVE_FIELDS = ("user_groups", "is_active", "expiry_date")
+
+    def perform_update(self, serializer):
+        """Authoritative pass on the last-admin invariants, under the admin-group
+        lock and in the same transaction as the write.
+
+        UserWriteSerializer runs the same predicates during validation, but that
+        read happens before any lock is taken, so on its own it is check-then-act:
+        two concurrent requests stripping BI-UG-ADM from two *different* admins
+        both see a second admin still standing and both proceed, leaving none.
+
+        This lives in perform_update rather than update() because batch_action
+        calls it directly. A lock only excludes writers that take it, so leaving
+        the batch path outside would not merely leave batch writes unprotected —
+        it would let them slip past the lock a concurrent update() is holding.
+        NOTE: select_for_update is a no-op on SQLite, which has no
+        SELECT ... FOR UPDATE; the checks still hold there, only the window stays
+        open."""
+        instance = serializer.instance
+        attrs = serializer.validated_data
+        if not (
+            instance is not None
+            and any(field in attrs for field in self.LOCKOUT_SENSITIVE_FIELDS)
+            and UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists()
         ):
-            with transaction.atomic():
-                # Lock the admin group row so this check-then-act can't race a
-                # concurrent admin-membership change into a zero-admin lockout.
-                admin_group = (
-                    UserGroup.objects.select_for_update()
-                    .filter(name="BI-UG-ADM")
-                    .first()
+            return super().perform_update(serializer)
+
+        with transaction.atomic():
+            UserGroup.objects.select_for_update().filter(name="BI-UG-ADM").first()
+            if "user_groups" in attrs and UserWriteSerializer.strips_last_admin_group(
+                instance, attrs["user_groups"]
+            ):
+                self._deny_lockout(
+                    "last_admin_group",
+                    {"error": "attemptToRemoveOnlyAdminUserGroup"},
+                    instance,
                 )
-                direct_admin_count = User.objects.filter(
-                    user_groups__name="BI-UG-ADM"
-                ).count()
-                if direct_admin_count == 1 and admin_group is not None:
-                    new_user_groups = set(request.data["user_groups"])
-                    if str(admin_group.pk) not in new_user_groups:
-                        return Response(
-                            {"error": "attemptToRemoveOnlyAdminUserGroup"},
-                            status=status.HTTP_403_FORBIDDEN,
-                        )
-                return super().update(request, *args, **kwargs)
+            offending = UserWriteSerializer.deactivates_last_active_admin(
+                instance, attrs
+            )
+            if offending:
+                self._deny_lockout(
+                    "last_active_admin",
+                    {
+                        field: ["attemptToDeactivateOnlyAdminAccountError"]
+                        for field in offending
+                    },
+                    instance,
+                )
+            return super().perform_update(serializer)
 
-        return super().update(request, *args, **kwargs)
+    def _deny_lockout(self, guard: str, errors: dict, user) -> None:
+        """Log the refused write as a security event, then raise it. Raising
+        inside perform_update rolls the transaction back, and batch_action
+        collects the PermissionDenied into its per-object `failed` list."""
+        logger.warning(
+            "denied privileged user operation",
+            guard=guard,
+            errors=errors,
+            requester=self.request.user.email,
+            target=user.email,
+        )
+        raise PermissionDenied(errors)
 
-    def destroy(self, request, *args, **kwargs):
-        user = self.get_object()
+    def _deny_destroy(self, guard: str, error_key: str, user) -> None:
+        """Log the denied deletion as a security event, then raise it. DRF
+        renders the dict detail as the response body, so the payload stays
+        `{"error": ...}` on both the single-object and batch paths."""
+        errors = {"error": error_key}
+        logger.warning(
+            "denied privileged user operation",
+            guard=guard,
+            errors=errors,
+            requester=self.request.user.email,
+            target=user.email,
+        )
+        raise PermissionDenied(errors)
+
+    def perform_destroy(self, instance):
+        """Every deletion guard lives here, not in destroy(): batch_action calls
+        perform_destroy() directly, so a guard placed in destroy() would leave
+        POST /users/batch-action/ {"action": "delete"} as an unguarded path to
+        the very deletions this protects against."""
+        # SCIM owns this account's lifecycle: identity fields are immutable via
+        # the API (see UserWriteSerializer) and deprovisioning normally arrives
+        # through SCIM. Manual deletion is the admin-only escape hatch for a
+        # decommissioned SCIM integration, not a user-manager operation.
+        if instance.is_scim_managed and not self.request.user.is_admin():
+            self._deny_destroy("scim_delete", "onlyAdminCanDeleteScimAccount", instance)
+        # Deleting an administrator is a lifecycle operation on the admin
+        # group's power: require the right that guards its membership, so the
+        # deactivation guard (UserWriteSerializer) can't be bypassed by
+        # reaching for the bigger hammer. Non-admin accounts stay deletable
+        # with plain delete_user, consistent with their deactivation.
+        if instance.is_admin() and not RoleAssignment.is_access_allowed(
+            user=self.request.user,
+            perm=UserWriteSerializer._change_usergroup_perm(),
+            folder=Folder.get_root_folder(),
+        ):
+            self._deny_destroy(
+                "admin_delete", "deletingAdminAccountRequiresAdminRights", instance
+            )
         # Protect the last direct (locally-managed) administrator — see update().
-        if user.user_groups.filter(name="BI-UG-ADM").exists():
+        if UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists():
             with transaction.atomic():
                 # Lock the admin group row so this check-then-act can't race a
                 # concurrent admin removal into a zero-admin lockout.
+                # NOTE: a no-op on SQLite, which has no SELECT ... FOR UPDATE;
+                # the check itself still holds, only the race window remains.
                 UserGroup.objects.select_for_update().filter(name="BI-UG-ADM").first()
                 direct_admin_count = User.objects.filter(
                     user_groups__name="BI-UG-ADM"
                 ).count()
                 if direct_admin_count == 1:
-                    return Response(
-                        {"error": "attemptToDeleteOnlyAdminAccountError"},
-                        status=status.HTTP_403_FORBIDDEN,
+                    self._deny_destroy(
+                        "last_admin_delete",
+                        "attemptToDeleteOnlyAdminAccountError",
+                        instance,
                     )
-                return super().destroy(request, *args, **kwargs)
+                return super().perform_destroy(instance)
 
-        return super().destroy(request, *args, **kwargs)
+        return super().perform_destroy(instance)
 
 
 class TranslatedNameOrderingFilter(SmartOrderingFilter):
@@ -12088,8 +12239,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # children in place but the returned dict drops them).
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
-        context = gen_audit_context(pk, doc, tree, user_lang)
-        doc.render(context, jinja_env=SandboxedEnvironment())
+        context = gen_audit_context(pk, tree, user_lang)
+        doc.render(
+            inline_charts_for_docx(context, doc), jinja_env=SandboxedEnvironment()
+        )
         buffer_doc = io.BytesIO()
         doc.save(buffer_doc)
         buffer_doc.seek(0)
@@ -12100,6 +12253,73 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         response["Content-Disposition"] = "attachment; filename=exec_report.docx"
 
+        return response
+
+    @action(detail=True, name="Get audit posture PDF", url_path="posture-pdf")
+    def posture_pdf(self, request, pk):
+        """Audit posture as a PDF, redacted for the caller's viewer role."""
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
+        )
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        audit = self.get_object()
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        role = (
+            "respondent"
+            if respondent_folders and audit.folder_id in respondent_folders
+            else "auditor"
+        )
+
+        framework = audit.framework
+        # Object-level permission is not enough: a respondent sees only their
+        # assigned requirements, and CEL-hidden ones do not apply at all.
+        assessments, hidden_urns = scoped_requirement_assessments(audit, request.user)
+        nodes = RequirementNode.objects.filter(framework=framework)
+        if hidden_urns:
+            nodes = nodes.exclude(urn__in=hidden_urns)
+        tree = get_sorted_requirement_nodes(
+            list(nodes),
+            assessments,
+            audit.max_score if audit.max_score is not None else framework.max_score,
+            audit.min_score if audit.min_score is not None else framework.min_score,
+        )
+        # Don't reassign: empty top-level sections must survive for the charts.
+        filter_graph_by_implementation_groups(
+            tree, audit.selected_implementation_groups
+        )
+        annotate_tree_with_aggregated_scores(tree, audit)
+
+        profile = request.query_params.get("profile", "full")
+        if profile not in REPORT_PROFILES:
+            return Response(
+                {"error": "unknownProfile"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        lang = request.user.preferences.get("lang") or "en"
+        wants_charts = "charts" in REPORT_PROFILES[profile]["sections"]
+        context = gen_audit_context(
+            pk, tree, lang, assessments=assessments, charts=wants_charts
+        )
+        payload, images = audit_context_for_typst(
+            context, audit, role, lang, profile, assessments=assessments
+        )
+
+        response = HttpResponse(
+            render_pdf(
+                localized_template(REPORT_PROFILES[profile]["template"], lang),
+                payload,
+                images=images,
+            ),
+            content_type="application/pdf",
+        )
+        safe_name = slugify(audit.name) or "audit"
+        response["Content-Disposition"] = (
+            f'attachment; filename="{safe_name}_{profile}.pdf"'
+        )
         return response
 
     @action(detail=True, name="Get action plan CSV")
@@ -12307,33 +12527,34 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "deprecated": "#ff8811",
                 "--": "#e5e7eb",
             }
-            status = AppliedControl.Status.choices
-            compliance_assessment_object: ComplianceAssessment = self.get_object()
-            requirement_assessments_objects = (
-                compliance_assessment_object.get_requirement_assessments(
-                    include_non_assessable=True
-                )
-            )
-            applied_controls = (
-                AppliedControl.objects.filter(
-                    requirement_assessments__in=requirement_assessments_objects
-                )
+            audit: ComplianceAssessment = self.get_object()
+            assessments, _hidden = scoped_requirement_assessments(audit, request.user)
+            applied_controls = list(
+                AppliedControl.objects.filter(requirement_assessments__in=assessments)
                 .distinct()
+                .prefetch_related(
+                    "requirement_assessments__requirement", actor_prefetch("owner")
+                )
                 .order_by("eta")
             )
-            for applied_control in applied_controls:
-                context[applied_control.status].append(
-                    applied_control
-                ) if applied_control.status else context["--"].append(applied_control)
-            data = {
-                "status_text": status,
-                "color_map": color_map,
-                "context": context,
-                "compliance_assessment": compliance_assessment_object,
+            linked = {
+                control.id: [
+                    str(ra.requirement.display_short)
+                    for ra in control.requirement_assessments.all()
+                    if ra.compliance_assessment_id == audit.id
+                ]
+                for control in applied_controls
             }
-            html = render_to_string("core/action_plan_pdf.html", data)
-            pdf_file = HTML(string=html).write_pdf()
-            response = HttpResponse(pdf_file, content_type="application/pdf")
+            lang = request.user.preferences.get("lang") or "en"
+            payload = action_plan_context(audit, applied_controls, lang, linked)
+            response = HttpResponse(
+                render_pdf(localized_template("action_plan", lang), payload),
+                content_type="application/pdf",
+            )
+            safe_name = slugify(audit.name) or "audit"
+            response["Content-Disposition"] = (
+                f'attachment; filename="{safe_name}_action_plan.pdf"'
+            )
             return response
         else:
             return Response({"error": "Permission denied"})
@@ -16046,18 +16267,15 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         def format_status_data(metrics):
             status_mapping = {
-                "identified": {"localName": "identified", "color": "#F5C481"},
-                "confirmed": {"localName": "confirmed", "color": "#E6686D"},
-                "assigned": {"localName": "assigned", "color": "#fab998"},
-                "in_progress": {"localName": "inProgress", "color": "#fac858"},
-                "mitigated": {
-                    "localName": "mitigated",
-                    "color": "hsl(80deg, 80%, 60%)",
-                },
-                "resolved": {"localName": "resolved", "color": "hsl(120deg, 80%, 45%)"},
-                "closed": {"localName": "closed", "color": "hsl(120deg, 60%, 35%)"},
-                "dismissed": {"localName": "dismissed", "color": "#5470c6"},
-                "deprecated": {"localName": "deprecated", "color": "#91cc75"},
+                "identified": {"localName": "identified", "color": "#DDCC77"},
+                "confirmed": {"localName": "confirmed", "color": "#CC6677"},
+                "assigned": {"localName": "assigned", "color": "#88CCEE"},
+                "in_progress": {"localName": "inProgress", "color": "#44AA99"},
+                "mitigated": {"localName": "mitigated", "color": "#117733"},
+                "resolved": {"localName": "resolved", "color": "#AA4499"},
+                "closed": {"localName": "closed", "color": "#882255"},
+                "dismissed": {"localName": "dismissed", "color": "#999933"},
+                "deprecated": {"localName": "deprecated", "color": "#332288"},
                 "--": {"localName": "undefined", "color": "#CCCCCC"},
             }
 
@@ -16209,7 +16427,12 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
             .select_related("folder")
-            .prefetch_related("applied_controls", "evidences")
+            .prefetch_related(
+                "applied_controls",
+                "evidences",
+                actor_prefetch("owner"),
+                "filtering_labels",
+            )
             .order_by("ref_id")
         )
 
@@ -16331,56 +16554,12 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .prefetch_related("applied_controls", "evidences", actor_prefetch("owner"))
             .order_by("ref_id")
         )
-        metrics = findings_assessment.get_findings_metrics()
-
-        # Calculate closed and open findings counts
-        closed_statuses = [
-            Finding.Status.DISMISSED,
-            Finding.Status.MITIGATED,
-            Finding.Status.RESOLVED,
-            Finding.Status.CLOSED,
-            Finding.Status.DEPRECATED,
-        ]
-        open_statuses = [
-            Finding.Status.UNDEFINED,
-            Finding.Status.IDENTIFIED,
-            Finding.Status.CONFIRMED,
-            Finding.Status.ASSIGNED,
-            Finding.Status.IN_PROGRESS,
-        ]
-
-        closed_findings_count = findings.filter(status__in=closed_statuses).count()
-        open_findings_count = findings.filter(status__in=open_statuses).count()
-
-        # Process status distribution with display names
-        status_choices = dict(Finding.Status.choices)
-        processed_status_distribution = []
-        for status, count in metrics["status_distribution"].items():
-            if count > 0:
-                display_name = status_choices.get(
-                    status, status.replace("_", " ").title()
-                )
-                processed_status_distribution.append(
-                    {"status": status, "display_name": display_name, "count": count}
-                )
-
-        context = {
-            "findings_assessment": findings_assessment,
-            "findings": findings,
-            "metrics": metrics,
-            "total_findings": metrics["total_count"],
-            "closed_findings_count": closed_findings_count,
-            "open_findings_count": open_findings_count,
-            "unresolved_important": metrics["unresolved_important_count"],
-            "severity_distribution": metrics["severity_distribution"],
-            "status_distribution": metrics["status_distribution"],
-            "processed_status_distribution": processed_status_distribution,
-            "finding_status_choices": dict(Finding.Status.choices),
-        }
-
-        html = render_to_string("core/findings_assessment_pdf.html", context)
-        pdf_file = HTML(string=html).write_pdf()
-        response = HttpResponse(pdf_file, content_type="application/pdf")
+        lang = request.user.preferences.get("lang") or "en"
+        payload = findings_assessment_context(findings_assessment, findings, lang)
+        response = HttpResponse(
+            render_pdf(localized_template("findings_report", lang), payload),
+            content_type="application/pdf",
+        )
         safe_name = slugify(findings_assessment.name) or "findings_assessment"
         response["Content-Disposition"] = (
             f'attachment; filename="{safe_name}_findings.pdf"'
@@ -16826,7 +17005,11 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         incident = (
             Incident.objects.select_related("folder")
             .prefetch_related(
-                "owners", "entities", "assets", "threats", "qualifications"
+                actor_prefetch("owners"),
+                "entities",
+                "assets",
+                "threats",
+                "qualifications",
             )
             .get(id=pk)
         )
@@ -16838,24 +17021,12 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             .order_by("timestamp")
         )
 
-        # Count timeline entry types
-        detection_count = timeline_entries.filter(
-            entry_type=TimelineEntry.EntryType.DETECTION
-        ).count()
-        mitigation_count = timeline_entries.filter(
-            entry_type=TimelineEntry.EntryType.MITIGATION
-        ).count()
-
-        context = {
-            "incident": incident,
-            "timeline_entries": timeline_entries,
-            "detection_count": detection_count,
-            "mitigation_count": mitigation_count,
-        }
-
-        html = render_to_string("core/incident_pdf.html", context)
-        pdf_file = HTML(string=html).write_pdf()
-        response = HttpResponse(pdf_file, content_type="application/pdf")
+        lang = request.user.preferences.get("lang") or "en"
+        payload = incident_context(incident, timeline_entries, lang)
+        response = HttpResponse(
+            render_pdf(localized_template("incident_report", lang), payload),
+            content_type="application/pdf",
+        )
         safe_name = slugify(incident.name) or "incident"
         response["Content-Disposition"] = (
             f'attachment; filename="{safe_name}_report.pdf"'

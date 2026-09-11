@@ -26,6 +26,18 @@ class TestSafeUrlFetcher:
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg=="
         )
 
+    def test_rejection_surfaces_as_url_fetching_error(self):
+        # WeasyPrint >= 70 reads `_fail_on_errors` on the fetcher when a fetch
+        # raises; a plain callable would surface AttributeError and abort the
+        # whole render instead of skipping the resource.
+        from weasyprint.urls import URLFetchingError, fetch
+
+        with (
+            pytest.raises(URLFetchingError),
+            fetch(_safe_url_fetcher, "http://example.com/img.png"),
+        ):
+            pass
+
 
 @pytest.mark.django_db
 class TestDeferredContent:
