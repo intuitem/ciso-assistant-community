@@ -7,17 +7,20 @@ wired so a change can be reviewed against the intended structure.
 
 There are two grant sources:
 
-- **explicit role assignments** — `RoleAssignment` rows, recursive or not;
-- **ambient default roles** — `Folder.default_role`, granted to the folder's
-  members (see the ADR for the audience rule).
+- **stored role assignments** — `RoleAssignment` rows, recursive or not;
+- **virtual assignments** — `Folder.default_role`, granted non-recursively to
+  the folder's members (see the ADR for the audience rule), computed on read
+  and never written anywhere.
 
 And two kinds of question:
 
 - **verdicts** — "may this user do X here?", point or bulk;
 - **listings** — "which permissions does this principal hold, and where?".
 
-Each axis has exactly one place where the two grant sources meet, and the
-verdict axis has exactly one coverage rule. Everything else is plumbing.
+The two sources are enumerated in **exactly one function**,
+`_get_grant_sources`, which returns them as a pair of branches. Each question
+axis is a projection of that pair, and the verdict axis then has exactly one
+coverage rule. Everything else is plumbing.
 
 ## Call graph
 
@@ -25,7 +28,6 @@ verdict axis has exactly one coverage rule. Everything else is plumbing.
 flowchart TB
   classDef amb stroke:#B4550A,stroke-width:2px
   classDef meet fill:#0E7C86,color:#ffffff,stroke:#0E7C86
-  classDef pred stroke:#0E7C86,stroke-width:2px
   classDef data stroke-dasharray:2 3
 
   subgraph CALLERS["callers outside the file"]
@@ -49,8 +51,8 @@ flowchart TB
   end
 
   subgraph PRED["the two predicates"]
-    COVQ["_coverage_q"]:::pred
-    SCOQ["_scope_q"]:::pred
+    COVQ["_coverage_q"]
+    SCOQ["_scope_q"]
   end
 
   subgraph ANSWERS["permission listings"]
@@ -59,17 +61,19 @@ flowchart TB
     GPPF["get_permissions_per_folder"]
   end
 
-  GFS["_get_grant_folder_set<br/>→ GrantFolderSet"]:::meet
-  EGR["_get_effective_grant_rows<br/>(one row per folder × codename)"]:::meet
+  subgraph PROJ["the two projections"]
+    GFS["_get_grant_folder_set<br/>→ GrantFolderSet (flat id lists)"]
+    EGR["_get_effective_grant_rows"]
+  end
 
-  subgraph EXPLICIT["grant source 1 — explicit assignments"]
-    RAP["_get_role_assignments<br/>_from_permission"]
+  GSRC["_get_grant_sources<br/>stored ∪ virtual grants"]:::meet
+
+  subgraph EXPLICIT["the stored branch — explicit assignments"]
     RAU["get_role_assignments_from_user"]
   end
 
-  subgraph AMBIENT["grant source 2 — ambient default roles"]
-    DRA["_get_default_role<br/>_allowed_folder_ids"]:::amb
-    DRF["_get_default_role_folder_ids"]:::amb
+  subgraph AMBIENT["the virtual branch — ambient default roles"]
+    DRF["_get_default_role_folder_ids<br/>(the audience rule)"]:::amb
   end
 
   subgraph SCOPE["object → folder resolution"]
@@ -108,45 +112,49 @@ flowchart TB
   COVQ -- "recursive grants expand ↓" --> CLO
   SCOQ -- "base subtree" --> CLO
 
-  GFS -- "by recursion kind" --> RAP
-  GFS -- "merged into the<br/>non-recursive bucket" --> DRA
-
-  RAP --> RAU
-  RAU -- "direct ∪ group ∪ IdP" --> RATBL
-
-  DRA -- "role holds the permission?" --> FDR
-  DRA --> DRF
-  DRF -- "builtin-group grants only" --> RAU
-  DRF -- "perimeters, self ∪ ancestors" --> CLO
-  DRF -- "non-null default_role" --> FDR
-
   HPA -- "exists()" --> EGR
   GP --> EGR
   GPPF --> EGR
   GPPF -- "descendant expansion" --> CLO
-  EGR -- "explicit rows" --> RAU
-  EGR -- "ambient rows" --> DRF
-  EGR -- "codenames per folder" --> FDR
 
-  linkStyle 24,27,28,29,30,31,37,38 stroke:#B4550A
+  GFS -- "folder-id lists,<br/>split by recursion kind" --> GSRC
+  EGR -- "folder × codename rows" --> GSRC
+
+  GSRC -- "stored assignments" --> RAU
+  GSRC -- "virtual assignments:<br/>the audience rule" --> DRF
+  GSRC -- "role holds the permission?" --> FDR
+
+  RAU -- "direct ∪ group ∪ IdP" --> RATBL
+
+  DRF -- "builtin-group grants only" --> RAU
+  DRF -- "perimeters, self ∪ ancestors" --> CLO
+  DRF -- "non-null default_role" --> FDR
+
+  linkStyle 30,31,33,34,35 stroke:#B4550A
 ```
 
-Solid teal nodes are the two meeting points (one per axis); teal-outlined nodes
-are the two predicates; orange edges are the ambient (default-role) path;
-dashed arrows come from outside the file. Special-case leaves
-(`_get_actor_accessible_ids`, `_get_permission_accessible_ids`, the
-`FilteringLabel` add) are listed in the table rather than drawn.
+The solid teal node is the single meeting point of the two grant sources;
+orange edges are the virtual (default-role) branch; dashed arrows come from
+outside the file. Special-case leaves (`_get_actor_accessible_ids`,
+`_get_permission_accessible_ids`, and `_get_role_assignments_from_permission`,
+which now serves only the `FilteringLabel` add special case) are listed in the
+table rather than drawn.
 
 ## The four invariants
 
-1. **One meeting point per axis.** The grant sources meet only inside
-   `_get_grant_folder_set` (verdict axis, folder-id sets) and
-   `_get_effective_grant_rows` (listing axis, folder × codename rows). No other
-   function reads `Folder.default_role` or unions the sources on its own — so
-   verdicts and listings agree by construction.
-2. **Ambient never cascades.** Default-role folders are merged into
-   `GrantFolderSet.non_recursive_grant_folder_ids`, never into the recursive
-   bucket — non-recursion is a property of the data shape, not a check.
+1. **One meeting point.** The grant sources are enumerated only inside
+   `_get_grant_sources`; its two consumers are the projections
+   `_get_grant_folder_set` (verdict axis: flat folder-id lists by recursion
+   kind) and `_get_effective_grant_rows` (listing axis: folder × codename
+   rows). No other function reads `Folder.default_role` or combines
+   assignments with default roles — so verdicts and listings agree by
+   construction. Django forbids filtering a union, so the permission filter is
+   applied per branch *inside* the builder; consumers project and combine the
+   branches, they never re-derive them.
+2. **Virtual grants never cascade.** The verdict projection merges the
+   default-role folders into `GrantFolderSet.non_recursive_grant_folder_ids`,
+   never into the recursive bucket — non-recursion is a property of the data
+   shape, not a check.
 3. **One verdict rule.** `_coverage_q` states coverage once — a non-recursive
    grant names the folder, or a recursive grant names it or an ancestor — and
    is applied to one folder (`is_access_allowed`) or to all folders
@@ -154,10 +162,12 @@ dashed arrows come from outside the file. Special-case leaves
    result with `_scope_q`; they never introduce a second coverage rule. The two
    predicates must stay in **chained** `.filter()` calls: both join the
    multi-valued `ancestors` relation, and a single call would force one
-   ancestor row to satisfy both.
+   ancestor row to satisfy both. `GrantFolderSet` carries materialized flat id
+   lists, so no union or subquery ever reaches the verdict SQL (PostgreSQL
+   parser-depth safety).
 4. **Raw `RoleAssignment` queries are for write-capability or conservative
    fast paths only.** Any *view*-access answer computed from the table alone
-   misses ambient grants; a raw query is acceptable only where a false negative
+   misses virtual grants; a raw query is acceptable only where a false negative
    falls through to an accurate primitive.
 
 These invariants are executable: `backend/iam/tests/test_access_oracle.py`
@@ -174,16 +184,17 @@ A refactor of this subsystem should leave that file untouched and green.
 | `is_object_accessible` | Resolves the object to its governing folder (existence, `Actor` delegation, IAM scope), then delegates the verdict. | `get_iam_folder_id` · `is_access_allowed` |
 | `is_access_allowed` | The point verdict. Owns the prologue — anonymous, `Permission` view-only, `FilteringLabel` add, the focus-mode gate (root exempt) — then evaluates coverage on the one folder. | `_get_grant_folder_set` · `_coverage_q` |
 | **The two predicates** | | |
-| `_coverage_q` | The coverage rule, stated once (invariant 3). Grant-folder ids are materialized into flat literal `IN` lists: they are small by nature, and inlining them keeps unions out of subqueries (PostgreSQL parser-depth limit). | — |
+| `_coverage_q` | The coverage rule, stated once (invariant 3), over flat literal `IN` lists. | — |
 | `_scope_q` | The clamp: folder is the base folder or a descendant. Combined with coverage via chained `.filter()` calls only. | — |
-| **The two meeting points** | | |
-| `_get_grant_folder_set` | Verdict axis. Explicit perimeters split by recursion kind, ambient default-role folders merged into the non-recursive bucket → `GrantFolderSet`. | `_get_role_assignments_from_permission` · `_get_default_role_allowed_folder_ids` |
-| `_get_effective_grant_rows` | Listing axis. One row per (folder, codename, name, is_recursive) a grant names, unexpanded; NULL-perimeter rows preserved for parity. With a `permission` argument the relation is restricted to matching roles — for existence checks, not projection. Accepts `User` or `UserGroup` principals. | `get_role_assignments_from_user` · `_get_default_role_folder_ids` |
-| **Grant source 1 — explicit** | | |
-| `_get_role_assignments_from_permission` | The user's assignments whose role holds the permission. | `get_role_assignments_from_user` · `_resolve_permission` |
+| **The meeting point** | | |
+| `_get_grant_sources` | The single function where the two grant sources are enumerated, as a (stored assignments, virtual default-role folders) pair of branch querysets. Principal dispatch lives here (`User` → effective assignment set, `UserGroup` → its own assignments); the optional permission filter is applied per branch. | `get_role_assignments_from_user` · `_get_default_role_folder_ids` |
+| **The two projections** | | |
+| `_get_grant_folder_set` | Verdict projection: flat folder-id lists split by recursion kind; virtual folders join the non-recursive bucket (invariant 2). Materialized — the verdict path carries no querysets. | `_resolve_permission` · `_get_grant_sources` |
+| `_get_effective_grant_rows` | Listing projection: one row per (folder, codename, name, is_recursive) a grant names, unexpanded; NULL-perimeter rows preserved for parity. The permission-filtered form is for existence checks, not projection. | `_get_grant_sources` |
+| **The stored branch — explicit assignments** | | |
 | `get_role_assignments_from_user` | Effective assignments: direct ∪ group-carried ∪ IdP-mapped; inactive users get none. | — |
-| **Grant source 2 — ambient** | | |
-| `_get_default_role_allowed_folder_ids` | Member folders whose default role holds the permission, materialized to a plain list. | `_get_default_role_folder_ids` |
+| `_get_role_assignments_from_permission` | The user's assignments whose role holds the permission — now only the `FilteringLabel` add special case. | `get_role_assignments_from_user` · `_resolve_permission` |
+| **The virtual branch — ambient default roles** | | |
 | `_get_default_role_folder_ids` | The audience rule: builtin-group-carried grants → non-enclaved perimeters → self ∪ ancestors carrying a default role. The third-party backstop lives here; service accounts never reach it (their assignments carry no builtin group). | `get_role_assignments_from_user` |
 | **Bulk checks** | | |
 | `get_viewable/changeable/deletable_object_ids` | Per-model object ids the user may view/change/delete. | `_get_accessible_ids` |
@@ -191,11 +202,11 @@ A refactor of this subsystem should leave that file untouched and green.
 | `get_allowed_folder_ids` | The bulk verdict: coverage over all folders, clamped by `_scope_q` when focus mode or `base_folder` narrows the scope (the narrower of the two wins when nested; disjoint → empty). In focus mode a covered root stays reachable. | `_get_grant_folder_set` · `_coverage_q` · `_scope_q` |
 | **Permission listings** | | |
 | `has_permission_anywhere` | "Holds the codename on any folder" — an `exists()` on the filtered relation. | `_get_effective_grant_rows` |
-| `get_permissions` | Codename map of everything the principal holds, ambient included. | `_get_effective_grant_rows` |
+| `get_permissions` | Codename map of everything the principal holds, virtual grants included. | `_get_effective_grant_rows` |
 | `get_permissions_per_folder` | folder-id → codenames map; recursive rows expand to descendants through one bulk closure query. | `_get_effective_grant_rows` |
 | **Object → folder scope** | | |
 | `get_iam_folder_id` / `get_iam_folder_field` | Governing folder of an object: its `folder` field, or the field named by `IAM_SCOPE_FIELD` (undeclared models raise `IAMNotImplementedError`). | — |
 
 Function names, not line numbers, anchor this page: lines drift with every
 edit, the structure only changes when someone adds a grant source — which, per
-invariant 1, must happen inside the two meeting points and nowhere else.
+invariant 1, must happen inside `_get_grant_sources` and nowhere else.

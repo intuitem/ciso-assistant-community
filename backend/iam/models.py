@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Any, List, Literal, Optional, Iterable, Final
+from typing import Any, List, Literal, Optional, Final
 from typing import TYPE_CHECKING, cast
 import secrets
 import uuid
@@ -1365,20 +1365,25 @@ class GrantFolderSet:
     a recursive grant appears here as its perimeter folder, not its subtree.
     Expansion is `_coverage_q`'s job, applied to one folder (point check) or to
     all folders (bulk check).
+
+    Both fields are materialized flat id lists: the verdict path never carries
+    querysets or unions into subqueries (PostgreSQL parser-depth safety).
     """
 
-    non_recursive_grant_folder_ids: Iterable[uuid.UUID]
+    non_recursive_grant_folder_ids: list[uuid.UUID]
     """Perimeters of the non-recursive grants: non-recursive role assignments AND the
     ambient default-role folders (default roles are non-recursive by design). A grant
     here covers exactly its folder."""
-    recursive_grant_folder_ids: Iterable[uuid.UUID]
+    recursive_grant_folder_ids: list[uuid.UUID]
     """Perimeters of the recursive role assignments only — never ambient. A grant here
     covers its folder and the whole subtree below it."""
 
     @staticmethod
     def none() -> GrantFolderSet:
-        _none = Folder.objects.none().values_list("id", flat=True)
-        return GrantFolderSet(_none, _none)
+        return GrantFolderSet(
+            non_recursive_grant_folder_ids=[],
+            recursive_grant_folder_ids=[],
+        )
 
 
 class RoleAssignment(NameDescriptionMixin, FolderMixin):
@@ -1670,98 +1675,21 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return default_role_folder_ids
 
     @staticmethod
-    def _get_default_role_allowed_folder_ids(
-        principal: AbstractBaseUser | AnonymousUser | UserGroup, permission: Permission
-    ) -> list[uuid.UUID]:
-        """Return the folder IDs on which the `permission` is granted via the `Folder.default_role` mechanism."""
-
-        default_role_folder_ids = RoleAssignment._get_default_role_folder_ids(principal)
-
-        default_role_allowed_folder_ids = list(
-            Folder.objects.filter(
-                id__in=default_role_folder_ids, default_role__permissions=permission
-            )
-            .values_list("id", flat=True)
-            .order_by()
-        )
-        return default_role_allowed_folder_ids
-
-    @staticmethod
-    def _get_grant_folder_set(
-        user: AbstractBaseUser | AnonymousUser,
-        permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
-    ) -> GrantFolderSet:
-        """
-        Return the `GrantFolderSet` of the `user` for the `permission` — the single
-        place where the two grant sources meet: explicit role assignments (split by
-        recursion kind) and the ambient default-role folders (merged into the
-        non-recursive bucket). Every access primitive consumes this.
-        """
-        if not isinstance(user, User):
-            return GrantFolderSet.none()
-
-        permission = RoleAssignment._resolve_permission(permission)
-
-        user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
-            user, permission
-        )
-
-        non_recursive_role_assignments = user_role_assignments.filter(
-            is_recursive=False
-        )
-        recursive_role_assignments = user_role_assignments.filter(is_recursive=True)
-
-        # Perimeters of the user's explicit assignments, split by kind.
-        non_recursive_assignment_folder_ids = (
-            non_recursive_role_assignments.values_list(
-                "perimeter_folders__id", flat=True
-            ).distinct()
-        )
-        recursive_grant_folder_ids = recursive_role_assignments.values_list(
-            "perimeter_folders__id", flat=True
-        ).distinct()
-
-        # The ambient grant source: folders whose default_role carries the permission.
-        default_role_folder_ids = RoleAssignment._get_default_role_allowed_folder_ids(
-            user, permission
-        )
-        # Convert the materialized folder ID list back to a queryset to avoid
-        # "parser stack overflow" SQL errors on PostgreSQL.
-        default_role_folder_ids_qs = Folder.objects.filter(
-            id__in=default_role_folder_ids
-        ).values_list("id", flat=True)
-
-        # Default roles are non-recursive by design, so the ambient folders join
-        # the non-recursive bucket, never the recursive one.
-        # order_by() drops the default ordering Django 6.1 applies to unions.
-        non_recursive_grant_folder_ids = non_recursive_assignment_folder_ids.union(
-            default_role_folder_ids_qs
-        ).order_by()
-
-        return GrantFolderSet(
-            non_recursive_grant_folder_ids=non_recursive_grant_folder_ids,
-            recursive_grant_folder_ids=recursive_grant_folder_ids,
-        )
-
-    @staticmethod
-    def _get_effective_grant_rows(
+    def _get_grant_sources(
         principal: AbstractBaseUser | AnonymousUser | UserGroup,
-        permission: Permission | None = None,
-    ) -> QuerySet:
+        permission: Permission | None,
+    ) -> tuple[QuerySet[RoleAssignment], QuerySet[Folder]]:
         """
-        The effective-grant relation of a principal: one row per
-        (folder_id, codename, name, is_recursive) that a grant names — explicit
-        assignments at their perimeter folders (folder_id may be NULL for an
-        assignment with no perimeter, preserved for listing parity), and ambient
-        default roles at their folder (never recursive).
+        The single place where the two grant sources are enumerated:
 
-        Unexpanded: recursive coverage is the consumer's job. Besides
-        `_get_grant_folder_set`, this is the only place where the two grant
-        sources meet; the permission listings are projections of it.
+        - the principal's stored role assignments;
+        - the folders whose default role reaches the principal — virtual
+          assignments, computed on read, non-recursive by design.
 
-        When `permission` is given, the relation is restricted to grants whose
-        role holds it — rows still list every codename of the matching roles,
-        so the filtered form is for existence checks, not for projection.
+        When `permission` is not None, each branch is restricted to grants
+        whose role holds it. The filter is applied per branch because Django
+        forbids filtering a union. Consumers project and combine the branches;
+        they never re-derive them.
         """
         if isinstance(principal, User):
             role_assignments = RoleAssignment.get_role_assignments_from_user(principal)
@@ -1779,6 +1707,83 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             ambient_folders = ambient_folders.filter(
                 default_role__permissions=permission
             )
+
+        return role_assignments, ambient_folders
+
+    @staticmethod
+    def _get_grant_folder_set(
+        user: AbstractBaseUser | AnonymousUser,
+        permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
+    ) -> GrantFolderSet:
+        """
+        The verdict projection of `_get_grant_sources`: flat folder-id lists
+        split by recursion kind. Ambient default-role folders join the
+        non-recursive bucket, never the recursive one — the structural
+        enforcement of "default roles never cascade."
+        """
+        if not isinstance(user, User):
+            return GrantFolderSet.none()
+
+        permission = RoleAssignment._resolve_permission(permission)
+
+        role_assignments, ambient_folders = RoleAssignment._get_grant_sources(
+            user, permission
+        )
+
+        # A perimeter-less assignment projects a NULL folder id — inert in an
+        # IN list, dropped here to keep the literals clean. order_by() keeps
+        # the model's default ordering out of the DISTINCT projection.
+        non_recursive_assignment_folder_ids = [
+            folder_id
+            for folder_id in role_assignments.filter(is_recursive=False)
+            .order_by()
+            .values_list("perimeter_folders__id", flat=True)
+            .distinct()
+            if folder_id is not None
+        ]
+        recursive_grant_folder_ids = [
+            folder_id
+            for folder_id in role_assignments.filter(is_recursive=True)
+            .order_by()
+            .values_list("perimeter_folders__id", flat=True)
+            .distinct()
+            if folder_id is not None
+        ]
+        ambient_folder_ids = list(
+            ambient_folders.values_list("id", flat=True).order_by()
+        )
+
+        # Default roles are non-recursive by design, so the ambient folders join
+        # the non-recursive bucket, never the recursive one.
+        return GrantFolderSet(
+            non_recursive_grant_folder_ids=non_recursive_assignment_folder_ids
+            + ambient_folder_ids,
+            recursive_grant_folder_ids=recursive_grant_folder_ids,
+        )
+
+    @staticmethod
+    def _get_effective_grant_rows(
+        principal: AbstractBaseUser | AnonymousUser | UserGroup,
+        permission: Permission | None = None,
+    ) -> QuerySet:
+        """
+        The effective-grant relation of a principal: one row per
+        (folder_id, codename, name, is_recursive) that a grant names — explicit
+        assignments at their perimeter folders (folder_id may be NULL for an
+        assignment with no perimeter, preserved for listing parity), and ambient
+        default roles at their folder (never recursive).
+
+        Unexpanded: recursive coverage is the consumer's job. This is the
+        listing projection of `_get_grant_sources`; the permission listings
+        are projections of it in turn.
+
+        When `permission` is given, the relation is restricted to grants whose
+        role holds it — rows still list every codename of the matching roles,
+        so the filtered form is for existence checks, not for projection.
+        """
+        role_assignments, ambient_folders = RoleAssignment._get_grant_sources(
+            principal, permission
+        )
 
         explicit_rows = role_assignments.values_list(
             "perimeter_folders__id",

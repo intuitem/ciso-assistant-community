@@ -302,6 +302,17 @@ class TestFolderDescendants:
         )
 
 
+def _ambient_grant_folder_ids(principal, permission) -> list:
+    """The ambient branch of `RoleAssignment._get_grant_sources`, projected to
+    folder ids: the folders whose default role grants `permission` to the
+    principal. Boundary tests assert on this branch alone — the stored branch
+    would mask a leak."""
+    _role_assignments, ambient_folders = RoleAssignment._get_grant_sources(
+        principal, permission
+    )
+    return list(ambient_folders.values_list("id", flat=True).order_by())
+
+
 @pytest.mark.django_db
 class TestFolderDefaultRole:
     """
@@ -317,7 +328,7 @@ class TestFolderDefaultRole:
     NOT_CALLED = "The `RoleAssignment._get_default_role_folder_ids` function MUST be called by the above function, as it's the safe way for IAM functions to get the accessible folder IDs from a default_role."
 
     CALL_COUNT = 0
-    """Count how much time the `RoleAssignment._get_default_role_allowed_folder_ids` function has been called."""
+    """Count how much time the `RoleAssignment._get_default_role_folder_ids` function has been called."""
 
     @pytest.fixture(autouse=True)
     def _monkeypatch_default_role(self):
@@ -440,13 +451,13 @@ class TestFolderDefaultRole:
             root_folder.save()
 
     def test_get_grant_folder_set(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that _get_grant_folder_set calls _get_default_role_allowed_folder_ids."""
+        """Test that _get_grant_folder_set calls _get_default_role_folder_ids."""
 
         RoleAssignment._get_grant_folder_set(ctx.user, ctx.default_role_permission)
         self._test_and_reset_call_count()
 
     def test_has_permission_anywhere(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that has_permission_anywhere calls _get_default_role_allowed_folder_ids."""
+        """Test that has_permission_anywhere calls _get_default_role_folder_ids."""
 
         # We use the `"view_vulnerability"` permission instead as the user isn't assigned to it.
         # When a user doesn't have a permission, this IIAM function falls back to checking if any `Folder.default_role` grants it.
@@ -456,7 +467,7 @@ class TestFolderDefaultRole:
         self._test_and_reset_call_count()
 
     def test_is_access_allowed(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that is_access_allowed calls _get_default_role_allowed_folder_ids."""
+        """Test that is_access_allowed calls _get_default_role_folder_ids."""
 
         RoleAssignment.is_access_allowed(
             ctx.user, ctx.default_role_permission, ctx.parent_folder
@@ -464,20 +475,20 @@ class TestFolderDefaultRole:
         self._test_and_reset_call_count()
 
     def test_is_object_accessible(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that is_object_accessible calls _get_default_role_allowed_folder_ids."""
+        """Test that is_object_accessible calls _get_default_role_folder_ids."""
         RoleAssignment.is_object_accessible(
             ctx.user, "view", AppliedControl, ctx.applied_control.id
         )
         self._test_and_reset_call_count()
 
     def test_get_allowed_folder_ids(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that get_allowed_folder_ids calls _get_default_role_allowed_folder_ids."""
+        """Test that get_allowed_folder_ids calls _get_default_role_folder_ids."""
 
         RoleAssignment.get_allowed_folder_ids(ctx.user, ctx.default_role_permission)
         self._test_and_reset_call_count()
 
     def test_is_object_readable(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that is_object_readable calls _get_default_role_allowed_folder_ids."""
+        """Test that is_object_readable calls _get_default_role_folder_ids."""
 
         RoleAssignment.is_object_readable(
             ctx.user, AppliedControl, ctx.applied_control.id
@@ -487,13 +498,13 @@ class TestFolderDefaultRole:
     def test_get_actor_accessible_ids_by_perm(
         self, ctx: TestFolderDefaultRole.UserInfo
     ):
-        """Test that _get_actor_accessible_ids_by_perm calls _get_default_role_allowed_folder_ids."""
+        """Test that _get_actor_accessible_ids_by_perm calls _get_default_role_folder_ids."""
 
         RoleAssignment._get_actor_accessible_ids_by_perm(ctx.user, "view")
         self._test_and_reset_call_count()
 
     def test_get_accessible_ids(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that _get_accessible_ids calls _get_default_role_allowed_folder_ids."""
+        """Test that _get_accessible_ids calls _get_default_role_folder_ids."""
 
         RoleAssignment._get_accessible_ids(
             ctx.user, "view", AppliedControl, ctx.parent_folder
@@ -501,13 +512,13 @@ class TestFolderDefaultRole:
         self._test_and_reset_call_count()
 
     def test_get_actor_accessible_ids(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that _get_actor_accessible_ids calls _get_default_role_allowed_folder_ids."""
+        """Test that _get_actor_accessible_ids calls _get_default_role_folder_ids."""
 
         RoleAssignment._get_actor_accessible_ids(ctx.user)
         self._test_and_reset_call_count()
 
     def test_get_viewable_object_ids(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that get_viewable_object_ids calls _get_default_role_allowed_folder_ids."""
+        """Test that get_viewable_object_ids calls _get_default_role_folder_ids."""
 
         RoleAssignment.get_viewable_object_ids(
             ctx.user, AppliedControl, ctx.parent_folder
@@ -515,7 +526,7 @@ class TestFolderDefaultRole:
         self._test_and_reset_call_count()
 
     def test_get_changeable_object_ids(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that get_changeable_object_ids calls _get_default_role_allowed_folder_ids."""
+        """Test that get_changeable_object_ids calls _get_default_role_folder_ids."""
 
         RoleAssignment.get_changeable_object_ids(
             ctx.user, AppliedControl, ctx.parent_folder
@@ -523,7 +534,7 @@ class TestFolderDefaultRole:
         self._test_and_reset_call_count()
 
     def test_get_deletable_object_ids(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that get_deletable_object_ids calls _get_default_role_allowed_folder_ids."""
+        """Test that get_deletable_object_ids calls _get_default_role_folder_ids."""
 
         RoleAssignment.get_deletable_object_ids(
             ctx.user, AppliedControl, ctx.parent_folder
@@ -546,26 +557,22 @@ class TestFolderDefaultRole:
             "Unexpected missing/unknown/extra codenames in the RoleAssignment.get_permissions return."
         )
 
-    def test_get_default_role_allowed_folder_ids(
-        self, ctx: TestFolderDefaultRole.UserInfo
-    ):
-        """Test that _get_default_role_allowed_folder_ids correctly identifies folders accessible via default_role."""
-        assert not RoleAssignment._get_default_role_allowed_folder_ids(
-            ctx.user, ctx.user_role_permission
-        ), "A permission absent from the default_role SHALL NOT be granted by it."
+    def test_ambient_grant_folder_ids(self, ctx: TestFolderDefaultRole.UserInfo):
+        """Test that the ambient grant branch correctly identifies folders accessible via default_role."""
+        assert not _ambient_grant_folder_ids(ctx.user, ctx.user_role_permission), (
+            "A permission absent from the default_role SHALL NOT be granted by it."
+        )
 
-        assert RoleAssignment._get_default_role_allowed_folder_ids(
-            ctx.user, ctx.default_role_permission
-        ) == [ctx.parent_folder.id], (
+        assert _ambient_grant_folder_ids(ctx.user, ctx.default_role_permission) == [
+            ctx.parent_folder.id
+        ], (
             "The default_role permissions SHALL be granted on the ancestor folder carrying it."
         )
 
         ctx.parent_folder.default_role = None
         ctx.parent_folder.save()
 
-        assert not RoleAssignment._get_default_role_allowed_folder_ids(
-            ctx.user, ctx.default_role_permission
-        ), (
+        assert not _ambient_grant_folder_ids(ctx.user, ctx.default_role_permission), (
             "The default role permission SHALL NOT be granted if there's no folder.default_role"
         )
 
@@ -575,9 +582,9 @@ class TestFolderDefaultRole:
         ctx.folder.default_role = ctx.default_role
         ctx.folder.save()
 
-        assert RoleAssignment._get_default_role_allowed_folder_ids(
-            ctx.user, ctx.default_role_permission
-        ) == [ctx.folder.id], (
+        assert _ambient_grant_folder_ids(ctx.user, ctx.default_role_permission) == [
+            ctx.folder.id
+        ], (
             "The folder.default_role SHALL also be granted to the holders of grants on the folder itself (inclusive membership)."
         )
 
@@ -647,7 +654,7 @@ class TestFolderDefaultRole:
             )
             role_assignment.perimeter_folders.add(ctx.folder)
 
-            assert not RoleAssignment._get_default_role_allowed_folder_ids(
+            assert not _ambient_grant_folder_ids(
                 direct_user, ctx.default_role_permission
             ), "A direct role assignment MUST NOT join any default-role audience."
             assert not RoleAssignment.is_access_allowed(
@@ -667,9 +674,9 @@ class TestFolderDefaultRole:
         ctx.user.is_third_party = True
         ctx.user.save()
 
-        assert not RoleAssignment._get_default_role_allowed_folder_ids(
-            ctx.user, ctx.default_role_permission
-        ), "A third-party user MUST NOT join any default-role audience."
+        assert not _ambient_grant_folder_ids(ctx.user, ctx.default_role_permission), (
+            "A third-party user MUST NOT join any default-role audience."
+        )
         assert not RoleAssignment.is_access_allowed(
             ctx.user, ctx.default_role_permission, ctx.parent_folder
         ), "A third-party user MUST NOT receive default_role permissions."
@@ -717,9 +724,7 @@ class TestFolderDefaultRole:
             user.user_groups.add(enclave_group)
             user.user_groups.add(sub_group)
 
-            assert not RoleAssignment._get_default_role_allowed_folder_ids(
-                user, ctx.default_role_permission
-            ), (
+            assert not _ambient_grant_folder_ids(user, ctx.default_role_permission), (
                 "Groups on an enclave, or beneath one, MUST NOT join any default-role audience."
             )
             assert not RoleAssignment.is_access_allowed(
@@ -755,9 +760,9 @@ class TestFolderDefaultRole:
             role_assignment.perimeter_folders.add(ctx.folder)
             user.user_groups.add(custom_group)
 
-            assert not RoleAssignment._get_default_role_allowed_folder_ids(
-                user, ctx.default_role_permission
-            ), "Non-builtin group grants MUST NOT join any default-role audience."
+            assert not _ambient_grant_folder_ids(user, ctx.default_role_permission), (
+                "Non-builtin group grants MUST NOT join any default-role audience."
+            )
             assert not RoleAssignment.is_access_allowed(
                 user, ctx.default_role_permission, ctx.parent_folder
             ), (
