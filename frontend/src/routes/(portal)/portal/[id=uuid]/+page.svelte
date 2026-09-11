@@ -37,6 +37,8 @@
 			folder?: string;
 			user_names?: boolean;
 			quick_form?: string;
+			// Either wiring will do; a publication carries its own form and target folder.
+			publication?: string;
 		};
 	}
 

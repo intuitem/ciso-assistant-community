@@ -8,7 +8,7 @@ description: >
   only when its answers said no compensating control is in place — the outcome
   suggests, the reviewer commits, the workflow executes.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-09-09
 provider: intuitem
 packager: intuitem
@@ -31,9 +31,10 @@ objects:
         type: string
       - key: outcomes
         type: string
+      # No default: an unaddressable request must fail the notification node, not
+      # quietly mail a placeholder domain. The durable work is committed by then.
       - key: requester_emails
         type: string
-        default_value: requester@example.com
       nodes:
       - ref: on_request
         type: trigger

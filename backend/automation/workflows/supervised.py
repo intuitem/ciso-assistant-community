@@ -19,6 +19,26 @@ select which sequences are worth offering, and the reviewer chooses.
 
 from .models import WorkflowNode, WorkflowVersion
 
+
+def _requester_emails(obj) -> str:
+    """Who to tell about a request, as `send_email` wants them: comma-separated.
+
+    Same notion of "the asking side" as `QuickFormResponse.is_requester` — the
+    submitter plus the respondents — so a notification cannot reach someone the
+    request does not consider its owner. Team and entity actors have no address of
+    their own and are skipped; a workflow that needs them should address a group.
+    """
+    emails = []
+    if obj.submitted_by_id and obj.submitted_by.email:
+        emails.append(obj.submitted_by.email)
+    for actor in obj.respondents.select_related("user").all():
+        email = getattr(actor.user, "email", "") if actor.user_id else ""
+        if email:
+            emails.append(email)
+    seen = set()
+    return ",".join(e for e in emails if not (e in seen or seen.add(e)))
+
+
 #: Object kinds a supervised action may target. Keyed by the string an author
 #: writes in `applies_to.model`; the value reads the object's outcome refs so a
 #: trigger can be narrowed to the classifications it is meant for.
@@ -33,6 +53,7 @@ SUPERVISED_TARGETS = {
             "request_id": str(obj.id),
             "request_ref": obj.ref_id or "",
             "outcomes": obj.outcome_refs or "",
+            "requester_emails": _requester_emails(obj),
         },
     },
 }

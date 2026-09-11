@@ -20371,7 +20371,7 @@ class MyRequestViewSet(viewsets.ViewSet):
                     output_field=IntegerField(),
                 )
             )
-            .order_by("status_rank", "-updated_at")
+            .order_by("status_rank", "-updated_at", "id")
         )
         paginator = CustomLimitOffsetPagination()
         page = paginator.paginate_queryset(responses, request, view=self)

@@ -25,12 +25,15 @@ from core.views import (
     get_or_create_personal_folder,
     start_quick_form_response,
 )
-from global_settings.utils import general_setting_is_enabled
+from global_settings.utils import ff_is_enabled, general_setting_is_enabled
 from iam.models import Folder, RoleAssignment
 
 # The whole feature is opt-in: the API is unreachable unless `custom_portals` is on,
 # mirroring the UI flag gating so a flag-off build can't reach it through the API.
 FEATURE_FLAG = "custom_portals"
+# A quick-form tile spans two features. `FeatureFlagRequired` reads a single view-level
+# attribute and ORs a tuple, so the second flag is checked per-action instead.
+QUICK_FORMS_FLAG = "quick_forms"
 
 
 class CustomPortalsViewSet(BaseModelViewSet):
@@ -307,6 +310,11 @@ class PortalViewSet(CustomPortalsViewSet):
         """Open the quick form wired on a 'quickForm' tile and hand back the route the
         clicker should land on. The form and domain come from the author-stored tile
         config, never the request body."""
+        if not ff_is_enabled(QUICK_FORMS_FLAG):
+            return Response(
+                {"detail": "This feature is not enabled."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         portal = self._entitled_queryset(request).filter(pk=pk).first()
         if portal is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -371,9 +379,11 @@ class PortalViewSet(CustomPortalsViewSet):
         # tile, so the check has nothing to protect here.
         clicker = Actor.objects.filter(user=request.user, entity__isnull=True).first()
         with transaction.atomic():
-            return self._launch_or_resume(request, item, target, folder, clicker)
+            return self._launch_or_resume(
+                request, item, target, folder, clicker, quick_form_id
+            )
 
-    def _launch_or_resume(self, request, item, target, folder, clicker):
+    def _launch_or_resume(self, request, item, target, folder, clicker, quick_form_id):
         """The draft check and the create, under one transaction so the lock holds
         across both."""
 

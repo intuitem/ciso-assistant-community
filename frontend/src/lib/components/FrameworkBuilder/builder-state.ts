@@ -1118,7 +1118,8 @@ export function createBuilderState(
 
 		const roots = get(rootNodes);
 		let parentBn: BuilderNode | null = null;
-		if (opts.parent) {
+		// Flat pages: a parent would nest one page under another.
+		if (opts.parent && mode !== 'quick_form') {
 			for (const r of roots) {
 				const found = findRequirement([r], opts.parent);
 				if (found) {
@@ -1229,6 +1230,8 @@ export function createBuilderState(
 	 * Returns true if the tree was mutated.
 	 */
 	function indentNode(nodeId: string): boolean {
+		// Quick-form pages are a flat list, not a tree.
+		if (mode === 'quick_form') return false;
 		let changed = false;
 		rootNodes.update((tree) => {
 			function recurse(list: BuilderNode[]): BuilderNode[] {
@@ -1272,6 +1275,7 @@ export function createBuilderState(
 	 * Returns true if the tree was mutated.
 	 */
 	function outdentNode(nodeId: string): boolean {
+		if (mode === 'quick_form') return false;
 		let changed = false;
 		rootNodes.update((tree) => {
 			// Phase 1: locate the node's parent chain
@@ -1370,6 +1374,8 @@ export function createBuilderState(
 	 * Toggle the `assessable` flag on a node.
 	 */
 	function toggleAssessable(nodeId: string) {
+		// Quick-form pages are created assessable and stay that way.
+		if (mode === 'quick_form') return;
 		// Find current value across the full tree (including roots)
 		let current: boolean | null = null;
 		const roots = get(rootNodes);

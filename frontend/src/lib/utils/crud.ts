@@ -1194,6 +1194,7 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'quick-form-publications': {
 		name: 'quickformpublication',
+		customNameDescription: true,
 		localName: 'quickFormPublication',
 		localNamePlural: 'quickFormPublications',
 		verboseName: 'Quick form publication',

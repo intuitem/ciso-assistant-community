@@ -9,9 +9,12 @@
 	let { data }: Props = $props();
 
 	// NOTE: duplicates `customNameDescription` in crud.ts, which this route ignores.
-	const customNameDescription = ['operational-scenarios', 'terminologies', 'asset-class'].includes(
-		data.model.urlModel
-	);
+	const customNameDescription = [
+		'operational-scenarios',
+		'terminologies',
+		'asset-class',
+		'quick-form-publications'
+	].includes(data.model.urlModel);
 </script>
 
 <ModelForm

@@ -4410,6 +4410,13 @@ class AnswerWriteSerializer(BaseModelSerializer):
                 raise serializers.ValidationError(
                     "Answers can only be modified while the response is in progress."
                 )
+            # Same rule as the `answers` dict on the response itself: folder-level rights
+            # on Answer are not rights over someone else's request.
+            request = self.context.get("request")
+            if request is not None and not response.is_requester(request.user):
+                raise serializers.ValidationError(
+                    "Only the requester can change the answers."
+                )
 
         if requirement_assessment:
             # 1. Parent/child consistency check

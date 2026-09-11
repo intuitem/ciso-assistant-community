@@ -5573,6 +5573,8 @@
 	"builderKeyboardShortcuts": "Keyboard shortcuts",
 	"builderKbOutlineEditing": "Outline editing",
 	"builderKbOutlineEditingHint": "Apply to the highlighted node.",
+	"builderKbPageEditing": "Page editing",
+	"builderKbAddPageAtEnd": "Add page at the end",
 	"builderKbBuilder": "Builder",
 	"builderKbIndentNode": "Indent node",
 	"builderKbOutdentNode": "Outdent node",

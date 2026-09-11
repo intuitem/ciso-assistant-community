@@ -5,6 +5,7 @@ folder-scoped `Evidence` and the first must not require folder rights.
 """
 
 import hashlib
+import mimetypes
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -42,6 +43,31 @@ def _question_config(question):
     return question.config if isinstance(question.config, dict) else {}
 
 
+def _accepts(filename: str, allowed: list[str]) -> bool:
+    """Match a filename against an HTML `accept` list.
+
+    It carries three shapes — `.pdf`, `image/png`, `image/*` — and only the first is a
+    suffix. The MIME comes from the extension, never from the uploading client.
+    """
+    guessed = (mimetypes.guess_type(filename)[0] or "").lower()
+    for entry in allowed:
+        if entry == "*/*":
+            return True
+        if entry.startswith("."):
+            if filename.endswith(entry):
+                return True
+        elif entry.endswith("/*"):
+            if guessed.startswith(entry[:-1]):
+                return True
+        elif "/" in entry:
+            if guessed == entry:
+                return True
+        elif filename.endswith(f".{entry.lstrip('.')}"):
+            # A bare extension without its dot, which authors write by hand.
+            return True
+    return False
+
+
 def validate_upload(answer, upload):
     """Size, type and per-question limits. Raises AttachmentError."""
     question = answer.question
@@ -67,7 +93,7 @@ def validate_upload(answer, upload):
     accept = config.get("accept")
     if accept:
         allowed = [a.strip().lower() for a in str(accept).split(",") if a.strip()]
-        if allowed and not any(lowered.endswith(a.lstrip("*")) for a in allowed):
+        if allowed and not _accepts(lowered, allowed):
             raise AttachmentError("fileTypeNotAccepted", name)
 
     existing = answer.attachments.count()
@@ -205,8 +231,6 @@ def _safe_filename_header(disposition, filename):
 def serve(attachment):
     """Stream one attachment back. The stored `mime_type` is the client's claim, so the
     type is re-derived and allowlisted; anything else downloads."""
-    import mimetypes
-
     from django.http import FileResponse
 
     guessed = mimetypes.guess_type(attachment.filename)[0]

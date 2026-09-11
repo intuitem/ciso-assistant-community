@@ -915,3 +915,152 @@ def test_preview_score_matches_the_persisted_score(app_config):
     )["score"]
     assert live == preview, f"preview {preview} disagrees with live {live}"
     assert live == 5, f"mean of two 5s is 5, got {live}"
+
+
+@pytest.mark.parametrize(
+    "filename,accept,expected",
+    [
+        ("photo.png", ".png", True),
+        ("photo.png", "image/*", True),
+        ("photo.png", "image/png", True),
+        ("photo.png", "*/*", True),
+        ("photo.png", "png", True),
+        ("photo.png", ".pdf,image/*", True),
+        ("photo.png", ".pdf", False),
+        ("photo.png", "video/*", False),
+        ("report.pdf", "application/pdf", True),
+        ("archive.zzz", "image/*", False),
+    ],
+)
+def test_accept_matches_every_shape_html_allows(filename, accept, expected):
+    """`accept` carries extensions, exact MIME types and MIME wildcards. Only the first
+    is a suffix of the filename, so a suffix test alone rejects every MIME form."""
+    from core.answer_attachments import _accepts
+
+    allowed = [a.strip().lower() for a in accept.split(",") if a.strip()]
+    assert _accepts(filename.lower(), allowed) is expected
+
+
+@pytest.mark.django_db
+def test_answer_endpoint_honours_the_requester_rule(app_config):
+    """The `/answers/` surface is the same content, reached by a different door:
+    folder-level rights on Answer are not rights over someone else's request."""
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    question = Question.objects.get(urn=Q_HEADCOUNT)
+    folder = Folder.objects.create(
+        name="qf-answer-door", parent_folder=Folder.get_root_folder()
+    )
+    requester, requester_client = _role_client(
+        "qf-door@test.local", "BI-RL-ANA", folder
+    )
+    response = QuickFormResponse.objects.create(
+        name="theirs",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.DRAFT,
+        submitted_by=requester,
+    )
+    payload = {
+        "response": str(response.id),
+        "question": str(question.id),
+        "value": 42,
+        "folder": str(folder.id),
+    }
+
+    _, admin = _admin_client("qf-door-admin@test.local")
+    res = admin.post("/api/answers/", payload, format="json")
+    assert res.status_code == 400, res.json()
+    assert "Only the requester" in str(res.json())
+    assert not Answer.objects.filter(response=response).exists()
+
+    res = requester_client.post("/api/answers/", payload, format="json")
+    assert res.status_code == 201, res.json()
+
+    # And the same door stays shut on update.
+    answer_id = res.json()["id"]
+    res = admin.patch(f"/api/answers/{answer_id}/", {"value": 99}, format="json")
+    assert res.status_code == 400, res.json()
+    assert "Only the requester" in str(res.json())
+
+
+@pytest.mark.django_db
+def test_my_requests_pagination_is_stable_across_ties(app_config):
+    """Offset pagination over a non-unique sort repeats or drops rows. Requests closed
+    by one workflow run share `updated_at` to the microsecond, so the tie is real."""
+    from datetime import datetime, timezone as dt_timezone
+
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-paging", parent_folder=Folder.get_root_folder()
+    )
+    requester, client = _role_client("qf-paging@test.local", "BI-RL-ANA", folder)
+    actor = Actor.objects.filter(user=requester, entity__isnull=True).first()
+
+    made = []
+    for i in range(7):
+        r = QuickFormResponse.objects.create(
+            name=f"req-{i}",
+            quick_form=form,
+            folder=folder,
+            status=QuickFormResponse.Status.DRAFT,
+            submitted_by=requester,
+        )
+        r.respondents.add(actor)
+        made.append(r.id)
+
+    # auto_now would defeat the point; .update() writes the column directly.
+    tie = datetime(2026, 1, 1, 12, 0, 0, tzinfo=dt_timezone.utc)
+    QuickFormResponse.objects.filter(id__in=made).update(updated_at=tie)
+
+    seen = []
+    for offset in range(0, 8, 2):
+        page = client.get(f"/api/my-requests/?limit=2&offset={offset}").json()
+        assert page["count"] == 7, page
+        seen.extend(row["id"] for row in page["results"])
+
+    assert len(seen) == len(set(seen)), "a row was served on two different pages"
+    assert set(seen) == {str(i) for i in made}, "a row was never served"
+
+    # The union being complete is necessary but not sufficient: SQLite happens to return
+    # a consistent order for this query even without a tie-breaker, so assert the order
+    # the tie-breaker *defines* instead. Insertion order is not UUID order.
+    assert seen == [str(i) for i in sorted(made, key=lambda u: u.hex)], (
+        "tied rows must fall back to a unique key"
+    )
+
+
+@pytest.mark.django_db
+def test_supervised_run_seeds_the_real_requester_email(app_config):
+    """The notification node addresses `{{requester_emails}}`. Unseeded, the workflow
+    fell back to its declared default and mailed a placeholder domain."""
+    from automation.workflows.supervised import SUPERVISED_TARGETS
+
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-seed", parent_folder=Folder.get_root_folder()
+    )
+    requester, _ = _role_client("qf-seed@test.local", "BI-RL-ANA", folder)
+    actor = Actor.objects.filter(user=requester, entity__isnull=True).first()
+
+    response = QuickFormResponse.objects.create(
+        name="needs-a-control",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.SUBMITTED,
+        submitted_by=requester,
+    )
+    response.respondents.add(actor)
+
+    variables = SUPERVISED_TARGETS["quick_form_response"]["variables"](response)
+    assert variables["requester_emails"] == "qf-seed@test.local"
+    assert "example.com" not in variables["requester_emails"]
+
+    # A request nobody is on addresses nobody, rather than a placeholder.
+    orphan = QuickFormResponse.objects.create(
+        name="unclaimed", quick_form=form, folder=folder
+    )
+    orphan_vars = SUPERVISED_TARGETS["quick_form_response"]["variables"](orphan)
+    assert orphan_vars["requester_emails"] == ""
