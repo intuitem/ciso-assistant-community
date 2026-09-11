@@ -1202,6 +1202,12 @@ def process_model_relationships(
                 if perimeter_id
                 else None
             )
+            audit_id = link_dump_database_ids.get(_fields.get("compliance_assessment"))
+            _fields["compliance_assessment"] = (
+                ComplianceAssessment.objects.filter(id=audit_id).first()
+                if audit_id
+                else None
+            )
             many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
                 _fields.pop("evidences", []), link_dump_database_ids
             )
@@ -1599,17 +1605,21 @@ def resolve_self_referencing_fks(
 def restore_entity_assessment_enclaves(
     objects: List[dict], link_dump_database_ids: dict[str, Any]
 ) -> None:
-    """Put questionnaires that arrived outside an enclave back into one.
+    """Put questionnaires from a pre-enclave dump back into an enclave.
 
-    An enclave now travels with the export, so most audits land in theirs
-    directly. This catches the ones that cannot: dumps taken before enclaves
-    were exported, and audits that were sitting in a domain folder at the
-    source. Either way `grant_respondent_access` builds a recursive assignment
-    on `audit.folder`, so leaving one in the domain would hand the respondent
-    everything. Evidence is left where the dump put it: nothing here can tell
-    whether a file was the vendor's or the internal team's.
+    Such a dump carries no folders, so its audits land flat in the domain — and
+    `grant_respondent_access` builds a recursive assignment on `audit.folder`,
+    which would hand the respondent everything.
+
+    A dump that does carry folders came from an enclave-aware export, so its
+    placement is the source of truth and nothing here may second-guess it: an
+    audit deliberately kept in a domain folder stays there, or the round trip
+    would silently move data.
     """
     from tprm.services import enclave_folder
+
+    if any(obj["model"] == "iam.folder" for obj in objects):
+        return
 
     for obj in objects:
         if obj["model"] != "tprm.entityassessment":

@@ -4790,6 +4790,7 @@ class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
     evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    compliance_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
         model = FindingsAssessment
@@ -4808,6 +4809,7 @@ class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
             "folder",
             "perimeter",
             "evidences",
+            "compliance_assessment",
             "created_at",
             "updated_at",
         ]

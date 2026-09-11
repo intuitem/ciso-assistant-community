@@ -528,10 +528,17 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     ).distinct()
 
     findings_assessments = FindingsAssessment.objects.filter(
-        Q(perimeter__in=perimeters) | Q(folder__in=folders)
+        Q(perimeter__in=perimeters)
+        | Q(folder__in=folders)
+        | Q(folder__in=enclaves)
+        # A binder raised from an enclave audit sits in that enclave and the
+        # audit drops its perimeter, so only the audit itself can reach it.
+        | Q(compliance_assessment__in=compliance_assessments)
     ).distinct()
     findings = Finding.objects.filter(
-        Q(folder__in=folders) | Q(findings_assessment__in=findings_assessments)
+        Q(folder__in=folders)
+        | Q(folder__in=enclaves)
+        | Q(findings_assessment__in=findings_assessments)
     ).distinct()
 
     risk_acceptances = RiskAcceptance.objects.filter(

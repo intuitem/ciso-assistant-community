@@ -27,6 +27,8 @@ from core.models import (
     Campaign,
     ComplianceAssessment,
     Evidence,
+    Finding,
+    FindingsAssessment,
     Framework,
     Perimeter,
     StoredLibrary,
@@ -1052,6 +1054,75 @@ class TestExportedEnclaves:
         assert imported_evidence("Internal file").folder == imported
 
     @pytest.mark.django_db
+    def test_domain_hosted_audit_is_left_where_the_dump_put_it(
+        self, root_folder, admin_user, framework_fixture
+    ):
+        """An enclave-aware dump is authoritative: an audit deliberately kept in
+        a domain folder must not be quietly moved into an enclave, or the round
+        trip stops being an identity."""
+        domain = Folder.objects.create(
+            name="Mixed Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        provider = Entity.objects.create(
+            name="Mixed Provider", ref_id="PROV-M", folder=domain
+        )
+
+        # One audit in an enclave: makes the dump carry a folder row.
+        enclaved_ea = EntityAssessment.objects.create(
+            name="Enclaved assessment", folder=domain, entity=provider
+        )
+        enclaved_audit = ComplianceAssessment.objects.create(
+            name="Enclaved audit",
+            framework=framework_fixture,
+            field_visibility=build_initial_field_visibility(framework_fixture),
+        )
+        enclaved_audit.folder = Folder.objects.create(
+            content_type=Folder.ContentType.ENCLAVE,
+            name=provider.name,
+            parent_folder=domain,
+        )
+        enclaved_audit.save()
+        enclaved_ea.compliance_assessment = enclaved_audit
+        enclaved_ea.save()
+
+        # One audit left in the domain on purpose.
+        domain_ea = EntityAssessment.objects.create(
+            name="Domain assessment", folder=domain, entity=provider
+        )
+        domain_audit = ComplianceAssessment.objects.create(
+            name="Domain audit",
+            framework=framework_fixture,
+            folder=domain,
+            field_visibility=build_initial_field_visibility(framework_fixture),
+        )
+        domain_ea.compliance_assessment = domain_audit
+        domain_ea.save()
+
+        response = export_domain(domain, admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        import_objects(
+            json_dump,
+            domain_name="Mixed Imported",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        imported = Folder.objects.get(
+            name="Mixed Imported", content_type=Folder.ContentType.DOMAIN
+        )
+        imported_audits = {
+            ea.name: ea.compliance_assessment
+            for ea in EntityAssessment.objects.filter(folder=imported)
+        }
+        assert (
+            imported_audits["Enclaved assessment"].folder.content_type
+            == Folder.ContentType.ENCLAVE
+        )
+        assert imported_audits["Domain assessment"].folder == imported
+
+    @pytest.mark.django_db
     def test_audit_arriving_outside_an_enclave_is_isolated(
         self, root_folder, admin_user, framework_fixture
     ):
@@ -1108,3 +1179,75 @@ class TestExportedEnclaves:
         assert set(
             imported_audit.requirement_assessments.values_list("folder", flat=True)
         ) == {imported_audit.folder_id}
+
+    @pytest.mark.django_db
+    def test_findings_binder_of_an_enclave_audit_travels(
+        self, root_folder, admin_user, framework_fixture
+    ):
+        """A binder raised from an enclave audit sits in that enclave, and such
+        an audit carries no perimeter, so neither the folder nor the perimeter
+        clause reaches it: only the audit it belongs to does."""
+        domain = Folder.objects.create(
+            name="Binder Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        provider = Entity.objects.create(
+            name="Binder Provider", ref_id="PROV-B", folder=domain
+        )
+        entity_assessment = EntityAssessment.objects.create(
+            name="Binder assessment", folder=domain, entity=provider
+        )
+        enclave = Folder.objects.create(
+            content_type=Folder.ContentType.ENCLAVE,
+            name=provider.name,
+            parent_folder=domain,
+        )
+        audit = ComplianceAssessment.objects.create(
+            name="Binder audit",
+            framework=framework_fixture,
+            field_visibility=build_initial_field_visibility(framework_fixture),
+        )
+        audit.folder = enclave
+        audit.save()
+        entity_assessment.compliance_assessment = audit
+        entity_assessment.save()
+
+        # Built the way the findings-binder endpoint builds it.
+        binder = FindingsAssessment.objects.create(
+            name="Binder audit (findings)",
+            compliance_assessment=audit,
+            folder=enclave,
+            perimeter=audit.perimeter,
+            category=FindingsAssessment.Category.AUDIT,
+        )
+        finding = Finding.objects.create(
+            name="Vendor gap", findings_assessment=binder, folder=enclave
+        )
+
+        assert audit.perimeter is None
+
+        scope = get_domain_export_objects(domain)
+        assert binder in scope["findingsassessment"]
+        assert finding in scope["finding"]
+
+        response = export_domain(domain, admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        import_objects(
+            json_dump,
+            domain_name="Binder Imported",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        imported = Folder.objects.get(
+            name="Binder Imported", content_type=Folder.ContentType.DOMAIN
+        )
+        imported_audit = EntityAssessment.objects.get(
+            folder=imported
+        ).compliance_assessment
+        imported_binder = FindingsAssessment.objects.get(
+            compliance_assessment=imported_audit
+        )
+        assert imported_binder.folder == imported_audit.folder
+        assert imported_binder.findings.count() == 1
