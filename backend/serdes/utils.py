@@ -575,9 +575,15 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(feared_events__in=feared_events)
         | Q(findings__in=findings)
     ).distinct()
-    task_templates = TaskTemplate.objects.filter(folder__in=folders).distinct()
+    # A third party owns tasks in its enclave the way it owns evidence there,
+    # so those belong to the export too.
+    task_templates = TaskTemplate.objects.filter(
+        Q(folder__in=folders) | Q(folder__in=enclaves)
+    ).distinct()
     task_nodes = TaskNode.objects.filter(
-        Q(folder__in=folders) | Q(task_template__in=task_templates)
+        Q(folder__in=folders)
+        | Q(folder__in=enclaves)
+        | Q(task_template__in=task_templates)
     ).distinct()
 
     # --- TPRM ecosystem ---

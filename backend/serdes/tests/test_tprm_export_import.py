@@ -984,6 +984,76 @@ class TestExportedEnclaves:
         assert not Folder.objects.filter(name="Rejected").exists()
 
     @pytest.mark.django_db
+    def test_third_party_task_in_the_enclave_travels(
+        self, root_folder, admin_user, framework_fixture
+    ):
+        """A respondent owns tasks in its enclave the way it owns evidence there
+        (THIRD_PARTY_RESPONDENT holds add/change_tasktemplate), so a task sitting
+        in an enclave has to survive the round trip and stay in it."""
+        domain = Folder.objects.create(
+            name="Task Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        provider = Entity.objects.create(
+            name="Task Provider", ref_id="PROV-T", folder=domain
+        )
+        entity_assessment = EntityAssessment.objects.create(
+            name="Task assessment", folder=domain, entity=provider
+        )
+        enclave = Folder.objects.create(
+            content_type=Folder.ContentType.ENCLAVE,
+            name=provider.name,
+            parent_folder=domain,
+        )
+        audit = ComplianceAssessment.objects.create(
+            name="Task audit",
+            framework=framework_fixture,
+            field_visibility=build_initial_field_visibility(framework_fixture),
+        )
+        audit.folder = enclave
+        audit.save()
+        entity_assessment.compliance_assessment = audit
+        entity_assessment.save()
+
+        vendor_task = TaskTemplate.objects.create(
+            name="Gather SOC 2 report", folder=enclave
+        )
+        vendor_task.compliance_assessments.add(audit)
+        internal_task = TaskTemplate.objects.create(
+            name="Chase the vendor", folder=domain
+        )
+        internal_task.compliance_assessments.add(audit)
+
+        scope = get_domain_export_objects(domain)
+        assert vendor_task in scope["tasktemplate"]
+
+        response = export_domain(domain, admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        import_objects(
+            json_dump,
+            domain_name="Task Imported",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        imported = Folder.objects.get(
+            name="Task Imported", content_type=Folder.ContentType.DOMAIN
+        )
+        imported_audit = EntityAssessment.objects.get(
+            folder=imported
+        ).compliance_assessment
+        imported_tasks = {
+            task.name: task
+            for task in TaskTemplate.objects.filter(
+                compliance_assessments=imported_audit
+            )
+        }
+        # The vendor's task follows its enclave, the internal one stays out of it.
+        assert imported_tasks["Gather SOC 2 report"].folder == imported_audit.folder
+        assert imported_tasks["Chase the vendor"].folder == imported
+
+    @pytest.mark.django_db
     def test_enclave_evidence_lands_in_the_enclave_without_inference(
         self, root_folder, admin_user, framework_fixture
     ):
