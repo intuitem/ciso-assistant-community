@@ -48,6 +48,11 @@ CUSTOM_EVENTS = [
         "model": "quickformresponse",
         "action": "submitted",
     },
+    {
+        "key": "quickformresponse.closed",
+        "model": "quickformresponse",
+        "action": "closed",
+    },
 ]
 
 VALID_FILTER_OPS = {choice[0] for choice in Condition.Operator.choices}

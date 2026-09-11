@@ -19699,12 +19699,16 @@ def _outcome_sla_due_date(response):
     return (timezone.now() + timedelta(days=min(days))).date()
 
 
-def emit_quick_form_submitted(response):
-    """Announce a submitted request to the workflow engine.
+def emit_quick_form_event(response, action):
+    """Announce a request reaching a lifecycle point to the workflow engine.
 
-    A CUD event cannot express this: answering a question saves the row too, so a
-    trigger on `quickformresponse.updated` fires throughout the fill and has to
-    filter by status. Deferred to commit so a run never reads a half-written row.
+    A CUD event cannot express these: answering a question saves the row too, so a
+    trigger on `quickformresponse.updated` fires throughout the fill and has to filter by
+    status. Deferred to commit so a run never reads a half-written row.
+
+    `quick_form_ref` and `quick_form_urn` travel alongside the id because a workflow
+    condition has to name a form in a way that survives being exported and loaded
+    somewhere else; a primary key does not.
     """
     from automation.workflows.events import dispatch_internal_event
 
@@ -19713,20 +19717,66 @@ def emit_quick_form_submitted(response):
         "ref_id": response.ref_id,
         "name": response.name,
         "quick_form": str(response.quick_form_id),
+        "quick_form_ref": response.quick_form.ref_id,
+        "quick_form_urn": response.quick_form.urn,
         "publication": str(response.publication_id)
         if response.publication_id
         else None,
+        "status": response.status,
+        "resolution": response.resolution,
         "outcome_refs": response.outcome_refs,
         "score": response.score,
         "submitted_by": str(response.submitted_by_id)
         if response.submitted_by_id
         else None,
+        "decided_by": str(response.decided_by_id) if response.decided_by_id else None,
     }
     transaction.on_commit(
         lambda: dispatch_internal_event(
-            "quickformresponse.submitted", payload, response.folder_id
+            f"quickformresponse.{action}", payload, response.folder_id
         )
     )
+
+
+def emit_quick_form_submitted(response):
+    emit_quick_form_event(response, "submitted")
+
+
+def _reference_labels(response, user=None):
+    """{question urn: [{id, label, folder}]} for every object-reference answer.
+
+    Stored answers are ids; a reviewer needs the name. Resolved through the same folder
+    scope the picker used, so an object that has since moved out of reach degrades to its
+    raw id rather than leaking a name from somewhere else.
+    """
+    from core.object_references import ReferenceError_, labels_for
+
+    out = {}
+    for answer in response.answers.select_related("question").all():
+        if answer.question.type != Question.Type.OBJECT_REFERENCE:
+            continue
+        try:
+            out[answer.question.urn] = labels_for(
+                answer.question, response.folder, answer.value or [], user=user
+            )
+        except ReferenceError_:
+            out[answer.question.urn] = []
+    return out
+
+
+def _self_validation_allowed(response) -> bool:
+    """Whether the requester may also decide this one.
+
+    The instance-wide setting is the escape hatch for organisations too small to
+    separate the two roles. It deliberately stops at a personal folder: a personal space
+    grants its owner the analyst role over their own sandbox, so allowing it there would
+    let anyone raise and approve a governed record with nobody else ever seeing it.
+    """
+    from iam.models import Folder
+
+    if response.folder.content_type == Folder.ContentType.PERSONAL:
+        return False
+    return general_setting_is_enabled("allow_self_validation")
 
 
 def _can_review(user, response):
@@ -19738,11 +19788,9 @@ def _can_review(user, response):
         folder=response.folder,
     ):
         return False
-    if general_setting_is_enabled("allow_self_validation"):
+    if _self_validation_allowed(response):
         return True
-    if response.submitted_by_id == user.id:
-        return False
-    return not response.respondents.filter(user=user, entity__isnull=True).exists()
+    return not response.is_requester(user)
 
 
 def quick_form_response_content(response, user=None):
@@ -19776,6 +19824,7 @@ def quick_form_response_content(response, user=None):
         response.answers.select_related("question").prefetch_related("selected_choices")
     )
     attachments = attachments_for(response.answers.all())
+    references = _reference_labels(response, user)
     return Response(
         {
             "id": str(response.id),
@@ -19791,6 +19840,8 @@ def quick_form_response_content(response, user=None):
             "pages": pages,
             "answers": answers,
             "attachments": attachments,
+            "references": references,
+            "produced_objects": response.produced_objects or [],
             "hidden_pages": evaluation["hidden_pages"],
             "missing_required": evaluation["missing_required"],
             "progress": evaluation["progress"],
@@ -19966,7 +20017,9 @@ class MyRequestViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         with transaction.atomic():
-            apply_answers_dict("response", response, questions_by_urn, answers)
+            apply_answers_dict(
+                "response", response, questions_by_urn, answers, user=request.user
+            )
             response.refresh_title_from_answers()
         response.refresh_from_db()
         return Response(quick_form_response_content(response, request.user).data)
@@ -20054,6 +20107,49 @@ class MyRequestViewSet(viewsets.ViewSet):
         return Response(
             serialize_attachment(attachment), status=status.HTTP_201_CREATED
         )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="reference-options",
+        name="Objects an object-reference question may point at",
+    )
+    def reference_options(self, request, pk=None):
+        """Options for one object-reference question on this request.
+
+        Deliberately narrow: only the model the author's question names, only within the
+        folder the request lands in and its ancestors. This is the one place a requester
+        with no role on that domain learns any object name, and asking the question is
+        what authorised it.
+        """
+        from core.object_references import ReferenceError_, options_for
+
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        question = Question.objects.filter(
+            page__quick_form_id=response.quick_form_id,
+            urn=request.query_params.get("question"),
+            type=Question.Type.OBJECT_REFERENCE,
+        ).first()
+        if question is None:
+            return Response(
+                {"error": "unknownQuestion"}, status=status.HTTP_404_NOT_FOUND
+            )
+        try:
+            return Response(
+                options_for(
+                    question,
+                    response.folder,
+                    request.query_params.get("search", ""),
+                    user=request.user,
+                )
+            )
+        except ReferenceError_ as e:
+            return Response(
+                {"error": "badReferenceConfig", "detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     @action(
         detail=True,
@@ -20305,6 +20401,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description"]
     permission_overrides = {
+        "awaiting_conversion": "view_quickformresponse",
         "content": "view_quickformresponse",
         "set_status": "change_quickformresponse",
         "start": "change_quickformresponse",
@@ -20398,6 +20495,49 @@ class QuickFormResponseViewSet(BaseModelViewSet):
     @action(
         detail=True,
         methods=["get"],
+        url_path="reference-options",
+        name="Objects an object-reference question may point at",
+    )
+    def reference_options(self, request, pk):
+        """Options for one object-reference question on this request.
+
+        Deliberately narrow: only the model the author's question names, only within the
+        folder the request lands in and its ancestors. This is the one place a requester
+        with no role on that domain learns any object name, and asking the question is
+        what authorised it.
+        """
+        from core.object_references import ReferenceError_, options_for
+
+        response = self.get_object()
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        question = Question.objects.filter(
+            page__quick_form_id=response.quick_form_id,
+            urn=request.query_params.get("question"),
+            type=Question.Type.OBJECT_REFERENCE,
+        ).first()
+        if question is None:
+            return Response(
+                {"error": "unknownQuestion"}, status=status.HTTP_404_NOT_FOUND
+            )
+        try:
+            return Response(
+                options_for(
+                    question,
+                    response.folder,
+                    request.query_params.get("search", ""),
+                    user=request.user,
+                )
+            )
+        except ReferenceError_ as e:
+            return Response(
+                {"error": "badReferenceConfig", "detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    @action(
+        detail=True,
+        methods=["get"],
         url_path=r"attachments/(?P<attachment_id>[^/.]+)/download",
         name="Open a file attached to this request",
     )
@@ -20433,6 +20573,51 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         attachment.delete()
         response.recompute()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=False, url_path="awaiting-conversion", name="Accepted but unconverted"
+    )
+    def awaiting_conversion(self, request):
+        """Accepted requests that produced nothing — the reconciliation worklist.
+
+        An engine that is down does not raise, it is absent: the event is dispatched
+        fire-and-forget, so a run that never started leaves no trace anywhere. This is
+        the only way to find those, and it reads the outcome rather than the machinery,
+        so it stays true however the conversion was supposed to happen.
+        """
+        from django.contrib.contenttypes.models import ContentType
+
+        produced = ProducedObjectLink.objects.filter(
+            source_content_type=ContentType.objects.get_for_model(QuickFormResponse),
+            source_object_id=models.OuterRef("pk"),
+        )
+        rows = list(
+            self.get_queryset()
+            .filter(
+                status=QuickFormResponse.Status.CLOSED,
+                resolution=QuickFormResponse.Resolution.ACCEPTED,
+            )
+            .annotate(has_produced=Exists(produced))
+            .filter(has_produced=False)
+            .select_related("quick_form", "folder")
+            .order_by("-updated_at")
+        )
+        return Response(
+            {
+                "count": len(rows),
+                "results": [
+                    {
+                        "id": str(r.id),
+                        "ref_id": r.ref_id,
+                        "name": r.name,
+                        "quick_form": r.quick_form.name,
+                        "folder": r.folder.name,
+                        "closed_at": r.updated_at,
+                    }
+                    for r in rows
+                ],
+            }
+        )
 
     @action(detail=True, url_path="suggested-actions", name="Supervised actions")
     def suggested_actions(self, request, pk):
@@ -20580,8 +20765,8 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                 {"error": "approvalPermissionRequired"},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        if response.is_requester(request.user) and not general_setting_is_enabled(
-            "allow_self_validation"
+        if response.is_requester(request.user) and not _self_validation_allowed(
+            response
         ):
             return Response(
                 {"error": "selfValidationNotAllowed"},
@@ -20660,6 +20845,16 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         response.status = new_status
         update_fields = ["status", "resolution", "observation", "updated_at"]
 
+        if new_status == QuickFormResponse.Status.CLOSED:
+            # Who actually decided, as opposed to who picked it up: an exception raised
+            # from this request needs an approver, and `assignee` is optional.
+            response.decided_by = request.user
+            update_fields.append("decided_by")
+        elif response.decided_by_id is not None:
+            # Reopened: the verdict is withdrawn, so its author is too.
+            response.decided_by = None
+            update_fields.append("decided_by")
+
         if new_status == QuickFormResponse.Status.IN_REVIEW:
             claimer = Actor.objects.filter(
                 user=request.user, entity__isnull=True
@@ -20697,6 +20892,10 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             transaction.on_commit(
                 lambda pk=response.pk: send_quick_form_submitted_notification(pk)
             )
+        elif new_status == QuickFormResponse.Status.CLOSED:
+            # The decision is the interesting moment: `resolution` is on the payload, so
+            # a workflow waits for "accepted" rather than for "no longer open".
+            emit_quick_form_event(response, "closed")
         elif (
             new_status == QuickFormResponse.Status.DRAFT
             and response.started_at is not None

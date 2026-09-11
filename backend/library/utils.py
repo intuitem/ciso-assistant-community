@@ -550,6 +550,13 @@ class QuickFormImporter:
                 name=self.quick_form_data.get("name"),
                 description=self.quick_form_data.get("description"),
                 annotation=self.quick_form_data.get("annotation"),
+                # Carried here as well as in `update_quick_forms`: a field honoured on
+                # re-import but dropped on first load silently works only for authors
+                # who happened to publish twice.
+                ref_id_prefix=self.quick_form_data.get("ref_id_prefix") or "",
+                title_question_urn=(
+                    self.quick_form_data.get("title_question_urn") or ""
+                ).lower(),
                 outcomes_definition=self.quick_form_data.get("outcomes_definition")
                 or [],
                 scores_definition=self.quick_form_data.get("scores_definition"),

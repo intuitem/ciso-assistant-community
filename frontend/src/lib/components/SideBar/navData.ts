@@ -41,7 +41,7 @@ export const navData = {
 					name: 'myRequests',
 					fa_icon: 'fa-solid fa-hand',
 					href: '/my-requests',
-					permissions: []
+					permissions: ['view_quickformresponse']
 				},
 				{
 					name: 'myAssignments',
@@ -279,7 +279,7 @@ export const navData = {
 					href: '/risk-acceptances'
 				},
 				{
-					name: 'requests',
+					name: 'requestQueue',
 					fa_icon: 'fa-solid fa-inbox',
 					href: '/requests',
 					permissions: ['view_quickformresponse']

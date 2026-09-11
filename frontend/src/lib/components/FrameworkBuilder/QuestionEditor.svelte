@@ -9,9 +9,15 @@
 	import TypeSelector from './TypeSelector.svelte';
 	import ChoiceListEditor from './ChoiceListEditor.svelte';
 	import DependsOnEditor from './DependsOnEditor.svelte';
-	import { QUESTION_TYPES, inferVariant, defaultConfigFor } from './builder-utils.svelte';
+	import {
+		QUESTION_TYPES,
+		inferVariant,
+		defaultConfigFor,
+		REFERENCEABLE_MODELS
+	} from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		question: Question;
@@ -49,6 +55,9 @@
 	const fileMaxFiles = $derived(Number(fileConfig.max_files ?? 1));
 	const fileMaxSize = $derived(Number(fileConfig.max_size_mb ?? 10));
 	const fileAccept = $derived(String(fileConfig.accept ?? ''));
+
+	const refModel = $derived(String(fileConfig.model ?? 'applied_control'));
+	const refMultiple = $derived(!!fileConfig.multiple);
 
 	// Real-time mirror of the publish-time slider validation in `builder-state.ts`,
 	// so authors see the problem while editing instead of only when they click
@@ -271,6 +280,33 @@
 					</label>
 				</div>
 				<p class="text-[10px] text-surface-500">{m.builderFileHint()}</p>
+			{/if}
+
+			{#if question.type === 'object_reference'}
+				<div class="flex flex-wrap items-center gap-3">
+					<label class="flex items-center gap-1.5">
+						<span class="text-xs text-surface-600-400">{m.builderReferenceModel()}</span>
+						<select
+							class="select text-xs"
+							value={refModel}
+							onchange={(e) => patchConfig({ model: e.currentTarget.value })}
+						>
+							{#each REFERENCEABLE_MODELS as model}
+								<option value={model}>{safeTranslate(model)}</option>
+							{/each}
+						</select>
+					</label>
+					<label class="flex items-center gap-1.5">
+						<input
+							type="checkbox"
+							class="checkbox"
+							checked={refMultiple}
+							onchange={(e) => patchConfig({ multiple: e.currentTarget.checked })}
+						/>
+						<span class="text-xs text-surface-600-400">{m.builderReferenceMultiple()}</span>
+					</label>
+				</div>
+				<p class="text-[10px] text-surface-500">{m.builderReferenceHint()}</p>
 			{/if}
 
 			{#if sliderConfigError}

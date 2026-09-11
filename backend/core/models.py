@@ -3709,6 +3709,7 @@ class Question(AbstractBaseModel, FolderMixin):
         MULTIPLE_CHOICE = "multiple_choice", _("Multiple choice")
         DATE = "date", _("Date")
         FILE = "file", _("File")
+        OBJECT_REFERENCE = "object_reference", _("Object reference")
 
     # Exactly one parent: a requirement node (compliance questionnaire) or a
     # quick form page (quick form). Enforced by the CheckConstraint below.
@@ -10274,6 +10275,115 @@ class RequirementAssignmentEvent(AbstractBaseModel, FolderMixin):
         return f"{self.assignment} - {self.event_type} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
+class ProducedObjectLink(AbstractBaseModel):
+    """Which thing caused which other thing to exist.
+
+    Both ends are generic so the answer works in either direction with one indexed
+    query. The forward direction (what did this request produce?) could have been a JSON
+    list on the source — and was, briefly — but `JSONField.contains` is unsupported on
+    SQLite, so the reverse direction would have been a table scan on the only deployment
+    where it hurts. One small indexed table answers both.
+
+    Written by the workflow engine when an action creates something; see
+    `QuickFormResponse.record_produced_object`.
+    """
+
+    source_content_type = models.ForeignKey(
+        "contenttypes.ContentType",
+        on_delete=models.CASCADE,
+        related_name="produced_links_as_source",
+    )
+    source_object_id = models.UUIDField()
+    content_type = models.ForeignKey(
+        "contenttypes.ContentType",
+        on_delete=models.CASCADE,
+        related_name="produced_links_as_target",
+    )
+    object_id = models.UUIDField()
+    source = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        help_text=_("What performed the creation, e.g. the workflow that ran."),
+    )
+
+    source_object = GenericForeignKey("source_content_type", "source_object_id")
+    target_object = GenericForeignKey("content_type", "object_id")
+
+    class Meta:
+        verbose_name = _("Produced object link")
+        verbose_name_plural = _("Produced object links")
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "source_content_type",
+                    "source_object_id",
+                    "content_type",
+                    "object_id",
+                ],
+                name="unique_produced_object_link",
+            )
+        ]
+        indexes = [
+            # Forward: what did this produce. Reverse: what produced this.
+            models.Index(fields=["source_content_type", "source_object_id"]),
+            models.Index(fields=["content_type", "object_id"]),
+        ]
+
+    def __str__(self):
+        return f"{self.source_object} -> {self.target_object}"
+
+    @classmethod
+    def record(cls, source, target, source_label: str = "") -> bool:
+        """Idempotent on the pair; True when the link was new."""
+        from django.contrib.contenttypes.models import ContentType
+
+        _link, created = cls.objects.get_or_create(
+            source_content_type=ContentType.objects.get_for_model(source),
+            source_object_id=source.pk,
+            content_type=ContentType.objects.get_for_model(target),
+            object_id=target.pk,
+            defaults={"source": source_label},
+        )
+        return created
+
+    @classmethod
+    def produced_by(cls, target):
+        """The links naming what caused `target` to exist — the reverse direction."""
+        from django.contrib.contenttypes.models import ContentType
+
+        return cls.objects.filter(
+            content_type=ContentType.objects.get_for_model(target),
+            object_id=target.pk,
+        ).select_related("source_content_type")
+
+    @classmethod
+    def produced_from(cls, source):
+        from django.contrib.contenttypes.models import ContentType
+
+        return cls.objects.filter(
+            source_content_type=ContentType.objects.get_for_model(source),
+            source_object_id=source.pk,
+        ).select_related("content_type")
+
+    def describe(self, obj) -> dict:
+        """A row the UI can render and link: identity, label, and its model name."""
+        if obj is None:
+            return {}
+        ref_id = getattr(obj, "ref_id", "") or ""
+        name = str(getattr(obj, "name", "") or obj)
+        return {
+            "model": obj._meta.model_name,
+            "id": str(obj.pk),
+            "ref_id": ref_id,
+            "name": name,
+            # `str` is what every generic renderer in the frontend already looks for.
+            "str": f"{ref_id} - {name}" if ref_id else name,
+            "at": self.created_at.isoformat() if self.created_at else None,
+            "source": self.source,
+        }
+
+
 class QuickFormResponse(
     NameDescriptionMixin, ETADueDateMixin, FolderMixin, AbstractBaseModel
 ):
@@ -10337,6 +10447,27 @@ class QuickFormResponse(
         blank=True,
         related_name="clones",
         verbose_name=_("Cloned from"),
+    )
+    # A generic foreign key does not cascade, so deleting a request would leave its
+    # provenance rows behind. This makes the source half clean up after itself; the
+    # target half is guarded by resolving through the GFK, which yields None.
+    produced_links = GenericRelation(
+        "core.ProducedObjectLink",
+        content_type_field="source_content_type",
+        object_id_field="source_object_id",
+    )
+    decided_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="quick_form_responses_decided",
+        verbose_name=_("Decided by"),
+        help_text=_(
+            "Who closed this request. `assignee` is who picked it up and is optional; "
+            "this is who actually rendered the verdict, which is what a produced record "
+            "needs as its approver."
+        ),
     )
     respondents = models.ManyToManyField(
         "core.Actor",
@@ -10424,6 +10555,32 @@ class QuickFormResponse(
             )
         ]
 
+    def record_produced_object(self, obj, source: str = "") -> bool:
+        """Record that this request caused `obj` to exist. Idempotent on the pair, so a
+        retried run or a supervised re-run after a partial reactive one cannot
+        double-count. True when the link was new."""
+        return ProducedObjectLink.record(self, obj, source_label=source)
+
+    @property
+    def produced_objects(self) -> list[dict]:
+        """What this request caused to exist, newest last. Same shape the JSON column
+        held, so nothing downstream had to learn a new one."""
+        return [
+            link.describe(link.target_object)
+            for link in ProducedObjectLink.produced_from(self).order_by("created_at")
+            if link.target_object is not None
+        ]
+
+    @property
+    def awaiting_conversion(self) -> bool:
+        """Accepted, but nothing was ever produced. The worklist of silent failures:
+        an engine that is down does not error, it is absent."""
+        return (
+            self.status == self.Status.CLOSED
+            and self.resolution == self.Resolution.ACCEPTED
+            and not ProducedObjectLink.produced_from(self).exists()
+        )
+
     def is_requester(self, user) -> bool:
         """Whoever is on the asking side of this request.
 
@@ -10434,7 +10591,13 @@ class QuickFormResponse(
         """
         if self.submitted_by_id == user.id:
             return True
-        if self.respondents.filter(user=user, entity__isnull=True).exists():
+        # The same actor set `MyRequestViewSet._own_response` uses to decide who may
+        # fill this. The two must agree: anyone who can put a request forward — through
+        # a team they belong to, or an entity they represent — is on the asking side of
+        # it, and must not also be the one who decides it.
+        if self.respondents.filter(
+            pk__in=[a.pk for a in Actor.get_all_for_user(user)]
+        ).exists():
             return True
         return self.submitted_by_id is None and not self.respondents.exists()
 

@@ -4204,6 +4204,21 @@ class AnswerWriteSerializer(BaseModelSerializer):
                     attrs["_m2m_choices"] = selected_choices_list
                     attrs["value"] = None
 
+            elif q_type == Question.Type.OBJECT_REFERENCE:
+                from core.object_references import ReferenceError_, validate_ids
+
+                owner = self.instance.owner if self.instance else None
+                folder = getattr(owner, "folder", None) or question.folder
+                request = self.context.get("request")
+                try:
+                    attrs["value"] = validate_ids(
+                        question,
+                        folder,
+                        value or [],
+                        user=getattr(request, "user", None),
+                    )
+                except ReferenceError_ as e:
+                    raise serializers.ValidationError({"value": str(e)})
             elif q_type == Question.Type.BOOLEAN:
                 if value is not None and not isinstance(value, bool):
                     raise serializers.ValidationError(
@@ -4905,7 +4920,29 @@ class SecurityExceptionWriteSerializer(
         read_only_fields = ["approver"]
 
 
-class SecurityExceptionReadSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
+class ProducedFromMixin(serializers.Serializer):
+    """`produced_from` on any read serializer whose model can be created by automation.
+
+    One indexed query against `ProducedObjectLink`, so adding it to another model costs
+    a mixin and nothing else. Answers "where did this record come from?" — the half of
+    provenance that a register needs and a forward-only link cannot give.
+    """
+
+    produced_from = serializers.SerializerMethodField()
+
+    def get_produced_from(self, obj) -> list[dict]:
+        from core.models import ProducedObjectLink
+
+        return [
+            link.describe(link.source_object)
+            for link in ProducedObjectLink.produced_by(obj)
+            if link.source_object is not None
+        ]
+
+
+class SecurityExceptionReadSerializer(
+    ProducedFromMixin, CustomFieldsSerializerMixin, BaseModelSerializer
+):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     owners = FieldsRelatedField(many=True)
@@ -6502,6 +6539,7 @@ class QuickFormResponseReadSerializer(BaseModelSerializer):
     cloned_from = FieldsRelatedField(["id", "ref_id"])
     progress = serializers.SerializerMethodField()
     is_deletable = serializers.SerializerMethodField()
+    awaiting_conversion = serializers.BooleanField(read_only=True)
 
     def get_is_deletable(self, obj) -> bool:
         # Answered per caller: a closed request is administrator-only.
@@ -6591,7 +6629,13 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
                 page__quick_form_id=instance.quick_form_id
             ).prefetch_related("choices")
         }
-        apply_answers_dict("response", instance, questions_by_urn, answers_data)
+        apply_answers_dict(
+            "response",
+            instance,
+            questions_by_urn,
+            answers_data,
+            user=getattr(self.context.get("request"), "user", None),
+        )
         instance.refresh_title_from_answers()
 
     def create(self, validated_data):

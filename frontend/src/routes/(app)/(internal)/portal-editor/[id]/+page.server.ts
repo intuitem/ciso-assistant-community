@@ -36,7 +36,13 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 		effective_field_visibility: f.effective_field_visibility ?? null
 	}));
 	const quickForms = rawQuickForms.map((f: any) => ({ id: f.id, name: f.name }));
-	const actors = rawActors.map((a: any) => ({ id: a.id, name: a.str ?? a.name }));
+	// `type` distinguishes a person from a team or an entity — a reviewer list that
+	// does not say which is which is a list of ambiguous names.
+	const actors = rawActors.map((a: any) => ({
+		id: a.id,
+		name: a.str ?? a.name,
+		type: a.type ?? ''
+	}));
 	const publications = rawPublications.map((p: any) => ({ id: p.id, name: p.name }));
 	const settingsForm = await superValidate(
 		{

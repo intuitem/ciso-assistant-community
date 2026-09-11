@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import IconPicker from '$lib/components/IconPicker/IconPicker.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
@@ -69,7 +70,19 @@
 	// The whole actor list is already fetched once by the page loader, and this editor
 	// renders per tile — an optionsEndpoint here would be one /actors round-trip per tile.
 	const actorOptions = $derived(
-		(ctx.actors ?? []).map((a: any) => ({ label: a.name, value: a.id }))
+		(ctx.actors ?? []).map((a: any) => ({
+			label: a.name,
+			value: a.id,
+			// A team named "Security" and a person named "Security" are different
+			// reviewers; the picker has to say which one you just chose.
+			infoString: a.type
+				? {
+						string: safeTranslate(a.type),
+						position: 'suffix' as const,
+						classes: 'text-surface-400'
+					}
+				: undefined
+		}))
 	);
 
 	function toggleIg(refId: string) {

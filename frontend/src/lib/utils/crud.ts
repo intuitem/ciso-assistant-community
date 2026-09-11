@@ -2563,6 +2563,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'approver' },
 			{ field: 'observation' },
 			{ field: 'link' },
+			// Where this record came from, when automation produced it. Rendered by the
+			// generic `produced_from` branch, which routes per entry rather than per field.
+			{ field: 'produced_from' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		],
@@ -4136,6 +4139,20 @@ export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
 	// The urlmodel of {model}_duplicate must be {model}
 	map['urlModel'] = baseModel;
 	return map;
+};
+
+/** Route segment for a Django model name (`securityexception` -> `security-exceptions`).
+ *  Derived from URL_MODEL_MAP rather than a second table, so a model that gains a route
+ *  gains this for free. Returns null when nothing claims that name. */
+export const urlModelForDjangoName = (name: string): string | null => {
+	const hit = Object.entries(URL_MODEL_MAP).find(([, entry]) => entry.name === name);
+	return hit ? hit[0] : null;
+};
+
+/** Human label for a Django model name, from the same map. */
+export const localNameForDjangoName = (name: string): string | null => {
+	const hit = Object.values(URL_MODEL_MAP).find((entry) => entry.name === name);
+	return hit ? (hit.localName ?? hit.verboseName ?? null) : null;
 };
 
 export const urlParamModelVerboseName = (model: string): string => {

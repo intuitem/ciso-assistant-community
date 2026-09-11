@@ -32,6 +32,7 @@ from django.db.models import (
     UUIDField,
 )
 
+from iam.models import User
 from core.models import (
     Actor,
     AppliedControl,
@@ -317,8 +318,18 @@ CREATABLE_MODELS = {
     },
     "security_exception": {
         "model": SecurityException,
-        "fields": ["name", "description", "ref_id", "severity", "expiration_date"],
-        "fk_fields": {},
+        "fields": [
+            "name",
+            "description",
+            "ref_id",
+            "severity",
+            "expiration_date",
+            "status",
+            "observation",
+        ],
+        # An exception raised from an approved request should name the person who
+        # approved it; without this the register says nobody did.
+        "fk_fields": {"approver": (User, "users")},
     },
     "entity": {
         "model": Entity,
@@ -615,10 +626,11 @@ class CreateObjectAction(BaseAction):
             params = _construction_params(entry, fields, instance)
             try:
                 obj = globals()[constructor](
-                    {"folder": instance.folder, **kwargs}, params, instance
+                    {"folder": _creation_folder(instance), **kwargs}, params, instance
                 )
             except ValidationError as e:
                 raise ActionError(f"create_object: {'; '.join(e.messages)}")
+            _record_provenance(instance, obj)
             return {
                 "created_object_id": str(obj.id),
                 "created_object_name": obj.name,
@@ -648,15 +660,84 @@ class CreateObjectAction(BaseAction):
             else:
                 if named and not kwargs.get("name"):
                     raise ActionError("create_object: 'name' is required")
-                obj = entry["model"].objects.create(folder=instance.folder, **kwargs)
+                obj = entry["model"].objects.create(
+                    folder=_creation_folder(instance), **kwargs
+                )
         except ValidationError as e:
             raise ActionError(f"create_object: {'; '.join(e.messages)}")
+        if created:
+            _record_provenance(instance, obj)
         return {
             "created_object_id": str(obj.id),
             "created_object_name": getattr(obj, "name", None) or str(obj),
             "created_object_model": config.get("model"),
             "created": created,
         }
+
+
+def _creation_folder(instance):
+    """Where an object a run creates should live.
+
+    The triggering object's folder when there is one, the instance's otherwise. A
+    derogation raised for one domain belongs in that domain: planting it in the
+    workflow's folder scopes it wrongly, and where the request came from a personal
+    space it publishes sandbox content to whoever can see the workflow.
+    """
+    trigger_obj = _triggering_object(instance)
+    folder = getattr(trigger_obj, "folder", None)
+    return folder or instance.folder
+
+
+def _record_provenance(instance, obj):
+    """Tell the object that triggered this run what it just caused to exist.
+
+    Duck-typed on purpose: the engine stays ignorant of quick forms, and a model that
+    wants provenance opts in by defining `record_produced_object`. Best-effort — a run
+    that produced a real object must not fail because the bookkeeping did.
+    """
+    import structlog
+
+    try:
+        trigger_obj = _triggering_object(instance)
+        if trigger_obj is None or not hasattr(trigger_obj, "record_produced_object"):
+            return
+        trigger_obj.record_produced_object(
+            obj, source=f"workflow:{instance.workflow.ref_id or instance.workflow.name}"
+        )
+    except Exception as e:  # noqa: BLE001 - bookkeeping never breaks a run
+        structlog.get_logger(__name__).warning(
+            "Could not record produced object", instance=str(instance.id), error=e
+        )
+
+
+def _triggering_object(instance):
+    """The object a run is about, when there is one.
+
+    Internal events carry it as `payload.id` alongside the event key that names its
+    model; supervised runs carry it as a seeded variable. Anything else — scheduled,
+    webhook — is about nothing in particular and gets None.
+    """
+    from django.apps import apps
+
+    payload = instance.payload or {}
+    variables = instance.variables or {}
+    pk = payload.get("id") or variables.get("request_id")
+    # The event key names the model: `quickformresponse.closed` -> quickformresponse.
+    key = getattr(instance.trigger_registration, "event_key", "") or ""
+    model_name = key.split(".")[0] if "." in key else None
+    if model_name is None and variables.get("request_id"):
+        # Supervised runs carry no event key; `request_id` is the seeded subject and
+        # today only quick form responses seed it.
+        model_name = "quickformresponse"
+    if not (model_name and pk):
+        return None
+    for app_label in ("core", "tprm", "privacy", "resilience"):
+        try:
+            model = apps.get_model(app_label, model_name)
+        except LookupError:
+            continue
+        return model.objects.filter(pk=pk).first()
+    return None
 
 
 # Columns every readable model exposes, when it has them.
@@ -1070,6 +1151,8 @@ def _read_filters_to_q(tree, entry, allowed_fields, context):
 
 
 def _serialize_read_row(obj, fields, computed=None):
+    from django.db.models import Model
+
     row = {}
     for field in fields:
         value = getattr(obj, field, None)
@@ -1077,6 +1160,11 @@ def _serialize_read_row(obj, fields, computed=None):
             value = str(value)
         elif isinstance(value, (datetime.datetime, datetime.date)):
             value = value.isoformat()
+        elif isinstance(value, Model):
+            # A related object reaches a template as a row, not as an instance: the id
+            # is what an `update_object` downstream can actually use, and the whole
+            # payload has to survive being stored as JSON on the run.
+            value = {"id": str(value.pk), "str": str(value)}
         row[field] = value
     if computed:
         import json
@@ -1223,6 +1311,7 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
             "owner": _ACTOR,
             "evidences": _EVIDENCES,
             "assets": _ASSETS,
+            "security_exceptions": _EXCEPTIONS,
             "filtering_labels": _LABELS,
         },
     ),

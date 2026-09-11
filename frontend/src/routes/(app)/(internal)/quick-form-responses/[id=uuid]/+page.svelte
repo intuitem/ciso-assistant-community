@@ -8,6 +8,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { canPerformActionOnObject } from '$lib/utils/access-control';
+	import { urlModelForDjangoName, localNameForDjangoName } from '$lib/utils/crud';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -33,6 +34,17 @@
 		})
 	);
 	const viewerIsRequester = $derived(!!data.viewerIsRequester);
+	// The other direction from an object-reference answer: not what the request points
+	// at, but what it caused to exist once it was accepted.
+	const producedObjects = $derived(
+		((content.produced_objects ?? []) as any[]).map((entry) => ({
+			...entry,
+			label: localNameForDjangoName(entry.model) ?? entry.model,
+			href: urlModelForDjangoName(entry.model)
+				? `/${urlModelForDjangoName(entry.model)}/${entry.id}`
+				: null
+		}))
+	);
 	// The server decides: holds the approve right, and isn't the person who filed this
 	// (unless self-validation is enabled instance-wide). Offering a button the server
 	// will refuse is worse than not offering it.
@@ -107,6 +119,13 @@
 
 	async function removeAttachment(_urn: string, attachmentId: string) {
 		await post('removeAttachment', { attachmentId });
+	}
+
+	async function searchReferences(urn: string, search: string) {
+		const query = new URLSearchParams({ question: urn, search });
+		const res = await fetch(`/quick-form-responses/${response.id}/reference-options?${query}`);
+		if (!res.ok) return [];
+		return (await res.json()).results ?? [];
 	}
 
 	const statusColor: Record<string, string> = {
@@ -202,6 +221,31 @@
 						{(payload as any)?.label ?? (payload as any)?.annotation ?? refId}
 					</span>
 				{/each}
+			</div>
+		{/if}
+
+		{#if producedObjects.length}
+			<div class="rounded-lg border border-success-300 bg-success-50 dark:bg-success-500/10 p-3">
+				<p
+					class="text-xs font-semibold uppercase tracking-wider text-success-700 dark:text-success-400"
+				>
+					<i class="fa-solid fa-circle-check mr-1"></i>{m.producedObjects()}
+				</p>
+				<ul class="mt-2 flex flex-col gap-1 text-sm">
+					{#each producedObjects as obj (obj.id)}
+						<li class="flex flex-wrap items-baseline gap-2">
+							{#if obj.href}
+								<a class="anchor font-medium" href={obj.href}>{obj.ref_id || obj.name}</a>
+							{:else}
+								<span class="font-medium">{obj.ref_id || obj.name}</span>
+							{/if}
+							<span class="text-surface-500">{safeTranslate(obj.label)}</span>
+							{#if obj.ref_id && obj.name}
+								<span class="text-surface-500">— {obj.name}</span>
+							{/if}
+						</li>
+					{/each}
+				</ul>
 			</div>
 		{/if}
 
@@ -378,6 +422,8 @@
 					{/if}
 					<Question
 						attachments={content.attachments ?? {}}
+						references={content.references ?? {}}
+						onSearchReferences={canEditAnswers ? searchReferences : undefined}
 						attachmentHref={(a) => `/quick-form-responses/${response.id}/attachments/${a.id}`}
 						onUpload={canEditAnswers ? uploadAttachment : undefined}
 						onRemoveAttachment={canEditAnswers ? removeAttachment : undefined}

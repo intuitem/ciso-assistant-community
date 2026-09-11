@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { urlModelForDjangoName } from '$lib/utils/crud';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
@@ -709,7 +710,25 @@
 															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if key === 'purposes'}
+																{#if key === 'produced_from'}
+																	<!-- Each entry names its own model, so the route is derived per
+																	     entry rather than from a single urlModel on the field. -->
+																	{@const producedUrlModel = urlModelForDjangoName(val.model)}
+																	{#if producedUrlModel}
+																		<Anchor
+																			breadcrumbAction="push"
+																			href={`/${producedUrlModel}/${val.id}`}
+																			class="anchor">{val.str}</Anchor
+																		>
+																	{:else}
+																		{val.str}
+																	{/if}
+																	{#if val.source}
+																		<span class="text-surface-600-400 text-xs">
+																			— {val.source}</span
+																		>
+																	{/if}
+																{:else if key === 'purposes'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel ?? 'purposes'

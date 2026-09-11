@@ -1128,7 +1128,7 @@ def _is_question_visible(question, answers_by_urn, questions_by_urn=None, visite
     return False
 
 
-def apply_answers_dict(owner_field, owner, questions_by_urn, answers_data):
+def apply_answers_dict(owner_field, owner, questions_by_urn, answers_data, user=None):
     """Write a legacy `{question_urn: value}` dict onto the Answer rows of
     *owner*, a RequirementAssessment (owner_field="requirement_assessment")
     or a QuickFormResponse (owner_field="response").
@@ -1185,6 +1185,26 @@ def apply_answers_dict(owner_field, owner, questions_by_urn, answers_data):
                 answer.selected_choices.clear()
             answer.value = None
             answer.save(update_fields=["value"])
+        elif question.type == Question.Type.OBJECT_REFERENCE:
+            # Ids only, always a list, and only ones reachable from the owner's folder —
+            # this path bypasses the serializer, so it cannot bypass the check too.
+            from core.object_references import ReferenceError_, validate_ids
+
+            ids = (
+                answer_value
+                if isinstance(answer_value, list)
+                else ([answer_value] if answer_value else [])
+            )
+            try:
+                answer.value = validate_ids(
+                    question, owner.folder, [str(i) for i in ids], user=user
+                )
+            except ReferenceError_ as e:
+                logger.warning(
+                    "Rejected object reference answer", q_urn=q_urn, error=str(e)
+                )
+                answer.value = []
+            answer.save(update_fields=["value"])
         else:
             answer.value = answer_value
             answer.save(update_fields=["value"])
@@ -1234,6 +1254,9 @@ def _build_answer_context(questions_qs, answers_qs):
         elif q_type == Question.Type.FILE:
             # A file question is answered by uploading, not by writing a value.
             has_answer_by_qid[a.question_id] = a.attachments.exists()
+        elif q_type == Question.Type.OBJECT_REFERENCE:
+            # Always a list, so an empty one is unanswered rather than "[]".
+            has_answer_by_qid[a.question_id] = bool(a.value)
         else:
             has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
 

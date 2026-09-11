@@ -23,6 +23,10 @@
 		onRemoveAttachment?: (urn: string, attachmentId: string) => Promise<void> | void;
 		/** Where to open an attached file. Absent on surfaces that store nothing. */
 		attachmentHref?: (attachment: any) => string;
+		/** {question urn: [{id, label, folder}]} — resolved names for stored ids. */
+		references?: Record<string, any[]>;
+		/** Search the objects an object-reference question may point at. */
+		onSearchReferences?: (urn: string, search: string) => Promise<any[]>;
 	}
 
 	let {
@@ -39,8 +43,42 @@
 		attachments = {},
 		onUpload,
 		onRemoveAttachment,
-		attachmentHref
+		attachmentHref,
+		references = {},
+		onSearchReferences
 	}: Props = $props();
+
+	// Object-reference pickers: one open dropdown at a time, results per question.
+	let refOpen = $state<string | null>(null);
+	let refSearch = $state<Record<string, string>>({});
+	let refResults = $state<Record<string, any[]>>({});
+	let refBusy = $state<Record<string, boolean>>({});
+
+	async function searchReferences(urn: string) {
+		if (!onSearchReferences) return;
+		refBusy[urn] = true;
+		try {
+			refResults[urn] = await onSearchReferences(urn, refSearch[urn] ?? '');
+		} finally {
+			refBusy[urn] = false;
+		}
+	}
+
+	function toggleReference(urn: string, question: any, option: any) {
+		const current: string[] = Array.isArray(internalAnswers[urn]) ? internalAnswers[urn] : [];
+		const multiple = !!question.config?.multiple;
+		let next: string[];
+		if (current.includes(option.id)) next = current.filter((id) => id !== option.id);
+		else next = multiple ? [...current, option.id] : [option.id];
+		internalAnswers[urn] = next;
+		// Keep the label visible immediately; the server resends it on the next load.
+		const known = [...(references[urn] ?? []), ...(refResults[urn] ?? [])];
+		references[urn] = next.map(
+			(id) => known.find((o) => o.id === id) ?? { id, label: id, folder: null }
+		);
+		if (!multiple) refOpen = null;
+		onChange(urn, next);
+	}
 
 	let uploading = $state<Record<string, boolean>>({});
 	let uploadError = $state<Record<string, string>>({});
@@ -382,6 +420,84 @@
 								{/if}
 							</div>
 						{/if}
+					{:else if question.type === 'object_reference'}
+						{@const picked = references[urn] ?? []}
+						<div class="flex flex-col gap-2">
+							{#if picked.length}
+								<ul class="flex flex-col gap-1">
+									{#each picked as option (option.id)}
+										<li
+											class="flex items-center gap-2 rounded-lg border border-surface-200-800 bg-surface-100-900 px-3 py-2 text-sm"
+										>
+											<i class="fa-solid fa-link text-surface-400"></i>
+											<span class="min-w-0 grow truncate">{option.label}</span>
+											{#if option.folder}
+												<span class="shrink-0 text-xs text-surface-400">{option.folder}</span>
+											{/if}
+											{#if !disabled && onSearchReferences}
+												<button
+													type="button"
+													class="shrink-0 text-surface-400 hover:text-error-500"
+													aria-label={m.delete()}
+													onclick={() => toggleReference(urn, question, option)}
+												>
+													<i class="fa-solid fa-xmark"></i>
+												</button>
+											{/if}
+										</li>
+									{/each}
+								</ul>
+							{:else if disabled || !onSearchReferences}
+								<p class="text-xs italic text-surface-400">{m.objectReferenceNone()}</p>
+							{/if}
+
+							{#if !disabled && onSearchReferences}
+								<div class="flex items-center gap-2">
+									<input
+										type="text"
+										class="input text-sm"
+										placeholder={m.objectReferenceSearch()}
+										bind:value={refSearch[urn]}
+										onfocus={() => {
+											refOpen = urn;
+											if (!refResults[urn]) searchReferences(urn);
+										}}
+										oninput={() => searchReferences(urn)}
+									/>
+									{#if refBusy[urn]}
+										<i class="fa-solid fa-spinner fa-spin text-xs text-surface-400"></i>
+									{/if}
+								</div>
+								{#if refOpen === urn && (refResults[urn] ?? []).length}
+									<ul
+										class="max-h-56 overflow-y-auto rounded-lg border border-surface-200-800 bg-surface-50-950"
+									>
+										{#each refResults[urn] as option (option.id)}
+											{@const selected = (internalAnswers[urn] ?? []).includes(option.id)}
+											<li>
+												<button
+													type="button"
+													class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-surface-100-900 {selected
+														? 'text-primary-600'
+														: ''}"
+													onclick={() => toggleReference(urn, question, option)}
+												>
+													<i
+														class="fa-solid {selected
+															? 'fa-circle-check'
+															: 'fa-circle'} text-xs opacity-60"
+													></i>
+													<span class="min-w-0 grow truncate">{option.label}</span>
+													{#if option.folder}
+														<span class="shrink-0 text-xs text-surface-400">{option.folder}</span>
+													{/if}
+												</button>
+											</li>
+										{/each}
+									</ul>
+								{/if}
+							{/if}
+						</div>
 					{:else if question.type === 'file'}
 						{@const files = attachments[urn] ?? []}
 						{@const fileLimit = question.config?.multiple
