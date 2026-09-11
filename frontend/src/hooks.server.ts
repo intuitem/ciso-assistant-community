@@ -13,7 +13,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { loadFeatureFlags } from '$lib/feature-flags';
 import { logger, installJsonConsole } from '$lib/server/logger';
 import { paraglideMiddleware } from '$paraglide/server';
-import { defineCustomServerStrategy } from '$paraglide/runtime';
+import { defineCustomServerStrategy, toLocale } from '$paraglide/runtime';
 
 // Runs once at server start. When LOG_FORMAT=json, routes the whole SSR stdout
 // stream (including not-yet-migrated console.* call sites) through JSON output.
@@ -166,7 +166,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// this each unmatched path costs two backend round-trips. route.id is set by now.
 	if (!event.route.id) {
 		event.locals.featureFlags = loadFeatureFlags();
-		const locale = event.cookies.get('LOCALE') || DEFAULT_LANGUAGE;
+		// %lang% is an unescaped HTML attribute and LOCALE is not httpOnly, so the
+		// cookie must be validated here the way paraglide would on the normal path.
+		const locale = toLocale(event.cookies.get('LOCALE')) ?? DEFAULT_LANGUAGE;
 		return resolve(event, {
 			transformPageChunk: ({ html }) => html.replace('%lang%', locale).replace('%theme%', '')
 		});
