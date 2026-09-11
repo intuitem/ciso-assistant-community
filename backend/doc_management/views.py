@@ -1329,12 +1329,14 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         )
 
         content_html = mark_safe(self._inline_images(content_html, set(accessible_ids)))
-        author_name = ""
-        if revision.author:
-            author_name = (
-                f"{revision.author.first_name} {revision.author.last_name}".strip()
-                or revision.author.email
-            )
+
+        author_name = str(revision.author) if revision.author else ""
+        reviewer_name = (
+            str(revision.reviewer)
+            if revision.reviewer
+            and revision.status in DocumentRevision.APPROVED_STATUSES
+            else ""
+        )
         doc = revision.document
         container = getattr(doc, "container", None)
         document_type_label = ""
@@ -1362,6 +1364,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             "status": revision.status,
             "status_display": revision.get_status_display(),
             "author_name": author_name,
+            "reviewer_name": reviewer_name,
             "published_at": (
                 revision.published_at.strftime("%Y-%m-%d")
                 if revision.published_at
