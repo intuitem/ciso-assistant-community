@@ -13,6 +13,7 @@ from core.net_safety import (
     BlockedRequestError,
     DnsLookupError,
     assert_public_url_unless_dev,
+    is_https_url,
 )
 from .models import GlobalSettings
 
@@ -147,6 +148,11 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
                 raise serializers.ValidationError(f"Invalid key: {key}")
+            if key == "orcarouter_api_base" and not value:
+                # Empty means "use the documented gateway default": storing ""
+                # would make get_llm() build a relative /models URL, fail the
+                # health check and silently degrade to retrieval-only.
+                validated_data["value"][key] = LLM_URL_DEFAULTS["orcarouter_api_base"]
             if (
                 key in ("ollama_base_url", "openai_api_base", "orcarouter_api_base")
                 and value
@@ -157,6 +163,12 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 if parsed.scheme not in ("http", "https"):
                     raise serializers.ValidationError(
                         {key: "URL must use http or https scheme."}
+                    )
+                if key == "orcarouter_api_base" and not is_https_url(value):
+                    # The key rides on the health check and on every delegated
+                    # request, so a plaintext gateway would leak it in transit.
+                    raise serializers.ValidationError(
+                        {key: "OrcaRouter URL must use the https scheme."}
                     )
                 if "#" in value:
                     raise serializers.ValidationError(

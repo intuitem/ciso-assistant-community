@@ -5,7 +5,12 @@ from unittest.mock import patch
 
 import pytest
 
-from core.net_safety import BlockedRequestError, DnsLookupError, assert_public_url
+from core.net_safety import (
+    BlockedRequestError,
+    DnsLookupError,
+    assert_public_url,
+    is_https_url,
+)
 
 
 def _addrinfo(*addrs):
@@ -97,3 +102,22 @@ class TestAssertPublicUrl:
                 assert_public_url("http://example.com/")
             # Caller can opt in.
             assert_public_url("http://example.com/", allowed_schemes=("http", "https"))
+
+
+class TestIsHttpsUrl:
+    def test_accepts_https(self):
+        assert is_https_url("https://api.orcarouter.ai/v1") is True
+
+    def test_scheme_match_is_case_insensitive(self):
+        assert is_https_url("HTTPS://api.orcarouter.ai/v1") is True
+
+    def test_rejects_http(self):
+        # The whole point: a configured key must never ride on plaintext.
+        assert is_https_url("http://api.orcarouter.ai/v1") is False
+
+    def test_rejects_other_schemes_and_relative_values(self):
+        for url in ("ftp://example.com", "file:///etc/passwd", "/v1", ""):
+            assert is_https_url(url) is False
+
+    def test_rejects_missing_value(self):
+        assert is_https_url(None) is False

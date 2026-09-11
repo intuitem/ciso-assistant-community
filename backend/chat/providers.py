@@ -14,6 +14,7 @@ from chat.memory import (
     strip_framing_markers,
     wrap_session_summary,
 )
+from core.net_safety import is_https_url
 
 logger = structlog.get_logger(__name__)
 
@@ -951,6 +952,11 @@ def get_llm() -> LLM:
 
     if provider == "orcarouter":
         base_url = settings.get("orcarouter_api_base", "https://api.orcarouter.ai/v1")
+        if not is_https_url(base_url):
+            # Both the health check below and the delegated client attach the
+            # API key, so refuse the endpoint instead of leaking it in transit.
+            logger.warning("orcarouter_insecure_base_url", base_url=base_url)
+            return StubLLM()
         try:
             import httpx
 

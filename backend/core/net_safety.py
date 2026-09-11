@@ -74,6 +74,18 @@ def assert_public_url_unless_dev(
     assert_public_url(url, allowed_schemes=allowed_schemes)
 
 
+def is_https_url(url: str) -> bool:
+    """True when *url* carries the https scheme.
+
+    Callers that attach credentials to a request gate on this first: an API
+    key sent over plaintext http is exposed on the wire, so a provider whose
+    key was configured for such a URL must refuse to connect rather than
+    connect anyway. Only the scheme is checked — host validation stays with
+    the callers that need it (see assert_public_url).
+    """
+    return urlparse(url or "").scheme == "https"
+
+
 def check_integration_url(url: str, source: str) -> None:
     """SSRF check for admin-configured integration URLs (Jira, ServiceNow).
 
