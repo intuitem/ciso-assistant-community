@@ -113,27 +113,35 @@ _PDF_FETCH_MAX_BYTES = 10 * 1024 * 1024
 _DATA_URL_FETCHER = URLFetcher(allowed_protocols=("data",), allow_redirects=False)
 
 
-# WeasyPrint passes a configured `ssl_context` we don't thread through:
-# deployments needing a custom CA for embedded images won't get it. File
-# an issue if that becomes a real need.
-def _safe_url_fetcher(url, timeout=10, ssl_context=None):
-    if url.startswith("data:"):
-        return _DATA_URL_FETCHER.fetch(url)
-    assert_public_url(url, allowed_schemes=("https",))
-    r = requests.get(url, timeout=timeout, allow_redirects=False, stream=True)
-    try:
-        status_code = r.status_code
-        final_url = r.url
-        content_type = r.headers.get("Content-Type", "application/octet-stream")
-        if 300 <= status_code < 400:
-            raise BlockedRequestError(f"Redirects not followed: {url}")
-        content = r.raw.read(_PDF_FETCH_MAX_BYTES + 1, decode_content=True)
-    finally:
-        r.close()
-    if len(content) > _PDF_FETCH_MAX_BYTES:
-        raise BlockedRequestError(f"Response exceeds {_PDF_FETCH_MAX_BYTES} bytes")
-    mime = content_type.split(";")[0].strip() or "application/octet-stream"
-    return URLFetcherResponse(final_url, content, {"Content-Type": mime})
+# Must be a URLFetcher subclass, not a plain callable: since 70.0 WeasyPrint
+# reads `url_fetcher._fail_on_errors` unguarded when a fetch raises, so a bare
+# function turns every blocked resource into an AttributeError that escapes the
+# URLFetchingError handling and aborts the whole render.
+# A configured `ssl_context` is not threaded through: deployments needing a
+# custom CA for embedded images won't get it. File an issue if that becomes a
+# real need.
+class _SafeURLFetcher(URLFetcher):
+    def fetch(self, url, headers=None):
+        if url.startswith("data:"):
+            return _DATA_URL_FETCHER.fetch(url)
+        assert_public_url(url, allowed_schemes=("https",))
+        r = requests.get(url, timeout=self._timeout, allow_redirects=False, stream=True)
+        try:
+            status_code = r.status_code
+            final_url = r.url
+            content_type = r.headers.get("Content-Type", "application/octet-stream")
+            if 300 <= status_code < 400:
+                raise BlockedRequestError(f"Redirects not followed: {url}")
+            content = r.raw.read(_PDF_FETCH_MAX_BYTES + 1, decode_content=True)
+        finally:
+            r.close()
+        if len(content) > _PDF_FETCH_MAX_BYTES:
+            raise BlockedRequestError(f"Response exceeds {_PDF_FETCH_MAX_BYTES} bytes")
+        mime = content_type.split(";")[0].strip() or "application/octet-stream"
+        return URLFetcherResponse(final_url, content, {"Content-Type": mime})
+
+
+_safe_url_fetcher = _SafeURLFetcher()
 
 
 class DocumentContainerFilter(GenericFilterSet):
@@ -1319,12 +1327,14 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         )
 
         content_html = mark_safe(self._inline_images(content_html, set(accessible_ids)))
-        author_name = ""
-        if revision.author:
-            author_name = (
-                f"{revision.author.first_name} {revision.author.last_name}".strip()
-                or revision.author.email
-            )
+
+        author_name = str(revision.author) if revision.author else ""
+        reviewer_name = (
+            str(revision.reviewer)
+            if revision.reviewer
+            and revision.status in DocumentRevision.APPROVED_STATUSES
+            else ""
+        )
         doc = revision.document
         container = getattr(doc, "container", None)
         document_type_label = ""
@@ -1352,6 +1362,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             "status": revision.status,
             "status_display": revision.get_status_display(),
             "author_name": author_name,
+            "reviewer_name": reviewer_name,
             "published_at": (
                 revision.published_at.strftime("%Y-%m-%d")
                 if revision.published_at

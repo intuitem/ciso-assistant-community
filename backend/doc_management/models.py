@@ -149,6 +149,12 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         PUBLISHED = "published", _("Published")
         DEPRECATED = "deprecated", _("Deprecated")
 
+    # `reviewer` is also written by mark_change_requested(), so it only means
+    # "approver" once the revision reached one of these.
+    APPROVED_STATUSES = frozenset(
+        {Status.VALIDATED, Status.PUBLISHED, Status.DEPRECATED}
+    )
+
     document = models.ForeignKey(
         ManagedDocument, on_delete=models.CASCADE, related_name="revisions"
     )

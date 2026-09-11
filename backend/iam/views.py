@@ -291,6 +291,9 @@ class SessionTokenView(views.APIView):
         # Log the user in and get the session token
         # This token is used for allauth's authentication flows
         login(request, user)
+        # Same-hostname deployments forward the browser cookies here, so this
+        # may be the callback session and its short TTL must not be inherited.
+        request.session.set_expiry(None)
         copy_slo_state_from_session_key(
             request, request.META.get("HTTP_X_SSO_SESSION_KEY")
         )

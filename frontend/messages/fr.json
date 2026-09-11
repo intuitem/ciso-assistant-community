@@ -1009,6 +1009,7 @@
 	"inProgress": "En cours",
 	"inReview": "En révision",
 	"approved": "Approuvé",
+	"approvedBy": "Approuvé par",
 	"resolved": "Résolu",
 	"deprecated": "Déprécié",
 	"stale": "Obsolète",
