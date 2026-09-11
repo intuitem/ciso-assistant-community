@@ -88,6 +88,23 @@ class TestRespondentAlignmentRoundtrip:
             requirement_assessment.result == RequirementAssessment.Result.NOT_ASSESSED
         )
 
+    def test_unchanged_alignment_roundtrip_keeps_auditor_result(
+        self, requirement_assessment
+    ):
+        _update(requirement_assessment, {"respondent_alignment": "yes"})
+        assert requirement_assessment.result == RequirementAssessment.Result.COMPLIANT
+
+        requirement_assessment.result = RequirementAssessment.Result.NON_COMPLIANT
+        requirement_assessment.save(update_fields=["result"])
+
+        _update(
+            requirement_assessment,
+            {"respondent_alignment": "yes", "observation": "respondent edit"},
+        )
+        assert (
+            requirement_assessment.result == RequirementAssessment.Result.NON_COMPLIANT
+        )
+
     def test_alignment_still_maps_to_result(self, requirement_assessment):
         _update(requirement_assessment, {"respondent_alignment": "no"})
         assert (
