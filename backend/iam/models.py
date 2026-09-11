@@ -1363,8 +1363,7 @@ class GrantFolderSet:
     """
     The folders on which a user's grants sit, for one permission — unexpanded:
     a recursive grant appears here as its perimeter folder, not its subtree.
-    Expansion is `_coverage_q`'s job, applied to one folder (point check) or to
-    all folders (bulk check).
+    Expansion is `_coverage_q`'s job, inside `get_allowed_folder_ids`.
 
     Both fields are materialized flat id lists: the verdict path never carries
     querysets or unions into subqueries (PostgreSQL parser-depth safety).
@@ -1468,34 +1467,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return permission
 
     @staticmethod
-    def _get_role_assignments_from_permission(
-        user: AbstractBaseUser | AnonymousUser,
-        permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
-    ) -> QuerySet[RoleAssignment]:
-        """
-        Return the `RoleAssignment` list (as a `QuerySet`) granting the `permission`.
-
-        The `permission` is either a (`perm_prefix`, `model`) pair (e.g. `("view", AppliedControl)`) or a django `Permission`.
-        """
-
-        # Using `.order_by()` prevent django from including the "name" column (to avoid problems on queryset unions)
-        role_assignments = RoleAssignment.get_role_assignments_from_user(
-            user
-        ).order_by()
-
-        permission = RoleAssignment._resolve_permission(permission)
-
-        role_assignments = role_assignments.filter(role__permissions=permission)
-        return role_assignments
-
-    @staticmethod
     def _coverage_q(grant_folder_set: GrantFolderSet) -> Q:
         """
         The coverage predicate, stated once: a folder is covered when a
         non-recursive grant (an assignment or a default role) names it, or a
-        recursive grant names it or one of its ancestors. The point check
-        applies it to one folder, the bulk check to all folders — the same
-        rule evaluated in both directions.
+        recursive grant names it or one of its ancestors. Evaluated in one
+        place — `get_allowed_folder_ids` — over all folders; the point check
+        is membership in that result.
 
         The id sets are materialized into flat literal INs on purpose: they are
         small by nature (a user's perimeter folders plus default-role folders),
@@ -1529,7 +1507,15 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         perm: Permission,
         folder: Folder,
     ) -> bool:
-        """Return `True` if ther `user` `User` has the `perm` `Permission` the `folder` `Folder`, return `False` otherwise."""
+        """
+        Return `True` if the `user` `User` has the `perm` `Permission` on the `folder` `Folder`, return `False` otherwise.
+
+        After the model-level special cases, the point verdict is membership in
+        the bulk verdict: the folder is accessible iff `get_allowed_folder_ids`
+        (which owns coverage and the focus/base clamp) contains it — one
+        decision procedure with a point shape and a vector shape, which cannot
+        drift apart.
+        """
         from core.models import FilteringLabel
 
         if not isinstance(user, User):
@@ -1543,25 +1529,17 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return perm_prefix == "view"
 
         if perm_prefix == "add" and model is FilteringLabel:
-            return RoleAssignment._get_role_assignments_from_permission(
+            # Anywhere-you-hold-it, deliberately folder-independent — served by
+            # the stored branch alone (a default role is view-only by rule, so
+            # the virtual branch cannot carry an add permission).
+            stored_assignments, _ambient_folders = RoleAssignment._get_grant_sources(
                 user, perm
-            ).exists()
-
-        focused_folder_id = Folder.get_focused_folder_id()
-        if focused_folder_id is not None:
-            is_folder_focused = (
-                folder.id == focused_folder_id
-                or folder.ancestors.filter(id=focused_folder_id).exists()
             )
-
-            if (not is_folder_focused) and (not folder.is_root()):
-                return False
-
-        grant_folder_set = RoleAssignment._get_grant_folder_set(user, perm)
+            return stored_assignments.exists()
 
         return (
-            Folder.objects.filter(id=folder.id)
-            .filter(RoleAssignment._coverage_q(grant_folder_set))
+            RoleAssignment.get_allowed_folder_ids(user, perm)
+            .filter(id=folder.id)
             .exists()
         )
 
@@ -1730,25 +1708,26 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             user, permission
         )
 
-        # A perimeter-less assignment projects a NULL folder id — inert in an
-        # IN list, dropped here to keep the literals clean. order_by() keeps
-        # the model's default ordering out of the DISTINCT projection.
-        non_recursive_assignment_folder_ids = [
-            folder_id
-            for folder_id in role_assignments.filter(is_recursive=False)
-            .order_by()
-            .values_list("perimeter_folders__id", flat=True)
-            .distinct()
-            if folder_id is not None
-        ]
-        recursive_grant_folder_ids = [
-            folder_id
-            for folder_id in role_assignments.filter(is_recursive=True)
-            .order_by()
-            .values_list("perimeter_folders__id", flat=True)
-            .distinct()
-            if folder_id is not None
-        ]
+        def perimeter_folder_ids(
+            assignments: QuerySet[RoleAssignment],
+        ) -> list[uuid.UUID]:
+            # A perimeter-less assignment projects a NULL folder id — inert in
+            # an IN list, dropped here to keep the literals clean. order_by()
+            # keeps the model's default ordering out of the DISTINCT projection.
+            return [
+                folder_id
+                for folder_id in assignments.order_by()
+                .values_list("perimeter_folders__id", flat=True)
+                .distinct()
+                if folder_id is not None
+            ]
+
+        non_recursive_assignment_folder_ids = perimeter_folder_ids(
+            role_assignments.filter(is_recursive=False)
+        )
+        recursive_grant_folder_ids = perimeter_folder_ids(
+            role_assignments.filter(is_recursive=True)
+        )
         ambient_folder_ids = list(
             ambient_folders.values_list("id", flat=True).order_by()
         )
@@ -1929,29 +1908,20 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return allowed_actor_ids
 
     @staticmethod
-    def _get_actor_accessible_ids(
-        user: AbstractBaseUser | AnonymousUser,
-    ) -> tuple[QuerySet[uuid.UUID], QuerySet[uuid.UUID], QuerySet[uuid.UUID]]:
-        return (
-            RoleAssignment._get_actor_accessible_ids_by_perm(user, "view"),
-            RoleAssignment._get_actor_accessible_ids_by_perm(user, "change"),
-            RoleAssignment._get_actor_accessible_ids_by_perm(user, "delete"),
-        )
+    def _get_permission_accessible_ids(
+        perm_prefix: NativePermissionPrefix,
+    ) -> QuerySet[uuid.UUID]:
+        # No user (even admin) SHALL be able to change/delete `Permission` objects.
+        if perm_prefix != "view":
+            return Permission.objects.none().values_list("id", flat=True)
 
-    @staticmethod
-    def _get_permission_accessible_ids() -> tuple[
-        QuerySet[uuid.UUID], QuerySet[uuid.UUID], QuerySet[uuid.UUID]
-    ]:
-        allowed_ids = (
+        return (
             Permission.objects.filter(
                 content_type__app_label__in=ALLOWED_PERMISSION_APPS
             )
             .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
             .values_list("id", flat=True)
         )
-        # No user (even admin) SHALL be able to change/delete `Permission` objects.
-        _none = Permission.objects.none().values_list("id", flat=True)
-        return (allowed_ids, _none, _none)
 
     @staticmethod
     def get_iam_folder_field(model: type[models.Model]) -> str:
@@ -2022,30 +1992,25 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Gets all objects of a specified type that a user can reach in a given folder
         Only accessible folders are considered
         Assumes that object type follows Django conventions for permissions
-        Also retrieve published objects in view
         """
-        from core.models import Actor, FilteringLabel
+        from core.models import Actor
 
         if folder is None:
             folder = Folder.get_root_folder()
 
-        PERM_PREFIXES: list[NativePermissionPrefix] = ["view", "change", "delete"]
-        try:
-            perm_prefix_index = PERM_PREFIXES.index(perm_prefix)
-        except Exception:
+        if perm_prefix not in ("view", "change", "delete"):
             raise AssertionError(
                 f"The following permission prefix isn't allowed for this function: {perm_prefix!r}"
             )
 
         if not isinstance(user, User):
-            _none = model.objects.none().values_list("id", flat=True)
-            return _none
+            return model.objects.none().values_list("id", flat=True)
 
         if model is Permission:
-            return RoleAssignment._get_permission_accessible_ids()[perm_prefix_index]
+            return RoleAssignment._get_permission_accessible_ids(perm_prefix)
 
         if model is Actor:
-            return RoleAssignment._get_actor_accessible_ids(user)[perm_prefix_index]
+            return RoleAssignment._get_actor_accessible_ids_by_perm(user, perm_prefix)
 
         allowed_folder_ids = RoleAssignment.get_allowed_folder_ids(
             user, (perm_prefix, model), base_folder=folder

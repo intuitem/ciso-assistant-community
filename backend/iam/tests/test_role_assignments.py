@@ -69,6 +69,17 @@ def _enterprise_flags(monkeypatch):
     monkeypatch.setattr(ff_utils, "get_supported_feature_flags", lambda: supported)
 
 
+def _stored_grant_assignments(user, permission):
+    """The stored branch of `RoleAssignment._get_grant_sources`, restricted to
+    the given permission (a `Permission` or a `(prefix, model)` pair) — the
+    successor of the deleted `_get_role_assignments_from_permission`."""
+    permission = RoleAssignment._resolve_permission(permission)
+    role_assignments, _ambient_folders = RoleAssignment._get_grant_sources(
+        user, permission
+    )
+    return role_assignments
+
+
 @pytest.mark.django_db
 class TestIAMFolder:
     @staticmethod
@@ -347,35 +358,23 @@ class TestRoleAssignment:
 
         permission = Permission.objects.get(codename="view_appliedcontrol")
 
-        assert (
-            RoleAssignment._get_role_assignments_from_permission(
-                user, permission
-            ).count()
-            == 0
-        ), "No role assignment have been yet assigned."
-        assert (
-            RoleAssignment._get_role_assignments_from_permission(
-                user, ("view", AppliedControl)
-            ).count()
-            == 0
-        ), "No role assignment have been yet assigned."
+        assert _stored_grant_assignments(user, permission).count() == 0, (
+            "No role assignment have been yet assigned."
+        )
+        assert _stored_grant_assignments(user, ("view", AppliedControl)).count() == 0, (
+            "No role assignment have been yet assigned."
+        )
 
         RoleAssignment.objects.create(user=user, role=role)
 
+        assert _stored_grant_assignments(user, permission).count() == 1, (
+            "Role assignment couldn't be detected."
+        )
+        assert _stored_grant_assignments(user, ("view", AppliedControl)).count() == 1, (
+            "Role assignment couldn't be detected."
+        )
         assert (
-            RoleAssignment._get_role_assignments_from_permission(
-                user, permission
-            ).count()
-            == 1
-        ), "Role assignment couldn't be detected."
-        assert (
-            RoleAssignment._get_role_assignments_from_permission(
-                user, ("view", AppliedControl)
-            ).count()
-            == 1
-        ), "Role assignment couldn't be detected."
-        assert (
-            RoleAssignment._get_role_assignments_from_permission(
+            _stored_grant_assignments(
                 user, ("transition", RequirementAssignment)
             ).count()
             == 1
@@ -389,31 +388,19 @@ class TestRoleAssignment:
             codename="view_compliance_assessment_full"
         )
 
+        assert _stored_grant_assignments(user, unassigned_permission1).count() == 0, (
+            "Role assignment wrongly considered as assigned."
+        )
         assert (
-            RoleAssignment._get_role_assignments_from_permission(
-                user, unassigned_permission1
-            ).count()
-            == 0
-        ), "Role assignment wrongly considered as assigned."
-        assert (
-            RoleAssignment._get_role_assignments_from_permission(
-                user, ("change", AppliedControl)
-            ).count()
-            == 0
+            _stored_grant_assignments(user, ("change", AppliedControl)).count() == 0
         ), "Role assignment wrongly considered as assigned."
 
-        assert (
-            RoleAssignment._get_role_assignments_from_permission(
-                user, unassigned_permission2
-            ).count()
-            == 0
-        ), "Role assignment wrongly considered as assigned."
-        assert (
-            RoleAssignment._get_role_assignments_from_permission(
-                user, unassigned_permission3
-            ).count()
-            == 0
-        ), "Role assignment wrongly considered as assigned."
+        assert _stored_grant_assignments(user, unassigned_permission2).count() == 0, (
+            "Role assignment wrongly considered as assigned."
+        )
+        assert _stored_grant_assignments(user, unassigned_permission3).count() == 0, (
+            "Role assignment wrongly considered as assigned."
+        )
 
 
 @pytest.mark.django_db

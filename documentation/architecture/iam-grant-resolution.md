@@ -19,8 +19,10 @@ And two kinds of question:
 
 The two sources are enumerated in **exactly one function**,
 `_get_grant_sources`, which returns them as a pair of branches. Each question
-axis is a projection of that pair, and the verdict axis then has exactly one
-coverage rule. Everything else is plumbing.
+axis is a projection of that pair, the verdict has **one evaluation site**
+(`get_allowed_folder_ids`), and the point check is membership in it — one
+decision procedure with a point shape and a vector shape. Everything else is
+plumbing.
 
 ## Call graph
 
@@ -44,7 +46,7 @@ flowchart TB
     IAA["is_access_allowed"]
   end
 
-  subgraph BULK["bulk checks — lists and filters"]
+  subgraph BULK["the verdict — one evaluation site"]
     GVOI["get_viewable / changeable /<br/>deletable_object_ids"]
     GAI["_get_accessible_ids"]
     GAFI["get_allowed_folder_ids"]
@@ -97,15 +99,13 @@ flowchart TB
   IOA -- "governing folder" --> GIFI
   GIFI --> GIFF
   IOA -- "delegates verdict" --> IAA
-  IAA --> GFS
-  IAA -- "one folder" --> COVQ
-  IAA -- "focus prologue" --> CLO
+  IAA -- "membership:<br/>folder ∈ allowed ids" --> GAFI
 
   GVOI --> GAI
   GAI -- "folder field per model" --> GIFF
   GAI --> GAFI
   GAFI --> GFS
-  GAFI -- "all folders" --> COVQ
+  GAFI -- "coverage, all folders" --> COVQ
   GAFI -- "focus / base clamp" --> SCOQ
   GAFI -- "effective-base resolution" --> CLO
 
@@ -130,15 +130,15 @@ flowchart TB
   DRF -- "perimeters, self ∪ ancestors" --> CLO
   DRF -- "non-null default_role" --> FDR
 
-  linkStyle 30,31,33,34,35 stroke:#B4550A
+  linkStyle 28,29,31,32,33 stroke:#B4550A
 ```
 
 The solid teal node is the single meeting point of the two grant sources;
 orange edges are the virtual (default-role) branch; dashed arrows come from
-outside the file. Special-case leaves (`_get_actor_accessible_ids`,
-`_get_permission_accessible_ids`, and `_get_role_assignments_from_permission`,
-which now serves only the `FilteringLabel` add special case) are listed in the
-table rather than drawn.
+outside the file. Special-case leaves (`_get_actor_accessible_ids_by_perm`,
+`_get_permission_accessible_ids`, and the `FilteringLabel` add — which reads
+the stored branch of `_get_grant_sources` directly) are listed in the table
+rather than drawn.
 
 ## The four invariants
 
@@ -155,13 +155,14 @@ table rather than drawn.
    default-role folders into `GrantFolderSet.non_recursive_grant_folder_ids`,
    never into the recursive bucket — non-recursion is a property of the data
    shape, not a check.
-3. **One verdict rule.** `_coverage_q` states coverage once — a non-recursive
-   grant names the folder, or a recursive grant names it or an ancestor — and
-   is applied to one folder (`is_access_allowed`) or to all folders
-   (`get_allowed_folder_ids`). Focus mode and `base_folder` narrow the bulk
-   result with `_scope_q`; they never introduce a second coverage rule. The two
-   predicates must stay in **chained** `.filter()` calls: both join the
-   multi-valued `ancestors` relation, and a single call would force one
+3. **One verdict, evaluated once.** `_coverage_q` states coverage — a
+   non-recursive grant names the folder, or a recursive grant names it or an
+   ancestor — and `get_allowed_folder_ids` is its only evaluation site,
+   clamping with `_scope_q` when focus mode or `base_folder` narrows the scope.
+   The point check `is_access_allowed` is membership in that result (after its
+   model-level special cases), so the point and vector shapes cannot drift.
+   The two predicates must stay in **chained** `.filter()` calls: both join
+   the multi-valued `ancestors` relation, and a single call would force one
    ancestor row to satisfy both. `GrantFolderSet` carries materialized flat id
    lists, so no union or subquery ever reaches the verdict SQL (PostgreSQL
    parser-depth safety).
@@ -182,7 +183,9 @@ A refactor of this subsystem should leave that file untouched and green.
 | **Point checks** | | |
 | `is_object_readable` | Alias: `is_object_accessible` with `view`. | `is_object_accessible` |
 | `is_object_accessible` | Resolves the object to its governing folder (existence, `Actor` delegation, IAM scope), then delegates the verdict. | `get_iam_folder_id` · `is_access_allowed` |
-| `is_access_allowed` | The point verdict. Owns the prologue — anonymous, `Permission` view-only, `FilteringLabel` add, the focus-mode gate (root exempt) — then evaluates coverage on the one folder. | `_get_grant_folder_set` · `_coverage_q` |
+| `is_access_allowed` | Model-level special cases — anonymous, `Permission` view-only, `FilteringLabel` add (the stored branch alone: a default role is view-only, so the virtual branch cannot carry an add permission) — then membership in the bulk verdict. | `get_allowed_folder_ids` · `_get_grant_sources` |
+| **The verdict** | | |
+| `get_allowed_folder_ids` | The single evaluation site: coverage over all folders, clamped by `_scope_q` when focus mode or `base_folder` narrows the scope (the narrower of the two wins when nested; disjoint → empty; a covered root stays reachable in focus mode). | `_get_grant_folder_set` · `_coverage_q` · `_scope_q` |
 | **The two predicates** | | |
 | `_coverage_q` | The coverage rule, stated once (invariant 3), over flat literal `IN` lists. | — |
 | `_scope_q` | The clamp: folder is the base folder or a descendant. Combined with coverage via chained `.filter()` calls only. | — |
@@ -193,13 +196,11 @@ A refactor of this subsystem should leave that file untouched and green.
 | `_get_effective_grant_rows` | Listing projection: one row per (folder, codename, name, is_recursive) a grant names, unexpanded; NULL-perimeter rows preserved for parity. The permission-filtered form is for existence checks, not projection. | `_get_grant_sources` |
 | **The stored branch — explicit assignments** | | |
 | `get_role_assignments_from_user` | Effective assignments: direct ∪ group-carried ∪ IdP-mapped; inactive users get none. | — |
-| `_get_role_assignments_from_permission` | The user's assignments whose role holds the permission — now only the `FilteringLabel` add special case. | `get_role_assignments_from_user` · `_resolve_permission` |
 | **The virtual branch — ambient default roles** | | |
 | `_get_default_role_folder_ids` | The audience rule: builtin-group-carried grants → non-enclaved perimeters → self ∪ ancestors carrying a default role. The third-party backstop lives here; service accounts never reach it (their assignments carry no builtin group). | `get_role_assignments_from_user` |
-| **Bulk checks** | | |
+| **Object-id layer** | | |
 | `get_viewable/changeable/deletable_object_ids` | Per-model object ids the user may view/change/delete. | `_get_accessible_ids` |
-| `_get_accessible_ids` | Objects whose governing folder is allowed; special-cases `Permission` (everyone views, nobody writes) and `Actor` (delegates to the wrapped User/Team/Entity). | `get_allowed_folder_ids` · `get_iam_folder_field` |
-| `get_allowed_folder_ids` | The bulk verdict: coverage over all folders, clamped by `_scope_q` when focus mode or `base_folder` narrows the scope (the narrower of the two wins when nested; disjoint → empty). In focus mode a covered root stays reachable. | `_get_grant_folder_set` · `_coverage_q` · `_scope_q` |
+| `_get_accessible_ids` | Objects whose governing folder is allowed; special-cases `Permission` (everyone views, nobody writes) and `Actor` (per-prefix delegate over the readable User ∪ Team ∪ Entity). | `get_allowed_folder_ids` · `get_iam_folder_field` |
 | **Permission listings** | | |
 | `has_permission_anywhere` | "Holds the codename on any folder" — an `exists()` on the filtered relation. | `_get_effective_grant_rows` |
 | `get_permissions` | Codename map of everything the principal holds, virtual grants included. | `_get_effective_grant_rows` |

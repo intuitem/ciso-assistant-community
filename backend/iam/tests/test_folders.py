@@ -511,12 +511,6 @@ class TestFolderDefaultRole:
         )
         self._test_and_reset_call_count()
 
-    def test_get_actor_accessible_ids(self, ctx: TestFolderDefaultRole.UserInfo):
-        """Test that _get_actor_accessible_ids calls _get_default_role_folder_ids."""
-
-        RoleAssignment._get_actor_accessible_ids(ctx.user)
-        self._test_and_reset_call_count()
-
     def test_get_viewable_object_ids(self, ctx: TestFolderDefaultRole.UserInfo):
         """Test that get_viewable_object_ids calls _get_default_role_folder_ids."""
 
