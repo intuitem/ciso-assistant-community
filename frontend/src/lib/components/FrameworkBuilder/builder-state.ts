@@ -63,6 +63,8 @@ export interface Question {
 	depends_on: Record<string, unknown> | null;
 	order: number;
 	weight: number;
+	/** Quick forms only: an unanswered optional question does not block submission. */
+	required?: boolean;
 	translations?: Translations | null;
 	folder: { id: string; str: string } | string;
 	requirement_node: string;
@@ -615,6 +617,7 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 					depends_on: q.depends_on,
 					order: q.order,
 					weight: q.weight,
+					required: q.required ?? true,
 					requirement_node_id: extractRequirementNodeId(q.requirement_node),
 					folder_id: extractFolderId(q.folder),
 					translations: q.translations ?? null
@@ -737,6 +740,7 @@ export function hydrateDraft(
 			depends_on: (q.depends_on ?? null) as Record<string, unknown> | null,
 			order: (q.order ?? 0) as number,
 			weight: (q.weight ?? 1) as number,
+			required: (q.required ?? true) as boolean,
 			translations: (q.translations ?? null) as Translations | null,
 			folder: (q.folder_id ?? q.folder ?? '') as string,
 			requirement_node: nodeId,
@@ -901,9 +905,14 @@ const CONTEXT_KEY = 'framework-builder';
 
 export type NodePreset = 'blank' | 'group' | 'requirement' | 'splash';
 
+/** What the editor is authoring: a framework tree, or a quick form whose
+ * nodes are flat pages (always assessable, no scoring or grouping vocabulary). */
+export type BuilderMode = 'framework' | 'quick_form';
+
 export interface BuilderStore {
 	/** Target of the _action protocol calls (framework id or adapter path) */
 	apiTarget: string;
+	mode: BuilderMode;
 	framework: Writable<Framework>;
 	rootNodes: Writable<BuilderNode[]>;
 	saving: Writable<boolean>;
@@ -954,8 +963,9 @@ export function createBuilderState(
 	nodes: RequirementNode[],
 	questions: Question[],
 	editingDraft?: DraftJSON | null,
-	options?: { apiTarget?: string }
+	options?: { apiTarget?: string; mode?: BuilderMode }
 ): BuilderStore {
+	const mode: BuilderMode = options?.mode ?? 'framework';
 	const folderId =
 		typeof frameworkData.folder === 'string' ? frameworkData.folder : frameworkData.folder.id;
 	const frameworkId = frameworkData.id;
@@ -1108,7 +1118,8 @@ export function createBuilderState(
 
 		const roots = get(rootNodes);
 		let parentBn: BuilderNode | null = null;
-		if (opts.parent) {
+		// Flat pages: a parent would nest one page under another.
+		if (opts.parent && mode !== 'quick_form') {
 			for (const r of roots) {
 				const found = findRequirement([r], opts.parent);
 				if (found) {
@@ -1139,7 +1150,7 @@ export function createBuilderState(
 			annotation: null,
 			parent_urn: parentBn?.node.urn ?? null,
 			order_id: order,
-			assessable: defaults.assessable,
+			assessable: mode === 'quick_form' ? true : defaults.assessable,
 			implementation_groups: null,
 			visibility_expression: null,
 			typical_evidence: null,
@@ -1219,6 +1230,8 @@ export function createBuilderState(
 	 * Returns true if the tree was mutated.
 	 */
 	function indentNode(nodeId: string): boolean {
+		// Quick-form pages are a flat list, not a tree.
+		if (mode === 'quick_form') return false;
 		let changed = false;
 		rootNodes.update((tree) => {
 			function recurse(list: BuilderNode[]): BuilderNode[] {
@@ -1262,6 +1275,7 @@ export function createBuilderState(
 	 * Returns true if the tree was mutated.
 	 */
 	function outdentNode(nodeId: string): boolean {
+		if (mode === 'quick_form') return false;
 		let changed = false;
 		rootNodes.update((tree) => {
 			// Phase 1: locate the node's parent chain
@@ -1360,6 +1374,8 @@ export function createBuilderState(
 	 * Toggle the `assessable` flag on a node.
 	 */
 	function toggleAssessable(nodeId: string) {
+		// Quick-form pages are created assessable and stay that way.
+		if (mode === 'quick_form') return;
 		// Find current value across the full tree (including roots)
 		let current: boolean | null = null;
 		const roots = get(rootNodes);
@@ -1431,6 +1447,7 @@ export function createBuilderState(
 			depends_on: null,
 			order,
 			weight: 1,
+			required: true,
 			folder: folderId,
 			requirement_node: reqNodeId,
 			choices: []
@@ -1942,6 +1959,7 @@ export function createBuilderState(
 
 	return {
 		apiTarget,
+		mode,
 		framework,
 		rootNodes,
 		saving,

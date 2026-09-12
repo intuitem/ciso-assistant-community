@@ -1,0 +1,151 @@
+urn: urn:intuitem:risk:library:workflow-derogation-triage
+locale: en
+ref_id: workflow-derogation-triage
+name: Derogation triage — route and open the exception
+description: >
+  Worked example of triaging a request queue. When a derogation request is submitted,
+  the outcomes its own answers produced decide what happens: a high-exposure request
+  is dated tightly and escalated, a low-exposure one is left alone, and either way the
+  security exception is opened in draft so the reviewer decides rather than transcribes.
+  The workflow never accepts or rejects — that verdict stays human.
+copyright: © intuitem
+version: 1
+publication_date: 2026-09-08
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-derogation-triage:workflow:derogation-triage
+    schema_version: 1
+    ref_id: derogation-triage
+    name: Derogation triage
+    description: >
+      Reads a submitted request, opens its exception in draft, then branches on the
+      outcome its own answers produced: high exposure is dated tightly and escalated,
+      routine is left alone. Note the ordering — the durable step runs before the
+      notification, so an undeliverable email never costs you the record.
+
+      After import: set `escalation_emails`, add the escalation reviewers on the
+      "escalate" node, and enable the trigger. Internal-event triggers register
+      disabled, so nothing fires until you say so.
+    graph:
+      variables:
+      - key: escalation_emails
+        type: string
+        default_value: ciso@example.com
+      - key: request_id
+        type: string
+      - key: request_ref
+        type: string
+      - key: outcomes
+        type: string
+      - key: due
+        type: string
+      nodes:
+      - ref: on_submit
+        type: trigger
+        label: A request is submitted
+        trigger_config:
+          type: internal_event
+          event_key: quickformresponse.submitted
+
+      # The trigger payload carries the classification, so no read is needed to branch.
+      - ref: capture
+        type: action
+        label: Capture the request
+        action_config:
+          type: set_variables
+          variables:
+            request_id: '{{payload.id}}'
+            request_ref: '{{payload.ref_id}}'
+            outcomes: '{{payload.outcome_refs}}'
+
+      - ref: how_severe
+        type: condition
+        label: How exposed is it?
+        branches:
+        - name: Needs the CISO
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: outcomes
+              op: contains
+              value: ciso_approval
+        - name: Routine
+          is_default: true
+
+      # "May record that time passed and may attach work, but may not render the
+      # judgment": the run tightens the date and widens the reviewer pool. Accepting
+      # or rejecting stays with a person.
+      # The run's own "today", so a retry cannot drift the deadline.
+      - ref: five_days
+        type: action
+        label: Five days from now
+        action_config:
+          type: date_offset
+          days: 5
+          output: due
+
+      - ref: escalate
+        type: action
+        label: Escalate — tighten the date, note why
+        action_config:
+          type: update_object
+          model: quick_form_response
+          id: '{{request_id}}'
+          fields:
+            due_date: '{{due}}'
+            observation: >-
+              Escalated automatically: the answers classify this as needing CISO
+              approval. Add the escalation reviewers on this node after import.
+
+      - ref: notify
+        type: action
+        label: Tell the escalation list
+        action_config:
+          type: send_email
+          recipients: '{{escalation_emails}}'
+          subject: 'Derogation {{request_ref}} needs a CISO decision'
+          body: >-
+            {{request_ref}} was submitted and its answers classify it as requiring CISO
+            approval ({{outcomes}}). It is waiting in the request queue.
+
+      # The conversion: the reviewer decides on a draft exception rather than
+      # retyping the request into one.
+      - ref: open_exception
+        type: action
+        label: Open the security exception in draft
+        action_config:
+          type: create_object
+          model: security_exception
+          fields:
+            name: 'Derogation {{request_ref}}'
+            ref_id: '{{request_ref}}'
+            description: >-
+              Opened from quick form request {{request_ref}}. Outcomes: {{outcomes}}.
+              Review the request before approving.
+
+      - ref: done
+        type: end
+      edges:
+      # The conversion comes before the branch and before the email: every
+      # derogation request needs its exception record, and a notification that
+      # cannot be delivered must never cost you the durable part of the run.
+      - source: on_submit
+        target: capture
+      - source: capture
+        target: open_exception
+      - source: open_exception
+        target: how_severe
+      - source: how_severe
+        target: five_days
+        source_branch: Needs the CISO
+      - source: five_days
+        target: escalate
+      - source: escalate
+        target: notify
+      - source: notify
+        target: done
+      - source: how_severe
+        target: done
+        source_branch: Routine

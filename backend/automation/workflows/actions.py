@@ -32,6 +32,7 @@ from django.db.models import (
     UUIDField,
 )
 
+from iam.models import User
 from core.models import (
     Actor,
     AppliedControl,
@@ -47,6 +48,7 @@ from core.models import (
     Incident,
     Perimeter,
     RiskAcceptance,
+    QuickFormResponse,
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
@@ -316,8 +318,16 @@ CREATABLE_MODELS = {
     },
     "security_exception": {
         "model": SecurityException,
-        "fields": ["name", "description", "ref_id", "severity", "expiration_date"],
-        "fk_fields": {},
+        "fields": [
+            "name",
+            "description",
+            "ref_id",
+            "severity",
+            "expiration_date",
+            "status",
+            "observation",
+        ],
+        "fk_fields": {"approver": (User, "users")},
     },
     "entity": {
         "model": Entity,
@@ -614,10 +624,11 @@ class CreateObjectAction(BaseAction):
             params = _construction_params(entry, fields, instance)
             try:
                 obj = globals()[constructor](
-                    {"folder": instance.folder, **kwargs}, params, instance
+                    {"folder": _creation_folder(instance), **kwargs}, params, instance
                 )
             except ValidationError as e:
                 raise ActionError(f"create_object: {'; '.join(e.messages)}")
+            _record_provenance(instance, obj)
             return {
                 "created_object_id": str(obj.id),
                 "created_object_name": obj.name,
@@ -627,6 +638,7 @@ class CreateObjectAction(BaseAction):
 
         obj = None
         created = True
+        folder = _creation_folder(instance)
         if config.get("upsert"):
             match_field = entry.get("match_on", "name")
             match_value = kwargs.get(match_field)
@@ -634,7 +646,7 @@ class CreateObjectAction(BaseAction):
                 raise ActionError(f"create_object: upsert requires '{match_field}'")
             obj = (
                 entry["model"]
-                .objects.filter(folder=instance.folder, **{match_field: match_value})
+                .objects.filter(folder=folder, **{match_field: match_value})
                 .first()
             )
 
@@ -647,15 +659,68 @@ class CreateObjectAction(BaseAction):
             else:
                 if named and not kwargs.get("name"):
                     raise ActionError("create_object: 'name' is required")
-                obj = entry["model"].objects.create(folder=instance.folder, **kwargs)
+                obj = entry["model"].objects.create(folder=folder, **kwargs)
         except ValidationError as e:
             raise ActionError(f"create_object: {'; '.join(e.messages)}")
+        if created:
+            _record_provenance(instance, obj)
         return {
             "created_object_id": str(obj.id),
             "created_object_name": getattr(obj, "name", None) or str(obj),
             "created_object_model": config.get("model"),
             "created": created,
         }
+
+
+def _creation_folder(instance):
+    """The triggering object's folder when there is one: an object created because of X
+    belongs where X lives, not where the workflow does."""
+    trigger_obj = _triggering_object(instance)
+    folder = getattr(trigger_obj, "folder", None)
+    return folder or instance.folder
+
+
+def _record_provenance(instance, obj):
+    """Tell the triggering object what it caused. Duck-typed so the engine stays
+    ignorant; best-effort so bookkeeping never fails a run."""
+    import structlog
+
+    try:
+        trigger_obj = _triggering_object(instance)
+        if trigger_obj is None or not hasattr(trigger_obj, "record_produced_object"):
+            return
+        trigger_obj.record_produced_object(
+            obj, source=f"workflow:{instance.workflow.ref_id or instance.workflow.name}"
+        )
+    except Exception as e:  # noqa: BLE001 - bookkeeping never breaks a run
+        structlog.get_logger(__name__).warning(
+            "Could not record produced object", instance=str(instance.id), error=e
+        )
+
+
+def _triggering_object(instance):
+    """The object a run is about, or None for scheduled and webhook runs."""
+    from django.apps import apps
+
+    payload = instance.payload or {}
+    variables = instance.variables or {}
+    pk = payload.get("id") or payload.get("object_id") or variables.get("request_id")
+    # The event key names the model: `quickformresponse.closed` -> quickformresponse.
+    key = getattr(instance.trigger_registration, "event_key", "") or ""
+    model_name = key.split(".")[0] if "." in key else None
+    if model_name is None and variables.get("request_id"):
+        # Supervised runs carry no event key; `request_id` is the seeded subject and
+        # today only quick form responses seed it.
+        model_name = "quickformresponse"
+    if not (model_name and pk):
+        return None
+    for app_label in ("core", "tprm", "privacy", "resilience"):
+        try:
+            model = apps.get_model(app_label, model_name)
+        except LookupError:
+            continue
+        return model.objects.filter(pk=pk).first()
+    return None
 
 
 # Columns every readable model exposes, when it has them.
@@ -696,6 +761,17 @@ class ReadEntry:
         RequirementAssessment has no name column), plus ``fields``."""
         columns = {field.name for field in self.model._meta.concrete_fields}
         return [field for field in BASE_READ_FIELDS if field in columns] + self.fields
+
+
+def _quick_form_answers(response):
+    """Answers of a quick form response keyed by question node_id, in the
+    legacy {urn: value} vocabulary (choice URNs for choice questions)."""
+    from core.utils import build_answers_dict, extract_node_id
+
+    by_urn = build_answers_dict(
+        response.answers.select_related("question").prefetch_related("selected_choices")
+    )
+    return {extract_node_id(urn) or urn: value for urn, value in by_urn.items()}
 
 
 def _requirements_breakdown(assessment):
@@ -811,6 +887,24 @@ READABLE_MODELS: dict[str, ReadEntry] = {
     "risk_assessment": ReadEntry(
         model=RiskAssessment,
         fields=["description", "ref_id", "status", "eta", "due_date"],
+    ),
+    "quick_form_response": ReadEntry(
+        model=QuickFormResponse,
+        # `outcome_refs` is the filterable mirror of `computed_outcome`: `computed`
+        # entries below are output-only, and reads filter concrete columns only.
+        fields=[
+            "description",
+            "status",
+            "eta",
+            "due_date",
+            "quick_form",
+            "outcome_refs",
+        ],
+        computed={
+            "computed_outcome": lambda r: r.computed_outcome,
+            "score": lambda r: r.score,
+            "answers": _quick_form_answers,
+        },
     ),
     "entity_assessment": ReadEntry(
         model=EntityAssessment,
@@ -1051,6 +1145,8 @@ def _read_filters_to_q(tree, entry, allowed_fields, context):
 
 
 def _serialize_read_row(obj, fields, computed=None):
+    from django.db.models import Model
+
     row = {}
     for field in fields:
         value = getattr(obj, field, None)
@@ -1058,6 +1154,9 @@ def _serialize_read_row(obj, fields, computed=None):
             value = str(value)
         elif isinstance(value, (datetime.datetime, datetime.date)):
             value = value.isoformat()
+        elif isinstance(value, Model):
+            # A row, not an instance: the id is what a downstream action can use.
+            value = {"id": str(value.pk), "str": str(value)}
         row[field] = value
     if computed:
         import json
@@ -1176,6 +1275,16 @@ _ASSESSMENT_STATUSES = frozenset(
 )
 
 UPDATABLE_MODELS: dict[str, UpdateEntry] = {
+    # Triage, not judgment. A run may widen the reviewer pool, tighten the date and
+    # leave a note; `status` and `resolution` are absent on purpose — the request
+    # lifecycle lives in set_status, outside save(), and accepting or rejecting is a
+    # verdict with consequences. Auto-closing the "nothing further needed" outcomes
+    # is worth having later, but as an explicit capability rather than a field write.
+    "quick_form_response": UpdateEntry(
+        model=QuickFormResponse,
+        fields=["due_date", "eta", "observation", "description"],
+        m2m_fields={"reviewers": _ACTOR, "respondents": _ACTOR},
+    ),
     "applied_control": UpdateEntry(
         model=AppliedControl,
         fields=[
@@ -1194,6 +1303,7 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
             "owner": _ACTOR,
             "evidences": _EVIDENCES,
             "assets": _ASSETS,
+            "security_exceptions": _EXCEPTIONS,
             "filtering_labels": _LABELS,
         },
     ),

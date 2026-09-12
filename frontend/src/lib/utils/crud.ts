@@ -1171,6 +1171,95 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reference_controls', urlModel: 'reference-controls' }
 		]
 	},
+	'quick-forms': {
+		name: 'quickform',
+		localName: 'quickForm',
+		localNamePlural: 'quickForms',
+		verboseName: 'Quick form',
+		verboseNamePlural: 'Quick forms',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'provider' },
+			{ field: 'folder' },
+			{ field: 'library' },
+			{ field: 'pages_count' },
+			{ field: 'responses_count' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'quick_form', urlModel: 'quick-form-responses', disableCreate: true }
+		]
+	},
+	'quick-form-publications': {
+		name: 'quickformpublication',
+		customNameDescription: true,
+		localName: 'quickFormPublication',
+		localNamePlural: 'quickFormPublications',
+		verboseName: 'Quick form publication',
+		verboseNamePlural: 'Quick form publications',
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'quick_form' },
+			{ field: 'folder' },
+			{ field: 'submission_folder' },
+			{ field: 'enabled' },
+			{ field: 'audience_groups' },
+			{ field: 'default_reviewers' },
+			{ field: 'allow_multiple_drafts' },
+			{ field: 'responses_count' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{
+				field: 'submission_folder',
+				urlModel: 'folders',
+				urlParams: 'content_type=DO&content_type=GL'
+			},
+			{ field: 'quick_form', urlModel: 'quick-forms' },
+			{ field: 'audience_groups', urlModel: 'user-groups' },
+			{ field: 'default_reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'publication', urlModel: 'quick-form-responses', disableCreate: true }
+		]
+	},
+	'quick-form-responses': {
+		name: 'quickformresponse',
+		localName: 'quickFormResponse',
+		localNamePlural: 'quickFormResponses',
+		verboseName: 'Quick form response',
+		verboseNamePlural: 'Quick form responses',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'quick_form' },
+			{ field: 'folder' },
+			{ field: 'status' },
+			{ field: 'respondents' },
+			{ field: 'reviewers' },
+			{ field: 'submitted_by' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'score' },
+			{ field: 'observation' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'quick_form', urlModel: 'quick-forms' },
+			{ field: 'respondents', urlModel: 'actors', urlParams: 'is_third_party=false' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' }
+		],
+		selectFields: [{ field: 'status' }]
+	},
 	evidences: {
 		name: 'evidence',
 		localName: 'evidence',
@@ -2480,6 +2569,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'approver' },
 			{ field: 'observation' },
 			{ field: 'link' },
+			// Where this record came from, when automation produced it. Rendered by the
+			// generic `produced_from` branch, which routes per entry rather than per field.
+			{ field: 'produced_from' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		],
@@ -4064,6 +4156,18 @@ export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
 	// The urlmodel of {model}_duplicate must be {model}
 	map['urlModel'] = baseModel;
 	return map;
+};
+
+/** Django model name -> route segment, derived from URL_MODEL_MAP. */
+export const urlModelForDjangoName = (name: string): string | null => {
+	const hit = Object.entries(URL_MODEL_MAP).find(([, entry]) => entry.name === name);
+	return hit ? hit[0] : null;
+};
+
+/** Human label for a Django model name, from the same map. */
+export const localNameForDjangoName = (name: string): string | null => {
+	const hit = Object.values(URL_MODEL_MAP).find((entry) => entry.name === name);
+	return hit ? (hit.localName ?? hit.verboseName ?? null) : null;
 };
 
 export const urlParamModelVerboseName = (model: string): string => {

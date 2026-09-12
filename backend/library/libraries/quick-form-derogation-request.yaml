@@ -1,0 +1,134 @@
+urn: urn:intuitem:risk:library:derogation-request
+locale: en
+ref_id: derogation-request
+name: Derogation request
+description: >
+  Ask for a temporary exemption from a control or policy, and give the reviewer what
+  they need to decide: what cannot be met, why, for how long, and what is being done
+  instead. Pair it with the "Derogation — approve and attach the compensating control"
+  workflow, which is offered on a request whose answers said no compensating control is
+  in place.
+copyright: © intuitem
+version: 2
+publication_date: 2026-09-12
+provider: intuitem
+packager: intuitem
+objects:
+  quick_forms:
+  - urn: urn:intuitem:risk:quick_form:derogation-request
+    ref_id: derogation-request
+    name: Derogation request
+    description: >
+      Mirrors the security exception record, so an accepted request carries everything
+      the exception needs.
+    ref_id_prefix: DRG
+    # The request names itself from this answer instead of "Derogation request (3)".
+    title_question_urn: urn:intuitem:risk:qf_page:derogation-request:request:question:subject
+    scores_definition:
+      min: 0
+      max: 100
+      aggregation: sum
+    # Outcomes classify the request from its own answers. `no_compensating_control` is
+    # the one the shipped workflow triggers on — renaming it unhooks that workflow.
+    # Keys here are the URN tail (everything after the 5th colon): page, then question.
+    outcomes_definition:
+    - ref_id: no_compensating_control
+      label: No compensating control
+      expression: >-
+        answers["mitigation:question:has_compensating"].answered &&
+        answers["mitigation:question:has_compensating"].value == false
+    - ref_id: high_risk
+      label: High residual risk
+      expression: >-
+        "risk:question:severity:choice:high" in answers["risk:question:severity"].selected_choices ||
+        "risk:question:severity:choice:critical" in answers["risk:question:severity"].selected_choices
+    pages:
+    - urn: urn:intuitem:risk:qf_page:derogation-request:request
+      ref_id: request
+      name: What you need
+      description: |
+        Describe the exemption you are asking for. A reviewer who has never seen your
+        system should be able to understand it from this page alone.
+      questions:
+        urn:intuitem:risk:qf_page:derogation-request:request:question:subject:
+          type: text
+          text: In one line, what cannot be met?
+          annotation: e.g. "TLS 1.2 on the legacy billing gateway"
+        urn:intuitem:risk:qf_page:derogation-request:request:question:control:
+          type: text
+          text: Which control or requirement is this about?
+          required: false
+          annotation: >-
+            Its reference if you have one, otherwise describe it.
+        urn:intuitem:risk:qf_page:derogation-request:request:question:scope:
+          type: text
+          text: Which systems, services or assets are affected?
+          required: false
+        urn:intuitem:risk:qf_page:derogation-request:request:question:justification:
+          type: text
+          text: Why can the requirement not be met as written?
+          annotation: >-
+            The business or technical reason. "It is expensive" is a reason; say how much
+            and until when.
+
+    - urn: urn:intuitem:risk:qf_page:derogation-request:risk
+      ref_id: risk
+      name: Risk and duration
+      description: |
+        What the organisation is accepting, and for how long.
+      questions:
+        urn:intuitem:risk:qf_page:derogation-request:risk:question:severity:
+          type: unique_choice
+          text: If this is exploited, how bad is it?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:derogation-request:risk:question:severity:choice:low
+            value: Low — contained, no data at risk
+            add_score: 10
+          - urn: urn:intuitem:risk:qf_page:derogation-request:risk:question:severity:choice:medium
+            value: Medium — limited data or availability impact
+            add_score: 30
+          - urn: urn:intuitem:risk:qf_page:derogation-request:risk:question:severity:choice:high
+            value: High — regulated data or a core service
+            add_score: 60
+          - urn: urn:intuitem:risk:qf_page:derogation-request:risk:question:severity:choice:critical
+            value: Critical — safety, solvency or mass data loss
+            add_score: 100
+        urn:intuitem:risk:qf_page:derogation-request:risk:question:expires_on:
+          type: date
+          text: Target date for returning to compliance
+          annotation: >-
+            A derogation is temporary. Ask for the date the fix needs, not more.
+
+    - urn: urn:intuitem:risk:qf_page:derogation-request:mitigation
+      ref_id: mitigation
+      name: What you are doing instead
+      description: |
+        A derogation without compensation is an accepted risk with extra steps. If
+        nothing is in place yet, say so — the reviewer can raise the control for you.
+      questions:
+        urn:intuitem:risk:qf_page:derogation-request:mitigation:question:has_compensating:
+          type: boolean
+          text: Is a compensating control already in place?
+        # `depends_on` addresses the parent by full URN and matches the stored answer
+        # value, unlike the CEL expressions above which use the short key.
+        urn:intuitem:risk:qf_page:derogation-request:mitigation:question:compensating_control:
+          type: text
+          text: Which control compensates for this?
+          required: false
+          depends_on:
+            question: urn:intuitem:risk:qf_page:derogation-request:mitigation:question:has_compensating
+            answers: [true]
+        urn:intuitem:risk:qf_page:derogation-request:mitigation:question:compensating_plan:
+          type: text
+          text: What will you put in place, and by when?
+          required: false
+          depends_on:
+            question: urn:intuitem:risk:qf_page:derogation-request:mitigation:question:has_compensating
+            answers: [false]
+        urn:intuitem:risk:qf_page:derogation-request:mitigation:question:evidence:
+          type: file
+          text: Supporting document
+          required: false
+          annotation: Architecture note, vendor statement, risk analysis — whatever backs the request.
+          config:
+            accept: .pdf,.png,.jpg,image/*

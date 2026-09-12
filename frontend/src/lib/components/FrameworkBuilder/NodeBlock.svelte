@@ -24,6 +24,7 @@
 	let { node, parentId = null, indexWithinParent = 0 }: Props = $props();
 
 	const builder = getBuilderContext();
+	const isQuickForm = builder.mode === 'quick_form';
 	const {
 		framework: frameworkStore,
 		errors: errorsStore,
@@ -92,6 +93,7 @@
 
 	// Status line text
 	const statusLine = $derived.by(() => {
+		if (isQuickForm) return m.builderPageStatus({ count: node.questions.length });
 		if (node.node.display_mode === 'splash') return m.builderSplashScreenStatus();
 		const childCount = node.children.length;
 		if (node.node.assessable && childCount > 0) {
@@ -457,7 +459,7 @@
 								</div>
 							</div>
 						{/if}
-						{#if showAdvanced && node.node.assessable}
+						{#if showAdvanced && node.node.assessable && !isQuickForm}
 							<!-- Typical evidence side-by-side -->
 							<div>
 								<label
@@ -561,30 +563,32 @@
 
 			<!-- Right controls: Assessable checkbox, Display mode select, Delete -->
 			<div class="flex items-center gap-2 shrink-0">
-				{#if !isSplash}
-					<label
-						class="flex items-center gap-1.5 text-xs text-surface-500 cursor-pointer hover:text-surface-600-400 transition-colors"
-						title={m.builderAssessableTooltip()}
+				{#if !isQuickForm}
+					{#if !isSplash}
+						<label
+							class="flex items-center gap-1.5 text-xs text-surface-500 cursor-pointer hover:text-surface-600-400 transition-colors"
+							title={m.builderAssessableTooltip()}
+						>
+							<input
+								type="checkbox"
+								checked={node.node.assessable}
+								onchange={(e) => saveField('assessable', e.currentTarget.checked)}
+								class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
+							/>
+							{m.builderAssessable()}
+						</label>
+					{/if}
+					<select
+						value={node.node.display_mode}
+						onchange={(e) =>
+							builder.setDisplayMode(node.node.id, e.currentTarget.value as 'default' | 'splash')}
+						class="text-xs bg-transparent border-b border-surface-200-800 focus:border-blue-500 outline-none"
+						title={m.builderDisplayMode()}
 					>
-						<input
-							type="checkbox"
-							checked={node.node.assessable}
-							onchange={(e) => saveField('assessable', e.currentTarget.checked)}
-							class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
-						/>
-						{m.builderAssessable()}
-					</label>
+						<option value="default">{m.builderDefaultMode()}</option>
+						<option value="splash">{m.builderSplashMode()}</option>
+					</select>
 				{/if}
-				<select
-					value={node.node.display_mode}
-					onchange={(e) =>
-						builder.setDisplayMode(node.node.id, e.currentTarget.value as 'default' | 'splash')}
-					class="text-xs bg-transparent border-b border-surface-200-800 focus:border-blue-500 outline-none"
-					title={m.builderDisplayMode()}
-				>
-					<option value="default">{m.builderDefaultMode()}</option>
-					<option value="splash">{m.builderSplashMode()}</option>
-				</select>
 				<ConfirmAction
 					onconfirm={() => builder.deleteNode(node.node.id)}
 					confirmLabel={m.delete()}
@@ -779,23 +783,25 @@
 
 					{#if showAdvanced}
 						<div class="space-y-2 pt-1">
-							<div class="w-32">
-								<label
-									class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
-								>
-									{m.builderWeight()}
-								</label>
-								<input
-									type="number"
-									value={node.node.weight}
-									min="1"
-									class="w-full text-xs text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 px-0.5 py-0.5 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
-									onblur={(e) => {
-										const val = Number(e.currentTarget.value) || 1;
-										saveField('weight', val);
-									}}
-								/>
-							</div>
+							{#if !isQuickForm}
+								<div class="w-32">
+									<label
+										class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
+									>
+										{m.builderWeight()}
+									</label>
+									<input
+										type="number"
+										value={node.node.weight}
+										min="1"
+										class="w-full text-xs text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 px-0.5 py-0.5 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
+										onblur={(e) => {
+											const val = Number(e.currentTarget.value) || 1;
+											saveField('weight', val);
+										}}
+									/>
+								</div>
+							{/if}
 							<div>
 								<label
 									class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
@@ -811,7 +817,7 @@
 									onblur={(e) => saveField('annotation', e.currentTarget.value || null)}
 								></textarea>
 							</div>
-							{#if node.node.assessable}
+							{#if node.node.assessable && !isQuickForm}
 								<div>
 									<label
 										class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
@@ -836,7 +842,7 @@
 			<!-- Implementation groups — editable on any node, not just assessable ones.
 			     Ancestors can carry IGs (e.g. ISO 27001's annex-a has ['SoA']) and
 			     the audit-tree filter honours them. -->
-			{#if $frameworkStore.implementation_groups_definition && $frameworkStore.implementation_groups_definition.length > 0}
+			{#if !isQuickForm && $frameworkStore.implementation_groups_definition && $frameworkStore.implementation_groups_definition.length > 0}
 				<div class="px-4 py-2 border-b border-surface-100-900">
 					<span class="text-xs text-surface-600-400 mr-2"
 						>{m.builderImplementationGroupsLabel()}</span
@@ -865,8 +871,10 @@
 
 			<!-- Reference controls & threats: language-neutral URN links, editable
 			     like the implementation-group pills above (also in translation mode). -->
-			<ReferentialLinks {node} kind="reference_controls" />
-			<ReferentialLinks {node} kind="threats" />
+			{#if !isQuickForm}
+				<ReferentialLinks {node} kind="reference_controls" />
+				<ReferentialLinks {node} kind="threats" />
+			{/if}
 		{/if}
 
 		<!-- CEL visibility expression: inside Advanced for default nodes, always-on for splash -->
@@ -935,7 +943,7 @@
 	</div>
 
 	<!-- Add child button (outside card to avoid overflow-hidden clipping the dropdown) -->
-	{#if node.node.urn}
+	{#if node.node.urn && !isQuickForm}
 		<AddNodeMenu
 			parent={node.node.id}
 			triggerLabel={m.builderAddChild()}
@@ -946,12 +954,27 @@
 
 	<!-- Add sibling below button -->
 	{#if parentId !== undefined}
-		<AddNodeMenu
-			parent={parentId}
-			afterIndex={indexWithinParent}
-			triggerLabel={m.builderAddSiblingBelow()}
-			triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-surface-600-400 transition-colors"
-		/>
+		{#if isQuickForm}
+			<button
+				type="button"
+				class="w-full py-1 text-[11px] text-gray-300 hover:text-surface-600-400 transition-colors"
+				onclick={() =>
+					builder.addNode({
+						parent: parentId,
+						afterIndex: indexWithinParent,
+						preset: 'requirement'
+					})}
+			>
+				<i class="fa-solid fa-plus mr-1"></i>{m.builderAddPageBelow()}
+			</button>
+		{:else}
+			<AddNodeMenu
+				parent={parentId}
+				afterIndex={indexWithinParent}
+				triggerLabel={m.builderAddSiblingBelow()}
+				triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-surface-600-400 transition-colors"
+			/>
+		{/if}
 	{/if}
 
 	<!-- Recursive children -->

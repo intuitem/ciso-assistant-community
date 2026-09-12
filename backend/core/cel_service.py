@@ -1,4 +1,4 @@
-"""CEL-based outcome evaluation for compliance assessments."""
+"""CEL-based outcome evaluation for compliance assessments and quick forms."""
 
 from __future__ import annotations
 
@@ -304,3 +304,640 @@ def evaluate_outcomes(compliance_assessment) -> None:
     if ca.computed_outcome != computed:
         ca.computed_outcome = computed
         ca.save(update_fields=["computed_outcome"])
+
+
+# ---------------------------------------------------------------------------
+# Quick forms
+# ---------------------------------------------------------------------------
+
+
+def _question_max_score(question) -> int:
+    """Best achievable score on a choice question: the top choice for a
+    unique choice, every positive choice for a multiple choice."""
+    scores = [
+        (c.add_score or 0) * question.weight
+        for c in question.choices.all()
+        if c.add_score is not None
+    ]
+    if not scores:
+        return 0
+    if question.type == "multiple_choice":
+        return sum(s for s in scores if s > 0)
+    return max(max(scores), 0)
+
+
+def _quick_form_snapshot(response) -> dict:
+    """One pass over the form's pages, questions and answers of *response*.
+
+    Returns everything the context builder and the progress/score
+    computation need, keyed to avoid a second round of queries.
+    """
+    from core.models import Answer, Question, QuickFormPage
+    from core.utils import _build_answer_context, _is_question_visible
+
+    pages = list(
+        QuickFormPage.objects.filter(quick_form_id=response.quick_form_id)
+        .order_by("order")
+        .values("id", "urn", "visibility_expression")
+    )
+    questions = list(
+        Question.objects.filter(page__quick_form_id=response.quick_form_id)
+        .select_related("page")
+        .prefetch_related("choices")
+        .order_by("page__order", "order")
+    )
+    answers = list(
+        Answer.objects.filter(response=response)
+        .select_related("question")
+        .prefetch_related("selected_choices")
+    )
+    (
+        _selected_pks_by_qid,
+        answers_by_urn,
+        questions_by_urn,
+        has_answer_by_qid,
+    ) = _build_answer_context(questions, answers)
+    answers_by_qid = {a.question_id: a for a in answers}
+
+    per_question = {}
+    for question in questions:
+        visible = _is_question_visible(question, answers_by_urn, questions_by_urn)
+        answer = answers_by_qid.get(question.id)
+        selected = list(answer.selected_choices.all()) if answer else []
+        score = sum(
+            (c.add_score or 0) * question.weight
+            for c in selected
+            if c.add_score is not None
+        )
+        per_question[question.id] = {
+            "question": question,
+            "page_id": question.page_id,
+            "visible": visible,
+            "answered": bool(has_answer_by_qid.get(question.id)),
+            "answer": answer,
+            "selected": selected,
+            "score": score,
+            "max_score": _question_max_score(question),
+            "scorable": question.type in ("unique_choice", "multiple_choice")
+            and any(c.add_score is not None for c in question.choices.all()),
+        }
+    return {"pages": pages, "per_question": per_question}
+
+
+def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
+    """Build the CEL context for a quick form response, excluding questions
+    that sit on hidden pages or are hidden by depends_on."""
+    from core.utils import extract_node_id
+
+    answers: dict[str, dict] = {}
+    pages: dict[str, dict] = {}
+    page_stats = {
+        p["id"]: {"answered_count": 0, "total_count": 0, "required_missing": 0}
+        for p in snapshot["pages"]
+    }
+    score_sum = 0
+    score_max = 0
+    answered_count = 0
+    total_count = 0
+    required_missing = 0
+
+    for entry in snapshot["per_question"].values():
+        if entry["page_id"] in hidden_page_ids or not entry["visible"]:
+            continue
+        question = entry["question"]
+        stats = page_stats[entry["page_id"]]
+        stats["total_count"] += 1
+        total_count += 1
+        if entry["answered"]:
+            stats["answered_count"] += 1
+            answered_count += 1
+        elif question.required:
+            stats["required_missing"] += 1
+            required_missing += 1
+        if entry["scorable"]:
+            score_max += entry["max_score"]
+            if entry["answered"]:
+                score_sum += entry["score"]
+        answer = entry["answer"]
+        q_node_id = extract_node_id(question.urn)
+        if q_node_id:
+            answers[q_node_id] = {
+                "value": answer.value if answer else None,
+                "score": entry["score"],
+                "selected_choices": [
+                    extract_node_id(c.urn)
+                    for c in entry["selected"]
+                    if extract_node_id(c.urn)
+                ],
+                "weight": question.weight,
+                "type": question.type,
+                "answered": entry["answered"],
+            }
+
+    for page in snapshot["pages"]:
+        node_id = extract_node_id(page["urn"])
+        if not node_id:
+            continue
+        stats = page_stats[page["id"]]
+        pages[node_id] = {
+            "visible": page["id"] not in hidden_page_ids,
+            "answered_count": stats["answered_count"],
+            "total_count": stats["total_count"],
+        }
+
+    return {
+        "response": {
+            "score_sum": score_sum,
+            "score_max": score_max,
+            "answered_count": answered_count,
+            "total_count": total_count,
+            "complete": required_missing == 0,
+        },
+        "pages": pages,
+        "answers": answers,
+        "computed_outcomes": computed_outcomes or {},
+    }
+
+
+def _quick_form_score(response, context, snapshot, hidden_page_ids) -> int | None:
+    """Aggregate score of the visible, answered, scorable questions, clamped
+    to the form's bounds. None until the response is complete."""
+    if not context["response"]["complete"]:
+        return None
+    form = response.quick_form
+    scorable = [
+        e
+        for e in snapshot["per_question"].values()
+        if e["scorable"]
+        and e["visible"]
+        and e["page_id"] not in hidden_page_ids
+        and e["answered"]
+    ]
+    if not scorable:
+        return None
+    total = sum(e["score"] for e in scorable)
+    if form.score_aggregation == "mean":
+        total_weight = sum(e["question"].weight for e in scorable) or 1
+        total = total / total_weight
+    lo, hi = form.score_bounds
+    return int(max(lo, min(hi, round(total))))
+
+
+_PROBE_VALUE_BY_TYPE = {
+    "boolean": False,
+    "number": 0,
+    "text": "",
+    "date": "",
+    "unique_choice": "",
+    "multiple_choice": "",
+}
+
+
+def _quick_form_probe(quick_form: dict) -> dict:
+    """A context with the real shape of `quick_form` but empty values.
+
+    Evaluating a rule against it proves the expression compiles, only touches
+    roots the quick-form evaluator actually provides, and only indexes page and
+    question node_ids that exist — the three ways an outcome rule silently never
+    fires at runtime.
+    """
+    from core.utils import extract_node_id
+
+    pages, answers = {}, {}
+    for page in quick_form.get("pages") or []:
+        node_id = extract_node_id(str(page.get("urn") or ""))
+        if node_id:
+            pages[node_id] = {"visible": True, "answered_count": 0, "total_count": 0}
+        for q_urn, question in (page.get("questions") or {}).items():
+            q_node_id = extract_node_id(str(q_urn))
+            if not q_node_id:
+                continue
+            q_type = str((question or {}).get("type") or "text")
+            answers[q_node_id] = {
+                "value": _PROBE_VALUE_BY_TYPE.get(q_type, ""),
+                "score": 0,
+                "selected_choices": [],
+                "weight": int((question or {}).get("weight") or 1),
+                "type": q_type,
+                "answered": False,
+            }
+    return {
+        "response": {
+            "score_sum": 0,
+            "score_max": 0,
+            "answered_count": 0,
+            "total_count": 0,
+            "complete": False,
+        },
+        "pages": pages,
+        "answers": answers,
+        "computed_outcomes": {
+            str(rule.get("ref_id")): {}
+            for rule in quick_form.get("outcomes_definition") or []
+            if rule.get("ref_id")
+        },
+        "hidden_pages": [],
+    }
+
+
+def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
+    """Check every page visibility expression and outcome rule of a quick form.
+
+    Returns a list of {where, ref_id, expression, error}; empty means every
+    expression is evaluable. Compilation alone is not enough — the common
+    mistake is a valid expression against the wrong context (`assessment.*`
+    instead of `response.*`), which raises at evaluation and is swallowed there.
+    """
+    probe = {k: _python_to_cel(v) for k, v in _quick_form_probe(quick_form).items()}
+    env = celpy.Environment()
+    errors = []
+
+    def _check(where, ref_id, expression):
+        if not expression:
+            return
+        try:
+            env.program(env.compile(expression)).evaluate(probe)
+        except Exception as e:
+            errors.append(
+                {
+                    "where": where,
+                    "ref_id": ref_id,
+                    "expression": expression,
+                    "error": str(e).split("\n")[0][:300],
+                }
+            )
+
+    for page in quick_form.get("pages") or []:
+        _check(
+            "page_visibility",
+            str(page.get("ref_id") or page.get("urn") or ""),
+            str(page.get("visibility_expression") or ""),
+        )
+    for rule in quick_form.get("outcomes_definition") or []:
+        _check(
+            "outcome",
+            str(rule.get("ref_id") or ""),
+            str(rule.get("expression") or ""),
+        )
+    return errors
+
+
+def _sync_outcome_rows(response, computed: dict) -> None:
+    """Reconcile QuickFormOutcome rows against the outcomes that currently fire.
+
+    Rows are matched by ref_id and left in place when they still fire, so
+    `fired_at` records when a classification was first reached rather than when
+    it was last recomputed.
+    """
+    from core.models import QuickFormOutcome
+
+    existing = {row.ref_id: row for row in response.outcomes.all()}
+    stale = set(existing) - set(computed)
+    if stale:
+        response.outcomes.filter(ref_id__in=stale).delete()
+
+    to_create = []
+    for ref_id, payload in (computed or {}).items():
+        label = str(payload.get("label") or payload.get("annotation") or ref_id)[:255]
+        color = str(payload.get("color") or "")[:50]
+        row = existing.get(ref_id)
+        if row is None:
+            to_create.append(
+                QuickFormOutcome(
+                    response=response,
+                    ref_id=ref_id,
+                    label=label,
+                    color=color,
+                    folder_id=response.folder_id,
+                )
+            )
+        elif row.label != label or row.color != color:
+            row.label = label
+            row.color = color
+            row.save(update_fields=["label", "color"])
+    if to_create:
+        QuickFormOutcome.objects.bulk_create(to_create, ignore_conflicts=True)
+
+
+def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) -> dict:
+    """Evaluate a quick form straight from an editor document, against trial answers.
+
+    Nothing is queried and nothing is saved: an author previewing a draft has no
+    response, and may be looking at pages that do not exist live yet. The rules are
+    the real ones — `_is_question_visible` already accepts plain dicts, and page
+    visibility and outcomes go through the same CEL programs as a filled response —
+    so a preview cannot quietly disagree with what respondents will get.
+    """
+    from core.utils import _is_question_visible, extract_node_id
+
+    answers = answers or {}
+    pages = []
+    questions_by_urn = {}
+    for page in quick_form.get("pages") or []:
+        entries = []
+        for urn, question in (page.get("questions") or {}).items():
+            entry = {**(question or {}), "urn": urn}
+            questions_by_urn[urn] = entry
+            entries.append(entry)
+        pages.append({**page, "_questions": entries})
+
+    def selected_of(entry):
+        q_type = entry.get("type")
+        if q_type not in ("unique_choice", "multiple_choice"):
+            return []
+        value = answers.get(entry["urn"])
+        if q_type == "multiple_choice":
+            return [v for v in (value or []) if v]
+        return [value] if value else []
+
+    def is_answered(entry):
+        q_type = entry.get("type")
+        if q_type in ("unique_choice", "multiple_choice"):
+            return bool(selected_of(entry))
+        if q_type == "file":
+            # Previews carry no uploads; treat a file question as still to answer.
+            return False
+        value = answers.get(entry["urn"])
+        return value is not None and value != ""
+
+    def score_of(entry):
+        weight = int(entry.get("weight") or 1)
+        chosen = set(selected_of(entry))
+        return sum(
+            int(choice.get("add_score") or 0) * weight
+            for choice in entry.get("choices") or []
+            if choice.get("urn") in chosen and choice.get("add_score") is not None
+        )
+
+    def max_score_of(entry):
+        weight = int(entry.get("weight") or 1)
+        scores = [
+            int(choice.get("add_score") or 0) * weight
+            for choice in entry.get("choices") or []
+            if choice.get("add_score") is not None
+        ]
+        if not scores:
+            return 0
+        if entry.get("type") == "multiple_choice":
+            return sum(value for value in scores if value > 0)
+        return max(max(scores), 0)
+
+    def build_context(hidden_page_urns, computed_outcomes):
+        answer_ctx, page_ctx = {}, {}
+        # `weight` is the mean's divisor: the summed weight of the questions that
+        # actually scored, matching `_quick_form_score`. Dividing by `total` instead
+        # counted text and file questions and made the preview disagree with the live
+        # response on any form that mixes scorable and non-scorable questions.
+        totals = {
+            "sum": 0,
+            "max": 0,
+            "answered": 0,
+            "total": 0,
+            "missing": 0,
+            "weight": 0,
+        }
+        for page in pages:
+            node_id = extract_node_id(str(page.get("urn") or "")) or page.get("ref_id")
+            stats = {"answered_count": 0, "total_count": 0}
+            for entry in page["_questions"]:
+                if page.get("urn") in hidden_page_urns:
+                    continue
+                if not _is_question_visible(entry, answers, questions_by_urn):
+                    continue
+                answered = is_answered(entry)
+                stats["total_count"] += 1
+                totals["total"] += 1
+                if answered:
+                    stats["answered_count"] += 1
+                    totals["answered"] += 1
+                elif entry.get("required", True) is not False:
+                    totals["missing"] += 1
+                if entry.get("type") in ("unique_choice", "multiple_choice"):
+                    totals["max"] += max_score_of(entry)
+                    if answered:
+                        totals["sum"] += score_of(entry)
+                        totals["weight"] += int(entry.get("weight") or 1)
+                q_node_id = extract_node_id(entry["urn"])
+                if q_node_id:
+                    answer_ctx[q_node_id] = {
+                        "value": answers.get(entry["urn"]),
+                        "score": score_of(entry),
+                        "selected_choices": [
+                            extract_node_id(u)
+                            for u in selected_of(entry)
+                            if extract_node_id(u)
+                        ],
+                        "weight": int(entry.get("weight") or 1),
+                        "type": entry.get("type") or "text",
+                        "answered": answered,
+                    }
+            if node_id:
+                page_ctx[node_id] = {
+                    "visible": page.get("urn") not in hidden_page_urns,
+                    **stats,
+                }
+        return {
+            "response": {
+                "score_sum": totals["sum"],
+                "score_max": totals["max"],
+                "score_weight": totals["weight"],
+                "answered_count": totals["answered"],
+                "total_count": totals["total"],
+                "complete": totals["missing"] == 0,
+            },
+            "pages": page_ctx,
+            "answers": answer_ctx,
+            "computed_outcomes": computed_outcomes or {},
+        }
+
+    env = celpy.Environment()
+    initial = build_context(set(), {})
+    hidden = set()
+    cel_context = {k: _python_to_cel(v) for k, v in initial.items()}
+    for page in pages:
+        expression = page.get("visibility_expression")
+        if not expression:
+            continue
+        try:
+            if not env.program(env.compile(expression)).evaluate(cel_context):
+                hidden.add(page.get("urn"))
+        except Exception:
+            # Same fail-open as a real evaluation; the author sees the page.
+            logger.warning("preview_visibility_error", expression=expression)
+
+    context = build_context(hidden, {}) if hidden else initial
+    computed = {}
+    for rule in quick_form.get("outcomes_definition") or []:
+        expression, ref_id = rule.get("expression", ""), rule.get("ref_id", "")
+        if not expression or not ref_id:
+            continue
+        try:
+            program = env.program(env.compile(expression))
+            if program.evaluate({k: _python_to_cel(v) for k, v in context.items()}):
+                computed[ref_id] = {
+                    k: v for k, v in rule.items() if k not in ("expression", "ref_id")
+                }
+        except Exception:
+            logger.warning("preview_outcome_error", expression=expression, rule=ref_id)
+
+    missing_required = [
+        entry["urn"]
+        for page in pages
+        if page.get("urn") not in hidden
+        for entry in page["_questions"]
+        if entry.get("required", True) is not False
+        and _is_question_visible(entry, answers, questions_by_urn)
+        and not is_answered(entry)
+    ]
+
+    definition = quick_form.get("scores_definition") or {}
+    try:
+        lo, hi = int(definition.get("min", 0)), int(definition.get("max", 100))
+    except TypeError, ValueError:
+        lo, hi = 0, 100
+    raw = context["response"]["score_sum"]
+    aggregation = definition.get("aggregation", "sum")
+    if aggregation == "mean":
+        # The same divisor `_quick_form_score` uses: the summed weight of the scorable
+        # answered questions, not the count of every visible one. Dividing by the count
+        # made the preview disagree with the live response on any form that mixes
+        # scorable and non-scorable questions, or uses a weight other than 1.
+        raw = raw / (context["response"]["score_weight"] or 1)
+    score = (
+        int(max(lo, min(hi, round(raw))))
+        if context["response"]["complete"] and context["response"]["score_max"]
+        else None
+    )
+
+    return {
+        "hidden_pages": sorted(u for u in hidden if u),
+        "missing_required": missing_required,
+        "progress": {
+            "answered_count": context["response"]["answered_count"],
+            "total_count": context["response"]["total_count"],
+            "complete": context["response"]["complete"],
+        },
+        "score": score,
+        "computed_outcome": computed,
+        "context": context,
+    }
+
+
+def evaluate_quick_form(response, persist: bool = True) -> dict:
+    """Evaluate page visibility, completion, score and outcome rules for a
+    QuickFormResponse.
+
+    Same three-phase scheme as build_cel_context: context with every page,
+    evaluate page visibility_expression, rebuild without hidden pages, then
+    evaluate outcomes_definition. Fail-open on expression errors.
+
+    Returns a dict with `context`, `hidden_pages` (page URNs), `progress`,
+    `score` and `computed_outcome`. With persist=True the score and outcome
+    are written back to the response when they changed.
+    """
+    from core.models import QuickForm, QuickFormResponse
+
+    form = QuickForm.objects.get(pk=response.quick_form_id)
+    response.quick_form = form
+    snapshot = _quick_form_snapshot(response)
+    previous_outcomes = response.computed_outcome or {}
+
+    initial = _quick_form_context(snapshot, set(), previous_outcomes)
+    hidden_page_ids: set = set()
+    hidden_page_urns: set[str] = set()
+    env = celpy.Environment()
+    if any(p.get("visibility_expression") for p in snapshot["pages"]):
+        cel_context = {k: _python_to_cel(v) for k, v in initial.items()}
+        for page in snapshot["pages"]:
+            expression = page.get("visibility_expression")
+            if not expression:
+                continue
+            try:
+                prog = env.program(env.compile(expression))
+                if not prog.evaluate(cel_context):
+                    hidden_page_ids.add(page["id"])
+                    hidden_page_urns.add(page["urn"])
+            except Exception:
+                logger.warning(
+                    "cel_visibility_error",
+                    expression=expression,
+                    page_urn=page["urn"],
+                    quick_form_response_id=str(response.pk),
+                    exc_info=True,
+                )
+
+    context = (
+        _quick_form_context(snapshot, hidden_page_ids, previous_outcomes)
+        if hidden_page_ids
+        else initial
+    )
+    context["hidden_pages"] = sorted(hidden_page_urns)
+
+    computed = {}
+    if form.outcomes_definition:
+        cel_context = {k: _python_to_cel(v) for k, v in context.items()}
+        for rule in form.outcomes_definition:
+            expression = rule.get("expression", "")
+            ref_id = rule.get("ref_id", "")
+            if not expression or not ref_id:
+                continue
+            try:
+                prog = env.program(env.compile(expression))
+                if prog.evaluate(cel_context):
+                    computed[ref_id] = {
+                        k: v
+                        for k, v in rule.items()
+                        if k not in ("expression", "ref_id")
+                    }
+            except Exception:
+                logger.warning(
+                    "cel_evaluation_error",
+                    expression=expression,
+                    quick_form_response_id=str(response.pk),
+                    exc_info=True,
+                )
+    computed_outcome = computed if form.outcomes_definition else None
+
+    score = _quick_form_score(response, context, snapshot, hidden_page_ids)
+    outcome_refs = ",".join(sorted(computed)) if computed else ""
+
+    if persist and (
+        response.computed_outcome != computed_outcome
+        or response.score != score
+        or response.outcome_refs != outcome_refs
+    ):
+        QuickFormResponse.objects.filter(pk=response.pk).update(
+            computed_outcome=computed_outcome,
+            score=score,
+            outcome_refs=outcome_refs,
+        )
+    if persist:
+        _sync_outcome_rows(response, computed)
+    response.computed_outcome = computed_outcome
+    response.score = score
+    response.outcome_refs = outcome_refs
+
+    # Which required questions are still blank, so a caller can say *what* is
+    # missing rather than only that something is. Visibility is already resolved
+    # here; making the client work it out again would duplicate depends_on.
+    missing_required = [
+        entry["question"].urn
+        for entry in snapshot["per_question"].values()
+        if entry["question"].required
+        and entry["visible"]
+        and entry["page_id"] not in hidden_page_ids
+        and not entry["answered"]
+    ]
+
+    return {
+        "context": context,
+        "hidden_pages": sorted(hidden_page_urns),
+        "missing_required": missing_required,
+        "progress": {
+            "answered_count": context["response"]["answered_count"],
+            "total_count": context["response"]["total_count"],
+            "complete": context["response"]["complete"],
+        },
+        "score": score,
+        "computed_outcome": computed_outcome,
+    }

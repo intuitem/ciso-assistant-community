@@ -34,6 +34,7 @@ from rest_framework.parsers import (
 from django.http import HttpResponse
 
 import django_filters as df
+from core.cel_service import validate_quick_form_expressions
 from core.excel import ExcelUploadHandler
 from core.helpers import get_sorted_requirement_nodes
 from core.models import (
@@ -44,6 +45,9 @@ from core.models import (
     LoadedLibrary,
     Question,
     QuestionChoice,
+    QuickForm,
+    QuickFormPage,
+    QuickFormResponse,
     RequirementNode,
     StoredLibrary,
     match_urn,
@@ -54,6 +58,7 @@ from core.views import BaseModelViewSet, GenericFilterSet, SmartOrderingFilter
 from iam.models import RoleAssignment, Folder, Permission
 from library import builder
 from library import framework_editor as fw_editor
+from library import quick_form_editor as qf_editor
 from library.validators import validate_file_extension
 from .helpers import update_translations
 from .utils import LibraryImporter, preview_library
@@ -1048,6 +1053,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
         "export": "view_librarydraft",
         "framework_editor_preview": "view_librarydraft",
         "add_framework": "change_librarydraft",
+        "add_quick_form": "change_librarydraft",
+        "quick_form_editor_preview": "view_librarydraft",
         "upsert_object": "change_librarydraft",
         "delete_object": "change_librarydraft",
         "preset_editor_preview": "view_librarydraft",
@@ -1509,6 +1516,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 overwrite=bool(request.data.get("overwrite")),
             )
         except builder.BuilderError as e:
+            # Author-facing validation text by construction — see BuilderError.
+            logger.warning("Builder rejected the draft", error=e)
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
         dependencies = set(draft.dependencies or []) | set(extraction["dependencies"])
         dependencies.discard(draft.effective_urn)
@@ -1561,6 +1570,307 @@ class LibraryDraftViewSet(BaseModelViewSet):
         viewable = RoleAssignment.get_viewable_object_ids(user, ComplianceAssessment)
         return ComplianceAssessment.objects.filter(framework=framework, id__in=viewable)
 
+    @staticmethod
+    def _pick_quick_form(content: dict, quick_form_urn):
+        """Resolve the target quick form object from a normalized document.
+
+        Returns (quick_form, error_response): exactly one of the two is None.
+        """
+        quick_forms = content.get("quick_forms") or []
+        if not quick_forms:
+            return None, Response(
+                {"error": "noQuickFormInDraft"}, status=HTTP_404_NOT_FOUND
+            )
+        if quick_form_urn:
+            lowered = str(quick_form_urn).lower()
+            for quick_form in quick_forms:
+                if str(quick_form.get("urn", "")).lower() == lowered:
+                    return quick_form, None
+            return None, Response(
+                {"error": "quickFormNotFoundInDraft"}, status=HTTP_404_NOT_FOUND
+            )
+        if len(quick_forms) > 1:
+            return None, Response(
+                {
+                    "error": "quickFormUrnRequired",
+                    "quick_forms": [
+                        {"urn": f.get("urn"), "name": f.get("name")}
+                        for f in quick_forms
+                    ],
+                },
+                status=HTTP_400_BAD_REQUEST,
+            )
+        return quick_forms[0], None
+
+    @action(detail=True, methods=["post"], url_path="add-quick-form")
+    def add_quick_form(self, request, pk):
+        """Add a skeleton quick form object (one empty page) to the draft."""
+        draft = self.get_object()
+        if not (
+            re.match(LibraryDraft.IDENTITY_REGEX, draft.packager)
+            and re.match(LibraryDraft.IDENTITY_REGEX, draft.ref_id)
+        ):
+            return Response(
+                {"error": "identityNotMintable"}, status=HTTP_400_BAD_REQUEST
+            )
+        content = builder.normalize_objects(draft.content or {})
+        quick_forms = content.setdefault("quick_forms", [])
+        if quick_forms:
+            return Response(
+                {"error": "singleObjectOfKindPerLibrary", "field": "quick_forms"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        quick_form_urn = builder.object_urn_base(
+            draft.packager, draft.ref_id, "quick_forms"
+        )
+        quick_forms.append(
+            {
+                "urn": quick_form_urn,
+                "ref_id": request.data.get("ref_id") or draft.ref_id,
+                "name": request.data.get("name") or draft.name,
+                "pages": [
+                    {
+                        "urn": f"{qf_editor.page_base_urn(quick_form_urn)}:page-1",
+                        "ref_id": "page-1",
+                        "name": "Page 1",
+                    }
+                ],
+            }
+        )
+        draft.content = content
+        draft.save(update_fields=["content", "updated_at"])
+        return Response(
+            {"status": "ok", "quick_form_urn": quick_form_urn},
+            status=HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["get", "put"], url_path="quick-form-editor")
+    def quick_form_editor(self, request, pk):
+        """Bridge to the visual editor for the quick form of the draft.
+
+        Same protocol as framework-editor: GET returns the editor doc, PUT
+        converts an editor doc back and saves it into the draft document.
+        """
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+
+        if request.method == "GET":
+            quick_form, error = self._pick_quick_form(
+                content, request.query_params.get("quick_form_urn")
+            )
+            if error is not None:
+                return error
+            quick_form_urn = str(quick_form.get("urn", "")).lower()
+            live = QuickForm.objects.filter(urn=quick_form_urn).first()
+            return Response(
+                {
+                    "status": "ok",
+                    "quick_form_urn": quick_form_urn,
+                    "has_responses": bool(live and live.responses.exists()),
+                    "editing_draft": qf_editor.quick_form_to_editor_doc(
+                        quick_form, locale=draft.locale
+                    ),
+                }
+            )
+
+        editor_doc = request.data.get("editing_draft")
+        if not isinstance(editor_doc, dict):
+            return Response(
+                {"error": "editingDraftMustBeAnObject"}, status=HTTP_400_BAD_REQUEST
+            )
+        quick_form, error = self._pick_quick_form(
+            content, request.data.get("quick_form_urn")
+        )
+        if error is not None:
+            return error
+        try:
+            new_quick_form = qf_editor.editor_doc_to_quick_form_object(
+                editor_doc, existing=quick_form
+            )
+        except builder.BuilderError as e:
+            # Author-facing validation text by construction — see BuilderError.
+            logger.warning("Builder rejected the draft", error=e)
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+        # An outcome rule written against the wrong context compiles but raises at
+        # evaluation, where it is swallowed and logged — the rule would just never
+        # fire. Catch it while the author is still looking at it.
+        if expression_errors := validate_quick_form_expressions(new_quick_form):
+            return Response(
+                {"error": "invalidExpressions", "details": expression_errors},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        quick_forms = content["quick_forms"]
+        quick_forms[quick_forms.index(quick_form)] = new_quick_form
+        if shape_errors := builder.check_document_shape(content):
+            return Response(
+                {"error": "draftShapeInvalid", "details": shape_errors},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        draft.content = content
+        draft.save(update_fields=["content", "updated_at"])
+        return Response({"status": "ok", "quick_form_urn": new_quick_form["urn"]})
+
+    @action(detail=True, methods=["post"], url_path="quick-form-fill-preview")
+    def quick_form_fill_preview(self, request, pk):
+        """The form as a respondent would meet it, straight from the draft.
+
+        Distinct from `quick-form-editor-preview`, which diffs the draft against the
+        live rows: this renders the pages and evaluates the real conditional
+        visibility, scoring and outcome rules against trial answers, so an author can
+        see what their logic actually does before publishing anything. Nothing is
+        stored — the answers live in the request body.
+        """
+        from core.cel_service import evaluate_quick_form_document
+
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        quick_form, error = self._pick_quick_form(
+            content, request.data.get("quick_form_urn")
+        )
+        if error is not None:
+            return error
+        editor_doc = request.data.get("editing_draft")
+        if isinstance(editor_doc, dict):
+            try:
+                quick_form = qf_editor.editor_doc_to_quick_form_object(
+                    editor_doc, existing=quick_form
+                )
+            except builder.BuilderError as e:
+                # Author-facing validation text by construction — see BuilderError.
+                logger.warning("Builder rejected the draft", error=e)
+                return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        answers = request.data.get("answers")
+        evaluation = evaluate_quick_form_document(
+            quick_form, answers if isinstance(answers, dict) else {}
+        )
+        hidden = set(evaluation["hidden_pages"])
+        return Response(
+            {
+                "name": quick_form.get("name") or "",
+                "description": quick_form.get("description") or "",
+                "outcomes_definition": quick_form.get("outcomes_definition") or [],
+                "pages": [
+                    {
+                        "urn": page.get("urn"),
+                        "ref_id": page.get("ref_id"),
+                        "name": page.get("name") or "",
+                        "description": page.get("description") or "",
+                        "hidden": page.get("urn") in hidden,
+                        "questions": page.get("questions") or {},
+                    }
+                    for page in quick_form.get("pages") or []
+                ],
+                "hidden_pages": evaluation["hidden_pages"],
+                "missing_required": evaluation["missing_required"],
+                "progress": evaluation["progress"],
+                "score": evaluation["score"],
+                "computed_outcome": evaluation["computed_outcome"],
+            }
+        )
+
+    @action(detail=True, methods=["post"], url_path="quick-form-editor-preview")
+    def quick_form_editor_preview(self, request, pk):
+        """What would change on the live quick form if the draft were
+        published now, diffed by URN against the loaded rows."""
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        quick_form, error = self._pick_quick_form(
+            content, request.data.get("quick_form_urn")
+        )
+        if error is not None:
+            return error
+        editor_doc = request.data.get("editing_draft")
+        if isinstance(editor_doc, dict):
+            try:
+                quick_form = qf_editor.editor_doc_to_quick_form_object(
+                    editor_doc, existing=quick_form
+                )
+            except builder.BuilderError as e:
+                # Author-facing validation text by construction — see BuilderError.
+                logger.warning("Builder rejected the draft", error=e)
+                return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        quick_form_urn = str(quick_form.get("urn", "")).lower()
+        live = QuickForm.objects.filter(urn=quick_form_urn).first()
+        live_pages = (
+            {page.urn: page for page in QuickFormPage.objects.filter(quick_form=live)}
+            if live
+            else {}
+        )
+        doc_pages = {
+            page["urn"]: page
+            for page in quick_form.get("pages") or []
+            if page.get("urn")
+        }
+        added = [urn for urn in doc_pages if urn not in live_pages]
+        removed = [urn for urn in live_pages if urn not in doc_pages]
+        doc_question_urns = set()
+        doc_choice_urns = set()
+        for page in doc_pages.values():
+            for q_urn, q_data in (page.get("questions") or {}).items():
+                doc_question_urns.add(str(q_urn).lower())
+                for choice in q_data.get("choices") or []:
+                    if choice.get("urn"):
+                        doc_choice_urns.add(str(choice["urn"]).lower())
+        live_question_urns = (
+            set(
+                Question.objects.filter(page__quick_form=live).values_list(
+                    "urn", flat=True
+                )
+            )
+            if live
+            else set()
+        )
+        live_choice_urns = (
+            set(
+                QuestionChoice.objects.filter(
+                    question__page__quick_form=live
+                ).values_list("urn", flat=True)
+            )
+            if live
+            else set()
+        )
+
+        def details(urns, source, limit=20):
+            entries = []
+            for urn in urns[:limit]:
+                page = source[urn]
+                name = page.get("name") if isinstance(page, dict) else page.name
+                entries.append({"name": name or urn, "assessable": True})
+            return entries
+
+        viewable = (
+            RoleAssignment.get_viewable_object_ids(request.user, QuickFormResponse)
+            if live
+            else []
+        )
+        return Response(
+            {
+                "added": {
+                    "requirements": len(added),
+                    "questions": len(doc_question_urns - live_question_urns),
+                    "choices": len(doc_choice_urns - live_choice_urns),
+                    "details": details(added, doc_pages),
+                },
+                "removed": {
+                    "requirements": len(removed),
+                    "questions": len(live_question_urns - doc_question_urns),
+                    "choices": len(live_choice_urns - doc_choice_urns),
+                    "details": details(removed, live_pages),
+                },
+                "breaking_changes": [],
+                "affected_audits": [
+                    {"id": str(response.id), "name": response.name}
+                    for response in QuickFormResponse.objects.filter(
+                        quick_form=live, id__in=viewable
+                    )
+                ]
+                if live
+                else [],
+            }
+        )
+
     @action(detail=True, methods=["get", "put"], url_path="framework-editor")
     def framework_editor(self, request, pk):
         """Bridge to the visual framework editor.
@@ -1612,6 +1922,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 editor_doc, existing=framework
             )
         except builder.BuilderError as e:
+            # Author-facing validation text by construction — see BuilderError.
+            logger.warning("Builder rejected the draft", error=e)
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
         frameworks = content["frameworks"]
         frameworks[frameworks.index(framework)] = new_framework
@@ -1696,6 +2008,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
                     editor_doc, existing=framework
                 )
             except builder.BuilderError as e:
+                # Author-facing validation text by construction — see BuilderError.
+                logger.warning("Builder rejected the draft", error=e)
                 return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
         framework_urn = str(framework.get("urn", "")).lower()
@@ -2121,6 +2435,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
             try:
                 base = builder.leaf_object_base(draft.effective_urn, field)
             except builder.BuilderError as e:
+                # Author-facing validation text by construction — see BuilderError.
+                logger.warning("Builder rejected the draft", error=e)
                 return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
             if field in builder.SINGLETON_OBJECT_FIELDS:
                 # The single object of its kind takes the bare family URN,
