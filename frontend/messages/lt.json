@@ -1239,6 +1239,8 @@
 	"removeIdentifier": "Pašalinti identifikatorių",
 	"phone": "Telefonas",
 	"role": "Vaidmuo",
+	"defaultRole": "Numatytasis vaidmuo",
+	"defaultRoleHelpText": "Vaidmuo, automatiškai suteikiamas šiame domene kiekvienam naudotojui, turinčiam vaidmens priskyrimą viename iš jo subdomenų.",
 	"questions": "Klausimai",
 	"recipientEntity": "Gavėjo subjektas",
 	"financial": "Finansinis",

@@ -68,7 +68,7 @@ export const extendedResultColorMap: { [key: string]: string } = {
 	not_set: '#d1d5db',
 	major_nonconformity: '#dc2626',
 	minor_nonconformity: '#f97316',
-	observation: '#eab308',
+	observation_sensitive_point: '#eab308',
 	opportunity_for_improvement: '#3b82f6',
 	good_practice: '#22c55e'
 };

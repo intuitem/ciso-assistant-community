@@ -64,16 +64,13 @@ class TestFindingsFromRequirements:
             RequirementNode,
         )
 
-        framework = Framework.objects.create(
-            name="F", folder=Folder.get_root_folder(), is_published=True
-        )
+        framework = Framework.objects.create(name="F", folder=Folder.get_root_folder())
         node = RequirementNode.objects.create(
             framework=framework,
             urn="urn:test:req:1",
             ref_id="1",
             assessable=True,
             folder=Folder.get_root_folder(),
-            is_published=True,
         )
         assessment = ComplianceAssessment.objects.create(
             name="ISO audit", folder=setup["domain"], framework=framework
@@ -517,3 +514,20 @@ class TestBatchAction:
         for finding in findings:
             finding.refresh_from_db()
             assert finding.folder == setup["other_domain"]
+
+
+class TestFindingsAssessmentPdf:
+    """The report is rendered by Typst now, not a Django template.
+
+    The behavioural assertions that used to live here — actors named rather than
+    emailed, observations not truncated — moved to
+    `core/tests/test_findings_report_pdf.py`, where they run against the engine
+    that actually produces the PDF.
+    """
+
+    def test_pdf_endpoint_renders(self, setup):
+        res = setup["client"].get(
+            f"/api/findings-assessments/{setup['binder'].id}/pdf/"
+        )
+        assert res.status_code == 200
+        assert res["Content-Type"] == "application/pdf"

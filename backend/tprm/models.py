@@ -34,7 +34,7 @@ from core.dora import (
     DORA_REINTEGRATION_POSSIBILITY_CHOICES,
     DORA_DISCONTINUING_IMPACT_CHOICES,
 )
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin
 from iam.views import User
 
 from auditlog.registry import auditlog
@@ -44,7 +44,6 @@ class Entity(
     ActorSyncMixin,
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     """
@@ -117,6 +116,11 @@ class Entity(
         blank=True,
         verbose_name=_("Legal identifiers"),
         help_text=_("Legal identifiers (LEI, EUID, VAT, DUNS, etc.)"),
+    )
+    address = models.TextField(
+        blank=True,
+        verbose_name=_("Address"),
+        help_text=_("Postal address, as it should appear on formal documents"),
     )
     country = models.CharField(
         max_length=3,
@@ -227,12 +231,20 @@ class EntityAssessment(Assessment):
         blank=True,
         null=True,
     )
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+        help_text=_("Date after which the conclusion is no longer considered valid"),
+    )
     reference_link = models.URLField(
         blank=True,
         null=True,
         max_length=2048,
         verbose_name=_("Reference link"),
     )
+
+    IAM_SCOPE_FIELD = "entity"
 
     class Meta:
         verbose_name = _("Entity assessment")
@@ -261,6 +273,8 @@ class Representative(AbstractBaseModel, FilteringLabelMixin):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     fields_to_check = ["email"]
+
+    IAM_SCOPE_FIELD = "entity"
 
 
 class Solution(NameDescriptionMixin, FilteringLabelMixin):
@@ -394,6 +408,8 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
 
     fields_to_check = ["name", "provider_entity"]
 
+    IAM_SCOPE_FIELD = "provider_entity"
+
     class Meta:
         verbose_name = _("Solution")
         verbose_name_plural = _("Solutions")
@@ -442,6 +458,8 @@ class SolutionSubcontractor(AbstractBaseModel):
         null=True,
         blank=True,
     )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("Solution subcontractor")

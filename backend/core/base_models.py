@@ -1,15 +1,36 @@
+import uuid
+from typing import TYPE_CHECKING
+
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-import uuid
+
+
+class _IAMNotImplemented:
+    pass
+
+
+class _IAMSpecialCase:
+    pass
 
 
 class AbstractBaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
-    is_published = models.BooleanField(_("published"), default=False)
+
+    if TYPE_CHECKING:
+        IAM_SCOPE_FIELD: str | _IAMNotImplemented | _IAMSpecialCase  # pragma: no cover
+        """
+        An `IAM_SCOPE_FIELD` attribute MUST be set for all the models which don't have a `folder` field.
+
+        For example if a model `RiskObject` has `IAM_SCOPE_FIELD` set to `"risk_assessment"`.
+
+        Then IAM will use `obj.risk_assessment.folder_id` for the permission checks (for `obj = RiskObject(...)`).
+
+        `IAM_SCOPE_FIELD` can also be set to `Folder.IAM_NOT_IMPLEMENTED` to explicitely declare a model as being expected not be supported by the IAM.
+        """
 
     class Meta:
         abstract = True
@@ -218,10 +239,6 @@ class ActorSyncManager(models.Manager):
     """
 
     def bulk_create(self, objs, batch_size=None, ignore_conflicts=False, **kwargs):
-        if self.model.__name__ == "Team":
-            for obj in objs:
-                obj.is_published = True
-
         # Perform the standard bulk_create
         created_objs = super().bulk_create(
             objs, batch_size=batch_size, ignore_conflicts=ignore_conflicts, **kwargs
@@ -237,7 +254,6 @@ class ActorSyncManager(models.Manager):
         for obj in created_objs:
             if obj.pk:  # Only link if the object was actually created
                 actor = Actor(**{field_name: obj})
-                actor.is_published = True
                 actors.append(actor)
 
         # Bulk create the corresponding Actors

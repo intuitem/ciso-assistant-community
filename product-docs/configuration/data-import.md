@@ -263,6 +263,10 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
   Pipe or comma-separated vulnerability names
 * **asset**\
   Name or ref\_id of a single asset, looked up in the domain folder. A finding carries one asset, so if the cell holds several names only the first is linked and the row is reported as a warning. A missing asset is created in the domain folder with the default type Support, provided you may add assets there.
+* **applied\_controls**\
+  Pipe-, newline-, semicolon- or comma-separated control names or ref\_ids, looked up in the domain folder. Missing controls are auto-created there, provided you may add controls — otherwise the name is reported as a warning on the row.
+* **owner**\
+  Semicolon-separated list of user emails and/or team names. Resolved case-insensitively: first by user email, then by team name. Unresolved entries are skipped with a warning and will not block the import.
 
 
 

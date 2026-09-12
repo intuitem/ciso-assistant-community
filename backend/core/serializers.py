@@ -439,7 +439,7 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Vulnerability
-        exclude = ["is_published"]
+        fields = "__all__"
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
@@ -449,7 +449,7 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Vulnerability
-        exclude = ["created_at", "updated_at", "is_published"]
+        exclude = ["created_at", "updated_at"]
 
 
 class VulnerabilityImportExportSerializer(BaseModelSerializer):
@@ -1110,7 +1110,7 @@ class AssetClassReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = AssetClass
-        exclude = ["created_at", "updated_at", "is_published"]
+        exclude = ["created_at", "updated_at"]
 
 
 class AssetClassWriteSerializer(BaseModelSerializer):
@@ -1119,7 +1119,7 @@ class AssetClassWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = AssetClass
-        exclude = ["created_at", "updated_at", "folder", "is_published"]
+        exclude = ["created_at", "updated_at", "folder"]
 
     def validate_name(self, value):
         if "/" in value:
@@ -2172,6 +2172,8 @@ class UserReadSerializer(BaseModelSerializer):
             "has_mfa_enabled",
             "expiry_date",
             "is_superuser",
+            "is_scim_managed",
+            "is_jit_provisioned",
             "folder",
             "language",
         ]
@@ -2194,6 +2196,11 @@ class UserRolesOnFolderSerializer(BaseModelSerializer):
 class UserWriteSerializer(BaseModelSerializer):
     is_local = serializers.BooleanField(required=False)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
+    # Deployment-owned bootstrap flag (CISO_ASSISTANT_SUPERUSER_EMAIL,
+    # createsuperuser): the startup sync turns it into admin group membership,
+    # so it must never be writable through the API, whoever the requester is.
+    # validate() rejects attempted changes instead of letting DRF drop them.
+    is_superuser = serializers.BooleanField(read_only=True)
     # Lives in `preferences`, not a column, so it is declared rather than derived.
     language = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
@@ -2228,11 +2235,368 @@ class UserWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError("unsupportedLanguage")
         return language
 
+    @staticmethod
+    def _change_usergroup_perm() -> Permission:
+        return Permission.objects.get(
+            codename="change_usergroup",
+            content_type__app_label=UserGroup._meta.app_label,
+            content_type__model=UserGroup._meta.model_name,
+        )
+
+    def _deny(self, guard: str, errors: dict) -> None:
+        """Log the denied privileged user operation as a security event, then
+        raise it. Error values are camelCase keys translated by the frontend."""
+        request = self.context.get("request")
+        requester = getattr(request, "user", None) if request else None
+        logger.warning(
+            "denied privileged user operation",
+            guard=guard,
+            errors=errors,
+            requester=getattr(requester, "email", None),
+            target=getattr(self.instance, "email", None),
+        )
+        raise PermissionDenied(errors)
+
+    def _enforce_superuser_immutable(self) -> None:
+        # The field is read-only, so DRF would silently ignore it; an attempted
+        # change must fail loudly instead. Echoing the current value back (full
+        # PUT of a previously fetched object) stays valid.
+        if "is_superuser" not in self.initial_data:
+            return
+        requested = self.initial_data.get("is_superuser")
+        if requested is None:
+            return
+        requested = serializers.BooleanField().run_validation(requested)
+        current = bool(self.instance.is_superuser) if self.instance else False
+        if requested != current:
+            self._deny("superuser", {"is_superuser": ["cannotChangeSuperuserStatus"]})
+
+    def _enforce_group_membership_rights(self, attrs: dict) -> None:
+        """Group membership grants the roles the group carries, so changing it
+        requires change_usergroup on each affected group's folder — change_user
+        alone must not let a user manager grant (or strip) the admin group.
+        Only the delta is checked, so a full PUT echoing unchanged memberships
+        still passes for a plain user manager."""
+        if "user_groups" not in attrs:
+            return
+        request = self.context.get("request")
+        if request is None:
+            return
+        # Not instance.user_groups.all(): the viewset prefetches that relation
+        # filtered to the requester's viewable groups, which would hide the
+        # memberships this guard exists to protect.
+        current = (
+            set(UserGroup.objects.filter(user=self.instance).select_related("folder"))
+            if self.instance
+            else set()
+        )
+        submitted = set(attrs["user_groups"] or [])
+        if current:
+            # Memberships in groups the requester cannot see are absent from a
+            # full PUT echo; keep them rather than reading the omission as a
+            # removal, which would strip them silently or 403 spuriously.
+            viewable_ids = {
+                str(pk)
+                for pk in RoleAssignment.get_viewable_object_ids(
+                    request.user, UserGroup
+                )
+            }
+            submitted |= {g for g in current if str(g.id) not in viewable_ids}
+            attrs["user_groups"] = list(submitted)
+        delta = current.symmetric_difference(submitted)
+        if not delta:
+            return
+        perm = self._change_usergroup_perm()
+        for group in delta:
+            if not RoleAssignment.is_access_allowed(
+                user=request.user, perm=perm, folder=group.folder
+            ):
+                self._deny(
+                    "group_membership",
+                    {"user_groups": ["missingPermissionToManageUserGroupMembership"]},
+                )
+
+    def _enforce_last_admin_group(self, attrs: dict) -> None:
+        """Stripping BI-UG-ADM from the last direct administrator would lock the
+        deployment out of administration, so it is blocked for everyone —
+        mirroring the delete and deactivation last-admin guards.
+
+        Direct membership only: this edits the DIRECT group list, so the anchor
+        it protects is the last *directly*-managed administrator, the one
+        SCIM/IdP can never reach and that must always exist. Admins inherited
+        via an IdP group are managed by the IdP, not here, so they neither gate
+        this check nor count toward it.
+
+        Runs after _enforce_group_membership_rights, which folds memberships
+        invisible to the requester back into attrs — those must count as kept,
+        not stripped.
+
+        This is the fast fail, running before the lock: it reports a field-level
+        error on the common case. It is NOT authoritative — the check is
+        check-then-act, so UserViewSet.perform_update re-runs the predicate
+        under the admin-group lock, in the same transaction as the write.
+        """
+        if "user_groups" not in attrs:
+            return
+        if self.strips_last_admin_group(self.instance, attrs["user_groups"]):
+            # Top-level "error" key, not a field-keyed one: same response body
+            # this returned from the view, and the same one UserGroupViewSet's
+            # remove-members returns for the mirror-image operation.
+            self._deny(
+                "last_admin_group", {"error": "attemptToRemoveOnlyAdminUserGroup"}
+            )
+
+    @staticmethod
+    def strips_last_admin_group(instance, submitted_groups) -> bool:
+        """Would this membership write leave the deployment with no direct
+        administrator? Pure predicate, no raising, so UserViewSet.perform_update
+        can re-evaluate it under the BI-UG-ADM lock — the serializer reads it
+        before any lock is held, which is only good enough to fail fast."""
+        if instance is None:
+            return False
+        if not UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists():
+            return False
+        if User.objects.filter(user_groups__name="BI-UG-ADM").count() > 1:
+            return False
+        submitted = {str(group.pk) for group in submitted_groups or []}
+        return not UserGroup.objects.filter(name="BI-UG-ADM", pk__in=submitted).exists()
+
+    # Lifecycle/auth-surface fields: deactivation (directly, or deferred via
+    # expiry_date and the nightly deactivate_expired_users task) and the
+    # local-login fallback.
+    LIFECYCLE_FIELDS = ("is_active", "keep_local_login", "expiry_date")
+
+    def _enforce_scim_managed_fields(self, attrs: dict) -> None:
+        """SCIM is the authoritative write channel for the identity fields of a
+        SCIM-managed account: a manual edit is at best drift the next sync
+        overwrites, at worst the SSO email re-binding attack. Immutable here for
+        everyone, admins included — a legitimate rename arrives through the SCIM
+        endpoint itself. `is_active` and `expiry_date` stay admin-only
+        break-glass (emergency deactivation must not wait on IdP sync latency);
+        `keep_local_login` can never be enabled (a SCIM identity stays SSO-only,
+        admin or not) and only an admin can disable a legacy flag. Deleting the
+        account (admin-only, see UserViewSet.destroy) remains the escape hatch
+        for a decommissioned SCIM integration.
+        Local-only fields SCIM has no concept of (user_groups, observation,
+        expiry_date, ...) keep their own guards."""
+        if self.instance is None or not self.instance.is_scim_managed:
+            return
+        request = self.context.get("request")
+        if request is None:
+            return
+        if (
+            "email" in attrs
+            and (attrs["email"] or "").lower() != (self.instance.email or "").lower()
+        ):
+            self._deny("scim_identity", {"email": ["fieldManagedByScim"]})
+        for field in ("first_name", "last_name"):
+            if field in attrs and (attrs[field] or "") != (
+                getattr(self.instance, field) or ""
+            ):
+                self._deny("scim_identity", {field: ["fieldManagedByScim"]})
+        if attrs.get("keep_local_login") and not self.instance.keep_local_login:
+            # A SCIM-owned identity stays SSO-only: no password fallback may be
+            # opened on it, not even by an admin — deletion (admin-only, see
+            # UserViewSet.destroy) is the decommission escape. Disabling a
+            # legacy flag stays admin-only via the lifecycle loop below.
+            self._deny(
+                "scim_local_login",
+                {"keep_local_login": ["scimAccountCannotEnableLocalLogin"]},
+            )
+        for field in self.LIFECYCLE_FIELDS:
+            if (
+                field in attrs
+                and attrs[field] != getattr(self.instance, field)
+                and not request.user.is_admin()
+            ):
+                self._deny("scim_lifecycle", {field: ["scimAccountFieldRequiresAdmin"]})
+
+    def _require_group_rights_over_instance(
+        self, request_user, field_name: str, error_key: str
+    ) -> None:
+        """Require change_usergroup on the folder of every group the target
+        belongs to. DB query, not the visibility-filtered prefetch: memberships
+        the requester cannot see must still make the target privileged."""
+        groups = list(
+            UserGroup.objects.filter(user=self.instance).select_related("folder")
+        )
+        if not groups:
+            return
+        perm = self._change_usergroup_perm()
+        for group in groups:
+            if not RoleAssignment.is_access_allowed(
+                user=request_user, perm=perm, folder=group.folder
+            ):
+                self._deny("group_rights_over_target", {field_name: [error_key]})
+
+    def _enforce_last_active_admin(self, attrs: dict) -> None:
+        """Deactivating — or scheduling expiry for — the last active
+        directly-managed administrator would lock the deployment out of
+        administration, so it is blocked for everyone, mirroring the
+        delete/group-removal last-admin guards. Reactivating and clearing an
+        expiry stay allowed. deactivate_expired_users carries the same backstop
+        for expiries that predate this guard.
+
+        Fast fail only, like _enforce_last_admin_group: the authoritative
+        re-check runs under the admin-group lock in
+        UserViewSet.perform_update."""
+        offending = self.deactivates_last_active_admin(self.instance, attrs)
+        if not offending:
+            return
+        self._deny(
+            "last_active_admin",
+            {
+                field: ["attemptToDeactivateOnlyAdminAccountError"]
+                for field in offending
+            },
+        )
+
+    @staticmethod
+    def deactivates_last_active_admin(instance, attrs: dict) -> set:
+        """Fields in *attrs* whose write would leave no active direct
+        administrator. Pure predicate, mirroring strips_last_admin_group, so the
+        view can re-evaluate it under the lock."""
+        if instance is None:
+            return set()
+        offending = set()
+        if attrs.get("is_active") is False and instance.is_active:
+            offending.add("is_active")
+        if (
+            "expiry_date" in attrs
+            and attrs["expiry_date"] is not None
+            and attrs["expiry_date"] != instance.expiry_date
+        ):
+            offending.add("expiry_date")
+        if not offending:
+            return set()
+        if not UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists():
+            return set()
+        if (
+            User.objects.filter(user_groups__name="BI-UG-ADM", is_active=True)
+            .exclude(pk=instance.pk)
+            .exists()
+        ):
+            return set()
+        return offending
+
+    def _enforce_lifecycle_field_rights(self, attrs: dict) -> None:
+        """Deactivating an administrator — directly, or deferred via
+        expiry_date and the nightly deactivate_expired_users task — or toggling
+        their local-login fallback could lock the deployment out of
+        administration, so on an admin account these fields require
+        change_usergroup on the root folder: the same right that guards admin
+        group membership. Non-admin accounts stay freely manageable by user
+        managers (routine onboarding/offboarding), deliberately: deactivation
+        is a recoverable denial of service, unlike the email re-binding, which
+        is a takeover and therefore stays gated on all the target's groups."""
+        if self.instance is None:
+            return
+        changed = {
+            field
+            for field in self.LIFECYCLE_FIELDS
+            if field in attrs and attrs[field] != getattr(self.instance, field)
+        }
+        if not changed:
+            return
+        request = self.context.get("request")
+        if request is None:
+            return
+        if not self.instance.is_admin():
+            return
+        if RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=self._change_usergroup_perm(),
+            folder=Folder.get_root_folder(),
+        ):
+            return
+        self._deny(
+            "admin_lifecycle",
+            {
+                field: ["adminAccountLifecycleChangeRequiresAdminRights"]
+                for field in changed
+            },
+        )
+
+    @staticmethod
+    def _is_sso_only(user) -> bool:
+        """No local password path exists for this account, so the IdP assertion
+        is the whole identity binding and its email is the only thing tying the
+        two together.
+
+        Deliberately not `not user.is_local`: that property also folds in
+        `is_active`, so it reads False for a merely *deactivated* plain local
+        account — which would make a routine offboarded user's email
+        admin-only for no security reason.
+        """
+        if user.keep_local_login:
+            return False
+        from global_settings.models import GlobalSettings
+
+        sso_settings = (
+            GlobalSettings.objects.filter(name=GlobalSettings.Names.SSO)
+            .values_list("value", flat=True)
+            .first()
+        ) or {}
+        return bool(sso_settings.get("is_enabled")) and bool(
+            sso_settings.get("force_sso")
+        )
+
+    def _enforce_email_change_rights(self, attrs: dict) -> None:
+        """The SSO adapter maps logins to accounts by email, so rewriting a
+        user's email re-binds their identity: with SSO it hands the account to
+        whoever the IdP asserts the new address for, IdP MFA notwithstanding.
+        Hence, beyond change_user:
+        - a SCIM-managed account is fully immutable on email (see
+          _enforce_scim_managed_fields, which runs first);
+        - a JIT-provisioned or SSO-only account is admin-only: its authoritative
+          email lives in the IdP, but no sync channel exists to repair drift, so
+          an admin must be able to (e.g. an IdP-side rename would otherwise
+          orphan the account and JIT-provision a duplicate);
+        - a user already holding group memberships requires the same
+          change_usergroup rights as editing those memberships would.
+        """
+        if self.instance is None or "email" not in attrs:
+            return
+        new_email = attrs["email"] or ""
+        if new_email.lower() == (self.instance.email or "").lower():
+            return
+        request = self.context.get("request")
+        if request is None:
+            return
+        idp_bound = (
+            self.instance.is_scim_managed
+            or self.instance.is_jit_provisioned
+            or self._is_sso_only(self.instance)
+        )
+        if idp_bound and not request.user.is_admin():
+            self._deny(
+                "idp_bound_email",
+                {"email": ["emailChangeOfIdpManagedUserRequiresAdmin"]},
+            )
+        self._require_group_rights_over_instance(
+            request.user, "email", "emailChangeRequiresUserGroupManagementRights"
+        )
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        self._enforce_superuser_immutable()
+        self._enforce_scim_managed_fields(attrs)
+        self._enforce_group_membership_rights(attrs)
+        self._enforce_last_admin_group(attrs)
+        self._enforce_last_active_admin(attrs)
+        self._enforce_lifecycle_field_rights(attrs)
+        self._enforce_email_change_rights(attrs)
+        return attrs
+
     def to_representation(self, instance):
         # write_only so DRF never looks for a `language` attribute; the edit form
         # still reads its initial value from here.
         data = super().to_representation(instance)
         data["language"] = instance.get_preferences().get("lang")
+        # Read-only provenance for the edit form: says which fields the SCIM
+        # and admin-account guards will refuse before the user hits a 403.
+        data["is_scim_managed"] = instance.is_scim_managed
+        data["is_jit_provisioned"] = instance.is_jit_provisioned
         return data
 
     def create(self, validated_data):
@@ -2276,7 +2640,10 @@ class UserWriteSerializer(BaseModelSerializer):
 
         user_groups_data = validated_data.get("user_groups")
         if user_groups_data is not None:
-            initial_groups = set(instance.user_groups.all())
+            # UserGroup.objects, not instance.user_groups.all(): the latter is the
+            # viewset's visibility-filtered prefetch, which would under-report the
+            # previous memberships in this audit line.
+            initial_groups = set(UserGroup.objects.filter(user=instance))
             new_groups = set(group for group in user_groups_data)
 
             if initial_groups != new_groups:
@@ -2421,6 +2788,12 @@ class PermissionWriteSerializer(BaseModelSerializer):
 
 
 class RoleAssignmentReadSerializer(BaseModelSerializer):
+    user = FieldsRelatedField()
+    user_group = FieldsRelatedField()
+    role = FieldsRelatedField()
+    perimeter_folders = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+
     class Meta:
         model = RoleAssignment
         fields = "__all__"
@@ -2434,12 +2807,39 @@ class RoleAssignmentWriteSerializer(BaseModelSerializer):
 
 class FolderWriteSerializer(BaseModelSerializer):
     class Meta:
+        read_only_fields = ["content_type"]
         model = Folder
         exclude = [
             "builtin",
-            "content_type",
             "descendants",
+            # The default role is not configurable through this serializer: the
+            # root folder carries the baseline reader role, pinned by startup(),
+            # and no other folder gets one. A subclass may reopen the field
+            # (and inherits the validator below).
+            "default_role",
         ]
+
+    def validate_default_role(self, default_role):
+        if default_role is None:
+            return default_role
+
+        # The default role's audience is coarse (everyone working below), so only
+        # read capability may ever be ambient — write capability reaches people
+        # through explicit group placement, never through a default role.
+        if default_role.permissions.exclude(codename__startswith="view_").exists():
+            raise serializers.ValidationError(
+                "defaultRoleMustContainOnlyViewPermissions"
+            )
+
+        # Enclaves are visitor spaces and receive explicit grants only; a member
+        # audience there would contradict their purpose.
+        if (
+            self.instance is not None
+            and self.instance.content_type == Folder.ContentType.ENCLAVE
+        ):
+            raise serializers.ValidationError("enclaveFolderCannotHaveDefaultRole")
+
+        return default_role
 
     def update(self, instance, validated_data):
         if (
@@ -2512,6 +2912,7 @@ class FolderReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     parent_folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
+    default_role = FieldsRelatedField()
 
     content_type = serializers.CharField(source="get_content_type_display")
 
@@ -2534,6 +2935,39 @@ class FolderImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class RoleReadSerializer(BaseModelSerializer):
+    name = serializers.CharField(source="__str__")
+    permissions = serializers.SerializerMethodField()
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Role
+        fields = "__all__"
+
+    def get_permissions(self, obj):
+        return [{"str": perm.codename} for perm in obj.permissions.all()]
+
+
+class RoleWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Role
+        fields = "__all__"
+
+    def validate_permissions(self, permissions):
+        # A role already in use as some folder's default role must stay view-only;
+        # otherwise editing the role would silently hand write capability to every
+        # member audience that references it.
+        if (
+            self.instance is not None
+            and self.instance.default_role_folders.exists()
+            and not all(
+                permission.codename.startswith("view_") for permission in permissions
+            )
+        ):
+            raise serializers.ValidationError("roleUsedAsDefaultRoleMustStayViewOnly")
+        return permissions
 
 
 # Compliance Assessment
@@ -2771,7 +3205,7 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Evidence
-        exclude = ["is_published"]
+        fields = "__all__"
 
     def create(self, validated_data):
         attachment = validated_data.pop("attachment", None)
@@ -3457,6 +3891,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
 class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
     framework = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
@@ -3484,6 +3919,7 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "target_score",
             "anchor_na_to_target",
             "field_visibility",
+            "evidences",
             "created_at",
             "updated_at",
         ]
@@ -3496,6 +3932,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             fields = [
                 "id",
                 "urn",
+                "parent_urn",
                 "annotation",
                 "name",
                 "description",
@@ -3836,6 +4273,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 validated_data.pop("is_scored", None)
 
             was_overridden = instance.is_score_overridden
+            previous_alignment = instance.respondent_alignment
             instance = super().update(instance, validated_data)
 
             # Override turned off: resync score from answers below.
@@ -3948,20 +4386,21 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "in_progress": RequirementAssessment.Result.PARTIALLY_COMPLIANT,
                 "not_applicable": RequirementAssessment.Result.NOT_APPLICABLE,
             }
-            # Skip auto-map when the auditor explicitly sets result in the same
-            # request: SuperForm round-trips the existing respondent_alignment
-            # on every submit, and we must not clobber an auditor-edited result
-            # (or zero it to NOT_ASSESSED if the respondent never answered).
+            # Only an actual change drives the result. SuperForm round-trips the
+            # existing respondent_alignment on every submit, so re-applying it
+            # would clobber an auditor-edited result (or zero it out when the
+            # respondent never answered). Blank and null mean the same thing.
             if (
                 "respondent_alignment" in validated_data
                 and "result" not in validated_data
                 and not requirement_has_questions
             ):
-                new_alignment = validated_data.get("respondent_alignment")
-                if new_alignment and new_alignment in ALIGNMENT_TO_RESULT:
+                new_alignment = validated_data.get("respondent_alignment") or None
+                changed = new_alignment != (previous_alignment or None)
+                if changed and new_alignment in ALIGNMENT_TO_RESULT:
                     instance.result = ALIGNMENT_TO_RESULT[new_alignment]
                     instance.save(update_fields=["result"])
-                elif not new_alignment:
+                elif changed and not new_alignment:
                     # Deselection: reset result and scores so the RA is truly
                     # unassessed (progress() flags an RA as assessed when score
                     # is set, even if result is NOT_ASSESSED).
@@ -4291,7 +4730,6 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
             "builtin",
             "locale",
             "default_locale",
-            "is_published",
             "translations",
             "frameworks_available",
         ]
@@ -4373,9 +4811,14 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
             "folder",
             "status",
             "result",
+            "extended_result",
             "score",
             "is_scored",
             "is_score_overridden",
+            "documentation_score",
+            "target_score",
+            "respondent_alignment",
+            "review_state",
             "observation",
             "compliance_assessment",
             "requirement",
@@ -4420,6 +4863,7 @@ class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
     evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    compliance_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
         model = FindingsAssessment
@@ -4438,6 +4882,7 @@ class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
             "folder",
             "perimeter",
             "evidences",
+            "compliance_assessment",
             "created_at",
             "updated_at",
         ]
@@ -4602,6 +5047,9 @@ class TaskTemplateImportExportSerializer(BaseModelSerializer):
     compliance_assessments = HashSlugRelatedField(
         slug_field="pk", read_only=True, many=True
     )
+    requirement_assessments = HashSlugRelatedField(
+        slug_field="pk", read_only=True, many=True
+    )
     risk_assessments = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     findings_assessment = HashSlugRelatedField(
         slug_field="pk", read_only=True, many=True
@@ -4623,6 +5071,7 @@ class TaskTemplateImportExportSerializer(BaseModelSerializer):
             "assets",
             "applied_controls",
             "compliance_assessments",
+            "requirement_assessments",
             "risk_assessments",
             "findings_assessment",
             "created_at",
@@ -4736,7 +5185,7 @@ class FilteringLabelReadSerializer(BaseModelSerializer):
 class FilteringLabelWriteSerializer(BaseModelSerializer):
     class Meta:
         model = FilteringLabel
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class LibraryFilteringLabelReadSerializer(BaseModelSerializer):
@@ -4751,7 +5200,7 @@ class LibraryFilteringLabelReadSerializer(BaseModelSerializer):
 class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
     class Meta:
         model = LibraryFilteringLabel
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class SecurityExceptionWriteSerializer(
@@ -5149,7 +5598,7 @@ class CommitmentReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Commitment
-        exclude = ["content_type", "object_id", "is_published"]
+        exclude = ["content_type", "object_id"]
 
 
 class PresetReadSerializer(BaseModelSerializer):
@@ -5889,7 +6338,7 @@ class TerminologyWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Terminology
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class ClassificationLevelReadSerializer(BaseModelSerializer):
@@ -5908,7 +6357,7 @@ class ClassificationLevelWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = ClassificationLevel
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class ObjectClassificationReadSerializer(BaseModelSerializer):
@@ -5927,7 +6376,7 @@ class ObjectClassificationWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = ObjectClassification
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class ValidationFlowWriteSerializer(BaseModelSerializer):

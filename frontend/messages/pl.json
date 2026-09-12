@@ -868,6 +868,8 @@
 	"addRepresentative": "Dodaj przedstawiciela",
 	"phone": "Telefon",
 	"role": "Rola",
+	"defaultRole": "Rola domyślna",
+	"defaultRoleHelpText": "Rola nadawana automatycznie w tej domenie każdemu użytkownikowi posiadającemu przypisanie roli w jednej z jej subdomen.",
 	"questions": "Pytania",
 	"recipientEntity": "Podmiot odbierający",
 	"financial": "Finansowy",
