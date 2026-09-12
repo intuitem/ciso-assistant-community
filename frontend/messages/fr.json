@@ -6062,5 +6062,11 @@
 	"lastAssessmentStatus": "Statut de la dernière évaluation",
 	"lastAssessmentDate": "Date de la dernière évaluation",
 	"resolveCommitmentBeforeRecurrence": "Clôturez l’engagement avant de rendre cette tâche récurrente.",
-	"neverAssessed": "Jamais évaluée"
+	"neverAssessed": "Jamais évaluée",
+	"anyDate": "Toute date",
+	"onOrBefore": "Jusqu’au",
+	"onOrAfter": "À partir du",
+	"between": "Entre",
+	"dateNotSet": "Non renseignée",
+	"and": "et"
 }

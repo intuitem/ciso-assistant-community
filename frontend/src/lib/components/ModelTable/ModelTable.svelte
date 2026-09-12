@@ -436,18 +436,23 @@
 
 	const filters = $derived(source?.filters ?? tableFilters);
 	const filteredFields = $derived(Object.keys(filters));
+	// A filter emits one query param per key by default; `params` lets one widget drive several
+	// (a date range emits both bounds).
+	const paramsOf = (field: string): string[] => filters[field]?.params ?? [field];
 	// Only persist filters on standalone list pages, not embedded sub-tables
 	const isStandaloneTable = hasRemoteSource && baseEndpoint === `/${URLModel}`;
 	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
 	const storedFilters = isStandaloneTable ? ($tableFilterStates[filterStoreKey] ?? {}) : {};
 	// Check if any filter-related URL params exist
-	const hasUrlFilterParams = filteredFields.some(
-		(field) => page.url.searchParams.getAll(field).length > 0
+	const hasUrlFilterParams = filteredFields.some((field) =>
+		paramsOf(field).some((param: string) => page.url.searchParams.getAll(param).length > 0)
 	);
 	const filterValues: { [key: string]: any } = $state(
 		Object.fromEntries(
 			filteredFields.map((field: string) => {
-				const urlValues = page.url.searchParams.getAll(field).map((value) => ({ value }));
+				const urlValues = paramsOf(field).flatMap((param: string) =>
+					page.url.searchParams.getAll(param).map((value) => ({ value, param }))
+				);
 				if (urlValues.length > 0) return [field, urlValues];
 				// Restore persisted filters only when no URL filter params exist at all
 				if (!hasUrlFilterParams && field in storedFilters) {
@@ -461,22 +466,23 @@
 	$effect(() => onFilterChange(filterValues));
 
 	run(() => {
-		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
+		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter?.hide);
 	});
 
 	$effect(() => {
 		for (const field of filteredFields) {
-			const filterValue = filterValues[field];
-			const overrideFilterValue = overrideFilters[field];
-			const finalFilterValue = overrideFilterValue || filterValue;
+			const finalFilterValue = overrideFilters[field] || filterValues[field] || [];
 
-			const fieldFilterParams = finalFilterValue
-				? finalFilterValue.map((v: Record<string, any>) => v.value)
-				: [];
-			handler.filter(fieldFilterParams, field);
-			page.url.searchParams.delete(field);
-			if (finalFilterValue) {
-				finalFilterValue.forEach(({ value }) => page.url.searchParams.append(field, value));
+			const buckets: Record<string, any> = Object.fromEntries(
+				paramsOf(field).map((param: string) => [param, []])
+			);
+			for (const v of finalFilterValue) {
+				(buckets[v.param ?? field] ??= []).push(v.value);
+			}
+			for (const [param, values] of Object.entries(buckets)) {
+				handler.filter(values, param);
+				page.url.searchParams.delete(param);
+				values.forEach((value: string) => page.url.searchParams.append(param, value));
 			}
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
@@ -654,7 +660,11 @@
 		filteredFields?.reduce((acc, field) => acc + filterValues?.[field]?.length, 0)
 	);
 
+	// Bumped on reset so filters holding their own state (date ranges) remount cleared.
+	let filterResetKey = $state(0);
+
 	async function resetFilters() {
+		filterResetKey++;
 		for (const field of filteredFields) {
 			const defaultValue = defaultFilters[field] ?? [];
 			filterValues[field] = Array.isArray(defaultValue)
@@ -849,21 +859,26 @@
 									{#each filteredFields as field}
 										{#if filters[field]?.component}
 											{@const FilterComponent = filters[field].component}
-											<FilterComponent
-												{form}
-												{field}
-												{...filters[field].props}
-												fieldContext="filter"
-												label={safeTranslate(filters[field].props?.label)}
-												onChange={(value) => {
-													const arrayValue = Array.isArray(value) ? value : [value];
-													const sanitizedArrayValue = arrayValue.filter(
-														(v) => v !== null && v !== undefined && v !== ''
-													);
+											{#key filterResetKey}
+												<FilterComponent
+													{form}
+													{field}
+													{...filters[field].props}
+													fieldContext="filter"
+													label={safeTranslate(filters[field].props?.label)}
+													filterValue={filterValues[field]}
+													onChange={(value) => {
+														const arrayValue = Array.isArray(value) ? value : [value];
+														const sanitizedArrayValue = arrayValue.filter(
+															(v) => v !== null && v !== undefined && v !== ''
+														);
 
-													filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
-												}}
-											/>
+														filterValues[field] = sanitizedArrayValue.map((v) =>
+															typeof v === 'object' && v !== null && 'value' in v ? v : { value: v }
+														);
+													}}
+												/>
+											{/key}
 										{/if}
 									{/each}
 									{#if filterCount > 0}

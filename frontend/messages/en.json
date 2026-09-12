@@ -6307,5 +6307,11 @@
 	"lastAssessmentStatus": "Last assessment status",
 	"lastAssessmentDate": "Last assessment date",
 	"resolveCommitmentBeforeRecurrence": "Resolve the commitment before making this task recurrent.",
-	"neverAssessed": "Never assessed"
+	"neverAssessed": "Never assessed",
+	"anyDate": "Any date",
+	"onOrBefore": "On or before",
+	"onOrAfter": "On or after",
+	"between": "Between",
+	"dateNotSet": "Not set",
+	"and": "and"
 }
