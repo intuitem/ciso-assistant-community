@@ -791,8 +791,17 @@ class GenericFilterSet(df.FilterSet):
     # Range lookups every date column gets, so listing a date in filterset_fields is
     # enough to make it filterable from the table UI. On a DateTimeField the `date`
     # transform is what the UI uses: a bare `lte` on a timestamp would drop its last day.
-    DATE_LOOKUPS = ("exact", "gte", "lte", "isnull")
-    DATETIME_LOOKUPS = ("date", "date__gte", "date__lte", "gte", "lte", "isnull")
+    DATE_LOOKUPS = ("exact", "gte", "lte", "gt", "lt", "isnull")
+    DATETIME_LOOKUPS = (
+        "date",
+        "date__gte",
+        "date__lte",
+        "date__gt",
+        "date__lt",
+        "gte",
+        "lte",
+        "isnull",
+    )
     ALWAYS_FILTERABLE_DATES = ("created_at", "updated_at")
 
     @classmethod

@@ -6313,5 +6313,21 @@
 	"onOrAfter": "On or after",
 	"between": "Between",
 	"dateNotSet": "Not set",
-	"and": "and"
+	"dateOn": "On",
+	"dateBefore": "Before",
+	"dateAfter": "After",
+	"dateQuickRanges": "Quick ranges",
+	"dateSpecificDates": "Specific dates",
+	"dateToday": "Today",
+	"dateThisWeek": "This week",
+	"dateThisMonth": "This month",
+	"dateThisQuarter": "This quarter",
+	"dateThisYear": "This year",
+	"dateLast7Days": "Last 7 days",
+	"dateLast30Days": "Last 30 days",
+	"dateLastMonth": "Last month",
+	"dateLastYear": "Last year",
+	"dateNext7Days": "Next 7 days",
+	"dateNext30Days": "Next 30 days",
+	"dateNext90Days": "Next 90 days"
 }

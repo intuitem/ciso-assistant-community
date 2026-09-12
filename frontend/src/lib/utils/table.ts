@@ -148,7 +148,7 @@ export function dateFilter(
 	const base = isDateTime ? `${field}__date` : field;
 	return {
 		component: DateFilter,
-		params: [`${base}__gte`, `${base}__lte`, `${field}__isnull`],
+		params: [`${base}__gte`, `${base}__lte`, `${base}__gt`, `${base}__lt`, `${field}__isnull`],
 		props: { label, param: field, isDateTime }
 	};
 }
