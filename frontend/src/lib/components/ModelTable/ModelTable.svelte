@@ -563,7 +563,8 @@
 	$effect(() => {
 		if (hasRemoteSource && page.form?.form?.posted && page.form?.form?.valid) {
 			console.debug('Form posted, invalidating table');
-			handler.invalidate();
+			// untracked: the reload writes inFlight, which would retrigger this effect
+			untrack(() => handler.invalidate());
 		}
 	});
 
