@@ -528,6 +528,7 @@
 	"dueDate": "Date d'échéance",
 	"scheduledDate": "Date initialement prévue",
 	"attachment": "Pièce jointe",
+	"attachmentHash": "Empreinte de la pièce jointe",
 	"observation": "Observation",
 	"observationHelpText": "Notes et commentaires supplémentaires au format markdown",
 	"noObservation": "Aucune observation",
