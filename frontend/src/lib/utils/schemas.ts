@@ -111,7 +111,8 @@ export const FolderSchema = z.object({
 	...NameDescriptionMixin,
 	parent_folder: z.string(),
 	create_iam_groups: z.boolean().default(false),
-	filtering_labels: z.array(z.string()).optional()
+	filtering_labels: z.array(z.string()).optional(),
+	default_role: z.string().uuid().optional().nullable()
 });
 
 export const FolderImportSchema = z.object({

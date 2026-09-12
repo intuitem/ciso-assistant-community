@@ -428,14 +428,33 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     Returns:
         A dictionary mapping model names to QuerySets of related objects;
     """
+    sub_folders = [f.id for f in domain.get_sub_folders()]
     folders = (
-        Folder.objects.filter(
-            Q(id=domain.id) | Q(id__in=[f.id for f in domain.get_sub_folders()])
-        )
+        Folder.objects.filter(Q(id=domain.id) | Q(id__in=sub_folders))
         .filter(content_type=Folder.ContentType.DOMAIN)
         .distinct()
     )
+    # Enclaves travel, domains do not: they carry which objects a third party is
+    # allowed to see, and re-deriving that on import can only ever approximate.
+    # Keeping DOMAIN folders out is what still flattens sub-domains away.
+    enclaves = Folder.objects.filter(
+        id__in=sub_folders, content_type=Folder.ContentType.ENCLAVE
+    ).distinct()
+
+    campaigns = Campaign.objects.filter(folder__in=folders).distinct()
     perimeters = Perimeter.objects.filter(folder__in=folders).distinct()
+    # Campaign.perimeters is unrestricted, so a campaign can target another
+    # domain. Export those rows so its M2M resolves, but never scope the
+    # assessments below on them or the dump swallows that domain's data.
+    exported_perimeters = Perimeter.objects.filter(
+        Q(folder__in=folders) | Q(campaigns__in=campaigns)
+    ).distinct()
+
+    # Computed early: the audits these reference live in enclave sub-folders
+    # (excluded from `folders`) and must feed compliance_assessments below.
+    entity_assessments = EntityAssessment.objects.filter(
+        Q(folder__in=folders) | Q(perimeter__in=perimeters)
+    ).distinct()
 
     risk_assessments = RiskAssessment.objects.filter(
         Q(perimeter__in=perimeters) | Q(folder__in=folders)
@@ -471,7 +490,9 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     compliance_assessments = ComplianceAssessment.objects.filter(
         Q(perimeter__in=perimeters)
         | Q(folder__in=folders)
+        | Q(folder__in=enclaves)
         | Q(ebios_rm_studies__in=ebios_rm_studies)
+        | Q(pk__in=entity_assessments.values("compliance_assessment"))
     ).distinct()
     requirement_assessments = RequirementAssessment.objects.filter(
         compliance_assessment__in=compliance_assessments
@@ -520,10 +541,17 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     ).distinct()
 
     findings_assessments = FindingsAssessment.objects.filter(
-        Q(perimeter__in=perimeters) | Q(folder__in=folders)
+        Q(perimeter__in=perimeters)
+        | Q(folder__in=folders)
+        # An enclave binder is in no perimeter (the audit drops its own), so the
+        # folder is what reaches it. Never reach one through the audit it points
+        # at: the binder's own folder is the only thing saying it is ours.
+        | Q(folder__in=enclaves)
     ).distinct()
     findings = Finding.objects.filter(
-        Q(folder__in=folders) | Q(findings_assessment__in=findings_assessments)
+        Q(folder__in=folders)
+        | Q(folder__in=enclaves)
+        | Q(findings_assessment__in=findings_assessments)
     ).distinct()
 
     risk_acceptances = RiskAcceptance.objects.filter(
@@ -539,7 +567,6 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     # incidents/campaigns/findings still make it into the dump (and into
     # loaded_libraries). Rebuild with fresh Q filters rather than queryset
     # union so the result plays nicely with .distinct().
-    campaigns = Campaign.objects.filter(folder__in=folders).distinct()
     entities = Entity.objects.filter(
         Q(folder__in=folders)
         | Q(stakeholders__in=stakeholders)
@@ -561,25 +588,22 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(feared_events__in=feared_events)
         | Q(findings__in=findings)
     ).distinct()
-    perimeters = Perimeter.objects.filter(
-        Q(folder__in=folders) | Q(campaigns__in=campaigns)
+    # A third party owns tasks in its enclave the way it owns evidence there,
+    # so those belong to the export too.
+    task_templates = TaskTemplate.objects.filter(
+        Q(folder__in=folders) | Q(folder__in=enclaves)
     ).distinct()
-
-    task_templates = TaskTemplate.objects.filter(folder__in=folders).distinct()
     task_nodes = TaskNode.objects.filter(
-        Q(folder__in=folders) | Q(task_template__in=task_templates)
+        Q(folder__in=folders)
+        | Q(folder__in=enclaves)
+        | Q(task_template__in=task_templates)
     ).distinct()
 
     # --- TPRM ecosystem ---
-    # Only Entity was exported historically. Pull in the rest of the third
-    # party graph so a SaaS -> on-prem migration keeps assessments, solutions,
-    # subcontracting chains, representatives and contracts (all flattened into
-    # the target domain like everything else). Computed before evidences so
-    # audit / contract attachments are folded into the evidence scope below.
-    entity_assessments = EntityAssessment.objects.filter(
-        Q(folder__in=folders) | Q(perimeter__in=perimeters)
-    ).distinct()
-
+    # Pull in the rest of the third party graph so a SaaS -> on-prem migration
+    # keeps solutions, subcontracting chains, representatives and contracts (all
+    # flattened into the target domain like everything else). entity_assessments
+    # is defined earlier (its audits feed the compliance_assessments scope).
     solutions = Solution.objects.filter(
         Q(provider_entity__in=entities)
         | Q(recipient_entity__in=entities)
@@ -635,8 +659,11 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
 
     evidences = Evidence.objects.filter(
         Q(folder__in=folders)
+        | Q(folder__in=enclaves)
         | Q(applied_controls__in=applied_controls)
         | Q(requirement_assessments__in=requirement_assessments)
+        # Attached straight to an audit: an enclave one is in no exported folder.
+        | Q(compliance_assessments__in=compliance_assessments)
         | Q(findings__in=findings)
         | Q(findings_assessments__in=findings_assessments)
         | Q(entityassessment__in=entity_assessments)
@@ -644,7 +671,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     ).distinct()
 
     evidence_revisions = EvidenceRevision.objects.filter(
-        Q(folder__in=folders) | Q(evidence__in=evidences)
+        Q(folder__in=folders) | Q(folder__in=enclaves) | Q(evidence__in=evidences)
     )
 
     loaded_libraries = LoadedLibrary.objects.filter(
@@ -667,13 +694,11 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     ).distinct()
 
     return {
-        # Folder is deliberately NOT exported. The domain tree is flattened on
-        # import: all `folder` FKs are remapped to the newly-created
-        # base_folder by create_batch's generic folder handler. Keeping
-        # Folder out of the dump is what makes the re-import possible — the
-        # guard in import_objects rejects dumps that *do* contain Folder rows
-        # (e.g. full DB backups), not our own domain exports.
-        # "folder": folders,
+        # Enclaves only: they carry what a third party may see, so re-deriving
+        # it on import could only approximate. Domain folders stay out and are
+        # flattened onto base_folder, which is what keeps sub-domains a Pro
+        # feature; import_objects rejects any dump carrying one.
+        "folder": enclaves,
         "loadedlibrary": loaded_libraries,
         "vulnerability": vulnerabilities,
         "framework": frameworks,
@@ -691,7 +716,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         "contract": contracts,
         "evidence": evidences,
         "evidencerevision": evidence_revisions,
-        "perimeter": perimeters,
+        "perimeter": exported_perimeters,
         "complianceassessment": compliance_assessments,
         "requirementassessment": requirement_assessments,
         "quickformresponse": quick_form_responses,

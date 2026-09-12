@@ -2074,8 +2074,8 @@ export const listViewFields = {
 		body: ['name', 'description']
 	},
 	'role-assignments': {
-		head: ['user', 'userGroup', 'role', 'perimeter'],
-		body: ['user', 'user_group', 'role', 'perimeter_folders']
+		head: ['user', 'userGroup', 'role', 'perimeter', 'isRecursive'],
+		body: ['user', 'user_group', 'role', 'perimeter_folders', 'is_recursive']
 	},
 	frameworks: {
 		head: ['name', 'description', 'provider', 'complianceAssessments', 'domain'],

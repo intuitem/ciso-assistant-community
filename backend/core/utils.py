@@ -440,6 +440,33 @@ BUILTIN_ROLE_TRANSLATIONS = {
         "ur": {"name": "تکنیکی ٹیسٹر"},
         "zh": {"name": "技术测试员"},
     },
+    "BI-RL-BSL": {
+        "en": {"name": "Baseline reader"},
+        "ar": {"name": "قارئ خط الأساس"},
+        "cs": {"name": "Čtenář základní úrovně"},
+        "da": {"name": "Basislæser"},
+        "de": {"name": "Basis-Leser"},
+        "el": {"name": "Αναγνώστης βασικής γραμμής"},
+        "es": {"name": "Lector de línea base"},
+        "et": {"name": "Baastaseme lugeja"},
+        "fr": {"name": "Lecteur de socle"},
+        "hi": {"name": "आधारभूत रीडर"},
+        "hr": {"name": "Osnovni čitatelj"},
+        "hu": {"name": "Alapszintű olvasó"},
+        "id": {"name": "Pembaca dasar"},
+        "it": {"name": "Lettore di base"},
+        "ko": {"name": "기본 열람자"},
+        "lt": {"name": "Bazinis skaitytojas"},
+        "nl": {"name": "Basislezer"},
+        "pl": {"name": "Czytelnik bazowy"},
+        "pt": {"name": "Leitor de base"},
+        "ro": {"name": "Cititor de bază"},
+        "sv": {"name": "Basläsare"},
+        "tr": {"name": "Temel okuyucu"},
+        "uk": {"name": "Базовий читач"},
+        "ur": {"name": "بنیادی ریڈر"},
+        "zh": {"name": "基线阅读者"},
+    },
 }
 
 
@@ -1642,8 +1669,6 @@ def get_respondent_scoped_folder_ids(user) -> set[UUID]:
     treated as a respondent. Auditor-side roles (reader, approver, analyst,
     domain-manager, administrator) hold ``view_compliance_assessment_full`` and are therefore
     excluded; auditee and third-party respondent do not and are included.
-
-    Uses the IAM snapshot caches exclusively (no extra DB queries).
     """
     from iam.models import RoleAssignment
 

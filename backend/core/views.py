@@ -9071,6 +9071,32 @@ class FolderViewSet(BaseModelViewSet):
         return Response(res)
 
 
+class RoleViewSet(BaseModelViewSet):
+    """
+    Read-only roles endpoint: serves the folder default-role display and pickers.
+
+    Role management (create/update/delete, with per-folder group provisioning)
+    is not exposed here; a module may register its own RoleViewSet on the same
+    route, which takes precedence over this one.
+    """
+
+    model = Role
+    ordering_fields = ["name"]
+    http_method_names = ["get", "head", "options"]
+    filter_backends = [
+        DjangoFilterBackend,
+        RoleFilter,
+    ]
+
+    def get_queryset(self):
+        # Hide only dedicated per-SA roles; a shared builtin role stays visible.
+        return (
+            super()
+            .get_queryset()
+            .exclude(service_accounts__isnull=False, builtin=False)
+        )
+
+
 class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 

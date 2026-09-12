@@ -206,7 +206,7 @@
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
-	const BUILTIN_EDITABLE_URL_MODELS = ['terminologies', 'entities', 'asset-class'];
+	const BUILTIN_EDITABLE_URL_MODELS = ['terminologies', 'entities', 'asset-class', 'folders'];
 	// A field's flag(s) can be a single flag name or a list (shown if ANY is on).
 	// Hidden only once every listed flag is a known, explicitly-false feature flag.
 	function isFieldHiddenByFeatureFlags(
@@ -1055,9 +1055,11 @@
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
 																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
+																			{@const [labelKey, ...valueParts] = val.split(':')}
 																			<span class="text"
-																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																				{val.split(':')[1]}</span
+																				>{unsafeTranslate(labelKey + 'Colon') ??
+																					`${unsafeTranslate(labelKey)}:`}
+																				{valueParts.join(':')}</span
 																			>
 																		{:else}
 																			{val ?? '-'}

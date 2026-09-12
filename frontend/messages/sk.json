@@ -1233,6 +1233,8 @@
 	"removeIdentifier": "Odstrániť identifikátor",
 	"phone": "Telefón",
 	"role": "Rola používateľa",
+	"defaultRole": "Predvolená rola",
+	"defaultRoleHelpText": "Rola, ktorá sa automaticky udeľuje v tejto doméne každému používateľovi s priradením role v niektorej z jej subdomén.",
 	"questions": "Otázky",
 	"recipientEntity": "Cieľový subjekt",
 	"financial": "Finančné",

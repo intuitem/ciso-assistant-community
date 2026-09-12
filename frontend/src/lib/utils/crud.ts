@@ -261,7 +261,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		listViewUrlParams: '?content_type=DO&content_type=GL',
 		foreignKeyFields: [
 			{ field: 'parent_folder', urlModel: 'folders' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'default_role', urlModel: 'roles' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'folder', urlModel: 'perimeters' },
@@ -3079,7 +3080,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }, { field: 'kind' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'framework', urlModel: 'frameworks' },
+			{ field: 'frameworks', urlModel: 'frameworks' },
 			{ field: 'perimeters', urlModel: 'perimeters' },
 			{ field: 'entities', urlModel: 'entities' }
 		],
@@ -3114,7 +3115,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: [
 			{ field: 'status' },
-			{ field: 'framework' },
+			{ field: 'frameworks' },
 			{ field: 'folder' },
 			{ field: 'perimeters' }
 		]
