@@ -1188,3 +1188,24 @@ def test_a_low_privilege_requester_can_still_submit(app_config):
     # under an `approve` gate this is a flat 403.
     assert res.status_code != 403, "the requester was refused by the permission layer"
     assert res.json()["error"] == "responseIncomplete", res.json()
+
+
+@pytest.mark.django_db
+def test_preview_survives_non_choice_answers(app_config):
+    """A boolean or number answer used to reach `extract_node_id` as a raw value, so
+    previewing any form with one 500ed as soon as it was answered truthy."""
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    _user, client = _admin_client("qf-preview-bool@test.local")
+
+    res = client.post(
+        f"/api/quick-forms/{form.id}/preview/",
+        {"answers": {Q_SENSITIVE: True, Q_HEADCOUNT: 12}},
+        format="json",
+    )
+    assert res.status_code == 200, res.content[:300]
+    body = res.json()
+
+    # The boolean did not merely survive: it drove the rule that reads it.
+    assert "dpia_required" in (body["computed_outcome"] or {}), body["computed_outcome"]
+    assert body["progress"]["answered_count"] == 2, body["progress"]

@@ -41,7 +41,7 @@ def extract_node_id(urn: str | None) -> str | None:
     URN format: urn:{org}:risk:{type}:{slug}:{node_id}
     The node_id is everything after the 5th colon and may contain colons.
     """
-    if not urn:
+    if not urn or not isinstance(urn, str):
         return None
     parts = urn.split(":")
     if len(parts) <= 5:

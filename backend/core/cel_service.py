@@ -642,8 +642,11 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         pages.append({**page, "_questions": entries})
 
     def selected_of(entry):
+        q_type = entry.get("type")
+        if q_type not in ("unique_choice", "multiple_choice"):
+            return []
         value = answers.get(entry["urn"])
-        if entry.get("type") == "multiple_choice":
+        if q_type == "multiple_choice":
             return [v for v in (value or []) if v]
         return [value] if value else []
 
