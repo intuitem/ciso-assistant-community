@@ -44,12 +44,11 @@ A **quick form** arrives from a **library**, like a framework or a risk matrix d
 
 ## Where each piece lives
 
-Four places in the sidebar, and they are deliberately different audiences:
+Three places in the sidebar, and they are deliberately different audiences:
 
 | Screen | Who it is for | What it holds |
 |---|---|---|
 | **Quick forms** (Catalog) | Anyone building the catalog | The form templates themselves, imported from libraries |
-| **Published forms** | Whoever decides what may be asked for | One entry per form offered to an audience |
 | **My requests** | Everyone | The requests *you* filed, including unfinished drafts |
 | **Requests** (Governance) | Reviewers | The queue of requests waiting on a decision |
 
@@ -69,6 +68,12 @@ A quick form sitting in the catalog cannot be filled by anyone. Publishing it is
 The same form can be published more than once — to different audiences, landing in different domains, with different reviewers. That is how one derogation form serves several business units without being copied.
 
 Publishing is necessary but not sufficient: a publication becomes reachable when a **portal tile** points at it. **My requests** lists the portals you can ask from, not the publications themselves.
+
+{% hint style="info" %}
+A portal tile does not have to point at a publication. It can be wired straight to a quick form — the **inline** wiring — and then it carries the domain, reviewers and drafts policy itself instead of inheriting them. What it cannot carry is an audience, so it authorises on domain permissions instead: whoever clicks it must be allowed to create a request in the domain the tile names.
+
+That makes the two wirings a deliberate choice rather than a shortcut. Inline suits an internal tile whose users already work in the domain; a publication suits self-service, where the requester holds nothing. Published forms have no screen of their own in the navigation yet, so inline is the easier of the two to reach today.
+{% endhint %}
 
 Audience membership is the authorisation here. It is not folder permissions: someone in the audience can file a request into a domain they otherwise cannot see, and they will still not see anything else in it.
 

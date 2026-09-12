@@ -60,7 +60,7 @@
 		})
 	);
 	// A requester edits their own draft; a reviewer edits by folder permission.
-	const canEditAnswers = $derived((viewerIsRequester || canEdit) && content.can_edit_answers);
+	const canEditAnswers = $derived(!!content.can_edit_answers);
 
 	let busy = $state(false);
 	let reopenObservation = $state('');

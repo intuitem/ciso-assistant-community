@@ -20,7 +20,7 @@ from core.models import (
     RequirementNode,
     StoredLibrary,
 )
-from iam.models import Folder, User, UserGroup
+from iam.models import Folder, RoleAssignment, User, UserGroup
 from tprm.models import Entity
 
 FORM_URN = "urn:test:risk:quick_form:dpia-screening"
@@ -1254,3 +1254,67 @@ def test_respondent_role_can_answer_and_submit(app_config):
         client.get(f"/api/quick-form-responses/{response.id}/content/").status_code
         == 404
     )
+
+
+@pytest.mark.django_db
+def test_respondent_may_start_a_request_but_sees_only_their_own(app_config):
+    """`add_quickformresponse` on BI-RL-ADE is what an inline portal tile checks. It is
+    create-only on purpose: reading needs `view_quickformresponse`, which the role has
+    not got, so a respondent never sees a request they are not on."""
+    from django.contrib.auth.models import Permission
+
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-ade-grant", parent_folder=Folder.get_root_folder()
+    )
+    respondent, client = _role_client("qf-ade@test.local", "BI-RL-ADE", folder)
+    other, _ = _role_client("qf-ade-other@test.local", "BI-RL-ANA", folder)
+
+    # The gate the inline tile checks (portals/views.py).
+    assert RoleAssignment.is_access_allowed(
+        user=respondent,
+        perm=Permission.objects.get(codename="add_quickformresponse"),
+        folder=folder,
+    )
+
+    someone_elses = QuickFormResponse.objects.create(
+        name="not yours",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.SUBMITTED,
+        submitted_by=other,
+    )
+
+    # Create-only: the reviewer surface stays empty and closed.
+    listing = client.get("/api/quick-form-responses/")
+    assert listing.status_code == 200
+    assert listing.json()["results"] == [], listing.json()
+    assert (
+        client.get(f"/api/quick-form-responses/{someone_elses.id}/content/").status_code
+        == 404
+    )
+
+    # Their own request is reachable, answerable and submittable.
+    mine = QuickFormResponse.objects.create(
+        name="mine",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.DRAFT,
+    )
+    mine.respondents.add(
+        Actor.objects.filter(user=respondent, entity__isnull=True).first()
+    )
+    base = f"/api/my-requests/{mine.id}/"
+    assert [r["id"] for r in client.get("/api/my-requests/").json()["results"]] == [
+        str(mine.id)
+    ]
+    assert (
+        client.patch(
+            f"{base}answers/",
+            {"answers": {Q_SENSITIVE: False, Q_HEADCOUNT: 3}},
+            format="json",
+        ).status_code
+        == 200
+    )
+    assert client.post(f"{base}submit/", {}, format="json").status_code == 200

@@ -1763,7 +1763,7 @@
 	"userChoosesDomain": "L'utilisateur choisit le domaine",
 	"letUserNameAudit": "Laisser l'utilisateur le nommer",
 	"letUserNameResponse": "Laisser l'utilisateur nommer la réponse",
-	"quickFormTileNoPublication": "Configurer sur cette tuile (sans publication)",
+	"quickFormTileNoPublication": "Configurer sur cette tuile — nécessite des droits sur le domaine",
 	"quickFormTileSource": "Source du formulaire",
 	"portalTileDomainHint": "Laissez vide et la personne qui clique choisira le domaine.",
 	"portalTileMissing": "Choisissez un élément « {field} » : sans cela, la tuile échouera au clic.",

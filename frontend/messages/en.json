@@ -1807,7 +1807,7 @@
 	"userChoosesDomain": "User chooses domain",
 	"letUserNameAudit": "Let the user name it",
 	"letUserNameResponse": "Let the user name the response",
-	"quickFormTileNoPublication": "Configure on this tile (no publication)",
+	"quickFormTileNoPublication": "Configure on this tile — requires rights on the domain",
 	"quickFormTileSource": "Form source",
 	"portalTileDomainHint": "Leave empty and the person clicking the tile picks the domain.",
 	"portalTileMissing": "Pick a {field} — without one this tile fails when someone clicks it.",

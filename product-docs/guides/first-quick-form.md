@@ -31,31 +31,27 @@ Open it to see what you imported: three pages — *What you need*, *Risk and dur
 No **+** button on the **Quick forms** list is intentional. Forms come from libraries; to write your own, use the library builder (see step 6).
 {% endhint %}
 
-## 3. Publish it
+## 3. Put it on a portal
 
-This is the step people miss. A form in the catalog cannot be filled by anyone — publishing it is what says who may ask and where their requests land.
+A form in the catalog cannot be filled by anyone. A **portal tile** is what people click to start a request, and wiring that tile is what makes the form reachable.
 
-1. Go to **Published forms** and click **+**.
-2. Fill in:
-   - **Quick form**: `Derogation request`
-   - **Name**: `Derogation request` — this is what the requester sees on the tile
-   - **Domain**: the domain that owns the offer
-   - **Submission domain**: where responses land. Leave it empty to use the publication's own domain
-   - **Audience**: the groups allowed to file this. **Leave it empty and every user may file one**
-   - **Default reviewers**: who gets put on each request
-3. Leave **Allow multiple drafts** off. A requester who already has an unfinished draft is then handed it back instead of starting a second one.
-4. Save.
-
-## 4. Put it on a portal
-
-Publishing says who may ask. A portal tile is where they click to do it — and it is currently the only way in.
-
-1. Go to **Manage portals** and open a portal your audience can see, or create one.
+1. Go to **Extra > Manage portals** and open a portal your requesters can see, or create one.
 2. Add a tile and set its kind to **Quick form**.
-3. Under **Form source**, pick your published form from the **Published forms** list. A tile wired to a publication inherits its audience, its domain and its reviewers, so the two entry points cannot drift apart.
+3. Wire it. The **Form source** dropdown offers two ways, and they authorise differently:
+   - **A published form**, if one exists — the tile then inherits its audience, submission domain and reviewers.
+   - **Otherwise pick the quick form directly**, and choose the domain requests should land in. This is the inline wiring.
 4. Save the portal.
 
-## 5. File a request
+{% hint style="warning" %}
+The two wirings authorise differently, and that is the whole of the choice:
+
+- **Configure on this tile** — whoever clicks it must hold the right to create a request **in the domain the tile names**, or they get "No permission to file a request in '…'". Use it for internal tiles, where the people clicking already work in that domain.
+- **A published form** — authorises on audience membership instead, so someone with no role in the domain can still file. Use it for self-service.
+
+Published forms have no screen of their own in the navigation yet, so inline is the easier of the two to reach today.
+{% endhint %}
+
+## 4. File a request
 
 Sign in as someone in the audience — a person with no particular permissions on the submission domain. That is the point: audience membership is the authorisation.
 
@@ -69,7 +65,7 @@ If **Submit** is greyed out, hover it: "Answer every required question on every 
 
 The request moves to **Awaiting review**, and its content freezes. From here you can still **Drop** it, which withdraws it without a reviewer's decision.
 
-## 6. Decide it
+## 5. Decide it
 
 Sign in as a reviewer — someone with approval rights on the submission domain.
 
@@ -87,7 +83,7 @@ Two things worth noticing on this screen:
 
 Instead of deciding, you can send the request back to the requester. It returns to **Draft**, they change their answers and resubmit.
 
-## 7. Write your own form
+## 6. Write your own form
 
 Once the ready-made one makes sense, build one of your own.
 
