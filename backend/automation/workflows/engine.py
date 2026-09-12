@@ -29,7 +29,7 @@ from .actions import (
     read_snapshot_ids,
     render,
 )
-from .context import temporal_seeds
+from .context import RESERVED_VARIABLE_KEYS, temporal_seeds
 from .models import (
     WorkflowInstance,
     WorkflowInstanceLog,
@@ -1087,6 +1087,10 @@ def _apply_output_mapping(node, output, instance):
         return
     updates = {}
     for variable_key, path in mapping.items():
+        if variable_key in RESERVED_VARIABLE_KEYS:
+            # Refused at publish too; this covers graphs published before that
+            # check existed. Seeds stay engine-owned.
+            continue
         value = dig(output, path, MISSING)
         if value is MISSING:
             # A silent skip is what makes a mis-authored mapping look like an
