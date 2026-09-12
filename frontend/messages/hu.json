@@ -827,6 +827,8 @@
 	"addRepresentative": "Képviselő hozzáadása",
 	"phone": "Telefon",
 	"role": "Szerep",
+	"defaultRole": "Alapértelmezett szerepkör",
+	"defaultRoleHelpText": "Az a szerepkör, amelyet a rendszer automatikusan megad ezen a tartományon minden olyan felhasználónak, akinek szerepkör-hozzárendelése van valamelyik aldoménjén.",
 	"questions": "Kérdések",
 	"recipientEntity": "Címzett vállalat",
 	"financial": "Pénzügyi",

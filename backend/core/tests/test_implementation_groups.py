@@ -22,7 +22,6 @@ def dynamic_framework_setup(db):
     fw = Framework.objects.create(
         name="Dynamic IG Framework",
         folder=folder,
-        is_published=True,
         min_score=0,
         max_score=100,
         implementation_groups_definition=[
@@ -37,7 +36,6 @@ def dynamic_framework_setup(db):
         ref_id="IG-REQ",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     q1 = Question.objects.create(
         requirement_node=rn,
@@ -48,7 +46,6 @@ def dynamic_framework_setup(db):
         order=0,
         weight=1,
         folder=folder,
-        is_published=True,
     )
     c_basic = QuestionChoice.objects.create(
         question=q1,
@@ -59,7 +56,6 @@ def dynamic_framework_setup(db):
         compute_result="true",
         order=0,
         folder=folder,
-        is_published=True,
         select_implementation_groups=["base"],
     )
     c_advanced = QuestionChoice.objects.create(
@@ -71,7 +67,6 @@ def dynamic_framework_setup(db):
         compute_result="true",
         order=1,
         folder=folder,
-        is_published=True,
         select_implementation_groups=["advanced"],
     )
 
@@ -81,7 +76,6 @@ def dynamic_framework_setup(db):
         framework=fw,
         folder=folder,
         perimeter=perimeter,
-        is_published=True,
         min_score=0,
         max_score=100,
     )
@@ -116,7 +110,6 @@ class TestIsDynamic:
         fw = Framework.objects.create(
             name="Static FW",
             folder=folder,
-            is_published=True,
         )
         rn = RequirementNode.objects.create(
             framework=fw,
@@ -124,7 +117,6 @@ class TestIsDynamic:
             ref_id="ST-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         q = Question.objects.create(
             requirement_node=rn,
@@ -133,7 +125,6 @@ class TestIsDynamic:
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q,
@@ -142,7 +133,6 @@ class TestIsDynamic:
             value="A",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q,
@@ -151,7 +141,6 @@ class TestIsDynamic:
             value="B",
             order=1,
             folder=folder,
-            is_published=True,
         )
         assert fw.is_dynamic() is False
 
@@ -161,7 +150,6 @@ class TestIsDynamic:
         fw = Framework.objects.create(
             name="Empty IG FW",
             folder=folder,
-            is_published=True,
         )
         rn = RequirementNode.objects.create(
             framework=fw,
@@ -169,7 +157,6 @@ class TestIsDynamic:
             ref_id="EIG-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         q = Question.objects.create(
             requirement_node=rn,
@@ -178,7 +165,6 @@ class TestIsDynamic:
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q,
@@ -187,7 +173,6 @@ class TestIsDynamic:
             value="A",
             order=0,
             folder=folder,
-            is_published=True,
             select_implementation_groups=[],
         )
         QuestionChoice.objects.create(
@@ -197,7 +182,6 @@ class TestIsDynamic:
             value="B",
             order=1,
             folder=folder,
-            is_published=True,
         )
         assert fw.is_dynamic() is False
 
@@ -242,7 +226,6 @@ class TestUpdateSelectedImplementationGroups:
         fw = Framework.objects.create(
             name="Hidden IG FW",
             folder=folder,
-            is_published=True,
             implementation_groups_definition=[
                 {"ref_id": "base", "default_selected": True},
                 {"ref_id": "hidden_ig"},
@@ -254,7 +237,6 @@ class TestUpdateSelectedImplementationGroups:
             ref_id="HIG-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         q1 = Question.objects.create(
             requirement_node=rn,
@@ -263,7 +245,6 @@ class TestUpdateSelectedImplementationGroups:
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
-            is_published=True,
         )
         c_no = QuestionChoice.objects.create(
             question=q1,
@@ -274,7 +255,6 @@ class TestUpdateSelectedImplementationGroups:
             compute_result="false",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q1,
@@ -285,7 +265,6 @@ class TestUpdateSelectedImplementationGroups:
             compute_result="true",
             order=1,
             folder=folder,
-            is_published=True,
         )
         q2 = Question.objects.create(
             requirement_node=rn,
@@ -299,7 +278,6 @@ class TestUpdateSelectedImplementationGroups:
                 "condition": "any",
             },
             folder=folder,
-            is_published=True,
         )
         c_ig = QuestionChoice.objects.create(
             question=q2,
@@ -308,7 +286,6 @@ class TestUpdateSelectedImplementationGroups:
             value="Select",
             order=0,
             folder=folder,
-            is_published=True,
             select_implementation_groups=["hidden_ig"],
         )
         QuestionChoice.objects.create(
@@ -318,7 +295,6 @@ class TestUpdateSelectedImplementationGroups:
             value="Skip",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         perimeter = Perimeter.objects.create(name="HIG Perim", folder=folder)
@@ -327,7 +303,6 @@ class TestUpdateSelectedImplementationGroups:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
         )
         ra = RequirementAssessment.objects.create(
             compliance_assessment=ca,
@@ -365,7 +340,6 @@ class TestUpdateSelectedImplementationGroups:
         fw = Framework.objects.create(
             name="Merge IG FW",
             folder=folder,
-            is_published=True,
             implementation_groups_definition=[
                 {"ref_id": "ig_a"},
                 {"ref_id": "ig_b"},
@@ -377,7 +351,6 @@ class TestUpdateSelectedImplementationGroups:
             ref_id="MIG-REQ1",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         rn2 = RequirementNode.objects.create(
             framework=fw,
@@ -385,7 +358,6 @@ class TestUpdateSelectedImplementationGroups:
             ref_id="MIG-REQ2",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
 
         q1 = Question.objects.create(
@@ -395,7 +367,6 @@ class TestUpdateSelectedImplementationGroups:
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
-            is_published=True,
         )
         c1 = QuestionChoice.objects.create(
             question=q1,
@@ -404,7 +375,6 @@ class TestUpdateSelectedImplementationGroups:
             value="A",
             order=0,
             folder=folder,
-            is_published=True,
             select_implementation_groups=["ig_a"],
         )
         QuestionChoice.objects.create(
@@ -414,7 +384,6 @@ class TestUpdateSelectedImplementationGroups:
             value="B",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         q2 = Question.objects.create(
@@ -424,7 +393,6 @@ class TestUpdateSelectedImplementationGroups:
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
-            is_published=True,
         )
         c2 = QuestionChoice.objects.create(
             question=q2,
@@ -433,7 +401,6 @@ class TestUpdateSelectedImplementationGroups:
             value="C",
             order=0,
             folder=folder,
-            is_published=True,
             select_implementation_groups=["ig_b"],
         )
         QuestionChoice.objects.create(
@@ -443,7 +410,6 @@ class TestUpdateSelectedImplementationGroups:
             value="D",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         perimeter = Perimeter.objects.create(name="MIG Perim", folder=folder)
@@ -452,7 +418,6 @@ class TestUpdateSelectedImplementationGroups:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
         )
         ra1 = RequirementAssessment.objects.create(
             compliance_assessment=ca,

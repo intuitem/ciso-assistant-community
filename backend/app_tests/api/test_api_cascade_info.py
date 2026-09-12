@@ -30,7 +30,7 @@ def target_folder(app_ready):
 
 
 def _scoped_client(email, role_name, folder, app_ready):
-    user = User.objects.create_user(email, is_published=True)
+    user = User.objects.create_user(email)
     user.folder = app_ready
     user.save()
     group = UserGroup.objects.create(name=f"grp-{email}", folder=folder)
@@ -47,7 +47,7 @@ def _scoped_client(email, role_name, folder, app_ready):
 
 @pytest.fixture
 def admin_client(app_ready):
-    user = User.objects.create_user("admin@cascade.test", is_published=True)
+    user = User.objects.create_user("admin@cascade.test")
     group = UserGroup.objects.get(name="BI-UG-ADM", folder=app_ready)
     user.folder = group.folder
     user.save()
@@ -74,7 +74,7 @@ def test_view_only_roles_are_denied(app_ready, target_folder, role_name):
 
 
 def test_user_without_role_is_denied(app_ready, target_folder):
-    user = User.objects.create_user("norole@cascade.test", is_published=True)
+    user = User.objects.create_user("norole@cascade.test")
     user.folder = app_ready
     user.save()
     resp = _client(user).get(_url(target_folder))
@@ -114,7 +114,7 @@ def test_cross_folder_m2m_endpoint_is_not_disclosed(app_ready, target_folder):
 
 
 def test_role_assignment_emails_not_leaked_to_view_only_role(app_ready, target_folder):
-    victim = User.objects.create_user("victim@cascade.test", is_published=True)
+    victim = User.objects.create_user("victim@cascade.test")
     victim.folder = app_ready
     victim.save()
     group = UserGroup.objects.create(name="victim-grp", folder=target_folder)

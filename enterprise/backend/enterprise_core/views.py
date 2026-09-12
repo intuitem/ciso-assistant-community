@@ -281,6 +281,28 @@ class LicenseStatusView(APIView):
             return Response({"status": "expired", "days_expired": days_expired})
 
 
+class RoleFilterSet(GenericFilterSet):
+    read_only = df.BooleanFilter(method="filter_read_only")
+
+    class Meta:
+        model = Role
+        fields = ["builtin"]
+
+    def filter_read_only(self, queryset, name, value):
+        """
+        A role is read-only when none of its permissions is a non-view
+        permission. A role with no permissions at all counts as read-only.
+
+        No regex here: the negative lookahead this used to rely on is not
+        supported by PostgreSQL's POSIX regexes (it only worked on SQLite,
+        whose regex operator is Python-backed).
+        """
+        write_permissions = Permission.objects.exclude(codename__startswith="view_")
+        if value:
+            return queryset.exclude(permissions__in=write_permissions)
+        return queryset.filter(permissions__in=write_permissions).distinct()
+
+
 class RoleViewSet(BaseModelViewSet):
     """
     API endpoint that allows roles to be viewed or edited
@@ -288,6 +310,7 @@ class RoleViewSet(BaseModelViewSet):
 
     model = Role
     ordering_fields = ["name"]
+    filterset_class = RoleFilterSet
     filter_backends = [
         DjangoFilterBackend,
         RoleFilter,

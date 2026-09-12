@@ -225,9 +225,7 @@ def _client_for(user):
 
 
 def _make_scoped_reader(folder):
-    user = User.objects.create_user(
-        f"reader-{uuid.uuid4().hex[:6]}@perf.test", is_published=True
-    )
+    user = User.objects.create_user(f"reader-{uuid.uuid4().hex[:6]}@perf.test")
     role = Role.objects.get(name=RoleCodename.READER.value)
     ra = RoleAssignment.objects.create(
         user=user,

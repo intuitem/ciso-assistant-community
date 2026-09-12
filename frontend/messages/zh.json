@@ -1032,6 +1032,8 @@
 	"removeIdentifier": "移除标识符",
 	"phone": "电话",
 	"role": "角色",
+	"defaultRole": "默认角色",
+	"defaultRoleHelpText": "在此域中自动授予角色，适用于在其任一子域拥有角色分配的任何用户。",
 	"questions": "问题",
 	"recipientEntity": "接收实体",
 	"financial": "财务",
