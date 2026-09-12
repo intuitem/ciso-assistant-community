@@ -489,7 +489,6 @@ class QuickFormPageImporter:
                 locale=quick_form.locale,
                 default_locale=quick_form.default_locale,
                 translations=self.page_data.get("translations", {}),
-                is_published=True,
             ),
         )
         questions_data = self.page_data.get("questions")
@@ -563,7 +562,6 @@ class QuickFormImporter:
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,
                 translations=self.quick_form_data.get("translations", {}),
-                is_published=True,
             ),
         )
         for page in self._pages:

@@ -6979,7 +6979,7 @@ def _reject_entity_actors(actors):
 class QuickFormPublicationWriteSerializer(BaseModelSerializer):
     class Meta:
         model = QuickFormPublication
-        exclude = ["created_at", "updated_at", "is_published"]
+        exclude = ["created_at", "updated_at"]
 
     def validate_default_reviewers(self, value):
         return _reject_entity_actors(value)

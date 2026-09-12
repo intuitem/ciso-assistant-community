@@ -251,7 +251,6 @@ def _sync_questions_from_data(
             question = Question.objects.create(
                 urn=q_urn,
                 folder=requirement_node.folder,
-                is_published=True,
                 **{owner_field: owner},
                 **question_fields,
             )
@@ -10254,6 +10253,10 @@ class ProducedObjectLink(AbstractBaseModel):
     A table rather than a JSON list on the source: `JSONField.contains` is unsupported on
     SQLite, so the reverse lookup would have been a scan.
     """
+
+    # Both ends are generic, so there is no FK to scope on. Reachable only through the
+    # objects it links, which carry their own folder.
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     source_content_type = models.ForeignKey(
         "contenttypes.ContentType",

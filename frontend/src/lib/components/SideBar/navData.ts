@@ -104,11 +104,6 @@ export const navData = {
 					name: 'idpGroups',
 					fa_icon: 'fa-solid fa-id-badge',
 					href: '/idp-groups'
-				},
-				{
-					name: 'roleAssignments',
-					fa_icon: 'fa-solid fa-user-tag',
-					href: '/role-assignments'
 				}
 			]
 		},
