@@ -397,6 +397,7 @@
 	let hasLoadedOnce = $state(false);
 	const isFetching = $derived(inFlight > 0 && !hasLoadedOnce);
 	let currentLoad: Promise<any[]> = Promise.resolve([]);
+	let loadFailed = false;
 
 	if (hasRemoteSource) {
 		// The trigger handler calls our reload synchronously before its first
@@ -407,6 +408,7 @@
 		};
 		handler.onChange((state: State) => {
 			inFlight += 1;
+			loadFailed = false;
 			currentLoad = loadTableData({
 				state,
 				URLModel,
@@ -428,12 +430,13 @@
 								},
 				featureFlags: page.data?.featureflags,
 				onError: (error) => {
+					loadFailed = true;
 					console.error(error);
 					toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
 				}
 			}).finally(() => {
 				inFlight -= 1;
-				if (inFlight === 0) hasLoadedOnce = true;
+				if (inFlight === 0 && !loadFailed) hasLoadedOnce = true;
 			});
 			return currentLoad;
 		});
@@ -445,6 +448,13 @@
 				? handler.sortAsc(orderBy.identifier)
 				: handler.sortDesc(orderBy.identifier);
 		}
+		return () => {
+			if (hasRemoteSource)
+				tableRefreshers.update((r) => {
+					delete r[baseEndpoint];
+					return r;
+				});
+		};
 	});
 
 	const actionsURLModel = URLModel;

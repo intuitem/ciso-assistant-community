@@ -100,11 +100,10 @@
 			if (res.ok) {
 				// Refetch the rows of the table the action belongs to (the user may
 				// have navigated away since) and wait for them, so the slot only
-				// frees once the new rows are on screen. loadTableData never
-				// rejects: a failed refetch toasts on its own and yields no rows.
+				// frees once the new rows are on screen.
 				const refresh = $tableRefreshers[`/${model}`];
-				if (refresh) await refresh();
-				else await invalidateAll();
+				if (refresh) await refresh().catch(() => {});
+				else await invalidateAll().catch(() => {});
 			}
 		} catch {
 			toastStore.trigger({ message: failed(), preset: 'error' });
