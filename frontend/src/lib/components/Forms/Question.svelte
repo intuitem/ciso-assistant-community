@@ -316,6 +316,7 @@
 							type="date"
 							class="input {_class}"
 							{disabled}
+							autocomplete="off"
 							bind:value={internalAnswers[urn]}
 							onchange={(e) => onChange(urn, internalAnswers[urn])}
 						/>
@@ -362,6 +363,7 @@
 								type="number"
 								class="input {_class}"
 								{disabled}
+								autocomplete="off"
 								bind:value={internalAnswers[urn]}
 								onchange={() => onChange(urn, internalAnswers[urn])}
 							/>
@@ -371,6 +373,7 @@
 									type="number"
 									class="input {_class}"
 									{disabled}
+									autocomplete="off"
 									bind:value={questionBuffers[urn]}
 									onchange={() => {
 										const val = questionBuffers[urn] === '' ? null : Number(questionBuffers[urn]);
@@ -386,6 +389,7 @@
 								placeholder=""
 								class="input w-full {_class}"
 								{disabled}
+								autocomplete="off"
 								bind:value={internalAnswers[urn]}
 							></textarea>
 						{:else}
@@ -394,6 +398,7 @@
 									placeholder=""
 									class="input w-full {_class}"
 									{disabled}
+									autocomplete="off"
 									bind:value={questionBuffers[urn]}
 									onblur={(e) => commitOnBlur(urn, e)}
 								></textarea>
@@ -455,6 +460,7 @@
 										type="text"
 										class="input text-sm"
 										placeholder={m.objectReferenceSearch()}
+										autocomplete="off"
 										bind:value={refSearch[urn]}
 										onfocus={() => {
 											refOpen = urn;

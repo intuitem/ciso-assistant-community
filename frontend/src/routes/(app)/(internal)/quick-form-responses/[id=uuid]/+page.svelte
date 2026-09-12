@@ -350,6 +350,7 @@
 						type="text"
 						class="input max-w-xs text-sm"
 						placeholder={m.quickFormReopenPrompt()}
+						autocomplete="off"
 						bind:value={reopenObservation}
 					/>
 					<button
