@@ -788,6 +788,42 @@ class GenericFilterSet(df.FilterSet):
 
     id = UUIDInFilter(field_name="id", lookup_expr="in")
 
+    # Range lookups every date column gets, so listing a date in filterset_fields is
+    # enough to make it filterable from the table UI. On a DateTimeField the `date`
+    # transform is what the UI uses: a bare `lte` on a timestamp would drop its last day.
+    DATE_LOOKUPS = ("exact", "gte", "lte", "gt", "lt", "isnull")
+    DATETIME_LOOKUPS = (
+        "date",
+        "date__gte",
+        "date__lte",
+        "date__gt",
+        "date__lt",
+        "gte",
+        "lte",
+        "isnull",
+    )
+    ALWAYS_FILTERABLE_DATES = ("created_at", "updated_at")
+
+    @classmethod
+    def get_fields(cls):
+        fields = super().get_fields()
+        model = cls._meta.model
+        if model is None:
+            return fields
+        for name in [*fields, *cls.ALWAYS_FILTERABLE_DATES]:
+            try:
+                field = model._meta.get_field(name)
+            except FieldDoesNotExist:
+                continue
+            if isinstance(field, models.DateTimeField):
+                extra = cls.DATETIME_LOOKUPS
+            elif isinstance(field, models.DateField):
+                extra = cls.DATE_LOOKUPS
+            else:
+                continue
+            fields[name] = list(dict.fromkeys([*fields.get(name, []), *extra]))
+        return fields
+
     @classmethod
     def filter_for_lookup(cls, field, lookup_type):
         DEFAULTS = dict(cls.FILTER_DEFAULTS)
@@ -1166,14 +1202,15 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
 
     @property
     def filterset_class(self):
-        # If you have defined filterset_fields, build the FilterSet on the fly.
-        if self.filterset_fields:
-            return filterset_factory(
-                model=self.model,
-                filterset=GenericFilterSet,
-                fields=self.filterset_fields,
-            )
-        return None
+        # Built even with no filterset_fields: GenericFilterSet still contributes the
+        # created_at/updated_at ranges and the id lookup.
+        if not self.model:
+            return None
+        return filterset_factory(
+            model=self.model,
+            filterset=GenericFilterSet,
+            fields=self.filterset_fields or [],
+        )
 
     def get_queryset(self) -> models.query.QuerySet:
         if not self.model:
@@ -3698,6 +3735,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "cwes": ["exact"],
         "created_at": ["gte", "lt"],
         "updated_at": ["gte", "lt"],
+        "due_date": ["exact"],
     }
     search_fields = ["name", "description", "ref_id"]
 
@@ -3993,6 +4031,7 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "reviewers": ["exact"],
             "genericcollection": ["exact"],
             "due_date": ["exact", "year", "month"],
+            "eta": ["exact"],
         }
 
     def filter_status(self, queryset, name, value):
@@ -5416,6 +5455,8 @@ class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
             "findings": ["exact"],
             "incidents": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
+            "start_date": ["exact"],
+            "expiry_date": ["exact"],
             "ref_id": ["exact"],
             "processings": ["exact"],
             "genericcollection": ["exact"],
@@ -7957,6 +7998,7 @@ class ValidationFlowFilterSet(GenericFilterSet):
             "evidences",
             "security_exceptions",
             "policies",
+            "validation_deadline",
         ]
 
 
@@ -11089,6 +11131,10 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
         "issues",
         "assigned_to",
         "is_active",
+        "start_date",
+        "eta",
+        "due_date",
+        "closing_date",
     ]
     search_fields = ["name", "description"]
 
@@ -11158,7 +11204,14 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
 class OrganisationIssueViewSet(BaseModelViewSet):
     model = OrganisationIssue
 
-    filterset_fields = ["folder", "category", "origin", "status"]
+    filterset_fields = [
+        "folder",
+        "category",
+        "origin",
+        "status",
+        "start_date",
+        "expiration_date",
+    ]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -11610,6 +11663,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
         "genericcollection",
+        "due_date",
+        "eta",
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
@@ -16244,6 +16299,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "compliance_assessment",
         "filtering_labels",
         "genericcollection",
+        "reported_at",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -16703,6 +16759,7 @@ class FindingFilterSet(GenericFilterSet):
             "due_date": ["exact"],
             "created_at": ["gte", "lt"],
             "updated_at": ["gte", "lt"],
+            "eta": ["exact"],
         }
 
 
@@ -16877,6 +16934,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "filtering_labels": ["exact"],
         "created_at": ["gte", "lt"],
         "updated_at": ["gte", "lt"],
+        "reported_at": ["exact"],
     }
 
     def get_queryset(self):
@@ -17525,6 +17583,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "findings",
             "requirement_assessments",
             "filtering_labels",
+            "task_date",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
