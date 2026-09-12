@@ -5,7 +5,7 @@ import structlog
 from django.db import models, transaction
 from datetime import datetime
 
-from django.db.models import F
+from django.db.models import F, Q
 from django.utils import timezone
 
 from django.conf import settings
@@ -4299,59 +4299,11 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         requirement_node=instance.requirement
                     ).prefetch_related("choices")
                 }
-                for q_urn, answer_value in answers_data.items():
-                    question = questions_by_urn.get(q_urn)
-                    if not question:
-                        logger.warning(
-                            "Question URN not found, skipping answer",
-                            q_urn=q_urn,
-                            available_urns=list(questions_by_urn.keys()),
-                        )
-                        continue
+                from core.utils import apply_answers_dict
 
-                    answer, _created = Answer.objects.update_or_create(
-                        requirement_assessment=instance,
-                        question=question,
-                        defaults={"folder": instance.folder},
-                    )
-
-                    if question.type == Question.Type.UNIQUE_CHOICE:
-                        if answer_value:
-                            choice = question.choices.filter(urn=answer_value).first()
-
-                            answer.selected_choices.set([choice] if choice else [])
-                            if not choice:
-                                logger.warning(
-                                    "Choice not found for answer",
-                                    q_urn=q_urn,
-                                    value=answer_value,
-                                )
-                        else:
-                            answer.selected_choices.clear()
-                        answer.value = None
-                        answer.save(update_fields=["value"])
-                    elif question.type == Question.Type.MULTIPLE_CHOICE:
-                        if isinstance(answer_value, list) and answer_value:
-                            choices = question.choices.filter(urn__in=answer_value)
-                            found_identifiers = set(
-                                choices.values_list("urn", flat=True)
-                            )
-                            missing = set(answer_value) - found_identifiers
-
-                            answer.selected_choices.set(choices)
-                            if missing:
-                                logger.warning(
-                                    "Some choices not found for answer",
-                                    q_urn=q_urn,
-                                    missing_values=list(missing),
-                                )
-                        else:
-                            answer.selected_choices.clear()
-                        answer.value = None
-                        answer.save(update_fields=["value"])
-                    else:
-                        answer.value = answer_value
-                        answer.save(update_fields=["value"])
+                apply_answers_dict(
+                    "requirement_assessment", instance, questions_by_urn, answers_data
+                )
 
                 # Check if any choice has scoring or result logic. For
                 # compute_result, mirror `resolve_compute_result`: empty strings,
@@ -4496,53 +4448,91 @@ class AnswerWriteSerializer(BaseModelSerializer):
         value = attrs.get("value")
         selected_choices_list = attrs.get("selected_choices")
 
-        if not requirement_assessment:
-            raise serializers.ValidationError(
-                {"requirement_assessment": "This field is required."}
-            )
+        response = attrs.get("response") or (
+            self.instance.response if self.instance else None
+        )
 
-        # 1. Parent/child consistency check
-        if (
-            question
-            and question.requirement_node_id != requirement_assessment.requirement_id
-        ):
+        if not requirement_assessment and not response:
             raise serializers.ValidationError(
                 {
-                    "question": f"Question '{question}' does not belong to requirement assessment '{requirement_assessment}'."
+                    "requirement_assessment": "Either requirement_assessment or response is required."
                 }
             )
-
-        # 2. Assessment state/locked checks
-        compliance_assessment = requirement_assessment.compliance_assessment
-        if compliance_assessment.is_locked:
+        if requirement_assessment and response:
             raise serializers.ValidationError(
-                "⚠️ Cannot modify the answer when the audit is locked."
+                "An answer belongs to a requirement assessment or to a quick form response, not both."
             )
 
-        from core.models import ComplianceAssessment
-
-        if compliance_assessment.status == ComplianceAssessment.Status.IN_REVIEW:
-            raise serializers.ValidationError(
-                "⚠️ Cannot modify the answer when the audit is in review."
-            )
-
-        # 3. Assignment-level locking for respondent users
-        request = self.context.get("request")
-        if request and requirement_assessment:
-            from core.utils import get_respondent_scoped_folder_ids
-
-            respondent_folders = get_respondent_scoped_folder_ids(request.user)
-            if (
-                respondent_folders
-                and requirement_assessment.folder_id in respondent_folders
+        if response:
+            # Quick form branch: the question must sit on a page of the
+            # response's form, and the response must still be in progress.
+            if question and (
+                question.page_id is None
+                or question.page.quick_form_id != response.quick_form_id
             ):
-                locked_assignment = requirement_assessment.assignments.filter(
-                    status__in=["submitted", "closed"]
-                ).first()
-                if locked_assignment:
-                    raise serializers.ValidationError(
-                        "Cannot modify: this requirement's assignment has been submitted or closed."
-                    )
+                raise serializers.ValidationError(
+                    {
+                        "question": f"Question '{question}' does not belong to quick form response '{response}'."
+                    }
+                )
+            from core.models import QuickFormResponse
+
+            if response.status != QuickFormResponse.Status.DRAFT:
+                raise serializers.ValidationError(
+                    "Answers can only be modified while the response is in progress."
+                )
+            # Same rule as the `answers` dict on the response itself: folder-level rights
+            # on Answer are not rights over someone else's request.
+            request = self.context.get("request")
+            if request is not None and not response.is_requester(request.user):
+                raise serializers.ValidationError(
+                    "Only the requester can change the answers."
+                )
+
+        if requirement_assessment:
+            # 1. Parent/child consistency check
+            if (
+                question
+                and question.requirement_node_id
+                != requirement_assessment.requirement_id
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "question": f"Question '{question}' does not belong to requirement assessment '{requirement_assessment}'."
+                    }
+                )
+
+            # 2. Assessment state/locked checks
+            compliance_assessment = requirement_assessment.compliance_assessment
+            if compliance_assessment.is_locked:
+                raise serializers.ValidationError(
+                    "⚠️ Cannot modify the answer when the audit is locked."
+                )
+
+            from core.models import ComplianceAssessment
+
+            if compliance_assessment.status == ComplianceAssessment.Status.IN_REVIEW:
+                raise serializers.ValidationError(
+                    "⚠️ Cannot modify the answer when the audit is in review."
+                )
+
+            # 3. Assignment-level locking for respondent users
+            request = self.context.get("request")
+            if request:
+                from core.utils import get_respondent_scoped_folder_ids
+
+                respondent_folders = get_respondent_scoped_folder_ids(request.user)
+                if (
+                    respondent_folders
+                    and requirement_assessment.folder_id in respondent_folders
+                ):
+                    locked_assignment = requirement_assessment.assignments.filter(
+                        status__in=["submitted", "closed"]
+                    ).first()
+                    if locked_assignment:
+                        raise serializers.ValidationError(
+                            "Cannot modify: this requirement's assignment has been submitted or closed."
+                        )
 
         if question:
             q_type = question.type
@@ -4659,6 +4649,33 @@ class AnswerWriteSerializer(BaseModelSerializer):
                     attrs["_m2m_choices"] = selected_choices_list
                     attrs["value"] = None
 
+            elif q_type == Question.Type.OBJECT_REFERENCE:
+                from core.object_references import ReferenceError_, validate_ids
+
+                # The answer's owner, never the question's folder: library questions
+                # live in the root folder, so falling back to it would admit every
+                # object there — the scope check is the whole point of this branch.
+                owner = (
+                    self.instance.owner
+                    if self.instance
+                    else attrs.get("response") or attrs.get("requirement_assessment")
+                )
+                folder = getattr(owner, "folder", None)
+                if folder is None:
+                    raise serializers.ValidationError({"value": "unknownAnswerOwner"})
+                request = self.context.get("request")
+                try:
+                    attrs["value"] = validate_ids(
+                        question,
+                        folder,
+                        value or [],
+                        user=getattr(request, "user", None),
+                    )
+                except ReferenceError_ as e:
+                    # The code, not the exception text: the response is translatable and
+                    # carries nothing the caller did not already send.
+                    logger.warning("Rejected object reference", error=e)
+                    raise serializers.ValidationError({"value": e.code})
             elif q_type == Question.Type.BOOLEAN:
                 if value is not None and not isinstance(value, bool):
                     raise serializers.ValidationError(
@@ -4840,6 +4857,7 @@ class RequirementAssignmentEventSerializer(BaseModelSerializer):
 class AnswerImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     requirement_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    response = HashSlugRelatedField(slug_field="pk", read_only=True)
     question = serializers.SlugRelatedField(slug_field="urn", read_only=True)
     selected_choices_urns = serializers.SerializerMethodField()
 
@@ -4853,9 +4871,49 @@ class AnswerImportExportSerializer(BaseModelSerializer):
             "updated_at",
             "folder",
             "requirement_assessment",
+            "response",
             "question",
             "value",
             "selected_choices_urns",
+        ]
+
+
+class QuickFormImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    class Meta:
+        model = QuickForm
+        fields = [
+            "urn",
+            "ref_id",
+            "name",
+            "library",
+            "outcomes_definition",
+            "scores_definition",
+        ]
+
+
+class QuickFormResponseImportExportSerializer(BaseModelSerializer):
+    quick_form = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    class Meta:
+        model = QuickFormResponse
+        fields = [
+            "name",
+            "description",
+            "folder",
+            "quick_form",
+            "status",
+            "eta",
+            "due_date",
+            "computed_outcome",
+            "score",
+            "started_at",
+            "submitted_at",
+            "observation",
+            "created_at",
+            "updated_at",
         ]
 
 
@@ -5329,7 +5387,34 @@ class SecurityExceptionWriteSerializer(
         read_only_fields = ["approver"]
 
 
-class SecurityExceptionReadSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
+class ProducedFromMixin(serializers.Serializer):
+    """`produced_from` on any read serializer whose model can be created by automation.
+
+    One indexed query against `ProducedObjectLink`, so adding it to another model costs
+    a mixin and nothing else. Answers "where did this record come from?" — the half of
+    provenance that a register needs and a forward-only link cannot give.
+    """
+
+    produced_from = serializers.SerializerMethodField()
+
+    def get_produced_from(self, obj) -> list[dict]:
+        from core.models import ProducedObjectLink
+
+        return [
+            link.describe(link.source_object)
+            for link in ProducedObjectLink.produced_by(obj)
+            if link.source_object is not None
+        ]
+
+
+class SecurityExceptionReadSerializer(
+    ProducedFromMixin, CustomFieldsSerializerMixin, BaseModelSerializer
+):
+    # Two bases declare FLAGGED_FIELDS and the MRO picks a winner silently. Stating it
+    # here means a future change to the base order cannot quietly drop custom-field
+    # flagging on this serializer.
+    FLAGGED_FIELDS = CustomFieldsSerializerMixin.FLAGGED_FIELDS
+
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     owners = FieldsRelatedField(many=True)
@@ -6827,3 +6912,234 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
             "size",
             "requirement_assessments",
         ]
+
+
+# ---------------------------------------------------------------------------
+# Quick forms
+# ---------------------------------------------------------------------------
+
+
+class QuickFormReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    library = FieldsRelatedField(["id", "urn", "name"])
+    pages_count = serializers.SerializerMethodField()
+    responses_count = serializers.SerializerMethodField()
+    is_deletable = serializers.SerializerMethodField()
+
+    def get_pages_count(self, obj):
+        return obj.pages.count()
+
+    def get_responses_count(self, obj):
+        return obj.responses.count()
+
+    def get_is_deletable(self, obj):
+        return obj.is_deletable()
+
+    class Meta:
+        model = QuickForm
+        fields = "__all__"
+
+
+class QuickFormWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = QuickForm
+        exclude = ["created_at", "updated_at"]
+
+
+class QuickFormPageReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    quick_form = FieldsRelatedField()
+    questions = serializers.SerializerMethodField()
+
+    def get_questions(self, obj):
+        return obj.get_questions_translated() or {}
+
+    class Meta:
+        model = QuickFormPage
+        fields = "__all__"
+
+
+class QuickFormPageWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = QuickFormPage
+        exclude = ["created_at", "updated_at"]
+
+
+def _reject_entity_actors(actors):
+    """Third-party respondents are out of scope for quick forms: only user
+    and team actors may be picked."""
+    for actor in actors or []:
+        if actor.entity_id is not None:
+            raise serializers.ValidationError(
+                f"Entity actor '{actor}' cannot be picked on a quick form response."
+            )
+    return actors
+
+
+class QuickFormPublicationWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = QuickFormPublication
+        exclude = ["created_at", "updated_at"]
+
+    def validate_default_reviewers(self, value):
+        return _reject_entity_actors(value)
+
+
+class QuickFormPublicationReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    submission_folder = FieldsRelatedField()
+    quick_form = FieldsRelatedField(["id", "name", "urn"])
+    audience_groups = FieldsRelatedField(many=True)
+    default_reviewers = FieldsRelatedField(many=True)
+    responses_count = serializers.SerializerMethodField()
+
+    def get_responses_count(self, obj) -> int:
+        return obj.responses.count()
+
+    class Meta:
+        model = QuickFormPublication
+        fields = "__all__"
+
+
+class QuickFormResponseReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    quick_form = FieldsRelatedField(["id", "name", "urn"])
+    respondents = FieldsRelatedField(many=True)
+    reviewers = FieldsRelatedField(many=True)
+    assignee = FieldsRelatedField()
+    publication = FieldsRelatedField()
+    cloned_from = FieldsRelatedField(["id", "ref_id"])
+    progress = serializers.SerializerMethodField()
+    is_deletable = serializers.SerializerMethodField()
+    awaiting_conversion = serializers.BooleanField(read_only=True)
+
+    def get_is_deletable(self, obj) -> bool:
+        # Answered per caller: a closed request is administrator-only.
+        request = self.context.get("request")
+        return obj.is_deletable(getattr(request, "user", None))
+
+    def get_progress(self, obj):
+        """Cheap list-view progress: answered vs seeded questions, ignoring
+        page visibility and depends_on. The `content` endpoint carries the
+        exact figures."""
+        total = Question.objects.filter(page__quick_form_id=obj.quick_form_id).count()
+        answered = (
+            obj.answers.filter(
+                ~Answer.empty_value_q() | Q(selected_choices__isnull=False)
+            )
+            .distinct()
+            .count()
+        )
+        return {"answered_count": answered, "total_count": total}
+
+    class Meta:
+        model = QuickFormResponse
+        fields = "__all__"
+
+
+class QuickFormResponseWriteSerializer(BaseModelSerializer):
+    answers = serializers.JSONField(required=False, write_only=True)
+    start_now = serializers.BooleanField(required=False, write_only=True, default=False)
+
+    class Meta:
+        model = QuickFormResponse
+        exclude = ["created_at", "updated_at"]
+        read_only_fields = [
+            "status",
+            "computed_outcome",
+            "score",
+            "started_at",
+            "submitted_at",
+        ]
+
+    def validate_respondents(self, value):
+        return _reject_entity_actors(value)
+
+    def validate_reviewers(self, value):
+        return _reject_entity_actors(value)
+
+    def validate_answers(self, value):
+        if value is not None and not isinstance(value, dict):
+            raise serializers.ValidationError("answers must be an object keyed by URN")
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if (
+            self.instance
+            and attrs.get("answers")
+            and self.instance.status != QuickFormResponse.Status.DRAFT
+        ):
+            raise serializers.ValidationError(
+                {
+                    "answers": "Answers can only be modified while the response is in progress."
+                }
+            )
+        # The content of a request belongs to whoever is asking. A reviewer with change
+        # rights on the domain sends it back with a note; they do not answer it for you.
+        if self.instance and attrs.get("answers") is not None:
+            request = self.context.get("request")
+            if request is not None and not self.instance.is_requester(request.user):
+                raise serializers.ValidationError(
+                    {"answers": "Only the requester can change the answers."}
+                )
+        if self.instance and "quick_form" in attrs:
+            if attrs["quick_form"] != self.instance.quick_form:
+                raise serializers.ValidationError(
+                    {
+                        "quick_form": "The form of an existing response cannot be changed."
+                    }
+                )
+        return attrs
+
+    def _apply_answers(self, instance, answers_data):
+        from core.utils import apply_answers_dict
+
+        questions_by_urn = {
+            q.urn: q
+            for q in Question.objects.filter(
+                page__quick_form_id=instance.quick_form_id
+            ).prefetch_related("choices")
+        }
+        apply_answers_dict(
+            "response",
+            instance,
+            questions_by_urn,
+            answers_data,
+            user=getattr(self.context.get("request"), "user", None),
+        )
+        instance.refresh_title_from_answers()
+
+    def create(self, validated_data):
+        from core.tasks import send_quick_form_started_notification
+
+        answers_data = validated_data.pop("answers", None)
+        start_now = validated_data.pop("start_now", False)
+        request = self.context.get("request")
+        with transaction.atomic():
+            if not validated_data.get("reviewers") and request is not None:
+                # Someone has to hear about the submission: default the
+                # reviewers to the creator when none were picked.
+                creator_actor = Actor.objects.filter(user=request.user).first()
+                if creator_actor is not None:
+                    validated_data["reviewers"] = [creator_actor]
+            instance = super().create(validated_data)
+            instance.seed_answers()
+            if answers_data:
+                self._apply_answers(instance, answers_data)
+            if start_now:
+                instance.started_at = timezone.now()
+                instance.save(update_fields=["started_at"])
+                transaction.on_commit(
+                    lambda pk=instance.pk: send_quick_form_started_notification(pk)
+                )
+        return instance
+
+    def update(self, instance, validated_data):
+        answers_data = validated_data.pop("answers", None)
+        validated_data.pop("start_now", None)
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            if answers_data:
+                self._apply_answers(instance, answers_data)
+        return instance

@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task
 from core.models import (
+    QuickFormResponse,
     AppliedControl,
     ComplianceAssessment,
     Evidence,
@@ -1775,4 +1776,95 @@ def notify_campaign_assignees(campaign_id):
         campaign_id=str(campaign_id),
         audits=notified,
         failed_actors=failed,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Quick form notifications
+# ---------------------------------------------------------------------------
+
+
+def _quick_form_context(response) -> dict:
+    return {
+        "response_name": response.name,
+        "quick_form_name": response.quick_form.name,
+        "due_date": response.due_date.strftime("%Y-%m-%d")
+        if response.due_date
+        else "Not set",
+        "response_id": str(response.id),
+        "observation": response.observation or "",
+    }
+
+
+def _notify_actors(actors, template_name, context, response) -> None:
+    from .email_utils import render_email_template
+
+    recipient_emails = set()
+    for actor in actors:
+        for email in actor.get_emails():
+            if email:
+                recipient_emails.add(email)
+    for email in sorted(recipient_emails):
+        if check_email_configuration(email, [response]):
+            rendered = render_email_template(
+                template_name, context, recipient_email=email
+            )
+            if rendered:
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
+
+
+def _load_quick_form_response(response_id):
+    try:
+        return QuickFormResponse.objects.select_related("quick_form").get(
+            id=response_id
+        )
+    except QuickFormResponse.DoesNotExist:
+        logger.error(f"QuickFormResponse with id {response_id} not found")
+        return None
+
+
+@task()
+def send_quick_form_started_notification(response_id):
+    """Respondents are told a quick form response is ready for their input."""
+    response = _load_quick_form_response(response_id)
+    if response is None:
+        return
+    _notify_actors(
+        response.respondents.all(),
+        "quick_form_started",
+        _quick_form_context(response),
+        response,
+    )
+
+
+@task()
+def send_quick_form_submitted_notification(response_id):
+    """Reviewers are told a quick form response was submitted."""
+    response = _load_quick_form_response(response_id)
+    if response is None:
+        return
+    _notify_actors(
+        response.reviewers.all(),
+        "quick_form_submitted",
+        _quick_form_context(response),
+        response,
+    )
+
+
+@task()
+def send_quick_form_reopened_notification(response_id):
+    """Respondents are told a submitted response was sent back to them."""
+    response = _load_quick_form_response(response_id)
+    if response is None:
+        return
+    _notify_actors(
+        response.respondents.all(),
+        "quick_form_reopened",
+        _quick_form_context(response),
+        response,
     )

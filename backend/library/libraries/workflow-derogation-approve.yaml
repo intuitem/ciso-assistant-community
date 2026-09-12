@@ -1,0 +1,96 @@
+urn: urn:intuitem:risk:library:workflow-derogation-approve
+locale: en
+ref_id: workflow-derogation-approve
+name: Derogation — approve and attach the compensating control
+description: >
+  Worked example of a supervised action: a sequence a reviewer runs on a request they
+  have read, rather than something that fires on its own. It is offered on a request
+  only when its answers said no compensating control is in place — the outcome
+  suggests, the reviewer commits, the workflow executes.
+copyright: © intuitem
+version: 2
+publication_date: 2026-09-09
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-derogation-approve:workflow:derogation-approve
+    schema_version: 1
+    ref_id: derogation-approve
+    name: Derogation — attach a compensating control
+    description: >
+      Run this from a derogation request once you have decided it can proceed with a
+      compensating control. Creates the control, notes it on the request, and tells the
+      requester. It does not accept the request — press Accept when you mean it.
+    graph:
+      variables:
+      # Seeded from the request the reviewer ran this on. Declare them to receive them.
+      - key: request_id
+        type: string
+      - key: request_ref
+        type: string
+      - key: outcomes
+        type: string
+      # No default: an unaddressable request must fail the notification node, not
+      # quietly mail a placeholder domain. The durable work is committed by then.
+      - key: requester_emails
+        type: string
+      nodes:
+      - ref: on_request
+        type: trigger
+        label: Attach a compensating control
+        trigger_config:
+          type: manual
+          applies_to:
+            model: quick_form_response
+            outcome: no_compensating_control
+
+      - ref: create_control
+        type: action
+        label: Create the compensating control
+        action_config:
+          type: create_object
+          model: applied_control
+          fields:
+            name: 'Compensating control for {{request_ref}}'
+            ref_id: '{{request_ref}}-CC'
+            description: >-
+              Raised from derogation request {{request_ref}} during review. The request
+              recorded no compensating control ({{outcomes}}); this is the control the
+              reviewer required before letting it proceed.
+
+      - ref: note_it
+        type: action
+        label: Note it on the request
+        action_config:
+          type: update_object
+          model: quick_form_response
+          id: '{{request_id}}'
+          fields:
+            observation: >-
+              Reviewed: a compensating control was raised for this derogation. The
+              request still needs an explicit accept or reject.
+
+      - ref: tell_requester
+        type: action
+        label: Tell the requester
+        action_config:
+          type: send_email
+          recipients: '{{requester_emails}}'
+          subject: 'Your derogation {{request_ref}} needs a compensating control'
+          body: >-
+            A compensating control has been raised for {{request_ref}}. It will be
+            reviewed alongside your request.
+
+      - ref: done
+        type: end
+      edges:
+      # Durable first, notification last — an undeliverable email must not cost the work.
+      - source: on_request
+        target: create_control
+      - source: create_control
+        target: note_it
+      - source: note_it
+        target: tell_requester
+      - source: tell_requester
+        target: done

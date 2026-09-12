@@ -9,8 +9,12 @@
 	let { data }: Props = $props();
 
 	// NOTE: duplicates `customNameDescription` in crud.ts, which this route ignores.
-	const customNameDescription = ['operational-scenarios', 'terminologies', 'asset-class'].includes(
-		data.model.urlModel
+	// `$derived`, not `const`: this route is shared by every model, so a client-side
+	// navigation between two edit pages swaps `data` without remounting.
+	const customNameDescription = $derived(
+		['operational-scenarios', 'terminologies', 'asset-class', 'quick-form-publications'].includes(
+			data.model.urlModel
+		)
 	);
 </script>
 

@@ -12,21 +12,38 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	const res = await fetch(`${BASE_API_URL}/portals/${params.id}/`);
 	if (!res.ok) error(res.status === 404 ? 404 : 500, 'Portal not found');
 	const portal = await res.json();
-	const [publicDocuments, snapshots, rawFrameworks, rawFolders] = await Promise.all([
-		fetchAllPages(fetch, `${BASE_API_URL}/public-documents/`),
-		fetchAllPages(fetch, `${BASE_API_URL}/framework-snapshots/`),
-		fetchAllPages(fetch, `${BASE_API_URL}/frameworks/`),
-		fetchAllPages(fetch, `${BASE_API_URL}/folders/?content_type=DO`)
-	]).catch((e) => {
-		error(e?.status ?? 500, 'Failed to load portal data');
-	});
+	const [publicDocuments, snapshots, rawFrameworks, rawQuickForms, rawActors, rawPublications] =
+		await Promise.all([
+			fetchAllPages(fetch, `${BASE_API_URL}/public-documents/`),
+			fetchAllPages(fetch, `${BASE_API_URL}/framework-snapshots/`),
+			fetchAllPages(fetch, `${BASE_API_URL}/frameworks/`),
+			locals.featureflags?.quick_forms
+				? fetchAllPages(fetch, `${BASE_API_URL}/quick-forms/`)
+				: Promise.resolve([]),
+			locals.featureflags?.quick_forms
+				? fetchAllPages(fetch, `${BASE_API_URL}/actors/?is_third_party=false`)
+				: Promise.resolve([]),
+			locals.featureflags?.quick_forms
+				? fetchAllPages(fetch, `${BASE_API_URL}/quick-form-publications/`)
+				: Promise.resolve([])
+		]).catch((e) => {
+			error(e?.status ?? 500, 'Failed to load portal data');
+		});
 	const frameworks = rawFrameworks.map((f: any) => ({
 		id: f.id,
 		name: f.name,
 		implementation_groups_definition: f.implementation_groups_definition ?? [],
 		effective_field_visibility: f.effective_field_visibility ?? null
 	}));
-	const folders = rawFolders.map((f: any) => ({ id: f.id, name: f.name }));
+	const quickForms = rawQuickForms.map((f: any) => ({ id: f.id, name: f.name }));
+	// `type` distinguishes a person from a team or an entity — a reviewer list that
+	// does not say which is which is a list of ambiguous names.
+	const actors = rawActors.map((a: any) => ({
+		id: a.id,
+		name: a.str ?? a.name,
+		type: a.type ?? ''
+	}));
+	const publications = rawPublications.map((p: any) => ({ id: p.id, name: p.name }));
 	const settingsForm = await superValidate(
 		{
 			enabled: portal.enabled,
@@ -39,7 +56,17 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 		},
 		zod(PortalSettingsSchema)
 	);
-	return { portal, settingsForm, publicDocuments, snapshots, frameworks, folders };
+	return {
+		portal,
+		settingsForm,
+		publicDocuments,
+		snapshots,
+		frameworks,
+		quickForms,
+		actors,
+		publications,
+		quickFormsEnabled: !!locals.featureflags?.quick_forms
+	};
 };
 
 const patchPortal = (fetch: typeof globalThis.fetch, id: string, body: unknown) =>

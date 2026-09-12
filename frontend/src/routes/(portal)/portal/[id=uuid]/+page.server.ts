@@ -49,6 +49,18 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	return { portal, createForms };
 };
 
+// The tile launch banner prints this verbatim, so hand it the backend's message
+// rather than the JSON envelope around it.
+const readError = async (res: Response) => {
+	const body = await res.text();
+	try {
+		const parsed = JSON.parse(body);
+		return parsed?.detail ?? parsed?.error ?? body;
+	} catch {
+		return body;
+	}
+};
+
 export const actions: Actions = {
 	create: async (event) => {
 		const urlModel = event.url.searchParams.get('model');
@@ -56,6 +68,23 @@ export const actions: Actions = {
 			return fail(400, { error: 'invalid model' });
 		}
 		return defaultWriteFormAction({ event, urlModel, action: 'create', doRedirect: false });
+	},
+	launchQuickForm: async ({ params, request, fetch }) => {
+		const data = await request.formData();
+		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/launch-quick-form/`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				item: data.get('item'),
+				folder: data.get('folder') || undefined,
+				name: data.get('name') || undefined
+			})
+		});
+		if (!res.ok) return fail(res.status, { error: await readError(res) });
+		// resumed/ref_id drive the "we handed you your draft back" banner; dropping them
+		// here made that banner unreachable from a tile.
+		const { redirect, resumed, ref_id } = await res.json();
+		return { redirect, resumed, ref_id };
 	},
 	launchAssessment: async ({ params, request, fetch }) => {
 		const data = await request.formData();
@@ -67,7 +96,7 @@ export const actions: Actions = {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ item, folder, name })
 		});
-		if (!res.ok) return fail(res.status, { error: await res.text() });
+		if (!res.ok) return fail(res.status, { error: await readError(res) });
 		const { redirect } = await res.json();
 		return { redirect };
 	}
