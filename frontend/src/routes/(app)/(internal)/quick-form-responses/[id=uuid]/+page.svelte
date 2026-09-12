@@ -295,7 +295,9 @@
 					<i class="fa-solid fa-copy mr-1"></i>{m.quickFormClone()}
 				</button>
 			</div>
-		{:else if canEdit && canReview}
+			<!-- Deciding is `approve`, not `change`: the Approver role holds one and not the
+		     other, and requiring both left it with no action bar at all. -->
+		{:else if canReview}
 			{#if suggestedActions.length}
 				<!-- Supervised automation: the outcomes suggest, the reviewer commits, the
 				     workflow executes. Offered only when the answers make them relevant. -->

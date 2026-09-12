@@ -20489,7 +20489,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
     permission_overrides = {
         "awaiting_conversion": "view_quickformresponse",
         "content": "view_quickformresponse",
-        "set_status": "change_quickformresponse",
+        "set_status": "view_quickformresponse",
         "start": "change_quickformresponse",
         "status": "view_quickformresponse",
     }

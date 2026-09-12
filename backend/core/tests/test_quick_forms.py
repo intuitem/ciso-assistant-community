@@ -1064,3 +1064,127 @@ def test_supervised_run_seeds_the_real_requester_email(app_config):
     )
     orphan_vars = SUPERVISED_TARGETS["quick_form_response"]["variables"](orphan)
     assert orphan_vars["requester_emails"] == ""
+
+
+@pytest.mark.django_db
+def test_approver_role_can_decide_without_edit_rights(app_config):
+    """BI-RL-APP is granted `approve` and deliberately not `change`. The DRF layer used
+    to demand `change` on set-status, so the role could read a request and nothing else."""
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-approver", parent_folder=Folder.get_root_folder()
+    )
+    requester, _ = _role_client("qf-appr-asker@test.local", "BI-RL-ANA", folder)
+    _approver, approver = _role_client("qf-appr@test.local", "BI-RL-APP", folder)
+
+    response = QuickFormResponse.objects.create(
+        name="decide-me",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.SUBMITTED,
+        submitted_by=requester,
+    )
+    url = f"/api/quick-form-responses/{response.id}/"
+
+    assert approver.get(f"{url}content/").status_code == 200
+    res = approver.post(
+        f"{url}set-status/",
+        {"status": "closed", "resolution": "accepted"},
+        format="json",
+    )
+    assert res.status_code == 200, res.json()
+    response.refresh_from_db()
+    assert response.status == QuickFormResponse.Status.CLOSED
+    assert response.resolution == QuickFormResponse.Resolution.ACCEPTED
+
+    # Deciding is not editing: the role still cannot rewrite the request itself.
+    assert approver.patch(url, {"name": "renamed"}, format="json").status_code == 403
+
+
+@pytest.mark.django_db
+def test_viewing_a_request_is_not_deciding_it(app_config):
+    """set-status now only requires `view` at the DRF layer, so the per-transition
+    actor checks inside the action are the whole authorisation. They must hold."""
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-viewer", parent_folder=Folder.get_root_folder()
+    )
+    requester, _ = _role_client("qf-view-asker@test.local", "BI-RL-ANA", folder)
+    # Reader holds every quick-form `view` permission and no `approve`.
+    _reader, reader = _role_client("qf-reader@test.local", "BI-RL-AUD", folder)
+
+    response = QuickFormResponse.objects.create(
+        name="not-yours-to-close",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.SUBMITTED,
+        submitted_by=requester,
+    )
+    url = f"/api/quick-form-responses/{response.id}/set-status/"
+
+    assert (
+        reader.get(f"/api/quick-form-responses/{response.id}/content/").status_code
+        == 200
+    )
+    res = reader.post(
+        url, {"status": "closed", "resolution": "accepted"}, format="json"
+    )
+    assert res.status_code == 403, res.json()
+    assert res.json()["error"] == "approvalPermissionRequired"
+
+    res = reader.post(url, {"status": "in_review"}, format="json")
+    assert res.status_code == 403, res.json()
+    response.refresh_from_db()
+    assert response.status == QuickFormResponse.Status.SUBMITTED
+
+
+@pytest.mark.django_db
+def test_baseline_role_sees_the_form_but_not_the_requests(app_config):
+    """Ambient on the root folder: the catalog is fair game, people's requests are not."""
+    from iam.models import Role
+
+    _load(LIBRARY_V1)
+    baseline = set(
+        Role.objects.get(name="BI-RL-BSL").permissions.values_list(
+            "codename", flat=True
+        )
+    )
+    assert {"view_quickform", "view_quickformpage"} <= baseline
+    assert not (
+        {"view_quickformresponse", "view_answer", "view_quickformpublication"}
+        & baseline
+    )
+
+
+@pytest.mark.django_db
+def test_a_low_privilege_requester_can_still_submit(app_config):
+    """`set_status` serves both sides. Gating it on `approve` would fix the reviewer and
+    break the requester: filing your own request is not an approval."""
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-lowpriv", parent_folder=Folder.get_root_folder()
+    )
+    # Reader holds view on responses and neither `change` nor `approve`.
+    reader, reader_client = _role_client("qf-lowpriv@test.local", "BI-RL-AUD", folder)
+    actor = Actor.objects.filter(user=reader, entity__isnull=True).first()
+
+    response = QuickFormResponse.objects.create(
+        name="mine",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.DRAFT,
+    )
+    response.respondents.add(actor)
+
+    res = reader_client.post(
+        f"/api/quick-form-responses/{response.id}/set-status/",
+        {"status": "submitted"},
+        format="json",
+    )
+    # Reaching the completion check proves the permission layer let the requester in;
+    # under an `approve` gate this is a flat 403.
+    assert res.status_code != 403, "the requester was refused by the permission layer"
+    assert res.json()["error"] == "responseIncomplete", res.json()

@@ -187,6 +187,8 @@ BASELINE_READER_PERMISSIONS_LIST = [
     "view_framework",
     "view_question",
     "view_questionchoice",
+    "view_quickform",
+    "view_quickformpage",
     "view_requirementnode",
     "view_referencecontrol",
     "view_elementaryaction",

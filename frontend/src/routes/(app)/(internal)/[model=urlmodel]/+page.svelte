@@ -275,6 +275,22 @@
 </script>
 
 {#if data?.table}
+	{#if URLModel === 'quick-forms'}
+		<!-- Create is suppressed here (LIBRARY_MANAGED_URL_MODELS): forms come from
+		     libraries, so point at the one place that can author them. -->
+		<div
+			class="mb-2 flex flex-wrap items-center gap-2 rounded-md bg-surface-50-950 px-3 py-2 text-sm text-surface-600-400 shadow-xs"
+		>
+			<i class="fa-solid fa-circle-info text-primary-500"></i>
+			<span>{m.quickFormsAuthoredInBuilder()}</span>
+			<a
+				href="/experimental/library-builder"
+				class="btn btn-sm preset-outlined-primary-500 ml-auto"
+			>
+				<i class="fa-solid fa-shapes mr-1"></i>{m.lbListLibraryBuilder()}
+			</a>
+		</div>
+	{/if}
 	{#if URLModel === 'quick-form-responses'}
 		<!-- Requests are owned by whoever filed them. One created here has no requester,
 		     so nobody can submit it — say where they actually come from. -->
