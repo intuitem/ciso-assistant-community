@@ -409,3 +409,124 @@ class TestDirectivesThroughBuildMessages:
 
         assert "YOUR RESPONSE MUST NOT" in messages[0]["content"]
         assert "The system found 3" in messages[-1]["content"]
+
+
+class TestOrcaRouterSettings:
+    def test_chat_settings_include_orcarouter_defaults(self):
+        from chat.providers import get_chat_settings
+
+        settings = get_chat_settings()
+        assert settings["orcarouter_api_base"] == "https://api.orcarouter.ai/v1"
+        assert settings["orcarouter_model"] == "orcarouter/auto"
+        assert settings["orcarouter_api_key"] == ""
+
+
+class TestOrcaRouterLLM:
+    def test_delegates_to_openai_compatible_client(self):
+        from chat.providers import OpenAICompatibleLLM, OrcaRouterLLM
+
+        llm = OrcaRouterLLM()
+        assert isinstance(llm._client, OpenAICompatibleLLM)
+        assert llm._client.model == "orcarouter/auto"
+        assert llm._client.base_url == "https://api.orcarouter.ai/v1"
+
+    def test_accepts_custom_model_and_key(self):
+        from chat.providers import OrcaRouterLLM
+
+        llm = OrcaRouterLLM(model="anthropic/claude-opus-4.8", api_key="sk-orca-test")
+        assert llm._client.model == "anthropic/claude-opus-4.8"
+        assert llm._client._api_key == "sk-orca-test"
+
+
+class TestGetLlmOrcaRouter:
+    def test_orcarouter_branch_returns_stub_on_failed_health_check(self, monkeypatch):
+        from chat.providers import StubLLM, clear_provider_cache, get_llm
+
+        clear_provider_cache()
+
+        class FakeResp:
+            status_code = 503
+
+        monkeypatch.setattr("httpx.get", lambda *a, **k: FakeResp())
+        monkeypatch.setattr(
+            "chat.providers.get_chat_settings",
+            lambda: {
+                "llm_provider": "orcarouter",
+                "orcarouter_api_base": "https://api.orcarouter.ai/v1",
+                "orcarouter_model": "orcarouter/auto",
+                "orcarouter_api_key": "",
+                "chat_system_prompt": "",
+                "chat_temperature_enabled": True,
+                "chat_temperature": 0,
+            },
+        )
+
+        llm = get_llm()
+        assert isinstance(llm, StubLLM)
+        clear_provider_cache()
+
+    def test_orcarouter_branch_returns_llm_on_success(self, monkeypatch):
+        from chat.providers import OrcaRouterLLM, clear_provider_cache, get_llm
+
+        clear_provider_cache()
+
+        class FakeResp:
+            status_code = 200
+
+        monkeypatch.setattr("httpx.get", lambda *a, **k: FakeResp())
+        monkeypatch.setattr(
+            "chat.providers.get_chat_settings",
+            lambda: {
+                "llm_provider": "orcarouter",
+                "orcarouter_api_base": "https://api.orcarouter.ai/v1",
+                "orcarouter_model": "orcarouter/auto",
+                "orcarouter_api_key": "sk-orca-test",
+                "chat_system_prompt": "",
+                "chat_temperature_enabled": True,
+                "chat_temperature": 0,
+            },
+        )
+
+        llm = get_llm()
+        assert isinstance(llm, OrcaRouterLLM)
+        clear_provider_cache()
+
+    def test_orcarouter_http_base_url_is_refused_without_any_request(
+        self, monkeypatch
+    ):
+        """The health check carries the API key, so an http endpoint must not
+        be contacted at all — not even once."""
+        from chat.providers import StubLLM, clear_provider_cache, get_llm
+
+        clear_provider_cache()
+
+        requests: list[tuple[str, dict]] = []
+
+        class FakeResp:
+            status_code = 200
+
+        def record(url, **kwargs):
+            # Recorded rather than raised: get_llm() swallows every exception
+            # from this call, so a raising stub would be indistinguishable
+            # from a call that never happened.
+            requests.append((url, kwargs.get("headers") or {}))
+            return FakeResp()
+
+        monkeypatch.setattr("httpx.get", record)
+        monkeypatch.setattr(
+            "chat.providers.get_chat_settings",
+            lambda: {
+                "llm_provider": "orcarouter",
+                "orcarouter_api_base": "http://api.orcarouter.ai/v1",
+                "orcarouter_model": "orcarouter/auto",
+                "orcarouter_api_key": "sk-orca-test",
+                "chat_system_prompt": "",
+                "chat_temperature_enabled": True,
+                "chat_temperature": 0,
+            },
+        )
+
+        llm = get_llm()
+        assert isinstance(llm, StubLLM)
+        assert requests == [], f"insecure URL was contacted with {requests}"
+        clear_provider_cache()

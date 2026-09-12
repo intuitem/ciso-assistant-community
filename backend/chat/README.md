@@ -24,7 +24,7 @@ Without `ENABLE_CHAT=true`, the chat app is installed (for migrations) but compl
 
 | Component | Purpose | Required? |
 |-----------|---------|-----------|
-| **LLM server** | Local LLM inference — [Ollama](https://ollama.com), [LM Studio](https://lmstudio.ai), [MLX](https://github.com/ml-explore/mlx-examples/tree/main/llms/mlx_lm), or [llama.cpp](https://github.com/ggml-org/llama.cpp) | Yes (one of them) |
+| **LLM server** | Local LLM inference — [Ollama](https://ollama.com), [LM Studio](https://lmstudio.ai), [MLX](https://github.com/ml-explore/mlx-examples/tree/main/llms/mlx_lm), or [llama.cpp](https://github.com/ggml-org/llama.cpp). Alternatively the [OrcaRouter](https://www.orcarouter.ai) gateway for hosted models | Yes (one of them) |
 | **Qdrant** | Vector database for RAG | Yes |
 | **Huey worker** | Background indexing tasks | Recommended |
 
@@ -75,6 +75,17 @@ llama-server -m ./models/your-model.gguf -c 8192 -ngl 999 --port 8081
 ```
 
 Set `llm_provider` to `openai_compatible` and `openai_api_base` to `http://localhost:8081/v1`.
+
+### OrcaRouter (hosted gateway)
+
+For hosted models without running local inference, point the chat engine at the [OrcaRouter](https://www.orcarouter.ai) gateway. It exposes the same OpenAI-compatible `/chat/completions` surface the platform already talks to, plus adaptive routing, automatic failover, and guardrails on the same endpoint.
+
+1. Create an API key in the OrcaRouter console (keys start with `sk-orca-`)
+2. In **Settings > General**, set:
+   - `llm_provider` to `orcarouter`
+   - `orcarouter_api_base` to `https://api.orcarouter.ai/v1` (default)
+   - `orcarouter_model` to a `vendor/model` identifier (e.g. `anthropic/claude-opus-4.8`) or `orcarouter/auto` to let the gateway pick a live model
+   - `orcarouter_api_key` to your `sk-orca-` key
 
 ### Qdrant
 
@@ -133,7 +144,7 @@ In **Settings > General**, set:
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `llm_provider` | `ollama` | `ollama` or `openai_compatible` |
+| `llm_provider` | `ollama` | `ollama`, `openai_compatible`, or `orcarouter` |
 | `ollama_base_url` | `http://localhost:11434` | Ollama server URL |
 | `ollama_model` | `mistral` | Model name for chat generation |
 | `ollama_embed_model` | `snowflake-arctic-embed2` | Model for embeddings (if using Ollama embeddings) |
@@ -141,6 +152,9 @@ In **Settings > General**, set:
 | `openai_api_base` | `http://localhost:1234/v1` | For LM Studio / vLLM / llama.cpp |
 | `openai_model` | _(empty)_ | Model identifier for OpenAI-compatible servers |
 | `openai_api_key` | _(empty)_ | API key for authenticated endpoints (optional) |
+| `orcarouter_api_base` | `https://api.orcarouter.ai/v1` | For the OrcaRouter gateway |
+| `orcarouter_model` | `orcarouter/auto` | Model identifier for OrcaRouter (`vendor/model` or `orcarouter/auto`) |
+| `orcarouter_api_key` | _(empty)_ | OrcaRouter API key (starts with `sk-orca-`) |
 | `chat_system_prompt` | _(empty)_ | Custom system prompt (overrides the built-in GRC prompt) |
 
 ---
