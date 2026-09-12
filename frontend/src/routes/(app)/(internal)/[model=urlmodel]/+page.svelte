@@ -12,7 +12,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { buildCustomFieldFilters, listViewFields } from '$lib/utils/table';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { driverInstance } from '$lib/utils/stores';
+	import { driverInstance, tableRefreshers } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import type { ActionData, PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -53,6 +53,75 @@
 	$effect(() => {
 		currentFilterSearch = data.urlSearch;
 	});
+
+	// These actions run synchronously in the request (catalog pulls, bulk
+	// updates), so the page holds a single in-flight slot: a second click would
+	// start a second import. Every button is disabled while the slot is taken;
+	// the loading bar and placeholder rows only show on the model the action
+	// belongs to, so navigating to another list does not carry them along.
+	const remoteActions = {
+		kev: {
+			model: 'security-advisories',
+			endpoint: '/security-advisories/sync-kev',
+			failed: m.syncKevFailed
+		},
+		euvd: {
+			model: 'security-advisories',
+			endpoint: '/security-advisories/sync-euvd',
+			failed: m.syncEuvdFailed
+		},
+		cwe: { model: 'cwes', endpoint: '/cwes/sync-catalog', failed: m.syncCweCatalogFailed },
+		'refresh-due-dates': {
+			model: 'vulnerabilities',
+			endpoint: '/vulnerabilities/refresh-due-dates',
+			failed: m.refreshDueDatesFailed
+		}
+	} as const;
+	type RemoteAction = keyof typeof remoteActions;
+	let runningAction = $state<RemoteAction | null>(null);
+	const isBusy = $derived(runningAction !== null);
+	const isSyncing = $derived(
+		runningAction !== null && remoteActions[runningAction].model === URLModel
+	);
+
+	async function runRemoteAction(action: RemoteAction) {
+		if (runningAction) return;
+		runningAction = action;
+		const { model, endpoint, failed } = remoteActions[action];
+		try {
+			const res = await fetch(endpoint, { method: 'POST' });
+			// A gateway error or a crashed passthrough does not carry the
+			// backend's detail/error shape, so fall back to a real message.
+			const result = await res.json().catch(() => ({}));
+			toastStore.trigger({
+				message: result.detail || result.error || (res.ok ? m.done() : failed()),
+				preset: res.ok ? 'success' : 'error'
+			});
+			if (res.ok) {
+				// Refetch the rows of the table the action belongs to (the user may
+				// have navigated away since) and wait for them, so the slot only
+				// frees once the new rows are on screen.
+				const refresh = $tableRefreshers[`/${model}`];
+				if (refresh) await refresh().catch(() => {});
+				else await invalidateAll().catch(() => {});
+			}
+		} catch {
+			toastStore.trigger({ message: failed(), preset: 'error' });
+		} finally {
+			runningAction = null;
+		}
+	}
+
+	function confirmRemoteAction(action: RemoteAction, title: string, body: string) {
+		modalStore.trigger({
+			type: 'confirm',
+			title,
+			body,
+			response: (confirmed: boolean) => {
+				if (confirmed) runRemoteAction(action);
+			}
+		});
+	}
 
 	function handleFilterChange(filters: Record<string, any>) {
 		const params = new URLSearchParams();
@@ -275,6 +344,16 @@
 </script>
 
 {#if data?.table}
+	{#if isSyncing}
+		<div
+			class="h-1 w-full overflow-hidden bg-surface-200-800"
+			role="status"
+			aria-label={m.loading()}
+			data-testid="sync-loading-bar"
+		>
+			<div class="h-full w-full animate-pulse bg-primary-500"></div>
+		</div>
+	{/if}
 	<div class="shadow-lg">
 		<!-- `urlSearch` comes from the load, so it only changes on a real navigation:
 		     the table's own in-place rewrites of the query string never remount it. -->
@@ -286,6 +365,7 @@
 				{URLModel}
 				disableEdit={['user-groups', 'validation-flows', 'commitments'].includes(URLModel)}
 				disableDelete={['user-groups', 'commitments'].includes(URLModel)}
+				loading={isSyncing}
 				onFilterChange={handleFilterChange}
 			>
 				{#snippet addButton()}
@@ -333,37 +413,24 @@
 								{/if}
 								{#if URLModel === 'vulnerabilities'}
 									<button
-										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative disabled:opacity-50 disabled:cursor-not-allowed"
 										title={m.refreshDueDates()}
 										aria-label={m.refreshDueDates()}
 										data-testid="refresh-due-dates-button"
-										onclick={() => {
-											modalStore.trigger({
-												type: 'confirm',
-												title: m.refreshDueDates(),
-												body: m.refreshDueDatesConfirm(),
-												response: async (confirmed) => {
-													if (!confirmed) return;
-													try {
-														const res = await fetch('/vulnerabilities/refresh-due-dates', {
-															method: 'POST'
-														});
-														const result = await res.json();
-														toastStore.trigger({
-															message: result.detail || result.error,
-															preset: res.ok ? 'success' : 'error'
-														});
-														if (res.ok) invalidateAll();
-													} catch {
-														toastStore.trigger({
-															message: m.refreshDueDatesFailed(),
-															preset: 'error'
-														});
-													}
-												}
-											});
-										}}><i class="fa-solid fa-clock-rotate-left"></i></button
+										disabled={isBusy}
+										onclick={() =>
+											confirmRemoteAction(
+												'refresh-due-dates',
+												m.refreshDueDates(),
+												m.refreshDueDatesConfirm()
+											)}
 									>
+										{#if runningAction === 'refresh-due-dates'}
+											<i class="fa-solid fa-spinner animate-spin"></i>
+										{:else}
+											<i class="fa-solid fa-clock-rotate-left"></i>
+										{/if}
+									</button>
 								{/if}
 								{#if URLModel === 'applied-controls'}
 									<a
@@ -393,69 +460,33 @@
 								{/if}
 								{#if URLModel === 'security-advisories'}
 									<button
-										class="inline-block p-3 w-12 focus:relative bg-blue-100 hover:bg-blue-200 dark:bg-blue-500/20 dark:hover:bg-blue-500/30"
+										class="inline-block p-3 w-12 focus:relative bg-blue-100 hover:bg-blue-200 dark:bg-blue-500/20 dark:hover:bg-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
 										title={m.syncKev()}
 										aria-label={m.syncKev()}
 										data-testid="sync-kev-button"
-										onclick={() => {
-											modalStore.trigger({
-												type: 'confirm',
-												title: m.pullCatalog(),
-												body: m.syncKev(),
-												response: async (confirmed) => {
-													if (!confirmed) return;
-													try {
-														const res = await fetch('/security-advisories/sync-kev', {
-															method: 'POST'
-														});
-														const result = await res.json();
-														toastStore.trigger({
-															message: result.detail || result.error,
-															preset: res.ok ? 'success' : 'error'
-														});
-														if (res.ok) invalidateAll();
-													} catch {
-														toastStore.trigger({
-															message: m.syncKevFailed(),
-															preset: 'error'
-														});
-													}
-												}
-											});
-										}}>🇺🇸</button
+										disabled={isBusy}
+										onclick={() => confirmRemoteAction('kev', m.pullCatalog(), m.syncKev())}
 									>
+										{#if runningAction === 'kev'}
+											<i class="fa-solid fa-spinner animate-spin"></i>
+										{:else}
+											🇺🇸
+										{/if}
+									</button>
 									<button
-										class="inline-block p-3 w-12 focus:relative bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-500/20 dark:hover:bg-yellow-500/30"
+										class="inline-block p-3 w-12 focus:relative bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-500/20 dark:hover:bg-yellow-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
 										title={m.syncEuvd()}
 										aria-label={m.syncEuvd()}
 										data-testid="sync-euvd-button"
-										onclick={() => {
-											modalStore.trigger({
-												type: 'confirm',
-												title: m.pullCatalog(),
-												body: m.syncEuvd(),
-												response: async (confirmed) => {
-													if (!confirmed) return;
-													try {
-														const res = await fetch('/security-advisories/sync-euvd', {
-															method: 'POST'
-														});
-														const result = await res.json();
-														toastStore.trigger({
-															message: result.detail || result.error,
-															preset: res.ok ? 'success' : 'error'
-														});
-														if (res.ok) invalidateAll();
-													} catch {
-														toastStore.trigger({
-															message: m.syncEuvdFailed(),
-															preset: 'error'
-														});
-													}
-												}
-											});
-										}}>🇪🇺</button
+										disabled={isBusy}
+										onclick={() => confirmRemoteAction('euvd', m.pullCatalog(), m.syncEuvd())}
 									>
+										{#if runningAction === 'euvd'}
+											<i class="fa-solid fa-spinner animate-spin"></i>
+										{:else}
+											🇪🇺
+										{/if}
+									</button>
 								{/if}
 								{#if URLModel === 'document-templates'}
 									<a
@@ -468,27 +499,19 @@
 								{/if}
 								{#if URLModel === 'cwes'}
 									<button
-										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative disabled:opacity-50 disabled:cursor-not-allowed"
 										title={m.syncCweCatalog()}
 										aria-label={m.syncCweCatalog()}
 										data-testid="sync-cwe-button"
-										onclick={async () => {
-											try {
-												const res = await fetch('/cwes/sync-catalog', { method: 'POST' });
-												const result = await res.json();
-												toastStore.trigger({
-													message: result.detail || result.error,
-													preset: res.ok ? 'success' : 'error'
-												});
-												if (res.ok) invalidateAll();
-											} catch {
-												toastStore.trigger({
-													message: m.syncCweCatalogFailed(),
-													preset: 'error'
-												});
-											}
-										}}><i class="fa-solid fa-satellite-dish"></i></button
+										disabled={isBusy}
+										onclick={() => runRemoteAction('cwe')}
 									>
+										{#if runningAction === 'cwe'}
+											<i class="fa-solid fa-spinner animate-spin"></i>
+										{:else}
+											<i class="fa-solid fa-satellite-dish"></i>
+										{/if}
+									</button>
 								{/if}
 								{#if ['threats', 'reference-controls', 'metric-definitions'].includes(URLModel)}
 									{@const title =

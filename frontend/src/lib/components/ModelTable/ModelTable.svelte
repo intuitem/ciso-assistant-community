@@ -68,7 +68,12 @@
 		hasPermissionAnywhere
 	} from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
-	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
+	import {
+		tableHandlers,
+		tableRefreshers,
+		tableStates,
+		tableColumnStates
+	} from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
@@ -123,6 +128,7 @@
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
 		expectedCount?: number;
+		loading?: boolean;
 		onFilterChange?: (filters: Record<string, any>) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
@@ -189,6 +195,7 @@
 		forcePreventDelete = false,
 		forcePreventEdit = false,
 		expectedCount = undefined,
+		loading = false,
 		onFilterChange = () => {},
 		quickFilters,
 		optButton,
@@ -381,9 +388,28 @@
 
 	const toastStore = getToastStore();
 
-	if (hasRemoteSource)
-		handler.onChange((state: State) =>
-			loadTableData({
+	// Rows arrive from the API, so on a slow connection an empty table would
+	// otherwise be indistinguishable from a table with no data loaded. Requests
+	// can overlap (search, sort, filters), so count them rather than flag them,
+	// and only show placeholders until the first page has landed: a later
+	// refetch keeps the previous rows on screen.
+	let inFlight = $state(0);
+	let hasLoadedOnce = $state(false);
+	const isFetching = $derived(inFlight > 0 && !hasLoadedOnce);
+	let currentLoad: Promise<any[]> = Promise.resolve([]);
+	let loadFailed = false;
+
+	if (hasRemoteSource) {
+		// The trigger handler calls our reload synchronously before its first
+		// await, so once invalidate() returns, currentLoad is the new request.
+		$tableRefreshers[baseEndpoint] = () => {
+			handler.invalidate();
+			return currentLoad;
+		};
+		handler.onChange((state: State) => {
+			inFlight += 1;
+			loadFailed = false;
+			currentLoad = loadTableData({
 				state,
 				URLModel,
 				endpoint: baseEndpoint,
@@ -404,11 +430,17 @@
 								},
 				featureFlags: page.data?.featureflags,
 				onError: (error) => {
+					loadFailed = true;
 					console.error(error);
 					toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
 				}
-			})
-		);
+			}).finally(() => {
+				inFlight -= 1;
+				if (inFlight === 0 && !loadFailed) hasLoadedOnce = true;
+			});
+			return currentLoad;
+		});
+	}
 
 	onMount(() => {
 		if (orderBy) {
@@ -416,6 +448,13 @@
 				? handler.sortAsc(orderBy.identifier)
 				: handler.sortDesc(orderBy.identifier);
 		}
+		return () => {
+			if (hasRemoteSource)
+				tableRefreshers.update((r) => {
+					delete r[baseEndpoint];
+					return r;
+				});
+		};
 	});
 
 	const actionsURLModel = URLModel;
@@ -534,7 +573,8 @@
 	$effect(() => {
 		if (hasRemoteSource && page.form?.form?.posted && page.form?.form?.valid) {
 			console.debug('Form posted, invalidating table');
-			handler.invalidate();
+			// untracked: the reload writes inFlight, which would retrigger this effect
+			untrack(() => handler.invalidate());
 		}
 	});
 
@@ -1252,6 +1292,28 @@
 								{/if}
 							</tr>
 						{/each}
+						{#if (loading || isFetching) && $rows.length === 0}
+							{#each Array(5) as _}
+								<tr class="even:bg-surface-100-900" data-testid="row-skeleton">
+									{#if hasBatchActions}
+										<td class="w-10"></td>
+									{/if}
+									{#each renderColumnKeys as key (key)}
+										<td>
+											<div class={regionCell}>
+												<div class="space-y-2 py-2 animate-pulse">
+													<div class="h-4 rounded bg-surface-200-800"></div>
+													<div class="h-4 w-3/5 rounded bg-surface-200-800"></div>
+												</div>
+											</div>
+										</td>
+									{/each}
+									{#if displayActions}
+										<td class="text-end {regionCell}"></td>
+									{/if}
+								</tr>
+							{/each}
+						{/if}
 					</tbody>
 				{/snippet}
 			</ContextMenu.Trigger>
