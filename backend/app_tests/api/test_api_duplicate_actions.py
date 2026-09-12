@@ -50,7 +50,7 @@ def _make_domain(name):
 
 def _client_for(email, memberships):
     """Authenticated client for a fresh user added to ``(group_name, folder)`` pairs."""
-    user = User.objects.create_user(email, is_published=True)
+    user = User.objects.create_user(email)
     for group_name, folder in memberships:
         group = UserGroup.objects.get(name=group_name, folder=folder)
         group.user_set.add(user)
@@ -206,7 +206,7 @@ def test_risk_assessment_duplicate_with_scenarios_requires_scenario_rights(domai
     from core.models import RiskScenario
 
     domain_a, _ = domains
-    user = User.objects.create_user("dup-ra-only@tests.com", is_published=True)
+    user = User.objects.create_user("dup-ra-only@tests.com")
     user.folder = domain_a
     user.save()
     role = Role.objects.create(name="ra-only", folder=Folder.get_root_folder())

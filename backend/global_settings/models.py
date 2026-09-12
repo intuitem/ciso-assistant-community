@@ -48,6 +48,8 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
     # Value of the setting.
     value = models.JSONField(default=dict)
 
+    # All sensitive global settings (e.g. `SSO`, `INFRA_CONFIG`) MUST have extra permission checks on their API views.
+    # Otherwise anyone with a `"view_globalsettings"` permission on any folder could view these sensitive global settings (as `GlobalSettings` are always stored in the root folder).
     GENERAL_DEFAULT_VALUE = {
         "security_objective_scale": "1-4",
         "ebios_radar_max": 6,
@@ -97,7 +99,7 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
 # tracking it makes auditlog query its non-existent table on create/delete.
 auditlog.register(
     GlobalSettings,
-    exclude_fields=["created_at", "updated_at", "is_published", "ssosettings"],
+    exclude_fields=["created_at", "updated_at", "ssosettings"],
     mask_fields=["value"],
     mask_callable="global_settings.utils.mask_sensitive_settings",
 )

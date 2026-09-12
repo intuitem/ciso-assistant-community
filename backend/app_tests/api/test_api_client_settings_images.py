@@ -42,7 +42,7 @@ def _client(user):
 
 
 def _in_group(email, group_name):
-    user = User.objects.create_user(email, is_published=True)
+    user = User.objects.create_user(email)
     group = UserGroup.objects.get(name=group_name, folder=Folder.get_root_folder())
     user.folder = group.folder
     user.save()
@@ -62,7 +62,7 @@ def global_reader_client(app_ready):
 
 @pytest.fixture
 def norole_client(app_ready):
-    user = User.objects.create_user("norole@clientsettings.test", is_published=True)
+    user = User.objects.create_user("norole@clientsettings.test")
     user.folder = Folder.get_root_folder()
     user.save()
     return _client(user)

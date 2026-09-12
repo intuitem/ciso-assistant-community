@@ -1346,7 +1346,6 @@ async def get_task_template_details(task_id: str):
         result += f"|{task.get('task_date', 'N/A')}"
         result += f"|{'Yes' if task.get('is_recurrent') else 'No'}"
         result += f"|{'Yes' if task.get('enabled') else 'No'}"
-        result += f"|{'Yes' if task.get('is_published') else 'No'}"
         result += f"|{task.get('link', 'N/A')}"
         result += f"|{task.get('folder', 'N/A')}"
         result += f"|{task.get('path', 'N/A')}"
