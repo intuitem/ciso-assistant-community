@@ -172,6 +172,15 @@ def validate_graph(version):
                 errors.append(_error(code, message, node=node))
             for code, message in _validate_ai_value_fencing(node, *ai_sources):
                 errors.append(_error(code, message, node=node))
+        for key in sorted(RESERVED_VARIABLE_KEYS & set(node.output_mapping or {})):
+            errors.append(
+                _error(
+                    "output_mapping_reserved",
+                    f"'{key}' is set by the engine on every run — map this "
+                    "step's output to a different variable",
+                    node=node,
+                )
+            )
         for ref in sorted(_referenced_node_refs(node) - known_refs):
             errors.append(
                 _error(

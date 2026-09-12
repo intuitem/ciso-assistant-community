@@ -138,7 +138,15 @@ def _parse_ai_object(completion: str, schema: dict) -> dict:
     from jsonschema import ValidationError as SchemaValidationError
     from jsonschema import validate as validate_schema
 
+    from .actions import AI_OUTPUT_MAX_CHARS
+
     text = (completion or "").strip()
+    if len(text) > AI_OUTPUT_MAX_CHARS:
+        # Rejected, not truncated: a cut would not parse anyway, and a model
+        # emitting this much for a schema is malfunctioning.
+        raise ValueError(
+            f"the model returned more than {AI_OUTPUT_MAX_CHARS} characters"
+        )
     # The json_object fallback and smaller models still fence occasionally.
     if text.startswith("```"):
         text = text.split("```")[1] if "```" in text[3:] else text[3:]

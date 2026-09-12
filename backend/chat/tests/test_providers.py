@@ -1,5 +1,7 @@
 """Tests for providers.py — thinking token parsing and streaming."""
 
+import copy
+
 
 class TestFilterThinkingTokens:
     def test_no_think_tags(self):
@@ -409,3 +411,79 @@ class TestDirectivesThroughBuildMessages:
 
         assert "YOUR RESPONSE MUST NOT" in messages[0]["content"]
         assert "The system found 3" in messages[-1]["content"]
+
+
+class _FakeResponse:
+    def __init__(self, status):
+        self.status_code = status
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise RuntimeError(f"HTTP {self.status_code}")
+
+    def json(self):
+        return {"choices": [{"message": {"content": '{"severity": "high"}'}}]}
+
+
+class _FakeClient:
+    """Replays canned statuses and records every request body.
+
+    Snapshots each body: the caller reuses one dict across the retry, and httpx
+    serialises at post time, so a stored reference would show only the final
+    mutation."""
+
+    def __init__(self, *statuses):
+        self.statuses = list(statuses)
+        self.bodies = []
+
+    def post(self, url, json=None):
+        self.bodies.append(copy.deepcopy(json))
+        return _FakeResponse(self.statuses.pop(0))
+
+
+class TestSchemaFallback:
+    """A server that rejects response_format: json_schema still honours
+    json_object. A 401/429/5xx is not that, so retrying buys a second failure
+    at the price of a second completion."""
+
+    SCHEMA = {"type": "object", "properties": {"severity": {"type": "string"}}}
+
+    def _llm(self, *statuses):
+        from chat.providers import OpenAICompatibleLLM
+
+        llm = OpenAICompatibleLLM(model="m", base_url="http://x/v1")
+        llm.client = _FakeClient(*statuses)
+        return llm
+
+    def test_format_rejection_falls_back(self):
+        llm = self._llm(400, 200)
+        llm.generate(prompt="p", context="", schema=self.SCHEMA)
+        assert len(llm.client.bodies) == 2
+        assert llm.client.bodies[0]["response_format"]["type"] == "json_schema"
+        assert llm.client.bodies[1]["response_format"] == {"type": "json_object"}
+
+    def test_unprocessable_also_falls_back(self):
+        llm = self._llm(422, 200)
+        llm.generate(prompt="p", context="", schema=self.SCHEMA)
+        assert len(llm.client.bodies) == 2
+
+    def test_rate_limit_does_not_retry(self):
+        llm = self._llm(429)
+        try:
+            llm.generate(prompt="p", context="", schema=self.SCHEMA)
+        except RuntimeError:
+            pass
+        assert len(llm.client.bodies) == 1
+
+    def test_server_error_does_not_retry(self):
+        llm = self._llm(503)
+        try:
+            llm.generate(prompt="p", context="", schema=self.SCHEMA)
+        except RuntimeError:
+            pass
+        assert len(llm.client.bodies) == 1
+
+    def test_success_sends_one_request(self):
+        llm = self._llm(200)
+        llm.generate(prompt="p", context="", schema=self.SCHEMA)
+        assert len(llm.client.bodies) == 1

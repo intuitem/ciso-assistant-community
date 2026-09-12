@@ -553,9 +553,11 @@ class OpenAICompatibleLLM:
                 "json_schema": {"name": "output", "schema": schema},
             }
         resp = self.client.post(self._chat_url(), json=body)
-        if schema is not None and resp.status_code >= 400:
+        if schema is not None and resp.status_code in (400, 422):
             # Uneven json_schema support (older LM Studio, some vLLM builds);
             # json_object still forces valid JSON and the caller checks shape.
+            # Only on a request-rejection status: retrying a 401/429/5xx would
+            # buy a second failure at the price of a second completion.
             body["response_format"] = {"type": "json_object"}
             resp = self.client.post(self._chat_url(), json=body)
         resp.raise_for_status()

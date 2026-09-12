@@ -107,8 +107,9 @@ objects:
 
             Most findings are not critical. If two findings differ in blast radius, they must not get the
             same rating. Then say whether a human should review the rating: set needs_human_review to
-            true when the finding is ambiguous, hints at a compliance or privacy breach, or you are not
-            confident.'
+            true ONLY when the text is too vague to rate, or when it describes a possible breach of
+            regulated data that someone may have to notify. A finding is not review-worthy merely
+            because it touches compliance — most are not.'
           input: '{{item.name}}
 
             {{item.description}}'
@@ -223,7 +224,8 @@ objects:
           model: finding
           id: '{{item.id}}'
           fields:
-            observation: 'AI triage on {{today}} — rated {{ai_severity}}. {{nodes.draft_note.text}}'
+            observation: 'AI triage on {{today}} — rated {{ai_severity}}, needs human review: {{ai_needs_review}}.
+              {{nodes.draft_note.text}}'
       - ref: done
         type: end
       edges:

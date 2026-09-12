@@ -8,6 +8,7 @@ Huey is not immediate in tests: the `dispatch` fixture captures the enqueue and
 `dispatch.run()` executes the task body synchronously.
 """
 
+import json
 import uuid
 
 import pytest
@@ -183,7 +184,7 @@ class TestAiExtract:
             }
         )
         with django_capture_on_commit_callbacks(execute=True):
-            instance = start_instance(version)
+            start_instance(version)
         dispatch.run()
         call = fake.calls[0]
         assert call["schema"] == SEVERITY_SCHEMA
@@ -208,7 +209,7 @@ class TestAiExtract:
             ],
         )
         with django_capture_on_commit_callbacks(execute=True):
-            instance = start_instance(version)
+            start_instance(version)
         dispatch.run()
         assert fake.calls[0]["prompt"] == "Classify for Acme"
         assert fake.calls[0]["context"] == "port 5432 open"
@@ -238,7 +239,7 @@ class TestAiExtract:
     def test_a_later_draw_that_validates_is_accepted(
         self, dispatch, llm, django_capture_on_commit_callbacks
     ):
-        fake = llm("not json at all", '{"severity": "high"}')
+        llm("not json at all", '{"severity": "high"}')
         version = ai_flow(
             {
                 "type": "ai_extract",
@@ -273,7 +274,7 @@ class TestAiExtract:
         assert any("no AI provider is reachable" in m for m in error_messages(instance))
 
     def test_get_llm_strict_refuses_the_stub(self, monkeypatch):
-        monkeypatch.setattr("chat.providers.get_llm", lambda: StubLLM())
+        monkeypatch.setattr("chat.providers.get_llm", StubLLM)
         from chat import providers
 
         with pytest.raises(NoLLMAvailable):
@@ -579,6 +580,30 @@ class TestAiConfigValidation:
     def test_ai_generate_needs_no_schema(self):
         assert not self.graph_codes({"type": "ai_generate", "prompt": "Draft"})
 
+    @pytest.mark.parametrize("value", ["invalid", 0, 9999])
+    def test_bad_max_words_is_refused(self, value):
+        # The action clamps at runtime, but int() on junk raises there instead
+        # of failing the publish.
+        assert "action_ai_bad_option" in self.graph_codes(
+            {"type": "ai_generate", "prompt": "Draft", "max_words": value}
+        )
+
+    @pytest.mark.parametrize("value", ["invalid", 0, 9])
+    def test_bad_max_attempts_is_refused(self, value):
+        assert "action_ai_bad_option" in self.graph_codes(
+            {
+                "type": "ai_extract",
+                "prompt": "Classify",
+                "schema": SEVERITY_SCHEMA,
+                "max_attempts": value,
+            }
+        )
+
+    def test_templated_numbers_pass(self):
+        assert not self.graph_codes(
+            {"type": "ai_generate", "prompt": "Draft", "max_words": "{{limit}}"}
+        )
+
 
 @pytest.mark.django_db
 class TestAiActionPortability:
@@ -606,3 +631,99 @@ class TestAiActionPortability:
         assert node.action_config["schema"] == SEVERITY_SCHEMA
         assert node.action_config["max_attempts"] == 3
         assert node.output_mapping == {"verdict": "severity"}
+
+
+@pytest.mark.django_db
+class TestAiOutputBounds:
+    """ai_generate truncates; ai_extract cannot (a cut JSON would not parse),
+    so an oversized completion is refused before it reaches variables. Without
+    this the engine's node_outputs cap gives false comfort: output_mapping
+    copies from the uncapped output."""
+
+    def test_oversized_completion_is_refused(
+        self, dispatch, llm, django_capture_on_commit_callbacks
+    ):
+        llm(json.dumps({"severity": "high", "blob": "A" * 200_000}))
+        version = ai_flow(
+            {
+                "type": "ai_extract",
+                "prompt": "Classify",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "severity": {"type": "string", "enum": ["low", "high"]},
+                        "blob": {"type": "string"},
+                    },
+                    "required": ["severity"],
+                },
+                "max_attempts": 1,
+            },
+            output_mapping={"sink": "blob"},
+            variables=[{"key": "sink", "type": "string"}],
+        )
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        instance.refresh_from_db()
+        assert not instance.logs.filter(event_type="action_executed").exists()
+        assert any("more than" in message for message in error_messages(instance))
+        # Declared variables are seeded at run start; the point is that the
+        # oversized value never landed in it.
+        assert instance.variables["sink"] is None
+
+    def test_ordinary_output_still_passes(
+        self, dispatch, llm, django_capture_on_commit_callbacks
+    ):
+        llm('{"severity": "high"}')
+        version = ai_flow(
+            {"type": "ai_extract", "prompt": "Classify", "schema": SEVERITY_SCHEMA}
+        )
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        instance.refresh_from_db()
+        assert instance.node_outputs["classify"] == {"severity": "high"}
+
+
+@pytest.mark.django_db
+class TestReservedOutputMapping:
+    """{{today}}/{{now}}/{{payload}} are engine-owned. set_variables and
+    date_offset were already fenced; output_mapping was the open door, and AI
+    steps route model output through it as a matter of course."""
+
+    def build(self):
+        workflow = Workflow.objects.create(
+            name="Seed spoof", folder=Folder.get_root_folder()
+        )
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
+        start = node("trigger", trigger_config={"type": "manual"})
+        spoof = node(
+            "action",
+            ref="spoof",
+            action_config={"type": "log", "message": "1999-01-01"},
+            output_mapping={"today": "message"},
+        )
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [start, spoof, end],
+                "edges": [edge(start, spoof), edge(spoof, end)],
+                "variables": [],
+            },
+        )
+        return version
+
+    def test_publish_refuses_it(self):
+        codes = {error["code"] for error in validate_graph(self.build())}
+        assert "output_mapping_reserved" in codes
+
+    def test_runtime_ignores_it(self, django_capture_on_commit_callbacks):
+        # Covers graphs published before the check existed.
+        version = self.build()
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        instance.refresh_from_db()
+        assert instance.variables["today"] != "1999-01-01"

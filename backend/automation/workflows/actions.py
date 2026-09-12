@@ -2058,6 +2058,10 @@ AI_SYSTEM_PROMPT = (
 
 AI_INPUT_MAX_CHARS = 20000
 AI_TEXT_MAX_CHARS = 5000
+# ai_extract's parsed object flows into variables uncapped (output_mapping
+# copies from the output, which the engine's node_outputs cap never sees), so
+# the completion is bounded before it is parsed.
+AI_OUTPUT_MAX_CHARS = 20000
 
 
 def ai_max_calls_per_run():
@@ -2569,6 +2573,25 @@ def validate_update_config(node):
 AI_ACTION_TYPES = frozenset({"ai_extract", "ai_generate"})
 
 
+def _validate_ai_number(config, key, low, high):
+    """The action clamps these at runtime, but int() on junk raises there
+    instead of failing the publish."""
+    value = config.get(key)
+    if value in ("", None) or _is_templated(value):
+        return []
+    try:
+        if not low <= int(value) <= high:
+            raise ValueError
+    except TypeError, ValueError:
+        return [
+            (
+                "action_ai_bad_option",
+                f"'{key}' must be a whole number between {low} and {high}",
+            )
+        ]
+    return []
+
+
 def validate_ai_config(node):
     """Publish-time checks for ai_extract / ai_generate nodes."""
     config = node.action_config or {}
@@ -2581,7 +2604,8 @@ def validate_ai_config(node):
             ("action_ai_no_prompt", "This step has no instruction for the model")
         )
     if action_type == "ai_generate":
-        return errors
+        return errors + _validate_ai_number(config, "max_words", 1, 2000)
+    errors += _validate_ai_number(config, "max_attempts", 1, 5)
 
     schema = config.get("schema")
     if not isinstance(schema, dict) or not schema:
