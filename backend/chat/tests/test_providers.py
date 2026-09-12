@@ -2,6 +2,8 @@
 
 import copy
 
+import pytest
+
 
 class TestFilterThinkingTokens:
     def test_no_think_tags(self):
@@ -469,18 +471,14 @@ class TestSchemaFallback:
 
     def test_rate_limit_does_not_retry(self):
         llm = self._llm(429)
-        try:
+        with pytest.raises(RuntimeError):
             llm.generate(prompt="p", context="", schema=self.SCHEMA)
-        except RuntimeError:
-            pass
         assert len(llm.client.bodies) == 1
 
     def test_server_error_does_not_retry(self):
         llm = self._llm(503)
-        try:
+        with pytest.raises(RuntimeError):
             llm.generate(prompt="p", context="", schema=self.SCHEMA)
-        except RuntimeError:
-            pass
         assert len(llm.client.bodies) == 1
 
     def test_success_sends_one_request(self):

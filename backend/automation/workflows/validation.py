@@ -488,20 +488,48 @@ def _referenced_node_refs(node):
 
 
 def _ai_sources(nodes):
-    """AI node refs, and the variables their output_mapping writes."""
+    """AI node refs, and every variable that can carry their answer.
+
+    Directly: a variable an AI node's own output_mapping writes. Indirectly: a
+    variable a set_variables step assigns from one, which is how a graph would
+    otherwise walk an AI answer past the fencing check. Chains and a node list
+    that is not in execution order both need a fixpoint rather than one pass.
+
+    A loop's `collect` is deliberately not followed: it yields the loop's
+    `results` list, and a list can never match a fenced field's value.
+    """
     refs, variables = set(), set()
+    setters = []
     for node in nodes:
-        if (node.action_config or {}).get("type") in AI_ACTION_TYPES:
+        action_type = (node.action_config or {}).get("type")
+        if action_type in AI_ACTION_TYPES:
             if node.ref:
                 refs.add(node.ref)
             variables |= {str(key) for key in (node.output_mapping or {})}
+        elif action_type == "set_variables":
+            setters.append(node)
+
+    changed = bool(setters)
+    while changed:
+        changed = False
+        for node in setters:
+            assigned = (node.action_config or {}).get("variables") or {}
+            if not isinstance(assigned, dict):
+                continue
+            for key, value in assigned.items():
+                if str(key) in variables:
+                    continue
+                if _ai_sources_in(value, refs, variables):
+                    variables.add(str(key))
+                    changed = True
     return refs, variables
 
 
 def _ai_sources_in(value, ai_refs, ai_variables):
     """AI-derived references a config value reads, as the author wrote them."""
     if not isinstance(value, str):
-        return set()
+        # set_variables may assign a dict or list; the tokens are in there.
+        value = json.dumps(value, default=str)
     found = set()
     for token in TEMPLATE_TOKEN_RE.findall(value):
         segments = token.split(".")
@@ -518,8 +546,8 @@ def _validate_ai_value_fencing(node, ai_refs, ai_variables):
     record a guess as fact, and the registry cannot tell a template from a
     literal at the write site. Branch on the output and write literals instead.
 
-    Catches the honest mistake only — laundering through set_variables defeats
-    it, which is what taint tracking on the instance would close."""
+    Provenance is followed through set_variables (see _ai_sources), so routing
+    the answer through a variable first does not evade this."""
     config = node.action_config or {}
     if config.get("type") != "update_object":
         return []
@@ -534,9 +562,10 @@ def _validate_ai_value_fencing(node, ai_refs, ai_variables):
             errors.append(
                 (
                     "action_update_ai_value_on_fenced_field",
-                    f"'{key}' only accepts a fixed set of values, so it cannot be "
-                    f"set from '{{{{{source}}}}}' — branch on the AI output and "
-                    f"write the value on each branch instead",
+                    f"'{key}' only accepts a fixed set of values, so it cannot "
+                    f"be set from '{{{{{source}}}}}', which carries an AI "
+                    f"answer — branch on it and write the value on each "
+                    f"branch instead",
                 )
             )
     return errors

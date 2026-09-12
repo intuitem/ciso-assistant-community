@@ -727,3 +727,100 @@ class TestReservedOutputMapping:
             instance = start_instance(version)
         instance.refresh_from_db()
         assert instance.variables["today"] != "1999-01-01"
+
+
+@pytest.mark.django_db
+class TestAiProvenanceThroughSetVariables:
+    """Routing the answer through a variable must not walk it past the fence.
+    set_variables renders an AI template into instance.variables, and a later
+    update_object renders that variable into the field — same write, one hop
+    further away."""
+
+    def graph(self, hops, target_field="severity", seed="{{ai_severity}}"):
+        """classify -> N set_variables hops -> update_object on `target_field`."""
+        workflow = Workflow.objects.create(
+            name="Launder", folder=Folder.get_root_folder()
+        )
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
+        start = node("trigger", trigger_config={"type": "manual"})
+        classify = node(
+            "action",
+            ref="classify",
+            action_config={
+                "type": "ai_extract",
+                "prompt": "Classify",
+                "schema": SEVERITY_SCHEMA,
+            },
+            output_mapping={"ai_severity": "severity"},
+        )
+        chain, source = [], seed
+        for index in range(hops):
+            key = f"hop{index}"
+            chain.append(
+                node(
+                    "action",
+                    ref=key,
+                    action_config={"type": "set_variables", "variables": {key: source}},
+                )
+            )
+            source = f"{{{{{key}}}}}"
+        write = node(
+            "action",
+            ref="write",
+            action_config={
+                "type": "update_object",
+                "model": "finding",
+                "id": "{{finding_id}}",
+                "fields": {target_field: source},
+            },
+        )
+        end = node("end")
+        # set_variables nodes listed BEFORE the AI node: the fixpoint must not
+        # depend on the order they come back from the database.
+        nodes = [start, *chain, classify, write, end]
+        edges = [edge(start, classify)]
+        previous = classify
+        for step in chain:
+            edges.append(edge(previous, step))
+            previous = step
+        edges += [edge(previous, write), edge(write, end)]
+        keys = ["finding_id", "ai_severity"] + [f"hop{i}" for i in range(hops)]
+        save_graph(
+            version,
+            {
+                "nodes": nodes,
+                "edges": edges,
+                "variables": [
+                    {"id": str(uuid.uuid4()), "key": key, "type": "string"}
+                    for key in keys
+                ],
+            },
+        )
+        return version
+
+    def codes(self, version):
+        return {error["code"] for error in validate_graph(version)}
+
+    def test_one_hop_is_refused(self):
+        codes = self.codes(self.graph(hops=1))
+        assert "action_update_ai_value_on_fenced_field" in codes
+
+    def test_three_hop_chain_is_refused(self):
+        # A single pass would only taint the first hop.
+        codes = self.codes(self.graph(hops=3))
+        assert "action_update_ai_value_on_fenced_field" in codes
+
+    def test_laundering_a_node_reference_is_refused(self):
+        codes = self.codes(self.graph(hops=1, seed="{{nodes.classify.severity}}"))
+        assert "action_update_ai_value_on_fenced_field" in codes
+
+    def test_free_text_field_still_accepts_it(self):
+        codes = self.codes(self.graph(hops=2, target_field="observation"))
+        assert "action_update_ai_value_on_fenced_field" not in codes
+
+    def test_unrelated_variable_is_not_tainted(self):
+        # The hop reads nothing AI, so the write is an ordinary literal path.
+        codes = self.codes(self.graph(hops=1, seed="expired"))
+        assert "action_update_ai_value_on_fenced_field" not in codes
