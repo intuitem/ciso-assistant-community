@@ -13,6 +13,8 @@ from .models import (
     WorkflowSecret,
     WorkflowVersion,
 )
+from .actions import AI_ACTION_TYPES, UPDATABLE_MODELS, _writable_values
+from .actions import validate_ai_config as _validate_ai_config
 from .actions import validate_create_config as _validate_create_config
 from .actions import validate_date_offset_config as _validate_date_offset_config
 from .actions import validate_read_config as _validate_read_config
@@ -24,6 +26,7 @@ from .triggers import validate_trigger_config
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
 NODE_REF_RE = re.compile(r"\{\{\s*nodes\.([A-Za-z_]\w*)")
+TEMPLATE_TOKEN_RE = re.compile(r"\{\{\s*([\w.]+)\s*\}\}")
 
 # Node/action types cut from v1: the engine still runs them for seeded/legacy
 # graphs, but the API refuses to author (graph PUT) or import them. Enabling a
@@ -45,6 +48,7 @@ def validate_graph(version):
     edges = list(version.edges.all())
     nodes_by_id = {node.id: node for node in nodes}
     existing_secrets = _existing_secret_names(version, nodes)
+    ai_sources = _ai_sources(nodes)
     # Which branches carry a wire (a branch with a condition but no wire is a
     # defined-but-unrouted case).
     wired_branch_ids = {
@@ -163,6 +167,10 @@ def validate_graph(version):
             for code, message in _validate_set_variables_config(node):
                 errors.append(_error(code, message, node=node))
             for code, message in _validate_attach_evidence_config(node):
+                errors.append(_error(code, message, node=node))
+            for code, message in _validate_ai_config(node):
+                errors.append(_error(code, message, node=node))
+            for code, message in _validate_ai_value_fencing(node, *ai_sources):
                 errors.append(_error(code, message, node=node))
         for ref in sorted(_referenced_node_refs(node) - known_refs):
             errors.append(
@@ -468,6 +476,61 @@ def _referenced_node_refs(node):
         ]
     )
     return set(NODE_REF_RE.findall(blob))
+
+
+def _ai_sources(nodes):
+    """AI node refs, and the variables their output_mapping writes."""
+    refs, variables = set(), set()
+    for node in nodes:
+        if (node.action_config or {}).get("type") in AI_ACTION_TYPES:
+            if node.ref:
+                refs.add(node.ref)
+            variables |= {str(key) for key in (node.output_mapping or {})}
+    return refs, variables
+
+
+def _ai_sources_in(value, ai_refs, ai_variables):
+    """AI-derived references a config value reads, as the author wrote them."""
+    if not isinstance(value, str):
+        return set()
+    found = set()
+    for token in TEMPLATE_TOKEN_RE.findall(value):
+        segments = token.split(".")
+        if segments[0] == "nodes":
+            if len(segments) > 1 and segments[1] in ai_refs:
+                found.add(token)
+        elif segments[0] in ai_variables:
+            found.add(token)
+    return found
+
+
+def _validate_ai_value_fencing(node, ai_refs, ai_variables):
+    """A model's answer must not set a fenced field: the audit trail would
+    record a guess as fact, and the registry cannot tell a template from a
+    literal at the write site. Branch on the output and write literals instead.
+
+    Catches the honest mistake only — laundering through set_variables defeats
+    it, which is what taint tracking on the instance would close."""
+    config = node.action_config or {}
+    if config.get("type") != "update_object":
+        return []
+    entry = UPDATABLE_MODELS.get(config.get("model"))
+    if entry is None or not (ai_refs or ai_variables):
+        return []
+    errors = []
+    for key, value in sorted((config.get("fields") or {}).items()):
+        if key not in entry.fields or _writable_values(entry, key) is None:
+            continue
+        for source in sorted(_ai_sources_in(value, ai_refs, ai_variables)):
+            errors.append(
+                (
+                    "action_update_ai_value_on_fenced_field",
+                    f"'{key}' only accepts a fixed set of values, so it cannot be "
+                    f"set from '{{{{{source}}}}}' — branch on the AI output and "
+                    f"write the value on each branch instead",
+                )
+            )
+    return errors
 
 
 def _existing_secret_names(version, nodes):

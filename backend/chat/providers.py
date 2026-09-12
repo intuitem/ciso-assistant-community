@@ -208,6 +208,8 @@ class LLM(Protocol):
         context: str,
         history: list[dict] | None = None,
         directives: str = "",
+        schema: dict | None = None,
+        system_prompt: str | None = None,
     ) -> str: ...
 
     def stream(
@@ -392,13 +394,18 @@ class OllamaLLM:
         context: str,
         history: list[dict] | None = None,
         directives: str = "",
+        schema: dict | None = None,
+        system_prompt: str | None = None,
     ) -> str:
         messages = _build_messages(
-            self.system_prompt, prompt, context, history, directives
+            system_prompt or self.system_prompt, prompt, context, history, directives
         )
         body: dict = {"model": self.model, "messages": messages, "stream": False}
         if options := self._options():
             body["options"] = options
+        if schema is not None:
+            # Constrained decoding: valid JSON by construction.
+            body["format"] = schema
         resp = self.client.post(f"{self.base_url}/api/chat", json=body)
         resp.raise_for_status()
         return strip_thinking(resp.json()["message"]["content"])
@@ -527,16 +534,30 @@ class OpenAICompatibleLLM:
         context: str,
         history: list[dict] | None = None,
         directives: str = "",
+        schema: dict | None = None,
+        system_prompt: str | None = None,
     ) -> str:
         messages = _build_messages(
-            self.system_prompt, prompt, context, history, directives
+            system_prompt or self.system_prompt, prompt, context, history, directives
         )
         body: dict = {"messages": messages, "stream": False}
         if self.model:
             body["model"] = self.model
         if self.temperature_enabled:
             body["temperature"] = self.temperature
+        if schema is not None:
+            body["response_format"] = {
+                "type": "json_schema",
+                # Not strict mode: it would also demand
+                # additionalProperties:false and every property required.
+                "json_schema": {"name": "output", "schema": schema},
+            }
         resp = self.client.post(self._chat_url(), json=body)
+        if schema is not None and resp.status_code >= 400:
+            # Uneven json_schema support (older LM Studio, some vLLM builds);
+            # json_object still forces valid JSON and the caller checks shape.
+            body["response_format"] = {"type": "json_object"}
+            resp = self.client.post(self._chat_url(), json=body)
         resp.raise_for_status()
         return strip_thinking(resp.json()["choices"][0]["message"]["content"])
 
@@ -724,6 +745,8 @@ class StubLLM:
         context: str,
         history: list[dict] | None = None,
         directives: str = "",
+        schema: dict | None = None,
+        system_prompt: str | None = None,
     ) -> str:
         return f"[No LLM configured — showing retrieved context]\n\n{context}"
 
@@ -913,6 +936,22 @@ def get_llm() -> LLM:
     logger.info("no_llm_available", mode="retrieval-only")
     # Don't cache StubLLM — retry on next request in case LLM comes back
     return StubLLM()
+
+
+class NoLLMAvailable(Exception):
+    """No LLM provider is reachable."""
+
+
+def get_llm_strict() -> LLM:
+    """Like get_llm, but raises instead of degrading to StubLLM: unattended
+    callers must not proceed on stub text."""
+    llm = get_llm()
+    if isinstance(llm, StubLLM):
+        raise NoLLMAvailable(
+            f"no LLM provider reachable (provider: "
+            f"{get_chat_settings().get('llm_provider', 'ollama')})"
+        )
+    return llm
 
 
 def is_ollama_available() -> bool:

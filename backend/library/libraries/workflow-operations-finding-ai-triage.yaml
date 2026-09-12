@@ -1,0 +1,234 @@
+urn: urn:intuitem:risk:library:workflow-operations-finding-ai-triage
+locale: en
+ref_id: workflow-operations-finding-ai-triage
+name: Finding raised — AI triage
+description: 'Reads a newly raised finding, asks the configured AI provider to rate it and draft a triage
+  note, then sets the severity and priority and notifies the triage team. The model chooses the branch;
+  the severity and priority written on each branch are fixed values in the graph, so the rating a machine
+  suggested is always visible as the branch the run took. Needs an AI provider configured in Global settings
+  — without one, the AI steps fail and the run stops rather than guessing.'
+copyright: © intuitem
+version: 1
+publication_date: 2026-09-12
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-finding-ai-triage:workflow:finding-ai-triage
+    schema_version: 1
+    ref_id: finding-ai-triage
+    name: Finding raised — AI triage
+    description: 'Reads a newly raised finding, asks the configured AI provider to rate it and draft a
+      triage note, then sets the severity and priority and notifies the triage team. The model chooses
+      the branch; the severity and priority written on each branch are fixed values in the graph.'
+    graph:
+      variables:
+      - key: triage_emails
+        type: string
+        default_value: findings@example.com
+      - key: ai_severity
+        type: string
+        default_value: ''
+      - key: ai_rationale
+        type: string
+        default_value: ''
+      - key: ai_needs_review
+        type: boolean
+        default_value: false
+      nodes:
+      - ref: on_finding
+        type: trigger
+        label: Finding created
+        trigger_config:
+          type: internal_event
+          event_key: finding.created
+      - ref: read_finding
+        type: action
+        label: Read the finding
+        action_config:
+          type: read_objects
+          model: finding
+          mode: first
+          filters:
+            operator: and
+            conditions:
+            - field: id
+              op: eq
+              value: '{{payload.object_id}}'
+      - ref: classify
+        type: action
+        label: Rate it
+        action_config:
+          type: ai_extract
+          prompt: 'You are triaging a security finding for a GRC team. Rate how severe it is for the organisation,
+            and say whether a human should review the rating before anyone acts on it. Set needs_human_review
+            to true whenever the finding is ambiguous, describes a possible compliance or privacy breach,
+            or you are not confident in the rating.'
+          input: '{{nodes.read_finding.object.name}}
+
+            {{nodes.read_finding.object.description}}'
+          schema:
+            type: object
+            properties:
+              severity:
+                type: string
+                enum:
+                - low
+                - medium
+                - high
+                - critical
+              needs_human_review:
+                type: boolean
+              rationale:
+                type: string
+            required:
+            - severity
+            - needs_human_review
+            - rationale
+          max_attempts: 2
+        output_mapping:
+          ai_severity: severity
+          ai_rationale: rationale
+          ai_needs_review: needs_human_review
+      - ref: route
+        type: condition
+        label: How severe did it come back?
+        branches:
+        - name: critical
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: ai_severity
+              op: eq
+              value: critical
+        - name: high
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: ai_severity
+              op: eq
+              value: high
+        - name: medium
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: ai_severity
+              op: eq
+              value: medium
+        - name: low
+          is_default: true
+      - ref: mark_critical
+        type: action
+        label: Critical, P1
+        action_config:
+          type: update_object
+          model: finding
+          id: '{{payload.object_id}}'
+          fields:
+            severity: '4'
+            priority: '1'
+      - ref: mark_high
+        type: action
+        label: High, P2
+        action_config:
+          type: update_object
+          model: finding
+          id: '{{payload.object_id}}'
+          fields:
+            severity: '3'
+            priority: '2'
+      - ref: mark_medium
+        type: action
+        label: Medium, P3
+        action_config:
+          type: update_object
+          model: finding
+          id: '{{payload.object_id}}'
+          fields:
+            severity: '2'
+            priority: '3'
+      - ref: mark_low
+        type: action
+        label: Low, P4
+        action_config:
+          type: update_object
+          model: finding
+          id: '{{payload.object_id}}'
+          fields:
+            severity: '1'
+            priority: '4'
+      - ref: draft_note
+        type: action
+        label: Draft the triage note
+        action_config:
+          type: ai_generate
+          prompt: 'Write a short triage note for the person who will own this finding. Say what the issue
+            is and what to check first. Plain prose, no heading, no bullet list.'
+          input: 'Finding: {{nodes.read_finding.object.name}}
+
+            {{nodes.read_finding.object.description}}
+
+            Assessed severity: {{ai_severity}} — {{ai_rationale}}'
+          max_words: 90
+      - ref: write_note
+        type: action
+        label: Record it as an observation
+        action_config:
+          type: update_object
+          model: finding
+          id: '{{payload.object_id}}'
+          fields:
+            observation: 'AI triage on {{today}} — rated {{ai_severity}}. {{nodes.draft_note.text}}'
+      - ref: notify
+        type: action
+        label: Tell the triage team
+        action_config:
+          type: send_email
+          recipients: '{{triage_emails}}'
+          subject: 'Finding triaged {{ai_severity}}: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} was raised on {{today}} and rated {{ai_severity}} by the AI triage
+            step.
+
+
+            Why: {{ai_rationale}}
+
+
+            Needs a human to review the rating: {{ai_needs_review}}
+
+
+            {{nodes.draft_note.text}}'
+      - ref: done
+        type: end
+      edges:
+      - source: on_finding
+        target: read_finding
+      - source: read_finding
+        target: classify
+      - source: classify
+        target: route
+      - source: route
+        target: mark_critical
+        source_branch: critical
+      - source: route
+        target: mark_high
+        source_branch: high
+      - source: route
+        target: mark_medium
+        source_branch: medium
+      - source: route
+        target: mark_low
+        source_branch: low
+      - source: mark_critical
+        target: draft_note
+      - source: mark_high
+        target: draft_note
+      - source: mark_medium
+        target: draft_note
+      - source: mark_low
+        target: draft_note
+      - source: draft_note
+        target: write_note
+      - source: write_note
+        target: notify
+      - source: notify
+        target: done

@@ -130,6 +130,136 @@ def send_email_task(
         raise
 
 
+def _parse_ai_object(completion: str, schema: dict) -> dict:
+    """Parse and schema-check one completion. ValueError messages are safe for
+    the run log: the completion itself is untrusted and never echoed."""
+    import json
+
+    from jsonschema import ValidationError as SchemaValidationError
+    from jsonschema import validate as validate_schema
+
+    text = (completion or "").strip()
+    # The json_object fallback and smaller models still fence occasionally.
+    if text.startswith("```"):
+        text = text.split("```")[1] if "```" in text[3:] else text[3:]
+        text = text.removeprefix("json").strip()
+    try:
+        parsed = json.loads(text)
+    except ValueError:
+        raise ValueError("the model did not return valid JSON")
+    if not isinstance(parsed, dict):
+        raise ValueError("the model did not return a JSON object")
+    try:
+        validate_schema(instance=parsed, schema=schema)
+    except SchemaValidationError as e:
+        # e.message names the field and constraint, not the value.
+        raise ValueError(f"the model's output does not match the schema: {e.message}")
+    return parsed
+
+
+@db_task()
+def ai_call_task(
+    token_id: str,
+    dispatch_id: str,
+    mode: str,
+    prompt: str,
+    text: str,
+    truncated: bool,
+    schema: dict | None = None,
+    max_attempts: int = 1,
+    max_words: int = 200,
+) -> None:
+    """Run one AI step's inference and hand the token back to the engine, in a
+    task so a call that takes minutes never holds the instance-tree locks.
+    get_llm_strict, not get_llm: a run must not proceed on StubLLM output."""
+    from chat.providers import NoLLMAvailable, get_llm_strict
+
+    from .actions import AI_SYSTEM_PROMPT, AI_TEXT_MAX_CHARS
+    from .engine import (
+        claim_deferred_action,
+        complete_deferred_action,
+        fail_deferred_action,
+    )
+
+    token = claim_deferred_action(token_id, dispatch_id)
+    if token is None:
+        # Duplicate delivery; the claim is exclusive, so no second call.
+        return
+
+    label = "ai_extract" if mode == "extract" else "ai_generate"
+    output: dict | None = None
+    failure: str | None = None
+    try:
+        llm = get_llm_strict()
+        if mode == "extract":
+            last = ""
+            for attempt in range(1, max_attempts + 1):
+                completion = llm.generate(
+                    prompt=prompt,
+                    context=text,
+                    schema=schema,
+                    system_prompt=AI_SYSTEM_PROMPT,
+                )
+                try:
+                    output = _parse_ai_object(completion, schema or {})
+                    break
+                except ValueError as e:
+                    # Another draw may parse; retry before a node retry.
+                    last = str(e)
+                    logger.info(
+                        "ai_extract output rejected",
+                        instance_id=str(token.instance_id),
+                        attempt=attempt,
+                        reason=last,
+                    )
+            if output is None:
+                failure = f"ai_extract: {last} (after {max_attempts} attempts)"
+        else:
+            completion = llm.generate(
+                prompt=f"{prompt}\n\nAnswer in at most {max_words} words.",
+                context=text,
+                system_prompt=AI_SYSTEM_PROMPT,
+            )
+            output = {"text": (completion or "").strip()[:AI_TEXT_MAX_CHARS]}
+        if output is not None and truncated:
+            output["_input_truncated"] = True
+    except NoLLMAvailable as e:
+        # Retryable: the node's backoff should outlast a provider restart.
+        logger.warning(
+            "AI action provider unavailable",
+            instance_id=str(token.instance_id),
+            action=label,
+            error=e,
+        )
+        failure = f"{label}: no AI provider is reachable"
+    except Exception as e:
+        # Provider errors stringify with the endpoint URL, and a key can ride
+        # in a header: controlled message to the run log, detail to the server.
+        logger.error(
+            "AI action call failed",
+            instance_id=str(token.instance_id),
+            action=label,
+            error=e,
+        )
+        failure = f"{label}: the AI provider call failed"
+
+    try:
+        if output is not None:
+            complete_deferred_action(token, output)
+        else:
+            fail_deferred_action(token, failure or f"{label}: produced no output")
+    except Exception as e:
+        # The call is already paid for; a failed hand-back strands the token.
+        logger.error(
+            "AI action hand-back failure",
+            token_id=str(token.id),
+            instance_id=str(token.instance_id),
+            action=label,
+            error=e,
+        )
+        raise
+
+
 @db_periodic_task(crontab(minute="*"))
 def process_workflow_schedules():
     from .scheduling import run_due_schedules
