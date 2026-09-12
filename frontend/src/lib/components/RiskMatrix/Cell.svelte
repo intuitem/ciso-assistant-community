@@ -33,7 +33,7 @@
 		return `width: ${maxBubbleSize}rem; height: ${maxBubbleSize}rem`;
 	});
 	let classesCellText = $derived((backgroundHexColor: string) => {
-		return isDark(backgroundHexColor) ? 'text-white' : '';
+		return isDark(backgroundHexColor) ? 'text-white' : 'text-black';
 	});
 </script>
 
