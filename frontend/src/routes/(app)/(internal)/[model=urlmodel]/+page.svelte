@@ -59,7 +59,7 @@
 		for (const [field, values] of Object.entries(filters)) {
 			if (Array.isArray(values)) {
 				for (const v of values) {
-					if (v?.value) params.append(field, v.value);
+					if (v?.value) params.append(v.param ?? field, v.value);
 				}
 			}
 		}

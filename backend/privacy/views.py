@@ -813,6 +813,7 @@ class RightRequestViewSet(BaseModelViewSet):
         "status",
         "processings",
         "folder",
+        "due_date",
     ]
 
     @action(detail=False, name="Get request type choices")
@@ -849,6 +850,8 @@ class DataBreachViewSet(BaseModelViewSet):
         "affected_processings",
         "incident",
         "evidences",
+        "discovered_on",
+        "authority_notified_on",
     ]
 
     def get_queryset(self):

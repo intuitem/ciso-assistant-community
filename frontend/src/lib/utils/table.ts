@@ -1,4 +1,5 @@
 import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+import DateFilter from '$lib/components/Forms/DateFilter.svelte';
 import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 import type { urlModel } from './types';
@@ -11,6 +12,7 @@ import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeSt
 import WorkflowToggleActive from '$lib/components/ContextMenu/workflows/ToggleActive.svelte';
 import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo, isFieldFlagEnabled } from './crud';
+import { toCamelCase } from './locales';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
 import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWith.svelte';
@@ -31,6 +33,8 @@ export function tableSourceMapper(source: any[], keys: string[]): any[] {
 
 export interface ListViewFilterConfig {
 	component: ComponentType;
+	// Query params this filter may emit. Defaults to its own key.
+	params?: string[];
 	props?: {
 		label: string;
 		optionsEndpoint?: string;
@@ -131,6 +135,28 @@ export function buildCustomFieldFilters(
 	}
 	return filters;
 }
+
+/**
+ * Range filter for a date column. `isDateTime` switches the lookups to the `__date` transform,
+ * without which an upper bound on a timestamp column excludes the whole of its last day.
+ * GenericFilterSet widens any date listed in the viewset's filterset_fields to these lookups,
+ * so the backend side is just listing the field name.
+ */
+export function dateFilter(
+	field: string,
+	{ isDateTime = false, label = toCamelCase(field) }: { isDateTime?: boolean; label?: string } = {}
+): ListViewFilterConfig {
+	const base = isDateTime ? `${field}__date` : field;
+	return {
+		component: DateFilter,
+		params: [`${base}__gte`, `${base}__lte`, `${base}__gt`, `${base}__lt`, `${field}__isnull`],
+		props: { label, param: field, isDateTime }
+	};
+}
+
+// Every model carries these, and GenericFilterSet exposes them on every viewset.
+export const CREATED_AT_FILTER = dateFilter('created_at', { isDateTime: true });
+export const UPDATED_AT_FILTER = dateFilter('updated_at', { isDateTime: true });
 
 export const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
@@ -1566,7 +1592,9 @@ export const listViewFields = {
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
-			lc_status: PERIMETER_STATUS_FILTER
+			lc_status: PERIMETER_STATUS_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'filtering-labels': {
@@ -1623,7 +1651,8 @@ export const listViewFields = {
 			severity: VULNERABILITY_SEVERITY_FILTER,
 			assets: ASSET_FILTER,
 			security_advisories: SECURITY_ADVISORY_FILTER,
-			cwes: CWE_FILTER
+			cwes: CWE_FILTER,
+			due_date: dateFilter('due_date')
 		}
 	},
 	'risk-assessments': {
@@ -1656,7 +1685,11 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
-			status: RISK_ASSESSMENT_STATUS_FILTER
+			status: RISK_ASSESSMENT_STATUS_FILTER,
+			due_date: dateFilter('due_date'),
+			eta: dateFilter('eta'),
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	threats: {
@@ -1674,7 +1707,9 @@ export const listViewFields = {
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'threats/provider' }
 			},
 			library: LIBRARY_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'security-advisories': {
@@ -1716,7 +1751,8 @@ export const listViewFields = {
 					multiple: true
 				}
 			},
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			published_date: dateFilter('published_date')
 		}
 	},
 	cwes: {
@@ -1773,7 +1809,9 @@ export const listViewFields = {
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
 			within_tolerance: RISK_TOLERANCE_FILTER,
 			qualifications: QUALIFICATION_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'risk-acceptances': {
@@ -1787,7 +1825,8 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			state: STATE_FILTER,
-			approver: APPROVER_FILTER
+			approver: APPROVER_FILTER,
+			expiry_date: dateFilter('expiry_date')
 		}
 	},
 	'validation-flows': {
@@ -1829,7 +1868,10 @@ export const listViewFields = {
 			requester: REQUESTER_FILTER,
 			approver: APPROVER_FILTER,
 			linked_models: LINKED_MODELS_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			validation_deadline: dateFilter('validation_deadline'),
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'applied-controls': {
@@ -1897,10 +1939,14 @@ export const listViewFields = {
 			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
 			filtering_labels: LABELS_FILTER,
 			reference_control: REFERENCE_CONTROL_FILTER,
-			eta__lte: undefined,
+			eta: dateFilter('eta'),
+			start_date: dateFilter('start_date'),
+			expiry_date: dateFilter('expiry_date'),
 			is_assigned: IS_ASSIGNED_FILTER,
 			owner: OWNER_FILTER,
-			linked_models: APPLIED_CONTROL_LINKED_MODELS_FILTER
+			linked_models: APPLIED_CONTROL_LINKED_MODELS_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	policies: {
@@ -1935,7 +1981,12 @@ export const listViewFields = {
 			status: APPLIED_CONTROL_STATUS_FILTER,
 			csf_function: CSF_FUNCTION_FILTER,
 			owner: OWNER_FILTER,
-			priority: PRIORITY_FILTER
+			priority: PRIORITY_FILTER,
+			eta: dateFilter('eta'),
+			expiry_date: dateFilter('expiry_date'),
+			start_date: dateFilter('start_date'),
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'reference-controls': {
@@ -1972,7 +2023,9 @@ export const listViewFields = {
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'reference-controls/provider' }
 			},
 			csf_function: CSF_FUNCTION_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	assets: {
@@ -2005,7 +2058,9 @@ export const listViewFields = {
 			type: ASSET_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER,
 			asset_class: ASSET_CLASS_FILTER,
-			is_business_function: ASSET_IS_BUSINESS_FUNCTION_FILTER
+			is_business_function: ASSET_IS_BUSINESS_FUNCTION_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'asset-class': {
@@ -2121,7 +2176,11 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
 			framework: FRAMEWORK_FILTER,
-			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER
+			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
+			due_date: dateFilter('due_date'),
+			eta: dateFilter('eta'),
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'requirement-assessments': {
@@ -2154,14 +2213,18 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
 			status: EVIDENCE_STATUS_FILTER,
-			owner: EVIDENCE_OWNER_FILTER
+			owner: EVIDENCE_OWNER_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'evidence-revisions': {
 		head: ['version', 'evidence', 'file', 'size', 'updatedAt'],
 		body: ['version', 'evidence', 'attachment', 'size', 'updated_at'],
 		filters: {
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'document-revisions': {
@@ -2307,7 +2370,9 @@ export const listViewFields = {
 			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER,
 			last_assessment_status: LAST_ASSESSMENT_STATUS_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'entity-assessments': {
@@ -2340,15 +2405,17 @@ export const listViewFields = {
 			'folder'
 		],
 		optionalFields: {
-			head: ['perimeter'],
-			body: ['perimeter']
+			head: ['perimeter', 'expiryDate'],
+			body: ['perimeter', 'expiry_date']
 		},
 		filters: {
 			perimeter: PERIMETER_FILTER,
 			entity: ENTITY_FILTER,
 			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
 			criticality: ENTITY_CRITICALITY_FILTER,
-			conclusion: ENTITY_ASSESSMENT_CONCLUSION_FILTER
+			conclusion: ENTITY_ASSESSMENT_CONCLUSION_FILTER,
+			due_date: dateFilter('due_date'),
+			expiry_date: dateFilter('expiry_date')
 		}
 	},
 	solutions: {
@@ -2361,7 +2428,9 @@ export const listViewFields = {
 		filters: {
 			provider_entity: ENTITY_FILTER,
 			criticality: SOLUTION_CRITICALITY_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	contracts: {
@@ -2393,7 +2462,9 @@ export const listViewFields = {
 			status: CONTRACT_STATUS_FILTER,
 			provider_entity: PROVIDER_ENTITY_FILTER,
 			beneficiary_entity: BENEFICIARY_ENTITY_FILTER,
-			solutions: SOLUTION_FILTER
+			solutions: SOLUTION_FILTER,
+			start_date: dateFilter('start_date'),
+			end_date: dateFilter('end_date')
 		}
 	},
 	'entity-scores': {
@@ -2424,7 +2495,9 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
-			status: RISK_ASSESSMENT_STATUS_FILTER
+			status: RISK_ASSESSMENT_STATUS_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'asset-assessments': {
@@ -2475,7 +2548,9 @@ export const listViewFields = {
 			'created_at'
 		],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	processings: {
@@ -2500,7 +2575,9 @@ export const listViewFields = {
 			nature: PROCESSING_NATURE_FILTER,
 			personal_data__category: PERSONAL_DATA_CATEGORY_FILTER,
 			data_subjects__category: DATA_SUBJECT_CATEGORY_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'right-requests': {
@@ -2553,7 +2630,8 @@ export const listViewFields = {
 					label: 'processings',
 					multiple: true
 				}
-			}
+			},
+			due_date: dateFilter('due_date')
 		}
 	},
 	'data-breaches': {
@@ -2616,7 +2694,9 @@ export const listViewFields = {
 					label: 'affectedProcessings',
 					multiple: true
 				}
-			}
+			},
+			discovered_on: dateFilter('discovered_on', { isDateTime: true }),
+			authority_notified_on: dateFilter('authority_notified_on', { isDateTime: true })
 		}
 	},
 	purposes: {
@@ -2697,7 +2777,9 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
 			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
-			status: ORGANISATION_ISSUE_STATUS_FILTER
+			status: ORGANISATION_ISSUE_STATUS_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'feared-events': {
@@ -2872,7 +2954,10 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			severity: EXCEPTION_SEVERITY_FILTER,
-			status: EXCEPTION_STATUS_FILTER
+			status: EXCEPTION_STATUS_FILTER,
+			expiration_date: dateFilter('expiration_date'),
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'findings-assessments': {
@@ -2907,7 +2992,8 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			category: FINDINGS_ASSESSMENTS_CATEGORY_FILTER,
 			status: FINDINGS_ASSESSMENTS_STATUS_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			reported_at: dateFilter('reported_at')
 		}
 	},
 	'posture-assessments': {
@@ -2930,7 +3016,9 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			state: COMMITMENT_STATE_FILTER,
-			committed_by: COMMITMENT_OWNER_FILTER
+			committed_by: COMMITMENT_OWNER_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	findings: {
@@ -2969,7 +3057,11 @@ export const listViewFields = {
 			severity: FINDINGS_SEVERITY_FILTER,
 			status: FINDINGS_STATUS_FILTER,
 			priority: FINDINGS_PRIORITY_FILTER,
-			owner: FINDINGS_OWNER_FILTER
+			owner: FINDINGS_OWNER_FILTER,
+			due_date: dateFilter('due_date'),
+			eta: dateFilter('eta'),
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	incidents: {
@@ -3008,7 +3100,10 @@ export const listViewFields = {
 			status: INCIDENT_STATUS_FILTER,
 			detection: INCIDENT_DETECTION_FILTER,
 			severity: INCIDENT_SEVERITY_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			reported_at: dateFilter('reported_at', { isDateTime: true }),
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'timeline-entries': {
@@ -3055,7 +3150,11 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			status: ORGANISATION_OBJECTIVE_STATUS_FILTER,
 			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER,
-			is_active: USER_IS_ACTIVE_FILTER
+			is_active: USER_IS_ACTIVE_FILTER,
+			start_date: dateFilter('start_date'),
+			eta: dateFilter('eta'),
+			due_date: dateFilter('due_date'),
+			closing_date: dateFilter('closing_date')
 		}
 	},
 	'organisation-issues': {
@@ -3083,7 +3182,9 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
 			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
-			status: ORGANISATION_ISSUE_STATUS_FILTER
+			status: ORGANISATION_ISSUE_STATUS_FILTER,
+			start_date: dateFilter('start_date'),
+			expiration_date: dateFilter('expiration_date')
 		}
 	},
 	'quantitative-risk-studies': {
@@ -3091,7 +3192,9 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'status', 'updated_at', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			status: RISK_ASSESSMENT_STATUS_FILTER
+			status: RISK_ASSESSMENT_STATUS_FILTER,
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'quantitative-risk-scenarios': {
@@ -3201,7 +3304,10 @@ export const listViewFields = {
 			enabled: ENABLED_FILTER,
 			last_occurrence_status: LAST_OCCURENCE_STATUS_FILTER,
 			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			task_date: dateFilter('task_date'),
+			created_at: CREATED_AT_FILTER,
+			updated_at: UPDATED_AT_FILTER
 		}
 	},
 	'task-nodes': {
@@ -3212,7 +3318,8 @@ export const listViewFields = {
 			past: PAST_FILTER,
 			// URL-driven only (the "All occurrences" link on a task's detail page):
 			// without an entry here the table drops the param instead of applying it.
-			task_template: { hide: true } as ListViewFilterConfig
+			task_template: { hide: true } as ListViewFilterConfig,
+			due_date: dateFilter('due_date')
 		}
 	},
 	qualifications: {
@@ -3267,7 +3374,8 @@ export const listViewFields = {
 			status: ACCREDITATION_STATUS_FILTER,
 			category: ACCREDITATION_CATEGORY_FILTER,
 			authority: ACCREDITATION_AUTHORITY_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			expiry_date: dateFilter('expiry_date')
 		}
 	},
 	projects: {

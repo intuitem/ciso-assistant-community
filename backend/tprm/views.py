@@ -1161,6 +1161,8 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         "genericcollection",
         # A third-party campaign owns the questionnaire; the assessment hangs off it.
         "compliance_assessment__campaign",
+        "due_date",
+        "expiry_date",
     ]
 
     # Ordering the raw string would be alphabetical; the annotation ranks it by
@@ -1715,6 +1717,7 @@ class ContractViewSet(ExportMixin, BaseModelViewSet):
         "notice_period_entity",
         "notice_period_provider",
         "end_date",
+        "start_date",
     ]
 
     @action(detail=False, name="Get status choices")
