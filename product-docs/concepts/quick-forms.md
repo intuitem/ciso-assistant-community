@@ -12,6 +12,8 @@ The distinction from an audit matters. An audit measures an organisation against
 
 {% hint style="info" %}
 Quick forms are gated by the **Forms and Requests** feature flag, off by default. Turn it on under **Settings → Feature flags**.
+
+You also need **Custom portals**. A portal tile is currently the only way a requester starts a request, so a published form with no portal behind it cannot be reached.
 {% endhint %}
 
 ## Mental model
@@ -21,13 +23,14 @@ graph LR
   LIB[Library] -->|imports| QF[Quick form]
   QF -->|published as| PUB[Published form]
   PUB -->|scopes| AUD[Audience]
-  PUB -->|filed as| REQ[Request]
+  PUB -->|surfaced on| POR[Portal tile]
+  POR -->|filed as| REQ[Request]
   REQ -->|classified by| OUT[Outcomes]
   REQ -->|decided by| REV[Reviewer]
   OUT -.->|may produce| OBJ[Security exception / applied control]
 ```
 
-A **quick form** arrives from a **library**, like a framework or a risk matrix does. On its own it cannot be filled — it must first be **published**, which is what names the **audience** allowed to file it and the domain their requests land in. Someone in that audience files a **request**, answers it, and submits. The answers compute a **score** and fire **outcomes**, which classify the request. A **reviewer** decides. An accepted request can then produce a real governed object, with the link back to the request that caused it.
+A **quick form** arrives from a **library**, like a framework or a risk matrix does. On its own it cannot be filled — it must first be **published**, which is what names the **audience** allowed to file it and the domain their requests land in. A publication is then surfaced to people through a **portal tile**, which is where they click to start. Someone in that audience files a **request**, answers it, and submits. The answers compute a **score** and fire **outcomes**, which classify the request. A **reviewer** decides. An accepted request can then produce a real governed object, with the link back to the request that caused it.
 
 | User-facing | Internal | Notes |
 |---|---|---|
@@ -64,6 +67,8 @@ A quick form sitting in the catalog cannot be filled by anyone. Publishing it is
 | **Allow multiple drafts** | Off: a requester with an unfinished draft is handed it back instead of starting a new one. Submitted requests are never limited |
 
 The same form can be published more than once — to different audiences, landing in different domains, with different reviewers. That is how one derogation form serves several business units without being copied.
+
+Publishing is necessary but not sufficient: a publication becomes reachable when a **portal tile** points at it. **My requests** lists the portals you can ask from, not the publications themselves.
 
 Audience membership is the authorisation here. It is not folder permissions: someone in the audience can file a request into a domain they otherwise cannot see, and they will still not see anything else in it.
 

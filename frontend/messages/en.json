@@ -5981,7 +5981,7 @@
 	"lbListQuickFormName": "Quick form name",
 	"lbListQuickFormNamePlaceholder": "My derogation request",
 	"lbListQuickHelpQuickForm": "Name and packager determine every URN of the quick form. The packager is remembered for next time; the wrapping library stays out of the way and remains editable in the draft's full view until first publication.",
-	"quickFormsAuthoredInBuilder": "Quick forms come from libraries. Build your own in the library builder, then publish it to an audience.",
+	"quickFormsAuthoredInBuilder": "Quick forms come from libraries. Build your own in the library builder, then publish it to an audience via a portal.",
 	"lbListNewFramework": "New framework",
 	"lbListNewMatrix": "New matrix",
 	"lbListNewLibraryDraft": "New Library Draft",

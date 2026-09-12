@@ -262,8 +262,8 @@
 			</div>
 		{/if}
 
-		<!-- Editable but not decidable means they are on the asking side. -->
-		{#if viewerIsRequester || (canEdit && !canReview)}
+		<!-- The asking side. `can_edit_answers` is already requester-gated server-side. -->
+		{#if viewerIsRequester || content.can_edit_answers}
 			<!-- The person who filed this. Submitting is theirs; deciding is not. -->
 			<div class="flex flex-wrap items-center gap-2 pt-1">
 				{#if response.status === 'draft'}
@@ -295,9 +295,12 @@
 					<i class="fa-solid fa-copy mr-1"></i>{m.quickFormClone()}
 				</button>
 			</div>
-			<!-- Deciding is `approve`, not `change`: the Approver role holds one and not the
-		     other, and requiring both left it with no action bar at all. -->
-		{:else if canReview}
+		{/if}
+		<!-- Independent of the block above: being the requester and being able to decide
+		     are not exclusive. With self-validation on the same person is both, and an
+		     {:else if} silently dropped one of the two sets. Deciding keys on `approve`,
+		     not `change` — the Approver role holds one and not the other. -->
+		{#if canReview}
 			{#if suggestedActions.length}
 				<!-- Supervised automation: the outcomes suggest, the reviewer commits, the
 				     workflow executes. Offered only when the answers make them relevant. -->

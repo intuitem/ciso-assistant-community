@@ -5733,7 +5733,7 @@
 	"lbListQuickFormName": "Nom du formulaire rapide",
 	"lbListQuickFormNamePlaceholder": "Ma demande de dérogation",
 	"lbListQuickHelpQuickForm": "Le nom et le packager déterminent toutes les URN du formulaire rapide. Le packager est mémorisé pour la prochaine fois ; la bibliothèque qui l'enveloppe reste discrète et modifiable dans la vue complète du brouillon jusqu'à la première publication.",
-	"quickFormsAuthoredInBuilder": "Les formulaires rapides proviennent de bibliothèques. Créez le vôtre dans le constructeur de bibliothèques, puis publiez-le auprès d'un public.",
+	"quickFormsAuthoredInBuilder": "Les formulaires rapides proviennent de bibliothèques. Créez le vôtre dans le constructeur de bibliothèques, puis publiez-le auprès d'un public via un portail.",
 	"lbListNewFramework": "Nouveau référentiel",
 	"lbListNewMatrix": "Nouvelle matrice",
 	"lbListNewLibraryDraft": "Nouveau brouillon de bibliothèque",

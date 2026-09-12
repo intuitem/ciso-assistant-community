@@ -6,7 +6,7 @@ description: "Enable the feature, import a ready-made derogation form, publish i
 
 This walkthrough takes about ten minutes. You will enable the feature, import a ready-made **Derogation request** form, publish it so people can actually file it, submit one as a requester, then decide it as a reviewer.
 
-You need an administrator to do the first two steps. For the last two you need **two different people** — or at least two accounts — because whoever submits a request may not decide it.
+You need an administrator for the first three steps. For the last two you need **two different people** — or at least two accounts — because whoever submits a request may not decide it.
 
 ## 1. Enable the feature
 
@@ -14,7 +14,8 @@ Quick forms ship behind a feature flag.
 
 1. Open **Extra > Settings**, then the **Feature flags** tab.
 2. Turn on **Forms and Requests**. The description reads: "Standalone forms filled outside an audit, and the requests they raise".
-3. Save. Three entries appear in the sidebar: **Quick forms** under Catalog, **Requests** under Governance, and **My requests** at the top.
+3. Turn on **Custom portals** as well. A portal tile is how a requester starts a request, so without it the rest of this walkthrough has no entry point.
+4. Save. Three entries appear in the sidebar: **Quick forms** under Catalog, **Requests** under Governance, and **My requests** at the top.
 
 ## 2. Import a form
 
@@ -45,12 +46,21 @@ This is the step people miss. A form in the catalog cannot be filled by anyone �
 3. Leave **Allow multiple drafts** off. A requester who already has an unfinished draft is then handed it back instead of starting a second one.
 4. Save.
 
-## 4. File a request
+## 4. Put it on a portal
+
+Publishing says who may ask. A portal tile is where they click to do it — and it is currently the only way in.
+
+1. Go to **Manage portals** and open a portal your audience can see, or create one.
+2. Add a tile and set its kind to **Quick form**.
+3. Under **Form source**, pick your published form from the **Published forms** list. A tile wired to a publication inherits its audience, its domain and its reviewers, so the two entry points cannot drift apart.
+4. Save the portal.
+
+## 5. File a request
 
 Sign in as someone in the audience — a person with no particular permissions on the submission domain. That is the point: audience membership is the authorisation.
 
 1. Open **My requests**. The subtitle reads "Everything you have asked for — drafts first."
-2. Under **Start a request from**, click the published form.
+2. Under **Start a request from**, click the portal that carries your tile, then click the tile.
 3. Answer the first page and move on. Answers save as you go — the request appears in your list as **Unfinished** with the hint "Your answers are saved. Pick up where you left off."
 4. On the last page, answer **Is a compensating control already in place?** with **No**. Watch the question below it change: answering *No* asks what you plan to put in place, answering *Yes* asks which control already covers it.
 5. Click **Submit**.
@@ -59,7 +69,7 @@ If **Submit** is greyed out, hover it: "Answer every required question on every 
 
 The request moves to **Awaiting review**, and its content freezes. From here you can still **Drop** it, which withdraws it without a reviewer's decision.
 
-## 5. Decide it
+## 6. Decide it
 
 Sign in as a reviewer — someone with approval rights on the submission domain.
 
@@ -77,7 +87,7 @@ Two things worth noticing on this screen:
 
 Instead of deciding, you can send the request back to the requester. It returns to **Draft**, they change their answers and resubmit.
 
-## 6. Write your own form
+## 7. Write your own form
 
 Once the ready-made one makes sense, build one of your own.
 

@@ -1209,3 +1209,48 @@ def test_preview_survives_non_choice_answers(app_config):
     # The boolean did not merely survive: it drove the rule that reads it.
     assert "dpia_required" in (body["computed_outcome"] or {}), body["computed_outcome"]
     assert body["progress"]["answered_count"] == 2, body["progress"]
+
+
+@pytest.mark.django_db
+def test_respondent_role_can_answer_and_submit(app_config):
+    """BI-RL-ADE ("Respondent") holds no quick-form permission at all, and does not need
+    one: `/my-requests` authorises on respondent membership, not folder RBAC."""
+    _load(LIBRARY_V1)
+    form = QuickForm.objects.get(urn=FORM_URN)
+    folder = Folder.objects.create(
+        name="qf-respondent", parent_folder=Folder.get_root_folder()
+    )
+    user, client = _role_client("qf-respondent@test.local", "BI-RL-ADE", folder)
+    actor = Actor.objects.filter(user=user, entity__isnull=True).first()
+
+    response = QuickFormResponse.objects.create(
+        name="theirs",
+        quick_form=form,
+        folder=folder,
+        status=QuickFormResponse.Status.DRAFT,
+    )
+    response.respondents.add(actor)
+    base = f"/api/my-requests/{response.id}/"
+
+    assert client.get("/api/my-requests/").status_code == 200
+    assert client.get(f"{base}content/").status_code == 200
+
+    res = client.patch(
+        f"{base}answers/",
+        {"answers": {Q_SENSITIVE: False, Q_HEADCOUNT: 5}},
+        format="json",
+    )
+    assert res.status_code == 200, res.json()
+
+    res = client.post(f"{base}submit/", {}, format="json")
+    assert res.status_code == 200, res.json()
+    response.refresh_from_db()
+    assert response.status == QuickFormResponse.Status.SUBMITTED
+    assert response.submitted_by_id == user.id
+
+    # And the reviewer surface stays shut: answering is not reviewing. 404 rather than
+    # 403 — folder scoping hides the row, so it does not leak that it exists.
+    assert (
+        client.get(f"/api/quick-form-responses/{response.id}/content/").status_code
+        == 404
+    )
