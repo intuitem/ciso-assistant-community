@@ -1053,9 +1053,11 @@
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
 																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
+																			{@const [labelKey, ...valueParts] = val.split(':')}
 																			<span class="text"
-																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																				{val.split(':')[1]}</span
+																				>{unsafeTranslate(labelKey + 'Colon') ??
+																					`${unsafeTranslate(labelKey)}:`}
+																				{valueParts.join(':')}</span
 																			>
 																		{:else}
 																			{val ?? '-'}

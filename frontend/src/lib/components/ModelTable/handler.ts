@@ -81,7 +81,9 @@ export const loadTableData = async ({
 const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
 	const params = new URLSearchParams();
 	params.set('offset', offset.toString() ?? '0');
-	params.set('limit', rowsPerPage.toString() ?? '10');
+	// rowsPerPage is 0 when a table opts out of pagination, and the backend rejects
+	// limit=0; leaving it unset falls back to the server default page size.
+	if (rowsPerPage) params.set('limit', rowsPerPage.toString());
 	if (search) {
 		params.set('search', search);
 	}

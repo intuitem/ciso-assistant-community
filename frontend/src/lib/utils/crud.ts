@@ -2988,7 +2988,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }, { field: 'kind' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'framework', urlModel: 'frameworks' },
+			{ field: 'frameworks', urlModel: 'frameworks' },
 			{ field: 'perimeters', urlModel: 'perimeters' },
 			{ field: 'entities', urlModel: 'entities' }
 		],
@@ -3023,7 +3023,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: [
 			{ field: 'status' },
-			{ field: 'framework' },
+			{ field: 'frameworks' },
 			{ field: 'folder' },
 			{ field: 'perimeters' }
 		]
