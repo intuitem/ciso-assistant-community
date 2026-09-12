@@ -392,6 +392,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     validation_flows = serializers.BooleanField(
         source="value.validation_flows", required=False, default=False
     )
+    risk_owner_approvals = serializers.BooleanField(
+        source="value.risk_owner_approvals", required=False, default=False
+    )
     outgoing_webhooks = serializers.BooleanField(
         source="value.outgoing_webhooks", required=False, default=False
     )

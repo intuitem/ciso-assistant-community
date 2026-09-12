@@ -1,0 +1,13 @@
+subject: "CISO Assistant : ${risk_approval_stage} demandée pour ${risk_ref_id}"
+body: |
+  Bonjour,
+
+  Une approbation de risque vous a été attribuée pour décision :
+
+  - Risque : ${risk_ref_id} – ${risk_name}
+  - Décision demandée : ${risk_approval_stage}
+  - Demandée par : ${requester_name}
+  - Échéance de décision : ${validation_deadline}
+  - Domaine : ${folder_name}
+
+  Veuillez examiner la version soumise : [Ouvrir l’approbation du risque](${validation_url})

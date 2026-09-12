@@ -7298,6 +7298,41 @@ class RiskScenarioFilter(TimestampRangeFilterMixin, GenericFilterSet):
 
 
 class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
+    @action(detail=True, methods=["get"], url_path="approval-options")
+    def approval_options(self, request, pk=None):
+        """List named risk owners eligible to approve this scenario."""
+        from core.risk_approvals import (
+            approval_candidates,
+            management_approval_candidates,
+            residual_risk_above_tolerance,
+            risk_approvals_enabled,
+        )
+
+        if not risk_approvals_enabled():
+            raise PermissionDenied("riskApprovalFeatureDisabled")
+        scenario = self.get_object()
+
+        visible_user_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, User)
+        )
+        visible_user_ids.add(request.user.id)
+
+        return Response(
+            {
+                "approvers": approval_candidates(scenario, visible_user_ids),
+                "management_approvers": management_approval_candidates(
+                    scenario, visible_user_ids
+                ),
+                "residual_risk_above_tolerance": residual_risk_above_tolerance(
+                    scenario
+                ),
+                "risk_tolerance": scenario.risk_assessment.risk_tolerance,
+                "risk_tolerance_configured": (
+                    scenario.risk_assessment.risk_tolerance >= 0
+                ),
+            }
+        )
+
     """
     API endpoint that allows risk scenarios to be viewed or edited.
     """
@@ -7454,10 +7489,17 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
         ).prefetch_related(
             "threats",
             "assets",
-            "applied_controls",
-            "existing_applied_controls",
+            "vulnerabilities",
+            "applied_controls__owner",
+            "existing_applied_controls__owner",
             "owner",
             "security_exceptions",
+            Prefetch(
+                "risk_approvals",
+                queryset=ValidationFlow.objects.select_related(
+                    "approver", "requester", "folder"
+                ),
+            ),
         )
 
     def _perform_write(self, serializer):
@@ -7866,6 +7908,8 @@ VALIDATION_FLOW_OPEN_STATUSES = [
 
 
 class ValidationFlowFilterSet(GenericFilterSet):
+    risk_scenario = df.UUIDFilter(field_name="risk_scenario_id")
+
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     requester = df.ModelMultipleChoiceFilter(queryset=User.objects.all())
     approver = df.ModelMultipleChoiceFilter(queryset=User.objects.all())
@@ -7937,6 +7981,11 @@ class ValidationFlowFilterSet(GenericFilterSet):
 
 
 class ValidationFlowViewSet(BaseModelViewSet):
+    def perform_destroy(self, instance):
+        if instance.risk_scenario_id:
+            raise ValidationError("riskApprovalHistoryProtected")
+        return super().perform_destroy(instance)
+
     """
     API endpoint that allows validation flows to be viewed or edited.
     """
@@ -7976,7 +8025,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
         accreditation_model = related_model("accreditations")
         contract_model = related_model("contracts")
 
-        queryset = queryset.select_related("requester", "approver").prefetch_related(
+        queryset = queryset.select_related(
+            "requester", "approver", "risk_scenario__risk_assessment__risk_matrix"
+        ).prefetch_related(
             Prefetch("events", queryset=events_qs),
             Prefetch("compliance_assessments", queryset=compliance_qs),
             Prefetch("risk_assessments", queryset=risk_qs),

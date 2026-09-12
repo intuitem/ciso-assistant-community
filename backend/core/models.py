@@ -10657,6 +10657,23 @@ class TaskNode(AbstractBaseModel, FolderMixin):
 
 
 class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
+    class RiskApprovalStage(models.TextChoices):
+        ASSESSMENT = "assessment", "Assessment"
+        TREATMENT = "treatment", "Treatment"
+        RESIDUAL_ACCEPTANCE = "residual_acceptance", "Residual risk acceptance"
+
+    risk_scenario = models.ForeignKey(
+        RiskScenario,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="risk_approvals",
+    )
+    risk_approval_stage = models.CharField(
+        max_length=20, choices=RiskApprovalStage.choices, blank=True, default=""
+    )
+    risk_snapshot = models.JSONField(default=dict, blank=True)
+
     class Status(models.TextChoices):
         SUBMITTED = "submitted", "Submitted"
         ACCEPTED = "accepted", "Accepted"
@@ -10832,6 +10849,9 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
 
 
 class FlowEvent(AbstractBaseModel, FolderMixin):
+    risk_snapshot = models.JSONField(default=dict, blank=True)
+    residual_risk_accepted = models.BooleanField(default=False)
+
     validation_flow = models.ForeignKey(
         ValidationFlow,
         on_delete=models.CASCADE,

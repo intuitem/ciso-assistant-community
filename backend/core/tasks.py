@@ -1248,7 +1248,9 @@ def send_validation_flow_created_notification(validation_flow):
     if not check_email_configuration(approver_email, [validation_flow]):
         return
 
-    from .email_utils import render_email_template
+    from .email_utils import get_locale_for_email, render_email_template
+
+    locale = (get_locale_for_email(approver_email) or "en").split("-")[0].lower()
 
     requester_name = (
         f"{validation_flow.requester.first_name} {validation_flow.requester.last_name}".strip()
@@ -1275,8 +1277,41 @@ def send_validation_flow_created_notification(validation_flow):
         "validation_url": f"{getattr(settings, 'CISO_ASSISTANT_URL', 'http://localhost:5173')}/validation-flows/{validation_flow.id}",
     }
 
+    template_name = "validation_flow_created"
+    if validation_flow.risk_scenario_id:
+        stage_labels = {
+            "de": {
+                "assessment": "Einstufung",
+                "treatment": "Behandlung",
+                "residual_acceptance": "Akzeptanz oberhalb der Risikotoleranz",
+            },
+            "en": {
+                "assessment": "Assessment",
+                "treatment": "Treatment",
+                "residual_acceptance": "Above-tolerance risk acceptance",
+            },
+            "fr": {
+                "assessment": "Évaluation",
+                "treatment": "Traitement",
+                "residual_acceptance": "Acceptation au-delà de la tolérance",
+            },
+        }
+        labels = stage_labels.get(locale, stage_labels["en"])
+        scenario = validation_flow.risk_scenario
+        context.update(
+            {
+                "risk_ref_id": scenario.ref_id,
+                "risk_name": scenario.name,
+                "risk_approval_stage": labels.get(
+                    validation_flow.risk_approval_stage,
+                    validation_flow.risk_approval_stage,
+                ),
+            }
+        )
+        template_name = "risk_approval_created"
+
     rendered = render_email_template(
-        "validation_flow_created", context, recipient_email=approver_email
+        template_name, context, locale=locale, recipient_email=approver_email
     )
     if rendered:
         send_notification_email(

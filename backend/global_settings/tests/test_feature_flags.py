@@ -12,6 +12,7 @@ from global_settings.serializers import FeatureFlagsSerializer
 from global_settings.utils import (
     clear_feature_flags_cache,
     ff_is_enabled,
+    get_feature_flag_defaults,
     get_supported_feature_flags,
 )
 
@@ -130,6 +131,11 @@ def test_supported_flags_derived_from_serializer():
     assert supported == declared
     assert "incidents" in supported
     assert "idp_groups" not in supported
+
+
+def test_risk_owner_approvals_are_opt_in():
+    defaults = get_feature_flag_defaults()
+    assert defaults["risk_owner_approvals"] is False
 
 
 def test_startup_seeds_declared_defaults(no_flags_row):

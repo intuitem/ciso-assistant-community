@@ -11,6 +11,7 @@ declare global {
 		interface Locals {
 			user: User;
 			featureFlags: FeatureFlags;
+			featureflags?: Record<string, boolean>;
 			globalSettings: GlobalSettings;
 			generalSettings: Record<string, any>;
 		}

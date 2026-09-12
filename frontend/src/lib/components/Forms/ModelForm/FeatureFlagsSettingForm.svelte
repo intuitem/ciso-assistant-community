@@ -210,6 +210,11 @@
 					description: m.riskAcceptancesDescription()
 				},
 				{
+					field: 'risk_owner_approvals',
+					label: m.riskOwnerApprovalsFeature(),
+					description: m.riskOwnerApprovalsFeatureDescription()
+				},
+				{
 					field: 'inherent_risk',
 					label: m.inherentRisk(),
 					description: m.inherentRiskLevelHelpText()
@@ -353,7 +358,7 @@
 	const allFields: string[] = featureFlagGroups.flatMap((g) => g.fields.map((f) => f.field));
 
 	// Preset ON-sets. Any flag not listed is turned OFF when the preset is applied.
-	// `inherent_risk` is intentionally absent from every preset (kept off by default).
+	// `inherent_risk` and `risk_owner_approvals` are intentionally absent from every preset.
 	const PRESETS = [
 		{
 			id: 'minimal',

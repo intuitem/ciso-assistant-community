@@ -51,6 +51,12 @@
 		return name || user.email;
 	}
 
+	function riskApprovalStageLabel(stage: string): string {
+		if (stage === 'assessment') return m.riskApprovalAssessment();
+		if (stage === 'treatment') return m.riskApprovalTreatment();
+		return m.riskApprovalResidualAcceptance();
+	}
+
 	function runAction(action: ValidationFlowAction) {
 		modalStore.trigger({
 			type: 'component',
@@ -106,12 +112,26 @@
 			{/if}
 		</div>
 
+		{#if flow.risk_scenario && flow.risk_approval_stage}
+			<div class="flex flex-wrap items-center gap-2 text-sm" data-testid="risk-approval-subject">
+				<span class="font-medium">{m.riskApprovalStage()}:</span>
+				<span class="badge preset-tonal-primary">
+					{riskApprovalStageLabel(flow.risk_approval_stage)}
+				</span>
+				<Anchor href="/risk-scenarios/{flow.risk_scenario.id}" class="anchor">
+					{flow.risk_scenario.ref_id} – {flow.risk_scenario.name}
+				</Anchor>
+			</div>
+		{/if}
+
 		{#if linkedObjects.length}
 			<div class="flex flex-col gap-1">
-				{#each linkedObjects.slice(0, 3) as { key, item, href }}
+				{#each linkedObjects.slice(0, 3) as { key, item, href } (`${key}:${item.id}`)}
 					<div class="flex items-baseline gap-2 min-w-0">
 						<span class="text-xs text-surface-500 whitespace-nowrap">{modelLabels[key]}</span>
-						<Anchor {href} class="anchor text-sm truncate">{item.str}</Anchor>
+						<Anchor {href} class="anchor text-sm truncate">
+							{item.str ?? item.ref_id ?? item.name}
+						</Anchor>
 					</div>
 				{/each}
 				{#if linkedObjects.length > 3}
@@ -153,7 +173,7 @@
 	</div>
 
 	<div class="flex flex-wrap items-center gap-2 md:justify-end md:shrink-0">
-		{#each actions as action}
+		{#each actions as action (action)}
 			<button
 				type="button"
 				class="btn btn-sm {VALIDATION_ACTION_CLASSES[action]}"

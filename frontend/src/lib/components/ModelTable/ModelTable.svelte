@@ -700,7 +700,12 @@
 
 	// Computed in Python from related rows, so there is no column for the backend to
 	// ORDER BY: DRF drops the term and the click does nothing. Better not to offer it.
-	const UNSORTABLE_COMPUTED_COLUMNS = ['completion', 'review_progress', 'schedule'];
+	const UNSORTABLE_COMPUTED_COLUMNS = [
+		'completion',
+		'review_progress',
+		'schedule',
+		'risk_approval_summary'
+	];
 
 	// Function to check if a column is multi-value and should not be sortable
 	const isMultiValueColumn = (key: string): boolean => {
