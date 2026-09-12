@@ -2198,8 +2198,14 @@ def duplicate_related_objects(
             # If the object exists in the target folder, link it to the duplicate object
             link_existing_object(duplicate_object, existing_obj, field_name)
 
-        elif obj.folder in target_parent_folders and obj.is_published:
-            # If the object's folder is a parent and it's published, link it
+        elif (
+            obj.folder in target_parent_folders
+            and obj.folder.default_role is not None
+            and obj.folder.default_role.permissions.filter(
+                codename=f"view_{model_class._meta.model_name}"
+            ).exists()
+        ):
+            # Link the object if the user can see it thanks to the `obj.folder.default_role`.
             link_existing_object(duplicate_object, obj, field_name)
 
         elif obj.folder in sub_folders:

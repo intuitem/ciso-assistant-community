@@ -124,20 +124,26 @@ The following schematic illustrates the fundamental concepts of IAM in CISO Assi
 
 <figure><img src="../../.gitbook/assets/rbac.png" alt=""><figcaption></figcaption></figure>
 
-### 6. Publication mechanism
+### 6. Default role mechanism
 
-All objects of CISO Assistant support a built-in flag called _**is\_published.**_&#x20;
+Every domain has **members**: the people its own and its sub-domains' IAM groups grant roles to. A domain can carry a **default role** — the role it grants its members, on the domain itself: never recursively, and only there.
 
-Objects with the flag _is\_published_ are visible in subdomains as if they were attached to each subdomain of the object's domain. This mechanism only concerns visibility, not creation/udpate/deletion.\
-All objects are currently published, except assessments (audits, risk analysis, BIA, entitiy assessments)
+For example: if the **Domain** domain has the **Baseline reader** default role, then a user granted any role on **Domain** itself or on its sub-domain **ChildDomain** through the IAM groups is a member of **Domain**, and receives **Baseline reader** on it.
 
-To avoid an object being published, the simplest solution is to put it in a leaf subdomain.
+Who is *not* a member follows from the definition — no exception list to remember:
 
-The plan is to remove this mechanism by Q2 2026 and introduce dynamic groups instead (e.g. the group of all users).
+* **third parties** hold their grants inside third-party workspaces, which are not the domain's groups → never members;
+* **service accounts** hold direct role assignments — no group grants them anything, so they read exactly what their own assignment names (least privilege by design);
+* a grant made outside the IAM groups (a direct assignment) gives exactly what it names, nothing ambient;
+* deactivated users cannot sign in and therefore exercise no permission at all.
+
+Only roles containing view permissions can be used as a default role, and enclave domains cannot carry one.
+
+Configuring default roles is an **enterprise** capability: the domain form exposes the control there, and it can be tuned per domain — set to a narrower view-only role, or **cleared entirely** for domains that should share nothing ambiently. Clearing the root domain's default role gives the instance an **explicit-grant policy**: no ambient visibility at all, every access traceable to an assigned role. In the community edition, the default role exists only on the root domain, fixed to **Baseline reader**, and cannot be changed.
 
 #### Can I make an object visible to all users without attaching it to global?
 
-You can attach this object to a subdomain (e.g. named "published"), and add every user in the group corresponding to reader role on the subdomain. This does not rely on the publication mechanism, and is more generic.
+Yes — the shelf pattern: attach the object to a sub-domain (e.g. named "shared"), and add the intended readers to that sub-domain's reader group. This uses ordinary role assignments only, works for any object type, and the audience is exactly the group's member list — explicit and auditable.
 
 ### 7. Accounting: Full Audit and Traceability <a href="#ember965" id="ember965"></a>
 

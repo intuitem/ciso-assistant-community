@@ -488,7 +488,7 @@ def app_config(db):
 
 @pytest.fixture
 def admin_client(app_config):
-    admin = User.objects.create_superuser("admin@builder-tests.com", is_published=True)
+    admin = User.objects.create_superuser("admin@builder-tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()
@@ -597,8 +597,6 @@ def test_check_identity_requires_draft_creation_permission(app_config):
     """Any authenticated account without library permissions (e.g. a
     third-party respondent) must not be able to probe the corpus."""
     user = User.objects.create_user("nobody@builder-tests.com")
-    user.is_published = True
-    user.save()
     client = APIClient()
     _auth_token = AuthToken.objects.create(user=user)
     client.credentials(HTTP_AUTHORIZATION=f"Token {_auth_token[1]}")
@@ -1800,8 +1798,6 @@ def builder_only_client(app_config):
     folder-scoped read checks protect against.
     """
     user = User.objects.create_user("builder-only@builder-tests.com")
-    user.is_published = True
-    user.save()
     role = Role.objects.create(name="BuilderOnly", folder=Folder.get_root_folder())
     role.permissions.set(
         Permission.objects.filter(
@@ -1844,8 +1840,7 @@ def test_framework_editor_audits_are_rbac_scoped(app_config):
 
     admin = User.objects.create_superuser("audit-admin@builder-tests.com")
     builder = User.objects.create_user("nobody@builder-tests.com")
-    builder.is_published = True
-    builder.save()
+
     role = Role.objects.create(name="NoAudit", folder=root)
     role.permissions.set(Permission.objects.filter(codename="view_folder"))
     group = UserGroup.objects.create(name="no-audit-group", folder=root)

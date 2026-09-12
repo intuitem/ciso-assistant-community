@@ -439,7 +439,7 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Vulnerability
-        exclude = ["is_published"]
+        fields = "__all__"
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
@@ -449,7 +449,7 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Vulnerability
-        exclude = ["created_at", "updated_at", "is_published"]
+        exclude = ["created_at", "updated_at"]
 
 
 class VulnerabilityImportExportSerializer(BaseModelSerializer):
@@ -1110,7 +1110,7 @@ class AssetClassReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = AssetClass
-        exclude = ["created_at", "updated_at", "is_published"]
+        exclude = ["created_at", "updated_at"]
 
 
 class AssetClassWriteSerializer(BaseModelSerializer):
@@ -1119,7 +1119,7 @@ class AssetClassWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = AssetClass
-        exclude = ["created_at", "updated_at", "folder", "is_published"]
+        exclude = ["created_at", "updated_at", "folder"]
 
     def validate_name(self, value):
         if "/" in value:
@@ -2788,6 +2788,12 @@ class PermissionWriteSerializer(BaseModelSerializer):
 
 
 class RoleAssignmentReadSerializer(BaseModelSerializer):
+    user = FieldsRelatedField()
+    user_group = FieldsRelatedField()
+    role = FieldsRelatedField()
+    perimeter_folders = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+
     class Meta:
         model = RoleAssignment
         fields = "__all__"
@@ -2801,12 +2807,39 @@ class RoleAssignmentWriteSerializer(BaseModelSerializer):
 
 class FolderWriteSerializer(BaseModelSerializer):
     class Meta:
+        read_only_fields = ["content_type"]
         model = Folder
         exclude = [
             "builtin",
-            "content_type",
             "descendants",
+            # The default role is not configurable through this serializer: the
+            # root folder carries the baseline reader role, pinned by startup(),
+            # and no other folder gets one. A subclass may reopen the field
+            # (and inherits the validator below).
+            "default_role",
         ]
+
+    def validate_default_role(self, default_role):
+        if default_role is None:
+            return default_role
+
+        # The default role's audience is coarse (everyone working below), so only
+        # read capability may ever be ambient — write capability reaches people
+        # through explicit group placement, never through a default role.
+        if default_role.permissions.exclude(codename__startswith="view_").exists():
+            raise serializers.ValidationError(
+                "defaultRoleMustContainOnlyViewPermissions"
+            )
+
+        # Enclaves are visitor spaces and receive explicit grants only; a member
+        # audience there would contradict their purpose.
+        if (
+            self.instance is not None
+            and self.instance.content_type == Folder.ContentType.ENCLAVE
+        ):
+            raise serializers.ValidationError("enclaveFolderCannotHaveDefaultRole")
+
+        return default_role
 
     def update(self, instance, validated_data):
         if (
@@ -2879,6 +2912,7 @@ class FolderReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     parent_folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
+    default_role = FieldsRelatedField()
 
     content_type = serializers.CharField(source="get_content_type_display")
 
@@ -2901,6 +2935,39 @@ class FolderImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class RoleReadSerializer(BaseModelSerializer):
+    name = serializers.CharField(source="__str__")
+    permissions = serializers.SerializerMethodField()
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Role
+        fields = "__all__"
+
+    def get_permissions(self, obj):
+        return [{"str": perm.codename} for perm in obj.permissions.all()]
+
+
+class RoleWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Role
+        fields = "__all__"
+
+    def validate_permissions(self, permissions):
+        # A role already in use as some folder's default role must stay view-only;
+        # otherwise editing the role would silently hand write capability to every
+        # member audience that references it.
+        if (
+            self.instance is not None
+            and self.instance.default_role_folders.exists()
+            and not all(
+                permission.codename.startswith("view_") for permission in permissions
+            )
+        ):
+            raise serializers.ValidationError("roleUsedAsDefaultRoleMustStayViewOnly")
+        return permissions
 
 
 # Compliance Assessment
@@ -3138,7 +3205,7 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Evidence
-        exclude = ["is_published"]
+        fields = "__all__"
 
     def create(self, validated_data):
         attachment = validated_data.pop("attachment", None)
@@ -4663,7 +4730,6 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
             "builtin",
             "locale",
             "default_locale",
-            "is_published",
             "translations",
             "frameworks_available",
         ]
@@ -5119,7 +5185,7 @@ class FilteringLabelReadSerializer(BaseModelSerializer):
 class FilteringLabelWriteSerializer(BaseModelSerializer):
     class Meta:
         model = FilteringLabel
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class LibraryFilteringLabelReadSerializer(BaseModelSerializer):
@@ -5134,7 +5200,7 @@ class LibraryFilteringLabelReadSerializer(BaseModelSerializer):
 class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
     class Meta:
         model = LibraryFilteringLabel
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class SecurityExceptionWriteSerializer(
@@ -5532,7 +5598,7 @@ class CommitmentReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Commitment
-        exclude = ["content_type", "object_id", "is_published"]
+        exclude = ["content_type", "object_id"]
 
 
 class PresetReadSerializer(BaseModelSerializer):
@@ -6272,7 +6338,7 @@ class TerminologyWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Terminology
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class ClassificationLevelReadSerializer(BaseModelSerializer):
@@ -6291,7 +6357,7 @@ class ClassificationLevelWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = ClassificationLevel
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class ObjectClassificationReadSerializer(BaseModelSerializer):
@@ -6310,7 +6376,7 @@ class ObjectClassificationWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = ObjectClassification
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class ValidationFlowWriteSerializer(BaseModelSerializer):

@@ -85,9 +85,7 @@ class Command(BaseCommand):
             if not error:
                 return Framework.objects.get(library__urn=K8S_LIBRARY_URN)
         root = Folder.get_root_folder()
-        framework = Framework.objects.create(
-            name="TEST-Posture benchmark", folder=root, is_published=True
-        )
+        framework = Framework.objects.create(name="TEST-Posture benchmark", folder=root)
         for section in range(1, 4):
             for item in range(1, 11):
                 RequirementNode.objects.create(
@@ -97,7 +95,6 @@ class Command(BaseCommand):
                     name=f"Ensure demo setting {section}.{item} is hardened",
                     assessable=True,
                     folder=root,
-                    is_published=True,
                 )
         return framework
 

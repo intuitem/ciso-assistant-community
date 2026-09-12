@@ -369,7 +369,6 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 document_type=document_type,
                 name=request.data.get("name") or getattr(upload, "name", ""),
                 folder=folder,
-                is_published=False,
             )
             document = ManagedDocument.objects.create(
                 container=container,
@@ -441,7 +440,6 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 document_type=document_type,
                 name=request.data.get("name") or "",
                 folder=folder,
-                is_published=False,
             )
             document = ManagedDocument.objects.create(
                 container=container,

@@ -193,14 +193,12 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
                             name=validated_data.get("name")
                             or getattr(policy, "name", ""),
                             folder=policy.folder,
-                            is_published=policy.is_published,
                         )
                         container.policies.add(policy)
                 else:
                     container = DocumentContainer.objects.create(
                         document_type=document_type,
                         name=validated_data.get("name", ""),
-                        is_published=False,
                         **(
                             {"folder": validated_data["folder"]}
                             if validated_data.get("folder")
