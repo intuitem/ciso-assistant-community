@@ -147,6 +147,7 @@
 			!['frameworks', 'risk-matrices'].includes(URLModel) &&
 			editURL
 	);
+
 	let displayDelete = $derived(canDeleteObject && deleteForm !== null);
 </script>
 
