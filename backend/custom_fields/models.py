@@ -193,9 +193,7 @@ class CustomFieldDefinition(FolderMixin, PublishInRootFolderMixin, AbstractBaseM
 
     @staticmethod
     def _ancestor_or_self_ids(folder: Folder) -> set:
-        ids = {folder.id}
-        ids.update(f.id for f in folder.get_parent_folders())
-        return ids
+        return {f.id for f in folder.get_parent_folders(include_self=True)}
 
     @classmethod
     def for_object(cls, obj) -> models.QuerySet["CustomFieldDefinition"]:
