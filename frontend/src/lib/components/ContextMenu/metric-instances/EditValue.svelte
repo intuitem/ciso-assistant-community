@@ -5,6 +5,7 @@
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { modelSchema } from '$lib/utils/schemas';
 	import { getModelInfo } from '$lib/utils/crud';
+	import { createModalCache } from '$lib/utils/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
@@ -24,6 +25,7 @@
 	async function openAddSampleModal() {
 		const id = row?.meta?.id;
 		if (!id) return;
+		delete createModalCache.data['custom-metric-samples'];
 		const initialData = {
 			metric_instance: id,
 			_metric_definition: row.meta.metric_definition,
