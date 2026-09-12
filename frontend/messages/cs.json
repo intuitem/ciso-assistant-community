@@ -2346,6 +2346,7 @@
 	"exportTableMss": "Šablona MonServiceSécurisé",
 	"exportTableMssDesc": "Předvyplněná šablona pro portál MonServiceSécurisé od ANSSI",
 	"customFields": "Vlastní pole",
+	"customFieldsLoadError": "Vlastní pole se nepodařilo načíst. Znovu vyberte subjekt nebo znovu otevřete formulář a zkuste to znovu.",
 	"customFieldsDescription": "Definujte typovaná a filtrovatelná pole u objektů (Projekty, Aktiva a Aplikovaná opatření).",
 	"customField": "Vlastní pole",
 	"addCustomField": "Přidat vlastní pole",
