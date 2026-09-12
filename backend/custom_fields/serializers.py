@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
-from iam.models import Folder
+from iam.models import Folder, RoleAssignment
 
 from .models import (
     SEARCHABLE_TYPES,
@@ -177,16 +177,26 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
     def validate(self, attrs):
         attrs = super().validate(attrs)
         raw = self.initial_data.get("custom_fields")
+        new_folder = attrs.get("folder")
+        folder = new_folder or (
+            getattr(self.instance, "folder", None) or Folder.get_root_folder()
+        )
         if raw is None:
             self._pending_custom_fields = None
+            # A folder move re-scopes which definitions apply (update() discards
+            # the values that stop applying), so the destination's required
+            # fields must hold even when the client sends no custom_fields.
+            if (
+                self.instance is not None
+                and new_folder is not None
+                and new_folder.id != RoleAssignment.get_iam_folder_id(self.instance)
+            ):
+                self._clean({}, new_folder)
             return attrs
         if not isinstance(raw, dict):
             raise serializers.ValidationError(
                 {"custom_fields": "Expected an object of {key: value}."}
             )
-        folder = attrs.get("folder") or (
-            getattr(self.instance, "folder", None) or Folder.get_root_folder()
-        )
         self._pending_custom_fields = self._clean(raw, folder)
         return attrs
 
@@ -201,12 +211,34 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
             ).prefetch_related("choices")
         }
 
+        unknown_keys = set(raw) - set(definitions)
+        # Keys that name a real definition of this model, just not one applying
+        # to the target folder — as opposed to outright unknown (typo'd) keys.
+        out_of_scope = (
+            set(
+                CustomFieldDefinition.objects.filter(
+                    content_type=content_type, key__in=unknown_keys
+                ).values_list("key", flat=True)
+            )
+            if unknown_keys
+            else set()
+        )
+
         errors: dict = {}
         cleaned = []
         for key, value in raw.items():
             definition = definitions.get(key)
             if definition is None:
-                errors[key] = "Unknown custom field for this object."
+                if key in out_of_scope:
+                    # Tolerate empty leftovers: form clients may keep a
+                    # null/blank placeholder (or a checkbox's fabricated False)
+                    # for a field that stopped applying when the target folder
+                    # changed. A real value must not be dropped silently.
+                    if self._is_empty(value):
+                        continue
+                    errors[key] = "Custom field does not apply to this folder."
+                else:
+                    errors[key] = "Unknown custom field for this object."
                 continue
             try:
                 cleaned_value = self._clean_one(definition, value)
@@ -231,6 +263,20 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
         if errors:
             raise serializers.ValidationError({"custom_fields": errors})
         return cleaned
+
+    @staticmethod
+    def _is_empty(value) -> bool:
+        """Whether ``value`` carries no information for a custom field.
+
+        Empty means ``None``, ``False``, or an empty string/list/dict. ``False``
+        is matched by identity rather than equality because ``0 == False`` in
+        Python, and a numeric field set to ``0`` is a value that must be kept.
+        """
+        return (
+            value is None
+            or value is False
+            or (isinstance(value, (str, list, dict)) and not value)
+        )
 
     @staticmethod
     def _clean_one(definition: CustomFieldDefinition, value):
@@ -266,6 +312,14 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
+        old_folder_id = RoleAssignment.get_iam_folder_id(instance)
         instance = super().update(instance, validated_data)
+        # Values follow definition scope: moving the object to another folder
+        # discards values whose definition no longer applies, so they don't
+        # linger unreadable in forms while still matching cf__ filters.
+        if RoleAssignment.get_iam_folder_id(instance) != old_folder_id:
+            instance.custom_field_values.exclude(
+                definition__in=CustomFieldDefinition.for_object(instance)
+            ).delete()
         self._apply(instance)
         return instance

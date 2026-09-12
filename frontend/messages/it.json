@@ -3977,6 +3977,7 @@
 	"compactView": "Vista compatta",
 	"detailedView": "Vista dettagliata",
 	"customFields": "Campi personalizzati",
+	"customFieldsLoadError": "Impossibile caricare i campi personalizzati. Riseleziona il dominio o riapri il modulo per riprovare.",
 	"customFieldsDescription": "Definisci campi tipizzati e filtrabili sugli oggetti (progetti, asset e controlli applicati).",
 	"customField": "Campo personalizzato",
 	"addCustomField": "Aggiungi campo personalizzato",
