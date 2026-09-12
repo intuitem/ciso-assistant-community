@@ -779,11 +779,22 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "eta",
             "due_date",
             "priority",
+            "findings_assessment",
         ],
         computed={
             "severity": lambda o: o.get_severity_display(),
             "priority": lambda o: o.get_priority_display(),
+            "findings_assessment": lambda f: (
+                {
+                    "str": str(f.findings_assessment),
+                    "id": str(f.findings_assessment_id),
+                    "name": f.findings_assessment.name,
+                }
+                if f.findings_assessment_id
+                else None
+            ),
         },
+        select_related=["findings_assessment"],
     ),
     "compliance_assessment": ReadEntry(
         model=ComplianceAssessment,
@@ -1094,9 +1105,9 @@ class ReadObjectsAction(BaseAction):
         return entry, fields, queryset
 
     def execute(self, config, instance):
-        entry, fields, queryset = self._queryset(config, instance)
         context = _render_context(instance)
         try:
+            entry, fields, queryset = self._queryset(config, instance)
             if config.get("mode", "list") == "first":
                 obj = queryset.first()
                 return {
@@ -2678,8 +2689,8 @@ def read_snapshot_ids(node, instance, read_config, cap):
     config = {**read_config, "type": "read_objects", "mode": "list"}
     authorize_action(node, instance, config)
     action = ACTION_REGISTRY["read_objects"]
-    _entry, _fields, queryset = action._queryset(config, instance)
     try:
+        _entry, _fields, queryset = action._queryset(config, instance)
         return [str(pk) for pk in queryset.values_list("id", flat=True)[:cap]]
     except (ValidationError, ValueError, TypeError) as e:
         raise ActionError(f"read_objects: invalid filter value ({e})")
@@ -2692,8 +2703,8 @@ def read_page(node, instance, read_config, ids):
     config = {**read_config, "type": "read_objects", "mode": "list"}
     authorize_action(node, instance, config)
     action = ACTION_REGISTRY["read_objects"]
-    entry, fields, queryset = action._queryset(config, instance)
     try:
+        entry, fields, queryset = action._queryset(config, instance)
         rows = {
             str(obj.id): _serialize_read_row(obj, fields, entry.computed)
             for obj in queryset.filter(id__in=ids)

@@ -1,12 +1,14 @@
 urn: urn:intuitem:risk:library:workflow-operations-finding-ai-triage
 locale: en
 ref_id: workflow-operations-finding-ai-triage
-name: Finding raised — AI triage
-description: 'Reads a newly raised finding, asks the configured AI provider to rate it and draft a triage
-  note, then sets the severity and priority and notifies the triage team. The model chooses the branch;
-  the severity and priority written on each branch are fixed values in the graph, so the rating a machine
-  suggested is always visible as the branch the run took. Needs an AI provider configured in Global settings
-  — without one, the AI steps fail and the run stops rather than guessing.'
+name: Findings binder — AI triage sweep
+description: 'Walks every finding in a findings binder, asks the configured AI provider to rate it and
+  draft a triage note, then sets the severity and priority on each one. Run it with binder_id set to
+  the binder you want swept. The run log records how many findings the sweep processed. The model only chooses the branch; the severity and priority written
+  on each branch are fixed values in the graph, so the rating a machine suggested is always visible as
+  the branch that iteration took. Each finding costs two AI calls, so a sweep is bounded by
+  WORKFLOW_AI_MAX_CALLS_PER_RUN (50 by default, about 25 findings). Needs an AI provider configured in
+  Global settings — without one the AI steps fail and the run stops rather than guessing.'
 copyright: © intuitem
 version: 1
 publication_date: 2026-09-12
@@ -17,15 +19,16 @@ objects:
   - urn: urn:intuitem:risk:library:workflow-operations-finding-ai-triage:workflow:finding-ai-triage
     schema_version: 1
     ref_id: finding-ai-triage
-    name: Finding raised — AI triage
-    description: 'Reads a newly raised finding, asks the configured AI provider to rate it and draft a
-      triage note, then sets the severity and priority and notifies the triage team. The model chooses
-      the branch; the severity and priority written on each branch are fixed values in the graph.'
+    name: Findings binder — AI triage sweep
+    description: 'Walks every finding in a findings binder, rates it with the configured AI provider,
+      sets its severity and priority and drafts a triage note onto it. Run it with binder_id set to the
+      binder you want swept. The model only chooses the branch; the values written
+      on each branch are fixed in the graph.'
     graph:
       variables:
-      - key: triage_emails
+      - key: binder_id
         type: string
-        default_value: findings@example.com
+        default_value: ''
       - key: ai_severity
         type: string
         default_value: ''
@@ -36,37 +39,79 @@ objects:
         type: boolean
         default_value: false
       nodes:
-      - ref: on_finding
+      - ref: start
         type: trigger
-        label: Finding created
+        label: Run the sweep
         trigger_config:
-          type: internal_event
-          event_key: finding.created
-      - ref: read_finding
+          type: manual
+      - ref: check_id
+        type: condition
+        label: Was a binder given?
+        branches:
+        - name: given
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: binder_id
+              op: neq
+              value: ''
+        - name: missing
+          is_default: true
+      - ref: no_binder
         type: action
-        label: Read the finding
+        label: Nothing to sweep
+        action_config:
+          type: log
+          message: 'No binder_id was given. Run this workflow with "Run with variables" and set binder_id
+            to the findings binder you want swept.'
+      - ref: fetch
+        type: action
+        label: List the binder's findings
         action_config:
           type: read_objects
           model: finding
-          mode: first
+          mode: list
+          order_by: created_at
+          limit: 25
           filters:
             operator: and
             conditions:
-            - field: id
+            - field: findings_assessment
               op: eq
-              value: '{{payload.object_id}}'
+              value: '{{binder_id}}'
+      - ref: per_finding
+        type: loop
+        label: One finding at a time
+        loop_config:
+          collection: '{{nodes.fetch.results}}'
+          collect: '{{item.name}}'
+          on_item_error: continue
       - ref: classify
         type: action
         label: Rate it
         action_config:
           type: ai_extract
-          prompt: 'You are triaging a security finding for a GRC team. Rate how severe it is for the organisation,
-            and say whether a human should review the rating before anyone acts on it. Set needs_human_review
-            to true whenever the finding is ambiguous, describes a possible compliance or privacy breach,
-            or you are not confident in the rating.'
-          input: '{{nodes.read_finding.object.name}}
+          prompt: 'You are triaging a security finding for a GRC team. Rate how severe it is for the
+            organisation, using these definitions and nothing else:
 
-            {{nodes.read_finding.object.description}}'
+            critical — regulated or customer data is exposed right now, or an attacker needs no credentials
+            to reach production. Reserve this for the worst finding on the list.
+
+            high — a credible path to production data or a control that has already failed, but exploitation
+            needs a step the attacker does not yet have.
+
+            medium — real weakness confined to non-production, or a control that will fail soon if nobody
+            acts.
+
+            low — hygiene, cosmetic or administrative, with no path to data.
+
+            Most findings are not critical. If two findings differ in blast radius, they must not get the
+            same rating. Then say whether a human should review the rating: set needs_human_review to
+            true when the finding is ambiguous, hints at a compliance or privacy breach, or you are not
+            confident.'
+          input: '{{item.name}}
+
+            {{item.description}}'
           schema:
             type: object
             properties:
@@ -123,7 +168,7 @@ objects:
         action_config:
           type: update_object
           model: finding
-          id: '{{payload.object_id}}'
+          id: '{{item.id}}'
           fields:
             severity: '4'
             priority: '1'
@@ -133,7 +178,7 @@ objects:
         action_config:
           type: update_object
           model: finding
-          id: '{{payload.object_id}}'
+          id: '{{item.id}}'
           fields:
             severity: '3'
             priority: '2'
@@ -143,7 +188,7 @@ objects:
         action_config:
           type: update_object
           model: finding
-          id: '{{payload.object_id}}'
+          id: '{{item.id}}'
           fields:
             severity: '2'
             priority: '3'
@@ -153,7 +198,7 @@ objects:
         action_config:
           type: update_object
           model: finding
-          id: '{{payload.object_id}}'
+          id: '{{item.id}}'
           fields:
             severity: '1'
             priority: '4'
@@ -164,9 +209,9 @@ objects:
           type: ai_generate
           prompt: 'Write a short triage note for the person who will own this finding. Say what the issue
             is and what to check first. Plain prose, no heading, no bullet list.'
-          input: 'Finding: {{nodes.read_finding.object.name}}
+          input: 'Finding: {{item.name}}
 
-            {{nodes.read_finding.object.description}}
+            {{item.description}}
 
             Assessed severity: {{ai_severity}} — {{ai_rationale}}'
           max_words: 90
@@ -176,34 +221,27 @@ objects:
         action_config:
           type: update_object
           model: finding
-          id: '{{payload.object_id}}'
+          id: '{{item.id}}'
           fields:
             observation: 'AI triage on {{today}} — rated {{ai_severity}}. {{nodes.draft_note.text}}'
-      - ref: notify
-        type: action
-        label: Tell the triage team
-        action_config:
-          type: send_email
-          recipients: '{{triage_emails}}'
-          subject: 'Finding triaged {{ai_severity}}: {{payload.object_repr}}'
-          body: '{{payload.object_repr}} was raised on {{today}} and rated {{ai_severity}} by the AI triage
-            step.
-
-
-            Why: {{ai_rationale}}
-
-
-            Needs a human to review the rating: {{ai_needs_review}}
-
-
-            {{nodes.draft_note.text}}'
       - ref: done
         type: end
       edges:
-      - source: on_finding
-        target: read_finding
-      - source: read_finding
+      - source: start
+        target: check_id
+      - source: check_id
+        target: fetch
+        source_branch: given
+      - source: check_id
+        target: no_binder
+        source_branch: missing
+      - source: no_binder
+        target: done
+      - source: fetch
+        target: per_finding
+      - source: per_finding
         target: classify
+        source_port: each
       - source: classify
         target: route
       - source: route
@@ -229,6 +267,7 @@ objects:
       - source: draft_note
         target: write_note
       - source: write_note
-        target: notify
-      - source: notify
+        target: per_finding
+      - source: per_finding
         target: done
+        source_port: done
