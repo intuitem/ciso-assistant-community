@@ -1568,11 +1568,23 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         dispatch_webhook_event(instance, "updated", serializer=serializer)
         return instance
 
+    def cascade_preclear(self, instance):
+        """Querysets to delete before `instance` cascades, for trees Django
+        refuses to collect: a PROTECT reference between two children of one
+        parent is a ProtectedError even though deleting the parent removes
+        both. Listed here rather than in a perform_destroy override so the
+        cascade_info preview excludes them too and cannot refuse a delete that
+        would succeed."""
+        return []
+
     def perform_destroy(self, instance):
         # resolve for "destroy" explicitly so batch_action can call this too
         serializer_class = self.get_serializer_class(action="destroy")
         serializer = serializer_class(instance, context=self.get_serializer_context())
-        serializer.delete(instance)
+        with transaction.atomic():
+            for queryset in self.cascade_preclear(instance):
+                queryset.delete()
+            serializer.delete(instance)
         try:
             dispatch_webhook_event(instance, "deleted")
         except Exception:
@@ -2022,10 +2034,22 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         affected_bucket = {"by_model": {}, "_seen": set()}
         blocked_bucket = {"by_model": {}, "_seen": set()}
 
+        # Cleared before the cascade (see cascade_preclear), so gone by the
+        # time the PROTECT would be evaluated.
+        precleared_index = set()
+        for queryset in self.cascade_preclear(instance):
+            pre_collector = NestedObjects(using=router.db_for_write(instance))
+            pre_collector.collect(list(queryset))
+            for model, objs in pre_collector.model_objs.items():
+                for o in objs:
+                    precleared_index.add((model.__name__, str(getattr(o, "pk", ""))))
+
         # 0) PROTECT/RESTRICT references: NestedObjects.collect() swallows the
         # ProtectedError and parks the blockers here.
         for obj in getattr(collector, "protected", ()):
             if is_hidden_model(type(obj)) or not is_visible(obj):
+                continue
+            if (type(obj).__name__, str(getattr(obj, "pk", ""))) in precleared_index:
                 continue
             add_grouped(blocked_bucket, obj)
 
