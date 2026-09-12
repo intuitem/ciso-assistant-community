@@ -6387,6 +6387,7 @@
 	"quickFormsDescription": "Standalone forms of ordered pages, filled without an audit: intake requests, pre-qualifications and light questionnaires.",
 	"quickFormResponse": "Quick form response",
 	"quickFormResponses": "Quick form responses",
+	"quickFormResponsesOrigin": "Requests are raised from a portal tile or from My requests, not created here.",
 	"add-quickFormResponse": "New quick form response",
 	"respondents": "Respondents",
 	"startNow": "Start now",

@@ -275,6 +275,16 @@
 </script>
 
 {#if data?.table}
+	{#if URLModel === 'quick-form-responses'}
+		<!-- Requests are owned by whoever filed them. One created here has no requester,
+		     so nobody can submit it — say where they actually come from. -->
+		<div
+			class="mb-2 flex items-center gap-2 rounded-md bg-surface-50-950 px-3 py-2 text-sm text-surface-600-400 shadow-xs"
+		>
+			<i class="fa-solid fa-circle-info text-primary-500"></i>
+			<span>{m.quickFormResponsesOrigin()}</span>
+		</div>
+	{/if}
 	<div class="shadow-lg">
 		<!-- `urlSearch` comes from the load, so it only changes on a real navigation:
 		     the table's own in-place rewrites of the query string never remount it. -->
@@ -300,7 +310,7 @@
 									aria-label={safeTranslate('add-' + data.model.localName)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</a>
-							{:else if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications', 'commitments'].includes(URLModel)}
+							{:else if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications', 'commitments', 'quick-form-responses'].includes(URLModel)}
 								<button
 									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 									data-testid="add-button"

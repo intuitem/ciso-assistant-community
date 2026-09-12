@@ -1190,7 +1190,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'library', urlModel: 'loaded-libraries' }
 		],
-		reverseForeignKeyFields: [{ field: 'quick_form', urlModel: 'quick-form-responses' }]
+		reverseForeignKeyFields: [
+			{ field: 'quick_form', urlModel: 'quick-form-responses', disableCreate: true }
+		]
 	},
 	'quick-form-publications': {
 		name: 'quickformpublication',
@@ -1222,7 +1224,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'audience_groups', urlModel: 'user-groups' },
 			{ field: 'default_reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' }
 		],
-		reverseForeignKeyFields: [{ field: 'publication', urlModel: 'quick-form-responses' }]
+		reverseForeignKeyFields: [
+			{ field: 'publication', urlModel: 'quick-form-responses', disableCreate: true }
+		]
 	},
 	'quick-form-responses': {
 		name: 'quickformresponse',

@@ -6140,6 +6140,7 @@
 	"quickFormsDescription": "Formulaires autonomes composés de pages ordonnées, remplis sans audit : demandes entrantes, pré-qualifications et questionnaires légers.",
 	"quickFormResponse": "Réponse à un formulaire rapide",
 	"quickFormResponses": "Réponses aux formulaires rapides",
+	"quickFormResponsesOrigin": "Les demandes sont déposées depuis une tuile de portail ou depuis Mes demandes, et non créées ici.",
 	"add-quickFormResponse": "Nouvelle réponse à un formulaire rapide",
 	"respondents": "Répondants",
 	"startNow": "Démarrer maintenant",
