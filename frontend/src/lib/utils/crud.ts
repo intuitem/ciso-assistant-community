@@ -2988,7 +2988,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }, { field: 'kind' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'framework', urlModel: 'frameworks' },
+			{ field: 'frameworks', urlModel: 'frameworks' },
 			{ field: 'perimeters', urlModel: 'perimeters' },
 			{ field: 'entities', urlModel: 'entities' }
 		],
@@ -3023,7 +3023,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: [
 			{ field: 'status' },
-			{ field: 'framework' },
+			{ field: 'frameworks' },
 			{ field: 'folder' },
 			{ field: 'perimeters' }
 		]
@@ -3761,6 +3761,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'metric_instance', urlModel: 'metric-instances' },
 			{ field: 'evidence_revision', urlModel: 'evidence-revisions' }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'metric_instance' },
+			{ field: 'timestamp', type: 'datetime' },
+			{ field: 'display_value' },
+			{ field: 'observation' },
+			{ field: 'evidence_revision' },
+			{ field: 'folder' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
 		],
 		filters: [{ field: 'folder' }, { field: 'metric_instance' }]
 	},

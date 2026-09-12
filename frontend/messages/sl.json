@@ -1051,6 +1051,7 @@
 	"secret": "Skrivnost (Secret)",
 	"key": "Ključ",
 	"customFields": "Polja po meri",
+	"customFieldsLoadError": "Polj po meri ni bilo mogoče naložiti. Znova izberite domeno ali znova odprite obrazec in poskusite znova.",
 	"customFieldsDescription": "Določite tipizirana polja z možnostjo filtriranja na objektih (projekti, sredstva in izvedeni ukrepi).",
 	"customField": "Polje po meri",
 	"addCustomField": "Dodaj polje po meri",
