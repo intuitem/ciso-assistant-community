@@ -30,6 +30,7 @@
 	let formDataCache = $state({});
 
 	const formStore = form.form;
+	const tainted = form.tainted;
 	const modalStore = getModalStore();
 	const toastStore = getToastStore();
 
@@ -254,11 +255,14 @@
 				/>
 				<hr class="my-2" />
 				<p class="text-sm text-surface-600-400">{m.forceLanguageHelpText()}</p>
+				{#if $tainted?.default_language}
+					<p class="text-sm text-warning-700-300">{m.saveSettingsBeforeForcing()}</p>
+				{/if}
 				<button
 					type="button"
 					class="btn preset-filled-warning-500 text-sm"
 					onclick={handleForceLanguage}
-					disabled={forceLanguageInProgress}
+					disabled={forceLanguageInProgress || Boolean($tainted?.default_language)}
 				>
 					<i class="fa-solid fa-users mr-2"></i>
 					{m.forceLanguageForAllUsers()}
@@ -292,11 +296,14 @@
 				/>
 				<hr class="my-2" />
 				<p class="text-sm text-surface-600-400">{m.forceDateFormatHelpText()}</p>
+				{#if $tainted?.default_date_format}
+					<p class="text-sm text-warning-700-300">{m.saveSettingsBeforeForcing()}</p>
+				{/if}
 				<button
 					type="button"
 					class="btn preset-filled-warning-500 text-sm"
 					onclick={handleForceDateFormat}
-					disabled={forceDateFormatInProgress}
+					disabled={forceDateFormatInProgress || Boolean($tainted?.default_date_format)}
 				>
 					<i class="fa-solid fa-users mr-2"></i>
 					{m.forceDateFormatForAllUsers()}

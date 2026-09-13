@@ -759,7 +759,7 @@ def default_date_format() -> str:
             candidate = general.value.get("default_date_format", "auto")
             if candidate in User.DATE_FORMATS:
                 return candidate
-    except (ImportError, OperationalError, ProgrammingError):
+    except ImportError, OperationalError, ProgrammingError:
         # Called during startup and from migrations, before the table exists.
         pass
     return "auto"

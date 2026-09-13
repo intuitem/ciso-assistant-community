@@ -495,6 +495,7 @@
 	"forceDateFormatFinalConfirmBody": "Cela remplacera la préférence de format de date de tous les utilisateurs. Cette action est irréversible. Continuer ?",
 	"forceDateFormatSuccess": "Format de date forcé avec succès pour tous les utilisateurs",
 	"forceDateFormatFailed": "Échec du forçage du format de date pour tous les utilisateurs",
+	"saveSettingsBeforeForcing": "Enregistrez d'abord les paramètres : cette action applique la valeur déjà enregistrée, et non celle sélectionnée ci-dessus.",
 	"annotation": "Annotation",
 	"library": "Bibliothèque",
 	"typicalEvidence": "Preuve typique",

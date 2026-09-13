@@ -426,6 +426,7 @@
 	"forceDateFormatFinalConfirmBody": "This will override the date format preference of all users. This action cannot be undone. Proceed?",
 	"forceDateFormatSuccess": "Date format forced successfully for all users",
 	"forceDateFormatFailed": "Failed to force date format for all users",
+	"saveSettingsBeforeForcing": "Save the settings first — this applies the value already saved, not the one selected above.",
 	"annotation": "Annotation",
 	"library": "Library",
 	"typicalEvidence": "Typical evidence",

@@ -297,7 +297,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             if general and isinstance(general.value, dict)
             else None
         )
-        if date_format not in User.DATE_FORMATS:
+        if not isinstance(date_format, str) or date_format not in User.DATE_FORMATS:
             return Response(
                 {
                     "error": "No valid default date format configured in general settings."

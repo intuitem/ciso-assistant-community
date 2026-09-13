@@ -188,7 +188,9 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                         }
                     )
             if key == "default_date_format":
-                if value not in User.DATE_FORMATS:
+                # isinstance first: DATE_FORMATS is a set, so an unhashable JSON
+                # value (list/dict) would raise TypeError instead of a 400.
+                if not isinstance(value, str) or value not in User.DATE_FORMATS:
                     raise serializers.ValidationError(
                         {
                             "default_date_format": f"Invalid date format. Must be one of: {sorted(User.DATE_FORMATS)}"
