@@ -757,6 +757,13 @@
 	};
 
 	let openState = $state(false);
+	// Popover.Content renders while closed and every filter widget fetches its
+	// options on mount, so keep them out of the tree until the first open. Kept
+	// once mounted so reopening does not refetch.
+	let filtersMounted = $state(false);
+	$effect(() => {
+		if (openState) filtersMounted = true;
+	});
 
 	// Search state lifted here so it survives BatchActionBar show/hide cycles
 	let searchValue = $state('');
@@ -856,50 +863,54 @@
 						<Popover.Content
 							class="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200-800"
 						>
-							<SuperForm {_form} validators={zod(z.object({}))}>
-								{#snippet children({ form })}
-									{#each filteredFields as field}
-										{#if filters[field]?.component}
-											{@const FilterComponent = filters[field].component}
-											{#key filterResetKey}
-												<FilterComponent
-													{form}
-													{field}
-													{...filters[field].props}
-													fieldContext="filter"
-													label={safeTranslate(filters[field].props?.label)}
-													filterValue={filterValues[field]}
-													onChange={(value) => {
-														const arrayValue = Array.isArray(value) ? value : [value];
-														const sanitizedArrayValue = arrayValue.filter(
-															(v) => v !== null && v !== undefined && v !== ''
-														);
+							{#if filtersMounted}
+								<SuperForm {_form} validators={zod(z.object({}))}>
+									{#snippet children({ form })}
+										{#each filteredFields as field}
+											{#if filters[field]?.component}
+												{@const FilterComponent = filters[field].component}
+												{#key filterResetKey}
+													<FilterComponent
+														{form}
+														{field}
+														{...filters[field].props}
+														fieldContext="filter"
+														label={safeTranslate(filters[field].props?.label)}
+														filterValue={filterValues[field]}
+														onChange={(value) => {
+															const arrayValue = Array.isArray(value) ? value : [value];
+															const sanitizedArrayValue = arrayValue.filter(
+																(v) => v !== null && v !== undefined && v !== ''
+															);
 
-														filterValues[field] = sanitizedArrayValue.map((v) =>
-															typeof v === 'object' && v !== null && 'value' in v ? v : { value: v }
-														);
+															filterValues[field] = sanitizedArrayValue.map((v) =>
+																typeof v === 'object' && v !== null && 'value' in v
+																	? v
+																	: { value: v }
+															);
+														}}
+													/>
+												{/key}
+											{/if}
+										{/each}
+										{#if filterCount > 0}
+											<div class="flex justify-end pt-1">
+												<button
+													type="button"
+													class="btn preset-tonal-surface text-sm"
+													onclick={() => {
+														resetFilters();
+														openState = false;
 													}}
-												/>
-											{/key}
+												>
+													<i class="fa-solid fa-rotate-left mr-2"></i>
+													{m.resetFilters()}
+												</button>
+											</div>
 										{/if}
-									{/each}
-									{#if filterCount > 0}
-										<div class="flex justify-end pt-1">
-											<button
-												type="button"
-												class="btn preset-tonal-surface text-sm"
-												onclick={() => {
-													resetFilters();
-													openState = false;
-												}}
-											>
-												<i class="fa-solid fa-rotate-left mr-2"></i>
-												{m.resetFilters()}
-											</button>
-										</div>
-									{/if}
-								{/snippet}
-							</SuperForm>
+									{/snippet}
+								</SuperForm>
+							{/if}
 						</Popover.Content>
 					</Popover.Positioner>
 				</Popover>
