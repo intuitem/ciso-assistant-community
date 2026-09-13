@@ -149,7 +149,7 @@ export const loadDetail = async ({ event, model, id }) => {
 
 	if (model.reverseForeignKeyFields) {
 		const initialData = {};
-		// Resolved up front: the filters below are synchronous callbacks.
+		// Hoisted: the filters below are synchronous.
 		const [featureflags, user] = await Promise.all([
 			event.locals.getFeatureFlags(),
 			event.locals.getUser()

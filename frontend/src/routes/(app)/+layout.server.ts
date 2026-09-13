@@ -4,7 +4,6 @@ import { loadFlash } from 'sveltekit-flash-message/server';
 
 const loginPageRegex = /^[a-zA-Z0-9]+:\/\/[^\/]+\/login\/?.*$/;
 
-// Resolve the session and app config, and pass them to the `page` store.
 export const load = loadFlash(async ({ locals, url, cookies, request }) => {
 	const user = await locals.getUser();
 	if (!user && !url.pathname.includes('/login')) {

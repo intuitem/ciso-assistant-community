@@ -457,10 +457,8 @@
 	let group = $state(
 		Object.keys(data?.relatedModels ?? {}).length > 0 ? getSortedRelatedModels()[0][0] : undefined
 	);
-	// Tabs.Content renders its children whether or not the panel is shown, so every
-	// tab's table and filter widgets used to mount — and fetch — on page load.
-	// Mount a tab the first time it is opened and keep it after, so coming back to
-	// one costs no refetch. Reassigned rather than mutated: a plain Set is not deep state.
+	// Tabs.Content renders hidden panels too, so gate on first visit. Kept once
+	// visited, so switching back costs no refetch. Reassigned: a Set is not deep state.
 	let visitedTabs = $state(
 		new Set(
 			Object.keys(data?.relatedModels ?? {}).length > 0 ? [getSortedRelatedModels()[0][0]] : []

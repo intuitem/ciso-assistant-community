@@ -9,17 +9,14 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			// Populated as a side effect of the accessors below; only set once
-			// something has actually asked for them. Read these directly only
-			// after awaiting the matching accessor in the same request.
+			// Set by the accessors below; only valid after awaiting the matching one.
 			user: User;
 			settings: Record<string, any>;
 			featureflags: Record<string, boolean>;
-			// Memoised per request: the first call fetches, the rest reuse it.
 			getUser: () => Promise<User | null>;
 			getSettings: () => Promise<Record<string, any> | undefined>;
 			getFeatureFlags: () => Promise<Record<string, boolean> | undefined>;
-			// Static catalogue of flag names, not their values — no round-trip.
+			// Flag names, not their values — unrelated to `featureflags` above.
 			featureFlags: FeatureFlags;
 		}
 		interface PageData {

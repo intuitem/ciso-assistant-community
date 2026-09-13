@@ -27,7 +27,6 @@ defineCustomServerStrategy('custom-fallback', {
 
 const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
 
-/** Runs `fn` at most once per request; every later caller reuses the first result. */
 function memoize<T>(fn: () => Promise<T>): () => Promise<T> {
 	let pending: Promise<T> | undefined;
 	return () => (pending ??= fn());
@@ -201,12 +200,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		// been fetched yet; that happens in the page's load function.
 		const isSSOAuthenticate = event.url.pathname.endsWith('/sso/authenticate');
 
-		// Session, general settings and feature flags are page-render context:
-		// page and layout loads read them, the endpoint routes that only proxy a
-		// query to the API do not. Resolving them on demand makes the cost
-		// proportional to what a request actually reads rather than charging
-		// every request three backend round-trips — current-user alone is a
-		// ~2 MB authorization snapshot.
+		// On demand: the endpoint routes that only proxy a query read none of these.
 		event.locals.getUser = memoize(async () => {
 			if (isSSOAuthenticate) return null;
 			const user = await validateUserSession(event);
@@ -217,9 +211,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			return user;
 		});
 
-		// Gated on the token rather than on getUser(): these two are independent of
-		// the session snapshot, and chaining them onto it would drag the 2 MB
-		// current-user payload into every request that only wants a feature flag.
+		// Token-gated, not getUser()-gated: a flag lookup must not pull in current-user.
 		const authorized = () => {
 			const token = event.cookies.get('token');
 			return token
@@ -288,10 +280,7 @@ export const handleError: HandleServerError = ({ error, status, message, event }
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const unsafeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-	// Deliberately reads the already-resolved user rather than awaiting getUser():
-	// the LOCALE cookie carries the same preference (applyUserLocale writes it on
-	// every request that resolves a session), so forcing the session fetch here
-	// would cost a round-trip per proxied API call for no change in outcome.
+	// Not awaiting getUser(): the LOCALE cookie carries the same preference.
 	const currentLang =
 		event.locals.user?.preferences?.lang || event.cookies.get('LOCALE') || DEFAULT_LANGUAGE;
 	if (request.url.startsWith(BASE_API_URL)) {
@@ -311,10 +300,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 
 		// Inject focus folder ID header from cookie
 		const focusFolderId = event.cookies.get('focus_folder_id');
-		// The only locals read left on the proxy path, and the one round-trip a
-		// pure pass-through request still pays. FocusModeMiddleware re-checks the
-		// flag server-side, so this guard is duplication — see the note in
-		// backend/core/focus_middleware.py before removing it.
+		// Duplicates FocusModeMiddleware's own flag check, at one round-trip per request.
 		const focusModeEnabled = focusFolderId
 			? ((await event.locals.getFeatureFlags())?.focus_mode ?? false)
 			: false;
