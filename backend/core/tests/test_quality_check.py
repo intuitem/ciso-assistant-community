@@ -5,6 +5,7 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 
 from core.models import (
     AppliedControl,
+    Evidence,
     ComplianceAssessment,
     Framework,
     Perimeter,
@@ -69,8 +70,11 @@ def test_query_count_does_not_grow_with_requirements(audit_with_shared_control):
         compliance_assessment.quality_check()
 
     framework = compliance_assessment.framework
+    # Assessments are created here rather than through
+    # create_requirement_assessments(), which would add a second assessment for
+    # the three requirements the audit already covers.
     for index in range(3, 20):
-        RequirementNode.objects.create(
+        requirement = RequirementNode.objects.create(
             framework=framework,
             urn=f"urn:test:quality-check-framework:req{index}",
             ref_id=f"REQ-{index}",
@@ -78,12 +82,17 @@ def test_query_count_does_not_grow_with_requirements(audit_with_shared_control):
             assessable=True,
             folder=Folder.get_root_folder(),
         )
-    compliance_assessment.create_requirement_assessments()
+        RequirementAssessment.objects.create(
+            compliance_assessment=compliance_assessment,
+            requirement=requirement,
+            folder=compliance_assessment.folder,
+        )
     assert (
         RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment
         ).count()
-        > 3
+        == RequirementNode.objects.filter(framework=framework).count()
+        == 20
     )
 
     with CaptureQueriesContext(connection) as grown:
@@ -111,3 +120,22 @@ def test_folders_without_findings_are_left_out(audit_with_shared_control):
     assert str(compliance_assessment.folder_id) in results
     assert str(quiet_folder.id) not in results
     assert all(FolderViewSet._has_findings(entry) for entry in results.values())
+
+
+@pytest.mark.django_db
+def test_evidence_attached_directly_to_a_requirement_is_checked(
+    audit_with_shared_control,
+):
+    """Evidence reaches an audit through a requirement assessment as well as
+    through an applied control; the file check has to follow both paths."""
+    compliance_assessment, _ = audit_with_shared_control
+    evidence = Evidence.objects.create(
+        name="Direct evidence", folder=compliance_assessment.folder
+    )
+    requirement_assessment = compliance_assessment.requirement_assessments.first()
+    requirement_assessment.evidences.add(evidence)
+
+    findings = compliance_assessment.quality_check()
+
+    reported = [f for f in findings["warnings"] if f["msgid"] == "evidenceNoFile"]
+    assert [f["link"] for f in reported] == [f"evidences/{evidence.id}"]

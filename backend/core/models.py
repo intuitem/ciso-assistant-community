@@ -9246,10 +9246,14 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on evidence:
+        # Evidence of this audit, on the two paths RequirementAssessment.has_evidence()
+        # follows: attached to a requirement assessment directly, or through one
+        # of its applied controls.
+        evidence_scope = models.Q(
+            applied_controls__requirement_assessments__compliance_assessment=self
+        ) | models.Q(requirement_assessments__compliance_assessment=self)
         evidence_objects = (
-            Evidence.objects.filter(
-                applied_controls__requirement_assessments__compliance_assessment=self
-            )
+            Evidence.objects.filter(evidence_scope)
             .distinct()
             .prefetch_related("filtering_labels", "owner")
             .order_by("created_at")
@@ -9258,7 +9262,7 @@ class ComplianceAssessment(Assessment):
         # in a single query instead of two per evidence.
         evidence_ids_with_content = set(
             EvidenceRevision.objects.filter(
-                evidence__applied_controls__requirement_assessments__compliance_assessment=self
+                evidence__in=Evidence.objects.filter(evidence_scope)
             )
             .filter(
                 (models.Q(attachment__isnull=False) & ~models.Q(attachment=""))
