@@ -277,6 +277,44 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
                 updated += 1
         return Response({"updated": updated, "language": lang})
 
+    @action(detail=True, methods=["post"], name="Force date format for all users")
+    def force_date_format(self, request, pk=None):
+        perm = Permission.objects.get(codename="change_user")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=perm,
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(
+                {"error": "You do not have permission to change user preferences."},
+                status=403,
+            )
+        general = GlobalSettings.objects.filter(
+            name=GlobalSettings.Names.GENERAL
+        ).first()
+        date_format = (
+            general.value.get("default_date_format")
+            if general and isinstance(general.value, dict)
+            else None
+        )
+        if date_format not in User.DATE_FORMATS:
+            return Response(
+                {
+                    "error": "No valid default date format configured in general settings."
+                },
+                status=400,
+            )
+        with transaction.atomic():
+            users = User.objects.select_for_update().all()
+            updated = 0
+            for user in users:
+                if not isinstance(user.preferences, dict):
+                    user.preferences = {}
+                user.preferences["date_format"] = date_format
+                user.save(update_fields=["preferences"])
+                updated += 1
+        return Response({"updated": updated, "date_format": date_format})
+
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
         choices = {

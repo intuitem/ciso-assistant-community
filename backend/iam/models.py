@@ -749,6 +749,22 @@ def default_language() -> str:
     return "en"
 
 
+def default_date_format() -> str:
+    """The instance-wide default date format, used when the user has no preference."""
+    try:
+        from global_settings.models import GlobalSettings
+
+        general = GlobalSettings.objects.filter(name="general").first()
+        if general and isinstance(general.value, dict):
+            candidate = general.value.get("default_date_format", "auto")
+            if candidate in User.DATE_FORMATS:
+                return candidate
+    except (ImportError, OperationalError, ProgrammingError):
+        # Called during startup and from migrations, before the table exists.
+        pass
+    return "auto"
+
+
 def resolve_language(code) -> str:
     """An explicit, supported language, else the instance default."""
     return code if is_supported_language(code) else default_language()
@@ -1019,7 +1035,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if not is_supported_language(prefs.get("lang")):
             prefs["lang"] = default_language()
         if prefs.get("date_format") not in self.DATE_FORMATS:
-            prefs["date_format"] = "auto"
+            prefs["date_format"] = default_date_format()
         ui = prefs.get("ui") if isinstance(prefs.get("ui"), dict) else {}
         if ui.get("theme") not in ("light", "dark", "system"):
             ui["theme"] = "system"
