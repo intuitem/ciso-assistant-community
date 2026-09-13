@@ -759,6 +759,7 @@ export const FeatureFlagsSchema = z.object({
 	data_breaches: z.boolean().optional(),
 	chat_mode: z.boolean().optional(),
 	auditee_mode: z.boolean().optional(),
+	quick_forms: z.boolean().optional(),
 	advanced_analytics: z.boolean().optional(),
 	comments: z.boolean().optional(),
 	journeys: z.boolean().optional(),
@@ -1444,6 +1445,31 @@ export const SecurityExceptionSchema = z.object({
 	observation: z.string().optional().nullable(),
 	link: z.string().url().optional().nullable().or(z.literal('')),
 	custom_fields: z.record(z.string(), z.any()).optional()
+});
+
+export const QuickFormPublicationSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	quick_form: z.string(),
+	submission_folder: z.string().optional().nullable(),
+	enabled: z.boolean().default(true).optional(),
+	audience_groups: z.array(z.string().optional()).optional(),
+	default_reviewers: z.array(z.string().optional()).optional(),
+	allow_multiple_drafts: z.boolean().default(false).optional(),
+	icon: z.string().optional(),
+	order: z.number().default(0).optional()
+});
+
+export const QuickFormResponseSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	quick_form: z.string(),
+	respondents: z.array(z.string().optional()).optional(),
+	reviewers: z.array(z.string().optional()).optional(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	observation: z.string().optional().nullable(),
+	start_now: z.boolean().default(false).optional()
 });
 
 export const FindingSchema = z.object({
@@ -2157,6 +2183,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'attack-paths': AttackPathSchema,
 	'operational-scenarios': operationalScenarioSchema,
 	'security-exceptions': SecurityExceptionSchema,
+	'quick-form-publications': QuickFormPublicationSchema,
+	'quick-form-responses': QuickFormResponseSchema,
 	findings: FindingSchema,
 	'findings-assessments': FindingsAssessmentSchema,
 	'posture-assessments': PostureAssessmentSchema,

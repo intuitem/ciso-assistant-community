@@ -12,6 +12,8 @@ from rest_framework.exceptions import ValidationError
 
 from core.models import (
     Answer,
+    QuickForm,
+    QuickFormResponse,
     Asset,
     AppliedControl,
     Campaign,
@@ -58,6 +60,8 @@ from tprm.models import (
 
 from core.serializers import (
     AnswerImportExportSerializer,
+    QuickFormImportExportSerializer,
+    QuickFormResponseImportExportSerializer,
     FolderImportExportSerializer,
     AssetImportExportSerializer,
     AppliedControlImportExportSerializer,
@@ -180,6 +184,8 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
     model_serializer_map = {
         Folder: FolderImportExportSerializer,
         Answer: AnswerImportExportSerializer,
+        QuickForm: QuickFormImportExportSerializer,
+        QuickFormResponse: QuickFormResponseImportExportSerializer,
         Asset: AssetImportExportSerializer,
         AppliedControl: AppliedControlImportExportSerializer,
         Campaign: CampaignImportExportSerializer,
@@ -491,8 +497,15 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     requirement_assessments = RequirementAssessment.objects.filter(
         compliance_assessment__in=compliance_assessments
     ).distinct()
+    quick_form_responses = QuickFormResponse.objects.filter(
+        folder__in=folders
+    ).distinct()
+    quick_forms = QuickForm.objects.filter(
+        Q(folder__in=folders) | Q(responses__in=quick_form_responses)
+    ).distinct()
     answers = Answer.objects.filter(
-        requirement_assessment__in=requirement_assessments
+        Q(requirement_assessment__in=requirement_assessments)
+        | Q(response__in=quick_form_responses)
     ).distinct()
     frameworks = Framework.objects.filter(
         Q(folder__in=folders) | Q(complianceassessment__in=compliance_assessments)
@@ -667,6 +680,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(reference_controls__in=reference_controls)
         | Q(risk_matrices__in=risk_matrices)
         | Q(frameworks__in=frameworks)
+        | Q(quick_forms__in=quick_forms)
         | Q(
             pk__in=LoadedLibrary.objects.filter(
                 Q(folder__in=folders)
@@ -674,6 +688,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
                 | Q(reference_controls__in=reference_controls)
                 | Q(risk_matrices__in=risk_matrices)
                 | Q(frameworks__in=frameworks)
+                | Q(quick_forms__in=quick_forms)
             ).values_list("dependencies", flat=True)
         )
     ).distinct()
@@ -687,6 +702,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         "loadedlibrary": loaded_libraries,
         "vulnerability": vulnerabilities,
         "framework": frameworks,
+        "quickform": quick_forms,
         "riskmatrix": risk_matrices,
         "referencecontrol": reference_controls,
         "threat": threats,
@@ -703,6 +719,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         "perimeter": exported_perimeters,
         "complianceassessment": compliance_assessments,
         "requirementassessment": requirement_assessments,
+        "quickformresponse": quick_form_responses,
         "answer": answers,
         "ebiosrmstudy": ebios_rm_studies,
         "riskassessment": risk_assessments,

@@ -2145,6 +2145,30 @@ export const listViewFields = {
 			}
 		}
 	},
+	'quick-forms': {
+		head: ['name', 'description', 'provider', 'pages', 'quickFormResponses', 'domain'],
+		body: ['name', 'description', 'provider', 'pages_count', 'responses_count', 'folder'],
+		meta: ['id', 'urn'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
+	'quick-form-publications': {
+		head: ['name', 'quickForm', 'submissionFolder', 'audienceGroups', 'enabled', 'domain'],
+		body: ['name', 'quick_form', 'submission_folder', 'audience_groups', 'enabled', 'folder'],
+		meta: ['id'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
+	'quick-form-responses': {
+		head: ['ref_id', 'name', 'quickForm', 'status', 'respondents', 'dueDate', 'domain'],
+		body: ['ref_id', 'name', 'quick_form', 'status', 'respondents', 'due_date', 'folder'],
+		meta: ['id', 'status'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	'compliance-assessments': {
 		head: [
 			'ref_id',

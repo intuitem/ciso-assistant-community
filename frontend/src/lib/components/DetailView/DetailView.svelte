@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { urlModelForDjangoName } from '$lib/utils/crud';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
@@ -709,7 +710,23 @@
 															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if key === 'purposes'}
+																{#if key === 'produced_from'}
+																	{@const producedUrlModel = urlModelForDjangoName(val.model)}
+																	{#if producedUrlModel}
+																		<Anchor
+																			breadcrumbAction="push"
+																			href={`/${producedUrlModel}/${val.id}`}
+																			class="anchor">{val.str}</Anchor
+																		>
+																	{:else}
+																		{val.str}
+																	{/if}
+																	{#if val.source}
+																		<span class="text-surface-600-400 text-xs">
+																			— {val.source}</span
+																		>
+																	{/if}
+																{:else if key === 'purposes'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel ?? 'purposes'
@@ -952,6 +969,16 @@
 				{/if}
 			{/if}
 			{@render actions?.()}
+			{#if data.urlModel === 'quick-forms'}
+				<!-- Answering a form is the only way to see what its conditions and outcomes
+				     actually do; the same preview serves drafts in the builder. -->
+				<a
+					class="btn preset-filled-primary-500 h-fit"
+					href={`/quick-forms/${data.data?.id}/preview`}
+				>
+					<i class="fa-solid fa-eye mr-2"></i>{m.preview()}
+				</a>
+			{/if}
 			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} folderId={objectDomain} />
 		</div>
 	</div>
