@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
@@ -13,6 +14,140 @@
 
 	// Create local mutable copy of applied controls to avoid SvelteKit data reload issues
 	let appliedControls = $state([...data.applied_controls]);
+
+	// Per-swimlane totals from the aggregate endpoint. The board renders these
+	// even for swimlanes whose cards have not been fetched, so the numbers on
+	// screen are the real ones rather than "what happens to be loaded".
+	type LaneStats = {
+		folder: Record<string, any>;
+		count: number;
+		perStatus: Record<string, number>;
+	};
+	let laneStats: Record<string, LaneStats> = $state(
+		Object.fromEntries(
+			(data.counts?.results ?? []).map((entry: any) => [
+				entry.folder.id,
+				{ folder: entry.folder, count: entry.count, perStatus: { ...entry.per_status } }
+			])
+		)
+	);
+	const swimlanes = $derived(
+		Object.values(laneStats).sort((a, b) =>
+			String(a.folder.str ?? '').localeCompare(String(b.folder.str ?? ''))
+		)
+	);
+	const totalCount = $derived(Object.values(laneStats).reduce((sum, lane) => sum + lane.count, 0));
+
+	// How many cards the board is willing to render without being asked. A
+	// preloaded board is already under it; past it, swimlanes open on demand so
+	// a big board costs one aggregate request instead of one request per 200 rows.
+	const AUTO_EXPAND_BUDGET = 600;
+
+	// Smallest lanes first, so the budget buys as many open swimlanes as it can
+	// rather than being spent on one large one.
+	function lanesWithinBudget(): string[] {
+		const ordered = Object.values(laneStats).sort((a, b) => a.count - b.count);
+		const open: string[] = [];
+		let budget = AUTO_EXPAND_BUDGET;
+		for (const lane of ordered) {
+			if (lane.count > budget) break;
+			budget -= lane.count;
+			open.push(lane.folder.id);
+		}
+		return open;
+	}
+
+	// A small board arrives whole, so every swimlane is already loaded and open.
+	const initiallyOpen = data.preloaded ? Object.keys(laneStats) : lanesWithinBudget();
+
+	let loadedFolders: Set<string> = $state(new Set(data.preloaded ? Object.keys(laneStats) : []));
+	let loadingFolders: Set<string> = $state(new Set());
+
+	// Fetch the cards for lanes the budget opened. Sequential: these are one
+	// user's page load, not a reason to open several backend slots at once.
+	onMount(async () => {
+		if (data.preloaded) return;
+		// Group the opened lanes into page-sized requests; a lane bigger than one
+		// page gets its first page here and its "load more" button for the rest.
+		let batch: string[] = [];
+		let batched = 0;
+		for (const folderId of initiallyOpen) {
+			const count = laneStats[folderId]?.count ?? 0;
+			if (batch.length > 0 && batched + count > data.pageSize) {
+				await loadLaneBatch(batch);
+				batch = [];
+				batched = 0;
+			}
+			batch.push(folderId);
+			batched += count;
+		}
+		await loadLaneBatch(batch);
+	});
+
+	function loadedCountForFolder(folderId: string): number {
+		return appliedControls.filter((control: any) => control.folder?.id === folderId).length;
+	}
+
+	async function loadFolderPage(folderId: string, offset: number) {
+		if (loadingFolders.has(folderId)) return;
+		loadingFolders = new Set(loadingFolders).add(folderId);
+		try {
+			const params = new URLSearchParams(data.filterQuery);
+			// Replaces any folder filter inherited from the list view: this request
+			// is for one swimlane, and the aggregate already excluded the rest.
+			params.set('folder', folderId);
+			params.set('offset', String(offset));
+			params.set('limit', String(data.pageSize));
+			const response = await fetch(`/${data.URLModel}?${params.toString()}`);
+			if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+			const body = await response.json();
+			const known = new Set(appliedControls.map((control: any) => control.id));
+			appliedControls = [
+				...appliedControls,
+				...(body.results ?? []).filter((row: any) => !known.has(row.id))
+			];
+			loadedFolders = new Set(loadedFolders).add(folderId);
+		} catch (error) {
+			console.error('Error loading swimlane:', error);
+		} finally {
+			const next = new Set(loadingFolders);
+			next.delete(folderId);
+			loadingFolders = next;
+		}
+	}
+
+	// The folder filter takes repeated values, so lanes that fit in a single page
+	// are opened with one request rather than one apiece.
+	async function loadLaneBatch(folderIds: string[]) {
+		if (folderIds.length === 0) return;
+		loadingFolders = new Set([...loadingFolders, ...folderIds]);
+		try {
+			const params = new URLSearchParams(data.filterQuery);
+			params.delete('folder');
+			for (const folderId of folderIds) params.append('folder', folderId);
+			params.set('offset', '0');
+			params.set('limit', String(data.pageSize));
+			const response = await fetch(`/${data.URLModel}?${params.toString()}`);
+			if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+			const body = await response.json();
+			const known = new Set(appliedControls.map((control: any) => control.id));
+			appliedControls = [
+				...appliedControls,
+				...(body.results ?? []).filter((row: any) => !known.has(row.id))
+			];
+			loadedFolders = new Set([...loadedFolders, ...folderIds]);
+		} catch (error) {
+			console.error('Error loading swimlanes:', error);
+		} finally {
+			const next = new Set(loadingFolders);
+			for (const folderId of folderIds) next.delete(folderId);
+			loadingFolders = next;
+		}
+	}
+
+	function loadMore(folderId: string) {
+		void loadFolderPage(folderId, loadedCountForFolder(folderId));
+	}
 
 	// View mode toggle
 	let compactMode = $state(false);
@@ -145,39 +280,24 @@
 
 	// Get count of controls per status column (across all folders)
 	function getStatusCount(statusId: string): number {
-		return appliedControls.filter((control: any) => {
-			const controlStatus = control.status || '--';
-			return controlStatus === statusId;
-		}).length;
+		return Object.values(laneStats).reduce((sum, lane) => sum + (lane.perStatus[statusId] ?? 0), 0);
 	}
 
-	// Get unique folders from applied controls
-	function getUniqueFolders() {
-		const folderMap = new Map();
-		appliedControls.forEach((control: any) => {
-			if (control.folder) {
-				folderMap.set(control.folder.id, control.folder);
-			}
-		});
-		return Array.from(folderMap.values());
-	}
-
-	// Collapsible swimlanes
-	let collapsedFolders: Set<string> = $state(new Set());
+	// Collapsible swimlanes: closed by default unless the whole board was
+	// preloaded, since opening one is what fetches its cards.
+	let collapsedFolders: Set<string> = $state(
+		new Set(Object.keys(laneStats).filter((id) => !initiallyOpen.includes(id)))
+	);
 
 	function toggleFolder(folderId: string) {
 		const next = new Set(collapsedFolders);
 		if (next.has(folderId)) {
 			next.delete(folderId);
+			if (!loadedFolders.has(folderId)) void loadFolderPage(folderId, 0);
 		} else {
 			next.add(folderId);
 		}
 		collapsedFolders = next;
-	}
-
-	// Get count of controls in a folder
-	function getFolderControlCount(folderId: string): number {
-		return appliedControls.filter((control: any) => control.folder?.id === folderId).length;
 	}
 
 	// Owner initials helper
@@ -203,6 +323,13 @@
 
 	function dropZoneKey(statusId: string, folderId: string): string {
 		return `${statusId}::${folderId}`;
+	}
+
+	function shiftLaneCount(folderId: string | null, fromStatus: string, toStatus: string) {
+		const lane = folderId ? laneStats[folderId] : undefined;
+		if (!lane || fromStatus === toStatus) return;
+		lane.perStatus[fromStatus] = Math.max(0, (lane.perStatus[fromStatus] ?? 0) - 1);
+		lane.perStatus[toStatus] = (lane.perStatus[toStatus] ?? 0) + 1;
 	}
 
 	function handleDragStart(event: DragEvent, control: any) {
@@ -270,10 +397,13 @@
 		// Optimistically update local state first for better UX
 		const controlIndex = appliedControls.findIndex((c: any) => c.id === controlToUpdate.id);
 		const previousStatus = controlIndex !== -1 ? appliedControls[controlIndex].status : null;
+		const laneId = controlToUpdate.folder?.id ?? null;
 
 		if (controlIndex !== -1) {
 			// Update status and create new array reference to trigger reactivity
 			appliedControls[controlIndex] = { ...appliedControls[controlIndex], status: statusId };
+			// The headers read the aggregate, so move the card there too.
+			shiftLaneCount(laneId, currentStatus, statusId);
 		}
 
 		try {
@@ -295,6 +425,7 @@
 					...appliedControls[controlIndex],
 					status: previousStatus
 				};
+				shiftLaneCount(laneId, statusId, previousStatus || '--');
 			}
 		}
 
@@ -306,8 +437,6 @@
 		if (!dateStr) return '--';
 		return formatDateOrDateTime(dateStr, getLocale());
 	}
-
-	const folders = $derived(getUniqueFolders());
 </script>
 
 <div class="flex flex-col h-full min-h-screen bg-surface-100-900 p-4">
@@ -322,7 +451,7 @@
 		</a>
 		<div class="flex items-center space-x-4">
 			<span class="text-sm text-surface-600-400">
-				{appliedControls.length}
+				{totalCount}
 				{m.appliedControls().toLowerCase()}
 			</span>
 			<button
@@ -370,9 +499,10 @@
 			</div>
 
 			<!-- Swimlanes (Folders) -->
-			{#each folders as folder}
+			{#each swimlanes as lane}
+				{@const folder = lane.folder}
 				{@const isCollapsed = collapsedFolders.has(folder.id)}
-				{@const folderCount = getFolderControlCount(folder.id)}
+				{@const folderCount = lane.count}
 				<div class="mb-2 border-b border-surface-200-800 pb-2">
 					<!-- Folder Header Row (clickable to collapse) -->
 					<div class="flex">
@@ -397,13 +527,13 @@
 						</div>
 
 						{#if isCollapsed}
-							<!-- Collapsed summary: show count per status -->
+							<!-- Collapsed summary: real counts, no cards fetched yet -->
 							{#each statusColumns as column}
-								{@const controls = getControlsForFolderAndStatus(folder.id, column.id)}
+								{@const count = lane.perStatus[column.id] ?? 0}
 								<div class="w-64 flex-shrink-0 px-2 flex items-center justify-center">
-									{#if controls.length > 0}
+									{#if count > 0}
 										<span class="text-xs font-medium {column.headerText}">
-											{controls.length}
+											{count}
 										</span>
 									{/if}
 								</div>
@@ -418,6 +548,8 @@
 							<!-- Status Columns for this Folder -->
 							{#each statusColumns as column}
 								{@const controls = getControlsForFolderAndStatus(folder.id, column.id)}
+								{@const cellTotal = lane.perStatus[column.id] ?? 0}
+								{@const hiddenInCell = Math.max(0, cellTotal - controls.length)}
 								<div
 									class="w-64 flex-shrink-0 px-2"
 									ondragenter={(e) => handleDragEnter(e, column.id, folder.id)}
@@ -444,9 +576,17 @@
 											</div>
 										{/if}
 
-										{#if controls.length === 0 && !(draggedControl && dragOverStatus === column.id && dragOverFolder === folder.id)}
+										{#if loadingFolders.has(folder.id) && controls.length === 0}
+											<div class="text-center py-4">
+												<i class="fa-solid fa-spinner fa-spin text-surface-400-600"></i>
+											</div>
+										{:else if controls.length === 0 && !(draggedControl && dragOverStatus === column.id && dragOverFolder === folder.id)}
 											<div class="text-xs text-surface-400-600 text-center py-4 italic">
-												{m.noControlsInCategory()}
+												{#if hiddenInCell > 0}
+													+{hiddenInCell}
+												{:else}
+													{m.noControlsInCategory()}
+												{/if}
 											</div>
 										{:else}
 											<div class={compactMode ? 'space-y-1' : 'space-y-2'}>
@@ -659,18 +799,38 @@
 														</div>
 													{/if}
 												{/each}
+												{#if hiddenInCell > 0}
+													<p class="text-xs text-surface-400-600 text-center italic pt-1">
+														+{hiddenInCell}
+													</p>
+												{/if}
 											</div>
 										{/if}
 									</div>
 								</div>
 							{/each}
 						</div>
+						{#if loadedFolders.has(folder.id) && loadedCountForFolder(folder.id) < lane.count}
+							<div class="flex pl-48">
+								<button
+									type="button"
+									class="btn preset-tonal-surface text-xs my-1"
+									disabled={loadingFolders.has(folder.id)}
+									onclick={() => loadMore(folder.id)}
+								>
+									{#if loadingFolders.has(folder.id)}
+										<i class="fa-solid fa-spinner fa-spin mr-2"></i>
+									{/if}
+									{loadedCountForFolder(folder.id)} / {lane.count}
+								</button>
+							</div>
+						{/if}
 					{/if}
 				</div>
 			{/each}
 
 			<!-- Empty state if no folders -->
-			{#if folders.length === 0}
+			{#if swimlanes.length === 0}
 				<div class="flex items-center justify-center py-12 text-surface-600-400">
 					<div class="text-center">
 						<i class="fa-solid fa-folder-open text-4xl mb-4 text-surface-300-700"></i>

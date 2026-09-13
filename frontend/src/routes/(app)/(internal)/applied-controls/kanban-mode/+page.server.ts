@@ -1,8 +1,12 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
 import { getSecureRedirect } from '$lib/utils/helpers';
 import type { PageServerLoad } from './$types';
 import type { Actions } from '@sveltejs/kit';
+
+// Swimlane cards are fetched per folder as the user opens them. Below this many
+// matching controls the whole board fits in one request, so it is loaded up
+// front and every swimlane starts expanded: small boards behave as before.
+const PAGE_SIZE = 200;
 
 export const load = (async ({ fetch, url }) => {
 	const URLModel = 'applied-controls';
@@ -15,17 +19,35 @@ export const load = (async ({ fetch, url }) => {
 	const searchParams = url.searchParams;
 	for (const [key, value] of searchParams.entries()) {
 		// Don't pass through UI-specific parameters to the API, nor paging
-		// params (fetchAllPages appends its own; a stray offset skips rows).
+		// params: the page size is ours to set per swimlane.
 		if (!['backUrl', 'backLabel', 'limit', 'offset'].includes(key)) {
 			queryParams.append(key, value);
 		}
 	}
+	const filterQuery = queryParams.toString();
 
-	const fullEndpoint = `${endpoint}?${queryParams.toString()}`;
-	const applied_controls = await fetchAllPages(fetch, fullEndpoint);
+	// One aggregate query gives every swimlane and its true per-status totals, so
+	// the board can render truthful headers without holding a card per row.
+	const countsResponse = await fetch(`${endpoint}counts_per_folder/?${filterQuery}`);
+	if (!countsResponse.ok) {
+		console.error('Failed to load kanban counts:', countsResponse.status);
+	}
+	const counts = countsResponse.ok ? await countsResponse.json() : { results: [], total: 0 };
 
-	// Fetch folders for swimlanes
-	const folders = await fetchAllPages(fetch, `${BASE_API_URL}/folders/`);
+	let applied_controls: Record<string, any>[] = [];
+	let preloaded = false;
+	if (counts.total > 0 && counts.total <= PAGE_SIZE) {
+		const params = new URLSearchParams(filterQuery);
+		params.set('offset', '0');
+		params.set('limit', String(PAGE_SIZE));
+		const response = await fetch(`${endpoint}?${params.toString()}`);
+		if (response.ok) {
+			applied_controls = (await response.json()).results ?? [];
+			preloaded = true;
+		} else {
+			console.error('Failed to load applied controls:', response.status);
+		}
+	}
 
 	// Extract UI parameters for the kanban mode page
 	const backUrl = getSecureRedirect(searchParams.get('backUrl')) || '/applied-controls';
@@ -34,7 +56,10 @@ export const load = (async ({ fetch, url }) => {
 	return {
 		URLModel,
 		applied_controls,
-		folders,
+		counts,
+		preloaded,
+		filterQuery,
+		pageSize: PAGE_SIZE,
 		backUrl,
 		backLabel
 	};
