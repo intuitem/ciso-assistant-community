@@ -27,7 +27,7 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		if (res.status === 404) {
 			// Check if focus mode is active
 			const focusFolderId = cookies.get('focus_folder_id');
-			const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
+			const focusModeEnabled = (await locals.getFeatureFlags())?.focus_mode ?? false;
 			const isFocusModeActive = focusFolderId && focusModeEnabled;
 
 			const message = isFocusModeActive

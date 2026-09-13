@@ -114,7 +114,7 @@ export const loadDetail = async ({ event, model, id }) => {
 		if (res.status === 404) {
 			// Check if focus mode is active
 			const focusFolderId = event.cookies.get('focus_folder_id');
-			const focusModeEnabled = event.locals.featureflags?.focus_mode ?? false;
+			const focusModeEnabled = (await event.locals.getFeatureFlags())?.focus_mode ?? false;
 			const isFocusModeActive = focusFolderId && focusModeEnabled;
 
 			const message = isFocusModeActive
@@ -149,24 +149,29 @@ export const loadDetail = async ({ event, model, id }) => {
 
 	if (model.reverseForeignKeyFields) {
 		const initialData = {};
+		// Resolved up front: the filters below are synchronous callbacks.
+		const [featureflags, user] = await Promise.all([
+			event.locals.getFeatureFlags(),
+			event.locals.getUser()
+		]);
 		await Promise.all(
 			model.reverseForeignKeyFields
 				// Flag from the reverse FK when it declares one, else from the model.
 				.filter((m) => {
 					const flag = m?.featureFlag ?? MODEL_FEATURE_FLAGS[m.urlModel];
-					return !flag || event.locals.featureflags?.[flag];
+					return !flag || featureflags?.[flag];
 				})
 				.filter(
 					(m) =>
 						!m?.folderPermsNeeded ||
 						canPerformAction({
-							user: event.locals.user,
+							user,
 							action: 'change',
 							model: 'folder',
 							domain:
 								model.name === 'folder'
 									? data.id
-									: (data.folder?.id ?? data.folder ?? event.locals.user.root_folder_id)
+									: (data.folder?.id ?? data.folder ?? user.root_folder_id)
 						})
 				)
 				.map(async (e) => {

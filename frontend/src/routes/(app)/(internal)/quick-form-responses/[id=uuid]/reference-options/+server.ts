@@ -6,7 +6,7 @@ import type { RequestHandler } from './$types';
 // rights on the domain their request landed in, which is the whole reason this endpoint
 // exists rather than the ordinary autocomplete.
 export const GET: RequestHandler = async ({ fetch, params, url, locals }) => {
-	if (!locals.user) error(401, 'Unauthorized');
+	if (!(await locals.getUser())) error(401, 'Unauthorized');
 	const query = `?question=${encodeURIComponent(url.searchParams.get('question') ?? '')}&search=${encodeURIComponent(
 		url.searchParams.get('search') ?? ''
 	)}`;

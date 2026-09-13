@@ -106,7 +106,7 @@
 			user: data.user,
 			action: 'change',
 			model: 'globalsettings',
-			domain: data.user?.root_folder_id
+			domain: data.user?.root_folder_id ?? ''
 		})
 	);
 

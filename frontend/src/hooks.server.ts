@@ -27,6 +27,12 @@ defineCustomServerStrategy('custom-fallback', {
 
 const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
 
+/** Runs `fn` at most once per request; every later caller reuses the first result. */
+function memoize<T>(fn: () => Promise<T>): () => Promise<T> {
+	let pending: Promise<T> | undefined;
+	return () => (pending ??= fn());
+}
+
 async function fetchWithRetry(
 	url: string,
 	init?: RequestInit,
@@ -184,17 +190,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 		await ensureCsrfToken(event);
 
-		if (event.locals.user) {
-			applyUserLocale(event, event.locals.user);
-			return await resolve(event, {
-				transformPageChunk: ({ html }) => {
-					return html
-						.replace('%lang%', locale)
-						.replace('%theme%', event.locals.user?.preferences?.ui?.theme ?? '');
-				}
-			});
-		}
-
 		const errorId = new URL(event.request.url).searchParams.get('error');
 		if (errorId) {
 			setFlash({ type: 'error', message: safeTranslate(errorId) }, event);
@@ -206,34 +201,64 @@ export const handle: Handle = async ({ event, resolve }) => {
 		// been fetched yet; that happens in the page's load function.
 		const isSSOAuthenticate = event.url.pathname.endsWith('/sso/authenticate');
 
-		const user = isSSOAuthenticate ? null : await validateUserSession(event);
-		if (user) {
-			event.locals.user = user;
-			applyUserLocale(event, user);
+		// Session, general settings and feature flags are page-render context:
+		// page and layout loads read them, the endpoint routes that only proxy a
+		// query to the API do not. Resolving them on demand makes the cost
+		// proportional to what a request actually reads rather than charging
+		// every request three backend round-trips — current-user alone is a
+		// ~2 MB authorization snapshot.
+		event.locals.getUser = memoize(async () => {
+			if (isSSOAuthenticate) return null;
+			const user = await validateUserSession(event);
+			if (user) {
+				event.locals.user = user;
+				applyUserLocale(event, user);
+			}
+			return user;
+		});
+
+		// Gated on the token rather than on getUser(): these two are independent of
+		// the session snapshot, and chaining them onto it would drag the 2 MB
+		// current-user payload into every request that only wants a feature flag.
+		const authorized = () => {
+			const token = event.cookies.get('token');
+			return token
+				? { 'content-type': 'application/json', Authorization: `Token ${token}` }
+				: undefined;
+		};
+
+		event.locals.getSettings = memoize(async () => {
+			const headers = authorized();
+			if (!headers) return undefined;
 			const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`, {
 				credentials: 'include',
-				headers: {
-					'content-type': 'application/json',
-					Authorization: `Token ${event.cookies.get('token')}`
-				}
+				headers
 			});
+			if (!generalSettings.ok) {
+				logger.error('Error fetching general settings', { status: generalSettings.status });
+				return undefined;
+			}
 			event.locals.settings = await generalSettings.json();
 			setUseRiskCategoryLabel(event.locals.settings?.use_risk_category_label);
+			return event.locals.settings;
+		});
 
-			const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`, {
-				credentials: 'include',
-				headers: {
-					'content-type': 'application/json',
-					Authorization: `Token ${event.cookies.get('token')}`
-				}
-			});
+		event.locals.getFeatureFlags = memoize(async () => {
+			const headers = authorized();
+			if (!headers) return undefined;
 			try {
+				const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`, {
+					credentials: 'include',
+					headers
+				});
+				if (!featureFlagSettings.ok) throw new Error(`status ${featureFlagSettings.status}`);
 				event.locals.featureflags = await featureFlagSettings.json();
 			} catch (e) {
 				logger.error('Error fetching feature flags', { error: e });
 				event.locals.featureflags = {};
 			}
-		}
+			return event.locals.featureflags;
+		});
 
 		return await resolve(event, {
 			transformPageChunk: ({ html }) => {
@@ -263,6 +288,10 @@ export const handleError: HandleServerError = ({ error, status, message, event }
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const unsafeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+	// Deliberately reads the already-resolved user rather than awaiting getUser():
+	// the LOCALE cookie carries the same preference (applyUserLocale writes it on
+	// every request that resolves a session), so forcing the session fetch here
+	// would cost a round-trip per proxied API call for no change in outcome.
 	const currentLang =
 		event.locals.user?.preferences?.lang || event.cookies.get('LOCALE') || DEFAULT_LANGUAGE;
 	if (request.url.startsWith(BASE_API_URL)) {
@@ -282,7 +311,13 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 
 		// Inject focus folder ID header from cookie
 		const focusFolderId = event.cookies.get('focus_folder_id');
-		const focusModeEnabled = event.locals.featureflags?.focus_mode ?? false;
+		// The only locals read left on the proxy path, and the one round-trip a
+		// pure pass-through request still pays. FocusModeMiddleware re-checks the
+		// flag server-side, so this guard is duplication — see the note in
+		// backend/core/focus_middleware.py before removing it.
+		const focusModeEnabled = focusFolderId
+			? ((await event.locals.getFeatureFlags())?.focus_mode ?? false)
+			: false;
 		if (focusFolderId && focusModeEnabled) {
 			request.headers.set('X-Focus-Folder-Id', focusFolderId);
 		}
