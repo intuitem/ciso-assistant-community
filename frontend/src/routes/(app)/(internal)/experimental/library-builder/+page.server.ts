@@ -21,6 +21,6 @@ export const load = (async ({ fetch, locals }) => {
 		orphanFrameworks,
 		// Instance-wide authoring identity (general settings); the last
 		// packager typed in this browser overrides it in the forms.
-		defaultPackager: locals.settings?.default_packager ?? 'custom'
+		defaultPackager: (await locals.getSettings())?.default_packager ?? 'custom'
 	};
 }) satisfies PageServerLoad;

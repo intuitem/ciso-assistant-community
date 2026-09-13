@@ -74,14 +74,14 @@ async function revokeAccessToken(fetch: Fetch): Promise<boolean> {
 }
 
 export const GET = async ({ locals }) => {
-	if (!locals.user) {
+	if (!(await locals.getUser())) {
 		redirect(302, `/login?next=/home`);
 	}
 	redirect(302, '/analytics');
 };
 
 export const POST = async ({ fetch, cookies, locals }) => {
-	const isSSOUser = locals.user?.is_sso === true;
+	const isSSOUser = (await locals.getUser())?.is_sso === true;
 	let target = '/login';
 
 	const idpLogout = isSSOUser ? await resolveIdPLogoutUrl(fetch, cookies) : null;
@@ -100,7 +100,7 @@ export const POST = async ({ fetch, cookies, locals }) => {
 	cookies.delete('allauth_session_token', { path: '/' });
 	cookies.delete('sessionid', { path: '/' });
 
-	logger.info('User logged out', { user_id: locals.user?.id });
+	logger.info('User logged out', { user_id: (await locals.getUser())?.id });
 
 	// eslint-disable-next-line eslint-plugin-intuitem-sveltekit/secure-redirect -- backend-issued IdP URL
 	redirect(302, target);
