@@ -757,7 +757,7 @@ def default_date_format() -> str:
         general = GlobalSettings.objects.filter(name="general").first()
         if general and isinstance(general.value, dict):
             candidate = general.value.get("default_date_format", "auto")
-            if candidate in User.DATE_FORMATS:
+            if isinstance(candidate, str) and candidate in User.DATE_FORMATS:
                 return candidate
     except ImportError, OperationalError, ProgrammingError:
         # Called during startup and from migrations, before the table exists.
@@ -1034,7 +1034,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             self.preferences = prefs
         if not is_supported_language(prefs.get("lang")):
             prefs["lang"] = default_language()
-        if prefs.get("date_format") not in self.DATE_FORMATS:
+        stored_format = prefs.get("date_format")
+        if not isinstance(stored_format, str) or stored_format not in self.DATE_FORMATS:
             prefs["date_format"] = default_date_format()
         ui = prefs.get("ui") if isinstance(prefs.get("ui"), dict) else {}
         if ui.get("theme") not in ("light", "dark", "system"):
