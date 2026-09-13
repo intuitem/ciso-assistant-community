@@ -252,7 +252,6 @@ export const COMMITMENT_OWNER_FILTER: ListViewFilterConfig = {
 export const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		lazy: true,
 		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
 		label: 'domain',
 		multiple: true
