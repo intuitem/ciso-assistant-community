@@ -856,6 +856,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_policy",
     "change_perimeter",
     "change_referencecontrol",
+    "add_representative",
     "change_representative",
     "change_requirementassessment",
     "add_answer",
