@@ -26,6 +26,7 @@ from core.models import (
 from sec_intel.models import Tactic, Technique, TTPCatalog
 from metrology.models import MetricDefinition
 from django.db import transaction
+from core.utils import free_name
 from iam.models import Folder
 
 from django.db.utils import IntegrityError, OperationalError
@@ -572,14 +573,6 @@ class QuickFormImporter:
             ).delete()
 
 
-def _free_name(model, name, folder):
-    candidate, suffix = name, 2
-    while model.objects.filter(folder=folder, name__iexact=candidate).exists():
-        candidate = f"{name} ({suffix})"
-        suffix += 1
-    return candidate
-
-
 class PortalPresetImporter:
     """Loads a portal design as a starting point. Workflow-shaped: it divorces on
     arrival, so a library update leaves it alone and an unload cannot take it away."""
@@ -622,7 +615,7 @@ class PortalPresetImporter:
             )
         PortalPreset.objects.create(
             folder=folder,
-            name=_free_name(
+            name=free_name(
                 PortalPreset, self.preset_data.get("name") or "Portal", folder
             ),
             description=self.preset_data.get("description"),

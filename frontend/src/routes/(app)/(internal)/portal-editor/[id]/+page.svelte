@@ -178,6 +178,7 @@
 	const payload = $derived(JSON.stringify({ sections }));
 	// Gates publishing, not saving: a design cloned from a library can land half-wired.
 	const incompleteTiles = $derived(countIncompleteTiles(sections));
+	const publishBlocked = $derived(data.portal.status !== 'published' && incompleteTiles > 0);
 
 	// 'navigate' targets a model (mandatory) — backfill any tile that lacks one so the
 	// select is never silently empty. 'assessment' tiles need a stable id so a click can
@@ -383,10 +384,8 @@
 			/>
 			<button
 				class="btn preset-tonal"
-				disabled={data.portal.status !== 'published' && incompleteTiles > 0}
-				title={incompleteTiles > 0
-					? m.portalTileIncompleteCount({ count: incompleteTiles })
-					: undefined}
+				disabled={publishBlocked}
+				title={publishBlocked ? m.portalTileIncompleteCount({ count: incompleteTiles }) : undefined}
 			>
 				{data.portal.status === 'published' ? m.unpublish() : m.publish()}
 			</button>
