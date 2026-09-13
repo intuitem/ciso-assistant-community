@@ -14,7 +14,7 @@ def setup(db):
         name="Posture Domain",
         content_type=Folder.ContentType.DOMAIN,
     )
-    fw = Framework.objects.create(name="Test Benchmark", folder=root, is_published=True)
+    fw = Framework.objects.create(name="Test Benchmark", folder=root)
     section = RequirementNode.objects.create(
         framework=fw,
         urn="urn:test:posture:section:1",
@@ -22,7 +22,6 @@ def setup(db):
         name="Control Plane",
         assessable=False,
         folder=root,
-        is_published=True,
     )
     nodes = {}
     for ref_id in ("1.1", "1.2", "1.3", "2.1"):
@@ -33,7 +32,6 @@ def setup(db):
             ref_id=ref_id,
             assessable=True,
             folder=root,
-            is_published=True,
         )
     RequirementNode.objects.create(
         framework=fw,
@@ -41,7 +39,6 @@ def setup(db):
         ref_id="9",
         assessable=False,
         folder=root,
-        is_published=True,
     )
     asset1 = Asset.objects.create(name="vm-1", folder=domain)
     asset2 = Asset.objects.create(name="vm-2", folder=domain)
@@ -603,7 +600,6 @@ def ig_setup(db):
     fw = Framework.objects.create(
         name="IG Benchmark",
         folder=root,
-        is_published=True,
         implementation_groups_definition=[
             {"ref_id": "A", "name": "Automatic"},
             {"ref_id": "B", "name": "Manual"},
@@ -615,7 +611,6 @@ def ig_setup(db):
         ref_id="1",
         assessable=False,
         folder=root,
-        is_published=True,
     )
     groups = {"1.1": ["A"], "1.2": ["B"], "1.3": None, "2.1": ["A", "B"]}
     nodes = {}
@@ -628,7 +623,6 @@ def ig_setup(db):
             assessable=True,
             implementation_groups=igs,
             folder=root,
-            is_published=True,
         )
     asset = Asset.objects.create(name="ig-vm", folder=domain)
     pa = PostureAssessment.objects.create(

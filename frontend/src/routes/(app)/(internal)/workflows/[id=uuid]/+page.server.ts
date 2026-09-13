@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -36,10 +37,11 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 		versions[0];
 	if (!activeVersion) error(404, 'This workflow has no version');
 
-	const [graph, creatableModelsRaw, readableModelsRaw] = await Promise.all([
+	const [graph, creatableModelsRaw, readableModelsRaw, updatableModelsRaw] = await Promise.all([
 		fetchJson(fetch, `${BASE_API_URL}/workflows/workflow-versions/${activeVersion.id}/graph/`),
 		fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/creatable-models/`),
-		fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/readable-models/`)
+		fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/readable-models/`),
+		fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/updatable-models/`)
 	]);
 	if (!graph) error(404, 'Graph not found');
 
@@ -47,16 +49,23 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 	// Folders are always fetched: the provisioning actions need them regardless
 	// of what the registry declares.
 	const creatableModels = listResults(creatableModelsRaw);
+	// Only the small relation targets are fetched as pickers; controls,
+	// evidences and assets are templated from an upstream node instead.
 	const fkEndpoints = [
 		...new Set([
 			...creatableModels.flatMap((entry: any) => Object.values(entry.fk_fields ?? {})),
-			'folders'
+			'folders',
+			'actors',
+			'filtering-labels',
+			'frameworks'
 		])
 	] as string[];
 	const fkOptions: Record<string, any[]> = {};
 	await Promise.all(
 		fkEndpoints.map(async (endpoint) => {
-			fkOptions[endpoint] = listResults(await fetchJson(fetch, `${BASE_API_URL}/${endpoint}/`));
+			fkOptions[endpoint] = await fetchAllPages(fetch, `${BASE_API_URL}/${endpoint}/`).catch(
+				() => []
+			);
 		})
 	);
 
@@ -73,6 +82,7 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 		subprocessCandidates: [],
 		creatableModels,
 		readableModels: listResults(readableModelsRaw),
+		updatableModels: listResults(updatableModelsRaw),
 		fkOptions,
 		title: workflow.name
 	};

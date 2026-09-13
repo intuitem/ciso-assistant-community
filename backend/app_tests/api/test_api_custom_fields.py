@@ -1,7 +1,9 @@
 import pytest
 from rest_framework import status
 
+from global_settings import utils as ff_utils
 from global_settings.models import GlobalSettings
+from global_settings.utils import clear_feature_flags_cache
 from iam.models import Folder
 
 CF_URL = "/api/custom-fields/"
@@ -13,12 +15,20 @@ class TestCustomFieldsAPI:
     """End-to-end HTTP coverage through the real router + RBAC stack."""
 
     @pytest.fixture(autouse=True)
-    def enable_custom_fields(self, authenticated_client):
+    def enable_custom_fields(self, authenticated_client, monkeypatch):
+        # custom_fields is enterprise-only (declared on the EE
+        # FeatureFlagsSerializer, hence unsupported on CE); these tests
+        # exercise the EE-gated behavior from the CE test bed.
+        supported = ff_utils.get_supported_feature_flags() | {"custom_fields"}
+        monkeypatch.setattr(ff_utils, "get_supported_feature_flags", lambda: supported)
         gs, _ = GlobalSettings.objects.get_or_create(
             name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {}}
         )
         gs.value = {**(gs.value or {}), "custom_fields": True}
         gs.save()
+        # Direct ORM write: bypasses the write-point invalidation of the
+        # feature-flags cache.
+        clear_feature_flags_cache()
 
     def _make_choice_def(self, client, folder_id, key="tier"):
         return client.post(
@@ -187,12 +197,166 @@ class TestCustomFieldsAPI:
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
         assert "custom_fields" in resp.json()
 
+    def _sibling_domains_with_def(self, client):
+        root = Folder.get_root_folder()
+        domain_a = Folder.objects.create(name="Domain A", parent_folder=root)
+        domain_b = Folder.objects.create(name="Domain B", parent_folder=root)
+        resp = self._make_choice_def(client, str(domain_a.id))
+        assert resp.status_code == status.HTTP_201_CREATED, resp.content
+        return domain_a, domain_b
+
+    @pytest.mark.parametrize("stale_value", [None, "", [], False])
+    def test_stale_empty_keys_from_other_scope_ignored(
+        self, authenticated_client, stale_value
+    ):
+        # A form can leave empty placeholders behind for fields scoped to
+        # another domain (the section rendered before the target folder was
+        # picked; checkboxes fabricate False); those must not block the write.
+        _, domain_b = self._sibling_domains_with_def(authenticated_client)
+
+        create = authenticated_client.post(
+            PROJECTS_URL,
+            {
+                "name": "In B",
+                "folder": str(domain_b.id),
+                "custom_fields": {"tier": stale_value},
+            },
+            format="json",
+        )
+        assert create.status_code == status.HTTP_201_CREATED, create.content
+        detail = authenticated_client.get(f"{PROJECTS_URL}{create.json()['id']}/")
+        assert detail.json()["custom_fields"] == {}
+
+    def test_out_of_scope_key_with_value_still_rejected(self, authenticated_client):
+        _, domain_b = self._sibling_domains_with_def(authenticated_client)
+
+        resp = authenticated_client.post(
+            PROJECTS_URL,
+            {
+                "name": "In B",
+                "folder": str(domain_b.id),
+                "custom_fields": {"tier": "gold"},
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert "tier" in resp.json()["custom_fields"]
+
+    def test_typoed_clear_still_rejected(self, authenticated_client):
+        # An empty value is only tolerated for keys that exist somewhere for
+        # the model; a typo'd key must not 200 while the real field is intact.
+        root = Folder.get_root_folder()
+        resp = self._make_choice_def(authenticated_client, str(root.id))
+        assert resp.status_code == status.HTTP_201_CREATED, resp.content
+
+        resp = authenticated_client.post(
+            PROJECTS_URL,
+            {
+                "name": "Typo",
+                "folder": str(root.id),
+                "custom_fields": {"teir": None},
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert "teir" in resp.json()["custom_fields"]
+
+    def test_folder_move_discards_out_of_scope_values(self, authenticated_client):
+        domain_a, domain_b = self._sibling_domains_with_def(authenticated_client)
+
+        create = authenticated_client.post(
+            PROJECTS_URL,
+            {
+                "name": "Mover",
+                "folder": str(domain_a.id),
+                "custom_fields": {"tier": "gold"},
+            },
+            format="json",
+        )
+        assert create.status_code == status.HTTP_201_CREATED, create.content
+        project_id = create.json()["id"]
+
+        move = authenticated_client.patch(
+            f"{PROJECTS_URL}{project_id}/",
+            {"folder": str(domain_b.id)},
+            format="json",
+        )
+        assert move.status_code == status.HTTP_200_OK, move.content
+
+        detail = authenticated_client.get(f"{PROJECTS_URL}{project_id}/")
+        assert detail.json()["custom_fields"] == {}
+        filtered = authenticated_client.get(PROJECTS_URL, {"cf__tier": "gold"})
+        assert project_id not in {p["id"] for p in filtered.json()["results"]}
+
+    def test_folder_move_enforces_destination_required_fields(
+        self, authenticated_client
+    ):
+        root = Folder.get_root_folder()
+        domain_a = Folder.objects.create(name="Domain A", parent_folder=root)
+        domain_b = Folder.objects.create(name="Domain B", parent_folder=root)
+        resp = authenticated_client.post(
+            CF_URL,
+            {
+                "model": "pmbok.project",
+                "key": "level",
+                "label": "Level",
+                "field_type": "text",
+                "required": True,
+                "folder": str(domain_b.id),
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_201_CREATED, resp.content
+
+        create = authenticated_client.post(
+            PROJECTS_URL, {"name": "Mover", "folder": str(domain_a.id)}, format="json"
+        )
+        assert create.status_code == status.HTTP_201_CREATED, create.content
+        project_id = create.json()["id"]
+
+        # No custom_fields key at all: the destination's required field must
+        # still be checked, otherwise the move lands in a state B forbids.
+        move = authenticated_client.patch(
+            f"{PROJECTS_URL}{project_id}/", {"folder": str(domain_b.id)}, format="json"
+        )
+        assert move.status_code == status.HTTP_400_BAD_REQUEST, move.content
+        assert "level" in move.json()["custom_fields"]
+
+        move = authenticated_client.patch(
+            f"{PROJECTS_URL}{project_id}/",
+            {"folder": str(domain_b.id), "custom_fields": {"level": "high"}},
+            format="json",
+        )
+        assert move.status_code == status.HTTP_200_OK, move.content
+        detail = authenticated_client.get(f"{PROJECTS_URL}{project_id}/")
+        assert detail.json()["custom_fields"] == {"level": "high"}
+
+    def test_empty_for_folder_returns_global_definitions_only(
+        self, authenticated_client
+    ):
+        root = Folder.get_root_folder()
+        domain = Folder.objects.create(name="Domain A", parent_folder=root)
+        resp = self._make_choice_def(
+            authenticated_client, str(root.id), key="global_tier"
+        )
+        assert resp.status_code == status.HTTP_201_CREATED, resp.content
+        resp = self._make_choice_def(
+            authenticated_client, str(domain.id), key="domain_tier"
+        )
+        assert resp.status_code == status.HTTP_201_CREATED, resp.content
+
+        listed = authenticated_client.get(
+            CF_URL, {"model": "pmbok.project", "for_folder": ""}
+        )
+        assert {d["key"] for d in listed.json()["results"]} == {"global_tier"}
+
     def test_disabled_flag_gates_access(self, authenticated_client):
         root = Folder.get_root_folder()
         self._make_choice_def(authenticated_client, str(root.id))
         gs = GlobalSettings.objects.get(name=GlobalSettings.Names.FEATURE_FLAGS)
         gs.value = {**gs.value, "custom_fields": False}
         gs.save()
+        clear_feature_flags_cache()
         # reads degrade to an empty list (no hard error), writes are forbidden
         listing = authenticated_client.get(CF_URL)
         assert listing.status_code == status.HTTP_200_OK

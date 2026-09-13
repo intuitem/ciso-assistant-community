@@ -80,7 +80,8 @@
 	let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 	let previewAbortController: AbortController | null = null;
 
-	const cBase = 'card bg-surface-50-950 p-6 w-modal-wide max-w-4xl space-y-5';
+	const cBase =
+		'card bg-surface-100-900 border border-surface-500 p-6 w-modal-wide max-w-4xl space-y-5';
 	const cHeader = 'text-xl font-medium text-surface-900-100';
 
 	onMount(async () => {

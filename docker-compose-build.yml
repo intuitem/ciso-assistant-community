@@ -71,10 +71,6 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:8443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
-      - HOME=/tmp
-      - XDG_CACHE_HOME=/tmp/.cache
-      - XDG_CONFIG_HOME=/tmp/.config
-      - XDG_DATA_HOME=/tmp/.local/share
     read_only: true
     cap_drop:
       - ALL
@@ -85,12 +81,13 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      # DHI via the GHCR mirror; see frontend/Dockerfile for why not dhi.io
       args:
-        NODE_IMAGE: ${NODE_IMAGE:-node:24-slim}
+        NODE_BUILD_IMAGE: ${NODE_BUILD_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-node:24-dev}
+        NODE_RUNTIME_IMAGE: ${NODE_RUNTIME_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-node:24}
     depends_on:
       - backend
     restart: always
-    user: "1001:1001"
 
   qdrant:
     container_name: qdrant

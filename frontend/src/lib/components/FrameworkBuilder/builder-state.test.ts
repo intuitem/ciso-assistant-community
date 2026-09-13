@@ -9,6 +9,7 @@ import {
 	buildTree,
 	serializeDraft,
 	createBuilderState,
+	nodePassesIgFilter,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
@@ -450,8 +451,6 @@ describe('buildTree', () => {
 	});
 });
 
-import { createBuilderState } from './builder-state';
-
 describe('addNode', () => {
 	function newStore() {
 		const fw = makeFramework();
@@ -499,6 +498,34 @@ describe('addNode', () => {
 		const roots = get(s.rootNodes);
 		expect(roots[0].node.assessable).toBe(false);
 		expect(roots[0].node.display_mode).toBe('default');
+	});
+});
+
+describe('setDisplayMode', () => {
+	function newStore() {
+		const fw = makeFramework();
+		return createBuilderState(fw, [], []);
+	}
+
+	it('clears assessable when a requirement is switched to splash', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const nodeId = get(s.rootNodes)[0].node.id;
+		s.setDisplayMode(nodeId, 'splash');
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.display_mode).toBe('splash');
+		expect(roots[0].node.assessable).toBe(false);
+	});
+
+	it('switching back to default keeps the node non-assessable', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const nodeId = get(s.rootNodes)[0].node.id;
+		s.setDisplayMode(nodeId, 'splash');
+		s.setDisplayMode(nodeId, 'default');
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.display_mode).toBe('default');
+		expect(roots[0].node.assessable).toBe(false);
 	});
 });
 
@@ -584,6 +611,64 @@ describe('indentNode', () => {
 		expect(roots[0].children[0].children[0].node.id).toBe(targetId);
 		expect(roots[0].children[0].children[0].node.parent_urn).toBe(prevUrn);
 		expect(roots[0].children[0].children[0].depth).toBe(2);
+	});
+});
+
+describe('quick-form mode keeps pages flat', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], [], null, { mode: 'quick_form' });
+	}
+
+	function twoPages() {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		s.addNode({ parent: null, preset: 'requirement' });
+		return s;
+	}
+
+	it('refuses to indent a page under the previous one', () => {
+		const s = twoPages();
+		const id = get(s.rootNodes)[1].node.id;
+
+		expect(s.indentNode(id)).toBe(false);
+		const after = get(s.rootNodes);
+		expect(after).toHaveLength(2);
+		expect(after.every((p) => p.depth === 0 && p.node.parent_urn === null)).toBe(true);
+	});
+
+	it('refuses to outdent', () => {
+		const s = twoPages();
+		expect(s.outdentNode(get(s.rootNodes)[0].node.id)).toBe(false);
+		expect(get(s.rootNodes)).toHaveLength(2);
+	});
+
+	it('ignores a parent on addNode, so Alt+Enter cannot nest a page', () => {
+		const s = twoPages();
+		const first = get(s.rootNodes)[0].node.id;
+
+		s.addNode({ parent: first, preset: 'requirement' });
+
+		const after = get(s.rootNodes);
+		expect(after).toHaveLength(3);
+		expect(after.flatMap((p) => p.children)).toHaveLength(0);
+		expect(after.every((p) => p.depth === 0 && p.node.parent_urn === null)).toBe(true);
+	});
+
+	it('keeps pages assessable', () => {
+		const s = twoPages();
+		const id = get(s.rootNodes)[0].node.id;
+		expect(get(s.rootNodes)[0].node.assessable).toBe(true);
+
+		s.toggleAssessable(id);
+		expect(get(s.rootNodes)[0].node.assessable).toBe(true);
+	});
+
+	it('still nests in framework mode', () => {
+		const s = createBuilderState(makeFramework(), [], []);
+		s.addNode({ parent: null, preset: 'group' });
+		s.addNode({ parent: null, preset: 'requirement' });
+		expect(s.indentNode(get(s.rootNodes)[1].node.id)).toBe(true);
+		expect(get(s.rootNodes)[0].children).toHaveLength(1);
 	});
 });
 
@@ -1288,5 +1373,27 @@ describe('URN rewrite & repair — gap coverage', () => {
 
 		const choiceUrns = get(store.rootNodes)[0].questions[0].question.choices.map((c) => c.urn);
 		expect(new Set(choiceUrns).size).toBe(2);
+	});
+});
+
+describe('nodePassesIgFilter', () => {
+	it('keeps everything when no filter is active', () => {
+		expect(nodePassesIgFilter(['A'], new Set())).toBe(true);
+		expect(nodePassesIgFilter(null, new Set())).toBe(true);
+		expect(nodePassesIgFilter([], new Set())).toBe(true);
+	});
+
+	it('keeps nodes whose IGs intersect the selection', () => {
+		expect(nodePassesIgFilter(['A', 'B'], new Set(['B', 'C']))).toBe(true);
+	});
+
+	it('drops nodes whose IGs do not intersect the selection', () => {
+		expect(nodePassesIgFilter(['A'], new Set(['B']))).toBe(false);
+	});
+
+	it('drops IG-less nodes when a filter is active, matching audit semantics', () => {
+		expect(nodePassesIgFilter(null, new Set(['A']))).toBe(false);
+		expect(nodePassesIgFilter(undefined, new Set(['A']))).toBe(false);
+		expect(nodePassesIgFilter([], new Set(['A']))).toBe(false);
 	});
 });

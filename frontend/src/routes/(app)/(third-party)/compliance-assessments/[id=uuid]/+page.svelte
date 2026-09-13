@@ -15,7 +15,6 @@
 	import {} from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
-	import TreeViewItemLead from './TreeViewItemLead.svelte';
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
@@ -65,6 +64,10 @@
 
 	let { data, form }: Props = $props();
 
+	const scoreFloor = $derived(
+		data.global_score?.score_calculation_method === 'sum' ? 0 : (data.global_score?.min_score ?? 0)
+	);
+
 	const compliance_assessment = $derived(data.compliance_assessment);
 
 	const user = page.data.user;
@@ -76,6 +79,18 @@
 		model: model.name,
 		object: compliance_assessment
 	});
+	// Assignments that have actually been sent out: a draft has nothing to review yet.
+	const activeAssignments = $derived(
+		(compliance_assessment.requirement_assignments ?? []).filter(
+			(a: { status?: string }) => a.status && a.status !== 'draft'
+		)
+	);
+	const reviewResponsesHref = $derived(
+		activeAssignments.length === 1
+			? `/auditee-assessments/${activeAssignments[0].id}`
+			: `${page.url.pathname}/assignments`
+	);
+
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
 	const canEditRequirementAssessment: boolean =
 		!data.compliance_assessment.is_locked &&
@@ -188,6 +203,8 @@
 	let selectedStatus = $state([]);
 	let selectedResults = $state([]);
 	let selectedExtendedResults = $state([]);
+	let selectedControlCoverage = $state([]);
+	let selectedEvidenceCoverage = $state([]);
 	let displayOnlyAssessableNodes = $state(false);
 	$effect(
 		() =>
@@ -195,6 +212,8 @@
 				selectedStatus = [],
 				selectedResults = [],
 				selectedExtendedResults = [],
+				selectedControlCoverage = [],
+				selectedEvidenceCoverage = [],
 				displayOnlyAssessableNodes = false
 			} = $currentFilters)
 	);
@@ -222,15 +241,31 @@
 		auditFiltersStore.setExtendedResults(page.params.id, selectedExtendedResults);
 	}
 
+	function toggleControlCoverage(coverage) {
+		selectedControlCoverage = toggleItem(coverage, selectedControlCoverage);
+		auditFiltersStore.setControlCoverage(page.params.id, selectedControlCoverage);
+	}
+
+	function toggleEvidenceCoverage(coverage) {
+		selectedEvidenceCoverage = toggleItem(coverage, selectedEvidenceCoverage);
+		auditFiltersStore.setEvidenceCoverage(page.params.id, selectedEvidenceCoverage);
+	}
+
 	function isNodeHidden(node: Node, displayOnlyAssessableNodes: boolean): boolean {
 		const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
+		const controlCoverage = node.has_applied_controls ? 'with' : 'without';
+		const evidenceCoverage = node.has_evidence ? 'with' : 'without';
 		return (
 			(displayOnlyAssessableNodes && !node.assessable && !hasAssessableChildren) ||
 			(node.assessable &&
 				((selectedStatus.length > 0 && !selectedStatus.includes(node.status)) ||
 					(selectedResults.length > 0 && !selectedResults.includes(node.result)) ||
 					(selectedExtendedResults.length > 0 &&
-						!selectedExtendedResults.includes(node.extended_result))))
+						!selectedExtendedResults.includes(node.extended_result)) ||
+					(selectedControlCoverage.length > 0 &&
+						!selectedControlCoverage.includes(controlCoverage)) ||
+					(selectedEvidenceCoverage.length > 0 &&
+						!selectedEvidenceCoverage.includes(evidenceCoverage))))
 		);
 	}
 	function transformToTreeView(nodes: Node[], hasParentNode: boolean = false) {
@@ -250,33 +285,11 @@
 					showStatus,
 					showScore,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
+					showExtendedResult,
 					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					scoreCalculationMethod: data.compliance_assessment.score_calculation_method,
 					hidden,
 					selectedStatus
-				},
-				lead: TreeViewItemLead,
-				leadProps: {
-					statusI18n: node.status_i18n,
-					resultI18n: node.result_i18n,
-					assessable: node.assessable,
-					statusColor: complianceStatusColorMap[node.status],
-					resultColor: complianceResultColorMap[node.result],
-					score: node.score,
-					documentationScore: node.documentation_score,
-					isScored: node.is_scored,
-					showResult,
-					showScore,
-					showStatus,
-					scoringEnabled: data.compliance_assessment.scoring_enabled,
-					showDocumentationScore: data.compliance_assessment.show_documentation_score,
-					max_score: node.max_score,
-					min_score: node.min_score ?? 0,
-					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,
-					extendedResultEnabled: data.compliance_assessment.extended_result_enabled,
-					showExtendedResult,
-					extendedResult: node.extended_result,
-					extendedResultColor: extendedResultColorMap[node.extended_result]
 				},
 				children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
 			};
@@ -284,14 +297,14 @@
 	}
 	let treeViewNodes: TreeViewNode[] = $state();
 
-	function assessableNodesCount(nodes: TreeViewNode[]): number {
+	function assessableNodesCount(nodes: TreeViewNode[], onlyVisible = false): number {
 		let count = 0;
 		for (const node of nodes) {
-			if (node.contentProps.assessable) {
+			if (node.contentProps.assessable && !(onlyVisible && node.contentProps.hidden)) {
 				count++;
 			}
 			if (node.children) {
-				count += assessableNodesCount(node.children);
+				count += assessableNodesCount(node.children, onlyVisible);
 			}
 		}
 		return count;
@@ -420,6 +433,21 @@
 				format: 'DOCX' as const,
 				href: `/compliance-assessments/${id}/export/word`,
 				testId: 'export-option-word'
+			},
+			// Offered to third parties too: the backend redacts per viewer role.
+			{
+				titleKey: 'exportAuditPosture',
+				descriptionKey: 'exportAuditPostureDesc',
+				format: 'PDF' as const,
+				href: `/compliance-assessments/${id}/export/posture-pdf?profile=full`,
+				testId: 'export-option-posture-pdf'
+			},
+			{
+				titleKey: 'exportAuditAttestation',
+				descriptionKey: 'exportAuditAttestationDesc',
+				format: 'PDF' as const,
+				href: `/compliance-assessments/${id}/export/posture-pdf?profile=attestation`,
+				testId: 'export-option-attestation-pdf'
 			},
 			isInternal &&
 				isCyFun && {
@@ -663,6 +691,8 @@
 		(selectedStatus.length > 0 ? 1 : 0) +
 			(selectedResults.length > 0 ? 1 : 0) +
 			(selectedExtendedResults.length > 0 ? 1 : 0) +
+			(selectedControlCoverage.length > 0 ? 1 : 0) +
+			(selectedEvidenceCoverage.length > 0 ? 1 : 0) +
 			(displayOnlyAssessableNodes ? 1 : 0)
 	);
 
@@ -836,9 +866,12 @@
 							name="global_maturity"
 							value={data.global_score.maturity_score}
 							max={data.global_score.total_max_score}
+							min={scoreFloor}
 							color={getScoreHexColor(
 								data.global_score.maturity_score,
-								data.global_score.total_max_score
+								data.global_score.total_max_score,
+								false,
+								scoreFloor
 							)}
 							strokeWidth={35}
 							fontSize={36}
@@ -925,6 +958,15 @@
 					{/if}
 				</div>
 				{#if !page.data.user.is_third_party}
+					{#each page.data?.featureflags?.findings_from_requirements ? (data.compliance_assessment.findings_assessments ?? []) : [] as binder}
+						<Anchor
+							href={`/findings-assessments/${binder.id}`}
+							class="btn preset-filled-secondary-500 h-fit"
+							breadcrumbAction="push"
+							data-testid="go-to-findings-binder-button"
+							><i class="fa-solid fa-bug mr-2"></i>{m.findings()}</Anchor
+						>
+					{/each}
 					<Anchor
 						href={`${page.url.pathname}/action-plan`}
 						class="btn preset-filled-primary-500 h-fit"
@@ -1093,6 +1135,20 @@
 										<span class="text-sm font-medium">{m.assignments()}</span>
 									</Anchor>
 								{/if}
+								{#if page.data?.featureflags?.auditee_mode && activeAssignments.length > 0}
+									<!-- Reviewing what was answered was reachable only through the
+										assignments page, which disappears once the audit is locked or in
+										review — exactly when a reviewer needs it. -->
+									<Anchor
+										breadcrumbAction="push"
+										href={reviewResponsesHref}
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+										data-testid="review-responses-button"
+									>
+										<i class="fa-solid fa-clipboard-check text-blue-500 text-base"></i>
+										<span class="text-sm font-medium">{m.reviewResponses()}</span>
+									</Anchor>
+								{/if}
 							</div>
 						</div>
 					{/if}
@@ -1151,7 +1207,11 @@
 				<span class="h4">{m.associatedRequirements()}</span>
 				<span class="badge bg-violet-400 text-white ml-1 rounded-xl">
 					{#if treeViewNodes}
-						{assessableNodesCount(treeViewNodes)}
+						{#if filterCount}
+							{assessableNodesCount(treeViewNodes, true)} / {assessableNodesCount(treeViewNodes)}
+						{:else}
+							{assessableNodesCount(treeViewNodes)}
+						{/if}
 					{/if}
 				</span>
 			</div>
@@ -1252,6 +1312,47 @@
 								</div>
 							{/if}
 							<div>
+								<span class="text-sm font-bold">{m.appliedControls()}</span>
+								<div
+									class="flex flex-wrap w-fit gap-2 text-xs bg-surface-200-800 border-2 p-1 rounded-md"
+								>
+									{#each ['with', 'without'] as coverage}
+										<button
+											type="button"
+											onclick={() => toggleControlCoverage(coverage)}
+											class="px-2 py-1 rounded-md font-bold {selectedControlCoverage.includes(
+												coverage
+											)
+												? 'bg-primary-500 text-white'
+												: 'bg-surface-400 text-black opacity-30'}"
+										>
+											{coverage === 'with' ? m.withAppliedControls() : m.withoutAppliedControls()}
+										</button>
+									{/each}
+								</div>
+							</div>
+							<div>
+								<span class="text-sm font-bold">{m.evidence()}</span>
+								<span class="text-xs text-surface-600-400 ml-1">({m.evidenceCoverageHint()})</span>
+								<div
+									class="flex flex-wrap w-fit gap-2 text-xs bg-surface-200-800 border-2 p-1 rounded-md"
+								>
+									{#each ['with', 'without'] as coverage}
+										<button
+											type="button"
+											onclick={() => toggleEvidenceCoverage(coverage)}
+											class="px-2 py-1 rounded-md font-bold {selectedEvidenceCoverage.includes(
+												coverage
+											)
+												? 'bg-primary-500 text-white'
+												: 'bg-surface-400 text-black opacity-30'}"
+										>
+											{coverage === 'with' ? m.withEvidence() : m.withoutEvidence()}
+										</button>
+									{/each}
+								</div>
+							</div>
+							<div>
 								<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
 								<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
 									<Switch
@@ -1286,7 +1387,7 @@
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults || selectedExtendedResults}
+			{#key [displayOnlyAssessableNodes, selectedStatus, selectedResults, selectedExtendedResults, selectedControlCoverage, selectedEvidenceCoverage].join('|')}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes

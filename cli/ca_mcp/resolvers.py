@@ -1,6 +1,6 @@
 """Helper functions to resolve names to UUIDs"""
 
-from .client import make_get_request, get_paginated_results
+from .client import fetch_all_results
 
 
 def resolve_folder_id(folder_name_or_id: str) -> str:
@@ -13,13 +13,10 @@ def resolve_folder_id(folder_name_or_id: str) -> str:
         return folder_name_or_id
 
     # Otherwise, look up by name - return exactly one result
-    res = make_get_request("/folders/", params={"name": folder_name_or_id})
+    folders, error = fetch_all_results("/folders/", params={"name": folder_name_or_id})
 
-    if res.status_code != 200:
-        raise ValueError(f"Folder '{folder_name_or_id}' API error {res.status_code}")
-
-    data = res.json()
-    folders = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Folder '{folder_name_or_id}' API error: {error}")
 
     if not folders or len(folders) == 0:
         raise ValueError(f"Folder '{folder_name_or_id}' not found")
@@ -44,15 +41,12 @@ def resolve_perimeter_id(perimeter_name_or_id: str) -> str:
         return perimeter_name_or_id
 
     # Otherwise, look up by name - return exactly one result
-    res = make_get_request("/perimeters/", params={"name": perimeter_name_or_id})
+    perimeters, error = fetch_all_results(
+        "/perimeters/", params={"name": perimeter_name_or_id}
+    )
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"Perimeter '{perimeter_name_or_id}' API error {res.status_code}"
-        )
-
-    data = res.json()
-    perimeters = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Perimeter '{perimeter_name_or_id}' API error: {error}")
 
     if not perimeters or len(perimeters) == 0:
         raise ValueError(f"Perimeter '{perimeter_name_or_id}' not found")
@@ -76,15 +70,12 @@ def resolve_risk_matrix_id(matrix_name_or_id: str) -> str:
         return matrix_name_or_id
 
     # Otherwise, look up by name
-    res = make_get_request("/risk-matrices/", params={"name": matrix_name_or_id})
+    matrices, error = fetch_all_results(
+        "/risk-matrices/", params={"name": matrix_name_or_id}
+    )
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"Risk matrix '{matrix_name_or_id}' API error {res.status_code}"
-        )
-
-    data = res.json()
-    matrices = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Risk matrix '{matrix_name_or_id}' API error: {error}")
 
     if not matrices:
         raise ValueError(f"Risk matrix '{matrix_name_or_id}' not found")
@@ -107,22 +98,17 @@ def resolve_framework_id(framework_name_or_urn_or_id: str) -> str:
 
     # Try URN search first if it looks like a URN
     if framework_name_or_urn_or_id.startswith("urn:"):
-        res = make_get_request(
-            "/frameworks/", params={"urn": framework_name_or_urn_or_id}
-        )
+        params = {"urn": framework_name_or_urn_or_id}
     else:
         # Search by name
-        res = make_get_request(
-            "/frameworks/", params={"name": framework_name_or_urn_or_id}
-        )
+        params = {"name": framework_name_or_urn_or_id}
 
-    if res.status_code != 200:
+    frameworks, error = fetch_all_results("/frameworks/", params=params)
+
+    if error:
         raise ValueError(
-            f"Framework '{framework_name_or_urn_or_id}' API error {res.status_code}"
+            f"Framework '{framework_name_or_urn_or_id}' API error: {error}"
         )
-
-    data = res.json()
-    frameworks = get_paginated_results(data)
 
     if not frameworks:
         raise ValueError(f"Framework '{framework_name_or_urn_or_id}' not found")
@@ -144,15 +130,12 @@ def resolve_risk_assessment_id(assessment_name_or_id: str) -> str:
         return assessment_name_or_id
 
     # Otherwise, look up by name
-    res = make_get_request("/risk-assessments/", params={"name": assessment_name_or_id})
+    assessments, error = fetch_all_results(
+        "/risk-assessments/", params={"name": assessment_name_or_id}
+    )
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"Risk assessment '{assessment_name_or_id}' API error {res.status_code}"
-        )
-
-    data = res.json()
-    assessments = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Risk assessment '{assessment_name_or_id}' API error: {error}")
 
     if not assessments:
         raise ValueError(f"Risk assessment '{assessment_name_or_id}' not found")
@@ -182,13 +165,10 @@ def resolve_asset_id(asset_name_or_id: str, folder_id: str = None) -> str:
     if folder_id:
         params["folder"] = folder_id
 
-    res = make_get_request("/assets/", params=params)
+    assets, error = fetch_all_results("/assets/", params=params)
 
-    if res.status_code != 200:
-        raise ValueError(f"Asset '{asset_name_or_id}' API error {res.status_code}")
-
-    data = res.json()
-    assets = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Asset '{asset_name_or_id}' API error: {error}")
 
     if not assets:
         raise ValueError(f"Asset '{asset_name_or_id}' not found")
@@ -208,15 +188,12 @@ def resolve_asset_class_id(asset_class_name_or_id: str) -> str:
     if "-" in asset_class_name_or_id and len(asset_class_name_or_id) == 36:
         return asset_class_name_or_id
 
-    res = make_get_request("/asset-class/", params={"name": asset_class_name_or_id})
+    asset_classes, error = fetch_all_results(
+        "/asset-class/", params={"name": asset_class_name_or_id}
+    )
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"Asset class '{asset_class_name_or_id}' API error {res.status_code}"
-        )
-
-    data = res.json()
-    asset_classes = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Asset class '{asset_class_name_or_id}' API error: {error}")
 
     if not asset_classes:
         raise ValueError(f"Asset class '{asset_class_name_or_id}' not found")
@@ -239,15 +216,12 @@ def resolve_risk_scenario_id(scenario_name_or_id: str) -> str:
         return scenario_name_or_id
 
     # Otherwise, look up by name
-    res = make_get_request("/risk-scenarios/", params={"name": scenario_name_or_id})
+    scenarios, error = fetch_all_results(
+        "/risk-scenarios/", params={"name": scenario_name_or_id}
+    )
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"Risk scenario '{scenario_name_or_id}' API error {res.status_code}"
-        )
-
-    data = res.json()
-    scenarios = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Risk scenario '{scenario_name_or_id}' API error: {error}")
 
     if not scenarios:
         raise ValueError(f"Risk scenario '{scenario_name_or_id}' not found")
@@ -277,15 +251,10 @@ def resolve_applied_control_id(control_name_or_id: str, folder_id: str = None) -
     if folder_id:
         params["folder"] = folder_id
 
-    res = make_get_request("/applied-controls/", params=params)
+    controls, error = fetch_all_results("/applied-controls/", params=params)
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"Applied control '{control_name_or_id}' API error {res.status_code}"
-        )
-
-    data = res.json()
-    controls = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Applied control '{control_name_or_id}' API error: {error}")
 
     if not controls:
         raise ValueError(f"Applied control '{control_name_or_id}' not found")
@@ -317,17 +286,14 @@ def resolve_compliance_assessment_id(assessment_name_or_id: str) -> str:
         return assessment_name_or_id
 
     # Otherwise, look up by name
-    res = make_get_request(
+    assessments, error = fetch_all_results(
         "/compliance-assessments/", params={"name": assessment_name_or_id}
     )
 
-    if res.status_code != 200:
+    if error:
         raise ValueError(
-            f"Compliance assessment '{assessment_name_or_id}' API error {res.status_code}"
+            f"Compliance assessment '{assessment_name_or_id}' API error: {error}"
         )
-
-    data = res.json()
-    assessments = get_paginated_results(data)
 
     if not assessments:
         raise ValueError(f"Compliance assessment '{assessment_name_or_id}' not found")
@@ -357,13 +323,10 @@ def resolve_id_or_name(name_or_id: str, endpoint: str) -> str:
         return name_or_id
 
     # Otherwise, look up by name
-    res = make_get_request(endpoint, params={"name": name_or_id})
+    results, error = fetch_all_results(endpoint, params={"name": name_or_id})
 
-    if res.status_code != 200:
-        raise ValueError(f"'{name_or_id}' at {endpoint} API error {res.status_code}")
-
-    data = res.json()
-    results = get_paginated_results(data)
+    if error:
+        raise ValueError(f"'{name_or_id}' at {endpoint} API error: {error}")
 
     if not results:
         raise ValueError(f"'{name_or_id}' not found at {endpoint}")
@@ -403,13 +366,10 @@ def resolve_threat_id(
     if folder_id:
         params["folder"] = folder_id
 
-    res = make_get_request("/threats/", params=params)
+    threats, error = fetch_all_results("/threats/", params=params)
 
-    if res.status_code != 200:
-        raise ValueError(f"Threat '{threat_name_or_id}' API error {res.status_code}")
-
-    data = res.json()
-    threats = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Threat '{threat_name_or_id}' API error: {error}")
 
     if not threats:
         raise ValueError(f"Threat '{threat_name_or_id}' not found")
@@ -433,13 +393,12 @@ def resolve_library_id(library_urn_or_id: str) -> str:
     if "-" in library_urn_or_id and len(library_urn_or_id) == 36:
         return library_urn_or_id
 
-    res = make_get_request("/loaded-libraries/", params={"urn": library_urn_or_id})
+    libraries, error = fetch_all_results(
+        "/loaded-libraries/", params={"urn": library_urn_or_id}
+    )
 
-    if res.status_code != 200:
-        raise ValueError(f"Library '{library_urn_or_id}' API error {res.status_code}")
-
-    data = res.json()
-    libraries = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Library '{library_urn_or_id}' API error: {error}")
 
     if not libraries or len(libraries) == 0:
         raise ValueError(f"Library '{library_urn_or_id}' not found or not loaded")
@@ -462,17 +421,14 @@ def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
         return vulnerability_name_or_id
 
     # Otherwise, look up by name
-    res = make_get_request(
+    vulnerabilities, error = fetch_all_results(
         "/vulnerabilities/", params={"name": vulnerability_name_or_id}
     )
 
-    if res.status_code != 200:
+    if error:
         raise ValueError(
-            f"Vulnerability '{vulnerability_name_or_id}' API error {res.status_code}"
+            f"Vulnerability '{vulnerability_name_or_id}' API error: {error}"
         )
-
-    data = res.json()
-    vulnerabilities = get_paginated_results(data)
 
     if not vulnerabilities:
         raise ValueError(f"Vulnerability '{vulnerability_name_or_id}' not found")
@@ -495,15 +451,12 @@ def resolve_task_template_id(task_name_or_id: str) -> str:
         return task_name_or_id
 
     # Otherwise, look up by name
-    res = make_get_request("/task-templates/", params={"name": task_name_or_id})
+    tasks, error = fetch_all_results(
+        "/task-templates/", params={"name": task_name_or_id}
+    )
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"Task template '{task_name_or_id}' API error {res.status_code}"
-        )
-
-    data = res.json()
-    tasks = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Task template '{task_name_or_id}' API error: {error}")
 
     if not tasks:
         raise ValueError(f"Task template '{task_name_or_id}' not found")
@@ -528,13 +481,10 @@ def resolve_entity_id(entity_name_or_id: str) -> str:
     if "-" in entity_name_or_id and len(entity_name_or_id) == 36:
         return entity_name_or_id
 
-    res = make_get_request("/entities/", params={"name": entity_name_or_id})
+    entities, error = fetch_all_results("/entities/", params={"name": entity_name_or_id})
 
-    if res.status_code != 200:
-        raise ValueError(f"Entity '{entity_name_or_id}' API error {res.status_code}")
-
-    data = res.json()
-    entities = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Entity '{entity_name_or_id}' API error: {error}")
 
     if not entities:
         raise ValueError(f"Entity '{entity_name_or_id}' not found")
@@ -554,15 +504,12 @@ def resolve_solution_id(solution_name_or_id: str) -> str:
     if "-" in solution_name_or_id and len(solution_name_or_id) == 36:
         return solution_name_or_id
 
-    res = make_get_request("/solutions/", params={"name": solution_name_or_id})
+    solutions, error = fetch_all_results(
+        "/solutions/", params={"name": solution_name_or_id}
+    )
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"Solution '{solution_name_or_id}' API error {res.status_code}"
-        )
-
-    data = res.json()
-    solutions = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Solution '{solution_name_or_id}' API error: {error}")
 
     if not solutions:
         raise ValueError(f"Solution '{solution_name_or_id}' not found")
@@ -582,15 +529,12 @@ def resolve_contract_id(contract_name_or_id: str) -> str:
     if "-" in contract_name_or_id and len(contract_name_or_id) == 36:
         return contract_name_or_id
 
-    res = make_get_request("/contracts/", params={"name": contract_name_or_id})
+    contracts, error = fetch_all_results(
+        "/contracts/", params={"name": contract_name_or_id}
+    )
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"Contract '{contract_name_or_id}' API error {res.status_code}"
-        )
-
-    data = res.json()
-    contracts = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Contract '{contract_name_or_id}' API error: {error}")
 
     if not contracts:
         raise ValueError(f"Contract '{contract_name_or_id}' not found")
@@ -610,17 +554,14 @@ def resolve_entity_assessment_id(assessment_name_or_id: str) -> str:
     if "-" in assessment_name_or_id and len(assessment_name_or_id) == 36:
         return assessment_name_or_id
 
-    res = make_get_request(
+    assessments, error = fetch_all_results(
         "/entity-assessments/", params={"name": assessment_name_or_id}
     )
 
-    if res.status_code != 200:
+    if error:
         raise ValueError(
-            f"Entity assessment '{assessment_name_or_id}' API error {res.status_code}"
+            f"Entity assessment '{assessment_name_or_id}' API error: {error}"
         )
-
-    data = res.json()
-    assessments = get_paginated_results(data)
 
     if not assessments:
         raise ValueError(f"Entity assessment '{assessment_name_or_id}' not found")
@@ -641,17 +582,14 @@ def resolve_representative_id(representative_email_or_id: str) -> str:
         return representative_email_or_id
 
     # Search by email since that's the unique identifier for representatives
-    res = make_get_request(
+    representatives, error = fetch_all_results(
         "/representatives/", params={"search": representative_email_or_id}
     )
 
-    if res.status_code != 200:
+    if error:
         raise ValueError(
-            f"Representative '{representative_email_or_id}' API error {res.status_code}"
+            f"Representative '{representative_email_or_id}' API error: {error}"
         )
-
-    data = res.json()
-    representatives = get_paginated_results(data)
 
     if not representatives:
         raise ValueError(f"Representative '{representative_email_or_id}' not found")
@@ -676,15 +614,12 @@ def resolve_ebios_rm_study_id(study_name_or_id: str) -> str:
     if "-" in study_name_or_id and len(study_name_or_id) == 36:
         return study_name_or_id
 
-    res = make_get_request("/ebios-rm/studies/", params={"name": study_name_or_id})
+    studies, error = fetch_all_results(
+        "/ebios-rm/studies/", params={"name": study_name_or_id}
+    )
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"EBIOS RM Study '{study_name_or_id}' API error {res.status_code}"
-        )
-
-    data = res.json()
-    studies = get_paginated_results(data)
+    if error:
+        raise ValueError(f"EBIOS RM Study '{study_name_or_id}' API error: {error}")
 
     if not studies:
         raise ValueError(f"EBIOS RM Study '{study_name_or_id}' not found")
@@ -704,17 +639,14 @@ def resolve_feared_event_id(feared_event_name_or_id: str) -> str:
     if "-" in feared_event_name_or_id and len(feared_event_name_or_id) == 36:
         return feared_event_name_or_id
 
-    res = make_get_request(
+    feared_events, error = fetch_all_results(
         "/ebios-rm/feared-events/", params={"name": feared_event_name_or_id}
     )
 
-    if res.status_code != 200:
+    if error:
         raise ValueError(
-            f"Feared event '{feared_event_name_or_id}' API error {res.status_code}"
+            f"Feared event '{feared_event_name_or_id}' API error: {error}"
         )
-
-    data = res.json()
-    feared_events = get_paginated_results(data)
 
     if not feared_events:
         raise ValueError(f"Feared event '{feared_event_name_or_id}' not found")
@@ -754,17 +686,14 @@ def resolve_strategic_scenario_id(scenario_name_or_id: str) -> str:
     if "-" in scenario_name_or_id and len(scenario_name_or_id) == 36:
         return scenario_name_or_id
 
-    res = make_get_request(
+    scenarios, error = fetch_all_results(
         "/ebios-rm/strategic-scenarios/", params={"name": scenario_name_or_id}
     )
 
-    if res.status_code != 200:
+    if error:
         raise ValueError(
-            f"Strategic scenario '{scenario_name_or_id}' API error {res.status_code}"
+            f"Strategic scenario '{scenario_name_or_id}' API error: {error}"
         )
-
-    data = res.json()
-    scenarios = get_paginated_results(data)
 
     if not scenarios:
         raise ValueError(f"Strategic scenario '{scenario_name_or_id}' not found")
@@ -784,17 +713,14 @@ def resolve_attack_path_id(attack_path_name_or_id: str) -> str:
     if "-" in attack_path_name_or_id and len(attack_path_name_or_id) == 36:
         return attack_path_name_or_id
 
-    res = make_get_request(
+    attack_paths, error = fetch_all_results(
         "/ebios-rm/attack-paths/", params={"name": attack_path_name_or_id}
     )
 
-    if res.status_code != 200:
+    if error:
         raise ValueError(
-            f"Attack path '{attack_path_name_or_id}' API error {res.status_code}"
+            f"Attack path '{attack_path_name_or_id}' API error: {error}"
         )
-
-    data = res.json()
-    attack_paths = get_paginated_results(data)
 
     if not attack_paths:
         raise ValueError(f"Attack path '{attack_path_name_or_id}' not found")
@@ -824,17 +750,14 @@ def resolve_elementary_action_id(action_name_or_id: str) -> str:
     if "-" in action_name_or_id and len(action_name_or_id) == 36:
         return action_name_or_id
 
-    res = make_get_request(
+    actions, error = fetch_all_results(
         "/ebios-rm/elementary-actions/", params={"name": action_name_or_id}
     )
 
-    if res.status_code != 200:
+    if error:
         raise ValueError(
-            f"Elementary action '{action_name_or_id}' API error {res.status_code}"
+            f"Elementary action '{action_name_or_id}' API error: {error}"
         )
-
-    data = res.json()
-    actions = get_paginated_results(data)
 
     if not actions:
         raise ValueError(f"Elementary action '{action_name_or_id}' not found")
@@ -854,17 +777,12 @@ def resolve_operating_mode_id(mode_name_or_id: str) -> str:
     if "-" in mode_name_or_id and len(mode_name_or_id) == 36:
         return mode_name_or_id
 
-    res = make_get_request(
+    modes, error = fetch_all_results(
         "/ebios-rm/operating-modes/", params={"name": mode_name_or_id}
     )
 
-    if res.status_code != 200:
-        raise ValueError(
-            f"Operating mode '{mode_name_or_id}' API error {res.status_code}"
-        )
-
-    data = res.json()
-    modes = get_paginated_results(data)
+    if error:
+        raise ValueError(f"Operating mode '{mode_name_or_id}' API error: {error}")
 
     if not modes:
         raise ValueError(f"Operating mode '{mode_name_or_id}' not found")

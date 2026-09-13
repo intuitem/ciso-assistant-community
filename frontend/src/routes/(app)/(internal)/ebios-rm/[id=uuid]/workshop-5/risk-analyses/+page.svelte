@@ -68,7 +68,7 @@
 				const actionData = result.data || result;
 				toastStore.trigger({
 					message: actionData.message || 'Synchronization complete',
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 5000
 				});
 				// Redirect to the risk assessment
@@ -79,7 +79,7 @@
 				const actionData = result.data || result;
 				toastStore.trigger({
 					message: actionData.message || 'Synchronization failed',
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 5000
 				});
 			}
@@ -87,7 +87,7 @@
 			console.error('Sync error:', error);
 			toastStore.trigger({
 				message: 'An error occurred during synchronization',
-				background: 'variant-filled-error',
+				background: 'preset-filled-error-500',
 				timeout: 5000
 			});
 		}

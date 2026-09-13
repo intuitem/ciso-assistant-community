@@ -38,7 +38,7 @@ export function create(context) {
 						fix: function (fixer) {
 							return fixer.replaceText(
 								locationArg,
-								`getSecureRedirect(${context.getSourceCode().getText(locationArg)})`
+								`getSecureRedirect(${context.sourceCode.getText(locationArg)})`
 							);
 						}
 					});
@@ -50,7 +50,7 @@ export function create(context) {
 						fix: function (fixer) {
 							return fixer.replaceText(
 								locationArg,
-								`getSecureRedirect(${context.getSourceCode().getText(locationArg)})`
+								`getSecureRedirect(${context.sourceCode.getText(locationArg)})`
 							);
 						}
 					});

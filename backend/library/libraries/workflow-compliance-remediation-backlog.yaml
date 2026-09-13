@@ -1,0 +1,88 @@
+urn: urn:intuitem:risk:library:workflow-compliance-remediation-backlog
+locale: en
+ref_id: workflow-compliance-remediation-backlog
+name: Remediation backlog digest
+description: Weekly list of requirements still assessed non-compliant and not yet done, so the backlog
+  is reviewed rather than remembered.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-compliance-remediation-backlog:workflow:remediation-backlog
+    schema_version: 1
+    ref_id: remediation-backlog
+    name: Remediation backlog digest
+    description: Weekly list of requirements still assessed non-compliant and not yet done, so the backlog
+      is reviewed rather than remembered.
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: grc@example.com
+      nodes:
+      - ref: every_friday
+        type: trigger
+        label: Friday 16:00
+        trigger_config:
+          type: schedule
+          cron_expression: 0 16 * * 5
+          timezone: UTC
+      - ref: fetch_gaps
+        type: action
+        label: Open non-compliances
+        action_config:
+          type: read_objects
+          model: requirement_assessment
+          mode: list
+          order_by: due_date
+          limit: 50
+          filters:
+            operator: and
+            conditions:
+            - field: result
+              op: eq
+              value: non_compliant
+            - field: status
+              op: neq
+              value: done
+      - ref: per_gap
+        type: loop
+        label: One line per requirement
+        loop_config:
+          collection: '{{nodes.fetch_gaps.results}}'
+          collect: '{{item.name}}'
+          on_item_error: continue
+      - ref: note_gap
+        type: action
+        label: Log the requirement
+        action_config:
+          type: log
+          message: '{{item.name}} · {{item.compliance_assessment.name}}'
+      - ref: send_digest
+        type: action
+        label: Email the backlog
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Open non-compliances: {{nodes.fetch_gaps.count}}'
+          body: '{{nodes.fetch_gaps.count}} requirement(s) are still non-compliant as of {{today}}: {{nodes.per_gap.results}}'
+      - ref: done
+        type: end
+      edges:
+      - source: every_friday
+        target: fetch_gaps
+      - source: fetch_gaps
+        target: per_gap
+      - source: per_gap
+        target: note_gap
+        source_port: each
+      - source: note_gap
+        target: per_gap
+      - source: per_gap
+        target: send_digest
+        source_port: done
+      - source: send_digest
+        target: done

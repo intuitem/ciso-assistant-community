@@ -53,7 +53,7 @@ const FLAGS = {
 	// Governance
 	riskAcceptances: 'Risk acceptances',
 	exceptions: 'Exceptions',
-	followUp: 'Findings tracking',
+	followUp: 'Findings management',
 	// Risk
 	ebiosRm: 'Ebios RM',
 	scoringAssistant: 'Scoring assistant',

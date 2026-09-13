@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import type { ModelMapEntry } from './crud';
 import type { RiskScenarioSchema } from './schemas';
+import type { ThemeMode } from './theme';
 
 export interface User {
 	id: string;
@@ -26,6 +27,7 @@ export interface User {
 	root_folder_id: string;
 	preferences: {
 		lang?: string;
+		ui?: { theme?: ThemeMode };
 	};
 }
 
@@ -65,6 +67,9 @@ export const URL_MODEL = [
 	'roles',
 	'role-assignments',
 	'compliance-assessments',
+	'quick-forms',
+	'quick-form-responses',
+	'quick-form-publications',
 	'evidences',
 	'evidence-revisions',
 	'frameworks',
@@ -82,6 +87,7 @@ export const URL_MODEL = [
 	'solutions',
 	'contracts',
 	'custom-fields',
+	'entity-scores',
 	'representatives',
 	'vulnerabilities',
 	'security-advisories',
@@ -101,6 +107,7 @@ export const URL_MODEL = [
 	'processings',
 	'security-exceptions',
 	'findings',
+	'commitments',
 	'findings-assessments',
 	'posture-assessments',
 	// privacy,
@@ -218,7 +225,6 @@ export interface Perimeter {
 	lc_status: string;
 	created_at: string;
 	updated_at: string;
-	is_published: boolean;
 	name: string;
 	description?: string;
 	ref_id?: string;

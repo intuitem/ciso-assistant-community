@@ -34,7 +34,7 @@ from core.dora import (
     DORA_REINTEGRATION_POSSIBILITY_CHOICES,
     DORA_DISCONTINUING_IMPACT_CHOICES,
 )
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin
 from iam.views import User
 
 from auditlog.registry import auditlog
@@ -44,7 +44,6 @@ class Entity(
     ActorSyncMixin,
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     """
@@ -117,6 +116,11 @@ class Entity(
         blank=True,
         verbose_name=_("Legal identifiers"),
         help_text=_("Legal identifiers (LEI, EUID, VAT, DUNS, etc.)"),
+    )
+    address = models.TextField(
+        blank=True,
+        verbose_name=_("Address"),
+        help_text=_("Postal address, as it should appear on formal documents"),
     )
     country = models.CharField(
         max_length=3,
@@ -227,12 +231,20 @@ class EntityAssessment(Assessment):
         blank=True,
         null=True,
     )
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+        help_text=_("Date after which the conclusion is no longer considered valid"),
+    )
     reference_link = models.URLField(
         blank=True,
         null=True,
         max_length=2048,
         verbose_name=_("Reference link"),
     )
+
+    IAM_SCOPE_FIELD = "entity"
 
     class Meta:
         verbose_name = _("Entity assessment")
@@ -261,6 +273,8 @@ class Representative(AbstractBaseModel, FilteringLabelMixin):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     fields_to_check = ["email"]
+
+    IAM_SCOPE_FIELD = "entity"
 
 
 class Solution(NameDescriptionMixin, FilteringLabelMixin):
@@ -394,6 +408,8 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
 
     fields_to_check = ["name", "provider_entity"]
 
+    IAM_SCOPE_FIELD = "provider_entity"
+
     class Meta:
         verbose_name = _("Solution")
         verbose_name_plural = _("Solutions")
@@ -442,6 +458,8 @@ class SolutionSubcontractor(AbstractBaseModel):
         null=True,
         blank=True,
     )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("Solution subcontractor")
@@ -634,6 +652,86 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name_plural = _("Contracts")
 
 
+class EntityScore(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
+    """A rating an external service publishes about an entity, dated so readings
+    accumulate as history. `scale_max` makes providers comparable."""
+
+    entity = models.ForeignKey(
+        Entity,
+        on_delete=models.CASCADE,
+        related_name="scores",
+        verbose_name=_("Entity"),
+    )
+    provider = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        related_name="entity_scores",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+        verbose_name=_("Provider"),
+        help_text=_("Service that published this score"),
+    )
+    score = models.FloatField(
+        verbose_name=_("Score"),
+        help_text=_("Value as published by the provider"),
+    )
+    scale_max = models.FloatField(
+        default=100,
+        validators=[MinValueValidator(1)],
+        verbose_name=_("Scale maximum"),
+        help_text=_("Top of the provider's scale, so scores can be compared"),
+    )
+    grade = models.CharField(
+        max_length=8,
+        blank=True,
+        verbose_name=_("Grade"),
+        help_text=_("Letter rating, when the provider publishes one (A, B+, ...)"),
+    )
+    as_of = models.DateField(
+        verbose_name=_("As of"),
+        help_text=_("Date the provider published this score"),
+    )
+    url = models.URLField(
+        blank=True,
+        max_length=2048,
+        verbose_name=_("Link"),
+        help_text=_("Link to the report on the provider's platform"),
+    )
+    observation = models.TextField(blank=True, null=True, verbose_name=_("Observation"))
+
+    fields_to_check = ["entity", "provider", "as_of"]
+
+    class Meta:
+        verbose_name = _("Entity score")
+        verbose_name_plural = _("Entity scores")
+        ordering = ["-as_of"]
+        constraints = [
+            # One reading per provider per day, for writes that skip the serializer.
+            models.UniqueConstraint(
+                fields=["entity", "provider", "as_of"],
+                name="unique_entity_score_per_provider_and_date",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.entity} - {self.provider}: {self.score}"
+
+    @property
+    def normalized_score(self) -> float | None:
+        """The score on a 0-100 scale."""
+        if not self.scale_max:
+            return None
+        return round((self.score / self.scale_max) * 100, 1)
+
+    def save(self, *args, **kwargs):
+        # As visible as the entity it is about.
+        if self.entity_id:
+            self.folder = self.entity.folder
+        super().save(*args, **kwargs)
+
+
 common_exclude = ["created_at", "updated_at"]
 
 auditlog.register(
@@ -654,5 +752,9 @@ auditlog.register(
 )
 auditlog.register(
     Contract,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    EntityScore,
     exclude_fields=common_exclude,
 )

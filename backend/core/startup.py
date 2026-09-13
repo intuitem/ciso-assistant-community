@@ -13,8 +13,10 @@ READER_PERMISSIONS_LIST = [
     "view_compliance_assessment_full",
     "view_object_audittrail",
     "view_appliedcontrol",
+    "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_entityscore",
     "view_entity",
     "view_entityassessment",
     "view_evidence",
@@ -45,6 +47,10 @@ READER_PERMISSIONS_LIST = [
     "view_question",
     "view_questionchoice",
     "view_answer",
+    "view_quickform",
+    "view_quickformpage",
+    "view_quickformresponse",
+    "view_quickformpublication",
     "view_riskacceptance",
     "view_riskassessment",
     "view_riskmatrix",
@@ -72,7 +78,6 @@ READER_PERMISSIONS_LIST = [
     "view_terminology",
     "view_objectclassification",
     "view_classificationlevel",
-    "view_globalsettings",
     "view_securityexception",
     "view_finding",
     "view_findingsassessment",
@@ -101,6 +106,8 @@ READER_PERMISSIONS_LIST = [
     "view_databreach",
     # campaigns,
     "view_campaign",
+    "view_organisationobjective",
+    "view_organisationissue",
     # operating modes
     "view_elementaryaction",
     "view_operatingmode",
@@ -140,6 +147,7 @@ READER_PERMISSIONS_LIST = [
     # integrations
     "view_syncmapping",
     "view_filteringlabel",
+    "view_libraryfilteringlabel",
     # presets
     "view_preset",
     "view_presetjourney",
@@ -165,12 +173,60 @@ READER_PERMISSIONS_LIST = [
     "view_agentaction",
 ]
 
+BASELINE_READER_PERMISSIONS_LIST = [
+    "view_securityadvisory",
+    "view_cwe",
+    "view_technique",
+    "view_ttpcatalog",
+    "view_tactic",
+    "view_responsibilityrole",
+    "view_metricdefinition",
+    "view_metricinstance",
+    "view_terminology",
+    "view_riskmatrix",
+    "view_framework",
+    "view_question",
+    "view_questionchoice",
+    "view_quickform",
+    "view_quickformpage",
+    "view_requirementnode",
+    "view_referencecontrol",
+    "view_elementaryaction",
+    "view_asset",
+    "view_threat",
+    "view_evidence",
+    "view_evidencerevision",
+    "view_comment",
+    "view_appliedcontrol",
+    "view_policy",
+    "view_vulnerability",
+    "view_folder",
+    "view_actor",
+    "view_user",
+    "view_team",
+    "view_storedlibrary",
+    "view_loadedlibrary",
+    "view_filteringlabel",
+    "view_libraryfilteringlabel",
+    "view_organisationobjective",
+    "view_organisationissue",
+    "view_assetclass",
+    "view_assetcapability",
+    "view_objectclassification",
+    "view_entity",
+    "view_documenttemplate",
+    "view_customfielddefinition",
+    "view_requirementmapping",
+    "view_requirementmappingset",
+]
+
 APPROVER_PERMISSIONS_LIST = [
     "view_customfielddefinition",
     "view_compliance_assessment_full",
     "view_perimeter",
     "view_riskassessment",
     "view_appliedcontrol",
+    "view_commitment",
     "view_policy",
     "view_riskscenario",
     "view_riskacceptance",
@@ -192,6 +248,11 @@ APPROVER_PERMISSIONS_LIST = [
     "view_question",
     "view_questionchoice",
     "view_answer",
+    "view_quickform",
+    "view_quickformpage",
+    "view_quickformresponse",
+    "approve_quickformresponse",
+    "view_quickformpublication",
     "view_evidence",
     "view_evidencerevision",
     "view_documentcontainer",
@@ -223,7 +284,6 @@ APPROVER_PERMISSIONS_LIST = [
     "view_terminology",
     "view_objectclassification",
     "view_classificationlevel",
-    "view_globalsettings",
     "view_securityexception",
     "view_finding",
     "view_findingsassessment",
@@ -241,6 +301,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_assetcapability",
     # campaigns,
     "view_campaign",
+    "view_organisationobjective",
+    "view_organisationissue",
     # privacy,
     "view_processing",
     "view_purpose",
@@ -349,6 +411,7 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_requirementassignment",
     "view_requirementassignment",
     "transition_requirementassignment",
+    "transition_commitment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskscenario",
@@ -382,8 +445,13 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_securityadvisory",
     "delete_cwe",
     "view_appliedcontrol",
+    "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_entityscore",
+    "add_entityscore",
+    "change_entityscore",
+    "delete_entityscore",
     "view_entity",
     "view_entityassessment",
     "view_evidence",
@@ -419,6 +487,14 @@ ANALYST_PERMISSIONS_LIST = [
     "view_question",
     "view_questionchoice",
     "view_answer",
+    "view_quickform",
+    "view_quickformpage",
+    "view_quickformresponse",
+    "approve_quickformresponse",
+    "view_quickformpublication",
+    "add_quickformresponse",
+    "change_quickformresponse",
+    "delete_quickformresponse",
     "view_riskacceptance",
     "view_riskassessment",
     "view_riskmatrix",
@@ -463,7 +539,6 @@ ANALYST_PERMISSIONS_LIST = [
     "view_terminology",
     "view_objectclassification",
     "view_classificationlevel",
-    "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
     "change_securityexception",
@@ -525,6 +600,8 @@ ANALYST_PERMISSIONS_LIST = [
     "view_assetcapability",
     # campaigns,
     "view_campaign",
+    "view_organisationobjective",
+    "view_organisationissue",
     # privacy,
     "add_processing",
     "change_processing",
@@ -788,6 +865,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_requirementassignment",
     "view_requirementassignment",
     "transition_requirementassignment",
+    "transition_commitment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskmatrix",
@@ -828,8 +906,13 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_securityadvisory",
     "delete_cwe",
     "view_appliedcontrol",
+    "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_entityscore",
+    "add_entityscore",
+    "change_entityscore",
+    "delete_entityscore",
     "view_entity",
     "view_entityassessment",
     "view_evidence",
@@ -885,6 +968,23 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_questionchoice",
     "delete_questionchoice",
     "view_answer",
+    "view_quickform",
+    "view_quickformpage",
+    "view_quickformresponse",
+    "approve_quickformresponse",
+    "view_quickformpublication",
+    "add_quickformpublication",
+    "change_quickformpublication",
+    "delete_quickformpublication",
+    "add_quickformresponse",
+    "change_quickformresponse",
+    "delete_quickformresponse",
+    "add_quickform",
+    "change_quickform",
+    "delete_quickform",
+    "add_quickformpage",
+    "change_quickformpage",
+    "delete_quickformpage",
     "view_riskacceptance",
     "view_riskassessment",
     "view_riskmatrix",
@@ -934,7 +1034,6 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_terminology",
     "view_objectclassification",
     "view_classificationlevel",
-    "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
     "change_securityexception",
@@ -1327,6 +1426,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_riskassessment",
     "add_appliedcontrol",
     "view_appliedcontrol",
+    "view_commitment",
     "change_appliedcontrol",
     "delete_appliedcontrol",
     "add_policy",
@@ -1363,6 +1463,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_requirementassignment",
     "view_requirementassignment",
     "transition_requirementassignment",
+    "transition_commitment",
     # evidence
     "add_evidence",
     "view_evidence",
@@ -1429,6 +1530,23 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_question",
     "view_questionchoice",
     "view_answer",
+    "view_quickform",
+    "view_quickformpage",
+    "view_quickformresponse",
+    "approve_quickformresponse",
+    "view_quickformpublication",
+    "add_quickformpublication",
+    "change_quickformpublication",
+    "delete_quickformpublication",
+    "add_quickformresponse",
+    "change_quickformresponse",
+    "delete_quickformresponse",
+    "add_quickform",
+    "change_quickform",
+    "delete_quickform",
+    "add_quickformpage",
+    "change_quickformpage",
+    "delete_quickformpage",
     "add_question",
     "change_question",
     "delete_question",
@@ -1469,6 +1587,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_requirementmapping",
     "add_entity",
     "change_entity",
+    "view_entityscore",
+    "add_entityscore",
+    "change_entityscore",
+    "delete_entityscore",
     "view_entity",
     "delete_entity",
     "add_representative",
@@ -1779,6 +1901,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_role",
     "delete_role",
     "view_permission",
+    "view_roleassignment",
     # integrations
     "add_integrationconfiguration",
     "view_integrationconfiguration",
@@ -1870,6 +1993,14 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_folder",
     "view_requirementassignment",
     "transition_requirementassignment",
+    # The third party owns their tasks like their evidences, bounded to the enclave by
+    # the role assignment. `transition_commitment` is deliberately separate: promising
+    # a date is governed by the commitment sides, not by write access.
+    "view_tasktemplate",
+    "add_tasktemplate",
+    "change_tasktemplate",
+    "delete_tasktemplate",
+    "transition_commitment",
     "add_comment",
     "view_comment",
     "change_comment",
@@ -1885,6 +2016,7 @@ AUDITEE_PERMISSIONS_LIST = [
     "view_answer",
     "add_answer",
     "change_answer",
+    "add_quickformresponse",
     "view_evidence",
     "add_evidence",
     "change_evidence",
@@ -1896,7 +2028,9 @@ AUDITEE_PERMISSIONS_LIST = [
     "view_folder",
     "view_requirementassignment",
     "transition_requirementassignment",
+    "transition_commitment",
     "view_appliedcontrol",
+    "view_commitment",
     "add_appliedcontrol",
     "change_appliedcontrol",
     "delete_appliedcontrol",
@@ -1939,6 +2073,70 @@ TECHNICAL_TESTER_PERMISSIONS_LIST = [
     "change_finding",
     "delete_finding",
 ]
+
+
+def seed_feature_flag_defaults():
+    """Fill in flags the stored row has never heard of.
+
+    A flag added by a release is absent from an existing row, and `ff_is_enabled`
+    reads that row: a missing key is False whatever the field declares, so an
+    on-by-default flag would land off while the UI, which reads the serializer,
+    shows it on. Only fills gaps — a choice already made is left alone.
+    """
+    from global_settings.models import GlobalSettings
+    from global_settings.utils import (
+        clear_feature_flags_cache,
+        get_feature_flag_defaults,
+    )
+
+    try:
+        row, _ = GlobalSettings.objects.get_or_create(
+            name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {}}
+        )
+        stored = row.value if isinstance(row.value, dict) else {}
+        missing = {
+            name: value
+            for name, value in get_feature_flag_defaults().items()
+            if name not in stored
+        }
+        if not missing:
+            return
+        row.value = {**stored, **missing}
+        row.save(update_fields=["value"])
+        clear_feature_flags_cache()
+        logger.info("Seeded feature flag defaults", flags=sorted(missing))
+    except Exception:
+        logger.error("Could not seed feature flag defaults", exc_info=True)
+
+
+def normalize_third_party_workspaces():
+    """One workspace per third party per domain, merging the per-assessment ones.
+
+    Here rather than in a migration: it reuses the service the API calls, so it needs
+    real models, safe to read only once every migration has run. Idempotent.
+    """
+    from tprm.services import normalize_entity_workspaces
+
+    try:
+        rows = normalize_entity_workspaces(apply=True)
+    except Exception:
+        logger.error("Could not normalise third-party workspaces", exc_info=True)
+        return
+    for row in rows:
+        if row["error"]:
+            # One awkward entity must not block a startup.
+            logger.warning(
+                "Could not normalise third-party workspace",
+                entity=row["entity"].name,
+                domain=row["domain"].name,
+                error=row["error"],
+            )
+        else:
+            logger.info(
+                "Normalised third-party workspace",
+                entity=row["entity"].name,
+                action=row["action"],
+            )
 
 
 def ensure_admin_user():
@@ -2026,6 +2224,7 @@ def startup(sender=None, **kwargs):
     # Sync builtin role permissions — all permission rows exist at this point
     for name, perm_list in (
         ("BI-RL-AUD", READER_PERMISSIONS_LIST),
+        ("BI-RL-BSL", BASELINE_READER_PERMISSIONS_LIST),
         ("BI-RL-APP", APPROVER_PERMISSIONS_LIST),
         ("BI-RL-ANA", ANALYST_PERMISSIONS_LIST),
         ("BI-RL-DMA", DOMAIN_MANAGER_PERMISSIONS_LIST),
@@ -2039,6 +2238,20 @@ def startup(sender=None, **kwargs):
     ):
         role, _ = Role.objects.get_or_create(name=name, builtin=True)
         role.permissions.set(Permission.objects.filter(codename__in=perm_list))
+
+    # When nothing installed makes the default role configurable, it is
+    # hard-coded: the root folder carries the baseline reader role and nothing
+    # else is configurable (the folder serializer excludes the field).
+    # Re-pinning it at every boot is what makes it hard-coded rather than
+    # merely seeded. Folder trees are one level deep here, so root-only
+    # ambience reproduces exactly what `is_published` used to expose.
+    if not getattr(settings, "CONFIGURABLE_DEFAULT_ROLE", False):
+        root_folder = Folder.get_root_folder()
+        baseline_reader_role = Role.objects.get(name="BI-RL-BSL")
+        if root_folder.default_role_id != baseline_reader_role.id:
+            root_folder.default_role = baseline_reader_role
+            root_folder.save()
+
     # backfill builtin groups (e.g. technical tester) on pre-existing domains
     for folder in Folder.objects.filter(
         content_type=Folder.ContentType.DOMAIN, create_iam_groups=True
@@ -2177,6 +2390,11 @@ def startup(sender=None, **kwargs):
         logger.error("Error creating default Entity Relationships", exc_info=True)
 
     try:
+        Terminology.create_default_entity_score_providers()
+    except Exception as e:
+        logger.error("Error creating default Entity Score Providers", exc_info=True)
+
+    try:
         Terminology.create_default_metric_units()
     except Exception as e:
         logger.error("Error creating default Metric Units", exc_info=True)
@@ -2236,26 +2454,15 @@ def startup(sender=None, **kwargs):
     except Exception as e:
         logger.error("Error backfilling builtin metrics", exc_info=True)
 
+    seed_feature_flag_defaults()
+
+    normalize_third_party_workspaces()
+
     ensure_admin_user()
 
     # reset global setings in case of an issue
-    default_settings = {
-        "security_objective_scale": "1-4",
-        "ebios_radar_max": 6,
-        "ebios_radar_green_zone_radius": 0.2,
-        "ebios_radar_yellow_zone_radius": 0.9,
-        "ebios_radar_red_zone_radius": 2.5,
-        "notifications_enable_mailing": False,
-        "interface_agg_scenario_matrix": False,
-        "currency": "€",
-        "daily_rate": 500,
-        "mapping_max_depth": 3,
-        "show_warning_external_links": True,
-        "show_get_started": True,
-        "personal_folders": False,
-        "allow_assignments_to_entities": False,
-        "enforce_mfa": False,
-    }
+    default_settings = GlobalSettings.GENERAL_DEFAULT_VALUE
+
     try:
         global_settings, _ = GlobalSettings.objects.get_or_create(
             name="general", defaults={"value": default_settings}
@@ -2293,7 +2500,6 @@ def startup(sender=None, **kwargs):
             name="vulnerability-sla",
             defaults={
                 "value": vulnerability_sla_defaults,
-                "is_published": True,
                 "folder": Folder.get_root_folder(),
             },
         )
@@ -2314,7 +2520,6 @@ def startup(sender=None, **kwargs):
             name="sec-intel-feeds",
             defaults={
                 "value": sec_intel_defaults,
-                "is_published": True,
                 "folder": Folder.get_root_folder(),
             },
         )

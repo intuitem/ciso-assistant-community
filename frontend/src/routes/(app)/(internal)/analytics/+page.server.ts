@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { Actions, PageServerLoad } from './$types';
 import { fail } from '@sveltejs/kit';
 import { m } from '$paraglide/messages';
@@ -10,11 +11,10 @@ async function loadCustomDashboard(fetch: typeof globalThis.fetch, dashboardId: 
 	const dashboard = await dashboardRes.json();
 
 	// Fetch widgets for this dashboard
-	const widgetsRes = await fetch(
+	const widgets = await fetchAllPages(
+		fetch,
 		`${BASE_API_URL}/metrology/dashboard-widgets/?dashboard=${dashboardId}`
-	);
-	const widgetsData = widgetsRes.ok ? await widgetsRes.json() : { results: [] };
-	const widgets = widgetsData.results || [];
+	).catch(() => []);
 
 	// For each widget, fetch its samples (matches /dashboards/[id]/+page.server.ts)
 	const widgetsWithSamples = await Promise.all(
@@ -38,11 +38,11 @@ async function loadCustomDashboard(fetch: typeof globalThis.fetch, dashboardId: 
 			}
 			const metricInstanceId = widget.metric_instance?.id || widget.metric_instance;
 			if (!metricInstanceId) return { ...widget, samples: [], builtinSamples: [] };
-			const r = await fetch(
+			const samples = await fetchAllPages(
+				fetch,
 				`${BASE_API_URL}/metrology/custom-metric-samples/?metric_instance=${metricInstanceId}`
-			);
-			const data = r.ok ? await r.json() : { results: [] };
-			return { ...widget, samples: data.results || [], builtinSamples: [] };
+			).catch(() => []);
+			return { ...widget, samples, builtinSamples: [] };
 		})
 	);
 
@@ -157,46 +157,61 @@ export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 			return [];
 		});
 
-	// Start all operations analytics fetches in parallel
-	const detectionPromise = fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch incident detection breakdown:', error);
-			return { results: [] };
-		});
+	// Start all operations analytics fetches in parallel; skip the incident
+	// endpoints entirely when the incidents feature flag is off.
+	const incidentsEnabled = Boolean((await locals.getFeatureFlags())?.incidents);
 
-	const monthlyPromise = fetch(`${BASE_API_URL}/incidents/monthly_metrics/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch monthly incident metrics:', error);
-			return { results: { months: [], monthly_counts: [], cumulative_counts: [] } };
-		});
+	const detectionPromise = incidentsEnabled
+		? fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident detection breakdown:', error);
+					return { results: [] };
+				})
+		: Promise.resolve({ results: [] });
 
-	const summaryPromise = fetch(`${BASE_API_URL}/incidents/summary_stats/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch incident summary stats:', error);
-			return { results: { total_incidents: 0, incidents_this_month: 0, open_incidents: 0 } };
-		});
+	const monthlyPromise = incidentsEnabled
+		? fetch(`${BASE_API_URL}/incidents/monthly_metrics/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch monthly incident metrics:', error);
+					return { results: { months: [], monthly_counts: [], cumulative_counts: [] } };
+				})
+		: Promise.resolve({ results: { months: [], monthly_counts: [], cumulative_counts: [] } });
 
-	const severityPromise = fetch(`${BASE_API_URL}/incidents/severity_breakdown/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch incident severity breakdown:', error);
-			return { results: [] };
-		});
+	const summaryPromise = incidentsEnabled
+		? fetch(`${BASE_API_URL}/incidents/summary_stats/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident summary stats:', error);
+					return { results: { total_incidents: 0, incidents_this_month: 0, open_incidents: 0 } };
+				})
+		: Promise.resolve({
+				results: { total_incidents: 0, incidents_this_month: 0, open_incidents: 0 }
+			});
 
-	const qualificationsPromise = fetch(`${BASE_API_URL}/incidents/qualifications_breakdown/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch incident qualifications breakdown:', error);
-			return { results: { labels: [], values: [] } };
-		});
+	const severityPromise = incidentsEnabled
+		? fetch(`${BASE_API_URL}/incidents/severity_breakdown/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident severity breakdown:', error);
+					return { results: [] };
+				})
+		: Promise.resolve({ results: [] });
+
+	const qualificationsPromise = incidentsEnabled
+		? fetch(`${BASE_API_URL}/incidents/qualifications_breakdown/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident qualifications breakdown:', error);
+					return { results: { labels: [], values: [] } };
+				})
+		: Promise.resolve({ results: { labels: [], values: [] } });
 
 	const exceptionSankeyPromise = fetch(`${BASE_API_URL}/security-exceptions/sankey_data/`)
 		.then(assertOk)
@@ -223,11 +238,9 @@ export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 		});
 
 	// Custom tab: list of dashboards (always) + selected dashboard data (if any)
-	const dashboardsListPromise = fetch(`${BASE_API_URL}/metrology/dashboards/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.then((data) => data.results || [])
-		.catch(() => []);
+	const dashboardsListPromise = fetchAllPages(fetch, `${BASE_API_URL}/metrology/dashboards/`).catch(
+		() => []
+	);
 
 	const generalSettingsPromise = fetch(`${BASE_API_URL}/settings/general/object/`)
 		.then(assertOk)
@@ -287,7 +300,7 @@ export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 		});
 
 	return {
-		user: locals.user,
+		user: await locals.getUser(),
 		title: m.analytics(),
 		stream: {
 			metrics: metricsPromise,

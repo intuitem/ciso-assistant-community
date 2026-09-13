@@ -12,7 +12,7 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	// redirect user if already logged in
-	if (event.locals.user) {
+	if (await event.locals.getUser()) {
 		redirect(302, '/');
 	}
 

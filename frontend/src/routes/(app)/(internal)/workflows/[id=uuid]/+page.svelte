@@ -62,6 +62,7 @@
 			taskTemplates={data.taskTemplates}
 			subprocessCandidates={data.subprocessCandidates}
 			creatableModels={data.creatableModels}
+			updatableModels={data.updatableModels}
 			readableModels={data.readableModels}
 			workflowIsActive={data.workflow.is_active}
 			workflowTimeoutSeconds={data.workflow.timeout_seconds}

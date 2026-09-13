@@ -7,7 +7,6 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-	import NumberField from '../NumberField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -47,14 +46,12 @@
 <HiddenInput {form} field="task_node" />
 
 {#if context === 'edit'}
-	<NumberField
-		{form}
-		field="version"
-		label={m.version()}
-		cacheLock={cacheLocks['version']}
-		bind:cachedValue={formDataCache['version']}
-	/>
+	<div>
+		<span class="text-sm font-semibold">{m.version()}</span>
+		<p class="text-sm text-surface-600-400">{object.version}</p>
+	</div>
 {/if}
+
 <FileInput
 	{form}
 	allowPaste={true}

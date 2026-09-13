@@ -12,12 +12,23 @@ from allauth.idp.oidc.models import Client, Token
 from core.startup import startup
 from django.contrib.auth.models import Permission
 from django.utils import timezone
+from global_settings import utils as ff_utils
 from global_settings.models import GlobalSettings
+from global_settings.utils import clear_feature_flags_cache
 from iam.models import Folder, Role, RoleAssignment, ServiceAccount, User, UserGroup
 from iam.service_accounts import get_selectable_permissions
 
 TOKEN_ENDPOINT = "/api/identity/o/api/token"
 SA_ENDPOINT = "/api/iam/service-accounts/"
+
+
+@pytest.fixture(autouse=True)
+def _enterprise_flags(monkeypatch):
+    """service_accounts is enterprise-only (declared on the EE
+    FeatureFlagsSerializer, hence unsupported on CE); these tests exercise
+    the EE-gated behavior from the CE test bed."""
+    supported = ff_utils.get_supported_feature_flags() | {"service_accounts"}
+    monkeypatch.setattr(ff_utils, "get_supported_feature_flags", lambda: supported)
 
 
 @pytest.fixture
@@ -29,11 +40,13 @@ def app_config():
     )
     ff_settings.value = {**(ff_settings.value or {}), "service_accounts": True}
     ff_settings.save()
+    # Direct ORM write: bypasses the serializer, the single invalidation point.
+    clear_feature_flags_cache()
 
 
 @pytest.fixture
 def admin_client(app_config):
-    admin = User.objects.create_superuser("admin@sa-tests.com", is_published=True)
+    admin = User.objects.create_superuser("admin@sa-tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()
@@ -178,6 +191,7 @@ class TestServiceAccountProvisioning:
         )
         ff_settings.value = {**(ff_settings.value or {}), "service_accounts": False}
         ff_settings.save()
+        clear_feature_flags_cache()
         assert admin_client.get(SA_ENDPOINT).status_code == 403
         assert admin_client.get(f"{SA_ENDPOINT}permissions/").status_code == 403
 
@@ -472,6 +486,9 @@ class TestServiceAccountExclusions:
         assert str(domain_folder.id) not in folder_ids
 
     def test_update_permissions_to_empty_is_allowed(self, admin_client, domain_folder):
+        # Note: the root folder's default_role is deliberately left in place — service
+        # accounts hold direct role assignments and no group membership, so nothing
+        # about them is ambient and no default role can reach them.
         payload = _create_sa(admin_client, domain_folder)
         access_token = _fetch_token(
             payload["client_id"], payload["client_secret"]

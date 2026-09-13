@@ -241,6 +241,10 @@
 					multiple
 					optionsEndpoint="applied-controls"
 					optionsExtraFields={[['folder', 'str']]}
+					optionsInfoFields={{
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					}}
 					cacheLock={cacheLocks['remediation_measures']}
 					bind:cachedValue={formDataCache['remediation_measures']}
 					label={m.remediationMeasures()}

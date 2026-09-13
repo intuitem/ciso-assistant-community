@@ -1,0 +1,58 @@
+urn: urn:intuitem:risk:library:workflow-operations-entity-assessment-kickoff
+locale: en
+ref_id: workflow-operations-entity-assessment-kickoff
+name: Third party added — start its assessment
+description: Creates an entity assessment for a newly registered third party, so due diligence starts
+  with the relationship rather than after it.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-entity-assessment-kickoff:workflow:entity-assessment-kickoff
+    schema_version: 1
+    ref_id: entity-assessment-kickoff
+    name: Third party added — start its assessment
+    description: Creates an entity assessment for a newly registered third party, so due diligence starts
+      with the relationship rather than after it.
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: tprm@example.com
+      nodes:
+      - ref: on_entity
+        type: trigger
+        label: Third party created
+        trigger_config:
+          type: internal_event
+          event_key: entity.created
+      - ref: create_assessment
+        type: action
+        label: Open the assessment
+        action_config:
+          type: create_object
+          model: entity_assessment
+          fields:
+            name: 'Due diligence: {{payload.object_repr}}'
+            description: Opened automatically on {{today}}.
+            entity: '{{payload.object_id}}'
+      - ref: notify
+        type: action
+        label: Tell the team
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Due diligence opened: {{payload.object_repr}}'
+          body: '{{nodes.create_assessment.created_object_name}} was opened on {{today}}.'
+      - ref: done
+        type: end
+      edges:
+      - source: on_entity
+        target: create_assessment
+      - source: create_assessment
+        target: notify
+      - source: notify
+        target: done

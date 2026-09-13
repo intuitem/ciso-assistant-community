@@ -1,0 +1,69 @@
+urn: urn:intuitem:risk:library:workflow-compliance-audit-closed
+locale: en
+ref_id: workflow-compliance-audit-closed
+name: Audit completed — closure summary
+description: When an audit reaches Done, send its final score and requirement breakdown to the people
+  who need to file it.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-compliance-audit-closed:workflow:audit-closed
+    schema_version: 1
+    ref_id: audit-closed
+    name: Audit completed — closure summary
+    description: When an audit reaches Done, send its final score and requirement breakdown to the people
+      who need to file it.
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: grc@example.com
+      nodes:
+      - ref: on_done
+        type: trigger
+        label: Audit completed
+        trigger_config:
+          type: internal_event
+          event_key: complianceassessment.updated
+          filters:
+            operator: and
+            conditions:
+            - field: status
+              op: eq
+              value: done
+              changed: true
+      - ref: read_audit
+        type: action
+        label: Read the audit
+        action_config:
+          type: read_objects
+          model: compliance_assessment
+          mode: first
+          filters:
+            operator: and
+            conditions:
+            - field: id
+              op: eq
+              value: '{{payload.object_id}}'
+      - ref: summarise
+        type: action
+        label: Email the summary
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Audit completed: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} was completed on {{today}}. Requirements: {{nodes.read_audit.object.requirements}}.
+            Scores: {{nodes.read_audit.object.scores}}.'
+      - ref: done
+        type: end
+      edges:
+      - source: on_done
+        target: read_audit
+      - source: read_audit
+        target: summarise
+      - source: summarise
+        target: done

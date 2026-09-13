@@ -24,14 +24,12 @@ def library_framework(db):
         locale="en",
         default_locale=True,
         folder=folder,
-        is_published=True,
     )
     fw = Framework.objects.create(
         name="Question Import Framework",
         urn="urn:test:qimport:fw",
         folder=folder,
         library=lib,
-        is_published=True,
         locale="en",
         default_locale=True,
     )

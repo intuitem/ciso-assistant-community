@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ChoiceCardsModal from '$lib/components/Modals/ChoiceCardsModal.svelte';
 	import ImportWorkflowModal from '$lib/components/Modals/ImportWorkflowModal.svelte';
 	import ExportModal, {
 		type ExportGroup,
@@ -33,6 +34,12 @@
 	let { data, form }: Props = $props();
 	const toastStore = getToastStore();
 	let URLModel = $derived(data.URLModel);
+	// Models with an analytics page. The link carries the table's current filters,
+	// so the page aggregates exactly the rows the user is looking at.
+	const ANALYTICS_LABELS: Record<string, () => string> = {
+		'applied-controls': m.appliedControlsAnalytics,
+		'task-templates': m.taskTemplatesAnalytics
+	};
 	// Static (per-model) filters merged with dynamic custom-field filters.
 	const tableFilters = $derived({
 		...listViewFields[URLModel]?.filters,
@@ -40,19 +47,31 @@
 	});
 	let pullCatalogOpen = $state(false);
 	let currentFilterSearch = $state(page.url.search);
+	// The page survives a query-string navigation (only the table is keyed), so the
+	// value captured at creation would keep the previous filters. In-place filter
+	// changes still assign to it below.
+	$effect(() => {
+		currentFilterSearch = data.urlSearch;
+	});
 
 	function handleFilterChange(filters: Record<string, any>) {
 		const params = new URLSearchParams();
 		for (const [field, values] of Object.entries(filters)) {
 			if (Array.isArray(values)) {
 				for (const v of values) {
-					if (v?.value) params.append(field, v.value);
+					if (v?.value) params.append(v.param ?? field, v.value);
 				}
 			}
 		}
 		const search = params.toString();
 		currentFilterSearch = search ? `?${search}` : '';
 	}
+
+	// The list is already scoped to one kind (the menu links carry it, and the filter
+	// chip keeps it current), so creating from here inherits it instead of asking again.
+	const campaignKinds = $derived(
+		new URLSearchParams(currentFilterSearch.replace(/^\?/, '')).getAll('kind')
+	);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -120,12 +139,13 @@
 		modalStore.trigger(modal);
 	}
 
-	function modalCreateForm(): void {
+	function modalCreateForm(additionalInitialData: Record<string, any> = {}): void {
 		let modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
 				form: data.createForm,
-				model: data.model
+				model: data.model,
+				additionalInitialData
 			}
 		};
 		let modal: ModalSettings = {
@@ -135,6 +155,43 @@
 			title: safeTranslate('add-' + data.model.localName)
 		};
 		modalStore.trigger(modal);
+	}
+
+	function modalCampaignKind(): void {
+		let modalComponent: ModalComponent = {
+			ref: ChoiceCardsModal,
+			props: {
+				title: m.newCampaign(),
+				choices: [
+					{
+						icon: 'fa-building-shield',
+						iconClass: 'text-emerald-500',
+						label: m.internalCampaign(),
+						description: m.internalCampaignDescription(),
+						testId: 'internal-campaign-card',
+						action: () => modalCreateForm({ kind: 'internal' })
+					},
+					{
+						icon: 'fa-handshake',
+						iconClass: 'text-indigo-500',
+						label: m.thirdPartyCampaign(),
+						description: m.thirdPartyCampaignDescription(),
+						testId: 'third-party-campaign-card',
+						action: () => modalCreateForm({ kind: 'third_party' })
+					}
+				]
+			}
+		};
+		modalStore.trigger({ type: 'component', component: modalComponent });
+	}
+
+	function modalAddForm(): void {
+		if (URLModel === 'campaigns') {
+			// Only ask when the list spans both kinds and the choice is genuinely open.
+			if (campaignKinds.length === 1) return modalCreateForm({ kind: campaignKinds[0] });
+			return modalCampaignKind();
+		}
+		modalCreateForm();
 	}
 
 	function modalWorkflowImportForm(): void {
@@ -196,7 +253,7 @@
 					'role-assignments'
 				].includes(URLModel)
 			) {
-				modalCreateForm();
+				modalAddForm();
 			}
 		}
 	}
@@ -218,15 +275,43 @@
 </script>
 
 {#if data?.table}
+	{#if URLModel === 'quick-forms'}
+		<!-- Create is suppressed here (LIBRARY_MANAGED_URL_MODELS): forms come from
+		     libraries, so point at the one place that can author them. -->
+		<div
+			class="mb-2 flex flex-wrap items-center gap-2 rounded-md bg-surface-50-950 px-3 py-2 text-sm text-surface-600-400 shadow-xs"
+		>
+			<i class="fa-solid fa-circle-info text-primary-500"></i>
+			<span>{m.quickFormsAuthoredInBuilder()}</span>
+			<a
+				href="/experimental/library-builder"
+				class="btn btn-sm preset-outlined-primary-500 ml-auto"
+			>
+				<i class="fa-solid fa-shapes mr-1"></i>{m.lbListLibraryBuilder()}
+			</a>
+		</div>
+	{/if}
+	{#if URLModel === 'quick-form-responses'}
+		<!-- Requests are owned by whoever filed them. One created here has no requester,
+		     so nobody can submit it — say where they actually come from. -->
+		<div
+			class="mb-2 flex items-center gap-2 rounded-md bg-surface-50-950 px-3 py-2 text-sm text-surface-600-400 shadow-xs"
+		>
+			<i class="fa-solid fa-circle-info text-primary-500"></i>
+			<span>{m.quickFormResponsesOrigin()}</span>
+		</div>
+	{/if}
 	<div class="shadow-lg">
-		{#key URLModel}
+		<!-- `urlSearch` comes from the load, so it only changes on a real navigation:
+		     the table's own in-place rewrites of the query string never remount it. -->
+		{#key `${URLModel}${data.urlSearch ?? ''}`}
 			<ModelTable
 				source={data.table}
 				{tableFilters}
 				deleteForm={data.deleteForm}
 				{URLModel}
-				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
-				disableDelete={['user-groups'].includes(URLModel)}
+				disableEdit={['user-groups', 'validation-flows', 'commitments'].includes(URLModel)}
+				disableDelete={['user-groups', 'commitments'].includes(URLModel)}
 				onFilterChange={handleFilterChange}
 			>
 				{#snippet addButton()}
@@ -241,14 +326,14 @@
 									aria-label={safeTranslate('add-' + data.model.localName)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</a>
-							{:else if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
+							{:else if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications', 'commitments', 'quick-form-responses'].includes(URLModel)}
 								<button
 									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={safeTranslate('add-' + data.model.localName)}
 									aria-label={safeTranslate('add-' + data.model.localName)}
-									onclick={handlers(modalCreateForm, handleClickForGT)}
+									onclick={handlers(modalAddForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
 								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates', 'entities', 'solutions', 'contracts', 'representatives'].includes(URLModel)}
@@ -321,11 +406,14 @@
 										aria-label={m.kanbanMode()}
 										data-testid="kanban-mode-button"><i class="fa-solid fa-table-columns"></i></a
 									>
+								{/if}
+								{#if ANALYTICS_LABELS[URLModel]}
+									{@const analyticsLabel = ANALYTICS_LABELS[URLModel]()}
 									<a
 										href="{URLModel}/analytics/{currentFilterSearch}"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-										title={m.appliedControlsAnalytics()}
-										aria-label={m.appliedControlsAnalytics()}
+										title={analyticsLabel}
+										aria-label={analyticsLabel}
 										data-testid="analytics-button"><i class="fa-solid fa-chart-pie"></i></a
 									>
 								{/if}

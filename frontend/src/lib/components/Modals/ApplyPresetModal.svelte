@@ -44,8 +44,8 @@
 	let selectedPresetId: string = $state('');
 	let folderName: string = $state(presetName);
 	let selectedFolderId: string = $state('');
-	let createObjects: boolean = $state(true);
-	let applyFeatureFlags: boolean = $state(true);
+	let createObjects: boolean = $state(false);
+	let applyFeatureFlags: boolean = $state(false);
 	let errorMessage: string = $state('');
 	let submitting: boolean = $state(false);
 

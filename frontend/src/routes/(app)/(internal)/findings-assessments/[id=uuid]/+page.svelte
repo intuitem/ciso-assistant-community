@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 	import type { PageData, ActionData } from './$types';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { page } from '$app/state';
@@ -6,7 +7,6 @@
 	import { m } from '$paraglide/messages';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
@@ -23,9 +23,6 @@
 	}
 
 	let { data, form }: Props = $props();
-	let exportPopupOpen = $state(false);
-	let chartKey = $state(0);
-
 	const modalStore: ModalStore = getModalStore();
 	const findings_assessment = $derived(data.data);
 
@@ -52,16 +49,44 @@
 		modalStore.trigger(modal);
 	}
 
-	function resizeObserver(node: HTMLElement) {
-		const observer = new ResizeObserver(() => {
-			chartKey = chartKey + 1;
-		});
-		observer.observe(node);
-		return {
-			destroy() {
-				observer.disconnect();
+	function buildExportGroups(): ExportGroup[] {
+		const id = data.data.id;
+		return [
+			{
+				titleKey: 'findingsAssessment',
+				options: [
+					{
+						titleKey: 'exportFindingsReport',
+						descriptionKey: 'exportFindingsReportDesc',
+						format: 'PDF' as const,
+						href: `/findings-assessments/${id}/export/pdf`,
+						testId: 'export-option-pdf'
+					},
+					{
+						titleKey: 'exportFindingsWorkbook',
+						descriptionKey: 'exportFindingsWorkbookDesc',
+						format: 'XLSX' as const,
+						href: `/findings-assessments/${id}/export/xlsx`,
+						testId: 'export-option-xlsx'
+					},
+					{
+						titleKey: 'exportFindingsMarkdown',
+						descriptionKey: 'exportFindingsMarkdownDesc',
+						format: 'MD' as const,
+						href: `/findings-assessments/${id}/export/md`,
+						testId: 'export-option-md'
+					}
+				]
 			}
+		];
+	}
+
+	function modalExport(): void {
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: { title: m.exportOptionsTitle(), groups: buildExportGroups() }
 		};
+		modalStore.trigger({ type: 'component', component: modalComponent });
 	}
 </script>
 
@@ -79,41 +104,23 @@
 <DetailView {data} disableCreate={data.data?.is_locked} disableDelete={data.data?.is_locked}>
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
-			<Popover
-				open={exportPopupOpen}
-				onOpenChange={(e) => (exportPopupOpen = e.open)}
-				positioning={{ placement: 'bottom' }}
+			{#if data.data.compliance_assessment}
+				<Anchor
+					breadcrumbAction="push"
+					href={`/compliance-assessments/${data.data.compliance_assessment.id}`}
+					class="btn preset-filled-secondary-500 w-full"
+					data-testid="go-to-audit-button"
+					><i class="fa-solid fa-list-check mr-2"></i>{m.complianceAssessment()}</Anchor
+				>
+			{/if}
+			<button
+				type="button"
+				class="btn preset-filled-primary-500 w-full"
+				onclick={modalExport}
+				data-testid="export-button"
 			>
-				<Popover.Trigger class="btn preset-filled-primary-500 w-full">
-					<span data-testid="export-button">
-						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-					</span>
-				</Popover.Trigger>
-				<Popover.Positioner>
-					<Popover.Content
-						class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
-					>
-						<div>
-							<p class="block px-4 py-2 text-sm text-surface-950-50">{m.findingsAssessment()}</p>
-							<a
-								href="/findings-assessments/{data.data.id}/export/xlsx"
-								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-								>... {m.asXLSX()}</a
-							>
-							<a
-								href="/findings-assessments/{data.data.id}/export/md"
-								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-								>... {m.asMarkdown()}</a
-							>
-							<a
-								href="/findings-assessments/{data.data.id}/export/pdf"
-								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-								>... {m.asPDF()}</a
-							>
-						</div>
-					</Popover.Content>
-				</Popover.Positioner>
-			</Popover>
+				<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+			</button>
 			<Anchor
 				href={`${page.url.pathname}/action-plan`}
 				class="btn preset-filled-primary-500 h-fit"
@@ -134,7 +141,7 @@
 
 	{#snippet widgets()}
 		{#key form}
-			<div class="h-full flex flex-col space-y-4">
+			<div class="min-h-full flex flex-col space-y-4">
 				<div class="card p-4 bg-surface-50-950 shadow-xs">
 					<h3 class="text-lg font-semibold mb-2">{m.summary()}</h3>
 					<div class="grid grid-cols-2 gap-2">
@@ -154,29 +161,24 @@
 					</div>
 				</div>
 
-				<div
-					class="card p-2 bg-surface-50-950 shadow-xs flex-1 flex flex-row gap-2"
-					use:resizeObserver
-				>
-					{#key chartKey}
-						<div class="flex-1 min-h-0 min-w-0">
-							<HalfDonutChart
-								name="current_h"
-								title={m.severity()}
-								classesContainer="card p-2 bg-surface-50-950 h-full"
-								values={data.findings_metrics.severity_chart_data}
-								colors={data.findings_metrics.severity_chart_data.map((object) => object.color)}
-							/>
-						</div>
-						<div class="flex-1 min-h-0 min-w-0">
-							<DonutChart
-								classesContainer="card p-2 bg-surface-50-950 h-full"
-								name="f_treatment_progress"
-								title={m.progress()}
-								values={data.findings_metrics.status_chart_data.values}
-							/>
-						</div>
-					{/key}
+				<div class="card p-2 bg-surface-50-950 shadow-xs shrink-0 h-80 flex flex-row gap-2">
+					<div class="flex-1 min-h-0 min-w-0">
+						<HalfDonutChart
+							name="current_h"
+							title={m.severity()}
+							classesContainer="card p-2 bg-surface-50-950 h-full"
+							values={data.findings_metrics.severity_chart_data}
+							colors={data.findings_metrics.severity_chart_data.map((object) => object.color)}
+						/>
+					</div>
+					<div class="flex-1 min-h-0 min-w-0">
+						<DonutChart
+							classesContainer="card p-2 bg-surface-50-950 h-full"
+							name="f_treatment_progress"
+							title={m.progress()}
+							values={data.findings_metrics.status_chart_data.values}
+						/>
+					</div>
 				</div>
 				{#if page.data?.featureflags?.validation_flows}
 					{#key findings_assessment.validation_flows}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 	import ReportTile from './ReportTile.svelte';
@@ -18,10 +19,11 @@
 		onClick?: () => void;
 		href?: string;
 		tags?: string[];
+		flag?: string;
 	}
 
 	// Available report tiles
-	const reportTiles: ReportTileData[] = [
+	const allReportTiles: ReportTileData[] = [
 		{
 			id: 'dora-roi',
 			title: m.doraRegisterOfInformation(),
@@ -29,7 +31,8 @@
 			icon: 'fa-solid fa-building-shield',
 			category: 'compliance',
 			href: '/reports/dora-roi',
-			tags: ['DORA', 'Regulation', 'Entities']
+			tags: ['DORA', 'Regulation', 'Entities'],
+			flag: 'dora'
 		},
 		{
 			id: 'soa',
@@ -41,6 +44,10 @@
 			tags: ['ISO 27001', 'Compliance', 'Controls']
 		}
 	];
+
+	const reportTiles = $derived(
+		allReportTiles.filter((tile) => !tile.flag || page.data?.featureflags?.[tile.flag])
+	);
 
 	function handleTileClick(tile: ReportTileData): void {
 		if (tile.onClick) {

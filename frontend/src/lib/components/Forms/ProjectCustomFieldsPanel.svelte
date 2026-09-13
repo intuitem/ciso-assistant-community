@@ -4,7 +4,10 @@
 	import { z } from 'zod';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import CustomFieldsSection from './CustomFieldsSection.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { isURL } from '$lib/utils/helpers';
 
 	interface Choice {
 		value: string;
@@ -55,10 +58,7 @@
 		const params = new URLSearchParams({ model, visible: 'true' });
 		if (folderId) params.set('for_folder', folderId);
 		try {
-			const res = await fetch(`/custom-fields/?${params.toString()}`);
-			if (!res.ok) return;
-			const data = await res.json();
-			definitions = data.results ?? data;
+			definitions = await fetchAllPages<Definition>(fetch, `/custom-fields/?${params.toString()}`);
 		} catch (e) {
 			console.error('Failed to load custom field definitions', e);
 		}
@@ -153,7 +153,18 @@
 						<dt class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
 							{def.label_localized}
 						</dt>
-						<dd class="text-sm text-gray-900">{displayValue(def, displayedValues?.[def.key])}</dd>
+						<dd class="text-sm text-gray-900">
+							{#if def.field_type === 'url' && isURL(displayedValues?.[def.key])}
+								<Anchor
+									breadcrumbAction="push"
+									href={displayedValues[def.key]}
+									target="_blank"
+									class="anchor">{displayedValues[def.key]}</Anchor
+								>
+							{:else}
+								{displayValue(def, displayedValues?.[def.key])}
+							{/if}
+						</dd>
 					</div>
 				{/each}
 			</dl>

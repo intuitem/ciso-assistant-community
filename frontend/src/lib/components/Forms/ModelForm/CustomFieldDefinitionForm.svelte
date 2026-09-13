@@ -41,7 +41,7 @@
 	const { value: fieldType } = formFieldProxy(form, 'field_type');
 	const isChoice = $derived($fieldType === 'choice' || $fieldType === 'multi_choice');
 	// Only value_text-backed types can be searched (search scans value_text).
-	const isTextBacked = $derived($fieldType === 'text' || isChoice);
+	const isTextBacked = $derived($fieldType === 'text' || $fieldType === 'url' || isChoice);
 
 	// Definition-level translations {locale: {label, help_text}}, synced for submission.
 	const { value: translationsValue } = formFieldProxy(form, 'translations');
@@ -140,7 +140,7 @@
 	<div class="border rounded-container-token p-3 space-y-2 bg-surface-50">
 		<div class="flex items-center justify-between">
 			<span class="text-sm font-semibold">{m.choices()}</span>
-			<button type="button" class="btn btn-sm variant-soft-primary" onclick={addChoice}>
+			<button type="button" class="btn btn-sm preset-tonal-primary" onclick={addChoice}>
 				<i class="fa-solid fa-plus mr-1"></i>{m.addChoice()}
 			</button>
 		</div>
@@ -160,7 +160,7 @@
 					</label>
 					<button
 						type="button"
-						class="btn-icon variant-soft-error"
+						class="btn-icon preset-tonal-error"
 						onclick={() => removeChoice(i)}
 						title={m.delete()}
 					>

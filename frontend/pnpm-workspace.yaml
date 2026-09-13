@@ -20,8 +20,9 @@ overrides:
   yaml: ^1.10.3
   brace-expansion: ^5.0.9
   postcss: ^8.5.18
+  maplibre-gl: ^6.4.1
 engineStrict: true
 allowBuilds:
   '@tailwindcss/oxide': true
   esbuild: true
-  maplibre-gl: true
+  maplibre-gl: false

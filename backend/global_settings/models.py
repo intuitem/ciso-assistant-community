@@ -48,6 +48,37 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
     # Value of the setting.
     value = models.JSONField(default=dict)
 
+    # All sensitive global settings (e.g. `SSO`, `INFRA_CONFIG`) MUST have extra permission checks on their API views.
+    # Otherwise anyone with a `"view_globalsettings"` permission on any folder could view these sensitive global settings (as `GlobalSettings` are always stored in the root folder).
+    GENERAL_DEFAULT_VALUE = {
+        "security_objective_scale": "1-4",
+        "ebios_radar_max": 6,
+        "ebios_radar_green_zone_radius": 0.2,
+        "ebios_radar_yellow_zone_radius": 0.9,
+        "ebios_radar_red_zone_radius": 2.5,
+        "notifications_enable_mailing": False,
+        "interface_agg_scenario_matrix": False,
+        "risk_matrix_swap_axes": False,
+        "risk_matrix_flip_vertical": False,
+        "risk_matrix_labels": "ISO",
+        "currency": "€",
+        "daily_rate": 500,
+        "mapping_max_depth": 3,
+        "allow_self_validation": False,
+        "show_warning_external_links": True,
+        "show_get_started": True,
+        "personal_folders": False,
+        "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
+        "allow_assignments_to_entities": False,
+        "enforce_mfa": False,
+        "default_language": "en",
+        "default_custom_analytics_dashboard": None,
+        "default_packager": "custom",
+        "disable_partially_compliant_result": False,
+        "use_risk_category_label": False,
+    }
+    """Default `value` used when creating a new `GENERAL` GlobalSetting. """
+
     class Meta:
         permissions = [
             ("view_central_auditlog", "Can access the central audit log"),
@@ -68,7 +99,7 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
 # tracking it makes auditlog query its non-existent table on create/delete.
 auditlog.register(
     GlobalSettings,
-    exclude_fields=["created_at", "updated_at", "is_published", "ssosettings"],
+    exclude_fields=["created_at", "updated_at", "ssosettings"],
     mask_fields=["value"],
     mask_callable="global_settings.utils.mask_sensitive_settings",
 )

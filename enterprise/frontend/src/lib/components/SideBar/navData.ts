@@ -39,6 +39,12 @@ export const navData = {
 					]
 				},
 				{
+					name: 'myRequests',
+					fa_icon: 'fa-solid fa-hand',
+					href: '/my-requests',
+					permissions: ['view_quickformresponse']
+				},
+				{
 					name: 'myAssignments',
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',
@@ -47,8 +53,10 @@ export const navData = {
 						'view_riskscenario',
 						'view_referencecontrol',
 						'view_assessment',
-						'view_riskassessment'
-					]
+						'view_riskassessment',
+						'view_requirementassignment'
+					],
+					exclude: ['BI-RL-TPR']
 				},
 				{
 					name: 'auditDashboard',
@@ -146,11 +154,6 @@ export const navData = {
 					permissions: ['add_role']
 				},
 				{
-					name: 'roleAssignments',
-					fa_icon: 'fa-solid fa-user-tag',
-					href: '/role-assignments'
-				},
-				{
 					name: 'serviceAccounts',
 					fa_icon: 'fa-solid fa-robot',
 					href: '/service-accounts',
@@ -206,6 +209,18 @@ export const navData = {
 					fa_icon: 'fa-solid fa-file-code',
 					href: '/document-templates',
 					permissions: ['view_documenttemplate']
+				},
+				{
+					name: 'quickForms',
+					fa_icon: 'fa-solid fa-clipboard-question',
+					href: '/quick-forms',
+					permissions: ['view_quickformpublication']
+				},
+				{
+					name: 'lbListLibraryBuilder',
+					fa_icon: 'fas fa-shapes',
+					href: '/experimental/library-builder',
+					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
 				}
 			]
 		},
@@ -248,7 +263,8 @@ export const navData = {
 					name: 'xRays',
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
-					permissions: ['view_riskassessment', 'view_assessment']
+					permissions: ['view_riskassessment', 'view_assessment'],
+					exclude: ['BI-RL-TPR']
 				},
 				{
 					name: 'incidents',
@@ -265,6 +281,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-table-columns',
 					href: '/tasks-review',
 					permissions: ['view_appliedcontrol']
+				},
+				{
+					name: 'workflows',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/workflows',
+					permissions: ['view_workflow']
 				}
 			]
 		},
@@ -301,6 +323,12 @@ export const navData = {
 					href: '/risk-acceptances'
 				},
 				{
+					name: 'requestQueue',
+					fa_icon: 'fa-solid fa-inbox',
+					href: '/requests',
+					permissions: ['view_quickformresponse']
+				},
+				{
 					name: 'validationFlows',
 					fa_icon: 'fa-solid fa-clipboard-check',
 					href: '/validation-flows',
@@ -312,8 +340,19 @@ export const navData = {
 					href: '/security-exceptions'
 				},
 				{
+					name: 'findings',
+					fa_icon: 'fas fa-bug',
+					href: '/findings'
+				},
+				{
+					name: 'commitments',
+					fa_icon: 'fa-solid fa-handshake',
+					href: '/commitments',
+					permissions: ['view_commitment']
+				},
+				{
 					name: 'followUp',
-					fa_icon: 'fa-solid fa-clipboard-list',
+					fa_icon: 'fas fa-th-list',
 					href: '/findings-assessments'
 				}
 			]
@@ -370,7 +409,7 @@ export const navData = {
 					name: 'complianceAssessments',
 					fa_icon: 'fa-solid fa-certificate',
 					href: '/compliance-assessments',
-					exclude: ['BI-RL-ADE']
+					exclude: ['BI-RL-ADE', 'BI-RL-TPR']
 				},
 				{
 					name: 'postureAssessments',
@@ -385,8 +424,9 @@ export const navData = {
 				},
 				{
 					name: 'campaigns',
+					key: 'campaignsInternal',
 					fa_icon: 'fa-solid fa-scale-balanced',
-					href: '/campaigns'
+					href: '/campaigns?kind=internal'
 				},
 				{
 					name: 'recap',
@@ -458,6 +498,12 @@ export const navData = {
 					name: 'entityAssessments',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/entity-assessments'
+				},
+				{
+					name: 'campaigns',
+					key: 'campaignsThirdParty',
+					fa_icon: 'fa-solid fa-scale-balanced',
+					href: '/campaigns?kind=third_party'
 				}
 			]
 		},

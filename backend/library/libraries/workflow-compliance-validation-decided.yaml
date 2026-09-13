@@ -1,0 +1,114 @@
+urn: urn:intuitem:risk:library:workflow-compliance-validation-decided
+locale: en
+ref_id: workflow-compliance-validation-decided
+name: Validation decided — route the outcome
+description: Routes an approver's decision to a different message per outcome, using a branch. A good
+  starting point for anything that reacts to a status.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-compliance-validation-decided:workflow:validation-decided
+    schema_version: 1
+    ref_id: validation-decided
+    name: Validation decided — route the outcome
+    description: Routes an approver's decision to a different message per outcome, using a branch. A good
+      starting point for anything that reacts to a status.
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: grc@example.com
+      - key: decision
+        type: string
+        default_value: ''
+      nodes:
+      - ref: on_decision
+        type: trigger
+        label: Validation status changed
+        trigger_config:
+          type: internal_event
+          event_key: validationflow.updated
+          filters:
+            operator: and
+            conditions:
+            - field: status
+              op: neq
+              value: submitted
+              changed: true
+      - ref: read_decision
+        type: action
+        label: Keep the decision
+        action_config:
+          type: set_variables
+          variables:
+            decision: '{{payload.new_values.status}}'
+      - ref: route
+        type: condition
+        label: Which outcome?
+        branches:
+        - name: accepted
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: decision
+              op: eq
+              value: accepted
+        - name: rejected
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: decision
+              op: eq
+              value: rejected
+        - name: otherwise
+          is_default: true
+      - ref: tell_accepted
+        type: action
+        label: Approved
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Approved: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} was approved on {{today}}.'
+      - ref: tell_rejected
+        type: action
+        label: Rejected
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Rejected: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} was rejected on {{today}}.'
+      - ref: tell_other
+        type: action
+        label: Anything else
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Validation updated: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} is now {{decision}}.'
+      - ref: done
+        type: end
+      edges:
+      - source: on_decision
+        target: read_decision
+      - source: read_decision
+        target: route
+      - source: route
+        target: tell_accepted
+        source_branch: accepted
+      - source: route
+        target: tell_rejected
+        source_branch: rejected
+      - source: route
+        target: tell_other
+        source_branch: otherwise
+      - source: tell_accepted
+        target: done
+      - source: tell_rejected
+        target: done
+      - source: tell_other
+        target: done

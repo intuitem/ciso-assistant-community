@@ -61,7 +61,8 @@ export const load: PageServerLoad = async (event) => {
 	const registerWebAuthnForm = await superValidate(zod(registerWebAuthnSchema));
 	const personalAccessTokenCreateForm = await superValidate(zod(AuthTokenCreateSchema));
 	const personalAccessTokenDeleteForm = await superValidate(zod(z.object({ id: z.string() })));
-	const patAllowed = !event.locals.user.is_third_party;
+	const patUser = await event.locals.getUser();
+	const patAllowed = patUser != null && !patUser.is_third_party;
 	let personalAccessTokens = [];
 
 	if (patAllowed) {
@@ -179,8 +180,8 @@ export const actions: Actions = {
 		return { recoveryCodes: response.data };
 	},
 	createPAT: async (event) => {
-		const patAllowed = !event.locals.user.is_third_party;
-		if (!patAllowed) {
+		const patUser = await event.locals.getUser();
+		if (!patUser || patUser.is_third_party) {
 			return fail(403, { error: 'Forbidden' });
 		}
 
@@ -289,8 +290,8 @@ export const actions: Actions = {
 		return { form };
 	},
 	deletePAT: async (event) => {
-		const patAllowed = !event.locals.user.is_third_party;
-		if (!patAllowed) {
+		const patUser = await event.locals.getUser();
+		if (!patUser || patUser.is_third_party) {
 			return fail(403, { error: 'Forbidden' });
 		}
 

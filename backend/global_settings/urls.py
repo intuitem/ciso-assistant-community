@@ -1,11 +1,9 @@
 from django.conf import settings
 from django.urls import include, path
-from rest_framework import routers
 
 from iam.sso.views import SSOSettingsViewSet
 
 from .views import (
-    GlobalSettingsViewSet,
     get_default_language,
     get_sso_info,
     GeneralSettingsViewSet,
@@ -15,10 +13,6 @@ from .views import (
     InfraConfigViewSet,
 )
 from .routers import DefaultSettingsRouter
-
-
-router = routers.DefaultRouter()
-router.register(r"global", GlobalSettingsViewSet, basename="global-settings")
 
 settings_router = DefaultSettingsRouter()
 settings_router.register(
@@ -59,7 +53,6 @@ if getattr(settings, "ENABLE_INFRA_CONFIG_MANAGEMENT", False):
 
 
 urlpatterns = [
-    path(r"", include(router.urls)),
     path(r"", include(settings_router.urls)),
     path(r"sso/info/", get_sso_info, name="get_sso_info"),
     path(
