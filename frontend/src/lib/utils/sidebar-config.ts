@@ -98,7 +98,7 @@ type SidebarFrontendKeys = {
 };
 
 export function getSidebarVisibleItems(
-	featureFlags: Partial<SidebarBackendKeys>
+	featureFlags: Partial<SidebarBackendKeys> | undefined
 ): SidebarFrontendKeys {
 	return {
 		xRays: featureFlags?.xrays ?? false,
