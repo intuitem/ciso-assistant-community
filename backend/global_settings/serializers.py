@@ -463,6 +463,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     jit_provisioning = serializers.BooleanField(
         source="value.jit_provisioning", required=False, default=False
     )
+    relations_graph = serializers.BooleanField(
+        source="value.relations_graph", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings

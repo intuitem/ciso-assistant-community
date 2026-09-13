@@ -14,6 +14,8 @@
 
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
+	import RelationsDrawer from '$lib/components/RelationsGraph/RelationsDrawer.svelte';
+	import { hasRelationGraph } from '$lib/components/RelationsGraph/relations';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import RiskAcceptancesSection from '$lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
 
@@ -42,6 +44,11 @@
 	let { data, form }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
+
+	let relationsOpen = $state(false);
+	const showRelations = $derived(
+		Boolean(page.data?.featureflags?.relations_graph) && hasRelationGraph('risk-scenarios')
+	);
 
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
@@ -243,6 +250,16 @@
 				objectId={data.scenario.id}
 				folderId={data.scenario.folder?.id ?? user.root_folder_id}
 			/>
+			{#if showRelations}
+				<button
+					type="button"
+					class="btn preset-tonal h-fit"
+					data-testid="relations-button"
+					onclick={() => (relationsOpen = true)}
+				>
+					<i class="fa-solid fa-circle-nodes mr-2"></i>{m.relationsGraph()}
+				</button>
+			{/if}
 		</div>
 	</div>
 
@@ -643,3 +660,12 @@
 		<CommentsPanel parentType="risk_scenario" parentId={data.scenario.id} />
 	{/if}
 </div>
+
+{#if showRelations}
+	<RelationsDrawer
+		open={relationsOpen}
+		urlModel="risk-scenarios"
+		id={data.scenario.id}
+		onClose={() => (relationsOpen = false)}
+	/>
+{/if}

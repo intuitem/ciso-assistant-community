@@ -5825,6 +5825,8 @@
 	"objectToUpdate": "Object to update",
 	"targetObjectId": "Which one (id)",
 	"relations": "Links",
+	"relationsGraph": "Relations graph",
+	"relationsGraphDescription": "Show a Relations button on supported detail pages, opening a graph of what the object is linked to",
 	"addRelation": "Add link",
 	"relationValues": "Ids, comma-separated, or an expression",
 	"set": "Replace",

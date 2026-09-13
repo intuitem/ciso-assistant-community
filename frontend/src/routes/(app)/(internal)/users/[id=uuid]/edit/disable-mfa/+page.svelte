@@ -15,7 +15,7 @@
 </script>
 
 <div class="flex w-full h-full items-center justify-center">
-	<div class="flex flex-col bg-white p-12 w-2/5 rounded-lg shadow-lg items-center space-y-4">
+	<div class="flex flex-col bg-surface-50-950 p-12 w-2/5 rounded-lg shadow-lg items-center space-y-4">
 		<div class="bg-error-300 px-6 py-5 rounded-full text-3xl">
 			<i class="fa-solid fa-shield-halved"></i>
 		</div>
@@ -40,7 +40,7 @@
 			<div class="flex flex-row justify-between space-x-4 pt-3">
 				<a
 					href="/users/{data.object.id}"
-					class="btn bg-gray-400 text-white font-semibold w-full text-center"
+					class="btn bg-surface-400-600 text-white font-semibold w-full text-center"
 				>
 					{m.cancel()}
 				</a>

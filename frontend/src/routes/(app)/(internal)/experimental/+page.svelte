@@ -43,6 +43,12 @@
 		link="/experimental/analytics-export"
 		tags={['analytics', 'export', 'xlsx', 'reporting']}
 	/>
+	<Article
+		title="Mini graph explorer"
+		desc="Obsidian-style ego graph on an object page: depth 1-3, fan-out caps with collapsible +N nodes, hover for details, click to re-centre. Mock data, no backend."
+		link="/experimental/mini-graph"
+		tags={['graph', 'applied-controls', 'risk-scenarios', 'prototype']}
+	/>
 	<!-- <Article -->
 	<!-- 	title="Multi-file evidence (UX prototype)" -->
 	<!-- 	desc="Imagine an evidence whose revisions hold multiple files at once. History timeline with file-level diff (added / removed / replaced / unchanged) and arbitrary revision compare. Static fake data, no backend." -->
