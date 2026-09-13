@@ -94,7 +94,8 @@
 <div class="space-y-3">
 	<div class="flex items-center">
 		<div class="flex font-semibold text-sm text-surface-600-400 -rotate-90 whitespace-nowrap mr-1">
-			{flipVertical ? `${yAxisLabel} →` : `← ${yAxisLabel}`}
+			<!-- -rotate-90 turns → upward and ← downward; the arrow follows increasing level order. -->
+			{flipVertical ? `← ${yAxisLabel}` : `${yAxisLabel} →`}
 		</div>
 		<div class="overflow-x-auto flex-1">
 			<table class="table table-compact border-collapse">
