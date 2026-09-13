@@ -13,9 +13,9 @@
 	import { page } from '$app/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
-	import { getLocale, setLocale } from '$paraglide/runtime';
+	import { setLocale } from '$paraglide/runtime';
 	import { invalidateAll } from '$app/navigation';
-	import { sampleDateForPreference, type DateFormatPreference } from '$lib/utils/datetime';
+	import type { DateFormatPreference } from '$lib/utils/datetime';
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 
@@ -73,19 +73,14 @@
 	let forceLanguageInProgress = $state(false);
 	let forceDateFormatInProgress = $state(false);
 
-	const dateFormatOptions = (
-		[
-			{ value: 'auto', label: m.dateFormatAuto() },
-			{ value: 'iso', label: m.dateFormatIso() },
-			{ value: 'ddmmyyyy', label: m.dateFormatDdmmyyyy() },
-			{ value: 'mmddyyyy', label: m.dateFormatMmddyyyy() },
-			{ value: 'long_dmy', label: m.dateFormatLongDmy() },
-			{ value: 'long_mdy', label: m.dateFormatLongMdy() }
-		] satisfies { value: DateFormatPreference; label: string }[]
-	).map((opt) => ({
-		value: opt.value,
-		label: `${opt.label} (${sampleDateForPreference(opt.value, getLocale())})`
-	}));
+	const dateFormatOptions: { value: DateFormatPreference; label: string }[] = [
+		{ value: 'auto', label: m.dateFormatAuto() },
+		{ value: 'iso', label: m.dateFormatIso() },
+		{ value: 'ddmmyyyy', label: m.dateFormatDdmmyyyy() },
+		{ value: 'mmddyyyy', label: m.dateFormatMmddyyyy() },
+		{ value: 'long_dmy', label: m.dateFormatLongDmy() },
+		{ value: 'long_mdy', label: m.dateFormatLongMdy() }
+	];
 
 	function handleForceDateFormat() {
 		const firstModal: ModalSettings = {
@@ -115,7 +110,7 @@
 								await invalidateAll();
 							} else {
 								toastStore.trigger({
-									message: data.error || m.forceDateFormatFailed(),
+									message: data.error ? safeTranslate(data.error) : m.forceDateFormatFailed(),
 									preset: 'error'
 								});
 							}
@@ -160,7 +155,7 @@
 								}
 							} else {
 								toastStore.trigger({
-									message: data.error || m.forceLanguageFailed(),
+									message: data.error ? safeTranslate(data.error) : m.forceLanguageFailed(),
 									preset: 'error'
 								});
 							}

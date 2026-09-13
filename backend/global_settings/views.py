@@ -250,7 +250,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             folder=Folder.get_root_folder(),
         ):
             return Response(
-                {"error": "You do not have permission to change user preferences."},
+                {"error": "userDoesNotHavePermissionToChangeUserPreferences"},
                 status=403,
             )
         general = GlobalSettings.objects.filter(
@@ -263,7 +263,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         )
         if not lang or lang not in dict(settings.LANGUAGES):
             return Response(
-                {"error": "No valid default language configured in general settings."},
+                {"error": "noDefaultLanguageConfigured"},
                 status=400,
             )
         with transaction.atomic():
@@ -286,7 +286,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             folder=Folder.get_root_folder(),
         ):
             return Response(
-                {"error": "You do not have permission to change user preferences."},
+                {"error": "userDoesNotHavePermissionToChangeUserPreferences"},
                 status=403,
             )
         general = GlobalSettings.objects.filter(
@@ -299,9 +299,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         )
         if not isinstance(date_format, str) or date_format not in User.DATE_FORMATS:
             return Response(
-                {
-                    "error": "No valid default date format configured in general settings."
-                },
+                {"error": "noDefaultDateFormatConfigured"},
                 status=400,
             )
         with transaction.atomic():
