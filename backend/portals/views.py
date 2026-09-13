@@ -69,7 +69,30 @@ class PortalPresetViewSet(CustomPortalsViewSet):
     model = PortalPreset
     serializers_module = "portals.serializers"
     filterset_fields = ["folder", "provider"]
-    search_fields = ["name", "description", "ref_id", "source_urn"]
+    search_fields = ["name", "description", "ref_id", "urn"]
+
+    def _reject_if_library_backed(self):
+        if self.get_object().urn is not None:
+            return Response(
+                {"detail": "Library-backed presets are read-only. Duplicate first."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return None
+
+    def update(self, request, *args, **kwargs):
+        return self._reject_if_library_backed() or super().update(
+            request, *args, **kwargs
+        )
+
+    def partial_update(self, request, *args, **kwargs):
+        return self._reject_if_library_backed() or super().partial_update(
+            request, *args, **kwargs
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        return self._reject_if_library_backed() or super().destroy(
+            request, *args, **kwargs
+        )
 
 
 def _resolve_launch_folder(request, target):
@@ -185,7 +208,7 @@ class PortalViewSet(CustomPortalsViewSet):
             "name": request.data.get("name") or preset.name,
             "folder": str(preset.folder_id),
             "content": preset.content,
-            "source_ref": preset.source_urn or preset.ref_id or str(preset.id),
+            "source_ref": preset.urn or preset.ref_id or str(preset.id),
         }
         serializer = PortalWriteSerializer(data=data, context={"request": request})
         serializer.is_valid(raise_exception=True)

@@ -24,8 +24,7 @@ class PortalPresetReadSerializer(BaseModelSerializer):
             "id",
             "name",
             "description",
-            "source_urn",
-            "source_version",
+            "urn",
             "ref_id",
             "version",
             "provider",
@@ -38,7 +37,7 @@ class PortalPresetReadSerializer(BaseModelSerializer):
         ]
 
     def get_is_user_authored(self, obj) -> bool:
-        return not obj.source_urn
+        return obj.urn is None
 
 
 class PortalPresetWriteSerializer(BaseModelSerializer):

@@ -257,10 +257,10 @@ class TestRoundTrip:
         assert importer.init() is None
         importer.import_portal_preset(catalog["library"])
 
-        preset = PortalPreset.objects.get(source_urn=preset_data["urn"])
+        preset = PortalPreset.objects.get(urn=preset_data["urn"])
         items = preset.content["sections"][0]["items"]
 
-        assert preset.source_version == str(catalog["library"].version)
+        assert preset.library_id == catalog["library"].id
         assert items[0]["target"]["framework"] == str(catalog["fw"].id)
         assert items[1]["target"]["quick_form"] == str(catalog["qf"].id)
         assert items[2]["target"]["model"] == "incidents"
@@ -288,26 +288,31 @@ class TestRoundTrip:
         assert importer.init() is None
         importer.import_portal_preset(catalog["library"])
 
-        preset = PortalPreset.objects.get(source_urn=preset_data["urn"])
+        preset = PortalPreset.objects.get(urn=preset_data["urn"])
         assert "framework" not in preset.content["sections"][0]["items"][0]["target"]
 
-    def test_unloading_the_library_leaves_the_preset_alone(self, catalog):
+    def test_unloading_drops_the_catalog_entry_but_never_a_live_portal(self, catalog):
         portal = _portal(
             catalog, [{"kind": "create", "target": {"model": "incidents"}}]
         )
+        user_authored = PortalPreset.objects.create(
+            name="Mine", folder=catalog["folder"], content=portal.content
+        )
         preset = PortalPreset.objects.create(
             name="Loaded design",
-            source_urn="urn:test:portals:portal_preset:p",
+            urn="urn:test:portals:portal_preset:p",
             folder=catalog["folder"],
+            library=catalog["library"],
             content=portal.content,
         )
 
         catalog["library"].delete()
 
-        assert PortalPreset.objects.filter(pk=preset.pk).exists()
+        assert not PortalPreset.objects.filter(pk=preset.pk).exists()
+        assert PortalPreset.objects.filter(pk=user_authored.pk).exists()
         assert Portal.objects.filter(pk=portal.pk).exists()
 
-    def test_a_second_load_does_not_collide(self, catalog):
+    def test_a_second_load_refreshes_in_place(self, catalog):
         preset_data = {
             "urn": "urn:test:portals:portal_preset:twice",
             "ref_id": "twice",
@@ -315,14 +320,12 @@ class TestRoundTrip:
             "content": {"sections": [{"items": []}]},
         }
         PortalPresetImporter(preset_data).import_portal_preset(catalog["library"])
-        PortalPresetImporter(preset_data).import_portal_preset(catalog["library"])
+        PortalPresetImporter(
+            {**preset_data, "name": "Onboarding v2"}
+        ).import_portal_preset(catalog["library"])
 
-        names = sorted(
-            PortalPreset.objects.filter(source_urn=preset_data["urn"]).values_list(
-                "name", flat=True
-            )
-        )
-        assert names == ["Onboarding", "Onboarding (2)"]
+        presets = PortalPreset.objects.filter(urn=preset_data["urn"])
+        assert [p.name for p in presets] == ["Onboarding v2"]
 
 
 @pytest.mark.django_db
@@ -412,3 +415,75 @@ class TestPublishGate:
         )
 
         assert serializer.is_valid(), serializer.errors
+
+
+@pytest.mark.django_db
+class TestLibraryUpdateRefresh:
+    def _stored(self, catalog, version, preset_name):
+        from core.models import StoredLibrary
+
+        return StoredLibrary.objects.create(
+            name="Catalog",
+            urn=catalog["library"].urn,
+            ref_id="CAT",
+            version=version,
+            locale="en",
+            default_locale=True,
+            folder=catalog["folder"],
+            content={
+                "portal_presets": [
+                    {
+                        "urn": "urn:test:portals:portal_preset:refreshed",
+                        "ref_id": "refreshed",
+                        "name": preset_name,
+                        "content": {"sections": [{"items": []}]},
+                    }
+                ]
+            },
+        )
+
+    def test_a_newer_version_refreshes_the_entry_in_place(self, catalog):
+        from core.models import LibraryUpdater
+
+        PortalPresetImporter(
+            {
+                "urn": "urn:test:portals:portal_preset:refreshed",
+                "ref_id": "refreshed",
+                "name": "v1",
+                "content": {"sections": [{"items": []}]},
+            }
+        ).import_portal_preset(catalog["library"])
+
+        LibraryUpdater(
+            catalog["library"], self._stored(catalog, 2, "v2")
+        ).update_portal_presets()
+
+        presets = PortalPreset.objects.filter(
+            urn="urn:test:portals:portal_preset:refreshed"
+        )
+        assert [(p.name, p.version) for p in presets] == [("v2", 2)]
+
+    def test_a_refresh_does_not_touch_portals_cloned_from_it(self, catalog):
+        from core.models import LibraryUpdater
+
+        PortalPresetImporter(
+            {
+                "urn": "urn:test:portals:portal_preset:refreshed",
+                "ref_id": "refreshed",
+                "name": "v1",
+                "content": {"sections": [{"title": "Original", "items": []}]},
+            }
+        ).import_portal_preset(catalog["library"])
+        preset = PortalPreset.objects.get(
+            urn="urn:test:portals:portal_preset:refreshed"
+        )
+        clone = Portal.objects.create(
+            name="Live", folder=catalog["folder"], content=preset.content
+        )
+
+        LibraryUpdater(
+            catalog["library"], self._stored(catalog, 2, "v2")
+        ).update_portal_presets()
+        clone.refresh_from_db()
+
+        assert clone.content["sections"][0]["title"] == "Original"

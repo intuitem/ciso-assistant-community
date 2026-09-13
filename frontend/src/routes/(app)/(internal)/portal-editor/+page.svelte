@@ -123,10 +123,10 @@
 					<div class="flex items-center gap-3">
 						<i class="fa-solid fa-clone text-surface-400"></i>
 						<span class="font-medium">{preset.name}</span>
-						{#if preset.source_urn}
+						{#if !preset.is_user_authored}
 							<span
 								class="text-[10px] uppercase rounded-full bg-surface-200-800 px-2 py-0.5 text-surface-500"
-								title={preset.source_urn}>{preset.provider ?? m.library()}</span
+								title={preset.urn}>{preset.provider ?? m.library()}</span
 							>
 						{/if}
 					</div>
@@ -135,18 +135,20 @@
 							<input type="hidden" name="preset" value={preset.id} />
 							<button class="btn btn-sm preset-filled-primary-500">{m.useTemplate()}</button>
 						</form>
-						<form method="POST" action="?/deletePreset" use:enhance>
-							<input type="hidden" name="id" value={preset.id} />
-							<button
-								type="button"
-								onclick={(e) => confirmDelete(e, preset.name)}
-								class="btn btn-sm preset-tonal-error"
-								aria-label={m.delete()}
-								title={m.delete()}
-							>
-								<i class="fa-solid fa-trash"></i>
-							</button>
-						</form>
+						{#if preset.is_user_authored}
+							<form method="POST" action="?/deletePreset" use:enhance>
+								<input type="hidden" name="id" value={preset.id} />
+								<button
+									type="button"
+									onclick={(e) => confirmDelete(e, preset.name)}
+									class="btn btn-sm preset-tonal-error"
+									aria-label={m.delete()}
+									title={m.delete()}
+								>
+									<i class="fa-solid fa-trash"></i>
+								</button>
+							</form>
+						{/if}
 					</div>
 				</div>
 			{:else}

@@ -26,7 +26,6 @@ from core.models import (
 from sec_intel.models import Tactic, Technique, TTPCatalog
 from metrology.models import MetricDefinition
 from django.db import transaction
-from core.utils import free_name
 from iam.models import Folder
 
 from django.db.utils import IntegrityError, OperationalError
@@ -574,8 +573,9 @@ class QuickFormImporter:
 
 
 class PortalPresetImporter:
-    """Loads a portal design as a starting point. Workflow-shaped: it divorces on
-    arrival, so a library update leaves it alone and an unload cannot take it away."""
+    """Loads a portal design as a catalog entry, keyed on its URN so a later version
+    refreshes it in place. Tile references arrive as URNs; one that cannot be resolved
+    leaves its tile unwired rather than failing the load, and the editor flags it."""
 
     REQUIRED_FIELDS = {"ref_id", "urn"}
 
@@ -605,7 +605,7 @@ class PortalPresetImporter:
         from portals.models import PortalPreset
         from portals.references import resolve
 
-        folder = Folder.get_root_folder()
+        urn = self.preset_data["urn"].lower()
         content, unresolved = resolve(self.preset_data.get("content") or {})
         for warning in unresolved:
             logger.warning(
@@ -613,18 +613,21 @@ class PortalPresetImporter:
                 library=library_object.urn,
                 warning=warning,
             )
-        PortalPreset.objects.create(
-            folder=folder,
-            name=free_name(
-                PortalPreset, self.preset_data.get("name") or "Portal", folder
+        PortalPreset.objects.update_or_create(
+            urn=urn,
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                library=library_object,
+                ref_id=self.preset_data["ref_id"],
+                name=self.preset_data.get("name"),
+                description=self.preset_data.get("description"),
+                version=library_object.version,
+                provider=library_object.provider,
+                locale=library_object.locale,
+                default_locale=library_object.default_locale,
+                translations=self.preset_data.get("translations", {}),
+                content=content,
             ),
-            description=self.preset_data.get("description"),
-            ref_id=self.preset_data["ref_id"],
-            source_urn=self.preset_data["urn"].lower()[:255],
-            source_version=str(library_object.version)[:50],
-            provider=library_object.provider,
-            translations=self.preset_data.get("translations", {}),
-            content=content,
         )
 
 
