@@ -10,9 +10,9 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			// Set by the accessors below; only valid after awaiting the matching one.
-			user: User;
-			settings: Record<string, any>;
-			featureflags: Record<string, boolean>;
+			user?: User;
+			settings?: Record<string, any>;
+			featureflags?: Record<string, boolean>;
 			getUser: () => Promise<User | null>;
 			getSettings: () => Promise<Record<string, any> | undefined>;
 			getFeatureFlags: () => Promise<Record<string, boolean> | undefined>;
