@@ -12,7 +12,7 @@ from core.models import (
     RequirementAssessment,
     RequirementNode,
 )
-from core.views import FolderViewSet
+from core.views import ComplianceAssessmentViewSet, FolderViewSet
 from iam.models import Folder, User
 
 
@@ -139,3 +139,20 @@ def test_evidence_attached_directly_to_a_requirement_is_checked(
 
     reported = [f for f in findings["warnings"] if f["msgid"] == "evidenceNoFile"]
     assert [f["link"] for f in reported] == [f"evidences/{evidence.id}"]
+
+
+@pytest.mark.django_db
+def test_ordering_by_authors_works_outside_the_list_action(audit_with_shared_control):
+    """`ordering_remap` rewrites `authors` on every action, not just `list`, so
+    the annotation it points at has to be there too. Any action handed the list
+    query string -- the autocomplete endpoint here, the CSV export once it is
+    wired -- used to raise FieldError on the rewritten column."""
+    user = User.objects.create_superuser("ordering@tests.com")
+
+    request = APIRequestFactory().get(
+        "/api/compliance-assessments/autocomplete/", {"ordering": "authors"}
+    )
+    force_authenticate(request, user=user)
+    response = ComplianceAssessmentViewSet.as_view({"get": "autocomplete"})(request)
+
+    assert response.status_code == 200

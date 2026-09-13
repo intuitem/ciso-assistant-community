@@ -12004,7 +12004,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 actor_prefetch("authors"),  # Optional table column
                 "entityassessment_set",
             )
-            qs = annotate_actor_ordering(qs, self)
+
+        # Outside the list branch: `ordering_remap` rewrites `authors` on every
+        # action, so any action handed the list query string (the CSV export, the
+        # autocomplete endpoint) needs the column it is rewritten to. The helper
+        # is already a no-op unless the request orders by it.
+        qs = annotate_actor_ordering(qs, self)
 
         # No requirement_assessments prefetch on the list action: progress is
         # served by `_get_optimized_object_data` (no-IG audits) or the model's

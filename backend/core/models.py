@@ -9249,21 +9249,16 @@ class ComplianceAssessment(Assessment):
         # Evidence of this audit, on the two paths RequirementAssessment.has_evidence()
         # follows: attached to a requirement assessment directly, or through one
         # of its applied controls.
-        evidence_scope = models.Q(
-            applied_controls__requirement_assessments__compliance_assessment=self
-        ) | models.Q(requirement_assessments__compliance_assessment=self)
-        evidence_objects = (
-            Evidence.objects.filter(evidence_scope)
-            .distinct()
-            .prefetch_related("filtering_labels", "owner")
-            .order_by("created_at")
+        evidences = Evidence.objects.filter(
+            models.Q(
+                applied_controls__requirement_assessments__compliance_assessment=self
+            )
+            | models.Q(requirement_assessments__compliance_assessment=self)
         )
         # Evidences holding at least one revision with a file or a link, resolved
         # in a single query instead of two per evidence.
         evidence_ids_with_content = set(
-            EvidenceRevision.objects.filter(
-                evidence__in=Evidence.objects.filter(evidence_scope)
-            )
+            EvidenceRevision.objects.filter(evidence__in=evidences)
             .filter(
                 (models.Q(attachment__isnull=False) & ~models.Q(attachment=""))
                 | (models.Q(link__isnull=False) & ~models.Q(link=""))
@@ -9271,23 +9266,24 @@ class ComplianceAssessment(Assessment):
             .values_list("evidence_id", flat=True)
         )
 
-        for evidence_obj in evidence_objects:
-            if evidence_obj.id not in evidence_ids_with_content:
-                evidence_dict = json.loads(
-                    serializers.serialize("json", [evidence_obj])
-                )[0]["fields"]
-                evidence_dict["id"] = evidence_obj.id
-                warnings_lst.append(
-                    {
-                        "msg": _("{}: Evidence has no file or link uploaded").format(
-                            evidence_obj.name
-                        ),
-                        "msgid": "evidenceNoFile",
-                        "link": f"evidences/{evidence_obj.id}",
-                        "obj_type": "evidence",
-                        "object": evidence_dict,
-                    }
-                )
+        # Only the evidences actually reported are serialized, so the m2m
+        # prefetching the helper does is paid for the broken ones alone.
+        for evidence in _serialize_for_quality_check(
+            evidences.exclude(id__in=evidence_ids_with_content)
+            .distinct()
+            .order_by("created_at")
+        ):
+            warnings_lst.append(
+                {
+                    "msg": _("{}: Evidence has no file or link uploaded").format(
+                        evidence["name"]
+                    ),
+                    "msgid": "evidenceNoFile",
+                    "link": f"evidences/{evidence['id']}",
+                    "obj_type": "evidence",
+                    "object": evidence,
+                }
+            )
 
         findings = {
             "errors": errors_lst,
