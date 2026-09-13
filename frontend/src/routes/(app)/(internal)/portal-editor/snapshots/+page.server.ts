@@ -8,7 +8,7 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
-	if (!locals.featureflags?.custom_portals) redirect(302, '/');
+	if (!(await locals.getFeatureFlags())?.custom_portals) redirect(302, '/');
 	const [snapshots, audits, frameworks] = await Promise.all([
 		fetchAllPages(fetch, `${BASE_API_URL}/framework-snapshots/`),
 		fetchAllPages(fetch, `${BASE_API_URL}/compliance-assessments/`),
