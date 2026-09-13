@@ -24,9 +24,6 @@ export const load = (async ({ fetch, url }) => {
 	const fullEndpoint = `${endpoint}?${queryParams.toString()}`;
 	const applied_controls = await fetchAllPages(fetch, fullEndpoint);
 
-	// Fetch folders for swimlanes
-	const folders = await fetchAllPages(fetch, `${BASE_API_URL}/folders/`);
-
 	// Extract UI parameters for the kanban mode page
 	const backUrl = getSecureRedirect(searchParams.get('backUrl')) || '/applied-controls';
 	const backLabel = searchParams.get('backLabel') || 'Applied Controls';
@@ -34,7 +31,6 @@ export const load = (async ({ fetch, url }) => {
 	return {
 		URLModel,
 		applied_controls,
-		folders,
 		backUrl,
 		backLabel
 	};
