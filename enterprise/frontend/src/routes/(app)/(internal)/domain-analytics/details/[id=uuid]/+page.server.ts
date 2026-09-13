@@ -53,7 +53,7 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 		threats_count,
 		folderData,
 		applied_control_status: applied_control_status.results,
-		user: locals.user,
+		user: await locals.getUser(),
 		title: `${m.analytics()} - ${folderData?.name}`,
 		stream: {
 			metrics: getMetrics(),

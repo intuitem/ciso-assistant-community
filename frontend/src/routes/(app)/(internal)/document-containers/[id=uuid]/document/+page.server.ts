@@ -7,7 +7,7 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async (event) => {
 	const { fetch, params, cookies, locals, url } = event;
 
-	if (!locals.featureflags?.document_management) {
+	if (!(await locals.getFeatureFlags())?.document_management) {
 		redirect(302, `/documents`);
 	}
 

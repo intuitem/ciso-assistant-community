@@ -146,7 +146,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 
 	return {
 		folderRecaps,
-		user: locals.user,
+		user: await locals.getUser(),
 		title: m.recap()
 	};
 };
