@@ -6,11 +6,14 @@ from iam.models import FolderMixin, UserGroup
 
 
 class PortalPreset(NameDescriptionMixin, FolderMixin):
-    """A portal definition / catalog entry. Library-backed (urn set) or user-authored.
-    Cloned into a live Portal; never referenced live (no sync). Exports to YAML.
-    `content` holds the whole design: {"sections": [{"title", "items": [...]}]}."""
+    """A portal design kept as a starting point, cloned into a live Portal and never
+    referenced live. `content` holds the design: {"sections": [{"title", "items"}]}.
 
-    urn = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    Like a workflow, one loaded from a library divorces on arrival: `source_*` only
+    records where it came from, so an update or unload leaves it untouched."""
+
+    source_urn = models.CharField(max_length=255, blank=True)
+    source_version = models.CharField(max_length=50, blank=True)
     ref_id = models.CharField(max_length=255, null=True, blank=True)
     version = models.IntegerField(default=1)
     provider = models.CharField(max_length=255, null=True, blank=True)

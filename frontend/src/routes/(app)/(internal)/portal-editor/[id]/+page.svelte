@@ -176,8 +176,7 @@
 	});
 
 	const payload = $derived(JSON.stringify({ sections }));
-	// A tile with no target 400s for every clicker, so saving one is never what the
-	// author meant. The backend rejects it too; this is what stops them getting there.
+	// Gates publishing, not saving: a design cloned from a library can land half-wired.
 	const incompleteTiles = $derived(countIncompleteTiles(sections));
 
 	// 'navigate' targets a model (mandatory) — backfill any tile that lacks one so the
@@ -309,6 +308,19 @@
 					title={m.duplicate()}><i class="fa-solid fa-copy"></i></button
 				>
 			</form>
+			<form method="POST" action="?/saveAsTemplate" use:enhance={savedToastEnhance(toast)}>
+				<button
+					class="btn-icon btn-sm preset-tonal"
+					aria-label={m.saveAsTemplate()}
+					title={m.saveAsTemplate()}><i class="fa-solid fa-clone"></i></button
+				>
+			</form>
+			<a
+				href="/portal-editor/{data.portal.id}/export"
+				class="btn-icon btn-sm preset-tonal"
+				aria-label={m.exportAsLibrary()}
+				title={m.exportAsLibrary()}><i class="fa-solid fa-file-export"></i></a
+			>
 		</div>
 	</div>
 
@@ -369,7 +381,13 @@
 				name="status"
 				value={data.portal.status === 'published' ? 'draft' : 'published'}
 			/>
-			<button class="btn preset-tonal">
+			<button
+				class="btn preset-tonal"
+				disabled={data.portal.status !== 'published' && incompleteTiles > 0}
+				title={incompleteTiles > 0
+					? m.portalTileIncompleteCount({ count: incompleteTiles })
+					: undefined}
+			>
 				{data.portal.status === 'published' ? m.unpublish() : m.publish()}
 			</button>
 		</form>
@@ -379,13 +397,7 @@
 			use:enhance={savedToastEnhance(toast, { reset: false })}
 		>
 			<input type="hidden" name="payload" value={payload} />
-			<button
-				class="btn preset-filled-primary-500"
-				disabled={incompleteTiles > 0}
-				title={incompleteTiles > 0
-					? m.portalTileIncompleteCount({ count: incompleteTiles })
-					: undefined}
-			>
+			<button class="btn preset-filled-primary-500">
 				<i class="fa-solid fa-floppy-disk mr-1"></i>{m.save()}
 			</button>
 		</form>

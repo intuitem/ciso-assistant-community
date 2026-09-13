@@ -138,6 +138,13 @@ export const actions: Actions = {
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},
+	saveAsTemplate: async ({ params, fetch }) => {
+		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/save-as-preset/`, {
+			method: 'POST'
+		});
+		if (!res.ok) return fail(res.status, { error: await res.text() });
+		return { success: true };
+	},
 	duplicate: async ({ params, fetch }) => {
 		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/duplicate/`, { method: 'POST' });
 		if (!res.ok) return fail(res.status, { error: await res.text() });
