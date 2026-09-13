@@ -47,6 +47,10 @@ READER_PERMISSIONS_LIST = [
     "view_question",
     "view_questionchoice",
     "view_answer",
+    "view_quickform",
+    "view_quickformpage",
+    "view_quickformresponse",
+    "view_quickformpublication",
     "view_riskacceptance",
     "view_riskassessment",
     "view_riskmatrix",
@@ -169,6 +173,53 @@ READER_PERMISSIONS_LIST = [
     "view_agentaction",
 ]
 
+BASELINE_READER_PERMISSIONS_LIST = [
+    "view_securityadvisory",
+    "view_cwe",
+    "view_technique",
+    "view_ttpcatalog",
+    "view_tactic",
+    "view_responsibilityrole",
+    "view_metricdefinition",
+    "view_metricinstance",
+    "view_terminology",
+    "view_riskmatrix",
+    "view_framework",
+    "view_question",
+    "view_questionchoice",
+    "view_quickform",
+    "view_quickformpage",
+    "view_requirementnode",
+    "view_referencecontrol",
+    "view_elementaryaction",
+    "view_asset",
+    "view_threat",
+    "view_evidence",
+    "view_evidencerevision",
+    "view_comment",
+    "view_appliedcontrol",
+    "view_policy",
+    "view_vulnerability",
+    "view_folder",
+    "view_actor",
+    "view_user",
+    "view_team",
+    "view_storedlibrary",
+    "view_loadedlibrary",
+    "view_filteringlabel",
+    "view_libraryfilteringlabel",
+    "view_organisationobjective",
+    "view_organisationissue",
+    "view_assetclass",
+    "view_assetcapability",
+    "view_objectclassification",
+    "view_entity",
+    "view_documenttemplate",
+    "view_customfielddefinition",
+    "view_requirementmapping",
+    "view_requirementmappingset",
+]
+
 APPROVER_PERMISSIONS_LIST = [
     "view_customfielddefinition",
     "view_compliance_assessment_full",
@@ -197,6 +248,11 @@ APPROVER_PERMISSIONS_LIST = [
     "view_question",
     "view_questionchoice",
     "view_answer",
+    "view_quickform",
+    "view_quickformpage",
+    "view_quickformresponse",
+    "approve_quickformresponse",
+    "view_quickformpublication",
     "view_evidence",
     "view_evidencerevision",
     "view_documentcontainer",
@@ -431,6 +487,14 @@ ANALYST_PERMISSIONS_LIST = [
     "view_question",
     "view_questionchoice",
     "view_answer",
+    "view_quickform",
+    "view_quickformpage",
+    "view_quickformresponse",
+    "approve_quickformresponse",
+    "view_quickformpublication",
+    "add_quickformresponse",
+    "change_quickformresponse",
+    "delete_quickformresponse",
     "view_riskacceptance",
     "view_riskassessment",
     "view_riskmatrix",
@@ -904,6 +968,23 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_questionchoice",
     "delete_questionchoice",
     "view_answer",
+    "view_quickform",
+    "view_quickformpage",
+    "view_quickformresponse",
+    "approve_quickformresponse",
+    "view_quickformpublication",
+    "add_quickformpublication",
+    "change_quickformpublication",
+    "delete_quickformpublication",
+    "add_quickformresponse",
+    "change_quickformresponse",
+    "delete_quickformresponse",
+    "add_quickform",
+    "change_quickform",
+    "delete_quickform",
+    "add_quickformpage",
+    "change_quickformpage",
+    "delete_quickformpage",
     "view_riskacceptance",
     "view_riskassessment",
     "view_riskmatrix",
@@ -1449,6 +1530,23 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_question",
     "view_questionchoice",
     "view_answer",
+    "view_quickform",
+    "view_quickformpage",
+    "view_quickformresponse",
+    "approve_quickformresponse",
+    "view_quickformpublication",
+    "add_quickformpublication",
+    "change_quickformpublication",
+    "delete_quickformpublication",
+    "add_quickformresponse",
+    "change_quickformresponse",
+    "delete_quickformresponse",
+    "add_quickform",
+    "change_quickform",
+    "delete_quickform",
+    "add_quickformpage",
+    "change_quickformpage",
+    "delete_quickformpage",
     "add_question",
     "change_question",
     "delete_question",
@@ -1803,6 +1901,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_role",
     "delete_role",
     "view_permission",
+    "view_roleassignment",
     # integrations
     "add_integrationconfiguration",
     "view_integrationconfiguration",
@@ -1917,6 +2016,7 @@ AUDITEE_PERMISSIONS_LIST = [
     "view_answer",
     "add_answer",
     "change_answer",
+    "add_quickformresponse",
     "view_evidence",
     "add_evidence",
     "change_evidence",
@@ -2124,6 +2224,7 @@ def startup(sender=None, **kwargs):
     # Sync builtin role permissions — all permission rows exist at this point
     for name, perm_list in (
         ("BI-RL-AUD", READER_PERMISSIONS_LIST),
+        ("BI-RL-BSL", BASELINE_READER_PERMISSIONS_LIST),
         ("BI-RL-APP", APPROVER_PERMISSIONS_LIST),
         ("BI-RL-ANA", ANALYST_PERMISSIONS_LIST),
         ("BI-RL-DMA", DOMAIN_MANAGER_PERMISSIONS_LIST),
@@ -2137,6 +2238,20 @@ def startup(sender=None, **kwargs):
     ):
         role, _ = Role.objects.get_or_create(name=name, builtin=True)
         role.permissions.set(Permission.objects.filter(codename__in=perm_list))
+
+    # When nothing installed makes the default role configurable, it is
+    # hard-coded: the root folder carries the baseline reader role and nothing
+    # else is configurable (the folder serializer excludes the field).
+    # Re-pinning it at every boot is what makes it hard-coded rather than
+    # merely seeded. Folder trees are one level deep here, so root-only
+    # ambience reproduces exactly what `is_published` used to expose.
+    if not getattr(settings, "CONFIGURABLE_DEFAULT_ROLE", False):
+        root_folder = Folder.get_root_folder()
+        baseline_reader_role = Role.objects.get(name="BI-RL-BSL")
+        if root_folder.default_role_id != baseline_reader_role.id:
+            root_folder.default_role = baseline_reader_role
+            root_folder.save()
+
     # backfill builtin groups (e.g. technical tester) on pre-existing domains
     for folder in Folder.objects.filter(
         content_type=Folder.ContentType.DOMAIN, create_iam_groups=True
@@ -2385,7 +2500,6 @@ def startup(sender=None, **kwargs):
             name="vulnerability-sla",
             defaults={
                 "value": vulnerability_sla_defaults,
-                "is_published": True,
                 "folder": Folder.get_root_folder(),
             },
         )
@@ -2406,7 +2520,6 @@ def startup(sender=None, **kwargs):
             name="sec-intel-feeds",
             defaults={
                 "value": sec_intel_defaults,
-                "is_published": True,
                 "folder": Folder.get_root_folder(),
             },
         )

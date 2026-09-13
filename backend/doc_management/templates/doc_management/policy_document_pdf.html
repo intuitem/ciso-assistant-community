@@ -240,6 +240,12 @@ body {
                 <td>{{ author_name }}</td>
             </tr>
             {% endif %}
+            {% if reviewer_name %}
+            <tr>
+                <td>Approved by:</td>
+                <td>{{ reviewer_name }}</td>
+            </tr>
+            {% endif %}
             {% if published_at %}
             <tr>
                 <td>Published:</td>

@@ -67,6 +67,9 @@ export const URL_MODEL = [
 	'roles',
 	'role-assignments',
 	'compliance-assessments',
+	'quick-forms',
+	'quick-form-responses',
+	'quick-form-publications',
 	'evidences',
 	'evidence-revisions',
 	'frameworks',
@@ -222,7 +225,6 @@ export interface Perimeter {
 	lc_status: string;
 	created_at: string;
 	updated_at: string;
-	is_published: boolean;
 	name: string;
 	description?: string;
 	ref_id?: string;

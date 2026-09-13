@@ -1368,7 +1368,7 @@ class TestRealAuthAndRBAC:
             parent_folder=app_ready,
             content_type=Folder.ContentType.DOMAIN,
         )
-        user = User.objects.create_user("split@datawizard.test", is_published=True)
+        user = User.objects.create_user("split@datawizard.test")
         user.folder = app_ready
         user.save()
         for folder, role_name in ((writable, "BI-RL-ANA"), (readonly, "BI-RL-AUD")):
@@ -1411,7 +1411,7 @@ class TestRealAuthAndRBAC:
             parent_folder=app_ready,
             content_type=Folder.ContentType.DOMAIN,
         )
-        user = User.objects.create_user("dma@datawizard.test", is_published=True)
+        user = User.objects.create_user("dma@datawizard.test")
         user.folder = app_ready
         user.save()
         group = UserGroup.objects.create(name="grp-dma", folder=dom)
@@ -1458,14 +1458,13 @@ class TestRealAuthAndRBAC:
 def _make_audit(folder, name="Vendor Audit", ref_id="AUD-001"):
     from core.models import ComplianceAssessment, Framework, RequirementNode
 
-    fw = Framework.objects.create(name=f"{name} FW", folder=folder, is_published=True)
+    fw = Framework.objects.create(name=f"{name} FW", folder=folder)
     RequirementNode.objects.create(
         framework=fw,
         urn=f"urn:test:{ref_id}:req:1",
         ref_id="REQ1",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     audit = ComplianceAssessment.objects.create(
         name=name,

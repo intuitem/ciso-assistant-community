@@ -162,6 +162,8 @@
 		'read_objects',
 		'http_request',
 		'send_email',
+		'ai_extract',
+		'ai_generate',
 		'provision_folder',
 		'provision_user',
 		'manage_group_membership',
@@ -171,6 +173,9 @@
 	];
 
 	const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+
+	// 'choice' emits an enum, which is what a branch step can route on.
+	const AI_FIELD_TYPES = ['choice', 'string', 'number', 'boolean'];
 
 	const BUILTIN_GROUPS = [
 		{ code: 'BI-UG-AUD', label: 'reader' },
@@ -201,6 +206,13 @@
 		},
 		http_request: { method: 'GET', url: '', headers: {}, body: '', timeout: 15 },
 		send_email: { recipients: '', subject: '', body: '' },
+		ai_extract: {
+			prompt: '',
+			input: '',
+			schema: { type: 'object', properties: {}, required: [] },
+			max_attempts: 2
+		},
+		ai_generate: { prompt: '', input: '', max_words: 200 },
 		provision_folder: { name: '', parent: '', create_default_groups: true },
 		provision_user: {
 			email: '',
@@ -277,13 +289,16 @@
 		onChange();
 	}
 
-	// Older nodes may carry a bare {type} config; make sure the shape the
-	// bindings expect exists before the template reads it.
+	// Older nodes may carry a bare {type} config — so do the ones the palette
+	// drops pre-typed; make sure the shape the bindings expect exists before
+	// the template reads it.
 	$effect(() => {
 		if (nodeDomain?.type === 'action' && actionConfig?.type) {
 			const defaults: any = ACTION_CONFIG_DEFAULTS[actionConfig.type] ?? {};
 			for (const [key, value] of Object.entries(defaults)) {
-				if (actionConfig[key] === undefined) actionConfig[key] = value;
+				// Clone: the nested literals are shared, so two nodes of one
+				// type would otherwise edit the same object.
+				if (actionConfig[key] === undefined) actionConfig[key] = structuredClone(value);
 			}
 		}
 		if (nodeDomain?.type === 'trigger') {
@@ -313,6 +328,8 @@
 		provision_user: 'user_id',
 		manage_group_membership: 'group_id',
 		send_email: 'subject',
+		ai_extract: 'category',
+		ai_generate: 'text',
 		date_offset: 'result',
 		log: 'message'
 	};
@@ -754,6 +771,77 @@
 	function removeHeaderRow(index: number) {
 		headerEntries = headerEntries.filter((_, i) => i !== index);
 		syncHeaders();
+	}
+
+	// ---------- ai_extract output fields ----------
+	// Authors name fields and pick types; we build the JSON Schema from that.
+	// Same round-trip shape as headerEntries above.
+	type AiField = { name: string; type: string; choices: string };
+	let aiFields = $state<AiField[]>([]);
+	let aiFieldsNodeId: string | null = null;
+	$effect(() => {
+		const nodeId =
+			nodeDomain?.type === 'action' && actionConfig?.type === 'ai_extract' ? selectedNode.id : null;
+		if (nodeId !== aiFieldsNodeId) {
+			aiFieldsNodeId = nodeId;
+			aiFields = nodeId ? schemaToFields(actionConfig.schema) : [];
+		}
+	});
+
+	function schemaToFields(schema: any): AiField[] {
+		return Object.entries(schema?.properties ?? {}).map(([name, spec]: [string, any]) => ({
+			name,
+			type: Array.isArray(spec?.enum) ? 'choice' : (spec?.type ?? 'string'),
+			choices: Array.isArray(spec?.enum) ? spec.enum.join(', ') : ''
+		}));
+	}
+
+	function syncAiFields() {
+		const properties: Record<string, any> = {};
+		for (const field of aiFields) {
+			const name = field.name.trim();
+			if (!name) continue;
+			if (field.type === 'choice') {
+				const choices = field.choices
+					.split(',')
+					.map((choice) => choice.trim())
+					.filter(Boolean);
+				// An empty enum would validate nothing.
+				properties[name] = choices.length ? { type: 'string', enum: choices } : { type: 'string' };
+			} else {
+				properties[name] = { type: field.type };
+			}
+		}
+		// All required: an absent key makes {{nodes.<ref>.<field>}} unresolvable.
+		actionConfig.schema = {
+			type: 'object',
+			properties,
+			required: Object.keys(properties)
+		};
+		onChange();
+	}
+
+	function aiTypeLabel(fieldType: string): string {
+		// Not m[`...`]: a dynamic index defeats Paraglide tree-shaking.
+		switch (fieldType) {
+			case 'choice':
+				return m.aiTypeChoice();
+			case 'number':
+				return m.aiTypeNumber();
+			case 'boolean':
+				return m.aiTypeBoolean();
+			default:
+				return m.aiTypeString();
+		}
+	}
+
+	function addAiField() {
+		aiFields = [...aiFields, { name: '', type: 'choice', choices: '' }];
+	}
+
+	function removeAiField(index: number) {
+		aiFields = aiFields.filter((_, i) => i !== index);
+		syncAiFields();
 	}
 
 	function optionLabel(option: Option): string {
@@ -1907,6 +1995,111 @@
 					</label>
 					<p class="text-[10px] text-surface-500 leading-relaxed">
 						<i class="fa-solid fa-key mr-1"></i>{m.secretsHint({ syntax: '{{secrets.name}}' })}
+					</p>
+				{:else if actionConfig.type === 'ai_extract' || actionConfig.type === 'ai_generate'}
+					<label>
+						{@render fieldLabel(m.aiInstruction())}
+						<textarea
+							class="input w-full text-sm"
+							rows="3"
+							placeholder={m.aiInstructionPlaceholder()}
+							bind:value={actionConfig.prompt}
+							oninput={onChange}
+						></textarea>
+					</label>
+					<label>
+						{@render fieldLabel(m.aiInput())}
+						<textarea
+							class="input w-full text-sm font-mono"
+							rows="2"
+							placeholder={'{{nodes.read_findings.results.0.description}}'}
+							bind:value={actionConfig.input}
+							oninput={onChange}
+						></textarea>
+					</label>
+					{#if actionConfig.type === 'ai_extract'}
+						<div>
+							<div class="flex items-center justify-between mb-1">
+								{@render fieldLabel(m.aiOutputFields())}
+								<button
+									type="button"
+									class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold"
+									onclick={addAiField}
+								>
+									<i class="fa-solid fa-plus mr-0.5"></i>{m.aiAddField()}
+								</button>
+							</div>
+							{#each aiFields as field, index (index)}
+								<div class="flex items-center gap-1 mb-1">
+									<input
+										type="text"
+										class="input text-xs w-24 min-w-0 font-mono shrink-0"
+										placeholder={m.aiFieldName()}
+										bind:value={field.name}
+										oninput={syncAiFields}
+									/>
+									<select
+										class="select text-xs w-20 min-w-0 shrink-0"
+										bind:value={field.type}
+										onchange={syncAiFields}
+									>
+										{#each AI_FIELD_TYPES as fieldType}
+											<option value={fieldType}>{aiTypeLabel(fieldType)}</option>
+										{/each}
+									</select>
+									{#if field.type === 'choice'}
+										<input
+											type="text"
+											class="input text-xs flex-1 min-w-0 font-mono"
+											placeholder={m.aiChoicesPlaceholder()}
+											bind:value={field.choices}
+											oninput={syncAiFields}
+										/>
+									{:else}
+										<span class="flex-1"></span>
+									{/if}
+									<button
+										type="button"
+										aria-label={m.aiRemoveField()}
+										class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0"
+										onclick={() => removeAiField(index)}
+									>
+										<i class="fa-solid fa-xmark"></i>
+									</button>
+								</div>
+							{/each}
+							{#if aiFields.length === 0}
+								<p class="text-[10px] text-surface-500 leading-relaxed">
+									{m.aiNoFieldsHint()}
+								</p>
+							{/if}
+						</div>
+						<label>
+							{@render fieldLabel(m.aiMaxAttempts())}
+							<input
+								type="number"
+								class="input w-full text-sm"
+								min="1"
+								max="5"
+								bind:value={actionConfig.max_attempts}
+								oninput={onChange}
+							/>
+						</label>
+					{:else}
+						<label>
+							{@render fieldLabel(m.aiMaxWords())}
+							<input
+								type="number"
+								class="input w-full text-sm"
+								min="1"
+								max="2000"
+								bind:value={actionConfig.max_words}
+								oninput={onChange}
+							/>
+						</label>
+					{/if}
+					<p class="text-[10px] text-surface-500 leading-relaxed">
+						<i class="fa-solid fa-circle-info mr-1"></i>{m.aiFencingHint()}
 					</p>
 				{:else if actionConfig.type === 'send_email'}
 					<label>

@@ -787,6 +787,8 @@
 	"addRepresentative": "Vertreter hinzufügen",
 	"phone": "Telefon",
 	"role": "Rolle",
+	"defaultRole": "Standardrolle",
+	"defaultRoleHelpText": "Rolle, die automatisch auf dieser Domäne an jeden Benutzer mit einer Rollenzuweisung in einer ihrer Unterdomänen gewährt wird.",
 	"questions": "Fragen",
 	"recipientEntity": "Empfänger",
 	"financial": "Finanziell",

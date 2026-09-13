@@ -222,11 +222,12 @@ test('ListSelector renders the full permission list on the custom role form', as
 	test.slow();
 	const token = await getAuthToken(page.context());
 
-	// Roles and permissions endpoints only exist on the enterprise backend.
-	const probe = await page.request.get(`${BACKEND_API_URL}/roles/`, {
+	// Role management and the permissions endpoint only exist on the enterprise
+	// backend (the community roles endpoint is read-only), so probe permissions.
+	const probe = await page.request.get(`${BACKEND_API_URL}/permissions/`, {
 		headers: authHeaders(token)
 	});
-	test.skip(!probe.ok(), 'roles/permissions endpoints are enterprise-only');
+	test.skip(!probe.ok(), 'role management/permissions endpoints are enterprise-only');
 
 	const folders = await apiGet(page, token, '/folders/?limit=200');
 	const globalFolder = (folders.results ?? folders).find(
