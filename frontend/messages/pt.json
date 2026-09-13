@@ -822,6 +822,8 @@
 	"addRepresentative": "Adicionar representante",
 	"phone": "Telefone",
 	"role": "Papel",
+	"defaultRole": "Função padrão",
+	"defaultRoleHelpText": "Função concedida automaticamente neste domínio a qualquer usuário com uma atribuição de função em um dos seus subdomínios.",
 	"questions": "Perguntas",
 	"recipientEntity": "Entidade beneficiária",
 	"financial": "Financeiro",

@@ -823,6 +823,8 @@
 	"addRepresentative": "Lägg till representant",
 	"phone": "Telefon",
 	"role": "Roll",
+	"defaultRole": "Standardroll",
+	"defaultRoleHelpText": "Roll som automatiskt ges på denna domän till alla användare med en rolltilldelning på någon av dess underdomäner.",
 	"questions": "Frågor",
 	"recipientEntity": "Mottagarenhet",
 	"financial": "Finansiell",

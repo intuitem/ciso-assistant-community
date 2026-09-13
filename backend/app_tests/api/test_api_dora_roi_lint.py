@@ -36,7 +36,7 @@ def _client(user):
 
 
 def _global_group_client(email, group_name, app_ready):
-    user = User.objects.create_user(email, is_published=True)
+    user = User.objects.create_user(email)
     group = UserGroup.objects.get(name=group_name, folder=app_ready)
     user.folder = group.folder
     user.save()
@@ -46,7 +46,7 @@ def _global_group_client(email, group_name, app_ready):
 
 @pytest.fixture
 def norole_client(app_ready):
-    user = User.objects.create_user("norole@dora.test", is_published=True)
+    user = User.objects.create_user("norole@dora.test")
     user.folder = app_ready
     user.save()
     return _client(user)
@@ -64,7 +64,7 @@ def global_reader_client(app_ready):
 
 @pytest.fixture
 def domain_analyst_client(app_ready, victim_folder):
-    user = User.objects.create_user("analyst@dora.test", is_published=True)
+    user = User.objects.create_user("analyst@dora.test")
     user.folder = app_ready
     user.save()
     group = UserGroup.objects.create(name="domain-analysts", folder=victim_folder)

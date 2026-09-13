@@ -71,7 +71,6 @@ class TestGenericAutocomplete:
         Threat.objects.create(
             name="Published threat",
             folder=Folder.get_root_folder(),
-            is_published=True,
         )
         scoped_client, _, _ = EndpointTestsUtils.get_test_client_and_folder(
             authenticated_client, "BI-UG-AUD", "test"

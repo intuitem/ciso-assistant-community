@@ -35,6 +35,7 @@
   * [Incidents](concepts/incidents.md)
   * [Workflows](concepts/workflows.md)
 * Governance
+  * [Quick forms and requests](concepts/quick-forms.md)
   * [Policies](concepts/policies.md)
   * [Documents](concepts/documents.md)
   * [Findings binders](concepts/findings-assessments.md)
@@ -133,6 +134,7 @@
   * [Creating your first audit](guides/first-audit.md)
   * [Creating your first risk assessment](guides/first-risk-assessment.md)
   * [Building your first workflow](guides/first-workflow.md)
+  * [Filing and deciding your first request](guides/first-quick-form.md)
 * Assessments
   * [Basic audit](guides/basic-audit.md)
   * [Customize your audit](guides/customize-audit.md)

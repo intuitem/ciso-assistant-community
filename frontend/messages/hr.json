@@ -874,6 +874,8 @@
 	"addRepresentative": "Dodaj predstavnika",
 	"phone": "Telefon",
 	"role": "Uloga",
+	"defaultRole": "Zadana uloga",
+	"defaultRoleHelpText": "Uloga koja se automatski dodjeljuje na ovoj domeni svakom korisniku s dodjelom uloge na jednoj od njezinih poddomena.",
 	"questions": "Pitanja",
 	"recipientEntity": "Primajući entitet",
 	"financial": "Financijska",

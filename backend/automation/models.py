@@ -18,7 +18,7 @@ from core.models import (
     Framework,
     RequirementNode,
 )
-from iam.models import User
+from iam.models import Folder, User
 
 
 class PostureAssessment(Assessment):
@@ -162,6 +162,8 @@ class PostureRun(AbstractBaseModel):
         validators=[validate_file_size, validate_file_name],
     )
 
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
     class Meta:
         verbose_name = _("Posture run")
         verbose_name_plural = _("Posture runs")
@@ -204,6 +206,8 @@ class PostureResult(AbstractBaseModel):
     imported_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("Posture result")

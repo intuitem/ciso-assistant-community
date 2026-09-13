@@ -34,7 +34,7 @@ from core.dora import (
     DORA_REINTEGRATION_POSSIBILITY_CHOICES,
     DORA_DISCONTINUING_IMPACT_CHOICES,
 )
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin
 from iam.views import User
 
 from auditlog.registry import auditlog
@@ -44,7 +44,6 @@ class Entity(
     ActorSyncMixin,
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     """
@@ -245,6 +244,8 @@ class EntityAssessment(Assessment):
         verbose_name=_("Reference link"),
     )
 
+    IAM_SCOPE_FIELD = "entity"
+
     class Meta:
         verbose_name = _("Entity assessment")
         verbose_name_plural = _("Entity assessments")
@@ -272,6 +273,8 @@ class Representative(AbstractBaseModel, FilteringLabelMixin):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     fields_to_check = ["email"]
+
+    IAM_SCOPE_FIELD = "entity"
 
 
 class Solution(NameDescriptionMixin, FilteringLabelMixin):
@@ -405,6 +408,8 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
 
     fields_to_check = ["name", "provider_entity"]
 
+    IAM_SCOPE_FIELD = "provider_entity"
+
     class Meta:
         verbose_name = _("Solution")
         verbose_name_plural = _("Solutions")
@@ -453,6 +458,8 @@ class SolutionSubcontractor(AbstractBaseModel):
         null=True,
         blank=True,
     )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("Solution subcontractor")

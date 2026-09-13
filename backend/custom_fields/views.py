@@ -41,15 +41,17 @@ class CustomFieldDefinitionViewSet(BaseModelViewSet):
 
         # ?for_folder=<id> returns the definitions that apply to objects in that
         # folder: global ones plus those owned by an ancestor-or-self folder.
-        for_folder = params.get("for_folder")
-        if for_folder:
-            try:
-                folder = Folder.objects.filter(pk=for_folder).first()
-            except ValueError, ValidationError:
-                return queryset.none()
+        # An empty value means "no folder chosen yet" and returns global ones only.
+        if "for_folder" in params:
+            for_folder = params.get("for_folder")
             folder_ids = {Folder.get_root_folder_id()}
-            if folder is not None:
-                folder_ids |= CustomFieldDefinition._ancestor_or_self_ids(folder)
+            if for_folder:
+                try:
+                    folder = Folder.objects.filter(pk=for_folder).first()
+                except ValueError, ValidationError:
+                    return queryset.none()
+                if folder is not None:
+                    folder_ids |= CustomFieldDefinition._ancestor_or_self_ids(folder)
             queryset = queryset.filter(folder_id__in=folder_ids)
 
         return queryset.prefetch_related("choices")

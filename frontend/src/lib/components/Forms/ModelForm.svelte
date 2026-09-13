@@ -13,6 +13,8 @@
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
 	import ThreatForm from './ModelForm/ThreatForm.svelte';
 	import SecurityAdvisoryForm from './ModelForm/SecurityAdvisoryForm.svelte';
+	import QuickFormResponseForm from './ModelForm/QuickFormResponseForm.svelte';
+	import QuickFormPublicationForm from './ModelForm/QuickFormPublicationForm.svelte';
 	import CWEForm from './ModelForm/CWEForm.svelte';
 	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
@@ -455,7 +457,7 @@
 				data-focusindex="1"
 			/>
 		{/if}
-		{#if shape.folder && !customFolder && !['validation-flows', 'findings', 'entity-assessments'].includes(URLModel)}
+		{#if shape.folder && !customFolder && !['validation-flows', 'findings', 'entity-assessments', 'quick-form-publications'].includes(URLModel)}
 			{#key folderKey}
 				<FolderTreeSelect
 					{form}
@@ -839,6 +841,26 @@
 			/>
 		{:else if URLModel === 'operational-scenarios'}
 			<OperationalScenarioForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{context}
+				{object}
+				{...rest}
+			/>
+		{:else if URLModel === 'quick-form-publications'}
+			<QuickFormPublicationForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{...rest}
+			/>
+		{:else if URLModel === 'quick-form-responses'}
+			<QuickFormResponseForm
 				{form}
 				{model}
 				{cacheLocks}

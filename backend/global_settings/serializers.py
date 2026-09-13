@@ -310,7 +310,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GlobalSettings
-        exclude = ["is_published", "folder"]
+        exclude = ["folder"]
         read_only_fields = ["name"]
 
 
@@ -422,6 +422,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     auditee_mode = serializers.BooleanField(
         source="value.auditee_mode", required=False, default=True
     )
+    quick_forms = serializers.BooleanField(
+        source="value.quick_forms", required=False, default=False
+    )
     advanced_analytics = serializers.BooleanField(
         source="value.advanced_analytics", required=False, default=True
     )
@@ -470,7 +473,6 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "name",
             "value",
             "folder",
-            "is_published",
         ]
         read_only_fields = ["name"]
 
@@ -564,7 +566,6 @@ class VulnerabilitySlaSerializer(serializers.ModelSerializer):
             "name",
             "value",
             "folder",
-            "is_published",
         ]
         read_only_fields = ["name"]
 
@@ -626,7 +627,6 @@ class InfraConfigSerializer(serializers.ModelSerializer):
             "name",
             "value",
             "folder",
-            "is_published",
         ]
         read_only_fields = ["name"]
 
@@ -715,7 +715,6 @@ class SecIntelFeedsSerializer(serializers.ModelSerializer):
             "name",
             "value",
             "folder",
-            "is_published",
         ]
         read_only_fields = ["name"]
 
