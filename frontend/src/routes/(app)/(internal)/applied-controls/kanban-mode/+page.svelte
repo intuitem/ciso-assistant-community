@@ -62,6 +62,9 @@
 
 	let loadedFolders: Set<string> = $state(new Set(data.preloaded ? Object.keys(laneStats) : []));
 	let loadingFolders: Set<string> = $state(new Set());
+	// Lanes whose fetch failed: without this a failed lane is indistinguishable
+	// from an empty one and has no way back except collapsing and reopening.
+	let failedFolders: Set<string> = $state(new Set());
 
 	// Fetch the cards for lanes the budget opened. Sequential: these are one
 	// user's page load, not a reason to open several backend slots at once.
@@ -107,8 +110,12 @@
 				...(body.results ?? []).filter((row: any) => !known.has(row.id))
 			];
 			loadedFolders = new Set(loadedFolders).add(folderId);
+			const cleared = new Set(failedFolders);
+			cleared.delete(folderId);
+			failedFolders = cleared;
 		} catch (error) {
 			console.error('Error loading swimlane:', error);
+			failedFolders = new Set(failedFolders).add(folderId);
 		} finally {
 			const next = new Set(loadingFolders);
 			next.delete(folderId);
@@ -136,8 +143,12 @@
 				...(body.results ?? []).filter((row: any) => !known.has(row.id))
 			];
 			loadedFolders = new Set([...loadedFolders, ...folderIds]);
+			const cleared = new Set(failedFolders);
+			for (const folderId of folderIds) cleared.delete(folderId);
+			failedFolders = cleared;
 		} catch (error) {
 			console.error('Error loading swimlanes:', error);
+			failedFolders = new Set([...failedFolders, ...folderIds]);
 		} finally {
 			const next = new Set(loadingFolders);
 			for (const folderId of folderIds) next.delete(folderId);
@@ -822,6 +833,22 @@
 										<i class="fa-solid fa-spinner fa-spin mr-2"></i>
 									{/if}
 									{loadedCountForFolder(folder.id)} / {lane.count}
+								</button>
+							</div>
+						{:else if failedFolders.has(folder.id)}
+							<div class="flex pl-48">
+								<button
+									type="button"
+									class="btn preset-tonal-error text-xs my-1"
+									disabled={loadingFolders.has(folder.id)}
+									onclick={() => loadFolderPage(folder.id, loadedCountForFolder(folder.id))}
+								>
+									{#if loadingFolders.has(folder.id)}
+										<i class="fa-solid fa-spinner fa-spin mr-2"></i>
+									{:else}
+										<i class="fa-solid fa-triangle-exclamation mr-2"></i>
+									{/if}
+									{m.retry()}
 								</button>
 							</div>
 						{/if}

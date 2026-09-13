@@ -1,7 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getSecureRedirect } from '$lib/utils/helpers';
 import type { PageServerLoad } from './$types';
-import type { Actions } from '@sveltejs/kit';
+import { error, type Actions } from '@sveltejs/kit';
 
 // Swimlane cards are fetched per folder as the user opens them. Below this many
 // matching controls the whole board fits in one request, so it is loaded up
@@ -29,10 +29,11 @@ export const load = (async ({ fetch, url }) => {
 	// One aggregate query gives every swimlane and its true per-status totals, so
 	// the board can render truthful headers without holding a card per row.
 	const countsResponse = await fetch(`${endpoint}counts_per_folder/?${filterQuery}`);
+	// Falling back to zero swimlanes here would render a failure as an empty board.
 	if (!countsResponse.ok) {
-		console.error('Failed to load kanban counts:', countsResponse.status);
+		throw error(countsResponse.status, 'Failed to load kanban counts');
 	}
-	const counts = countsResponse.ok ? await countsResponse.json() : { results: [], total: 0 };
+	const counts = await countsResponse.json();
 
 	let applied_controls: Record<string, any>[] = [];
 	let preloaded = false;
