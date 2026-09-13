@@ -2,6 +2,7 @@ import { BASE_API_URL, DEFAULT_LANGUAGE } from '$lib/utils/constants';
 import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
 import type { User } from '$lib/utils/types';
 import {
+	error,
 	redirect,
 	type Handle,
 	type HandleFetch,
@@ -228,7 +229,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			});
 			if (!generalSettings.ok) {
 				logger.error('Error fetching general settings', { status: generalSettings.status });
-				return undefined;
+				error(503, 'Settings unavailable');
 			}
 			event.locals.settings = await generalSettings.json();
 			setUseRiskCategoryLabel(event.locals.settings?.use_risk_category_label);
@@ -298,13 +299,10 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 			request.headers.append('Authorization', `Token ${token}`);
 		}
 
-		// Inject focus folder ID header from cookie
+		// FocusModeMiddleware re-checks the flag and drops the header when it is off,
+		// so gating here would only cost a feature-flag round-trip per proxied call.
 		const focusFolderId = event.cookies.get('focus_folder_id');
-		// Duplicates FocusModeMiddleware's own flag check, at one round-trip per request.
-		const focusModeEnabled = focusFolderId
-			? ((await event.locals.getFeatureFlags())?.focus_mode ?? false)
-			: false;
-		if (focusFolderId && focusModeEnabled) {
+		if (focusFolderId) {
 			request.headers.set('X-Focus-Folder-Id', focusFolderId);
 		}
 		if (unsafeMethods.has(request.method) && csrfToken) {

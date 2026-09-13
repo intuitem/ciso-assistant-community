@@ -154,6 +154,9 @@ export const loadDetail = async ({ event, model, id }) => {
 			event.locals.getFeatureFlags(),
 			event.locals.getUser()
 		]);
+		// The (app) layout redirect runs concurrently with this load, so it cannot be
+		// relied on to have happened before the folder-permission filter reads `user`.
+		if (!user) throw redirect(302, `/login?next=${event.url.pathname}`);
 		await Promise.all(
 			model.reverseForeignKeyFields
 				// Flag from the reverse FK when it declares one, else from the model.
