@@ -34,11 +34,8 @@
 		scrollTarget?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 	};
 
-	let currentEndpoint: string | null = $state(null);
-
 	afterNavigate(() => {
-		if (!page.url || page.url.pathname === currentEndpoint) return;
-		currentEndpoint = page.url.pathname;
+		if (!page.url) return;
 
 		const parsed = parseInt(page.url.searchParams.get('page') ?? '1');
 		const newPageNumber = Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
