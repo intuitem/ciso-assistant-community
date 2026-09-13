@@ -8901,6 +8901,9 @@ class FolderViewSet(BaseModelViewSet):
         """
         Helper method to aggregate quality checks for a queryset of folders.
         Enforces RBAC for both folders and assessments.
+
+        Objects are reduced to the reference the X-rays page links on: the full
+        read serializers cost about twenty queries each for two fields.
         """
         # Get viewable assessment IDs for proper RBAC
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
@@ -8910,7 +8913,7 @@ class FolderViewSet(BaseModelViewSet):
 
         res = {
             str(f.id): {
-                "folder": FolderReadSerializer(f).data,
+                "folder": {"id": f.id, "name": f.name},
                 "compliance_assessments": {"objects": {}},
                 "risk_assessments": {"objects": {}},
             }
@@ -8919,30 +8922,48 @@ class FolderViewSet(BaseModelViewSet):
         for ca in ComplianceAssessment.objects.filter(
             folder__in=folders, id__in=viewable_ca_ids
         ):
-            res[str(ca.folder.id)]["compliance_assessments"]["objects"][str(ca.id)] = {
-                "object": ComplianceAssessmentReadSerializer(ca).data,
+            res[str(ca.folder_id)]["compliance_assessments"]["objects"][str(ca.id)] = {
+                "object": {"id": ca.id, "name": ca.name},
                 "quality_check": ca.quality_check(),
             }
         for ra in RiskAssessment.objects.filter(
             folder__in=folders, id__in=viewable_ra_ids
         ):
-            res[str(ra.folder.id)]["risk_assessments"]["objects"][str(ra.id)] = {
-                "object": RiskAssessmentReadSerializer(ra).data,
+            res[str(ra.folder_id)]["risk_assessments"]["objects"][str(ra.id)] = {
+                "object": {"id": ra.id, "name": ra.name},
                 "quality_check": ra.quality_check(),
             }
         return res
+
+    @staticmethod
+    def _has_findings(folder_entry) -> bool:
+        return any(
+            assessment["quality_check"]["count"]
+            for group in ("compliance_assessments", "risk_assessments")
+            for assessment in folder_entry[group]["objects"].values()
+        )
 
     @action(detail=False, methods=["get"])
     def quality_check(self, request):
         """
         Returns the quality check of assessments grouped by folder.
+
+        Folders without a single finding are left out: they render as empty
+        cards and, on large instances, make up most of the response.
         """
         viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
         folders = Folder.objects.filter(id__in=viewable_objects).exclude(
             content_type=Folder.ContentType.ROOT
         )
+        results = self._get_quality_checks_for_folders(folders, request.user)
         return Response(
-            {"results": self._get_quality_checks_for_folders(folders, request.user)}
+            {
+                "results": {
+                    folder_id: entry
+                    for folder_id, entry in results.items()
+                    if self._has_findings(entry)
+                }
+            }
         )
 
     @action(detail=True, methods=["get"], url_path="quality_check")

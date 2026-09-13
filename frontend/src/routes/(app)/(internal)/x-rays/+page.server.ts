@@ -3,15 +3,14 @@ import { m } from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
 
 const getQualityCheckData = async (fetch: any) => {
-	try {
-		const endpoint = `${BASE_API_URL}/folders/quality_check/`;
-		const res = await fetch(endpoint);
-		const json = await res.json();
-		return json.results;
-	} catch (error) {
-		console.error('Failed to fetch quality check data:', error);
-		return null;
+	const endpoint = `${BASE_API_URL}/folders/quality_check/`;
+	const res = await fetch(endpoint);
+	if (!res.ok) {
+		console.error('Failed to fetch quality check data:', res.status, res.statusText);
+		throw new Error(`${res.status} ${res.statusText}`);
 	}
+	const json = await res.json();
+	return json.results;
 };
 
 export const load = (async ({ fetch }) => {
