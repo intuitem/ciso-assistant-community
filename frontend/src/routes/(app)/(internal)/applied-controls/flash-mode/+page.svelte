@@ -11,13 +11,55 @@
 
 	let { data }: Props = $props();
 
-	// Filter applied controls that have name or description
-	const appliedControls = data.applied_controls.filter(
-		(control) => control.name || control.description
-	);
+	const pageSize = data.pageSize;
+	const total = $derived(data.count);
+
+	function indexRows(list: Record<string, any>[], offset = 0) {
+		const indexed: Record<number, Record<string, any>> = {};
+		list.forEach((row, i) => (indexed[offset + i] = row));
+		return indexed;
+	}
+
+	// Rows keyed by absolute index rather than a dense array: a jump can land on
+	// any page, so what is loaded is a sparse set of pages, not a prefix.
+	let rows: Record<number, Record<string, any>> = $state(indexRows(data.applied_controls));
+	let loadedPages = new Set<number>([0]);
+	let isLoading = $state(false);
 
 	let currentIndex = $state(0);
-	let currentAppliedControl = $derived(appliedControls[currentIndex]);
+	let currentAppliedControl = $derived(rows[currentIndex]);
+
+	async function ensureLoaded(index: number) {
+		if (index < 0 || index >= total || rows[index] !== undefined) return;
+		const pageStart = Math.floor(index / pageSize) * pageSize;
+		if (loadedPages.has(pageStart)) return;
+		loadedPages.add(pageStart);
+		isLoading = true;
+		try {
+			const params = new URLSearchParams(data.filterQuery);
+			params.set('offset', String(pageStart));
+			params.set('limit', String(pageSize));
+			const response = await fetch(`/${data.URLModel}?${params.toString()}`);
+			if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+			const body = await response.json();
+			rows = { ...rows, ...indexRows(body.results ?? [], pageStart) };
+		} catch (error) {
+			// Drop the marker so the next visit to this page retries.
+			loadedPages.delete(pageStart);
+			console.error('Error loading applied controls page:', error);
+		} finally {
+			isLoading = false;
+		}
+	}
+
+	async function goTo(index: number) {
+		if (total === 0) return;
+		const wrapped = ((index % total) + total) % total;
+		currentIndex = wrapped;
+		await ensureLoaded(wrapped);
+		// Warm the next row so a linear walk never waits at a page boundary.
+		if (wrapped + 1 < total) void ensureLoaded(wrapped + 1);
+	}
 
 	// Static options like compliance assessment flash mode
 	const statusOptions = [
@@ -78,20 +120,12 @@
 
 	// Function to handle the "Next" button click
 	function nextItem() {
-		if (currentIndex < appliedControls.length - 1) {
-			currentIndex += 1;
-		} else {
-			currentIndex = 0;
-		}
+		void goTo(currentIndex + 1);
 	}
 
 	// Function to handle the "Back" button click
 	function previousItem() {
-		if (currentIndex > 0) {
-			currentIndex -= 1;
-		} else {
-			currentIndex = appliedControls.length - 1;
-		}
+		void goTo(currentIndex - 1);
 	}
 
 	// Function to update a field of the current item
@@ -129,8 +163,8 @@
 	}
 
 	function jumpToItem(index: number) {
-		if (index >= 0 && index < appliedControls.length) {
-			currentIndex = index;
+		if (index >= 0 && index < total) {
+			void goTo(index);
 			showNavigation = false;
 			jumpToInput = '';
 		}
@@ -203,7 +237,7 @@
 						onclick={() => (showNavigation = !showNavigation)}
 						title="Click to jump to specific item (or press G)"
 					>
-						<span>{currentIndex + 1}/{appliedControls.length}</span>
+						<span>{currentIndex + 1}/{total}</span>
 						<i class="fa-solid fa-chevron-down text-xs opacity-60"></i>
 						<span class="text-xs opacity-60">(G)</span>
 					</button>
@@ -220,7 +254,7 @@
 										bind:value={jumpToInput}
 										type="number"
 										min="1"
-										max={appliedControls.length}
+										max={total}
 										placeholder="Item number"
 										class="flex-1 px-2 py-1 border border-surface-300-700 rounded text-sm"
 										onkeydown={(e) => {
@@ -392,6 +426,10 @@
 						<span class="text-xs opacity-75">(L)</span>
 					</button>
 				</div>
+			</div>
+		{:else if isLoading}
+			<div class="flex flex-1 items-center justify-center">
+				<i class="fa-solid fa-spinner fa-spin text-2xl text-surface-500"></i>
 			</div>
 		{/if}
 	</div>
