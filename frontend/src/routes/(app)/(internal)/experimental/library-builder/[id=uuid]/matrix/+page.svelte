@@ -67,7 +67,7 @@
 	let activeLang = $state(baseLang);
 	let addedLanguages: string[] = $state([]);
 	let metaTranslations: Record<string, { name?: string; description?: string }> = $state({
-		...(matrix.translations ?? {})
+		...matrix.translations
 	});
 	let isTranslatingMeta = $derived(activeLang !== baseLang);
 
