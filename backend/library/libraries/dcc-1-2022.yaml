@@ -1,0 +1,896 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:dcc-1-2022
+locale: en
+ref_id: dcc-1-2022
+name: Data Cybersecurity Controls (DCC-1:2022)
+description: 'NCA Data Cybersecurity Controls (DCC-1:2022), an extension of the Essential
+  Cybersecurity Controls (ECC) focused on protecting data across its lifecycle. 3
+  main domains / 11 subdomains / 19 main controls / 47 subcontrols. Controls apply
+  to four data classification levels (Public, Confidential, Secret, Top Secret), modelled
+  here as implementation groups. Source: https://cdn.nca.gov.sa/api/public/cms/files/1c2cfb9c-7788-4549-9f29-f337500f1787_Data-Cybersecurity-Controls-.pdf'
+copyright: "\xA9 NCA"
+version: 1
+publication_date: 2026-06-23
+provider: NCA
+packager: community
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:dcc-1-2022
+    ref_id: dcc-1-2022
+    name: Data Cybersecurity Controls (DCC-1:2022)
+    description: 'NCA Data Cybersecurity Controls (DCC-1:2022), an extension of the
+      Essential Cybersecurity Controls (ECC) focused on protecting data across its
+      lifecycle. 3 main domains / 11 subdomains / 19 main controls / 47 subcontrols.
+      Controls apply to four data classification levels (Public, Confidential, Secret,
+      Top Secret), modelled here as implementation groups. Source: https://cdn.nca.gov.sa/api/public/cms/files/1c2cfb9c-7788-4549-9f29-f337500f1787_Data-Cybersecurity-Controls-.pdf'
+    implementation_groups_definition:
+    - ref_id: public
+      name: Public
+      description: Controls applicable to data classified as Public under the NCA
+        data classification model.
+    - ref_id: confidential
+      name: Confidential
+      description: Controls applicable to data classified as Confidential under the
+        NCA data classification model.
+    - ref_id: secret
+      name: Secret
+      description: Controls applicable to data classified as Secret under the NCA
+        data classification model.
+    - ref_id: top-secret
+      name: Top Secret
+      description: Controls applicable to data classified as Top Secret under the
+        NCA data classification model.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Cybersecurity Governance
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1
+      ref_id: 1-1
+      name: Periodical Cybersecurity Review and Audit
+      description: To ensure that cybersecurity controls are implemented and in compliance
+        with organizational policies and procedures, as well as related national and
+        international laws, regulations and agreements.
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-1
+      ref_id: 1-1-1
+      description: With reference to ECC control 1-8-1, the cybersecurity function
+        in the organization must review the implementation of the Data Cybersecurity
+        Controls as specified for each data classification level.
+      annotation: 'Review frequency: at least annually for all classification levels.'
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-1
+      ref_id: 1-1-2
+      description: With reference to ECC control 1-8-2, cybersecurity review and audit
+        must be conducted periodically by independent parties outside the organization's
+        cybersecurity function as specified for each data classification level.
+      annotation: 'Review frequency:
+
+        * **Public** and **Confidential** at least every 2 years
+
+        * **Secret** and **Top Secret** at least annually'
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1
+      ref_id: 1-2
+      name: Cybersecurity in Human Resources
+      description: To ensure that cybersecurity risks and requirements related to
+        personnel (employees and contractors) are managed efficiently prior to employment,
+        during employment and after termination/separation as per organizational policies
+        and procedures, and related laws and regulations.
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-2-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-2
+      ref_id: 1-2-1
+      description: 'In addition to the subcontrols in the ECC control 1-9-3, cybersecurity
+        requirements in human resources prior to employment, during employment and
+        after termination/separation must include at least the following:'
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-2-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-2-1
+      ref_id: 1-2-1-1
+      description: Screening and vetting candidates in jobs related to data handling.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-2-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-2-1
+      ref_id: 1-2-1-2
+      description: A signed agreement by personnel pledging to not use social media,
+        communication applications or personal cloud storage to create, store or share
+        the organization's data, with the exception of secure communication applications
+        approved by relevant authorities.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1
+      ref_id: 1-3
+      name: Cybersecurity Awareness and Training Program
+      description: To ensure that personnel are aware of their cybersecurity responsibilities
+        and have the required cybersecurity awareness. It is also to ensure that personnel
+        are provided with the required cybersecurity training, skills and credentials
+        needed to accomplish their cybersecurity responsibilities and to protect the
+        organization's information and technology assets.
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3
+      ref_id: 1-3-1
+      description: 'In addition to the subcontrols in ECC control 1-10-3, the cybersecurity
+        awareness program must cover topics related to data protection, including
+        the following:'
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1
+      ref_id: 1-3-1-1
+      description: Risks of data leakage and unauthorized access to data during its
+        lifecycle.
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1
+      ref_id: 1-3-1-2
+      description: Secure handling of classified data while traveling and outside
+        the workplace.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1
+      ref_id: 1-3-1-3
+      description: Secure handling of data during meetings (virtual and in-person).
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1
+      ref_id: 1-3-1-4
+      description: Secure use of printers, scanners and copy machines.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1
+      ref_id: 1-3-1-5
+      description: Procedures for secure data disposal.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1
+      ref_id: 1-3-1-6
+      description: Risks of sharing documents and information through non-secure channels.
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1-7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-3-1
+      ref_id: 1-3-1-7
+      description: Cybersecurity risks related to the use of external storage media.
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Cybersecurity Defense
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2
+      ref_id: 2-1
+      name: Identity and Access Management
+      description: To ensure the secure and restricted logical access to information
+        and technology assets in order to prevent unauthorized access and allow only
+        authorized access for users which are necessary to accomplish assigned tasks.
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-1-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-1
+      ref_id: 2-1-1
+      description: 'In addition to the subcontrols in ECC control 2-2-3, cybersecurity
+        requirements for identity and access management must cover at least the following:'
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-1-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-1-1
+      ref_id: 2-1-1-1
+      description: Strict restriction to allow only the minimum number of personnel
+        accessing, viewing and sharing data based on lists of privileges limited to
+        Saudi national employees unless exempted by the Authorizing Official (the
+        head of the organization or his/her delegate) and those lists are approved
+        by the Authorizing Official.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-1-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-1-1
+      ref_id: 2-1-1-2
+      description: Prohibiting the sharing of approved lists of privileges with unauthorized
+        persons.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-1
+      ref_id: 2-1-2
+      description: Managing identities and access rights to view data using Privileged
+        Access Management systems.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-1
+      ref_id: 2-1-3
+      description: In addition to ECC subcontrol 2-2-3-5, the approved lists of privileges
+        and privileges used to handle data must be reviewed as specified for each
+        data classification level.
+      annotation: 'Review frequency:
+
+        * **Public** and **Confidential** at least annually
+
+        * **Secret** and **Top Secret** at least every 3 months'
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2
+      ref_id: 2-2
+      name: Information System and Information Processing Facilities Protection
+      description: To ensure the protection of information systems and information
+        processing facilities (including workstations and infrastructures) against
+        cyber risks.
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2
+      ref_id: 2-2-1
+      description: 'In addition to the subcontrols in ECC control 2-3-3, cybersecurity
+        requirements for Information System and Information Processing Facilities
+        Protection must include at least the following:'
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2-1
+      ref_id: 2-2-1-1
+      description: Applying security patches and updates from the time of announcement
+        on systems used to handle data as specified for each data classification level.
+      annotation: 'Frequency:
+
+        * **Public** and **Confidential** at least every month
+
+        * **Secret** and **Top Secret** immediately'
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2-1
+      ref_id: 2-2-1-2
+      description: Reviewing the security configuration and hardening of systems used
+        to handle data as specified for each data classification level.
+      annotation: 'Frequency:
+
+        * **Public** and **Confidential** at least annually
+
+        * **Secret** and **Top Secret** at least every 6 months'
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2-1
+      ref_id: 2-2-1-3
+      description: Reviewing and hardening the default configuration (e.g., default
+        passwords and backgrounds) of the technology assets used to handle the data.
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2-1
+      ref_id: 2-2-1-4
+      description: Disabling the Print Screen or Screen Capture features on the devices
+        that create or process documents.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2
+      ref_id: 2-3
+      name: Mobile Devices Security
+      description: To ensure the protection of mobile devices (including laptops,
+        smartphones, tablets) from cyber risks and to ensure the secure handling of
+        the organization's information (including sensitive information) while utilizing
+        Bring Your Own Device (BYOD) policy.
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-3-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-3
+      ref_id: 2-3-1
+      description: 'In addition to the subcontrols in ECC control 2-6-3, cybersecurity
+        requirements for mobile devices must cover at least the following:'
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-3-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-3-1
+      ref_id: 2-3-1-1
+      description: Centrally managing the organization's owned mobile devices using
+        Mobile Device Management (MDM) system and activating the remote wipe feature.
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-3-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-3-1
+      ref_id: 2-3-1-2
+      description: Centrally managing BYOD devices using Mobile Device Management
+        (MDM) system and activating the remote wipe feature.
+      annotation: 'Applicability by classification level: for **Secret** and **Top
+        Secret** the use of BYOD devices is prohibited.'
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2
+      ref_id: 2-4
+      name: Data and Information Protection
+      description: To ensure the confidentiality, integrity and availability of organization's
+        data and information as per organizational policies and procedures, and related
+        laws and regulations.
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-4-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-4
+      ref_id: 2-4-1
+      description: 'In addition to ECC control 2-7-3, cybersecurity requirements for
+        data and information protection must cover at least the following:'
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-4-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-4-1
+      ref_id: 2-4-1-1
+      description: Using Watermark feature to label the whole document when creating,
+        storing, printing, on the screen and on each copy so that the symbol can be
+        traced to the user or device level.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-4-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-4-1
+      ref_id: 2-4-1-2
+      description: Using Data Leakage Prevention technologies and Rights Management
+        technologies.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-4-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-4-1
+      ref_id: 2-4-1-3
+      description: Prohibiting the use of data in any environment other than the production
+        environment, except after conducting a risk assessment and applying controls
+        to protect that data, such as data masking or data scrambling techniques.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-4-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-4-1
+      ref_id: 2-4-1-4
+      description: Using brand protection service to protect the organization's identity
+        from impersonation.
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2
+      ref_id: 2-5
+      name: Cryptography
+      description: To ensure the proper and efficient use of cryptography to protect
+        information assets as per organizational policies and procedures, and related
+        laws and regulations.
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-5-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-5
+      ref_id: 2-5-1
+      description: 'In addition to the subcontrols in ECC control 2-8-3, cybersecurity
+        requirements for cryptography must cover at least the following:'
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-5-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-5-1
+      ref_id: 2-5-1-1
+      description: Using secure and up-to-date cryptographic methods and algorithms
+        when creating, storing, transmitting data, and for overall network communication
+        medium; as per the requirements of the "advanced level" in the National Cryptographic
+        Standards (NCS-1:2020).
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-5-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-5-1
+      ref_id: 2-5-1-2
+      description: Using secure and up-to-date cryptographic methods and algorithms
+        when creating, storing, transmitting data, and for overall network communication
+        medium; as per the requirements of the "moderate level" in the National Cryptographic
+        Standards (NCS-1:2020).
+      implementation_groups:
+      - confidential
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2
+      ref_id: 2-6
+      name: Secure Data Disposal
+      description: To ensure a secure data disposal as per organizational policies
+        and procedures, and related laws and regulations.
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6
+      ref_id: 2-6-1
+      description: 'Cybersecurity requirements for secure data disposal must cover
+        at least the following:'
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6-1
+      ref_id: 2-6-1-1
+      description: Identification of technologies, tools and procedures for the implementation
+        of secure data disposal according to the data classification level.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6-1
+      ref_id: 2-6-1-2
+      description: When storage media is no longer needed, it must be securely disposed
+        by using the technologies, tools and procedures identified in subcontrol 2-6-1-1.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6-1
+      ref_id: 2-6-1-3
+      description: When storage media needs to be re-used, data must be securely erased
+        (secure erasure) in a manner it cannot be recovered.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6-1
+      ref_id: 2-6-1-4
+      description: Implementation of secure data disposal or erasure operations referred
+        to in sub-controls 2-6-1-2 and 2-6-1-3 must be verified.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6-1
+      ref_id: 2-6-1-5
+      description: Keeping a record of all secure data disposal and erasure operations
+        that have been conducted.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6
+      ref_id: 2-6-2
+      description: The implementation of the secure data disposal requirements must
+        be reviewed as specified for each data classification level.
+      annotation: 'Review frequency:
+
+        * **Public** and **Confidential** at least annually
+
+        * **Secret** and **Top Secret** at least every 6 months'
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2
+      ref_id: 2-7
+      name: Cybersecurity for Printers, Scanners and Copy Machines
+      description: To ensure secure handling of data when using Printers, Scanners
+        and Copy Machines.
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7
+      ref_id: 2-7-1
+      description: Cybersecurity requirements for protecting printers, scanners and
+        copy machines must be defined, documented and approved.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7
+      ref_id: 2-7-2
+      description: Cybersecurity requirements for printers, scanners and copy machines
+        must be implemented.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7
+      ref_id: 2-7-3
+      description: 'Cybersecurity requirements for printers, scanners and copy machines
+        must cover at least the following:'
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-3-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-3
+      ref_id: 2-7-3-1
+      description: Disabling the temporary storage feature.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-3-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-3
+      ref_id: 2-7-3-2
+      description: Enabling authentication on centralized printers, scanners and copy
+        machines and requiring it before usage.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-3-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-3
+      ref_id: 2-7-3-3
+      description: Securely retaining (for a period not less than 12 months) logs
+        of printers, scanners and copy machines usage.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-3-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-3
+      ref_id: 2-7-3-4
+      description: Enabling and protecting CCTV logs which are used to monitor centralized
+        printers, scanners and copy machines areas.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-3-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-3
+      ref_id: 2-7-3-5
+      description: Using cross-shredding devices, to securely dispose documents when
+        no longer needed.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7
+      ref_id: 2-7-4
+      description: Implementation of cybersecurity requirements for printers, scanners
+        and copy machines must be reviewed as specified for each data classification
+        level.
+      annotation: 'Review frequency:
+
+        * **Public** and **Confidential** at least every 3 years
+
+        * **Secret** and **Top Secret** at least annually'
+      implementation_groups:
+      - public
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Third-Party and Cloud Computing Cybersecurity
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3
+      ref_id: 3-1
+      name: Third-Party Cybersecurity
+      description: To ensure the protection of assets against the cybersecurity risks
+        related to third parties including outsourcing, managed services, and consultancy
+        services as per organizational policies and procedures, and related laws and
+        regulations.
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1
+      ref_id: 3-1-1
+      description: 'In addition to the controls in ECC subdomain 4-1, cybersecurity
+        requirements for third-parties cybersecurity must include at least the following:'
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1
+      ref_id: 3-1-1-1
+      description: Screening or vetting third-party employees who have access to the
+        data.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1
+      ref_id: 3-1-1-2
+      description: Requiring contractual commitment by third-parties to securely dispose
+        the organization's data at the end of the contract or in case of contract
+        termination, including providing evidences of such disposal to the organization.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1
+      ref_id: 3-1-1-3
+      description: Documenting all data sharing operations within third-parties, including
+        data sharing justification.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1
+      ref_id: 3-1-1-4
+      description: When transferring data outside the kingdom, the capability of the
+        hosting organization abroad to safeguard data must be verified, approval of
+        the Authorizing Official must be obtained and complying with related laws
+        and regulations.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1
+      ref_id: 3-1-1-5
+      description: Requiring third-parties to notify the organization immediately
+        in case of cybersecurity incident that may affect data being shared or created.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-1
+      ref_id: 3-1-1-6
+      description: Reclassifying data to the least level to achieve the objective
+        before sharing it with third-parties using data masking or data scrambling
+        techniques.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1
+      ref_id: 3-1-2
+      description: 'In alignment with related laws and regulations, and in addition
+        to the applicable controls in ECC and controls within DCC domains (1), (2),
+        and (3), cybersecurity requirements when dealing with consultancy services
+        that work on high-sensitivity strategic projects at the national level must
+        cover at least the following:'
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2
+      ref_id: 3-1-2-1
+      description: Screening or vetting consultancy services employees who have access
+        to the data.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2
+      ref_id: 3-1-2-2
+      description: Requiring contractual commitment by consultancy services including
+        employees non-disclosure agreements and secure disposal the organization's
+        data at the end of the contract or in case of contract termination, including
+        providing evidences of such disposal to the organization.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2
+      ref_id: 3-1-2-3
+      description: Documenting all data sharing operations within consultancy services,
+        including data sharing justification.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2
+      ref_id: 3-1-2-4
+      description: Requiring consultancy services to notify the organization immediately
+        in case of cybersecurity incident that may affect data that has been shared
+        or created.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2
+      ref_id: 3-1-2-5
+      description: Reclassifying data to the least level to achieve the objective
+        before sharing it with consultancy services using data masking or data scrambling
+        techniques.
+      implementation_groups:
+      - confidential
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2
+      ref_id: 3-1-2-6
+      description: Dedicating a closed room for the consultancy services employees
+        to perform their work, in addition to providing dedicated organization owned
+        devices to share and process data.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2-7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2
+      ref_id: 3-1-2-7
+      description: Activating access control system to allow only authorized access
+        to the closed room.
+      implementation_groups:
+      - secret
+      - top-secret
+    - urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2-8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:3-1-2
+      ref_id: 3-1-2-8
+      description: Preventing carrying out of devices, storage media and documents
+        outside the closed room, as well as the entry of any other electronic devices.
+      implementation_groups:
+      - secret
+      - top-secret
