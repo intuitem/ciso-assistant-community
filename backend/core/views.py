@@ -15391,6 +15391,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
         requirement_assessment = self.get_object()
         audit = requirement_assessment.compliance_assessment
+        if audit.is_locked:
+            return Response(
+                {"error": "Cannot raise a finding on a locked audit"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         # `add_findingsassessment` on the audit's folder is what authorizes creating it.
         if not RoleAssignment.is_access_allowed(

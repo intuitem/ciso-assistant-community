@@ -4261,10 +4261,27 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             )
 
     def _check_findings_rebind(self, instance, findings):
-        """Binding or unbinding a finding edits the finding, not just the assessment."""
+        """Binding or unbinding a finding edits the finding, not just the assessment.
+
+        Runs inside update()'s transaction: the changed findings and their binders
+        are re-read under row locks, so a binder locked between validation and
+        the write is still refused and the rows cannot move under us.
+        """
         current = set(instance.findings.all())
-        for finding in current.symmetric_difference(findings):
-            if finding.is_locked:
+        changed_ids = [f.id for f in current.symmetric_difference(findings)]
+        if not changed_ids:
+            return
+        changed = list(Finding.objects.select_for_update().filter(id__in=changed_ids))
+        binder_ids = {
+            f.findings_assessment_id for f in changed if f.findings_assessment_id
+        }
+        locked_binders = set(
+            FindingsAssessment.objects.select_for_update()
+            .filter(id__in=binder_ids, is_locked=True)
+            .values_list("id", flat=True)
+        )
+        for finding in changed:
+            if finding.findings_assessment_id in locked_binders:
                 raise serializers.ValidationError(
                     {
                         "findings": "⚠️ Cannot bind or unbind a finding whose findings assessment is locked."

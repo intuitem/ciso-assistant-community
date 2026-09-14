@@ -91,6 +91,20 @@ class TestFindingsFromRequirements:
         )
         assert res.status_code == 403
 
+    def test_a_locked_audit_has_no_binder(self, setup, audit):
+        assessment, requirement_assessment = audit
+        set_flag(True)
+        assessment.is_locked = True
+        assessment.save()
+        res = setup["client"].post(
+            f"/api/requirement-assessments/{requirement_assessment.id}/findings-binder/"
+        )
+        assert res.status_code == 403
+        assert not FindingsAssessment.objects.filter(
+            compliance_assessment=assessment
+        ).exists()
+        set_flag(False)
+
     def test_the_binder_is_created_once_and_bound_to_the_audit(self, setup, audit):
         assessment, requirement_assessment = audit
         set_flag(True)
