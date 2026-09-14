@@ -45,6 +45,8 @@
 		apiTarget?: string | null;
 		/** Toolbar link overrides for non-live hosts (null preview hides the link) */
 		links?: { back?: string; preview?: string | null; exportYaml?: string } | null;
+		/** Framework tree (default) or quick form pages */
+		mode?: 'framework' | 'quick_form';
 	}
 
 	let {
@@ -53,16 +55,14 @@
 		questions,
 		editingDraft = null,
 		apiTarget = null,
-		links = null
+		links = null,
+		mode = 'framework'
 	}: Props = $props();
 
-	const builder = createBuilderState(
-		framework,
-		requirementNodes,
-		questions,
-		editingDraft,
-		apiTarget ? { apiTarget } : undefined
-	);
+	const builder = createBuilderState(framework, requirementNodes, questions, editingDraft, {
+		apiTarget: apiTarget ?? undefined,
+		mode
+	});
 	setBuilderContext(builder);
 	// Threats / reference controls pickable on nodes; hosts without the
 	// reference-catalog action leave the store errored and the UI hidden.
@@ -532,252 +532,256 @@
 								</p>
 							</div>
 
-							<!-- Scoring settings -->
-							<div class="space-y-1.5">
-								<button
-									type="button"
-									class="flex items-center gap-1.5 text-xs font-medium text-surface-600-400 uppercase tracking-wider hover:text-surface-700-300 transition-colors"
-									onclick={() => (showScoringSettings = !showScoringSettings)}
-								>
-									<i
-										class="fa-solid {showScoringSettings
-											? 'fa-chevron-down'
-											: 'fa-chevron-right'} text-[9px]"
-									></i>
-									{m.builderScoringSettings()}
-								</button>
-								{#if showScoringSettings}
-									<div
-										class="border border-surface-200-800 rounded-lg bg-surface-50-950/50 px-3 py-3 space-y-3"
+							{#if mode === 'framework'}
+								<!-- Scoring settings -->
+								<div class="space-y-1.5">
+									<button
+										type="button"
+										class="flex items-center gap-1.5 text-xs font-medium text-surface-600-400 uppercase tracking-wider hover:text-surface-700-300 transition-colors"
+										onclick={() => (showScoringSettings = !showScoringSettings)}
 									>
-										<div class="grid grid-cols-3 gap-3">
-											<label class="block">
-												<span class="text-xs text-surface-600-400">{m.minScore()}</span>
-												<input
-													type="number"
-													value={$frameworkStore.min_score}
-													class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-													onblur={(e) => {
-														builder.updateFramework({
-															min_score: parseInt(e.currentTarget.value) || 0
-														});
-													}}
-												/>
-											</label>
-											<label class="block">
-												<span class="text-xs text-surface-600-400">{m.maxScore()}</span>
-												<input
-													type="number"
-													value={$frameworkStore.max_score}
-													class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-													onblur={(e) => {
-														builder.updateFramework({
-															max_score: parseInt(e.currentTarget.value) || 100
-														});
-													}}
-												/>
-											</label>
-											<label class="block">
-												<span class="text-xs text-surface-600-400">{m.aggregation()}</span>
-												<select
-													value={getAggregation()}
-													class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-surface-50-950"
-													onchange={(e) => setAggregation(e.currentTarget.value)}
-												>
-													<option value="average">{m.average()}</option>
-													<option value="sum">{m.sum()}</option>
-												</select>
-											</label>
-										</div>
-										<p class="text-xs text-surface-500">
-											{m.builderAggregationHint()}
-										</p>
-
-										<!-- Scale entries editor -->
-										<div class="border-t border-surface-200-800 pt-3 space-y-2">
-											<button
-												type="button"
-												class="flex items-center gap-1.5 text-xs font-medium text-surface-600-400 hover:text-surface-700-300 transition-colors"
-												onclick={() => (showScalesEditor = !showScalesEditor)}
-											>
-												<i
-													class="fa-solid {showScalesEditor
-														? 'fa-chevron-down'
-														: 'fa-chevron-right'} text-[9px]"
-												></i>
-												{m.builderScoreScale()} ({m.builderScaleLevel({
-													count: scaleEntries.length
-												})})
-											</button>
-											{#if showScalesEditor}
-												<div class="space-y-1.5">
-													{#each scaleEntries as entry, idx}
-														<div
-															class="bg-surface-50-950 border border-surface-200-800 rounded px-2 py-1.5 space-y-1"
-														>
-															<div class="flex items-start gap-2">
-																<label class="block w-16 shrink-0">
-																	<span class="text-[10px] text-surface-500">{m.score()}</span>
-																	<input
-																		type="number"
-																		value={entry.score}
-																		class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-																		onblur={(e) => {
-																			const entries = [...scaleEntries];
-																			entries[idx].score = parseInt(e.currentTarget.value) || 0;
-																			setScaleEntries(entries);
-																		}}
-																	/>
-																</label>
-																<label class="block flex-1 min-w-0">
-																	<span class="text-[10px] text-surface-500">{m.name()}</span>
-																	<input
-																		type="text"
-																		value={entry.name}
-																		placeholder={m.builderScaleNamePlaceholder()}
-																		class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-																		onblur={(e) => {
-																			const entries = [...scaleEntries];
-																			entries[idx].name = e.currentTarget.value;
-																			setScaleEntries(entries);
-																		}}
-																	/>
-																</label>
-																<label class="block flex-1 min-w-0">
-																	<span class="text-[10px] text-surface-500">{m.description()}</span
-																	>
-																	<input
-																		type="text"
-																		value={entry.description}
-																		placeholder={m.builderScaleDescriptionPlaceholder()}
-																		class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-																		onblur={(e) => {
-																			const entries = [...scaleEntries];
-																			entries[idx].description = e.currentTarget.value;
-																			setScaleEntries(entries);
-																		}}
-																	/>
-																</label>
-																<button
-																	type="button"
-																	class="mt-4 text-gray-300 hover:text-red-500 text-xs transition-colors"
-																	onclick={() => {
-																		const entries = [...scaleEntries];
-																		entries.splice(idx, 1);
-																		setScaleEntries(entries);
-																	}}
-																>
-																	<i class="fa-solid fa-trash"></i>
-																</button>
-															</div>
-															{#if $activeLanguageStore}
-																{@const lang = $activeLanguageStore}
-																<div
-																	class="flex items-start gap-2 pl-16 border-t border-surface-100-900 pt-1"
-																>
-																	<label class="block flex-1 min-w-0">
-																		<span class="text-[10px] text-blue-500"
-																			>{m.builderScaleNameTranslate({
-																				lang: lang.toUpperCase()
-																			})}</span
-																		>
-																		<input
-																			type="text"
-																			value={getTranslation(entry.translations, lang, 'name')}
-																			placeholder={m.builderTranslateName()}
-																			class="input w-full text-sm border border-blue-100 dark:border-blue-900/40 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-																			onblur={(e) => {
-																				const entries = [...scaleEntries];
-																				entries[idx].translations = withTranslation(
-																					entries[idx].translations,
-																					lang,
-																					'name',
-																					e.currentTarget.value
-																				);
-																				setScaleEntries(entries);
-																			}}
-																		/>
-																	</label>
-																	<label class="block flex-1 min-w-0">
-																		<span class="text-[10px] text-blue-500"
-																			>{m.builderScaleDescriptionTranslate({
-																				lang: lang.toUpperCase()
-																			})}</span
-																		>
-																		<input
-																			type="text"
-																			value={getTranslation(
-																				entry.translations,
-																				lang,
-																				'description'
-																			)}
-																			placeholder={m.builderTranslateDescription()}
-																			class="input w-full text-sm border border-blue-100 dark:border-blue-900/40 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-																			onblur={(e) => {
-																				const entries = [...scaleEntries];
-																				entries[idx].translations = withTranslation(
-																					entries[idx].translations,
-																					lang,
-																					'description',
-																					e.currentTarget.value
-																				);
-																				setScaleEntries(entries);
-																			}}
-																		/>
-																	</label>
-																</div>
-															{/if}
-														</div>
-													{/each}
-													<button
-														type="button"
-														class="text-xs text-blue-600 hover:text-blue-700 font-medium"
-														onclick={() => {
-															const entries = [...scaleEntries];
-															entries.push({ score: 0, name: '', description: '' });
-															setScaleEntries(entries);
+										<i
+											class="fa-solid {showScoringSettings
+												? 'fa-chevron-down'
+												: 'fa-chevron-right'} text-[9px]"
+										></i>
+										{m.builderScoringSettings()}
+									</button>
+									{#if showScoringSettings}
+										<div
+											class="border border-surface-200-800 rounded-lg bg-surface-50-950/50 px-3 py-3 space-y-3"
+										>
+											<div class="grid grid-cols-3 gap-3">
+												<label class="block">
+													<span class="text-xs text-surface-600-400">{m.minScore()}</span>
+													<input
+														type="number"
+														value={$frameworkStore.min_score}
+														class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+														onblur={(e) => {
+															builder.updateFramework({
+																min_score: parseInt(e.currentTarget.value) || 0
+															});
 														}}
+													/>
+												</label>
+												<label class="block">
+													<span class="text-xs text-surface-600-400">{m.maxScore()}</span>
+													<input
+														type="number"
+														value={$frameworkStore.max_score}
+														class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+														onblur={(e) => {
+															builder.updateFramework({
+																max_score: parseInt(e.currentTarget.value) || 100
+															});
+														}}
+													/>
+												</label>
+												<label class="block">
+													<span class="text-xs text-surface-600-400">{m.aggregation()}</span>
+													<select
+														value={getAggregation()}
+														class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-surface-50-950"
+														onchange={(e) => setAggregation(e.currentTarget.value)}
 													>
-														<i class="fa-solid fa-plus mr-1"></i>{m.builderAddScaleLevel()}
-													</button>
-												</div>
-											{/if}
-										</div>
-									</div>
-								{/if}
-							</div>
+														<option value="average">{m.average()}</option>
+														<option value="sum">{m.sum()}</option>
+													</select>
+												</label>
+											</div>
+											<p class="text-xs text-surface-500">
+												{m.builderAggregationHint()}
+											</p>
 
+											<!-- Scale entries editor -->
+											<div class="border-t border-surface-200-800 pt-3 space-y-2">
+												<button
+													type="button"
+													class="flex items-center gap-1.5 text-xs font-medium text-surface-600-400 hover:text-surface-700-300 transition-colors"
+													onclick={() => (showScalesEditor = !showScalesEditor)}
+												>
+													<i
+														class="fa-solid {showScalesEditor
+															? 'fa-chevron-down'
+															: 'fa-chevron-right'} text-[9px]"
+													></i>
+													{m.builderScoreScale()} ({m.builderScaleLevel({
+														count: scaleEntries.length
+													})})
+												</button>
+												{#if showScalesEditor}
+													<div class="space-y-1.5">
+														{#each scaleEntries as entry, idx}
+															<div
+																class="bg-surface-50-950 border border-surface-200-800 rounded px-2 py-1.5 space-y-1"
+															>
+																<div class="flex items-start gap-2">
+																	<label class="block w-16 shrink-0">
+																		<span class="text-[10px] text-surface-500">{m.score()}</span>
+																		<input
+																			type="number"
+																			value={entry.score}
+																			class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																			onblur={(e) => {
+																				const entries = [...scaleEntries];
+																				entries[idx].score = parseInt(e.currentTarget.value) || 0;
+																				setScaleEntries(entries);
+																			}}
+																		/>
+																	</label>
+																	<label class="block flex-1 min-w-0">
+																		<span class="text-[10px] text-surface-500">{m.name()}</span>
+																		<input
+																			type="text"
+																			value={entry.name}
+																			placeholder={m.builderScaleNamePlaceholder()}
+																			class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																			onblur={(e) => {
+																				const entries = [...scaleEntries];
+																				entries[idx].name = e.currentTarget.value;
+																				setScaleEntries(entries);
+																			}}
+																		/>
+																	</label>
+																	<label class="block flex-1 min-w-0">
+																		<span class="text-[10px] text-surface-500"
+																			>{m.description()}</span
+																		>
+																		<input
+																			type="text"
+																			value={entry.description}
+																			placeholder={m.builderScaleDescriptionPlaceholder()}
+																			class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																			onblur={(e) => {
+																				const entries = [...scaleEntries];
+																				entries[idx].description = e.currentTarget.value;
+																				setScaleEntries(entries);
+																			}}
+																		/>
+																	</label>
+																	<button
+																		type="button"
+																		class="mt-4 text-gray-300 hover:text-red-500 text-xs transition-colors"
+																		onclick={() => {
+																			const entries = [...scaleEntries];
+																			entries.splice(idx, 1);
+																			setScaleEntries(entries);
+																		}}
+																	>
+																		<i class="fa-solid fa-trash"></i>
+																	</button>
+																</div>
+																{#if $activeLanguageStore}
+																	{@const lang = $activeLanguageStore}
+																	<div
+																		class="flex items-start gap-2 pl-16 border-t border-surface-100-900 pt-1"
+																	>
+																		<label class="block flex-1 min-w-0">
+																			<span class="text-[10px] text-blue-500"
+																				>{m.builderScaleNameTranslate({
+																					lang: lang.toUpperCase()
+																				})}</span
+																			>
+																			<input
+																				type="text"
+																				value={getTranslation(entry.translations, lang, 'name')}
+																				placeholder={m.builderTranslateName()}
+																				class="input w-full text-sm border border-blue-100 dark:border-blue-900/40 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																				onblur={(e) => {
+																					const entries = [...scaleEntries];
+																					entries[idx].translations = withTranslation(
+																						entries[idx].translations,
+																						lang,
+																						'name',
+																						e.currentTarget.value
+																					);
+																					setScaleEntries(entries);
+																				}}
+																			/>
+																		</label>
+																		<label class="block flex-1 min-w-0">
+																			<span class="text-[10px] text-blue-500"
+																				>{m.builderScaleDescriptionTranslate({
+																					lang: lang.toUpperCase()
+																				})}</span
+																			>
+																			<input
+																				type="text"
+																				value={getTranslation(
+																					entry.translations,
+																					lang,
+																					'description'
+																				)}
+																				placeholder={m.builderTranslateDescription()}
+																				class="input w-full text-sm border border-blue-100 dark:border-blue-900/40 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																				onblur={(e) => {
+																					const entries = [...scaleEntries];
+																					entries[idx].translations = withTranslation(
+																						entries[idx].translations,
+																						lang,
+																						'description',
+																						e.currentTarget.value
+																					);
+																					setScaleEntries(entries);
+																				}}
+																			/>
+																		</label>
+																	</div>
+																{/if}
+															</div>
+														{/each}
+														<button
+															type="button"
+															class="text-xs text-blue-600 hover:text-blue-700 font-medium"
+															onclick={() => {
+																const entries = [...scaleEntries];
+																entries.push({ score: 0, name: '', description: '' });
+																setScaleEntries(entries);
+															}}
+														>
+															<i class="fa-solid fa-plus mr-1"></i>{m.builderAddScaleLevel()}
+														</button>
+													</div>
+												{/if}
+											</div>
+										</div>
+									{/if}
+								</div>
+							{/if}
 							<!-- Outcome rules -->
 							<OutcomesEditor
 								outcomes={$frameworkStore.outcomes_definition ?? []}
 								onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
 								activeLanguage={$activeLanguageStore}
+								{mode}
 							/>
 
-							<!-- Implementation groups -->
-							<ImplementationGroupsEditor
-								groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => {
-									const rec = g as Record<string, unknown>;
-									return {
-										ref_id: (rec.ref_id as string) ?? '',
-										name: (rec.name as string) ?? '',
-										description: (rec.description as string) ?? '',
-										default_selected: (rec.default_selected as boolean) ?? false,
-										translations:
-											(rec.translations as Record<string, Record<string, string>>) ?? null
-									};
-								})}
-								onupdate={(groups) =>
-									builder.updateFramework({ implementation_groups_definition: groups })}
-								activeLanguage={$activeLanguageStore}
-							/>
+							{#if mode === 'framework'}
+								<!-- Implementation groups -->
+								<ImplementationGroupsEditor
+									groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => {
+										const rec = g as Record<string, unknown>;
+										return {
+											ref_id: (rec.ref_id as string) ?? '',
+											name: (rec.name as string) ?? '',
+											description: (rec.description as string) ?? '',
+											default_selected: (rec.default_selected as boolean) ?? false,
+											translations:
+												(rec.translations as Record<string, Record<string, string>>) ?? null
+										};
+									})}
+									onupdate={(groups) =>
+										builder.updateFramework({ implementation_groups_definition: groups })}
+									activeLanguage={$activeLanguageStore}
+								/>
 
-							<!-- Field Visibility -->
-							<VisibilityEditor
-								value={$frameworkStore.field_visibility}
-								onChange={(next) => builder.updateFramework({ field_visibility: next })}
-							/>
-
+								<!-- Field Visibility -->
+								<VisibilityEditor
+									value={$frameworkStore.field_visibility}
+									onChange={(next) => builder.updateFramework({ field_visibility: next })}
+								/>
+							{/if}
 							<!-- Languages -->
 							<div class="space-y-1.5">
 								<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
@@ -866,11 +870,21 @@
 						</div>
 					{/each}
 
-					<AddNodeMenu
-						parent={null}
-						triggerLabel={m.builderAddTopLevelNode()}
-						triggerClass="w-full py-4 border-2 border-dashed border-surface-200-800 rounded-lg text-sm text-surface-500 hover:text-surface-600-400 hover:border-surface-300-700 transition-colors"
-					/>
+					{#if mode === 'quick_form'}
+						<button
+							type="button"
+							class="w-full py-4 border-2 border-dashed border-surface-200-800 rounded-lg text-sm text-surface-500 hover:text-surface-600-400 hover:border-surface-300-700 transition-colors"
+							onclick={() => builder.addNode({ parent: null, preset: 'requirement' })}
+						>
+							<i class="fa-solid fa-plus mr-1"></i>{m.builderAddPage()}
+						</button>
+					{:else}
+						<AddNodeMenu
+							parent={null}
+							triggerLabel={m.builderAddTopLevelNode()}
+							triggerClass="w-full py-4 border-2 border-dashed border-surface-200-800 rounded-lg text-sm text-surface-500 hover:text-surface-600-400 hover:border-surface-300-700 transition-colors"
+						/>
+					{/if}
 				{/if}
 
 				<!-- Global errors -->

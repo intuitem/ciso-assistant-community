@@ -22,7 +22,7 @@ async function fetchChoices(fetch: typeof globalThis.fetch, endpoint: string) {
 }
 
 export const load: PageServerLoad = async ({ url, fetch, locals }) => {
-	if (!locals.featureflags?.dora) redirect(302, '/');
+	if (!(await locals.getFeatureFlags())?.dora) redirect(302, '/');
 	const schema = modelSchema(URL_MODEL);
 	const model = getModelInfo(URL_MODEL);
 
@@ -206,7 +206,7 @@ export const load: PageServerLoad = async ({ url, fetch, locals }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		if (!event.locals.featureflags?.dora) redirect(302, '/');
+		if (!(await event.locals.getFeatureFlags())?.dora) redirect(302, '/');
 		return defaultWriteFormAction({
 			event,
 			urlModel: URL_MODEL,

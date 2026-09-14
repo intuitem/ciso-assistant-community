@@ -4,10 +4,10 @@ import pytest
 
 from core.models import Policy
 from core.net_safety import BlockedRequestError
-from doc_management.models import DocumentContainer
+from doc_management.models import DocumentContainer, DocumentRevision
 from doc_management.serializers import ManagedDocumentWriteSerializer
-from doc_management.views import _safe_url_fetcher
-from iam.models import Folder
+from doc_management.views import DocumentRevisionViewSet, _safe_url_fetcher
+from iam.models import Folder, User
 
 
 class TestSafeUrlFetcher:
@@ -25,6 +25,18 @@ class TestSafeUrlFetcher:
         _safe_url_fetcher(
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg=="
         )
+
+    def test_rejection_surfaces_as_url_fetching_error(self):
+        # WeasyPrint >= 70 reads `_fail_on_errors` on the fetcher when a fetch
+        # raises; a plain callable would surface AttributeError and abort the
+        # whole render instead of skipping the resource.
+        from weasyprint.urls import URLFetchingError, fetch
+
+        with (
+            pytest.raises(URLFetchingError),
+            fetch(_safe_url_fetcher, "http://example.com/img.png"),
+        ):
+            pass
 
 
 @pytest.mark.django_db
@@ -283,3 +295,53 @@ class TestContainerGrouping:
         rev.refresh_from_db()
         assert rev.source == "link"
         assert rev.url == "https://example.com/policy"
+
+
+@pytest.mark.django_db
+class TestPdfApproverRow:
+    """`reviewer` is written by both approval and change-request, so the PDF must
+    only call that user an approver once the revision is actually approved."""
+
+    def _revision(self, status):
+        folder = Folder.objects.create(
+            name=f"PDF-{status}", parent_folder=Folder.get_root_folder()
+        )
+        s = ManagedDocumentWriteSerializer(
+            data={"folder": str(folder.id), "locale": "en", "name": "Doc"},
+            context={},
+        )
+        s.is_valid(raise_exception=True)
+        doc = s.save()
+        rev = doc.revisions.first()
+        rev.status = status
+        rev.reviewer = User.objects.create_user(email=f"rev-{status}@test.com")
+        rev.save()
+        return rev
+
+    def _reviewer_name(self, rev):
+        view = DocumentRevisionViewSet()
+        captured = {}
+
+        def capture(revision, context):
+            captured.update(context)
+            return "<html></html>"
+
+        view._resolve_document_html = capture
+        view._render_pdf_bytes(rev, rev.reviewer)
+        return captured["reviewer_name"]
+
+    def test_change_requested_reviewer_is_not_an_approver(self):
+        rev = self._revision(DocumentRevision.Status.CHANGE_REQUESTED)
+        assert self._reviewer_name(rev) == ""
+
+    def test_in_review_reviewer_is_not_an_approver(self):
+        rev = self._revision(DocumentRevision.Status.IN_REVIEW)
+        assert self._reviewer_name(rev) == ""
+
+    def test_published_revision_names_its_approver(self):
+        rev = self._revision(DocumentRevision.Status.PUBLISHED)
+        assert self._reviewer_name(rev) == str(rev.reviewer)
+
+    def test_validated_revision_names_its_approver(self):
+        rev = self._revision(DocumentRevision.Status.VALIDATED)
+        assert self._reviewer_name(rev) == str(rev.reviewer)

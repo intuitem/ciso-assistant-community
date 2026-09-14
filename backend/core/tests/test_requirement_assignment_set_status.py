@@ -33,7 +33,7 @@ def app_config():
 
 def _admin_client(email):
     """A user in BI-UG-ADM: full permissions everywhere, not respondent-scoped."""
-    user = User.objects.create_user(email=email, is_published=True)
+    user = User.objects.create_user(email=email)
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     user.folder = admin_group.folder
     user.save()
