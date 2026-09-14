@@ -154,7 +154,7 @@ jobs:
       COMPOSE_TEST: True
       # Pull build-time and runtime base images from our GHCR mirror instead of
       # Docker Hub to avoid anonymous pull rate limits. See .github/mirror-images.json.
-      PYTHON_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/python:3.14-slim
+      PYTHON_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev
       NODE_BUILD_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-node:24-dev
       NODE_RUNTIME_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-node:24
       QDRANT_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/qdrant:v1.14.0
@@ -356,7 +356,7 @@ jobs:
     env:
       COMPOSE_TEST: True
       # Pull base/runtime images from our GHCR mirror instead of Docker Hub. See .github/mirror-images.json.
-      PYTHON_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/python:3.14-slim
+      PYTHON_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev
       NODE_BUILD_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-node:24-dev
       NODE_RUNTIME_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-node:24
       CADDY_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/caddy:2.11.4

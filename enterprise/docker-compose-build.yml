@@ -7,7 +7,7 @@ services:
       additional_contexts:
         enterprise_backend: ./backend
       args:
-        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.14-slim}
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev}
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -27,7 +27,7 @@ services:
       additional_contexts:
         enterprise_backend: ./backend
       args:
-        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.14-slim}
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev}
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
