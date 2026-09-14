@@ -1,10 +1,10 @@
-# Container scan findings
+# Container scan notes
 
-Vulnerabilities that scanners report against our published container images and that
-we have assessed as **not affecting** CISO Assistant, with the evidence for each.
+CVEs that scanners report against our published container images and that we have
+assessed as **not affecting** CISO Assistant, with the evidence for each.
 
-This file covers false positives only. A vulnerability that is real but has no fix yet
-does **not** belong here — it gets tracked and fixed. Justifications use the
+These are false positives, not accepted risk. A vulnerability that is real but has no
+fix yet does **not** belong here — it gets tracked and fixed. Justifications use the
 [OpenVEX](https://openvex.dev) vocabulary so the entries can be turned into VEX
 statements if we ever publish them.
 
