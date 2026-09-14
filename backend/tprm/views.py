@@ -1257,38 +1257,54 @@ class EntityAssessmentViewSet(BaseModelViewSet):
 
         return data
 
+    def _owned_audit_deletion(self, instance):
+        """What deleting this assessment takes down with it: the linked audit when
+        its enclave is shared by other rounds, the whole enclave folder when this is
+        the last audit in it, nothing when the audit lives outside an enclave.
+        """
+        audit = instance.compliance_assessment
+        if not audit:
+            return None
+        folder = audit.folder
+        if folder.content_type != Folder.ContentType.ENCLAVE:
+            return None
+        # Revisions share the enclave: it is the vendor's workspace, not this
+        # round's. Only the last audit takes the folder down with it.
+        shared = (
+            ComplianceAssessment.objects.filter(folder=folder)
+            .exclude(pk=audit.pk)
+            .exists()
+        )
+        return audit if shared else folder
+
+    def cascade_extra_deletions(self, instance):
+        target = self._owned_audit_deletion(instance)
+        return [target] if target is not None else []
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.compliance_assessment:
             audit = instance.compliance_assessment
-            folder = audit.folder
-            if folder.content_type == Folder.ContentType.ENCLAVE:
-                # Revisions share the enclave: it is the vendor's workspace, not this
-                # round's. Only the last audit takes the folder down with it.
-                shared = (
-                    ComplianceAssessment.objects.filter(folder=folder)
-                    .exclude(pk=audit.pk)
-                    .exists()
-                )
-                if shared:
-                    logger.info(
-                        "deleting_audit_keeping_shared_enclave",
-                        audit_id=str(audit.pk),
-                        folder_id=str(folder.id),
-                    )
-                    audit.delete()
-                else:
-                    logger.info(
-                        "deleting_compliance_assessment_folder",
-                        folder_id=str(folder.id),
-                        content_type=str(folder.content_type),
-                    )
-                    folder.delete()
-            else:
+            target = self._owned_audit_deletion(instance)
+            if target is None:
                 logger.warning(
                     "Compliance assessment folder is not an Enclave, skipping deletion",
-                    folder=folder,
+                    folder=audit.folder,
                 )
+            elif isinstance(target, Folder):
+                logger.info(
+                    "deleting_compliance_assessment_folder",
+                    folder_id=str(target.id),
+                    content_type=str(target.content_type),
+                )
+                target.delete()
+            else:
+                logger.info(
+                    "deleting_audit_keeping_shared_enclave",
+                    audit_id=str(target.pk),
+                    folder_id=str(target.folder_id),
+                )
+                target.delete()
 
         return super().destroy(request, *args, **kwargs)
 
