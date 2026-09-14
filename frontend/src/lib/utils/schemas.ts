@@ -682,6 +682,7 @@ export const GeneralSettingsSchema = z.object({
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
 	enforce_mfa: z.boolean().default(false).optional(),
 	default_language: z.string().default('en').optional(),
+	default_date_format: z.string().default('auto').optional(),
 	default_packager: z
 		.string()
 		.regex(/^[a-z0-9_-]+$/)

@@ -125,6 +125,18 @@ def match_urn(urn_string):
         return None
 
 
+def _serialize_for_quality_check(queryset) -> list[dict]:
+    """Serialize a queryset to plain dicts, with the object id folded in.
+
+    serializers.serialize() fetches every m2m field one object at a time, so the
+    m2m fields are prefetched here to keep quality checks at a constant number of
+    queries whatever the size of the assessment.
+    """
+    m2m_fields = [f.name for f in queryset.model._meta.many_to_many]
+    payload = serializers.serialize("json", queryset.prefetch_related(*m2m_fields))
+    return [{**item["fields"], "id": item["pk"]} for item in json.loads(payload)]
+
+
 def _translate_questions(owner) -> dict | None:
     """Questions of a RequirementNode or QuickFormPage as the {urn: definition}
     dict the frontend renderer consumes, translated to the active language."""
@@ -7164,8 +7176,9 @@ class RiskAssessment(Assessment):
         warnings_lst = list()
         info_lst = list()
         # --- check on the risk risk_assessment:
-        _object = serializers.serialize("json", [self])
-        _object = json.loads(_object)
+        # Same dict shape as every other finding object, so the name renders.
+        _serialized = json.loads(serializers.serialize("json", [self]))[0]
+        _object = {**_serialized["fields"], "id": _serialized["pk"]}
         if self.status == Assessment.Status.IN_PROGRESS:
             info_lst.append(
                 {
@@ -7203,12 +7216,9 @@ class RiskAssessment(Assessment):
 
         # --- checks on the risk scenarios
         # TODO: Refactor this
-        _scenarios = serializers.serialize(
-            "json", self.risk_scenarios.all().order_by("created_at")
+        scenarios = _serialize_for_quality_check(
+            self.risk_scenarios.all().order_by("created_at")
         )
-        scenarios = [x["fields"] for x in json.loads(_scenarios)]
-        for i in range(len(scenarios)):
-            scenarios[i]["id"] = json.loads(_scenarios)[i]["pk"]
         for ri in scenarios:
             if ri["current_level"] < 0:
                 warnings_lst.append(
@@ -7358,15 +7368,11 @@ class RiskAssessment(Assessment):
                     )
 
         # --- checks on the applied controls
-        _measures = serializers.serialize(
-            "json",
-            AppliedControl.objects.filter(
-                risk_scenarios__risk_assessment=self
-            ).order_by("created_at"),
+        measures = _serialize_for_quality_check(
+            AppliedControl.objects.filter(risk_scenarios__risk_assessment=self)
+            .distinct()
+            .order_by("created_at")
         )
-        measures = [x["fields"] for x in json.loads(_measures)]
-        for i in range(len(measures)):
-            measures[i]["id"] = json.loads(_measures)[i]["pk"]
 
         for mtg in measures:
             if not mtg["eta"] and not mtg["status"] == "active":
@@ -7433,15 +7439,11 @@ class RiskAssessment(Assessment):
                 )
 
         # --- checks on the risk acceptances
-        _acceptances = serializers.serialize(
-            "json",
+        acceptances = _serialize_for_quality_check(
             RiskAcceptance.objects.filter(risk_scenarios__risk_assessment=self)
             .distinct()
-            .order_by("created_at"),
+            .order_by("created_at")
         )
-        acceptances = [x["fields"] for x in json.loads(_acceptances)]
-        for i in range(len(acceptances)):
-            acceptances[i]["id"] = json.loads(_acceptances)[i]["pk"]
         for ra in acceptances:
             if not ra["expiry_date"]:
                 warnings_lst.append(
@@ -9164,8 +9166,9 @@ class ComplianceAssessment(Assessment):
         warnings_lst = list()
         info_lst = list()
         # --- check on the assessment:
-        _object = serializers.serialize("json", [self])
-        _object = json.loads(_object)
+        # Same dict shape as every other finding object, so the name renders.
+        _serialized = json.loads(serializers.serialize("json", [self]))[0]
+        _object = {**_serialized["fields"], "id": _serialized["pk"]}
         if self.status == Assessment.Status.IN_PROGRESS:
             info_lst.append(
                 {
@@ -9192,21 +9195,43 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on requirement assessments:
-        _requirement_assessments = self.requirement_assessments.all().order_by(
-            "created_at"
+        _requirement_assessments = (
+            self.requirement_assessments.select_related("requirement")
+            .prefetch_related("applied_controls")
+            .order_by("created_at")
+        )
+        # Set-based equivalent of RequirementAssessment.has_evidence(), so the
+        # loop below does not issue one query per requirement assessment.
+        ac_through = RequirementAssessment.applied_controls.through.objects.filter(
+            requirementassessment__compliance_assessment=self
+        )
+        ra_ids_with_evidence = set(
+            RequirementAssessment.evidences.through.objects.filter(
+                requirementassessment__compliance_assessment=self
+            ).values_list("requirementassessment_id", flat=True)
+        ) | set(
+            ac_through.filter(appliedcontrol__evidences__isnull=False).values_list(
+                "requirementassessment_id", flat=True
+            )
         )
         requirement_assessments = []
         for ra in _requirement_assessments:
-            ra_dict = json.loads(serializers.serialize("json", [ra]))[0]["fields"]
-            ra_dict["name"] = str(ra)
-            ra_dict["id"] = ra.id
+            # Only the fields the checks below and the X-rays page read: fully
+            # serializing every requirement assessment dominated both the runtime
+            # and the payload of this check on large audits.
+            ra_dict = {
+                "id": ra.id,
+                "name": str(ra),
+                "result": ra.result,
+                "applied_controls": [ac.id for ac in ra.applied_controls.all()],
+            }
             requirement_assessments.append(ra_dict)
 
             # Check if assessable requirement assessment with compliant result has no evidence
             if (
                 ra.requirement.assessable
                 and ra.result == RequirementAssessment.Result.COMPLIANT
-                and not ra.has_evidence()
+                and ra.id not in ra_ids_with_evidence
             ):
                 warnings_lst.append(
                     {
@@ -9239,15 +9264,13 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on applied controls:
-        _applied_controls = serializers.serialize(
-            "json",
+        applied_controls = _serialize_for_quality_check(
             AppliedControl.objects.filter(
                 requirement_assessments__compliance_assessment=self
-            ).order_by("created_at"),
+            )
+            .distinct()
+            .order_by("created_at")
         )
-        applied_controls = [x["fields"] for x in json.loads(_applied_controls)]
-        for i in range(len(applied_controls)):
-            applied_controls[i]["id"] = json.loads(_applied_controls)[i]["pk"]
         for applied_control in applied_controls:
             if not applied_control["reference_control"]:
                 info_lst.append(
@@ -9264,37 +9287,44 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on evidence:
-        evidence_objects = Evidence.objects.filter(
-            applied_controls__in=AppliedControl.objects.filter(
-                requirement_assessments__compliance_assessment=self
+        # Evidence of this audit, on the two paths RequirementAssessment.has_evidence()
+        # follows: attached to a requirement assessment directly, or through one
+        # of its applied controls.
+        evidences = Evidence.objects.filter(
+            models.Q(
+                applied_controls__requirement_assessments__compliance_assessment=self
             )
-        ).order_by("created_at")
+            | models.Q(requirement_assessments__compliance_assessment=self)
+        )
+        # Evidences holding at least one revision with a file or a link, resolved
+        # in a single query instead of two per evidence.
+        evidence_ids_with_content = set(
+            EvidenceRevision.objects.filter(evidence__in=evidences)
+            .filter(
+                (models.Q(attachment__isnull=False) & ~models.Q(attachment=""))
+                | (models.Q(link__isnull=False) & ~models.Q(link=""))
+            )
+            .values_list("evidence_id", flat=True)
+        )
 
-        for evidence_obj in evidence_objects:
-            # Check if evidence has any revisions with attachments or links
-            has_attachment = evidence_obj.revisions.filter(
-                models.Q(attachment__isnull=False) & ~models.Q(attachment="")
-            ).exists()
-            has_link = evidence_obj.revisions.filter(
-                models.Q(link__isnull=False) & ~models.Q(link="")
-            ).exists()
-
-            if not has_attachment and not has_link:
-                evidence_dict = json.loads(
-                    serializers.serialize("json", [evidence_obj])
-                )[0]["fields"]
-                evidence_dict["id"] = evidence_obj.id
-                warnings_lst.append(
-                    {
-                        "msg": _("{}: Evidence has no file or link uploaded").format(
-                            evidence_obj.name
-                        ),
-                        "msgid": "evidenceNoFile",
-                        "link": f"evidences/{evidence_obj.id}",
-                        "obj_type": "evidence",
-                        "object": evidence_dict,
-                    }
-                )
+        # Only the evidences actually reported are serialized, so the m2m
+        # prefetching the helper does is paid for the broken ones alone.
+        for evidence in _serialize_for_quality_check(
+            evidences.exclude(id__in=evidence_ids_with_content)
+            .distinct()
+            .order_by("created_at")
+        ):
+            warnings_lst.append(
+                {
+                    "msg": _("{}: Evidence has no file or link uploaded").format(
+                        evidence["name"]
+                    ),
+                    "msgid": "evidenceNoFile",
+                    "link": f"evidences/{evidence['id']}",
+                    "obj_type": "evidence",
+                    "object": evidence,
+                }
+            )
 
         findings = {
             "errors": errors_lst,

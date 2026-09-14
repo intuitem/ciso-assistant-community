@@ -240,6 +240,7 @@ export const COMMITMENT_STATE_FILTER: ListViewFilterConfig = {
 export const COMMITMENT_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'committedBy',
 		optionsEndpoint: 'actors',
 		optionsLabelField: 'str',
@@ -361,6 +362,7 @@ export const EFFORT_FILTER: ListViewFilterConfig = {
 export const PERIMETER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'perimeter',
 		optionsEndpoint: 'perimeters',
 		multiple: true
@@ -802,6 +804,7 @@ export const APPLIED_CONTROL_LINKED_MODELS_FILTER: ListViewFilterConfig = {
 export const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'riskAssessment',
 		optionsEndpoint: 'risk-assessments',
 		multiple: true
@@ -811,6 +814,7 @@ export const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 export const REFERENCE_CONTROL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'referenceControl',
 		optionsEndpoint: 'reference-controls',
 		multiple: true
@@ -820,6 +824,7 @@ export const REFERENCE_CONTROL_FILTER: ListViewFilterConfig = {
 export const COMPLIANCE_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'complianceAssessment',
 		optionsEndpoint: 'compliance-assessments',
 		multiple: true
@@ -840,6 +845,7 @@ export const PROVIDER_FILTER: ListViewFilterConfig = {
 export const THREAT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		optionsEndpoint: 'threats',
 		label: 'threat',
 		multiple: true
@@ -858,6 +864,7 @@ export const LIBRARY_FILTER: ListViewFilterConfig = {
 export const ASSET_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		optionsEndpoint: 'assets',
 		label: 'asset',
 		multiple: true
@@ -984,7 +991,20 @@ export const ENABLED_FILTER: ListViewFilterConfig = {
 export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'assigned_to',
+		optionsLabelField: 'str',
+		optionsValueField: 'id',
+		optionsEndpoint: 'actors',
+		multiple: true
+	}
+};
+
+export const AUTHOR_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		lazy: true,
+		label: 'authors',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'actors',
@@ -1054,6 +1074,7 @@ export const PERTINENCE_FILTER: ListViewFilterConfig = {
 export const ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'entity',
 		optionsEndpoint: 'entities',
 		multiple: true
@@ -1063,6 +1084,7 @@ export const ENTITY_FILTER: ListViewFilterConfig = {
 export const PARENT_ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'parentEntity',
 		optionsEndpoint: 'entities',
 		multiple: true
@@ -1072,6 +1094,7 @@ export const PARENT_ENTITY_FILTER: ListViewFilterConfig = {
 export const PROVIDER_ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'providerEntity',
 		optionsEndpoint: 'entities',
 		multiple: true
@@ -1080,6 +1103,7 @@ export const PROVIDER_ENTITY_FILTER: ListViewFilterConfig = {
 export const BENEFICIARY_ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'beneficiaryEntity',
 		optionsEndpoint: 'entities',
 		multiple: true
@@ -1088,6 +1112,7 @@ export const BENEFICIARY_ENTITY_FILTER: ListViewFilterConfig = {
 export const SOLUTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'solutions',
 		optionsEndpoint: 'solutions',
 		multiple: true
@@ -1120,6 +1145,7 @@ export const LAST_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 export const ACCREDITATION_AUTHORITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'authority',
 		optionsEndpoint: 'entities?relationship__name=accreditation_authority',
 		multiple: true
@@ -1360,6 +1386,7 @@ export const APPLIED_CONTROL_CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 export const OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'owner',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
@@ -1371,6 +1398,7 @@ export const OWNER_FILTER: ListViewFilterConfig = {
 export const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'owner',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
@@ -1516,6 +1544,7 @@ export const CONTRACT_STATUS_FILTER: ListViewFilterConfig = {
 export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		label: 'owner',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
@@ -1552,6 +1581,7 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 export const SECURITY_ADVISORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		optionsEndpoint: 'security-advisories',
 		label: 'securityAdvisory',
 		multiple: true
@@ -1561,6 +1591,7 @@ export const SECURITY_ADVISORY_FILTER: ListViewFilterConfig = {
 export const CWE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		optionsEndpoint: 'cwes',
 		label: 'cwe',
 		multiple: true
@@ -1686,6 +1717,7 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER,
+			authors: AUTHOR_FILTER,
 			due_date: dateFilter('due_date'),
 			eta: dateFilter('eta'),
 			created_at: CREATED_AT_FILTER,
@@ -2201,6 +2233,7 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			framework: FRAMEWORK_FILTER,
 			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
+			authors: AUTHOR_FILTER,
 			due_date: dateFilter('due_date'),
 			eta: dateFilter('eta'),
 			created_at: CREATED_AT_FILTER,
@@ -3016,6 +3049,7 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			category: FINDINGS_ASSESSMENTS_CATEGORY_FILTER,
 			status: FINDINGS_ASSESSMENTS_STATUS_FILTER,
+			authors: AUTHOR_FILTER,
 			filtering_labels: LABELS_FILTER,
 			reported_at: dateFilter('reported_at')
 		}

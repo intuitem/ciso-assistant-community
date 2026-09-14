@@ -7,7 +7,7 @@ import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ fetch, params, locals }) => {
 	// +server.ts handlers do not run the parent layout's load, so this route carries its
 	// own session check rather than inheriting one.
-	if (!locals.user) error(401, 'Unauthorized');
+	if (!(await locals.getUser())) error(401, 'Unauthorized');
 
 	const paths = [
 		`${BASE_API_URL}/quick-form-responses/${params.id}/attachments/${params.attachmentId}/download/`,

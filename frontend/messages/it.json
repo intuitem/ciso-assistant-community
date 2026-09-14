@@ -313,7 +313,6 @@
 	"plan": "Piano",
 	"asPDF": "come PDF",
 	"asCSV": "come CSV",
-	"asWord": "come Word",
 	"draft": "Bozza",
 	"riskMatrixView": "Vista matrice di rischio",
 	"currentInMatrixView": "Corrente",
@@ -633,7 +632,6 @@
 	"noStatus": "Nessuno stato",
 	"actionPlanHelpText": "Il contatore rappresenta il numero di requisiti associati",
 	"matchingRequirements": "Requisiti corrispondenti",
-	"asZIP": "come ZIP",
 	"incoming": "In arrivo",
 	"outdated": "Obsoleto",
 	"flashMode": "Modalità flash",
@@ -848,7 +846,8 @@
 	"mailFailedToSend": "Invio email non riuscito",
 	"questionOrQuestions": "Domanda/e",
 	"successfullyUpdatedClientSettings": "Impostazioni cliente aggiornate con successo, ricarica la pagina",
-	"xRaysEmptyMessage": "Devi creare almeno un perimetro per usare gli X-ray",
+	"xRaysEmptyMessage": "Nessun problema rilevato. X-ray elenca solo i domini con rilevamenti.",
+	"xRaysLoadingError": "Non è stato possibile completare l'analisi X-ray. Consulta i log del server per i dettagli.",
 	"suggestControls": "Suggerisci controlli",
 	"createAppliedControlsFromSuggestionsHelpText": "Crea controlli applicati dai controlli di riferimento suggeriti nei requisiti del framework",
 	"createAppliedControlsFromSuggestionsSuccess": "Controlli applicati creati con successo dai controlli di riferimento suggeriti",
@@ -1183,7 +1182,6 @@
 	"ebiosWs2_3_tooltip": "Serve almeno una coppia RO/TO per selezionarla",
 	"ebiosWs3_2_tooltip": "Serve almeno una coppia RO/TO selezionata per elaborare uno scenario strategico",
 	"ebiosWs3_3_tooltip": "Serve almeno uno stakeholder per definire misure di sicurezza associate",
-	"ebiosWs4_1_tooltip": "Serve almeno un percorso di attacco selezionato per elaborare uno scenario operativo",
 	"ebiosWs4_2_tooltip": "Serve almeno uno scenario operativo per valutarne la probabilità",
 	"ebiosWs5_tooltip": "Nessuna valutazione del rischio è stata ancora eseguita",
 	"govern": "Governare",
@@ -1369,19 +1367,7 @@
 	"createRiskAssessment": "Avvia anche una valutazione del rischio",
 	"riskAssessmentName": "Nome valutazione del rischio",
 	"noDataAvailable": "Dati insufficienti per questa visualizzazione. Aggiorna quando saranno disponibili più contenuti.",
-	"collection": "Raccolta",
-	"recording": "Registrazione",
-	"structuring": "Strutturazione",
-	"storage": "Archiviazione",
-	"adaptationOrAlteration": "Adattamento o alterazione",
-	"retrieval": "Recupero",
-	"consultation": "Consultazione",
-	"use": "Utilizzo",
-	"disclosureByTransmission": "Divulgazione tramite trasmissione",
-	"disseminationOrOtherwiseMakingAvailable": "Diffusione o messa a disposizione",
-	"alignmentOrCombination": "Allineamento o combinazione",
 	"restriction": "Restrizione",
-	"erasureOrDestruction": "Cancellazione o distruzione",
 	"failedToContactProvider": "Impossibile contattare il fornitore",
 	"userIsNotSSO": "L'accesso SSO è attualmente disabilitato per il tuo account.",
 	"enableSSOHelpText": "Abilita SSO come opzione di accesso per tutti gli utenti.",
@@ -1515,15 +1501,6 @@
 	"changeUserGroup": "Cambia gruppo utenti",
 	"deleteUserGroup": "Elimina gruppo utenti",
 	"viewUserGroup": "Visualizza gruppo utenti",
-	"changeQuantitativeRiskHypothesis": "Cambia ipotesi di rischio quantitativo",
-	"deleteQuantitativeRiskHypothesis": "Elimina ipotesi di rischio quantitativo",
-	"viewQuantitativeRiskHypothesis": "Visualizza ipotesi di rischio quantitativo",
-	"changeQuantitativeRiskScenario": "Cambia scenario",
-	"deleteQuantitativeRiskScenario": "Elimina scenario",
-	"viewQuantitativeRiskScenario": "Visualizza scenario",
-	"changeQuantitativeRiskStudy": "Cambia studio di quantificazione del rischio",
-	"deleteQuantitativeRiskStudy": "Elimina studio di quantificazione del rischio",
-	"viewQuantitativeRiskStudy": "Visualizza studio di quantificazione del rischio",
 	"dueDateUpdatedSuccessfully": "Data di scadenza aggiornata con successo",
 	"taskScheduleInfo": "Le occorrenze passate sono protette da modifiche alla pianificazione. Solo le attività future verranno ricalcolate.",
 	"cascadeDeleteWarning": "Attenzione: L'eliminazione di questo elemento comporterà anche l'eliminazione permanente di {count} oggetto/i correlato/i:",
@@ -2494,7 +2471,6 @@
 	"syncCweCatalog": "Recupera catalogo CWE di MITRE",
 	"syncCweCatalogFailed": "Errore nel recupero del catalogo CWE",
 	"syncToReferenceControl": "Sincronizza con il controllo di riferimento",
-	"exportEcosystem": "esportazione dell'ecosistema (XLSX)",
 	"average": "Media",
 	"close": "Chiudi",
 	"collapseAll": "Comprimi tutto",
@@ -2525,19 +2501,12 @@
 	"builderRequirementHint": "Valutabile, può comunque avere figli",
 	"builderSplashScreen": "Schermata di presentazione",
 	"builderSplashScreenHint": "Presentazionale, non valutabile",
-	"builderStatusLive": "In produzione",
-	"builderStatusLiveTitle": "La bozza corrisponde a ciò che vedono i rispondenti dell'audit.",
-	"builderStatusUnpublishedChanges": "Modifiche non pubblicate",
-	"builderStatusUnpublishedChangesTitle": "La bozza contiene modifiche non ancora visibili ai rispondenti dell'audit. Pubblica per applicarle.",
-	"builderStatusDraftNothingLive": "Bozza — nulla in produzione",
-	"builderStatusDraftNothingLiveTitle": "La bozza ha contenuto ma nulla è ancora stato pubblicato. I nuovi audit non vedranno nulla finché non pubblichi.",
 	"builderStatusEmpty": "Vuoto",
 	"builderStatusEmptyTitle": "Nessun requisito per ora. I nuovi audit basati su questo framework non avranno nulla da valutare.",
 	"builderPreview": "Anteprima",
 	"builderPreviewSaveFirst": "Salva prima la bozza per poter visualizzare l'anteprima",
 	"builderPreviewAsRespondent": "Anteprima come rispondente (apre in una nuova scheda)",
 	"builderExportYamlTitle": "Esporta il framework come file di libreria YAML",
-	"builderExportYamlUnpublishedWarning": "Le modifiche non pubblicate non saranno incluse. Pubblica prima per esportare le ultime modifiche.",
 	"builderCopyBase": "Copia base",
 	"builderCopyBaseTitle": "Copia il testo della lingua di base in {lang} (non sovrascrive le traduzioni esistenti)",
 	"builderCopyBaseQuestion": "Copiare il testo di base?",
@@ -2547,82 +2516,7 @@
 	"builderExpandAllCards": "Espandi tutte le schede",
 	"builderCollapseAllCards": "Comprimi tutte le schede",
 	"builderSaveFailed": "Salvataggio non riuscito",
-	"builderPublishedFlash": "Pubblicato!",
 	"builderSaveDraftTitle": "Salva bozza (Ctrl+S)",
-	"builderDiscardDraftTitle": "Scarta bozza",
-	"builderDiscard": "Scarta",
-	"builderDiscardAllChangesQuestion": "Scartare tutte le modifiche?",
-	"builderYesDiscard": "Sì, scarta",
-	"builderPublishDraftToLiveTitle": "Pubblica la bozza nel framework in produzione",
-	"builderPublishing": "Pubblicazione...",
-	"builderPublishModalTitle": "Pubblica bozza in produzione",
-	"builderPublishModalDescription": "Questa azione aggiornerà il framework in produzione. Verifica le modifiche qui sotto.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} requisiti aggiunti",
-				"countPlural=other": "{count} requisiti aggiunti"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} domande",
-				"countPlural=other": "{count} domande"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} requisiti rimossi",
-				"countPlural=other": "{count} requisiti rimossi"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} domande",
-				"countPlural=other": "{count} domande"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Nessuna modifica strutturale rilevata (solo metadati).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} modifiche incompatibili rilevate",
-				"countPlural=other": "{count} modifiche incompatibili rilevate"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Queste modifiche possono influenzare il calcolo del punteggio, la visibilità o i risultati di conformità negli audit esistenti.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} audit esistenti saranno interessati",
-				"countPlural=other": "{count} audit esistenti saranno interessati"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Nuovi requisiti saranno aggiunti a questi audit.",
-	"builderAffectedAuditsRemovedHint": "I requisiti rimossi e i loro dati di valutazione saranno eliminati da questi audit.",
-	"builderCouldNotLoadPreview": "Impossibile caricare l'anteprima d'impatto. Procedi con cautela.",
-	"builderConfirmPublish": "Conferma pubblicazione",
 	"builderSearchNodes": "Cerca nodi...",
 	"builderExpandSidebar": "Espandi barra laterale",
 	"builderCollapseSidebar": "Comprimi barra laterale",
@@ -2802,7 +2696,6 @@
 	"builderSplashNumberedList": "Elenco numerato",
 	"builderSplashLink": "Collegamento",
 	"builderSplashTable": "Tabella",
-	"builderSplashInsertImage": "Inserisci immagine",
 	"builderUntitledQuestion": "Domanda senza titolo",
 	"builderNotTranslated": "Non tradotto",
 	"builderQuestionTextPlaceholder": "Inserisci la tua domanda...",
@@ -2847,27 +2740,12 @@
 	"builderKbSaveDraft": "Salva bozza",
 	"builderKbShowCheatsheet": "Mostra questo prontuario",
 	"builderKbCloseDialog": "Chiudi finestra di dialogo o menu a discesa",
-	"builderImportedFramework": "Framework importato",
-	"builderImportedFrameworkDescription": "Questo framework è stato importato da una libreria e non può essere modificato direttamente. Per apportare modifiche, crea una copia modificabile.",
-	"builderCreateCopyAndEdit": "Crea copia e modifica",
-	"builderCreatingCopy": "Creazione della copia...",
-	"builderLoadingEditor": "Caricamento dell'editor...",
-	"builderFailedToStartEditor": "Avvio dell'editor non riuscito",
-	"builderBackToFramework": "Torna al framework",
-	"builderBackToBuilder": "Torna al costruttore",
-	"builderFailedToLoadDraft": "Caricamento della bozza non riuscito",
-	"builderImplementationGroupsHeader": "Gruppi di implementazione",
-	"builderNoItemsToPreview": "Nessun elemento da visualizzare in anteprima.",
-	"builderNoItemsToPreviewHint": "Aggiungi requisiti valutabili o schermate di presentazione nel costruttore.",
-	"builderBaseLanguageOption": "Lingua di base",
 	"builderFrameworkNameRequired": "Il nome del framework è obbligatorio.",
 	"builderFrameworkNameTooLong": "Il nome del framework è di {length} caratteri (max 200).",
 	"builderNodeNameTooLong": "Il nome supera i 200 caratteri ({length}/200). Sposta il testo lungo nel campo descrizione.",
 	"builderRefIdTooLong": "«{label}»: ref_id è di {length} caratteri (max 100).",
 	"builderUrnTooLong": "«{label}»: URN è di {length} caratteri (max 255).",
-	"builderFailedToSaveDraftBeforePublish": "Salvataggio della bozza prima della pubblicazione non riuscito.",
 	"builderUnsavedChangesNavigation": "Hai modifiche non salvate che andranno perse. Uscire comunque?",
-	"builderUnpublishedChangesNavigation": "Hai modifiche non pubblicate. La tua bozza è salvata e potrai riprenderla più tardi. Uscire comunque?",
 	"fieldVisibility": "Visibilità dei campi",
 	"fieldVisibilityHelpText": "Controlla quali campi ogni ruolo può vedere e modificare.",
 	"visibilityAuditorRespondent": "Revisore + Rispondente",
@@ -2900,7 +2778,6 @@
 	"mfaDisabledSuccessfully": "La MFA è stata disattivata per questo utente",
 	"errorDisablingMFA": "Impossibile disattivare la MFA per questo utente",
 	"userHasNoMFAEnabled": "Questo utente non ha la MFA attivata",
-	"builderChangedOn": "modificato in",
 	"requirementWeight": "Peso",
 	"scim": "SCIM",
 	"scimDescription": "Configura il provisioning SCIM 2.0. Indirizza il tuo provider di identità all'endpoint sottostante e autenticalo con un token bearer generato qui.",
@@ -2920,8 +2797,6 @@
 	"idpGroup": "Gruppo IdP",
 	"idpGroups": "Gruppi IdP",
 	"idpGroupsDescription": "Abilita la federazione dei gruppi IdP (provisioning SCIM, mappature dei gruppi IdP e appartenenze ai gruppi IdP degli utenti).",
-	"libraryFileInYaml": "File della libreria in formato YAML",
-	"riskAcceptanceJusitficationHelpText": "Giustificazione per l'accettazione del rischio. Solo l'approvatore può modificare questo campo.",
 	"addProcessingNature": "Aggiungi natura del trattamento",
 	"addRoTo": "Aggiungi RO/TO",
 	"addStoredLibrary": "Aggiungi libreria salvata",
@@ -3318,7 +3193,6 @@
 	"deactivateServiceAccountConfirm": "La disattivazione di questo account di servizio revocherà immediatamente qualsiasi token di accesso in sospeso e impedirà l'emissione di nuovi token. Continuare?",
 	"gracePeriod": "Periodo di tolleranza",
 	"gracePeriodHelpText": "Il secret attuale continua a funzionare per questo periodo dopo la rotazione, in modo che le integrazioni possano essere aggiornate senza interruzioni. Limitato a 1 mese.",
-	"gracePeriodTooLong": "Il periodo di tolleranza non può superare 1 mese.",
 	"previousSecretValidUntil": "Il secret client precedente rimane valido fino al {date}.",
 	"personalAccessTokens": "Token di accesso personali",
 	"personalAccessTokensDescription": "Token che hai generato e che possono essere utilizzati per accedere all'API di CISO Assistant.",

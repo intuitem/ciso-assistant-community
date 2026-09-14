@@ -3,7 +3,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ fetch }) => {
-	const response = await fetch(`${BASE_API_URL}/settings/general/force_language/`, {
+	const response = await fetch(`${BASE_API_URL}/settings/general/force_date_format/`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' }
 	});

@@ -4,10 +4,15 @@ import { loadFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
 
 export const load = loadFlash(async ({ locals, url, fetch }) => {
-	if (!locals.user) {
+	const user = await locals.getUser();
+	if (!user) {
 		redirect(302, `/login?next=${encodeURIComponent(url.pathname + url.search)}`);
 	}
-	if (!locals.featureflags?.custom_portals) {
+	const [settings, featureflags] = await Promise.all([
+		locals.getSettings(),
+		locals.getFeatureFlags()
+	]);
+	if (!featureflags?.custom_portals) {
 		redirect(302, '/');
 	}
 	const res = await fetch(`${BASE_API_URL}/portals/mine/`);
@@ -15,9 +20,9 @@ export const load = loadFlash(async ({ locals, url, fetch }) => {
 		? await res.json()
 		: [];
 	return {
-		user: locals.user,
-		settings: locals.settings,
-		featureflags: locals.featureflags,
+		user,
+		settings,
+		featureflags,
 		portals
 	};
 }) satisfies LayoutServerLoad;

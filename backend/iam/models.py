@@ -749,6 +749,22 @@ def default_language() -> str:
     return "en"
 
 
+def default_date_format() -> str:
+    """The instance-wide default date format, used when the user has no preference."""
+    try:
+        from global_settings.models import GlobalSettings
+
+        general = GlobalSettings.objects.filter(name="general").first()
+        if general and isinstance(general.value, dict):
+            candidate = general.value.get("default_date_format", "auto")
+            if isinstance(candidate, str) and candidate in User.DATE_FORMATS:
+                return candidate
+    except ImportError, OperationalError, ProgrammingError:
+        # Called during startup and from migrations, before the table exists.
+        pass
+    return "auto"
+
+
 def resolve_language(code) -> str:
     """An explicit, supported language, else the instance default."""
     return code if is_supported_language(code) else default_language()
@@ -799,6 +815,7 @@ class UserManager(BaseUserManager):
         # An explicit language wins over the instance default: a third-party
         # representative gets their invitation in their own language.
         user.preferences["lang"] = resolve_language(extra_fields.get("language"))
+        user.preferences["date_format"] = default_date_format()
 
         user.save(using=self._db)
         user.user_groups.set(extra_fields.get("user_groups", []))
@@ -1018,13 +1035,24 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             self.preferences = prefs
         if not is_supported_language(prefs.get("lang")):
             prefs["lang"] = default_language()
-        if prefs.get("date_format") not in self.DATE_FORMATS:
-            prefs["date_format"] = "auto"
+        stored_format = prefs.get("date_format")
+        if not isinstance(stored_format, str) or stored_format not in self.DATE_FORMATS:
+            prefs["date_format"] = default_date_format()
         ui = prefs.get("ui") if isinstance(prefs.get("ui"), dict) else {}
         if ui.get("theme") not in ("light", "dark", "system"):
             ui["theme"] = "system"
         prefs["ui"] = ui
         return prefs
+
+    def language_code(self) -> str:
+        """Just the language, resolved against the instance default. Unlike
+        get_preferences() this normalizes nothing else, so a read path that
+        only needs the language doesn't pay for — or mutate — the rest of the
+        preferences dict. Matters on list endpoints, which call it per row.
+        """
+        prefs = self.preferences if isinstance(self.preferences, dict) else {}
+        code = prefs.get("lang")
+        return code if is_supported_language(code) else default_language()
 
     # Maps Django HTML template names to YAML template keys
     _TEMPLATE_KEY_MAP = {

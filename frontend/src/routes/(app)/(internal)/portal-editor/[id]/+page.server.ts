@@ -8,7 +8,7 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch, locals }) => {
-	if (!locals.featureflags?.custom_portals) redirect(302, '/');
+	if (!(await locals.getFeatureFlags())?.custom_portals) redirect(302, '/');
 	const res = await fetch(`${BASE_API_URL}/portals/${params.id}/`);
 	if (!res.ok) error(res.status === 404 ? 404 : 500, 'Portal not found');
 	const portal = await res.json();
@@ -17,13 +17,13 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 			fetchAllPages(fetch, `${BASE_API_URL}/public-documents/`),
 			fetchAllPages(fetch, `${BASE_API_URL}/framework-snapshots/`),
 			fetchAllPages(fetch, `${BASE_API_URL}/frameworks/`),
-			locals.featureflags?.quick_forms
+			(await locals.getFeatureFlags())?.quick_forms
 				? fetchAllPages(fetch, `${BASE_API_URL}/quick-forms/`)
 				: Promise.resolve([]),
-			locals.featureflags?.quick_forms
+			(await locals.getFeatureFlags())?.quick_forms
 				? fetchAllPages(fetch, `${BASE_API_URL}/actors/?is_third_party=false`)
 				: Promise.resolve([]),
-			locals.featureflags?.quick_forms
+			(await locals.getFeatureFlags())?.quick_forms
 				? fetchAllPages(fetch, `${BASE_API_URL}/quick-form-publications/`)
 				: Promise.resolve([])
 		]).catch((e) => {
@@ -65,7 +65,7 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 		quickForms,
 		actors,
 		publications,
-		quickFormsEnabled: !!locals.featureflags?.quick_forms
+		quickFormsEnabled: !!(await locals.getFeatureFlags())?.quick_forms
 	};
 };
 

@@ -2152,7 +2152,7 @@ class UserReadSerializer(BaseModelSerializer):
     def get_language(self, obj):
         # The label, not the code: this feeds the detail view. The edit form reads the
         # code from the write serializer instead.
-        code = obj.get_preferences().get("lang")
+        code = obj.language_code()
         return dict(settings.LANGUAGES).get(code, code)
 
     class Meta:
