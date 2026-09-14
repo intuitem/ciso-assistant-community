@@ -530,8 +530,12 @@
 			{/if}
 		{/each}
 	{:catch error}
-		<div class="flex flex-col items-center justify-center py-8">
-			<p class="text-red-500">Error loading data</p>
+		<div class="flex flex-col items-center justify-center py-8 space-y-2">
+			<i class="fa-solid fa-triangle-exclamation text-3xl text-error-500"></i>
+			<p class="text-error-500 font-semibold">{m.xRaysLoadingError()}</p>
+			{#if error?.message}
+				<p class="text-sm text-surface-600-400">{error.message}</p>
+			{/if}
 		</div>
 	{/await}
 </div>

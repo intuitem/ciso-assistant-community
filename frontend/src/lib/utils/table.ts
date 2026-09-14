@@ -1000,6 +1000,18 @@ export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const AUTHOR_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		lazy: true,
+		label: 'authors',
+		optionsLabelField: 'str',
+		optionsValueField: 'id',
+		optionsEndpoint: 'actors',
+		multiple: true
+	}
+};
+
 export const USER_IS_ACTIVE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1705,6 +1717,7 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER,
+			authors: AUTHOR_FILTER,
 			due_date: dateFilter('due_date'),
 			eta: dateFilter('eta'),
 			created_at: CREATED_AT_FILTER,
@@ -2220,6 +2233,7 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			framework: FRAMEWORK_FILTER,
 			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
+			authors: AUTHOR_FILTER,
 			due_date: dateFilter('due_date'),
 			eta: dateFilter('eta'),
 			created_at: CREATED_AT_FILTER,
@@ -3035,6 +3049,7 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			category: FINDINGS_ASSESSMENTS_CATEGORY_FILTER,
 			status: FINDINGS_ASSESSMENTS_STATUS_FILTER,
+			authors: AUTHOR_FILTER,
 			filtering_labels: LABELS_FILTER,
 			reported_at: dateFilter('reported_at')
 		}
