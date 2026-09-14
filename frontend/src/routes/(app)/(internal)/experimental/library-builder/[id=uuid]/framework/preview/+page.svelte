@@ -213,7 +213,9 @@
 <div class="max-w-3xl mx-auto px-4 py-6 space-y-4">
 	<!-- Implementation Group filter -->
 	{#if igDefs.length > 0}
-		<div class="flex flex-wrap items-center gap-2 p-3 bg-surface-100-900 rounded-lg border border-surface-200-800">
+		<div
+			class="flex flex-wrap items-center gap-2 p-3 bg-surface-100-900 rounded-lg border border-surface-200-800"
+		>
 			<span class="text-xs font-medium text-surface-500 uppercase tracking-wide mr-1"
 				>Filter by implementation group</span
 			>
@@ -275,7 +277,9 @@
 			{@const questions = currentItem.data.questions}
 			{@const questionsDict = toQuestionDict(questions)}
 			{@const hasQuestions = Object.keys(questionsDict).length > 0}
-			<div class="card bg-surface-50-950 shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 space-y-4">
+			<div
+				class="card bg-surface-50-950 shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 space-y-4"
+			>
 				<h3 class="text-xl font-semibold text-orange-600">
 					{node.ref_id ? `${node.ref_id} - ` : ''}{t(node.translations, 'name', node.name) ||
 						'Untitled'}

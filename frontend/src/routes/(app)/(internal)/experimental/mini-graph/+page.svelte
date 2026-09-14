@@ -2,7 +2,7 @@
 	import { pageTitle } from '$lib/utils/stores';
 	import GraphPanel from './GraphPanel.svelte';
 	import { NODE_BY_ID, TYPE_META, neighborsOf } from './universe';
-	import type { EgoNode } from './ego';
+	import type { LiveNode } from './accretion';
 
 	$pageTitle = 'Mini graph explorer';
 
@@ -21,7 +21,7 @@
 	const meta = $derived(TYPE_META[root.type]);
 	const directCount = $derived(new Set(neighborsOf(rootId).map((n) => n.id)).size);
 
-	function openObject(node: EgoNode) {
+	function openObject(node: LiveNode) {
 		// Fixture ids have no page. Wired up, this is an Anchor to /{urlModel}/{uuid}.
 		toast = `Would navigate to the ${TYPE_META[node.type].label.toLowerCase()} "${node.name}"`;
 		setTimeout(() => (toast = ''), 2500);
@@ -80,7 +80,12 @@
 	</div>
 </div>
 
-<GraphPanel open={panelOpen} {rootId} onClose={() => (panelOpen = false)} onOpenObject={openObject} />
+<GraphPanel
+	open={panelOpen}
+	{rootId}
+	onClose={() => (panelOpen = false)}
+	onOpenObject={openObject}
+/>
 
 {#if toast}
 	<div

@@ -1,5 +1,5 @@
 import { metaFor } from './meta';
-import type { PlacedGraph, PlacedNode } from './layout';
+import { canExpand, type LiveGraph, type LiveNode } from './accretion';
 
 function truncate(s: string, n: number): string {
 	return s.length <= n ? s : s.slice(0, n - 1) + '…';
@@ -9,44 +9,63 @@ function esc(s: string): string {
 	return String(s).replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[c]!);
 }
 
-/** Long names never fit a ring; ref_id does, and it is what people quote anyway —
- *  but only when it really is a short code. Some models carry a full imported
- *  identifier in ref_id, which is longer than the name it was meant to replace. */
+/**
+ * Long names never fit a ring; ref_id does, and it is what people quote. Only
+ * when it really is a short code — some models carry a full imported identifier
+ * in ref_id, longer than the name it was meant to replace.
+ */
 const MAX_REF = 16;
 
-export function shortLabel(n: PlacedNode): string {
+export function shortLabel(n: LiveNode): string {
 	if (n.aggregate) return n.name;
 	const ref = n.ref?.trim();
 	if (ref && ref.length <= MAX_REF) return ref;
 	return truncate(n.name, 14);
 }
 
-function labelSide(n: PlacedNode): 'left' | 'right' | 'top' | 'bottom' {
+function labelSide(n: LiveNode): 'left' | 'right' | 'top' | 'bottom' {
 	const a = (Math.atan2(n.y, n.x) * 180) / Math.PI;
 	if (a > 75 && a < 105) return 'bottom';
 	if (a < -75 && a > -105) return 'top';
 	return Math.abs(a) > 90 ? 'left' : 'right';
 }
 
-export function buildGraphOption(graph: PlacedGraph, showLabels: boolean, dark: boolean) {
-	const byId = new Map(graph.nodes.map((n) => [n.id, n]));
+export function buildGraphOption(graph: LiveGraph, showLabels: boolean, dark: boolean) {
+	const nodes = [...graph.nodes.values()];
+	const byId = graph.nodes;
 	const dim = dark ? '#94a3b8' : '#64748b';
 
-	const data = graph.nodes.map((n) => {
+	const data = nodes.map((n) => {
 		const meta = metaFor(n.urlModel);
-		const isRoot = n.depth === 0;
+		const isRoot = n.hop === 0;
+		// A halo means "there is more behind this". Flat means you are already
+		// seeing everything it holds; faded means it sits at the hop limit.
+		const hasMore = canExpand(n);
 		return {
 			id: n.id,
 			name: n.name,
 			x: n.x,
 			y: n.y,
 			symbol: n.aggregate ? 'circle' : meta.symbol,
-			symbolSize: isRoot ? 40 : n.aggregate ? 13 : 22,
+			symbolSize: isRoot ? 38 : n.aggregate ? 13 : Math.max(13, 22 - n.hop * 3),
 			itemStyle: {
 				color: n.aggregate ? 'transparent' : meta.color,
-				borderColor: n.aggregate ? meta.color : isRoot ? (dark ? '#fff' : '#1e293b') : 'transparent',
-				borderWidth: n.aggregate ? 1.5 : isRoot ? 3 : 0,
-				borderType: n.aggregate ? [3, 2] : 'solid'
+				opacity: n.frontier ? 0.45 : n.expanded ? 0.75 : 1,
+				borderColor: n.aggregate
+					? meta.color
+					: isRoot
+						? dark
+							? '#fff'
+							: '#1e293b'
+						: n.loading
+							? dark
+								? '#fff'
+								: '#1e293b'
+							: hasMore
+								? meta.color
+								: 'transparent',
+				borderWidth: n.aggregate ? 1.5 : isRoot ? 3 : n.loading ? 3 : hasMore ? 4 : 0,
+				borderType: n.aggregate || n.loading ? [3, 2] : 'solid'
 			},
 			label: {
 				show: showLabels,
@@ -55,21 +74,22 @@ export function buildGraphOption(graph: PlacedGraph, showLabels: boolean, dark: 
 				fontSize: isRoot ? 12 : 10,
 				fontWeight: isRoot ? 'bold' : 'normal',
 				color: dark ? '#e2e8f0' : '#334155',
-				formatter: () => (isRoot ? truncate(n.name, 44) : shortLabel(n))
+				formatter: () => (isRoot ? truncate(n.name, 40) : shortLabel(n))
 			}
 		};
 	});
 
-	const links = graph.links.map((l) => ({
+	const links = [...graph.edges.values()].map((l) => ({
 		source: l.source,
 		target: l.target,
 		value: l.verb,
-		lineStyle: { color: dim, opacity: 0.45, width: 1.5, curveness: 0.12 }
+		lineStyle: { color: dim, opacity: 0.45, width: 1.4, curveness: 0.1 }
 	}));
 
 	return {
 		animationDuration: 400,
-		animationEasingUpdate: 'quinticInOut',
+		animationDurationUpdate: 500,
+		animationEasingUpdate: 'cubicOut',
 		tooltip: {
 			trigger: 'item',
 			confine: true,
@@ -94,11 +114,21 @@ export function buildGraphOption(graph: PlacedGraph, showLabels: boolean, dark: 
 							`<tr><td style="opacity:.6;padding-right:8px">${esc(k)}</td><td>${esc(v)}</td></tr>`
 					)
 					.join('');
+				const hint = n.loading
+					? 'loading…'
+					: n.expanded
+						? 'click to collapse'
+						: n.frontier
+							? 'edge of this view — open it to explore from there'
+							: canExpand(n)
+								? 'click to expand'
+								: 'nothing further';
 				return `<div style="max-width:260px">
 					<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${meta.color};margin-right:6px"></span>
 					<span style="font-size:11px;opacity:.7">${meta.label}</span>
 					<div style="font-weight:600;margin:2px 0 4px;white-space:normal">${esc(n.name)}</div>
 					<table style="font-size:11px">${rows}</table>
+					<div style="font-size:10px;opacity:.55;margin-top:6px">${hint}</div>
 				</div>`;
 			}
 		},

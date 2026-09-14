@@ -39,22 +39,65 @@ export interface UniverseEdge {
 	verb: string;
 }
 
-export const TYPE_META: Record<NodeType, { label: string; color: string; icon: string; symbol: string }> = {
-	'applied-control': { label: 'Applied control', color: '#3b82f6', icon: 'fa-fire-extinguisher', symbol: 'circle' },
-	'risk-scenario': { label: 'Risk scenario', color: '#ef4444', icon: 'fa-biohazard', symbol: 'circle' },
+export const TYPE_META: Record<
+	NodeType,
+	{ label: string; color: string; icon: string; symbol: string }
+> = {
+	'applied-control': {
+		label: 'Applied control',
+		color: '#3b82f6',
+		icon: 'fa-fire-extinguisher',
+		symbol: 'circle'
+	},
+	'risk-scenario': {
+		label: 'Risk scenario',
+		color: '#ef4444',
+		icon: 'fa-biohazard',
+		symbol: 'circle'
+	},
 	asset: { label: 'Asset', color: '#10b981', icon: 'fa-gem', symbol: 'diamond' },
 	threat: { label: 'Threat', color: '#6d28d9', icon: 'fa-virus', symbol: 'triangle' },
 	vulnerability: { label: 'Vulnerability', color: '#ec4899', icon: 'fa-bug', symbol: 'triangle' },
-	'requirement-assessment': { label: 'Requirement', color: '#f59e0b', icon: 'fa-list-check', symbol: 'roundRect' },
-	'compliance-assessment': { label: 'Audit', color: '#b45309', icon: 'fa-certificate', symbol: 'roundRect' },
-	'risk-assessment': { label: 'Risk assessment', color: '#9f1239', icon: 'fa-chart-simple', symbol: 'roundRect' },
+	'requirement-assessment': {
+		label: 'Requirement',
+		color: '#f59e0b',
+		icon: 'fa-list-check',
+		symbol: 'roundRect'
+	},
+	'compliance-assessment': {
+		label: 'Audit',
+		color: '#b45309',
+		icon: 'fa-certificate',
+		symbol: 'roundRect'
+	},
+	'risk-assessment': {
+		label: 'Risk assessment',
+		color: '#9f1239',
+		icon: 'fa-chart-simple',
+		symbol: 'roundRect'
+	},
 	evidence: { label: 'Evidence', color: '#06b6d4', icon: 'fa-file-lines', symbol: 'rect' },
 	finding: { label: 'Finding', color: '#f97316', icon: 'fa-magnifying-glass', symbol: 'circle' },
-	'finding-assessment': { label: 'Follow-up', color: '#c2410c', icon: 'fa-clipboard-check', symbol: 'roundRect' },
+	'finding-assessment': {
+		label: 'Follow-up',
+		color: '#c2410c',
+		icon: 'fa-clipboard-check',
+		symbol: 'roundRect'
+	},
 	task: { label: 'Task', color: '#84cc16', icon: 'fa-list-check', symbol: 'rect' },
 	actor: { label: 'Actor', color: '#6b7280', icon: 'fa-user', symbol: 'circle' },
-	'reference-control': { label: 'Reference control', color: '#1e3a8a', icon: 'fa-book', symbol: 'roundRect' },
-	'security-exception': { label: 'Security exception', color: '#d946ef', icon: 'fa-shield-halved', symbol: 'rect' },
+	'reference-control': {
+		label: 'Reference control',
+		color: '#1e3a8a',
+		icon: 'fa-book',
+		symbol: 'roundRect'
+	},
+	'security-exception': {
+		label: 'Security exception',
+		color: '#d946ef',
+		icon: 'fa-shield-halved',
+		symbol: 'rect'
+	},
 	incident: { label: 'Incident', color: '#be123c', icon: 'fa-bolt', symbol: 'circle' },
 	perimeter: { label: 'Perimeter', color: '#94a3b8', icon: 'fa-draw-polygon', symbol: 'roundRect' },
 	folder: { label: 'Domain', color: '#cbd5e1', icon: 'fa-folder', symbol: 'roundRect' }
@@ -62,63 +105,258 @@ export const TYPE_META: Record<NodeType, { label: string; color: string; icon: s
 
 export const NODES: UniverseNode[] = [
 	// controls
-	{ id: 'ac-fde', type: 'applied-control', name: 'Full-disk encryption on endpoints', meta: { ref: 'M.12', status: 'Active', priority: 'P1', effort: 'Medium' } },
-	{ id: 'ac-mdm', type: 'applied-control', name: 'MDM enrolment & compliance baseline', meta: { ref: 'M.14', status: 'In progress', priority: 'P2' } },
-	{ id: 'ac-wipe', type: 'applied-control', name: 'Remote wipe capability', meta: { ref: 'M.15', status: 'Active' } },
-	{ id: 'ac-locks', type: 'applied-control', name: 'Cable locks in open offices', meta: { ref: 'M.03', status: 'Active' } },
-	{ id: 'ac-dlp', type: 'applied-control', name: 'DLP on egress gateways', meta: { ref: 'M.21', status: 'To do', priority: 'P1' } },
-	{ id: 'ac-backup', type: 'applied-control', name: 'Encrypted offsite backups', meta: { ref: 'M.08', status: 'Active' } },
-	{ id: 'ac-awareness', type: 'applied-control', name: 'Security awareness training', meta: { ref: 'M.01', status: 'Active' } },
-	{ id: 'ac-mfa', type: 'applied-control', name: 'MFA on remote access', meta: { ref: 'M.05', status: 'In progress' } },
+	{
+		id: 'ac-fde',
+		type: 'applied-control',
+		name: 'Full-disk encryption on endpoints',
+		meta: { ref: 'M.12', status: 'Active', priority: 'P1', effort: 'Medium' }
+	},
+	{
+		id: 'ac-mdm',
+		type: 'applied-control',
+		name: 'MDM enrolment & compliance baseline',
+		meta: { ref: 'M.14', status: 'In progress', priority: 'P2' }
+	},
+	{
+		id: 'ac-wipe',
+		type: 'applied-control',
+		name: 'Remote wipe capability',
+		meta: { ref: 'M.15', status: 'Active' }
+	},
+	{
+		id: 'ac-locks',
+		type: 'applied-control',
+		name: 'Cable locks in open offices',
+		meta: { ref: 'M.03', status: 'Active' }
+	},
+	{
+		id: 'ac-dlp',
+		type: 'applied-control',
+		name: 'DLP on egress gateways',
+		meta: { ref: 'M.21', status: 'To do', priority: 'P1' }
+	},
+	{
+		id: 'ac-backup',
+		type: 'applied-control',
+		name: 'Encrypted offsite backups',
+		meta: { ref: 'M.08', status: 'Active' }
+	},
+	{
+		id: 'ac-awareness',
+		type: 'applied-control',
+		name: 'Security awareness training',
+		meta: { ref: 'M.01', status: 'Active' }
+	},
+	{
+		id: 'ac-mfa',
+		type: 'applied-control',
+		name: 'MFA on remote access',
+		meta: { ref: 'M.05', status: 'In progress' }
+	},
 
 	// assets
-	{ id: 'as-laptops', type: 'asset', name: 'Field laptops', meta: { ref: 'A.7', type: 'Support', class: 'Endpoint' } },
-	{ id: 'as-custdb', type: 'asset', name: 'Customer database', meta: { ref: 'A.1', type: 'Primary', class: 'Data' } },
-	{ id: 'as-crm', type: 'asset', name: 'CRM SaaS', meta: { ref: 'A.12', type: 'Support', class: 'Application' } },
-	{ id: 'as-payroll', type: 'asset', name: 'Payroll data', meta: { ref: 'A.2', type: 'Primary', class: 'Data' } },
+	{
+		id: 'as-laptops',
+		type: 'asset',
+		name: 'Field laptops',
+		meta: { ref: 'A.7', type: 'Support', class: 'Endpoint' }
+	},
+	{
+		id: 'as-custdb',
+		type: 'asset',
+		name: 'Customer database',
+		meta: { ref: 'A.1', type: 'Primary', class: 'Data' }
+	},
+	{
+		id: 'as-crm',
+		type: 'asset',
+		name: 'CRM SaaS',
+		meta: { ref: 'A.12', type: 'Support', class: 'Application' }
+	},
+	{
+		id: 'as-payroll',
+		type: 'asset',
+		name: 'Payroll data',
+		meta: { ref: 'A.2', type: 'Primary', class: 'Data' }
+	},
 
 	// reference controls
-	{ id: 'rc-crypto', type: 'reference-control', name: 'A.8.24 Use of cryptography', meta: { ref: 'A.8.24', library: 'ISO/IEC 27001:2022', category: 'Technical' } },
-	{ id: 'rc-mobile', type: 'reference-control', name: 'A.8.1 User endpoint devices', meta: { ref: 'A.8.1', library: 'ISO/IEC 27001:2022' } },
+	{
+		id: 'rc-crypto',
+		type: 'reference-control',
+		name: 'A.8.24 Use of cryptography',
+		meta: { ref: 'A.8.24', library: 'ISO/IEC 27001:2022', category: 'Technical' }
+	},
+	{
+		id: 'rc-mobile',
+		type: 'reference-control',
+		name: 'A.8.1 User endpoint devices',
+		meta: { ref: 'A.8.1', library: 'ISO/IEC 27001:2022' }
+	},
 
 	// evidence
-	{ id: 'ev-fde-report', type: 'evidence', name: 'FDE coverage report 2026-Q2', meta: { ref: 'EV.03', revisions: '3', updated: '2026-07-02' } },
-	{ id: 'ev-gpo', type: 'evidence', name: 'BitLocker GPO export', meta: { ref: 'EV.04', revisions: '1', updated: '2026-04-18' } },
-	{ id: 'ev-mdm-screens', type: 'evidence', name: 'MDM compliance screenshots', meta: { ref: 'EV.09', revisions: '2' } },
+	{
+		id: 'ev-fde-report',
+		type: 'evidence',
+		name: 'FDE coverage report 2026-Q2',
+		meta: { ref: 'EV.03', revisions: '3', updated: '2026-07-02' }
+	},
+	{
+		id: 'ev-gpo',
+		type: 'evidence',
+		name: 'BitLocker GPO export',
+		meta: { ref: 'EV.04', revisions: '1', updated: '2026-04-18' }
+	},
+	{
+		id: 'ev-mdm-screens',
+		type: 'evidence',
+		name: 'MDM compliance screenshots',
+		meta: { ref: 'EV.09', revisions: '2' }
+	},
 
 	// actors
-	{ id: 'act-alice', type: 'actor', name: 'A. Martin', meta: { kind: 'User', role: 'IT security lead' } },
+	{
+		id: 'act-alice',
+		type: 'actor',
+		name: 'A. Martin',
+		meta: { kind: 'User', role: 'IT security lead' }
+	},
 	{ id: 'act-itops', type: 'actor', name: 'IT Operations', meta: { kind: 'Team' } },
 
 	// compliance
-	{ id: 'ra-8-24', type: 'requirement-assessment', name: 'A.8.24 Use of cryptography', meta: { ref: 'A.8.24', result: 'Compliant', status: 'Done' } },
-	{ id: 'ra-8-1', type: 'requirement-assessment', name: 'A.8.1 User endpoint devices', meta: { ref: 'A.8.1', result: 'Partially compliant', status: 'In progress' } },
-	{ id: 'ra-cc61', type: 'requirement-assessment', name: 'CC6.1 Logical access controls', meta: { ref: 'CC6.1', result: 'Compliant' } },
-	{ id: 'au-iso', type: 'compliance-assessment', name: 'ISO/IEC 27001:2022 — Group certification', meta: { ref: 'ISO 27001', progress: '78%', framework: 'ISO 27001' } },
-	{ id: 'au-soc2', type: 'compliance-assessment', name: 'SOC 2 Type II — Platform', meta: { ref: 'SOC 2', progress: '42%', framework: 'SOC 2' } },
+	{
+		id: 'ra-8-24',
+		type: 'requirement-assessment',
+		name: 'A.8.24 Use of cryptography',
+		meta: { ref: 'A.8.24', result: 'Compliant', status: 'Done' }
+	},
+	{
+		id: 'ra-8-1',
+		type: 'requirement-assessment',
+		name: 'A.8.1 User endpoint devices',
+		meta: { ref: 'A.8.1', result: 'Partially compliant', status: 'In progress' }
+	},
+	{
+		id: 'ra-cc61',
+		type: 'requirement-assessment',
+		name: 'CC6.1 Logical access controls',
+		meta: { ref: 'CC6.1', result: 'Compliant' }
+	},
+	{
+		id: 'au-iso',
+		type: 'compliance-assessment',
+		name: 'ISO/IEC 27001:2022 — Group certification',
+		meta: { ref: 'ISO 27001', progress: '78%', framework: 'ISO 27001' }
+	},
+	{
+		id: 'au-soc2',
+		type: 'compliance-assessment',
+		name: 'SOC 2 Type II — Platform',
+		meta: { ref: 'SOC 2', progress: '42%', framework: 'SOC 2' }
+	},
 
 	// risk
-	{ id: 'rs-theft', type: 'risk-scenario', name: 'Laptop theft leads to customer data disclosure', meta: { ref: 'R.4', current: 'High', residual: 'Medium' } },
-	{ id: 'rs-exfil', type: 'risk-scenario', name: 'Database dump exfiltrated by insider', meta: { ref: 'R.7', current: 'Critical', residual: 'High' } },
-	{ id: 'rs-phish', type: 'risk-scenario', name: 'Phishing leads to credential compromise', meta: { ref: 'R.1', current: 'High', residual: 'Medium' } },
-	{ id: 'rsa-2026', type: 'risk-assessment', name: '2026 corporate risk review', meta: { ref: 'RA.26', matrix: '5x5 balanced', status: 'In progress' } },
-	{ id: 'th-theft', type: 'threat', name: 'Theft of equipment', meta: { ref: 'T.05', library: 'ISO 27005' } },
-	{ id: 'th-insider', type: 'threat', name: 'Malicious insider', meta: { ref: 'T.11', library: 'ISO 27005' } },
-	{ id: 'th-phish', type: 'threat', name: 'Phishing', meta: { library: 'MITRE ATT&CK', ref: 'T1566' } },
-	{ id: 'vu-nofde', type: 'vulnerability', name: 'Legacy fleet without full-disk encryption', meta: { ref: 'V.03', severity: 'High', status: 'Confirmed' } },
-	{ id: 'vu-weakmfa', type: 'vulnerability', name: 'MFA not enforced on VPN', meta: { ref: 'V.07', severity: 'Critical', status: 'Mitigated' } },
+	{
+		id: 'rs-theft',
+		type: 'risk-scenario',
+		name: 'Laptop theft leads to customer data disclosure',
+		meta: { ref: 'R.4', current: 'High', residual: 'Medium' }
+	},
+	{
+		id: 'rs-exfil',
+		type: 'risk-scenario',
+		name: 'Database dump exfiltrated by insider',
+		meta: { ref: 'R.7', current: 'Critical', residual: 'High' }
+	},
+	{
+		id: 'rs-phish',
+		type: 'risk-scenario',
+		name: 'Phishing leads to credential compromise',
+		meta: { ref: 'R.1', current: 'High', residual: 'Medium' }
+	},
+	{
+		id: 'rsa-2026',
+		type: 'risk-assessment',
+		name: '2026 corporate risk review',
+		meta: { ref: 'RA.26', matrix: '5x5 balanced', status: 'In progress' }
+	},
+	{
+		id: 'th-theft',
+		type: 'threat',
+		name: 'Theft of equipment',
+		meta: { ref: 'T.05', library: 'ISO 27005' }
+	},
+	{
+		id: 'th-insider',
+		type: 'threat',
+		name: 'Malicious insider',
+		meta: { ref: 'T.11', library: 'ISO 27005' }
+	},
+	{
+		id: 'th-phish',
+		type: 'threat',
+		name: 'Phishing',
+		meta: { library: 'MITRE ATT&CK', ref: 'T1566' }
+	},
+	{
+		id: 'vu-nofde',
+		type: 'vulnerability',
+		name: 'Legacy fleet without full-disk encryption',
+		meta: { ref: 'V.03', severity: 'High', status: 'Confirmed' }
+	},
+	{
+		id: 'vu-weakmfa',
+		type: 'vulnerability',
+		name: 'MFA not enforced on VPN',
+		meta: { ref: 'V.07', severity: 'Critical', status: 'Mitigated' }
+	},
 
 	// findings / ops
-	{ id: 'fi-devlaptops', type: 'finding', name: '12 developer laptops unencrypted', meta: { ref: 'F.11', severity: 'High', status: 'Open' } },
-	{ id: 'fa-pentest', type: 'finding-assessment', name: 'Internal pentest 2026-05', meta: { ref: 'PT.05', findings: '9' } },
-	{ id: 'tk-fde-check', type: 'task', name: 'Quarterly encryption coverage check', meta: { ref: 'TK.02', recurrence: 'Quarterly', next: '2026-10-01' } },
-	{ id: 'tk-mdm-review', type: 'task', name: 'Monthly MDM exception review', meta: { ref: 'TK.07', recurrence: 'Monthly' } },
-	{ id: 'se-pos', type: 'security-exception', name: 'Legacy POS terminals — FDE exemption', meta: { ref: 'EX.01', status: 'Approved', expires: '2026-12-31' } },
-	{ id: 'in-lost', type: 'incident', name: 'INC-2026-011 — Laptop lost in transit', meta: { ref: 'INC-11', severity: 'Major', status: 'Closed' } },
+	{
+		id: 'fi-devlaptops',
+		type: 'finding',
+		name: '12 developer laptops unencrypted',
+		meta: { ref: 'F.11', severity: 'High', status: 'Open' }
+	},
+	{
+		id: 'fa-pentest',
+		type: 'finding-assessment',
+		name: 'Internal pentest 2026-05',
+		meta: { ref: 'PT.05', findings: '9' }
+	},
+	{
+		id: 'tk-fde-check',
+		type: 'task',
+		name: 'Quarterly encryption coverage check',
+		meta: { ref: 'TK.02', recurrence: 'Quarterly', next: '2026-10-01' }
+	},
+	{
+		id: 'tk-mdm-review',
+		type: 'task',
+		name: 'Monthly MDM exception review',
+		meta: { ref: 'TK.07', recurrence: 'Monthly' }
+	},
+	{
+		id: 'se-pos',
+		type: 'security-exception',
+		name: 'Legacy POS terminals — FDE exemption',
+		meta: { ref: 'EX.01', status: 'Approved', expires: '2026-12-31' }
+	},
+	{
+		id: 'in-lost',
+		type: 'incident',
+		name: 'INC-2026-011 — Laptop lost in transit',
+		meta: { ref: 'INC-11', severity: 'Major', status: 'Closed' }
+	},
 
 	// context
 	{ id: 'fo-corp', type: 'folder', name: 'Corporate IT', meta: { kind: 'Domain' } },
-	{ id: 'pe-endpoint', type: 'perimeter', name: 'Endpoint estate', meta: { status: 'In production' } }
+	{
+		id: 'pe-endpoint',
+		type: 'perimeter',
+		name: 'Endpoint estate',
+		meta: { status: 'In production' }
+	}
 ];
 
 export const EDGES: UniverseEdge[] = [
@@ -228,9 +466,30 @@ NODES.push({
 EDGES.push({ source: 'fo-corp', target: 'au-nis2', verb: 'scopes' });
 
 for (const [id, name, audit, result] of CITATIONS) {
-	NODES.push({ id, type: 'requirement-assessment', name, meta: { ref: name.split(' ')[0], result } });
+	NODES.push({
+		id,
+		type: 'requirement-assessment',
+		name,
+		meta: { ref: name.split(' ')[0], result }
+	});
 	EDGES.push({ source: id, target: 'ac-fde', verb: 'satisfied by' });
 	EDGES.push({ source: audit, target: id, verb: 'comprises' });
+}
+
+// A real ISO 27001 audit carries ninety-odd requirement assessments. Without them
+// the fixture cannot reproduce the case the back-relation rule exists for: walking
+// applied control -> requirement -> audit and being buried in the audit's other
+// requirements, none of which have anything to do with the control you started on.
+for (let i = 0; i < 64; i++) {
+	const id = `ra-bulk-${i}`;
+	const clause = `A.${5 + (i % 4)}.${20 + i}`;
+	NODES.push({
+		id,
+		type: 'requirement-assessment',
+		name: `${clause} Control requirement`,
+		meta: { ref: clause, result: i % 3 === 0 ? 'Compliant' : 'In progress' }
+	});
+	EDGES.push({ source: 'au-iso', target: id, verb: 'comprises' });
 }
 
 export const NODE_BY_ID = new Map(NODES.map((n) => [n.id, n]));

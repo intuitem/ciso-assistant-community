@@ -34,7 +34,12 @@ export interface RelationSpec {
 export const RELATION_MAP: Record<string, RelationSpec> = {
 	'applied-controls': {
 		forward: [
-			{ field: 'reference_control', urlModel: 'reference-controls', verb: 'templates', inbound: true },
+			{
+				field: 'reference_control',
+				urlModel: 'reference-controls',
+				verb: 'templates',
+				inbound: true
+			},
 			{ field: 'assets', urlModel: 'assets', verb: 'protects' },
 			{ field: 'evidences', urlModel: 'evidences', verb: 'evidenced by' },
 			{ field: 'owner', urlModel: 'actors', verb: 'owned by' },

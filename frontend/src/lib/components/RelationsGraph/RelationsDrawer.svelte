@@ -1,106 +1,166 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RelationsGraph from './RelationsGraph.svelte';
 	import { metaFor } from './meta';
-	import { RELATION_MAP } from './relations';
+	import {
+		createGraph,
+		merge,
+		collapse,
+		setLoading,
+		canExpand,
+		NODE_BUDGET,
+		MAX_HOP,
+		type LiveGraph,
+		type LiveNode
+	} from './accretion';
 	import type { Neighborhood } from './types';
-	import type { PlacedNode } from './layout';
 
 	interface Props {
 		open: boolean;
 		urlModel: string;
 		id: string;
+		name?: string;
 		onClose: () => void;
 	}
 
-	let { open, urlModel, id, onClose }: Props = $props();
+	let { open, urlModel, id, name = '', onClose }: Props = $props();
 
-	interface Focus {
-		urlModel: string;
-		id: string;
-	}
-
-	// The drawer owns what it is looking at, so re-centring explores without
-	// navigating the page underneath. null = still on the record the page is on.
-	let explored: Focus | null = $state(null);
-	let trail: Focus[] = $state([]);
-	const focus = $derived<Focus>(explored ?? { urlModel, id });
-
-	let data: Neighborhood | null = $state(null);
-	let loading = $state(false);
-	let loadError = $state('');
-	let selected: PlacedNode | null = $state(null);
+	let graph: LiveGraph = $state(createGraph({ id, urlModel, name }));
+	let selected: LiveNode | null = $state(null);
 	let fanCap = $state(5);
 	let showLabels = $state(true);
 	let wide = $state(false);
 	let filterOpen = $state(false);
 	let hidden = $state(new Set<string>(['folders']));
-	let stats = $state({ nodes: 0, collapsed: 0 });
+	let opened = $state(new Set<string>());
+	let booting = $state(false);
+	let bootError = $state('');
 
-	// The chat launcher is fixed at bottom-right above everything (z-950), so the
+	// The chat launcher is fixed bottom-right above everything (z-950), so the
 	// footer keeps its corner clear rather than hiding controls underneath it.
 	const chatBubble = $derived(Boolean(page.data?.featureflags?.chat_mode));
 
-	$effect(() => {
-		urlModel;
-		id;
-		explored = null;
-		trail = [];
-	});
+	/** Neighbourhoods are immutable for the life of the panel: collapsing and
+	 *  re-expanding, or opening a "+N", costs nothing after the first fetch. */
+	const cache = new Map<string, Neighborhood>();
+	const inflight = new Map<string, Promise<Neighborhood>>();
 
-	$effect(() => {
-		if (!open) return;
-		const { urlModel: m, id: objectId } = focus;
-		let stale = false;
-		loading = true;
-		loadError = '';
-		selected = null;
-		fetch(`/${m}/${objectId}/neighborhood`)
+	async function neighborhood(model: string, objectId: string): Promise<Neighborhood> {
+		const key = `${model}/${objectId}`;
+		const hit = cache.get(key);
+		if (hit) return hit;
+		const pending = inflight.get(key);
+		if (pending) return pending;
+		const request = fetch(`/${model}/${objectId}/neighborhood`)
 			.then(async (res) => {
 				if (!res.ok) throw new Error(String(res.status));
-				const body = await res.json();
-				if (!stale) data = body;
+				const body: Neighborhood = await res.json();
+				cache.set(key, body);
+				return body;
 			})
-			.catch(() => {
-				if (!stale) {
-					data = null;
-					loadError = 'Could not load the relations of this object.';
-				}
-			})
-			.finally(() => {
-				if (!stale) loading = false;
-			});
-		return () => {
-			stale = true;
-		};
+			.finally(() => inflight.delete(key));
+		inflight.set(key, request);
+		return request;
+	}
+
+	// Opening on a different record starts a new exploration.
+	$effect(() => {
+		if (!open) return;
+		urlModel;
+		id;
+		reset();
 	});
 
-	const rootMeta = $derived(metaFor(focus.urlModel));
-	const canExplore = (node: PlacedNode) => node.urlModel in RELATION_MAP;
+	async function reset() {
+		graph = createGraph({ id, urlModel, name });
+		selected = null;
+		opened = new Set();
+		bootError = '';
+		booting = true;
+		try {
+			const payload = await neighborhood(urlModel, id);
+			graph = merge(createGraph(payload.root), id, payload, { fanCap, hidden, opened });
+		} catch {
+			bootError = 'Could not load the relations of this object.';
+		} finally {
+			booting = false;
+		}
+	}
 
-	function reroot(node: PlacedNode) {
-		trail = [...trail, focus];
-		explored = { urlModel: node.urlModel, id: node.id };
+	async function expandNode(node: LiveNode) {
+		if (node.hop >= MAX_HOP) {
+			graph = {
+				...graph,
+				notice: `${MAX_HOP} hops is as far as this view goes. Open that object to explore from there.`
+			};
+			return;
+		}
+		if (!canExpand(node) || node.loading) return;
+		graph = setLoading(graph, node.id, true);
+		try {
+			const payload = await neighborhood(node.urlModel, node.id);
+			graph = merge(graph, node.id, payload, { fanCap, hidden, opened });
+		} catch {
+			graph = { ...setLoading(graph, node.id, false), notice: 'Could not load that object.' };
+		}
 	}
-	function back() {
-		if (!trail.length) return;
-		const previous = trail[trail.length - 1];
-		trail = trail.slice(0, -1);
-		explored = trail.length || previous.id !== id ? previous : null;
+
+	function openAggregate(node: LiveNode) {
+		if (!node.aggregate) return;
+		const { parentId, group } = node.aggregate;
+		const parent = graph.nodes.get(parentId);
+		if (!parent) return;
+		const payload = cache.get(`${parent.urlModel}/${parentId}`);
+		if (!payload) return;
+		const next = new Set(opened);
+		next.add(`${parentId}|${group}`);
+		opened = next;
+		// Re-fold the same payload with that group released; collapse first so the
+		// parent's fan is laid out once, with the newcomers included.
+		graph = merge(collapse(graph, parentId), parentId, payload, { fanCap, hidden, opened: next });
 	}
+
+	function onNode(node: LiveNode) {
+		if (node.aggregate) {
+			selected = null;
+			openAggregate(node);
+			return;
+		}
+		selected = node;
+		if (node.expanded) graph = collapse(graph, node.id);
+		else expandNode(node);
+	}
+
+	function goToNode(node: LiveNode) {
+		onClose();
+		goto(`/${node.urlModel}/${node.id}`);
+	}
+
 	function toggleType(model: string) {
 		const next = new Set(hidden);
 		next.has(model) ? next.delete(model) : next.add(model);
 		hidden = next;
+		reset();
 	}
 
+	const rootNode = $derived(graph.nodes.get(id));
+	const rootMeta = $derived(metaFor(urlModel));
+	const expandable = $derived([...graph.nodes.values()].filter(canExpand));
 	const presentTypes = $derived(
-		[...new Set((data?.nodes ?? []).map((n) => n.urlModel))].sort((a, b) =>
+		[...new Set([...graph.nodes.values()].map((n) => n.urlModel))].sort((a, b) =>
 			metaFor(a).label.localeCompare(metaFor(b).label)
 		)
 	);
+
+	async function expandAll() {
+		for (const node of expandable.slice(0, 10)) {
+			await expandNode(node);
+			if (graph.notice) break;
+		}
+	}
 </script>
 
 <svelte:window
@@ -120,18 +180,14 @@
 		aria-label="Relations"
 	>
 		<header class="flex items-start gap-2 p-3 border-b border-surface-200-800">
-			{#if trail.length}
-				<button class="btn btn-sm preset-tonal" onclick={back} title="Back" aria-label="Back">
-					<i class="fa-solid fa-arrow-left"></i>
-				</button>
-			{/if}
 			<i class="fa-solid {rootMeta.icon} mt-1.5" style="color:{rootMeta.color}"></i>
 			<div class="flex-1 min-w-0">
 				<div class="text-xs text-surface-500">{rootMeta.label}</div>
-				<div class="font-semibold truncate" title={data?.root.name}>
-					{data?.root.name ?? '…'}
-				</div>
+				<div class="font-semibold truncate" title={rootNode?.name}>{rootNode?.name ?? name}</div>
 			</div>
+			<button class="btn btn-sm preset-tonal" onclick={reset} title="Reset" aria-label="Reset">
+				<i class="fa-solid fa-rotate-left"></i>
+			</button>
 			<button
 				class="btn btn-sm preset-tonal"
 				onclick={() => (wide = !wide)}
@@ -146,34 +202,43 @@
 		</header>
 
 		<div class="relative flex-1 min-h-0 bg-surface-100-900">
-			{#if loading}
-				<div class="absolute inset-0 grid place-items-center text-surface-500 text-sm z-10">
+			{#if booting}
+				<div class="absolute inset-0 grid place-items-center text-surface-500 z-10">
 					<i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
 				</div>
-			{:else if loadError}
-				<div class="absolute inset-0 grid place-items-center text-surface-500 text-sm p-6 text-center">
-					{loadError}
+			{:else if bootError}
+				<div
+					class="absolute inset-0 grid place-items-center text-surface-500 text-sm p-6 text-center"
+				>
+					{bootError}
 				</div>
-			{:else if data && data.nodes.length === 0}
-				<div class="absolute inset-0 grid place-items-center text-surface-500 text-sm p-6 text-center">
+			{:else if graph.nodes.size <= 1}
+				<div
+					class="absolute inset-0 grid place-items-center text-surface-500 text-sm p-6 text-center"
+				>
 					<div>
 						<i class="fa-solid fa-circle-nodes text-3xl mb-3 opacity-40"></i>
 						<p>Nothing is linked to this object yet.</p>
 					</div>
 				</div>
-			{/if}
-			{#if data && !loading && data.nodes.length > 0}
+			{:else}
 				<RelationsGraph
-					{data}
-					{fanCap}
-					{hidden}
+					{graph}
 					{showLabels}
-					onSelect={(n) => (selected = n)}
-					onStats={(s) => (stats = s)}
+					onNodeClick={onNode}
+					onNodeDoubleClick={(n) => !n.aggregate && n.hop > 0 && goToNode(n)}
 				/>
 			{/if}
 
-			{#if selected}
+			{#if graph.notice}
+				<div
+					class="absolute top-2 left-2 right-2 card preset-tonal-warning px-3 py-2 text-xs shadow-lg"
+				>
+					{graph.notice}
+				</div>
+			{/if}
+
+			{#if selected && selected.hop > 0}
 				{@const meta = metaFor(selected.urlModel)}
 				<div
 					class="absolute bottom-2 left-2 card bg-surface-50-950 border border-surface-200-800 shadow-lg p-3 text-sm {chatBubble
@@ -183,7 +248,10 @@
 					<div class="flex items-start gap-2">
 						<i class="fa-solid {meta.icon} mt-1" style="color:{meta.color}"></i>
 						<div class="flex-1 min-w-0">
-							<div class="text-xs text-surface-500">{meta.label}</div>
+							<div class="text-xs text-surface-500">
+								{meta.label}
+								{#if selected.frontier}· <span class="opacity-70">edge of this view</span>{/if}
+							</div>
 							<div class="font-semibold truncate" title={selected.name}>{selected.name}</div>
 							{#if selected.meta}
 								<div class="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-surface-600-400">
@@ -194,14 +262,6 @@
 							{/if}
 						</div>
 						<div class="flex items-center gap-1">
-							{#if canExplore(selected)}
-								<button
-									class="btn btn-sm preset-tonal"
-									title="Explore this object's relations"
-									aria-label="Re-centre"
-									onclick={() => reroot(selected!)}><i class="fa-solid fa-crosshairs"></i></button
-								>
-							{/if}
 							<Anchor
 								breadcrumbAction="push"
 								href={`/${selected.urlModel}/${selected.id}`}
@@ -223,13 +283,26 @@
 		</div>
 
 		<footer class="border-t border-surface-200-800 px-3 py-2 {chatBubble ? 'pr-20' : ''}">
-			<div class="flex items-center gap-2 text-xs text-surface-500">
-				<span class="tabular-nums">
-					{stats.nodes} related{stats.collapsed ? ` · ${stats.collapsed} collapsed` : ''}
-				</span>
+			<div class="flex flex-wrap items-center gap-2 text-xs text-surface-500">
+				<span class="tabular-nums">{graph.nodes.size - 1}/{NODE_BUDGET} related</span>
+				{#if expandable.length}
+					<span class="opacity-70">· {expandable.length} expandable</span>
+				{/if}
 				<div class="flex-1"></div>
+				{#if expandable.length && expandable.length <= 10}
+					<button class="btn btn-sm preset-tonal" onclick={expandAll}>
+						<i class="fa-solid fa-arrows-left-right-to-line mr-1"></i>expand all
+					</button>
+				{/if}
 				<span class="uppercase tracking-wide">Fan-out</span>
-				<input type="range" min="2" max="15" bind:value={fanCap} class="w-16 accent-primary-500" />
+				<input
+					type="range"
+					min="2"
+					max="12"
+					bind:value={fanCap}
+					onchange={reset}
+					class="w-16 accent-primary-500"
+				/>
 				<span class="w-4 text-center tabular-nums">{fanCap}</span>
 				<button
 					class="btn btn-sm preset-tonal"

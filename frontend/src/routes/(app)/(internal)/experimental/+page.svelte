@@ -45,7 +45,7 @@
 	/>
 	<Article
 		title="Mini graph explorer"
-		desc="Obsidian-style ego graph on an object page: depth 1-3, fan-out caps with collapsible +N nodes, hover for details, click to re-centre. Mock data, no backend."
+		desc="Relations graph that grows by accretion: click a node to expand it in place, click again to collapse. Expansion never moves what is already on screen. Mock data, no backend."
 		link="/experimental/mini-graph"
 		tags={['graph', 'applied-controls', 'risk-scenarios', 'prototype']}
 	/>

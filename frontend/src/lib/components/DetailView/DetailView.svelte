@@ -1169,6 +1169,7 @@
 		open={relationsOpen}
 		urlModel={data.urlModel}
 		id={data.data.id}
+		name={data.data.name ?? data.data.str ?? ''}
 		onClose={() => (relationsOpen = false)}
 	/>
 {/if}

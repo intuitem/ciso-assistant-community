@@ -666,6 +666,7 @@
 		open={relationsOpen}
 		urlModel="risk-scenarios"
 		id={data.scenario.id}
+		name={data.scenario.name ?? data.scenario.str ?? ''}
 		onClose={() => (relationsOpen = false)}
 	/>
 {/if}

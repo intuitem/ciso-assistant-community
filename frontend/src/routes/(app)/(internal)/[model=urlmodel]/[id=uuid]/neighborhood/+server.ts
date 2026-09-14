@@ -78,7 +78,8 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 		const items = Array.isArray(value) ? value : [value];
 		const group = `${rel.verb}|${rel.urlModel}`;
 		totals[group] = (totals[group] ?? 0) + items.length;
-		for (const item of items) add(toNode(item, rel.urlModel, group), rel.verb, Boolean(rel.inbound));
+		for (const item of items)
+			add(toNode(item, rel.urlModel, group), rel.verb, Boolean(rel.inbound));
 	}
 
 	const reverse = await Promise.all(
