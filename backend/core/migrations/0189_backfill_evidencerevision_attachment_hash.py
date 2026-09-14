@@ -36,7 +36,7 @@ def backfill_attachment_hash(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0186_commitment_remove_comment_comment_exactly_one_parent_and_more"),
+        ("core", "0188_quickformpublication_quickformresponse_and_more"),
     ]
 
     operations = [
