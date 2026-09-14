@@ -51,6 +51,7 @@
 	"authorHint": "Partez d’une page vierge ou d’un modèle dans l’éditeur.",
 	"newDocumentSubtitle": "Rédigez-le, téléversez un fichier ou liez une source externe.",
 	"deleteConfirm": "Voulez-vous vraiment supprimer ceci ?",
+	"validated": "Validée",
 	"documentType": "Type de document",
 	"untitled": "Sans titre",
 	"linkDocumentHelp": "Pointez vers un document hébergé ailleurs (Confluence, SharePoint, une GED, …). Le lien est versionné et suit le même cycle de relecture/publication.",

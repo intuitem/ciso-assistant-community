@@ -25,6 +25,7 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     document_count = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     progress = serializers.SerializerMethodField()
+    pending_revision = serializers.SerializerMethodField()
     source = serializers.SerializerMethodField()
 
     STATUS_PROGRESS = {
@@ -84,6 +85,30 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
         if doc and doc.current_revision_id:
             return self.STATUS_PROGRESS.get(doc.current_revision.status)
         return None
+
+    def get_pending_revision(self, obj):
+        """Newest revision still in the approval loop, or None.
+
+        `status` above reports the revision in force, which stays on the
+        published one until a publish repoints it — so work in progress would
+        otherwise never show up in the list.
+        """
+        doc = self._default_doc(obj)
+        if not doc:
+            return None
+        rev = next(
+            (
+                r
+                for r in sorted(
+                    doc.revisions.all(), key=lambda r: r.version_number, reverse=True
+                )
+                if r.status in DocumentRevision.ACTIVE_STATUSES
+            ),
+            None,
+        )
+        if not rev:
+            return None
+        return {"version_number": rev.version_number, "status": rev.status}
 
 
 class DocumentContainerWriteSerializer(BaseModelSerializer):

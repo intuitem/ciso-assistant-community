@@ -1,11 +1,23 @@
 """Integration coverage for SSRF guard wiring in doc_management."""
 
+from uuid import uuid4
+
 import pytest
+from django.db import connection
+from django.db.models import Prefetch
+from django.test.utils import CaptureQueriesContext
 
 from core.models import Policy
 from core.net_safety import BlockedRequestError
-from doc_management.models import DocumentContainer, DocumentRevision
-from doc_management.serializers import ManagedDocumentWriteSerializer
+from doc_management.models import (
+    DocumentContainer,
+    DocumentRevision,
+    ManagedDocument,
+)
+from doc_management.serializers import (
+    DocumentContainerReadSerializer,
+    ManagedDocumentWriteSerializer,
+)
 from doc_management.views import DocumentRevisionViewSet, _safe_url_fetcher
 from iam.models import Folder, User
 
@@ -345,3 +357,90 @@ class TestPdfApproverRow:
     def test_validated_revision_names_its_approver(self):
         rev = self._revision(DocumentRevision.Status.VALIDATED)
         assert self._reviewer_name(rev) == str(rev.reviewer)
+
+
+@pytest.mark.django_db
+class TestContainerPendingRevision:
+    """A container keeps showing its published revision (that is the one in
+    force), so a newer revision still in the approval loop is invisible from the
+    list. `pending_revision` surfaces it without overwriting `status`.
+    """
+
+    def _container_with(self, *, pending_status=None, suffix=""):
+        folder = Folder.objects.create(
+            name=f"PR-{pending_status}{suffix}", parent_folder=Folder.get_root_folder()
+        )
+        s = ManagedDocumentWriteSerializer(
+            data={"folder": str(folder.id), "locale": "en", "name": "Doc"},
+            context={},
+        )
+        s.is_valid(raise_exception=True)
+        doc = s.save()
+        doc.revisions.first().publish()
+        if pending_status:
+            DocumentRevision.objects.create(
+                document=doc, version_number=2, status=pending_status
+            )
+        doc.refresh_from_db()
+        return doc.container
+
+    def _serialize(self, container):
+        return DocumentContainerReadSerializer(container).data
+
+    def test_no_pending_revision_when_only_published(self):
+        data = self._serialize(self._container_with())
+        assert data["pending_revision"] is None
+
+    def test_in_review_revision_is_reported_as_pending(self):
+        data = self._serialize(
+            self._container_with(pending_status=DocumentRevision.Status.IN_REVIEW)
+        )
+        assert data["pending_revision"] == {
+            "version_number": 2,
+            "status": DocumentRevision.Status.IN_REVIEW,
+        }
+
+    def test_validated_revision_is_reported_as_pending(self):
+        data = self._serialize(
+            self._container_with(pending_status=DocumentRevision.Status.VALIDATED)
+        )
+        assert data["pending_revision"]["status"] == DocumentRevision.Status.VALIDATED
+
+    def test_published_status_and_progress_survive_a_pending_revision(self):
+        data = self._serialize(
+            self._container_with(pending_status=DocumentRevision.Status.IN_REVIEW)
+        )
+        assert data["status"] == DocumentRevision.Status.PUBLISHED
+        assert data["progress"] == 100
+
+    def _revision_queries(self, count):
+        batch = uuid4().hex[:6]
+        for i in range(count):
+            self._container_with(
+                pending_status=DocumentRevision.Status.IN_REVIEW, suffix=f"-{batch}-{i}"
+            )
+        # Mirrors DocumentContainerViewSet.get_queryset: current_revision feeds
+        # status/progress, revisions feeds pending_revision.
+        qs = DocumentContainer.objects.filter(
+            folder__name__startswith=f"PR-in_review-{batch}"
+        ).prefetch_related(
+            Prefetch(
+                "documents",
+                queryset=ManagedDocument.objects.select_related(
+                    "current_revision"
+                ).prefetch_related("revisions"),
+            )
+        )
+        with CaptureQueriesContext(connection) as ctx:
+            data = DocumentContainerReadSerializer(list(qs), many=True).data
+        assert len(data) == count
+        assert all(d["pending_revision"] is not None for d in data)
+        return sum(
+            1 for q in ctx.captured_queries if "documentrevision" in q["sql"].lower()
+        )
+
+    def test_pending_revision_does_not_query_per_container(self):
+        """It must come off the prefetch: `revisions` is not covered by the
+        viewset's `current_revision` select_related, so a naive lookup is one
+        query per row."""
+        assert self._revision_queries(5) == self._revision_queries(1)
