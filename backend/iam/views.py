@@ -262,7 +262,7 @@ class CurrentUserView(views.APIView):
             "accessible_domains": [str(f) for f in accessible_domains],
             "domain_permissions": domain_permissions,
             "root_folder_id": Folder.get_root_folder().id,
-            "preferences": request.user.preferences,
+            "preferences": request.user.get_preferences(),
             "has_mfa_enabled": request.user.has_mfa_enabled(),
             "is_superuser": request.user.is_superuser,
         }

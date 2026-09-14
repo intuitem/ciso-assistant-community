@@ -42,7 +42,7 @@ from django.db.models import (
     QuerySet,
     Prefetch,
 )
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, Concat
 
 from collections import defaultdict
 import pytz
@@ -1049,6 +1049,50 @@ def actor_prefetch(field_name: str) -> Prefetch:
         field_name,
         queryset=Actor.objects.select_related("user", "team", "entity"),
     )
+
+
+# Mirrors ``Actor.__str__``: the underlying user's full name when it has one,
+# else its email, else the team's or entity's name. Lowercased so the sort
+# agrees between Postgres and SQLite.
+ACTOR_ORDERING_LABEL = Lower(
+    Coalesce(
+        Case(
+            When(
+                Q(user__first_name__gt="", user__last_name__gt=""),
+                then=Concat("user__first_name", Value(" "), "user__last_name"),
+            ),
+            default=F("user__email"),
+            output_field=CharField(),
+        ),
+        "team__name",
+        "entity__name",
+        output_field=CharField(),
+    )
+)
+
+
+def annotate_actor_ordering(queryset, view, field: str = "authors"):
+    """Make an ``Actor`` M2M column sortable, keyed on its first member's label.
+
+    DRF validates ``ordering`` against concrete fields only, so a header click on
+    such a column used to be dropped in silence. The view pairs this with
+    ``ordering_remap = {field: f"{field}_label"}``.
+
+    Annotated only when the request actually orders by the column: the subquery
+    would otherwise ride along on every list page, including the pagination count.
+    """
+    params = getattr(getattr(view, "request", None), "query_params", None)
+    ordering = params.get("ordering", "") if params else ""
+    if field not in {term.strip().lstrip("-") for term in ordering.split(",")}:
+        return queryset
+    related_query_name = f"{queryset.model._meta.model_name}_{field}"
+    first_label = (
+        Actor.objects.filter(**{related_query_name: OuterRef("pk")})
+        .annotate(_label=ACTOR_ORDERING_LABEL)
+        .order_by("_label")
+        .values("_label")[:1]
+    )
+    return queryset.annotate(**{f"{field}_label": Subquery(first_label)})
 
 
 RESTRICTED_BUCKET_KEY = "_restricted"
@@ -4058,10 +4102,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     model = RiskAssessment
     filterset_class = RiskAssessmentFilterSet
+    ordering_remap = {"authors": "authors_label"}
+    ordering_nulls_last = ("authors_label",)
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.select_related(
+        queryset = queryset.select_related(
             "folder",
             "perimeter",
             "perimeter__folder",
@@ -4072,6 +4118,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             actor_prefetch("reviewers"),
             "risk_scenarios",
         )
+        return annotate_actor_ordering(queryset, self)
 
     def perform_create(self, serializer):
         instance: RiskAssessment = serializer.save()
@@ -6045,6 +6092,44 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
     def per_status(self, request):
         data = applied_control_per_status(request.user)
         return Response({"results": data})
+
+    @action(detail=False, name="Counts per folder and status for the kanban board")
+    def counts_per_folder(self, request):
+        """Per-swimlane totals for the kanban board.
+
+        The board shows one card per control, so loading every row just to
+        count them does not scale. This returns the same numbers from one
+        aggregate query, honouring the caller's filters and visibility, which
+        lets the board render truthful headers while fetching cards only for
+        the swimlanes the user actually opens.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        # order_by() clears the model's default ordering: left in place, `name`
+        # joins the GROUP BY and every control comes back as its own group.
+        rows = (
+            queryset.values("folder_id", "status")
+            .annotate(count=Count("id"))
+            .order_by()
+        )
+
+        per_folder: dict = defaultdict(dict)
+        total = 0
+        for row in rows:
+            status = row["status"] or AppliedControl.Status.UNDEFINED
+            per_folder[row["folder_id"]][status] = row["count"]
+            total += row["count"]
+
+        results = [
+            {
+                "folder": {"id": str(folder.id), "str": str(folder)},
+                "per_status": per_folder[folder.id],
+                "count": sum(per_folder[folder.id].values()),
+            }
+            for folder in Folder.objects.filter(id__in=list(per_folder.keys()))
+        ]
+        results.sort(key=lambda entry: entry["folder"]["str"].lower())
+
+        return Response({"results": results, "total": total})
 
     @action(detail=False, name="Get the ordered todo applied controls")
     def todo(self, request):
@@ -8173,7 +8258,15 @@ class ActorViewSet(BaseModelViewSet):
     http_method_names = ["get", "head", "options"]
 
     model = Actor
-    search_fields = []
+    # An actor is searched through whichever of user/team/entity it wraps: with no
+    # search fields the lazy pickers returned an unfiltered, page-capped list.
+    search_fields = [
+        "user__email",
+        "user__first_name",
+        "user__last_name",
+        "team__name",
+        "entity__name",
+    ]
     ordering = [
         "type_rank",
         "display_name",
@@ -8846,6 +8939,9 @@ class FolderViewSet(BaseModelViewSet):
         """
         Helper method to aggregate quality checks for a queryset of folders.
         Enforces RBAC for both folders and assessments.
+
+        Objects are reduced to the reference the X-rays page links on: the full
+        read serializers cost about twenty queries each for two fields.
         """
         # Get viewable assessment IDs for proper RBAC
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
@@ -8855,7 +8951,7 @@ class FolderViewSet(BaseModelViewSet):
 
         res = {
             str(f.id): {
-                "folder": FolderReadSerializer(f).data,
+                "folder": {"id": f.id, "name": f.name},
                 "compliance_assessments": {"objects": {}},
                 "risk_assessments": {"objects": {}},
             }
@@ -8864,30 +8960,48 @@ class FolderViewSet(BaseModelViewSet):
         for ca in ComplianceAssessment.objects.filter(
             folder__in=folders, id__in=viewable_ca_ids
         ):
-            res[str(ca.folder.id)]["compliance_assessments"]["objects"][str(ca.id)] = {
-                "object": ComplianceAssessmentReadSerializer(ca).data,
+            res[str(ca.folder_id)]["compliance_assessments"]["objects"][str(ca.id)] = {
+                "object": {"id": ca.id, "name": ca.name},
                 "quality_check": ca.quality_check(),
             }
         for ra in RiskAssessment.objects.filter(
             folder__in=folders, id__in=viewable_ra_ids
         ):
-            res[str(ra.folder.id)]["risk_assessments"]["objects"][str(ra.id)] = {
-                "object": RiskAssessmentReadSerializer(ra).data,
+            res[str(ra.folder_id)]["risk_assessments"]["objects"][str(ra.id)] = {
+                "object": {"id": ra.id, "name": ra.name},
                 "quality_check": ra.quality_check(),
             }
         return res
+
+    @staticmethod
+    def _has_findings(folder_entry) -> bool:
+        return any(
+            assessment["quality_check"]["count"]
+            for group in ("compliance_assessments", "risk_assessments")
+            for assessment in folder_entry[group]["objects"].values()
+        )
 
     @action(detail=False, methods=["get"])
     def quality_check(self, request):
         """
         Returns the quality check of assessments grouped by folder.
+
+        Folders without a single finding are left out: they render as empty
+        cards and, on large instances, make up most of the response.
         """
         viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
         folders = Folder.objects.filter(id__in=viewable_objects).exclude(
             content_type=Folder.ContentType.ROOT
         )
+        results = self._get_quality_checks_for_folders(folders, request.user)
         return Response(
-            {"results": self._get_quality_checks_for_folders(folders, request.user)}
+            {
+                "results": {
+                    folder_id: entry
+                    for folder_id, entry in results.items()
+                    if self._has_findings(entry)
+                }
+            }
         )
 
     @action(detail=True, methods=["get"], url_path="quality_check")
@@ -9187,7 +9301,10 @@ class UserPreferencesView(APIView):
 
         if "date_format" in request.data:
             new_date_format = request.data.get("date_format")
-            if new_date_format not in request.user.DATE_FORMATS:
+            if (
+                not isinstance(new_date_format, str)
+                or new_date_format not in request.user.DATE_FORMATS
+            ):
                 logger.error(
                     f"Error in UserPreferencesView: date_format={new_date_format} available formats={request.user.DATE_FORMATS}"
                 )
@@ -11677,6 +11794,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "eta",
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
+    ordering_remap = {"authors": "authors_label"}
+    ordering_nulls_last = ("authors_label",)
 
     def get_serializer_class(self, **kwargs):
         action = kwargs.get("action", self.action)
@@ -11926,6 +12045,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 actor_prefetch("authors"),  # Optional table column
                 "entityassessment_set",
             )
+
+        # Outside the list branch: `ordering_remap` rewrites `authors` on every
+        # action, so any action handed the list query string (the CSV export, the
+        # autocomplete endpoint) needs the column it is rewritten to. The helper
+        # is already a no-op unless the request orders by it.
+        qs = annotate_actor_ordering(qs, self)
 
         # No requirement_assessments prefetch on the list action: progress is
         # served by `_get_optimized_object_data` (no-IG audits) or the model's
@@ -16312,6 +16437,8 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "reported_at",
     ]
     search_fields = ["name", "description", "ref_id"]
+    ordering_remap = {"authors": "authors_label"}
+    ordering_nulls_last = ("authors_label",)
 
     def get_queryset(self):
         dealt_with_statuses = [
@@ -16320,7 +16447,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             Finding.Status.DISMISSED,
             Finding.Status.CLOSED,
         ]
-        return (
+        queryset = (
             super()
             .get_queryset()
             .select_related("folder", "perimeter")
@@ -16343,6 +16470,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 ),
             )
         )
+        return annotate_actor_ordering(queryset, self)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
