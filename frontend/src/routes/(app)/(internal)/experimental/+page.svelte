@@ -38,6 +38,12 @@
 		tags={['assets', 'graph', 'canvas', 'prototype']}
 	/>
 	<Article
+		title="Domain Whiteboard"
+		desc="Restructure your domain hierarchy on a canvas. Drag a domain onto another to nest it, create sub-domains in place, rename inline. Every move is confirmed with its access impact spelled out."
+		link="/experimental/domain-board"
+		tags={['domains', 'iam', 'graph', 'canvas', 'prototype']}
+	/>
+	<Article
 		title="Analytics Export"
 		desc="Export all analytics dashboard data as a multi-sheet Excel file (Summary, Risk Levels, Compliance, Controls, Incidents) — ready to use in Power BI or any reporting tool."
 		link="/experimental/analytics-export"

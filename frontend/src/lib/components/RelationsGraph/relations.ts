@@ -1,3 +1,5 @@
+import { getModelInfo } from '$lib/utils/crud';
+
 /**
  * Which relations a mini graph shows, per model.
  *
@@ -56,7 +58,8 @@ export const RELATION_MAP: Record<string, RelationSpec> = {
 			},
 			{ urlModel: 'risk-scenarios', param: 'applied_controls', verb: 'mitigated by' },
 			{ urlModel: 'findings', param: 'applied_controls', verb: 'remediated by' },
-			{ urlModel: 'task-templates', param: 'applied_controls', verb: 'maintains' }
+			{ urlModel: 'task-templates', param: 'applied_controls', verb: 'maintains' },
+			{ urlModel: 'document-containers', param: 'applied_controls', verb: 'documented by' }
 		]
 	},
 
@@ -104,6 +107,40 @@ export const RELATION_MAP: Record<string, RelationSpec> = {
 	}
 };
 
+/** Labels and bookkeeping rather than objects worth a node of their own. */
+const GENERIC_SKIP = new Set(['filtering_labels', 'custom_field_values']);
+
+export interface GenericRelation {
+	field: string;
+	urlModel: string;
+	verb: string;
+}
+
+/**
+ * Forward relations for a model with no curated entry, read off the field-to-model
+ * metadata `crud.ts` already maintains for form pickers. A read serializer resolves
+ * every forward relation as `{id, str}`, so this costs nothing beyond the fetch of
+ * the object itself.
+ *
+ * Forward only, deliberately. The reverse direction would mean guessing a filter
+ * name on a list endpoint, and DRF silently ignores a query parameter it does not
+ * know — a wrong guess would not fail, it would return the entire table.
+ */
+export function genericForward(urlModel: string): GenericRelation[] {
+	const info = getModelInfo(urlModel) as {
+		foreignKeyFields?: { field: string; urlModel?: string }[];
+	};
+	return (info?.foreignKeyFields ?? [])
+		.filter((f) => f?.field && f?.urlModel && !GENERIC_SKIP.has(f.field))
+		.map((f) => ({ field: f.field, urlModel: f.urlModel!, verb: f.field.replace(/_/g, ' ') }));
+}
+
+/** Whether the drawer offers a Relations button for this model: curated only. */
 export function hasRelationGraph(urlModel: string | undefined): boolean {
 	return Boolean(urlModel && urlModel in RELATION_MAP);
+}
+
+/** Whether a node reached inside the drawer can be expanded further. */
+export function canExploreModel(urlModel: string): boolean {
+	return urlModel in RELATION_MAP || genericForward(urlModel).length > 0;
 }

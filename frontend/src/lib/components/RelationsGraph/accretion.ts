@@ -1,4 +1,4 @@
-import { RELATION_MAP } from './relations';
+import { canExploreModel } from './relations';
 import type { GraphLink, Neighborhood } from './types';
 
 /**
@@ -113,7 +113,7 @@ export function canExpand(node: LiveNode): boolean {
 		!node.exhausted &&
 		!node.aggregate &&
 		node.hop < MAX_HOP &&
-		node.urlModel in RELATION_MAP
+		canExploreModel(node.urlModel)
 	);
 }
 
@@ -247,9 +247,9 @@ export function merge(
 			x: p.x,
 			y: p.y,
 			expanded: false,
-			// A model with no entry in the registry has nothing we know how to show.
-			exhausted: hop >= MAX_HOP || !(n.urlModel in RELATION_MAP),
-			frontier: hop >= MAX_HOP && n.urlModel in RELATION_MAP
+			// A model we have no relation metadata for has nothing we know how to show.
+			exhausted: hop >= MAX_HOP || !canExploreModel(n.urlModel),
+			frontier: hop >= MAX_HOP && canExploreModel(n.urlModel)
 		});
 	});
 

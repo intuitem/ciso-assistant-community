@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { RELATION_MAP } from '$lib/components/RelationsGraph/relations';
+import { RELATION_MAP, genericForward } from '$lib/components/RelationsGraph/relations';
 import type { GraphLink, GraphNode, Neighborhood } from '$lib/components/RelationsGraph/types';
 import { error, json, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
@@ -41,8 +41,17 @@ function pickMeta(raw: any): Record<string, string> | undefined {
 
 export const GET: RequestHandler = async ({ fetch, params }) => {
 	const urlModel = params.model as string;
-	const spec = RELATION_MAP[urlModel];
-	if (!spec) error(404, 'No relation map for this model');
+	// Curated models get both directions and hand-written verbs. Everything else
+	// gets whatever its own payload already resolves, so a graph started on a
+	// curated model can still walk one more step through a requirement assessment
+	// or an audit without each of those needing an entry of its own.
+	const spec = RELATION_MAP[urlModel] ?? {
+		forward: genericForward(urlModel).map((r) => ({ ...r, inbound: false })),
+		reverse: []
+	};
+	if (!spec.forward.length && !spec.reverse.length) {
+		error(404, 'No relations are known for this model');
+	}
 
 	const model = getModelInfo(urlModel);
 	const res = await fetch(`${BASE_API_URL}/${model.endpointUrl ?? urlModel}/${params.id}/`);

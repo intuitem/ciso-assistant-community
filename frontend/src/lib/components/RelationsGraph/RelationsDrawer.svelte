@@ -34,7 +34,7 @@
 	let showLabels = $state(true);
 	let wide = $state(false);
 	let filterOpen = $state(false);
-	let hidden = $state(new Set<string>(['folders']));
+	let hidden = $state(new Set<string>(['perimeters']));
 	let opened = $state(new Set<string>());
 	let booting = $state(false);
 	let bootError = $state('');
@@ -149,8 +149,10 @@
 	const rootNode = $derived(graph.nodes.get(id));
 	const rootMeta = $derived(metaFor(urlModel));
 	const expandable = $derived([...graph.nodes.values()].filter(canExpand));
-	const presentTypes = $derived(
-		[...new Set([...graph.nodes.values()].map((n) => n.urlModel))].sort((a, b) =>
+	// Hidden types must stay in the list: filtering them out of the canvas also
+	// filtered them out of their own chips, so the only way back was a page reload.
+	const filterTypes = $derived(
+		[...new Set([...[...graph.nodes.values()].map((n) => n.urlModel), ...hidden])].sort((a, b) =>
 			metaFor(a).label.localeCompare(metaFor(b).label)
 		)
 	);
@@ -312,14 +314,31 @@
 				>
 					<i class="fa-solid fa-tag {showLabels ? '' : 'opacity-40'}"></i>
 				</button>
-				<button class="btn btn-sm preset-tonal" onclick={() => (filterOpen = !filterOpen)}>
+				<button
+					class="btn btn-sm {hidden.size ? 'preset-filled-primary-500' : 'preset-tonal'}"
+					onclick={() => (filterOpen = !filterOpen)}
+					title="Filter by type"
+				>
 					<i class="fa-solid fa-filter"></i>
 					{#if hidden.size}<span class="ml-1">{hidden.size}</span>{/if}
 				</button>
 			</div>
 			{#if filterOpen}
-				<div class="flex flex-wrap gap-1 mt-2">
-					{#each presentTypes as model}
+				<div class="flex items-center gap-2 mt-2">
+					<span class="text-[10px] uppercase tracking-wide text-surface-500">Shown types</span>
+					<div class="flex-1"></div>
+					{#if hidden.size}
+						<button
+							class="text-[10px] underline text-surface-600-400"
+							onclick={() => {
+								hidden = new Set();
+								reset();
+							}}>show all ({hidden.size} hidden)</button
+						>
+					{/if}
+				</div>
+				<div class="flex flex-wrap gap-1 mt-1">
+					{#each filterTypes as model}
 						{@const tm = metaFor(model)}
 						{@const off = hidden.has(model)}
 						<button

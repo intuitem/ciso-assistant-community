@@ -61,6 +61,12 @@ export const NODE_META: Record<string, NodeMeta> = {
 		icon: 'fa-certificate',
 		symbol: 'roundRect'
 	},
+	'document-containers': {
+		label: 'Document',
+		color: '#0369a1',
+		icon: 'fa-file-contract',
+		symbol: 'rect'
+	},
 	evidences: { label: 'Evidence', color: '#06b6d4', icon: 'fa-file-lines', symbol: 'rect' },
 	findings: { label: 'Finding', color: '#f97316', icon: 'fa-magnifying-glass', symbol: 'circle' },
 	'findings-assessments': {
@@ -97,7 +103,7 @@ export const NODE_META: Record<string, NodeMeta> = {
 		icon: 'fa-draw-polygon',
 		symbol: 'roundRect'
 	},
-	folders: { label: 'Domain', color: '#cbd5e1', icon: 'fa-folder', symbol: 'roundRect' }
+	folders: { label: 'Domain', color: '#94a3b8', icon: 'fa-folder', symbol: 'roundRect' }
 };
 
 export function metaFor(urlModel: string): NodeMeta {
