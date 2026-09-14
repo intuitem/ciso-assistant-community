@@ -16,3 +16,10 @@ export function pickWorkingRevision<T extends RevisionLike>(revisions: T[]): T |
 		null
 	);
 }
+
+// The revision that currently applies. It stays behind the working revision for
+// the whole approval loop, so a header showing only one of the two hides either
+// what is in force or what is coming.
+export function pickInForceRevision<T extends RevisionLike>(revisions: T[]): T | null {
+	return revisions.find((r) => r.status === 'published') ?? null;
+}
