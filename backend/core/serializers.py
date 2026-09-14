@@ -4270,6 +4270,17 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         "findings": "⚠️ Cannot bind or unbind a finding whose findings assessment is locked."
                     }
                 )
+            # A finding belongs to one requirement assessment. Moving it is done
+            # from the finding, never as a side effect of editing another assessment.
+            if (
+                finding.requirement_assessment_id
+                and finding.requirement_assessment_id != instance.id
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "findings": "⚠️ This finding is already bound to another requirement assessment."
+                    }
+                )
             self._check_object_perm(finding, "change", model=Finding)
 
     def update(self, instance, validated_data):

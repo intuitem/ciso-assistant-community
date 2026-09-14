@@ -1712,6 +1712,9 @@ DEFAULT_VISIBILITY = {
     # Off unless the audit opts in: existing audits track remediation through
     # applied controls or findings, and should not sprout a tasks tab.
     "task_templates": HIDDEN,
+    # Findings are the auditor's verdict; a missing key would resolve to
+    # EVERYONE_EDIT and show them to the auditee.
+    "findings": AUDITOR_ONLY,
 }
 
 

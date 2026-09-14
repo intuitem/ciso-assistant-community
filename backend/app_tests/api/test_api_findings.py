@@ -277,6 +277,47 @@ class TestPickingExistingFindings:
         locked.refresh_from_db()
         assert locked.requirement_assessment is None
 
+    def test_a_finding_bound_elsewhere_is_not_stolen(self, setup, audit):
+        from core.models import RequirementAssessment
+
+        other = RequirementAssessment.objects.create(
+            compliance_assessment=audit.compliance_assessment,
+            requirement=audit.requirement,
+            folder=setup["domain"],
+        )
+        taken = Finding.objects.create(
+            name="Taken", folder=setup["domain"], requirement_assessment=other
+        )
+        res = setup["client"].patch(
+            f"/api/requirement-assessments/{audit.id}/",
+            {"findings": [str(taken.id)]},
+            format="json",
+        )
+        assert res.status_code == 400
+        taken.refresh_from_db()
+        assert taken.requirement_assessment == other
+
+    def test_the_picker_lists_the_unbound_and_its_own(self, setup, audit):
+        from core.models import RequirementAssessment
+
+        other = RequirementAssessment.objects.create(
+            compliance_assessment=audit.compliance_assessment,
+            requirement=audit.requirement,
+            folder=setup["domain"],
+        )
+        own = Finding.objects.create(
+            name="Own", folder=setup["domain"], requirement_assessment=audit
+        )
+        free = Finding.objects.create(name="Free", folder=setup["domain"])
+        Finding.objects.create(
+            name="Taken", folder=setup["domain"], requirement_assessment=other
+        )
+        res = setup["client"].get(
+            f"/api/findings/?requirement_assessment=--&requirement_assessment={audit.id}"
+        )
+        assert res.status_code == 200
+        assert {f["id"] for f in res.json()["results"]} == {str(own.id), str(free.id)}
+
     def test_binding_needs_change_permission_on_the_finding(self, setup, audit):
         from iam.models import Role, RoleAssignment
         from core.utils import RoleCodename

@@ -884,6 +884,10 @@
 												multiple
 												{form}
 												optionsEndpoint="findings"
+												optionsDetailedUrlParameters={[
+													['requirement_assessment', '--'],
+													['requirement_assessment', page.data.requirementAssessment.id]
+												]}
 												optionsExtraFields={[['folder', 'str']]}
 												field="findings"
 											/>

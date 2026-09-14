@@ -10292,6 +10292,7 @@ class RequirementViewSet(BaseModelViewSet):
                 "evidences",
                 "applied_controls",
                 "security_exceptions",
+                "findings",
             )
         )
         serialized_requirement_assessments = RequirementAssessmentReadSerializer(
@@ -16878,6 +16879,11 @@ class FindingFilterSet(GenericFilterSet):
     findings_assessment = NullableModelChoiceFilter(
         queryset=FindingsAssessment.objects.all()
     )
+    # Same convention: the requirement assessment picker asks for the unbound
+    # findings alongside its own.
+    requirement_assessment = NullableModelChoiceFilter(
+        queryset=RequirementAssessment.objects.all()
+    )
 
     class Meta:
         model = Finding
@@ -16890,7 +16896,6 @@ class FindingFilterSet(GenericFilterSet):
             "priority": ["exact"],
             "asset": ["exact"],
             "requirement_node": ["exact"],
-            "requirement_assessment": ["exact"],
             "filtering_labels": ["exact"],
             "applied_controls": ["exact"],
             "evidences": ["exact"],
