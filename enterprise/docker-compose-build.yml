@@ -16,8 +16,21 @@ services:
       - LICENSE_SEATS=5
       - LICENSE_EXPIRATION=2025-12-21
       - DJANGO_SETTINGS_MODULE=enterprise_core.settings
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
+
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
     volumes:
       - ./db:/code/db
+    user: "1001:1001"
 
   huey:
     container_name: huey
@@ -34,8 +47,21 @@ services:
       - DJANGO_DEBUG=True
       - LICENSE_SEATS=5
       - LICENSE_EXPIRATION=2025-12-21
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
+
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
     volumes:
       - ./db:/code/db
+    user: "1001:1001"
     entrypoint:
       - /bin/sh
       - -c
@@ -49,7 +75,13 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:8443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
-
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
     build:
       context: ../frontend
       dockerfile: ../enterprise/frontend/Dockerfile
