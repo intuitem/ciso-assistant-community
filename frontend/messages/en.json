@@ -6551,5 +6551,20 @@
 	"dateLastYear": "Last year",
 	"dateNext7Days": "Next 7 days",
 	"dateNext30Days": "Next 30 days",
-	"dateNext90Days": "Next 90 days"
+	"dateNext90Days": "Next 90 days",
+	"subject": "Subject",
+	"riskOwnerApproval": "Risk owner approval",
+	"aboveRiskTolerance": "Above risk tolerance",
+	"notRequested": "Not requested",
+	"notRequired": "Not required",
+	"requestRiskOwnerValidation": "Request risk owner approval",
+	"riskTreatmentAndResidualRiskApprovalSubject": "Treatment plan and residual risk — {refId}",
+	"riskTreatmentAndResidualRiskApprovalNotes": "Please approve the information security risk treatment plan and accept the residual information security risk.",
+	"riskValidationOutdatedMessage": "A linked risk changed after this request or decision. Submit a new validation before relying on the approval.",
+	"riskValidationOwnerRequired": "The approver must be an owner of every linked risk scenario.",
+	"riskValidationSameFolderRequired": "All linked risk scenarios must belong to the validation domain.",
+	"riskValidationToleranceRequired": "Set the risk tolerance before requesting approval.",
+	"riskValidationTreatmentRequired": "Complete the current rating, treatment and residual rating before requesting approval.",
+	"riskValidationImmutable": "The approver and linked risks cannot be changed after the request was created.",
+	"riskValidationOutdated": "The risk changed after this request. Submit the validation again before approval."
 }

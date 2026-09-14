@@ -32,19 +32,24 @@
 	}: Props = $props();
 
 	// Check if we're coming from a specific assessment context
-	const hasPresetAssessments =
+	const hasPresetTargets = $derived(
 		initialData.risk_assessments ||
+		initialData.risk_scenarios ||
 		initialData.compliance_assessments ||
 		initialData.business_impact_analysis ||
 		initialData.crq_studies ||
 		initialData.ebios_studies ||
 		initialData.entity_assessments ||
-		initialData.findings_assessments;
+		initialData.findings_assessments
+	);
 
 	// Determine the approver endpoint based on allow_self_validation setting
 	const allowSelfValidation = $derived(page.data?.settings?.allow_self_validation ?? false);
+	const riskScenarioId = $derived(initialData.risk_scenarios?.[0]);
 	const approverEndpoint = $derived(
-		allowSelfValidation ? 'users?is_approver=true' : 'users?is_approver=true&exclude_current=true'
+		`users?is_approver=true${allowSelfValidation ? '' : '&exclude_current=true'}${
+			riskScenarioId ? `&risk_scenario_owner=${riskScenarioId}` : ''
+		}`
 	);
 
 	async function fetchDefaultRefId() {
@@ -65,6 +70,20 @@
 	}
 </script>
 
+{#if object?.id}
+	<div class="space-y-2">
+		<span class="text-sm font-medium text-surface-700-300">{m.subject()}</span>
+		<p class="p-3 bg-surface-50-950 rounded-lg text-sm">{object.subject || '--'}</p>
+	</div>
+{:else}
+	<TextField
+		{form}
+		field="subject"
+		label={m.subject()}
+		cacheLock={cacheLocks['subject']}
+		bind:cachedValue={formDataCache['subject']}
+	/>
+{/if}
 <AutocompleteSelect
 	{form}
 	optionsEndpoint={approverEndpoint}
@@ -106,7 +125,7 @@
 	<Select
 		{form}
 		field="status"
-		options={model.selectOptions['status']}
+		options={model.selectOptions?.['status'] ?? []}
 		cacheLock={cacheLocks['status']}
 		bind:cachedValue={formDataCache['status']}
 		label={m.status()}
@@ -131,7 +150,7 @@
 		disabled={initialData.validation_deadline}
 	/>
 {/if}
-{#if !hasPresetAssessments}
+{#if !hasPresetTargets}
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 		<AutocompleteSelect
 			{form}
@@ -152,6 +171,16 @@
 			label={m.riskAssessments()}
 			multiple
 			disabled={initialData.risk_assessments}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="risk-scenarios"
+			field="risk_scenarios"
+			cacheLock={cacheLocks['risk_scenarios']}
+			bind:cachedValue={formDataCache['risk_scenarios']}
+			label={m.riskScenarios()}
+			multiple
+			disabled={initialData.risk_scenarios}
 		/>
 		<AutocompleteSelect
 			{form}

@@ -848,6 +848,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
+			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' },
 			{ field: 'business_impact_analysis', urlModel: 'business-impact-analysis' },
 			{ field: 'crq_studies', urlModel: 'quantitative-risk-studies' },
 			{ field: 'ebios_studies', urlModel: 'ebios-rm' },

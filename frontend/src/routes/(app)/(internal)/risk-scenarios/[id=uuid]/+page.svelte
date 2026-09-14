@@ -16,8 +16,10 @@
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import RiskAcceptancesSection from '$lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
+	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { openRiskAcceptanceModal } from '$lib/utils/riskAcceptance';
 
 	import { onMount } from 'svelte';
@@ -58,6 +60,14 @@
 			user,
 			action: 'add',
 			model: 'riskacceptance',
+			object: data.scenario
+		})
+	);
+	const canRequestValidation = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'add',
+			model: 'validationflow',
 			object: data.scenario
 		})
 	);
@@ -148,6 +158,25 @@
 		});
 	}
 
+	function modalRequestRiskOwnerValidation(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.validationFlowForm,
+				model: data.validationFlowModel,
+				debug: false,
+				invalidateAll: true,
+				formAction: '/validation-flows?/create',
+				onConfirm: async () => await invalidateAll()
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: m.requestRiskOwnerValidation()
+		});
+	}
+
 	onMount(() => {
 		// Add event listener when component mounts
 		window.addEventListener('keydown', handleKeydown);
@@ -227,6 +256,16 @@
 						{m.syncToAppliedControls()}
 					</button>
 				{/if}
+			{/if}
+			{#if page.data?.featureflags?.validation_flows && canRequestValidation && !data.scenario.risk_assessment?.is_locked}
+				<button
+					class="btn preset-filled-primary-500 h-fit"
+					onclick={() => modalRequestRiskOwnerValidation()}
+					data-testid="request-risk-owner-validation-button"
+				>
+					<i class="fa-solid fa-user-check mr-2"></i>
+					{m.requestRiskOwnerValidation()}
+				</button>
 			{/if}
 			{#if canCreateAcceptance && !data.scenario.risk_assessment?.is_locked}
 				<button
@@ -313,7 +352,28 @@
 						{safeTranslate(data.scenario.treatment)}
 					</p>
 				</div>
+				{#if page.data?.featureflags?.validation_flows}
+					<div>
+						<p class="text-sm font-semibold text-surface-400-600">{m.riskOwnerApproval()}</p>
+						<p class="text-sm font-semibold">
+							{safeTranslate(data.scenario.risk_owner_validation_status)}
+						</p>
+					</div>
+					<div>
+						<p class="text-sm font-semibold text-surface-400-600">{m.aboveRiskTolerance()}</p>
+						<p class="text-sm font-semibold">
+							{data.scenario.residual_above_tolerance === 'YES'
+								? m.required()
+								: data.scenario.residual_above_tolerance === 'NO'
+									? m.notRequired()
+									: '--'}
+						</p>
+					</div>
+				{/if}
 			</div>
+			{#if page.data?.featureflags?.validation_flows}
+				<ValidationFlowsSection validationFlows={data.scenario.validation_flows} />
+			{/if}
 		</div>
 	</div>
 	<div class="flex flex-col sm:flex-row gap-2">

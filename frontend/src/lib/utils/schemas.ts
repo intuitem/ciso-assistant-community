@@ -369,6 +369,7 @@ export const RiskAcceptanceSchema = z.object({
 export const ValidationFlowSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
+	subject: z.string().max(255).optional(),
 	status: z.string().default('submitted'),
 	validation_deadline: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	request_notes: z.string().optional().nullable(),
@@ -376,6 +377,7 @@ export const ValidationFlowSchema = z.object({
 	filtering_labels: z.array(z.string().uuid().optional()).optional(),
 	compliance_assessments: z.array(z.string()).optional(),
 	risk_assessments: z.array(z.string()).optional(),
+	risk_scenarios: z.array(z.string()).optional(),
 	business_impact_analysis: z.array(z.string()).optional(),
 	crq_studies: z.array(z.string()).optional(),
 	ebios_studies: z.array(z.string()).optional(),

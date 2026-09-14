@@ -26,6 +26,7 @@ interface LoadValidationFlowFormDataParams {
 	folderId: string;
 	targetField: string;
 	targetIds: string[];
+	presetValues?: Record<string, unknown>;
 }
 
 /**
@@ -68,13 +69,15 @@ export const loadValidationFlowFormData = async ({
 	event,
 	folderId,
 	targetField,
-	targetIds
+	targetIds,
+	presetValues = {}
 }: LoadValidationFlowFormDataParams) => {
 	const validationFlowSchema = modelSchema('validation-flows');
 	const validationFlowInitialData = {
 		folder: folderId,
 		[targetField]: targetIds,
-		ref_id: ''
+		ref_id: '',
+		...presetValues
 	};
 	const validationFlowForm = await superValidate(
 		validationFlowInitialData,

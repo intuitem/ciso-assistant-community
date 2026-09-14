@@ -1264,7 +1264,9 @@ def send_validation_flow_created_notification(validation_flow):
 
     context = {
         "validation_ref_id": validation_flow.ref_id,
+        "validation_subject": validation_flow.subject or validation_flow.ref_id,
         "requester_name": requester_name,
+        "request_notes": validation_flow.request_notes or "",
         "validation_deadline": (
             validation_flow.validation_deadline.strftime("%Y-%m-%d")
             if validation_flow.validation_deadline

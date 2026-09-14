@@ -97,8 +97,16 @@
 				{safeTranslate(flow.status)}
 			</span>
 			<Anchor href="/validation-flows/{flow.id}" class="anchor font-semibold">
-				{flow.ref_id ?? flow.str}
+				{flow.subject || flow.ref_id || flow.str}
 			</Anchor>
+			{#if flow.subject}
+				<span class="text-xs text-surface-600-400">{flow.ref_id}</span>
+			{/if}
+			{#if flow.is_stale}
+				<span class="badge preset-tonal-warning px-2 py-0.5 rounded-full text-xs font-medium">
+					<i class="fa-solid fa-rotate mr-1"></i>{m.outdated()}
+				</span>
+			{/if}
 			{#if isOverdue}
 				<span class="badge bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs font-medium">
 					<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.overdue()}

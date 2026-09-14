@@ -85,7 +85,10 @@
 	<div class="card px-6 py-4 bg-surface-50-950 shadow-lg">
 		<div class="flex justify-between items-start mb-4">
 			<div class="flex flex-col space-y-2">
-				<h1 class="text-2xl font-bold">{validation_flow.str}</h1>
+				<h1 class="text-2xl font-bold">{validation_flow.subject || validation_flow.str}</h1>
+				{#if validation_flow.subject}
+					<span class="text-sm text-surface-600-400">{validation_flow.ref_id}</span>
+				{/if}
 				<span
 					class="badge {validationStatusColor(
 						validation_flow.status
@@ -304,6 +307,12 @@
 			</div>
 		{/if}
 	</div>
+	{#if validation_flow.is_stale}
+		<div class="alert preset-tonal-warning px-4 py-3 rounded-lg">
+			<i class="fa-solid fa-triangle-exclamation mr-2"></i>
+			{m.riskValidationOutdatedMessage()}
+		</div>
+	{/if}
 
 	<!-- Associated Links Section -->
 	<div class="card px-6 py-4 bg-surface-50-950 shadow-lg mb-4">

@@ -1806,6 +1806,8 @@ export const listViewFields = {
 			'existingAppliedControls',
 			'currentLevel',
 			'withinTolerance',
+			'riskOwnerApproval',
+			'aboveRiskTolerance',
 			'extraAppliedControls',
 			'residualLevel',
 			'treatment',
@@ -1820,6 +1822,8 @@ export const listViewFields = {
 			'existing_applied_controls',
 			'current_level',
 			'within_tolerance',
+			'risk_owner_validation_status',
+			'residual_above_tolerance',
 			'applied_controls',
 			'residual_level',
 			'treatment',
@@ -1864,6 +1868,7 @@ export const listViewFields = {
 	'validation-flows': {
 		head: [
 			'ref_id',
+			'subject',
 			'status',
 			'createdAt',
 			'requester',
@@ -1875,6 +1880,7 @@ export const listViewFields = {
 		],
 		body: [
 			'ref_id',
+			'subject',
 			'status',
 			'created_at',
 			'requester',

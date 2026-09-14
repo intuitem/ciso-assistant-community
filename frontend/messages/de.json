@@ -6405,5 +6405,20 @@
 	"exportRiskScenariosData": "Szenariodaten",
 	"exportRiskScenariosDataDesc": "Einfache Szenarioliste mit Risikostufen, Zuständigen und Maßnahmen",
 	"exportRiskScenariosWorkbook": "Szenarien als Excel",
-	"exportRiskScenariosWorkbookDesc": "Vollständige Daten einschließlich Annahmen, Auswirkungen und Behandlung"
+	"exportRiskScenariosWorkbookDesc": "Vollständige Daten einschließlich Annahmen, Auswirkungen und Behandlung",
+	"subject": "Betreff",
+	"riskOwnerApproval": "Freigabe durch Risikoeigentümer",
+	"aboveRiskTolerance": "Über der Risikotoleranz",
+	"notRequested": "Nicht angefordert",
+	"notRequired": "Nicht erforderlich",
+	"requestRiskOwnerValidation": "Freigabe durch Risikoeigentümer anfordern",
+	"riskTreatmentAndResidualRiskApprovalSubject": "Behandlungsplan und Restrisiko — {refId}",
+	"riskTreatmentAndResidualRiskApprovalNotes": "Bitte genehmigen Sie den Informationssicherheits-Risikobehandlungsplan und akzeptieren Sie das verbleibende Informationssicherheitsrisiko.",
+	"riskValidationOutdatedMessage": "Ein verknüpftes Risiko wurde nach dieser Anfrage oder Entscheidung geändert. Fordern Sie eine neue Freigabe an, bevor Sie sich auf die Genehmigung stützen.",
+	"riskValidationOwnerRequired": "Der Genehmiger muss Risikoeigentümer aller verknüpften Risikoszenarien sein.",
+	"riskValidationSameFolderRequired": "Alle verknüpften Risikoszenarien müssen zum Bereich der Freigabe gehören.",
+	"riskValidationToleranceRequired": "Legen Sie vor der Freigabeanforderung die Risikotoleranz fest.",
+	"riskValidationTreatmentRequired": "Vervollständigen Sie vor der Freigabeanforderung die aktuelle Bewertung, die Behandlung und die Restrisikobewertung.",
+	"riskValidationImmutable": "Genehmiger und verknüpfte Risiken können nach Erstellung der Anfrage nicht geändert werden.",
+	"riskValidationOutdated": "Das Risiko wurde nach dieser Anfrage geändert. Reichen Sie die Freigabe vor der Genehmigung erneut ein."
 }

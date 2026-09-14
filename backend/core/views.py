@@ -7618,6 +7618,14 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
             "existing_applied_controls",
             "owner",
             "security_exceptions",
+            Prefetch(
+                "validationflow_set",
+                queryset=ValidationFlow.objects.select_related(
+                    "approver", "requester", "folder"
+                ).prefetch_related(
+                    "events", "risk_scenarios__risk_assessment"
+                ),
+            ),
         )
 
     def _perform_write(self, serializer):
@@ -7951,6 +7959,9 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
 class UserFilter(GenericFilterSet):
     is_approver = df.BooleanFilter(method="filter_approver", label="Approver")
+    risk_scenario_owner = df.UUIDFilter(
+        method="filter_risk_scenario_owner", label="Risk scenario owner"
+    )
     is_applied_control_owner = df.BooleanFilter(
         method="filter_applied_control_owner", label="Applied control owner"
     )
@@ -7992,6 +8003,22 @@ class UserFilter(GenericFilterSet):
             return queryset.filter(id__in=approvers_id)
         return queryset.exclude(id__in=approvers_id)
 
+    def filter_risk_scenario_owner(self, queryset, name, value):
+        if not value or not RoleAssignment.is_object_readable(
+            self.request.user, RiskScenario, value
+        ):
+            return queryset.none()
+        scenario = RiskScenario.objects.prefetch_related("owner").get(pk=value)
+        owner_ids = set(scenario.owner.values_list("pk", flat=True))
+        matching_user_ids = [
+            user.pk
+            for user in queryset
+            if owner_ids.intersection(
+                actor.pk for actor in Actor.get_all_for_user(user)
+            )
+        ]
+        return queryset.filter(pk__in=matching_user_ids)
+
     def filter_applied_control_owner(self, queryset, name, value):
         return queryset.filter(applied_controls__isnull=not value)
 
@@ -8015,6 +8042,7 @@ class UserFilter(GenericFilterSet):
             "user_groups",
             "idp_groups",
             "exclude_current",
+            "risk_scenario_owner",
             "representative__entity",
         ]
 
@@ -8086,6 +8114,7 @@ class ValidationFlowFilterSet(GenericFilterSet):
             "filtering_labels",
             "compliance_assessments",
             "risk_assessments",
+            "risk_scenarios",
             "crq_studies",
             "ebios_studies",
             "entity_assessments",
@@ -8105,7 +8134,7 @@ class ValidationFlowViewSet(BaseModelViewSet):
     model = ValidationFlow
     serializer_class = ValidationFlowWriteSerializer
     filterset_class = ValidationFlowFilterSet
-    search_fields = ["ref_id", "request_notes"]
+    search_fields = ["ref_id", "subject", "request_notes"]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -8118,6 +8147,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
         )
         compliance_qs = ComplianceAssessment.objects.select_related("perimeter__folder")
         risk_qs = RiskAssessment.objects.select_related("perimeter__folder")
+        risk_scenario_qs = RiskScenario.objects.select_related(
+            "risk_assessment__perimeter__folder"
+        )
         bia_model = related_model("business_impact_analysis")
         bia_qs = bia_model.objects.select_related("perimeter__folder")
         crq_model = related_model("crq_studies")
@@ -8141,6 +8173,7 @@ class ValidationFlowViewSet(BaseModelViewSet):
             Prefetch("events", queryset=events_qs),
             Prefetch("compliance_assessments", queryset=compliance_qs),
             Prefetch("risk_assessments", queryset=risk_qs),
+            Prefetch("risk_scenarios", queryset=risk_scenario_qs),
             Prefetch("business_impact_analysis", queryset=bia_qs),
             Prefetch("crq_studies", queryset=crq_model.objects.all()),
             Prefetch("ebios_studies", queryset=ebios_model.objects.all()),
@@ -8175,6 +8208,7 @@ class ValidationFlowViewSet(BaseModelViewSet):
         m2m_through_fields = {
             "has_compliance_assessments": ValidationFlow.compliance_assessments.through,
             "has_risk_assessments": ValidationFlow.risk_assessments.through,
+            "has_risk_scenarios": ValidationFlow.risk_scenarios.through,
             "has_business_impact_analysis": ValidationFlow.business_impact_analysis.through,
             "has_crq_studies": ValidationFlow.crq_studies.through,
             "has_ebios_studies": ValidationFlow.ebios_studies.through,
@@ -8206,6 +8240,7 @@ class ValidationFlowViewSet(BaseModelViewSet):
         model_types = {
             "compliance_assessments": "Compliance Assessments",
             "risk_assessments": "Risk Assessments",
+            "risk_scenarios": "Risk Scenarios",
             "business_impact_analysis": "Business Impact Analysis",
             "crq_studies": "Quantitative Risk Studies",
             "ebios_studies": "EBIOS RM Studies",

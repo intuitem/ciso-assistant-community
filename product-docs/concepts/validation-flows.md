@@ -21,7 +21,7 @@ graph LR
   ST -.->|change requested| CR[Change requested]
 ```
 
-A **requester** submits a validation flow for one or more objects in their domain. The flow carries optional **request notes**, a **validation deadline**, and is routed to a designated **approver**. The approver moves the flow through a status machine ending in one of: _Accepted_, _Rejected_, _Change requested_, _Revoked_, _Expired_, or _Dropped_. The original objects remain unchanged — what's recorded is the validation flow itself, with the link back to whatever was up for approval.
+A **requester** submits a validation flow for one or more objects in their domain. The flow carries a descriptive **subject**, optional **request notes**, a **validation deadline**, and is routed to a designated **approver**. The approver moves the flow through a status machine ending in one of: _Accepted_, _Rejected_, _Change requested_, _Revoked_, _Expired_, or _Dropped_. The original objects remain unchanged — what's recorded is the validation flow itself, with the link back to whatever was up for approval.
 
 | User-facing | Internal | Notes |
 |---|---|---|
@@ -29,6 +29,7 @@ A **requester** submits a validation flow for one or more objects in their domai
 | Validations (sidebar) | `validationFlows` i18n key | The list view label |
 | Requester | `requester` FK to User | The platform account that submitted the flow |
 | Approver | `approver` FK to User | Foreign key to a **User** (not an actor) — approval is always personal accountability, even if assignment elsewhere can fan out to a team |
+| Subject | `subject` | Short description of the decision requested; shown in lists and email notifications |
 | Request notes | `request_notes` | Free-text explanation of what's being asked for |
 | Validation deadline | `validation_deadline` | Optional date used for expiry and dashboards |
 
@@ -36,10 +37,18 @@ A **requester** submits a validation flow for one or more objects in their domai
 
 There are two ways to start a flow, and they cover slightly different objects:
 
-- **From the Validations list** — click **+**, then expand the **More** section to attach objects. The picker offers **Audits**, **Risk assessments**, **Business impact analyses**, **Findings binders**, **Security exceptions**, **Processings** (privacy), **Accreditations**, and **Contracts** (third-party). You can mix several types in one flow when they belong to the same approval decision (e.g. "approve this audit and the related exceptions").
-- **From an object's own page** — objects that carry a validation section let you submit the open object directly. This is the only way to route a **Policy** through a flow, and it's also available on audits, risk assessments, BIAs, findings binders, exceptions, processings, accreditations, and contracts.
+- **From the Validations list** — click **+**, then expand the **More** section to attach objects. The picker offers **Audits**, **Risk assessments**, **Risk scenarios**, **Business impact analyses**, **Findings binders**, **Security exceptions**, **Processings** (privacy), **Accreditations**, and **Contracts** (third-party). You can mix several types in one flow when they belong to the same approval decision (e.g. "approve this audit and the related exceptions").
+- **From an object's own page** — objects that carry a validation section let you submit the open object directly. This is the only way to route a **Policy** through a flow, and it's also available on audits, risk assessments, risk scenarios, BIAs, findings binders, exceptions, processings, accreditations, and contracts.
 
-So the full set of objects that can go through a validation flow is: audits, risk assessments, business impact analyses, findings binders, policies, security exceptions, processings, accreditations, and contracts.
+So the full set of objects that can go through a validation flow is: audits, risk assessments, risk scenarios, business impact analyses, findings binders, policies, security exceptions, processings, accreditations, and contracts.
+
+### Risk-owner approval
+
+A risk scenario can be submitted after its current rating, treatment plan, residual rating, and the parent assessment's risk tolerance are complete. The selected approver must resolve to an owner of every risk in the request, so several risks with the same owner can be approved together.
+
+The single decision covers approval of the information-security risk treatment plan and acceptance of the residual information-security risk, as required by ISO/IEC 27001:2022 clause 6.1.3 f). A separate approval of the initial classification is not required by this workflow.
+
+If a linked risk or its parent assessment changes after submission or approval, the validation is shown as **Outdated** and cannot be accepted until it is resubmitted. Risks above the configured tolerance remain visible in the risk list. Management-body approval can be recorded once for the complete risk assessment through the existing risk-assessment validation flow, with above-tolerance risks highlighted in that review.
 
 ## Status lifecycle
 

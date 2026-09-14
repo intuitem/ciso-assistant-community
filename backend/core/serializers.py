@@ -1377,6 +1377,22 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 
 
 class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "subject",
+            "status",
+            "is_stale",
+            "request_notes",
+            "last_event_notes",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
+    risk_owner_validation_status = serializers.SerializerMethodField()
+    residual_above_tolerance = serializers.SerializerMethodField()
     str = serializers.CharField(source="__str__", read_only=True)
     risk_assessment = FieldsRelatedField(["id", "name", "is_locked"])
     risk_matrix = FieldsRelatedField(source="risk_assessment.risk_matrix")
@@ -1415,6 +1431,25 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     filtering_labels = FieldsRelatedField(many=True)
 
     within_tolerance = serializers.CharField()
+
+    def get_risk_owner_validation_status(self, obj):
+        flows = sorted(
+            obj.validationflow_set.all(),
+            key=lambda flow: flow.created_at,
+            reverse=True,
+        )
+        if not flows:
+            return "notRequested"
+        latest = flows[0]
+        if latest.is_stale:
+            return "outdated"
+        return latest.status
+
+    def get_residual_above_tolerance(self, obj):
+        tolerance = obj.risk_assessment.risk_tolerance
+        if tolerance < 0 or obj.residual_level < 0:
+            return "--"
+        return "YES" if obj.residual_level > tolerance else "NO"
 
     class Meta:
         model = RiskScenario
@@ -6465,6 +6500,74 @@ class ObjectClassificationWriteSerializer(BaseModelSerializer):
 
 
 class ValidationFlowWriteSerializer(BaseModelSerializer):
+    RISK_IMMUTABLE_FIELDS = {"risk_scenarios", "approver"}
+
+    @staticmethod
+    def _validate_risk_scenario_request(scenarios, approver, folder):
+        if not scenarios:
+            return
+        if approver is None:
+            raise serializers.ValidationError({"approver": "riskValidationOwnerRequired"})
+
+        approver_actor_ids = {
+            actor.pk for actor in Actor.get_all_for_user(approver)
+        }
+        for scenario in scenarios:
+            if folder and scenario.folder_id != folder.id:
+                raise serializers.ValidationError(
+                    {"risk_scenarios": "riskValidationSameFolderRequired"}
+                )
+            if not approver_actor_ids.intersection(
+                scenario.owner.values_list("pk", flat=True)
+            ):
+                raise serializers.ValidationError(
+                    {"approver": "riskValidationOwnerRequired"}
+                )
+            if scenario.risk_assessment.risk_tolerance < 0:
+                raise serializers.ValidationError(
+                    {"risk_scenarios": "riskValidationToleranceRequired"}
+                )
+            if (
+                scenario.treatment in ("open", "cancelled")
+                or scenario.current_proba < 0
+                or scenario.current_impact < 0
+                or scenario.residual_proba < 0
+                or scenario.residual_impact < 0
+            ):
+                raise serializers.ValidationError(
+                    {"risk_scenarios": "riskValidationTreatmentRequired"}
+                )
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if self.instance is None:
+            scenarios = attrs.get("risk_scenarios", [])
+            self._validate_risk_scenario_request(
+                scenarios,
+                attrs.get("approver"),
+                attrs.get("folder"),
+            )
+            if scenarios and not attrs.get("subject"):
+                refs = ", ".join(scenario.ref_id for scenario in scenarios)
+                attrs["subject"] = f"Risk treatment and residual risk — {refs}"
+            return attrs
+
+        existing_scenarios = list(self.instance.risk_scenarios.all())
+        if existing_scenarios:
+            if self.RISK_IMMUTABLE_FIELDS.intersection(attrs):
+                raise serializers.ValidationError("riskValidationImmutable")
+            if attrs.get("status") == ValidationFlow.Status.ACCEPTED:
+                if self.instance.is_stale:
+                    raise serializers.ValidationError("riskValidationOutdated")
+                self._validate_risk_scenario_request(
+                    existing_scenarios,
+                    self.instance.approver,
+                    self.instance.folder,
+                )
+        elif attrs.get("risk_scenarios"):
+            raise serializers.ValidationError("riskValidationImmutable")
+        return attrs
+
     ALLOWED_STATUS_TRANSITIONS = {
         ValidationFlow.Status.SUBMITTED: {
             ValidationFlow.Status.ACCEPTED,
@@ -6729,6 +6832,8 @@ class FlowEventSerializer(BaseModelSerializer):
 
 class ValidationFlowReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__", read_only=True)
+    is_stale = serializers.BooleanField(read_only=True)
+    last_event_notes = serializers.CharField(read_only=True)
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     compliance_assessments = FieldsRelatedField(
@@ -6747,6 +6852,16 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
             "status",
             "updated_at",
             {"perimeter": ["id", {"folder": ["id"]}]},
+        ],
+    )
+    risk_scenarios = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "name",
+            "updated_at",
+            {"risk_assessment": ["id"]},
         ],
     )
     business_impact_analysis = FieldsRelatedField(
@@ -6799,6 +6914,7 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
         field_map = [
             ("compliance_assessments", "has_compliance_assessments"),
             ("risk_assessments", "has_risk_assessments"),
+            ("risk_scenarios", "has_risk_scenarios"),
             ("business_impact_analysis", "has_business_impact_analysis"),
             ("crq_studies", "has_crq_studies"),
             ("ebios_studies", "has_ebios_studies"),

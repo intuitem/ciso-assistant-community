@@ -11626,6 +11626,10 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         RiskAssessment,
         blank=True,
     )
+    risk_scenarios = models.ManyToManyField(
+        RiskScenario,
+        blank=True,
+    )
     business_impact_analysis = models.ManyToManyField(
         "resilience.BusinessImpactAnalysis",
         blank=True,
@@ -11671,6 +11675,11 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
     contracts = models.ManyToManyField(
         "tprm.Contract",
         blank=True,
+    )
+    subject = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Validation subject"),
     )
     request_notes = models.TextField(null=True, blank=True)
     requester = models.ForeignKey(
@@ -11748,6 +11757,7 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         model_fields = [
             "compliance_assessments",
             "risk_assessments",
+            "risk_scenarios",
             "business_impact_analysis",
             "crq_studies",
             "ebios_studies",
@@ -11776,6 +11786,29 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
     def last_event_notes(self) -> str | None:
         event = self.last_event
         return event.event_notes if event else None
+
+    @property
+    def is_stale(self) -> bool:
+        """Whether a linked risk scenario changed since this flow's current decision."""
+        if self.status not in (self.Status.SUBMITTED, self.Status.ACCEPTED):
+            return False
+
+        event = next(
+            (
+                event
+                for event in self.events.all()
+                if event.event_type == self.status
+            ),
+            None,
+        )
+        if event is None:
+            return False
+
+        return any(
+            scenario.updated_at > event.created_at
+            or scenario.risk_assessment.updated_at > event.created_at
+            for scenario in self.risk_scenarios.all()
+        )
 
     def __str__(self) -> str:
         # ref_id is nullable and only auto-assigned in save(); bulk-created
@@ -12091,7 +12124,18 @@ auditlog.register(
 )
 auditlog.register(
     RiskScenario,
-    m2m_fields={"owner", "applied_controls", "existing_applied_controls", "incidents"},
+    m2m_fields={
+        "owner",
+        "assets",
+        "threats",
+        "vulnerabilities",
+        "applied_controls",
+        "existing_applied_controls",
+        "incidents",
+        "qualifications",
+        "security_exceptions",
+        "antecedent_scenarios",
+    },
     exclude_fields=common_exclude,
 )
 auditlog.register(

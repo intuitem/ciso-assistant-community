@@ -7,6 +7,7 @@ export type ValidationFlowAction =
 export const VALIDATION_FLOW_MODEL_URLS: Record<string, string> = {
 	compliance_assessments: 'compliance-assessments',
 	risk_assessments: 'risk-assessments',
+	risk_scenarios: 'risk-scenarios',
 	business_impact_analysis: 'business-impact-analysis',
 	crq_studies: 'quantitative-risk-studies',
 	ebios_studies: 'ebios-rm',
@@ -24,6 +25,7 @@ export function validationFlowModelLabels(): Record<string, string> {
 	return {
 		compliance_assessments: m.complianceAssessments(),
 		risk_assessments: m.riskAssessments(),
+		risk_scenarios: m.riskScenarios(),
 		business_impact_analysis: m.businessImpactAnalysis(),
 		crq_studies: m.quantitativeRiskStudies(),
 		ebios_studies: m.ebiosRMStudies(),

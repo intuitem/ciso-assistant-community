@@ -10,6 +10,7 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 import { error, redirect } from '@sveltejs/kit';
+import { loadValidationFlowFormData } from '$lib/utils/load';
 
 export const load = (async ({ fetch, params, cookies, locals }) => {
 	const URLModel = 'risk-scenarios';
@@ -39,6 +40,16 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		throw error(res.status, res.statusText || 'Failed to load risk scenario');
 	}
 	const scenario = await res.json();
+	const { validationFlowForm, validationFlowModel } = await loadValidationFlowFormData({
+		event: { fetch },
+		folderId: scenario.folder.id,
+		targetField: 'risk_scenarios',
+		targetIds: [params.id],
+		presetValues: {
+			subject: m.riskTreatmentAndResidualRiskApprovalSubject({ refId: scenario.ref_id }),
+			request_notes: m.riskTreatmentAndResidualRiskApprovalNotes()
+		}
+	});
 	const object = await fetch(objectEndpoint).then((res) => res.json());
 
 	const tables: Record<string, any> = {};
@@ -79,6 +90,8 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		scenario,
 		tables,
 		riskMatrix,
+		validationFlowForm,
+		validationFlowModel,
 		title: scenario.str,
 		riskAcceptances: await riskAcceptancesPromise
 	};

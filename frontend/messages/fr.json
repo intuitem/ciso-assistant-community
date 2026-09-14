@@ -6282,5 +6282,20 @@
 	"dateLastYear": "L’année dernière",
 	"dateNext7Days": "7 prochains jours",
 	"dateNext30Days": "30 prochains jours",
-	"dateNext90Days": "90 prochains jours"
+	"dateNext90Days": "90 prochains jours",
+	"subject": "Objet",
+	"riskOwnerApproval": "Approbation du propriétaire du risque",
+	"aboveRiskTolerance": "Au-dessus de la tolérance au risque",
+	"notRequested": "Non demandée",
+	"notRequired": "Non requise",
+	"requestRiskOwnerValidation": "Demander l’approbation du propriétaire du risque",
+	"riskTreatmentAndResidualRiskApprovalSubject": "Plan de traitement et risque résiduel — {refId}",
+	"riskTreatmentAndResidualRiskApprovalNotes": "Veuillez approuver le plan de traitement du risque de sécurité de l’information et accepter le risque résiduel de sécurité de l’information.",
+	"riskValidationOutdatedMessage": "Un risque lié a été modifié après cette demande ou cette décision. Soumettez une nouvelle validation avant de vous appuyer sur l’approbation.",
+	"riskValidationOwnerRequired": "L’approbateur doit être propriétaire de tous les scénarios de risque liés.",
+	"riskValidationSameFolderRequired": "Tous les scénarios de risque liés doivent appartenir au domaine de la validation.",
+	"riskValidationToleranceRequired": "Définissez la tolérance au risque avant de demander l’approbation.",
+	"riskValidationTreatmentRequired": "Complétez l’évaluation actuelle, le traitement et l’évaluation du risque résiduel avant de demander l’approbation.",
+	"riskValidationImmutable": "L’approbateur et les risques liés ne peuvent plus être modifiés après la création de la demande.",
+	"riskValidationOutdated": "Le risque a été modifié après cette demande. Soumettez à nouveau la validation avant l’approbation."
 }

@@ -15,6 +15,8 @@
 	interface ValidationFlow {
 		id: string;
 		ref_id: string;
+		subject?: string;
+		is_stale?: boolean;
 		status:
 			| 'submitted'
 			| 'accepted'
@@ -114,6 +116,9 @@
 								>
 									{validation_flow.ref_id}
 								</Anchor>
+								{#if validation_flow.subject}
+									<span class="font-medium">{validation_flow.subject}</span>
+								{/if}
 								<span
 									class="badge text-xs"
 									class:preset-tonal-success={validation_flow.status === 'accepted'}
@@ -127,6 +132,9 @@
 									{safeTranslate(validation_flow.status)}
 								</span>
 								<i class="fa-solid {getStatusIcon(validation_flow.status)} text-sm ml-1"></i>
+								{#if validation_flow.is_stale}
+									<span class="badge preset-tonal-warning text-xs">{m.outdated()}</span>
+								{/if}
 							</div>
 							<div class="text-sm text-surface-600-400">
 								<i class="fa-solid fa-user-check mr-1"></i>

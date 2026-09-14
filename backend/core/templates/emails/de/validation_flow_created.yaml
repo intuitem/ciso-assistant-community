@@ -1,0 +1,19 @@
+subject: "CISO Assistant: ${validation_subject}"
+body: |
+  Hallo,
+
+  eine neue Freigabe wurde Ihnen zur Entscheidung zugewiesen:
+
+  - Referenz: ${validation_ref_id}
+  - Betreff: ${validation_subject}
+  - Antragsteller: ${requester_name}
+  - Freigabefrist: ${validation_deadline}
+  - Bereich: ${folder_name}
+
+  Anfragenotizen:
+
+  ${request_notes}
+
+  Bitte prüfen und entscheiden Sie die Anfrage: [Freigabe öffnen](${validation_url})
+
+  Vielen Dank.
