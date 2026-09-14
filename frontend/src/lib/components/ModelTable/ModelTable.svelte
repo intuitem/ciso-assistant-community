@@ -397,7 +397,6 @@
 	let hasLoadedOnce = $state(false);
 	const isFetching = $derived(inFlight > 0 && !hasLoadedOnce);
 	let currentLoad: Promise<any[]> = Promise.resolve([]);
-	let loadFailed = false;
 
 	if (hasRemoteSource) {
 		// The trigger handler calls our reload synchronously before its first
@@ -408,7 +407,8 @@
 		};
 		handler.onChange((state: State) => {
 			inFlight += 1;
-			loadFailed = false;
+			// Per request, so a failure cannot mask a success that overlapped it.
+			let failed = false;
 			currentLoad = loadTableData({
 				state,
 				URLModel,
@@ -430,13 +430,13 @@
 								},
 				featureFlags: page.data?.featureflags,
 				onError: (error) => {
-					loadFailed = true;
+					failed = true;
 					console.error(error);
 					toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
 				}
 			}).finally(() => {
 				inFlight -= 1;
-				if (inFlight === 0 && !loadFailed) hasLoadedOnce = true;
+				if (!failed) hasLoadedOnce = true;
 			});
 			return currentLoad;
 		});
