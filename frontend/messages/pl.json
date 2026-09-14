@@ -350,7 +350,6 @@
 	"asPDF": "jako PDF",
 	"asCSV": "jako CSV",
 	"asXLSX": "jako Excel",
-	"asWord": "jako Word",
 	"draft": "Szkic",
 	"riskMatrixView": "Widok macierzy ryzyka",
 	"currentInMatrixView": "Obecny",
@@ -700,7 +699,6 @@
 	"noStatus": "Brak statusu",
 	"actionPlanHelpText": "Podzielone według statusu i posortowane według eta",
 	"matchingRequirements": "Dopasowane wymagania",
-	"asZIP": "jako ZIP",
 	"incoming": "Przychodzące",
 	"outdated": "Nieaktualne",
 	"flashMode": "Tryb błyskawiczny",
@@ -1395,7 +1393,6 @@
 	"ebiosWs2_3_tooltip": "Potrzebujesz co najmniej jednego ro/do parowania, aby to wybrać",
 	"ebiosWs3_2_tooltip": "Potrzebujesz co najmniej jednego wybranego RO/do parowania, aby opracować strategiczny scenariusz",
 	"ebiosWs3_3_tooltip": "Potrzebujesz co najmniej jednego interesariusza, aby zdefiniować powiązane środki bezpieczeństwa",
-	"ebiosWs4_1_tooltip": "Potrzebujesz co najmniej jednej wybranej ścieżki ataku ze strategicznego scenariusza, aby opracować scenariusz operacyjny",
 	"ebiosWs4_2_tooltip": "Potrzebujesz co najmniej jednego scenariusza operacyjnego, aby ocenić jego prawdopodobieństwo",
 	"ebiosWs5_tooltip": "Nie przeprowadzono jeszcze oceny ryzyka",
 	"govern": "Rządzić",
@@ -1668,7 +1665,6 @@
 	"deactivateServiceAccountConfirm": "Dezaktywacja tego konta usługi natychmiast unieważni wszystkie oczekujące tokeny dostępu i zablokuje wydawanie nowych. Kontynuować?",
 	"gracePeriod": "Okres karencji",
 	"gracePeriodHelpText": "Obecny sekret działa jeszcze przez ten czas po rotacji, dzięki czemu integracje można zaktualizować bez przestojów. Ograniczone do 1 miesiąca.",
-	"gracePeriodTooLong": "Okres karencji nie może być dłuższy niż 1 miesiąc.",
 	"previousSecretValidUntil": "Poprzedni sekret klienta pozostaje ważny do {date}.",
 	"expiresOn": "Wygasa na {data}",
 	"personalAccessTokenExpiryHelpText": "Liczba dni, po których token wygasa",
@@ -1933,15 +1929,6 @@
 	"changeUserGroup": "Zmień grupę użytkowników",
 	"deleteUserGroup": "Usuń grupę użytkowników",
 	"viewUserGroup": "Zobacz grupę użytkowników",
-	"changeQuantitativeRiskHypothesis": "Zmień hipotezę ryzyka ilościowego",
-	"deleteQuantitativeRiskHypothesis": "Usuń hipotezę ryzyka ilościowego",
-	"viewQuantitativeRiskHypothesis": "Zobacz hipotezę ryzyka ilościowego",
-	"changeQuantitativeRiskScenario": "Zmień scenariusz",
-	"deleteQuantitativeRiskScenario": "Usuń scenariusz",
-	"viewQuantitativeRiskScenario": "Zobacz scenariusz",
-	"changeQuantitativeRiskStudy": "Zmień badanie ilościowe ryzyka",
-	"deleteQuantitativeRiskStudy": "Usuń badanie ilościowe ryzyka",
-	"viewQuantitativeRiskStudy": "Zobacz badanie ilościowe ryzyka",
 	"dueDateUpdatedSuccessfully": "Termin zaktualizowany pomyślnie",
 	"taskScheduleInfo": "Wcześniejsze wystąpienia są chronione przed zmianami harmonogramu. Tylko nadchodzące zadania zostaną przeliczone.",
 	"info": "Informacja",
@@ -2022,7 +2009,6 @@
 	"syncAppliedControlsMessage": "Zastosowane kontrole korzystające z tej kontroli referencyjnej zostaną z nią zsynchronizowane. Należy pamiętać, że tej operacji nie można cofnąć.",
 	"syncToAppliedControl": "Synchronizuj z zastosowaną kontrolą",
 	"syncToReferenceControl": "Synchronizuj z kontrolą referencyjną",
-	"exportEcosystem": "eksport ekosystemu (XLSX)",
 	"aggregation": "Agregacja",
 	"average": "Średnia",
 	"clearSearch": "Wyczyść wyszukiwanie",
@@ -2060,19 +2046,12 @@
 	"builderRequirementHint": "Oceniana, może mieć elementy podrzędne",
 	"builderSplashScreen": "Ekran powitalny",
 	"builderSplashScreenHint": "Prezentacyjny, nieoceniany",
-	"builderStatusLive": "Na żywo",
-	"builderStatusLiveTitle": "Szkic odpowiada temu, co widzą respondenci audytu.",
-	"builderStatusUnpublishedChanges": "Nieopublikowane zmiany",
-	"builderStatusUnpublishedChangesTitle": "Szkic zawiera zmiany, które nie są jeszcze widoczne dla respondentów audytu. Opublikuj, aby je zastosować.",
-	"builderStatusDraftNothingLive": "Szkic — nic nie jest na żywo",
-	"builderStatusDraftNothingLiveTitle": "Szkic ma treść, ale nic nie zostało jeszcze opublikowane. Nowe audyty nie zobaczą nic, dopóki nie opublikujesz.",
 	"builderStatusEmpty": "Pusty",
 	"builderStatusEmptyTitle": "Brak wymagań. Nowe audyty oparte na tej strukturze nie będą miały na co odpowiadać.",
 	"builderPreview": "Podgląd",
 	"builderPreviewSaveFirst": "Najpierw zapisz szkic, aby wyświetlić podgląd",
 	"builderPreviewAsRespondent": "Podgląd jako respondent (otwiera się w nowej karcie)",
 	"builderExportYamlTitle": "Eksportuj strukturę jako plik biblioteki YAML",
-	"builderExportYamlUnpublishedWarning": "Nieopublikowane zmiany nie zostaną uwzględnione. Najpierw opublikuj, aby wyeksportować najnowsze edycje.",
 	"builderCopyBase": "Kopiuj bazę",
 	"builderCopyBaseTitle": "Kopiuj tekst języka bazowego do {lang} (nie nadpisuje istniejących tłumaczeń)",
 	"builderCopyBaseQuestion": "Kopiować tekst bazowy?",
@@ -2082,82 +2061,7 @@
 	"builderExpandAllCards": "Rozwiń wszystkie karty",
 	"builderCollapseAllCards": "Zwiń wszystkie karty",
 	"builderSaveFailed": "Zapisywanie nie powiodło się",
-	"builderPublishedFlash": "Opublikowano!",
 	"builderSaveDraftTitle": "Zapisz szkic (Ctrl+S)",
-	"builderDiscardDraftTitle": "Odrzuć szkic",
-	"builderDiscard": "Odrzuć",
-	"builderDiscardAllChangesQuestion": "Odrzucić wszystkie zmiany?",
-	"builderYesDiscard": "Tak, odrzuć",
-	"builderPublishDraftToLiveTitle": "Opublikuj szkic do struktury na żywo",
-	"builderPublishing": "Publikowanie...",
-	"builderPublishModalTitle": "Opublikuj szkic na żywo",
-	"builderPublishModalDescription": "Spowoduje to aktualizację struktury na żywo. Sprawdź zmiany poniżej.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} wymagania dodane",
-				"countPlural=other": "{count} wymagania dodane"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} pytania",
-				"countPlural=other": "{count} pytania"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} wymagania usunięte",
-				"countPlural=other": "{count} wymagania usunięte"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} pytania",
-				"countPlural=other": "{count} pytania"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Nie wykryto zmian strukturalnych (tylko metadane).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "Wykryto {count} zmiany powodujące niezgodność",
-				"countPlural=other": "Wykryto {count} zmiany powodujące niezgodność"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Te zmiany mogą wpłynąć na punktację, widoczność lub wyniki zgodności w istniejących audytach.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} istniejących audytów zostanie naruszonych",
-				"countPlural=other": "{count} istniejących audytów zostanie naruszonych"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Nowe wymagania zostaną dodane do tych audytów.",
-	"builderAffectedAuditsRemovedHint": "Usunięte wymagania i ich dane oceny zostaną usunięte z tych audytów.",
-	"builderCouldNotLoadPreview": "Nie można załadować podglądu wpływu. Postępuj ostrożnie.",
-	"builderConfirmPublish": "Potwierdź publikację",
 	"builderSearchNodes": "Szukaj węzłów...",
 	"builderExpandSidebar": "Rozwiń pasek boczny",
 	"builderCollapseSidebar": "Zwiń pasek boczny",
@@ -2337,7 +2241,6 @@
 	"builderSplashNumberedList": "Lista numerowana",
 	"builderSplashLink": "Link",
 	"builderSplashTable": "Tabela",
-	"builderSplashInsertImage": "Wstaw obraz",
 	"builderUntitledQuestion": "Pytanie bez tytułu",
 	"builderNotTranslated": "Nieprzetłumaczone",
 	"builderQuestionTextPlaceholder": "Wprowadź swoje pytanie...",
@@ -2382,27 +2285,12 @@
 	"builderKbSaveDraft": "Zapisz szkic",
 	"builderKbShowCheatsheet": "Pokaż tę ściągawkę",
 	"builderKbCloseDialog": "Zamknij okno dialogowe lub menu rozwijane",
-	"builderImportedFramework": "Importowana struktura",
-	"builderImportedFrameworkDescription": "Ta struktura została zaimportowana z biblioteki i nie można jej edytować bezpośrednio. Aby wprowadzić zmiany, utwórz edytowalną kopię.",
-	"builderCreateCopyAndEdit": "Utwórz kopię i edytuj",
-	"builderCreatingCopy": "Tworzenie kopii...",
-	"builderLoadingEditor": "Ładowanie edytora...",
-	"builderFailedToStartEditor": "Nie udało się uruchomić edytora",
-	"builderBackToFramework": "Powrót do struktury",
-	"builderBackToBuilder": "Powrót do kreatora",
-	"builderFailedToLoadDraft": "Nie udało się załadować szkicu",
-	"builderImplementationGroupsHeader": "Grupy wdrożeniowe",
-	"builderNoItemsToPreview": "Brak elementów do podglądu.",
-	"builderNoItemsToPreviewHint": "Dodaj oceniane wymagania lub ekrany powitalne w kreatorze.",
-	"builderBaseLanguageOption": "Język bazowy",
 	"builderFrameworkNameRequired": "Nazwa struktury jest wymagana.",
 	"builderFrameworkNameTooLong": "Nazwa struktury ma {length} znaków (maks. 200).",
 	"builderNodeNameTooLong": "Nazwa przekracza 200 znaków ({length}/200). Przenieś długi tekst do pola opisu.",
 	"builderRefIdTooLong": "„{label}”: ref_id ma {length} znaków (maks. 100).",
 	"builderUrnTooLong": "„{label}”: URN ma {length} znaków (maks. 255).",
-	"builderFailedToSaveDraftBeforePublish": "Nie udało się zapisać szkicu przed publikacją.",
 	"builderUnsavedChangesNavigation": "Masz niezapisane zmiany, które zostaną utracone. Mimo to wyjść?",
-	"builderUnpublishedChangesNavigation": "Masz nieopublikowane zmiany. Twój szkic jest zapisany i możesz go wznowić później. Mimo to wyjść?",
 	"fieldVisibility": "Widoczność pól",
 	"fieldVisibilityHelpText": "Kontroluj, które pola każda rola może zobaczyć i edytować.",
 	"visibilityAuditorRespondent": "Audytor + Respondent",
@@ -2435,7 +2323,6 @@
 	"mfaDisabledSuccessfully": "MFA zostało wyłączone dla tego użytkownika",
 	"errorDisablingMFA": "Nie można wyłączyć MFA dla tego użytkownika",
 	"userHasNoMFAEnabled": "Ten użytkownik nie ma włączonego MFA",
-	"builderChangedOn": "zmienione w",
 	"requirementWeight": "Waga",
 	"scim": "SCIM",
 	"scimDescription": "Skonfiguruj provisioning SCIM 2.0. Skieruj swojego dostawcę tożsamości na poniższy punkt końcowy i uwierzytelnij go za pomocą tokenu bearer wygenerowanego tutaj.",
