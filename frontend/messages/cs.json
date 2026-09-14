@@ -344,7 +344,6 @@
 	"plan": "Plán",
 	"asPDF": "jako PDF",
 	"asCSV": "jako CSV",
-	"asWord": "jako Word",
 	"draft": "Návrh",
 	"riskMatrixView": "Zobrazení rizikové matice",
 	"currentInMatrixView": "Současný",
@@ -658,7 +657,6 @@
 	"noStatus": "Bez stavu",
 	"actionPlanHelpText": "Odděleno podle stavu a seřazeno podle eta",
 	"matchingRequirements": "Odpovídající požadavky",
-	"asZIP": "jako ZIP",
 	"incoming": "Příchozí",
 	"outdated": "Zastaralé",
 	"flashMode": "Rychlý režim",
@@ -863,7 +861,8 @@
 	"mailFailedToSend": "E-mail se nepodařilo odeslat",
 	"questionOrQuestions": "Otázka(y)",
 	"successfullyUpdatedClientSettings": "Nastavení klienta úspěšně aktualizováno, prosím obnovte stránku.",
-	"xRaysEmptyMessage": "Musíte vytvořit alespoň jeden obvod, abyste mohli používat Diagnostiku.",
+	"xRaysEmptyMessage": "Nebyl zjištěn žádný problém. Diagnostika zobrazuje pouze subjekty se zjištěními.",
+	"xRaysLoadingError": "Diagnostiku se nepodařilo dokončit. Podrobnosti najdete v protokolech serveru.",
 	"suggestControls": "Navrhnout opatření",
 	"createAppliedControlsFromSuggestionsHelpText": "Vytvořit aplikovaná opatření z navrhovaných referenčních opatření v požadavcích standardu",
 	"createAppliedControlsFromSuggestionsSuccess": "Aplikovaná opatření byla úspěšně vytvořena z navrhovaných referenčních opatření",
@@ -1147,15 +1146,6 @@
 	"changeUserGroup": "Změnit skupinu uživatelů",
 	"deleteUserGroup": "Smazat skupinu uživatelů",
 	"viewUserGroup": "Zobrazit skupinu uživatelů",
-	"changeQuantitativeRiskHypothesis": "Změnit kvantitativní hypotézu rizika",
-	"deleteQuantitativeRiskHypothesis": "Smazat kvantitativní hypotézu rizika",
-	"viewQuantitativeRiskHypothesis": "Zobrazit kvantitativní hypotézu rizika",
-	"changeQuantitativeRiskScenario": "Změnit scénář",
-	"deleteQuantitativeRiskScenario": "Smazat scénář",
-	"viewQuantitativeRiskScenario": "Zobrazit scénář",
-	"changeQuantitativeRiskStudy": "Změnit kvantitativní studii rizika",
-	"deleteQuantitativeRiskStudy": "Smazat kvantitativní studii rizika",
-	"viewQuantitativeRiskStudy": "Zobrazit kvantitativní studii rizika",
 	"dueDateUpdatedSuccessfully": "Termín byl úspěšně aktualizován",
 	"taskScheduleInfo": "Předchozí výskyty jsou chráněny před změnami plánu. Pouze nadcházející úlohy budou přepočítány.",
 	"cascadeDeleteWarning": "Varování: Smazáním tohoto objektu budou také trvale smazány {count} související objekty:",
@@ -1195,7 +1185,6 @@
 	"syncAppliedControlsMessage": "Aplikovaná opatření, která používají toto referenční opatření, s ním budou synchronizována. Vezměte prosím na vědomí, že tuto akci nelze vrátit zpět.",
 	"syncToAppliedControl": "Synchronizovat související aplikovaná opatření",
 	"syncToReferenceControl": "Synchronizovat s referenčním opatřením",
-	"exportEcosystem": "export ekosystému (XLSX)",
 	"expirationDate": "Datum vypršení platnosti",
 	"vulnerabilitySlaPolicyHelpText": "Definujte maximální počet dní pro opravu zranitelnosti podle její závažnosti. Nechte prázdné pro vypnutí automatického výpočtu.",
 	"slaAnchor": "Počátek SLA",
@@ -1281,19 +1270,12 @@
 	"builderRequirementHint": "Lze hodnotit, může mít podřazené uzly",
 	"builderSplashScreen": "Úvodní obrazovka",
 	"builderSplashScreenHint": "Prezentační, nelze hodnotit",
-	"builderStatusLive": "Publikováno",
-	"builderStatusLiveTitle": "Koncept odpovídá tomu, co vidí respondenti hodnocení.",
-	"builderStatusUnpublishedChanges": "Nepublikované změny",
-	"builderStatusUnpublishedChangesTitle": "Koncept obsahuje úpravy, které respondenti hodnocení zatím nevidí. Pro aplikování je publikujte.",
-	"builderStatusDraftNothingLive": "Koncept — zatím nic není publikováno",
-	"builderStatusDraftNothingLiveTitle": "Koncept má obsah, ale nic ještě nebylo publikováno. Nová hodnocení nic neuvidí, dokud neprovedete publikaci.",
 	"builderStatusEmpty": "Prázdný",
 	"builderStatusEmptyTitle": "Zatím žádné požadavky. Nová hodnocení postavená na tomto rámci nebudou mít co zodpovídat.",
 	"builderPreview": "Náhled",
 	"builderPreviewSaveFirst": "Pro zobrazení náhledu nejprve uložte koncept",
 	"builderPreviewAsRespondent": "Náhled z pohledu respondenta (otevře se v nové kartě)",
 	"builderExportYamlTitle": "Exportovat rámec jako soubor knihovny YAML",
-	"builderExportYamlUnpublishedWarning": "Nepublikované změny nebudou zahrnuty. Pokud chcete exportovat nejnovější úpravy, nejprve je publikujte.",
 	"builderCopyBase": "Kopírovat výchozí",
 	"builderCopyBaseTitle": "Kopírovat text z výchozího jazyka do {lang} (nepřepíše existující překlady)",
 	"builderCopyBaseQuestion": "Kopírovat výchozí text?",
@@ -1303,82 +1285,7 @@
 	"builderExpandAllCards": "Rozbalit všechny karty",
 	"builderCollapseAllCards": "Sbalit všechny karty",
 	"builderSaveFailed": "Uložení se nezdařilo",
-	"builderPublishedFlash": "Publikováno!",
 	"builderSaveDraftTitle": "Uložit koncept (Ctrl+S)",
-	"builderDiscardDraftTitle": "Zahodit koncept",
-	"builderDiscard": "Zahodit",
-	"builderDiscardAllChangesQuestion": "Zahodit všechny změny?",
-	"builderYesDiscard": "Ano, zahodit",
-	"builderPublishDraftToLiveTitle": "Publikovat koncept do živého rámce",
-	"builderPublishing": "Publikování...",
-	"builderPublishModalTitle": "Publikovat koncept do živého provozu",
-	"builderPublishModalDescription": "Tímto se aktualizuje živý rámec. Níže zkontrolujte změny.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} požadavků přidáno",
-				"countPlural=other": "{count} požadavků přidáno"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} otázek",
-				"countPlural=other": "{count} otázek"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} požadavků odebráno",
-				"countPlural=other": "{count} požadavků odebráno"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} otázek",
-				"countPlural=other": "{count} otázek"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Nebyly zjištěny žádné strukturální změny (pouze metadata).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} nekompatibilních změn zjištěno",
-				"countPlural=other": "{count} nekompatibilních změn zjištěno"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Tyto změny mohou ovlivnit skórování, viditelnost nebo výsledky shody v existujících hodnoceních.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} existujících auditů bude ovlivněno",
-				"countPlural=other": "{count} existujících auditů bude ovlivněno"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Do těchto hodnocení budou přidány nové požadavky.",
-	"builderAffectedAuditsRemovedHint": "Odstraněné požadavky a jejich data hodnocení budou z těchto hodnocení smazány.",
-	"builderCouldNotLoadPreview": "Nepodařilo se načíst náhled dopadů. Pokračujte opatrně.",
-	"builderConfirmPublish": "Potvrdit publikaci",
 	"builderSearchNodes": "Hledat uzly...",
 	"builderExpandSidebar": "Rozbalit postranní panel",
 	"builderCollapseSidebar": "Sbalit postranní panel",
@@ -1558,7 +1465,6 @@
 	"builderSplashNumberedList": "Číslovaný seznam",
 	"builderSplashLink": "Odkaz",
 	"builderSplashTable": "Tabulka",
-	"builderSplashInsertImage": "Vložit obrázek",
 	"builderUntitledQuestion": "Otázka bez názvu",
 	"builderNotTranslated": "Nepřeloženo",
 	"builderQuestionTextPlaceholder": "Zadejte svou otázku...",
@@ -1603,27 +1509,12 @@
 	"builderKbSaveDraft": "Uložit koncept",
 	"builderKbShowCheatsheet": "Zobrazit tento tahák",
 	"builderKbCloseDialog": "Zavřít dialog nebo nabídku",
-	"builderImportedFramework": "Importovaný rámec",
-	"builderImportedFrameworkDescription": "Tento rámec byl importován z knihovny a nelze jej přímo upravovat. Chcete-li provádět změny, vytvořte upravitelnou kopii.",
-	"builderCreateCopyAndEdit": "Vytvořit kopii a upravit",
-	"builderCreatingCopy": "Vytváření kopie...",
-	"builderLoadingEditor": "Načítání editoru...",
-	"builderFailedToStartEditor": "Nepodařilo se spustit editor",
-	"builderBackToFramework": "Zpět na rámec",
-	"builderBackToBuilder": "Zpět do Tvůrce",
-	"builderFailedToLoadDraft": "Nepodařilo se načíst koncept",
-	"builderImplementationGroupsHeader": "Implementační skupiny",
-	"builderNoItemsToPreview": "Žádné položky k náhledu.",
-	"builderNoItemsToPreviewHint": "Přidejte hodnotitelné požadavky nebo úvodní obrazovky v Tvůrci.",
-	"builderBaseLanguageOption": "Výchozí jazyk",
 	"builderFrameworkNameRequired": "Je vyžadován název rámce.",
 	"builderFrameworkNameTooLong": "Název rámce má {length} znaků (max. 200).",
 	"builderNodeNameTooLong": "Název překračuje 200 znaků ({length}/200). Přesuňte dlouhý text do pole popisu.",
 	"builderRefIdTooLong": "{label}: ref_id má {length} znaků (max. 100).",
 	"builderUrnTooLong": "{label}: URN má {length} znaků (max. 255).",
-	"builderFailedToSaveDraftBeforePublish": "Nepodařilo se uložit koncept před publikováním.",
 	"builderUnsavedChangesNavigation": "Máte neuložené změny, které budou ztraceny. Opravdu chcete odejít?",
-	"builderUnpublishedChangesNavigation": "Máte nepublikované změny. Váš koncept je uložen a můžete v něm pokračovat později. Opravdu chcete odejít?",
 	"fieldVisibility": "Viditelnost polí",
 	"fieldVisibilityHelpText": "Nastavte, která pole hodnocení může vidět a upravovat každá role čtenáře.",
 	"visibilityAuditorRespondent": "Auditor + Respondent",
@@ -1939,7 +1830,6 @@
 	"mfaDisabledSuccessfully": "MFA bylo pro tohoto uživatele zakázáno",
 	"errorDisablingMFA": "MFA pro tohoto uživatele se nepodařilo zakázat",
 	"userHasNoMFAEnabled": "Tento uživatel nemá povolenou MFA",
-	"builderChangedOn": "změněno v",
 	"requirementWeight": "Váha",
 	"inherentRisk": "Inherentní riziko",
 	"inherentLevel": "Inherentní úroveň",
@@ -3406,7 +3296,6 @@
 	"deactivateServiceAccountConfirm": "Deaktivace tohoto servisního účtu okamžitě zruší všechny nevyřízené přístupové tokeny a zablokuje vydávání nových. Pokračovat?",
 	"gracePeriod": "Ochranná lhůta",
 	"gracePeriodHelpText": "Současný tajný klíč funguje po tuto dobu i po otočení, aby bylo možné integrace aktualizovat bez výpadku. Omezeno na 1 měsíc.",
-	"gracePeriodTooLong": "Ochranná lhůta nesmí být delší než 1 měsíc.",
 	"previousSecretValidUntil": "Předchozí tajný klíč klienta zůstává platný do {date}.",
 	"expiresOn": "Vyprší: {date}",
 	"expiresIn": "Platnost vyprší za",

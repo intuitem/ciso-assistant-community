@@ -44,6 +44,8 @@ from core.models import (
     OrganisationObjective,
     Perimeter,
     Question,
+    QuickForm,
+    QuickFormResponse,
     QuestionChoice,
     ReferenceControl,
     RequirementAssessment,
@@ -951,16 +953,34 @@ def process_model_relationships(
                 }
             )
 
+        case "quickformresponse":
+            _fields["quick_form"] = QuickForm.objects.get(urn=_fields["quick_form"])
+
         case "answer":
-            _fields["requirement_assessment"] = RequirementAssessment.objects.get(
-                id=link_dump_database_ids.get(_fields["requirement_assessment"])
-            )
             question = Question.objects.get(urn=_fields.get("question"))
-            ra = _fields["requirement_assessment"]
-            if question.requirement_node_id != ra.requirement_id:
-                raise ValidationError(
-                    f"Question {question.urn} does not belong to requirement {ra.requirement_id}"
+            if _fields.get("response"):
+                _fields["requirement_assessment"] = None
+                _fields["response"] = QuickFormResponse.objects.get(
+                    id=link_dump_database_ids.get(_fields["response"])
                 )
+                response = _fields["response"]
+                if (
+                    question.page_id is None
+                    or question.page.quick_form_id != response.quick_form_id
+                ):
+                    raise ValidationError(
+                        f"Question {question.urn} does not belong to quick form {response.quick_form_id}"
+                    )
+            else:
+                _fields.pop("response", None)
+                _fields["requirement_assessment"] = RequirementAssessment.objects.get(
+                    id=link_dump_database_ids.get(_fields["requirement_assessment"])
+                )
+                ra = _fields["requirement_assessment"]
+                if question.requirement_node_id != ra.requirement_id:
+                    raise ValidationError(
+                        f"Question {question.urn} does not belong to requirement {ra.requirement_id}"
+                    )
             _fields["question"] = question
 
             choice_urns = _fields.pop("selected_choices_urns", None)

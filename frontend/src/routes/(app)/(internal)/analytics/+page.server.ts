@@ -159,7 +159,7 @@ export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 
 	// Start all operations analytics fetches in parallel; skip the incident
 	// endpoints entirely when the incidents feature flag is off.
-	const incidentsEnabled = Boolean(locals.featureflags?.incidents);
+	const incidentsEnabled = Boolean((await locals.getFeatureFlags())?.incidents);
 
 	const detectionPromise = incidentsEnabled
 		? fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
@@ -300,7 +300,7 @@ export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 		});
 
 	return {
-		user: locals.user,
+		user: await locals.getUser(),
 		title: m.analytics(),
 		stream: {
 			metrics: metricsPromise,

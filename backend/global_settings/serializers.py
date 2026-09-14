@@ -14,6 +14,8 @@ from core.net_safety import (
     DnsLookupError,
     assert_public_url_unless_dev,
 )
+from iam.models import User
+
 from .models import GlobalSettings
 
 
@@ -84,6 +86,7 @@ GENERAL_SETTINGS_KEYS = [
     "allow_assignments_to_entities",
     "enforce_mfa",
     "default_language",
+    "default_date_format",
     "llm_provider",
     "ollama_base_url",
     "ollama_model",
@@ -182,6 +185,15 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         {
                             "default_language": f"Invalid language. Must be one of: {valid_codes}"
+                        }
+                    )
+            if key == "default_date_format":
+                # isinstance first: DATE_FORMATS is a set, so an unhashable JSON
+                # value (list/dict) would raise TypeError instead of a 400.
+                if not isinstance(value, str) or value not in User.DATE_FORMATS:
+                    raise serializers.ValidationError(
+                        {
+                            "default_date_format": f"Invalid date format. Must be one of: {sorted(User.DATE_FORMATS)}"
                         }
                     )
             if key == "default_packager":
@@ -421,6 +433,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     )
     auditee_mode = serializers.BooleanField(
         source="value.auditee_mode", required=False, default=True
+    )
+    quick_forms = serializers.BooleanField(
+        source="value.quick_forms", required=False, default=False
     )
     advanced_analytics = serializers.BooleanField(
         source="value.advanced_analytics", required=False, default=True

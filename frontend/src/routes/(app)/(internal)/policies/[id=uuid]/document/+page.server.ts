@@ -7,7 +7,7 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async (event) => {
 	const { fetch, params, cookies, locals } = event;
 
-	if (!locals.featureflags?.policy_documents) {
+	if (!(await locals.getFeatureFlags())?.policy_documents) {
 		redirect(302, `/policies/${params.id}`);
 	}
 

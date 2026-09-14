@@ -7,6 +7,8 @@ from typing import List, Union
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
     Framework,
+    QuickForm,
+    QuickFormPage,
     Preset,
     Question,
     QuestionChoice,
@@ -454,6 +456,122 @@ class FrameworkImporter:
             ).delete()
 
 
+class QuickFormPageImporter:
+    REQUIRED_FIELDS = {"urn"}
+
+    def __init__(self, page_data: dict, index: int):
+        self.page_data = page_data
+        self.index = index
+
+    def is_valid(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(self.page_data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+        questions = self.page_data.get("questions")
+        if questions is not None and not isinstance(questions, dict):
+            return "questions must be an object keyed by URN"
+        return None
+
+    def import_page(self, quick_form: QuickForm):
+        # update_or_create scoped to the form: create on fresh loads, in-place
+        # update when the form row was adopted.
+        page, _ = QuickFormPage.objects.update_or_create(
+            quick_form=quick_form,
+            urn=self.page_data["urn"].lower(),
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                ref_id=self.page_data.get("ref_id"),
+                name=self.page_data.get("name"),
+                description=self.page_data.get("description"),
+                annotation=self.page_data.get("annotation"),
+                provider=quick_form.provider,
+                order=self.index,
+                visibility_expression=self.page_data.get("visibility_expression"),
+                locale=quick_form.locale,
+                default_locale=quick_form.default_locale,
+                translations=self.page_data.get("translations", {}),
+            ),
+        )
+        questions_data = self.page_data.get("questions")
+        _sync_questions_from_data(
+            page, questions_data if isinstance(questions_data, dict) else {}
+        )
+
+
+class QuickFormImporter:
+    REQUIRED_FIELDS = {"ref_id", "urn"}
+
+    def __init__(self, quick_form_data: dict):
+        self.quick_form_data = quick_form_data
+        self._pages: List[QuickFormPageImporter] = []
+
+    def init(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(self.quick_form_data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+        pages = self.quick_form_data.get("pages")
+        if not isinstance(pages, list) or not pages:
+            return "A quick form must define at least one page"
+        errors = []
+        for index, page_data in enumerate(pages):
+            if not isinstance(page_data, dict):
+                errors.append((index, "must be an object"))
+                continue
+            importer = QuickFormPageImporter(page_data, index)
+            self._pages.append(importer)
+            if (error := importer.is_valid()) is not None:
+                errors.append((index, error))
+        if errors:
+            index, error = errors[0]
+            return (
+                f"[QUICK_FORM_ERROR] {len(errors)} invalid page"
+                f"{'s' if len(errors) > 1 else ''} detected, page {index + 1} "
+                f"has the following error : {error}"
+            )
+        return None
+
+    def import_quick_form(self, library_object: LoadedLibrary):
+        urn = self.quick_form_data["urn"].lower()
+        existing = QuickForm.objects.filter(urn=urn).first()
+        if existing is not None and (
+            existing.library_id is not None or existing.locale != library_object.locale
+        ):
+            raise IntegrityError(
+                f"Quick form {urn} already exists and belongs to a library; "
+                f"cannot be adopted by {library_object.urn}"
+            )
+        quick_form, created = QuickForm.objects.update_or_create(
+            urn=urn,
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                library=library_object,
+                ref_id=self.quick_form_data["ref_id"],
+                name=self.quick_form_data.get("name"),
+                description=self.quick_form_data.get("description"),
+                annotation=self.quick_form_data.get("annotation"),
+                # Carried here as well as in `update_quick_forms`: a field honoured on
+                # re-import but dropped on first load silently works only for authors
+                # who happened to publish twice.
+                ref_id_prefix=self.quick_form_data.get("ref_id_prefix") or "",
+                title_question_urn=str(
+                    self.quick_form_data.get("title_question_urn") or ""
+                ).lower(),
+                outcomes_definition=self.quick_form_data.get("outcomes_definition")
+                or [],
+                scores_definition=self.quick_form_data.get("scores_definition"),
+                urn_namespace=urn.split(":")[1] if urn.startswith("urn:") else "custom",
+                provider=library_object.provider,
+                locale=library_object.locale,
+                default_locale=library_object.default_locale,
+                translations=self.quick_form_data.get("translations", {}),
+            ),
+        )
+        for page in self._pages:
+            page.import_page(quick_form)
+        if not created:
+            QuickFormPage.objects.filter(quick_form=quick_form).exclude(
+                urn__in=[p.page_data["urn"].lower() for p in self._pages]
+            ).delete()
+
+
 class ReferentialImporterMixin:
     REQUIRED_FIELDS = {"ref_id", "urn"}
 
@@ -758,6 +876,7 @@ class LibraryImporter:
         "risk_matrices",
         "framework",  # This field name is deprecated
         "frameworks",
+        "quick_forms",
         "requirement_mapping_set",  # This field name is deprecated
         "requirement_mapping_sets",
         "preset",
@@ -772,6 +891,7 @@ class LibraryImporter:
     def __init__(self, library: StoredLibrary):
         self._library = library
         self._frameworks = []
+        self._quick_forms = []
         self._ttp_catalogs = []
         self._tactics = []
         self._techniques = []
@@ -988,6 +1108,28 @@ class LibraryImporter:
                 invalid_framework_error,
             )
 
+    def init_quick_forms(self, quick_forms: List[dict]) -> Union[str, None]:
+        importers = []
+        import_errors = []
+        for index, quick_form_data in enumerate(quick_forms):
+            if not isinstance(quick_form_data, dict):
+                import_errors.append((index, "must be an object"))
+                continue
+            importer = QuickFormImporter(quick_form_data)
+            importers.append(importer)
+            if (error := importer.init()) is not None:
+                import_errors.append((index, error))
+        self._quick_forms = importers
+        if import_errors:
+            index, error = import_errors[0]
+            ordinal = {1: "st", 2: "nd", 3: "rd"}.get(index + 1, "th")
+            return (
+                f"[QUICK_FORM_ERROR] {len(import_errors)} invalid quick form"
+                f"{'s' if len(import_errors) > 1 else ''} detected, the "
+                f"{index + 1}{ordinal} quick form has the following error : {error}"
+            )
+        return None
+
     def init(self) -> Union[str, None]:
         """missing_fields = self.REQUIRED_FIELDS - set(self._library_data.keys())
         if missing_fields:
@@ -1032,6 +1174,16 @@ class LibraryImporter:
             ) is not None:
                 logger.error("Framework import error", error=framework_import_error)
                 return framework_import_error
+
+        if "quick_forms" in library_objects:
+            quick_forms_data = library_objects["quick_forms"]
+            if isinstance(quick_forms_data, dict):
+                quick_forms_data = [quick_forms_data]
+            if not isinstance(quick_forms_data, list):
+                return "[QUICK_FORM_ERROR] The 'quick_forms' field must be a list."
+            if (error := self.init_quick_forms(quick_forms_data)) is not None:
+                logger.error("Quick form import error", error=error)
+                return error
 
         if (
             "requirement_mapping_set" in library_objects
@@ -1214,6 +1366,9 @@ class LibraryImporter:
 
         for framework in self._frameworks:
             framework.import_framework(library_object)
+
+        for quick_form in self._quick_forms:
+            quick_form.import_quick_form(library_object)
 
         for requirement_mapping_set in self._requirement_mapping_sets:
             requirement_mapping_set.load(library_object)

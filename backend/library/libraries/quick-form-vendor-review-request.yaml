@@ -1,0 +1,186 @@
+urn: urn:intuitem:risk:library:vendor-review-request
+locale: en
+ref_id: vendor-review-request
+name: Vendor review request
+description: >
+  Ask for a third party to be reviewed before you start using them. The answers scope
+  the review rather than perform it: who the vendor is, how the service is delivered,
+  what they would hold or reach, and how much the business would depend on them.
+copyright: © intuitem
+version: 1
+publication_date: 2026-09-12
+provider: intuitem
+packager: intuitem
+objects:
+  quick_forms:
+  - urn: urn:intuitem:risk:quick_form:vendor-review-request
+    ref_id: vendor-review-request
+    name: Vendor review request
+    description: >
+      Feeds a third-party assessment. Criticality, dependency and trust stay the
+      assessor's judgement — this only gathers what is needed to scope and prioritise.
+    ref_id_prefix: VDR
+    title_question_urn: urn:intuitem:risk:qf_page:vendor-review-request:vendor:question:vendor_name
+    # Bounds clamp the *displayed* score only. Outcome rules read `response.score_sum`,
+    # which is the raw total, so the threshold below is unaffected by `max`.
+    scores_definition:
+      min: 0
+      max: 400
+      aggregation: sum
+    outcomes_definition:
+    # Routing on the total rather than on named answers: one threshold to tune instead
+    # of an enumeration of combinations that grows every time a choice is added.
+    - ref_id: full_assessment_required
+      label: Full assessment required
+      expression: 'response.score_sum >= 100'
+    - ref_id: personal_data_involved
+      label: Personal data involved
+      expression: >-
+        "exposure:question:data_types:choice:personal" in answers["exposure:question:data_types"].selected_choices ||
+        "exposure:question:data_types:choice:sensitive" in answers["exposure:question:data_types"].selected_choices
+    - ref_id: concentration_risk
+      label: Concentration risk
+      expression: >-
+        "dependency:question:business_impact:choice:cannot_operate" in answers["dependency:question:business_impact"].selected_choices &&
+        answers["dependency:question:alternatives"].answered &&
+        answers["dependency:question:alternatives"].value == false
+    pages:
+    - urn: urn:intuitem:risk:qf_page:vendor-review-request:vendor
+      ref_id: vendor
+      name: Who and what
+      description: |
+        Identify the third party and what you intend to use them for.
+      questions:
+        urn:intuitem:risk:qf_page:vendor-review-request:vendor:question:vendor_name:
+          type: text
+          text: Which company?
+          annotation: The legal entity you would contract with, not the product name.
+        urn:intuitem:risk:qf_page:vendor-review-request:vendor:question:service:
+          type: text
+          text: What will they do for us?
+        urn:intuitem:risk:qf_page:vendor-review-request:vendor:question:already_used:
+          type: boolean
+          text: Are we already working with them?
+          annotation: A renewal or an extension of scope still needs a review.
+        urn:intuitem:risk:qf_page:vendor-review-request:vendor:question:website:
+          type: text
+          text: Website or contract reference
+          required: false
+
+    - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure
+      ref_id: exposure
+      name: What they would touch
+      description: |
+        Delivery model, where the data sits, what data it is, and what they can reach.
+        These four answers carry the score.
+      questions:
+        urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:hosting_model:
+          type: unique_choice
+          text: How is the service delivered?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:hosting_model:choice:saas
+            value: SaaS — they run the application and the infrastructure
+            add_score: 30
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:hosting_model:choice:paas_iaas
+            value: Hosting (PaaS, IaaS) — they run the infrastructure, we run the application
+            add_score: 20
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:hosting_model:choice:on_premises
+            value: On-premises — it runs on our own infrastructure
+            add_score: 0
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:hosting_model:choice:hybrid
+            value: Hybrid — part ours, part theirs
+            add_score: 20
+        urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:data_location:
+          type: unique_choice
+          text: Where would the data sit?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:data_location:choice:eu
+            value: EU / EEA
+            add_score: 0
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:data_location:choice:adequacy
+            value: Country with an adequacy decision
+            add_score: 10
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:data_location:choice:elsewhere
+            value: Elsewhere
+            add_score: 40
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:data_location:choice:unknown
+            value: We do not know yet
+            add_score: 40
+        urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:data_types:
+          type: multiple_choice
+          text: What data would they hold or see?
+          annotation: Tick everything that applies — the score adds up.
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:data_types:choice:none
+            value: None
+            add_score: 0
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:data_types:choice:internal
+            value: Internal business data
+            add_score: 10
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:data_types:choice:personal
+            value: Personal data
+            add_score: 40
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:data_types:choice:sensitive
+            value: Sensitive personal data (health, biometrics, opinions)
+            add_score: 60
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:data_types:choice:financial
+            value: Financial or otherwise regulated data
+            add_score: 60
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:data_types:choice:credentials
+            value: Credentials or secrets
+            add_score: 80
+        urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:access:
+          type: multiple_choice
+          text: What access would they need?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:access:choice:none
+            value: No access to our systems
+            add_score: 0
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:access:choice:staff_data
+            value: Our staff directory or contact data
+            add_score: 10
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:access:choice:network
+            value: Our internal network
+            add_score: 40
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:access:choice:production
+            value: Production systems
+            add_score: 60
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:exposure:question:access:choice:source_code
+            value: Our source code
+            add_score: 40
+
+    - urn: urn:intuitem:risk:qf_page:vendor-review-request:dependency
+      ref_id: dependency
+      name: How much we would depend on them
+      description: |
+        What happens if they stop, and how quickly we could replace them.
+      questions:
+        urn:intuitem:risk:qf_page:vendor-review-request:dependency:question:business_impact:
+          type: unique_choice
+          text: If they were unavailable for a week, what happens?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:dependency:question:business_impact:choice:negligible
+            value: Negligible — we would barely notice
+            add_score: 0
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:dependency:question:business_impact:choice:degraded
+            value: Degraded — a workaround exists
+            add_score: 20
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:dependency:question:business_impact:choice:major
+            value: Major disruption — a service would be visibly affected
+            add_score: 50
+          - urn: urn:intuitem:risk:qf_page:vendor-review-request:dependency:question:business_impact:choice:cannot_operate
+            value: We could not operate
+            add_score: 80
+        urn:intuitem:risk:qf_page:vendor-review-request:dependency:question:alternatives:
+          type: boolean
+          text: Could we switch to another provider within three months?
+        urn:intuitem:risk:qf_page:vendor-review-request:dependency:question:needed_by:
+          type: date
+          text: When do you need the decision?
+        urn:intuitem:risk:qf_page:vendor-review-request:dependency:question:documentation:
+          type: file
+          text: Security documentation they have already given you
+          required: false
+          annotation: SOC 2 report, ISO 27001 certificate, pentest summary, DPA draft.
+          config:
+            accept: .pdf,.docx,.png,.jpg
