@@ -191,6 +191,150 @@ class TestFindingsFromRequirements:
         set_flag(False)
 
 
+class TestPickingExistingFindings:
+    """An existing finding can be bound to a requirement assessment from the
+    assessment's side, like applied controls and evidences."""
+
+    @pytest.fixture
+    def audit(self, setup):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        framework = Framework.objects.create(name="F", folder=Folder.get_root_folder())
+        node = RequirementNode.objects.create(
+            framework=framework,
+            urn="urn:test:req:1",
+            ref_id="1",
+            assessable=True,
+            folder=Folder.get_root_folder(),
+        )
+        assessment = ComplianceAssessment.objects.create(
+            name="ISO audit", folder=setup["domain"], framework=framework
+        )
+        return RequirementAssessment.objects.create(
+            compliance_assessment=assessment,
+            requirement=node,
+            folder=setup["domain"],
+        )
+
+    def test_the_assessment_exposes_its_findings(self, setup, audit):
+        finding = Finding.objects.create(
+            name="Bound",
+            folder=setup["domain"],
+            findings_assessment=setup["binder"],
+            requirement_assessment=audit,
+        )
+        res = setup["client"].get(f"/api/requirement-assessments/{audit.id}/")
+        assert res.status_code == 200
+        assert [f["id"] for f in res.json()["findings"]] == [str(finding.id)]
+
+    def test_patching_findings_binds_and_unbinds(self, setup, audit):
+        kept = Finding.objects.create(
+            name="Kept", folder=setup["domain"], requirement_assessment=audit
+        )
+        dropped = Finding.objects.create(
+            name="Dropped", folder=setup["domain"], requirement_assessment=audit
+        )
+        picked = Finding.objects.create(
+            name="Picked",
+            folder=setup["other_domain"],
+            findings_assessment=setup["other_binder"],
+        )
+
+        res = setup["client"].patch(
+            f"/api/requirement-assessments/{audit.id}/",
+            {"findings": [str(kept.id), str(picked.id)]},
+            format="json",
+        )
+        assert res.status_code == 200, res.json()
+
+        for finding in (kept, dropped, picked):
+            finding.refresh_from_db()
+        assert kept.requirement_assessment == audit
+        assert picked.requirement_assessment == audit
+        assert dropped.requirement_assessment is None
+        # Binding does not move the finding out of its own binder.
+        assert picked.findings_assessment == setup["other_binder"]
+
+    def test_a_locked_binder_keeps_its_findings(self, setup, audit):
+        setup["binder"].is_locked = True
+        setup["binder"].save()
+        locked = Finding.objects.create(
+            name="Locked",
+            folder=setup["domain"],
+            findings_assessment=setup["binder"],
+        )
+        res = setup["client"].patch(
+            f"/api/requirement-assessments/{audit.id}/",
+            {"findings": [str(locked.id)]},
+            format="json",
+        )
+        assert res.status_code == 400
+        locked.refresh_from_db()
+        assert locked.requirement_assessment is None
+
+    def test_binding_needs_change_permission_on_the_finding(self, setup, audit):
+        from iam.models import Role, RoleAssignment
+        from core.utils import RoleCodename
+
+        # Analyst on the audit's domain only: can edit the assessment, cannot touch
+        # a finding that lives in another domain.
+        analyst = User.objects.create_user("findings-analyst@tests.com")
+        assignment = RoleAssignment.objects.create(
+            user=analyst,
+            role=Role.objects.get(name=RoleCodename.ANALYST.value),
+            folder=Folder.get_root_folder(),
+            is_recursive=True,
+        )
+        assignment.perimeter_folders.add(setup["domain"])
+        client = APIClient()
+        client.force_authenticate(analyst)
+
+        foreign = Finding.objects.create(
+            name="Foreign",
+            folder=setup["other_domain"],
+            findings_assessment=setup["other_binder"],
+        )
+        res = client.patch(
+            f"/api/requirement-assessments/{audit.id}/",
+            {"findings": [str(foreign.id)]},
+            format="json",
+        )
+        assert res.status_code == 403
+        foreign.refresh_from_db()
+        assert foreign.requirement_assessment is None
+
+        own = Finding.objects.create(name="Own", folder=setup["domain"])
+        res = client.patch(
+            f"/api/requirement-assessments/{audit.id}/",
+            {"findings": [str(own.id)]},
+            format="json",
+        )
+        assert res.status_code == 200, res.json()
+        own.refresh_from_db()
+        assert own.requirement_assessment == audit
+
+    def test_an_unchanged_locked_finding_does_not_block_the_save(self, setup, audit):
+        locked = Finding.objects.create(
+            name="Locked",
+            folder=setup["domain"],
+            findings_assessment=setup["binder"],
+            requirement_assessment=audit,
+        )
+        setup["binder"].is_locked = True
+        setup["binder"].save()
+        res = setup["client"].patch(
+            f"/api/requirement-assessments/{audit.id}/",
+            {"findings": [str(locked.id)], "observation": "still fine"},
+            format="json",
+        )
+        assert res.status_code == 200, res.json()
+
+
 class TestStandaloneFinding:
     def test_create_without_assessment_requires_a_folder(self, setup):
         res = create_finding(setup["client"], name="Orphan")

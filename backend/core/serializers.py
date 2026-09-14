@@ -3980,6 +3980,8 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     is_locked = serializers.BooleanField()
     applied_controls = FieldsRelatedField(many=True)
+    # Reverse FK from Finding: DRF does not pick it up from Meta.
+    findings = FieldsRelatedField(many=True)
     answers = serializers.SerializerMethodField()
 
     # Effective scale after the Node -> CA cascade. Null when the CA has
@@ -4042,6 +4044,11 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     answers = serializers.JSONField(required=False, write_only=True)
     task_templates = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=TaskTemplate.objects.all()
+    )
+    # Reverse FK from Finding: binding an existing finding to this requirement
+    # assessment is done from the assessment's side, like the other pickers.
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
     )
 
     def to_internal_value(self, data):
@@ -4253,10 +4260,25 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "The specified Compliance Assessment does not exist."
             )
 
+    def _check_findings_rebind(self, instance, findings):
+        """Binding or unbinding a finding edits the finding, not just the assessment."""
+        current = set(instance.findings.all())
+        for finding in current.symmetric_difference(findings):
+            if finding.is_locked:
+                raise serializers.ValidationError(
+                    {
+                        "findings": "⚠️ Cannot bind or unbind a finding whose findings assessment is locked."
+                    }
+                )
+            self._check_object_perm(finding, "change", model=Finding)
+
     def update(self, instance, validated_data):
         with transaction.atomic():
             # Handle answers if provided in old JSON format
             answers_data = validated_data.pop("answers", None)
+
+            if "findings" in validated_data:
+                self._check_findings_rebind(instance, validated_data["findings"])
 
             # Question-driven score is recompute-owned: drop manual writes
             # unless is_score_overridden pins a value.

@@ -148,7 +148,7 @@
 					},
 					zod(FindingSchema)
 				),
-				formAction: '/findings?/create',
+				formAction: '?/createFinding',
 				model: findingModel,
 				debug: false
 			}
@@ -156,10 +156,7 @@
 		modalStore.trigger({
 			type: 'component',
 			component: modalComponent,
-			title: m.raiseFinding(),
-			response: (r: boolean) => {
-				if (r) refreshKey = !refreshKey;
-			}
+			title: m.raiseFinding()
 		});
 	}
 
@@ -463,6 +460,20 @@
 				{ taint: false }
 			);
 			form.newSecurityException = undefined;
+		}
+	});
+
+	$effect(() => {
+		if (form?.newFinding) {
+			refreshKey = !refreshKey;
+			requirementAssessmentForm.form.update(
+				(current: Record<string, any>) => ({
+					...current,
+					findings: [...(current.findings ?? []), form?.newFinding]
+				}),
+				{ taint: false }
+			);
+			form.newFinding = undefined;
 		}
 	});
 
@@ -869,10 +880,18 @@
 											>
 										</span>
 										{#key refreshKey}
+											<AutocompleteSelect
+												multiple
+												{form}
+												optionsEndpoint="findings"
+												optionsExtraFields={[['folder', 'str']]}
+												field="findings"
+											/>
 											<ModelTable
 												source={page.data.tables['findings']}
 												hideFilters={true}
 												URLModel="findings"
+												expectedCount={countMasked(page.data.requirementAssessment.findings)}
 												baseEndpoint="/findings?requirement_assessment={page.data
 													.requirementAssessment.id}"
 											/>

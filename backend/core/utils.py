@@ -1727,6 +1727,7 @@ THIRD_PARTY_VISIBILITY = {
     "score": HIDDEN,
     "documentation_score": HIDDEN,
     "applied_controls": AUDITOR_ONLY,
+    "findings": AUDITOR_ONLY,
     "task_templates": EVERYONE_EDIT,
     "evidences": EVERYONE_EDIT,
     "observation": EVERYONE_EDIT,
