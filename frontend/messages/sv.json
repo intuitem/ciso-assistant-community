@@ -662,7 +662,6 @@
 	"noStatus": "Ingen status",
 	"actionPlanHelpText": "Sorterad efter status och ETA",
 	"matchingRequirements": "Matchande krav",
-	"asZIP": "som ZIP",
 	"incoming": "Inkommande",
 	"outdated": "Föråldrad",
 	"flashMode": "Snabbläge",
@@ -1159,15 +1158,6 @@
 	"changeUserGroup": "Ändra användargrupp",
 	"deleteUserGroup": "Ta bort användargrupp",
 	"viewUserGroup": "Visa användargrupp",
-	"changeQuantitativeRiskHypothesis": "Ändra kvantitativ riskhypotes",
-	"deleteQuantitativeRiskHypothesis": "Ta bort kvantitativ riskhypotes",
-	"viewQuantitativeRiskHypothesis": "Visa kvantitativ riskhypotes",
-	"changeQuantitativeRiskScenario": "Ändra scenario",
-	"deleteQuantitativeRiskScenario": "Ta bort scenario",
-	"viewQuantitativeRiskScenario": "Visa scenario",
-	"changeQuantitativeRiskStudy": "Ändra kvantitativ riskstudie",
-	"deleteQuantitativeRiskStudy": "Ta bort kvantitativ riskstudie",
-	"viewQuantitativeRiskStudy": "Visa kvantitativ riskstudie",
 	"dueDateUpdatedSuccessfully": "Förfallodatum uppdaterades framgångsrikt",
 	"taskScheduleInfo": "Tidigare förekomster är skyddade från schemaläggningsändringar. Endast kommande uppgifter kommer att omräknas.",
 	"cascadeDeleteWarning": "Varning: Radering av detta kommer också att permanent radera {count} relaterade objekt:",
@@ -1204,7 +1194,6 @@
 	"syncAppliedControlsMessage": "De tillämpade kontroller som använder denna referenskontroll kommer att synkroniseras med den. Observera att detta inte kan ångras.",
 	"syncToAppliedControl": "Synkronisera med tillämpad kontroll",
 	"syncToReferenceControl": "Synkronisera med referenskontroll",
-	"exportEcosystem": "ekosystemexport (XLSX)",
 	"vulnerabilitySlaPolicyHelpText": "Definiera det maximala antalet dagar för att åtgärda en sårbarhet baserat på dess allvarlighetsgrad.",
 	"slaAnchor": "SLA startdatum",
 	"slaAnchorHelpText": "Välj när SLA börjar.",
@@ -1296,19 +1285,12 @@
 	"builderRequirementHint": "Bedömningsbar, kan ändå ha underordnade",
 	"builderSplashScreen": "Välkomstskärm",
 	"builderSplashScreenHint": "Presentation, ej bedömningsbar",
-	"builderStatusLive": "Live",
-	"builderStatusLiveTitle": "Utkastet motsvarar det respondenter ser i revisionen.",
-	"builderStatusUnpublishedChanges": "Opublicerade ändringar",
-	"builderStatusUnpublishedChangesTitle": "Utkastet har ändringar som ännu inte är synliga för revisionsrespondenter. Publicera för att tillämpa.",
-	"builderStatusDraftNothingLive": "Utkast — inget publicerat ännu",
-	"builderStatusDraftNothingLiveTitle": "Utkastet har innehåll men inget har publicerats ännu. Nya revisioner kommer inte att se något förrän du publicerar.",
 	"builderStatusEmpty": "Tomt",
 	"builderStatusEmptyTitle": "Inga krav ännu. Nya revisioner baserade på detta ramverk kommer inte att ha något att besvara.",
 	"builderPreview": "Förhandsgranska",
 	"builderPreviewSaveFirst": "Spara ditt utkast först för att förhandsgranska",
 	"builderPreviewAsRespondent": "Förhandsgranska som respondent (öppnas i ny flik)",
 	"builderExportYamlTitle": "Exportera ramverket som YAML-biblioteksfil",
-	"builderExportYamlUnpublishedWarning": "Opublicerade ändringar inkluderas inte. Publicera först för att exportera de senaste ändringarna.",
 	"builderCopyBase": "Kopiera bas",
 	"builderCopyBaseTitle": "Kopiera bastext till {lang} (skriver inte över befintliga översättningar)",
 	"builderCopyBaseQuestion": "Kopiera bastexten?",
@@ -1318,82 +1300,7 @@
 	"builderExpandAllCards": "Fäll ut alla kort",
 	"builderCollapseAllCards": "Fäll ihop alla kort",
 	"builderSaveFailed": "Det gick inte att spara",
-	"builderPublishedFlash": "Publicerat!",
 	"builderSaveDraftTitle": "Spara utkast (Ctrl+S)",
-	"builderDiscardDraftTitle": "Kassera utkast",
-	"builderDiscard": "Kassera",
-	"builderDiscardAllChangesQuestion": "Kassera alla ändringar?",
-	"builderYesDiscard": "Ja, kassera",
-	"builderPublishDraftToLiveTitle": "Publicera utkast till live-ramverket",
-	"builderPublishing": "Publicerar...",
-	"builderPublishModalTitle": "Publicera utkast till live",
-	"builderPublishModalDescription": "Detta uppdaterar live-ramverket. Granska ändringarna nedan.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} krav tillagda",
-				"countPlural=other": "{count} krav tillagda"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} frågor",
-				"countPlural=other": "{count} frågor"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} krav borttagna",
-				"countPlural=other": "{count} krav borttagna"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} frågor",
-				"countPlural=other": "{count} frågor"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Inga strukturella ändringar upptäckta (endast metadata).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} brytande ändring(ar) upptäckta",
-				"countPlural=other": "{count} brytande ändring(ar) upptäckta"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Dessa ändringar kan påverka poängsättning, synlighet eller efterlevnadsresultat i befintliga revisioner.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} befintlig(a) revision(er) kommer att påverkas",
-				"countPlural=other": "{count} befintlig(a) revision(er) kommer att påverkas"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Nya krav kommer att läggas till dessa revisioner.",
-	"builderAffectedAuditsRemovedHint": "Borttagna krav och deras bedömningsdata kommer att raderas från dessa revisioner.",
-	"builderCouldNotLoadPreview": "Kunde inte ladda påverkansförhandsgranskningen. Fortsätt med försiktighet.",
-	"builderConfirmPublish": "Bekräfta publicering",
 	"builderSearchNodes": "Sök noder...",
 	"builderExpandSidebar": "Fäll ut sidopanel",
 	"builderCollapseSidebar": "Fäll ihop sidopanel",
@@ -1573,7 +1480,6 @@
 	"builderSplashNumberedList": "Numrerad lista",
 	"builderSplashLink": "Länk",
 	"builderSplashTable": "Tabell",
-	"builderSplashInsertImage": "Infoga bild",
 	"builderUntitledQuestion": "Fråga utan titel",
 	"builderNotTranslated": "Ej översatt",
 	"builderQuestionTextPlaceholder": "Skriv din fråga...",
@@ -1618,27 +1524,12 @@
 	"builderKbSaveDraft": "Spara utkast",
 	"builderKbShowCheatsheet": "Visa detta fusklapp",
 	"builderKbCloseDialog": "Stäng dialog eller dropdown",
-	"builderImportedFramework": "Importerat ramverk",
-	"builderImportedFrameworkDescription": "Detta ramverk importerades från ett bibliotek och kan inte redigeras direkt. Skapa en redigerbar kopia för att göra ändringar.",
-	"builderCreateCopyAndEdit": "Skapa kopia och redigera",
-	"builderCreatingCopy": "Skapar kopia...",
-	"builderLoadingEditor": "Laddar editor...",
-	"builderFailedToStartEditor": "Det gick inte att starta editorn",
-	"builderBackToFramework": "Tillbaka till ramverket",
-	"builderBackToBuilder": "Tillbaka till builder",
-	"builderFailedToLoadDraft": "Det gick inte att ladda utkastet",
-	"builderImplementationGroupsHeader": "Implementeringsgrupper",
-	"builderNoItemsToPreview": "Inga element att förhandsgranska.",
-	"builderNoItemsToPreviewHint": "Lägg till bedömningsbara krav eller välkomstskärmar i builder.",
-	"builderBaseLanguageOption": "Basspråk",
 	"builderFrameworkNameRequired": "Ramverkets namn krävs.",
 	"builderFrameworkNameTooLong": "Ramverkets namn är {length} tecken (max 200).",
 	"builderNodeNameTooLong": "Namnet överskrider 200 tecken ({length}/200). Flytta lång text till beskrivningsfältet.",
 	"builderRefIdTooLong": "'{label}': ref_id är {length} tecken (max 100).",
 	"builderUrnTooLong": "'{label}': URN är {length} tecken (max 255).",
-	"builderFailedToSaveDraftBeforePublish": "Det gick inte att spara utkastet före publicering.",
 	"builderUnsavedChangesNavigation": "Du har osparade ändringar som kommer att gå förlorade. Lämna ändå?",
-	"builderUnpublishedChangesNavigation": "Du har opublicerade ändringar. Ditt utkast är sparat och du kan återuppta senare. Lämna ändå?",
 	"fieldVisibility": "Fältens synlighet",
 	"fieldVisibilityHelpText": "Bestäm vilka fält varje roll kan se och redigera.",
 	"visibilityAuditorRespondent": "Revisor + Svarande",
@@ -1671,7 +1562,6 @@
 	"mfaDisabledSuccessfully": "MFA har inaktiverats för den här användaren",
 	"errorDisablingMFA": "Det gick inte att inaktivera MFA för den här användaren",
 	"userHasNoMFAEnabled": "Den här användaren har inte MFA aktiverat",
-	"builderChangedOn": "ändrad i",
 	"requirementWeight": "Vikt",
 	"scim": "SCIM",
 	"scimDescription": "Konfigurera SCIM 2.0-provisionering. Rikta din identitetsleverantör mot slutpunkten nedan och autentisera den med en bearer-token som genereras här.",
@@ -1714,7 +1604,6 @@
 	"deactivateServiceAccountConfirm": "Att inaktivera detta tjänstekonto återkallar omedelbart alla utestående åtkomsttoken och blockerar utfärdande av nya. Fortsätta?",
 	"gracePeriod": "Övergångsperiod",
 	"gracePeriodHelpText": "Den nuvarande hemligheten fortsätter att fungera under denna tid efter rotation, så att integrationer kan uppdateras utan driftstopp. Begränsat till 1 månad.",
-	"gracePeriodTooLong": "Övergångsperioden får inte vara längre än 1 månad.",
 	"previousSecretValidUntil": "Den tidigare klienthemligheten förblir giltig till {date}.",
 	"enableJitProvisioning": "Aktivera automatisk provisionering",
 	"enableJitProvisioningHelpText": "Skapar automatiskt ett konto, med standardanvändargrupperna nedan, för användare som autentiserar via SSO för första gången.",
