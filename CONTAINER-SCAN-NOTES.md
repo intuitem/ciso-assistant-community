@@ -34,13 +34,24 @@ The advisory describes a heap buffer overflow in `gz_vacate()`, reachable throug
 **zlib 1.3.1.2 through 1.3.2**. `gz_vacate()` was added upstream after 1.3.1.
 
 Our images ship zlib 1.3.1 (`libz.so.1.3.1`), which predates the affected range. The
-symbol is absent from the shipped library, on both `linux/amd64` and `linux/arm64`:
+symbol is absent from the shipped library, on both `linux/amd64` and `linux/arm64`.
+
+Backend images:
 
 ```console
 $ docker run --rm --entrypoint bash ghcr.io/intuitem/ciso-assistant-community/backend:latest \
     -c 'ls -l /usr/lib/*/libz.so.1; grep -c gz_vacate /usr/lib/*/libz.so.1.3.1'
 lrwxrwxrwx 1 root root 13 /usr/lib/aarch64-linux-gnu/libz.so.1 -> libz.so.1.3.1
 0
+```
+
+Frontend images, which are distroless and ship no shell:
+
+```console
+$ docker run --rm --entrypoint node ghcr.io/intuitem/ciso-assistant-community/frontend:latest \
+    -e "const b=require('fs').readFileSync('/usr/lib/x86_64-linux-gnu/libz.so.1.3.1'); \
+        console.log('gz_vacate present:', b.includes('gz_vacate'))"
+gz_vacate present: false
 ```
 
 Debian has not triaged the CVE, so the package is marked `<unfixed>` in the security
@@ -55,4 +66,6 @@ why every version — including versions that predate the vulnerable code — is
 ### Re-check when
 
 - Debian triages the CVE and assigns a fixed version, **or**
-- our zlib moves to 1.3.1.2 or later, which is inside the affected range.
+- the installed `zlib1g` revision changes from the ones recorded above — the base
+  image tracks a tag, not a digest, so a mirror refresh can move it. Re-run the
+  commands above: any version from 1.3.1.2 on is inside the affected range.

@@ -393,7 +393,12 @@ jobs:
           done
           exit 1
       - name: Build the Docker app
-        run: docker compose -f enterprise/docker-compose-build.yml up -d
+        run: |
+          # The services run as 1001:1001, and the runner user is uid 1001, so the
+          # bind-mount source has to exist before compose creates it as root.
+          rm -rf enterprise/db
+          mkdir enterprise/db
+          docker compose -f enterprise/docker-compose-build.yml up -d
       - name: Wait for migrations to complete
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
