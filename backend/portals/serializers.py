@@ -107,16 +107,33 @@ class PortalWriteSerializer(BaseModelSerializer):
                 not isinstance(i, dict) for i in items
             ):
                 raise serializers.ValidationError("section items must be objects")
-            for item in items:
-                missing = _tile_missing_target(item)
-                if missing:
-                    title = item.get("title") or item.get("kind") or "tile"
-                    raise serializers.ValidationError(
-                        f"'{title}' has no {missing}; it would fail when clicked."
-                    )
         return value
 
+    def _incomplete_tiles(self, content):
+        for section in (content or {}).get("sections", []) or []:
+            for item in section.get("items", []) or []:
+                if not isinstance(item, dict):
+                    continue
+                if missing := _tile_missing_target(item):
+                    yield (item.get("title") or item.get("kind") or "tile"), missing
+
     def validate(self, data):
+        # Publishing is the gate, not saving: a design loaded from a library can land
+        # half-wired, and the author has to be able to save while wiring it up.
+        status_now = data.get(
+            "status", getattr(self.instance, "status", Portal.Status.DRAFT)
+        )
+        if status_now == Portal.Status.PUBLISHED:
+            content = data.get("content", getattr(self.instance, "content", None))
+            if incomplete := list(self._incomplete_tiles(content)):
+                title, missing = incomplete[0]
+                raise serializers.ValidationError(
+                    {
+                        "status": f"'{title}' has no {missing}; it would fail when "
+                        f"clicked. {len(incomplete)} tile(s) still need wiring up."
+                    }
+                )
+
         # Claiming the single global primary trust-center URL is an instance-wide effect,
         # so it takes settings-level rights — not just folder-scoped change_portal.
         if data.get("is_primary"):

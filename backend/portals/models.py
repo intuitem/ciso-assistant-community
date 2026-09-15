@@ -2,14 +2,29 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import NameDescriptionMixin
+from core.models import I18nObjectMixin
 from iam.models import FolderMixin, UserGroup
 
 
-class PortalPreset(NameDescriptionMixin, FolderMixin):
-    """A portal definition / catalog entry. Library-backed (urn set) or user-authored.
-    Cloned into a live Portal; never referenced live (no sync). Exports to YAML.
-    `content` holds the whole design: {"sections": [{"title", "items": [...]}]}."""
+class PortalPreset(NameDescriptionMixin, FolderMixin, I18nObjectMixin):
+    """A portal design kept as a starting point. A catalog object like Framework or
+    QuickForm: library-backed entries carry a `urn`, refresh on a library update and
+    go away on unload; user-authored ones leave it null.
 
+    `content` holds the design: {"sections": [{"title", "items"}]}, naming frameworks
+    and quick forms by URN as well as by local id (see portals.references).
+
+    The divorce is one level down: a live Portal is CLONED from a preset and keeps
+    only `source_ref`, a string. Nothing here can reach a portal a user built."""
+
+    library = models.ForeignKey(
+        "core.LoadedLibrary",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="portal_presets",
+        verbose_name=_("Library"),
+    )
     urn = models.CharField(max_length=255, null=True, blank=True, unique=True)
     ref_id = models.CharField(max_length=255, null=True, blank=True)
     version = models.IntegerField(default=1)

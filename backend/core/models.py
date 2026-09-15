@@ -1001,6 +1001,9 @@ class LibraryUpdater:
         self.new_quick_forms = new_library_content.get("quick_forms")
         if isinstance(self.new_quick_forms, dict):
             self.new_quick_forms = [self.new_quick_forms]
+        self.new_portal_presets = new_library_content.get("portal_presets")
+        if isinstance(self.new_portal_presets, dict):
+            self.new_portal_presets = [self.new_portal_presets]
 
     def update_dependencies(self) -> Union[str, None]:
         for dependency_urn in self.dependencies:
@@ -1789,6 +1792,41 @@ class LibraryUpdater:
                     if answers_to_create:
                         Answer.objects.bulk_create(answers_to_create, batch_size=500)
 
+    def update_portal_presets(self):
+        """Refresh catalog entries by URN. Live Portals cloned from them are copies,
+        so nothing here reaches a design a user is already running."""
+        from portals.models import PortalPreset
+        from portals.references import resolve
+
+        for new_preset in self.new_portal_presets:
+            urn = new_preset["urn"].lower()
+            content, _unresolved = resolve(new_preset.get("content") or {})
+            PortalPreset.objects.update_or_create(
+                urn=urn,
+                defaults={
+                    "ref_id": new_preset.get("ref_id"),
+                    "name": new_preset.get("name"),
+                    "description": new_preset.get("description"),
+                    "translations": new_preset.get("translations", {}),
+                    "version": self.new_library.version,
+                    "content": content,
+                    **self.referential_object_dict,
+                },
+                create_defaults={
+                    "urn": urn,
+                    "ref_id": new_preset.get("ref_id"),
+                    "name": new_preset.get("name"),
+                    "description": new_preset.get("description"),
+                    "translations": new_preset.get("translations", {}),
+                    "version": self.new_library.version,
+                    "content": content,
+                    "library": self.old_library,
+                    "folder": Folder.get_root_folder(),
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                },
+            )
+
     def update_quick_forms(self):
         """Upsert quick forms, pages and questions by URN, prune what the new
         version dropped, then reconcile every live response: seed answers for
@@ -2098,6 +2136,9 @@ class LibraryUpdater:
 
         if self.new_quick_forms is not None:
             self.update_quick_forms()
+
+        if self.new_portal_presets is not None:
+            self.update_portal_presets()
 
         if self.new_requirement_mapping_sets is not None:
             self.update_requirement_mapping_sets()

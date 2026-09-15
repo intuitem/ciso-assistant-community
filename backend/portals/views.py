@@ -1,5 +1,6 @@
 import re
 
+import yaml
 from django.contrib.auth.models import Permission
 from django.db import transaction
 from django.db.models import Q
@@ -55,9 +56,12 @@ class PublicPortalAPIView(APIView):
 from .models import FrameworkSnapshot, Portal, PortalPreset, PublicDocument
 from .serializers import (
     FrameworkSnapshotReadSerializer,
+    PortalPresetReadSerializer,
     PortalReadSerializer,
     PortalWriteSerializer,
 )
+from .presets import build_preset_library, _urn_leaf
+from .references import dereference
 from .snapshots import compute_snapshot
 
 
@@ -449,6 +453,43 @@ class PortalViewSet(CustomPortalsViewSet):
                 "ref_id": response_object.ref_id,
             }
         )
+
+    @action(detail=True, methods=["post"], url_path="save-as-preset")
+    def save_as_preset(self, request, pk=None):
+        """Capture the design as a reusable starting point. A snapshot: later edits
+        to either side never reach the other."""
+        portal = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_portalpreset"),
+            folder=portal.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        content, unwired = dereference(portal.content or {})
+        preset = PortalPreset.objects.create(
+            name=request.data.get("name") or portal.name,
+            description=request.data.get("description") or portal.description,
+            folder=portal.folder,
+            content=content,
+        )
+        return Response(
+            {**PortalPresetReadSerializer(preset).data, "unwired": unwired},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["get"])
+    def export(self, request, pk=None):
+        """Emit the design as a loadable library YAML, with dependencies derived
+        from the libraries behind its tiles."""
+        portal = self.get_object()
+        document, _unwired = build_preset_library(portal)
+        payload = yaml.safe_dump(
+            document, allow_unicode=True, sort_keys=False, width=1000
+        )
+        slug = _urn_leaf(portal.name)
+        response = HttpResponse(payload, content_type="application/yaml")
+        response["Content-Disposition"] = f'attachment; filename="portal-{slug}.yaml"'
+        return response
 
     @action(detail=True, methods=["post"])
     def duplicate(self, request, pk=None):

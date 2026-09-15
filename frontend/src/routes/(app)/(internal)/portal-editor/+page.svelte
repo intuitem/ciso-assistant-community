@@ -110,6 +110,52 @@
 			{/each}
 		</div>
 	</section>
+
+	<!-- Templates -->
+	<section class="card bg-surface-50-950 p-6 space-y-4">
+		<h2 class="text-lg font-bold">
+			<i class="fa-solid fa-clone mr-1 text-surface-400"></i>{m.portalTemplates()}
+		</h2>
+		<p class="text-sm text-surface-500">{m.portalTemplatesHelp()}</p>
+		<div class="divide-y divide-surface-200-800">
+			{#each data.presets ?? [] as preset}
+				<div class="flex items-center justify-between py-2">
+					<div class="flex items-center gap-3">
+						<i class="fa-solid fa-clone text-surface-400"></i>
+						<span class="font-medium">{preset.name}</span>
+						{#if !preset.is_user_authored}
+							<span
+								class="text-[10px] uppercase rounded-full bg-surface-200-800 px-2 py-0.5 text-surface-500"
+								title={preset.urn}>{preset.provider ?? m.library()}</span
+							>
+						{/if}
+					</div>
+					<div class="flex items-center gap-2">
+						<form method="POST" action="?/usePreset" use:enhance>
+							<input type="hidden" name="preset" value={preset.id} />
+							<button class="btn btn-sm preset-filled-primary-500">{m.useTemplate()}</button>
+						</form>
+						{#if preset.is_user_authored}
+							<form method="POST" action="?/deletePreset" use:enhance>
+								<input type="hidden" name="id" value={preset.id} />
+								<button
+									type="button"
+									onclick={(e) => confirmDelete(e, preset.name)}
+									class="btn btn-sm preset-tonal-error"
+									aria-label={m.delete()}
+									title={m.delete()}
+								>
+									<i class="fa-solid fa-trash"></i>
+								</button>
+							</form>
+						{/if}
+					</div>
+				</div>
+			{:else}
+				<p class="py-2 text-sm text-surface-500">{m.noPortalTemplates()}</p>
+			{/each}
+		</div>
+	</section>
 </div>
 
 {#if creating}

@@ -20,6 +20,8 @@ from uuid import uuid4
 
 from django.db import transaction
 
+from core.utils import free_name
+
 from .graph import (
     MAX_CONDITION_DEPTH,
     REF_RE,
@@ -376,7 +378,7 @@ def import_workflow(data, folder, user=None, source_version=None, secrets=None):
     _validate_structure(data)
     warnings = _unknown_key_warnings(data)
     with transaction.atomic():
-        name = _free_name(Workflow, str(data["name"]).strip(), folder)
+        name = free_name(Workflow, str(data["name"]).strip(), folder)
         if name != str(data["name"]).strip():
             warnings.append(
                 f"A workflow named '{data['name']}' already exists — imported as '{name}'"
@@ -702,14 +704,6 @@ def _validate_condition_group(group, variable_keys, depth):
             )
     for child in group.get("children") or []:
         _validate_condition_group(child, variable_keys, depth + 1)
-
-
-def _free_name(model, name, folder):
-    candidate, suffix = name, 2
-    while model.objects.filter(folder=folder, name__iexact=candidate).exists():
-        candidate = f"{name} ({suffix})"
-        suffix += 1
-    return candidate
 
 
 def _build_graph_payload(graph, workflow, folder, warnings):
