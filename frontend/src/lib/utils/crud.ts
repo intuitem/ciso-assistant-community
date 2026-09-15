@@ -636,20 +636,26 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'applied_controls',
 				urlModel: 'findings',
-				disableCreate: true,
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'findings'
+				}
 			},
 			{
 				field: 'applied_controls',
 				urlModel: 'assets',
 				disableDelete: true,
-				disableCreate: true
+				addExisting: {
+					parentField: 'assets'
+				}
 			},
 			{
 				field: 'applied_controls',
 				urlModel: 'incidents',
-				disableCreate: true,
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'incidents'
+				}
 			}
 		],
 		selectFields: [
