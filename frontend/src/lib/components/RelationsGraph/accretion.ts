@@ -1,20 +1,6 @@
-import { canExploreModel } from './relations';
 import type { GraphLink, Neighborhood } from './types';
 
-/**
- * A graph that grows by accretion rather than by depth.
- *
- * Depth-as-a-dial was the wrong control: measured against real data, an applied
- * control reaches 4.9 objects at two hops and 147 at three, because the third hop
- * walks back out of every hub it just walked into. Here the reader expands one
- * node at a time, each expansion is one bounded request, and the graph only ever
- * holds what somebody asked to see.
- *
- * The invariant that makes it readable: **expansion never moves an existing
- * node.** Coordinates are assigned once, on arrival, inside the angular wedge the
- * parent owns. Recomputing the layout on every growth step would teleport
- * everything and destroy the reader's mental map.
- */
+/** Ego graph that grows by explicit expansion; positions are assigned on arrival and never recomputed. */
 
 export interface LiveNode {
 	id: string;
@@ -22,19 +8,18 @@ export interface LiveNode {
 	name: string;
 	ref?: string;
 	meta?: Record<string, string>;
-	/** Hops from the record the drawer opened on. */
 	hop: number;
 	parentId?: string;
-	/** Relation group this node arrived in, as keyed by its parent's payload. */
 	group?: string;
 	angle: number;
 	wedge: number;
 	x: number;
 	y: number;
 	expanded: boolean;
-	/** Nothing more to show: a leaf, an unmapped model, or the hop limit. */
+	/** Whether the server says this node has relations of its own. */
+	expandable?: boolean;
+	navigable?: boolean;
 	exhausted: boolean;
-	/** Sits at the hop limit — it has more, but not in this view. */
 	frontier?: boolean;
 	loading?: boolean;
 	aggregate?: { parentId: string; group: string; count: number };
@@ -48,31 +33,18 @@ export interface LiveGraph {
 
 export const NODE_BUDGET = 100;
 
-/**
- * Measured, not guessed: with the back-relation rule on, the reachable set
- * saturates by here — an applied control gains 0.2 objects going from hop three
- * to four, a risk scenario gains 0.7 going from four to five. The model graph's
- * diameter is three, so a fourth hop cannot introduce a kind of object that is
- * not already on the canvas, only more instances of the same kinds.
- */
+/** Model graph diameter is 3, so a fourth hop adds instances, not kinds. */
 export const MAX_HOP = 3;
 
-/**
- * Ceiling on what one click may add. A safety net, not a trimming policy — the
- * per-relation cap and the back-relation rule do the real work, and a graph that
- * hides what it could have shown does not earn its place.
- */
 export const MAX_ARRIVALS = 25;
 
 const RING_STEP = 300;
 const ROOT_RADIUS = 300;
-/** Minimum arc between siblings, in layout units, so a fan stays legible. */
 const MIN_ARC = 110;
 
 export interface MergeOptions {
 	fanCap: number;
 	hidden?: Set<string>;
-	/** `${parentId}|${group}` keys the reader opened from a "+N". */
 	opened?: Set<string>;
 }
 
@@ -113,14 +85,11 @@ export function canExpand(node: LiveNode): boolean {
 		!node.exhausted &&
 		!node.aggregate &&
 		node.hop < MAX_HOP &&
-		canExploreModel(node.urlModel)
+		node.expandable !== false
 	);
 }
 
-/**
- * Folds a fetched neighbourhood into the graph under `parentId`. Existing nodes
- * keep their identity and their coordinates; only new ones are placed.
- */
+/** Folds a fetched neighbourhood in under `parentId`, placing only new nodes. */
 export function merge(
 	graph: LiveGraph,
 	parentId: string,
@@ -133,16 +102,7 @@ export function merge(
 	const nodes = new Map(graph.nodes);
 	const edges = new Map(graph.edges);
 
-	// The relation this node was reached through. Walking back out of it yields the
-	// siblings of the node we came from — the two hundred other requirement
-	// assessments of the audit we arrived via — whose only connection to the
-	// subject is the hub in between.
-	//
-	// Identified by which group holds the node we came from, not by verb: the two
-	// sides of a relation are named independently in the registry and need not
-	// agree. That node is often absent, though, because the endpoint returns only
-	// the first page of a large relation — precisely the hub case this rule exists
-	// for. So fall back to matching on model, and only when it is unambiguous.
+	// Walking back out of the arrival relation yields the hub's other children.
 	const grandparent = parent.parentId ? graph.nodes.get(parent.parentId) : undefined;
 	let backGroup = grandparent
 		? payload.nodes.find((n) => n.id === grandparent.id)?.group
@@ -169,21 +129,13 @@ export function merge(
 		const fresh = members.filter((m) => !nodes.has(m.id));
 		const onCanvas = members.length - fresh.length;
 		const total = payload.totals[key] ?? members.length;
-		// Only worth suppressing the back-relation when it is actually a hub. A
-		// requirement satisfied by three controls, reached from one of them, should
-		// show the other two: they answer "what else covers this?", and they cost
-		// less than the placeholder that would hide them.
-		// The node we came from counts as already shown even when the page it would
-		// have arrived on did not include it, or the placeholder overstates by one.
+		// Only suppress the back-relation when it is actually a hub.
 		const seen = key === backGroup && !backHoldsGrandparent ? onCanvas + 1 : onCanvas;
 		const back = key === backGroup && total - seen > fanCap;
 		return { key, fresh, onCanvas: seen, total, back, taken: 0 };
 	});
 
-	// Round-robin, so one crowded relation cannot crowd every other kind off the
-	// canvas: you always see at least one of each thing this node is attached to.
-	// Smallest first, so spare laps finish groups that can be finished. A group the
-	// reader explicitly opened from a "+N" is exempt — they asked for it.
+	// Round-robin so every relation is represented; smallest first finishes what it can.
 	for (const q of queues) if (opened.has(`${parentId}|${q.key}`)) q.taken = q.fresh.length;
 	let allowance = MAX_ARRIVALS;
 	const order = [...queues].sort((a, b) => a.fresh.length - b.fresh.length);
@@ -199,8 +151,7 @@ export function merge(
 			progressing = true;
 		}
 	}
-	// A "+1" placeholder occupies the same slot as the node it hides, so it is
-	// never worth drawing. Take the straggler instead.
+	// A "+1" placeholder costs the same slot as the node it hides.
 	for (const q of queues) {
 		if (q.back && !opened.has(`${parentId}|${q.key}`)) continue;
 		if (q.total - q.onCanvas - q.taken === 1 && q.fresh.length > q.taken) q.taken++;
@@ -242,14 +193,15 @@ export function merge(
 			hop,
 			parentId,
 			group: n.group,
+			expandable: n.expandable,
+			navigable: n.navigable,
 			angle: p.angle,
 			wedge: p.wedge,
 			x: p.x,
 			y: p.y,
 			expanded: false,
-			// A model we have no relation metadata for has nothing we know how to show.
-			exhausted: hop >= MAX_HOP || !canExploreModel(n.urlModel),
-			frontier: hop >= MAX_HOP && canExploreModel(n.urlModel)
+			exhausted: hop >= MAX_HOP || n.expandable === false,
+			frontier: hop >= MAX_HOP && n.expandable !== false
 		});
 	});
 
@@ -284,8 +236,6 @@ export function merge(
 		);
 	});
 
-	// Edges between nodes already on the canvas are free, and they are the most
-	// interesting thing a graph can show: they close loops rather than grow it.
 	for (const l of payload.links)
 		if (nodes.has(l.source) && nodes.has(l.target)) edges.set(edgeKey(l), l);
 
@@ -320,16 +270,7 @@ export function collapse(graph: LiveGraph, nodeId: string): LiveGraph {
 	return { nodes, edges, notice: '' };
 }
 
-/**
- * Places `count` children one ring further out, fanned around their parent's own
- * bearing so a branch reads as a branch.
- *
- * The fan deliberately does NOT inherit the parent's slice of the ring. A root
- * with nineteen neighbours owns 19° each, and six children crammed into 19° are a
- * smudge. Children live at a larger radius than the ring they grew from, so a
- * wide fan cannot collide with it — only with another branch expanded nearby,
- * which is rare and recoverable by collapsing.
- */
+/** Children fan around the parent's bearing, one ring out; the fan does not inherit the parent's ring slot. */
 function fanPositions(parent: LiveNode, count: number) {
 	if (parent.hop === 0) {
 		const step = (Math.PI * 2) / count;
@@ -341,8 +282,6 @@ function fanPositions(parent: LiveNode, count: number) {
 	}
 	const span = Math.max(Math.PI / 4, 1.9 * 0.72 ** (parent.hop - 1));
 	const step = span / count;
-	// Push the ring out far enough that siblings are MIN_ARC apart along the arc,
-	// rather than letting a wide fan of many children collapse into a smudge.
 	const radius = Math.max(Math.hypot(parent.x, parent.y) + RING_STEP, (count * MIN_ARC) / span);
 	const start = parent.angle - span / 2 + step / 2;
 	return Array.from({ length: count }, (_, i) => {

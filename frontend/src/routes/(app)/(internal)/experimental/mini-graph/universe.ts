@@ -1,8 +1,4 @@
-/**
- * Fake GRC universe for the mini-graph prototype. No backend: the whole point is
- * to settle the interaction model (depth, fan-out caps, re-rooting) before
- * deciding what `GET /{model}/{id}/neighborhood/` should return.
- */
+/** Fixture universe for the prototype. */
 
 export type NodeType =
 	| 'applied-control'
@@ -443,9 +439,7 @@ export const EDGES: UniverseEdge[] = [
 	{ source: 'fo-corp', target: 'rs-phish', verb: 'scopes' }
 ];
 
-// A real applied control is cited by a dozen requirements across several frameworks.
-// The fixture needs that shape, otherwise the fan-out cap never fires and the
-// prototype flatters itself.
+// A control is cited by many requirements; without that the cap never fires.
 const CITATIONS: Array<[string, string, string, string]> = [
 	['ra-a5-10', 'A.5.10 Acceptable use of information', 'au-iso', 'Compliant'],
 	['ra-a5-33', 'A.5.33 Protection of records', 'au-iso', 'Compliant'],

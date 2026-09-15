@@ -1,18 +1,6 @@
 import { NODE_BY_ID, neighborsOf, degreeOf, type NodeType } from './universe';
 
-/**
- * A graph that grows by accretion instead of by depth.
- *
- * Depth-as-a-dial was the wrong control: a depth-2 neighbourhood of a hub is a
- * hairball whether it costs five requests or a hundred and twenty-five. Here the
- * user expands one node at a time, so the graph only ever holds what somebody
- * asked to see, and every gesture is one bounded fetch.
- *
- * The invariant that makes it usable: **expansion never moves an existing node.**
- * Positions are assigned once, on arrival, inside the angular wedge its parent
- * owns. Recomputing the whole layout on every growth step would teleport
- * everything and destroy the reader's mental map.
- */
+/** Prototype of the accretion model; the shipped one is $lib/components/RelationsGraph. */
 
 export interface LiveNode {
 	id: string;
@@ -53,18 +41,7 @@ export interface LiveGraph {
 }
 
 export const NODE_BUDGET = 100;
-/**
- * Hops from the record the panel opened on. Past three the graph stops being
- * about that record: you end up looking at things related to things related to
- * things, and a walk wanders back into territory it already crossed by another
- * path. The boundary is a nudge to open the object and explore from there.
- */
 export const MAX_HOP = 3;
-/**
- * Ceiling on what one click may add. A safety net, not a trimming policy: the
- * per-relation cap and the back-relation rule do the real work, and a graph that
- * hides what it could have shown does not earn its place.
- */
 export const MAX_ARRIVALS = 25;
 const RING_STEP = 300;
 const ROOT_RADIUS = 300;
@@ -153,15 +130,6 @@ export function expand(
 		.map(([key, g]) => {
 			// Most-connected first: a hub neighbour is the one worth seeing.
 			const fresh = g.ids.filter((id) => !nodes.has(id)).sort((a, b) => degreeOf(b) - degreeOf(a));
-			// The relation this node was reached through. Walking back out of it
-			// yields the siblings of the node we came from — the two hundred other
-			// requirement assessments of the audit we arrived via — whose only
-			// connection to the subject is the hub in between.
-			//
-			// Only worth suppressing when it is actually a hub. A requirement
-			// satisfied by three controls, reached from one of them, should show the
-			// other two: they answer "what else covers this?", and they cost less
-			// than the placeholder that would hide them.
 			const arrived = g.type === parent.arrivalType && g.verb === parent.arrivalVerb;
 			return {
 				key,
@@ -174,9 +142,6 @@ export function expand(
 		})
 		.filter((q) => q.fresh.length);
 
-	// Round-robin, so one crowded relation cannot crowd every other kind off the
-	// canvas: you always see at least one of each thing this node is attached to.
-	// A group the user explicitly opened from a "+N" is exempt — they asked for it.
 	let allowance = MAX_ARRIVALS;
 	for (const q of queues) {
 		if (!opened.has(q.key)) continue;
@@ -330,17 +295,7 @@ export function openAggregate(graph: LiveGraph, aggId: string, options: ExpandOp
 	});
 }
 
-/**
- * Places `count` children one ring further out, fanned around their parent's own
- * bearing so a branch reads as a branch.
- *
- * The fan deliberately does NOT inherit the parent's slice of the ring. A root
- * with nineteen neighbours owns 19° each, and six children crammed into 19° are
- * a smudge. Children live at a larger radius than the ring they grew from, so a
- * wide fan cannot collide with it — only with another branch expanded nearby,
- * which is rare and recoverable by collapsing. The fan narrows with depth to
- * keep that rare case rarer.
- */
+/** Children fan around the parent's bearing, one ring out. */
 function fanPositions(parent: LiveNode, count: number) {
 	if (parent.hop === 0) {
 		const step = (Math.PI * 2) / count;

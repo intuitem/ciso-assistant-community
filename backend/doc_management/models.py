@@ -63,6 +63,7 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
     processings = models.ManyToManyField(
         "privacy.Processing", blank=True, related_name="documents"
     )
+    assets = models.ManyToManyField("core.Asset", blank=True, related_name="documents")
 
     fields_to_check = ["name"]
 

@@ -11,7 +11,6 @@
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import CustomFieldsDisplay from '$lib/components/Forms/CustomFieldsDisplay.svelte';
-	import RelationsDrawer from '$lib/components/RelationsGraph/RelationsDrawer.svelte';
 	import { hasRelationGraph } from '$lib/components/RelationsGraph/relations';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
@@ -427,13 +426,6 @@
 	);
 	// Same helper as ModelTable/TableRowActions so edit affordances agree everywhere,
 	// including the no-folder fallback (existential check deferring to the backend).
-	let relationsOpen = $state(false);
-	// Most models ship their own detail route, so the graph button lives here rather
-	// than in an `actions` snippet only the generic route would ever pass.
-	const showRelations = $derived(
-		Boolean(page.data?.featureflags?.relations_graph) && hasRelationGraph(data.urlModel)
-	);
-
 	const canEditObject: boolean = $derived(
 		canPerformActionOnObject({
 			user,
@@ -441,6 +433,12 @@
 			model: data.model.name,
 			object: data.data
 		})
+	);
+
+	let relationsOpen = $state(false);
+	// Here rather than an `actions` snippet: most models ship their own detail route.
+	const showRelations = $derived(
+		Boolean(page.data?.featureflags?.relations_graph) && hasRelationGraph(data.urlModel)
 	);
 
 	let displayEditButton = $derived(function () {
@@ -992,7 +990,7 @@
 			{#if showRelations}
 				<button
 					type="button"
-					class="btn preset-tonal h-fit"
+					class="btn h-fit text-white bg-linear-to-l from-violet-500 to-indigo-600"
 					data-testid="relations-button"
 					onclick={() => (relationsOpen = true)}
 				>
@@ -1165,11 +1163,13 @@
 {/if}
 
 {#if showRelations}
-	<RelationsDrawer
-		open={relationsOpen}
-		urlModel={data.urlModel}
-		id={data.data.id}
-		name={data.data.name ?? data.data.str ?? ''}
-		onClose={() => (relationsOpen = false)}
-	/>
+	{#await import('$lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
+		<RelationsDrawer
+			open={relationsOpen}
+			urlModel={data.urlModel}
+			id={data.data.id}
+			name={data.data.name ?? data.data.str ?? ''}
+			onClose={() => (relationsOpen = false)}
+		/>
+	{/await}
 {/if}

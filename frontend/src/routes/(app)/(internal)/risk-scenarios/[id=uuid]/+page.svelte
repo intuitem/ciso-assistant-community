@@ -14,7 +14,6 @@
 
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
-	import RelationsDrawer from '$lib/components/RelationsGraph/RelationsDrawer.svelte';
 	import { hasRelationGraph } from '$lib/components/RelationsGraph/relations';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import RiskAcceptancesSection from '$lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
@@ -253,7 +252,7 @@
 			{#if showRelations}
 				<button
 					type="button"
-					class="btn preset-tonal h-fit"
+					class="btn h-fit text-white bg-linear-to-l from-violet-500 to-indigo-600"
 					data-testid="relations-button"
 					onclick={() => (relationsOpen = true)}
 				>
@@ -662,11 +661,13 @@
 </div>
 
 {#if showRelations}
-	<RelationsDrawer
-		open={relationsOpen}
-		urlModel="risk-scenarios"
-		id={data.scenario.id}
-		name={data.scenario.name ?? data.scenario.str ?? ''}
-		onClose={() => (relationsOpen = false)}
-	/>
+	{#await import('$lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
+		<RelationsDrawer
+			open={relationsOpen}
+			urlModel="risk-scenarios"
+			id={data.scenario.id}
+			name={data.scenario.name ?? data.scenario.str ?? ''}
+			onClose={() => (relationsOpen = false)}
+		/>
+	{/await}
 {/if}

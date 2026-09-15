@@ -1266,6 +1266,19 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
             fields=self.filterset_fields or [],
         )
 
+    @action(detail=True, name="Get the object's relation neighbourhood")
+    def neighborhood(self, request, pk=None):
+        """One pass over the curated relations, for the graph drawer."""
+        from core.neighborhood import build
+
+        # The action hangs off the base viewset, so the flag is checked here rather
+        # than with FeatureFlagRequired — that attribute would gate every model's
+        # whole API, not this one action.
+        if not ff_is_enabled("relations_graph"):
+            raise PermissionDenied("This feature is not enabled.")
+
+        return Response(build(self.get_object(), request.user))
+
     def get_queryset(self) -> models.query.QuerySet:
         if not self.model:
             return None

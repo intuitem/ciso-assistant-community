@@ -9,11 +9,7 @@ function esc(s: string): string {
 	return String(s).replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[c]!);
 }
 
-/**
- * Long names never fit a ring; ref_id does, and it is what people quote. Only
- * when it really is a short code — some models carry a full imported identifier
- * in ref_id, longer than the name it was meant to replace.
- */
+/** ref_id is the label when it is genuinely short; some models put a full identifier there. */
 const MAX_REF = 16;
 
 export function shortLabel(n: LiveNode): string {
@@ -38,8 +34,7 @@ export function buildGraphOption(graph: LiveGraph, showLabels: boolean, dark: bo
 	const data = nodes.map((n) => {
 		const meta = metaFor(n.urlModel);
 		const isRoot = n.hop === 0;
-		// A halo means "there is more behind this". Flat means you are already
-		// seeing everything it holds; faded means it sits at the hop limit.
+		// Halo = more behind it; flat = fully expanded; faded = at the hop limit.
 		const hasMore = canExpand(n);
 		return {
 			id: n.id,
@@ -136,7 +131,7 @@ export function buildGraphOption(graph: LiveGraph, showLabels: boolean, dark: bo
 			{
 				type: 'graph',
 				layout: 'none',
-				// ECharts fits the node bounding box, not the labels hanging off it.
+				// ECharts fits the nodes, not the labels hanging off them.
 				zoom: 0.86,
 				roam: true,
 				draggable: true,

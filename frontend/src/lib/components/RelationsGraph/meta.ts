@@ -61,6 +61,20 @@ export const NODE_META: Record<string, NodeMeta> = {
 		icon: 'fa-certificate',
 		symbol: 'roundRect'
 	},
+	'managed-documents': {
+		label: 'Document version',
+		color: '#0284c7',
+		icon: 'fa-file-lines',
+		symbol: 'rect'
+	},
+	'classification-levels': {
+		label: 'Classification',
+		color: '#7c2d12',
+		icon: 'fa-tag',
+		symbol: 'roundRect'
+	},
+	policies: { label: 'Policy', color: '#1d4ed8', icon: 'fa-scroll', symbol: 'rect' },
+	processings: { label: 'Processing', color: '#9333ea', icon: 'fa-gears', symbol: 'roundRect' },
 	'document-containers': {
 		label: 'Document',
 		color: '#0369a1',

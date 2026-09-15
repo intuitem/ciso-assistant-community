@@ -5,6 +5,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RelationsGraph from './RelationsGraph.svelte';
 	import { metaFor } from './meta';
+	import { urlModelForDjangoName } from '$lib/utils/crud';
 	import {
 		createGraph,
 		merge,
@@ -42,12 +43,9 @@
 	let booting = $state(false);
 	let bootError = $state('');
 
-	// The chat launcher is fixed bottom-right above everything (z-950), so the
-	// footer keeps its corner clear rather than hiding controls underneath it.
+	// The chat launcher sits bottom-right at z-950; keep that corner clear.
 	const chatBubble = $derived(Boolean(page.data?.featureflags?.chat_mode));
 
-	/** Neighbourhoods are immutable for the life of the panel: collapsing and
-	 *  re-expanding, or opening a "+N", costs nothing after the first fetch. */
 	const cache = new Map<string, Neighborhood>();
 	const inflight = new Map<string, Promise<Neighborhood>>();
 
@@ -61,6 +59,12 @@
 			.then(async (res) => {
 				if (!res.ok) throw new Error(String(res.status));
 				const body: Neighborhood = await res.json();
+				// Route segments are the frontend's to know.
+				for (const n of [body.root, ...body.nodes]) {
+					const resolved = n.model ? urlModelForDjangoName(n.model) : null;
+					n.navigable = Boolean(resolved);
+					if (resolved) n.urlModel = resolved;
+				}
 				cache.set(key, body);
 				return body;
 			})
@@ -69,7 +73,6 @@
 		return request;
 	}
 
-	// Opening on a different record starts a new exploration.
 	$effect(() => {
 		if (!open) return;
 		urlModel;
@@ -128,8 +131,7 @@
 		const next = new Set(opened);
 		next.add(`${parentId}|${group}`);
 		opened = next;
-		// Re-fold the same payload with that group released; collapse first so the
-		// parent's fan is laid out once, with the newcomers included.
+		// Collapse first so the parent's fan is laid out once, newcomers included.
 		graph = merge(collapse(graph, parentId), parentId, payload, { fanCap, hidden, opened: next });
 	}
 
@@ -159,8 +161,7 @@
 	const rootNode = $derived(graph.nodes.get(id));
 	const rootMeta = $derived(metaFor(urlModel));
 	const expandable = $derived([...graph.nodes.values()].filter(canExpand));
-	// Hidden types must stay in the list: filtering them out of the canvas also
-	// filtered them out of their own chips, so the only way back was a page reload.
+	// Hidden types stay listed, or their own chips vanish with them.
 	const filterTypes = $derived(
 		[...new Set([...[...graph.nodes.values()].map((n) => n.urlModel), ...hidden])].sort((a, b) =>
 			metaFor(a).label.localeCompare(metaFor(b).label)
@@ -279,14 +280,16 @@
 							{/if}
 						</div>
 						<div class="flex items-center gap-1">
-							<Anchor
-								breadcrumbAction="push"
-								href={`/${selected.urlModel}/${selected.id}`}
-								label="Open"
-								class="btn btn-sm preset-tonal"
-								title="Open the object page"
-								><i class="fa-solid fa-arrow-up-right-from-square"></i></Anchor
-							>
+							{#if selected.navigable !== false}
+								<Anchor
+									breadcrumbAction="push"
+									href={`/${selected.urlModel}/${selected.id}`}
+									label="Open"
+									class="btn btn-sm preset-tonal"
+									title="Open the object page"
+									><i class="fa-solid fa-arrow-up-right-from-square"></i></Anchor
+								>
+							{/if}
 							<button
 								class="btn btn-sm preset-tonal"
 								title="Close"

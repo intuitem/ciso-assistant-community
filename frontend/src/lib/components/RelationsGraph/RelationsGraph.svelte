@@ -49,9 +49,7 @@
 		};
 	});
 
-	// Replace rather than merge: a collapse makes the data array shorter, and
-	// merging leaves the dropped nodes on screen. Stability does not depend on the
-	// merge — it comes from the coordinates, which never change once assigned.
+	// Replace, not merge: a collapse shortens the array and merging leaves ghosts.
 	$effect(() => {
 		chart?.setOption(buildGraphOption(graph, showLabels, isDarkTheme()), true);
 	});

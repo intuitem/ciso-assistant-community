@@ -21,6 +21,7 @@ from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
 from threat_modeling.models import ThreatModel
 from pmbok.models import GenericCollection
+from doc_management.models import DocumentContainer
 from global_settings.utils import ff_is_enabled
 
 from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
@@ -796,6 +797,11 @@ class AssetWriteSerializer(
         queryset=SecurityException.objects.all(),
         required=False,
     )
+    documents = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=DocumentContainer.objects.all(),
+        required=False,
+    )
     applied_controls = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=AppliedControl.objects.all(),
@@ -899,6 +905,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     overridden_children_capabilities = FieldsRelatedField(["id", "name"], many=True)
     solutions = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
+    documents = FieldsRelatedField(many=True)
 
     children_assets = serializers.SerializerMethodField()
     security_objectives = serializers.SerializerMethodField()
