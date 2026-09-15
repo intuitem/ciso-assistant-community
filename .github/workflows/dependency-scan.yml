@@ -1,4 +1,4 @@
-name: Dependency and base image scan
+name: Dependency scan
 
 on:
   pull_request:
@@ -10,9 +10,7 @@ on:
       - "enterprise/backend/pyproject.toml"
       - "frontend/pnpm-lock.yaml"
       - "frontend/package.json"
-      - "**/Dockerfile"
       - ".github/workflows/dependency-scan.yml"
-      - ".github/scripts/extract-base-images.py"
 
 permissions:
   contents: read
@@ -61,58 +59,3 @@ jobs:
           timeout: 15m
           version: ${{ env.TRIVY_VERSION }}
           skip-setup-trivy: true
-
-  discover-base-images:
-    runs-on: ubuntu-24.04
-    outputs:
-      images: ${{ steps.extract.outputs.images }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Extract base images from Dockerfiles
-        id: extract
-        shell: bash
-        run: |
-          set -euo pipefail
-          images="$(python3 .github/scripts/extract-base-images.py --json \
-            backend/Dockerfile \
-            frontend/Dockerfile \
-            cli/Dockerfile \
-            enterprise/backend/Dockerfile \
-            enterprise/frontend/Dockerfile)"
-          echo "$images"
-          echo "images=$images" >> "$GITHUB_OUTPUT"
-
-  base-images:
-    needs: discover-base-images
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: read
-    strategy:
-      fail-fast: false
-      matrix:
-        image: ${{ fromJSON(needs.discover-base-images.outputs.images) }}
-    steps:
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Report CRITICAL and HIGH (non-blocking)
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          scan-type: image
-          image-ref: ${{ matrix.image }}
-          format: table
-          scanners: vuln
-          ignore-unfixed: true
-          severity: CRITICAL,HIGH
-          exit-code: "0"
-          timeout: 15m
-          version: ${{ env.TRIVY_VERSION }}
