@@ -18,6 +18,8 @@ WORKDIR /code
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
+  # perl-base: clears the perl finding from docker scout (#4820)
+  perl-base \
   # not pango-1.0: resolves to libpango1.0-dev, pulls in mesa + LLVM
   libpango-1.0-0 \
   libpangoft2-1.0-0 \

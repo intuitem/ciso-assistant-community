@@ -10,5 +10,6 @@
   { "source": "dhi.io/node:24-dev", "target": "dhi-node:24-dev" },
   { "source": "dhi.io/node:24", "target": "dhi-node:24" },
   { "source": "dhi.io/python:3.14-dev", "target": "dhi-python:3.14-dev" },
-  { "source": "dhi.io/python:3.14", "target": "dhi-python:3.14" }
+  { "source": "dhi.io/python:3.14", "target": "dhi-python:3.14" },
+  { "source": "docker.io/docker/scout-cli:1.25.0", "target": "scout-cli:1.25.0", "platforms": "linux/amd64" }
 ]
