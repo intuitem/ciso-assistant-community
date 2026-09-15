@@ -157,7 +157,7 @@ jobs:
       PYTHON_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev
       NODE_BUILD_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-node:24-dev
       NODE_RUNTIME_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-node:24
-      QDRANT_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/qdrant:v1.14.0
+      QDRANT_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/qdrant:v1.19.1
       CADDY_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/caddy:2.11.4
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
