@@ -11,6 +11,17 @@ on:
       - "frontend/pnpm-lock.yaml"
       - "frontend/package.json"
       - ".github/workflows/dependency-scan.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend/uv.lock"
+      - "backend/pyproject.toml"
+      - "cli/uv.lock"
+      - "cli/pyproject.toml"
+      - "enterprise/backend/pyproject.toml"
+      - "frontend/pnpm-lock.yaml"
+      - "frontend/package.json"
+      - ".github/workflows/dependency-scan.yml"
 
 permissions:
   contents: read
@@ -21,7 +32,7 @@ concurrency:
 
 jobs:
   lockfiles:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repository
