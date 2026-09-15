@@ -212,39 +212,34 @@ jobs:
       matrix:
         component: [frontend, backend, mcp]
     steps:
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Report HIGH (non-blocking)
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        uses: docker/scout-action@7c6b6c3f7844478ace1ffd4e7aef649053d1f87d # v1.24.0
         with:
-          scan-type: image
-          image-ref: ghcr.io/${{ github.repository }}/${{ matrix.component }}:${{ needs.prepare.outputs.version }}-amd64
-          format: table
-          scanners: vuln
-          ignore-unfixed: true
-          severity: HIGH
-          exit-code: "0"
-          timeout: 20m
-          version: "v0.74.0"
+          command: cves
+          image: ghcr.io/${{ github.repository }}/${{ matrix.component }}:${{ needs.prepare.outputs.version }}-amd64
+          platform: linux/amd64
+          only-severities: critical,high
+          only-fixed: true
+          summary: true
+          exit-code: false
+          dockerhub-user: ${{ secrets.DOCKERHUB_USER }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry-user: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Gate on CRITICAL
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        uses: docker/scout-action@7c6b6c3f7844478ace1ffd4e7aef649053d1f87d # v1.24.0
         with:
-          scan-type: image
-          image-ref: ghcr.io/${{ github.repository }}/${{ matrix.component }}:${{ needs.prepare.outputs.version }}-amd64
-          format: table
-          scanners: vuln
-          ignore-unfixed: true
-          severity: CRITICAL
-          exit-code: "1"
-          timeout: 20m
-          version: "v0.74.0"
-          skip-setup-trivy: true
+          command: cves
+          image: ghcr.io/${{ github.repository }}/${{ matrix.component }}:${{ needs.prepare.outputs.version }}-amd64
+          platform: linux/amd64
+          only-severities: critical
+          only-fixed: true
+          exit-code: true
+          dockerhub-user: ${{ secrets.DOCKERHUB_USER }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry-user: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
 
   merge-manifests:
     needs: [prepare, build-frontend, build-backend, build-mcp, scan]

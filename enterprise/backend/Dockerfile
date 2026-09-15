@@ -14,6 +14,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /bin/
 WORKDIR /code
 
 RUN apt-get update && apt-get install -y \
+  perl-base \
   libyaml-cpp-dev \
   libffi-dev \
   libglib2.0-0 \
