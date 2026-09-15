@@ -158,8 +158,53 @@ jobs:
           labels: ${{ steps.meta-backend.outputs.labels }}
           annotations: ${{ steps.meta-backend.outputs.annotations }}
 
-  merge-manifests:
+  scan:
     needs: [prepare, build-frontend, build-backend]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [frontend, backend]
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Report HIGH (non-blocking)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ghcr.io/intuitem/ciso-assistant-enterprise-${{ matrix.component }}:${{ needs.prepare.outputs.version }}-amd64
+          format: table
+          scanners: vuln
+          ignore-unfixed: true
+          severity: HIGH
+          exit-code: "0"
+          timeout: 20m
+          version: "v0.74.0"
+
+      - name: Gate on CRITICAL
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ghcr.io/intuitem/ciso-assistant-enterprise-${{ matrix.component }}:${{ needs.prepare.outputs.version }}-amd64
+          format: table
+          scanners: vuln
+          ignore-unfixed: true
+          severity: CRITICAL
+          exit-code: "1"
+          timeout: 20m
+          version: "v0.74.0"
+          skip-setup-trivy: true
+
+  merge-manifests:
+    needs: [prepare, build-frontend, build-backend, scan]
     runs-on: ubuntu-24.04
     permissions:
       contents: read

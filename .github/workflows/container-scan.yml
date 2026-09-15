@@ -1,0 +1,159 @@
+name: Container image scan
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Image tag to scan"
+        required: false
+        default: "latest"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: container-scan
+  cancel-in-progress: false
+
+env:
+  TRIVY_VERSION: "v0.74.0"
+
+jobs:
+  scan:
+    if: github.repository == 'intuitem/ciso-assistant-community'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ce-frontend
+            image: ghcr.io/intuitem/ciso-assistant-community/frontend
+          - name: ce-backend
+            image: ghcr.io/intuitem/ciso-assistant-community/backend
+          - name: ee-frontend
+            image: ghcr.io/intuitem/ciso-assistant-enterprise-frontend
+          - name: ee-backend
+            image: ghcr.io/intuitem/ciso-assistant-enterprise-backend
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve image reference
+        id: ref
+        shell: bash
+        env:
+          IMAGE: ${{ matrix.image }}
+          TAG: ${{ inputs.tag || 'latest' }}
+        run: |
+          set -euo pipefail
+          echo "ref=${IMAGE}:${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Scan image (SARIF)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ steps.ref.outputs.ref }}
+          format: sarif
+          output: trivy-${{ matrix.name }}.sarif
+          scanners: vuln
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          limit-severities-for-sarif: true
+          exit-code: "0"
+          timeout: 20m
+          version: ${{ env.TRIVY_VERSION }}
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@977e6ceaea7361825998245d787fa3b4d6b9e5df # codeql-bundle-v2.27.0
+        with:
+          sarif_file: trivy-${{ matrix.name }}.sarif
+          category: trivy-${{ matrix.name }}
+
+      - name: Report HIGH (non-blocking)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ steps.ref.outputs.ref }}
+          format: table
+          scanners: vuln
+          ignore-unfixed: true
+          severity: HIGH
+          exit-code: "0"
+          timeout: 20m
+          version: ${{ env.TRIVY_VERSION }}
+          skip-setup-trivy: true
+
+      - name: Gate on CRITICAL
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ steps.ref.outputs.ref }}
+          format: table
+          scanners: vuln
+          ignore-unfixed: true
+          severity: CRITICAL
+          exit-code: "1"
+          timeout: 20m
+          version: ${{ env.TRIVY_VERSION }}
+          skip-setup-trivy: true
+
+  report:
+    needs: scan
+    if: always() && github.repository == 'intuitem/ciso-assistant-community'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Open, update or close the tracking issue
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RESULT: ${{ needs.scan.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ALERTS_URL: ${{ github.server_url }}/${{ github.repository }}/security/code-scanning
+          TAG: ${{ inputs.tag || 'latest' }}
+          LABEL: container-scan
+          TITLE: "Container image scan: fixable CRITICAL vulnerabilities"
+        run: |
+          set -euo pipefail
+
+          gh label create "$LABEL" --color B60205 --description "Automated container image scan" 2>/dev/null || true
+
+          number="$(gh issue list --label "$LABEL" --state open --limit 1 --json number --jq '.[0].number // empty')"
+
+          if [ "$RESULT" = "success" ]; then
+            if [ -n "$number" ]; then
+              gh issue close "$number" --comment "Clean as of $RUN_URL"
+            fi
+            exit 0
+          fi
+
+          body="$(printf '%s\n' \
+            "Tag scanned: \`$TAG\`" \
+            "" \
+            "One or more published images have CRITICAL vulnerabilities with a fix available." \
+            "" \
+            "- Run: $RUN_URL" \
+            "- Alerts: $ALERTS_URL" \
+            "" \
+            "This issue is updated automatically and closes when the next scan is clean.")"
+
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body "$body"
+          else
+            gh issue create --title "$TITLE" --label "$LABEL" --body "$body"
+          fi
+
+          exit 1
