@@ -17,6 +17,9 @@ concurrency:
   group: container-scan
   cancel-in-progress: false
 
+env:
+  SCOUT_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/scout-cli:1.25.0
+
 jobs:
   scan:
     if: github.repository == 'intuitem/ciso-assistant-community'
@@ -50,45 +53,56 @@ jobs:
           set -euo pipefail
           echo "ref=${IMAGE}:${TAG}" >> "$GITHUB_OUTPUT"
 
-      - name: Analyse and report
-        uses: docker/scout-action@7c6b6c3f7844478ace1ffd4e7aef649053d1f87d # v1.24.0
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
-          command: cves
-          image: ${{ steps.ref.outputs.ref }}
-          platform: linux/amd64
-          only-severities: critical,high
-          only-fixed: true
-          sarif-file: scout-${{ matrix.name }}.sarif
-          summary: true
-          exit-code: false
-          write-comment: false
-          dockerhub-user: ${{ secrets.DOCKERHUB_USER }}
-          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
-          registry-user: ${{ github.actor }}
-          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Analyse and report
+        shell: bash
+        env:
+          TARGET: ${{ steps.ref.outputs.ref }}
+          NAME: ${{ matrix.name }}
+          DOCKER_SCOUT_HUB_USER: ${{ secrets.DOCKERHUB_USER }}
+          DOCKER_SCOUT_HUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKER_SCOUT_REGISTRY_USER: ${{ github.actor }}
+          DOCKER_SCOUT_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p scout-out
+          docker run --rm \
+            -e DOCKER_SCOUT_HUB_USER -e DOCKER_SCOUT_HUB_PASSWORD \
+            -e DOCKER_SCOUT_REGISTRY_USER -e DOCKER_SCOUT_REGISTRY_PASSWORD \
+            "$SCOUT_IMAGE" \
+            cves --platform linux/amd64 --only-severity critical,high --only-fixed \
+              --format sarif "$TARGET" > "scout-out/scout-$NAME.sarif"
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@977e6ceaea7361825998245d787fa3b4d6b9e5df # codeql-bundle-v2.27.0
         with:
-          sarif_file: scout-${{ matrix.name }}.sarif
+          sarif_file: scout-out/scout-${{ matrix.name }}.sarif
           category: scout-${{ matrix.name }}
 
       - name: Gate on CRITICAL
         id: gate
         continue-on-error: true
-        uses: docker/scout-action@7c6b6c3f7844478ace1ffd4e7aef649053d1f87d # v1.24.0
-        with:
-          command: cves
-          image: ${{ steps.ref.outputs.ref }}
-          platform: linux/amd64
-          only-severities: critical
-          only-fixed: true
-          exit-code: true
-          write-comment: false
-          dockerhub-user: ${{ secrets.DOCKERHUB_USER }}
-          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
-          registry-user: ${{ github.actor }}
-          registry-password: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        env:
+          TARGET: ${{ steps.ref.outputs.ref }}
+          DOCKER_SCOUT_HUB_USER: ${{ secrets.DOCKERHUB_USER }}
+          DOCKER_SCOUT_HUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKER_SCOUT_REGISTRY_USER: ${{ github.actor }}
+          DOCKER_SCOUT_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -e DOCKER_SCOUT_HUB_USER -e DOCKER_SCOUT_HUB_PASSWORD \
+            -e DOCKER_SCOUT_REGISTRY_USER -e DOCKER_SCOUT_REGISTRY_PASSWORD \
+            "$SCOUT_IMAGE" \
+            cves --platform linux/amd64 --only-severity critical --only-fixed \
+              --exit-code "$TARGET" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Record gate outcome
         if: ${{ !cancelled() }}

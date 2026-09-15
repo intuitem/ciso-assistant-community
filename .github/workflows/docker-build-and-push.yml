@@ -211,37 +211,38 @@ jobs:
       fail-fast: false
       matrix:
         component: [frontend, backend, mcp]
+    env:
+      SCOUT_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/scout-cli:1.25.0
     steps:
-      - name: Report HIGH (non-blocking)
-        uses: docker/scout-action@7c6b6c3f7844478ace1ffd4e7aef649053d1f87d # v1.24.0
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
-          command: cves
-          image: ghcr.io/${{ github.repository }}/${{ matrix.component }}:${{ needs.prepare.outputs.version }}-amd64
-          platform: linux/amd64
-          only-severities: critical,high
-          only-fixed: true
-          summary: true
-          exit-code: false
-          write-comment: false
-          dockerhub-user: ${{ secrets.DOCKERHUB_USER }}
-          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
-          registry-user: ${{ github.actor }}
-          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Gate on CRITICAL
-        uses: docker/scout-action@7c6b6c3f7844478ace1ffd4e7aef649053d1f87d # v1.24.0
-        with:
-          command: cves
-          image: ghcr.io/${{ github.repository }}/${{ matrix.component }}:${{ needs.prepare.outputs.version }}-amd64
-          platform: linux/amd64
-          only-severities: critical
-          only-fixed: true
-          exit-code: true
-          write-comment: false
-          dockerhub-user: ${{ secrets.DOCKERHUB_USER }}
-          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
-          registry-user: ${{ github.actor }}
-          registry-password: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        env:
+          TARGET: ghcr.io/${{ github.repository }}/${{ matrix.component }}:${{ needs.prepare.outputs.version }}-amd64
+          DOCKER_SCOUT_HUB_USER: ${{ secrets.DOCKERHUB_USER }}
+          DOCKER_SCOUT_HUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKER_SCOUT_REGISTRY_USER: ${{ github.actor }}
+          DOCKER_SCOUT_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -e DOCKER_SCOUT_HUB_USER -e DOCKER_SCOUT_HUB_PASSWORD \
+            -e DOCKER_SCOUT_REGISTRY_USER -e DOCKER_SCOUT_REGISTRY_PASSWORD \
+            "$SCOUT_IMAGE" \
+            cves --platform linux/amd64 --only-severity critical,high --only-fixed --format markdown \
+              "$TARGET" | tee -a "$GITHUB_STEP_SUMMARY"
+          docker run --rm \
+            -e DOCKER_SCOUT_HUB_USER -e DOCKER_SCOUT_HUB_PASSWORD \
+            -e DOCKER_SCOUT_REGISTRY_USER -e DOCKER_SCOUT_REGISTRY_PASSWORD \
+            "$SCOUT_IMAGE" \
+            cves --platform linux/amd64 --only-severity critical --only-fixed \
+              --exit-code "$TARGET" > /dev/null
 
   merge-manifests:
     needs: [prepare, build-frontend, build-backend, build-mcp, scan]
