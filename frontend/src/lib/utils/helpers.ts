@@ -475,7 +475,8 @@ export const VISIBILITY_FIELDS = [
 	'task_templates',
 	'evidences',
 	'observation',
-	'comments'
+	'comments',
+	'annotation'
 ] as const;
 
 export type VisibilityField = (typeof VISIBILITY_FIELDS)[number];
@@ -543,6 +544,7 @@ export function getFieldVisibility(
 	showRespondentAlignment: boolean;
 	showComments: boolean;
 	showExtendedResult: boolean;
+	showAnnotation: boolean;
 } {
 	return {
 		showAnswers: isFieldVisible(complianceAssessment, 'answers', viewerRole),
@@ -560,7 +562,8 @@ export function getFieldVisibility(
 			viewerRole
 		),
 		showComments: isFieldVisible(complianceAssessment, 'comments', viewerRole),
-		showExtendedResult: isFieldVisible(complianceAssessment, 'extended_result', viewerRole)
+		showExtendedResult: isFieldVisible(complianceAssessment, 'extended_result', viewerRole),
+		showAnnotation: isFieldVisible(complianceAssessment, 'annotation', viewerRole)
 	};
 }
 
