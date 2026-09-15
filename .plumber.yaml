@@ -77,6 +77,7 @@ github:
       # Owner-level wildcards for well-known vendor orgs; exact repos for
       # individual-maintainer accounts.
       trustedGithubActions:
+      - aquasecurity/trivy-action # container image and dependency scanning
       - astral-sh/*              # setup-uv (uv/ruff maintainers)
       - pnpm/*                   # action-setup
       - docker/*                 # setup-buildx/login/metadata/build-push/setup-qemu

@@ -36,6 +36,8 @@ jobs:
             image: ghcr.io/intuitem/ciso-assistant-community/frontend
           - name: ce-backend
             image: ghcr.io/intuitem/ciso-assistant-community/backend
+          - name: ce-mcp
+            image: ghcr.io/intuitem/ciso-assistant-community/mcp
           - name: ee-frontend
             image: ghcr.io/intuitem/ciso-assistant-enterprise-frontend
           - name: ee-backend
@@ -94,6 +96,8 @@ jobs:
           skip-setup-trivy: true
 
       - name: Gate on CRITICAL
+        id: gate
+        continue-on-error: true
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: image
@@ -107,20 +111,80 @@ jobs:
           version: ${{ env.TRIVY_VERSION }}
           skip-setup-trivy: true
 
+      - name: Record gate outcome
+        if: ${{ !cancelled() }}
+        shell: bash
+        env:
+          OUTCOME: ${{ steps.gate.outcome }}
+          NAME: ${{ matrix.name }}
+        run: |
+          set -euo pipefail
+          mkdir -p gate
+          printf '%s %s\n' "$NAME" "$OUTCOME" > "gate/$NAME.txt"
+
+      - name: Upload gate outcome
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gate-${{ matrix.name }}
+          path: gate/
+          retention-days: 7
+
+      - name: Fail on CRITICAL
+        if: steps.gate.outcome == 'failure'
+        shell: bash
+        run: exit 1
+
   report:
     needs: scan
-    if: always() && github.repository == 'intuitem/ciso-assistant-community'
+    if: ${{ !cancelled() && github.repository == 'intuitem/ciso-assistant-community' }}
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       issues: write
     steps:
+      - name: Download gate outcomes
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: gate-*
+          merge-multiple: true
+          path: gate
+
+      - name: Classify scan outcome
+        id: classify
+        shell: bash
+        env:
+          RESULT: ${{ needs.scan.result }}
+        run: |
+          set -euo pipefail
+
+          failed=""
+          for f in gate/*.txt; do
+            [ -e "$f" ] || continue
+            name="$(cut -d' ' -f1 "$f")"
+            outcome="$(cut -d' ' -f2 "$f")"
+            if [ "$outcome" = "failure" ]; then
+              failed="${failed:+$failed, }$name"
+            fi
+          done
+
+          if [ -n "$failed" ]; then
+            echo "state=critical" >> "$GITHUB_OUTPUT"
+          elif [ "$RESULT" != "success" ]; then
+            echo "state=broken" >> "$GITHUB_OUTPUT"
+          else
+            echo "state=clean" >> "$GITHUB_OUTPUT"
+          fi
+          echo "images=$failed" >> "$GITHUB_OUTPUT"
+
       - name: Open, update or close the tracking issue
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          RESULT: ${{ needs.scan.result }}
+          STATE: ${{ steps.classify.outputs.state }}
+          IMAGES: ${{ steps.classify.outputs.images }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           ALERTS_URL: ${{ github.server_url }}/${{ github.repository }}/security/code-scanning
           TAG: ${{ inputs.tag || 'latest' }}
@@ -133,7 +197,12 @@ jobs:
 
           number="$(gh issue list --label "$LABEL" --state open --limit 1 --json number --jq '.[0].number // empty')"
 
-          if [ "$RESULT" = "success" ]; then
+          if [ "$STATE" = "broken" ]; then
+            echo "Scan did not complete; leaving the tracking issue untouched." >&2
+            exit 1
+          fi
+
+          if [ "$STATE" = "clean" ]; then
             if [ -n "$number" ]; then
               gh issue close "$number" --comment "Clean as of $RUN_URL"
             fi
@@ -143,7 +212,7 @@ jobs:
           body="$(printf '%s\n' \
             "Tag scanned: \`$TAG\`" \
             "" \
-            "One or more published images have CRITICAL vulnerabilities with a fix available." \
+            "These images have CRITICAL vulnerabilities with a fix available: $IMAGES" \
             "" \
             "- Run: $RUN_URL" \
             "- Alerts: $ALERTS_URL" \
@@ -155,5 +224,7 @@ jobs:
           else
             gh issue create --title "$TITLE" --label "$LABEL" --body "$body"
           fi
+
+          exit 1
 
           exit 1

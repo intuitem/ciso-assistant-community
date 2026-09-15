@@ -203,7 +203,7 @@ jobs:
           annotations: ${{ steps.meta-mcp.outputs.annotations }}
 
   scan:
-    needs: [prepare, build-frontend, build-backend]
+    needs: [prepare, build-frontend, build-backend, build-mcp]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -211,7 +211,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [frontend, backend]
+        component: [frontend, backend, mcp]
     steps:
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
