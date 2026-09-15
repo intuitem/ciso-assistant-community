@@ -179,15 +179,6 @@ jobs:
           set -euo pipefail
           CREATED="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
-          # :latest only ever moves on a tag build
-          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
-            LATEST_FRONTEND=(-t "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest")
-            LATEST_BACKEND=(-t "ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest")
-          else
-            LATEST_FRONTEND=()
-            LATEST_BACKEND=()
-          fi
-
           # Frontend
           docker buildx imagetools create \
             --annotation "index:org.opencontainers.image.title=CISO Assistant Enterprise Frontend" \
@@ -201,7 +192,7 @@ jobs:
             --annotation "index:org.opencontainers.image.revision=$GIT_SHA" \
             --annotation "index:org.opencontainers.image.created=$CREATED" \
             -t "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:$VERSION" \
-            "${LATEST_FRONTEND[@]}" \
+            -t "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest" \
             "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:$VERSION-amd64" \
             "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:$VERSION-arm64"
 
@@ -218,6 +209,6 @@ jobs:
             --annotation "index:org.opencontainers.image.revision=$GIT_SHA" \
             --annotation "index:org.opencontainers.image.created=$CREATED" \
             -t "ghcr.io/intuitem/ciso-assistant-enterprise-backend:$VERSION" \
-            "${LATEST_BACKEND[@]}" \
+            -t "ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest" \
             "ghcr.io/intuitem/ciso-assistant-enterprise-backend:$VERSION-amd64" \
             "ghcr.io/intuitem/ciso-assistant-enterprise-backend:$VERSION-arm64"
