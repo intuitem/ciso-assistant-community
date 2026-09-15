@@ -178,6 +178,7 @@ jobs:
           only-fixed: true
           summary: true
           exit-code: false
+          write-comment: false
           dockerhub-user: ${{ secrets.DOCKERHUB_USER }}
           dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
           registry-user: ${{ github.actor }}
@@ -192,6 +193,7 @@ jobs:
           only-severities: critical
           only-fixed: true
           exit-code: true
+          write-comment: false
           dockerhub-user: ${{ secrets.DOCKERHUB_USER }}
           dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
           registry-user: ${{ github.actor }}
