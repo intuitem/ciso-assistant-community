@@ -8829,19 +8829,10 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["post"])
     def reorganize(self, request):
-        """Apply a whole set of parent changes as one transaction.
+        """Apply a set of folder moves and deletions as one transaction.
 
-        A reorganisation is drafted client-side and sent here once, because half of it
-        landing is worse than none of it: the folder tree is what the IAM resolves role
-        assignments against, so a partial apply leaves access in a state nobody
-        designed.
-
-        Payload: {"moves": [{"folder": id, "parent_folder": id, "from_parent": id}]}
-
-        `from_parent` is what the caller believed the parent to be, and is required:
-        it makes the apply optimistic-concurrency safe, so if anybody moved that folder
-        in the meantime the whole request is refused with a report rather than silently
-        overwriting their change.
+        Payload: {"moves": [{"folder", "parent_folder", "from_parent"}],
+                  "deletes": [{"folder"}]}
         """
         moves = request.data.get("moves") or []
         deletes = request.data.get("deletes") or []
@@ -8865,9 +8856,7 @@ class FolderViewSet(BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             seen.add(folder_id)
-            # Mandatory, not optional: this endpoint rewrites access in bulk, so a
-            # caller that cannot say what it believed the tree looked like has no
-            # business overwriting whatever it looks like now.
+            # Required: guards against overwriting a concurrent change.
             if not move.get("from_parent"):
                 return Response(
                     {
@@ -8877,8 +8866,7 @@ class FolderViewSet(BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-        # Scope to what the caller may see, so an unreadable folder reads as missing
-        # rather than as a target to move.
+        # An unreadable folder reads as missing rather than as a target.
         visible = {str(f.id): f for f in self.get_queryset()}
 
         conflicts = []
@@ -8914,11 +8902,6 @@ class FolderViewSet(BaseModelViewSet):
 
             planned.append((folder, target, current))
 
-        # Deletes are restricted to empty leaves. That is what makes it safe to draft
-        # a deletion client-side and apply it later: there is nothing inside to be
-        # destroyed by a stale draft. Emptiness is therefore re-checked here, at apply
-        # time, and after the moves have landed — a folder emptied by this very draft
-        # is legitimately deletable, and one refilled since drafting is not.
         planned_deletes = []
         for entry in deletes:
             folder_id = str(entry.get("folder", ""))
@@ -8944,10 +8927,8 @@ class FolderViewSet(BaseModelViewSet):
                 {"conflicts": exc.conflicts}, status=status.HTTP_409_CONFLICT
             )
 
-        # No inverse is returned on purpose. One computed here goes stale the moment
-        # anyone else touches the tree, and replaying it blind would overwrite their
-        # change — the one thing `from_parent` exists to prevent. Undoing a
-        # reorganisation means drafting the moves back, which earns the same review.
+        # No inverse is returned: replaying a stale one would overwrite concurrent
+        # changes. Reverting means drafting the moves back.
         return Response(
             {
                 "applied": len(planned),
@@ -8958,15 +8939,10 @@ class FolderViewSet(BaseModelViewSet):
 
     @staticmethod
     def _folder_emptiness_blocker(folder) -> "str | None":
-        """Why this folder may not be deleted from the board, or None.
+        """Why this folder may not be deleted, or None.
 
-        Exhaustive rather than curated: deletion cascades through every FK, so an
-        object in a model nobody thought to list would still be destroyed. The cost
-        (~150 cheap counts) is acceptable here because it runs for a handful of
-        folders on an explicit action, not on every page load.
-
-        A domain's own auto-provisioned IAM objects don't count as content — every
-        domain has them, so counting them would make deletion impossible.
+        Exhaustive rather than curated: deletion cascades through every FK. The IAM
+        objects every domain auto-provisions are exempt, or nothing would be deletable.
         """
         from django.apps import apps
 
@@ -8986,23 +8962,14 @@ class FolderViewSet(BaseModelViewSet):
                 if model.objects.filter(folder=folder).exists():
                     return "notEmpty"
             except Exception:
-                # A model whose table is absent (unmanaged, or an edition-only app)
-                # cannot be holding anything.
-                continue
+                continue  # unmanaged or edition-only table: holds nothing
         return None
 
     def _apply_reorganisation(self, planned, planned_deletes):
         with transaction.atomic():
-            # Two phases on purpose. A valid final arrangement can still pass through
-            # an invalid intermediate — swap two subtrees and whichever move goes first
-            # is momentarily a cycle — so every mover is parked at the root before any
-            # of them is attached. That removes the ordering problem entirely instead
-            # of trying to find a safe permutation.
-            #
-            # The detach is a bare save: it is never an observable state, and routing it
-            # through the serializer would demand add permission on the root, which a
-            # domain-scoped caller legitimately lacks. Authorisation for what the caller
-            # actually asked for is enforced in phase two.
+            # Park every mover at the root first: a valid final arrangement can pass
+            # through an intermediate cycle (swapping two subtrees). Bare save, since
+            # going via the serializer would demand add permission on the root.
             root = Folder.get_root_folder()
             for folder, _, _ in planned:
                 folder.parent_folder = root
@@ -9018,7 +8985,7 @@ class FolderViewSet(BaseModelViewSet):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
 
-            # Deletes run last, so a folder emptied by the moves above qualifies.
+            # Last, so a folder emptied by the moves above qualifies.
             blocked = []
             for folder in planned_deletes:
                 reason = self._folder_emptiness_blocker(folder)
@@ -9031,9 +8998,7 @@ class FolderViewSet(BaseModelViewSet):
                         }
                     )
             if blocked:
-                # Raised inside the atomic block on purpose: it rolls the moves back
-                # too, so the caller never gets a half-applied reorganisation.
-                raise DraftNotEmptyError(blocked)
+                raise DraftNotEmptyError(blocked)  # inside atomic: rolls moves back too
 
             for folder in planned_deletes:
                 self.perform_destroy(folder)
@@ -9065,8 +9030,7 @@ class FolderViewSet(BaseModelViewSet):
             include_perimeters=include_perimeters
         )
 
-        # Opt-in: only the domain board asks for these, and they cost one grouped
-        # query per curated content model.
+        # Opt-in: one grouped query per curated content model.
         with_counts = request.query_params.get("with_counts", "").lower() in [
             "true",
             "1",
@@ -9074,8 +9038,8 @@ class FolderViewSet(BaseModelViewSet):
         ]
         content_counts = folder_direct_content_counts() if with_counts else None
 
-        # Add ancestors so viewable folders aren't orphaned. Walked over the in-memory
-        # parent map: doing it against the DB cost one query per folder per level.
+        # Ancestors, so viewable folders aren't orphaned. In memory: against the DB
+        # this cost one query per folder per level.
         needed_folders = set(viewable_objects)
         for folder_id in viewable_objects:
             current = parent_of.get(folder_id)
@@ -9089,9 +9053,7 @@ class FolderViewSet(BaseModelViewSet):
         if write_perm_codename:
             perm = Permission.objects.filter(codename=write_perm_codename).first()
             if perm is not None:
-                # Resolved in bulk. The per-folder `is_access_allowed` loop this
-                # replaces returned the same set, and was the single biggest cost of
-                # the endpoint.
+                # In bulk: the per-folder is_access_allowed loop dominated the endpoint.
                 writable_ids = set(
                     RoleAssignment.get_allowed_folder_ids(request.user, perm)
                 )
@@ -9150,8 +9112,6 @@ class FolderViewSet(BaseModelViewSet):
             "children": folders_list,
         }
         if content_counts is not None:
-            # The root holds objects like any other folder; without this its badge
-            # would show only what its children contain.
             root_entry["content_count"] = content_counts.get(root_folder.id, 0)
         return Response(root_entry)
 
@@ -9934,10 +9894,7 @@ class FrameworkFilter(GenericFilterSet):
 
 
 class DraftNotEmptyError(Exception):
-    """A staged folder deletion no longer targets an empty leaf.
-
-    Carries the per-folder reasons so the caller can say which ones and why.
-    """
+    """A staged folder deletion no longer targets an empty leaf."""
 
     def __init__(self, conflicts):
         self.conflicts = conflicts

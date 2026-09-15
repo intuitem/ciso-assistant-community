@@ -2090,11 +2090,8 @@ def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]
     return {"labels": labels, "values": values}
 
 
-# What a domain "holds" for display purposes. Deliberately a short, meaningful list
-# rather than every model with a folder FK: there are 151 of those, sweeping them all
-# costs ~150 GROUP BY queries, and "1824 perimeters" is a worse headline than the few
-# things a user actually thinks of as content. Emptiness for deletion is checked
-# exhaustively server-side instead — see FolderViewSet.reorganize.
+# Curated, not every folder-FK model: there are 151 of those, ~150 queries. Deletion
+# emptiness is checked exhaustively instead (FolderViewSet._folder_emptiness_blocker).
 FOLDER_CONTENT_MODELS = (
     "core.Perimeter",
     "core.Asset",
@@ -2110,11 +2107,7 @@ FOLDER_CONTENT_MODELS = (
 
 
 def folder_direct_content_counts() -> dict:
-    """{folder_id: number of curated content objects directly in it}.
-
-    Direct only: the board rolls subtree totals up itself, in the same bottom-up pass
-    it already runs to size each branch.
-    """
+    """{folder_id: curated content objects directly in it}. Callers roll subtrees up."""
     from django.apps import apps
     from django.db.models import Count
 
@@ -2133,13 +2126,8 @@ def folder_direct_content_counts() -> dict:
 def build_folder_indexes(*, include_perimeters: bool):
     """Fetch the whole folder tree (and optionally its perimeters) in two queries.
 
-    `get_folder_content` used to walk the tree with one query per node, and org_tree
-    resolved ancestors with one query per folder per level — together the dominant cost
-    of the endpoint. Both now read these indexes instead.
-
-    Folders are stored unordered on purpose: `Folder._meta.ordering` is empty, so the
-    per-parent queries this replaces had no defined order either, and imposing one here
-    would silently reshuffle every existing consumer of the tree.
+    Left unordered deliberately: `Folder._meta.ordering` is empty, so the per-parent
+    queries this replaces had no defined order either.
     """
     folders = list(
         Folder.objects.values("id", "name", "parent_folder_id", "content_type")
@@ -2170,7 +2158,7 @@ def get_folder_content(
     writable_ids: Optional[set[UUID]] = None,
     content_counts: Optional[dict] = None,
 ):
-    """Build the nested payload for one folder from prebuilt indexes — no queries."""
+    """Nested payload for one folder, from prebuilt indexes. No queries."""
     content = []
     for f in children_by_parent.get(folder_id, ()):
         if f["id"] not in viewable_objects and f["id"] not in needed_folders:

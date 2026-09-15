@@ -103,13 +103,9 @@ class TestFoldersAuthenticated:
         )
 
     def test_create_folders(self, test):
-        """test to create folders with the API with authentication
-
-        Community domains are created at the top level, so creating one is a
-        Global-scoped action: a role whose permissions are confined to a single domain
-        cannot add a sibling of that domain. This is asserted directly rather than
-        through `EndpointTestsQueries`, whose matrix treats the "Global" scope as
-        reachable by everyone — true for reads, not for writes at the root.
+        """Creating a domain is a Global-scoped action, so a domain-scoped role cannot
+        add a sibling. Asserted directly: the EndpointTestsQueries matrix treats the
+        "Global" scope as reachable by everyone, which holds for reads, not writes.
         """
         root = Folder.get_root_folder()
         response = test.client.post(
@@ -123,9 +119,8 @@ class TestFoldersAuthenticated:
 
         if may_create:
             assert response.status_code == status.HTTP_201_CREATED
-            # Asserted against the stored row rather than the response body: a create
-            # is rendered by the *write* serializer, whose shape differs from the read
-            # one (bare UUID for parent_folder, raw code for content_type).
+            # Against the stored row: a create is rendered by the *write* serializer,
+            # whose shape differs from the read one.
             created = Folder.objects.get(name=FOLDER_NAME)
             assert created.parent_folder_id == root.id
             assert created.content_type == Folder.ContentType.DOMAIN
@@ -134,12 +129,8 @@ class TestFoldersAuthenticated:
             assert not Folder.objects.filter(name=FOLDER_NAME).exists()
 
     def test_create_subfolder_requires_pro(self, test):
-        """Nesting a domain under another is refused by the community serializer.
-
-        Permission is still resolved first, so this only asserts the gate for callers
-        who hold add permission on the destination; everyone else is denied earlier and
-        for the usual reason.
-        """
+        """Refused by the community serializer. Permission resolves first, so this only
+        asserts the gate for callers who could otherwise have succeeded."""
         response = test.client.post(
             "/api/folders/",
             {

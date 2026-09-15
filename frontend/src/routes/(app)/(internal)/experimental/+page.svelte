@@ -2,6 +2,7 @@
 	import Article from '$lib/components/DataViz/Article.svelte';
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
+	import { experimentalExtras } from '$lib/utils/experimental-extras';
 
 	$pageTitle = 'Experimental';
 </script>
@@ -38,12 +39,6 @@
 		tags={['assets', 'graph', 'canvas', 'prototype']}
 	/>
 	<Article
-		title="Domain Whiteboard"
-		desc="Restructure your domain hierarchy on a canvas. Drag a domain onto another to nest it, create sub-domains in place, rename inline. Every move is confirmed with its access impact spelled out."
-		link="/experimental/domain-board"
-		tags={['domains', 'iam', 'graph', 'canvas', 'prototype']}
-	/>
-	<Article
 		title="Analytics Export"
 		desc="Export all analytics dashboard data as a multi-sheet Excel file (Summary, Risk Levels, Compliance, Controls, Incidents) — ready to use in Power BI or any reporting tool."
 		link="/experimental/analytics-export"
@@ -51,7 +46,7 @@
 	/>
 	<Article
 		title="Notification centre"
-		desc="In-app inbox replacing the email-only notifications. Two states (unread / read), one row per condition rather than one per nightly sweep, and a sweep simulator that shows read suppressing re-firing. Mock data, no backend."
+		desc="In-app inbox replacing the email-only notifications. Two states (unread / read), one row per object rather than one per nightly sweep, and a sweep simulator showing read suppressing re-firing and dedupe keys re-arming. Mock data, no backend."
 		link="/experimental/notifications"
 		tags={['notifications', 'inbox', 'prototype']}
 	/>
@@ -61,6 +56,9 @@
 		link="/experimental/mini-graph"
 		tags={['graph', 'applied-controls', 'risk-scenarios', 'prototype']}
 	/>
+	{#each experimentalExtras as extra (extra.link)}
+		<Article title={extra.title} desc={extra.desc} link={extra.link} tags={extra.tags} />
+	{/each}
 	<!-- <Article -->
 	<!-- 	title="Multi-file evidence (UX prototype)" -->
 	<!-- 	desc="Imagine an evidence whose revisions hold multiple files at once. History timeline with file-level diff (added / removed / replaced / unchanged) and arbitrary revision compare. Static fake data, no backend." -->

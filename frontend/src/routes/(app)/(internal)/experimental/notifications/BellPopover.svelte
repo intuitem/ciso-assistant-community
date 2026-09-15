@@ -13,11 +13,7 @@
 	const unread = $derived(items.filter((i) => !i.isRead));
 	const newest = $derived(
 		[...unread]
-			.sort(
-				(a, b) =>
-					new Date(b.lastSeenAt ?? b.createdAt).getTime() -
-					new Date(a.lastSeenAt ?? a.createdAt).getTime()
-			)
+			.sort((a, b) => new Date(b.lastSeenAt).getTime() - new Date(a.lastSeenAt).getTime())
 			.slice(0, 5)
 	);
 </script>
@@ -83,8 +79,8 @@
 										>{n.title}</span
 									>
 									<span class="block text-[11px] text-surface-500 mt-0.5">
-										{relTime(n.lastSeenAt ?? n.createdAt)}
-										{#if n.seenCount && n.seenCount > 1}
+										{relTime(n.lastSeenAt)}
+										{#if n.seenCount > 1}
 											· reminded {n.seenCount}×
 										{/if}
 									</span>

@@ -3,12 +3,13 @@ import { browser } from '$app/environment';
 export interface OrgTreeNode {
 	name: string;
 	uuid: string;
-	// org_tree emits the RAW content_type code ('GL' | 'DO' | 'EN' | 'PE'), unlike
-	// FolderReadSerializer which runs it through get_content_type_display() and so
-	// returns a translated label. Never swap this source for the list endpoint.
+	// RAW code ('GL'|'DO'|'EN'|'PE'). FolderReadSerializer returns a TRANSLATED label
+	// instead, so never source this from the list endpoint.
 	content_type?: string;
 	viewable?: boolean;
 	writable?: boolean;
+	/** curated count of objects held directly by this folder (with_counts=true) */
+	content_count?: number;
 	children?: OrgTreeNode[];
 }
 
@@ -20,6 +21,10 @@ export interface DomainNode {
 	depth: number;
 	childCount: number;
 	descendantCount: number;
+	/** objects held directly by this domain */
+	contentCount: number;
+	/** objects held by this domain and everything under it */
+	subtreeContentCount: number;
 	/** user holds change_folder here, so this node may be moved */
 	movable: boolean;
 	/** user holds add_folder here, so this node may become someone's parent */
@@ -44,13 +49,8 @@ function collectWritable(node: OrgTreeNode | null, into: Set<string>): Set<strin
 	return into;
 }
 
-/**
- * Flatten an org_tree response into a lookup keyed by folder id.
- *
- * `movableTree` and `receivingTree` are the same tree fetched with
- * `write_perm=change_folder` and `write_perm=add_folder`; a move needs the first
- * on the moved folder and the second on its new parent.
- */
+/** Flatten org_tree into a lookup by id. The two trees are the same fetch with
+ * `write_perm=change_folder` and `add_folder`: a move needs both. */
 export function flattenTree(
 	movableTree: OrgTreeNode | null,
 	receivingTree: OrgTreeNode | null
@@ -70,6 +70,8 @@ export function flattenTree(
 			depth,
 			childCount: children.length,
 			descendantCount: 0,
+			contentCount: node.content_count ?? 0,
+			subtreeContentCount: 0,
 			movable: movableIds.has(node.uuid),
 			canReceive: receivingIds.has(node.uuid)
 		});
@@ -82,14 +84,18 @@ export function flattenTree(
 
 	if (movableTree) visit(movableTree, null, 0);
 
-	// Second pass: subtree sizes, computed bottom-up from the deepest nodes.
+	// Bottom-up: subtree sizes and content totals. The server sends direct counts only.
 	const sorted = [...byId.values()].sort((a, b) => b.depth - a.depth);
 	for (const node of sorted) {
 		let total = 0;
+		let content = node.contentCount;
 		for (const childId of childrenOf.get(node.id) ?? []) {
-			total += 1 + (byId.get(childId)?.descendantCount ?? 0);
+			const child = byId.get(childId);
+			total += 1 + (child?.descendantCount ?? 0);
+			content += child?.subtreeContentCount ?? 0;
 		}
 		node.descendantCount = total;
+		node.subtreeContentCount = content;
 	}
 
 	return { byId, childrenOf, rootId: movableTree?.uuid ?? null };
@@ -101,18 +107,13 @@ export const NODE_HEIGHT = 58;
 /** Horizontal: depth runs left-to-right. Vertical: depth runs top-down (org chart). */
 export type Orientation = 'horizontal' | 'vertical';
 
-// Gaps differ per orientation because the node box is wide and short: siblings need
-// less room when stacked than when placed side by side, and levels need more.
+// The node box is wide and short, so stacked siblings need less room than side-by-side.
 const GAPS = {
 	horizontal: { depth: 90, sibling: 24 },
 	vertical: { depth: 70, sibling: 28 }
 } as const;
 
-/**
- * The two axes of a layout. `depth` grows with distance from the root, `sibling` with
- * position among peers; the orientation decides which maps to x and which to y, so the
- * traversal below is written once and the geometry that follows it derives from here.
- */
+/** Orientation decides which axis is x and which is y, so the traversal is written once. */
 function axes(orientation: Orientation) {
 	const gap = GAPS[orientation];
 	const horizontal = orientation === 'horizontal';
@@ -132,15 +133,10 @@ function sortedChildren(tree: FlatTree, id: string): string[] {
 }
 
 /**
- * Tidy tree layout: distance from the root drives one axis, an in-order walk of the
- * leaves drives the other, and every parent centres on the span of its children.
- * Subtrees under a collapsed id are left out entirely, so collapsing genuinely shrinks
- * the canvas rather than just hiding ink.
+ * Tidy tree layout; collapsed subtrees are omitted, not hidden.
  *
- * Positions are derived, never stored. A domain has exactly one parent
- * (`parent_folder` is an FK, not an M2M), so the arrangement is fully determined
- * by the hierarchy — there is nothing for a user to arrange by hand, and a drag
- * is therefore free to mean "re-parent" rather than "reposition".
+ * Positions are derived, never stored — `parent_folder` is an FK, so the hierarchy
+ * fully determines the arrangement, which frees a drag to mean "re-parent".
  */
 export function layoutTree(
 	tree: FlatTree,
@@ -180,14 +176,10 @@ export interface Rect {
 }
 
 /**
- * The region that reads as "nest under this domain": the node's own box plus the gap
- * towards its children — to the right when horizontal, below when vertical.
+ * "Nest under this domain": the node plus the gap towards its children.
  *
- * Requiring an exact overlap with the node made re-parenting fiddly to discover and
- * fiddly to hit. Because the layout is a strict grid, these bands tile the canvas —
- * one axis is exactly the sibling pitch, the other stops where the next level begins —
- * so widening the target costs no ambiguity: every point still has at most one owner,
- * and the band is where a child of that domain actually lands.
+ * Wider than the node on purpose. The bands tile exactly — one axis is the sibling
+ * pitch, the other stops at the next level — so every point still has one owner.
  */
 export function dropZone(position: XY, orientation: Orientation): Rect {
 	const { depthPitch, siblingGap } = axes(orientation);
@@ -243,13 +235,30 @@ export function subtreeIds(tree: FlatTree, id: string): Set<string> {
 	return out;
 }
 
+const INSTRUCTIONS_KEY = 'domainBoard:instructionsOpen';
+
+/** Starts closed; the choice is remembered so learners aren't re-collapsing it. */
+export function loadInstructionsOpen(): boolean {
+	if (!browser) return false;
+	try {
+		return localStorage.getItem(INSTRUCTIONS_KEY) === 'true';
+	} catch {
+		return false;
+	}
+}
+
+export function saveInstructionsOpen(open: boolean): void {
+	if (!browser) return;
+	try {
+		localStorage.setItem(INSTRUCTIONS_KEY, String(open));
+	} catch {
+		// ignore quota errors
+	}
+}
+
 const ORIENTATION_KEY = 'domainBoard:orientation';
 
-/**
- * Orientation is the one thing worth remembering between visits. Unlike a saved
- * viewport — which strands the user the moment the hierarchy or fold state changes —
- * this is a pure preference, and the board always re-fits after applying it.
- */
+/** Safe to persist, unlike a viewport: the board always re-fits after applying it. */
 export function loadOrientation(): Orientation {
 	if (!browser) return 'horizontal';
 	try {
@@ -266,4 +275,115 @@ export function saveOrientation(orientation: Orientation): void {
 	} catch {
 		// ignore quota errors
 	}
+}
+
+/** folder id -> proposed parent id, for moves staged but not yet applied. */
+export type Draft = Record<string, string>;
+/** folder id -> the parent it had when the move was staged (optimistic concurrency). */
+export type DraftBaseline = Record<string, string | null>;
+
+export interface StoredDraft {
+	moves: Draft;
+	baseline: DraftBaseline;
+	deletes: string[];
+}
+
+const DRAFT_KEY = 'domainBoard:draft';
+
+/** A draft is a list of moves, never a tree snapshot: a snapshot would clobber or
+ * conflict with concurrent changes to branches the draft never touched. */
+export function loadDraft(): StoredDraft {
+	if (!browser) return { moves: {}, baseline: {}, deletes: [] };
+	try {
+		const raw = localStorage.getItem(DRAFT_KEY);
+		if (!raw) return { moves: {}, baseline: {}, deletes: [] };
+		const parsed = JSON.parse(raw);
+		return {
+			moves: parsed?.moves && typeof parsed.moves === 'object' ? parsed.moves : {},
+			baseline: parsed?.baseline && typeof parsed.baseline === 'object' ? parsed.baseline : {},
+			deletes: Array.isArray(parsed?.deletes) ? parsed.deletes : []
+		};
+	} catch {
+		return { moves: {}, baseline: {}, deletes: [] };
+	}
+}
+
+export function saveDraft(draft: StoredDraft): void {
+	if (!browser) return;
+	try {
+		localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+	} catch {
+		// ignore quota errors
+	}
+}
+
+export function clearDraft(): void {
+	if (!browser) return;
+	try {
+		localStorage.removeItem(DRAFT_KEY);
+	} catch {
+		// ignore
+	}
+}
+
+/** Overlay staged moves so a proposal renders through the same path as reality.
+ * Moves whose folder or target has vanished are dropped; apply reports them. */
+export function applyDraftToTree(tree: FlatTree, moves: Draft): FlatTree {
+	if (Object.keys(moves).length === 0) return tree;
+
+	const byId = new Map<string, DomainNode>();
+	for (const [id, node] of tree.byId) byId.set(id, { ...node });
+
+	for (const [id, parentId] of Object.entries(moves)) {
+		const node = byId.get(id);
+		if (!node || !byId.has(parentId) || node.parentId === null) continue;
+		node.parentId = parentId;
+	}
+
+	const childrenOf = new Map<string, string[]>();
+	for (const id of byId.keys()) childrenOf.set(id, []);
+	for (const node of byId.values()) {
+		if (node.parentId !== null) childrenOf.get(node.parentId)?.push(node.id);
+	}
+
+	const drafted: FlatTree = { byId, childrenOf, rootId: tree.rootId };
+
+	// The overlay invalidates depth and subtree sizes, and both are rendered.
+	if (drafted.rootId) {
+		const stack: Array<[string, number]> = [[drafted.rootId, 0]];
+		while (stack.length) {
+			const [id, depth] = stack.pop()!;
+			const node = byId.get(id);
+			if (!node) continue;
+			node.depth = depth;
+			node.childCount = childrenOf.get(id)?.length ?? 0;
+			for (const child of childrenOf.get(id) ?? []) stack.push([child, depth + 1]);
+		}
+	}
+	for (const node of [...byId.values()].sort((a, b) => b.depth - a.depth)) {
+		let total = 0;
+		let content = node.contentCount;
+		for (const childId of childrenOf.get(node.id) ?? []) {
+			const child = byId.get(childId);
+			total += 1 + (child?.descendantCount ?? 0);
+			content += child?.subtreeContentCount ?? 0;
+		}
+		node.descendantCount = total;
+		node.subtreeContentCount = content;
+	}
+
+	return drafted;
+}
+
+/** folder ids staged for deletion. */
+export type DeleteDraft = string[];
+
+/** Read from the DRAFTED tree on purpose: staging children out makes a domain
+ * deletable. Only decides the affordance; the server re-checks at apply time. */
+export function isDeletableLeaf(tree: FlatTree, id: string): boolean {
+	const node = tree.byId.get(id);
+	if (!node || node.parentId === null) return false;
+	if (node.contentType !== 'DO' || !node.movable) return false;
+	if ((tree.childrenOf.get(id) ?? []).length > 0) return false;
+	return node.contentCount === 0;
 }

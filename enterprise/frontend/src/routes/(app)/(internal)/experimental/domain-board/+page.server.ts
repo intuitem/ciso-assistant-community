@@ -7,8 +7,7 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
 import type { OrgTreeNode } from './tree';
 
-// Enclaves are third-party visitor spaces, not part of the organisational structure,
-// so the board never shows them.
+// Enclaves are third-party visitor spaces, not org structure.
 async function fetchOrgTree(
 	fetch: typeof globalThis.fetch,
 	writePerm: string
@@ -16,6 +15,8 @@ async function fetchOrgTree(
 	const params = new URLSearchParams({
 		include_perimeters: 'false',
 		include_enclaves: 'false',
+		// Decides whether a domain is an empty leaf, the only thing deletable here.
+		with_counts: 'true',
 		write_perm: writePerm
 	});
 	try {
@@ -27,10 +28,8 @@ async function fetchOrgTree(
 }
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	// Two passes over org_tree. A move is allowed only when the user holds
-	// change_folder on the folder being moved AND add_folder on its new parent —
-	// that second half is enforced by FolderWriteSerializer.validate_parent_folder,
-	// so the board mirrors the same rule instead of inventing its own.
+	// A move needs change_folder on the folder and add_folder on its new parent; the
+	// serializer enforces the second half, so the board mirrors the same rule.
 	const [movableTree, receivingTree] = await Promise.all([
 		fetchOrgTree(fetch, 'change_folder'),
 		fetchOrgTree(fetch, 'add_folder')

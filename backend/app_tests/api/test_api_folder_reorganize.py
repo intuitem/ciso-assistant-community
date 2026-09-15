@@ -1,9 +1,4 @@
-"""Tests for the transactional folder reorganisation endpoint.
-
-The endpoint exists so that a reorganisation drafted client-side lands all at once:
-the folder tree is what the IAM resolves role assignments against, so a partial apply
-would leave access in a state nobody designed.
-"""
+"""Tests for the transactional folder reorganisation endpoint."""
 
 import pytest
 from rest_framework import status
@@ -14,8 +9,8 @@ from iam.models import Folder
 
 ENDPOINT = "/api/folders/reorganize/"
 
-# `authenticated_client` is the suite's admin fixture (knox token, BI-UG-ADM): these
-# tests exercise the endpoint, not the permission layer, which has its own tests.
+# `authenticated_client` is the suite's admin fixture: these exercise the endpoint,
+# not the permission layer, which has its own tests.
 
 
 def _tree():
@@ -30,12 +25,10 @@ def _tree():
 
 @pytest.fixture
 def nesting_allowed(monkeypatch):
-    """Run with a serializer that permits nesting, as the PRO edition's does.
+    """A serializer that permits nesting, as the PRO edition's does.
 
-    The endpoint is edition-independent — it reuses whichever FolderWriteSerializer
-    MODULE_PATHS resolves — so leaving these cases to the community policy would mean
-    never testing the endpoint's own logic: the two-phase apply, its atomicity, and
-    the inverse it returns. Cycle protection is untouched; that lives in Folder.save().
+    The endpoint is edition-independent, so without this its own logic (two-phase
+    apply, atomicity) would never be tested. Cycle protection lives in Folder.save().
     """
 
     def permissive(self, value):
@@ -47,7 +40,7 @@ def nesting_allowed(monkeypatch):
 @pytest.mark.django_db
 class TestFolderReorganize:
     def test_cannot_be_used_to_bypass_the_pro_gate(self, authenticated_client):
-        """Nesting is refused here exactly as it is on a single PATCH."""
+        """Nesting is refused here exactly as on a single PATCH."""
         _, a, a1, b, _ = _tree()
         response = authenticated_client.post(
             ENDPOINT,
@@ -139,11 +132,8 @@ class TestFolderReorganize:
     def test_swapping_subtrees_survives_the_transient_cycle(
         self, authenticated_client, nesting_allowed
     ):
-        """root->a->a1 becomes root->a1->a.
-
-        Whichever half is applied first is momentarily a cycle, so this only passes
-        because every mover is parked at the root before any is attached.
-        """
+        """root->a->a1 becomes root->a1->a: whichever half applies first is momentarily
+        a cycle, so this only passes because movers are parked at the root first."""
         root, a, a1, _, _ = _tree()
         response = authenticated_client.post(
             ENDPOINT,
@@ -273,11 +263,8 @@ class TestFolderReorganize:
 
 @pytest.mark.django_db
 class TestFolderReorganizeDeletes:
-    """Deleting from the board is restricted to empty leaves.
-
-    That restriction is what makes it safe to draft a deletion and apply it later:
-    a stale staged delete has nothing inside it to destroy.
-    """
+    """Deleting is restricted to empty leaves, which is what makes a staged deletion
+    safe to apply later: a stale one has nothing inside to destroy."""
 
     def test_deletes_an_empty_leaf(self, authenticated_client):
         _, _, a1, _, _ = _tree()

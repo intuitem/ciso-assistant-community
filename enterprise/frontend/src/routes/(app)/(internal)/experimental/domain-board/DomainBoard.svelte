@@ -28,11 +28,21 @@
 		contains,
 		loadOrientation,
 		saveOrientation,
+		loadInstructionsOpen,
+		saveInstructionsOpen,
+		loadDraft,
+		saveDraft,
+		clearDraft,
+		applyDraftToTree,
+		isDeletableLeaf,
 		NODE_WIDTH,
 		NODE_HEIGHT,
 		type FlatTree,
 		type OrgTreeNode,
-		type Orientation
+		type Orientation,
+		type Draft,
+		type DraftBaseline,
+		type DeleteDraft
 	} from './tree';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import {
@@ -41,6 +51,7 @@
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ApplyConfirmModal from './ApplyConfirmModal.svelte';
 	import { resolvedTheme } from '$lib/utils/theme';
 
 	interface Props {
@@ -56,30 +67,37 @@
 
 	const nodeTypes = { domain: DomainNodeComponent };
 
-	const tree = $derived<FlatTree>(flattenTree(movableTree, receivingTree));
+	const liveTree = $derived<FlatTree>(flattenTree(movableTree, receivingTree));
+
+	// Everything downstream reads `tree`, so the overlay gives proposals the same
+	// layout, drop zones and cycle checks as reality — no second code path.
+	const stored = loadDraft();
+	let draft = $state<Draft>(stored.moves);
+	let draftBaseline = $state<DraftBaseline>(stored.baseline);
+	let deleteDraft = $state<DeleteDraft>(stored.deletes ?? []);
+	const tree = $derived<FlatTree>(applyDraftToTree(liveTree, draft));
+	const pendingCount = $derived(Object.keys(draft).length + deleteDraft.length);
+	let applying = $state(false);
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
-	let instructionsOpen = $state(true);
+	let instructionsOpen = $state(loadInstructionsOpen());
 	let busy = $state(false);
 	let orientation = $state<Orientation>(loadOrientation());
 	// Which way a domain's children lie, for prose that has to point somewhere.
 	const childrenLie = $derived(orientation === 'horizontal' ? 'to its right' : 'below it');
 	const sourceEdge = $derived(orientation === 'horizontal' ? 'right' : 'bottom');
 
-	// Highlight state lives outside `nodes` on purpose: rewriting the nodes array
-	// mid-drag would swap the object xyflow is currently dragging.
+	// Outside `nodes`: rewriting that array mid-drag swaps the object xyflow is dragging.
 	const drag = $state<{ draggingId: string | null; targetId: string | null; blocked: string[] }>({
 		draggingId: null,
 		targetId: null,
 		blocked: []
 	});
 
-	// Real instances run to hundreds of domains, which no single canvas can show at a
-	// readable zoom, so everything below the top level starts folded.
+	// Hundreds of domains don't fit at a readable zoom, so below top level starts folded.
 	const collapsed = new SvelteSet<string>();
 	let collapseInitialised = false;
-	// Bumped by every fold/unfold. Watching `collapsed.size` instead would miss a
-	// change that adds and removes in the same tick.
+	// Watching `collapsed.size` would miss an add and remove in the same tick.
 	let collapseVersion = $state(0);
 
 	function collapseBelowTopLevel() {
@@ -98,10 +116,8 @@
 	async function toggleOrientation() {
 		orientation = orientation === 'horizontal' ? 'vertical' : 'horizontal';
 		saveOrientation(orientation);
-		// Flipping the axis turns a tall graph into a wide one, so the view has to be
-		// re-framed. `tick()` only flushes Svelte's own update — xyflow copies the new
-		// positions into its store from an effect of its own, and fitting before that
-		// lands measures the old bounds. Wait a frame past the flush.
+		// `tick()` only flushes Svelte; xyflow copies positions in an effect of its
+		// own, so fitting before that lands measures the old bounds.
 		await tick();
 		requestAnimationFrame(() =>
 			requestAnimationFrame(() => flowInstance?.fitView({ duration: 300, padding: 0.1 }))
@@ -133,8 +149,13 @@
 					childCount: node.childCount,
 					descendantCount: node.descendantCount,
 					collapsed: collapsed.has(node.id),
+					contentCount: node.contentCount,
+					subtreeContentCount: node.subtreeContentCount,
+					deletable: isDeletableLeaf(tree, node.id),
+					stagedForDelete: deleteDraft.includes(node.id),
 					movable: node.movable,
 					isRoot: node.parentId === null,
+					staged: draft[node.id] !== undefined,
 					orientation
 				},
 				draggable: node.parentId !== null && node.movable && node.contentType === 'DO',
@@ -144,30 +165,37 @@
 
 		edges = [...tree.byId.values()]
 			.filter((node) => node.parentId !== null && visible.has(node.id))
-			.map((node) => ({
-				id: `e-${node.parentId}-${node.id}`,
-				source: node.parentId!,
-				target: node.id,
-				type: 'smoothstep',
-				deletable: false,
-				selectable: false,
-				markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' }
-			}));
+			.map((node) => {
+				const staged = draft[node.id] !== undefined;
+				return {
+					id: `e-${node.parentId}-${node.id}`,
+					source: node.parentId!,
+					target: node.id,
+					type: 'smoothstep',
+					deletable: false,
+					selectable: false,
+					animated: staged,
+					style: staged ? 'stroke: var(--color-warning-500); stroke-width: 2.5;' : undefined,
+					markerEnd: {
+						type: MarkerType.ArrowClosed,
+						color: staged ? 'var(--color-warning-500)' : 'var(--color-surface-600)'
+					}
+				};
+			});
 	}
 
-	// Build synchronously, before mount: the `fitView` prop frames the graph as xyflow
-	// initialises, so populating `nodes` from an effect instead would hand it an empty
-	// canvas to fit and leave the tree parked off-screen.
+	// Before mount: `fitView` frames the graph at init, so filling `nodes` from an
+	// effect would hand it an empty canvas and park the tree off-screen.
 	collapseBelowTopLevel();
 	collapseInitialised = true;
 	buildGraph();
 
-	// Rebuild whenever the server data changes (after invalidateAll following a move,
-	// a rename or a sub-domain creation) or whenever a branch is folded.
 	$effect(() => {
 		void tree;
 		void collapseVersion;
 		void orientation;
+		void pendingCount;
+		void deleteDraft;
 		untrack(() => {
 			if (!collapseInitialised) {
 				collapseBelowTopLevel();
@@ -183,8 +211,8 @@
 	let flowInstance: ReturnType<typeof useSvelteFlow> | null = null;
 
 	function handleFlowInit() {
-		// `useSvelteFlow()` has to run inside `oninit`: this component is the parent
-		// of <SvelteFlow>, so the xyflow context only exists once the flow mounts.
+		// Must run in `oninit`: this component is the parent of <SvelteFlow>, so the
+		// xyflow context only exists once the flow mounts.
 		flowInstance = useSvelteFlow();
 	}
 
@@ -237,6 +265,8 @@
 	 * resolves role assignments against, so a move silently changes who can reach the
 	 * domain's contents. Always spell that out before committing.
 	 */
+	/** Stage a move instead of writing it; the access impact is reviewed once, for the
+	 * whole shape, in `applyDraft`. */
 	function requestReparent(childId: string, newParentId: string) {
 		const reason = rejectionReason(childId, newParentId);
 		if (reason) {
@@ -245,50 +275,170 @@
 			return;
 		}
 
-		const child = tree.byId.get(childId)!;
-		const newParent = tree.byId.get(newParentId)!;
-		const oldParent = child.parentId ? tree.byId.get(child.parentId) : null;
-		const carried =
-			child.descendantCount > 0
-				? ` and its ${child.descendantCount} nested domain${child.descendantCount > 1 ? 's' : ''}`
-				: '';
+		// The LIVE parent, captured once: re-staging must not overwrite it with a
+		// position that only existed in the draft.
+		if (draftBaseline[childId] === undefined) {
+			draftBaseline = {
+				...draftBaseline,
+				[childId]: liveTree.byId.get(childId)?.parentId ?? null
+			};
+		}
 
-		// Plain text only: ModalSettings.body is documented as accepting HTML, but
-		// Modal.svelte interpolates it as text, so any markup would show as tags.
-		const oldParentName = oldParent?.name ?? 'Global';
-		const modal: ModalSettings = {
+		const next = { ...draft, [childId]: newParentId };
+		// Moving back to the start is not a change.
+		if (draftBaseline[childId] === newParentId) {
+			delete next[childId];
+			const baseline = { ...draftBaseline };
+			delete baseline[childId];
+			draftBaseline = baseline;
+		}
+		draft = next;
+		persistDraft();
+
+		// Or the domain appears to vanish into a folded branch.
+		collapsed.delete(newParentId);
+		collapseVersion += 1;
+	}
+
+	function persistDraft() {
+		saveDraft({ moves: draft, baseline: draftBaseline, deletes: deleteDraft });
+	}
+
+	/** Only offered for an empty leaf of the DRAFTED tree, so emptying a domain by
+	 * dragging its children out unlocks removing it in the same apply. */
+	function stageDelete(folderId: string) {
+		const node = tree.byId.get(folderId);
+		if (!node) return;
+		if (!isDeletableLeaf(tree, folderId)) {
+			toastStore.trigger({
+				message: `"${node.name}" still holds something. Only an empty domain with no sub-domains can be deleted here.`,
+				background: 'preset-tonal-warning'
+			});
+			return;
+		}
+		// The server refuses move-and-delete of the same folder; don't stage it.
+		if (draft[folderId] !== undefined) {
+			const next = { ...draft };
+			delete next[folderId];
+			draft = next;
+			const baseline = { ...draftBaseline };
+			delete baseline[folderId];
+			draftBaseline = baseline;
+		}
+		deleteDraft = [...deleteDraft, folderId];
+		persistDraft();
+	}
+
+	function unstageDelete(folderId: string) {
+		deleteDraft = deleteDraft.filter((id) => id !== folderId);
+		persistDraft();
+	}
+
+	function discardDraft() {
+		modalStore.trigger({
 			type: 'confirm',
-			title: 'Move domain',
-			body:
-				`Move "${child.name}"${carried} from "${oldParentName}" to "${newParent.name}". ` +
-				`This changes access, not just the drawing: anyone holding a role on "${newParent.name}" ` +
-				`will gain that access over "${child.name}" and everything inside it, and access ` +
-				`inherited from "${oldParentName}" will be lost.`,
-			buttonTextConfirm: 'Move domain',
-			response: async (confirmed: boolean) => {
-				if (!confirmed) {
-					buildGraph();
-					return;
-				}
-				busy = true;
-				const ok = await patchParentFolder(childId, newParentId);
-				busy = false;
-				if (ok) {
-					// Unfold the destination, or the domain would appear to vanish into a
-					// collapsed branch.
-					collapsed.delete(newParentId);
-					collapseVersion += 1;
-					toastStore.trigger({
-						message: `"${child.name}" moved under "${newParent.name}"`,
-						background: 'preset-tonal-success'
-					});
-					await invalidateAll();
-				} else {
-					buildGraph();
+			title: 'Discard proposal',
+			body: `Discard all ${pendingCount} staged move${pendingCount > 1 ? 's' : ''}? The domains go back to where they actually are.`,
+			buttonTextConfirm: 'Discard',
+			response: (confirmed: boolean) => {
+				if (!confirmed) return;
+				draft = {};
+				draftBaseline = {};
+				deleteDraft = [];
+				clearDraft();
+			}
+		});
+	}
+
+	function draftSummary(): string[] {
+		const deletions = deleteDraft.map((id) => `delete  ${liveTree.byId.get(id)?.name ?? id}`);
+		return [...moveSummary(), ...deletions];
+	}
+
+	function moveSummary(): string[] {
+		return Object.entries(draft).map(([childId, parentId]) => {
+			const child = liveTree.byId.get(childId);
+			const target = liveTree.byId.get(parentId);
+			const from = child?.parentId ? liveTree.byId.get(child.parentId)?.name : 'Global';
+			const carried = child?.descendantCount ? ` (+${child.descendantCount} nested)` : '';
+			return `${child?.name ?? childId}${carried}:  ${from} → ${target?.name ?? parentId}`;
+		});
+	}
+
+	async function postReorganize(moves: unknown[], deletes: string[]) {
+		const res = await fetch('/experimental/domain-board/reorganize', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ moves, deletes: deletes.map((folder) => ({ folder })) })
+		});
+		return { status: res.status, body: await res.json().catch(() => ({})) };
+	}
+
+	async function runApply(moves: unknown[], deletes: string[]) {
+		applying = true;
+		busy = true;
+		const { status, body } = await postReorganize(moves, deletes);
+		applying = false;
+		busy = false;
+
+		if (status === 409) {
+			// Staleness, or a staged delete no longer targeting an empty leaf. Nothing
+			// was applied either way, so the draft is still good.
+			const detail = (body.conflicts ?? [])
+				.map((c: any) => `${c.name ?? c.folder} (${c.reason})`)
+				.join(', ');
+			toastStore.trigger({
+				message: `Nothing applied — the tree changed since you drafted: ${detail}. Reload to see it as it stands.`,
+				background: 'preset-tonal-warning',
+				timeout: 14000
+			});
+			return;
+		}
+
+		if (status !== 200) {
+			const detail = body?.parent_folder ?? body?.moves ?? body?.detail ?? 'Apply failed';
+			toastStore.trigger({
+				message: typeof detail === 'string' ? detail : JSON.stringify(detail),
+				background: 'preset-tonal-error'
+			});
+			return;
+		}
+
+		draft = {};
+		draftBaseline = {};
+		deleteDraft = [];
+		clearDraft();
+		const parts = [];
+		if (body.applied) parts.push(`${body.applied} move${body.applied === 1 ? '' : 's'}`);
+		if (body.deleted) parts.push(`${body.deleted} deletion${body.deleted === 1 ? '' : 's'}`);
+		toastStore.trigger({
+			message: `Applied ${parts.join(' and ') || 'nothing'}.`,
+			background: 'preset-tonal-success'
+		});
+		await invalidateAll();
+	}
+
+	/** The one irreversible step, so it asks for a typed confirmation. No undo: an
+	 * inverse goes stale as soon as anyone else touches the tree. */
+	function applyDraft() {
+		const moves = Object.entries(draft).map(([folder, parent_folder]) => ({
+			folder,
+			parent_folder,
+			from_parent: draftBaseline[folder] ?? null
+		}));
+
+		const deletes = [...deleteDraft];
+		modalStore.trigger({
+			type: 'component',
+			component: {
+				ref: ApplyConfirmModal,
+				props: {
+					moves: draftSummary(),
+					destructive: deletes.length > 0,
+					onConfirm: () => void runApply(moves, deletes)
 				}
 			}
-		};
-		modalStore.trigger(modal);
+		});
 	}
 
 	function nodeCentre(node: Node) {
@@ -298,8 +448,7 @@
 		};
 	}
 
-	// xyflow hands node-drag handlers ONE object — `{ targetNode, nodes, event }` — not
-	// the (event, node) pair the React API uses. `nodes` holds the dragged selection.
+	// xyflow passes ONE object here, not the (event, node) pair the React API uses.
 	type NodeDragArgs = { targetNode: Node | null; nodes: Node[]; event: MouseEvent | TouchEvent };
 
 	function draggedNode({ targetNode, nodes: dragged }: NodeDragArgs): Node | null {
@@ -317,9 +466,8 @@
 	}
 
 	function candidateUnderCursor(node: Node): string | null {
-		// Match the dragged node's centre against each domain's drop zone — its own box
-		// plus the child column to its right — rather than demanding an exact overlap.
-		// The zones tile the canvas, so at most one can claim the point.
+		// Centre against each drop zone rather than requiring overlap; zones tile, so
+		// at most one claims the point.
 		const centre = nodeCentre(node);
 		for (const other of nodes) {
 			if (other.id === node.id) continue;
@@ -363,8 +511,7 @@
 
 	// Unlike the node-drag handlers, this one really does take (event, state).
 	const handleConnectEnd: OnConnectEnd = (_event, connectionState) => {
-		// xyflow reports `isValid === null` when a connection is released over empty
-		// canvas rather than over a node — that's the "create a child here" gesture.
+		// xyflow reports `isValid === null` for a release over empty canvas.
 		if (!connectionState || connectionState.isValid !== null) return;
 		const parentId = connectionState.fromNode?.id;
 		const parent = parentId ? tree.byId.get(parentId) : null;
@@ -410,11 +557,9 @@
 	}
 
 	function createSubDomain(parentId: string, parentName: string) {
-		// The community FolderForm doesn't render a parent_folder picker, but the form
-		// posts with dataType 'json' — the whole `form.data` object goes over the wire,
-		// rendered or not — so seeding it here is enough to nest the new domain.
+		// The form posts with dataType 'json', so `form.data` goes over the wire whether
+		// or not a parent_folder field is rendered.
 		folderModel.createForm.data.parent_folder = parentId;
-		// Unfold the parent so the new domain is visible once it lands.
 		collapsed.delete(parentId);
 		collapseVersion += 1;
 		const modalComponent: ModalComponent = {
@@ -443,7 +588,9 @@
 		renameDomain,
 		createSubDomain,
 		detachToRoot,
-		toggleCollapse
+		toggleCollapse,
+		stageDelete,
+		unstageDelete
 	});
 </script>
 
@@ -479,7 +626,7 @@
 				<div
 					class="rounded-base border px-3 py-1.5 text-xs font-medium shadow-lg
 					{landing
-						? 'border-success-400 bg-success-100 text-success-800'
+						? 'border-success-400 bg-success-50-950 text-success-700-300'
 						: 'border-surface-300-700 bg-surface-100-900 text-surface-600-400'}"
 				>
 					{#if landing}
@@ -493,10 +640,33 @@
 			</Panel>
 		{/if}
 		<Panel position="top-right">
-			<div class="flex gap-1">
+			<div
+				class="flex items-center gap-1 rounded-base border border-surface-300-700 bg-surface-100-900 p-1 shadow-sm"
+			>
+				{#if pendingCount > 0}
+					<button
+						type="button"
+						class="btn btn-sm preset-filled-warning-500"
+						disabled={applying}
+						onclick={applyDraft}
+					>
+						<i class="fa-solid fa-check mr-1"></i>Apply {pendingCount} change{pendingCount > 1
+							? 's'
+							: ''}
+					</button>
+					<button
+						type="button"
+						class="btn btn-sm preset-tonal-surface"
+						disabled={applying}
+						onclick={discardDraft}
+					>
+						<i class="fa-solid fa-rotate-left mr-1"></i>Discard
+					</button>
+					<div class="mx-0.5 h-5 w-px bg-surface-300-700"></div>
+				{/if}
 				<button
 					type="button"
-					class="btn preset-filled-surface-500 text-sm shadow"
+					class="btn btn-sm preset-tonal-surface"
 					title={orientation === 'horizontal'
 						? 'Switch to a top-down layout'
 						: 'Switch to a left-to-right layout'}
@@ -508,23 +678,15 @@
 							: 'fa-arrows-left-right'} mr-1"
 					></i>{orientation === 'horizontal' ? 'Vertical' : 'Horizontal'}
 				</button>
-				<button
-					type="button"
-					class="btn preset-filled-surface-500 text-sm shadow"
-					onclick={expandAll}
-				>
+				<button type="button" class="btn btn-sm preset-tonal-surface" onclick={expandAll}>
 					<i class="fa-solid fa-angles-down mr-1"></i>Expand all
 				</button>
-				<button
-					type="button"
-					class="btn preset-filled-surface-500 text-sm shadow"
-					onclick={collapseAll}
-				>
+				<button type="button" class="btn btn-sm preset-tonal-surface" onclick={collapseAll}>
 					<i class="fa-solid fa-angles-up mr-1"></i>Collapse
 				</button>
 				<button
 					type="button"
-					class="btn preset-filled-surface-500 text-sm shadow"
+					class="btn btn-sm preset-tonal-surface"
 					onclick={() => flowInstance?.fitView({ duration: 250, padding: 0.1 })}
 				>
 					<i class="fa-solid fa-compress mr-1"></i>Fit
@@ -540,7 +702,10 @@
 					class="flex w-full cursor-pointer items-center justify-between rounded-base px-3 py-2 font-semibold hover:bg-surface-200-800"
 					aria-expanded={instructionsOpen}
 					aria-controls="domain-board-instructions"
-					onclick={() => (instructionsOpen = !instructionsOpen)}
+					onclick={() => {
+						instructionsOpen = !instructionsOpen;
+						saveInstructionsOpen(instructionsOpen);
+					}}
 				>
 					<span><i class="fa-solid fa-info-circle mr-1"></i>Instructions</span>
 					<i class="fa-solid {instructionsOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-[10px]"
@@ -551,6 +716,13 @@
 						<div class="mb-1 text-surface-600-400">
 							Convention: arrow <span class="font-mono">A → B</span> means
 							<em>B is a sub-domain of A</em>.
+						</div>
+						<div
+							class="mb-1.5 rounded border border-warning-200-800 bg-warning-50-950 px-2 py-1 text-warning-700-300"
+						>
+							<i class="fa-solid fa-flask mr-1"></i>Moves are staged, not saved. Rearrange freely,
+							then <span class="font-semibold">Apply</span> to write them in one go. The draft survives
+							a reload.
 						</div>
 						<div class="mt-1 mb-0.5 font-semibold text-surface-700-300">Move a domain</div>
 						<ul class="list-inside list-disc space-y-0.5">
@@ -573,10 +745,12 @@
 								Click the <span class="font-mono">−</span>/<span class="font-mono">+</span> count to fold
 								or unfold a branch
 							</li>
-							<li>Double-click a name to rename it</li>
+							<li>Double-click a name to rename it (renames save immediately)</li>
 							<li>Layout follows the hierarchy — a drag that isn't a move snaps back</li>
 						</ul>
-						<div class="mt-1.5 rounded bg-warning-100 px-2 py-1 text-warning-800">
+						<div
+							class="mt-1.5 rounded border border-warning-200-800 bg-warning-50-950 px-2 py-1 text-warning-700-300"
+						>
 							<i class="fa-solid fa-triangle-exclamation mr-1"></i>Moving a domain changes who can
 							see its contents — role assignments follow the tree.
 						</div>
@@ -593,8 +767,7 @@
 		--xy-edge-stroke: var(--color-surface-500);
 		background-color: var(--color-surface-50);
 	}
-	/* `colorMode` adds `.dark` to `.svelte-flow`, but the explicit background-color
-	   above would otherwise win, so flip it back here. */
+	/* `colorMode` adds `.dark`, but the background-color above would win. */
 	:global(.dark .svelte-flow) {
 		background-color: var(--color-surface-950);
 	}

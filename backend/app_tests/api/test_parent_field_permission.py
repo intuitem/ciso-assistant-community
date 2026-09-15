@@ -173,15 +173,13 @@ class TestParentFieldPermissionValidation:
             target_folder=folder_b,
         )
         if expected_status == status.HTTP_200_OK:
-            # Permission is still resolved first, so every denial above is unchanged.
-            # What used to succeed is now refused: nesting a domain under another is a
-            # PRO capability, and the community serializer rejects the move.
+            # Permission resolves first, so the denials above are unchanged; what used
+            # to succeed is now refused as a PRO capability.
             assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert response.json()["parent_folder"] == ["subDomainsRequirePro"]
         else:
             assert response.status_code == expected_status
 
-        # Whichever way it was refused, the folder must not have moved.
         subfolder.refresh_from_db()
         assert subfolder.parent_folder_id == test.folder.id
 

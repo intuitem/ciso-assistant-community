@@ -9,8 +9,13 @@
 			childCount: number;
 			descendantCount: number;
 			collapsed: boolean;
+			contentCount: number;
+			subtreeContentCount: number;
+			deletable: boolean;
+			stagedForDelete: boolean;
 			movable: boolean;
 			isRoot: boolean;
+			staged: boolean;
 			orientation: 'horizontal' | 'vertical';
 		};
 	}
@@ -23,10 +28,12 @@
 		createSubDomain: (parentId: string, parentName: string) => void;
 		detachToRoot: (id: string) => void;
 		toggleCollapse: (id: string) => void;
+		stageDelete: (id: string) => void;
+		unstageDelete: (id: string) => void;
 	}>('domainBoard');
 
-	// Drag feedback comes from shared board state rather than node data: rewriting
-	// the `nodes` array mid-drag would replace the object xyflow is dragging.
+	// From shared board state, not node data: rewriting `nodes` mid-drag would replace
+	// the object xyflow is dragging.
 	const dragging = $derived(board?.drag.draggingId === id);
 	const dropCandidate = $derived(board?.drag.targetId === id);
 	const dropBlocked = $derived(
@@ -35,19 +42,22 @@
 
 	const locked = $derived(data.isRoot || !data.movable);
 
-	// Handles sit on the axis the layout runs along, so an edge always leaves a parent
-	// on the side its children are actually drawn.
+	// On the axis the layout runs along, so edges leave a parent on its children's side.
 	const horizontal = $derived(data.orientation === 'horizontal');
 	const targetSide = $derived(horizontal ? Position.Left : Position.Top);
 	const sourceSide = $derived(horizontal ? Position.Right : Position.Bottom);
 
 	const accentClass = $derived(data.isRoot ? 'bg-secondary-400' : 'bg-primary-400');
 	const borderClass = $derived(
-		dropCandidate
-			? 'border-success-500'
-			: data.isRoot
-				? 'border-secondary-300'
-				: 'border-primary-300'
+		data.stagedForDelete
+			? 'border-error-500'
+			: dropCandidate
+				? 'border-success-500'
+				: data.staged
+					? 'border-warning-500'
+					: data.isRoot
+						? 'border-secondary-300'
+						: 'border-primary-300'
 	);
 
 	let hovered = $state(false);
@@ -77,9 +87,7 @@
 		try {
 			ok = (await board?.renameDomain(id, trimmed)) ?? false;
 		} finally {
-			// Clear the disabled state even if renameDomain throws, or the input
-			// would stay locked with no way back.
-			saving = false;
+			saving = false; // even if renameDomain throws, or the input stays locked
 		}
 		if (ok) editing = false;
 	}
@@ -115,12 +123,12 @@
 		<div class="flex items-center gap-1.5">
 			<span
 				class="inline-block rounded border px-1 py-0.5 text-[9px] font-semibold tracking-wide uppercase"
-				class:bg-secondary-100={data.isRoot}
-				class:text-secondary-700={data.isRoot}
-				class:border-secondary-200={data.isRoot}
-				class:bg-primary-100={!data.isRoot}
-				class:text-primary-700={!data.isRoot}
-				class:border-primary-200={!data.isRoot}
+				class:bg-secondary-50-950={data.isRoot}
+				class:text-secondary-700-300={data.isRoot}
+				class:border-secondary-200-800={data.isRoot}
+				class:bg-primary-50-950={!data.isRoot}
+				class:text-primary-700-300={!data.isRoot}
+				class:border-primary-200-800={!data.isRoot}
 			>
 				{data.isRoot ? 'Global' : 'Domain'}
 			</span>
@@ -141,6 +149,29 @@
 					<i class="fa-solid {data.collapsed ? 'fa-plus' : 'fa-minus'} text-[8px]"></i>
 					{data.descendantCount}
 				</button>
+			{/if}
+			{#if data.subtreeContentCount > 0}
+				<span
+					class="font-mono text-[9px] text-surface-500"
+					title={data.contentCount === data.subtreeContentCount
+						? `${data.contentCount} object(s) in this domain`
+						: `${data.contentCount} here, ${data.subtreeContentCount} including sub-domains`}
+				>
+					<i class="fa-solid fa-box-archive text-[8px]"></i>
+					{data.subtreeContentCount}
+				</span>
+			{/if}
+			{#if data.stagedForDelete}
+				<i
+					class="fa-solid fa-trash text-[8px] text-error-600"
+					title="Staged for deletion — not applied yet"
+				></i>
+			{/if}
+			{#if data.staged}
+				<i
+					class="fa-solid fa-arrow-right-arrow-left text-[8px] text-warning-600-400"
+					title="Staged move — not saved yet"
+				></i>
 			{/if}
 			{#if locked && !data.isRoot}
 				<i class="fa-solid fa-lock text-[8px] text-surface-400" title="You can't move this domain"
@@ -194,7 +225,7 @@
 					type="button"
 					aria-label="Move to top level"
 					title="Move to top level (directly under Global)"
-					class="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-surface-200 text-[8px] text-surface-700 shadow hover:bg-surface-300"
+					class="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-surface-200-800 text-[8px] text-surface-700-300 shadow hover:bg-surface-300-700"
 					onclick={(e) => {
 						e.stopPropagation();
 						board?.detachToRoot(id);
@@ -204,6 +235,35 @@
 					<i class="fa-solid fa-arrow-turn-up text-[8px]"></i>
 				</button>
 			{/if}
+			{#if data.stagedForDelete}
+				<button
+					type="button"
+					aria-label="Keep this domain"
+					title="Cancel the staged deletion"
+					class="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-surface-200-800 text-[8px] text-surface-700-300 shadow hover:bg-surface-300-700"
+					onclick={(e) => {
+						e.stopPropagation();
+						board?.unstageDelete(id);
+					}}
+					onmousedown={(e) => e.stopPropagation()}
+				>
+					<i class="fa-solid fa-rotate-left text-[8px]"></i>
+				</button>
+			{:else if data.deletable}
+				<button
+					type="button"
+					aria-label="Delete this domain"
+					title="Stage this empty domain for deletion"
+					class="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-error-500 text-[8px] text-white shadow hover:bg-error-600"
+					onclick={(e) => {
+						e.stopPropagation();
+						board?.stageDelete(id);
+					}}
+					onmousedown={(e) => e.stopPropagation()}
+				>
+					<i class="fa-solid fa-trash text-[8px]"></i>
+				</button>
+			{/if}
 			{#if !data.isRoot}
 				<a
 					href="/folders/{id}"
@@ -211,7 +271,7 @@
 					rel="noopener"
 					aria-label="Open domain in new tab"
 					title="Open domain in new tab"
-					class="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-surface-200 text-[8px] text-surface-700 shadow hover:bg-surface-300"
+					class="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-surface-200-800 text-[8px] text-surface-700-300 shadow hover:bg-surface-300-700"
 					onclick={(e) => e.stopPropagation()}
 					onmousedown={(e) => e.stopPropagation()}
 				>

@@ -1,9 +1,7 @@
 """Tests for /api/folders/org_tree/.
 
-The endpoint had three N+1s — an ancestor walk, a per-node children query, and a
-per-folder permission check — which together cost ~1250 queries on a 150-folder
-instance. They are gone; the query-count test below is what keeps them gone, since
-the shape tests would all still pass with the slow implementation.
+The query-count test is the point: the shape tests would all pass with the three N+1s
+this endpoint used to have.
 """
 
 import pytest
@@ -104,12 +102,8 @@ class TestFolderOrgTree:
     def test_query_count_does_not_grow_with_the_tree(
         self, authenticated_client, django_assert_max_num_queries
     ):
-        """The guard against the N+1s coming back.
-
-        Deliberately built wide *and* deep: under the old implementation this shape
-        cost one query per folder for children, one per folder per level for
-        ancestors, and one per folder for the permission check.
-        """
+        """Wide and deep: the old implementation cost a query per folder for children,
+        per folder per level for ancestors, and per folder for permissions."""
         root = Folder.get_root_folder()
         parent = root
         for depth in range(6):

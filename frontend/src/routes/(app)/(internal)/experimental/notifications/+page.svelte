@@ -1,22 +1,30 @@
 <script lang="ts">
 	import { pageTitle } from '$lib/utils/stores';
 	import BellPopover from './BellPopover.svelte';
+	import NotificationRow from './NotificationRow.svelte';
 	import {
 		CATEGORY_META,
 		EVENT_TYPES,
 		NOTIFICATIONS,
-		SEVERITY_META,
 		categoryOf,
+		conditionKeyOf,
+		isConditionBacked,
 		type Category,
 		type Notif
 	} from './fixtures';
-	import { NOW, relTime, shortDate } from './time';
+	import { NOW, relTime } from './time';
 
 	$pageTitle = 'Notification centre (mock)';
 
 	let items = $state<Notif[]>(NOTIFICATIONS.map((n) => ({ ...n })));
-	/** dedupe keys whose underlying object the user has "fixed" — drives the sweep demo */
-	let fixed = $state<Set<string>>(new Set());
+	/**
+	 * objectIds whose condition is currently false. Seeded from the already-auto-cleared
+	 * rows: a row the sweep cleared means its object got fixed, so a fresh sweep must not
+	 * resurrect it.
+	 */
+	const initialFixed = () =>
+		new Set(NOTIFICATIONS.filter((n) => n.autoClearedAt).map((n) => n.objectId));
+	let fixed = $state<Set<string>>(initialFixed());
 	let selected = $state<Set<string>>(new Set());
 	let view = $state<'unread' | 'all' | 'cleared'>('unread');
 	let category = $state<Category | 'all'>('all');
@@ -26,7 +34,7 @@
 	let toast = $state('');
 
 	const unreadCount = $derived(items.filter((i) => !i.isRead).length);
-	const clearedCount = $derived(items.filter((i) => i.autoCleared).length);
+	const clearedCount = $derived(items.filter((i) => i.autoClearedAt).length);
 
 	/** Event types offered in the dropdown, narrowed by the chosen category. */
 	const typeOptions = $derived(
@@ -45,7 +53,7 @@
 	const visible = $derived(
 		items
 			.filter((i) =>
-				view === 'unread' ? !i.isRead : view === 'cleared' ? Boolean(i.autoCleared) : true
+				view === 'unread' ? !i.isRead : view === 'cleared' ? Boolean(i.autoClearedAt) : true
 			)
 			.filter((i) => (category === 'all' ? true : categoryOf(i) === category))
 			.filter((i) => (eventType === 'all' ? true : i.type === eventType))
@@ -54,31 +62,21 @@
 					? (i.title + i.body).toLowerCase().includes(search.trim().toLowerCase())
 					: true
 			)
-			.sort((a, b) => {
-				const at = new Date(a.lastSeenAt ?? a.createdAt).getTime();
-				const bt = new Date(b.lastSeenAt ?? b.createdAt).getTime();
-				return bt - at;
-			})
+			.sort((a, b) => new Date(b.lastSeenAt).getTime() - new Date(a.lastSeenAt).getTime())
 	);
 
 	const allVisibleSelected = $derived(
 		visible.length > 0 && visible.every((i) => selected.has(i.id))
 	);
 
-	function toggle(id: string) {
-		const next = new Set(selected);
+	function toggleIn(set: Set<string>, id: string) {
+		const next = new Set(set);
 		next.has(id) ? next.delete(id) : next.add(id);
-		selected = next;
-	}
-
-	function toggleAll() {
-		selected = allVisibleSelected ? new Set() : new Set(visible.map((i) => i.id));
+		return next;
 	}
 
 	function setRead(ids: string[], isRead: boolean) {
-		items = items.map((i) =>
-			ids.includes(i.id) ? { ...i, isRead, autoCleared: isRead ? i.autoCleared : false } : i
-		);
+		items = items.map((i) => (ids.includes(i.id) ? { ...i, isRead } : i));
 		selected = new Set();
 	}
 
@@ -94,57 +92,63 @@
 		setTimeout(() => (toast = ''), 2500);
 	}
 
-	function toggleFixed(id: string) {
-		const next = new Set(fixed);
-		next.has(id) ? next.delete(id) : next.add(id);
-		fixed = next;
-	}
-
 	/**
-	 * The whole design in one button: read rows are never reopened while the condition
-	 * holds, a cleared condition marks the row read itself, and a re-broken condition
-	 * produces a fresh unread row.
+	 * The whole write path in one button. Three rules, matching §4 of the shaping doc:
+	 *   still true  → upsert (bump seenCount), never touching isRead
+	 *   gone        → mark read, stamp autoClearedAt, release the dedupe key
+	 *   true again  → the key is free, so a fresh unread row appears next to the old one
 	 */
 	function runSweep() {
+		const now = new Date(NOW).toISOString();
 		const log: string[] = [];
 		const next: Notif[] = [];
+		const activeKeys = new Set(items.map((i) => i.dedupeKey).filter(Boolean) as string[]);
+
 		for (const i of items) {
-			if (!i.conditionBacked) {
+			if (!isConditionBacked(i)) {
 				next.push(i);
 				continue;
 			}
-			const stillTrue = !fixed.has(i.id);
+			const stillTrue = !fixed.has(i.objectId);
+
 			if (!stillTrue) {
-				if (!i.autoCleared) {
-					next.push({ ...i, isRead: true, autoCleared: true });
-					log.push(`✓ "${i.title}" — condition gone, marked read and key re-armed`);
+				if (i.dedupeKey) {
+					next.push({ ...i, isRead: true, autoClearedAt: now, dedupeKey: null });
+					log.push(`✓ ${i.title} — condition gone, marked read, dedupe key released`);
 				} else {
 					next.push(i);
 				}
 				continue;
 			}
-			if (i.autoCleared) {
-				next.push({
-					...i,
-					isRead: false,
-					autoCleared: false,
-					seenCount: 1,
-					createdAt: new Date(NOW).toISOString(),
-					lastSeenAt: new Date(NOW).toISOString()
-				});
-				log.push(`↻ "${i.title}" — broke again, key was armed, fired as a new unread row`);
+
+			if (!i.dedupeKey) {
+				// Auto-cleared earlier and now true again. The unique constraint is what stops
+				// this firing every night: only one row may hold the key at a time.
+				next.push(i);
+				const key = conditionKeyOf(i);
+				if (!activeKeys.has(key)) {
+					activeKeys.add(key);
+					next.push({
+						...i,
+						id: `${i.id}-r${items.length}`,
+						dedupeKey: key,
+						isRead: false,
+						autoClearedAt: null,
+						seenCount: 1,
+						createdAt: now,
+						lastSeenAt: now
+					});
+					log.push(`↻ ${i.title} — true again, key was free, fired as a new unread row`);
+				}
 				continue;
 			}
-			const bumped = {
-				...i,
-				seenCount: (i.seenCount ?? 1) + 1,
-				lastSeenAt: new Date(NOW).toISOString()
-			};
+
+			const bumped = { ...i, seenCount: i.seenCount + 1, lastSeenAt: now };
 			next.push(bumped);
 			log.push(
 				i.isRead
-					? `· "${i.title}" — still true but read, suppressed (no reopen)`
-					: `· "${i.title}" — still true, reminder count now ${bumped.seenCount}`
+					? `· ${i.title} — still true but read, suppressed (no reopen)`
+					: `· ${i.title} — still true, reminder count now ${bumped.seenCount}`
 			);
 		}
 		items = next;
@@ -153,14 +157,13 @@
 
 	function reset() {
 		items = NOTIFICATIONS.map((n) => ({ ...n }));
-		fixed = new Set();
+		fixed = initialFixed();
 		selected = new Set();
 		sweepLog = [];
 	}
 </script>
 
 <div class="flex flex-col gap-4 p-4">
-	<!-- Framing -->
 	<div class="card bg-surface-50-950 shadow-sm p-3 flex flex-wrap items-center gap-3">
 		<h4 class="font-bold text-surface-800-200">
 			<i class="fa-solid fa-bell mr-2"></i>Notification centre
@@ -171,8 +174,7 @@
 		>
 		<span class="text-xs text-surface-500">
 			Two states only — <strong>unread</strong> and <strong>read</strong>. Read is the
-			acknowledgement
-			<em>and</em> the thing that stops the reminder.
+			acknowledgement <em>and</em> the thing that stops the reminder.
 		</span>
 	</div>
 
@@ -183,21 +185,19 @@
 				<i class="fa-solid fa-arrow-right mr-1"></i>
 				Surface 1 — the bell, as it would sit in the app bar next to the theme toggle:
 			</span>
-			<div class="flex items-center gap-2">
-				<BellPopover
-					{items}
-					onMarkAllRead={() =>
-						setRead(
-							items.filter((i) => !i.isRead).map((i) => i.id),
-							true
-						)}
-					onOpen={(id) => setRead([id], true)}
-				/>
-			</div>
+			<BellPopover
+				{items}
+				onMarkAllRead={() =>
+					setRead(
+						items.filter((i) => !i.isRead).map((i) => i.id),
+						true
+					)}
+				onOpen={(id) => setRead([id], true)}
+			/>
 		</div>
 	</div>
 
-	<!-- The sweep simulator: the part that is hard to convey on paper -->
+	<!-- The write path, made pressable -->
 	<div class="card bg-surface-50-950 shadow-sm p-3 flex flex-col gap-2">
 		<div class="flex flex-wrap items-center gap-3">
 			<button class="btn btn-sm preset-filled-primary-500" onclick={runSweep}>
@@ -208,7 +208,7 @@
 			</button>
 			<span class="text-xs text-surface-500">
 				Use the <i class="fa-solid fa-wrench"></i> on a reminder row to pretend the underlying object
-				got fixed, then run the sweep. Un-fix it and sweep again to see the key re-arm.
+				got fixed, then run the sweep. Un-fix it and sweep again to watch the dedupe key re-arm.
 			</span>
 		</div>
 		{#if sweepLog.length}
@@ -224,7 +224,6 @@
 
 	<!-- Surface 2: the inbox -->
 	<div class="card bg-surface-50-950 shadow-sm overflow-hidden">
-		<!-- Filters -->
 		<div class="flex flex-wrap items-center gap-2 p-3 border-b border-surface-200-800">
 			<div class="flex rounded-lg border border-surface-200-800 overflow-hidden">
 				{#each [['unread', `Unread (${unreadCount})`], ['all', `All (${items.length})`], ['cleared', `No longer applies (${clearedCount})`]] as [key, label]}
@@ -270,7 +269,6 @@
 			{/if}
 		</div>
 
-		<!-- Batch bar -->
 		{#if selected.size}
 			<div
 				class="flex flex-wrap items-center gap-2 px-3 py-2 bg-primary-50 dark:bg-primary-950 border-b border-primary-200 dark:border-primary-800"
@@ -302,7 +300,6 @@
 			</div>
 		{/if}
 
-		<!-- List -->
 		{#if visible.length === 0}
 			<div class="px-3 py-16 text-center text-sm text-surface-500">
 				<i class="fa-regular fa-bell-slash text-3xl mb-3 block opacity-40"></i>
@@ -317,150 +314,36 @@
 								type="checkbox"
 								class="checkbox"
 								checked={allVisibleSelected}
-								onchange={toggleAll}
+								onchange={() =>
+									(selected = allVisibleSelected ? new Set() : new Set(visible.map((i) => i.id)))}
 								aria-label="Select all"
 							/>
 						</th>
 						<th class="text-left font-semibold p-3">Notification</th>
-						<th class="text-left font-semibold p-3 w-40">Category</th>
+						<th class="text-left font-semibold p-3 w-44">Event type</th>
+						<th class="text-left font-semibold p-3 w-32">Domain</th>
 						<th class="text-left font-semibold p-3 w-32">Last reminded</th>
 						<th class="w-28 p-3"></th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-surface-200-800">
 					{#each visible as n (n.id)}
-						{@const sev = SEVERITY_META[n.severity]}
-						{@const isFixed = fixed.has(n.id)}
-						<tr
-							class="hover:bg-surface-100-900 transition-colors {n.isRead
-								? 'bg-surface-50-950'
-								: 'bg-primary-50/40 dark:bg-primary-950/30'}"
-						>
-							<td class="p-3 align-top">
-								<input
-									type="checkbox"
-									class="checkbox"
-									checked={selected.has(n.id)}
-									onchange={() => toggle(n.id)}
-									aria-label="Select notification"
-								/>
-							</td>
-							<td class="p-3">
-								<div class="flex gap-2.5">
-									<span class="mt-1.5 size-2 shrink-0 rounded-full {sev.dot}"></span>
-									<div class="min-w-0">
-										<button
-											class="text-left cursor-pointer {n.isRead
-												? 'font-normal text-surface-700-300'
-												: 'font-bold text-surface-900-100'}"
-											onclick={() => openNotification(n)}
-										>
-											{n.title}
-										</button>
-										<p class="text-surface-500 mt-0.5">{n.body}</p>
-										<div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-											<a
-												href={n.link}
-												class="text-primary-600 hover:underline"
-												onclick={(e) => e.preventDefault()}
-											>
-												<i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[10px]"
-												></i>{n.linkLabel}
-											</a>
-											{#if n.attestation}
-												<a
-													href={n.attestation.link}
-													class="px-2 py-0.5 rounded border border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-950"
-													onclick={(e) => e.preventDefault()}
-													title="The record lives on the object, never in the inbox"
-												>
-													{n.attestation.label} →
-												</a>
-											{/if}
-											{#if n.seenCount && n.seenCount > 1}
-												<span
-													class="px-1.5 py-0.5 rounded bg-surface-100-900 border border-surface-200-800 text-surface-500"
-													title="One row, upserted by every sweep — not {n.seenCount} rows"
-												>
-													reminded {n.seenCount}× since {shortDate(n.createdAt)}
-												</span>
-											{/if}
-											{#if n.autoCleared}
-												<span
-													class="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-													title="The sweep saw the condition go away and marked this read for you"
-												>
-													<i class="fa-solid fa-check mr-1"></i>no longer applies
-												</span>
-											{/if}
-											{#if isFixed && !n.autoCleared}
-												<span
-													class="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-												>
-													object fixed — clears on next sweep
-												</span>
-											{/if}
-											{#if !n.conditionBacked}
-												<span
-													class="px-1.5 py-0.5 rounded bg-surface-100-900 border border-surface-200-800 text-surface-400"
-												>
-													event
-												</span>
-											{/if}
-										</div>
-									</div>
-								</div>
-							</td>
-							<td class="p-3 align-top text-surface-600-400">
-								<i class="fa-solid {CATEGORY_META[categoryOf(n)].icon} mr-1.5 text-surface-400"></i>
-								<span class="block">{EVENT_TYPES[n.type].label}</span>
-								<span class="block text-[10px] text-surface-400"
-									>{CATEGORY_META[categoryOf(n)].label}</span
-								>
-							</td>
-							<td class="p-3 align-top text-surface-500 whitespace-nowrap">
-								{relTime(n.lastSeenAt ?? n.createdAt)}
-							</td>
-							<td class="p-3 align-top">
-								<div class="flex items-center justify-end gap-1">
-									{#if n.conditionBacked}
-										<button
-											class="size-7 rounded hover:bg-surface-200-800 text-surface-500 cursor-pointer {isFixed
-												? 'text-amber-600'
-												: ''}"
-											title={isFixed
-												? 'Un-fix the object'
-												: 'Pretend the underlying object got fixed'}
-											onclick={() => toggleFixed(n.id)}
-										>
-											<i class="fa-solid fa-wrench text-[11px]"></i>
-										</button>
-									{/if}
-									<button
-										class="size-7 rounded hover:bg-surface-200-800 text-surface-500 cursor-pointer"
-										title={n.isRead ? 'Mark as unread — bring it back to me' : 'Mark as read'}
-										onclick={() => setRead([n.id], !n.isRead)}
-									>
-										<i class="fa-solid {n.isRead ? 'fa-envelope' : 'fa-envelope-open'} text-[11px]"
-										></i>
-									</button>
-									<button
-										class="size-7 rounded hover:bg-error-100 dark:hover:bg-error-950 text-surface-500 hover:text-error-600 cursor-pointer"
-										title="Delete — removes the message. If the condition still holds it returns tomorrow."
-										onclick={() => remove([n.id])}
-									>
-										<i class="fa-solid fa-trash text-[11px]"></i>
-									</button>
-								</div>
-							</td>
-						</tr>
+						<NotificationRow
+							{n}
+							selected={selected.has(n.id)}
+							objectFixed={fixed.has(n.objectId)}
+							onToggleSelect={() => (selected = toggleIn(selected, n.id))}
+							onOpen={() => openNotification(n)}
+							onToggleRead={() => setRead([n.id], !n.isRead)}
+							onDelete={() => remove([n.id])}
+							onToggleFixed={() => (fixed = toggleIn(fixed, n.objectId))}
+						/>
 					{/each}
 				</tbody>
 			</table>
 		{/if}
 	</div>
 
-	<!-- What to look at -->
 	<div class="card bg-surface-50-950 shadow-sm p-3 text-xs text-surface-600-400">
 		<p class="font-semibold text-surface-800-200 mb-2">What this mock is trying to settle</p>
 		<ul class="list-disc ml-5 space-y-1">
@@ -481,9 +364,11 @@
 				is recorded instead of pretending an inbox click is evidence.
 			</li>
 			<li>
-				<strong>Does a flat table hold up?</strong> This is deliberately un-grouped, the way
-				<code>ModelTable</code> would render it. If it reads fine at 12 rows, filters plus the dedupe
-				collapse are probably enough and the bespoke grouped list can wait.
+				<strong>Per-object rows, not digests.</strong> Three expiring evidences are three rows,
+				which is what makes click-to-object universal and per-row actions meaningful — at the cost
+				of volume. <em>Does a flat table still hold up at a realistic overdue count?</em> That is
+				the open question, and the reason this is deliberately un-grouped the way
+				<code>ModelTable</code> would render it.
 			</li>
 		</ul>
 	</div>

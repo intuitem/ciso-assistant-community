@@ -2323,6 +2323,7 @@
 	"selectAudit": "Select audit",
 	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles.",
 	"errorFolderGraphMustNotContainCycles": "The domain graph must not contain cycles.",
+	"subDomainsRequirePro": "Sub-domains are available in the PRO edition. Domains here are created at the top level.",
 	"errorRiskScenarioGraphMustNotContainCycles": "The risk scenario graph must not contain cycles.",
 	"addStakeholder": "Add stakeholder",
 	"operationalScenario": "Operational scenario",
