@@ -172,10 +172,18 @@ class TestParentFieldPermissionValidation:
             object_url=f"/api/folders/{subfolder.id}/",
             target_folder=folder_b,
         )
-        assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            subfolder.refresh_from_db()
-            assert subfolder.parent_folder_id == folder_b.id
+            # Permission is still resolved first, so every denial above is unchanged.
+            # What used to succeed is now refused: nesting a domain under another is a
+            # PRO capability, and the community serializer rejects the move.
+            assert response.status_code == status.HTTP_400_BAD_REQUEST
+            assert response.json()["parent_folder"] == ["subDomainsRequirePro"]
+        else:
+            assert response.status_code == expected_status
+
+        # Whichever way it was refused, the folder must not have moved.
+        subfolder.refresh_from_db()
+        assert subfolder.parent_folder_id == test.folder.id
 
     def test_risk_scenario_risk_assessment_change_blocked(self, test):
         """Test that changing risk_assessment of RiskScenario validates permissions"""

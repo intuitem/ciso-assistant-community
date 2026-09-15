@@ -2090,53 +2090,132 @@ def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]
     return {"labels": labels, "values": values}
 
 
+# What a domain "holds" for display purposes. Deliberately a short, meaningful list
+# rather than every model with a folder FK: there are 151 of those, sweeping them all
+# costs ~150 GROUP BY queries, and "1824 perimeters" is a worse headline than the few
+# things a user actually thinks of as content. Emptiness for deletion is checked
+# exhaustively server-side instead — see FolderViewSet.reorganize.
+FOLDER_CONTENT_MODELS = (
+    "core.Perimeter",
+    "core.Asset",
+    "core.AppliedControl",
+    "core.ComplianceAssessment",
+    "core.RiskAssessment",
+    "core.FindingsAssessment",
+    "core.Evidence",
+    "core.Policy",
+    "core.RiskScenario",
+    "tprm.Entity",
+)
+
+
+def folder_direct_content_counts() -> dict:
+    """{folder_id: number of curated content objects directly in it}.
+
+    Direct only: the board rolls subtree totals up itself, in the same bottom-up pass
+    it already runs to size each branch.
+    """
+    from django.apps import apps
+    from django.db.models import Count
+
+    totals: dict = {}
+    for label in FOLDER_CONTENT_MODELS:
+        try:
+            model = apps.get_model(label)
+        except LookupError:
+            continue
+        for row in model.objects.values("folder").annotate(n=Count("id")):
+            if row["folder"] is not None:
+                totals[row["folder"]] = totals.get(row["folder"], 0) + row["n"]
+    return totals
+
+
+def build_folder_indexes(*, include_perimeters: bool):
+    """Fetch the whole folder tree (and optionally its perimeters) in two queries.
+
+    `get_folder_content` used to walk the tree with one query per node, and org_tree
+    resolved ancestors with one query per folder per level — together the dominant cost
+    of the endpoint. Both now read these indexes instead.
+
+    Folders are stored unordered on purpose: `Folder._meta.ordering` is empty, so the
+    per-parent queries this replaces had no defined order either, and imposing one here
+    would silently reshuffle every existing consumer of the tree.
+    """
+    folders = list(
+        Folder.objects.values("id", "name", "parent_folder_id", "content_type")
+    )
+    children_by_parent = defaultdict(list)
+    for f in folders:
+        children_by_parent[f["parent_folder_id"]].append(f)
+
+    parent_of = {f["id"]: f["parent_folder_id"] for f in folders}
+
+    perimeters_by_folder = defaultdict(list)
+    if include_perimeters:
+        for p in Perimeter.objects.values("id", "name", "folder_id"):
+            perimeters_by_folder[p["folder_id"]].append(p)
+
+    return children_by_parent, parent_of, perimeters_by_folder
+
+
 def get_folder_content(
-    folder: Folder,
+    folder_id,
+    *,
     include_perimeters,
     include_enclaves,
     viewable_objects,
     needed_folders,
+    children_by_parent,
+    perimeters_by_folder,
     writable_ids: Optional[set[UUID]] = None,
+    content_counts: Optional[dict] = None,
 ):
+    """Build the nested payload for one folder from prebuilt indexes — no queries."""
     content = []
-    for f in Folder.objects.filter(parent_folder=folder).distinct():
-        if f.id in viewable_objects or f.id in needed_folders:
-            # Skip enclaves if not included
-            if not include_enclaves and f.content_type == Folder.ContentType.ENCLAVE:
-                continue
-            entry = {
-                "name": f.name,
-                "uuid": f.id,
-                "viewable": viewable_objects and f.id in viewable_objects,
-                "writable": f.id in writable_ids if writable_ids is not None else True,
-                "content_type": f.content_type,
-            }
-            # Add enclave-specific styling
-            if f.content_type == Folder.ContentType.ENCLAVE:
-                entry.update(
-                    {
-                        "symbol": "triangle",
-                        "symbolSize": 12,
-                        "itemStyle": {"color": "#6366f1"},
-                    }
-                )
-            children = get_folder_content(
-                f,
-                include_perimeters=include_perimeters,
-                include_enclaves=include_enclaves,
-                viewable_objects=viewable_objects,
-                needed_folders=needed_folders,
-                writable_ids=writable_ids,
+    for f in children_by_parent.get(folder_id, ()):
+        if f["id"] not in viewable_objects and f["id"] not in needed_folders:
+            continue
+        # Skip enclaves if not included
+        if not include_enclaves and f["content_type"] == Folder.ContentType.ENCLAVE:
+            continue
+        entry = {
+            "name": f["name"],
+            "uuid": f["id"],
+            "viewable": bool(viewable_objects) and f["id"] in viewable_objects,
+            "writable": f["id"] in writable_ids if writable_ids is not None else True,
+            "content_type": f["content_type"],
+        }
+        if content_counts is not None:
+            entry["content_count"] = content_counts.get(f["id"], 0)
+        # Add enclave-specific styling
+        if f["content_type"] == Folder.ContentType.ENCLAVE:
+            entry.update(
+                {
+                    "symbol": "triangle",
+                    "symbolSize": 12,
+                    "itemStyle": {"color": "#6366f1"},
+                }
             )
-            if len(children) > 0:
-                entry.update({"children": children})
-            content.append(entry)
+        children = get_folder_content(
+            f["id"],
+            include_perimeters=include_perimeters,
+            include_enclaves=include_enclaves,
+            viewable_objects=viewable_objects,
+            needed_folders=needed_folders,
+            children_by_parent=children_by_parent,
+            perimeters_by_folder=perimeters_by_folder,
+            writable_ids=writable_ids,
+            content_counts=content_counts,
+        )
+        if len(children) > 0:
+            entry.update({"children": children})
+        content.append(entry)
 
-    if include_perimeters and folder.id in viewable_objects:
-        for p in Perimeter.objects.filter(folder=folder).distinct():
+    if include_perimeters and folder_id in viewable_objects:
+        for p in perimeters_by_folder.get(folder_id, ()):
             content.append(
                 {
-                    "name": p.name,
+                    "name": p["name"],
                     "symbol": "circle",
                     "symbolSize": 10,
                     "itemStyle": {"color": "#222436"},

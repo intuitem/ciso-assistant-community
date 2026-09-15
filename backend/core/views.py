@@ -8827,6 +8827,217 @@ class FolderViewSet(BaseModelViewSet):
         folder = serializer.save()
         Folder.create_default_ug_and_ra(folder)
 
+    @action(detail=False, methods=["post"])
+    def reorganize(self, request):
+        """Apply a whole set of parent changes as one transaction.
+
+        A reorganisation is drafted client-side and sent here once, because half of it
+        landing is worse than none of it: the folder tree is what the IAM resolves role
+        assignments against, so a partial apply leaves access in a state nobody
+        designed.
+
+        Payload: {"moves": [{"folder": id, "parent_folder": id, "from_parent": id}]}
+
+        `from_parent` is what the caller believed the parent to be, and is required:
+        it makes the apply optimistic-concurrency safe, so if anybody moved that folder
+        in the meantime the whole request is refused with a report rather than silently
+        overwriting their change.
+        """
+        moves = request.data.get("moves") or []
+        deletes = request.data.get("deletes") or []
+        if not isinstance(moves, list) or not isinstance(deletes, list):
+            return Response(
+                {"moves": "moves and deletes must be lists"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not moves and not deletes:
+            return Response(
+                {"moves": "At least one move or delete is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        seen: set[str] = set()
+        for move in moves:
+            folder_id = str(move.get("folder", ""))
+            if folder_id in seen:
+                return Response(
+                    {"moves": f"Folder {folder_id} appears more than once"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            seen.add(folder_id)
+            # Mandatory, not optional: this endpoint rewrites access in bulk, so a
+            # caller that cannot say what it believed the tree looked like has no
+            # business overwriting whatever it looks like now.
+            if not move.get("from_parent"):
+                return Response(
+                    {
+                        "moves": f"Move for folder {folder_id} is missing from_parent, "
+                        "which is required so a concurrent change cannot be overwritten"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Scope to what the caller may see, so an unreadable folder reads as missing
+        # rather than as a target to move.
+        visible = {str(f.id): f for f in self.get_queryset()}
+
+        conflicts = []
+        planned = []
+        for move in moves:
+            folder_id = str(move.get("folder", ""))
+            target_id = str(move.get("parent_folder", ""))
+            folder = visible.get(folder_id)
+            target = visible.get(target_id)
+
+            if folder is None:
+                conflicts.append({"folder": folder_id, "reason": "folderGone"})
+                continue
+            if target is None:
+                conflicts.append({"folder": folder_id, "reason": "targetGone"})
+                continue
+
+            expected = move.get("from_parent")
+            current = str(folder.parent_folder_id) if folder.parent_folder_id else None
+            if str(expected) != str(current):
+                conflicts.append(
+                    {
+                        "folder": folder_id,
+                        "reason": "movedElsewhere",
+                        "name": folder.name,
+                        "current_parent": current,
+                    }
+                )
+                continue
+
+            if current == target_id:
+                continue  # already where the draft wants it
+
+            planned.append((folder, target, current))
+
+        # Deletes are restricted to empty leaves. That is what makes it safe to draft
+        # a deletion client-side and apply it later: there is nothing inside to be
+        # destroyed by a stale draft. Emptiness is therefore re-checked here, at apply
+        # time, and after the moves have landed — a folder emptied by this very draft
+        # is legitimately deletable, and one refilled since drafting is not.
+        planned_deletes = []
+        for entry in deletes:
+            folder_id = str(entry.get("folder", ""))
+            folder = visible.get(folder_id)
+            if folder is None:
+                conflicts.append({"folder": folder_id, "reason": "folderGone"})
+                continue
+            if folder.content_type == Folder.ContentType.ROOT:
+                conflicts.append({"folder": folder_id, "reason": "cannotDeleteRoot"})
+                continue
+            if folder_id in seen:
+                conflicts.append({"folder": folder_id, "reason": "movedAndDeleted"})
+                continue
+            planned_deletes.append(folder)
+
+        if conflicts:
+            return Response({"conflicts": conflicts}, status=status.HTTP_409_CONFLICT)
+
+        try:
+            self._apply_reorganisation(planned, planned_deletes)
+        except DraftNotEmptyError as exc:
+            return Response(
+                {"conflicts": exc.conflicts}, status=status.HTTP_409_CONFLICT
+            )
+
+        # No inverse is returned on purpose. One computed here goes stale the moment
+        # anyone else touches the tree, and replaying it blind would overwrite their
+        # change — the one thing `from_parent` exists to prevent. Undoing a
+        # reorganisation means drafting the moves back, which earns the same review.
+        return Response(
+            {
+                "applied": len(planned),
+                "deleted": len(planned_deletes),
+                "skipped": len(moves) - len(planned),
+            }
+        )
+
+    @staticmethod
+    def _folder_emptiness_blocker(folder) -> "str | None":
+        """Why this folder may not be deleted from the board, or None.
+
+        Exhaustive rather than curated: deletion cascades through every FK, so an
+        object in a model nobody thought to list would still be destroyed. The cost
+        (~150 cheap counts) is acceptable here because it runs for a handful of
+        folders on an explicit action, not on every page load.
+
+        A domain's own auto-provisioned IAM objects don't count as content — every
+        domain has them, so counting them would make deletion impossible.
+        """
+        from django.apps import apps
+
+        if Folder.objects.filter(parent_folder=folder).exists():
+            return "hasSubDomains"
+
+        exempt = {"iam.UserGroup", "iam.RoleAssignment"}
+        for model in apps.get_models():
+            if model is Folder or model._meta.label in exempt:
+                continue
+            if not any(
+                f.name == "folder" and f.related_model is Folder
+                for f in model._meta.fields
+            ):
+                continue
+            try:
+                if model.objects.filter(folder=folder).exists():
+                    return "notEmpty"
+            except Exception:
+                # A model whose table is absent (unmanaged, or an edition-only app)
+                # cannot be holding anything.
+                continue
+        return None
+
+    def _apply_reorganisation(self, planned, planned_deletes):
+        with transaction.atomic():
+            # Two phases on purpose. A valid final arrangement can still pass through
+            # an invalid intermediate — swap two subtrees and whichever move goes first
+            # is momentarily a cycle — so every mover is parked at the root before any
+            # of them is attached. That removes the ordering problem entirely instead
+            # of trying to find a safe permutation.
+            #
+            # The detach is a bare save: it is never an observable state, and routing it
+            # through the serializer would demand add permission on the root, which a
+            # domain-scoped caller legitimately lacks. Authorisation for what the caller
+            # actually asked for is enforced in phase two.
+            root = Folder.get_root_folder()
+            for folder, _, _ in planned:
+                folder.parent_folder = root
+                folder.save()
+
+            for folder, target, _ in planned:
+                serializer = self.get_serializer_class(action="partial_update")(
+                    folder,
+                    data={"parent_folder": str(target.id)},
+                    partial=True,
+                    context=self.get_serializer_context(),
+                )
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+
+            # Deletes run last, so a folder emptied by the moves above qualifies.
+            blocked = []
+            for folder in planned_deletes:
+                reason = self._folder_emptiness_blocker(folder)
+                if reason:
+                    blocked.append(
+                        {
+                            "folder": str(folder.id),
+                            "name": folder.name,
+                            "reason": reason,
+                        }
+                    )
+            if blocked:
+                # Raised inside the atomic block on purpose: it rolls the moves back
+                # too, so the caller never gets a half-applied reorganisation.
+                raise DraftNotEmptyError(blocked)
+
+            for folder in planned_deletes:
+                self.perform_destroy(folder)
+
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -8850,14 +9061,27 @@ class FolderViewSet(BaseModelViewSet):
 
         viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
 
-        # Add ancestors so viewable folders aren't orphaned
-        needed_folders = set(viewable_objects)
+        children_by_parent, parent_of, perimeters_by_folder = build_folder_indexes(
+            include_perimeters=include_perimeters
+        )
 
+        # Opt-in: only the domain board asks for these, and they cost one grouped
+        # query per curated content model.
+        with_counts = request.query_params.get("with_counts", "").lower() in [
+            "true",
+            "1",
+            "yes",
+        ]
+        content_counts = folder_direct_content_counts() if with_counts else None
+
+        # Add ancestors so viewable folders aren't orphaned. Walked over the in-memory
+        # parent map: doing it against the DB cost one query per folder per level.
+        needed_folders = set(viewable_objects)
         for folder_id in viewable_objects:
-            current = Folder.objects.get(pk=folder_id)
-            while current and current.parent_folder_id:
-                needed_folders.add(current.parent_folder_id)
-                current = Folder.objects.get(pk=current.parent_folder_id)
+            current = parent_of.get(folder_id)
+            while current is not None and current not in needed_folders:
+                needed_folders.add(current)
+                current = parent_of.get(current)
 
         # Optional per-node writable annotation
         write_perm_codename = request.query_params.get("write_perm")
@@ -8865,37 +9089,38 @@ class FolderViewSet(BaseModelViewSet):
         if write_perm_codename:
             perm = Permission.objects.filter(codename=write_perm_codename).first()
             if perm is not None:
-                writable_ids = {
-                    f.id
-                    for f in Folder.objects.filter(id__in=needed_folders)
-                    if RoleAssignment.is_access_allowed(
-                        user=request.user, perm=perm, folder=f
-                    )
-                }
+                # Resolved in bulk. The per-folder `is_access_allowed` loop this
+                # replaces returned the same set, and was the single biggest cost of
+                # the endpoint.
+                writable_ids = set(
+                    RoleAssignment.get_allowed_folder_ids(request.user, perm)
+                )
             else:
                 writable_ids = set()
 
+        root_folder = Folder.get_root_folder()
+
         folders_list = []
-        for folder in (
-            Folder.objects.exclude(content_type="GL")
-            .filter(id__in=needed_folders, parent_folder=Folder.get_root_folder())
-            .distinct()
-        ):
+        for folder in children_by_parent.get(root_folder.id, ()):
+            if folder["content_type"] == "GL" or folder["id"] not in needed_folders:
+                continue
             # Skip enclaves at top level if not included
             if (
                 not include_enclaves
-                and folder.content_type == Folder.ContentType.ENCLAVE
+                and folder["content_type"] == Folder.ContentType.ENCLAVE
             ):
                 continue
             entry = {
-                "name": folder.name,
-                "uuid": folder.id,
-                "viewable": folder.id in viewable_objects,
-                "writable": writable_ids is None or folder.id in writable_ids,
-                "content_type": folder.content_type,
+                "name": folder["name"],
+                "uuid": folder["id"],
+                "viewable": folder["id"] in viewable_objects,
+                "writable": writable_ids is None or folder["id"] in writable_ids,
+                "content_type": folder["content_type"],
             }
+            if content_counts is not None:
+                entry["content_count"] = content_counts.get(folder["id"], 0)
             # Add enclave-specific styling
-            if folder.content_type == Folder.ContentType.ENCLAVE:
+            if folder["content_type"] == Folder.ContentType.ENCLAVE:
                 entry.update(
                     {
                         "symbol": "triangle",
@@ -8904,27 +9129,31 @@ class FolderViewSet(BaseModelViewSet):
                     }
                 )
             folder_content = get_folder_content(
-                folder,
+                folder["id"],
                 include_perimeters=include_perimeters,
                 include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
+                children_by_parent=children_by_parent,
+                perimeters_by_folder=perimeters_by_folder,
                 writable_ids=writable_ids,
+                content_counts=content_counts,
             )
             if len(folder_content) > 0:
                 entry.update({"children": folder_content})
             folders_list.append(entry)
-
-        root_folder = Folder.get_root_folder()
-        return Response(
-            {
-                "name": root_folder.name,
-                "uuid": str(root_folder.id),
-                "content_type": root_folder.content_type,
-                "writable": writable_ids is None or root_folder.id in writable_ids,
-                "children": folders_list,
-            }
-        )
+        root_entry = {
+            "name": root_folder.name,
+            "uuid": str(root_folder.id),
+            "content_type": root_folder.content_type,
+            "writable": writable_ids is None or root_folder.id in writable_ids,
+            "children": folders_list,
+        }
+        if content_counts is not None:
+            # The root holds objects like any other folder; without this its badge
+            # would show only what its children contain.
+            root_entry["content_count"] = content_counts.get(root_folder.id, 0)
+        return Response(root_entry)
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -9702,6 +9931,17 @@ class FrameworkFilter(GenericFilterSet):
     class Meta:
         model = Framework
         fields = ["provider"]
+
+
+class DraftNotEmptyError(Exception):
+    """A staged folder deletion no longer targets an empty leaf.
+
+    Carries the per-folder reasons so the caller can say which ones and why.
+    """
+
+    def __init__(self, conflicts):
+        self.conflicts = conflicts
+        super().__init__("Folders staged for deletion are not empty")
 
 
 class DraftValidationError(Exception):

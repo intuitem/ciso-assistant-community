@@ -2892,20 +2892,48 @@ class FolderWriteSerializer(BaseModelSerializer):
             )
         return value
 
-    def validate_parent_folder(self, value):
-        """
-        If parent_folder is empty or None, default to the root folder.
-        On update, check add permission on the target parent folder.
+    def _resolve_parent_folder(self, value):
+        """Normalise and authorise a target parent, independently of edition policy.
+
+        Empty means the root folder, and placing a folder under a new parent requires
+        add permission on the destination. Both rules hold in every edition, so they
+        live here rather than in `validate_parent_folder`, which carries the policy and
+        is overridden wholesale by editions that allow nesting.
+
+        Authorisation is deliberately resolved here, ahead of any policy: a user who
+        may not write to the destination must be told that, rather than being informed
+        which edition they would need.
         """
         if not value:
             return Folder.get_root_folder()
-        if (
-            self.instance is not None
-            and self.instance.parent_folder_id
-            and str(value.id) != str(self.instance.parent_folder_id)
+        if self.instance is None:
+            # On create the base class checks permission only once `create()` runs,
+            # which is after field validation — too late for a policy that rejects
+            # during `is_valid()`. Check it here so 403 still beats 400.
+            self._check_object_perm(None, "add", folder=value)
+        elif self.instance.parent_folder_id and str(value.id) != str(
+            self.instance.parent_folder_id
         ):
             self._check_object_perm(self.instance, "add", folder=value)
         return value
+
+    def validate_parent_folder(self, value):
+        """Community domains sit directly under the root: nesting is a PRO capability.
+
+        Editions that support it override this method entirely — the enterprise
+        serializer calls `_resolve_parent_folder` and adds its own cycle check, so
+        there is no `super()` call to keep in step.
+
+        Enforcement is on *changing* the nesting only. A folder that is already nested
+        — created under a PRO licence, or an enclave parented by TPRM — stays editable
+        here, so that downgrading to community never strands existing data.
+        """
+        parent_folder = self._resolve_parent_folder(value)
+        if parent_folder == Folder.get_root_folder():
+            return parent_folder
+        if self.instance is not None and parent_folder == self.instance.parent_folder:
+            return parent_folder
+        raise serializers.ValidationError("subDomainsRequirePro")
 
 
 class FolderReadSerializer(BaseModelSerializer):
