@@ -1313,10 +1313,10 @@ def _trigger_assignment(groups, new_groups, ig_triggers, assignment_by_ra_id):
 def sync_requirement_assignments(compliance_assessment, ig_triggers, previous_groups):
     """Keep assignment scopes in step with the selected implementation groups.
 
-    Requirements already visible under the previous groups are left alone.
+    Requirements already visible under the previous groups are left alone. Call
+    inside the transaction that saves the selection: previous_groups is the only
+    record of the old scope, so a partial write cannot be retried.
     """
-    from django.db import transaction
-
     from core.models import RequirementAssessment, RequirementAssignment
 
     selected = set(compliance_assessment.selected_implementation_groups or [])
@@ -1366,11 +1366,10 @@ def sync_requirement_assignments(compliance_assessment, ig_triggers, previous_gr
             to_add.setdefault(target, []).append(ra_id)
 
     assignments = RequirementAssignment.objects.in_bulk(set(to_add) | set(to_remove))
-    with transaction.atomic():
-        for assignment_id, ra_ids in to_add.items():
-            assignments[assignment_id].requirement_assessments.add(*ra_ids)
-        for assignment_id, ra_ids in to_remove.items():
-            assignments[assignment_id].requirement_assessments.remove(*ra_ids)
+    for assignment_id, ra_ids in to_add.items():
+        assignments[assignment_id].requirement_assessments.add(*ra_ids)
+    for assignment_id, ra_ids in to_remove.items():
+        assignments[assignment_id].requirement_assessments.remove(*ra_ids)
 
 
 def update_selected_implementation_groups(compliance_assessment):
@@ -1380,6 +1379,7 @@ def update_selected_implementation_groups(compliance_assessment):
     select_implementation_groups. Those get fully recomputed here. Any other IG already
     on the assessment is treated as a manual pick and left untouched.
     """
+    from django.db import transaction
     from django.db.models import F
 
     from core.models import Answer, Question, QuestionChoice
@@ -1449,9 +1449,10 @@ def update_selected_implementation_groups(compliance_assessment):
     compliance_assessment.selected_implementation_groups = list(
         manual_only | igs_to_select
     )
-    compliance_assessment.save(update_fields=["selected_implementation_groups"])
-
-    sync_requirement_assignments(compliance_assessment, ig_triggers, current)
+    # Answer.save() defers this to on_commit, so the outer transaction is gone.
+    with transaction.atomic():
+        compliance_assessment.save(update_fields=["selected_implementation_groups"])
+        sync_requirement_assignments(compliance_assessment, ig_triggers, current)
 
 
 def build_questions_dict(node):
