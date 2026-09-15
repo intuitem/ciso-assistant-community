@@ -66,6 +66,7 @@ export const load = (async ({ fetch, params }) => {
 	object.security_exceptions =
 		object.security_exceptions?.map((security_exception) => security_exception.id) ?? [];
 	object.task_templates = object.task_templates?.map((task_template) => task_template.id) ?? [];
+	object.findings = object.findings?.map((finding) => finding.id) ?? [];
 	object.nextRequirementAssessmentId = nextRequirementAssessmentId;
 	const form = await superValidate(object, zod(schema), { errors: true });
 
@@ -259,7 +260,8 @@ export const actions: Actions = {
 			'evidences',
 			'applied_controls',
 			'task_templates',
-			'security_exceptions'
+			'security_exceptions',
+			'findings'
 		];
 		for (const key of visibilityControlled) {
 			if (!(key in currentRa)) {
@@ -364,6 +366,10 @@ export const actions: Actions = {
 	createSecurityException: async (event) => {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
 		return { form: result.form, newSecurityException: result.form.message.object.id };
+	},
+	createFinding: async (event) => {
+		const result = await nestedWriteFormAction({ event, action: 'create' });
+		return { form: result.form, newFinding: result.form.message.object.id };
 	},
 	createSuggestedControls: async (event) => {
 		const formData = await event.request.formData();
