@@ -12,7 +12,10 @@ from core.models import (
     RequirementAssignment,
     RequirementNode,
 )
-from core.utils import update_selected_implementation_groups
+from core.utils import (
+    sync_requirement_assignments,
+    update_selected_implementation_groups,
+)
 from iam.models import Folder
 
 
@@ -702,6 +705,17 @@ class TestSyncRequirementAssignments:
 
         _answer_base(d, d["base_no"])
         update_selected_implementation_groups(d["ca"])
+
+        assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+    def test_empty_selection_keeps_every_assignment(self, assignment_setup):
+        """No selected group means the whole audit is in scope, so nothing is out of it."""
+        d = assignment_setup
+        d["ca"].selected_implementation_groups = []
+        d["ca"].save()
+
+        sync_requirement_assignments(d["ca"], {}, {"base"})
 
         assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
         assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
