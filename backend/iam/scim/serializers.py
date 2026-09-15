@@ -59,7 +59,7 @@ def scim_group_to_dict(idp_group, request):
     base_url = request.build_absolute_uri("/").rstrip("/")
     location = f"{base_url}/api/scim/v2/Groups/{idp_group.id}"
     members = []
-    for user in idp_group.users.all():
+    for user in idp_group.users.filter(is_scim_managed=True):
         user_location = f"{base_url}/api/scim/v2/Users/{user.id}"
         members.append(
             {"value": str(user.id), "display": str(user), "$ref": user_location}

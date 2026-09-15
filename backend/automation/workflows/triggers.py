@@ -107,6 +107,27 @@ def validate_trigger_config(node, workflow=None):
         except CronValidationError as e:
             errors.append(("trigger_invalid_cron", str(e)))
 
+    if trigger_type == WorkflowNode.TriggerType.MANUAL:
+        # `applies_to` is what makes a manual workflow discoverable from an object.
+        # A typo here does not break the run — it makes the button never appear,
+        # which is the same silent failure as a mistyped structural key.
+        from .supervised import SUPERVISED_TARGETS
+
+        applies = config.get("applies_to")
+        if applies is not None:
+            if not isinstance(applies, dict):
+                errors.append(
+                    ("trigger_applies_to_invalid", "applies_to must be a mapping")
+                )
+            elif applies.get("model") not in SUPERVISED_TARGETS:
+                errors.append(
+                    (
+                        "trigger_applies_to_unknown_model",
+                        "applies_to.model must be one of: "
+                        + ", ".join(sorted(SUPERVISED_TARGETS)),
+                    )
+                )
+
     if trigger_type == WorkflowNode.TriggerType.INTERNAL_EVENT:
         event_key = config.get("event_key", "")
         if event_key not in {entry["key"] for entry in event_key_catalog()}:

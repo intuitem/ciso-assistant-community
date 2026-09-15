@@ -17,18 +17,6 @@ export const load = (async ({ fetch }) => {
 	const storedLibrariesResponse = await fetch(storedLibrariesEndpoint);
 	const storedLibraries = await storedLibrariesResponse.json();
 
-	const prepareRow = (row: Record<string, any>) => {
-		row.overview = [
-			`Packager: ${row.packager}`,
-			`Version: ${row.version}`,
-			...Object.entries(row.objects_meta).map(([key, value]) => `${key}: ${value}`)
-		];
-		row.allowDeleteLibrary = row.allowDeleteLibrary =
-			row.reference_count && row.reference_count > 0 ? false : true;
-	};
-
-	storedLibraries.results.forEach(prepareRow);
-
 	const makeHeadData = (URLModel) => {
 		return listViewFields[URLModel].body.reduce((obj, key, index) => {
 			obj[key] = listViewFields[URLModel].head[index];
@@ -58,7 +46,7 @@ export const actions: Actions = {
 	upload: async (event) => {
 		const formData = await event.request.formData();
 		const form = await superValidate(formData, zod(LibraryUploadSchema));
-		const locale = event.locals.user?.preferences?.lang;
+		const locale = (await event.locals.getUser())?.preferences?.lang;
 
 		if (formData.has('file')) {
 			const { file } = Object.fromEntries(formData) as { file: File };

@@ -1,8 +1,10 @@
 from collections import defaultdict
+from contextlib import nullcontext
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task
 from core.models import (
+    QuickFormResponse,
     AppliedControl,
     ComplianceAssessment,
     Evidence,
@@ -592,7 +594,7 @@ def send_task_node_due_soon_notification(actor_email, task_nodes, days):
             actor_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render task_node_due_soon email template for {actor_email}"
         )
@@ -624,7 +626,7 @@ def send_task_node_overdue_notification(actor_email, task_nodes):
             actor_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render task_node_overdue email template for {actor_email}"
         )
@@ -669,10 +671,46 @@ def send_notification_email_expired_eta(owner_email, controls):
             owner_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render expired_controls email template for {owner_email}"
         )
+
+
+def send_email_now(
+    subject: str,
+    message: str,
+    recipient: str,
+    html_message: str | None = None,
+    connection=None,
+) -> None:
+    """Synchronous send that propagates failures to the caller. Pass
+    `connection` to batch several sends over one SMTP session (the caller
+    owns its lifecycle).
+
+    Raises RuntimeError when the backend reports the message unsent;
+    connection/backend exceptions propagate as-is."""
+    if connection is None:
+        ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
+        scope = get_connection(ssl_context=ssl_context)
+    else:
+        scope = nullcontext(connection)
+    with scope as conn:
+        msg = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[recipient],
+            connection=conn,
+        )
+        if html_message:
+            msg.content_subtype = "html"
+            msg.body = html_message
+        sent = msg.send()
+    # Backends can report 0 sent without raising (fail_silently paths,
+    # filtered recipients); that is a delivery failure, not a success.
+    if sent != 1:
+        raise RuntimeError(f"email backend reported {sent} of 1 messages sent")
 
 
 @task()
@@ -683,19 +721,7 @@ def send_notification_email(subject, message, owner_email, html_message=None):
             recipient=owner_email,
             has_html=html_message is not None,
         )
-        ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
-        with get_connection(ssl_context=ssl_context) as connection:
-            msg = EmailMessage(
-                subject=subject,
-                body=message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[owner_email],
-                connection=connection,
-            )
-            if html_message:
-                msg.content_subtype = "html"
-                msg.body = html_message
-            msg.send()
+        send_email_now(subject, message, owner_email, html_message)
         logger.info(
             "Notification email sent successfully",
             recipient=owner_email,
@@ -710,6 +736,19 @@ def send_notification_email(subject, message, owner_email, html_message=None):
         )
 
 
+def get_missing_email_settings() -> list[str]:
+    """Names of the email settings that are required but unset; empty when
+    email can be sent. The console backend (MAIL_DEBUG) never opens an SMTP
+    connection, so EMAIL_HOST/EMAIL_PORT are only required for the other
+    backends."""
+    required_settings = ["EMAIL_HOST", "EMAIL_PORT", "DEFAULT_FROM_EMAIL"]
+    if getattr(settings, "EMAIL_BACKEND", "").endswith("console.EmailBackend"):
+        required_settings = ["DEFAULT_FROM_EMAIL"]
+    return [
+        setting for setting in required_settings if not getattr(settings, setting, None)
+    ]
+
+
 def check_email_configuration(owner_email, controls):
     notifications_enable_mailing = GlobalSettings.objects.get(name="general").value.get(
         "notifications_enable_mailing", False
@@ -720,13 +759,7 @@ def check_email_configuration(owner_email, controls):
         )
         return False
 
-    # Check required email settings
-    required_settings = ["EMAIL_HOST", "EMAIL_PORT", "DEFAULT_FROM_EMAIL"]
-    missing_settings = [
-        setting
-        for setting in required_settings
-        if not hasattr(settings, setting) or not getattr(settings, setting)
-    ]
+    missing_settings = get_missing_email_settings()
 
     if missing_settings:
         error_msg = f"Cannot send email notification: Missing email settings: {', '.join(missing_settings)}"
@@ -957,7 +990,7 @@ def send_compliance_assessment_due_soon_notification(author_email, assessments, 
             author_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render {template_name} email template for {author_email}"
         )
@@ -988,7 +1021,7 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
             owner_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
         )
@@ -1017,7 +1050,7 @@ def send_notification_email_expired_evidence(owner_email, evidences, days=0):
             owner_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render expired_evidences email template for {owner_email}"
         )
@@ -1048,7 +1081,7 @@ def send_evidence_expiring_soon_notification(owner_email, evidences, days):
             owner_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
         )
@@ -1081,7 +1114,7 @@ def send_security_exception_expiring_soon_notification(
             owner_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
         )
@@ -1114,7 +1147,7 @@ def send_notification_email_expired_security_exception(
             owner_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
         )
@@ -1256,7 +1289,7 @@ def send_validation_flow_created_notification(validation_flow):
         logger.info(
             f"Sent validation flow creation notification to {approver_email} for {validation_flow.ref_id}"
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render validation_flow_created email template for {approver_email}"
         )
@@ -1299,7 +1332,7 @@ def send_validation_flow_updated_notification(
             recipient_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render validation_flow_updated email template for {recipient_email}"
         )
@@ -1336,7 +1369,7 @@ def send_validation_deadline_notification(approver_email, validations, days):
             approver_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render validation_deadline email template for {approver_email}"
         )
@@ -1452,6 +1485,20 @@ def deactivate_expired_users():
 
     count = 0
     for user in expired_users:
+        # Never expire the deployment out of administration: keep the last
+        # active directly-managed admin, mirroring the API-side guard
+        # (UserWriteSerializer._enforce_last_active_admin) for expiry dates
+        # that predate it.
+        if (
+            user.user_groups.filter(name="BI-UG-ADM").exists()
+            and not User.objects.filter(user_groups__name="BI-UG-ADM", is_active=True)
+            .exclude(pk=user.pk)
+            .exists()
+        ):
+            logger.warning(
+                f"Skipping expiry deactivation of the last active admin: {user.email} (ID: {user.id})"
+            )
+            continue
         user.is_active = False
         user.save()
         count += 1
@@ -1613,6 +1660,40 @@ def send_assignment_submitted_notification(assignment_id):
 
 
 @task()
+def send_assignment_reopened_notification(assignment_id, observation=""):
+    """Send notification when a RequirementAssignment is reset back to draft for editing."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    context = {
+        "assessment_name": ca.name,
+        "reviewer_observation": observation,
+    }
+
+    for actor in assignment.actor.all():
+        for email in actor.get_emails():
+            if email and check_email_configuration(email, [assignment]):
+                rendered = render_email_template(
+                    "assignment_reopened", context, recipient_email=email
+                )
+                if rendered:
+                    send_notification_email(
+                        rendered["subject"],
+                        rendered["body"],
+                        email,
+                        rendered.get("html_body"),
+                    )
+
+
+@task()
 def send_assignment_reviewed_notification(
     assignment_id, decision, reviewer_observation=""
 ):
@@ -1647,3 +1728,143 @@ def send_assignment_reviewed_notification(
                         email,
                         rendered.get("html_body"),
                     )
+
+
+def notify_audit_assignees(audit) -> list:
+    """Email everyone holding an assignment on *audit*. Returns the actors that failed."""
+    from django.utils.translation import gettext_lazy as _
+
+    failed = []
+    # Driven by the assignments, not by `authors`: an actor can be pointed at an
+    # assignment without being an author, and iterating authors skips them silently.
+    for assignment in audit.requirement_assignments.prefetch_related("actor"):
+        for actor in assignment.actor.all():
+            try:
+                specific = actor.specific
+                if not hasattr(specific, "mailing"):
+                    logger.warning(
+                        "Actor has no mailing method, skipping email",
+                        actor=actor,
+                        actor_type=type(specific).__name__,
+                    )
+                    continue
+                specific.mailing(
+                    email_template_name="tprm/third_party_email.html",
+                    subject=_(
+                        "CISO Assistant: A questionnaire has been assigned to you"
+                    ),
+                    object="auditee-assessments",
+                    object_id=assignment.id,
+                )
+            except Exception as e:
+                logger.error("Failed to send email", actor=actor, error=e)
+                failed.append(str(actor))
+    return failed
+
+
+@task()
+def notify_campaign_assignees(campaign_id):
+    """Send a campaign's notifications off the request thread: a fan-out is one SMTP round trip per audit."""
+    audits = ComplianceAssessment.objects.filter(campaign_id=campaign_id)
+    notified = failed = 0
+    for audit in audits:
+        errors = notify_audit_assignees(audit)
+        failed += len(errors)
+        notified += 1
+    logger.info(
+        "campaign notifications sent",
+        campaign_id=str(campaign_id),
+        audits=notified,
+        failed_actors=failed,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Quick form notifications
+# ---------------------------------------------------------------------------
+
+
+def _quick_form_context(response) -> dict:
+    return {
+        "response_name": response.name,
+        "quick_form_name": response.quick_form.name,
+        "due_date": response.due_date.strftime("%Y-%m-%d")
+        if response.due_date
+        else "Not set",
+        "response_id": str(response.id),
+        "observation": response.observation or "",
+    }
+
+
+def _notify_actors(actors, template_name, context, response) -> None:
+    from .email_utils import render_email_template
+
+    recipient_emails = set()
+    for actor in actors:
+        for email in actor.get_emails():
+            if email:
+                recipient_emails.add(email)
+    for email in sorted(recipient_emails):
+        if check_email_configuration(email, [response]):
+            rendered = render_email_template(
+                template_name, context, recipient_email=email
+            )
+            if rendered:
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
+
+
+def _load_quick_form_response(response_id):
+    try:
+        return QuickFormResponse.objects.select_related("quick_form").get(
+            id=response_id
+        )
+    except QuickFormResponse.DoesNotExist:
+        logger.error(f"QuickFormResponse with id {response_id} not found")
+        return None
+
+
+@task()
+def send_quick_form_started_notification(response_id):
+    """Respondents are told a quick form response is ready for their input."""
+    response = _load_quick_form_response(response_id)
+    if response is None:
+        return
+    _notify_actors(
+        response.respondents.all(),
+        "quick_form_started",
+        _quick_form_context(response),
+        response,
+    )
+
+
+@task()
+def send_quick_form_submitted_notification(response_id):
+    """Reviewers are told a quick form response was submitted."""
+    response = _load_quick_form_response(response_id)
+    if response is None:
+        return
+    _notify_actors(
+        response.reviewers.all(),
+        "quick_form_submitted",
+        _quick_form_context(response),
+        response,
+    )
+
+
+@task()
+def send_quick_form_reopened_notification(response_id):
+    """Respondents are told a submitted response was sent back to them."""
+    response = _load_quick_form_response(response_id)
+    if response is None:
+        return
+    _notify_actors(
+        response.respondents.all(),
+        "quick_form_reopened",
+        _quick_form_context(response),
+        response,
+    )

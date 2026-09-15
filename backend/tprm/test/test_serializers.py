@@ -201,6 +201,37 @@ class EntityAssessmentSerializersTestCase(TestCase):
             data["selected_implementation_groups"],
         )
 
+    def test_created_audit_lands_on_the_serializer_instance(self):
+        """The respondent assignment that follows reads
+        instance.compliance_assessment, so creating the audit must leave it on
+        the object the serializer is holding — not only in the database."""
+        with patch("iam.models.RoleAssignment.is_access_allowed", return_value=True):
+            serializer = EntityAssessmentWriteSerializer(
+                data={
+                    "name": "Assessment with questionnaire",
+                    "entity": self.entity.id,
+                    "folder": self.folder.id,
+                    "perimeter": self.perimeter.id,
+                    "create_audit": True,
+                    "framework": self.framework.id,
+                    "selected_implementation_groups": ["group1"],
+                },
+                context={"request": MagicMock()},
+            )
+            self.assertTrue(serializer.is_valid(), serializer.errors)
+            instance = serializer.save()
+
+        self.assertIsNotNone(instance.compliance_assessment)
+        self.assertEqual(
+            instance.compliance_assessment.selected_implementation_groups, ["group1"]
+        )
+        # The questionnaire lives in its own enclave, and the audit is real:
+        # a bare create would leave it without requirements.
+        self.assertEqual(
+            instance.compliance_assessment.folder.content_type,
+            Folder.ContentType.ENCLAVE,
+        )
+
     def test_link_audit_checks_change_complianceassessment_on_audit_folder(self):
         """Linking an existing audit relocates it, so the gate must be
         change_complianceassessment in the audit's own folder — not this

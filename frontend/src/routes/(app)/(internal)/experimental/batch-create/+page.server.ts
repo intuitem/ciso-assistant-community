@@ -1,19 +1,14 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { Actions, PageServerLoad } from './$types';
 import { fail } from '@sveltejs/kit';
 
 export const load = (async ({ fetch }) => {
 	// Load folders for assets and entities
-	const foldersEndpoint = `${BASE_API_URL}/folders/`;
-	const foldersRes = await fetch(foldersEndpoint);
-	const foldersData = await foldersRes.json();
-	const folders = foldersData.results || foldersData;
+	const folders = await fetchAllPages(fetch, `${BASE_API_URL}/folders/`);
 
 	// Load EBIOS RM studies for feared events
-	const studiesEndpoint = `${BASE_API_URL}/ebios-rm/studies/`;
-	const studiesRes = await fetch(studiesEndpoint);
-	const studiesData = await studiesRes.json();
-	const studies = studiesData.results || studiesData;
+	const studies = await fetchAllPages(fetch, `${BASE_API_URL}/ebios-rm/studies/`);
 
 	return { folders, studies };
 }) satisfies PageServerLoad;

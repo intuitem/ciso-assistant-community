@@ -116,7 +116,7 @@
 				>
 					{#if isExporting}
 						<i class="fa-solid fa-spinner fa-spin"></i>
-						{m.exporting ? m.exporting() : 'Exporting...'}
+						{m.exporting()}
 					{:else}
 						{m.exportDatabase()}
 					{/if}

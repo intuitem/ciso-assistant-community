@@ -413,7 +413,7 @@ class TestApiParity:
         runner = User.objects.create_user(email="parity@authz.test")
         grant(runner, parent, ["view_appliedcontrol"], recursive=False)
 
-        engine_ids = authz.viewable_ids(runner, AppliedControl)
+        engine_ids = set(authz.viewable_ids(runner, AppliedControl))
 
         factory = APIRequestFactory()
         view = AppliedControlViewSet.as_view({"get": "list"})
@@ -1068,3 +1068,52 @@ class TestLifecycleLockdown:
             resp = view(req, pk=str(instance.id))
             assert resp.status_code == 405, (op, resp.status_code)
         assert WorkflowInstance.objects.filter(id=instance.id).exists()
+
+
+@pytest.mark.django_db
+class TestNonRecursiveReadScope:
+    """The read subtree scope must never grant more than the identity's own
+    view scope: a non-recursive role assignment on the workflow's folder
+    keeps descendant-domain rows out of read results."""
+
+    def test_non_recursive_assignment_does_not_leak_subtree_rows(self):
+        domain = make_domain("NR parent")
+        child = Folder.objects.create(
+            name="NR child",
+            parent_folder=domain,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        AppliedControl.objects.create(name="parent row", folder=domain)
+        AppliedControl.objects.create(name="child row", folder=child)
+        runner = User.objects.create_user(email="nonrecursive@authz.test")
+        grant(
+            runner,
+            domain,
+            ["view_appliedcontrol", "add_workflowinstance"],
+            recursive=False,
+        )
+
+        workflow = Workflow.objects.create(name="NR read", folder=domain)
+        version = WorkflowVersion.objects.create(workflow=workflow)
+        trigger = node("trigger", trigger_config={"type": "manual"})
+        read = node(
+            "action",
+            label="Fetch rows",
+            action_config={"type": "read_objects", "model": "applied_control"},
+        )
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [trigger, read, end],
+                "edges": [edge(trigger, read), edge(read, end)],
+                "variables": [],
+            },
+        )
+        publish_as(version, runner)
+
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        output = instance.node_outputs["fetch_rows"]
+        assert output["count"] == 1
+        assert [row["name"] for row in output["results"]] == ["parent row"]

@@ -85,6 +85,8 @@ This is the field that feeds the framework's compliance percentages, the report,
 
 For questionnaire-driven frameworks (whether authored in the [library builder](../configuration/authoring/library-builder.md#add-questions-and-choices) or imported from an [Excel source](../configuration/authoring/excel.md) — same vocabulary on both paths), the result is computed from the `compute_result` tag carried by each question choice and aggregated _worst-wins_ across the requirement's questions, with `not_applicable` neutral.
 
+Text type questions are not taken into account for the result computation: leaving one empty does not hold the requirement at **Not assessed**.
+
 If you maintain a tenant whose audits were produced under the older boolean-collapse logic, see [Special cases — Recompute assessment results](../installation/special-cases.md#recompute-assessment-results-after-the-semantic-compute_result-upgrade) for the realignment procedure.
 
 ### Analyst dimension (assignee + workflow status)
@@ -139,9 +141,13 @@ See [Comments](../features/comments.md) for the full feature reference — proce
 
 Evidence justifies the status of a compliance requirement or proves that an applied control has been implemented. It can be a description, a link, or an uploaded file, and it can be attached to any number of applied controls or requirement assessments.
 
+## Raising findings
+
+With the **findings_from_requirements** [feature flag](../configuration/settings/feature-flags.md) on, a requirement assessment gains a **Findings** tab and a **Raise a finding** action, so a non-compliance is recorded without leaving the requirement. The audit's findings collect in a [findings binder](findings-assessments.md#raising-a-finding-from-a-requirement) created on first use.
+
 ## Related
 
 - [Applied controls](applied-controls.md)
-- [Findings assessments](findings-assessments.md)
+- [Findings binders](findings-assessments.md)
 - [Perimeters](perimeters.md)
 - [Vocabulary → Audit / Requirement / Evidence](../introduction/vocabulary.md)

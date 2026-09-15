@@ -4,6 +4,7 @@
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { page } from '$app/state';
 	import { LOCALE_MAP, language } from '$lib/utils/locales';
 	import { getToastStore } from '$lib/components/Toast/stores';
 
@@ -25,6 +26,10 @@
 	$pageTitle = m.lbMatrixPageTitle({ name: matrix.name || matrix.ref_id });
 
 	const baseLang = draft.locale ?? 'en';
+
+	let labelStandard = $derived(page.data.settings?.risk_matrix_labels ?? 'ISO');
+	let probabilityLabel = $derived(safeTranslate(`probability${labelStandard}`));
+	let impactLabel = $derived(safeTranslate(`impact${labelStandard}`));
 
 	// The document's level objects carry no numeric id; the editor components
 	// key on one. Assigned on load, stripped on save.
@@ -62,7 +67,7 @@
 	let activeLang = $state(baseLang);
 	let addedLanguages: string[] = $state([]);
 	let metaTranslations: Record<string, { name?: string; description?: string }> = $state({
-		...(matrix.translations ?? {})
+		...matrix.translations
 	});
 	let isTranslatingMeta = $derived(activeLang !== baseLang);
 
@@ -249,7 +254,8 @@
 						{(isTranslatingMeta && metaTranslations[activeLang]?.name) || name || matrix.ref_id}
 					</h2>
 					{#if unsaved}
-						<span class="badge variant-filled-warning text-xs">{m.lbMatrixUnsavedChanges()}</span>
+						<span class="badge preset-filled-warning-500 text-xs">{m.lbMatrixUnsavedChanges()}</span
+						>
 					{/if}
 				</div>
 				<p class="text-xs font-mono text-surface-500 mt-1">{matrix.urn}</p>
@@ -257,7 +263,7 @@
 			<div class="flex items-center gap-2">
 				<button
 					type="button"
-					class="btn btn-sm variant-filled-primary"
+					class="btn btn-sm preset-filled-primary-500"
 					onclick={save}
 					disabled={saving}
 				>
@@ -379,7 +385,7 @@
 		<div class="card p-4">
 			<LevelEditor
 				bind:levels={probabilityLevels}
-				title={m.lbMatrixProbability()}
+				title={probabilityLabel}
 				onchange={onProbabilityChange}
 				{activeLang}
 				{baseLang}
@@ -388,7 +394,7 @@
 		<div class="card p-4">
 			<LevelEditor
 				bind:levels={impactLevels}
-				title={m.lbMatrixImpact()}
+				title={impactLabel}
 				onchange={onImpactChange}
 				{activeLang}
 				{baseLang}

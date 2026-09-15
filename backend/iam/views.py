@@ -262,7 +262,7 @@ class CurrentUserView(views.APIView):
             "accessible_domains": [str(f) for f in accessible_domains],
             "domain_permissions": domain_permissions,
             "root_folder_id": Folder.get_root_folder().id,
-            "preferences": request.user.preferences,
+            "preferences": request.user.get_preferences(),
             "has_mfa_enabled": request.user.has_mfa_enabled(),
             "is_superuser": request.user.is_superuser,
         }
@@ -291,6 +291,9 @@ class SessionTokenView(views.APIView):
         # Log the user in and get the session token
         # This token is used for allauth's authentication flows
         login(request, user)
+        # Same-hostname deployments forward the browser cookies here, so this
+        # may be the callback session and its short TTL must not be inherited.
+        request.session.set_expiry(None)
         copy_slo_state_from_session_key(
             request, request.META.get("HTTP_X_SSO_SESSION_KEY")
         )
@@ -571,7 +574,18 @@ class SCIMTokenViewSet(views.APIView):
         name = request.data.get("name") or "SCIM provisioning token"
         if len(name) > 255:
             return Response(
-                {"error": "Name must be at most 255 characters."},
+                {"error": "scimTokenNameTooLong"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            sso_settings = GlobalSettings.objects.get(
+                name=GlobalSettings.Names.SSO
+            ).value
+        except GlobalSettings.DoesNotExist:
+            sso_settings = {}
+        if not sso_settings.get("is_enabled", False):
+            return Response(
+                {"error": "scimTokenRequiresSso"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         token_prefix = knox_settings.TOKEN_PREFIX

@@ -9,6 +9,7 @@
 	import Score from '$lib/components/Forms/Score.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
+	import { formFieldProxy } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import { onMount } from 'svelte';
@@ -30,6 +31,7 @@
 		origin?: string | null;
 		initialData?: Record<string, any>;
 		context?: string;
+		object?: any;
 		rest?: Record<string, any>;
 	}
 
@@ -42,11 +44,13 @@
 		schema = {},
 		origin = null,
 		initialData = {},
-		context = 'default'
+		context = 'default',
+		object = {}
 	}: Props = $props();
 
 	// Declare form store at top level
 	const formStore = form.form;
+	const { value: folderId } = formFieldProxy(form, 'folder');
 
 	let syncMappings: Record<string, any>[] = $state(page.data?.object?.sync_mappings ?? []);
 
@@ -368,6 +372,8 @@
 					{#key $formStore.integration_config}
 						<AutocompleteSelect
 							{form}
+							lazy
+							minSearchLength={1}
 							optionsEndpoint="settings/integrations/configs/{$formStore.integration_config}/remote-objects"
 							optionsLabelField="summary"
 							optionsValueField="key"
@@ -444,5 +450,5 @@
 {/if}
 
 {#if model?.name === 'appliedcontrol'}
-	<CustomFieldsSection {form} model="core.appliedcontrol" folderId={$formStore.folder} />
+	<CustomFieldsSection {form} model="core.appliedcontrol" folderId={$folderId} />
 {/if}

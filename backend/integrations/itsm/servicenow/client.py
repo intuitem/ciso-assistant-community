@@ -1,5 +1,7 @@
+import re
 from typing import Any, Dict, List
 import requests
+from django.core.exceptions import ObjectDoesNotExist
 from structlog import get_logger
 from integrations.models import SyncMapping
 from core.models import AppliedControl
@@ -8,6 +10,28 @@ from integrations.base import BaseIntegrationClient
 from .mapper import ServiceNowFieldMapper
 
 logger = get_logger(__name__)
+
+# ServiceNow sys_ids are 32-char hex GUIDs; accept alphanumeric only so no
+# encoded-query metacharacter can pass through hydration.
+SYS_ID_PATTERN = re.compile(r"[0-9a-zA-Z]{1,64}")
+
+# Each hydration id is user-supplied; the picker only hydrates selected
+# values, so a handful is plenty.
+MAX_HYDRATION_IDS = 20
+
+# Ceiling on total rows scanned per list call while paging past
+# already-mapped records that get filtered out of the results.
+MAX_LIST_FETCH = 500
+
+# Rows requested per page while scanning.
+LIST_PAGE_SIZE = 100
+
+# Deterministic global ordering for offset pagination: newest first, with the
+# immutable sys_id as tiebreaker (sys_updated_on would reshuffle pages when a
+# record is touched mid-scan). ORDERBY tokens apply to the whole encoded
+# query wherever they appear, ^NQ branches included; an ORDERBY an admin put
+# in base_query simply becomes the primary sort with these as tiebreakers.
+LIST_ORDERING = "ORDERBYDESCsys_created_on^ORDERBYsys_id"
 
 
 class ServiceNowClient(BaseIntegrationClient):
@@ -129,54 +153,166 @@ class ServiceNowClient(BaseIntegrationClient):
             )
             raise
 
+    # Candidate fields the picker searches when the user types. Matches the
+    # display label sources in ``_display_label``; restricted per table by
+    # ``_searchable_fields`` since not every table has all three.
+    SEARCH_FIELDS = ("number", "short_description", "name")
+
+    @staticmethod
+    def _and_onto_branches(base_query: str, condition: str) -> str:
+        """AND ``condition`` onto every top-level ``^NQ`` branch of ``base_query``.
+
+        ``base_query`` is free-form admin config and may itself OR complete
+        subqueries with ``^NQ`` (ServiceNow's own filter UI emits it), so
+        appending the condition to the string as a whole would leave every
+        branch but the last unconstrained, matching its entire scope.
+        """
+        branches = base_query.split("^NQ")
+        return "^NQ".join(
+            f"{branch}^{condition}" if branch else condition for branch in branches
+        )
+
+    def _searchable_fields(self) -> tuple[str, ...]:
+        """``SEARCH_FIELDS`` restricted to columns of the configured table.
+
+        A ``^NQ`` branch on a nonexistent field either matches everything
+        (ServiceNow drops invalid conditions by default) or kills the whole
+        query (strict mode), so only emit branches for real columns. Resolved
+        against the DB-backed schema cache (warmed on startup and by the
+        FieldMapper); when the table's columns aren't cached yet, keep all
+        candidates, which is the previous behavior.
+        """
+        try:
+            columns = self.configuration.schema_cache.columns.get(self.table)
+        except ObjectDoesNotExist:
+            return self.SEARCH_FIELDS
+        if not columns:
+            return self.SEARCH_FIELDS
+        names = {c.get("name") for c in columns}
+        return tuple(f for f in self.SEARCH_FIELDS if f in names)
+
     def list_remote_objects(
         self, query_params: dict[str, Any] | None = None
     ) -> List[dict[str, Any]]:
+        """List records from the configured table.
+
+        ``query_params`` supports ``search`` (matched against number,
+        short_description and name), ``limit`` and ``id`` (comma-separated
+        sys_ids to hydrate).
+        """
         if query_params is None:
             query_params = {}
 
         # Build Encoded Query
         # Example: active=true^sys_updated_on>=2024-01-01
-        sysparm_query = self.model_settings.get("base_query", "active=true")
+        base_query = self.model_settings.get("base_query", "active=true")
+        sysparm_query = base_query
+
+        ids = str(query_params.get("id", "") or "")
+        search = str(query_params.get("search", "") or "")
+        if ids:
+            # sys_ids are alphanumeric; drop anything else so a crafted id
+            # can't inject encoded-query branches (^, ^NQ, ...) past
+            # base_query. Only the server-generated commas delimit the IN.
+            id_list = [
+                i.strip()
+                for i in ids.split(",")
+                if i.strip() and SYS_ID_PATTERN.fullmatch(i.strip())
+            ][:MAX_HYDRATION_IDS]
+            if not id_list:
+                return []
+            sysparm_query = self._and_onto_branches(
+                base_query, f"sys_idIN{','.join(id_list)}"
+            )
+        elif search:
+            # ^ and , are encoded-query metacharacters; LIKE has no escape
+            # syntax so strip them from the term.
+            term = search.strip().replace("^", "").replace(",", "")
+            if not term:
+                # The term sanitized down to nothing: it must match nothing,
+                # not fall through to the unfiltered base query.
+                return []
+            search_fields = self._searchable_fields()
+            if not search_fields:
+                # No searchable column on this table: returning the base
+                # query would present unrelated rows as search matches.
+                return []
+            # ^NQ ORs complete subqueries, so base_query is repeated in
+            # each branch; a plain ^OR would escape the base_query AND
+            # due to flat left-to-right precedence.
+            sysparm_query = "^NQ".join(
+                self._and_onto_branches(base_query, f"{field}LIKE{term}")
+                for field in search_fields
+            )
+
+        used_ids = set(
+            SyncMapping.objects.filter(configuration=self.configuration).values_list(
+                "remote_id", flat=True
+            )
+        )
+
+        limit = query_params.get("limit", 100)
 
         url = f"{self.base_url}/api/now/table/{self.table}"
-        params = {
-            "sysparm_query": sysparm_query,
-            # Superset of common display fields so labels work across tables
-            # (incident uses number/short_description, CMDB/asset tables use name).
-            "sysparm_fields": "sys_id,number,name,short_description,sys_updated_on",
-            "sysparm_limit": query_params.get("max_results", 100),
-        }
 
+        # Mapped records are filtered out client-side, so a single fetch
+        # cannot tell "few matches" from "page full of mapped records" — the
+        # latter would return a short page and silently flip the picker's
+        # lazy/eager probe to eager on a truncated list. Keep paging until
+        # the page fills or the source (or the MAX_LIST_FETCH scan budget)
+        # runs out. Records are deduplicated by sys_id since a row can match
+        # more than one ^NQ branch of the query.
+        results = []
+        seen = set()
+        offset = 0
         try:
-            used_ids = SyncMapping.objects.filter(
-                configuration=self.configuration
-            ).values_list("remote_id", flat=True)
+            while True:
+                params = {
+                    "sysparm_query": f"{sysparm_query}^{LIST_ORDERING}",
+                    # Superset of common display fields so labels work across tables
+                    # (incident uses number/short_description, CMDB/asset tables use name).
+                    "sysparm_fields": "sys_id,number,name,short_description,sys_updated_on",
+                    "sysparm_limit": LIST_PAGE_SIZE,
+                    "sysparm_offset": offset,
+                }
+                response = requests.get(
+                    url,
+                    auth=self.auth,
+                    headers=self._get_headers(),
+                    params=params,
+                    timeout=30,
+                    allow_redirects=False,
+                )
+                response.raise_for_status()
 
-            response = requests.get(
-                url,
-                auth=self.auth,
-                headers=self._get_headers(),
-                params=params,
-                timeout=30,
-                allow_redirects=False,
-            )
-            response.raise_for_status()
+                records = response.json().get("result", [])
+                for record in records:
+                    sys_id = record.get("sys_id")
+                    if not sys_id or sys_id in seen:
+                        continue
+                    seen.add(sys_id)
+                    # Hydration by id must return the record even when mapped.
+                    if ids or sys_id not in used_ids:
+                        results.append(
+                            {
+                                "key": sys_id,
+                                "id": sys_id,
+                                "summary": self._display_label(record, sys_id),
+                            }
+                        )
+                        if len(results) >= limit:
+                            return results
 
-            results = []
-            for record in response.json().get("result", []):
-                sys_id = record.get("sys_id")
-                if not sys_id:
-                    continue
-                if sys_id not in used_ids:
-                    results.append(
-                        {
-                            "key": sys_id,
-                            "id": sys_id,
-                            "summary": self._display_label(record, sys_id),
-                        }
+                offset += len(records)
+                if len(records) < LIST_PAGE_SIZE:
+                    return results
+                if offset >= MAX_LIST_FETCH:
+                    logger.warning(
+                        "ServiceNow picker scan budget exhausted before the page filled",
+                        scanned=offset,
+                        collected=len(results),
                     )
-            return results
+                    return results
 
         except requests.exceptions.RequestException:
             logger.error("Failed to search ServiceNow", exc_info=True)

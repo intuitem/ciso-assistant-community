@@ -17,6 +17,9 @@ d dispatch events at depth d, which start instances at depth d+1, capped at
 MAX_TRIGGER_DEPTH.
 """
 
+from datetime import timedelta
+
+from django.db import transaction
 from django.utils import timezone
 
 import structlog
@@ -29,7 +32,28 @@ logger = structlog.get_logger(__name__)
 
 MAX_TRIGGER_DEPTH = 5
 
+# How long one user action's events keep collapsing into its first run.
+COALESCE_WINDOW = timedelta(minutes=5)
+
 CUD_ACTIONS = ["created", "updated", "deleted"]
+
+# Events a model emits itself, beyond create/update/delete. A CUD event cannot say
+# "this request was submitted": answering a question saves the row too, so a trigger
+# would fire on every keystroke's worth of progress and have to filter by status.
+# A named key makes the trigger say what it means, which is what a starter workflow
+# has to teach.
+CUSTOM_EVENTS = [
+    {
+        "key": "quickformresponse.submitted",
+        "model": "quickformresponse",
+        "action": "submitted",
+    },
+    {
+        "key": "quickformresponse.closed",
+        "model": "quickformresponse",
+        "action": "closed",
+    },
+]
 
 VALID_FILTER_OPS = {choice[0] for choice in Condition.Operator.choices}
 MAX_FILTER_DEPTH = 5
@@ -74,13 +98,21 @@ def event_key_catalog():
                     "action": action,
                 }
             )
+    keys.extend(CUSTOM_EVENTS)
     return keys
 
 
 def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
     """Match triggers and start workflows. Returns started instances."""
+    from global_settings.utils import ff_is_enabled
+
     from .engine import EngineError, create_instance
     from .tasks import run_instance_task
+
+    if not ff_is_enabled("workflows"):
+        # Flag off means off: application events fall through silently, same
+        # as when no trigger matches.
+        return []
 
     started = []
     triggers = WorkflowTrigger.objects.filter(
@@ -129,15 +161,26 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
             # No run identity, no automatic execution.
             _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_NO_IDENTITY)
             continue
+        # One run per (trigger, user action, object): a save that writes
+        # several LogEntries for one object is one run, while a bulk edit still
+        # gets a run per object. Windowed, not unique-constrained: the cid can
+        # come from an inbound x-correlation-id header, and a client reusing
+        # one must not silence a trigger for good.
+        cid = (payload or {}).get("cid") or ""
         try:
-            instance = create_instance(
-                version,
-                trigger=WorkflowInstance.Trigger.INTERNAL_EVENT,
-                payload=payload,
-                entry_node=entry,
-                trigger_registration=trigger,
-                trigger_depth=origin_depth + 1,
-            )
+            with transaction.atomic():
+                if cid and _already_running(trigger, cid, payload):
+                    _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_COALESCED)
+                    continue
+                instance = create_instance(
+                    version,
+                    trigger=WorkflowInstance.Trigger.INTERNAL_EVENT,
+                    payload=payload,
+                    entry_node=entry,
+                    trigger_registration=trigger,
+                    trigger_depth=origin_depth + 1,
+                    trigger_cid=cid,
+                )
         except EngineError:
             _bookkeep(trigger, WorkflowTrigger.Result.ERROR)
             continue
@@ -145,6 +188,17 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
         _bookkeep(trigger, WorkflowTrigger.Result.TRIGGERED, fired=True)
         started.append(instance)
     return started
+
+
+def _already_running(trigger, cid, payload):
+    """Locks the trigger row first: two dispatch workers must not both read
+    "nothing started yet" for the same user action."""
+    WorkflowTrigger.objects.select_for_update().filter(pk=trigger.pk).first()
+    return trigger.instances.filter(
+        trigger_cid=cid,
+        payload__object_id=(payload or {}).get("object_id"),
+        created_at__gte=timezone.now() - COALESCE_WINDOW,
+    ).exists()
 
 
 def _bookkeep(trigger, result, fired=False):
@@ -393,6 +447,7 @@ def payload_from_log_entry(log_entry):
         "object_repr": log_entry.object_repr,
         "changes": changes,
         "new_values": {field: diff[1] for field, diff in changes.items()},
+        "cid": log_entry.cid or "",
         "folder_id": additional.get("folder_id"),
         "actor_email": getattr(log_entry.actor, "email", None),
         "timestamp": log_entry.timestamp.isoformat() if log_entry.timestamp else None,

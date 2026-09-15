@@ -430,7 +430,6 @@
 	"asPDF": "导出为PDF",
 	"asCSV": "导出为CSV",
 	"asXLSX": "导出为Excel",
-	"asWord": "导出为Word",
 	"exportPdf": "导出PDF",
 	"generating": "生成中",
 	"asMarkdown": "导出为Markdown",
@@ -784,6 +783,10 @@
 	"attemptToRemoveOnlyAdminUserGroup": "您不能将应用程序中唯一的管理员用户从管理员用户组中移除。",
 	"attemptToRemoveSelfFromDomainAdminGroup": "您不能将自己从域管理员组中移除。请让其他管理员来操作。",
 	"scoringHelpText": "勾选以启用评分",
+	"overrideScore": "覆盖评分",
+	"overrideScoreHelpText": "手动固定评分，不再根据答案重新计算",
+	"automaticScore": "自动评分",
+	"scoreDeviatesFromAuto": "手动评分与自动评分不一致（{score}）",
 	"minScore": "最低分",
 	"maxScore": "最高分",
 	"setTemporaryPassword1": "如果用户无法自行设置密码，您可以",
@@ -800,7 +803,6 @@
 	"noStatus": "无状态",
 	"actionPlanHelpText": "计数器表示关联要求的数量。",
 	"matchingRequirements": "匹配的要求",
-	"asZIP": "导出为ZIP",
 	"incoming": "即将到来",
 	"outdated": "已过时",
 	"flashMode": "快速模式",
@@ -1028,6 +1030,8 @@
 	"removeIdentifier": "移除标识符",
 	"phone": "电话",
 	"role": "角色",
+	"defaultRole": "默认角色",
+	"defaultRoleHelpText": "在此域中自动授予角色，适用于在其任一子域拥有角色分配的任何用户。",
 	"questions": "问题",
 	"recipientEntity": "接收实体",
 	"financial": "财务",
@@ -1075,7 +1079,8 @@
 	"mailFailedToSend": "邮件发送失败",
 	"questionOrQuestions": "问题",
 	"successfullyUpdatedClientSettings": "客户端设置更新成功，请刷新页面。",
-	"xRaysEmptyMessage": "您必须至少创建一个范围才能使用X射线透视。",
+	"xRaysEmptyMessage": "未发现任何问题。X射线透视仅显示存在发现的域。",
+	"xRaysLoadingError": "X射线透视分析未能完成。请查看服务器日志了解详情。",
 	"xRaysLoadingData": "正在分析数据...",
 	"xRaysIssueType": "问题类型",
 	"xRaysIssueTypes": "问题类型",
@@ -1089,14 +1094,7 @@
 	"createAppliedControlsFromSuggestionsError": "从建议的参考控制措施创建已实施控制措施时发生错误",
 	"createAppliedControlsFromSuggestionsConfirmMessage": "将从建议的参考控制措施创建{count}个已实施控制措施。是否继续？",
 	"theFollowingControlsWillBeAddedColon": "将添加以下控制措施：",
-	"mfa": "多因素认证",
-	"mfaAuthentication": "多因素认证",
-	"mfaSetup": "设置多因素认证",
-	"mfaEnable": "启用MFA",
-	"mfaDisable": "禁用MFA",
-	"mfaCode": "验证码",
 	"privacy": "隐私",
-	"privacyManagement": "隐私管理",
 	"processing": "数据处理",
 	"processings": "数据处理活动",
 	"addProcessing": "添加数据处理",
@@ -1105,7 +1103,6 @@
 	"addPurpose": "添加目的",
 	"legalBasis": "法律依据",
 	"personalData": "个人数据",
-	"personalDataHelpText": "此处理涉及的个人数据类别",
 	"addPersonalData": "添加个人数据",
 	"dataSubject": "数据主体",
 	"dataSubjects": "数据主体",
@@ -1116,9 +1113,6 @@
 	"dataTransfer": "数据传输",
 	"dataTransfers": "数据传输",
 	"addDataTransfer": "添加数据传输",
-	"retentionPeriod": "保留期限",
-	"retentionPeriodHelpText": "数据将保留多长时间",
-	"retentionMechanism": "保留机制",
 	"personalDataCategories": "个人数据类别",
 	"personalDataCategoriesIdentified": "已识别的个人数据类别",
 	"documentedProcessings": "已记录的处理活动",
@@ -1815,7 +1809,6 @@
 	"deactivateServiceAccountConfirm": "停用此服务账户将立即撤销所有未过期的访问令牌,并阻止签发新令牌。是否继续?",
 	"gracePeriod": "宽限期",
 	"gracePeriodHelpText": "轮换后,当前密钥会在此时长内继续工作,以便在不中断服务的情况下更新集成。最长限制为 1 个月。",
-	"gracePeriodTooLong": "宽限期不能超过 1 个月。",
 	"previousSecretValidUntil": "之前的客户端密钥在 {date} 之前仍然有效。",
 	"expiresOn": "到期日期 {date}",
 	"expiresIn": "到期时间",
@@ -1948,6 +1941,7 @@
 	"mappingSuggestionTeasing": "现在提供映射建议！您可以使用筛选器浏览基于已加载框架的建议。",
 	"errorCreatingPersonalAccessToken": "创建个人访问令牌时发生错误。",
 	"errorMaxPatAmountExceeded": "该用户已超过允许的最大令牌数量。",
+	"errorSsoRequiredForManagedUsers": "只要存在没有本地访问权限的 SCIM 预配或自动预配用户，就无法禁用 SSO。",
 	"campaignDomainHelpText": "活动将附加到的域。",
 	"ebiosRmStudyDomainHelpText": "更改域会将研究及其所有工作坊对象移至所选域。",
 	"associatedFindingsAssessments": "关联的跟踪",
@@ -2823,15 +2817,6 @@
 	"changeUserGroup": "修改用户组",
 	"deleteUserGroup": "删除用户组",
 	"viewUserGroup": "查看用户组",
-	"changeQuantitativeRiskHypothesis": "修改定量风险假设",
-	"deleteQuantitativeRiskHypothesis": "删除定量风险假设",
-	"viewQuantitativeRiskHypothesis": "查看定量风险假设",
-	"changeQuantitativeRiskScenario": "修改场景",
-	"deleteQuantitativeRiskScenario": "删除场景",
-	"viewQuantitativeRiskScenario": "查看场景",
-	"changeQuantitativeRiskStudy": "修改风险量化研究",
-	"deleteQuantitativeRiskStudy": "删除风险量化研究",
-	"viewQuantitativeRiskStudy": "查看风险量化研究",
 	"dueDateUpdatedSuccessfully": "到期日期更新成功",
 	"taskScheduleInfo": "过去的实例受到保护，不受计划更改的影响。只有即将到来的任务将被重新计算。",
 	"cascadeDeleteWarning": "警告：删除此项还将永久删除 {count} 个相关对象：",
@@ -3304,7 +3289,6 @@
 	"enrichFromEUVD": "从EUVD丰富",
 	"syncCweCatalog": "拉取CWE",
 	"syncCweCatalogFailed": "CWE失败",
-	"exportEcosystem": "生态系统导出 (XLSX)",
 	"close": "关闭",
 	"expandAll": "全部展开",
 	"collapseAll": "全部折叠",
@@ -3335,19 +3319,12 @@
 	"builderRequirementHint": "可评估，仍可包含子节点",
 	"builderSplashScreen": "启动屏",
 	"builderSplashScreenHint": "展示性，不可评估",
-	"builderStatusLive": "已上线",
-	"builderStatusLiveTitle": "草稿与审计响应者所看到的内容一致。",
-	"builderStatusUnpublishedChanges": "存在未发布的更改",
-	"builderStatusUnpublishedChangesTitle": "草稿包含尚未对审计响应者可见的修改。请发布以应用。",
-	"builderStatusDraftNothingLive": "草稿 — 尚未上线任何内容",
-	"builderStatusDraftNothingLiveTitle": "草稿已有内容，但尚未发布。在您发布之前，新审计将看不到任何内容。",
 	"builderStatusEmpty": "空",
 	"builderStatusEmptyTitle": "尚无要求。基于此框架的新审计将无内容可作答。",
 	"builderPreview": "预览",
 	"builderPreviewSaveFirst": "请先保存草稿才能预览",
 	"builderPreviewAsRespondent": "以响应者身份预览（在新标签页中打开）",
 	"builderExportYamlTitle": "将框架导出为 YAML 库文件",
-	"builderExportYamlUnpublishedWarning": "未发布的更改不会被包含。请先发布以导出最新修改。",
 	"builderCopyBase": "复制基础语言",
 	"builderCopyBaseTitle": "将基础语言文本复制到 {lang}（不会覆盖已有翻译）",
 	"builderCopyBaseQuestion": "复制基础文本？",
@@ -3357,82 +3334,7 @@
 	"builderExpandAllCards": "展开所有卡片",
 	"builderCollapseAllCards": "折叠所有卡片",
 	"builderSaveFailed": "保存失败",
-	"builderPublishedFlash": "已发布！",
 	"builderSaveDraftTitle": "保存草稿 (Ctrl+S)",
-	"builderDiscardDraftTitle": "放弃草稿",
-	"builderDiscard": "放弃",
-	"builderDiscardAllChangesQuestion": "放弃所有更改？",
-	"builderYesDiscard": "是，放弃",
-	"builderPublishDraftToLiveTitle": "将草稿发布到正式框架",
-	"builderPublishing": "发布中...",
-	"builderPublishModalTitle": "将草稿发布到正式版本",
-	"builderPublishModalDescription": "此操作将更新正式框架。请查看下方的更改。",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "已添加 {count} 项要求",
-				"countPlural=other": "已添加 {count} 项要求"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} 个问题",
-				"countPlural=other": "{count} 个问题"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "已移除 {count} 项要求",
-				"countPlural=other": "已移除 {count} 项要求"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} 个问题",
-				"countPlural=other": "{count} 个问题"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "未检测到结构性更改（仅元数据）。",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "检测到 {count} 项不兼容更改",
-				"countPlural=other": "检测到 {count} 项不兼容更改"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "这些更改可能会影响现有审计中的评分、可见性或合规结果。",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} 个现有审计将受到影响",
-				"countPlural=other": "{count} 个现有审计将受到影响"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "新增要求将被添加到这些审计中。",
-	"builderAffectedAuditsRemovedHint": "已移除的要求及其评估数据将从这些审计中删除。",
-	"builderCouldNotLoadPreview": "无法加载影响预览。请谨慎操作。",
-	"builderConfirmPublish": "确认发布",
 	"builderSearchNodes": "搜索节点...",
 	"builderExpandSidebar": "展开侧边栏",
 	"builderCollapseSidebar": "折叠侧边栏",
@@ -3612,7 +3514,6 @@
 	"builderSplashNumberedList": "编号列表",
 	"builderSplashLink": "链接",
 	"builderSplashTable": "表格",
-	"builderSplashInsertImage": "插入图片",
 	"builderUntitledQuestion": "未命名问题",
 	"builderNotTranslated": "未翻译",
 	"builderQuestionTextPlaceholder": "输入您的问题...",
@@ -3657,27 +3558,12 @@
 	"builderKbSaveDraft": "保存草稿",
 	"builderKbShowCheatsheet": "显示此速查表",
 	"builderKbCloseDialog": "关闭对话框或下拉菜单",
-	"builderImportedFramework": "已导入的框架",
-	"builderImportedFrameworkDescription": "此框架是从库中导入的，无法直接编辑。如需修改，请创建可编辑副本。",
-	"builderCreateCopyAndEdit": "创建副本并编辑",
-	"builderCreatingCopy": "创建副本中...",
-	"builderLoadingEditor": "加载编辑器中...",
-	"builderFailedToStartEditor": "启动编辑器失败",
-	"builderBackToFramework": "返回框架",
-	"builderBackToBuilder": "返回构建器",
-	"builderFailedToLoadDraft": "加载草稿失败",
-	"builderImplementationGroupsHeader": "实施组",
-	"builderNoItemsToPreview": "无可预览的项目。",
-	"builderNoItemsToPreviewHint": "请在构建器中添加可评估的要求或启动屏。",
-	"builderBaseLanguageOption": "基础语言",
 	"builderFrameworkNameRequired": "框架名称为必填项。",
 	"builderFrameworkNameTooLong": "框架名称为 {length} 个字符（最多 200 个）。",
 	"builderNodeNameTooLong": "名称超过 200 个字符（{length}/200）。请将长文本移至描述字段。",
 	"builderRefIdTooLong": "「{label}」：ref_id 为 {length} 个字符（最多 100 个）。",
 	"builderUrnTooLong": "「{label}」：URN 为 {length} 个字符（最多 255 个）。",
-	"builderFailedToSaveDraftBeforePublish": "发布前保存草稿失败。",
 	"builderUnsavedChangesNavigation": "您有未保存的更改将会丢失。仍要离开吗？",
-	"builderUnpublishedChangesNavigation": "您有未发布的更改。您的草稿已保存，稍后可继续。仍要离开吗？",
 	"fieldVisibility": "字段可见性",
 	"fieldVisibilityHelpText": "控制每个角色可以查看和编辑哪些字段。",
 	"visibilityAuditorRespondent": "审计员 + 回应者",
@@ -3710,7 +3596,6 @@
 	"mfaDisabledSuccessfully": "已为该用户禁用 MFA",
 	"errorDisablingMFA": "无法为该用户禁用 MFA",
 	"userHasNoMFAEnabled": "此用户未启用 MFA",
-	"builderChangedOn": "已变更于",
 	"requirementWeight": "权重",
 	"scim": "SCIM",
 	"scimDescription": "配置 SCIM 2.0 预配。将您的身份提供商指向下面的端点，并使用此处生成的持有者令牌进行身份验证。",
@@ -3725,7 +3610,21 @@
 	"scimTokenWarning": "立即复制此令牌。出于安全原因，它将不会再次显示。",
 	"scimTokenRevoked": "SCIM 令牌已吊销",
 	"scimTokenGenerationFailed": "生成 SCIM 令牌失败",
+	"scimTokenRequiresSso": "生成 SCIM 令牌之前必须先启用 SSO。",
+	"scimTokenNameTooLong": "名称不得超过 255 个字符。",
 	"idpGroup": "IdP 组",
 	"idpGroups": "IdP 组",
-	"idpGroupsDescription": "启用 IdP 组联合（SCIM 预配、IdP 组映射以及用户的 IdP 组成员资格）。"
+	"idpGroupsDescription": "启用 IdP 组联合（SCIM 预配、IdP 组映射以及用户的 IdP 组成员资格）。",
+	"reopenAssignmentForEditing": "重新打开以编辑",
+	"forReview": "待审核",
+	"forEditing": "待编辑",
+	"enableJitProvisioning": "启用自动预配置",
+	"enableJitProvisioningHelpText": "为首次通过 SSO 进行身份验证的用户自动创建帐户，并分配下方的默认用户组。",
+	"defaultUserGroups": "默认用户组",
+	"defaultUserGroupsHelpText": "通过自动预配置创建的用户自动获得的用户组。",
+	"defaultUserGroupsWarning": "仅在创建帐户时应用一次。之后更改或删除此设置不会影响已预配置的用户。如果需要随时间保持同步的组成员身份，请改用 IdP 组映射。",
+	"attributeMappingGroups": "组属性映射",
+	"attributeMappingGroupsHelpText": "携带用户 IdP 组成员身份的声明（claim）名称。此处找到的组会在每次登录时与 IdP 组同步，并授予管理员已映射的任何 CISO Assistant 用户组。",
+	"jitProvisioning": "SSO 自动预配置（JIT）",
+	"jitProvisioningDescription": "在首次 SSO 登录时启用自动创建帐户，并同步其 IdP 组成员身份，无需 SCIM。"
 }

@@ -17,13 +17,13 @@ graph LR
   TN -.->|produces| EVR[Evidence revision]
 ```
 
-The task template is the definition — assignee, recurrence rule, expected evidence — and the task occurrence is the actual unit of work scheduled from it. The schedule is a JSON field describing the cadence (DAILY / WEEKLY / MONTHLY / YEARLY with the usual iCalendar refinements). Templates can be wired to many other objects — applied controls being the canonical one (the "maintains" semantics: this work keeps that control healthy) — and when an occurrence is completed, the evidence revision it produces is back-linked through `task_node` so the audit trail closes the loop.
+The task template is the definition — assignee, recurrence rule, expected evidence — and the task occurrence is the actual unit of work scheduled from it. The schedule is a JSON field describing the cadence (DAILY / WEEKLY / MONTHLY / YEARLY with the usual iCalendar refinements), rendered in words wherever it's displayed — *Monthly*, *Every 3 months* — rather than as the raw rule. Templates can be wired to many other objects — applied controls being the canonical one (the "maintains" semantics: this work keeps that control healthy) — and when an occurrence is completed, the evidence revision it produces is back-linked through `task_node` so the audit trail closes the loop.
 
 | User-facing | Internal | Notes |
 |---|---|---|
 | Task definition / template | `TaskTemplate` | One spec, one schedule |
 | Task occurrence | `TaskNode` | One scheduled run |
-| Schedule | `schedule` JSON field on the template | iCal-style recurrence rule |
+| Schedule | `schedule` JSON field on the template | iCal-style recurrence rule; shown in words in the tasks table and the occurrences panel |
 
 ## Definition vs occurrence
 
@@ -33,6 +33,8 @@ Tasks come in two layers, mirroring the **template → instance** pattern used e
 - A **task occurrence** is a single scheduled run produced from a definition — the actual row with a due date, a status (pending → in progress → completed / cancelled), and the evidence collected when the work was done. Internally a `TaskNode`.
 
 A one-off task is just a definition that produces a single occurrence.
+
+With [commitment management](commitments.md) enabled, a one-off definition can also carry a **commitment** — the delivery date its assignee has actually promised, tracked separately from the task date. Recurring definitions cannot: a recurring definition is a template, not a single promise.
 
 ## Lifecycle
 

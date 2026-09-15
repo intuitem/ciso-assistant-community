@@ -7,8 +7,8 @@ name: CCB-CFF-2023-03-01 <-> cyfun2025
 description: Mapping between CCB CyberFundamentals Framework - 2023-03-01 and CyberFundamentals
   2025
 copyright: intuitem
-version: 1
-publication_date: 2025-10-22
+version: 2
+publication_date: 2026-08-21
 provider: intuitem
 packager: intuitem
 dependencies:
@@ -1032,13 +1032,13 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-1.1
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.mi-01.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-2.1
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-1.1
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.mi-01.2
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-3.1
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-1.1
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-3.1
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-1.1
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.2
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_rs.im-1.1
@@ -2103,13 +2103,13 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-1.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.mi-01.2
-      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-1.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.1
-      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-1.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.2
-      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-1.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.1
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_rs.im-1.1

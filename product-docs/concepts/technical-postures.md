@@ -16,10 +16,10 @@ graph LR
   TP -->|monitors| A[Assets]
   TP -->|comprises| R[Runs]
   R -->|records| CR[Check results]
-  TP -.->|remediated through| FA[Follow-up findings assessment]
+  TP -.->|remediated through| FA[Findings binder]
 ```
 
-A technical posture always lives inside a **domain** and is measured against one **framework**, whose assessable requirements act as the check list. It monitors a set of **assets**, and every ingestion of results — a manual entry session, an API push, a file import — is recorded as a **run** carrying one **check result** per (check, asset) it touched. An optional **follow-up findings assessment** is where remediation of failing checks is tracked.
+A technical posture always lives inside a **domain** and is measured against one **framework**, whose assessable requirements act as the check list. It monitors a set of **assets**, and every ingestion of results — a manual entry session, an API push, a file import — is recorded as a **run** carrying one **check result** per (check, asset) it touched. An optional **findings binder** is where remediation of failing checks is tracked.
 
 | User-facing | Internal | Notes |
 |---|---|---|
@@ -27,7 +27,7 @@ A technical posture always lives inside a **domain** and is measured against one
 | Run | `PostureRun` | One ingestion event; keeps the tool name and start time |
 | Check result | `PostureResult` | One measurement of one check on one asset |
 | Check | `RequirementNode` | Assessable requirement from the framework library |
-| Follow-up assessment | `FindingsAssessment` | Findings assessment with the "Posture follow-up" category |
+| Findings binder | `FindingsAssessment` | Findings binder with the "Posture follow-up" category |
 | Domain | `Folder` | Required; drives IAM scoping |
 
 ## The measurement cube
@@ -70,10 +70,10 @@ Runs are the ingestion log of the assessment: the Runs tab lists them with their
 
 The **Action plan** tab lists every check whose current result is anything other than Pass — failures first, then errors, then unchecked and not-applicable cells — so the operational team can decide what to investigate. From there, each line can be turned into a **finding** with one click.
 
-Findings do not live on the technical posture itself. They are created in the **follow-up assessment**, a regular findings assessment linked to the posture (the creation form offers to create one automatically via **Create a related findings assessment**). This separation is deliberate:
+Findings do not live on the technical posture itself. They are created in the **findings binder** linked to the posture (the creation form offers to create one automatically via **Create a related findings assessment**). This separation is deliberate:
 
 - **Measurements are ephemeral; remediation is not.** A check result is overwritten by the next run and eventually pruned by the history depth. A finding needs a stable life of its own — status, owner, ETA, severity, linked applied controls — that survives every re-measurement. Pinning remediation to a measurement row would lose it on the next scan.
-- **Remediation is a shared discipline.** Findings assessments are the platform's common remediation ledger — the same object used for pentest reports and internal reviews. Routing posture failures into one means they benefit from the full findings workflow (action plans, applied controls, reporting) instead of a parallel, posture-only mechanism.
-- **The posture stays a pure measurement surface.** The cube tells you *what is true right now*; the follow-up assessment tells you *what you are doing about it*. Either can be read — or rebuilt — without touching the other.
+- **Remediation is a shared discipline.** Findings binders are the platform's common remediation ledger — the same object used for pentest reports and internal reviews. Routing posture failures into one means they benefit from the full findings workflow (action plans, applied controls, reporting) instead of a parallel, posture-only mechanism.
+- **The posture stays a pure measurement surface.** The cube tells you *what is true right now*; the binder tells you *what you are doing about it*. Either can be read — or rebuilt — without touching the other.
 
 The link is kept visible in both directions: the action plan shows the finding attached to each failing check with its status and ETA, and re-measuring a remediated check back to Pass is how the fix is verified — on the next run, not by declaration.

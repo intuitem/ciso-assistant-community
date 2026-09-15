@@ -227,7 +227,7 @@
 					<span>{m.threats()}</span>
 				</h3>
 				{#if operationalScenario.threats && countMasked(operationalScenario.threats) > 0}
-					<div class="alert variant-soft-warning mb-2">
+					<div class="alert preset-tonal-warning mb-2">
 						<i class="fa-solid fa-triangle-exclamation"></i>
 						<span>{m.objectsNotVisible({ count: countMasked(operationalScenario.threats) })}</span>
 					</div>

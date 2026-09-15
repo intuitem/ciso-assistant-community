@@ -18,6 +18,9 @@
 
 	let { data }: Props = $props();
 
+	const scoreFloor = (audit: any) =>
+		audit?.score_calculation_method === 'sum' ? 0 : (audit?.min_score ?? 0);
+
 	const fieldsToCompare = [
 		{ key: 'name', label: 'Name' },
 		{ key: 'version', label: 'Version' },
@@ -160,9 +163,12 @@
 								name="base_maturity"
 								value={data.baseAudit.global_score}
 								max={data.baseAudit.total_max_score}
+								min={scoreFloor(data.baseAudit)}
 								color={getScoreHexColor(
 									data.baseAudit.global_score,
-									data.baseAudit.total_max_score
+									data.baseAudit.total_max_score,
+									false,
+									scoreFloor(data.baseAudit)
 								)}
 								strokeWidth={32}
 								fontSize={32}
@@ -216,9 +222,12 @@
 								name="compare_maturity"
 								value={data.compareAudit.global_score}
 								max={data.compareAudit.total_max_score}
+								min={scoreFloor(data.compareAudit)}
 								color={getScoreHexColor(
 									data.compareAudit.global_score,
-									data.compareAudit.total_max_score
+									data.compareAudit.total_max_score,
+									false,
+									scoreFloor(data.compareAudit)
 								)}
 								strokeWidth={32}
 								fontSize={32}

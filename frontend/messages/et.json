@@ -1011,6 +1011,10 @@
 	"attemptToRemoveOnlyAdminUserGroup": "Rakenduse ainsat administraatorit ei saa admin-rühmast eemaldada.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Te ei saa ennast domeeni administraatorite grupist eemaldada. Paluge seda teha teisel administraatoril.",
 	"scoringHelpText": "Märgi hindamise lubamiseks",
+	"overrideScore": "Alista skoor",
+	"overrideScoreHelpText": "Määra skoor käsitsi ja lõpeta selle ümberarvutamine vastuste põhjal",
+	"automaticScore": "Automaatne skoor",
+	"scoreDeviatesFromAuto": "Käsitsi määratud skoor erineb automaatsest skoorist ({score})",
 	"minScore": "Miinimumhinne",
 	"maxScore": "Maksimumhinne",
 	"setTemporaryPassword1": "Kui kasutaja ei saa ise parooli määrata, saad",
@@ -1338,6 +1342,8 @@
 	"removeIdentifier": "Eemalda identifikaator",
 	"phone": "Telefon",
 	"role": "Roll",
+	"defaultRole": "Vaikimisi roll",
+	"defaultRoleHelpText": "Roll, mis antakse automaatselt sellele domeenile igale kasutajale, kellel on rollimääramine mõnel selle alamdomeenil.",
 	"questions": "Küsimused",
 	"recipientEntity": "Saajaüksus",
 	"financial": "Finants",
@@ -1385,7 +1391,8 @@
 	"mailFailedToSend": "E-kirja saatmine ebaõnnestus",
 	"questionOrQuestions": "Küsimus(ed)",
 	"successfullyUpdatedClientSettings": "Kliendiseaded uuendati edukalt, palun värskenda lehte.",
-	"xRaysEmptyMessage": "Röntgeni kasutamiseks pead looma vähemalt ühe perimeetri.",
+	"xRaysEmptyMessage": "Ühtegi probleemi ei tuvastatud. Röntgen kuvab ainult leidudega valdkondi.",
+	"xRaysLoadingError": "Röntgenanalüüsi ei õnnestunud lõpule viia. Üksikasjad leiate serveri logidest.",
 	"xRaysLoadingData": "Andmete analüüsimine...",
 	"xRaysIssueType": "probleemi tüüp",
 	"xRaysIssueTypes": "probleemi tüübid",
@@ -2488,7 +2495,6 @@
 	"deactivateServiceAccountConfirm": "Selle teenusekonto deaktiveerimine tühistab kohe kõik kehtivad juurdepääsutokenid ja blokeerib uute väljastamise. Kas jätkata?",
 	"gracePeriod": "Üleminekuperiood",
 	"gracePeriodHelpText": "Praegune saladus jätkab pärast vahetamist töötamist selle aja jooksul, et integratsioone saaks uuendada katkestusteta. Piiratud 1 kuuga.",
-	"gracePeriodTooLong": "Üleminekuperiood ei tohi olla pikem kui 1 kuu.",
 	"previousSecretValidUntil": "Eelmine kliendisaladus kehtib kuni {date}.",
 	"expiresOn": "Aegub {date}",
 	"expiresIn": "Aegub",
@@ -2741,6 +2747,7 @@
 	"mappingSuggestionTeasing": "Vastenduste soovitused on nüüd saadaval! Kasuta filtreid, et uurida laaditud raamistikest tulenevaid soovitusi.",
 	"errorCreatingPersonalAccessToken": "Isikliku juurdepääsutokeni loomisel ilmnes viga.",
 	"errorMaxPatAmountExceeded": "Selle kasutaja jaoks lubatud tokenite maksimaalne arv on ületatud.",
+	"errorSsoRequiredForManagedUsers": "SSO-d ei saa keelata, kuni on olemas SCIM-i kaudu või automaatselt loodud kasutajaid, kellel puudub kohalik juurdepääs.",
 	"campaign": "Kampaania",
 	"campaigns": "Kampaaniad",
 	"addCampaign": "Alusta kampaaniat",
@@ -4232,6 +4239,9 @@
 	"submitForReviewConfirm": "Kas soovid kindlasti oma vastused ülevaatuseks esitada? Sa ei saa neid muuta enne, kui ülevaataja need tagasi saadab.",
 	"closeAssignment": "Sulge",
 	"reopenAssignment": "Ava uuesti",
+	"reopenAssignmentForEditing": "Ava uuesti muutmiseks",
+	"forReview": "Ülevaatuseks",
+	"forEditing": "Muutmiseks",
 	"reviewerObservation": "Ülevaataja märkus",
 	"reviewerObservationPlaceholder": "Kirjelda, milliseid muudatusi on vaja...",
 	"assignmentSubmittedBanner": "Sinu vastused on esitatud ja on ülevaatusel.",
@@ -4486,19 +4496,12 @@
 	"builderRequirementHint": "Hinnatav, võib siiski sisaldada alamsõlmi",
 	"builderSplashScreen": "Avakuva",
 	"builderSplashScreenHint": "Esitluslik, mittehinnatav",
-	"builderStatusLive": "Aktiivne",
-	"builderStatusLiveTitle": "Mustand vastab sellele, mida auditi vastajad näevad.",
-	"builderStatusUnpublishedChanges": "Avaldamata muudatused",
-	"builderStatusUnpublishedChangesTitle": "Mustandis on muudatused, mis pole auditi vastajatele veel nähtavad. Rakendamiseks avalda.",
-	"builderStatusDraftNothingLive": "Mustand — midagi pole veel aktiivne",
-	"builderStatusDraftNothingLiveTitle": "Mustandis on sisu, kuid midagi pole veel avaldatud. Uued auditid ei näe midagi enne avaldamist.",
 	"builderStatusEmpty": "Tühi",
 	"builderStatusEmptyTitle": "Nõudeid pole veel. Sellel raamistikul põhinevatel uutel audititel pole midagi vastata.",
 	"builderPreview": "Eelvaade",
 	"builderPreviewSaveFirst": "Eelvaateks salvesta esmalt mustand",
 	"builderPreviewAsRespondent": "Eelvaade vastaja vaatest (avaneb uuel vahekaardil)",
 	"builderExportYamlTitle": "Ekspordi raamistik YAML-teegi failina",
-	"builderExportYamlUnpublishedWarning": "Avaldamata muudatusi ei kaasata. Viimaste muudatuste eksportimiseks avalda esmalt.",
 	"builderCopyBase": "Kopeeri baas",
 	"builderCopyBaseTitle": "Kopeeri baaskeele tekst keelde {lang} (olemasolevaid tõlkeid ei kirjutata üle)",
 	"builderCopyBaseQuestion": "Kas kopeerida baastekst?",
@@ -4508,82 +4511,7 @@
 	"builderExpandAllCards": "Laienda kõik kaardid",
 	"builderCollapseAllCards": "Ahenda kõik kaardid",
 	"builderSaveFailed": "Salvestamine ebaõnnestus",
-	"builderPublishedFlash": "Avaldatud!",
 	"builderSaveDraftTitle": "Salvesta mustand (Ctrl+S)",
-	"builderDiscardDraftTitle": "Hülga mustand",
-	"builderDiscard": "Hülga",
-	"builderDiscardAllChangesQuestion": "Kas hüljata kõik muudatused?",
-	"builderYesDiscard": "Jah, hülga",
-	"builderPublishDraftToLiveTitle": "Avalda mustand aktiivseks raamistikuks",
-	"builderPublishing": "Avaldamine...",
-	"builderPublishModalTitle": "Avalda mustand aktiivseks",
-	"builderPublishModalDescription": "See uuendab aktiivset raamistikku. Vaata allolevad muudatused üle.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} nõuet lisatud",
-				"countPlural=other": "{count} nõudeid lisatud"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} küsimus",
-				"countPlural=other": "{count} küsimust"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} nõue eemaldatud",
-				"countPlural=other": "{count} nõuet eemaldatud"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} küsimus",
-				"countPlural=other": "{count} küsimust"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Struktuurseid muudatusi ei tuvastatud (ainult metaandmed).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} lõhkuv muudatus tuvastatud",
-				"countPlural=other": "{count} lõhkuvat muudatust tuvastatud"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Need muudatused võivad mõjutada olemasolevate auditite hindamist, nähtavust või vastavustulemusi.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} olemasolev audit saab mõjutatud",
-				"countPlural=other": "{count} olemasolevat auditit saavad mõjutatud"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Nendesse audititesse lisatakse uued nõuded.",
-	"builderAffectedAuditsRemovedHint": "Eemaldatud nõuded ja nende hindamisandmed kustutatakse nendest audititest.",
-	"builderCouldNotLoadPreview": "Mõju eelvaadet ei õnnestunud laadida. Jätka ettevaatusega.",
-	"builderConfirmPublish": "Kinnita avaldamine",
 	"builderSearchNodes": "Otsi sõlmi...",
 	"builderExpandSidebar": "Laienda külgriba",
 	"builderCollapseSidebar": "Ahenda külgriba",
@@ -4763,7 +4691,6 @@
 	"builderSplashNumberedList": "Nummerdatud loend",
 	"builderSplashLink": "Link",
 	"builderSplashTable": "Tabel",
-	"builderSplashInsertImage": "Sisesta pilt",
 	"builderUntitledQuestion": "Pealkirjata küsimus",
 	"builderNotTranslated": "Tõlkimata",
 	"builderQuestionTextPlaceholder": "Sisesta küsimus...",
@@ -4808,27 +4735,12 @@
 	"builderKbSaveDraft": "Salvesta mustand",
 	"builderKbShowCheatsheet": "Kuva see spikker",
 	"builderKbCloseDialog": "Sulge dialoog või rippmenüü",
-	"builderImportedFramework": "Imporditud raamistik",
-	"builderImportedFrameworkDescription": "See raamistik imporditi teegist ja seda ei saa otse muuta. Muudatuste tegemiseks loo muudetav koopia.",
-	"builderCreateCopyAndEdit": "Loo koopia ja muuda",
-	"builderCreatingCopy": "Koopia loomine...",
-	"builderLoadingEditor": "Redaktori laadimine...",
-	"builderFailedToStartEditor": "Redaktori käivitamine ebaõnnestus",
-	"builderBackToFramework": "Tagasi raamistikku",
-	"builderBackToBuilder": "Tagasi koostajasse",
-	"builderFailedToLoadDraft": "Mustandi laadimine ebaõnnestus",
-	"builderImplementationGroupsHeader": "Rakendusgrupid",
-	"builderNoItemsToPreview": "Eelvaate kirjeid pole.",
-	"builderNoItemsToPreviewHint": "Lisa koostajas hinnatavad nõuded või avakuvad.",
-	"builderBaseLanguageOption": "Baaskeel",
 	"builderFrameworkNameRequired": "Raamistiku nimi on kohustuslik.",
 	"builderFrameworkNameTooLong": "Raamistiku nime pikkus on {length} märki (maksimaalselt 200).",
 	"builderNodeNameTooLong": "Nimi ületab 200 märki ({length}/200). Paiguta pikem tekst kirjelduse väljale.",
 	"builderRefIdTooLong": "'{label}': ref_id pikkus on {length} märki (maksimaalselt 100).",
 	"builderUrnTooLong": "'{label}': URN-i pikkus on {length} märki (maksimaalselt 255).",
-	"builderFailedToSaveDraftBeforePublish": "Mustandi salvestamine enne avaldamist ebaõnnestus.",
 	"builderUnsavedChangesNavigation": "Sul on salvestamata muudatusi, mis lähevad kaotsi. Kas lahkuda?",
-	"builderUnpublishedChangesNavigation": "Sul on avaldamata muudatusi. Mustand on salvestatud ja saad hiljem jätkata. Kas lahkuda?",
 	"bulkEvidenceUpload": "Tõendite hulgiüleslaadimine",
 	"bulkEvidenceUploadDescription": "Laadi ühe korraga üles mitu faili (või terve kaust) tõenditena. Duplikaatfailid (sama SHA-256 sihtvaldkonna sees) tuvastatakse automaatselt. Nimekonfliktid lahendatakse all valitud strateegia järgi.",
 	"targetDomain": "Sihtvaldkond",
@@ -4892,7 +4804,6 @@
 	"builderQuestionTypeUniqueChoice": "Üksikvalik",
 	"builderQuestionTypeMultipleChoice": "Mitmikvalik",
 	"builderQuestionTypeDate": "Kuupäev",
-	"builderChangedOn": "muudetud",
 	"disableMFA": "Keela MFA",
 	"disableMFA1": "Kui see kasutaja on kaotanud juurdepääsu oma teisele tegurile, saate",
 	"disableMFALinkText": "keelata tema MFA",
@@ -4915,7 +4826,18 @@
 	"scimTokenWarning": "Kopeerige see token kohe. Turvakaalutlustel seda enam ei kuvata.",
 	"scimTokenRevoked": "SCIM-i token tühistatud",
 	"scimTokenGenerationFailed": "SCIM-i tokeni loomine ebaõnnestus",
+	"scimTokenRequiresSso": "SSO peab olema lubatud enne SCIM-tokeni loomist.",
+	"scimTokenNameTooLong": "Nimi ei tohi olla pikem kui 255 tähemärki.",
 	"idpGroup": "IdP rühm",
 	"idpGroups": "IdP rühmad",
-	"idpGroupsDescription": "Luba IdP rühmade föderatsioon (SCIM ettevalmistamine, IdP rühmade vastendused ja kasutajate IdP rühmade liikmesused)."
+	"idpGroupsDescription": "Luba IdP rühmade föderatsioon (SCIM ettevalmistamine, IdP rühmade vastendused ja kasutajate IdP rühmade liikmesused).",
+	"enableJitProvisioning": "Luba kasutajakontode automaatne loomine",
+	"enableJitProvisioningHelpText": "Loob automaatselt konto koos allpool toodud vaikimisi kasutajarühmadega kasutajatele, kes autentivad SSO kaudu esimest korda.",
+	"defaultUserGroups": "Vaikimisi kasutajarühmad",
+	"defaultUserGroupsHelpText": "Kasutajarühmad, mis antakse automaatselt automaatse provisioneerimise teel loodud kasutajatele.",
+	"defaultUserGroupsWarning": "Rakendub ainult üks kord, konto loomisel. Selle seade hilisem muutmine või eemaldamine ei mõjuta juba provisioneeritud kasutajaid. Kui soovid rühmaliikmelisust, mis püsib ajas sünkroonis, kasuta selle asemel IdP rühmade kaardistamist.",
+	"attributeMappingGroups": "Rühmade atribuudi kaardistus",
+	"attributeMappingGroupsHelpText": "Nõude (claim) nimi/nimed, mis kannavad kasutaja IdP rühmaliikmesust. Siit leitud rühmad sünkroonitakse IdP rühmadega igal sisselogimisel ning annavad need CISO Assistanti kasutajarühmad, millega administraator on need kaardistanud.",
+	"jitProvisioning": "SSO automaatne provisioneerimine (JIT)",
+	"jitProvisioningDescription": "Luba kontode automaatne loomine esimesel SSO sisselogimisel ja nende IdP rühmaliikmesuse sünkroonimine, ilma SCIM-i vajaduseta."
 }

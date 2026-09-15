@@ -257,6 +257,13 @@ logger.info("EXPOSE_METRICS: %s", EXPOSE_METRICS)
 
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 50)
 
+# Workflow engine ceilings: rows one read returns, and items one loop iterates.
+# Every extra row is memory in the run context; every extra item is a token and
+# an action execution, so raise them deliberately.
+WORKFLOW_READ_MAX_LIMIT = int(os.environ.get("WORKFLOW_READ_MAX_LIMIT", 500))
+WORKFLOW_LOOP_MAX_ITEMS = int(os.environ.get("WORKFLOW_LOOP_MAX_ITEMS", 500))
+WORKFLOW_LOOP_MAX_PAGES = int(os.environ.get("WORKFLOW_LOOP_MAX_PAGES", 20))
+
 USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
 USE_AZURE = os.getenv("USE_AZURE", "False").lower() in ("true", "1", "yes")
 
@@ -439,6 +446,18 @@ else:
     MEDIA_URL = ""
 
 PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
+# Ceiling we intend to converge on; requests above it are logged, not clamped.
+PAGINATE_TARGET_MAX = 200
+# Held at 5000: Power BI connector <= 1.0.2 pages by the limit it requested, so a
+# lower ceiling truncates its imports silently. Lowering plan:
+# product-docs/configuration/settings/api-pagination.md.
+PAGINATE_MAX = int(os.environ.get("PAGINATE_MAX", default=max(5000, PAGINATE_BY)))
+PAGINATE_BY = min(PAGINATE_BY, PAGINATE_MAX)
+if PAGINATE_BY < 1 or PAGINATE_MAX < 1:
+    raise ImproperlyConfigured(
+        f"PAGINATE_BY and PAGINATE_MAX must be >= 1 "
+        f"(got PAGINATE_BY={PAGINATE_BY}, PAGINATE_MAX={PAGINATE_MAX})"
+    )
 
 # Application definition
 
@@ -887,9 +906,17 @@ AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
 
 # Run workflow instances in a Huey worker instead of the triggering request.
-# Requires a running Huey consumer; keep False for dev setups without one.
+# False only moves the engine into the request: a Huey consumer is required
+# either way, since scheduled triggers, TTL reaping and deferred actions
+# (send_email) are all Huey tasks and silently never run without one.
 WORKFLOWS_ASYNC_EXECUTION = (
     os.environ.get("WORKFLOWS_ASYNC_EXECUTION", "").lower() == "true"
+)
+
+# How long a token may sit parked on a deferred action before the sweep
+# treats the dispatch as lost and fails the node.
+WORKFLOWS_DISPATCH_TIMEOUT_SECONDS = int(
+    os.environ.get("WORKFLOWS_DISPATCH_TIMEOUT_SECONDS", 900)
 )
 
 # Kill-switch for inbound workflow webhooks: when disabled, hook

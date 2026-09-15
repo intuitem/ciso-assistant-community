@@ -1,0 +1,37 @@
+urn: urn:intuitem:test:library:splash-assessable
+locale: en
+ref_id: TEST-SPLASH-ASSESSABLE
+name: "Test - Splash Assessable Library"
+description: "Test fixture exercising the splash-nodes-are-never-assessable invariant."
+copyright: Test fixture, not for production use.
+version: 1
+publication_date: 2026-08-26
+provider: Test
+packager: Test
+objects:
+  framework:
+    urn: urn:intuitem:test:framework:splash-assessable
+    ref_id: TEST-SPLASH
+    name: "Splash Assessable Framework"
+    description: "Framework with a splash node wrongly flagged assessable."
+    requirement_nodes:
+      - urn: urn:intuitem:test:req_node:splash:root
+        assessable: false
+        depth: 1
+        ref_id: "ROOT"
+        name: "Root"
+
+      - urn: urn:intuitem:test:req_node:splash:intro
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:test:req_node:splash:root
+        ref_id: "S.1"
+        name: "Splash screen wrongly flagged assessable"
+        display_mode: splash
+
+      - urn: urn:intuitem:test:req_node:splash:req
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:test:req_node:splash:intro
+        ref_id: "S.1.1"
+        name: "Requirement under the splash screen"

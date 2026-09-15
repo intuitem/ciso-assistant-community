@@ -62,6 +62,25 @@ class TestResolveFieldVisibility:
         ca = _CA(None)
         assert resolve_field_visibility(ca, "score") == HIDDEN
 
+    def test_is_score_overridden_inherits_score_visibility(self):
+        # Default: score HIDDEN -> is_score_overridden HIDDEN (respondents
+        # can't pin scores by toggling the override).
+        ca = _CA({})
+        assert resolve_field_visibility(ca, "is_score_overridden") == HIDDEN
+
+        # Score exposed to auditors only -> override follows.
+        ca = _CA({"score": dict(AUDITOR_ONLY)})
+        assert resolve_field_visibility(ca, "is_score_overridden") == AUDITOR_ONLY
+
+        # Explicit is_score_overridden entry is ignored: alias always wins.
+        ca = _CA(
+            {
+                "score": dict(AUDITOR_ONLY),
+                "is_score_overridden": dict(EVERYONE_EDIT),
+            }
+        )
+        assert resolve_field_visibility(ca, "is_score_overridden") == AUDITOR_ONLY
+
     def test_default_visibility_constants_match_documented_shape(self):
         # If these change, the migration's setdefault logic, the frontend
         # DEFAULT_VISIBILITY mirror in helpers.ts, and the editor cascade

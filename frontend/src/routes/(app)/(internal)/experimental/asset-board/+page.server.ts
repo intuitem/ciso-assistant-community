@@ -1,5 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { modelSchema } from '$lib/utils/schemas';
 import { defaultWriteFormAction, defaultDeleteFormAction } from '$lib/utils/actions';
 import { superValidate } from 'sveltekit-superforms';
@@ -10,21 +11,19 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const selectedFolderId = url.searchParams.get('folder') ?? '';
 
-	// Defensive parsing: if the API returns a non-2xx (401/403/500/etc.), the body
-	// is an error object, not a list. Guard against that so {#each data.folders}
-	// doesn't iterate over object keys or throw.
-	const toList = (data: any): any[] =>
-		Array.isArray(data) ? data : Array.isArray(data?.results) ? data.results : [];
-
-	const foldersRes = await fetch(`${BASE_API_URL}/folders/?content_type=DO&content_type=GL`);
-	const folders = foldersRes.ok ? toList(await foldersRes.json()) : [];
+	// Defensive: if the API returns a non-2xx (401/403/500/etc.), degrade to an
+	// empty list so {#each data.folders} doesn't iterate over object keys or throw.
+	const folders = await fetchAllPages(
+		fetch,
+		`${BASE_API_URL}/folders/?content_type=DO&content_type=GL`
+	).catch(() => []);
 
 	let assets: any[] = [];
 	if (selectedFolderId) {
-		const assetsRes = await fetch(
+		assets = await fetchAllPages(
+			fetch,
 			`${BASE_API_URL}/assets/?folder=${encodeURIComponent(selectedFolderId)}`
-		);
-		assets = assetsRes.ok ? toList(await assetsRes.json()) : [];
+		).catch(() => []);
 	}
 
 	const assetModelInfo = getModelInfo('assets');

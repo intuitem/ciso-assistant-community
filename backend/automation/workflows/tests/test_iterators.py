@@ -4,6 +4,7 @@ in-body conditions on {{item}}, failure policies, caps, nesting, validation."""
 import uuid
 
 import pytest
+from django.test import override_settings
 
 from core.models import AppliedControl, Incident
 from iam.models import Folder
@@ -319,6 +320,7 @@ class TestLoopNode:
         instance = start_instance(version, payload={"items": []})
         assert instance.status == WorkflowInstance.Status.COMPLETED
         assert instance.node_outputs["per_item"] == {
+            "pages": 0,
             "count": 0,
             "results": [],
             "errors": [],
@@ -349,10 +351,13 @@ class TestLoopNode:
             variables=items_variable(),
             input_mapping={"items": "items"},
         )
-        instance = start_instance(version, payload={"items": list(range(101))})
+        # The cap is a deployment setting (WORKFLOW_LOOP_MAX_ITEMS); pin a
+        # small one rather than building hundreds of items to trip the default.
+        with override_settings(WORKFLOW_LOOP_MAX_ITEMS=10):
+            instance = start_instance(version, payload={"items": list(range(11))})
         assert instance.status != WorkflowInstance.Status.COMPLETED
         assert any(
-            "exceeds the 100 cap" in (log.message or "")
+            "exceeds the 10 cap" in (log.message or "")
             for log in instance.logs.filter(event_type="error")
         )
 

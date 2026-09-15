@@ -29,6 +29,6 @@ export class FrameworkHandler extends BaseResourceHandler {
   }
 
   private async list(): Promise<IDataObject> {
-    return this.request("GET", `/${this.getEndpoint()}/`);
+    return this.listAll(`/${this.getEndpoint()}/`);
   }
 }

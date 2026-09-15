@@ -238,7 +238,7 @@ export function normalizeSearchString(str: string): string {
 		.toLowerCase()
 		.normalize('NFD') // Decompose accented characters
 		.replace(/\p{Diacritic}/gu, '') // Remove combining marks (diacritics)
-		.replace(/[^\w\s-]/g, ' ') // Replace special chars with spaces
+		.replace(/[^\p{L}\p{N}\s-]/gu, ' ') // Replace special chars with spaces (unicode-aware, keeps e.g. Cyrillic)
 		.replace(/\s+/g, ' ') // Collapse multiple spaces
 		.trim();
 }
@@ -316,6 +316,11 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 	for (const [q_urn, question] of Object.entries<any>(questions)) {
 		if (!isQuestionVisible(question, answers, questions)) continue;
+
+		// Free-text questions are informational: they have no choices and can be anything,
+		// so it does not make very much sense to take them into account.
+		// Skip them out. (mirrors RequirementAssessment.recompute_assessment).
+		if (question.type === 'text') continue;
 
 		visibleCount++;
 
@@ -467,6 +472,7 @@ export const VISIBILITY_FIELDS = [
 	'score',
 	'documentation_score',
 	'applied_controls',
+	'task_templates',
 	'evidences',
 	'observation',
 	'comments'
@@ -532,6 +538,7 @@ export function getFieldVisibility(
 	showDocumentationScore: boolean;
 	showObservation: boolean;
 	showAppliedControls: boolean;
+	showTaskTemplates: boolean;
 	showEvidences: boolean;
 	showRespondentAlignment: boolean;
 	showComments: boolean;
@@ -545,6 +552,7 @@ export function getFieldVisibility(
 		showDocumentationScore: isFieldVisible(complianceAssessment, 'documentation_score', viewerRole),
 		showObservation: isFieldVisible(complianceAssessment, 'observation', viewerRole),
 		showAppliedControls: isFieldVisible(complianceAssessment, 'applied_controls', viewerRole),
+		showTaskTemplates: isFieldVisible(complianceAssessment, 'task_templates', viewerRole),
 		showEvidences: isFieldVisible(complianceAssessment, 'evidences', viewerRole),
 		showRespondentAlignment: isFieldVisible(
 			complianceAssessment,

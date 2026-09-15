@@ -1,0 +1,12 @@
+subject: "CISO Assistant : Le formulaire rapide '${response_name}' a été soumis"
+body: |
+  Bonjour,
+
+  Une réponse à un formulaire rapide dont vous êtes relecteur a été soumise :
+
+  - Réponse : ${response_name}
+  - Formulaire : ${quick_form_name}
+
+  Veuillez vous connecter à CISO Assistant pour la relire : [Ouvrir la réponse](${ciso_assistant_url}/quick-form-responses/${response_id})
+
+  Merci.

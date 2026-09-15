@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { error, type NumericRange } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -22,11 +23,10 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	const metrics = await metricsResponse.json();
 
 	// Fetch asset assessments with full details
-	const assetsResponse = await fetch(
+	const assetAssessments = await fetchAllPages(
+		fetch,
 		`${BASE_API_URL}/resilience/asset-assessments/?bia=${params.id}`
-	);
-	const assetsData = await assetsResponse.json();
-	const assetAssessments = assetsData.results || [];
+	).catch(() => []);
 
 	// Bulk-fetch full asset details instead of one request per assessment
 	const assetDetailsById = new Map<string, any>();

@@ -73,31 +73,31 @@ class TestStakeholderOrderingFilter:
     def test_entity_field_remapped_to_entity_name(self):
         f, request, qs, view = self._make_filter_with_ordering("entity")
         result = f.get_ordering(request, qs, view)
-        assert result == ["entity__name"]
+        assert result == ["entity__name", "pk"]
 
     def test_descending_entity_preserves_minus_prefix(self):
         f, request, qs, view = self._make_filter_with_ordering("-entity")
         result = f.get_ordering(request, qs, view)
-        assert result == ["-entity__name"]
+        assert result == ["-entity__name", "pk"]
 
     def test_unmapped_field_passes_through_unchanged(self):
         f, request, qs, view = self._make_filter_with_ordering("current_dependency")
         result = f.get_ordering(request, qs, view)
-        assert result == ["current_dependency"]
+        assert result == ["current_dependency", "pk"]
 
     def test_criticality_field_remapped_to_annotation(self):
         f, request, qs, view = self._make_filter_with_ordering("current_criticality")
         result = f.get_ordering(request, qs, view)
-        assert result == ["_current_criticality"]
+        assert result == ["_current_criticality", "pk"]
 
     def test_descending_criticality_preserves_minus_prefix(self):
         f, request, qs, view = self._make_filter_with_ordering("-residual_criticality")
         result = f.get_ordering(request, qs, view)
-        assert result == ["-_residual_criticality"]
+        assert result == ["-_residual_criticality", "pk"]
 
     def test_combined_ordering_entity_and_criticality(self):
         f, request, qs, view = self._make_filter_with_ordering(
             "entity,current_criticality"
         )
         result = f.get_ordering(request, qs, view)
-        assert result == ["entity__name", "_current_criticality"]
+        assert result == ["entity__name", "_current_criticality", "pk"]

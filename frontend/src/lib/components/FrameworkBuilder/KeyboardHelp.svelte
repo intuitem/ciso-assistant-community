@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { getBuilderContext } from './builder-state';
 
 	interface Props {
 		open: boolean;
 		onClose: () => void;
 	}
 	let { open = $bindable(), onClose }: Props = $props();
+
+	const builder = getBuilderContext();
+	const isQuickForm = builder.mode === 'quick_form';
 
 	// Detect platform for modifier-key labels
 	const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -15,15 +19,24 @@
 
 	const groups = $derived([
 		{
-			title: m.builderKbOutlineEditing(),
-			hint: m.builderKbOutlineEditingHint(),
-			shortcuts: [
-				{ keys: [altKey, '→'], label: m.builderKbIndentNode() },
-				{ keys: [altKey, '←'], label: m.builderKbOutdentNode() },
-				{ keys: [altKey, 'Enter'], label: m.builderKbAddChild() },
-				{ keys: [altKey, shiftKey, 'Enter'], label: m.builderKbAddSiblingBelow() },
-				{ keys: [cmdKey, '.'], label: m.builderKbToggleAssessable() }
-			]
+			// Quick-form pages are a flat list: indent, outdent and assessable
+			// do nothing there, so they are not advertised.
+			title: isQuickForm ? m.builderKbPageEditing() : m.builderKbOutlineEditing(),
+			// The framework hint ("the highlighted node") holds for every shortcut in that
+			// group; in quick-form mode "add at the end" is not relative to the selection.
+			hint: isQuickForm ? null : m.builderKbOutlineEditingHint(),
+			shortcuts: isQuickForm
+				? [
+						{ keys: [altKey, shiftKey, 'Enter'], label: m.builderAddPageBelow() },
+						{ keys: [altKey, 'Enter'], label: m.builderKbAddPageAtEnd() }
+					]
+				: [
+						{ keys: [altKey, '→'], label: m.builderKbIndentNode() },
+						{ keys: [altKey, '←'], label: m.builderKbOutdentNode() },
+						{ keys: [altKey, 'Enter'], label: m.builderKbAddChild() },
+						{ keys: [altKey, shiftKey, 'Enter'], label: m.builderKbAddSiblingBelow() },
+						{ keys: [cmdKey, '.'], label: m.builderKbToggleAssessable() }
+					]
 		},
 		{
 			title: m.builderKbBuilder(),

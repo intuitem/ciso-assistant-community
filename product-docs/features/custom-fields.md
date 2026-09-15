@@ -26,7 +26,7 @@ If an attribute is generic enough to be useful to everyone, **tell us** rather t
 - **When to use it.** Whenever you need to capture an org-specific attribute that isn't part of the built-in object — without waiting for a code change.
 - **How to use it.**
   1. Open **Custom fields** and add a definition. You choose the **Model** it attaches to, the **Domain** it applies to, a **Key** (the stable identifier), a **Label**, an optional **Help text**, and a **Field type**.
-  2. Pick the **Field type**: **Text**, **Number**, **Date**, **Boolean**, **Choice**, or **Multiple choice**. Choice and multiple-choice fields take a list of options (**Add choice**).
+  2. Pick the **Field type**: **Text**, **Number**, **Date**, **Boolean**, **Choice**, **Multiple choice**, or **URL**. Choice and multiple-choice fields take a list of options (**Add choice**).
   3. Tune behaviour with the flags — **Required**, **Visible**, **Searchable**, **Filterable** — and **Order** (where it sits among other custom fields).
   4. Open any targeted object. Custom fields show in a collapsible **Custom fields** section on the form; fill them in and save. The values then appear on the object's detail page.
 - **What it gives you.**
@@ -41,7 +41,7 @@ If an attribute is generic enough to be useful to everyone, **tell us** rather t
 - **Gotchas.**
   - **Folder scoping drives applicability** — a definition applies to an object only when its domain is the object's domain, an ancestor, or **Global**.
   - **Key is immutable** after creation, and a key resolves to a single type per model — you can't have the same key be a choice in one domain and a number in another.
-  - **Searchable** is allowed only on text-backed types (text, choice, multiple-choice); the others have no effect and the checkbox is hidden.
+  - **Searchable** is allowed only on text-backed types (text, URL, choice, multiple-choice); the others have no effect and the checkbox is hidden.
   - A field's **type can't be changed once values exist**, and a **required** field can't be cleared with an empty value.
   - Deleting a definition **deletes its stored values**.
 - **Configuration.** The `custom_fields` feature flag (enterprise, off by default). Defining and editing fields requires the **Custom field definition** management permissions (Domain manager and Administrator by default); other roles can read definitions so forms render.
