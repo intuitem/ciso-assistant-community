@@ -51,7 +51,7 @@ test('an applied control tab can attach an object that is not linked yet', async
 	await page.waitForLoadState('networkidle');
 
 	// Every tab the ticket covers must offer both actions, not just the one used below.
-	for (const name of ['Findings', 'Assets', 'Incidents']) {
+	for (const name of ['Documents', 'Findings', 'Assets', 'Incidents']) {
 		const tab = page.getByRole('tab', { name: new RegExp(`^${name}`) });
 		await tab.click();
 		const panel = page.getByRole('tabpanel', { name: new RegExp(`^${name}`) });

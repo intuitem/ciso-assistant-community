@@ -605,7 +605,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'applied_controls',
-				urlModel: 'document-containers'
+				urlModel: 'document-containers',
+				addExisting: {
+					parentField: 'control_documents'
+				}
 			},
 			{
 				field: 'applied_controls',
