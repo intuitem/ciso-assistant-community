@@ -2302,7 +2302,6 @@
 	"deactivateServiceAccountConfirm": "Het deactiveren van dit service-account trekt onmiddellijk alle openstaande toegangstokens in en blokkeert de uitgifte van nieuwe tokens. Doorgaan?",
 	"gracePeriod": "Overgangsperiode",
 	"gracePeriodHelpText": "Het huidige secret blijft na rotatie nog deze duur werken, zodat integraties zonder downtime kunnen worden bijgewerkt. Beperkt tot 1 maand.",
-	"gracePeriodTooLong": "De overgangsperiode mag niet langer zijn dan 1 maand.",
 	"previousSecretValidUntil": "Het vorige client secret blijft geldig tot {date}.",
 	"personalAccessTokens": "Personal Access Tokens",
 	"personalAccessTokensDescription": "Tokens die u hebt gegenereerd en die kunnen worden gebruikt om toegang te krijgen tot de CISO Assistant API.",
