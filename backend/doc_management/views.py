@@ -207,7 +207,19 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 "processings",
                 models.Prefetch(
                     "documents",
-                    queryset=ManagedDocument.objects.select_related("current_revision"),
+                    # `revisions` feeds the serializer's pending_revision — without
+                    # it that is a query per container. Only the two fields it
+                    # reads: a revision carries the whole document in `content`.
+                    queryset=ManagedDocument.objects.select_related(
+                        "current_revision"
+                    ).prefetch_related(
+                        models.Prefetch(
+                            "revisions",
+                            queryset=DocumentRevision.objects.only(
+                                "id", "document", "version_number", "status"
+                            ),
+                        )
+                    ),
                 ),
             )
         )

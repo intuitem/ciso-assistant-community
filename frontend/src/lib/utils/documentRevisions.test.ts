@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pickWorkingRevision } from './documentRevisions';
+import { pickInForceRevision, pickWorkingRevision } from './documentRevisions';
 
 // Ordered by descending version_number, as the API returns them.
 const rev = (version: number, status: string) => ({ id: `v${version}`, status });
@@ -35,5 +35,24 @@ describe('pickWorkingRevision', () => {
 
 	it('falls back to the newest revision when none is active or published', () => {
 		expect(pickWorkingRevision([rev(2, 'deprecated'), rev(1, 'deprecated')])?.id).toBe('v2');
+	});
+});
+
+describe('pickInForceRevision', () => {
+	it('returns null when nothing is published yet', () => {
+		expect(pickInForceRevision([rev(1, 'draft')])).toBeNull();
+	});
+
+	it('returns the published revision while a successor is in review', () => {
+		expect(pickInForceRevision([rev(2, 'in_review'), rev(1, 'published')])?.id).toBe('v1');
+	});
+
+	it('returns the same revision the lifecycle acts on once it is published', () => {
+		const revisions = [rev(2, 'published'), rev(1, 'deprecated')];
+		expect(pickInForceRevision(revisions)?.id).toBe(pickWorkingRevision(revisions)?.id);
+	});
+
+	it('ignores deprecated revisions', () => {
+		expect(pickInForceRevision([rev(2, 'deprecated'), rev(1, 'deprecated')])).toBeNull();
 	});
 });

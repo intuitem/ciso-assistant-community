@@ -1228,6 +1228,18 @@
 														{:else}
 															--
 														{/if}
+													{:else if URLModel == 'document-containers' && key === 'status' && row.meta?.pending_revision}
+														<div class="flex items-center space-x-2">
+															<span>{safeTranslate(value ?? '-')}</span>
+															<span
+																class="badge preset-tonal-primary text-xs whitespace-nowrap"
+																data-testid="pending-revision-badge"
+															>
+																v{row.meta.pending_revision.version_number} · {safeTranslate(
+																	row.meta.pending_revision.status
+																)}
+															</span>
+														</div>
 													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.state}
 														<div class="flex items-center space-x-2">
 															<span>{safeTranslate(value ?? '-')}</span>
