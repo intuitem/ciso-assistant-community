@@ -30,11 +30,14 @@
 
 	let graph: LiveGraph = $state(createGraph({ id, urlModel, name }));
 	let selected: LiveNode | null = $state(null);
-	let fanCap = $state(5);
+	const DEFAULT_HIDDEN = ['perimeters'];
+	const DEFAULT_FAN_CAP = 5;
+
+	let fanCap = $state(DEFAULT_FAN_CAP);
 	let showLabels = $state(true);
 	let wide = $state(false);
 	let filterOpen = $state(false);
-	let hidden = $state(new Set<string>(['perimeters']));
+	let hidden = $state(new Set<string>(DEFAULT_HIDDEN));
 	let opened = $state(new Set<string>());
 	let booting = $state(false);
 	let bootError = $state('');
@@ -73,6 +76,13 @@
 		id;
 		reset();
 	});
+
+	function reload() {
+		cache.clear();
+		hidden = new Set(DEFAULT_HIDDEN);
+		fanCap = DEFAULT_FAN_CAP;
+		return reset();
+	}
 
 	async function reset() {
 		graph = createGraph({ id, urlModel, name });
@@ -187,7 +197,12 @@
 				<div class="text-xs text-surface-500">{rootMeta.label}</div>
 				<div class="font-semibold truncate" title={rootNode?.name}>{rootNode?.name ?? name}</div>
 			</div>
-			<button class="btn btn-sm preset-tonal" onclick={reset} title="Reset" aria-label="Reset">
+			<button
+				class="btn btn-sm preset-tonal"
+				onclick={reload}
+				title="Start over: collapse everything, restore filters and refetch"
+				aria-label="Start over"
+			>
 				<i class="fa-solid fa-rotate-left"></i>
 			</button>
 			<button
@@ -296,14 +311,20 @@
 						<i class="fa-solid fa-arrows-left-right-to-line mr-1"></i>expand all
 					</button>
 				{/if}
-				<span class="uppercase tracking-wide">Fan-out</span>
+				<span
+					class="uppercase tracking-wide"
+					title="How many objects to draw per relation before the rest collapse into a +N"
+					>Per relation</span
+				>
 				<input
 					type="range"
 					min="2"
 					max="12"
 					bind:value={fanCap}
 					onchange={reset}
+					title="How many objects to draw per relation before the rest collapse into a +N"
 					class="w-16 accent-primary-500"
+					aria-label="Objects shown per relation"
 				/>
 				<span class="w-4 text-center tabular-nums">{fanCap}</span>
 				<button

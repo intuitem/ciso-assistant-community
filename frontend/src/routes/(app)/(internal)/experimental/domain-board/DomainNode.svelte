@@ -6,12 +6,12 @@
 		id: string;
 		data: {
 			label: string;
-			contentType: string;
 			childCount: number;
 			descendantCount: number;
 			collapsed: boolean;
 			movable: boolean;
 			isRoot: boolean;
+			orientation: 'horizontal' | 'vertical';
 		};
 	}
 
@@ -33,20 +33,21 @@
 		board?.drag.draggingId != null && !dragging && board.drag.blocked.includes(id)
 	);
 
-	const isEnclave = $derived(data.contentType === 'EN');
-	const locked = $derived(data.isRoot || isEnclave || !data.movable);
+	const locked = $derived(data.isRoot || !data.movable);
 
-	const accentClass = $derived(
-		data.isRoot ? 'bg-secondary-400' : isEnclave ? 'bg-warning-400' : 'bg-primary-400'
-	);
+	// Handles sit on the axis the layout runs along, so an edge always leaves a parent
+	// on the side its children are actually drawn.
+	const horizontal = $derived(data.orientation === 'horizontal');
+	const targetSide = $derived(horizontal ? Position.Left : Position.Top);
+	const sourceSide = $derived(horizontal ? Position.Right : Position.Bottom);
+
+	const accentClass = $derived(data.isRoot ? 'bg-secondary-400' : 'bg-primary-400');
 	const borderClass = $derived(
 		dropCandidate
 			? 'border-success-500'
 			: data.isRoot
 				? 'border-secondary-300'
-				: isEnclave
-					? 'border-warning-300'
-					: 'border-primary-300'
+				: 'border-primary-300'
 	);
 
 	let hovered = $state(false);
@@ -98,6 +99,8 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="domain-node relative rounded-base border-[1.5px] bg-surface-50-950 px-3 py-2 shadow-sm select-none transition-opacity {borderClass}"
+	class:cursor-grab={!locked}
+	class:active:cursor-grabbing={!locked}
 	class:opacity-30={dropBlocked}
 	class:ring-2={dropCandidate}
 	class:ring-success-400={dropCandidate}
@@ -115,14 +118,11 @@
 				class:bg-secondary-100={data.isRoot}
 				class:text-secondary-700={data.isRoot}
 				class:border-secondary-200={data.isRoot}
-				class:bg-warning-100={isEnclave}
-				class:text-warning-700={isEnclave}
-				class:border-warning-200={isEnclave}
-				class:bg-primary-100={!data.isRoot && !isEnclave}
-				class:text-primary-700={!data.isRoot && !isEnclave}
-				class:border-primary-200={!data.isRoot && !isEnclave}
+				class:bg-primary-100={!data.isRoot}
+				class:text-primary-700={!data.isRoot}
+				class:border-primary-200={!data.isRoot}
 			>
-				{data.isRoot ? 'Global' : isEnclave ? 'Enclave' : 'Domain'}
+				{data.isRoot ? 'Global' : 'Domain'}
 			</span>
 			{#if data.childCount > 0}
 				<button
@@ -223,12 +223,12 @@
 
 	<Handle
 		type="target"
-		position={Position.Left}
+		position={targetSide}
 		class="!h-3 !w-3 !border-2 !border-surface-600 !bg-surface-50-950"
 	/>
 	<Handle
 		type="source"
-		position={Position.Right}
+		position={sourceSide}
 		class="!h-3 !w-3 !border-2 !border-surface-600 !bg-surface-50-950"
 	/>
 </div>

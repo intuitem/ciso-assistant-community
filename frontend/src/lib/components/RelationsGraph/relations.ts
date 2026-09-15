@@ -85,7 +85,12 @@ export const RELATION_MAP: Record<string, RelationSpec> = {
 			},
 			{ field: 'folder', urlModel: 'folders', verb: 'scopes', inbound: true }
 		],
-		reverse: [{ urlModel: 'findings', param: 'risk_scenarios', verb: 'evidenced by' }]
+		reverse: [
+			{ urlModel: 'findings', param: 'risk_scenarios', verb: 'evidenced by' },
+			// Not a forward relation despite being an M2M on the model: the read
+			// serializer does not resolve it, so it has to be asked for.
+			{ urlModel: 'vulnerabilities', param: 'risk_scenarios', verb: 'exploits' }
+		]
 	},
 
 	assets: {
@@ -102,7 +107,13 @@ export const RELATION_MAP: Record<string, RelationSpec> = {
 		],
 		reverse: [
 			{ urlModel: 'risk-scenarios', param: 'assets', verb: 'targets' },
-			{ urlModel: 'findings', param: 'assets', verb: 'affects' }
+			{ urlModel: 'findings', param: 'assets', verb: 'affects' },
+			{ urlModel: 'vulnerabilities', param: 'assets', verb: 'exposes' },
+			{ urlModel: 'compliance-assessments', param: 'assets', verb: 'audits' },
+			{ urlModel: 'incidents', param: 'assets', verb: 'hit by' },
+			{ urlModel: 'asset-assessments', param: 'asset', verb: 'assessed by' },
+			{ urlModel: 'ebios-rm', param: 'assets', verb: 'studied by' },
+			{ urlModel: 'quantitative-risk-scenarios', param: 'assets', verb: 'quantified by' }
 		]
 	}
 };

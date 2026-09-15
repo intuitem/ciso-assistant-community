@@ -50,6 +50,12 @@
 		tags={['analytics', 'export', 'xlsx', 'reporting']}
 	/>
 	<Article
+		title="Notification centre"
+		desc="In-app inbox replacing the email-only notifications. Two states (unread / read), one row per condition rather than one per nightly sweep, and a sweep simulator that shows read suppressing re-firing. Mock data, no backend."
+		link="/experimental/notifications"
+		tags={['notifications', 'inbox', 'prototype']}
+	/>
+	<Article
 		title="Mini graph explorer"
 		desc="Relations graph that grows by accretion: click a node to expand it in place, click again to collapse. Expansion never moves what is already on screen. Mock data, no backend."
 		link="/experimental/mini-graph"

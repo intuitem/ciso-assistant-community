@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setContext, untrack } from 'svelte';
+	import { setContext, tick, untrack } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import {
 		SvelteFlow,
@@ -12,7 +12,8 @@
 		MarkerType,
 		type Node,
 		type Edge,
-		type Connection
+		type Connection,
+		type OnConnectEnd
 	} from '@xyflow/svelte';
 	import '@xyflow/svelte/dist/style.css';
 
@@ -23,10 +24,15 @@
 		layoutTree,
 		subtreeIds,
 		visibleIds,
+		dropZone,
+		contains,
+		loadOrientation,
+		saveOrientation,
 		NODE_WIDTH,
 		NODE_HEIGHT,
 		type FlatTree,
-		type OrgTreeNode
+		type OrgTreeNode,
+		type Orientation
 	} from './tree';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import {
@@ -55,6 +61,10 @@
 	let edges = $state<Edge[]>([]);
 	let instructionsOpen = $state(true);
 	let busy = $state(false);
+	let orientation = $state<Orientation>(loadOrientation());
+	// Which way a domain's children lie, for prose that has to point somewhere.
+	const childrenLie = $derived(orientation === 'horizontal' ? 'to its right' : 'below it');
+	const sourceEdge = $derived(orientation === 'horizontal' ? 'right' : 'bottom');
 
 	// Highlight state lives outside `nodes` on purpose: rewriting the nodes array
 	// mid-drag would swap the object xyflow is currently dragging.
@@ -85,6 +95,19 @@
 		collapseVersion += 1;
 	}
 
+	async function toggleOrientation() {
+		orientation = orientation === 'horizontal' ? 'vertical' : 'horizontal';
+		saveOrientation(orientation);
+		// Flipping the axis turns a tall graph into a wide one, so the view has to be
+		// re-framed. `tick()` only flushes Svelte's own update — xyflow copies the new
+		// positions into its store from an effect of its own, and fitting before that
+		// lands measures the old bounds. Wait a frame past the flush.
+		await tick();
+		requestAnimationFrame(() =>
+			requestAnimationFrame(() => flowInstance?.fitView({ duration: 300, padding: 0.1 }))
+		);
+	}
+
 	function expandAll() {
 		collapsed.clear();
 		collapseVersion += 1;
@@ -96,7 +119,7 @@
 	}
 
 	function buildGraph() {
-		const positions = layoutTree(tree, collapsed);
+		const positions = layoutTree(tree, collapsed, orientation);
 		const visible = visibleIds(tree, collapsed);
 
 		nodes = [...tree.byId.values()]
@@ -107,12 +130,12 @@
 				position: positions[node.id] ?? { x: 0, y: 0 },
 				data: {
 					label: node.name,
-					contentType: node.contentType,
 					childCount: node.childCount,
 					descendantCount: node.descendantCount,
 					collapsed: collapsed.has(node.id),
 					movable: node.movable,
-					isRoot: node.parentId === null
+					isRoot: node.parentId === null,
+					orientation
 				},
 				draggable: node.parentId !== null && node.movable && node.contentType === 'DO',
 				deletable: false,
@@ -144,6 +167,7 @@
 	$effect(() => {
 		void tree;
 		void collapseVersion;
+		void orientation;
 		untrack(() => {
 			if (!collapseInitialised) {
 				collapseBelowTopLevel();
@@ -293,15 +317,16 @@
 	}
 
 	function candidateUnderCursor(node: Node): string | null {
-		// A 1x1 probe at the dragged node's centre, so a domain only counts as a drop
-		// target when it is actually being pointed at — plain overlap would fire on
-		// any brush past a neighbour.
+		// Match the dragged node's centre against each domain's drop zone — its own box
+		// plus the child column to its right — rather than demanding an exact overlap.
+		// The zones tile the canvas, so at most one can claim the point.
 		const centre = nodeCentre(node);
-		const hits =
-			flowInstance?.getIntersectingNodes({ x: centre.x, y: centre.y, width: 1, height: 1 }) ?? [];
-		const hit = hits.find((n) => n.id !== node.id);
-		if (!hit) return null;
-		return rejectionReason(node.id, hit.id) === null ? hit.id : null;
+		for (const other of nodes) {
+			if (other.id === node.id) continue;
+			if (!contains(dropZone(other.position, orientation), centre)) continue;
+			return rejectionReason(node.id, other.id) === null ? other.id : null;
+		}
+		return null;
 	}
 
 	function handleNodeDrag(args: NodeDragArgs) {
@@ -335,6 +360,24 @@
 		// source is the prospective parent, target the domain being moved.
 		requestReparent(connection.target, connection.source);
 	}
+
+	// Unlike the node-drag handlers, this one really does take (event, state).
+	const handleConnectEnd: OnConnectEnd = (_event, connectionState) => {
+		// xyflow reports `isValid === null` when a connection is released over empty
+		// canvas rather than over a node — that's the "create a child here" gesture.
+		if (!connectionState || connectionState.isValid !== null) return;
+		const parentId = connectionState.fromNode?.id;
+		const parent = parentId ? tree.byId.get(parentId) : null;
+		if (!parent) return;
+		if (!parent.canReceive) {
+			toastStore.trigger({
+				message: `You don't have permission to add domains under "${parent.name}"`,
+				background: 'preset-tonal-warning'
+			});
+			return;
+		}
+		createSubDomain(parent.id, parent.name);
+	};
 
 	async function renameDomain(folderId: string, name: string): Promise<boolean> {
 		try {
@@ -371,6 +414,9 @@
 		// posts with dataType 'json' — the whole `form.data` object goes over the wire,
 		// rendered or not — so seeding it here is enough to nest the new domain.
 		folderModel.createForm.data.parent_folder = parentId;
+		// Unfold the parent so the new domain is visible once it lands.
+		collapsed.delete(parentId);
+		collapseVersion += 1;
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
@@ -411,6 +457,7 @@
 		{nodeTypes}
 		{isValidConnection}
 		onconnect={handleConnect}
+		onconnectend={handleConnectEnd}
 		onnodedragstart={handleNodeDragStart}
 		onnodedrag={handleNodeDrag}
 		onnodedragstop={handleNodeDragStop}
@@ -425,8 +472,42 @@
 		<Background variant={BackgroundVariant.Dots} gap={20} />
 		<Controls showLock={false} />
 		<MiniMap />
+		{#if drag.draggingId}
+			{@const moving = tree.byId.get(drag.draggingId)}
+			{@const landing = drag.targetId ? tree.byId.get(drag.targetId) : null}
+			<Panel position="bottom-center">
+				<div
+					class="rounded-base border px-3 py-1.5 text-xs font-medium shadow-lg
+					{landing
+						? 'border-success-400 bg-success-100 text-success-800'
+						: 'border-surface-300-700 bg-surface-100-900 text-surface-600-400'}"
+				>
+					{#if landing}
+						<i class="fa-solid fa-arrow-turn-down mr-1"></i>
+						Release to nest "{moving?.name}" under "{landing.name}"
+					{:else}
+						<i class="fa-solid fa-hand-pointer mr-1"></i>
+						Drop on a domain — or just {childrenLie} — to nest "{moving?.name}" under it
+					{/if}
+				</div>
+			</Panel>
+		{/if}
 		<Panel position="top-right">
 			<div class="flex gap-1">
+				<button
+					type="button"
+					class="btn preset-filled-surface-500 text-sm shadow"
+					title={orientation === 'horizontal'
+						? 'Switch to a top-down layout'
+						: 'Switch to a left-to-right layout'}
+					onclick={toggleOrientation}
+				>
+					<i
+						class="fa-solid {orientation === 'horizontal'
+							? 'fa-arrows-up-down'
+							: 'fa-arrows-left-right'} mr-1"
+					></i>{orientation === 'horizontal' ? 'Vertical' : 'Horizontal'}
+				</button>
 				<button
 					type="button"
 					class="btn preset-filled-surface-500 text-sm shadow"
@@ -471,20 +552,29 @@
 							Convention: arrow <span class="font-mono">A → B</span> means
 							<em>B is a sub-domain of A</em>.
 						</div>
+						<div class="mt-1 mb-0.5 font-semibold text-surface-700-300">Move a domain</div>
 						<ul class="list-inside list-disc space-y-0.5">
 							<li>
-								Click the <span class="font-mono">−</span>/<span class="font-mono">+</span> count on a
-								domain to fold or unfold its branch
+								Drag it onto another domain — or into the empty space just {childrenLie}, where its
+								sub-domains sit
 							</li>
-							<li>Drag a domain onto another to make it a sub-domain</li>
-							<li>Or drag the right handle of the new parent onto the domain to move</li>
+							<li>Click the ↰ icon to send it back up to the top level</li>
+						</ul>
+						<div class="mt-1.5 mb-0.5 font-semibold text-surface-700-300">Add a domain</div>
+						<ul class="list-inside list-disc space-y-0.5">
+							<li>Drag the handle on a domain's {sourceEdge} edge onto empty canvas</li>
 							<li>
-								Hover a domain and click the <span class="font-semibold">＋</span> badge to nest a new
-								one
+								Or hover it and click the <span class="font-semibold">＋</span> badge
 							</li>
-							<li>Click the ↰ icon to move a domain back up to the top level</li>
+						</ul>
+						<div class="mt-1.5 mb-0.5 font-semibold text-surface-700-300">Get around</div>
+						<ul class="list-inside list-disc space-y-0.5">
+							<li>
+								Click the <span class="font-mono">−</span>/<span class="font-mono">+</span> count to fold
+								or unfold a branch
+							</li>
 							<li>Double-click a name to rename it</li>
-							<li>Layout is computed from the hierarchy — a drag that isn't a move snaps back</li>
+							<li>Layout follows the hierarchy — a drag that isn't a move snaps back</li>
 						</ul>
 						<div class="mt-1.5 rounded bg-warning-100 px-2 py-1 text-warning-800">
 							<i class="fa-solid fa-triangle-exclamation mr-1"></i>Moving a domain changes who can

@@ -97,6 +97,9 @@ export const NODE_META: Record<string, NodeMeta> = {
 		symbol: 'roundRect'
 	},
 	'personal-data': { label: 'Personal data', color: '#db2777', icon: 'fa-id-card', symbol: 'rect' },
+	'asset-assessments': { label: 'Asset assessment', color: '#0f766e', icon: 'fa-heart-pulse', symbol: 'roundRect' },
+	'quantitative-risk-scenarios': { label: 'Quantitative scenario', color: '#7f1d1d', icon: 'fa-calculator', symbol: 'roundRect' },
+	'ebios-rm': { label: 'EBIOS RM study', color: '#4c1d95', icon: 'fa-shield-virus', symbol: 'roundRect' },
 	perimeters: {
 		label: 'Perimeter',
 		color: '#94a3b8',
