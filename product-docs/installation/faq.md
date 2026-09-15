@@ -72,6 +72,33 @@ docker compose exec backend uv run python manage.py migrate
 
 most likely because the initialization took longer than expected. Make sure you provide the expected specs or tune the docker compose to give the app more time to finish the init phase.
 
+### Nothing starts after upgrading, backend is unhealthy
+
+The backend image is built on a hardened base that no longer ships `curl`, and the healthcheck in `docker-compose.yml` was updated accordingly. If you upgraded the image but kept your own `docker-compose.yml`, the old check still calls `curl` and fails on every attempt.
+
+Nothing else comes up, because `frontend`, `caddy`, `huey` and `mcp` all wait for the backend to be healthy:
+
+```
+dependency failed to start: container backend is unhealthy
+```
+
+To confirm, check the health log:
+
+```bash
+docker inspect --format '{{json .State.Health}}' backend
+```
+
+A stale healthcheck shows `curl: not found` on every attempt.
+
+Fix it by replacing the `healthcheck` of the `backend` service in your `docker-compose.yml`:
+
+```yaml
+healthcheck:
+  test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://backend:8000/api/health/', timeout=5)"]
+```
+
+then run `docker compose up -d` again. The same applies to any other compose file you maintain, and to the `frontend` service if you added a `curl` healthcheck to it.
+
 ### Don't want / Can't run the init script
 
 The recommended pattern for a first local setup is to go with ./docker-compose.sh ;\
