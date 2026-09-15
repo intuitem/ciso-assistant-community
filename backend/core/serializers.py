@@ -4280,11 +4280,15 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         binder_ids = {
             f.findings_assessment_id for f in changed if f.findings_assessment_id
         }
-        locked_binders = set(
-            FindingsAssessment.objects.select_for_update()
-            .filter(id__in=binder_ids, is_locked=True)
-            .values_list("id", flat=True)
-        )
+        # Lock every binder involved, not only the locked ones: an unlocked
+        # binder must not get locked between this check and the write.
+        locked_binders = {
+            binder.id
+            for binder in FindingsAssessment.objects.select_for_update().filter(
+                id__in=binder_ids
+            )
+            if binder.is_locked
+        }
         for finding in changed:
             if finding.findings_assessment_id in locked_binders:
                 raise serializers.ValidationError(
@@ -5627,6 +5631,14 @@ class FindingWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 {
                     "findings_assessment": "⚠️ Cannot attach the finding to a locked findings assessment."
+                }
+            )
+        # Same rule as the findings-binder endpoint, for direct API writes.
+        target_requirement_assessment = attrs.get("requirement_assessment")
+        if target_requirement_assessment and target_requirement_assessment.is_locked:
+            raise serializers.ValidationError(
+                {
+                    "requirement_assessment": "⚠️ Cannot bind a finding to a requirement of a locked audit."
                 }
             )
         return super().validate(attrs)

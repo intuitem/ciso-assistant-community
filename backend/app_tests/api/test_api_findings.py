@@ -105,6 +105,30 @@ class TestFindingsFromRequirements:
         ).exists()
         set_flag(False)
 
+    def test_a_locked_audit_takes_no_finding_from_the_api_either(self, setup, audit):
+        assessment, requirement_assessment = audit
+        assessment.is_locked = True
+        assessment.save()
+        res = create_finding(
+            setup["client"],
+            name="Late",
+            folder=str(setup["domain"].id),
+            requirement_assessment=str(requirement_assessment.id),
+        )
+        assert res.status_code == 400
+        assert "requirement_assessment" in res.json()
+
+        # Reparenting an existing finding onto it is refused the same way.
+        finding = Finding.objects.create(name="Orphan", folder=setup["domain"])
+        res = setup["client"].patch(
+            f"/api/findings/{finding.id}/",
+            {"requirement_assessment": str(requirement_assessment.id)},
+            format="json",
+        )
+        assert res.status_code == 400
+        finding.refresh_from_db()
+        assert finding.requirement_assessment is None
+
     def test_the_binder_is_created_once_and_bound_to_the_audit(self, setup, audit):
         assessment, requirement_assessment = audit
         set_flag(True)
