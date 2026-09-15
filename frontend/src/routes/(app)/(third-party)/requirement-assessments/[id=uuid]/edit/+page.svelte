@@ -14,7 +14,12 @@
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getSecureRedirect, getFieldVisibility, alignmentColorMap } from '$lib/utils/helpers';
+	import {
+		getSecureRedirect,
+		getFieldVisibility,
+		isFieldVisible,
+		alignmentColorMap
+	} from '$lib/utils/helpers';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import { hideSuggestions } from '$lib/utils/stores';
@@ -128,7 +133,6 @@
 				object: data.requirementAssessment
 			})
 	);
-	const showFindings = $derived(canRaiseFinding || canBindFinding);
 
 	const flash = getFlash(pageStore);
 
@@ -401,6 +405,12 @@
 
 	const isAuditor = $derived(viewerRole === 'auditor');
 	const canShowAppliedControls = $derived(showAppliedControls && !page.data.user.is_third_party);
+	// Same gate as applied controls, on top of the finding permissions.
+	const showFindings = $derived(
+		(canRaiseFinding || canBindFinding) &&
+			isFieldVisible(complianceAssessment, 'findings', viewerRole) &&
+			!page.data.user.is_third_party
+	);
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';

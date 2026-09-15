@@ -258,6 +258,7 @@ class TestPickingExistingFindings:
             folder=setup["other_domain"],
             findings_assessment=setup["other_binder"],
         )
+        picked_before = picked.updated_at
 
         res = setup["client"].patch(
             f"/api/requirement-assessments/{audit.id}/",
@@ -273,6 +274,8 @@ class TestPickingExistingFindings:
         assert dropped.requirement_assessment is None
         # Binding does not move the finding out of its own binder.
         assert picked.findings_assessment == setup["other_binder"]
+        # It is an edit of the finding, so it shows as one.
+        assert picked.updated_at > picked_before
 
     def test_a_locked_binder_keeps_its_findings(self, setup, audit):
         setup["binder"].is_locked = True

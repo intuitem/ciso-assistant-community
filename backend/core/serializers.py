@@ -4263,11 +4263,16 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     def _check_findings_rebind(self, instance, findings):
         """Binding or unbinding a finding edits the finding, not just the assessment.
 
-        Runs inside update()'s transaction: the changed findings and their binders
-        are re-read under row locks, so a binder locked between validation and
-        the write is still refused and the rows cannot move under us.
+        Runs inside update()'s transaction: the current, changed and binder rows
+        are read under row locks (on PostgreSQL; SQLite has a single writer), so
+        a binder locked between validation and the write is still refused and
+        a finding bound meanwhile is not silently dropped. `instance.findings`
+        is not used here because get_object() prefetched it before the
+        transaction.
         """
-        current = set(instance.findings.all())
+        current = set(
+            Finding.objects.select_for_update().filter(requirement_assessment=instance)
+        )
         changed_ids = [f.id for f in current.symmetric_difference(findings)]
         if not changed_ids:
             return
@@ -4305,8 +4310,9 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             # Handle answers if provided in old JSON format
             answers_data = validated_data.pop("answers", None)
 
-            if "findings" in validated_data:
-                self._check_findings_rebind(instance, validated_data["findings"])
+            findings = validated_data.pop("findings", None)
+            if findings is not None:
+                self._check_findings_rebind(instance, findings)
 
             # Question-driven score is recompute-owned: drop manual writes
             # unless is_score_overridden pins a value.
@@ -4325,6 +4331,11 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             was_overridden = instance.is_score_overridden
             previous_alignment = instance.respondent_alignment
             instance = super().update(instance, validated_data)
+
+            if findings is not None:
+                # bulk=False goes through Finding.save(): updated_at moves and the
+                # binder's daily metrics are refreshed, as on any finding edit.
+                instance.findings.set(findings, bulk=False)
 
             # Override turned off: resync score from answers below.
             override_turned_off = (
