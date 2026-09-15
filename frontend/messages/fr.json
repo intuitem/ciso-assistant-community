@@ -2263,6 +2263,7 @@
 	"selectAudit": "Sélectionner un audit",
 	"errorAssetGraphMustNotContainCycles": "Le graphe des actifs ne doit pas contenir de boucles.",
 	"errorFolderGraphMustNotContainCycles": "Le graphe des domaines ne doit pas contenir de boucles.",
+	"subDomainsRequirePro": "Les sous-domaines sont disponibles dans l'édition PRO. Les domaines sont ici créés au premier niveau.",
 	"errorRiskScenarioGraphMustNotContainCycles": "Le graphe des scénarios de risque ne doit pas contenir de boucles.",
 	"addStakeholder": "Ajouter une partie prenante",
 	"operationalScenario": "Scénario opérationnel",

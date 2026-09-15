@@ -2,6 +2,7 @@
 	import Article from '$lib/components/DataViz/Article.svelte';
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
+	import { experimentalExtras } from '$lib/utils/experimental-extras';
 
 	$pageTitle = 'Experimental';
 </script>
@@ -43,6 +44,15 @@
 		link="/experimental/analytics-export"
 		tags={['analytics', 'export', 'xlsx', 'reporting']}
 	/>
+	<Article
+		title="Mini graph explorer"
+		desc="Relations graph that grows by accretion: click a node to expand it in place, click again to collapse. Expansion never moves what is already on screen. Mock data, no backend."
+		link="/experimental/mini-graph"
+		tags={['graph', 'applied-controls', 'risk-scenarios', 'prototype']}
+	/>
+	{#each experimentalExtras as extra (extra.link)}
+		<Article title={extra.title} desc={extra.desc} link={extra.link} tags={extra.tags} />
+	{/each}
 	<!-- <Article -->
 	<!-- 	title="Multi-file evidence (UX prototype)" -->
 	<!-- 	desc="Imagine an evidence whose revisions hold multiple files at once. History timeline with file-level diff (added / removed / replaced / unchanged) and arbitrary revision compare. Static fake data, no backend." -->

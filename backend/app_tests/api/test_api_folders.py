@@ -1,8 +1,10 @@
 import pytest
+from rest_framework import status
 from rest_framework.test import APIClient
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
+from test_vars import GROUPS_PERMISSIONS
 
 # Generic folder data for tests
 FOLDER_NAME = "Test Folder"
@@ -101,25 +103,52 @@ class TestFoldersAuthenticated:
         )
 
     def test_create_folders(self, test):
-        """test to create folders with the API with authentication"""
+        """Creating a domain is a Global-scoped action, so a domain-scoped role cannot
+        add a sibling. Asserted directly: the EndpointTestsQueries matrix treats the
+        "Global" scope as reachable by everyone, which holds for reads, not writes.
+        """
+        root = Folder.get_root_folder()
+        response = test.client.post(
+            "/api/folders/",
+            {"name": FOLDER_NAME, "description": FOLDER_DESCRIPTION},
+            format="json",
+        )
 
-        EndpointTestsQueries.Auth.create_object(
-            test.client,
-            "Folders",
-            Folder,
+        group = GROUPS_PERMISSIONS[test.user_group]
+        may_create = "add_folder" in group["perms"] and group["folder"] == "Global"
+
+        if may_create:
+            assert response.status_code == status.HTTP_201_CREATED
+            # Against the stored row: a create is rendered by the *write* serializer,
+            # whose shape differs from the read one.
+            created = Folder.objects.get(name=FOLDER_NAME)
+            assert created.parent_folder_id == root.id
+            assert created.content_type == Folder.ContentType.DOMAIN
+        else:
+            assert response.status_code == status.HTTP_403_FORBIDDEN
+            assert not Folder.objects.filter(name=FOLDER_NAME).exists()
+
+    def test_create_subfolder_requires_pro(self, test):
+        """Refused by the community serializer. Permission resolves first, so this only
+        asserts the gate for callers who could otherwise have succeeded."""
+        response = test.client.post(
+            "/api/folders/",
             {
                 "name": FOLDER_NAME,
                 "description": FOLDER_DESCRIPTION,
                 "parent_folder": str(test.folder.id),
             },
-            {
-                "parent_folder": {"id": str(test.folder.id), "str": test.folder.name},
-                "content_type": FOLDER_CONTENT_TYPE,
-            },
-            base_count=-1,
-            user_group=test.user_group,
-            scope=str(test.folder),
+            format="json",
         )
+
+        assert response.status_code in (400, 403, 404), (
+            "nesting a domain must never succeed in the community edition"
+        )
+        if response.status_code == 400:
+            assert response.json()["parent_folder"] == ["subDomainsRequirePro"]
+        assert not Folder.objects.filter(
+            name=FOLDER_NAME, parent_folder=test.folder
+        ).exists()
 
     def test_update_folders(self, test):
         """test to update folders with the API with authentication"""

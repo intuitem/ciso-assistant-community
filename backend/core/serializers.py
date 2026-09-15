@@ -21,6 +21,7 @@ from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
 from threat_modeling.models import ThreatModel
 from pmbok.models import GenericCollection
+from doc_management.models import DocumentContainer
 from global_settings.utils import ff_is_enabled
 
 from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
@@ -796,6 +797,11 @@ class AssetWriteSerializer(
         queryset=SecurityException.objects.all(),
         required=False,
     )
+    documents = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=DocumentContainer.objects.all(),
+        required=False,
+    )
     applied_controls = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=AppliedControl.objects.all(),
@@ -899,6 +905,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     overridden_children_capabilities = FieldsRelatedField(["id", "name"], many=True)
     solutions = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
+    documents = FieldsRelatedField(many=True)
 
     children_assets = serializers.SerializerMethodField()
     security_objectives = serializers.SerializerMethodField()
@@ -2892,20 +2899,37 @@ class FolderWriteSerializer(BaseModelSerializer):
             )
         return value
 
-    def validate_parent_folder(self, value):
-        """
-        If parent_folder is empty or None, default to the root folder.
-        On update, check add permission on the target parent folder.
+    def _resolve_parent_folder(self, value):
+        """Normalise and authorise a target parent, independent of edition policy.
+
+        Kept out of `validate_parent_folder` so that editions which allow nesting can
+        override the policy without losing these rules, and so permission is resolved
+        before any policy — a 403 must beat "this needs PRO".
         """
         if not value:
             return Folder.get_root_folder()
-        if (
-            self.instance is not None
-            and self.instance.parent_folder_id
-            and str(value.id) != str(self.instance.parent_folder_id)
+        if self.instance is None:
+            # The base class checks this only in `create()`, after field validation —
+            # too late for a policy that rejects during `is_valid()`.
+            self._check_object_perm(None, "add", folder=value)
+        elif self.instance.parent_folder_id and str(value.id) != str(
+            self.instance.parent_folder_id
         ):
             self._check_object_perm(self.instance, "add", folder=value)
         return value
+
+    def validate_parent_folder(self, value):
+        """Community domains sit directly under the root; nesting is a PRO capability.
+
+        Only *changing* the nesting is gated: an already-nested folder stays editable,
+        so downgrading from PRO never strands existing data.
+        """
+        parent_folder = self._resolve_parent_folder(value)
+        if parent_folder == Folder.get_root_folder():
+            return parent_folder
+        if self.instance is not None and parent_folder == self.instance.parent_folder:
+            return parent_folder
+        raise serializers.ValidationError("subDomainsRequirePro")
 
 
 class FolderReadSerializer(BaseModelSerializer):
