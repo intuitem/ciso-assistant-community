@@ -145,14 +145,12 @@ jobs:
           echo "critical=$critical" >> "$GITHUB_OUTPUT"
 
       - name: Upload SARIF
-        if: ${{ !cancelled() && steps.gate.outcome == 'success' }}
         uses: github/codeql-action/upload-sarif@977e6ceaea7361825998245d787fa3b4d6b9e5df # codeql-bundle-v2.27.0
         with:
           sarif_file: scout-out/scout-${{ matrix.name }}.sarif
           category: scout-${{ matrix.name }}
 
       - name: Upload gate outcome
-        if: ${{ !cancelled() && steps.gate.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: gate-${{ matrix.name }}
@@ -160,7 +158,7 @@ jobs:
           retention-days: 7
 
       - name: Fail on fixable CRITICAL
-        if: ${{ !cancelled() && steps.gate.outputs.critical != '0' }}
+        if: steps.gate.outputs.critical != '0'
         shell: bash
         env:
           COUNT: ${{ steps.gate.outputs.critical }}
