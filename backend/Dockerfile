@@ -34,6 +34,8 @@ RUN apt-get update \
   fontconfig \
   fonts-freefont-ttf \
   bubblewrap \
+  # curl: only keeps pre-existing compose healthchecks working, drop once on-prem users have migrated
+  curl \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   && locale-gen en_US.UTF-8 \
