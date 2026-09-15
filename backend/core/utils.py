@@ -1310,8 +1310,8 @@ def _trigger_assignment(groups, new_groups, ig_triggers, assignment_by_ra_id):
     return None
 
 
-def assign_revealed_requirements(compliance_assessment, ig_triggers, previous_groups):
-    """Hand requirements from a just-selected implementation group to whoever revealed them.
+def sync_requirement_assignments(compliance_assessment, ig_triggers, previous_groups):
+    """Keep assignment scopes in step with the selected implementation groups.
 
     Requirements already visible under the previous groups are left alone.
     """
@@ -1319,11 +1319,8 @@ def assign_revealed_requirements(compliance_assessment, ig_triggers, previous_gr
 
     from core.models import RequirementAssessment, RequirementAssignment
 
-    new_groups = (
-        set(compliance_assessment.selected_implementation_groups or [])
-        - previous_groups
-    )
-    if not new_groups:
+    selected = set(compliance_assessment.selected_implementation_groups or [])
+    if selected == previous_groups:
         return
 
     # A submitted or closed assignment keeps the scope it was judged on.
@@ -1345,11 +1342,20 @@ def assign_revealed_requirements(compliance_assessment, ig_triggers, previous_gr
     if not assignment_by_ra_id:
         return
 
+    new_groups = selected - previous_groups
     to_add: dict = {}
-    for ra_id, groups in RequirementAssessment.objects.filter(
-        compliance_assessment=compliance_assessment, requirement__assessable=True
-    ).values_list("id", "requirement__implementation_groups"):
-        if ra_id in assigned_ra_ids:
+    to_remove: dict = {}
+    for ra_id, assessable, groups in RequirementAssessment.objects.filter(
+        compliance_assessment=compliance_assessment
+    ).values_list(
+        "id", "requirement__assessable", "requirement__implementation_groups"
+    ):
+        owner = assignment_by_ra_id.get(ra_id)
+        if owner is not None:
+            if selected and not selected & set(groups or []):
+                to_remove.setdefault(owner, []).append(ra_id)
+            continue
+        if ra_id in assigned_ra_ids or not assessable:
             continue
         if not previous_groups or previous_groups & set(groups or []):
             continue
@@ -1359,10 +1365,12 @@ def assign_revealed_requirements(compliance_assessment, ig_triggers, previous_gr
         if target is not None:
             to_add.setdefault(target, []).append(ra_id)
 
-    assignments = RequirementAssignment.objects.in_bulk(to_add.keys())
+    assignments = RequirementAssignment.objects.in_bulk(set(to_add) | set(to_remove))
     with transaction.atomic():
         for assignment_id, ra_ids in to_add.items():
             assignments[assignment_id].requirement_assessments.add(*ra_ids)
+        for assignment_id, ra_ids in to_remove.items():
+            assignments[assignment_id].requirement_assessments.remove(*ra_ids)
 
 
 def update_selected_implementation_groups(compliance_assessment):
@@ -1443,7 +1451,7 @@ def update_selected_implementation_groups(compliance_assessment):
     )
     compliance_assessment.save(update_fields=["selected_implementation_groups"])
 
-    assign_revealed_requirements(compliance_assessment, ig_triggers, current)
+    sync_requirement_assignments(compliance_assessment, ig_triggers, current)
 
 
 def build_questions_dict(node):

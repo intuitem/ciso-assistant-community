@@ -66,10 +66,10 @@ Some frameworks are dynamic: a choice in a question selects an implementation gr
 This is the only case where an assignment's scope changes outside `draft`, and it stays narrow:
 
 * only requirements that were genuinely hidden before are added, never one the auditor saw and chose to leave out;
-* nothing is added to a `submitted` or `closed` assignment, which keeps the scope it was reviewed on;
+* a `submitted` or `closed` assignment is never touched, in either direction, and keeps the scope it was reviewed on;
 * if the revealing question belongs to no assignment, nothing is added and the auditor dispatches the new requirements manually.
 
-Requirements that leave the scope, because an answer deselects an implementation group, stay attached to their assignment but are hidden everywhere, so no work is lost if the group comes back.
+The reverse applies too: changing an answer so an implementation group is deselected removes the requirements that left the scope from their assignment. A requirement that comes back later is routed again by the same rule, so it may land on a different assignment than the one it had.
 
 ### Reviewing item by item
 

@@ -640,7 +640,7 @@ def _assigned_ids(assignment):
 
 
 @pytest.mark.django_db
-class TestAssignRevealedRequirements:
+class TestSyncRequirementAssignments:
     def test_revealed_requirement_joins_the_trigger_assignment(self, assignment_setup):
         d = assignment_setup
         _answer_base(d, d["base_yes"])
@@ -688,6 +688,19 @@ class TestAssignRevealedRequirements:
         d["alice"].save()
         _answer_base(d, d["base_yes"])
 
+        update_selected_implementation_groups(d["ca"])
+
+        assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+    def test_deselected_group_leaves_the_assignment(self, assignment_setup):
+        """Changing the answer back drops what it had revealed."""
+        d = assignment_setup
+        _answer_base(d, d["base_yes"])
+        update_selected_implementation_groups(d["ca"])
+        d["ca"].refresh_from_db()
+
+        _answer_base(d, d["base_no"])
         update_selected_implementation_groups(d["ca"])
 
         assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
