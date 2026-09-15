@@ -111,8 +111,8 @@
 		? isLocked
 			? 'bg-surface-100-900 border border-surface-200-800'
 			: isChecked
-				? 'bg-violet-50 border border-violet-200'
-				: 'bg-green-50 border border-green-200 hover:bg-green-100 cursor-pointer'
+				? 'bg-violet-50 dark:bg-violet-500/15 border border-violet-200 dark:border-violet-500/30'
+				: 'bg-green-50 dark:bg-green-500/15 border border-green-200 dark:border-green-500/30 hover:bg-green-100 dark:hover:bg-green-500/25 cursor-pointer'
 		: ''}"
 	class:pl-2={hasParentNode}
 	onclick={(e) => {
@@ -195,7 +195,7 @@
 						title="{m.assignedTo()} {actorName}"
 					>
 						<i class="fa-solid fa-user text-xs"></i>
-						<span class="max-w-[100px] truncate">{actorName}</span>
+						<span class="max-w-25 truncate">{actorName}</span>
 					</span>
 				{/each}
 			{/if}
