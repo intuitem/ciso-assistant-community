@@ -5,7 +5,6 @@ on:
   push:
     tags:
       - "v*"
-  workflow_dispatch:
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)
 concurrency:
