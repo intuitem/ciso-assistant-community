@@ -7,7 +7,7 @@ import type { LayoutServerLoad } from './$types';
 const URLModel = 'service-accounts';
 
 export const load: LayoutServerLoad = async ({ locals }) => {
-	if (!locals?.featureflags?.service_accounts) {
+	if (!(await locals.getFeatureFlags())?.service_accounts) {
 		redirect(302, '/analytics');
 	}
 	const base = listViewFields[URLModel];
