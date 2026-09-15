@@ -14,7 +14,7 @@ name: Mirror third-party images to GHCR
 
 on:
   schedule:
-    - cron: "17 4 * * 1" # weekly, Monday 04:17 UTC
+    - cron: "17 4 * * *" # daily, 04:17 UTC
   workflow_dispatch:
   push:
     branches: [main]

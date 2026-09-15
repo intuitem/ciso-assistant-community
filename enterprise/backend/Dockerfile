@@ -1,37 +1,42 @@
-ARG PYTHON_IMAGE=python:3.14-slim
+ARG PYTHON_IMAGE=ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev
 FROM ${PYTHON_IMAGE}
 
-# UV_NO_SYNC=1: prevent `uv run` from auto-syncing at runtime; the venv is built once at image build (uv sync --locked --no-dev)
+# UV_NO_SYNC=1: prevent `uv run` from auto-syncing at runtime (caused startup-docker-compose-test CI to fail);
+#   the venv is built once at image build (uv sync --locked --no-dev)
+# UV_PYTHON_DOWNLOADS=never: fail loudly rather than silently sideline the base interpreter
 ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   UV_LINK_MODE=copy \
   UV_NO_SYNC=1 \
+  UV_PYTHON_DOWNLOADS=never \
   PATH="/code/.venv/bin:$PATH" \
   DJANGO_SETTINGS_MODULE=enterprise_core.settings
 
-COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.13 /uv /bin/
 
 WORKDIR /code
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+  # perl-base: clears the perl finding from docker scout (#4820)
   perl-base \
-  libyaml-cpp-dev \
-  libffi-dev \
-  libglib2.0-0 \
-  pango-1.0 \
-  libcairo2 \
+  # not pango-1.0: resolves to libpango1.0-dev, pulls in mesa + LLVM
+  libpango-1.0-0 \
+  libpangoft2-1.0-0 \
+  libharfbuzz0b \
+  libfontconfig1 \
+  libfreetype6 \
+  libstdc++6 \
+  zlib1g \
+  libffi8 \
+  libmagic1 \
   locales \
   tzdata \
-  gettext \
   fontconfig \
   fonts-freefont-ttf \
-  build-essential \
-  python3-dev \
-  python3-numpy \
-  libjpeg-dev \
-  zlib1g-dev \
-  libmagic1 \
   bubblewrap \
+  # curl: only keeps pre-existing compose healthchecks working, drop once on-prem users have migrated
+  curl \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   && locale-gen en_US.UTF-8 \
@@ -55,7 +60,6 @@ COPY pyproject.toml uv.lock ./
 # torch is pinned to the PyTorch CPU index in pyproject.toml/uv.lock, so the CUDA
 # wheels are never resolved or downloaded — a plain locked sync is enough.
 RUN --mount=type=cache,target=/root/.cache/uv \
-  --mount=type=cache,target=/root/.cache/pip \
   uv sync --locked --no-dev
 
 # Pre-bake the embedding and reranker models into the image so the AI works with no
@@ -75,11 +79,22 @@ RUN uv run python -c "import chat.embedding_models as m; from sentence_transform
 ENV HF_HUB_OFFLINE=1 \
   TRANSFORMERS_OFFLINE=1
 
+# pip is unused (uv builds the venv); its vendored setuptools/msgpack carry CVEs.
+# Both prefixes covered in case PYTHON_IMAGE is overridden.
+RUN rm -rf /usr/lib/python3/dist-packages/pip \
+  /usr/lib/python3/dist-packages/pip-*.dist-info \
+  /usr/local/lib/python3.*/site-packages/pip \
+  /usr/local/lib/python3.*/site-packages/pip-*.dist-info \
+  /usr/bin/pip /usr/bin/pip3 /usr/local/bin/pip /usr/local/bin/pip3 /usr/local/bin/pip3.*
+
 COPY . /code/
 COPY --from=enterprise_backend /enterprise_core /code/enterprise_core
 COPY startup.sh /code/
 
-RUN groupadd -g 1001 app && useradd -u 1001 -g 1001 -m -s /bin/bash app
+# No `passwd` in the DHI base; installing it would pull shadow + PAM into the runtime.
+RUN echo 'app:x:1001:1001::/home/app:/bin/bash' >> /etc/passwd \
+  && echo 'app:x:1001:' >> /etc/group \
+  && install -d -m 700 -o 1001 -g 1001 /home/app
 # USER app  # not activated by default to keep compatibility
 
 EXPOSE 8000
