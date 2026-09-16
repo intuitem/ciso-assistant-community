@@ -555,9 +555,9 @@
 			});
 			if (!res.ok) {
 				const err = await res.json().catch(() => ({}));
-				const detail = err?.name ?? err?.detail ?? 'Rename failed';
+				const detail = err?.name ?? err?.detail ?? err?.message ?? 'Rename failed';
 				toastStore.trigger({
-					message: typeof detail === 'string' ? detail : JSON.stringify(detail),
+					message: Array.isArray(detail) ? detail.join(' ') : String(detail),
 					background: 'preset-tonal-error'
 				});
 				return false;

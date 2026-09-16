@@ -78,6 +78,9 @@
 	}
 
 	async function commitEdit() {
+		// `disabled={saving}` blurs the input the moment saving flips, which re-enters
+		// this through onblur and would fire a second identical PATCH.
+		if (saving) return;
 		const trimmed = draftName.trim();
 		if (!trimmed || trimmed === data.label) {
 			editing = false;
