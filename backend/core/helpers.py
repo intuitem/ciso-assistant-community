@@ -2173,7 +2173,9 @@ def get_folder_content(
             "writable": f["id"] in writable_ids if writable_ids is not None else True,
             "content_type": f["content_type"],
         }
-        if content_counts is not None:
+        # Counts only for folders the caller can see: ancestors are here to keep the
+        # tree connected, not to be described.
+        if content_counts is not None and entry["viewable"]:
             entry["content_count"] = content_counts.get(f["id"], 0)
         # Add enclave-specific styling
         if f["content_type"] == Folder.ContentType.ENCLAVE:

@@ -154,6 +154,7 @@
 					deletable: isDeletableLeaf(tree, node.id),
 					stagedForDelete: deleteDraft.includes(node.id),
 					movable: node.movable,
+					canReceive: node.canReceive,
 					isRoot: node.parentId === null,
 					staged: draft[node.id] !== undefined,
 					orientation
@@ -224,6 +225,9 @@
 		if (child.parentId === null) return 'The Global root has no parent and cannot be moved';
 		if (child.contentType !== 'DO') return 'Only domains can be re-parented here';
 		if (!child.movable) return `You don't have permission to modify "${child.name}"`;
+		// The server refuses the whole batch if a move touches a staged delete.
+		if (deleteDraft.includes(childId)) return `"${child.name}" is staged for deletion`;
+		if (deleteDraft.includes(newParentId)) return `"${parent.name}" is staged for deletion`;
 		if (!parent.canReceive)
 			return `You don't have permission to add domains under "${parent.name}"`;
 		if (childId === newParentId) return 'A domain cannot be its own parent';
@@ -377,9 +381,20 @@
 	async function runApply(moves: unknown[], deletes: string[]) {
 		applying = true;
 		busy = true;
-		const { status, body } = await postReorganize(moves, deletes);
-		applying = false;
-		busy = false;
+		let status: number;
+		let body: any;
+		try {
+			({ status, body } = await postReorganize(moves, deletes));
+		} catch {
+			toastStore.trigger({
+				message: 'Could not reach the server — nothing was applied.',
+				background: 'preset-tonal-error'
+			});
+			return;
+		} finally {
+			applying = false;
+			busy = false;
+		}
 
 		if (status === 409) {
 			// Staleness, or a staged delete no longer targeting an empty leaf. Nothing

@@ -14,6 +14,7 @@
 			deletable: boolean;
 			stagedForDelete: boolean;
 			movable: boolean;
+			canReceive: boolean;
 			isRoot: boolean;
 			staged: boolean;
 			orientation: 'horizontal' | 'vertical';
@@ -207,19 +208,21 @@
 
 	{#if hovered && board?.drag.draggingId === null}
 		<div class="nopan nodrag absolute -top-2 -right-2 flex gap-0.5">
-			<button
-				type="button"
-				aria-label="Create sub-domain"
-				title="Create a sub-domain here"
-				class="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-primary-500 text-[8px] text-white shadow hover:bg-primary-600"
-				onclick={(e) => {
-					e.stopPropagation();
-					board?.createSubDomain(id, data.label);
-				}}
-				onmousedown={(e) => e.stopPropagation()}
-			>
-				<i class="fa-solid fa-plus text-[8px]"></i>
-			</button>
+			{#if data.canReceive}
+				<button
+					type="button"
+					aria-label="Create sub-domain"
+					title="Create a sub-domain here"
+					class="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-primary-500 text-[8px] text-white shadow hover:bg-primary-600"
+					onclick={(e) => {
+						e.stopPropagation();
+						board?.createSubDomain(id, data.label);
+					}}
+					onmousedown={(e) => e.stopPropagation()}
+				>
+					<i class="fa-solid fa-plus text-[8px]"></i>
+				</button>
+			{/if}
 			{#if !locked}
 				<button
 					type="button"

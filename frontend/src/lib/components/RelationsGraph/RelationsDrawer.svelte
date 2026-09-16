@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
+	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -97,7 +98,7 @@
 			const payload = await neighborhood(urlModel, id);
 			graph = merge(createGraph(payload.root), id, payload, { fanCap, hidden, opened });
 		} catch {
-			bootError = 'Could not load the relations of this object.';
+			bootError = m.relationsLoadFailed();
 		} finally {
 			booting = false;
 		}
@@ -107,7 +108,7 @@
 		if (node.hop >= MAX_HOP) {
 			graph = {
 				...graph,
-				notice: `${MAX_HOP} hops is as far as this view goes. Open that object to explore from there.`
+				notice: m.relationsMaxHop({ hops: MAX_HOP })
 			};
 			return;
 		}
@@ -117,7 +118,7 @@
 			const payload = await neighborhood(node.urlModel, node.id);
 			graph = merge(graph, node.id, payload, { fanCap, hidden, opened });
 		} catch {
-			graph = { ...setLoading(graph, node.id, false), notice: 'Could not load that object.' };
+			graph = { ...setLoading(graph, node.id, false), notice: m.relationsLoadNodeFailed() };
 		}
 	}
 
@@ -190,7 +191,7 @@
 			shadow-[-16px_0_48px_-12px_rgba(2,6,23,0.38)] dark:shadow-[-16px_0_48px_-12px_rgba(0,0,0,0.75)]"
 		style="width: min({wide ? '1100px' : '580px'}, 96vw)"
 		transition:fly={{ x: 420, duration: 220 }}
-		aria-label="Relations"
+		aria-label={m.relations()}
 	>
 		<header class="flex items-start gap-2 p-3 border-b border-surface-200-800">
 			<i class="fa-solid {rootMeta.icon} mt-1.5" style="color:{rootMeta.color}"></i>
@@ -201,20 +202,25 @@
 			<button
 				class="btn btn-sm preset-tonal"
 				onclick={reload}
-				title="Start over: collapse everything, restore filters and refetch"
-				aria-label="Start over"
+				title={m.relationsStartOver()}
+				aria-label={m.relationsStartOver()}
 			>
 				<i class="fa-solid fa-rotate-left"></i>
 			</button>
 			<button
 				class="btn btn-sm preset-tonal"
 				onclick={() => (wide = !wide)}
-				title={wide ? 'Narrow' : 'Widen'}
-				aria-label="Toggle width"
+				title={wide ? m.narrow() : m.widen()}
+				aria-label={m.relationsToggleWidth()}
 			>
 				<i class="fa-solid {wide ? 'fa-right-to-bracket' : 'fa-left-right'}"></i>
 			</button>
-			<button class="btn btn-sm preset-tonal" onclick={onClose} title="Close" aria-label="Close">
+			<button
+				class="btn btn-sm preset-tonal"
+				onclick={onClose}
+				title={m.close()}
+				aria-label={m.close()}
+			>
 				<i class="fa-solid fa-xmark"></i>
 			</button>
 		</header>
@@ -236,7 +242,7 @@
 				>
 					<div>
 						<i class="fa-solid fa-circle-nodes text-3xl mb-3 opacity-40"></i>
-						<p>Nothing is linked to this object yet.</p>
+						<p>{m.relationsNoLinks()}</p>
 					</div>
 				</div>
 			{:else}
@@ -268,7 +274,8 @@
 						<div class="flex-1 min-w-0">
 							<div class="text-xs text-surface-500">
 								{meta.label}
-								{#if selected.frontier}· <span class="opacity-70">edge of this view</span>{/if}
+								{#if selected.frontier}· <span class="opacity-70">{m.relationsEdgeOfView()}</span
+									>{/if}
 							</div>
 							<div class="font-semibold truncate" title={selected.name}>{selected.name}</div>
 							{#if selected.meta}
@@ -284,16 +291,16 @@
 								<Anchor
 									breadcrumbAction="push"
 									href={`/${selected.urlModel}/${selected.id}`}
-									label="Open"
+									label={m.open()}
 									class="btn btn-sm preset-tonal"
-									title="Open the object page"
+									title={m.relationsOpenObjectPage()}
 									><i class="fa-solid fa-arrow-up-right-from-square"></i></Anchor
 								>
 							{/if}
 							<button
 								class="btn btn-sm preset-tonal"
-								title="Close"
-								aria-label="Close"
+								title={m.close()}
+								aria-label={m.close()}
 								onclick={() => (selected = null)}><i class="fa-solid fa-xmark"></i></button
 							>
 						</div>
@@ -304,20 +311,22 @@
 
 		<footer class="border-t border-surface-200-800 px-3 py-2 {chatBubble ? 'pr-20' : ''}">
 			<div class="flex flex-wrap items-center gap-2 text-xs text-surface-500">
-				<span class="tabular-nums">{graph.nodes.size - 1}/{NODE_BUDGET} related</span>
+				<span class="tabular-nums"
+					>{m.relationsRelatedCount({ shown: graph.nodes.size - 1, budget: NODE_BUDGET })}</span
+				>
 				{#if expandable.length}
-					<span class="opacity-70">· {expandable.length} expandable</span>
+					<span class="opacity-70"
+						>· {m.relationsExpandableCount({ count: expandable.length })}</span
+					>
 				{/if}
 				<div class="flex-1"></div>
 				{#if expandable.length && expandable.length <= 10}
 					<button class="btn btn-sm preset-tonal" onclick={expandAll}>
-						<i class="fa-solid fa-arrows-left-right-to-line mr-1"></i>expand all
+						<i class="fa-solid fa-arrows-left-right-to-line mr-1"></i>{m.expandAll()}
 					</button>
 				{/if}
-				<span
-					class="uppercase tracking-wide"
-					title="How many objects to draw per relation before the rest collapse into a +N"
-					>Per relation</span
+				<span class="uppercase tracking-wide" title={m.relationsPerRelationHint()}
+					>{m.relationsPerRelation()}</span
 				>
 				<input
 					type="range"
@@ -325,23 +334,23 @@
 					max="12"
 					bind:value={fanCap}
 					onchange={reset}
-					title="How many objects to draw per relation before the rest collapse into a +N"
+					title={m.relationsPerRelationHint()}
 					class="w-16 accent-primary-500"
-					aria-label="Objects shown per relation"
+					aria-label={m.relationsObjectsPerRelation()}
 				/>
 				<span class="w-4 text-center tabular-nums">{fanCap}</span>
 				<button
 					class="btn btn-sm preset-tonal"
 					onclick={() => (showLabels = !showLabels)}
-					title="Labels"
-					aria-label="Toggle labels"
+					title={m.labels()}
+					aria-label={m.relationsToggleLabels()}
 				>
 					<i class="fa-solid fa-tag {showLabels ? '' : 'opacity-40'}"></i>
 				</button>
 				<button
 					class="btn btn-sm {hidden.size ? 'preset-filled-primary-500' : 'preset-tonal'}"
 					onclick={() => (filterOpen = !filterOpen)}
-					title="Filter by type"
+					title={m.relationsFilterByType()}
 				>
 					<i class="fa-solid fa-filter"></i>
 					{#if hidden.size}<span class="ml-1">{hidden.size}</span>{/if}
@@ -349,7 +358,9 @@
 			</div>
 			{#if filterOpen}
 				<div class="flex items-center gap-2 mt-2">
-					<span class="text-[10px] uppercase tracking-wide text-surface-500">Shown types</span>
+					<span class="text-[10px] uppercase tracking-wide text-surface-500"
+						>{m.relationsShownTypes()}</span
+					>
 					<div class="flex-1"></div>
 					{#if hidden.size}
 						<button
@@ -357,7 +368,7 @@
 							onclick={() => {
 								hidden = new Set();
 								reset();
-							}}>show all ({hidden.size} hidden)</button
+							}}>{m.relationsShowAllHidden({ count: hidden.size })}</button
 						>
 					{/if}
 				</div>
@@ -371,7 +382,7 @@
 								: 'border-transparent'}"
 							style={off ? '' : `background:${tm.color}22;color:${tm.color}`}
 							onclick={() => toggleType(model)}
-							title={off ? 'Show' : 'Hide'}
+							title={off ? m.show() : m.hide()}
 						>
 							{tm.label}
 						</button>

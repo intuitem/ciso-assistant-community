@@ -39,7 +39,10 @@ NEIGHBOURHOOD: dict[str, list[Relation]] = {
         Relation("risk_scenarios", "risk-scenarios", "mitigated by", inbound=True),
         Relation("findings", "findings", "remediated by", inbound=True),
         Relation("task_templates", "task-templates", "maintains", inbound=True),
-        Relation("documents", "document-containers", "documented by", inbound=True),
+        # DocumentContainer.applied_controls; `documents` belongs to the Policy proxy.
+        Relation(
+            "control_documents", "document-containers", "documented by", inbound=True
+        ),
     ],
     "core.RiskScenario": [
         Relation("risk_assessment", "risk-assessments", "comprises", inbound=True),
@@ -71,7 +74,7 @@ NEIGHBOURHOOD: dict[str, list[Relation]] = {
         Relation("asset_class", "asset-classes", "classifies", inbound=True),
         Relation("security_exceptions", "security-exceptions", "excepted by"),
         Relation("folder", "folders", "scopes", inbound=True),
-        Relation("riskscenario_set", "risk-scenarios", "targets", inbound=True),
+        Relation("risk_scenarios", "risk-scenarios", "targets", inbound=True),
         Relation("findings", "findings", "affects", inbound=True),
         Relation("vulnerabilities", "vulnerabilities", "exposes", inbound=True),
         Relation(
@@ -218,8 +221,11 @@ def build(obj, user) -> dict:
         if label not in viewable:
             try:
                 viewable[label] = RoleAssignment.get_viewable_object_ids(user, target)
-            except Exception:
+            except NotImplementedError:
+                # Outside IAM (reference data): nothing to scope against.
                 viewable[label] = None
+            except Exception:
+                continue  # never fall back to unscoped
         if viewable[label] is not None:
             queryset = queryset.filter(id__in=viewable[label])
 

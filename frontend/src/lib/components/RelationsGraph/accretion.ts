@@ -1,4 +1,5 @@
 import type { GraphLink, Neighborhood } from './types';
+import { m } from '$paraglide/messages';
 
 /** Ego graph that grows by explicit expansion; positions are assigned on arrival and never recomputed. */
 
@@ -175,7 +176,7 @@ export function merge(
 		return {
 			...graph,
 			nodes: new Map([...nodes, [parentId, { ...parent, loading: false }]]),
-			notice: `That would push the graph past ${NODE_BUDGET} objects. Collapse something first.`
+			notice: m.relationsBudgetReached({ budget: NODE_BUDGET })
 		};
 	}
 

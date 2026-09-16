@@ -25,7 +25,9 @@
 	</div>
 
 	<div class="min-h-0 flex-1">
-		{#if data.movableTree}
+		<!-- Both: without the receiving tree every domain reads as unable to accept
+		     children, which renders a board that rejects every move. -->
+		{#if data.movableTree && data.receivingTree}
 			<DomainBoard
 				movableTree={data.movableTree}
 				receivingTree={data.receivingTree}

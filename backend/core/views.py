@@ -8859,6 +8859,13 @@ class FolderViewSet(BaseModelViewSet):
                 {"moves": "At least one move or delete is required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        # Each delete scans every model for a folder FK, so an unbounded batch is
+        # folder count times model count in one request.
+        if len(moves) + len(deletes) > BATCH_SIZE_LIMIT:
+            return Response(
+                {"error": "too many ids", "max": BATCH_SIZE_LIMIT},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         seen: set[str] = set()
         for move in moves:
@@ -8916,8 +8923,12 @@ class FolderViewSet(BaseModelViewSet):
             planned.append((folder, target, current))
 
         planned_deletes = []
+        seen_deletes: set[str] = set()
         for entry in deletes:
             folder_id = str(entry.get("folder", ""))
+            if folder_id in seen_deletes:
+                continue  # destroying it twice would double the reported count
+            seen_deletes.add(folder_id)
             folder = visible.get(folder_id)
             if folder is None:
                 conflicts.append({"folder": folder_id, "reason": "folderGone"})
@@ -9092,7 +9103,7 @@ class FolderViewSet(BaseModelViewSet):
                 "writable": writable_ids is None or folder["id"] in writable_ids,
                 "content_type": folder["content_type"],
             }
-            if content_counts is not None:
+            if content_counts is not None and entry["viewable"]:
                 entry["content_count"] = content_counts.get(folder["id"], 0)
             # Add enclave-specific styling
             if folder["content_type"] == Folder.ContentType.ENCLAVE:
@@ -9124,7 +9135,7 @@ class FolderViewSet(BaseModelViewSet):
             "writable": writable_ids is None or root_folder.id in writable_ids,
             "children": folders_list,
         }
-        if content_counts is not None:
+        if content_counts is not None and root_folder.id in viewable_objects:
             root_entry["content_count"] = content_counts.get(root_folder.id, 0)
         return Response(root_entry)
 

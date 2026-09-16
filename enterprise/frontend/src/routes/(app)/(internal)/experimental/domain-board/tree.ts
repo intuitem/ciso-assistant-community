@@ -199,12 +199,14 @@ export function dropZone(position: XY, orientation: Orientation): Rect {
 	};
 }
 
+/** Half-open: adjacent zones share an edge, and owning it twice would make the
+ * winner depend on iteration order. */
 export function contains(rect: Rect, point: XY): boolean {
 	return (
 		point.x >= rect.x &&
-		point.x <= rect.x + rect.width &&
+		point.x < rect.x + rect.width &&
 		point.y >= rect.y &&
-		point.y <= rect.y + rect.height
+		point.y < rect.y + rect.height
 	);
 }
 
