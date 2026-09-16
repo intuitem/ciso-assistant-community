@@ -399,6 +399,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02
       ref_id: ASI02.4
+      name: Policy Enforcement Middleware (“Intent Gate”)
       description: Policy Enforcement Middleware (“Intent Gate”). Treat LLM or planner outputs as untrusted.
         A pre-execution Policy Enforcement Point (PEP/PDP) validates intent and arguments, enforces schemas
         and rate limits, issues short-lived credentials, and revokes or audits on drift.
@@ -429,7 +430,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02
       ref_id: ASI02.7
-      description: Semantic and Identity Validation (‘Semantic Firewalls)”. Enforce fully qualified tool
+      name: Semantic and Identity Validation (“Semantic Firewalls”)
+      description: Semantic and Identity Validation (“Semantic Firewalls”). Enforce fully qualified tool
         names and version pins to avoid tool alias collisions or typo squatted tools; validate the intended
         semantics of tool calls (e.g., query type or category) rather than relying on syntax alone. Fail
         closed on ambiguous resolution and prompt for user disambiguation.
@@ -677,6 +679,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04
       ref_id: ASI04.9
+      name: Zero-trust security model in application design
       description: 'Zero-trust security model in application design: design system with security fault
         tolerance that assumes failure or exploitation of LLM or agentic function components.'
       threats:
@@ -1046,6 +1049,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08
       ref_id: ASI08.1
+      name: Zero-trust model in application design
       description: 'Zero-trust model in application design: design system with fault tolerance that assumes
         availability failure of LLM:2025, agentic function components and external sources.'
       threats:
@@ -1349,6 +1353,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10
       ref_id: ASI10.6
+      name: Require periodic behavioral attestation
       description: 'Require periodic behavioral attestation: challenge tasks, signed bill of materials
         for prompts and tools, and per-run ephemeral credentials with one-time audience binding. All signing
         and attestation mechanisms assume hardened cryptographic key management (e.g., HSM/KMS-backed
