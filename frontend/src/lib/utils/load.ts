@@ -106,8 +106,51 @@ export const loadValidationFlowFormData = async ({
 	return { validationFlowForm, validationFlowModel };
 };
 
+// A detail page's related-model work fans out over its reverse-FK tabs, and each
+// tab issues several calls of its own, so the socket count is tabs x calls. Tabs
+// are filtered by feature flag, so the fan-out grows as an instance turns
+// features on.
+//
+// Unbounded, detail pages fail intermittently: the SSR load dies with
+// `TypeError: fetch failed` (cause EPIPE — the backend ended the connection) and
+// the page 500s, or renders with related tables silently missing. Bounding the
+// fetches makes it stop. Observed on evidences and assets, the two pages with the
+// most flag-gated tabs; applied-controls, with fewer, was unaffected.
+//
+// WHY it fails is not established. Measured facts: the failures track the number
+// of enabled feature flags, disabling them all makes the pages load, and toggling
+// this constant between 6 and effectively-unlimited flips the behaviour
+// reproducibly. Candidates not ruled out: a connection limit upstream, a client
+// socket-pool interaction (the crashes involve undici, and nodejs/undici#5360 is
+// an uncatchable assertion on socket end that Node 22/24 still ship), or memory
+// pressure in the SSR process. Nobody has measured the real peak concurrency.
+//
+// So this value is empirical, not derived: 6 is stable, unbounded is not. If a
+// detail page ever fails at 6, that is the signal this was tuned to a symptom —
+// instrument handleFetch to log per-request size, duration and in-flight count,
+// and fix the cause rather than lowering the number.
+const DETAIL_FETCH_CONCURRENCY = 12;
+
+function boundedFetcher(fetchFn: typeof fetch, limit: number): typeof fetch {
+	let active = 0;
+	const waiting: Array<() => void> = [];
+	return (async (...args: Parameters<typeof fetch>) => {
+		if (active >= limit) await new Promise<void>((resolve) => waiting.push(resolve));
+		active++;
+		try {
+			return await fetchFn(...args);
+		} finally {
+			active--;
+			waiting.shift()?.();
+		}
+	}) as typeof fetch;
+}
+
 export const loadDetail = async ({ event, model, id }) => {
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/`;
+
+	// Scoped to this load: the cap is per page render, not per server.
+	const fetchRelated = boundedFetcher(event.fetch, DETAIL_FETCH_CONCURRENCY);
 
 	const res = await event.fetch(endpoint);
 	if (!res.ok) {
@@ -230,7 +273,7 @@ export const loadDetail = async ({ event, model, id }) => {
 					if (data.folder) {
 						if (!new RegExp(UUID_REGEX).test(data.folder) && !data?.folder?.id) {
 							const objectEndpoint = `${endpoint}object/`;
-							const objectResponse = await event.fetch(objectEndpoint);
+							const objectResponse = await fetchRelated(objectEndpoint);
 							const objectData = await objectResponse.json();
 							initialData['folder'] = objectData.folder;
 						} else {
@@ -265,7 +308,7 @@ export const loadDetail = async ({ event, model, id }) => {
 								if (selectField.formNestedField && selectField.detail === true) {
 									url = `${BASE_API_URL}/${selectField.endpointUrl}/${initialData[selectField.formNestedField]}/${selectField.field}/`;
 								}
-								const response = await event.fetch(url);
+								const response = await fetchRelated(url);
 								if (response.ok) {
 									const responseData = await response.json();
 									selectOptions[selectField.field] = formatSelectFieldData(
@@ -311,7 +354,7 @@ export const loadDetail = async ({ event, model, id }) => {
 							const relatedModelInfo = getModelInfo(e.urlModel);
 							countUrl = `${BASE_API_URL}/${relatedModelInfo.endpointUrl ?? e.urlModel}/?${e.field}=${id}&limit=1`;
 						}
-						const countRes = await event.fetch(countUrl);
+						const countRes = await fetchRelated(countUrl);
 						if (countRes.ok) {
 							const countData = await countRes.json();
 							if (typeof countData.count === 'number') {
