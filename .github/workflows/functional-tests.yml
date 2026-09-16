@@ -306,8 +306,13 @@ jobs:
           POSTGRES_DB: postgres
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-      mailhog:
-        image: ghcr.io/intuitem/ciso-assistant-community/mirror/mailhog:v1.0.1
+      mailpit:
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/mailpit:v1.31.1
+        # Unlike MailHog, Mailpit advertises no AUTH unless asked, and the Django
+        # SMTP backend calls login() whenever EMAIL_HOST_USER is set.
+        env:
+          MP_SMTP_AUTH_ACCEPT_ANY: 1
+          MP_SMTP_AUTH_ALLOW_INSECURE: 1
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
@@ -506,8 +511,13 @@ jobs:
           POSTGRES_DB: postgres
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-      mailhog:
-        image: ghcr.io/intuitem/ciso-assistant-community/mirror/mailhog:v1.0.1
+      mailpit:
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/mailpit:v1.31.1
+        # Unlike MailHog, Mailpit advertises no AUTH unless asked, and the Django
+        # SMTP backend calls login() whenever EMAIL_HOST_USER is set.
+        env:
+          MP_SMTP_AUTH_ACCEPT_ANY: 1
+          MP_SMTP_AUTH_ALLOW_INSECURE: 1
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
