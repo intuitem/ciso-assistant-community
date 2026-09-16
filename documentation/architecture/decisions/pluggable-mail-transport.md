@@ -7,13 +7,13 @@
 
 Today we send mail over plain SMTP. There is a primary server and an optional rescue server. Both are configured with `EMAIL_HOST` and related environment variables.
 
-Three parts of the code send mail on their own: `iam/models.py`, `core/tasks.py` and `automation/workflows/tasks.py`. Only the first one falls back to the rescue server. The code checks "is mail configured?" in three different ways. All three assume an SMTP host exists.
+Three parts of the code send mail on their own: `iam/models.py`, `core/tasks.py` and `automation/workflows/tasks.py`. Only the first one falls back to the rescue server. The code checks "is mail configured?" in several places, and every check assumes an SMTP host exists.
 
 Two things outside the project force a change.
 
-First, Microsoft 365 and Google Workspace are dropping password login for SMTP. Google did it in May 2025. Microsoft leaves it unchanged through December 2026, then disables it by default for existing tenants and makes it unavailable by default for tenants created after that date. Administrators can still re-enable it for now. Microsoft has not announced the final removal date. Customers who host with them need one of: OAuth over SMTP, the Microsoft Graph API, or an HTTP mail provider.
+First, Microsoft 365 and Google Workspace are dropping password login for SMTP. Google turned it off for Workspace on 14 March 2025. Microsoft leaves it unchanged through December 2026, then disables it by default for existing tenants and makes it unavailable by default for tenants created after that date. Administrators can still re-enable it for now. Microsoft has not announced the final removal date. Customers who host with them need one of: OAuth over SMTP, the Microsoft Graph API, or an HTTP mail provider.
 
-Second, Django 6.1 added `MAILERS`. It is a setting for named mail backends, shaped like `DATABASES`. At the same time Django deprecated everything we use today: the `EMAIL_*` settings, `get_connection()`, the `connection` argument and `fail_silently`.
+Second, Django 6.1 added `MAILERS`. It is a setting for named mail backends, shaped like `DATABASES`. At the same time Django deprecated everything we use today: the `EMAIL_*` settings, `get_connection()`, the `connection` argument and `fail_silently`. Its SMTP backend also stopped accepting a custom `ssl_context`. Our `EMAIL_FORCE_TLS_1_2` option passes one, so on Django 6.1 that option is silently ignored today.
 
 Our own production sends through SendGrid's SMTP relay. Neither change affects it. It must keep working with its current configuration.
 
@@ -27,7 +27,7 @@ Operators keep using environment variables. The existing SMTP variables keep wor
 
 Besides SMTP, the list covers the HTTP providers that django-anymail fully supports, plus a Microsoft Graph backend that we write ourselves.
 
-Templates, i18n and the task queue do not change. Huey stays.
+Templates, i18n and the task queue do not change.
 
 ## Consequences
 
@@ -42,19 +42,21 @@ Templates, i18n and the task queue do not change. Huey stays.
 
 ### Version 1
 
-- The mail service in `core`. Settings build `MAILERS` from the environment: `EMAIL_TRANSPORT` defines the first mailer, and the `_RESCUE` variables, if set, define a second SMTP mailer. The service tries them in declaration order. Failover applies to every send, not only password resets. Every failover writes an error log naming the mailer that failed and the exception. That log is the server log, for operators. Surfaces a user sees, such as a workflow run log or an API error, get a generic message, as #4654 already does. Credentials never appear in either.
-- The service fails over only when the failure happened before the message was handed over: connection refused, TLS or authentication failure, provider API unreachable. Two kinds of failure do not fail over. A permanent rejection of the message or recipient, because the next mailer would give the same answer. And a failure after the message was sent but before the server answered, such as a timeout waiting for the final response, because the server may have accepted it and a second mailer would send it twice. In that last case the service raises and says the outcome is unknown.
-- `EMAIL_TRANSPORT=smtp` (the default) maps the existing variables to `MAILERS` unchanged. In `MAIL_DEBUG` mode, the console backend is the only mailer.
+- The mail service in `core`. Settings build `MAILERS` from the environment: `EMAIL_TRANSPORT` defines the first mailer, and the `_RESCUE` variables, if set, define a second SMTP mailer. The service tries them in declaration order. Failover applies to every send, not only password resets.
+- Every failover writes an error log naming the mailer that failed and the exception. That log is the server log, for operators. Surfaces a user sees, such as a workflow run log or an API error, get a generic message, as #4654 already does. Credentials never appear in either.
+- The service fails over only when the failure happened before the message was handed over: connection refused or timed out, TLS or authentication failure, provider API unreachable. Two kinds of failure do not fail over. A permanent rejection of the message or recipient, because the next mailer would give the same answer. And a failure after the message was sent but before the server answered, such as a timeout waiting for the final response, because the server may have accepted it and a second mailer would send it twice. In that last case the service raises and says the outcome is unknown.
+- `EMAIL_TRANSPORT=smtp` (the default) maps the existing variables to `MAILERS` unchanged. The SMTP mailer is our own subclass of Django's SMTP backend, so that `EMAIL_FORCE_TLS_1_2` works again and the OAuth variant has a place to go later. In `MAIL_DEBUG` mode, the console backend is the only mailer.
+- When no transport is configured, `MAILERS` has no `default` entry and `mailing_enabled()` is false. Our code then does not try to send. Anything else that sends anyway gets Django's `MailerDoesNotExist`, a loud failure instead of today's silent connection attempt to localhost.
 - One function, `mailing_enabled()`, replaces all "is mail configured?" checks. It reads `MAILERS`. The `EMAIL_HOST or EMAIL_HOST_RESCUE` checks and the required-settings list in `core/tasks.py` are removed. Settings refuse to load if a mailer is set but `DEFAULT_FROM_EMAIL` is not, the same way they already refuse `EMAIL_USE_TLS` together with `EMAIL_USE_SSL`. This runs wherever Django starts, including the RHEL service, which launches gunicorn without any `manage.py` step. A Django system check alone would not cover that path.
 - django-anymail as a required dependency, exposing the providers Anymail marks as Full today: Amazon SES, Brevo, MailerSend, Mailgun, Mailjet, Mailtrap, Postmark, Resend, Scaleway TEM, SparkPost and Unisender Go. Anymail has not been able to test its SendGrid backend since June 2025, so production stays on the SMTP relay.
 - A Microsoft Graph backend that we write and maintain ourselves. It is roughly sixty lines: get a token from Entra with `msal` client credentials, then call the Graph `sendMail` endpoint as the configured mailbox. The alternative is a third-party package. The two that exist, django-msgraphbackend and django-o365, each have a single maintainer. We would rather own sixty lines than depend on one person for code that handles credentials. The cost is ours: we follow Graph API changes and fix bugs ourselves.
-- The service sends synchronously. It tries each mailer in order. If all fail, it raises. It never hides an error. Callers that must not block wrap the call in a Huey task. That task is responsible for the result: it must report success or failure to whoever asked for the mail. The workflow `send_email` action already works this way since #4654, and is the model to follow. A task that catches the error, logs it and moves on is not acceptable when a user asked for the mail. Password reset and invitations stay inline in version 1. They can move into a task later without changing the service.
+- The service sends synchronously. It tries each mailer in order. If all fail, it raises. It never hides an error. Callers that must not block wrap the call in a Huey task. That task is responsible for the result: it must report success or failure to whoever asked for the mail. The workflow `send_email` action already works this way since #4654, and is the model to follow. A Huey task that catches the error, logs it and reports success is not acceptable. Password reset and invitations stay inline in version 1. They can move into a task later without changing the service. The password reset endpoint is the one deliberate exception to surfacing errors: it logs the failure and still returns its neutral response, because it must not reveal whether an address exists.
 - A "send test email" action for administrators. It sends only to the administrator's own address. It reports which mailer was used, its type, and the error if there was one.
 
 ### Later
 
 - A generic way to declare any number of mailers of any type from the environment. Not needed until a customer wants a fallback that is not SMTP.
-- OAuth over SMTP (XOAUTH2) for Microsoft 365 and Google Workspace. One SMTP backend subclass that fetches the token and authenticates with it. Until then, Microsoft 365 customers use Graph and Google Workspace customers use the IP-allowlisted relay.
+- OAuth over SMTP (XOAUTH2) for Microsoft 365 and Google Workspace. One SMTP backend subclass that fetches the token and authenticates with it. Until then, Microsoft 365 customers use Graph and Google Workspace customers use the IP-allowlisted relay, which needs a fixed egress address.
 
 ### Out of scope
 
@@ -69,7 +71,7 @@ Templates, i18n and the task queue do not change. Huey stays.
 - The fixed list of transports in code prevents loading arbitrary classes from an environment variable.
 - The test-send action is limited to administrators and to their own address, so it cannot be used as a relay. It is rate limited.
 - If the first mailer is misconfigured, a later one may carry all traffic without anyone noticing. This is a monitoring gap, not a breach. The error log on every failover is the mitigation.
-- We accept that django-anymail and its `requests` dependency join the supply chain, and that we maintain a small Graph client ourselves.
+- We accept that django-anymail and its `requests` dependency join the supply chain, and that we maintain a small Graph client ourselves. Amazon SES needs `boto3`, which is already a dependency.
 
 ## Alternatives considered
 
