@@ -17,7 +17,7 @@ graph LR
   TN -.->|produces| EVR[Evidence revision]
 ```
 
-The task template is the definition — assignee, recurrence rule, expected evidence — and the task occurrence is the actual unit of work scheduled from it. The schedule is a JSON field describing the cadence (DAILY / WEEKLY / MONTHLY / YEARLY with the usual iCalendar refinements), rendered in words wherever it's displayed — *Monthly*, *Every 3 months* — rather than as the raw rule. Templates can be wired to many other objects — applied controls being the canonical one (the "maintains" semantics: this work keeps that control healthy) — and when an occurrence is completed, the evidence revision it produces is back-linked through `task_node` so the audit trail closes the loop.
+The task template is the definition — assignee, recurrence rule, expected evidence — and the task occurrence is the actual unit of work scheduled from it. The schedule is a JSON field describing the cadence (DAILY / WEEKLY / MONTHLY / YEARLY with the usual iCalendar refinements), rendered in words wherever it's displayed — *Monthly*, *Every 3 months* — rather than as the raw rule. Templates can be wired to many other objects — applied controls being the canonical one (the "maintains" semantics: this work keeps that control healthy) — and when an occurrence is completed, the evidence revision it produces is back-linked through `task_node` so the audit trail closes the loop. Observations that come out of a run are recorded as [findings](findings-assessments.md) and listed on the definition's **Findings** tab; they attach to the definition rather than to the occurrence, so a recurring task pools the findings raised across all of its runs.
 
 | User-facing | Internal | Notes |
 |---|---|---|
