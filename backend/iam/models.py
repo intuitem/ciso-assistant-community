@@ -1144,8 +1144,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def _send_email(self, subject, body, html_body=None):
         """Send an email with primary/rescue server fallback."""
         try:
-            ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
-            with get_connection(ssl_context=ssl_context) as connection:
+            with get_connection() as connection:
                 msg = EmailMessage(
                     subject=subject,
                     body=body,
@@ -1180,7 +1179,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                         password=settings.EMAIL_HOST_PASSWORD_RESCUE,
                         use_tls=settings.EMAIL_USE_TLS_RESCUE,
                         use_ssl=settings.EMAIL_USE_SSL_RESCUE,
-                        ssl_context=getattr(settings, "EMAIL_SSL_CONTEXT", None),
                     ) as new_connection:
                         msg = EmailMessage(
                             subject=subject,

@@ -68,11 +68,10 @@ def send_email_task(
         return
 
     sent, failed = [], []
-    ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
     try:
         # One connection for the whole batch (not one handshake per
         # recipient); individual messages so recipients don't see each other.
-        with get_connection(ssl_context=ssl_context) as connection:
+        with get_connection() as connection:
             for email in recipients:
                 try:
                     send_email_now(subject, body, email, connection=connection)
