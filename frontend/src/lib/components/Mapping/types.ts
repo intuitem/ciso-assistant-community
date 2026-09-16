@@ -1,4 +1,6 @@
 export interface MappingRow {
+	/** Occurrence index in the library's mapping list — the only stable row identity. */
+	index: number;
 	source_urn: string;
 	source_ref_id: string | null;
 	source_name: string | null;

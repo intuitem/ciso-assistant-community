@@ -64,6 +64,8 @@
 				sourceFramework={meta.source_framework}
 				targetFramework={meta.target_framework}
 			/>
+		{:catch}
+			<p class="p-4 text-sm text-error-700-300">{m.errorLoadingData()}</p>
 		{/await}
 	{/if}
 </div>

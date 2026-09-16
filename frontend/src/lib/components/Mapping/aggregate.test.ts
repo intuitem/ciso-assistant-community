@@ -3,6 +3,7 @@ import {
 	aggregateBySide,
 	bestRelationship,
 	compareValues,
+	escapeSpreadsheetFormula,
 	filterByCoverage,
 	matchesQuery,
 	relationshipRank
@@ -13,12 +14,15 @@ function requirement(urn: string, ref_id: string | null, name: string | null): M
 	return { urn, ref_id, name, description: null };
 }
 
+let nextIndex = 0;
+
 function mapping(
 	source: MappingRequirement,
 	target: MappingRequirement,
 	relationship: string | null
 ): MappingRow {
 	return {
+		index: nextIndex++,
 		source_urn: source.urn,
 		source_ref_id: source.ref_id,
 		source_name: source.name,
@@ -122,11 +126,63 @@ describe('filterByCoverage', () => {
 	});
 });
 
+describe('duplicate links', () => {
+	// 25 of the shipped mapping sets repeat the same (source, target, relationship)
+	// triple. Keying a Svelte {#each} on that triple throws each_key_duplicate, so
+	// every key derived here has to stay distinct.
+	const duplicated = [mapping(s1, t1, 'intersect'), mapping(s1, t1, 'intersect')];
+
+	it('gives repeated links distinct row indices', () => {
+		expect(duplicated[0].index).not.toBe(duplicated[1].index);
+	});
+
+	it('keeps counterpart keys distinct when a link is repeated', () => {
+		const [group] = aggregateBySide([s1], duplicated, 'source');
+
+		expect(group.counterparts).toHaveLength(2);
+		const keys = group.counterparts.map((counterpart) => counterpart.index);
+		expect(new Set(keys).size).toBe(keys.length);
+	});
+
+	it('still counts a repeated link once per occurrence', () => {
+		const [group] = aggregateBySide([s1], duplicated, 'source');
+		expect(group.counterparts).toHaveLength(2);
+		expect(group.relationship).toBe('intersect');
+	});
+});
+
 describe('matchesQuery', () => {
 	it('matches case-insensitively and ignores nullish values', () => {
 		expect(matchesQuery(['A.1', null, undefined], 'a.1')).toBe(true);
 		expect(matchesQuery([null, undefined], 'a')).toBe(false);
 		expect(matchesQuery(['Source one'], 'one')).toBe(true);
+	});
+
+	it('normalizes the query itself, so callers need not', () => {
+		expect(matchesQuery(['Source one'], 'SOURCE')).toBe(true);
+		expect(matchesQuery(['Source one'], 'OnE')).toBe(true);
+	});
+});
+
+describe('escapeSpreadsheetFormula', () => {
+	it('quotes out values a spreadsheet would execute', () => {
+		expect(escapeSpreadsheetFormula('=HYPERLINK("http://evil","x")')).toBe(
+			'\'=HYPERLINK("http://evil","x")'
+		);
+		for (const lead of ['=', '+', '-', '@']) {
+			expect(escapeSpreadsheetFormula(`${lead}cmd`)).toBe(`'${lead}cmd`);
+		}
+	});
+
+	it('catches leading whitespace before the formula character', () => {
+		expect(escapeSpreadsheetFormula('  =1+1')).toBe("'  =1+1");
+		expect(escapeSpreadsheetFormula('\t@SUM(A1)')).toBe("'\t@SUM(A1)");
+	});
+
+	it('leaves ordinary requirement text alone', () => {
+		expect(escapeSpreadsheetFormula('A.5.9')).toBe('A.5.9');
+		expect(escapeSpreadsheetFormula('Inventory of assets')).toBe('Inventory of assets');
+		expect(escapeSpreadsheetFormula('')).toBe('');
 	});
 });
 

@@ -11,6 +11,8 @@ export type CoverageFilter = 'all' | 'mapped' | 'unmapped';
 export const RELATIONSHIP_ORDER = ['equal', 'superset', 'subset', 'intersect', 'not_related'];
 
 export interface Counterpart {
+	/** The originating row's occurrence index — distinguishes repeated links. */
+	index: number;
 	urn: string;
 	ref_id: string | null;
 	name: string | null;
@@ -61,6 +63,7 @@ export function aggregateBySide(
 			name: requirement.name,
 			relationship: bestRelationship(groupRows),
 			counterparts: groupRows.map((row) => ({
+				index: row.index,
 				urn: side === 'source' ? row.target_urn : row.source_urn,
 				ref_id: side === 'source' ? row.target_ref_id : row.source_ref_id,
 				name: side === 'source' ? row.target_name : row.source_name,
@@ -76,8 +79,19 @@ export function filterByCoverage(rows: AggregateRow[], coverage: CoverageFilter)
 	return rows;
 }
 
+/** Case-insensitive substring match; `query` need not be normalized by the caller. */
 export function matchesQuery(values: (string | null | undefined)[], query: string): boolean {
-	return values.some((value) => value && value.toLowerCase().includes(query));
+	const needle = query.toLowerCase();
+	return values.some((value) => value && value.toLowerCase().includes(needle));
+}
+
+/**
+ * Neutralize spreadsheet formula injection, mirroring the backend's
+ * `escape_excel_formula`: a value whose first non-blank character is =, +, - or @
+ * is executed on open by Excel and Sheets unless it is quoted out.
+ */
+export function escapeSpreadsheetFormula(value: string): string {
+	return /^\s*[=+\-@]/.test(value) ? `'${value}` : value;
 }
 
 export function compareValues(a: string | number | null, b: string | number | null): number {

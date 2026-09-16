@@ -6,6 +6,7 @@
 	import {
 		aggregateBySide,
 		compareValues,
+		escapeSpreadsheetFormula,
 		filterByCoverage,
 		matchesQuery,
 		relationshipRank,
@@ -207,8 +208,10 @@
 		];
 	});
 
-	function rowKey(row: MappingRow | AggregateRow): string {
-		return 'urn' in row ? row.urn : `${row.source_urn}|${row.target_urn}|${row.relationship}`;
+	// A requirement's urn is unique per side; a mapping row's identity is its
+	// occurrence index, since the same link may be listed more than once.
+	function rowKey(row: MappingRow | AggregateRow): string | number {
+		return 'urn' in row ? row.urn : row.index;
 	}
 
 	function requirementLabel(counterpart: Counterpart): string {
@@ -218,7 +221,7 @@
 	}
 
 	function csvCell(value: unknown): string {
-		const text = value == null ? '' : String(value);
+		const text = escapeSpreadsheetFormula(value == null ? '' : String(value));
 		return /[",\n;]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 	}
 
@@ -388,7 +391,7 @@
 							<td class="px-3 py-2">
 								{#if group.counterparts.length}
 									<div class="flex flex-wrap gap-1">
-										{#each group.counterparts as counterpart (counterpart.urn)}
+										{#each group.counterparts as counterpart (counterpart.index)}
 											<span
 												class="rounded-sm px-2 py-0.5 text-xs {RELATIONSHIP_COLOR[
 													counterpart.relationship ?? ''

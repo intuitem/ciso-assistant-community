@@ -15855,9 +15855,13 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             raise NotFound(f"{label} framework library not found")
         return lib.content["framework"]
 
-    def _mapping_context(self, pk):
-        """Resolve the mapping set and both framework contents for a stored library."""
-        obj = StoredLibrary.objects.get(id=pk)
+    def _mapping_context(self):
+        """Resolve the mapping set and both framework contents for a stored library.
+
+        Goes through get_object() so the viewset's folder-scoped queryset applies:
+        a library the caller may not view is a 404 here, as through every other door.
+        """
+        obj = self.get_object()
 
         mapping_set = obj.content.get(
             "requirement_mapping_sets",
@@ -15909,7 +15913,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
-        mapping_set, source_framework, target_framework = self._mapping_context(pk)
+        mapping_set, source_framework, target_framework = self._mapping_context()
 
         source_nodes_dict = {
             n.get("urn"): n for n in source_framework["requirement_nodes"]
@@ -15999,7 +16003,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         payload, so unmapped requirements are shipped too: they are the coverage
         gaps the aggregate modes are there to surface.
         """
-        mapping_set, source_framework, target_framework = self._mapping_context(pk)
+        mapping_set, source_framework, target_framework = self._mapping_context()
 
         def inventory(framework):
             return {
@@ -16017,13 +16021,18 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         target_requirements = inventory(target_framework)
 
         rows = []
-        for mapping in mapping_set.get("requirement_mappings", []):
+        # Libraries carry no mapping identifier and nothing forbids the same
+        # (source, target, relationship) triple appearing twice — 25 of the shipped
+        # mapping sets do repeat links. The occurrence index is what makes a row
+        # addressable, so the client can key a list on it.
+        for index, mapping in enumerate(mapping_set.get("requirement_mappings", [])):
             source = source_requirements.get(mapping.get("source_requirement_urn"))
             target = target_requirements.get(mapping.get("target_requirement_urn"))
             if not source or not target:
                 continue
             rows.append(
                 {
+                    "index": index,
                     "source_urn": source["urn"],
                     "source_ref_id": source["ref_id"],
                     "source_name": source["name"],
