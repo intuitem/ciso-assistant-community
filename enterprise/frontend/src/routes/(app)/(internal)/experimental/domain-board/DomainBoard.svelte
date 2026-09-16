@@ -577,6 +577,14 @@
 	}
 
 	function createSubDomain(parentId: string, parentName: string) {
+		if (busy) return;
+		if (deleteDraft.includes(parentId)) {
+			toastStore.trigger({
+				message: `"${parentName}" is staged for deletion`,
+				background: 'preset-tonal-warning'
+			});
+			return;
+		}
 		// The form posts with dataType 'json', so `form.data` goes over the wire whether
 		// or not a parent_folder field is rendered.
 		folderModel.createForm.data.parent_folder = parentId;
