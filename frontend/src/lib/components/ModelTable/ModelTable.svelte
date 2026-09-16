@@ -1230,7 +1230,7 @@
 														{/if}
 													{:else if URLModel == 'document-containers' && key === 'status' && row.meta?.pending_revision}
 														<div class="flex items-center space-x-2">
-															<span>{safeTranslate(value ?? '-')}</span>
+															<span>{safeTranslate(value)}</span>
 															<span
 																class="badge preset-tonal-primary text-xs whitespace-nowrap"
 																data-testid="pending-revision-badge"

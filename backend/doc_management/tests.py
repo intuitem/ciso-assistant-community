@@ -387,6 +387,25 @@ class TestContainerPendingRevision:
     def _serialize(self, container):
         return DocumentContainerReadSerializer(container).data
 
+    def test_the_revision_in_force_is_not_reported_as_pending(self):
+        """A new document points current_revision at its own draft, and a
+        validated first revision stays current too. Reporting it as pending
+        showed the same revision twice in the table."""
+        folder = Folder.objects.create(
+            name="PR-current", parent_folder=Folder.get_root_folder()
+        )
+        s = ManagedDocumentWriteSerializer(
+            data={"folder": str(folder.id), "locale": "en", "name": "Doc"},
+            context={},
+        )
+        s.is_valid(raise_exception=True)
+        doc = s.save()
+        assert doc.current_revision == doc.revisions.first()
+
+        data = self._serialize(doc.container)
+        assert data["status"] == DocumentRevision.Status.DRAFT
+        assert data["pending_revision"] is None
+
     def test_no_pending_revision_when_only_published(self):
         data = self._serialize(self._container_with())
         assert data["pending_revision"] is None

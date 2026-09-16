@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { pickInForceRevision, pickWorkingRevision } from './documentRevisions';
+import { pickInForceRevision, pickWorkingRevision, type RevisionStatus } from './documentRevisions';
 
 // Ordered by descending version_number, as the API returns them.
-const rev = (version: number, status: string) => ({ id: `v${version}`, status });
+const rev = (version: number, status: RevisionStatus) => ({
+	id: `v${version}`,
+	status,
+	version_number: version
+});
 
 describe('pickWorkingRevision', () => {
 	it('returns null when there are no revisions', () => {
@@ -54,5 +58,10 @@ describe('pickInForceRevision', () => {
 
 	it('ignores deprecated revisions', () => {
 		expect(pickInForceRevision([rev(2, 'deprecated'), rev(1, 'deprecated')])).toBeNull();
+	});
+
+	it('picks the highest published version whatever order it is given in', () => {
+		const revisions = [rev(2, 'in_review'), rev(2, 'published'), rev(3, 'published')];
+		expect(pickInForceRevision(revisions)?.id).toBe('v3');
 	});
 });

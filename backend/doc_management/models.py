@@ -155,7 +155,6 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         {Status.VALIDATED, Status.PUBLISHED, Status.DEPRECATED}
     )
 
-    # Still moving through the approval loop: neither in force nor retired.
     ACTIVE_STATUSES = frozenset(
         {Status.DRAFT, Status.CHANGE_REQUESTED, Status.IN_REVIEW, Status.VALIDATED}
     )

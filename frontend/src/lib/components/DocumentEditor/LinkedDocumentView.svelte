@@ -231,7 +231,7 @@
 					<div class="mt-1 flex flex-wrap items-center gap-1.5">
 						{#if showsInForceRevision}
 							<span class="badge {statusStyles.published} text-xs">
-								{safeTranslate('published')} · v{inForceRevision.version_number}
+								{m.published()} · v{inForceRevision.version_number}
 							</span>
 						{/if}
 						<span class="badge {statusStyles[status ?? 'draft']} text-xs">

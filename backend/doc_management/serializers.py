@@ -90,8 +90,10 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
         """Newest revision still in the approval loop, or None.
 
         `status` above reports the revision in force, which stays on the
-        published one until a publish repoints it — so work in progress would
-        otherwise never show up in the list.
+        published one until a publish repoints it, so work in progress would
+        otherwise never show up in the list. The revision in force is excluded:
+        a new document points current_revision at its own draft, and reporting
+        it here would show the same revision twice.
         """
         doc = self._default_doc(obj)
         if not doc:
@@ -103,6 +105,7 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
                     doc.revisions.all(), key=lambda r: r.version_number, reverse=True
                 )
                 if r.status in DocumentRevision.ACTIVE_STATUSES
+                and r.id != doc.current_revision_id
             ),
             None,
         )
