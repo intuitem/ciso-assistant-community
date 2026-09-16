@@ -11,6 +11,7 @@
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import CustomFieldsDisplay from '$lib/components/Forms/CustomFieldsDisplay.svelte';
+	import { hasRelationGraph } from '$lib/components/RelationsGraph/relations';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
@@ -434,6 +435,12 @@
 		})
 	);
 
+	let relationsOpen = $state(false);
+	// Here rather than an `actions` snippet: most models ship their own detail route.
+	const showRelations = $derived(
+		Boolean(page.data?.featureflags?.relations_graph) && hasRelationGraph(data.urlModel)
+	);
+
 	let displayEditButton = $derived(function () {
 		return (
 			(canEditObject &&
@@ -689,7 +696,7 @@
 																{:else if val.str}
 																	{safeTranslate(val.str)}
 																{:else}
-																	{value}
+																	{val}
 																{/if}
 															</li>
 														{/each}
@@ -780,7 +787,7 @@
 																{:else if val.str}
 																	{safeTranslate(val.str)}
 																{:else}
-																	{value}
+																	{safeTranslate(val)}
 																{/if}
 															</li>
 														{/each}
@@ -980,6 +987,16 @@
 					>
 				{/if}
 			{/if}
+			{#if showRelations}
+				<button
+					type="button"
+					class="btn h-fit text-white bg-linear-to-l from-violet-500 to-indigo-600"
+					data-testid="relations-button"
+					onclick={() => (relationsOpen = true)}
+				>
+					<i class="fa-solid fa-circle-nodes mr-2"></i>{m.relationsGraph()}
+				</button>
+			{/if}
 			{@render actions?.()}
 			{#if data.urlModel === 'quick-forms'}
 				<!-- Answering a form is the only way to see what its conditions and outcomes
@@ -1143,4 +1160,16 @@
 			{/each}
 		</Tabs>
 	</div>
+{/if}
+
+{#if showRelations}
+	{#await import('$lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
+		<RelationsDrawer
+			open={relationsOpen}
+			urlModel={data.urlModel}
+			id={data.data.id}
+			name={data.data.name ?? data.data.str ?? ''}
+			onClose={() => (relationsOpen = false)}
+		/>
+	{/await}
 {/if}

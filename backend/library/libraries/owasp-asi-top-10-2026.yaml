@@ -1,0 +1,1375 @@
+urn: urn:intuitem:risk:library:owasp-asi-top-10-2026
+locale: en
+ref_id: owasp-asi-top-10-2026
+name: OWASP Top 10 for Agentic Applications 2026
+description: The ten most critical security risks for agentic AI applications, published by the OWASP
+  Gen AI Security Project - Agentic Security Initiative. Threats are the ten ASI entries; requirements
+  are transcribed from each entry's "Prevention and Mitigation Guidelines". Scope a single audit to one
+  agentic application. https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+copyright: OWASP - Creative Commons Attribution-ShareAlike 4.0
+version: 1
+publication_date: '2025-12-09'
+provider: OWASP
+packager: intuitem
+objects:
+  threats:
+  - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi01
+    ref_id: ASI01
+    name: Agent Goal Hijack
+    description: AI Agents exhibit autonomous ability to execute a series of tasks to achieve a goal.
+      Due to inherent weaknesses in how natural-language instructions and related content are processed,
+      agents and the underlying model cannot reliably distinguish instructions from related content. As
+      a result, attackers can manipulate an agent’s objectives, task selection, or decision pathways through
+      a variety of techniques - including, but not limited to, prompt-based manipulation, deceptive tool
+      outputs, malicious artefacts, forged agent-to-agent messages, or poisoned external data. Because
+      agents rely on untyped natural-language inputs and loosely governed orchestration logic, they cannot
+      reliably distinguish legitimate instructions from attacker -controlled content. Unlike LLM01:2025,
+      which focuses on altering a single model response, ASI01 captures the broader agentic impact where
+      manipulated inputs redirect goals, panning (when used) and multi-step behavior. Agent Goal Hijack
+      differs from ASI06 (Memory & Context Poisoning) and ASI10 (Rogue Agents) because the attacker directly
+      alters the agent’s goals, instructions, or decision pathways - regardless of whether the manipulation
+      occurs interactively or through pre-positioned inputs such as documents, templates, or external
+      data sources. ASI06 focuses on the persistent corruption of stored context or long-term memory,
+      while ASI10 captures autonomous misalignment that emerges without active attacker control. In the
+      OWASP Agentic AI Threats & Mitigations Guide, ASI01 corresponds to T06 Goal Manipulation (altering
+      the agent’s objectives) and T07 Misaligned & Deceptive Behaviors (bypassing safeguards or deceiving
+      humans). Together, these illustrate how attackers can subvert the agent’s objectives and action-selection
+      logic, redirecting its autonomy toward unintended or harmful outcomes.
+  - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi02
+    ref_id: ASI02
+    name: Tool Misuse and Exploitation
+    description: 'Agents can misuse legitimate tools due to prompt injection, misalignment, or unsafe
+      delegation or ambiguous instruction - leading to data exfiltration, tool output manipulation or
+      workflow hijacking. Risks arise from how the agent chooses and applies tools; agent memory, dynamic
+      tool selection, and delegation can contribute to misuse via chaining, privilege escalation, and
+      unintended actions. This relates to LLM06:2025 (Excessive Agency), which addresses excessive autonomy
+      but focuses on the misuse of legitimate tools. This entry covers cases where the agent operates
+      within its authorized privileges but applies a legitimate tool in an unsafe or unintended way -
+      for example deleting valuable data, over-invoking costly APIs, or exfiltrating information. If the
+      misuse involves privilege escalation or credential inheritance, it falls under ASI03 (Identity &
+      Privilege Abuse); if the misuse results in arbitrary or injected code execution, it is classified
+      under ASI05 (Unexpected Code Execution). Finally, tool definitions increasingly come via MCP servers,
+      creating a natural overlap with ASI04 (Agentic Supply Chain Vulnerabilities). The entry maps to
+      T2 Tool Misuse in the Agentic AI Threats and Mitigations Guide whilst T4 Resource Overload and T16
+      Insecure Inter-Agent Protocol Abuse represent contributing factors that can amplify or enable tool
+      exploitation. The entry aligns with AIVSS Core Risk: Agentic AI Tool Misuse.'
+  - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi03
+    ref_id: ASI03
+    name: Identity and Privilege Abuse
+    description: 'Identity & Privilege Abuse exploits dynamic trust and delegation in agents to escalate
+      access and bypass controls by manipulating delegation chains, role inheritance, control flows, and
+      agent context; context includes cached credentials or conversation history across interconnected
+      systems. In this context, identity refers both to the agent’s defined persona and to any authentication
+      material that represents it. Agent-to-agent trust or inherited credentials can be exploited to escalate
+      access, hijack privileges, or execute unauthorized actions. This risk arises from the architectural
+      mismatch between user-centric identity systems and agentic design. Without a distinct, governed
+      identity of its own, an agent operates in an attribution gap that makes enforcing true least privilege
+      impossible. Identity in this context includes both the agent’s assigned persona and any authentication
+      material (API keys, OAuth tokens, delegated user sessions) that represent it. This differs scenario
+      in ASI02 (Tools Misuse) which is an unintended or unsafe use of already granted privilege by a principal
+      misusing its own tools. Identity & Privilege Abuse is the agentic evolution of Excessive Agency
+      (LLM06:2025). It often leverages Prompt Injection (LLM01:2025), and because of agent permissions,
+      tool integrations, and multi-agent systems, the impact can amplify and exceed Sensitive Information
+      Disclosure (LLM02:2025) to directly compromise the confidentiality, integrity, and availability
+      of systems and data the agent can reach. In the OWASP ASI Threats and Mitigations, it maps one-to-one
+      to T3: Privilege Compromise, and in OWASP AIVSS it corresponds to Core Risk 2: Agent Access Control
+      Violation.'
+  - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi04
+    ref_id: ASI04
+    name: Agentic Supply Chain Vulnerabilities
+    description: Agentic Supply Chain Vulnerabilities arise when agents, tools, and related artefacts
+      they work with are provided by third parties and may be malicious, compromised, or tampered with
+      in transit. These can be both static and dynamical sourced components, including models and model
+      weights, tools, plug-ins, datasets, other agents, agentic interfaces - MCP (Model Context Protocol),
+      A2A (Agent2Agent) - agentic registries and related artifacts, or update channels. These dependencies
+      may introduce unsafe code, hidden instructions, or deceptive behaviors into the agent’s execution
+      chain. Supply chain is covered in depth in LLM03:2025 Supply Chain Vulnerabilities. However, its
+      focus is on static dependencies. Unlike traditional AI or software supply chains, agentic ecosystems
+      often compose capabilities at runtime - loading external tools- agent personas dynamically – thereby
+      increasing the attack surface. This distributed run-time coordination - combined with agentic autonomy
+      - creates a live supply chain that can cascade vulnerabilities across agents. These shifts focus
+      from manifest to run-time security of a diverse and often opaque component. Tackling this problem
+      requires careful development-time tooling and runtime orchestration, where components are dynamically
+      loaded, shared, and trusted. The entry maps to T17 Supply Chain Compromise in Agentic Threats and
+      Mitigations and across T2 Tool Misuse, T11 Unexpected RCE and Code Attacks, T12 Agent Communication
+      Poisoning, T13 Rogue Agent and T16 Insecure Inter-Agent Protocol Abuse.
+  - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi05
+    ref_id: ASI05
+    name: Unexpected Code Execution (RCE)
+    description: Agentic systems - including popular vibe coding tools - often generate and execute code.
+      Attackers exploit code-generation features or embedded tool access to escalate actions into remote
+      code execution (RCE), local misuse, or exploitation of internal systems. Because this code is often
+      generated in real-time by the agent it can bypass traditional security controls. Prompt injection,
+      tool misuse, or unsafe serialization can convert text into unintended executable behavior. While
+      code execution can be triggered via the same tool interfaces discussed under ASI02, ASI05 focuses
+      on unexpected or adversarial execution of code (scripts, binaries, JIT/WASM modules, deserialized
+      objects, template engines, in memory evaluations) that leads to host or container compromise, persistence,
+      or sandbox escape - outcomes that require host and runtime-specific mitigations beyond ordinary
+      tool-use controls. This entry builds on LLM01:2025 Prompt Injection and LLM05:2025 Improper Output
+      Handling, reflecting their evolution in agentic systems from a single manipulated output interpreted
+      or executed to orchestrated multi-tool chains that achieve execution through a sequence of otherwise
+      legitimate tool calls. This risk aligns with T11 Unexpected RCE and Code Attacks in Agentic AI –
+      Threats and Mitigations v1.1.
+  - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi06
+    ref_id: ASI06
+    name: Memory & Context Poisoning
+    description: Agentic systems rely on stored and retrievable information which can be a snapshot of
+      its conversation history, a memory tool or expanded context, which supports continuity across tasks
+      and reasoning cycles. Context includes any information an agent retains, retrieves, or reuses, such
+      as summaries, embeddings, and RAG stores but excludes one-time input prompts covered under LLM01
+      :2025 Prompt Injection. In Memory and Context Poisoning, adversaries corrupt or seed this context
+      with malicious or misleading data, causing future reasoning, planning, or tool use to become biased,
+      unsafe, or aid exfiltration. Ingestion sources such as uploads, API feeds, user input, or peer-agent
+      exchanges may be untrusted or only partially validated. This risk is distinct from ASI01 (Goal Hijack),
+      which captures direct goal manipulation, and ASI08 (Cascading Failures), which describes degradation
+      after poisoning occurs. However, memory poisoning frequently leads to goal hijacking (ASI01), as
+      corrupted context or long-term memory can alter the agent’s goal interpretation, reasoning path,
+      or tool-selection logic. It builds on LLM01:2025 Prompt Injection, LLM04:2025 Data and Model Poisoning,
+      and LLM08:2025 Vector and Embedding Weaknesses, but focuses on persistent corruption of agent memory
+      and retrievable context that propagates across sessions and alters autonomous reasoning. It maps
+      to T1 Memory Poisoning in Agentic Threats and Mitigations, with related impacts in T4 Memory Overload,
+      T6 Broken Goals, and T12 Shared Memory Poisoning. In AIVSS, the AARS fields Memory Use and Contextual
+      Awareness raise the agentic vulnerability score.
+  - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi07
+    ref_id: ASI07
+    name: Insecure Inter-Agent Communication
+    description: Multi agent systems depend on continuous communication between autonomous agents that
+      coordinate via APIs, message buses, and shared memory, significantly expanding the attack surface.
+      Decentralized architecture, varying autonomy, and uneven trust make perimeter-based security models
+      ineffective. Weak inter-agent controls for authentication, integrity, confidentiality, or authorization
+      let attackers intercept, manipulate, spoof, or block messages. Insecure Inter-Agent Communication
+      occurs when these exchanges lack proper authentication, integrity, or semantic validation-allowing
+      interception, spoofing, or manipulation of agent messages and intents. The threat spans transport,
+      routing, discovery, and semantic layers, including covert or side-channels where agents leak or
+      infer data through timing or behavioral cues. This differs from ASI03 (Identity & Privilege Abuse),
+      which focuses on credential and permissions misuse, and ASI06 (Memory & Context Poisoning), which
+      targets stored knowledge corruption. ASI07 focuses on compromising real-time messages between agents,
+      leading to misinformation, privilege confusion, or coordinated manipulation across distributed agentic
+      systems. The entry is covered by T12 – Agent Communication Poisoning & T16 – Insecure Inter-Agent
+      Protocol Abuse in Agentic Threats and Mitigations
+  - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi08
+    ref_id: ASI08
+    name: Cascading Failures
+    description: 'Agentic cascading failures occur when a single fault (hallucination, malicious input,
+      corrupted tool, or poisoned memory) propagates across autonomous agents, compounding into system-wide
+      harm. Because agents plan, persist, and delegate autonomously, a single error can bypass stepwise
+      human checks and persist in a saved state. As agents form emergent links to new tools or peers,
+      these latent faults chain into privileged operations that compromise confidentiality, integrity,
+      availability, leading to widespread service failures across agent networks, systems, and workflows.
+      Cascading Failures describes the propagation and amplification of an initial fault-not the initial
+      vulnerability itself-across agents, tools, and workflows, turning a single error into system-wide
+      impact. ASI08 focuses on the propagation and amplification of faults rather than their origin. Use
+      the initial defect under ASI04, ASI06, or ASI07 when it represents a direct compromise - such as
+      a tainted dependency, poisoned memory, or spoofed message - and apply ASI08 only when that defect
+      spreads across agents, sessions, or workflows, causing measurable fan-out or systemic impact beyond
+      the original breach. Observable symptoms include rapid fan-out where one faulty decision triggers
+      many downstream agents or tasks in a short time, cross-domain or tenant spread beyond the original
+      context, oscillating retries or feedback loops between agents, and downstream queue storms or repeated
+      identical intents-each providing clear detection hooks that make ASI08 operationally actionable.
+      Cascading failures amplify across interconnected agents, chaining OWASP LLM Top 10 risks. LLM01:2025
+      Prompt Injection and LLM06:2025 Excessive Agency can trigger autonomous tool runs that spread errors
+      without human checks, while LLM04:2025 Data and Model Poisoning in persistent memory can skew decisions
+      across sessions and workflows. Agentic AI - Threats and Mitigations 1.1 covers this threat in T5
+      – Cascading Hallucination Attacks while T8 – Repudiation and Untraceability highlights a fundamental
+      defense: the ability to trace, attribute, and audit cascading behaviors through resilient logging
+      and non-repudiation mechanisms that prevent silent propagation. However, these compounding threats
+      illustrate a potential discrepancy in the speed and scale of fault propagation in a multi-agent
+      system and the ability of humans to keep up with them to ensure secure and effective operation of
+      the system. This leaves some unmitigated risks that the enterprise must evaluate carefully to ensure
+      they are within the overall risk budget for the organization.'
+  - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi09
+    ref_id: ASI09
+    name: Human-Agent Trust Exploitation
+    description: Intelligent agents can establish strong trust with human users through their natural
+      language fluency, emotional intelligence, and perceived expertise, known as anthropomorphism. Adversaries
+      or misaligned designs may exploit this trust to influence user decisions, extract sensitive information,
+      or steer outcomes for malicious purposes. In agentic systems, this risk is amplified when humans
+      over-rely on autonomous recommendations or unverifiable rationales, approving actions without independent
+      validation. By leveraging authority bias and persuasive explainability, attackers can bypass oversight,
+      leading to data breaches, financial losses, downstream and reputational harms. The agent acts as
+      an untraceable "bad influence," manipulating the human into performing the final, audited action,
+      making the agent's role in the compromise invisible to forensics. Automation bias, perceived authority,
+      and anthropomorphic cues make abuse look legitimate and hard to spot. Over-reliance on agent recommendations,
+      especially when they appear confident or authoritative, increases the chance of harmful decision-making.
+      This entry is about human misperception or over-reliance whereas ASI10 is agent intent deviation.
+      The entry builds on LLM06:2025 Excessive Agency, and can be caused by LLM01:2025 Prompt Injection,
+      LLM05:2025 Improper Output Handling, or results in LLM09:2025 Misinformation. Aligns with Agentic
+      AI Threats and Mitigations Guide (T7) Misaligned & Deceptive, (T8) Repudiation & Untraceability,
+      (T10) Overwhelming the Human in the Loop.
+  - urn: urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi10
+    ref_id: ASI10
+    name: Rogue Agents
+    description: Rogue Agents are malicious or compromised AI Agents that deviate from their intended
+      function or authorized scope, acting harmfully, deceptively, or parasitically within multi-agent
+      or human-agent ecosystems. The agent’s actions may individually appear legitimate, but its emergent
+      behavior becomes harmful, creating a containment gap for traditional rule-based systems. While external
+      compromise, such as Prompt Injection (LLM01:2025), Goal Hijack (AS01) or Supply Chain tampering
+      (AS04) can initiate the divergence, ASI10 focuses on the loss of behavioral integrity and governance
+      once the drift begins, not the initial intrusion itself. Consequences include sensitive information
+      disclosure, misinformation propagation, workflow hijacking, and operational sabotage. Rogue Agents
+      represent a distinct risk of behavioral divergence, unlike Excessive Agency (LLM06:2025), which
+      focuses on over-granted permissions, and can be amplified "insider threats" due to the speed and
+      scale of Agentic systems. Consequences include Sensitive Information Disclosure (LLM02;2025), Misinformation
+      (LLM09:2025). In the OWASP Agentic AI Threats and Mitigations guide, ASI10 corresponds to T13 –
+      Rogue Agents in Multi-Agent Systems. The OWASP AIVSS framework maps this risk primarily to Behavioral
+      Integrity (BI), Operational Security (OS), and Compliance Violations (CV), with elevated severity
+      for critical or self-propagating deployments.
+  framework:
+    urn: urn:intuitem:risk:framework:owasp-asi-top-10-2026
+    ref_id: owasp-asi-top-10-2026
+    name: OWASP Top 10 for Agentic Applications 2026
+    description: The ten most critical security risks for agentic AI applications, published by the OWASP
+      Gen AI Security Project - Agentic Security Initiative. Threats are the ten ASI entries; requirements
+      are transcribed from each entry's "Prevention and Mitigation Guidelines". Scope a single audit to
+      one agentic application. https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01
+      assessable: false
+      depth: 1
+      ref_id: ASI01
+      name: Agent Goal Hijack
+      description: AI Agents exhibit autonomous ability to execute a series of tasks to achieve a goal.
+        Due to inherent weaknesses in how natural-language instructions and related content are processed,
+        agents and the underlying model cannot reliably distinguish instructions from related content.
+        As a result, attackers can manipulate an agent’s objectives, task selection, or decision pathways
+        through a variety of techniques - including, but not limited to, prompt-based manipulation, deceptive
+        tool outputs, malicious artefacts, forged agent-to-agent messages, or poisoned external data.
+        Because agents rely on untyped natural-language inputs and loosely governed orchestration logic,
+        they cannot reliably distinguish legitimate instructions from attacker -controlled content. Unlike
+        LLM01:2025, which focuses on altering a single model response, ASI01 captures the broader agentic
+        impact where manipulated inputs redirect goals, panning (when used) and multi-step behavior. Agent
+        Goal Hijack differs from ASI06 (Memory & Context Poisoning) and ASI10 (Rogue Agents) because the
+        attacker directly alters the agent’s goals, instructions, or decision pathways - regardless of
+        whether the manipulation occurs interactively or through pre-positioned inputs such as documents,
+        templates, or external data sources. ASI06 focuses on the persistent corruption of stored context
+        or long-term memory, while ASI10 captures autonomous misalignment that emerges without active
+        attacker control. In the OWASP Agentic AI Threats & Mitigations Guide, ASI01 corresponds to T06
+        Goal Manipulation (altering the agent’s objectives) and T07 Misaligned & Deceptive Behaviors (bypassing
+        safeguards or deceiving humans). Together, these illustrate how attackers can subvert the agent’s
+        objectives and action-selection logic, redirecting its autonomy toward unintended or harmful outcomes.
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01
+      ref_id: ASI01.1
+      description: Treat all natural-language inputs (e.g., user-provided text, uploaded documents, retrieved
+        content) as untrusted. Route them through the same input-validation and prompt-injection safeguards
+        defined in LLM01:2025 before they can influence goal selection, planning, or tool calls.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi01
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01
+      ref_id: ASI01.2
+      description: Minimize the impact of goal hijacking by enforcing least privilege for agent tools
+        and requiring human approval for high-impact or goal-changing actions.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi01
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01
+      ref_id: ASI01.3
+      description: Define and lock agent system prompts so that goal priorities and permitted actions
+        are explicit and auditable. Changes to changes in goals or reward definitions must go through
+        configuration management and human approval.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi01
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01
+      ref_id: ASI01.4
+      description: At run time, validate both user intent and agent intent before executing goal-changing
+        or high-impact actions. Require confirmation - via human approval, policy engine, or platform
+        guardrails whenever the agent proposes actions that deviate from the original task or scope. Pause
+        or block execution on any unexpected goal shift, surface the deviation for review, and record
+        it for audit.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi01
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01
+      ref_id: ASI01.5
+      description: When building agents, evaluate use of “intent capsule”, an emerging pattern to bind
+        the declared goal, constraints, and context to each execution cycle in a signed envelope, restricting
+        run-time use.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi01
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01
+      ref_id: ASI01.6
+      description: Sanitize and validate any connected data source - including RAG inputs, emails, calendar
+        invites, uploaded files, external APIs, browsing output, and peer-agent messages - using CDR,
+        prompt-carrier detection, and content filtering before the data can influence agent goals or actions.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi01
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01
+      ref_id: ASI01.7
+      description: Maintain comprehensive logging and continuous monitoring of agent activity, establishing
+        a behavioral baseline that includes goal state, tool-use patterns, and invariant properties (e.g.,
+        schema, access patterns). Track a stable identifier for the active goal where feasible, and alert
+        on any deviations-such as unexpected goal changes, anomalous tool sequences, or shifts from the
+        established baseline-so that unauthorized goal drift is immediately visible in operations.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi01
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01
+      ref_id: ASI01.8
+      description: Conduct periodic red-team tests simulating goal override and verify rollback effectiveness.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi01
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi01
+      ref_id: ASI01.9
+      description: Incorporate AI Agents into the established Insider Threat Program to monitor any insider
+        prompts intended to get access to sensitive data or to alter the agent behavior and allow for
+        investigation in case of outlier activity.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi01
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02
+      assessable: false
+      depth: 1
+      ref_id: ASI02
+      name: Tool Misuse and Exploitation
+      description: 'Agents can misuse legitimate tools due to prompt injection, misalignment, or unsafe
+        delegation or ambiguous instruction - leading to data exfiltration, tool output manipulation or
+        workflow hijacking. Risks arise from how the agent chooses and applies tools; agent memory, dynamic
+        tool selection, and delegation can contribute to misuse via chaining, privilege escalation, and
+        unintended actions. This relates to LLM06:2025 (Excessive Agency), which addresses excessive autonomy
+        but focuses on the misuse of legitimate tools. This entry covers cases where the agent operates
+        within its authorized privileges but applies a legitimate tool in an unsafe or unintended way
+        - for example deleting valuable data, over-invoking costly APIs, or exfiltrating information.
+        If the misuse involves privilege escalation or credential inheritance, it falls under ASI03 (Identity
+        & Privilege Abuse); if the misuse results in arbitrary or injected code execution, it is classified
+        under ASI05 (Unexpected Code Execution). Finally, tool definitions increasingly come via MCP servers,
+        creating a natural overlap with ASI04 (Agentic Supply Chain Vulnerabilities). The entry maps to
+        T2 Tool Misuse in the Agentic AI Threats and Mitigations Guide whilst T4 Resource Overload and
+        T16 Insecure Inter-Agent Protocol Abuse represent contributing factors that can amplify or enable
+        tool exploitation. The entry aligns with AIVSS Core Risk: Agentic AI Tool Misuse.'
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02
+      ref_id: ASI02.1
+      name: Least Agency and Least Privilege for Tools
+      description: Least Agency and Least Privilege for Tools. Define per-tool least-privilege profiles
+        (scopes, maximum rate, and egress allowlists) and restrict agentic tool functionality and each
+        tool’s permissions and data scope to those profiles – e.g., read-only queries for databases, no
+        send/delete rights for email summarizers, and minimal CRUD operations when exposing APIs. Where
+        possible, express these profiles as IAM or authorization policy stanzas attached to each tool,
+        rather than relying on ad-hoc conventions.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi02
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02
+      ref_id: ASI02.2
+      name: Action-Level Authentication and Approval
+      description: Action-Level Authentication and Approval. Require explicit authentication for each
+        tool invocation and human confirmation for high-impact or destructive actions (delete, transfer,
+        publish). Display a pre-execution plan or dry-run diff before final approval; where possible,
+        present a dry-run or diff preview to the user before high-impact actions are approved.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi02
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02
+      ref_id: ASI02.3
+      name: Execution Sandboxes and Egress Controls
+      description: Execution Sandboxes and Egress Controls. Run tool or code execution in isolated sandboxes.
+        Enforce outbound allowlists and deny all non-approved network destinations.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi02
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02
+      ref_id: ASI02.4
+      name: Policy Enforcement Middleware (“Intent Gate”)
+      description: Policy Enforcement Middleware (“Intent Gate”). Treat LLM or planner outputs as untrusted.
+        A pre-execution Policy Enforcement Point (PEP/PDP) validates intent and arguments, enforces schemas
+        and rate limits, issues short-lived credentials, and revokes or audits on drift.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi02
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02
+      ref_id: ASI02.5
+      name: Adaptive Tool Budgeting
+      description: Adaptive Tool Budgeting. Apply usage ceilings (cost, rate, or token budgets) with automatic
+        revocation or throttling when exceeded.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi02
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02
+      ref_id: ASI02.6
+      name: Just-in-Time and Ephemeral Access
+      description: Just-in-Time and Ephemeral Access. Grant temporary credentials or API tokens that expire
+        immediately after use. Bind keys to specific user sessions to prevent lateral abuse.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi02
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02
+      ref_id: ASI02.7
+      name: Semantic and Identity Validation (“Semantic Firewalls”)
+      description: Semantic and Identity Validation (“Semantic Firewalls”). Enforce fully qualified tool
+        names and version pins to avoid tool alias collisions or typo squatted tools; validate the intended
+        semantics of tool calls (e.g., query type or category) rather than relying on syntax alone. Fail
+        closed on ambiguous resolution and prompt for user disambiguation.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi02
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi02
+      ref_id: ASI02.8
+      name: Logging, Monitoring, and Drift Detection
+      description: Logging, Monitoring, and Drift Detection. Maintain immutable logs of all tool invocations
+        and parameter changes. Continuously monitor for anomalous execution rates, unusual tool-chaining
+        patterns (e.g., DB read followed by external transfer), and policy violations.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi02
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03
+      assessable: false
+      depth: 1
+      ref_id: ASI03
+      name: Identity and Privilege Abuse
+      description: 'Identity & Privilege Abuse exploits dynamic trust and delegation in agents to escalate
+        access and bypass controls by manipulating delegation chains, role inheritance, control flows,
+        and agent context; context includes cached credentials or conversation history across interconnected
+        systems. In this context, identity refers both to the agent’s defined persona and to any authentication
+        material that represents it. Agent-to-agent trust or inherited credentials can be exploited to
+        escalate access, hijack privileges, or execute unauthorized actions. This risk arises from the
+        architectural mismatch between user-centric identity systems and agentic design. Without a distinct,
+        governed identity of its own, an agent operates in an attribution gap that makes enforcing true
+        least privilege impossible. Identity in this context includes both the agent’s assigned persona
+        and any authentication material (API keys, OAuth tokens, delegated user sessions) that represent
+        it. This differs scenario in ASI02 (Tools Misuse) which is an unintended or unsafe use of already
+        granted privilege by a principal misusing its own tools. Identity & Privilege Abuse is the agentic
+        evolution of Excessive Agency (LLM06:2025). It often leverages Prompt Injection (LLM01:2025),
+        and because of agent permissions, tool integrations, and multi-agent systems, the impact can amplify
+        and exceed Sensitive Information Disclosure (LLM02:2025) to directly compromise the confidentiality,
+        integrity, and availability of systems and data the agent can reach. In the OWASP ASI Threats
+        and Mitigations, it maps one-to-one to T3: Privilege Compromise, and in OWASP AIVSS it corresponds
+        to Core Risk 2: Agent Access Control Violation.'
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03
+      ref_id: ASI03.1
+      name: Enforce Task-Scoped, Time-Bound Permissions
+      description: 'Enforce Task-Scoped, Time-Bound Permissions: Issue short-lived, narrowly scoped tokens
+        per task and cap rights with permission boundaries - using per-agent identities and short-lived
+        credentials (e.g., mTLS certificates or scoped tokens) - to limit blast radius, block delegated-abuse
+        and maintenance-window attacks, and mitigate un-scoped inheritance, orphaned privileges, and reflection-loop
+        elevation.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi03
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03
+      ref_id: ASI03.2
+      name: Isolate Agent Identities and Contexts
+      description: 'Isolate Agent Identities and Contexts: Run per-session sandboxes with separated permissions
+        and memory, wiping state between tasks to prevent Memory-Based Escalation and reduce Cross-Repository
+        Data Exfiltration.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi03
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03
+      ref_id: ASI03.3
+      name: Mandate Per-Action Authorization
+      description: 'Mandate Per-Action Authorization: Re-verify each privileged step with a centralized
+        policy engine that checks external data, stopping Cross-Agent Trust Exploitation and Reflection
+        Loop Elevation.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi03
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03
+      ref_id: ASI03.4
+      name: Apply Human-in-the-Loop for Privilege Escalation
+      description: 'Apply Human-in-the-Loop for Privilege Escalation: Require human approval for high-privilege
+        or irreversible actions to provide a safety net that would stop Memory-Based Escalation, Cross-Agent
+        Trust Exploitation, and Maintenance Window attacks.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi03
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03
+      ref_id: ASI03.5
+      name: Define Intent
+      description: 'Define Intent: Bind OAuth tokens to a signed intent that includes subject, audience,
+        purpose, and session. Reject any token use where the bound intent doesn’t match the current request.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi03
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03
+      ref_id: ASI03.6
+      name: Evaluate Agentic Identity Management Platforms
+      description: Evaluate Agentic Identity Management Platforms. Major platforms integrate agents into
+        their identity and access management systems, treating them as managed non-human identities with
+        scoped credentials, audit trails, and lifecycle controls. Examples include Microsoft Entra, AWS
+        Bedrock Agents, Salesforce Agentforce, Workday’s Agentic System of Record (ASOR) model, and similar
+        emerging patterns in Google Vertex AI.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi03
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03
+      ref_id: ASI03.7
+      name: Bind permissions to subject, resource, purpose, and duration
+      description: Bind permissions to subject, resource, purpose, and duration. Require re-authentication
+        on context switch. Prevent privilege inheritance across agents unless the original intent is re-validated.
+        Include automated revocation on idle or anomaly.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi03
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03
+      ref_id: ASI03.8
+      name: Detect Delegated and Transitive Permissions
+      description: 'Detect Delegated and Transitive Permissions: Monitor when an agent gains new permissions
+        indirectly through delegation chains. Flag cases where a low-privilege agent inherits or is handed
+        higher-privilege scopes during multi-agent workflows.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi03
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi03
+      ref_id: ASI03.9
+      description: Detect abnormal cross-agent privilege elevation and device-code style phishing flows
+        by monitoring when agents request new scopes or reuse tokens outside their original, signed intent.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi03
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04
+      assessable: false
+      depth: 1
+      ref_id: ASI04
+      name: Agentic Supply Chain Vulnerabilities
+      description: Agentic Supply Chain Vulnerabilities arise when agents, tools, and related artefacts
+        they work with are provided by third parties and may be malicious, compromised, or tampered with
+        in transit. These can be both static and dynamical sourced components, including models and model
+        weights, tools, plug-ins, datasets, other agents, agentic interfaces - MCP (Model Context Protocol),
+        A2A (Agent2Agent) - agentic registries and related artifacts, or update channels. These dependencies
+        may introduce unsafe code, hidden instructions, or deceptive behaviors into the agent’s execution
+        chain. Supply chain is covered in depth in LLM03:2025 Supply Chain Vulnerabilities. However, its
+        focus is on static dependencies. Unlike traditional AI or software supply chains, agentic ecosystems
+        often compose capabilities at runtime - loading external tools- agent personas dynamically – thereby
+        increasing the attack surface. This distributed run-time coordination - combined with agentic
+        autonomy - creates a live supply chain that can cascade vulnerabilities across agents. These shifts
+        focus from manifest to run-time security of a diverse and often opaque component. Tackling this
+        problem requires careful development-time tooling and runtime orchestration, where components
+        are dynamically loaded, shared, and trusted. The entry maps to T17 Supply Chain Compromise in
+        Agentic Threats and Mitigations and across T2 Tool Misuse, T11 Unexpected RCE and Code Attacks,
+        T12 Agent Communication Poisoning, T13 Rogue Agent and T16 Insecure Inter-Agent Protocol Abuse.
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04
+      ref_id: ASI04.1
+      name: Provenance and SBOMs, AIBOMs
+      description: 'Provenance and SBOMs, AIBOMs: Sign and attest manifests, prompts, and tool definitions;
+        require and operationalize SBOMs, AIBOMs with periodic attestations; maintain inventory of AI
+        components; use curated registries and block untrusted sources.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi04
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04
+      ref_id: ASI04.2
+      name: Dependency gatekeeping
+      description: 'Dependency gatekeeping: Allowlist and pin; scan for typosquats (PyPI, npm, LangChain,
+        LlamaIndex); verify provenance before install or activation; auto-reject unsigned or unverified.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi04
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04
+      ref_id: ASI04.3
+      name: Containment and builds
+      description: 'Containment and builds: Run sensitive agents in sandboxed containers with strict network
+        or syscall limits; require reproducible builds.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi04
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04
+      ref_id: ASI04.4
+      name: Secure prompts and memory
+      description: 'Secure prompts and memory: Put prompts, orchestration scripts, and memory schemas
+        under version control with peer review; scan for anomalies.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi04
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04
+      ref_id: ASI04.5
+      name: Inter-agent security
+      description: 'Inter-agent security: Enforce mutual auth and attestation via PKI and mTLS; no open
+        registration; sign and verify all inter-agent messages.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi04
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04
+      ref_id: ASI04.6
+      name: Continuous validation and monitoring
+      description: 'Continuous validation and monitoring: Re-check signatures, hashes, and SBOMs (incl.
+        AIBOMs) at runtime; monitor behavior, privilege use, lineage, and inter-module telemetry for anomalies.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi04
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04
+      ref_id: ASI04.7
+      name: Pinning
+      description: 'Pinning: Pin prompts, tools, and configs by content hash and commit ID. Require staged
+        rollout with differential tests and auto-rollback on hash drift or behavioral change.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi04
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04
+      ref_id: ASI04.8
+      name: Supply chain kill switch
+      description: 'Supply chain kill switch: Implement emergency revocation mechanisms that can instantly
+        disable specific tools, prompts, or agent connections across all deployments when a compromise
+        is detected, preventing further cascading damage.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi04
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi04
+      ref_id: ASI04.9
+      name: Zero-trust security model in application design
+      description: 'Zero-trust security model in application design: design system with security fault
+        tolerance that assumes failure or exploitation of LLM or agentic function components.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi04
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05
+      assessable: false
+      depth: 1
+      ref_id: ASI05
+      name: Unexpected Code Execution (RCE)
+      description: Agentic systems - including popular vibe coding tools - often generate and execute
+        code. Attackers exploit code-generation features or embedded tool access to escalate actions into
+        remote code execution (RCE), local misuse, or exploitation of internal systems. Because this code
+        is often generated in real-time by the agent it can bypass traditional security controls. Prompt
+        injection, tool misuse, or unsafe serialization can convert text into unintended executable behavior.
+        While code execution can be triggered via the same tool interfaces discussed under ASI02, ASI05
+        focuses on unexpected or adversarial execution of code (scripts, binaries, JIT/WASM modules, deserialized
+        objects, template engines, in memory evaluations) that leads to host or container compromise,
+        persistence, or sandbox escape - outcomes that require host and runtime-specific mitigations beyond
+        ordinary tool-use controls. This entry builds on LLM01:2025 Prompt Injection and LLM05:2025 Improper
+        Output Handling, reflecting their evolution in agentic systems from a single manipulated output
+        interpreted or executed to orchestrated multi-tool chains that achieve execution through a sequence
+        of otherwise legitimate tool calls. This risk aligns with T11 Unexpected RCE and Code Attacks
+        in Agentic AI – Threats and Mitigations v1.1.
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05
+      ref_id: ASI05.1
+      description: Follow the mitigations of LLM05:2025 Improper Output Handling with input validation
+        and output encoding to sanitize agent-generated code
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi05
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05
+      ref_id: ASI05.2
+      description: 'Prevent direct agent-to-production systems and operationalize use of vibe coding systems
+        with pre-production checks: including the guidelines of this entry with security evaluations,
+        adversarial unit tests and detection of unsafe memory evaluators.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi05
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05
+      ref_id: ASI05.3
+      name: Ban eval in production agents
+      description: 'Ban eval in production agents: Require safe interpreters, taint-tracking on generated
+        code.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi05
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05
+      ref_id: ASI05.4
+      name: Execution environment security
+      description: 'Execution environment security: Never run as root. Run code in sandboxed containers
+        with strict limits including network access; lint and block known-vulnerable packages and use
+        framework sandboxes like mcp-run-python. Where possible, restrict filesystem access to a dedicated
+        working directory and log file diffs for critical paths.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi05
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05
+      ref_id: ASI05.5
+      name: Architecture and design
+      description: 'Architecture and design: Isolate per-session environments with permission boundaries;
+        apply least privilege; fail secure by default; separate code generation from execution with validation
+        gates.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi05
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05
+      ref_id: ASI05.6
+      name: Access control and approvals
+      description: 'Access control and approvals: Require human approval for elevated runs; keep an allowlist
+        for auto-execution under version control; enforce role and action-based controls.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi05
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi05
+      ref_id: ASI05.7
+      name: Code analysis and monitoring
+      description: 'Code analysis and monitoring: Do static scans before execution; enable runtime monitoring;
+        watch for prompt-injection patterns; log and audit all generation and runs.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi05
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06
+      assessable: false
+      depth: 1
+      ref_id: ASI06
+      name: Memory & Context Poisoning
+      description: Agentic systems rely on stored and retrievable information which can be a snapshot
+        of its conversation history, a memory tool or expanded context, which supports continuity across
+        tasks and reasoning cycles. Context includes any information an agent retains, retrieves, or reuses,
+        such as summaries, embeddings, and RAG stores but excludes one-time input prompts covered under
+        LLM01 :2025 Prompt Injection. In Memory and Context Poisoning, adversaries corrupt or seed this
+        context with malicious or misleading data, causing future reasoning, planning, or tool use to
+        become biased, unsafe, or aid exfiltration. Ingestion sources such as uploads, API feeds, user
+        input, or peer-agent exchanges may be untrusted or only partially validated. This risk is distinct
+        from ASI01 (Goal Hijack), which captures direct goal manipulation, and ASI08 (Cascading Failures),
+        which describes degradation after poisoning occurs. However, memory poisoning frequently leads
+        to goal hijacking (ASI01), as corrupted context or long-term memory can alter the agent’s goal
+        interpretation, reasoning path, or tool-selection logic. It builds on LLM01:2025 Prompt Injection,
+        LLM04:2025 Data and Model Poisoning, and LLM08:2025 Vector and Embedding Weaknesses, but focuses
+        on persistent corruption of agent memory and retrievable context that propagates across sessions
+        and alters autonomous reasoning. It maps to T1 Memory Poisoning in Agentic Threats and Mitigations,
+        with related impacts in T4 Memory Overload, T6 Broken Goals, and T12 Shared Memory Poisoning.
+        In AIVSS, the AARS fields Memory Use and Contextual Awareness raise the agentic vulnerability
+        score.
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06
+      ref_id: ASI06.1
+      name: Baseline data protection
+      description: 'Baseline data protection: Encryption in transit and at rest combined with least-privilege
+        access'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi06
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06
+      ref_id: ASI06.2
+      name: Content validation
+      description: 'Content validation: Scan all new memory writes and model outputs (rules + AI) for
+        malicious or sensitive content before commit.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi06
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06
+      ref_id: ASI06.3
+      name: Memory segmentation
+      description: 'Memory segmentation: Isolate user sessions and domain contexts to prevent knowledge
+        and sensitive data leakage.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi06
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06
+      ref_id: ASI06.4
+      name: Access and retention
+      description: 'Access and retention: Allow only authenticated, curated sources; enforce context-aware
+        access per task; minimize retention by data sensitivity.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi06
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06
+      ref_id: ASI06.5
+      name: Provenance and anomalies
+      description: 'Provenance and anomalies: Require source attribution and detect suspicious updates
+        or frequencies.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi06
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06
+      ref_id: ASI06.6
+      description: Prevent automatic re-ingestion of an agent’s own generated outputs into trusted memory
+        to avoid self-reinforcing contamination or “bootstrap poisoning.”
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi06
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06
+      ref_id: ASI06.7
+      name: Resilience and verification
+      description: 'Resilience and verification: Perform adversarial test, use snapshots/rollback and
+        version control, and require human review for high-risk actions. Where you operate shared vector
+        or memory stores, use per-tenant namespaces and trust scores for entries, decaying or expiring
+        unverified memory over time and supporting rollback/quarantine for suspected poisoning.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi06
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06
+      ref_id: ASI06.8
+      description: Expire unverified memory to limit poison persistence.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi06
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi06
+      ref_id: ASI06.9
+      name: Weight retrieval by trust and tenancy
+      description: 'Weight retrieval by trust and tenancy: Require two factors to surface high-impact
+        memory (e.g., provenance score plus human-verified tag) and decay low-trust entries over time.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi06
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07
+      assessable: false
+      depth: 1
+      ref_id: ASI07
+      name: Insecure Inter-Agent Communication
+      description: Multi agent systems depend on continuous communication between autonomous agents that
+        coordinate via APIs, message buses, and shared memory, significantly expanding the attack surface.
+        Decentralized architecture, varying autonomy, and uneven trust make perimeter-based security models
+        ineffective. Weak inter-agent controls for authentication, integrity, confidentiality, or authorization
+        let attackers intercept, manipulate, spoof, or block messages. Insecure Inter-Agent Communication
+        occurs when these exchanges lack proper authentication, integrity, or semantic validation-allowing
+        interception, spoofing, or manipulation of agent messages and intents. The threat spans transport,
+        routing, discovery, and semantic layers, including covert or side-channels where agents leak or
+        infer data through timing or behavioral cues. This differs from ASI03 (Identity & Privilege Abuse),
+        which focuses on credential and permissions misuse, and ASI06 (Memory & Context Poisoning), which
+        targets stored knowledge corruption. ASI07 focuses on compromising real-time messages between
+        agents, leading to misinformation, privilege confusion, or coordinated manipulation across distributed
+        agentic systems. The entry is covered by T12 – Agent Communication Poisoning & T16 – Insecure
+        Inter-Agent Protocol Abuse in Agentic Threats and Mitigations
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07
+      ref_id: ASI07.1
+      name: Secure agent channels
+      description: 'Secure agent channels: Use end-to-end encryption with per-agent credentials and mutual
+        authentication. Enforce PKI certificate pinning, forward secrecy, and regular protocol reviews
+        to prevent interception or spoofing.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi07
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07
+      ref_id: ASI07.2
+      name: Message integrity and semantic protection
+      description: 'Message integrity and semantic protection: Digitally sign messages, hash both payload
+        and context, and validate for hidden or modified natural-language instructions. Apply natural-language–
+        aware sanitization and intent-diffing to detect goal, parameter tampering, hidden or modified
+        natural-language instructions'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi07
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07
+      ref_id: ASI07.3
+      name: Agent-aware anti-replay
+      description: 'Agent-aware anti-replay: Protect all exchanges with nonces, session identifiers, and
+        timestamps tied to task windows. Maintain short-term message fingerprints or state hashes to detect
+        cross-context replays.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi07
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07
+      ref_id: ASI07.4
+      name: Protocol and capability security
+      description: 'Protocol and capability security: Disable weak or legacy communication modes. Require
+        agent-specific trust negotiation and bind protocol authentication to agent identity. Enforce version
+        and capability policies at gateways or middleware.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi07
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07
+      ref_id: ASI07.5
+      name: Limit metadata-based inference
+      description: 'Limit metadata-based inference: Reduce the attack surface for traffic analysis by
+        using fixed-size or padded messages where feasible, smoothing communication rates, and avoiding
+        deterministic communication schedules. These lightweight measures make it harder for attackers
+        to infer agent roles or decision cycles from metadata alone, without requiring heavy protocol
+        redesign.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi07
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07
+      ref_id: ASI07.6
+      name: Protocol pinning and version enforcement
+      description: 'Protocol pinning and version enforcement: Define and enforce allowed protocol versions
+        (e.g., MCP, A2A, gRPC). Reject downgrade attempts or unrecognized schemas and validate that both
+        peers advertise matching capability and version fingerprints.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi07
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07
+      ref_id: ASI07.7
+      name: Discovery and routing protection
+      description: Discovery and routing protection. Authenticate all discovery and coordination messages
+        using cryptographic identity. Secure directories with access controls and verified reputations,
+        validate identity and intent end-to-end, and monitor for anomalous routing flows.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi07
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07
+      ref_id: ASI07.8
+      name: Attested registry and agent verification
+      description: 'Attested registry and agent verification: Use registries or marketplaces that provide
+        digital attestation of agent identity, provenance, and descriptor integrity. Require signed agent
+        cards and continuous verification before accepting discovery or coordination messages. Leverage
+        the PKI trusted root certificate registries to enable robust agent verification and attestation
+        of critical attributes.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi07
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi07
+      ref_id: ASI07.9
+      name: Typed contracts and schema validation
+      description: 'Typed contracts and schema validation: Use versioned, typed message schemas with explicit
+        per-message audiences. Reject messages that fail validation or attempt schema down-conversion
+        without declared compatibility. Typed contracts help with structure, but semantic divergence across
+        agents remains an inherent challenge; mitigations therefore focus on integrity, provenance, and
+        controlled communication patterns rather than attempting full semantic alignment.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi07
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08
+      assessable: false
+      depth: 1
+      ref_id: ASI08
+      name: Cascading Failures
+      description: 'Agentic cascading failures occur when a single fault (hallucination, malicious input,
+        corrupted tool, or poisoned memory) propagates across autonomous agents, compounding into system-wide
+        harm. Because agents plan, persist, and delegate autonomously, a single error can bypass stepwise
+        human checks and persist in a saved state. As agents form emergent links to new tools or peers,
+        these latent faults chain into privileged operations that compromise confidentiality, integrity,
+        availability, leading to widespread service failures across agent networks, systems, and workflows.
+        Cascading Failures describes the propagation and amplification of an initial fault-not the initial
+        vulnerability itself-across agents, tools, and workflows, turning a single error into system-wide
+        impact. ASI08 focuses on the propagation and amplification of faults rather than their origin.
+        Use the initial defect under ASI04, ASI06, or ASI07 when it represents a direct compromise - such
+        as a tainted dependency, poisoned memory, or spoofed message - and apply ASI08 only when that
+        defect spreads across agents, sessions, or workflows, causing measurable fan-out or systemic impact
+        beyond the original breach. Observable symptoms include rapid fan-out where one faulty decision
+        triggers many downstream agents or tasks in a short time, cross-domain or tenant spread beyond
+        the original context, oscillating retries or feedback loops between agents, and downstream queue
+        storms or repeated identical intents-each providing clear detection hooks that make ASI08 operationally
+        actionable. Cascading failures amplify across interconnected agents, chaining OWASP LLM Top 10
+        risks. LLM01:2025 Prompt Injection and LLM06:2025 Excessive Agency can trigger autonomous tool
+        runs that spread errors without human checks, while LLM04:2025 Data and Model Poisoning in persistent
+        memory can skew decisions across sessions and workflows. Agentic AI - Threats and Mitigations
+        1.1 covers this threat in T5 – Cascading Hallucination Attacks while T8 – Repudiation and Untraceability
+        highlights a fundamental defense: the ability to trace, attribute, and audit cascading behaviors
+        through resilient logging and non-repudiation mechanisms that prevent silent propagation. However,
+        these compounding threats illustrate a potential discrepancy in the speed and scale of fault propagation
+        in a multi-agent system and the ability of humans to keep up with them to ensure secure and effective
+        operation of the system. This leaves some unmitigated risks that the enterprise must evaluate
+        carefully to ensure they are within the overall risk budget for the organization.'
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08
+      ref_id: ASI08.1
+      name: Zero-trust model in application design
+      description: 'Zero-trust model in application design: design system with fault tolerance that assumes
+        availability failure of LLM:2025, agentic function components and external sources.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi08
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08
+      ref_id: ASI08.2
+      name: Isolation and trust boundaries
+      description: 'Isolation and trust boundaries: Sandbox agents, least privilege, network segmentation,
+        scoped APIs, and mutual auth. to contain failure propagation.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi08
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08
+      ref_id: ASI08.3
+      name: JIT, one-time tool access with runtime checks
+      description: 'JIT, one-time tool access with runtime checks: Issue short-lived, task-scoped credentials
+        for each agent run and validate every high-impact tool invocation against a policy-as-code rule
+        before executing it. This ensures a compromised or drifting agent cannot trigger chain reactions
+        across other agents or systems.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi08
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08
+      ref_id: ASI08.4
+      name: Independent policy enforcement
+      description: 'Independent policy enforcement: Separate planning and execution via an external policy
+        engine to prevent corrupt planning from triggering harmful actions.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi08
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08
+      ref_id: ASI08.5
+      name: Output validation and human gates
+      description: 'Output validation and human gates: Checkpoints, governance agents, or human review
+        for high risk before agent outputs are propagated downstream.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi08
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08
+      ref_id: ASI08.6
+      name: Rate limiting and monitoring
+      description: 'Rate limiting and monitoring: Detect fast-spreading commands and throttle or pause
+        on anomalies.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi08
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08
+      ref_id: ASI08.7
+      description: Implement blast-radius guardrails such as quotas, progress caps, circuit breakers between
+        planner and executor.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi08
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08
+      ref_id: ASI08.8
+      name: Behavioral and governance drift detection
+      description: 'Behavioral and governance drift detection: Track decisions vs baselines and alignment;
+        flag gradual degradation.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi08
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08
+      ref_id: ASI08.9
+      name: Digital twin replay and policy gating
+      description: 'Digital twin replay and policy gating: Re-run the last week’s recorded agent actions
+        in an isolated clone of the production environment to test whether the same sequence would trigger
+        cascading failures. Gate any policy expansion on these replay tests passing predefined blast-radius
+        caps before deployment.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi08
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi08
+      ref_id: ASI08.10
+      name: Logging and non-repudiation
+      description: Logging and non-repudiation. Record all inter-agent messages, policy decisions, and
+        execution outcomes in tamper-evident, time-stamped logs bound to cryptographic agent identities.
+        Maintain lineage metadata for every propagated action to support forensic traceability, rollback
+        validation, and accountability during cascades.
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi08
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09
+      assessable: false
+      depth: 1
+      ref_id: ASI09
+      name: Human-Agent Trust Exploitation
+      description: Intelligent agents can establish strong trust with human users through their natural
+        language fluency, emotional intelligence, and perceived expertise, known as anthropomorphism.
+        Adversaries or misaligned designs may exploit this trust to influence user decisions, extract
+        sensitive information, or steer outcomes for malicious purposes. In agentic systems, this risk
+        is amplified when humans over-rely on autonomous recommendations or unverifiable rationales, approving
+        actions without independent validation. By leveraging authority bias and persuasive explainability,
+        attackers can bypass oversight, leading to data breaches, financial losses, downstream and reputational
+        harms. The agent acts as an untraceable "bad influence," manipulating the human into performing
+        the final, audited action, making the agent's role in the compromise invisible to forensics. Automation
+        bias, perceived authority, and anthropomorphic cues make abuse look legitimate and hard to spot.
+        Over-reliance on agent recommendations, especially when they appear confident or authoritative,
+        increases the chance of harmful decision-making. This entry is about human misperception or over-reliance
+        whereas ASI10 is agent intent deviation. The entry builds on LLM06:2025 Excessive Agency, and
+        can be caused by LLM01:2025 Prompt Injection, LLM05:2025 Improper Output Handling, or results
+        in LLM09:2025 Misinformation. Aligns with Agentic AI Threats and Mitigations Guide (T7) Misaligned
+        & Deceptive, (T8) Repudiation & Untraceability, (T10) Overwhelming the Human in the Loop.
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09
+      ref_id: ASI09.1
+      name: Explicit confirmations
+      description: 'Explicit confirmations: Require multi-step approval or “human in the loop” before
+        accessing extra sensitive data or performing risky actions.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi09
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09
+      ref_id: ASI09.2
+      name: Immutable logs
+      description: 'Immutable logs: Keep tamper-proof records of user queries and agent actions for audit
+        and forensics.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi09
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09
+      ref_id: ASI09.3
+      name: Behavioral detection
+      description: 'Behavioral detection: Monitor sensitive data being exposed in either conversations
+        or Agentic connections, as well as risky action executions over time.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi09
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09
+      ref_id: ASI09.4
+      name: Allow reporting of suspicious interactions
+      description: 'Allow reporting of suspicious interactions: In user-interactive systems, provide plain-language
+        risk summary (not model-generated rationales) and a clear option for users to flag suspicious
+        or manipulative agent behavior, triggering automated review or a temporary lockdown of agent capabilities.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi09
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09
+      ref_id: ASI09.5
+      name: Adaptive Trust Calibration
+      description: 'Adaptive Trust Calibration: Continuously adjust the level of agent autonomy and required
+        human oversight based on contextual risk scoring. Implement confidence weighted cues (e.g., “low-certainty”
+        or “unverified source”) that visually prompt users to question high-impact actions, reducing automation
+        bias and blind approval. Develop and continuously maintain appropriate training of human personnel
+        involved in the evolving human oversight of autonomous agentic systems.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi09
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09
+      ref_id: ASI09.6
+      name: Content provenance and policy enforcement
+      description: 'Content provenance and policy enforcement: Attach verifiable metadata-source identifiers,
+        timestamps, and integrity hashes-to all recommendations and external data. Enforce digital signature
+        validation and runtime policy checks that block actions lacking trusted provenance or exceeding
+        the agent’s declared scope.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi09
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09
+      ref_id: ASI09.7
+      name: Separate preview from effect
+      description: 'Separate preview from effect: Block any network or state-changing calls during preview
+        context and display a risk badge with source provenance and expected side effects.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi09
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09
+      ref_id: ASI09.8
+      name: Human-factors and UI safeguards
+      description: 'Human-factors and UI safeguards: Visually differentiate high-risk recommendations
+        using cues such as red borders, banners, or confirmation prompts, and periodically remind users
+        of manipulation patterns and agent limitations. Where appropriate, avoid persuasive or emotionally
+        manipulative language in safety-critical flows. Maintain appropriate training and assessment of
+        personnel to ensure familiarity and consistency of perception of human-factors and UI.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi09
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi09
+      ref_id: ASI09.9
+      name: Plan-divergence detection
+      description: 'Plan-divergence detection: Compare agent action sequences against approved workflow
+        baselines and alert when unusual detours, skipped validation steps, or novel tool combinations
+        indicate possible deception or drift.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi09
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10
+      assessable: false
+      depth: 1
+      ref_id: ASI10
+      name: Rogue Agents
+      description: Rogue Agents are malicious or compromised AI Agents that deviate from their intended
+        function or authorized scope, acting harmfully, deceptively, or parasitically within multi-agent
+        or human-agent ecosystems. The agent’s actions may individually appear legitimate, but its emergent
+        behavior becomes harmful, creating a containment gap for traditional rule-based systems. While
+        external compromise, such as Prompt Injection (LLM01:2025), Goal Hijack (AS01) or Supply Chain
+        tampering (AS04) can initiate the divergence, ASI10 focuses on the loss of behavioral integrity
+        and governance once the drift begins, not the initial intrusion itself. Consequences include sensitive
+        information disclosure, misinformation propagation, workflow hijacking, and operational sabotage.
+        Rogue Agents represent a distinct risk of behavioral divergence, unlike Excessive Agency (LLM06:2025),
+        which focuses on over-granted permissions, and can be amplified "insider threats" due to the speed
+        and scale of Agentic systems. Consequences include Sensitive Information Disclosure (LLM02;2025),
+        Misinformation (LLM09:2025). In the OWASP Agentic AI Threats and Mitigations guide, ASI10 corresponds
+        to T13 – Rogue Agents in Multi-Agent Systems. The OWASP AIVSS framework maps this risk primarily
+        to Behavioral Integrity (BI), Operational Security (OS), and Compliance Violations (CV), with
+        elevated severity for critical or self-propagating deployments.
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10
+      ref_id: ASI10.1
+      name: Governance & Logging
+      description: 'Governance & Logging: Maintain comprehensive, immutable and signed audit logs of all
+        agent actions, tool calls, and inter-agent communication to review for stealth infiltration or
+        unapproved delegation.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi10
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10
+      ref_id: ASI10.2
+      name: Isolation & Boundaries
+      description: 'Isolation & Boundaries: Assign Trust Zones with strict inter-zone communication rules
+        and deploy restricted execution environments (e.g., container sandboxes) with API scopes based
+        on least privilege.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi10
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10
+      ref_id: ASI10.3
+      name: Monitoring & Detection
+      description: 'Monitoring & Detection: Deploy behavioral detection, such as watchdog agents to validate
+        peer behavior and outputs, focusing on detecting collusion patterns and coordinated false signals.
+        Monitor for anomalies such as excessive or abnormal actions executions.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi10
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10
+      ref_id: ASI10.4
+      name: Containment & Response
+      description: 'Containment & Response: Implement rapid mechanisms like kill-switches and credential
+        revocation to instantly disable rogue agents. Quarantine suspicious agents in sandboxed environments
+        for forensic review.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi10
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10
+      ref_id: ASI10.5
+      name: Identity Attestation and Behavioral Integrity Enforcement
+      description: 'Identity Attestation and Behavioral Integrity Enforcement: Implement per-agent cryptographic
+        identity attestation and enforce behavioral integrity baselines throughout the agent lifecycle.
+        Attach signed behavioral manifests declaring expected capabilities, tools, and goals that are
+        validated by orchestration services before each action. Integrate a behavioral verification layer
+        that continuously monitors tasks for deviations from the declared manifest for e.g. unapproved
+        tool invocations, unexpected data exfiltration attempts etc.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi10
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10
+      ref_id: ASI10.6
+      name: Require periodic behavioral attestation
+      description: 'Require periodic behavioral attestation: challenge tasks, signed bill of materials
+        for prompts and tools, and per-run ephemeral credentials with one-time audience binding. All signing
+        and attestation mechanisms assume hardened cryptographic key management (e.g., HSM/KMS-backed
+        keys, least-privilege access, rotation and revocation). Keys must never be directly available
+        to agents; instead, orchestrators should mediate signing operations so that a compromised agent
+        cannot simply exfiltrate or misuse long-lived keys'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi10
+    - urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asi-top-10-2026:asi10
+      ref_id: ASI10.7
+      name: Recovery and Reintegration
+      description: 'Recovery and Reintegration: Establish trusted baselines for restoring quarantined
+        or remediated agents. Require fresh attestation, dependency verification, and human approval before
+        reintegration into production networks.'
+      threats:
+      - urn:intuitem:risk:threat:owasp-asi-top-10-2026:asi10
