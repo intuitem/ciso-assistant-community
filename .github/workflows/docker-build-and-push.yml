@@ -5,7 +5,6 @@ on:
   push:
     tags:
       - "v*"
-  workflow_dispatch:
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)
 concurrency:
@@ -61,7 +60,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -123,7 +122,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -172,7 +171,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -202,15 +201,58 @@ jobs:
           labels: ${{ steps.meta-mcp.outputs.labels }}
           annotations: ${{ steps.meta-mcp.outputs.annotations }}
 
-  merge-manifests:
+  scan:
     needs: [prepare, build-frontend, build-backend, build-mcp]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [frontend, backend, mcp]
+    env:
+      SCOUT_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/scout-cli:1.25.0
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Gate on CRITICAL
+        shell: bash
+        env:
+          TARGET: ghcr.io/${{ github.repository }}/${{ matrix.component }}:${{ needs.prepare.outputs.version }}-amd64
+          DOCKER_SCOUT_HUB_USER: ${{ secrets.DOCKERHUB_USER }}
+          DOCKER_SCOUT_HUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKER_SCOUT_REGISTRY_USER: ${{ github.actor }}
+          DOCKER_SCOUT_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -e DOCKER_SCOUT_HUB_USER -e DOCKER_SCOUT_HUB_PASSWORD \
+            -e DOCKER_SCOUT_REGISTRY_USER -e DOCKER_SCOUT_REGISTRY_PASSWORD \
+            "$SCOUT_IMAGE" \
+            cves --platform linux/amd64 --only-severity critical,high --only-fixed --format markdown \
+              "$TARGET" | tee -a "$GITHUB_STEP_SUMMARY"
+          docker run --rm \
+            -e DOCKER_SCOUT_HUB_USER -e DOCKER_SCOUT_HUB_PASSWORD \
+            -e DOCKER_SCOUT_REGISTRY_USER -e DOCKER_SCOUT_REGISTRY_PASSWORD \
+            "$SCOUT_IMAGE" \
+            cves --platform linux/amd64 --only-severity critical --only-fixed \
+              --exit-code "$TARGET" > /dev/null
+
+  merge-manifests:
+    needs: [prepare, build-frontend, build-backend, build-mcp, scan]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
     steps:
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

@@ -350,7 +350,6 @@
 	"asPDF": "PDF olarak",
 	"asCSV": "CSV olarak",
 	"asXLSX": "Excel olarak",
-	"asWord": "Word olarak",
 	"draft": "Taslak",
 	"riskMatrixView": "Risk matrisi görünümü",
 	"currentInMatrixView": "Mevcut",
@@ -700,7 +699,6 @@
 	"noStatus": "Durum yok",
 	"actionPlanHelpText": "Sayaç, ilişkili gereksinimlerin sayısını temsil eder.",
 	"matchingRequirements": "Eşleşen gereksinimler",
-	"asZIP": "ZIP olarak",
 	"incoming": "Gelen",
 	"outdated": "Güncelliğini yitirmiş",
 	"flashMode": "Flash modu",
@@ -1395,7 +1393,6 @@
 	"ebiosWs2_3_tooltip": "Seçmek için en az bir RK/HA çiftine ihtiyacınız var",
 	"ebiosWs3_2_tooltip": "Stratejik senaryo oluşturmak için en az bir seçilmiş RK/HA çiftine ihtiyacınız var",
 	"ebiosWs3_3_tooltip": "İlişkili güvenlik önlemlerini tanımlamak için en az bir Paydaşa ihtiyacınız var",
-	"ebiosWs4_1_tooltip": "Operasyonel senaryo oluşturmak için bir Stratejik Senaryodan en az bir seçilmiş Saldırı Yoluna ihtiyacınız var",
 	"ebiosWs4_2_tooltip": "Olasılığını değerlendirmek için en az bir Operasyonel Senaryoya ihtiyacınız var",
 	"ebiosWs5_tooltip": "Henüz hiç risk değerlendirmesi yapılmadı",
 	"govern": "Yönet",
@@ -1668,7 +1665,6 @@
 	"deactivateServiceAccountConfirm": "Bu hizmet hesabını devre dışı bırakmak, geçerli tüm erişim belirteçlerini hemen iptal eder ve yenilerinin verilmesini engeller. Devam edilsin mi?",
 	"gracePeriod": "Ek süre",
 	"gracePeriodHelpText": "Mevcut gizli anahtar, entegrasyonların kesinti olmadan güncellenebilmesi için döndürmeden sonra bu süre boyunca çalışmaya devam eder. En fazla 1 ay ile sınırlıdır.",
-	"gracePeriodTooLong": "Ek süre 1 aydan uzun olamaz.",
 	"previousSecretValidUntil": "Önceki istemci gizli anahtarı {date} tarihine kadar geçerliliğini korur.",
 	"expiresOn": "{date} tarihinde sona eriyor",
 	"personalAccessTokenExpiryHelpText": "Jetonun süresinin dolacağı gün sayısı",
@@ -1927,15 +1923,6 @@
 	"changeUserGroup": "Kullanıcı grubunu değiştir",
 	"deleteUserGroup": "Kullanıcı grubunu sil",
 	"viewUserGroup": "Kullanıcı grubunu görüntüle",
-	"changeQuantitativeRiskHypothesis": "Nitel risk hipotezini değiştir",
-	"deleteQuantitativeRiskHypothesis": "Nitel risk hipotezini sil",
-	"viewQuantitativeRiskHypothesis": "Nitel risk hipotezini görüntüle",
-	"changeQuantitativeRiskScenario": "Senaryoyu değiştir",
-	"deleteQuantitativeRiskScenario": "Senaryoyu sil",
-	"viewQuantitativeRiskScenario": "Senaryoyu görüntüle",
-	"changeQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını değiştir",
-	"deleteQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını sil",
-	"viewQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını görüntüle",
 	"dueDateUpdatedSuccessfully": "Son tarih başarıyla güncellendi",
 	"taskScheduleInfo": "Geçmiş gerçekleşmeler program değişikliklerinden korunur. Sadece yaklaşan görevler yeniden hesaplanır.",
 	"cascadeDeleteWarning": "Uyarı: Bu, ayrıca {count} ilgili nesneyi kalıcı olarak silecektir:",
@@ -2015,7 +2002,6 @@
 	"enrichFromEUVD": "EUVD'den zenginleştir",
 	"syncCweCatalog": "CWE çek",
 	"syncCweCatalogFailed": "CWE hatası",
-	"exportEcosystem": "ekosistem dışa aktarımı (XLSX)",
 	"aggregation": "Toplama",
 	"average": "Ortalama",
 	"boolean": "Boolean",
@@ -2053,19 +2039,12 @@
 	"builderRequirementHint": "Değerlendirilebilir, alt düğümleri olabilir",
 	"builderSplashScreen": "Açılış ekranı",
 	"builderSplashScreenHint": "Sunum amaçlı, değerlendirilemez",
-	"builderStatusLive": "Yayında",
-	"builderStatusLiveTitle": "Taslak, denetim katılımcılarının gördüğüyle eşleşiyor.",
-	"builderStatusUnpublishedChanges": "Yayınlanmamış değişiklikler",
-	"builderStatusUnpublishedChangesTitle": "Taslakta henüz denetim katılımcılarına görünmeyen değişiklikler var. Uygulamak için yayınlayın.",
-	"builderStatusDraftNothingLive": "Taslak — henüz hiçbir şey yayında değil",
-	"builderStatusDraftNothingLiveTitle": "Taslakta içerik var ancak henüz hiçbir şey yayınlanmadı. Yeni denetimler siz yayınlayana kadar hiçbir şey görmeyecek.",
 	"builderStatusEmpty": "Boş",
 	"builderStatusEmptyTitle": "Henüz gereksinim yok. Bu çerçeveye dayanan yeni denetimlerin yanıtlayacağı bir şey olmayacak.",
 	"builderPreview": "Önizleme",
 	"builderPreviewSaveFirst": "Önizlemek için önce taslağınızı kaydedin",
 	"builderPreviewAsRespondent": "Katılımcı olarak önizle (yeni sekmede açılır)",
 	"builderExportYamlTitle": "Çerçeveyi YAML kütüphane dosyası olarak dışa aktar",
-	"builderExportYamlUnpublishedWarning": "Yayınlanmamış değişiklikler dahil edilmeyecek. En son düzenlemeleri dışa aktarmak için önce yayınlayın.",
 	"builderCopyBase": "Tabanı kopyala",
 	"builderCopyBaseTitle": "Taban dil metnini {lang} diline kopyala (mevcut çevirilerin üzerine yazmaz)",
 	"builderCopyBaseQuestion": "Taban metni kopyalansın mı?",
@@ -2075,82 +2054,7 @@
 	"builderExpandAllCards": "Tüm kartları genişlet",
 	"builderCollapseAllCards": "Tüm kartları daralt",
 	"builderSaveFailed": "Kaydetme başarısız",
-	"builderPublishedFlash": "Yayınlandı!",
 	"builderSaveDraftTitle": "Taslağı kaydet (Ctrl+S)",
-	"builderDiscardDraftTitle": "Taslağı iptal et",
-	"builderDiscard": "İptal et",
-	"builderDiscardAllChangesQuestion": "Tüm değişiklikler iptal edilsin mi?",
-	"builderYesDiscard": "Evet, iptal et",
-	"builderPublishDraftToLiveTitle": "Taslağı yayındaki çerçeveye yayınla",
-	"builderPublishing": "Yayınlanıyor...",
-	"builderPublishModalTitle": "Taslağı yayına al",
-	"builderPublishModalDescription": "Bu işlem yayındaki çerçeveyi güncelleyecek. Aşağıdaki değişiklikleri inceleyin.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} gereksinim eklendi",
-				"countPlural=other": "{count} gereksinim eklendi"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} soru",
-				"countPlural=other": "{count} soru"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} gereksinim kaldırıldı",
-				"countPlural=other": "{count} gereksinim kaldırıldı"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} soru",
-				"countPlural=other": "{count} soru"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Yapısal değişiklik algılanmadı (yalnızca üst veri).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} kırıcı değişiklik algılandı",
-				"countPlural=other": "{count} kırıcı değişiklik algılandı"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Bu değişiklikler mevcut denetimlerdeki puanlamayı, görünürlüğü veya uyumluluk sonuçlarını etkileyebilir.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} mevcut denetim etkilenecek",
-				"countPlural=other": "{count} mevcut denetim etkilenecek"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Bu denetimlere yeni gereksinimler eklenecek.",
-	"builderAffectedAuditsRemovedHint": "Kaldırılan gereksinimler ve değerlendirme verileri bu denetimlerden silinecek.",
-	"builderCouldNotLoadPreview": "Etki önizlemesi yüklenemedi. Dikkatli ilerleyin.",
-	"builderConfirmPublish": "Yayınlamayı onayla",
 	"builderSearchNodes": "Düğümleri ara...",
 	"builderExpandSidebar": "Kenar çubuğunu genişlet",
 	"builderCollapseSidebar": "Kenar çubuğunu daralt",
@@ -2330,7 +2234,6 @@
 	"builderSplashNumberedList": "Numaralı liste",
 	"builderSplashLink": "Bağlantı",
 	"builderSplashTable": "Tablo",
-	"builderSplashInsertImage": "Görsel ekle",
 	"builderUntitledQuestion": "Başlıksız soru",
 	"builderNotTranslated": "Çevrilmedi",
 	"builderQuestionTextPlaceholder": "Sorunuzu girin...",
@@ -2375,27 +2278,12 @@
 	"builderKbSaveDraft": "Taslağı kaydet",
 	"builderKbShowCheatsheet": "Bu ipucu listesini göster",
 	"builderKbCloseDialog": "İletişim kutusunu veya açılır menüyü kapat",
-	"builderImportedFramework": "İçe aktarılan çerçeve",
-	"builderImportedFrameworkDescription": "Bu çerçeve bir kütüphaneden içe aktarıldı ve doğrudan düzenlenemez. Değişiklik yapmak için düzenlenebilir bir kopya oluşturun.",
-	"builderCreateCopyAndEdit": "Kopya oluştur ve düzenle",
-	"builderCreatingCopy": "Kopya oluşturuluyor...",
-	"builderLoadingEditor": "Düzenleyici yükleniyor...",
-	"builderFailedToStartEditor": "Düzenleyici başlatılamadı",
-	"builderBackToFramework": "Çerçeveye geri dön",
-	"builderBackToBuilder": "Oluşturucuya geri dön",
-	"builderFailedToLoadDraft": "Taslak yüklenemedi",
-	"builderImplementationGroupsHeader": "Uygulama Grupları",
-	"builderNoItemsToPreview": "Önizlenecek öğe yok.",
-	"builderNoItemsToPreviewHint": "Oluşturucuda değerlendirilebilir gereksinimler veya açılış ekranları ekleyin.",
-	"builderBaseLanguageOption": "Taban dil",
 	"builderFrameworkNameRequired": "Çerçeve adı gereklidir.",
 	"builderFrameworkNameTooLong": "Çerçeve adı {length} karakter (maks. 200).",
 	"builderNodeNameTooLong": "Ad 200 karakteri aşıyor ({length}/200). Uzun metni açıklama alanına taşıyın.",
 	"builderRefIdTooLong": "'{label}': ref_id {length} karakter (maks. 100).",
 	"builderUrnTooLong": "'{label}': URN {length} karakter (maks. 255).",
-	"builderFailedToSaveDraftBeforePublish": "Yayınlamadan önce taslak kaydedilemedi.",
 	"builderUnsavedChangesNavigation": "Kaybolacak kaydedilmemiş değişiklikleriniz var. Yine de çıkılsın mı?",
-	"builderUnpublishedChangesNavigation": "Yayınlanmamış değişiklikleriniz var. Taslağınız kaydedildi ve daha sonra devam edebilirsiniz. Yine de çıkılsın mı?",
 	"fieldVisibility": "Alan görünürlüğü",
 	"fieldVisibilityHelpText": "Her rolün hangi alanları görebileceğini ve düzenleyebileceğini kontrol edin.",
 	"visibilityAuditorRespondent": "Denetçi + Yanıtlayan",
@@ -2428,7 +2316,6 @@
 	"mfaDisabledSuccessfully": "Bu kullanıcı için MFA devre dışı bırakıldı",
 	"errorDisablingMFA": "Bu kullanıcı için MFA devre dışı bırakılamadı",
 	"userHasNoMFAEnabled": "Bu kullanıcının MFA'sı etkin değil",
-	"builderChangedOn": "değiştirildi:",
 	"requirementWeight": "Ağırlık",
 	"scim": "SCIM",
 	"scimDescription": "SCIM 2.0 sağlamayı yapılandırın. Kimlik sağlayıcınızı aşağıdaki uç noktaya yönlendirin ve burada oluşturulan bir bearer belirteciyle kimlik doğrulaması yapın.",
