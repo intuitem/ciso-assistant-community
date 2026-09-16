@@ -8962,31 +8962,40 @@ class FolderViewSet(BaseModelViewSet):
         )
 
     @staticmethod
-    def _folder_emptiness_blocker(folder) -> "str | None":
-        """Why this folder may not be deleted, or None.
+    def _folder_content_models() -> list:
+        """Every model that could hold a folder's content.
 
         Exhaustive rather than curated: deletion cascades through every FK. The IAM
         objects every domain auto-provisions are exempt, or nothing would be deletable.
+        Models whose table this edition never created are dropped up front: probing one
+        raises, and on PostgreSQL that aborts the surrounding transaction, so the error
+        cannot simply be caught and skipped.
         """
         from django.apps import apps
+        from django.db import connection
 
-        if Folder.objects.filter(parent_folder=folder).exists():
-            return "hasSubDomains"
-
+        tables = set(connection.introspection.table_names())
         exempt = {"iam.UserGroup", "iam.RoleAssignment"}
-        for model in apps.get_models():
-            if model is Folder or model._meta.label in exempt:
-                continue
-            if not any(
+        return [
+            model
+            for model in apps.get_models()
+            if model is not Folder
+            and model._meta.label not in exempt
+            and model._meta.db_table in tables
+            and any(
                 f.name == "folder" and f.related_model is Folder
                 for f in model._meta.fields
-            ):
-                continue
-            try:
-                if model.objects.filter(folder=folder).exists():
-                    return "notEmpty"
-            except Exception:
-                continue  # unmanaged or edition-only table: holds nothing
+            )
+        ]
+
+    @staticmethod
+    def _folder_emptiness_blocker(folder, content_models) -> "str | None":
+        """Why this folder may not be deleted, or None."""
+        if Folder.objects.filter(parent_folder=folder).exists():
+            return "hasSubDomains"
+        for model in content_models:
+            if model.objects.filter(folder=folder).exists():
+                return "notEmpty"
         return None
 
     def _apply_reorganisation(self, planned, planned_deletes):
@@ -9055,10 +9064,12 @@ class FolderViewSet(BaseModelViewSet):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
 
-            # Last, so a folder emptied by the moves above qualifies.
+            # Last, so a folder emptied by the moves above qualifies. The model scan
+            # is resolved once for the whole batch, not per folder.
             blocked = []
+            content_models = self._folder_content_models() if planned_deletes else []
             for folder in planned_deletes:
-                reason = self._folder_emptiness_blocker(folder)
+                reason = self._folder_emptiness_blocker(folder, content_models)
                 if reason:
                     blocked.append(
                         {
