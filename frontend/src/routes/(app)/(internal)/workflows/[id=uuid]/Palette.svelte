@@ -1,15 +1,17 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
 
 	interface PaletteItem {
 		type: string;
 		triggerType?: string;
+		actionType?: string;
 		icon: string;
 		label: string;
 	}
 
 	interface Props {
-		onAdd: (nodeType: string, triggerType?: string) => void;
+		onAdd: (nodeType: string, triggerType?: string, actionType?: string) => void;
 	}
 
 	let { onAdd }: Props = $props();
@@ -39,17 +41,46 @@
 		{ type: 'loop', icon: 'fa-rotate', label: m.workflowNodeLoop() },
 		{ type: 'end', icon: 'fa-circle-stop', label: m.workflowNodeEnd() }
 	]);
+	// `featureflags` is the backend payload; `featureFlags` is an unrelated
+	// client-side registry (lib/feature-flags.ts) that never carries these.
+	const aiEnabled = $derived(Boolean($page.data?.featureflags?.chat_mode));
+
+	const AI_ITEMS = $derived<PaletteItem[]>([
+		{
+			type: 'action',
+			actionType: 'ai_extract',
+			icon: 'fa-wand-magic-sparkles',
+			label: m.workflowNodeAiExtract()
+		},
+		{
+			type: 'action',
+			actionType: 'ai_generate',
+			icon: 'fa-feather-pointed',
+			label: m.workflowNodeAiGenerate()
+		}
+	]);
 
 	let nodeSearch = $state('');
 	const GROUPS = $derived(
 		[
 			{ key: 'triggers', label: m.workflowTriggers(), items: TRIGGER_ITEMS },
-			{ key: 'steps', label: m.workflowSteps(), items: STEP_ITEMS }
+			{ key: 'steps', label: m.workflowSteps(), items: STEP_ITEMS },
+			...(aiEnabled
+				? [
+						{
+							key: 'ai',
+							label: m.workflowAiCalls(),
+							description: m.workflowAiCallsHint(),
+							items: AI_ITEMS
+						}
+					]
+				: [])
 		]
 			.map((group) => ({
 				...group,
+				// Group name included so "ai" finds Extract/Generate.
 				items: group.items.filter((item) =>
-					item.label.toLowerCase().includes(nodeSearch.trim().toLowerCase())
+					`${item.label} ${group.label}`.toLowerCase().includes(nodeSearch.trim().toLowerCase())
 				)
 			}))
 			.filter((group) => group.items.length > 0)
@@ -58,7 +89,11 @@
 	function handleDragStart(event: DragEvent, item: PaletteItem) {
 		event.dataTransfer?.setData(
 			'application/ciso-workflow-node',
-			JSON.stringify({ type: item.type, triggerType: item.triggerType })
+			JSON.stringify({
+				type: item.type,
+				triggerType: item.triggerType,
+				actionType: item.actionType
+			})
 		);
 		if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
 	}
@@ -88,19 +123,23 @@
 		{#each GROUPS as group (group.key)}
 			<h4
 				class="text-[10px] font-semibold uppercase tracking-wide text-surface-500 mt-2 mb-1.5 first:mt-0"
+				class:mb-0.5={group.description}
 			>
 				{group.label}
 			</h4>
+			{#if group.description}
+				<p class="text-[10px] leading-snug text-surface-500 mb-1.5">{group.description}</p>
+			{/if}
 			<div class="flex flex-col gap-1.5">
-				{#each group.items as item (item.type + (item.triggerType ?? ''))}
+				{#each group.items as item (item.type + (item.triggerType ?? item.actionType ?? ''))}
 					<button
 						type="button"
 						draggable="true"
 						ondragstart={(e) => handleDragStart(e, item)}
-						onclick={() => onAdd(item.type, item.triggerType)}
+						onclick={() => onAdd(item.type, item.triggerType, item.actionType)}
 						class="flex items-center gap-2 px-2.5 py-2 rounded-base border border-surface-200-800 bg-surface-50-950 text-xs text-surface-800-200 cursor-grab hover:border-primary-400 hover:shadow-sm transition-all text-left"
-						data-testid="palette-{item.triggerType
-							? `${item.type}-${item.triggerType}`
+						data-testid="palette-{(item.triggerType ?? item.actionType)
+							? `${item.type}-${item.triggerType ?? item.actionType}`
 							: item.type}"
 					>
 						<i class="fa-solid {item.icon} w-4 text-center text-surface-600-400"></i>

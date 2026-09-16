@@ -1047,7 +1047,6 @@ async def create_task_template(
     status: str = None,
     observation: str = None,
     evidences: list = None,
-    is_published: bool = False,
     task_date: str = None,
     is_recurrent: bool = False,
     ref_id: str = None,
@@ -1070,7 +1069,6 @@ async def create_task_template(
         status: Status
         observation: Observation text
         evidences: Array of evidence UUIDs
-        is_published: Published flag
         task_date: Task date (YYYY-MM-DD)
         is_recurrent: Recurrent flag
         ref_id: Reference ID
@@ -1091,7 +1089,6 @@ async def create_task_template(
         payload = {
             "name": name,
             "folder": folder_id,
-            "is_published": is_published,
             "is_recurrent": is_recurrent,
             "enabled": enabled,
         }

@@ -84,8 +84,6 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         obj, _ = self.model.objects.get_or_create(name="feature-flags")
-        obj.is_published = True  # we could do that at creation, but it's ok here
-        obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -135,8 +133,6 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         obj = self.model.objects.get(name=GlobalSettings.Names.GENERAL)
-        obj.is_published = True  # we could do that at creation, but it's ok here
-        obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -254,7 +250,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             folder=Folder.get_root_folder(),
         ):
             return Response(
-                {"error": "You do not have permission to change user preferences."},
+                {"error": "userDoesNotHavePermissionToChangeUserPreferences"},
                 status=403,
             )
         general = GlobalSettings.objects.filter(
@@ -267,7 +263,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         )
         if not lang or lang not in dict(settings.LANGUAGES):
             return Response(
-                {"error": "No valid default language configured in general settings."},
+                {"error": "noDefaultLanguageConfigured"},
                 status=400,
             )
         with transaction.atomic():
@@ -280,6 +276,42 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
                 user.save(update_fields=["preferences"])
                 updated += 1
         return Response({"updated": updated, "language": lang})
+
+    @action(detail=True, methods=["post"], name="Force date format for all users")
+    def force_date_format(self, request, pk=None):
+        perm = Permission.objects.get(codename="change_user")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=perm,
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(
+                {"error": "userDoesNotHavePermissionToChangeUserPreferences"},
+                status=403,
+            )
+        general = GlobalSettings.objects.filter(
+            name=GlobalSettings.Names.GENERAL
+        ).first()
+        date_format = (
+            general.value.get("default_date_format")
+            if general and isinstance(general.value, dict)
+            else None
+        )
+        if not isinstance(date_format, str) or date_format not in User.DATE_FORMATS:
+            return Response(
+                {"error": "noDefaultDateFormatConfigured"},
+                status=400,
+            )
+        with transaction.atomic():
+            users = User.objects.select_for_update().all()
+            updated = 0
+            for user in users:
+                if not isinstance(user.preferences, dict):
+                    user.preferences = {}
+                user.preferences["date_format"] = date_format
+                user.save(update_fields=["preferences"])
+                updated += 1
+        return Response({"updated": updated, "date_format": date_format})
 
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
@@ -369,8 +401,6 @@ class VulnerabilitySlaViewSet(viewsets.ModelViewSet):
         obj, _ = self.model.objects.get_or_create(
             name=GlobalSettings.Names.VULNERABILITY_SLA
         )
-        obj.is_published = True
-        obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -396,8 +426,6 @@ class SecIntelFeedsViewSet(viewsets.ModelViewSet):
         obj, _ = self.model.objects.get_or_create(
             name=GlobalSettings.Names.SEC_INTEL_FEEDS
         )
-        obj.is_published = True
-        obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -427,8 +455,6 @@ class InfraConfigViewSet(viewsets.ModelViewSet):
         obj, _ = self.model.objects.get_or_create(
             name=GlobalSettings.Names.INFRA_CONFIG
         )
-        obj.is_published = True
-        obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
 

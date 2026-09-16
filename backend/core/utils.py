@@ -41,7 +41,7 @@ def extract_node_id(urn: str | None) -> str | None:
     URN format: urn:{org}:risk:{type}:{slug}:{node_id}
     The node_id is everything after the 5th colon and may contain colons.
     """
-    if not urn:
+    if not urn or not isinstance(urn, str):
         return None
     parts = urn.split(":")
     if len(parts) <= 5:
@@ -439,6 +439,33 @@ BUILTIN_ROLE_TRANSLATIONS = {
         "uk": {"name": "Технічний тестувальник"},
         "ur": {"name": "تکنیکی ٹیسٹر"},
         "zh": {"name": "技术测试员"},
+    },
+    "BI-RL-BSL": {
+        "en": {"name": "Baseline reader"},
+        "ar": {"name": "قارئ خط الأساس"},
+        "cs": {"name": "Čtenář základní úrovně"},
+        "da": {"name": "Basislæser"},
+        "de": {"name": "Basis-Leser"},
+        "el": {"name": "Αναγνώστης βασικής γραμμής"},
+        "es": {"name": "Lector de línea base"},
+        "et": {"name": "Baastaseme lugeja"},
+        "fr": {"name": "Lecteur de socle"},
+        "hi": {"name": "आधारभूत रीडर"},
+        "hr": {"name": "Osnovni čitatelj"},
+        "hu": {"name": "Alapszintű olvasó"},
+        "id": {"name": "Pembaca dasar"},
+        "it": {"name": "Lettore di base"},
+        "ko": {"name": "기본 열람자"},
+        "lt": {"name": "Bazinis skaitytojas"},
+        "nl": {"name": "Basislezer"},
+        "pl": {"name": "Czytelnik bazowy"},
+        "pt": {"name": "Leitor de base"},
+        "ro": {"name": "Cititor de bază"},
+        "sv": {"name": "Basläsare"},
+        "tr": {"name": "Temel okuyucu"},
+        "uk": {"name": "Базовий читач"},
+        "ur": {"name": "بنیادی ریڈر"},
+        "zh": {"name": "基线阅读者"},
     },
 }
 
@@ -1128,6 +1155,86 @@ def _is_question_visible(question, answers_by_urn, questions_by_urn=None, visite
     return False
 
 
+def apply_answers_dict(owner_field, owner, questions_by_urn, answers_data, user=None):
+    """Write a legacy `{question_urn: value}` dict onto the Answer rows of
+    *owner*, a RequirementAssessment (owner_field="requirement_assessment")
+    or a QuickFormResponse (owner_field="response").
+
+    Choice questions receive URNs (one string for unique_choice, a list for
+    multiple_choice) resolved into `selected_choices`; every other type
+    stores the raw value. Unknown question URNs and unknown choice URNs are
+    logged and skipped rather than rejected, matching the historical
+    requirement assessment write path.
+    """
+    from core.models import Answer, Question
+
+    for q_urn, answer_value in answers_data.items():
+        question = questions_by_urn.get(q_urn)
+        if not question:
+            logger.warning(
+                "Question URN not found, skipping answer",
+                q_urn=q_urn,
+                available_urns=list(questions_by_urn.keys()),
+            )
+            continue
+
+        answer, _created = Answer.objects.update_or_create(
+            **{owner_field: owner},
+            question=question,
+            defaults={"folder": owner.folder},
+        )
+
+        if question.type == Question.Type.UNIQUE_CHOICE:
+            if answer_value:
+                choice = question.choices.filter(urn=answer_value).first()
+                answer.selected_choices.set([choice] if choice else [])
+                if not choice:
+                    logger.warning(
+                        "Choice not found for answer", q_urn=q_urn, value=answer_value
+                    )
+            else:
+                answer.selected_choices.clear()
+            answer.value = None
+            answer.save(update_fields=["value"])
+        elif question.type == Question.Type.MULTIPLE_CHOICE:
+            if isinstance(answer_value, list) and answer_value:
+                choices = question.choices.filter(urn__in=answer_value)
+                found_identifiers = set(choices.values_list("urn", flat=True))
+                missing = set(answer_value) - found_identifiers
+                answer.selected_choices.set(choices)
+                if missing:
+                    logger.warning(
+                        "Some choices not found for answer",
+                        q_urn=q_urn,
+                        missing_values=list(missing),
+                    )
+            else:
+                answer.selected_choices.clear()
+            answer.value = None
+            answer.save(update_fields=["value"])
+        elif question.type == Question.Type.OBJECT_REFERENCE:
+            # Ids only, always a list, and only ones reachable from the owner's folder —
+            # this path bypasses the serializer, so it cannot bypass the check too.
+            from core.object_references import ReferenceError_, validate_ids
+
+            ids = (
+                answer_value
+                if isinstance(answer_value, list)
+                else ([answer_value] if answer_value else [])
+            )
+            try:
+                answer.value = validate_ids(
+                    question, owner.folder, [str(i) for i in ids], user=user
+                )
+            except ReferenceError_ as e:
+                logger.warning("Rejected object reference answer", q_urn=q_urn, error=e)
+                answer.value = []
+            answer.save(update_fields=["value"])
+        else:
+            answer.value = answer_value
+            answer.save(update_fields=["value"])
+
+
 def build_answers_dict(answers_qs):
     """Build {question.urn: answer_value} dict from Answer queryset for backward compat.
 
@@ -1169,6 +1276,12 @@ def _build_answer_context(questions_qs, answers_qs):
             pks = {c.id for c in a.selected_choices.all()}
             selected_choice_pks_by_qid[a.question_id] = pks
             has_answer_by_qid[a.question_id] = len(pks) > 0
+        elif q_type == Question.Type.FILE:
+            # A file question is answered by uploading, not by writing a value.
+            has_answer_by_qid[a.question_id] = a.attachments.exists()
+        elif q_type == Question.Type.OBJECT_REFERENCE:
+            # Always a list, so an empty one is unanswered rather than "[]".
+            has_answer_by_qid[a.question_id] = bool(a.value)
         else:
             has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
 
@@ -1186,6 +1299,79 @@ def _build_answer_context(questions_qs, answers_qs):
     )
 
 
+def _trigger_assignment(groups, new_groups, ig_triggers, assignment_by_ra_id):
+    """The assignment owning an answer that selected one of the new groups."""
+    for group in groups or []:
+        if group not in new_groups:
+            continue
+        for trigger_ra_id in ig_triggers.get(group, []):
+            if trigger_ra_id in assignment_by_ra_id:
+                return assignment_by_ra_id[trigger_ra_id]
+    return None
+
+
+def sync_requirement_assignments(compliance_assessment, ig_triggers, previous_groups):
+    """Keep assignment scopes in step with the selected implementation groups.
+
+    Requirements already visible under the previous groups are left alone. Call
+    inside the transaction that saves the selection: previous_groups is the only
+    record of the old scope, so a partial write cannot be retried.
+    """
+    from core.models import RequirementAssessment, RequirementAssignment
+
+    selected = set(compliance_assessment.selected_implementation_groups or [])
+    if selected == previous_groups:
+        return
+
+    # A submitted or closed assignment keeps the scope it was judged on.
+    open_statuses = {
+        RequirementAssignment.Status.DRAFT,
+        RequirementAssignment.Status.IN_PROGRESS,
+        RequirementAssignment.Status.CHANGES_REQUESTED,
+    }
+    assigned_ra_ids: set = set()
+    assignment_by_ra_id: dict = {}
+    for assignment_id, assignment_status, ra_id in RequirementAssignment.objects.filter(
+        compliance_assessment=compliance_assessment
+    ).values_list("id", "status", "requirement_assessments__id"):
+        if not ra_id:
+            continue
+        assigned_ra_ids.add(ra_id)
+        if assignment_status in open_statuses:
+            assignment_by_ra_id[ra_id] = assignment_id
+    if not assignment_by_ra_id:
+        return
+
+    new_groups = selected - previous_groups
+    to_add: dict = {}
+    to_remove: dict = {}
+    for ra_id, assessable, groups in RequirementAssessment.objects.filter(
+        compliance_assessment=compliance_assessment
+    ).values_list(
+        "id", "requirement__assessable", "requirement__implementation_groups"
+    ):
+        owner = assignment_by_ra_id.get(ra_id)
+        if owner is not None:
+            if selected and not selected & set(groups or []):
+                to_remove.setdefault(owner, []).append(ra_id)
+            continue
+        if ra_id in assigned_ra_ids or not assessable:
+            continue
+        if not previous_groups or previous_groups & set(groups or []):
+            continue
+        target = _trigger_assignment(
+            groups, new_groups, ig_triggers, assignment_by_ra_id
+        )
+        if target is not None:
+            to_add.setdefault(target, []).append(ra_id)
+
+    assignments = RequirementAssignment.objects.in_bulk(set(to_add) | set(to_remove))
+    for assignment_id, ra_ids in to_add.items():
+        assignments[assignment_id].requirement_assessments.add(*ra_ids)
+    for assignment_id, ra_ids in to_remove.items():
+        assignments[assignment_id].requirement_assessments.remove(*ra_ids)
+
+
 def update_selected_implementation_groups(compliance_assessment):
     """Recalculate dynamic IGs from visible answers, preserving manually-picked ones.
 
@@ -1193,6 +1379,9 @@ def update_selected_implementation_groups(compliance_assessment):
     select_implementation_groups. Those get fully recomputed here. Any other IG already
     on the assessment is treated as a manual pick and left untouched.
     """
+    from django.db import transaction
+    from django.db.models import F
+
     from core.models import Answer, Question, QuestionChoice
 
     dynamic_eligible_igs: set[str] = set()
@@ -1204,11 +1393,14 @@ def update_selected_implementation_groups(compliance_assessment):
             dynamic_eligible_igs.update(select_list)
 
     igs_to_select: set[str] = set()
+    # ref_id -> the RAs whose answers selected that IG
+    ig_triggers: dict[str, list] = {}
 
     requirement_assessments = (
-        compliance_assessment.requirement_assessments.select_related(
-            "requirement", "requirement__framework"
+        compliance_assessment.requirement_assessments.order_by(
+            F("requirement__order_id").asc(nulls_last=True)
         )
+        .select_related("requirement", "requirement__framework")
         .prefetch_related(
             "answers",
             "answers__question",
@@ -1242,7 +1434,9 @@ def update_selected_implementation_groups(compliance_assessment):
             selected_pks = selected_choice_pks_by_qid.get(question.id, set())
             for choice in question.choices.all():
                 if choice.id in selected_pks:
-                    igs_to_select.update(choice.select_implementation_groups or [])
+                    for ig in choice.select_implementation_groups or []:
+                        igs_to_select.add(ig)
+                        ig_triggers.setdefault(ig, []).append(ra.id)
 
         if ra.requirement.framework.implementation_groups_definition:
             for ig in ra.requirement.framework.implementation_groups_definition:
@@ -1255,7 +1449,10 @@ def update_selected_implementation_groups(compliance_assessment):
     compliance_assessment.selected_implementation_groups = list(
         manual_only | igs_to_select
     )
-    compliance_assessment.save(update_fields=["selected_implementation_groups"])
+    # Answer.save() defers this to on_commit, so the outer transaction is gone.
+    with transaction.atomic():
+        compliance_assessment.save(update_fields=["selected_implementation_groups"])
+        sync_requirement_assignments(compliance_assessment, ig_triggers, current)
 
 
 def build_questions_dict(node):
@@ -1556,8 +1753,6 @@ def get_respondent_scoped_folder_ids(user) -> set[UUID]:
     treated as a respondent. Auditor-side roles (reader, approver, analyst,
     domain-manager, administrator) hold ``view_compliance_assessment_full`` and are therefore
     excluded; auditee and third-party respondent do not and are included.
-
-    Uses the IAM snapshot caches exclusively (no extra DB queries).
     """
     from iam.models import RoleAssignment
 

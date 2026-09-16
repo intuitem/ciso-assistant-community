@@ -10,7 +10,10 @@ from django.db.models import Avg, Count, OuterRef, Q, Subquery, Sum
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.base_models import AbstractBaseModel, NameDescriptionMixin
+from core.base_models import (
+    AbstractBaseModel,
+    NameDescriptionMixin,
+)
 from core.models import (
     Actor,
     AppliedControl,
@@ -36,7 +39,7 @@ from core.models import (
     Vulnerability,
 )
 from global_settings.models import GlobalSettings
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from iam.models import Folder, FolderMixin
 
 logger = structlog.getLogger(__name__)
 
@@ -82,7 +85,6 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
             "Format: [{'name': 'Low', 'description': '', 'translations': {'fr': {'name': 'Faible', 'description': ''}}}]"
         ),
     )
-    is_published = models.BooleanField(default=True, verbose_name=_("Published"))
     higher_is_better = models.BooleanField(
         default=True,
         verbose_name=_("Higher is better"),
@@ -114,9 +116,7 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         return self.display_short
 
 
-class MetricInstance(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
-):
+class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", _("Draft")
         ACTIVE = "active", _("Active")
@@ -175,6 +175,7 @@ class MetricInstance(
         blank=True,
         null=True,
     )
+
     fields_to_check = ["ref_id", "name"]
 
     class Meta:
@@ -439,6 +440,8 @@ class BuiltinMetricSample(AbstractBaseModel):
             "Format depends on object type (e.g., progress, result_breakdown, etc.)"
         ),
     )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("Builtin metric sample")

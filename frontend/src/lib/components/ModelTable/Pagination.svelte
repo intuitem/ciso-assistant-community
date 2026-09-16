@@ -34,18 +34,19 @@
 		scrollTarget?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 	};
 
-	let currentEndpoint: string | null = $state(null);
-
 	afterNavigate(() => {
-		if (page.url && page.url.pathname !== currentEndpoint) {
-			const endpoint = page.url.pathname;
-			let newPageNumber = parseInt(page.url.searchParams.get('page') ?? '1');
-			setTimeout(() => {
-				handler.setPage(newPageNumber);
-				handler.invalidate();
-			}, 300);
-			currentEndpoint = endpoint;
-		}
+		if (!page.url) return;
+
+		const parsed = parseInt(page.url.searchParams.get('page') ?? '1');
+		const newPageNumber = Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+		// The handler already fetches on mount; re-fetch only when the URL asks for a
+		// different page, or every table loads twice on load and on every navigation.
+		if (newPageNumber === $pageNumber) return;
+
+		setTimeout(() => {
+			handler.setPage(newPageNumber);
+			handler.invalidate();
+		}, 300);
 	});
 </script>
 

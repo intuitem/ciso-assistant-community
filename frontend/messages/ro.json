@@ -659,7 +659,6 @@
 	"noStatus": "Fără stare",
 	"actionPlanHelpText": "Separat pe stare și ordonat după eta",
 	"matchingRequirements": "Cerințe corespunzătoare",
-	"asZIP": "ca ZIP",
 	"incoming": "În curs",
 	"outdated": "Depășit",
 	"flashMode": "Mod flash",
@@ -821,6 +820,8 @@
 	"addRepresentative": "Adăugați un reprezentant",
 	"phone": "Telefon",
 	"role": "Rol",
+	"defaultRole": "Rol implicit",
+	"defaultRoleHelpText": "Rol acordat automat pe acest domeniu oricărui utilizator cu o atribuire de rol pe unul dintre subdomeniile sale.",
 	"questions": "Întrebări",
 	"recipientEntity": "Entitatea destinatară",
 	"financial": "Finanțe",
@@ -865,7 +866,8 @@
 	"mailFailedToSend": "Emailul nu a putut fi trimis",
 	"questionOrQuestions": "Întrebare(e)",
 	"successfullyUpdatedClientSettings": "Setările clientului au fost actualizate cu succes, vă rugăm să reîmprospătați pagina.",
-	"xRaysEmptyMessage": "Trebuie să creați cel puțin o întindere pentru a utiliza raze X.",
+	"xRaysEmptyMessage": "Nicio problemă detectată. X-rays afișează doar domeniile cu constatări.",
+	"xRaysLoadingError": "Analiza X-rays nu a putut fi finalizată. Consultați jurnalele serverului pentru detalii.",
 	"suggestControls": "Sugerați controale",
 	"createAppliedControlsFromSuggestionsHelpText": "Creați controale aplicate din controalele de referință sugerate de cerințele cadrului",
 	"createAppliedControlsFromSuggestionsSuccess": "Controalele aplicate create cu succes din controalele de referință sugerate",
@@ -1161,15 +1163,6 @@
 	"changeUserGroup": "Schimbă grupul de utilizatori",
 	"deleteUserGroup": "Șterge grupul de utilizatori",
 	"viewUserGroup": "Vezi grupul de utilizatori",
-	"changeQuantitativeRiskHypothesis": "Schimbă ipoteza de risc cantitativ",
-	"deleteQuantitativeRiskHypothesis": "Șterge ipoteza de risc cantitativ",
-	"viewQuantitativeRiskHypothesis": "Vezi ipoteza de risc cantitativ",
-	"changeQuantitativeRiskScenario": "Schimbă scenariul",
-	"deleteQuantitativeRiskScenario": "Șterge scenariul",
-	"viewQuantitativeRiskScenario": "Vezi scenariul",
-	"changeQuantitativeRiskStudy": "Schimbă studiul de risc cantitativ",
-	"deleteQuantitativeRiskStudy": "Șterge studiul de risc cantitativ",
-	"viewQuantitativeRiskStudy": "Vizualizați studiul de risc cantitativ",
 	"dueDateUpdatedSuccessfully": "Data limită a fost actualizată cu succes",
 	"taskScheduleInfo": "Aparițiile trecute sunt protejate împotriva schimbărilor de programare. Doar sarcinile viitoare vor fi recalculate.",
 	"info": "Informație",
@@ -1207,7 +1200,6 @@
 	"syncAppliedControlsMessage": "Controalele aplicate care utilizează acest control de referință vor fi sincronizate cu acesta. Vă rugăm să rețineți că această acțiune nu poate fi anulată.",
 	"syncToAppliedControl": "Sincronizează cu controlul aplicat",
 	"syncToReferenceControl": "Sincronizează cu controlul de referință",
-	"exportEcosystem": "export ecosistem (XLSX)",
 	"expirationDate": "Data expirării",
 	"vulnerabilitySlaPolicyHelpText": "Definiți numărul maxim de zile pentru remedierea unei vulnerabilități în funcție de severitate.",
 	"slaAnchor": "Data de început SLA",
@@ -1295,19 +1287,12 @@
 	"builderRequirementHint": "Evaluabil, poate avea copii",
 	"builderSplashScreen": "Ecran de prezentare",
 	"builderSplashScreenHint": "Prezentațional, neevaluabil",
-	"builderStatusLive": "În producție",
-	"builderStatusLiveTitle": "Schița corespunde cu ceea ce văd respondenții auditului.",
-	"builderStatusUnpublishedChanges": "Modificări nepublicate",
-	"builderStatusUnpublishedChangesTitle": "Schița conține modificări care nu sunt încă vizibile pentru respondenții auditului. Publicați pentru a le aplica.",
-	"builderStatusDraftNothingLive": "Schiță — nimic în producție",
-	"builderStatusDraftNothingLiveTitle": "Schița are conținut, dar nimic nu a fost publicat încă. Auditurile noi nu vor vedea nimic până când publicați.",
 	"builderStatusEmpty": "Gol",
 	"builderStatusEmptyTitle": "Încă nu există cerințe. Auditurile noi bazate pe acest cadru nu vor avea nimic de evaluat.",
 	"builderPreview": "Previzualizare",
 	"builderPreviewSaveFirst": "Salvați mai întâi schița pentru a previzualiza",
 	"builderPreviewAsRespondent": "Previzualizare ca respondent (se deschide într-o filă nouă)",
 	"builderExportYamlTitle": "Exportă cadrul ca fișier de bibliotecă YAML",
-	"builderExportYamlUnpublishedWarning": "Modificările nepublicate nu vor fi incluse. Publicați mai întâi pentru a exporta cele mai recente modificări.",
 	"builderCopyBase": "Copiază baza",
 	"builderCopyBaseTitle": "Copiază textul limbii de bază în {lang} (nu suprascrie traducerile existente)",
 	"builderCopyBaseQuestion": "Copiați textul de bază?",
@@ -1317,82 +1302,7 @@
 	"builderExpandAllCards": "Extinde toate cardurile",
 	"builderCollapseAllCards": "Restrânge toate cardurile",
 	"builderSaveFailed": "Salvarea a eșuat",
-	"builderPublishedFlash": "Publicat!",
 	"builderSaveDraftTitle": "Salvează schița (Ctrl+S)",
-	"builderDiscardDraftTitle": "Renunță la schiță",
-	"builderDiscard": "Renunță",
-	"builderDiscardAllChangesQuestion": "Renunțați la toate modificările?",
-	"builderYesDiscard": "Da, renunță",
-	"builderPublishDraftToLiveTitle": "Publică schița în cadrul de producție",
-	"builderPublishing": "Se publică...",
-	"builderPublishModalTitle": "Publică schița în producție",
-	"builderPublishModalDescription": "Această acțiune va actualiza cadrul de producție. Verificați modificările de mai jos.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} cerințe adăugate",
-				"countPlural=other": "{count} cerințe adăugate"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} întrebări",
-				"countPlural=other": "{count} întrebări"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} cerințe eliminate",
-				"countPlural=other": "{count} cerințe eliminate"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} întrebări",
-				"countPlural=other": "{count} întrebări"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Nu au fost detectate modificări structurale (numai metadate).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} modificări incompatibile detectate",
-				"countPlural=other": "{count} modificări incompatibile detectate"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Aceste modificări pot afecta calculul scorului, vizibilitatea sau rezultatele de conformitate în auditurile existente.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} audituri existente vor fi afectate",
-				"countPlural=other": "{count} audituri existente vor fi afectate"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Cerințe noi vor fi adăugate la aceste audituri.",
-	"builderAffectedAuditsRemovedHint": "Cerințele eliminate și datele lor de evaluare vor fi șterse din aceste audituri.",
-	"builderCouldNotLoadPreview": "Nu s-a putut încărca previzualizarea impactului. Continuați cu precauție.",
-	"builderConfirmPublish": "Confirmă publicarea",
 	"builderSearchNodes": "Caută noduri...",
 	"builderExpandSidebar": "Extinde bara laterală",
 	"builderCollapseSidebar": "Restrânge bara laterală",
@@ -1572,7 +1482,6 @@
 	"builderSplashNumberedList": "Listă numerotată",
 	"builderSplashLink": "Link",
 	"builderSplashTable": "Tabel",
-	"builderSplashInsertImage": "Inserează imagine",
 	"builderUntitledQuestion": "Întrebare fără titlu",
 	"builderNotTranslated": "Netradus",
 	"builderQuestionTextPlaceholder": "Introduceți întrebarea...",
@@ -1617,27 +1526,12 @@
 	"builderKbSaveDraft": "Salvează schița",
 	"builderKbShowCheatsheet": "Afișează acest memento",
 	"builderKbCloseDialog": "Închide dialogul",
-	"builderImportedFramework": "Cadru importat",
-	"builderImportedFrameworkDescription": "Acest cadru a fost importat dintr-o bibliotecă și nu poate fi editat direct. Pentru a face modificări, creați o copie editabilă.",
-	"builderCreateCopyAndEdit": "Creează copie și editează",
-	"builderCreatingCopy": "Se creează copia...",
-	"builderLoadingEditor": "Se încarcă editorul...",
-	"builderFailedToStartEditor": "Pornirea editorului a eșuat",
-	"builderBackToFramework": "Înapoi la cadru",
-	"builderBackToBuilder": "Înapoi la constructor",
-	"builderFailedToLoadDraft": "Încărcarea schiței a eșuat",
-	"builderImplementationGroupsHeader": "Grupuri de implementare",
-	"builderNoItemsToPreview": "Niciun element de previzualizat.",
-	"builderNoItemsToPreviewHint": "Adăugați cerințe evaluabile sau ecrane de prezentare în constructor.",
-	"builderBaseLanguageOption": "Limba de bază",
 	"builderFrameworkNameRequired": "Numele cadrului este obligatoriu.",
 	"builderFrameworkNameTooLong": "Numele cadrului are {length} caractere (max. 200).",
 	"builderNodeNameTooLong": "Numele depășește 200 de caractere ({length}/200). Mutați textul lung în câmpul de descriere.",
 	"builderRefIdTooLong": "'{label}': ref_id are {length} caractere (max. 100).",
 	"builderUrnTooLong": "'{label}': URN are {length} caractere (max. 255).",
-	"builderFailedToSaveDraftBeforePublish": "Salvarea schiței înainte de publicare a eșuat.",
 	"builderUnsavedChangesNavigation": "Aveți modificări nesalvate care vor fi pierdute. Părăsiți oricum?",
-	"builderUnpublishedChangesNavigation": "Aveți modificări nepublicate. Schița dvs. este salvată și o puteți relua mai târziu. Părăsiți oricum?",
 	"fieldVisibility": "Vizibilitatea câmpurilor",
 	"fieldVisibilityHelpText": "Controlați ce câmpuri poate vedea și edita fiecare rol.",
 	"visibilityAuditorRespondent": "Auditor + Respondent",
@@ -1670,7 +1564,6 @@
 	"mfaDisabledSuccessfully": "MFA a fost dezactivat pentru acest utilizator",
 	"errorDisablingMFA": "Nu s-a putut dezactiva MFA pentru acest utilizator",
 	"userHasNoMFAEnabled": "Acest utilizator nu are MFA activat",
-	"builderChangedOn": "modificat în",
 	"requirementWeight": "Pondere",
 	"scim": "SCIM",
 	"scimDescription": "Configurați provizionarea SCIM 2.0. Direcționați furnizorul de identitate către endpoint-ul de mai jos și autentificați-l cu un token bearer generat aici.",
@@ -1713,7 +1606,6 @@
 	"deactivateServiceAccountConfirm": "Dezactivarea acestui cont de serviciu va revoca imediat orice token de acces existent și va bloca emiterea altora noi. Continuați?",
 	"gracePeriod": "Perioadă de grație",
 	"gracePeriodHelpText": "Secretul curent continuă să funcționeze pe durata aceasta după rotire, astfel încât integrările să poată fi actualizate fără întrerupere. Limitat la 1 lună.",
-	"gracePeriodTooLong": "Perioada de grație nu poate depăși 1 lună.",
 	"previousSecretValidUntil": "Secretul anterior al clientului rămâne valid până la {date}.",
 	"enableJitProvisioning": "Activează provizionarea automată",
 	"enableJitProvisioningHelpText": "Creează automat un cont, cu grupurile de utilizatori implicite de mai jos, pentru utilizatorii care se autentifică prin SSO pentru prima dată.",

@@ -313,7 +313,6 @@
 	"plan": "Plan",
 	"asPDF": "como PDF",
 	"asCSV": "como CSV",
-	"asWord": "como Word",
 	"draft": "Borrador",
 	"riskMatrixView": "Vista de matriz de riesgos",
 	"currentInMatrixView": "Actual",
@@ -629,7 +628,6 @@
 	"noStatus": "Sin estado",
 	"actionPlanHelpText": "Separado por estado y ordenado por ETA",
 	"matchingRequirements": "Requisitos coincidentes",
-	"asZIP": "como ZIP",
 	"incoming": "Entrante",
 	"outdated": "Desactualizado",
 	"flashMode": "Modo destello",
@@ -790,6 +788,8 @@
 	"addRepresentative": "Agregar representante",
 	"phone": "Teléfono",
 	"role": "Role",
+	"defaultRole": "Rol predeterminado",
+	"defaultRoleHelpText": "Rol concedido automáticamente en este dominio a cualquier usuario con una asignación de rol en uno de sus subdominios.",
 	"questions": "Preguntas",
 	"recipientEntity": "Entidad destinataria",
 	"financial": "Finanzas",
@@ -835,7 +835,8 @@
 	"mailFailedToSend": "El correo no se pudo enviar",
 	"questionOrQuestions": "Preguntas)",
 	"successfullyUpdatedClientSettings": "La configuración del cliente se actualizó correctamente, actualice la página.",
-	"xRaysEmptyMessage": "Debes crear al menos un alcance para poder utilizar rayos X.",
+	"xRaysEmptyMessage": "No se ha detectado ningún problema. X-rays solo muestra los dominios con hallazgos.",
+	"xRaysLoadingError": "No se pudo completar el análisis de X-rays. Consulte los registros del servidor para más detalles.",
 	"suggestControls": "Sugerir controles",
 	"createAppliedControlsFromSuggestionsHelpText": "Crear controles aplicados a partir de los controles de referencia sugeridos por los requisitos del marco",
 	"createAppliedControlsFromSuggestionsSuccess": "Controles aplicados creados exitosamente a partir de los controles de referencia sugeridos",
@@ -1135,15 +1136,6 @@
 	"changeUserGroup": "Cambiar grupo de usuarios",
 	"deleteUserGroup": "Eliminar grupo de usuarios",
 	"viewUserGroup": "Ver grupo de usuarios",
-	"changeQuantitativeRiskHypothesis": "Cambiar hipótesis de riesgo cuantitativo",
-	"deleteQuantitativeRiskHypothesis": "Eliminar hipótesis de riesgo cuantitativo",
-	"viewQuantitativeRiskHypothesis": "Ver hipótesis de riesgo cuantitativo",
-	"changeQuantitativeRiskScenario": "Cambiar escenario",
-	"deleteQuantitativeRiskScenario": "Eliminar escenario",
-	"viewQuantitativeRiskScenario": "Ver escenario",
-	"changeQuantitativeRiskStudy": "Cambiar estudio de cuantificación de riesgos",
-	"deleteQuantitativeRiskStudy": "Eliminar estudio de cuantificación de riesgos",
-	"viewQuantitativeRiskStudy": "Ver estudio de cuantificación de riesgos",
 	"dueDateUpdatedSuccessfully": "Fecha de vencimiento actualizada con éxito",
 	"taskScheduleInfo": "Las ocurrencias pasadas están protegidas de cambios en el horario. Solo las tareas próximas se recalcularán.",
 	"acceptNotes": "Aceptar notas",
@@ -2312,7 +2304,6 @@
 	"deactivateServiceAccountConfirm": "Desactivar esta cuenta de servicio revocará inmediatamente todos los tokens de acceso actualmente emitidos e impedirá la emisión de nuevos tokens. ¿Continuar?",
 	"gracePeriod": "Período de gracia",
 	"gracePeriodHelpText": "El secreto actual sigue funcionando durante este tiempo tras la rotación, para que las integraciones puedan actualizarse sin interrupciones. Limitado a 1 mes.",
-	"gracePeriodTooLong": "El período de gracia no puede superar 1 mes.",
 	"previousSecretValidUntil": "El secreto de cliente anterior sigue siendo válido hasta el {date}.",
 	"personalAccessTokens": "Tokens de Acceso Personal",
 	"personalAccessTokensDescription": "Tokens que ha generado que se pueden usar para acceder a la API de CISO Assistant.",
@@ -3304,7 +3295,6 @@
 	"syncCweCatalog": "Obtener catálogo CWE de MITRE",
 	"syncCweCatalogFailed": "Error al obtener el catálogo CWE",
 	"syncToReferenceControl": "Sincronizar con el control de referencia",
-	"exportEcosystem": "exportación de ecosistema (XLSX)",
 	"average": "Promedio",
 	"boolean": "Booleano",
 	"close": "Cerrar",
@@ -3335,19 +3325,12 @@
 	"builderRequirementHint": "Evaluable, puede tener hijos",
 	"builderSplashScreen": "Pantalla de presentación",
 	"builderSplashScreenHint": "Presentacional, no evaluable",
-	"builderStatusLive": "En producción",
-	"builderStatusLiveTitle": "El borrador coincide con lo que ven los encuestados de la auditoría.",
-	"builderStatusUnpublishedChanges": "Cambios sin publicar",
-	"builderStatusUnpublishedChangesTitle": "El borrador tiene modificaciones que aún no son visibles para los encuestados de la auditoría. Publique para aplicarlas.",
-	"builderStatusDraftNothingLive": "Borrador — nada en producción",
-	"builderStatusDraftNothingLiveTitle": "El borrador tiene contenido pero nada se ha publicado aún. Las nuevas auditorías no verán nada hasta que publique.",
 	"builderStatusEmpty": "Vacío",
 	"builderStatusEmptyTitle": "Aún no hay requisitos. Las nuevas auditorías basadas en este marco no tendrán nada que evaluar.",
 	"builderPreview": "Vista previa",
 	"builderPreviewSaveFirst": "Guarde primero su borrador para poder previsualizar",
 	"builderPreviewAsRespondent": "Vista previa como encuestado (se abre en una pestaña nueva)",
 	"builderExportYamlTitle": "Exportar el marco como archivo de biblioteca YAML",
-	"builderExportYamlUnpublishedWarning": "Los cambios sin publicar no se incluirán. Publique primero para exportar las últimas modificaciones.",
 	"builderCopyBase": "Copiar base",
 	"builderCopyBaseTitle": "Copiar el texto del idioma base a {lang} (no sobrescribe las traducciones existentes)",
 	"builderCopyBaseQuestion": "¿Copiar el texto base?",
@@ -3357,82 +3340,7 @@
 	"builderExpandAllCards": "Expandir todas las tarjetas",
 	"builderCollapseAllCards": "Contraer todas las tarjetas",
 	"builderSaveFailed": "Error al guardar",
-	"builderPublishedFlash": "¡Publicado!",
 	"builderSaveDraftTitle": "Guardar borrador (Ctrl+S)",
-	"builderDiscardDraftTitle": "Descartar borrador",
-	"builderDiscard": "Descartar",
-	"builderDiscardAllChangesQuestion": "¿Descartar todos los cambios?",
-	"builderYesDiscard": "Sí, descartar",
-	"builderPublishDraftToLiveTitle": "Publicar el borrador al marco en producción",
-	"builderPublishing": "Publicando...",
-	"builderPublishModalTitle": "Publicar borrador en producción",
-	"builderPublishModalDescription": "Esta acción actualizará el marco en producción. Revise los cambios a continuación.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} requisito añadido",
-				"countPlural=other": "{count} requisitos añadidos"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} pregunta",
-				"countPlural=other": "{count} preguntas"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} requisito eliminado",
-				"countPlural=other": "{count} requisitos eliminados"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} pregunta",
-				"countPlural=other": "{count} preguntas"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "No se detectaron cambios estructurales (solo metadatos).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} cambio incompatible detectado",
-				"countPlural=other": "{count} cambios incompatibles detectados"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Estos cambios pueden afectar el cálculo de puntaje, la visibilidad o los resultados de cumplimiento en las auditorías existentes.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} auditoría existente se verá afectada",
-				"countPlural=other": "{count} auditorías existentes se verá afectada"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Se añadirán nuevos requisitos a estas auditorías.",
-	"builderAffectedAuditsRemovedHint": "Los requisitos eliminados y sus datos de evaluación se borrarán de estas auditorías.",
-	"builderCouldNotLoadPreview": "No se pudo cargar la vista previa de impacto. Proceda con precaución.",
-	"builderConfirmPublish": "Confirmar publicación",
 	"builderSearchNodes": "Buscar nodos...",
 	"builderExpandSidebar": "Expandir barra lateral",
 	"builderCollapseSidebar": "Contraer barra lateral",
@@ -3612,7 +3520,6 @@
 	"builderSplashNumberedList": "Lista numerada",
 	"builderSplashLink": "Enlace",
 	"builderSplashTable": "Tabla",
-	"builderSplashInsertImage": "Insertar imagen",
 	"builderUntitledQuestion": "Pregunta sin título",
 	"builderNotTranslated": "Sin traducir",
 	"builderQuestionTextPlaceholder": "Escriba su pregunta...",
@@ -3657,27 +3564,12 @@
 	"builderKbSaveDraft": "Guardar borrador",
 	"builderKbShowCheatsheet": "Mostrar este recordatorio",
 	"builderKbCloseDialog": "Cerrar diálogo",
-	"builderImportedFramework": "Marco importado",
-	"builderImportedFrameworkDescription": "Este marco se importó desde una biblioteca y no se puede editar directamente. Para realizar cambios, cree una copia editable.",
-	"builderCreateCopyAndEdit": "Crear copia y editar",
-	"builderCreatingCopy": "Creando copia...",
-	"builderLoadingEditor": "Cargando editor...",
-	"builderFailedToStartEditor": "Error al iniciar el editor",
-	"builderBackToFramework": "Volver al marco",
-	"builderBackToBuilder": "Volver al constructor",
-	"builderFailedToLoadDraft": "Error al cargar el borrador",
-	"builderImplementationGroupsHeader": "Grupos de implementación",
-	"builderNoItemsToPreview": "No hay elementos para previsualizar.",
-	"builderNoItemsToPreviewHint": "Añada requisitos evaluables o pantallas de presentación en el constructor.",
-	"builderBaseLanguageOption": "Idioma base",
 	"builderFrameworkNameRequired": "El nombre del marco es obligatorio.",
 	"builderFrameworkNameTooLong": "El nombre del marco tiene {length} caracteres (máx. 200).",
 	"builderNodeNameTooLong": "El nombre supera 200 caracteres ({length}/200). Mueva el texto largo al campo de descripción.",
 	"builderRefIdTooLong": "«{label}»: ref_id tiene {length} caracteres (máx. 100).",
 	"builderUrnTooLong": "«{label}»: URN tiene {length} caracteres (máx. 255).",
-	"builderFailedToSaveDraftBeforePublish": "Error al guardar el borrador antes de publicar.",
 	"builderUnsavedChangesNavigation": "Tiene cambios sin guardar que se perderán. ¿Salir de todos modos?",
-	"builderUnpublishedChangesNavigation": "Tiene cambios sin publicar. Su borrador está guardado y podrá retomarlo más tarde. ¿Salir de todos modos?",
 	"fieldVisibility": "Visibilidad de campos",
 	"fieldVisibilityHelpText": "Controle qué campos puede ver y editar cada rol.",
 	"visibilityAuditorRespondent": "Auditor + Encuestado",
@@ -3710,7 +3602,6 @@
 	"mfaDisabledSuccessfully": "Se ha desactivado MFA para este usuario",
 	"errorDisablingMFA": "No se pudo desactivar MFA para este usuario",
 	"userHasNoMFAEnabled": "Este usuario no tiene MFA habilitada",
-	"builderChangedOn": "modificado en",
 	"requirementWeight": "Peso",
 	"scim": "SCIM",
 	"scimDescription": "Configure el aprovisionamiento SCIM 2.0. Apunte su proveedor de identidad al endpoint de abajo y autentíquelo con un token de portador generado aquí.",

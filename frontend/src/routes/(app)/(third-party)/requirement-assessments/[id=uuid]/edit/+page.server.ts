@@ -254,6 +254,7 @@ export const actions: Actions = {
 			'is_score_overridden',
 			'documentation_score',
 			'observation',
+			'respondent_alignment',
 			'answers',
 			'evidences',
 			'applied_controls',

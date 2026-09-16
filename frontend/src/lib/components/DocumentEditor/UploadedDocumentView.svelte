@@ -2,6 +2,9 @@
 	import { m } from '$paraglide/messages';
 	import { invalidateAll, goto } from '$app/navigation';
 	import { LOCALE_MAP } from '$lib/utils/locales';
+	import { APPROVED_REVISION_STATUSES } from '$lib/utils/documentRevisions';
+	import { page } from '$app/state';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import {
 		getModalStore,
@@ -56,6 +59,25 @@
 	};
 
 	let status = $derived(currentRevision?.status as string | undefined);
+	// RBACPermissions maps POST to add_<model>, hence add_documentrevision here.
+	let canTransition = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'add',
+			model: 'documentrevision',
+			object: currentRevision ?? document ?? parent
+		})
+	);
+	// Deletes the whole locale variant, not a revision.
+	let canDeleteDocument = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'delete',
+			model: 'manageddocument',
+			object: document ?? parent
+		})
+	);
+
 	let isDraft = $derived(status === 'draft' || status === 'change_requested');
 	let isInReview = $derived(status === 'in_review');
 	let isValidated = $derived(status === 'validated');
@@ -178,7 +200,10 @@
 				method: 'DELETE'
 			});
 			if (res.ok) await goto(backHref);
-			else notifyError(m.deleteFailed());
+			else {
+				const data = await res.json().catch(() => null);
+				notifyError(data?.detail || data?.error || m.deleteFailed());
+			}
 		} finally {
 			busy = false;
 		}
@@ -321,31 +346,53 @@
 		<div class="flex flex-wrap items-center gap-2 border-t border-surface-200-800 pt-4">
 			<input type="file" class="hidden" bind:this={fileInput} onchange={onFilePicked} />
 			{#if isDraft}
-				<button class="btn btn-sm preset-tonal" disabled={busy} onclick={() => fileInput?.click()}>
+				<button
+					class="btn btn-sm preset-tonal"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={() => fileInput?.click()}
+				>
 					<i class="fa-solid fa-file-arrow-up mr-2"></i>{m.replaceFile()}
 				</button>
 				<button
 					class="btn btn-sm preset-filled-primary-500"
-					disabled={busy}
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
 					onclick={submitForReview}
 				>
 					{m.submitForReview()}
 				</button>
 			{:else if isInReview}
-				<button class="btn btn-sm preset-filled-success-500" disabled={busy} onclick={approve}>
+				<button
+					class="btn btn-sm preset-filled-success-500"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={approve}
+				>
 					{m.approve()}
 				</button>
-				<button class="btn btn-sm preset-tonal-error" disabled={busy} onclick={requestChanges}>
+				<button
+					class="btn btn-sm preset-tonal-error"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={requestChanges}
+				>
 					{m.requestChanges()}
 				</button>
 			{:else if isValidated}
-				<button class="btn btn-sm preset-filled-success-500" disabled={busy} onclick={publish}>
+				<button
+					class="btn btn-sm preset-filled-success-500"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={publish}
+				>
 					{m.publish()}
 				</button>
 			{:else if isPublished}
 				<button
 					class="btn btn-sm preset-filled-primary-500"
-					disabled={busy}
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
 					onclick={() => fileInput?.click()}
 				>
 					<i class="fa-solid fa-file-arrow-up mr-2"></i>{m.uploadNewVersion()}
@@ -353,7 +400,8 @@
 			{/if}
 			<button
 				class="btn btn-sm preset-tonal-error ml-auto"
-				disabled={busy}
+				disabled={busy || !canDeleteDocument}
+				title={canDeleteDocument ? undefined : m.permissionDenied()}
 				onclick={deleteDocument}
 			>
 				<i class="fa-solid fa-trash mr-2"></i>{m.delete()}
@@ -372,7 +420,15 @@
 			>
 				{#each revisions as rev (rev.id)}
 					<li class="flex items-center justify-between gap-2 px-4 py-2.5 text-sm">
-						<span>v{rev.version_number} · {rev.status_display ?? rev.status}</span>
+						<span class="min-w-0">
+							v{rev.version_number} · {rev.status_display ?? rev.status}
+							{#if rev.reviewer && APPROVED_REVISION_STATUSES.includes(rev.status)}
+								<span class="block truncate text-xs text-surface-500">
+									<i class="fa-solid fa-circle-check text-[9px] opacity-70"></i>
+									{m.approvedBy()}: {rev.reviewer.str || rev.reviewer.email || ''}
+								</span>
+							{/if}
+						</span>
 						{#if rev.file || rev.source === 'uploaded'}
 							<a
 								href={fileUrl(rev)}

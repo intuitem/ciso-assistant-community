@@ -770,7 +770,6 @@
 	"linkHelpText": "Externá adresa URL na sledovanie alebo referenciu (napr. ITSM, sharepoint, jira atď.)",
 	"effortHelpText": "Úsilie potrebné na implementáciu implementovaného opatrenia",
 	"costHelpText": "náklady potrebné na implementáciu implementovaného opatrenia",
-	"riskAcceptanceJusitficationHelpText": "Odôvodnenie prijatia rizika. Toto pole môže upravovať iba schvaľovateľ.",
 	"approverHelpText": "Identita vlastníka rizika a schvaľovateľa",
 	"riskAcceptanceRiskScenariosHelpText": "Rizikové scenáre, ktoré sú akceptované",
 	"attachmentHelpText": "Súbor dôkazov (napr. snímka obrazovky, súbor denníka atď.). Po výbere môžete snímky obrazovky prilepiť priamo zo schránky.",
@@ -1233,6 +1232,8 @@
 	"removeIdentifier": "Odstrániť identifikátor",
 	"phone": "Telefón",
 	"role": "Rola používateľa",
+	"defaultRole": "Predvolená rola",
+	"defaultRoleHelpText": "Rola, ktorá sa automaticky udeľuje v tejto doméne každému používateľovi s priradením role v niektorej z jej subdomén.",
 	"questions": "Otázky",
 	"recipientEntity": "Cieľový subjekt",
 	"financial": "Finančné",
@@ -1280,7 +1281,8 @@
 	"mailFailedToSend": "E-mail sa nepodarilo odoslať",
 	"questionOrQuestions": "otázka(y)",
 	"successfullyUpdatedClientSettings": "Nastavenia klienta boli úspešne aktualizované, obnovte stránku.",
-	"xRaysEmptyMessage": "Ak chcete použiť diagnostiku, musíte vytvoriť aspoň jeden rozsah hodnotenia.",
+	"xRaysEmptyMessage": "Nezistil sa žiadny problém. Diagnostika zobrazuje iba organizačné oblasti so zisteniami.",
+	"xRaysLoadingError": "Diagnostiku sa nepodarilo dokončiť. Podrobnosti nájdete v protokoloch servera.",
 	"xRaysLoadingData": "Prebieha analýza údajov...",
 	"xRaysIssueType": "Typ problému",
 	"xRaysIssueTypes": "Typy problémov",
@@ -1398,7 +1400,6 @@
 	"questionPlural": "Otázky",
 	"fillMetadataURL": "Možnosť 1: Vyplňte webovú adresu metadát (vyžaduje pripojenie od inštancie k IdP)",
 	"fillSSOSLOURLx509cert": "Možnosť 2: Vyplňte adresu URL SSO, URL SLO a x509cert (žiadne spojenie medzi inštanciou a IdP)",
-	"licenseAboutToExpireWarning": "Do konca platnosti licencie máte už len {days_left} dní.",
 	"proof": "Dôkaz",
 	"privacy": "Ochrana osobných údajov",
 	"safety": "Bezpečnosť",
@@ -2382,7 +2383,6 @@
 	"deactivateServiceAccountConfirm": "Deaktivácia tohto servisného účtu okamžite zruší všetky nevybavené prístupové tokeny a zablokuje vydávanie nových. Pokračovať?",
 	"gracePeriod": "Ochranná lehota",
 	"gracePeriodHelpText": "Súčasný tajný kľúč funguje ešte tento čas aj po otočení, aby bolo možné integrácie aktualizovať bez výpadku. Obmedzené na 1 mesiac.",
-	"gracePeriodTooLong": "Ochranná lehota nesmie byť dlhšia ako 1 mesiac.",
 	"previousSecretValidUntil": "Predchádzajúci tajný kľúč klienta zostáva platný do {date}.",
 	"expiresOn": "Platnosť vyprší {date}",
 	"expiresIn": "Platnosť vyprší",
@@ -4456,19 +4456,12 @@
 	"builderRequirementHint": "Hodnotiteľná položka, ktorá môže obsahovať podriadené uzly.",
 	"builderSplashScreen": "Úvodná obrazovka",
 	"builderSplashScreenHint": "Prezentačný obsah, ktorý sa nehodnotí.",
-	"builderStatusLive": "Publikované",
-	"builderStatusLiveTitle": "Návrh zodpovedá tomu, čo vidia respondenti auditu.",
-	"builderStatusUnpublishedChanges": "Nezverejnené zmeny",
-	"builderStatusUnpublishedChangesTitle": "Návrh obsahuje zmeny, ktoré zatiaľ nie sú viditeľné pre respondentov auditu. Publikujte ich a použite.",
-	"builderStatusDraftNothingLive": "Návrh — zatiaľ bez publikovaného obsahu",
-	"builderStatusDraftNothingLiveTitle": "Návrh má obsah, ale zatiaľ nič nebolo zverejnené. Nové audity neuvidia nič, kým ich nezverejníte.",
 	"builderStatusEmpty": "Prázdny",
 	"builderStatusEmptyTitle": "Zatiaľ žiadne požiadavky. Nové audity postavené na tomto rámci nebudú mať na čo odpovedať.",
 	"builderPreview": "Ukážka",
 	"builderPreviewSaveFirst": "Ak chcete zobraziť ukážku, najprv uložte koncept",
 	"builderPreviewAsRespondent": "Zobraziť ukážku ako respondent (otvorí sa na novej karte)",
 	"builderExportYamlTitle": "Exportujte rámec ako súbor knižnice YAML",
-	"builderExportYamlUnpublishedWarning": "Nezverejnené zmeny nebudú zahrnuté. Ak chcete exportovať najnovšie úpravy, najprv publikujte.",
 	"builderCopyBase": "Skopírovať zo základného jazyka",
 	"builderCopyBaseTitle": "Skopírovať text zo základného jazyka do jazyka {lang} (existujúce preklady zostanú zachované)",
 	"builderCopyBaseQuestion": "Skopírovať text zo základného jazyka?",
@@ -4478,88 +4471,7 @@
 	"builderExpandAllCards": "Rozbaľte všetky karty",
 	"builderCollapseAllCards": "Zbaliť všetky karty",
 	"builderSaveFailed": "Uloženie zlyhalo",
-	"builderPublishedFlash": "Zverejnené",
 	"builderSaveDraftTitle": "Uložiť koncept (Ctrl+S)",
-	"builderDiscardDraftTitle": "Zahodiť koncept",
-	"builderDiscard": "Zahodiť",
-	"builderDiscardAllChangesQuestion": "Zahodiť všetky zmeny?",
-	"builderYesDiscard": "Áno, zahodiť",
-	"builderPublishDraftToLiveTitle": "Publikovať koncept do živého rámca",
-	"builderPublishing": "Zverejňuje sa...",
-	"builderPublishModalTitle": "Zverejniť koncept naživo",
-	"builderPublishModalDescription": "Tým sa aktualizuje živý rámec. Preskúmať zmeny uvedené nižšie.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "Pridaná {count} požiadavka",
-				"countPlural=few": "Pridané {count} požiadavky",
-				"countPlural=other": "Pridaných {count} požiadaviek"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} otázka",
-				"countPlural=few": "{count} otázky",
-				"countPlural=other": "{count} otázok"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "Odstránená {count} požiadavka",
-				"countPlural=few": "Odstránené {count} požiadavky",
-				"countPlural=other": "Odstránených {count} požiadaviek"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} otázka",
-				"countPlural=few": "{count} otázky",
-				"countPlural=other": "{count} otázok"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Nezistili sa žiadne štrukturálne zmeny (iba metaúdaje).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "Zistená {count} nekompatibilná zmena",
-				"countPlural=few": "Zistené {count} nekompatibilné zmeny",
-				"countPlural=other": "Zistených {count} nekompatibilných zmien"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Tieto zmeny môžu ovplyvniť bodovanie, viditeľnosť alebo výsledky zhody v existujúcich auditoch.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "Ovplyvnený bude {count} existujúci audit",
-				"countPlural=few": "Ovplyvnené budú {count} existujúce audity",
-				"countPlural=other": "Ovplyvnených bude {count} existujúcich auditov"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "K týmto auditom budú pridané nové požiadavky.",
-	"builderAffectedAuditsRemovedHint": "Odstránené požiadavky a ich hodnotiace údaje budú z týchto auditov vymazané.",
-	"builderCouldNotLoadPreview": "Nepodarilo sa načítať náhľad analýzy dopadu. Pokračujte opatrne.",
-	"builderConfirmPublish": "Potvrďte zverejnenie",
 	"builderSearchNodes": "Hľadať uzly...",
 	"builderExpandSidebar": "Rozbaliť bočný panel",
 	"builderCollapseSidebar": "Zbaliť bočný panel",
@@ -4745,7 +4657,6 @@
 	"builderSplashNumberedList": "Číslovaný zoznam",
 	"builderSplashLink": "Odkaz",
 	"builderSplashTable": "Tabuľka",
-	"builderSplashInsertImage": "Vložte obrázok",
 	"builderUntitledQuestion": "Otázka bez názvu",
 	"builderNotTranslated": "Nepreložené",
 	"builderQuestionTextPlaceholder": "Zadajte svoju otázku...",
@@ -4791,27 +4702,12 @@
 	"builderKbSaveDraft": "Uložiť koncept",
 	"builderKbShowCheatsheet": "Ukáž tento cheat",
 	"builderKbCloseDialog": "Zatvorte dialógové okno alebo rozbaľovaciu ponuku",
-	"builderImportedFramework": "Importovaný rámec",
-	"builderImportedFrameworkDescription": "Tento rámec bol importovaný z knižnice a nemožno ho priamo upravovať. Ak chcete vykonať zmeny, vytvorte upraviteľnú kópiu.",
-	"builderCreateCopyAndEdit": "Vytvoriť kópiu a upravte",
-	"builderCreatingCopy": "Vytvára sa kópia...",
-	"builderLoadingEditor": "Načítava sa editor...",
-	"builderFailedToStartEditor": "Nepodarilo sa spustiť editor",
-	"builderBackToFramework": "Späť na rámec",
-	"builderBackToBuilder": "Späť k staviteľovi",
-	"builderFailedToLoadDraft": "Koncept sa nepodarilo načítať",
-	"builderImplementationGroupsHeader": "implementačné skupiny",
-	"builderNoItemsToPreview": "Žiadne položky na zobrazenie ukážky.",
-	"builderNoItemsToPreviewHint": "Pridať hodnotiteľné požiadavky alebo úvodné obrazovky v nástroji Builder.",
-	"builderBaseLanguageOption": "Základný jazyk",
 	"builderFrameworkNameRequired": "Vyžaduje sa názov rámca.",
 	"builderFrameworkNameTooLong": "Názov rámca je {length} znakov (max. 200).",
 	"builderNodeNameTooLong": "Názov presahuje 200 znakov ({length}/200). Presuňte dlhý text do poľa popisu.",
 	"builderRefIdTooLong": "'{label}': ref_id je {length} znakov (max. 100).",
 	"builderUrnTooLong": "'{label}': URN má {length} znakov (max. 255).",
-	"builderFailedToSaveDraftBeforePublish": "Koncept pred zverejnením sa nepodarilo uložiť.",
 	"builderUnsavedChangesNavigation": "Máte neuložené zmeny, ktoré sa stratia. Napriek tomu odísť?",
-	"builderUnpublishedChangesNavigation": "Máte nezverejnené zmeny. Váš koncept sa uloží a môžete v ňom pokračovať neskôr. Napriek tomu odísť?",
 	"bulkEvidenceUpload": "Hromadné nahrávanie dôkazov",
 	"bulkEvidenceUploadDescription": "Nahrajte viacero súborov (alebo celý adresár) ako dôkazy naraz. Duplicitné súbory (rovnaký SHA-256 v cieľovej oblasti) sú detekované automaticky. Kolízie mien sa riešia podľa stratégie, ktorú si vyberiete nižšie.",
 	"targetDomain": "Cieľová Organizačná oblasť",
@@ -4882,7 +4778,6 @@
 	"builderQuestionTypeUniqueChoice": "Jedna možnosť",
 	"builderQuestionTypeMultipleChoice": "Viac možností",
 	"builderQuestionTypeDate": "Dátum",
-	"builderChangedOn": "Zmenené",
 	"riskAcceptanceJustificationHelpText": "Odôvodnenie akceptácie rizika. Toto pole môže upravovať iba schvaľovateľ.",
 	"riskAcceptanceJustificationLabel": "Odôvodnenie akceptácie rizika",
 	"project": "Projekt",
@@ -5048,7 +4943,6 @@
 	"auditTreeInheritanceDescription": "Kombinovať výsledky auditu s auditmi nadradených domén pre rovnaký rámec.",
 	"atLeastOneColumnRequired": "Musí zostať zobrazený aspoň jeden stĺpec",
 	"hidden": "Skryté",
-
 	"complianceDescription": "Vykonávajte audity, kampane a analýzy súvisiace s auditmi.",
 	"riskManagement": "Riadenie rizík",
 	"riskManagementDescription": "Posudzujte a ošetrujte riziká naprieč scenármi, zraniteľnosťami a dopadmi.",
@@ -5082,6 +4976,7 @@
 	"downloadExcelTemplate": "Stiahnuť šablónu Excel",
 	"frameworkActionsHelp": "Šablóna Excel je určená pre tretie strany alebo externé subjekty na offline vyplnenie a následný import výsledkov prostredníctvom {dataWizard}.",
 	"customFields": "Vlastné polia",
+	"customFieldsLoadError": "Vlastné polia sa nepodarilo načítať. Znova vyberte organizačnú oblasť alebo znova otvorte formulár a skúste to znova.",
 	"customFieldsDescription": "Definujte vlastné typované a filtrovateľné polia objektov (projekty, aktíva a implementované opatrenia).",
 	"customField": "Vlastné pole",
 	"addCustomField": "Pridať vlastné pole",
@@ -5168,20 +5063,6 @@
 	"generateReport": "Vygenerovať report",
 	"aboutReports": "Reporty",
 	"aboutReportsDescription": "Reporty poskytujú jednoduché nástroje na vytváranie špecializovaných výstupov určených na získanie kľúčových informácií alebo na splnenie požiadaviek orgánov podľa konkrétnych štandardov.\nĎalšie špecializované funkcie budú postupne dopĺňané podľa identifikovaných potrieb.",
-	"builderFixValidationErrorsBeforePublish": "Niektoré položky obsahujú validačné chyby. Pred publikovaním opravte zvýraznené polia.",
-	"builderPublishedWithWarnings": "Publikované s upozorneniami:",
-	"builderChangeTypeRequirement": "požiadavka",
-	"builderChangeTypeQuestion": "otázka",
-	"builderChangeTypeChoice": "možnosť odpovede",
-	"builderFieldLabelAssessable": "Hodnotiteľné",
-	"builderFieldLabelWeight": "Váha hodnotenia",
-	"builderFieldLabelImplementationGroups": "Skupiny implementácie",
-	"builderFieldLabelVisibilityExpression": "Podmienka zobrazenia",
-	"builderFieldLabelType": "Typ otázky",
-	"builderFieldLabelDependsOn": "Podmienené zobrazenie",
-	"builderFieldLabelAddScore": "Príspevok k hodnoteniu",
-	"builderFieldLabelComputeResult": "Započítať do výsledku",
-	"builderFieldLabelSelectImplementationGroups": "Vyberá implementačné skupiny",
 	"decisionNotes": "Poznámky k rozhodnutiu",
 	"idpGroup": "Skupina IdP",
 	"idpGroups": "Skupiny IdP",

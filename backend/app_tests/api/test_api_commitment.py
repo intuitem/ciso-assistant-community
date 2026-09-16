@@ -729,8 +729,8 @@ class TestRegister:
         `transition_commitment` that was refused here got a panel claiming
         "not started" next to a commitment row saying otherwise.
 
-        On a task template rather than a control: `is_published` is False there, so
-        the permission layer does not short-circuit GET to a readability check.
+        Uses a task template rather than a control so the read is decided by the
+        caller's own role on the domain, not by any ambient visibility.
         """
         domain = setup["domain"]
         task = TaskTemplate.objects.create(name="Read me", folder=domain)

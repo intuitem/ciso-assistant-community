@@ -29,7 +29,14 @@ export function localeLabel(code: string): string {
 // Only `number` and `unique_choice` have a slider variant — this is enforced by
 // the discriminated union below.
 export type NativeStoredType =
-	'text' | 'boolean' | 'number' | 'unique_choice' | 'multiple_choice' | 'date';
+	| 'text'
+	| 'boolean'
+	| 'number'
+	| 'unique_choice'
+	| 'multiple_choice'
+	| 'date'
+	| 'file'
+	| 'object_reference';
 export type SliderStoredType = Extract<NativeStoredType, 'number' | 'unique_choice'>;
 
 interface BaseQuestionTypeInfo {
@@ -139,8 +146,44 @@ export const QUESTION_TYPES: readonly QuestionTypeInfo[] = [
 		},
 		icon: 'fa-calendar',
 		color: 'text-amber-600 bg-amber-50'
+	},
+	// Row 5 — answered by uploading rather than by writing a value. The files hang
+	// off the answer and a reviewer may later promote one to evidence.
+	{
+		value: 'file',
+		storedType: 'file',
+		widget: 'native',
+		get label() {
+			return m.builderQuestionTypeFile();
+		},
+		icon: 'fa-paperclip',
+		color: 'text-amber-600 bg-amber-50'
+	},
+	// Row 6 — points at something already in the platform, so an approved request can
+	// produce an object attached to what it concerns rather than an orphan record.
+	{
+		value: 'object_reference',
+		storedType: 'object_reference',
+		widget: 'native',
+		get label() {
+			return m.builderQuestionTypeObjectReference();
+		},
+		icon: 'fa-link',
+		color: 'text-teal-600 bg-teal-50'
 	}
 ];
+
+/** What an object-reference question may point at. Mirrors REFERENCEABLE in
+ *  `core/object_references.py` — widening it there is a deliberate decision, because it
+ *  is what a requester with no rights on the domain gets to enumerate. */
+export const REFERENCEABLE_MODELS = [
+	'applied_control',
+	'asset',
+	'risk_scenario',
+	'vulnerability',
+	'perimeter',
+	'entity'
+] as const;
 
 /** Map from composite value to Font Awesome icon class. */
 export const TYPE_ICONS: Record<string, string> = Object.fromEntries(
@@ -173,6 +216,10 @@ export function inferVariant(question: {
 export function defaultConfigFor(variant: string): Record<string, unknown> | null {
 	if (variant === 'number:slider') return { widget: 'slider', min: 0, max: 100, step: 1 };
 	if (variant === 'unique_choice:slider') return { widget: 'slider' };
+	// One 10 MB file unless the author says otherwise. Enforced server-side in
+	// `answer_attachments.validate_upload`; `accept` is only a hint to the browser.
+	if (variant === 'file') return { multiple: false, max_files: 1, max_size_mb: 10 };
+	if (variant === 'object_reference') return { model: 'applied_control', multiple: false };
 	return null;
 }
 

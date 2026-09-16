@@ -23,7 +23,6 @@ def cel_setup(db):
     fw = Framework.objects.create(
         name="CEL Test Framework",
         folder=folder,
-        is_published=True,
         min_score=0,
         max_score=100,
         outcomes_definition=[
@@ -53,7 +52,6 @@ def cel_setup(db):
         ref_id="CEL-001",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     rn2 = RequirementNode.objects.create(
         framework=fw,
@@ -61,7 +59,6 @@ def cel_setup(db):
         ref_id="CEL-002",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     perimeter = Perimeter.objects.create(name="CEL Perim", folder=folder)
     ca = ComplianceAssessment.objects.create(
@@ -69,7 +66,6 @@ def cel_setup(db):
         framework=fw,
         folder=folder,
         perimeter=perimeter,
-        is_published=True,
         min_score=0,
         max_score=100,
     )
@@ -153,7 +149,6 @@ class TestBuildCelContext:
         fw = Framework.objects.create(
             name="IG Framework",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -164,7 +159,6 @@ class TestBuildCelContext:
             assessable=True,
             implementation_groups=["group_a"],
             folder=folder,
-            is_published=True,
         )
         RequirementNode.objects.create(
             framework=fw,
@@ -173,7 +167,6 @@ class TestBuildCelContext:
             assessable=True,
             implementation_groups=["group_b"],
             folder=folder,
-            is_published=True,
         )
         perimeter = Perimeter.objects.create(name="IG Perim", folder=folder)
         ca = ComplianceAssessment.objects.create(
@@ -181,7 +174,6 @@ class TestBuildCelContext:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
             selected_implementation_groups=["group_a"],
@@ -202,7 +194,6 @@ class TestBuildCelContext:
         fw = Framework.objects.create(
             name="Missing RA Framework",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -212,7 +203,6 @@ class TestBuildCelContext:
             ref_id="MISS-001",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         perimeter = Perimeter.objects.create(name="Miss Perim", folder=folder)
         ca = ComplianceAssessment.objects.create(
@@ -220,7 +210,6 @@ class TestBuildCelContext:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -355,7 +344,6 @@ class TestEvaluateOutcomes:
         fw = Framework.objects.create(
             name="No Match FW",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
             outcomes_definition=[
@@ -368,7 +356,6 @@ class TestEvaluateOutcomes:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -439,7 +426,6 @@ class TestVisibilityExpression:
         fw = Framework.objects.create(
             name="Vis FW",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -449,7 +435,6 @@ class TestVisibilityExpression:
             ref_id="VIS-001",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         rn_hidden = RequirementNode.objects.create(
             framework=fw,
@@ -458,7 +443,6 @@ class TestVisibilityExpression:
             assessable=True,
             visibility_expression="false",
             folder=folder,
-            is_published=True,
         )
         perimeter = Perimeter.objects.create(name="Vis Perim", folder=folder)
         ca = ComplianceAssessment.objects.create(
@@ -466,7 +450,6 @@ class TestVisibilityExpression:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -503,7 +486,6 @@ class TestVisibilityExpression:
         fw = Framework.objects.create(
             name="Fail Open FW",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -514,7 +496,6 @@ class TestVisibilityExpression:
             assessable=True,
             visibility_expression="!!!invalid CEL!!!",
             folder=folder,
-            is_published=True,
         )
         perimeter = Perimeter.objects.create(name="FO Perim", folder=folder)
         ca = ComplianceAssessment.objects.create(
@@ -522,7 +503,6 @@ class TestVisibilityExpression:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -545,7 +525,6 @@ class TestVisibilityExpression:
         fw = Framework.objects.create(
             name="Cross Ref FW",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -555,7 +534,6 @@ class TestVisibilityExpression:
             ref_id="XREF-DRIVER",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         rn_dependent = RequirementNode.objects.create(
             framework=fw,
@@ -564,7 +542,6 @@ class TestVisibilityExpression:
             assessable=True,
             visibility_expression='requirements["driver"].score > 50',
             folder=folder,
-            is_published=True,
         )
         perimeter = Perimeter.objects.create(name="XRef Perim", folder=folder)
         ca = ComplianceAssessment.objects.create(
@@ -572,7 +549,6 @@ class TestVisibilityExpression:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -605,7 +581,6 @@ class TestVisibilityExpression:
         fw = Framework.objects.create(
             name="Cycle FW",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -616,7 +591,6 @@ class TestVisibilityExpression:
             assessable=True,
             visibility_expression='requirements["b"].score > 50',
             folder=folder,
-            is_published=True,
         )
         rn_b = RequirementNode.objects.create(
             framework=fw,
@@ -625,7 +599,6 @@ class TestVisibilityExpression:
             assessable=True,
             visibility_expression='requirements["a"].score > 50',
             folder=folder,
-            is_published=True,
         )
         perimeter = Perimeter.objects.create(name="Cyc Perim", folder=folder)
         ca = ComplianceAssessment.objects.create(
@@ -633,7 +606,6 @@ class TestVisibilityExpression:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -710,7 +682,6 @@ class TestCelTrigger:
                     ref_id="CEL-NEW",
                     assessable=True,
                     folder=cel_setup["folder"],
-                    is_published=True,
                 ),
                 folder=cel_setup["folder"],
             )
