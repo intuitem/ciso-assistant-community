@@ -5,7 +5,8 @@ name: Evidence collection — pull a recurring task's evidence from a tool
 description: 'A recurring task expects an evidence every week. Instead of someone downloading the export
   and uploading it by hand, this pulls the file from the tool on a schedule, files it as a new revision
   and pins it to the occurrence that asked for it, so the task shows its evidence as provided. After
-  importing: set evidence_name and export_url, and add the tool_token secret.'
+  importing: set task_template_id (the id in the task''s URL), evidence_name and export_url, and add
+  the tool_token secret.'
 copyright: © intuitem
 version: 1
 publication_date: 2026-09-16
@@ -17,14 +18,21 @@ objects:
     schema_version: 1
     ref_id: evidence-collection
     name: Evidence collection — pull a recurring task's evidence from a tool
-    description: 'Every Monday: find the oldest pending occurrence of a task, download this week''s export,
-      file it as a new revision of the expected evidence and pin it to that occurrence. The evidence moves
-      to In review, because a file nobody has looked at yet is not an approved one.'
+    description: 'Every Monday: find the oldest pending occurrence of one named task, download this week''s
+      export, file it as a new revision of the expected evidence and pin it to that occurrence. The evidence
+      moves to In review, because a file nobody has looked at yet is not an approved one.'
     requires:
       secrets:
       - tool_token
     graph:
       variables:
+      # Required. Without it the lookup would take the oldest pending occurrence
+      # of ANY task in the domain, which looks right until a second recurring
+      # task exists. Left empty the run stops on "invalid filter value" rather
+      # than collecting against the wrong task.
+      - key: task_template_id
+        type: string
+        default_value: ''
       - key: evidence_name
         type: string
         default_value: Weekly export
@@ -58,6 +66,9 @@ objects:
           filters:
             operator: and
             conditions:
+            - field: task_template
+              op: eq
+              value: '{{task_template_id}}'
             - field: status
               op: eq
               value: pending

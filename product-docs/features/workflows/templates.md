@@ -47,7 +47,7 @@ Every template follows the same rules:
 | Domain onboarding pack | Manual | Creates a domain with default groups, provisions a user, adds them to the analyst group. Fill the variables and run it per new team. |
 | Third party added, start its assessment | Entity created | Creates an entity assessment for the new third party. |
 | Third party added, tiered due diligence | Entity created | Branches on dependency. Critical gets the full questionnaire and two weeks, the rest the core implementation group and six weeks. Uses Date offset. |
-| Evidence collection, pull a recurring task's evidence from a tool | Schedule | Every Monday, finds the oldest pending occurrence of a task, downloads this week's export and files it as a new revision pinned to that occurrence, so the task shows its evidence as provided. Set `evidence_name` and `export_url`, add the `tool_token` secret. |
+| Evidence collection, pull a recurring task's evidence from a tool | Schedule | Every Monday, finds the oldest pending occurrence of one named task, downloads this week's export and files it as a new revision pinned to that occurrence, so the task shows its evidence as provided. Set `task_template_id` (the id in the task's URL), `evidence_name` and `export_url`, add the `tool_token` secret. |
 | External report, download it and file it as evidence | Webhook | Downloads a file from a base URL you control plus a caller-supplied path, attaches it to a new evidence. |
 | Personal access token created, notify security | Token created | Notice whenever a long-lived credential is minted. |
 | Read-only explorer | Manual | Reads a few applied controls and logs them. Touches nothing. The safest first Execute. |
