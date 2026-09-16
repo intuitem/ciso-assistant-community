@@ -27,6 +27,7 @@ from django.db.models import (
     FloatField,
     ForeignKey,
     IntegerField,
+    Max,
     Model,
     Q,
     UUIDField,
@@ -52,7 +53,10 @@ from core.models import (
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
+    TaskNode,
+    TaskTemplate,
     Terminology,
+    TimelineEntry,
     SecurityException,
     ValidationFlow,
     Vulnerability,
@@ -66,9 +70,10 @@ from privacy.models import (
     PersonalData,
     Processing,
     Purpose,
+    RightRequest,
 )
 from resilience.models import AssetAssessment, BusinessImpactAnalysis
-from tprm.models import Entity, EntityAssessment
+from tprm.models import Entity, EntityAssessment, EntityScore
 
 from .context import RESERVED_VARIABLE_KEYS, VARIABLE_KEY_RE, temporal_seeds
 from .models import WorkflowToken
@@ -364,6 +369,7 @@ CREATABLE_MODELS = {
         # Never the ratings or the treatment: those are the analyst's.
         "fields": ["name", "description", "ref_id"],
         "fk_fields": {"risk_assessment": (RiskAssessment, "risk-assessments")},
+        "folder_from": "risk_assessment",
     },
     "risk_assessment": {
         "model": RiskAssessment,
@@ -408,6 +414,7 @@ CREATABLE_MODELS = {
         "model": Purpose,
         "fields": ["name", "description", "legal_basis", "article_9_condition"],
         "fk_fields": {"processing": (Processing, "processings")},
+        "folder_from": "processing",
     },
     "personal_data": {
         "model": PersonalData,
@@ -423,16 +430,21 @@ CREATABLE_MODELS = {
             # Resolves among this field's own categories, by name or id.
             "category": (Terminology, "terminologies"),
         },
+        "folder_from": "processing",
     },
     "data_subject": {
         "model": DataSubject,
         "fields": ["name", "description", "category"],
         "fk_fields": {"processing": (Processing, "processings")},
+        "required_fields": ["category"],
+        "folder_from": "processing",
     },
     "data_recipient": {
         "model": DataRecipient,
         "fields": ["name", "description", "category"],
         "fk_fields": {"processing": (Processing, "processings")},
+        "required_fields": ["category"],
+        "folder_from": "processing",
     },
     "data_contractor": {
         "model": DataContractor,
@@ -447,6 +459,8 @@ CREATABLE_MODELS = {
             "processing": (Processing, "processings"),
             "entity": (Entity, "entities"),
         },
+        "required_fields": ["relationship_type", "country"],
+        "folder_from": "processing",
     },
     "data_transfer": {
         "model": DataTransfer,
@@ -462,6 +476,60 @@ CREATABLE_MODELS = {
             "processing": (Processing, "processings"),
             "entity": (Entity, "entities"),
         },
+        "required_fields": ["country"],
+        "folder_from": "processing",
+    },
+    "entity_score": {
+        "model": EntityScore,
+        # A rating a provider published: a measurement, not a verdict. The model
+        # is built for this — one reading per provider per day, dated so they
+        # accumulate as history.
+        "fields": ["score", "scale_max", "grade", "as_of", "url", "observation"],
+        "fk_fields": {
+            "entity": (Entity, "entities"),
+            "provider": (Terminology, "terminologies"),
+        },
+        "required_fields": ["score", "as_of"],
+        # save() takes the folder from the entity; match there or the upsert
+        # looks in a folder the row never lands in.
+        "folder_from": "entity",
+        "match_on": ["entity", "provider", "as_of"],
+    },
+    "timeline_entry": {
+        "model": TimelineEntry,
+        "fields": ["entry", "entry_type", "timestamp", "observation"],
+        "fk_fields": {"incident": (Incident, "incidents")},
+        "required_fields": ["entry"],
+        "folder_from": "incident",
+        # The model's own split (EntryType.get_manual_entry_types): a run
+        # reports what it observed; severity_changed/status_changed narrate a
+        # lifecycle move and belong to whoever made it.
+        "allowed_values": {
+            "entry_type": frozenset({"detection", "mitigation", "observation"})
+        },
+    },
+    "task_template": {
+        "model": TaskTemplate,
+        # Attaching work is explicitly automation's to do. No `schedule`:
+        # objects.create() does not run field validators and that column's shape
+        # is enforced by one, so recurrence stays an authored decision.
+        "fields": ["name", "description", "ref_id", "task_date"],
+        "fk_fields": {},
+    },
+    "right_request": {
+        "model": RightRequest,
+        # No status: a run opens the request, the DPO closes it.
+        "fields": [
+            "name",
+            "description",
+            "ref_id",
+            "requested_on",
+            "due_date",
+            "request_type",
+            "observation",
+        ],
+        "fk_fields": {},
+        "required_fields": ["requested_on"],
     },
     "entity_assessment": {
         "model": EntityAssessment,
@@ -590,7 +658,7 @@ class CreateObjectAction(BaseAction):
             if key in entry["fields"] and value not in ("", None)
         }
         for key, value in kwargs.items():
-            allowed = _column_choices(entry["model"], key)
+            allowed = _creatable_values(entry, key)
             if allowed is not None and str(value) not in allowed:
                 raise FatalActionError(
                     f"create_object: '{value}' is not an accepted "
@@ -599,6 +667,9 @@ class CreateObjectAction(BaseAction):
         named = get_model_field(entry["model"], "name") is not None
         if named and not kwargs.get("name") and not config.get("upsert"):
             raise ActionError("create_object: 'name' is required")
+        for key in entry.get("required_fields") or []:
+            if not kwargs.get(key):
+                raise ActionError(f"create_object: '{key}' is required")
 
         for fk_name, (fk_model, _endpoint) in (entry.get("fk_fields") or {}).items():
             raw = fields.get(fk_name)
@@ -639,16 +710,22 @@ class CreateObjectAction(BaseAction):
         obj = None
         created = True
         folder = _creation_folder(instance)
+        # Some rows take their folder from a parent in save() (an entity score is
+        # as visible as its entity). Matching on the instance folder would then
+        # look somewhere the row never lands, so the upsert would miss and the
+        # create would hit the model's own uniqueness constraint instead.
+        folder_from = entry.get("folder_from")
+        if folder_from and kwargs.get(folder_from) is not None:
+            folder = kwargs[folder_from].folder
         if config.get("upsert"):
-            match_field = entry.get("match_on", "name")
-            match_value = kwargs.get(match_field)
-            if match_value in ("", None):
-                raise ActionError(f"create_object: upsert requires '{match_field}'")
-            obj = (
-                entry["model"]
-                .objects.filter(folder=folder, **{match_field: match_value})
-                .first()
-            )
+            match_fields = _match_fields(entry)
+            match = {key: kwargs.get(key) for key in match_fields}
+            missing = [key for key, value in match.items() if value in ("", None)]
+            if missing:
+                raise ActionError(
+                    f"create_object: upsert requires {', '.join(repr(m) for m in missing)}"
+                )
+            obj = entry["model"].objects.filter(folder=folder, **match).first()
 
         try:
             if obj is not None:
@@ -909,6 +986,21 @@ READABLE_MODELS: dict[str, ReadEntry] = {
     "entity_assessment": ReadEntry(
         model=EntityAssessment,
         fields=["description", "status", "eta", "due_date"],
+    ),
+    "task_node": ReadEntry(
+        model=TaskNode,
+        # One occurrence of a recurring task. Read to find the week a collected
+        # file answers for, so attach_evidence can pin the revision to it.
+        fields=["status", "due_date", "scheduled_date", "observation", "task_template"],
+        computed={
+            "name": str,
+            "task_template": lambda tn: {
+                "str": str(tn.task_template),
+                "id": str(tn.task_template_id),
+                "name": tn.task_template.name,
+            },
+        },
+        select_related=["task_template"],
     ),
     "requirement_assessment": ReadEntry(
         model=RequirementAssessment,
@@ -1467,6 +1559,22 @@ def _writable_values(entry, key):
     return _column_choices(entry.model, key)
 
 
+def _creatable_values(entry, key):
+    """_writable_values for the create registry, whose entries are plain dicts."""
+    narrowed = (entry.get("allowed_values") or {}).get(key)
+    if narrowed is not None:
+        return narrowed
+    return _column_choices(entry["model"], key)
+
+
+def _match_fields(entry):
+    """The columns an upsert matches on. A tuple when the row's identity is a
+    composite natural key (an entity score is one reading per provider per day),
+    a single column otherwise."""
+    match_on = entry.get("match_on", "name")
+    return (match_on,) if isinstance(match_on, str) else tuple(match_on)
+
+
 def _as_id_list(value):
     """A JSON array or a comma-separated string of ids."""
     if isinstance(value, str):
@@ -1670,24 +1778,82 @@ class AttachEvidenceAction(BaseAction):
         if not data:
             raise ActionError("attach_evidence: nothing to attach")
 
+        occurrence = self._occurrence(config, context, instance, evidence)
         upload = ContentFile(data, name=filename)
-        # Same shape as the upload endpoint: the latest revision carries the
-        # file, and full_clean applies the extension allowlist and the size cap.
-        revision = evidence.revisions.order_by(
-            "-version"
-        ).first() or EvidenceRevision.objects.create(evidence=evidence)
-        revision.attachment = upload
-        try:
-            revision.full_clean()
-        except ValidationError as e:
-            raise FatalActionError(f"attach_evidence: {'; '.join(e.messages)}")
-        revision.save()
+        if _as_bool(config.get("new_revision")):
+            revision = self._file_new_revision(evidence, upload, occurrence)
+        else:
+            # Same shape as the upload endpoint: the latest revision carries the
+            # file, and full_clean applies the extension allowlist and the size cap.
+            revision = evidence.revisions.order_by(
+                "-version"
+            ).first() or EvidenceRevision.objects.create(evidence=evidence)
+            revision.attachment = upload
+            if occurrence is not None:
+                revision.task_node = occurrence
+            try:
+                revision.full_clean()
+            except ValidationError as e:
+                raise FatalActionError(f"attach_evidence: {'; '.join(e.messages)}")
+            revision.save()
         return {
             "object_id": str(evidence.id),
             "revision_id": str(revision.id),
+            "version": revision.version,
             "filename": revision.attachment.name,
             "bytes": len(data),
+            "task_node_id": str(occurrence.id) if occurrence else None,
         }
+
+    @staticmethod
+    def _occurrence(config, context, instance, evidence):
+        """The task occurrence this file answers for, when the step names one.
+
+        A revision carries the occurrence it was filed for, and that is what
+        marks the week's expected evidence as provided. Without it a collected
+        file satisfies nothing, however good the file is.
+        """
+        if not str(render(config.get("task_node", ""), context) or "").strip():
+            return None
+        occurrence = _scoped_target(
+            TaskNode, config, "task_node", context, instance, "attach_evidence"
+        )
+        # Both readers of a revision's occurrence (evidence_reviewed and
+        # evidence_revisions_map) only look at the template's expected list, so
+        # pinning to an occurrence that does not expect this evidence writes a
+        # link nothing will ever read.
+        if not occurrence.task_template.evidences.filter(pk=evidence.pk).exists():
+            raise ActionError(
+                f"attach_evidence: '{occurrence}' does not expect '{evidence.name}'"
+            )
+        return occurrence
+
+    @staticmethod
+    def _file_new_revision(evidence, upload, occurrence=None):
+        """A recurring collection keeps its history: each run files its own
+        revision instead of overwriting the last one. Mirrors
+        EvidenceRevisionWriteSerializer.create — same version allocation under
+        the same lock, and the same move to in_review, because a file nobody
+        has looked at yet must not inherit the previous one's approval."""
+        with transaction.atomic():
+            locked = Evidence.objects.select_for_update().get(pk=evidence.pk)
+            top = locked.revisions.aggregate(Max("version"))["version__max"]
+            revision = EvidenceRevision(
+                evidence=locked,
+                folder=locked.folder,
+                version=(top or 0) + 1,
+                attachment=upload,
+                task_node=occurrence,
+            )
+            try:
+                # Before the row exists: a refused extension leaves no orphan.
+                revision.full_clean()
+            except ValidationError as e:
+                raise FatalActionError(f"attach_evidence: {'; '.join(e.messages)}")
+            revision.save()
+            locked.status = Evidence.Status.IN_REVIEW
+            locked.save()
+        return revision
 
     def _target(self, config, context, instance):
         from . import authz
@@ -1762,6 +1928,220 @@ class AttachEvidenceAction(BaseAction):
                     f"attach_evidence: the file exceeds {settings.ATTACHMENT_MAX_SIZE_MB} MB"
                 )
         return data
+
+
+WHOLE_TEMPLATE_RE = re.compile(r"^\{\{\s*([\w.]+)\s*\}\}$")
+
+
+def _resolve_list(value, context, label):
+    """A list-valued config entry. A whole-template reference resolves straight
+    to the object it names — no JSON round-trip, so numbers stay numbers;
+    anything else renders and is parsed."""
+    if isinstance(value, str):
+        match = WHOLE_TEMPLATE_RE.match(value.strip())
+        resolved = (
+            dig(context, match.group(1))
+            if match
+            else json_loads_or_none(render(value, context))
+        )
+    else:
+        resolved = render(value, context)
+    if not isinstance(resolved, list):
+        raise ActionError(f"{label} must resolve to a list")
+    return resolved
+
+
+def _scoped_target(model, config, key, context, instance, label, ids=None):
+    """The row a landing-zone action writes into: named by id, inside the
+    workflow's own subtree, and visible to the run identity."""
+    from . import authz
+    from .engine import run_identity
+
+    target_id = str(render(config.get(key, ""), context) or "").strip()
+    if not target_id:
+        raise ActionError(f"{label}: '{key}' is required")
+    scope = ids if ids is not None else authz.viewable_ids
+    try:
+        obj = (
+            model.objects.filter(folder_id__in=_read_scope_folder_ids(instance.folder))
+            .filter(id__in=scope(run_identity(instance), model))
+            .filter(id=target_id)
+            .first()
+        )
+    except ValueError, ValidationError:
+        obj = None
+    if obj is None:
+        raise ActionError(
+            f"{label}: no {model._meta.verbose_name} '{target_id}' in this "
+            "workflow's scope"
+        )
+    return obj
+
+
+@register
+class RecordMeasurementAction(BaseAction):
+    """A number a run measured, filed against a metric instance. The sample is
+    a reading, not a verdict: nothing about the instance itself moves."""
+
+    action_type = "record_measurement"
+
+    def execute(self, config, instance):
+        from metrology.models import CustomMetricSample, MetricInstance
+
+        context = _render_context(instance)
+        metric = _scoped_target(
+            MetricInstance,
+            config,
+            "metric_instance",
+            context,
+            instance,
+            "record_measurement",
+        )
+        value = self._shape(render(config.get("value", ""), context), metric)
+        timestamp = self._timestamp(config, context)
+        sample = CustomMetricSample.objects.create(
+            metric_instance=metric,
+            folder=metric.folder,
+            timestamp=timestamp,
+            value=value,
+            observation=str(render(config.get("observation", ""), context) or ""),
+            evidence_revision=self._revision(config, context, instance),
+        )
+        return {
+            "object_id": str(sample.id),
+            "metric_instance_id": str(metric.id),
+            "value": value,
+            "timestamp": timestamp.isoformat(),
+        }
+
+    @staticmethod
+    def _shape(raw, metric):
+        """The definition's category decides the envelope, so an author writes
+        a number and cannot mismatch the schema the API validates against."""
+        import math
+
+        from metrology.models import MetricDefinition
+
+        category = metric.metric_definition.category
+        if category == MetricDefinition.Category.QUALITATIVE:
+            try:
+                index = int(str(raw).strip())
+            except ValueError, TypeError:
+                raise ActionError(
+                    f"record_measurement: '{raw}' is not a choice index for a "
+                    "qualitative metric"
+                )
+            choices = metric.metric_definition.choices_definition
+            ceiling = len(choices) if isinstance(choices, list) else None
+            if index < 1 or (ceiling and index > ceiling):
+                raise ActionError(
+                    f"record_measurement: choice index {index} is outside the "
+                    f"metric's {ceiling or '?'} options"
+                )
+            return {"choice_index": index}
+        try:
+            result = float(str(raw).strip())
+        except ValueError, TypeError:
+            raise ActionError(f"record_measurement: '{raw}' is not a number")
+        if not math.isfinite(result):
+            raise ActionError("record_measurement: the value must be finite")
+        return {"result": result}
+
+    @staticmethod
+    def _timestamp(config, context):
+        from django.utils import timezone
+
+        raw = str(render(config.get("timestamp", ""), context) or "").strip()
+        if not raw:
+            return timezone.now()
+        try:
+            parsed = datetime.datetime.fromisoformat(raw)
+        except ValueError:
+            raise ActionError(f"record_measurement: '{raw}' is not an ISO timestamp")
+        if timezone.is_naive(parsed):
+            parsed = timezone.make_aware(parsed)
+        # Same refusal as CustomMetricSampleWriteSerializer: a reading cannot
+        # be dated after the moment it was taken.
+        if parsed > timezone.now():
+            raise ActionError("record_measurement: the timestamp is in the future")
+        return parsed
+
+    @staticmethod
+    def _revision(config, context, instance):
+        if not str(render(config.get("evidence_revision", ""), context) or "").strip():
+            return None
+        return _scoped_target(
+            EvidenceRevision,
+            config,
+            "evidence_revision",
+            context,
+            instance,
+            "record_measurement",
+        )
+
+
+def results_max_entries():
+    """Rows one post_results call may carry. A framework's assessable nodes are
+    the real ceiling; this only stops an unbounded remote list."""
+    return int(getattr(settings, "WORKFLOW_RESULTS_MAX_ENTRIES", 2000))
+
+
+# An unknown ref_id list is remote-controlled and lands in node_outputs, which
+# is persisted: keep a usable sample, report the rest as a count.
+UNKNOWN_REF_SAMPLE = 20
+
+
+@register
+class PostResultsAction(BaseAction):
+    """A scan's verdicts, filed against a posture assessment. Shares the REST
+    endpoint's write path, so the patch contract (a repeated run_id upserts on
+    (run, asset, check)) holds for a retried node too."""
+
+    action_type = "post_results"
+
+    def execute(self, config, instance):
+        from automation.ingestion import IngestionError, ingest_posture_results
+        from automation.models import PostureAssessment, PostureResult
+
+        from . import authz
+        from .engine import run_identity
+
+        context = _render_context(instance)
+        assessment = _scoped_target(
+            PostureAssessment,
+            config,
+            "posture_assessment",
+            context,
+            instance,
+            "post_results",
+            ids=authz.changeable_ids,
+        )
+        entries = _resolve_list(
+            config.get("results"), context, "post_results: 'results'"
+        )
+        if len(entries) > results_max_entries():
+            raise FatalActionError(
+                f"post_results: {len(entries)} results exceed the "
+                f"{results_max_entries()} cap"
+            )
+        try:
+            summary = ingest_posture_results(
+                assessment,
+                asset_id=str(render(config.get("asset", ""), context) or "").strip(),
+                entries=entries,
+                run_id=str(render(config.get("run_id", ""), context) or "").strip(),
+                source=PostureResult.Source.API,
+                tool=str(render(config.get("tool", ""), context) or "")[:100],
+                user=run_identity(instance),
+            )
+        except IngestionError as e:
+            raise ActionError(f"post_results: {e.payload.get('error')}")
+        unknown = summary.pop("unknown_ref_ids", [])
+        return {
+            **summary,
+            "unknown_count": len(unknown),
+            "unknown_ref_ids": unknown[:UNKNOWN_REF_SAMPLE],
+        }
 
 
 @register
@@ -1855,6 +2235,14 @@ def _assert_credentials_stay_encrypted(url, config, headers, label):
         raise FatalActionError(f"{label}: credentials require an https URL")
 
 
+# Shared by the action and its publish-time validator, so the two halves of
+# every rule below cannot drift apart.
+HTTP_METHODS = frozenset({"GET", "POST", "PUT", "PATCH", "DELETE"})
+HTTP_MIN_TIMEOUT = 1
+HTTP_MAX_TIMEOUT = 30
+HTTP_DEFAULT_TIMEOUT = 15
+
+
 @register
 class HttpRequestAction(BaseAction):
     action_type = "http_request"
@@ -1881,7 +2269,7 @@ class HttpRequestAction(BaseAction):
             raise ActionError(f"http_request: {type(e).__name__} for host '{host}'")
 
         method = (config.get("method") or "GET").upper()
-        if method not in ("GET", "POST", "PUT", "PATCH", "DELETE"):
+        if method not in HTTP_METHODS:
             raise ActionError(f"http_request: unsupported method '{method}'")
         headers = {
             str(key): render(str(value), context)
@@ -1890,7 +2278,12 @@ class HttpRequestAction(BaseAction):
         _assert_credentials_stay_encrypted(url, config, headers, "http_request")
         body = render(config.get("body"), context)
         # Clamp both ends: requests raises ValueError on a negative timeout.
-        timeout = min(max(int(config.get("timeout") or 15), 1), 30)
+        # Publish validation rejects an out-of-range literal, so this only
+        # catches a template that resolved to one.
+        timeout = min(
+            max(int(config.get("timeout") or HTTP_DEFAULT_TIMEOUT), HTTP_MIN_TIMEOUT),
+            HTTP_MAX_TIMEOUT,
+        )
 
         # Redirects are NOT followed: only the initial URL is SSRF-checked, so
         # following a 3xx Location would reach an internal address the guard
@@ -2072,6 +2465,10 @@ class ProvisionUserAction(BaseAction):
         return {"user_id": str(user.id), "user_email": user.email, "created": created}
 
 
+# Shared with validate_group_membership_config.
+GROUP_OPERATIONS = frozenset({"add", "remove"})
+
+
 @register
 class ManageGroupMembershipAction(BaseAction):
     action_type = "manage_group_membership"
@@ -2115,6 +2512,12 @@ class ManageGroupMembershipAction(BaseAction):
             )
 
         operation = config.get("operation", "add")
+        # Anything unrecognized used to fall through to the add branch, which
+        # silently did the opposite of what a typo asked for.
+        if operation not in GROUP_OPERATIONS:
+            raise FatalActionError(
+                f"manage_group_membership: unsupported operation '{operation}'"
+            )
         if operation == "remove":
             # Last-admin protection (mirrors core remove-members): never strip the
             # final global administrator, or the platform locks out. Only reachable
@@ -2300,7 +2703,14 @@ def required_permissions(action_config):
                 codenames += extra
         return codenames
     if action_type == "attach_evidence":
-        return ["change_evidence"]
+        codenames = ["change_evidence"]
+        if _as_bool(action_config.get("new_revision")):
+            codenames.append("add_evidencerevision")
+        return codenames
+    if action_type == "record_measurement":
+        return ["add_custommetricsample"]
+    if action_type == "post_results":
+        return ["change_postureassessment"]
     if action_type == "update_object":
         entry = UPDATABLE_MODELS.get(action_config.get("model"))
         if entry is None:
@@ -2462,12 +2872,23 @@ def validate_create_config(node):
     for key, value in fields.items():
         if key not in entry["fields"] or _is_templated(value) or value in ("", None):
             continue
-        allowed = _column_choices(entry["model"], key)
+        allowed = _creatable_values(entry, key)
         if allowed is not None and str(value) not in allowed:
             errors.append(
                 (
                     "action_create_value_not_allowed",
                     f"'{key}' may only be set to {', '.join(sorted(allowed))}",
+                )
+            )
+    # Columns the model cannot store empty. The FK loop below covers relations;
+    # without this a missing one is an IntegrityError mid-run, or worse a row
+    # quietly saved with a blank required value.
+    for key in entry.get("required_fields") or []:
+        if not str(fields.get(key) or "").strip():
+            errors.append(
+                (
+                    "action_create_missing_field",
+                    f"'{key}' is required to create a '{config.get('model')}'",
                 )
             )
     for param in entry.get("required_params") or []:
@@ -2529,6 +2950,180 @@ def validate_attach_evidence_config(node):
         errors.append(("action_attach_bad_source", f"Unknown source '{source}'"))
     elif source == "url" and not str(config.get("url") or "").strip():
         errors.append(("action_attach_missing_url", "A URL is required"))
+    return errors
+
+
+def validate_record_measurement_config(node):
+    config = node.action_config or {}
+    if config.get("type") != "record_measurement":
+        return []
+    errors = []
+    if not str(config.get("metric_instance") or "").strip():
+        errors.append(
+            ("action_measure_missing_metric", "Which metric instance is not set")
+        )
+    if str(config.get("value", "")).strip() == "":
+        errors.append(("action_measure_missing_value", "A value is required"))
+    return errors
+
+
+def validate_post_results_config(node):
+    config = node.action_config or {}
+    if config.get("type") != "post_results":
+        return []
+    errors = []
+    if not str(config.get("posture_assessment") or "").strip():
+        errors.append(
+            ("action_results_missing_assessment", "Which posture assessment is not set")
+        )
+    if not str(config.get("asset") or "").strip():
+        errors.append(("action_results_missing_asset", "Which asset is not set"))
+    results = config.get("results")
+    if results in ("", None, [], {}):
+        errors.append(("action_results_missing_results", "Results are required"))
+    elif isinstance(results, str) and not TEMPLATE_RE.search(results):
+        if json_loads_or_none(results) is None:
+            errors.append(
+                (
+                    "action_results_not_a_list",
+                    "Results must reference a step's output or be a JSON list",
+                )
+            )
+    return errors
+
+
+def validate_http_request_config(node):
+    """Publish-time checks for http_request. Everything here is also enforced
+    at run time; catching it at publish is what stops a graph from looking
+    healthy until the first schedule fires."""
+    import json
+
+    config = node.action_config or {}
+    if config.get("type") != "http_request":
+        return []
+    errors = []
+    url = str(config.get("url") or "").strip()
+    if not url:
+        errors.append(("action_http_missing_url", "A URL is required"))
+    method = str(config.get("method") or "GET").upper()
+    if method not in HTTP_METHODS:
+        errors.append(
+            (
+                "action_http_bad_method",
+                f"'{method}' is not one of {', '.join(sorted(HTTP_METHODS))}",
+            )
+        )
+    headers = config.get("headers")
+    if headers not in (None, "") and not isinstance(headers, dict):
+        errors.append(("action_http_bad_headers", "Headers must be name/value pairs"))
+    timeout = config.get("timeout")
+    if timeout not in ("", None) and not _is_templated(timeout):
+        try:
+            seconds = int(timeout)
+            if not HTTP_MIN_TIMEOUT <= seconds <= HTTP_MAX_TIMEOUT:
+                raise ValueError
+        except ValueError, TypeError:
+            errors.append(
+                (
+                    "action_http_bad_timeout",
+                    f"The timeout must be between {HTTP_MIN_TIMEOUT} and "
+                    f"{HTTP_MAX_TIMEOUT} seconds",
+                )
+            )
+    # The run-time half of this refuses a secret or an Authorization header over
+    # cleartext. A literal URL can be judged now, so the author hears it while
+    # they are looking at the node rather than from a failed run.
+    carries_credentials = bool(SECRETS_REFERENCE_RE.search(json.dumps(config))) or any(
+        str(key).lower() == "authorization" for key in (headers or {})
+    )
+    if carries_credentials and url and not _is_templated(url):
+        if urlsplit(url).scheme != "https":
+            errors.append(
+                (
+                    "action_http_credentials_need_https",
+                    "Credentials may only travel over https",
+                )
+            )
+    return errors
+
+
+def validate_send_email_config(node):
+    config = node.action_config or {}
+    if config.get("type") != "send_email":
+        return []
+    recipients = str(config.get("recipients") or "").strip()
+    if not recipients:
+        errors = [("action_email_missing_recipients", "A recipient is required")]
+        return errors
+    errors = []
+    for recipient in recipients.split(","):
+        recipient = recipient.strip()
+        if not recipient or _is_templated(recipient):
+            continue
+        try:
+            # addr-spec only, like the action: 'Jane Doe <jane@x>' is valid.
+            validate_email(parseaddr(recipient)[1])
+        except ValidationError:
+            errors.append(
+                ("action_email_bad_recipient", f"'{recipient}' is not an email address")
+            )
+    return errors
+
+
+def validate_provision_folder_config(node):
+    config = node.action_config or {}
+    if config.get("type") != "provision_folder":
+        return []
+    if not str(config.get("name") or "").strip():
+        errors = [("action_provision_folder_missing_name", "A name is required")]
+        return errors
+    return []
+
+
+def validate_provision_user_config(node):
+    config = node.action_config or {}
+    if config.get("type") != "provision_user":
+        return []
+    email = str(config.get("email") or "").strip()
+    if not email:
+        return [("action_provision_user_missing_email", "An email is required")]
+    if _is_templated(email):
+        return []
+    try:
+        validate_email(email)
+    except ValidationError:
+        return [
+            ("action_provision_user_bad_email", f"'{email}' is not an email address")
+        ]
+    return []
+
+
+def validate_group_membership_config(node):
+    config = node.action_config or {}
+    if config.get("type") != "manage_group_membership":
+        return []
+    errors = []
+    if not str(config.get("user") or "").strip():
+        errors.append(("action_group_missing_user", "A user is required"))
+    # The action takes either an explicit group or a folder plus a builtin code.
+    if not str(config.get("group") or "").strip() and not (
+        str(config.get("folder") or "").strip()
+        and str(config.get("builtin_group") or "").strip()
+    ):
+        errors.append(
+            (
+                "action_group_missing_target",
+                "Set a group, or a folder and a built-in group",
+            )
+        )
+    operation = config.get("operation", "add")
+    if operation not in GROUP_OPERATIONS:
+        errors.append(
+            (
+                "action_group_bad_operation",
+                f"'{operation}' is not one of {', '.join(sorted(GROUP_OPERATIONS))}",
+            )
+        )
     return errors
 
 
@@ -2766,6 +3361,39 @@ def validate_ai_config(node):
 
 def _is_templated(value):
     return isinstance(value, str) and TEMPLATE_RE.search(value) is not None
+
+
+# Publish-time config validation, one entry per action type. A missing entry
+# means a graph publishes clean and fails on its first run, so
+# test_every_action_type_is_accounted_for holds this to ACTION_REGISTRY: a new
+# action either validates its config or says here that it has nothing to check.
+ACTION_CONFIG_VALIDATORS = {
+    "read_objects": validate_read_config,
+    "create_object": validate_create_config,
+    "update_object": validate_update_config,
+    "attach_evidence": validate_attach_evidence_config,
+    "record_measurement": validate_record_measurement_config,
+    "post_results": validate_post_results_config,
+    "http_request": validate_http_request_config,
+    "send_email": validate_send_email_config,
+    "provision_folder": validate_provision_folder_config,
+    "provision_user": validate_provision_user_config,
+    "manage_group_membership": validate_group_membership_config,
+    "set_variables": validate_set_variables_config,
+    "date_offset": validate_date_offset_config,
+    "ai_extract": validate_ai_config,
+    "ai_generate": validate_ai_config,
+}
+
+# `log` carries free text and `emit_event` is disabled for authoring
+# (DISABLED_ACTION_TYPES), so neither has a config that can be wrong.
+ACTIONS_WITHOUT_CONFIG_VALIDATION = frozenset({"log", "emit_event"})
+
+
+def validate_action_config(node):
+    """Every publish-time check an action node's own config gets."""
+    validator = ACTION_CONFIG_VALIDATORS.get((node.action_config or {}).get("type"))
+    return validator(node) if validator else []
 
 
 def authorize_action(node, instance, config=None):

@@ -1,0 +1,135 @@
+urn: urn:intuitem:risk:library:workflow-operations-evidence-collection
+locale: en
+ref_id: workflow-operations-evidence-collection
+name: Evidence collection — pull a recurring task's evidence from a tool
+description: 'A recurring task expects an evidence every week. Instead of someone downloading the export
+  and uploading it by hand, this pulls the file from the tool on a schedule, files it as a new revision
+  and pins it to the occurrence that asked for it, so the task shows its evidence as provided. After
+  importing: set evidence_name and export_url, and add the tool_token secret.'
+copyright: © intuitem
+version: 1
+publication_date: 2026-09-16
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-evidence-collection:workflow:evidence-collection
+    schema_version: 1
+    ref_id: evidence-collection
+    name: Evidence collection — pull a recurring task's evidence from a tool
+    description: 'Every Monday: find the oldest pending occurrence of a task, download this week''s export,
+      file it as a new revision of the expected evidence and pin it to that occurrence. The evidence moves
+      to In review, because a file nobody has looked at yet is not an approved one.'
+    requires:
+      secrets:
+      - tool_token
+    graph:
+      variables:
+      - key: evidence_name
+        type: string
+        default_value: Weekly export
+      - key: export_url
+        type: string
+        default_value: https://tool.example.com/exports/latest.csv
+      # A condition reads declared variables, so the two lookups publish their
+      # hit/miss into one before the branch reads them.
+      - key: week_found
+        type: boolean
+        default_value: false
+      - key: evidence_found
+        type: boolean
+        default_value: false
+      nodes:
+      - ref: every_monday
+        type: trigger
+        label: Every Monday
+        trigger_config:
+          type: schedule
+          cron_expression: 0 6 * * 1
+          timezone: UTC
+      - ref: find_the_week
+        type: action
+        label: Find the week to answer for
+        action_config:
+          type: read_objects
+          model: task_node
+          mode: first
+          order_by: due_date
+          filters:
+            operator: and
+            conditions:
+            - field: status
+              op: eq
+              value: pending
+        output_mapping:
+          week_found: found
+      - ref: find_the_evidence
+        type: action
+        label: Find the expected evidence
+        action_config:
+          type: read_objects
+          model: evidence
+          mode: first
+          filters:
+            operator: and
+            conditions:
+            - field: name
+              op: eq
+              value: '{{evidence_name}}'
+        output_mapping:
+          evidence_found: found
+      - ref: got_both
+        type: condition
+        label: Is there a week and an evidence?
+        branches:
+        - name: Collect
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: week_found
+              op: eq
+              value: true
+            - variable: evidence_found
+              op: eq
+              value: true
+        - name: Nothing to collect
+          is_default: true
+      - ref: file_the_export
+        type: action
+        label: File this week's export
+        action_config:
+          type: attach_evidence
+          evidence: '{{nodes.find_the_evidence.object.id}}'
+          task_node: '{{nodes.find_the_week.object.id}}'
+          source: url
+          url: '{{export_url}}'
+          filename: export-{{today}}.csv
+          new_revision: true
+          headers:
+            Authorization: Bearer {{secrets.tool_token}}
+      - ref: nothing_to_do
+        type: action
+        label: Say why nothing was collected
+        action_config:
+          type: log
+          message: 'No collection on {{today}}: a pending occurrence was found = {{week_found}}, the
+            evidence "{{evidence_name}}" was found = {{evidence_found}}'
+      - ref: done
+        type: end
+      edges:
+      - source: every_monday
+        target: find_the_week
+      - source: find_the_week
+        target: find_the_evidence
+      - source: find_the_evidence
+        target: got_both
+      - source: got_both
+        target: file_the_export
+        source_branch: Collect
+      - source: got_both
+        target: nothing_to_do
+        source_branch: Nothing to collect
+      - source: file_the_export
+        target: done
+      - source: nothing_to_do
+        target: done
