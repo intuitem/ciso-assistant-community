@@ -343,7 +343,6 @@
 	"plan": "Rencana",
 	"asPDF": "sebagai PDF",
 	"asCSV": "sebagai CSV",
-	"asWord": "sebagai Word",
 	"draft": "Draf",
 	"riskMatrixView": "Tampilan matriks risiko",
 	"currentInMatrixView": "Saat ini",
@@ -662,7 +661,6 @@
 	"noStatus": "Tidak ada status",
 	"actionPlanHelpText": "Penghitung menunjukkan jumlah persyaratan terkait.",
 	"matchingRequirements": "Persyaratan yang sesuai",
-	"asZIP": "sebagai ZIP",
 	"incoming": "Masuk",
 	"outdated": "Kedaluwarsa",
 	"flashMode": "Mode cepat",
@@ -825,6 +823,8 @@
 	"addRepresentative": "Tambahkan perwakilan",
 	"phone": "Telepon",
 	"role": "Peran",
+	"defaultRole": "Peran default",
+	"defaultRoleHelpText": "Peran yang secara otomatis diberikan pada domain ini kepada setiap pengguna yang memiliki penugasan peran di salah satu subdomainnya.",
 	"questions": "Pertanyaan",
 	"recipientEntity": "Entitas penerima",
 	"financial": "Finansial",
@@ -869,7 +869,8 @@
 	"mailFailedToSend": "Email gagal dikirim",
 	"questionOrQuestions": "Pertanyaan",
 	"successfullyUpdatedClientSettings": "Pengaturan klien berhasil diperbarui, silakan muat ulang halaman.",
-	"xRaysEmptyMessage": "Anda harus membuat setidaknya satu lingkup untuk menggunakan sinar-X.",
+	"xRaysEmptyMessage": "Tidak ada masalah yang terdeteksi. X-ray hanya menampilkan domain yang memiliki temuan.",
+	"xRaysLoadingError": "Analisis X-ray tidak dapat diselesaikan. Periksa log server untuk detailnya.",
 	"suggestControls": "Sarankan kontrol",
 	"createAppliedControlsFromSuggestionsHelpText": "Buat kontrol yang diterapkan dari kontrol referensi yang disarankan untuk persyaratan kerangka kerja",
 	"createAppliedControlsFromSuggestionsSuccess": "Kontrol yang diterapkan berhasil dibuat dari kontrol referensi yang disarankan",
@@ -1152,7 +1153,6 @@
 	"ebiosWs2_3_tooltip": "Anda memerlukan setidaknya satu pasangan SR/TT untuk memilihnya",
 	"ebiosWs3_2_tooltip": "Anda memerlukan setidaknya satu pasangan SR/TT yang dipilih untuk mengembangkan skenario strategis",
 	"ebiosWs3_3_tooltip": "Anda memerlukan setidaknya satu pemangku kepentingan untuk menentukan langkah keamanan terkait",
-	"ebiosWs4_1_tooltip": "Anda memerlukan setidaknya satu jalur serangan dari skenario strategis untuk mengembangkan skenario operasional",
 	"ebiosWs4_2_tooltip": "Anda memerlukan setidaknya satu skenario operasional untuk mengevaluasi kemungkinannya",
 	"ebiosWs5_tooltip": "Belum ada penilaian risiko yang dilakukan",
 	"govern": "Mengelola",
@@ -1216,7 +1216,6 @@
 	"addFinding": "Tambahkan temuan",
 	"selectEvidence": "Pilih bukti",
 	"timestampCannotBeInTheFuture": "Timestamp tidak boleh di masa depan",
-	"riskAcceptanceReviewMessage": "Penerimaan risiko ini menunggu untuk diproses. Ingat untuk meninjau sebelum memvalidasi atau menolak, karena Anda tidak dapat kembali.",
 	"failedToContactProvider": "Gagal menghubungi penyedia",
 	"userIsNotSSO": "Login SSO saat ini dinonaktifkan untuk akun Anda.",
 	"enableSSOHelpText": "Aktifkan SSO sebagai opsi login untuk semua pengguna.",
@@ -1351,15 +1350,6 @@
 	"changeUserGroup": "Ubah grup pengguna",
 	"deleteUserGroup": "Hapus grup pengguna",
 	"viewUserGroup": "Lihat grup pengguna",
-	"changeQuantitativeRiskHypothesis": "Ubah hipotesis risiko kuantitatif",
-	"deleteQuantitativeRiskHypothesis": "Hapus hipotesis risiko kuantitatif",
-	"viewQuantitativeRiskHypothesis": "Lihat hipotesis risiko kuantitatif",
-	"changeQuantitativeRiskScenario": "Ubah skenario",
-	"deleteQuantitativeRiskScenario": "Hapus skenario",
-	"viewQuantitativeRiskScenario": "Lihat skenario",
-	"changeQuantitativeRiskStudy": "Ubah studi kuantifikasi risiko",
-	"deleteQuantitativeRiskStudy": "Hapus studi kuantifikasi risiko",
-	"viewQuantitativeRiskStudy": "Lihat studi kuantifikasi risiko",
 	"dueDateUpdatedSuccessfully": "Tanggal jatuh tempo berhasil diperbarui",
 	"taskScheduleInfo": "Jadwal kejadian yang lalu dilindungi dari perubahan. Hanya tugas mendatang yang akan dihitung ulang.",
 	"info": "Informasi",
@@ -1397,7 +1387,6 @@
 	"syncAppliedControlsMessage": "Kontrol yang diterapkan yang menggunakan kontrol referensi ini akan disinkronkan dengannya. Harap dicatat bahwa tindakan ini tidak dapat dibatalkan.",
 	"syncToAppliedControl": "Sinkronkan dengan kontrol yang diterapkan",
 	"syncToReferenceControl": "Sinkronkan dengan kontrol referensi",
-	"exportEcosystem": "ekspor ekosistem (XLSX)",
 	"expirationDate": "Tanggal kedaluwarsa",
 	"vulnerabilitySlaPolicyHelpText": "Tentukan jumlah maksimum hari untuk memperbaiki kerentanan berdasarkan tingkat keparahannya.",
 	"slaAnchor": "Tanggal mulai SLA",
@@ -1464,19 +1453,12 @@
 	"builderRequirementHint": "Dapat dinilai, masih dapat memiliki anak",
 	"builderSplashScreen": "Layar pembuka",
 	"builderSplashScreenHint": "Bersifat presentasional, tidak dapat dinilai",
-	"builderStatusLive": "Aktif",
-	"builderStatusLiveTitle": "Draf sesuai dengan apa yang dilihat responden audit.",
-	"builderStatusUnpublishedChanges": "Perubahan belum diterbitkan",
-	"builderStatusUnpublishedChangesTitle": "Draf memiliki perubahan yang belum terlihat oleh responden audit. Terbitkan untuk menerapkannya.",
-	"builderStatusDraftNothingLive": "Draf — belum ada yang aktif",
-	"builderStatusDraftNothingLiveTitle": "Draf memiliki konten tetapi belum ada yang diterbitkan. Audit baru tidak akan melihat apa pun sampai Anda menerbitkan.",
 	"builderStatusEmpty": "Kosong",
 	"builderStatusEmptyTitle": "Belum ada persyaratan. Audit baru yang dibangun di atas kerangka kerja ini tidak akan memiliki apa pun untuk dijawab.",
 	"builderPreview": "Pratinjau",
 	"builderPreviewSaveFirst": "Simpan dulu draf Anda untuk pratinjau",
 	"builderPreviewAsRespondent": "Pratinjau sebagai responden (dibuka di tab baru)",
 	"builderExportYamlTitle": "Ekspor kerangka kerja sebagai berkas pustaka YAML",
-	"builderExportYamlUnpublishedWarning": "Perubahan yang belum diterbitkan tidak akan disertakan. Terbitkan dulu untuk mengekspor perubahan terbaru.",
 	"builderCopyBase": "Salin dasar",
 	"builderCopyBaseTitle": "Salin teks bahasa dasar ke {lang} (tidak akan menimpa terjemahan yang sudah ada)",
 	"builderCopyBaseQuestion": "Salin teks dasar?",
@@ -1486,82 +1468,7 @@
 	"builderExpandAllCards": "Bentangkan semua kartu",
 	"builderCollapseAllCards": "Ciutkan semua kartu",
 	"builderSaveFailed": "Gagal menyimpan",
-	"builderPublishedFlash": "Diterbitkan!",
 	"builderSaveDraftTitle": "Simpan draf (Ctrl+S)",
-	"builderDiscardDraftTitle": "Buang draf",
-	"builderDiscard": "Buang",
-	"builderDiscardAllChangesQuestion": "Buang semua perubahan?",
-	"builderYesDiscard": "Ya, buang",
-	"builderPublishDraftToLiveTitle": "Terbitkan draf ke kerangka kerja aktif",
-	"builderPublishing": "Menerbitkan...",
-	"builderPublishModalTitle": "Terbitkan draf ke aktif",
-	"builderPublishModalDescription": "Tindakan ini akan memperbarui kerangka kerja aktif. Tinjau perubahannya di bawah.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} persyaratan ditambahkan",
-				"countPlural=other": "{count} persyaratan ditambahkan"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} pertanyaan",
-				"countPlural=other": "{count} pertanyaan"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} persyaratan dihapus",
-				"countPlural=other": "{count} persyaratan dihapus"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} pertanyaan",
-				"countPlural=other": "{count} pertanyaan"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Tidak ada perubahan struktural yang terdeteksi (hanya metadata).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} perubahan tidak kompatibel terdeteksi",
-				"countPlural=other": "{count} perubahan tidak kompatibel terdeteksi"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Perubahan ini dapat memengaruhi penilaian, visibilitas, atau hasil kepatuhan dalam audit yang sudah ada.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} audit yang ada akan terdampak",
-				"countPlural=other": "{count} audit yang ada akan terdampak"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Persyaratan baru akan ditambahkan ke audit-audit ini.",
-	"builderAffectedAuditsRemovedHint": "Persyaratan yang dihapus dan data penilaiannya akan dihapus dari audit-audit ini.",
-	"builderCouldNotLoadPreview": "Tidak dapat memuat pratinjau dampak. Lanjutkan dengan hati-hati.",
-	"builderConfirmPublish": "Konfirmasi penerbitan",
 	"builderSearchNodes": "Cari node...",
 	"builderExpandSidebar": "Bentangkan bilah sisi",
 	"builderCollapseSidebar": "Ciutkan bilah sisi",
@@ -1741,7 +1648,6 @@
 	"builderSplashNumberedList": "Daftar bernomor",
 	"builderSplashLink": "Tautan",
 	"builderSplashTable": "Tabel",
-	"builderSplashInsertImage": "Sisipkan gambar",
 	"builderUntitledQuestion": "Pertanyaan tanpa judul",
 	"builderNotTranslated": "Belum diterjemahkan",
 	"builderQuestionTextPlaceholder": "Masukkan pertanyaan Anda...",
@@ -1786,27 +1692,12 @@
 	"builderKbSaveDraft": "Simpan draf",
 	"builderKbShowCheatsheet": "Tampilkan lembar contekan ini",
 	"builderKbCloseDialog": "Tutup dialog atau menu turun",
-	"builderImportedFramework": "Kerangka Kerja yang Diimpor",
-	"builderImportedFrameworkDescription": "Kerangka kerja ini diimpor dari pustaka dan tidak dapat diedit secara langsung. Untuk membuat perubahan, buat salinan yang dapat diedit.",
-	"builderCreateCopyAndEdit": "Buat salinan & edit",
-	"builderCreatingCopy": "Membuat salinan...",
-	"builderLoadingEditor": "Memuat editor...",
-	"builderFailedToStartEditor": "Gagal memulai editor",
-	"builderBackToFramework": "Kembali ke kerangka kerja",
-	"builderBackToBuilder": "Kembali ke pembangun",
-	"builderFailedToLoadDraft": "Gagal memuat draf",
-	"builderImplementationGroupsHeader": "Grup Implementasi",
-	"builderNoItemsToPreview": "Tidak ada item untuk dipratinjau.",
-	"builderNoItemsToPreviewHint": "Tambahkan persyaratan yang dapat dinilai atau layar pembuka di pembangun.",
-	"builderBaseLanguageOption": "Bahasa dasar",
 	"builderFrameworkNameRequired": "Nama kerangka kerja wajib diisi.",
 	"builderFrameworkNameTooLong": "Nama kerangka kerja {length} karakter (maks. 200).",
 	"builderNodeNameTooLong": "Nama melebihi 200 karakter ({length}/200). Pindahkan teks panjang ke bidang deskripsi.",
 	"builderRefIdTooLong": "'{label}': ref_id {length} karakter (maks. 100).",
 	"builderUrnTooLong": "'{label}': URN {length} karakter (maks. 255).",
-	"builderFailedToSaveDraftBeforePublish": "Gagal menyimpan draf sebelum penerbitan.",
 	"builderUnsavedChangesNavigation": "Anda memiliki perubahan yang belum disimpan dan akan hilang. Tetap keluar?",
-	"builderUnpublishedChangesNavigation": "Anda memiliki perubahan yang belum diterbitkan. Draf Anda tersimpan dan Anda dapat melanjutkan nanti. Tetap keluar?",
 	"fieldVisibility": "Visibilitas bidang",
 	"fieldVisibilityHelpText": "Kontrol bidang mana yang dapat dilihat dan diedit oleh setiap peran.",
 	"visibilityAuditorRespondent": "Auditor + Responden",
@@ -1839,7 +1730,6 @@
 	"mfaDisabledSuccessfully": "MFA telah dinonaktifkan untuk pengguna ini",
 	"errorDisablingMFA": "Tidak dapat menonaktifkan MFA untuk pengguna ini",
 	"userHasNoMFAEnabled": "Pengguna ini tidak memiliki MFA yang diaktifkan",
-	"builderChangedOn": "diubah pada",
 	"requirementWeight": "Bobot",
 	"scim": "SCIM",
 	"scimDescription": "Konfigurasikan penyediaan SCIM 2.0. Arahkan penyedia identitas Anda ke endpoint di bawah ini dan autentikasi dengan token bearer yang dibuat di sini.",
@@ -1861,6 +1751,9 @@
 	"idpGroups": "Grup IdP",
 	"idpGroupsDescription": "Aktifkan federasi grup IdP (penyediaan SCIM, pemetaan grup IdP, dan keanggotaan grup IdP pada pengguna).",
 	"ebiosRmStudyDomainHelpText": "Mengubah domain akan memindahkan studi dan semua objek workshop-nya ke domain yang dipilih.",
+	"reopenAssignmentForEditing": "Buka kembali untuk diedit",
+	"forReview": "Untuk ditinjau",
+	"forEditing": "Untuk diedit",
 	"serviceAccount": "Akun layanan",
 	"serviceAccounts": "Akun layanan",
 	"serviceAccountsDescription": "Mengaktifkan akun layanan (akses API mesin-ke-mesin melalui alur OAuth2 client credentials).",
@@ -1879,7 +1772,6 @@
 	"deactivateServiceAccountConfirm": "Menonaktifkan akun layanan ini akan langsung mencabut semua token akses yang tertunda dan memblokir penerbitan token baru. Lanjutkan?",
 	"gracePeriod": "Masa tenggang",
 	"gracePeriodHelpText": "Rahasia saat ini terus berfungsi selama durasi ini setelah rotasi, sehingga integrasi dapat diperbarui tanpa waktu henti. Dibatasi hingga 1 bulan.",
-	"gracePeriodTooLong": "Masa tenggang tidak boleh lebih dari 1 bulan.",
 	"previousSecretValidUntil": "Rahasia klien sebelumnya tetap berlaku hingga {date}.",
 	"enableJitProvisioning": "Aktifkan penyediaan otomatis",
 	"enableJitProvisioningHelpText": "Secara otomatis membuat akun, dengan grup pengguna default di bawah ini, untuk pengguna yang melakukan autentikasi melalui SSO untuk pertama kalinya.",

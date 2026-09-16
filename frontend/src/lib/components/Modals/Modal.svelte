@@ -100,9 +100,9 @@
 	}: Props = $props();
 
 	// Base Styles
-	const cBackdrop = 'fixed top-0 left-0 right-0 bottom-0 bg-surface-950/50 p-4';
+	const cBackdrop = 'fixed top-0 left-0 right-0 bottom-0 bg-surface-950/50 dark:bg-black/60 p-4';
 	const cTransitionLayer = 'w-full h-fit min-h-full flex justify-center';
-	const cModal = 'block overflow-y-auto';
+	const cModal = 'block overflow-y-auto border border-surface-500';
 	const cModalImage = 'w-full h-auto';
 
 	// Local
@@ -329,14 +329,25 @@
 								>
 							</footer>
 						{:else if $modalStore[0].type === 'prompt'}
+							{@const { multiline, rows, ...valueAttr } = $modalStore[0].valueAttr ?? {}}
 							<form class="space-y-4" onsubmit={onPromptSubmit}>
-								<input
-									class="modal-prompt-input input"
-									name="prompt"
-									type="text"
-									bind:value={promptValue}
-									{...$modalStore[0].valueAttr}
-								/>
+								{#if multiline}
+									<textarea
+										class="modal-prompt-input textarea w-full"
+										name="prompt"
+										rows={rows ?? 5}
+										bind:value={promptValue}
+										{...valueAttr}
+									></textarea>
+								{:else}
+									<input
+										class="modal-prompt-input input"
+										name="prompt"
+										type="text"
+										bind:value={promptValue}
+										{...valueAttr}
+									/>
+								{/if}
 								<footer class="modal-footer {regionFooter}">
 									<button type="button" class="btn {buttonNeutral}" onclick={onClose}
 										>{buttonTextCancel}</button

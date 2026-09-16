@@ -98,6 +98,10 @@
 		optionsEndpoint="applied-controls"
 		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
+		optionsInfoFields={{
+			fields: [{ field: 'category', translate: true }],
+			position: 'prefix'
+		}}
 		field="applied_controls"
 		label={m.appliedControls()}
 		cacheLock={cacheLocks['applied_controls']}

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -92,180 +94,185 @@
 		return data;
 	}
 
-	onMount(async () => {
-		if (!lowerBound || !upperBound || lowerBound >= upperBound) {
+	onMount(() => {
+		if (
+			!lowerBound ||
+			!upperBound ||
+			!Number.isFinite(lowerBound) ||
+			!Number.isFinite(upperBound) ||
+			lowerBound <= 0 ||
+			lowerBound >= upperBound
+		) {
 			return;
 		}
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			const echarts = await import('echarts');
+			if (!active) return;
+			const el = document.getElementById(chart_id);
+			if (!el) return;
 
-		const echarts = await import('echarts');
-		let chart = echarts.init(
-			document.getElementById(chart_id),
-			document.documentElement.classList.contains('dark') ? 'dark' : null,
-			{ renderer: 'svg' }
-		);
+			const { mu, sigma } = calculateLognormalParams(lowerBound, upperBound);
 
-		const { mu, sigma } = calculateLognormalParams(lowerBound, upperBound);
+			// Verify our calculation by checking if the percentiles match
+			const calculated5th = Math.exp(mu + sigma * -1.64485362695147);
+			const calculated95th = Math.exp(mu + sigma * 1.64485362695147);
 
-		// Verify our calculation by checking if the percentiles match
-		const calculated5th = Math.exp(mu + sigma * -1.64485362695147);
-		const calculated95th = Math.exp(mu + sigma * 1.64485362695147);
+			// Call the callback with calculated parameters
+			if (onParametersCalculated) {
+				onParametersCalculated(mu, sigma);
+			}
 
-		// Call the callback with calculated parameters
-		if (onParametersCalculated) {
-			onParametersCalculated(mu, sigma);
-		}
+			dispose = mountThemeAwareChart(echarts, el, () => {
+				// Use a more reasonable range: from 10% of lower bound to 10x upper bound
+				const chartMin = Math.max(lowerBound * 0.1, 1);
+				const chartMax = upperBound * 5;
+				const distributionData = generateLognormalPDF(mu, sigma, chartMin, chartMax, xAxisScale);
 
-		// Use a more reasonable range: from 10% of lower bound to 10x upper bound
-		const chartMin = Math.max(lowerBound * 0.1, 1);
-		const chartMax = upperBound * 5;
-		const distributionData = generateLognormalPDF(mu, sigma, chartMin, chartMax, xAxisScale);
-
-		const option = {
-			title: {
-				text: title,
-				left: 'center',
-				textStyle: {
-					fontSize: 16,
-					fontWeight: 'bold'
-				}
-			},
-			grid: {
-				show: false,
-				left: '10%',
-				right: '10%',
-				top: '15%',
-				bottom: '15%'
-			},
-			tooltip: {
-				show: !!enableTooltip,
-				trigger: 'axis',
-				formatter: function (params: any) {
-					const point = params[0];
-					const value = point.value[0];
-					const density = point.value[1];
-					let formattedValue;
-					if (value >= 1000000) {
-						formattedValue = `$${(value / 1000000).toFixed(1)}M`;
-					} else if (value >= 1000) {
-						formattedValue = `$${(value / 1000).toFixed(0)}K`;
-					} else {
-						formattedValue = `$${value.toFixed(0)}`;
-					}
-					return `${xAxisLabel}: ${formattedValue}<br/>${yAxisLabel}: ${density.toExponential(3)}`;
-				}
-			},
-			xAxis: {
-				type: xAxisScale === 'log' ? 'log' : 'value',
-				name: xAxisLabel,
-				nameLocation: 'middle',
-				nameGap: 30,
-				min: chartMin,
-				max: chartMax,
-				axisLabel: {
-					formatter: function (value: number) {
-						if (value >= 1000000) {
-							return '$' + (value / 1000000).toFixed(1) + 'M';
-						} else if (value >= 1000) {
-							return '$' + (value / 1000).toFixed(0) + 'K';
-						} else {
-							return '$' + value.toFixed(0);
+				const option = {
+					title: {
+						text: title,
+						left: 'center',
+						textStyle: {
+							fontSize: 16,
+							fontWeight: 'bold'
 						}
-					}
-				},
-				splitLine: {
-					show: true,
-					lineStyle: {
-						color: '#e0e0e0',
-						type: 'dashed'
-					}
-				}
-			},
-			yAxis: {
-				type: 'value',
-				name: yAxisLabel,
-				nameLocation: 'middle',
-				nameGap: 50,
-				min: 0,
-				axisLabel: {
-					formatter: function (value: number) {
-						if (value === 0) return '0';
-						return value.toExponential(1);
-					}
-				},
-				splitLine: {
-					show: true,
-					lineStyle: {
-						color: '#e0e0e0',
-						type: 'dashed'
-					}
-				}
-			},
-			series: [
-				{
-					name: 'Impact Distribution',
-					type: 'line',
-					smooth: true,
-					symbol: 'none',
-					showSymbol: false,
-					lineStyle: {
-						color: '#4f46e5',
-						width: 3
 					},
-					areaStyle: {
-						opacity: 0.2,
-						color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-							{
-								offset: 0,
-								color: '#4f46e5'
-							},
-							{
-								offset: 1,
-								color: 'rgba(79, 70, 229, 0.05)'
+					grid: {
+						show: false,
+						left: '10%',
+						right: '10%',
+						top: '15%',
+						bottom: '15%'
+					},
+					tooltip: {
+						show: !!enableTooltip,
+						trigger: 'axis',
+						formatter: function (params: any) {
+							const point = params[0];
+							const value = point.value[0];
+							const density = point.value[1];
+							let formattedValue;
+							if (value >= 1000000) {
+								formattedValue = `$${(value / 1000000).toFixed(1)}M`;
+							} else if (value >= 1000) {
+								formattedValue = `$${(value / 1000).toFixed(0)}K`;
+							} else {
+								formattedValue = `$${value.toFixed(0)}`;
 							}
-						])
+							return `${xAxisLabel}: ${formattedValue}<br/>${yAxisLabel}: ${density.toExponential(3)}`;
+						}
 					},
-					data: distributionData,
-					// Add vertical lines for 5th and 95th percentiles
-					markLine: {
-						silent: true,
-						symbol: 'none',
-						lineStyle: {
-							color: '#dc2626',
-							type: 'dashed',
-							width: 2
-						},
-						label: {
-							show: true,
-							position: 'end',
-							formatter: function (params: any) {
-								const value = params.value;
+					xAxis: {
+						type: xAxisScale === 'log' ? 'log' : 'value',
+						name: xAxisLabel,
+						nameLocation: 'middle',
+						nameGap: 30,
+						min: chartMin,
+						max: chartMax,
+						axisLabel: {
+							formatter: function (value: number) {
 								if (value >= 1000000) {
-									return `$${(value / 1000000).toFixed(1)}M`;
+									return '$' + (value / 1000000).toFixed(1) + 'M';
 								} else if (value >= 1000) {
-									return `$${(value / 1000).toFixed(0)}K`;
+									return '$' + (value / 1000).toFixed(0) + 'K';
 								} else {
-									return `$${value.toFixed(0)}`;
+									return '$' + value.toFixed(0);
 								}
 							}
 						},
-						data: [
-							{ xAxis: lowerBound, label: { formatter: '5th %ile: {c}' } },
-							{ xAxis: upperBound, label: { formatter: '95th %ile: {c}' } }
-						]
-					}
-				}
-			]
-		};
+						splitLine: {
+							show: true,
+							lineStyle: {
+								color: '#e0e0e0',
+								type: 'dashed'
+							}
+						}
+					},
+					yAxis: {
+						type: 'value',
+						name: yAxisLabel,
+						nameLocation: 'middle',
+						nameGap: 50,
+						min: 0,
+						axisLabel: {
+							formatter: function (value: number) {
+								if (value === 0) return '0';
+								return value.toExponential(1);
+							}
+						},
+						splitLine: {
+							show: true,
+							lineStyle: {
+								color: '#e0e0e0',
+								type: 'dashed'
+							}
+						}
+					},
+					series: [
+						{
+							name: 'Impact Distribution',
+							type: 'line',
+							smooth: true,
+							symbol: 'none',
+							showSymbol: false,
+							lineStyle: {
+								color: '#4f46e5',
+								width: 3
+							},
+							areaStyle: {
+								opacity: 0.2,
+								color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+									{
+										offset: 0,
+										color: '#4f46e5'
+									},
+									{
+										offset: 1,
+										color: 'rgba(79, 70, 229, 0.05)'
+									}
+								])
+							},
+							data: distributionData,
+							// Add vertical lines for 5th and 95th percentiles
+							markLine: {
+								silent: true,
+								symbol: 'none',
+								lineStyle: {
+									color: '#dc2626',
+									type: 'dashed',
+									width: 2
+								},
+								label: {
+									show: true,
+									position: 'end',
+									formatter: function (params: any) {
+										const value = params.value;
+										if (value >= 1000000) {
+											return `$${(value / 1000000).toFixed(1)}M`;
+										} else if (value >= 1000) {
+											return `$${(value / 1000).toFixed(0)}K`;
+										} else {
+											return `$${value.toFixed(0)}`;
+										}
+									}
+								},
+								data: [
+									{ xAxis: lowerBound, label: { formatter: '5th %ile: {c}' } },
+									{ xAxis: upperBound, label: { formatter: '95th %ile: {c}' } }
+								]
+							}
+						}
+					]
+				};
 
-		option.backgroundColor = 'transparent';
-		chart.setOption(option);
-
-		window.addEventListener('resize', function () {
-			chart.resize();
-		});
-
+				return option;
+			});
+		})();
 		return () => {
-			chart.dispose();
+			active = false;
+			dispose?.();
 		};
 	});
 </script>

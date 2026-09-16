@@ -1,47 +1,27 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { error } from '@sveltejs/kit';
+import { error, type NumericRange } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
+// fetch() does not reject on 4xx, so an unchecked count turns a 403 into an
+// empty state.
+const probeCount = async (fetchFn: typeof fetch, endpoint: string, label: string) => {
+	const res = await fetchFn(`${BASE_API_URL}/${endpoint}/?limit=1`);
+	if (!res.ok) {
+		error(res.status as NumericRange<400, 599>, `Error loading ${label}`);
+	}
+	return (await res.json()).count ?? 0;
+};
+
 export const load: PageServerLoad = async ({ fetch }) => {
-	const [complianceRes, riskRes] = await Promise.all([
-		fetch(`${BASE_API_URL}/compliance-assessments/?ordering=-created_at`),
-		fetch(`${BASE_API_URL}/risk-assessments/?ordering=-created_at`)
+	// Assessments are picked lazily client-side (server-side search) — only probe
+	// the counts here so the empty states can be shown without fetching every row.
+	const [complianceAssessmentsCount, riskAssessmentsCount] = await Promise.all([
+		probeCount(fetch, 'compliance-assessments', 'compliance assessments'),
+		probeCount(fetch, 'risk-assessments', 'risk assessments')
 	]);
 
-	if (!complianceRes.ok) {
-		error(400, 'Error loading compliance assessments');
-	}
-	if (!riskRes.ok) {
-		error(400, 'Error loading risk assessments');
-	}
-
-	const complianceData = await complianceRes.json();
-	const riskData = await riskRes.json();
-	const complianceAssessments = complianceData.results ?? complianceData;
-
-	// Fetch implementation_groups_definition for each unique framework
-	const frameworkIds = [
-		...new Set(
-			complianceAssessments.map((ca: Record<string, any>) => ca.framework?.id).filter(Boolean)
-		)
-	];
-
-	const frameworkGroupsMap: Record<string, any[]> = {};
-	if (frameworkIds.length > 0) {
-		const frameworkResponses = await Promise.all(
-			frameworkIds.map((id: string) => fetch(`${BASE_API_URL}/frameworks/${id}/`))
-		);
-		for (const res of frameworkResponses) {
-			if (res.ok) {
-				const fw = await res.json();
-				frameworkGroupsMap[fw.id] = fw.implementation_groups_definition || [];
-			}
-		}
-	}
-
 	return {
-		complianceAssessments,
-		riskAssessments: riskData.results ?? riskData,
-		frameworkGroupsMap
+		complianceAssessmentsCount,
+		riskAssessmentsCount
 	};
 };

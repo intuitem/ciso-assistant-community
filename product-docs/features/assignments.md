@@ -47,7 +47,48 @@ The default state is `draft` and you can set them and send feedbacks individuall
 
 <figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
+An assignment moves through the following states:
 
+* `draft`: being prepared. Actors and requirements can be edited, and the assignment can be deleted.
+* `in_progress`: launched, the respondent is working on it.
+* `submitted`: the respondent has handed the work back for review.
+* `changes_requested`: the reviewer asked for corrections, the respondent is expected to resubmit.
+* `closed`: reviewed and accepted.
+
+Once an assignment leaves `draft`, its scope (assigned actors and requirements) is locked, so the agreement between the auditor and the respondent stays consistent while work is ongoing. Edit and delete are therefore only available in `draft`. Dynamic frameworks are the one exception, described below.
+
+To change a locked assignment, a reviewer reopens it back to `draft` from any other state, which unlocks editing and reassignment. Respondents are notified by email of a reopening only when it comes from `in_progress` or `changes_requested`, the states where they were actively working; reopening a `submitted` or `closed` assignment stays silent.
+
+### Assignments on a dynamic framework
+
+Some frameworks are dynamic: a choice in a question selects an implementation group, which decides which requirements the audit actually covers. On those, answering a question can select a new implementation group and bring requirements into the audit that were not visible when the assignment was built. Those requirements are added automatically to the assignment holding the question that revealed them, so the respondent actually gets the follow-up questions their own answer triggered.
+
+This is the only case where an assignment's scope changes outside `draft`, and it stays narrow:
+
+* only requirements that were genuinely hidden before are added, never one the auditor saw and chose to leave out;
+* a `submitted` or `closed` assignment is never touched, in either direction, and keeps the scope it was reviewed on;
+* if the revealing question belongs to no assignment, nothing is added and the auditor dispatches the new requirements manually.
+
+The reverse applies too: changing an answer so an implementation group is deselected removes the requirements that left the scope from their assignment. A requirement that comes back later is routed again by the same rule, so it may land on a different assignment than the one it had.
+
+### Reviewing item by item
+
+The assignment status says where the round as a whole stands. Underneath it, each requirement carries its own **review state**, so a reviewer can be specific about what needs work instead of bouncing the whole assignment back with a note.
+
+Reading the respondent's answers, a reviewer has two buttons on every requirement:
+
+* **Request changes** — flags this item. The respondent sees a red banner on it pointing them at the comments for the detail.
+* the check button (**Mark as accepted**) — records that this one is settled.
+
+An item is therefore in one of four states: unreviewed, `changes_requested`, `resubmitted`, or `accepted`. The flags then follow the assignment's own transitions:
+
+* When the respondent hands back a `changes_requested` assignment, everything flagged becomes **Resubmitted** — it's been answered and is waiting for another look.
+* When the reviewer closes a `submitted` assignment, everything resubmitted becomes **Accepted**.
+* Every other transition leaves the flags alone. Reopening an assignment does not clear them: an accepted item records a verdict that was actually given, and re-flagging it is the reviewer's call, not a side effect.
+
+Sending an assignment back opens a dialog that says how many items are currently flagged, with a link to them — or tells you that none are, and that the respondent will only get the note you write. Flagging the items first is what turns "please fix this" into something actionable.
+
+Progress through the review is shown as a **Review progress** bar alongside completion, and the flagged count is surfaced on the [campaign](campaigns.md) dashboard so a reviewer can see across a whole round which questionnaires are waiting on rework.
 
 For review, if the auditors don't have the permissions to update the requirements compliance result, which will be the general case to keep consistent inputs from the respondent side, they can interact with comments on each one:\
 <br>

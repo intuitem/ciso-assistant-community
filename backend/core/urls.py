@@ -8,6 +8,7 @@ from sec_intel.views import (
 )
 from threat_modeling.views import ThreatModelViewSet
 from tprm.views import (
+    EntityScoreViewSet,
     EntityViewSet,
     RepresentativeViewSet,
     SolutionViewSet,
@@ -31,6 +32,7 @@ from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r"folders", FolderViewSet, basename="folders")
+router.register(r"roles", RoleViewSet, basename="roles")
 router.register(
     r"custom-fields",
     CustomFieldDefinitionViewSet,
@@ -41,6 +43,7 @@ router.register(
     r"entity-assessments", EntityAssessmentViewSet, basename="entity-assessments"
 )
 router.register(r"solutions", SolutionViewSet, basename="solutions")
+router.register(r"entity-scores", EntityScoreViewSet, basename="entity-scores")
 router.register(r"representatives", RepresentativeViewSet, basename="representatives")
 router.register(r"contracts", ContractViewSet, basename="contracts")
 router.register(r"perimeters", PerimeterViewSet, basename="perimeters")
@@ -141,6 +144,7 @@ router.register(
     r"findings-assessments", FindingsAssessmentViewSet, basename="findings-assessments"
 )
 router.register(r"findings", FindingViewSet, basename="findings")
+router.register(r"commitments", CommitmentRegisterViewSet, basename="commitments")
 router.register(r"incidents", IncidentViewSet, basename="incidents")
 router.register(r"timeline-entries", TimelineEntryViewSet, basename="timeline-entries")
 router.register(r"comments", CommentViewSet, basename="comments")
@@ -160,6 +164,19 @@ router.register(
 router.register(r"questions", QuestionViewSet, basename="questions")
 router.register(r"question-choices", QuestionChoiceViewSet, basename="question-choices")
 router.register(r"answers", AnswerViewSet, basename="answers")
+router.register(r"quick-forms", QuickFormViewSet, basename="quick-forms")
+router.register(
+    r"quick-form-publications",
+    QuickFormPublicationViewSet,
+    basename="quick-form-publications",
+)
+router.register(r"my-requests", MyRequestViewSet, basename="my-requests")
+router.register(r"quick-form-pages", QuickFormPageViewSet, basename="quick-form-pages")
+router.register(
+    r"quick-form-responses",
+    QuickFormResponseViewSet,
+    basename="quick-form-responses",
+)
 router.register(r"presets", PresetViewSet, basename="presets")
 router.register(r"journeys", JourneyViewSet, basename="journeys")
 router.register(r"journey-steps", JourneyStepViewSet, basename="journey-steps")

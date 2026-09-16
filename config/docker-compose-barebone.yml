@@ -24,7 +24,7 @@ services:
       - ./db:/code/db
     user: "1001:1001"
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://backend:8000/api/health/ || exit 1"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://backend:8000/api/health/', timeout=5)"]
       interval: 10s
       timeout: 5s
       retries: 10

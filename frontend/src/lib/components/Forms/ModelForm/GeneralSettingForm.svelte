@@ -14,6 +14,8 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
 	import { setLocale } from '$paraglide/runtime';
+	import { invalidateAll } from '$app/navigation';
+	import type { DateFormatPreference } from '$lib/utils/datetime';
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 
@@ -28,6 +30,7 @@
 	let formDataCache = $state({});
 
 	const formStore = form.form;
+	const tainted = form.tainted;
 	const modalStore = getModalStore();
 	const toastStore = getToastStore();
 
@@ -68,6 +71,59 @@
 	let conversionRateValue = $state('1.0');
 
 	let forceLanguageInProgress = $state(false);
+	let forceDateFormatInProgress = $state(false);
+
+	const dateFormatOptions: { value: DateFormatPreference; label: string }[] = [
+		{ value: 'auto', label: m.dateFormatAuto() },
+		{ value: 'iso', label: m.dateFormatIso() },
+		{ value: 'ddmmyyyy', label: m.dateFormatDdmmyyyy() },
+		{ value: 'mmddyyyy', label: m.dateFormatMmddyyyy() },
+		{ value: 'long_dmy', label: m.dateFormatLongDmy() },
+		{ value: 'long_mdy', label: m.dateFormatLongMdy() }
+	];
+
+	function handleForceDateFormat() {
+		const firstModal: ModalSettings = {
+			type: 'confirm',
+			title: m.forceDateFormatConfirmTitle(),
+			body: m.forceDateFormatConfirmBody(),
+			response: (confirmed: boolean) => {
+				if (!confirmed) return;
+				const secondModal: ModalSettings = {
+					type: 'confirm',
+					title: m.forceDateFormatFinalConfirmTitle(),
+					body: m.forceDateFormatFinalConfirmBody(),
+					response: async (confirmed2: boolean) => {
+						if (!confirmed2) return;
+						forceDateFormatInProgress = true;
+						try {
+							const res = await fetch('/settings/force-date-format', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' }
+							});
+							const data = await res.json();
+							if (res.ok) {
+								toastStore.trigger({
+									message: m.forceDateFormatSuccess(),
+									preset: 'success'
+								});
+								await invalidateAll();
+							} else {
+								toastStore.trigger({
+									message: data.error ? safeTranslate(data.error) : m.forceDateFormatFailed(),
+									preset: 'error'
+								});
+							}
+						} finally {
+							forceDateFormatInProgress = false;
+						}
+					}
+				};
+				modalStore.trigger(secondModal);
+			}
+		};
+		modalStore.trigger(firstModal);
+	}
 
 	function handleForceLanguage() {
 		const firstModal: ModalSettings = {
@@ -99,7 +155,7 @@
 								}
 							} else {
 								toastStore.trigger({
-									message: data.error || m.forceLanguageFailed(),
+									message: data.error ? safeTranslate(data.error) : m.forceLanguageFailed(),
 									preset: 'error'
 								});
 							}
@@ -194,14 +250,58 @@
 				/>
 				<hr class="my-2" />
 				<p class="text-sm text-surface-600-400">{m.forceLanguageHelpText()}</p>
+				{#if $tainted?.default_language}
+					<p class="text-sm text-warning-700-300">{m.saveSettingsBeforeForcing()}</p>
+				{/if}
 				<button
 					type="button"
 					class="btn preset-filled-warning-500 text-sm"
 					onclick={handleForceLanguage}
-					disabled={forceLanguageInProgress}
+					disabled={forceLanguageInProgress || Boolean($tainted?.default_language)}
 				>
 					<i class="fa-solid fa-users mr-2"></i>
 					{m.forceLanguageForAllUsers()}
+				</button>
+			</div>
+		</Accordion.ItemContent>
+	</Accordion.Item>
+	<Accordion.Item value="dateFormat">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-calendar-days mr-2"></i><span class="flex-1 text-left"
+				>{m.dateFormatSettings()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4 space-y-4">
+				<Select
+					{form}
+					field="default_date_format"
+					options={dateFormatOptions}
+					label={m.defaultDateFormat()}
+					helpText={m.defaultDateFormatHelpText()}
+					translateOptions={false}
+				/>
+				<hr class="my-2" />
+				<p class="text-sm text-surface-600-400">{m.forceDateFormatHelpText()}</p>
+				{#if $tainted?.default_date_format}
+					<p class="text-sm text-warning-700-300">{m.saveSettingsBeforeForcing()}</p>
+				{/if}
+				<button
+					type="button"
+					class="btn preset-filled-warning-500 text-sm"
+					onclick={handleForceDateFormat}
+					disabled={forceDateFormatInProgress || Boolean($tainted?.default_date_format)}
+				>
+					<i class="fa-solid fa-users mr-2"></i>
+					{m.forceDateFormatForAllUsers()}
 				</button>
 			</div>
 		</Accordion.ItemContent>

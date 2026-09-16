@@ -114,7 +114,7 @@
 			<div class="flex gap-2">
 				<Anchor
 					href="/compliance-assessments/{data.targetId}"
-					class="btn preset-filled-surface-500"
+					class="btn preset-tonal-surface border border-surface-500"
 				>
 					<i class="fa-solid fa-arrow-left mr-2"></i>
 					{m.cancel()}

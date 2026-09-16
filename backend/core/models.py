@@ -2,7 +2,11 @@ import json
 import os
 import re
 import hashlib
+import operator
 from datetime import date, datetime
+from functools import reduce
+
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from pathlib import Path
 from typing import Self, Union, List, Optional, Literal, Tuple, Final, Iterable
 import statistics
@@ -36,7 +40,7 @@ from django.utils.translation import gettext_lazy as _
 from structlog import get_logger
 from django.utils.timezone import now
 
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from iam.models import Folder, FolderMixin, User
 from custom_fields.host import CustomFieldsMixin
 
 from library.helpers import (
@@ -121,16 +125,111 @@ def match_urn(urn_string):
         return None
 
 
-def _sync_questions_from_data(requirement_node, questions_data):
-    """Sync Question and QuestionChoice objects for a RequirementNode.
+def _serialize_for_quality_check(queryset) -> list[dict]:
+    """Serialize a queryset to plain dicts, with the object id folded in.
 
-    For new nodes this behaves like a pure create. For existing nodes it
-    upserts questions by URN and choices by ref_id, then prunes stale rows.
+    serializers.serialize() fetches every m2m field one object at a time, so the
+    m2m fields are prefetched here to keep quality checks at a constant number of
+    queries whatever the size of the assessment.
     """
-    from core.models import Question, QuestionChoice
+    m2m_fields = [f.name for f in queryset.model._meta.many_to_many]
+    payload = serializers.serialize("json", queryset.prefetch_related(*m2m_fields))
+    return [{**item["fields"], "id": item["pk"]} for item in json.loads(payload)]
+
+
+def _translate_questions(owner) -> dict | None:
+    """Questions of a RequirementNode or QuickFormPage as the {urn: definition}
+    dict the frontend renderer consumes, translated to the active language."""
+    # Reuse the caller's prefetch when it covers choices too: calling
+    # prefetch_related() on the related manager discards
+    # _prefetched_objects_cache and re-queries once per owner.
+    prefetched = (getattr(owner, "_prefetched_objects_cache", None) or {}).get(
+        "questions"
+    )
+    if prefetched is not None and all(
+        "choices" in (getattr(q, "_prefetched_objects_cache", None) or {})
+        for q in prefetched
+    ):
+        questions_qs = prefetched
+    else:
+        questions_qs = owner.questions.prefetch_related("choices").all()
+    if not questions_qs:
+        return None
+
+    current_lang = get_language()
+
+    def _translate_choice(choice):
+        tr = (choice.translations or {}).get(current_lang, {})
+        choice_data = {
+            "urn": choice.urn,
+            "value": tr.get("value", choice.value or ""),
+        }
+        description = tr.get("description", choice.description)
+        if description:
+            choice_data["description"] = description
+        if choice.add_score is not None:
+            choice_data["add_score"] = choice.add_score
+        if choice.compute_result is not None:
+            resolved = resolve_compute_result(choice.compute_result)
+            if resolved is not None:
+                choice_data["compute_result"] = resolved
+        if choice.color:
+            choice_data["color"] = choice.color
+        if choice.select_implementation_groups:
+            choice_data["select_implementation_groups"] = (
+                choice.select_implementation_groups
+            )
+        if choice.annotation:
+            choice_data["annotation"] = choice.annotation
+        return choice_data
+
+    result = {}
+    for question in questions_qs:
+        q_tr = (question.translations or {}).get(current_lang, {})
+        q_data = {
+            "type": question.type,
+            "text": q_tr.get("text", question.text or ""),
+            "weight": question.weight,
+        }
+        if not question.required:
+            q_data["required"] = False
+        if question.annotation:
+            q_data["annotation"] = question.annotation
+        if question.config is not None:
+            q_data["config"] = question.config
+        choices = [_translate_choice(c) for c in question.choices.all()]
+        if choices:
+            q_data["choices"] = choices
+        if question.depends_on:
+            q_data["depends_on"] = question.depends_on
+        result[question.urn] = q_data
+
+    return result if result else None
+
+
+def _sync_questions_from_data(
+    owner, questions_data, protected_urns=None, protected_choice_urns=None
+):
+    """Sync Question and QuestionChoice objects for a question owner.
+
+    The owner is either a RequirementNode (compliance questionnaire) or a
+    QuickFormPage (quick form): both expose a `questions` reverse relation
+    and a folder, and Question carries exactly one of the two parent FKs.
+
+    For new owners this behaves like a pure create. For existing owners it
+    upserts questions by URN and choices by ref_id, then prunes stale rows.
+    URNs in `protected_urns` (questions) and `protected_choice_urns` (choices)
+    are never pruned: deleting either cascades into answers that a decided
+    record depends on — a dropped choice silently empties the selection it was
+    part of.
+    """
+    # Question, QuestionChoice and QuickFormPage are module globals here: this
+    # helper only runs after the module has finished loading.
+    owner_field = "page" if isinstance(owner, QuickFormPage) else "requirement_node"
+    requirement_node = owner
 
     existing_questions = {
-        q.urn: q for q in requirement_node.questions.prefetch_related("choices").all()
+        q.urn: q for q in owner.questions.prefetch_related("choices").all()
     }
     incoming_urns = set()
 
@@ -151,6 +250,7 @@ def _sync_questions_from_data(requirement_node, questions_data):
             "depends_on": q_data.get("depends_on"),
             "order": order,
             "weight": q_data.get("weight", 1),
+            "required": q_data.get("required", True) is not False,
             "translations": q_data.get("translations"),
         }
 
@@ -161,10 +261,9 @@ def _sync_questions_from_data(requirement_node, questions_data):
             question.save()
         else:
             question = Question.objects.create(
-                requirement_node=requirement_node,
                 urn=q_urn,
                 folder=requirement_node.folder,
-                is_published=True,
+                **{owner_field: owner},
                 **question_fields,
             )
 
@@ -188,7 +287,11 @@ def _sync_questions_from_data(requirement_node, questions_data):
                 incoming_urns_choices.add(c_urn)
 
         # 2. Delete choices with URNs no longer in incoming data
-        stale_urns_choices = set(existing_choices_by_urn.keys()) - incoming_urns_choices
+        stale_urns_choices = (
+            set(existing_choices_by_urn.keys())
+            - incoming_urns_choices
+            - (protected_choice_urns or set())
+        )
         if stale_urns_choices:
             question.choices.filter(urn__in=stale_urns_choices).delete()
 
@@ -235,7 +338,6 @@ def _sync_questions_from_data(requirement_node, questions_data):
                         question=question,
                         urn=c_urn,
                         folder=requirement_node.folder,
-                        is_published=True,
                         **choice_fields,
                     )
             else:
@@ -244,16 +346,15 @@ def _sync_questions_from_data(requirement_node, questions_data):
                     question=question,
                     urn=None,
                     folder=requirement_node.folder,
-                    is_published=True,
                     **choice_fields,
                 )
 
     # Delete questions whose URNs are no longer in the incoming data
-    stale_urns = set(existing_questions.keys()) - incoming_urns
+    stale_urns = (
+        set(existing_questions.keys()) - incoming_urns - (protected_urns or set())
+    )
     if stale_urns:
-        Question.objects.filter(
-            requirement_node=requirement_node, urn__in=stale_urns
-        ).delete()
+        Question.objects.filter(**{owner_field: owner}, urn__in=stale_urns).delete()
 
 
 ########################### Referential objects #########################
@@ -347,7 +448,7 @@ class I18nObjectMixin(models.Model):
         abstract = True
 
 
-class FilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
+class FilteringLabel(FolderMixin, AbstractBaseModel):
     label = models.CharField(
         max_length=100,
         verbose_name=_("Label"),
@@ -375,7 +476,7 @@ class FilteringLabelMixin(models.Model):
         abstract = True
 
 
-class LibraryFilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
+class LibraryFilteringLabel(FolderMixin, AbstractBaseModel):
     @property
     def reference_count(self) -> int:
         return self.stored_libraries.count()
@@ -574,7 +675,6 @@ class StoredLibrary(LibraryMixin):
             ]
             new_library = StoredLibrary.objects.create(
                 name=library_data["name"],
-                is_published=True,
                 urn=urn,
                 locale=locale,
                 version=version,
@@ -764,7 +864,7 @@ class LibraryDraft(NameDescriptionMixin, FolderMixin):
     # The library "objects" document (framework, threats, reference_controls,
     # risk_matrices, requirement_mapping_sets, metric_definitions, preset).
     content = models.JSONField(default=dict, blank=True)
-    # Builder lifecycle markers — never overload is_published (IAM visibility).
+
     first_published_at = models.DateTimeField(null=True, blank=True)
     last_published_at = models.DateTimeField(null=True, blank=True)
     # Snapshot of what was last loaded, so the builder can tell a published
@@ -868,7 +968,6 @@ class LibraryUpdater:
         }
         self.referential_object_dict = {
             "provider": self.new_library.provider,
-            "is_published": True,
         }
 
         # The "framework" field will be ignored if the "frameworks" field is defined.
@@ -898,6 +997,10 @@ class LibraryUpdater:
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
         self.metric_definitions = new_library_content.get("metric_definitions", [])
+
+        self.new_quick_forms = new_library_content.get("quick_forms")
+        if isinstance(self.new_quick_forms, dict):
+            self.new_quick_forms = [self.new_quick_forms]
 
     def update_dependencies(self) -> Union[str, None]:
         for dependency_urn in self.dependencies:
@@ -1686,6 +1789,152 @@ class LibraryUpdater:
                     if answers_to_create:
                         Answer.objects.bulk_create(answers_to_create, batch_size=500)
 
+    def update_quick_forms(self):
+        """Upsert quick forms, pages and questions by URN, prune what the new
+        version dropped, then reconcile every live response: seed answers for
+        new questions, drop selections that no longer exist, re-evaluate."""
+        for new_quick_form in self.new_quick_forms:
+            with transaction.atomic():
+                pages = new_quick_form.get("pages") or []
+                urn = new_quick_form["urn"].lower()
+                form_fields = {
+                    "urn": urn,
+                    "ref_id": new_quick_form.get("ref_id"),
+                    "name": new_quick_form.get("name"),
+                    "description": new_quick_form.get("description"),
+                    "annotation": new_quick_form.get("annotation"),
+                    "translations": new_quick_form.get("translations", {}),
+                    "outcomes_definition": new_quick_form.get("outcomes_definition")
+                    or [],
+                    "scores_definition": new_quick_form.get("scores_definition"),
+                    "ref_id_prefix": new_quick_form.get("ref_id_prefix") or "",
+                    "title_question_urn": (
+                        new_quick_form.get("title_question_urn") or ""
+                    ).lower(),
+                    "urn_namespace": urn.split(":")[1]
+                    if urn.startswith("urn:")
+                    else "custom",
+                }
+                quick_form, _ = QuickForm.objects.update_or_create(
+                    urn=urn,
+                    defaults=form_fields,
+                    create_defaults={
+                        **self.referential_object_dict,
+                        **self.i18n_object_dict,
+                        **form_fields,
+                        "library": self.old_library,
+                    },
+                )
+
+                # Question URNs a submitted or closed response has answered.
+                # Computed before any sync, and protected from every prune below.
+                decided_question_urns = set(
+                    Answer.objects.filter(
+                        response__quick_form=quick_form,
+                        question__page__quick_form=quick_form,
+                    )
+                    .exclude(response__status=QuickFormResponse.Status.DRAFT)
+                    .values_list("question__urn", flat=True)
+                )
+                decided_choice_urns = set(
+                    QuestionChoice.objects.filter(
+                        choice_answers__response__quick_form=quick_form
+                    )
+                    .exclude(
+                        choice_answers__response__status=(
+                            QuickFormResponse.Status.DRAFT
+                        )
+                    )
+                    .values_list("urn", flat=True)
+                )
+
+                incoming_page_urns = set()
+                for order, page in enumerate(pages):
+                    page_urn = page["urn"].lower()
+                    incoming_page_urns.add(page_urn)
+                    page_fields = {
+                        "ref_id": page.get("ref_id"),
+                        "name": page.get("name"),
+                        "description": page.get("description"),
+                        "annotation": page.get("annotation"),
+                        "translations": page.get("translations", {}),
+                        "order": order,
+                        "visibility_expression": page.get("visibility_expression"),
+                    }
+                    page_object, _ = QuickFormPage.objects.update_or_create(
+                        quick_form=quick_form,
+                        urn=page_urn,
+                        defaults=page_fields,
+                        create_defaults={
+                            **self.referential_object_dict,
+                            **self.i18n_object_dict,
+                            **page_fields,
+                            "folder": Folder.get_root_folder(),
+                        },
+                    )
+                    questions = page.get("questions")
+                    _sync_questions_from_data(
+                        page_object,
+                        questions if isinstance(questions, dict) else {},
+                        protected_urns=decided_question_urns,
+                        protected_choice_urns=decided_choice_urns,
+                    )
+                # Dropped pages cascade to their questions and their answers, so a
+                # page a decided response answered is kept instead of pruned: its
+                # record is what the decision was made on.
+                prunable = quick_form.pages.exclude(urn__in=incoming_page_urns)
+                for stale_page in prunable:
+                    if decided_question_urns & {
+                        q.urn for q in stale_page.questions.all()
+                    }:
+                        logger.warning(
+                            "quick_form_page_kept_for_decided_responses",
+                            quick_form=quick_form.urn,
+                            page=stale_page.urn,
+                        )
+                        continue
+                    stale_page.delete()
+
+                questions = list(
+                    Question.objects.filter(
+                        page__quick_form=quick_form
+                    ).prefetch_related("choices")
+                )
+                # Only responses still being filled are reconciled. A submitted or
+                # closed response is the record a decision was made on: seeding new
+                # answers, dropping selections or recomputing its score and outcome
+                # would rewrite history a library upgrade has no business touching.
+                for response in QuickFormResponse.objects.filter(
+                    quick_form=quick_form,
+                    status=QuickFormResponse.Status.DRAFT,
+                ):
+                    existing_answers = {
+                        a.question_id: a
+                        for a in response.answers.prefetch_related("selected_choices")
+                    }
+                    for question in questions:
+                        answer = existing_answers.get(question.id)
+                        if answer is None:
+                            Answer.objects.create(
+                                response=response,
+                                question=question,
+                                folder=response.folder,
+                            )
+                            continue
+                        if question.type in (
+                            Question.Type.UNIQUE_CHOICE,
+                            Question.Type.MULTIPLE_CHOICE,
+                        ):
+                            valid_pks = {c.id for c in question.choices.all()}
+                            invalid = [
+                                c
+                                for c in answer.selected_choices.all()
+                                if c.id not in valid_pks
+                            ]
+                            if invalid:
+                                answer.selected_choices.remove(*invalid)
+                    response.recompute()
+
     def update_risk_matrices(self):
         for matrix in self.new_matrices:
             json_definition_keys = {
@@ -1847,8 +2096,16 @@ class LibraryUpdater:
         if self.new_matrices is not None:
             self.update_risk_matrices()
 
+        if self.new_quick_forms is not None:
+            self.update_quick_forms()
+
         if self.new_requirement_mapping_sets is not None:
             self.update_requirement_mapping_sets()
+
+        if self.new_library.is_preset:
+            from library.utils import upsert_preset_from_stored_library
+
+            upsert_preset_from_stored_library(self.new_library)
 
 
 class LoadedLibrary(LibraryMixin):
@@ -1933,6 +2190,9 @@ class LoadedLibrary(LibraryMixin):
             + BusinessImpactAnalysis.objects.filter(risk_matrix__library=self)
             .distinct()
             .count()
+            + QuickFormResponse.objects.filter(quick_form__library=self)
+            .distinct()
+            .count()
         )
 
     @property
@@ -1975,7 +2235,7 @@ class LoadedLibrary(LibraryMixin):
         )
 
 
-class ObjectClassification(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class ObjectClassification(NameDescriptionMixin, FolderMixin):
     DEFAULT_TLP_LEVELS = [
         {
             "abbreviation": "CLEAR",
@@ -2107,7 +2367,7 @@ class ClassificationLevel(NameDescriptionMixin, FolderMixin):
         return t.get("name") or self.abbreviation or self.name
 
 
-class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class Terminology(NameDescriptionMixin, FolderMixin):
     """
     Model to store custom terminology for the application
     """
@@ -2123,6 +2383,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         PROJECT_HEALTH = "project.health", "projectHealth"
         PROCESSING_NATURE = "processing.nature", "processingNature"
         PERSONAL_DATA_CATEGORY = "personal_data.category", "personalDataCategory"
+        ENTITY_SCORE_PROVIDER = "entity_score.provider", "entityScoreProvider"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -2488,6 +2749,33 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         },
     ]
 
+    DEFAULT_ENTITY_SCORE_PROVIDERS = [
+        {
+            "name": "SecurityScorecard",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+        {
+            "name": "CyberVadis",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+        {
+            "name": "Bitsight",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+        {
+            "name": "EcoVadis",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+    ]
+
     DEFAULT_METRIC_UNITS = [
         {
             "name": "count",
@@ -2546,7 +2834,6 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             "translations": {"fr": {"name": "événements par seconde"}},
         },
     ]
-    is_published = models.BooleanField(_("published"), default=True)
     field_path = models.CharField(
         max_length=100,
         verbose_name=_("Field path"),
@@ -2612,8 +2899,17 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         cls._seed_defaults(cls.DEFAULT_ENTITY_RELATIONSHIPS)
 
     @classmethod
+    def create_default_entity_score_providers(cls):
+        cls._seed_defaults(cls.DEFAULT_ENTITY_SCORE_PROVIDERS)
+
+    @classmethod
     def create_default_metric_units(cls):
         cls._seed_defaults(cls.DEFAULT_METRIC_UNITS)
+
+    @staticmethod
+    def _display(value: str) -> str:
+        """Capitalize lowercase terms; leave names carrying their own casing alone."""
+        return value if any(c.isupper() for c in value) else value.capitalize()
 
     @property
     def get_name_translated(self) -> str:
@@ -2621,24 +2917,15 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         locale_translation = translations.get(get_language(), {})
         if isinstance(locale_translation, dict):
             locale_translation = locale_translation.get("name", "")
-        return (
-            locale_translation.capitalize()
-            if locale_translation
-            else self.name.capitalize()
-        )
+        return self._display(locale_translation or self.name)
 
     def __str__(self) -> str:
-        return (
-            self.get_name_translated.capitalize()
-            if self.get_name_translated
-            else self.name.capitalize()
-        )
+        return self._display(self.get_name_translated or self.name)
 
 
 class Threat(
     ReferentialObjectMixin,
     I18nObjectMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     library = models.ForeignKey(
@@ -2648,8 +2935,6 @@ class Threat(
         blank=True,
         related_name="threats",
     )
-
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
 
@@ -2715,7 +3000,6 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
     typical_evidence = models.JSONField(
         verbose_name=_("Typical evidence"), null=True, blank=True
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
 
@@ -3098,69 +3382,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_questions_translated(self) -> dict | None:
-        # Reuse the caller's prefetch when it covers choices too: calling
-        # prefetch_related() on the related manager discards
-        # _prefetched_objects_cache and re-queries once per node.
-        prefetched = (getattr(self, "_prefetched_objects_cache", None) or {}).get(
-            "questions"
-        )
-        if prefetched is not None and all(
-            "choices" in (getattr(q, "_prefetched_objects_cache", None) or {})
-            for q in prefetched
-        ):
-            questions_qs = prefetched
-        else:
-            questions_qs = self.questions.prefetch_related("choices").all()
-        if not questions_qs:
-            return None
-
-        current_lang = get_language()
-
-        def _translate_choice(choice):
-            tr = (choice.translations or {}).get(current_lang, {})
-            choice_data = {
-                "urn": choice.urn,
-                "value": tr.get("value", choice.value or ""),
-            }
-            description = tr.get("description", choice.description)
-            if description:
-                choice_data["description"] = description
-            if choice.add_score is not None:
-                choice_data["add_score"] = choice.add_score
-            if choice.compute_result is not None:
-                resolved = resolve_compute_result(choice.compute_result)
-                if resolved is not None:
-                    choice_data["compute_result"] = resolved
-            if choice.color:
-                choice_data["color"] = choice.color
-            if choice.select_implementation_groups:
-                choice_data["select_implementation_groups"] = (
-                    choice.select_implementation_groups
-                )
-            if choice.annotation:
-                choice_data["annotation"] = choice.annotation
-            return choice_data
-
-        result = {}
-        for question in questions_qs:
-            q_tr = (question.translations or {}).get(current_lang, {})
-            q_data = {
-                "type": question.type,
-                "text": q_tr.get("text", question.text or ""),
-                "weight": question.weight,
-            }
-            if question.annotation:
-                q_data["annotation"] = question.annotation
-            if question.config is not None:
-                q_data["config"] = question.config
-            choices = [_translate_choice(c) for c in question.choices.all()]
-            if choices:
-                q_data["choices"] = choices
-            if question.depends_on:
-                q_data["depends_on"] = question.depends_on
-            result[question.urn] = q_data
-
-        return result if result else None
+        return _translate_questions(self)
 
     def clean(self):
         """Validate the optional per-requirement scale override.
@@ -3293,6 +3515,193 @@ class RequirementNodeAttachment(AbstractBaseModel, FolderMixin):
         return f"Attachment for {self.requirement_node}"
 
 
+class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
+    """A standalone form: ordered pages of questions, no requirements, no
+    audit. Library-backed like Framework (authored in the library builder,
+    published through the library importer)."""
+
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="quick_forms",
+        verbose_name=_("Library"),
+    )
+    urn_namespace = models.CharField(
+        max_length=50,
+        default="custom",
+        verbose_name=_("URN namespace"),
+    )
+    outcomes_definition = models.JSONField(
+        default=list, blank=True, verbose_name=_("Outcomes definition")
+    )
+    scores_definition = models.JSONField(
+        blank=True, null=True, verbose_name=_("Scores definition")
+    )
+    title_question_urn = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name=_("Title question"),
+        help_text=_(
+            "URN of the question whose answer names each response. Without it "
+            "every response from the same entry point carries the same name."
+        ),
+    )
+    ref_id_prefix = models.CharField(
+        max_length=8,
+        blank=True,
+        default="",
+        verbose_name=_("Reference ID prefix"),
+        help_text=_(
+            "Prefix for the human reference of each response (e.g. DER gives "
+            "DER.000042). Derived from the form's reference ID when left empty."
+        ),
+    )
+
+    fields_to_check = ["urn"]
+
+    class Meta:
+        verbose_name = _("Quick form")
+        verbose_name_plural = _("Quick forms")
+
+    def is_deletable(self) -> bool:
+        return not self.responses.exists()
+
+    @property
+    def resolved_ref_id_prefix(self) -> str:
+        """Author-set prefix, else the first alphanumeric run of the form's
+        ref_id upper-cased, else QF."""
+        if self.ref_id_prefix:
+            return self.ref_id_prefix.upper()
+        token = re.split(r"[^A-Za-z0-9]+", self.ref_id or "")[0] if self.ref_id else ""
+        return (token[:4].upper() or "QF") if token else "QF"
+
+    @property
+    def score_bounds(self) -> tuple[int, int]:
+        definition = self.scores_definition or {}
+        min_score = definition.get("min", 0)
+        max_score = definition.get("max", 100)
+        try:
+            min_score, max_score = int(min_score), int(max_score)
+        except TypeError, ValueError:
+            return 0, 100
+        return (min_score, max_score) if min_score < max_score else (0, 100)
+
+    @property
+    def score_aggregation(self) -> str:
+        aggregation = (self.scores_definition or {}).get("aggregation", "sum")
+        return aggregation if aggregation in ("sum", "mean") else "sum"
+
+    def __str__(self) -> str:
+        return f"{self.provider} - {self.get_name_translated}"
+
+
+class QuickFormPage(ReferentialObjectMixin, I18nObjectMixin):
+    """A flat, ordered grouping of questions inside a QuickForm. The
+    definition-side mirror of RequirementNode, without a tree and without
+    per-page state on the response side."""
+
+    quick_form = models.ForeignKey(
+        QuickForm,
+        on_delete=models.CASCADE,
+        related_name="pages",
+        verbose_name=_("Quick form"),
+    )
+    order = models.IntegerField(default=0, verbose_name=_("Order"))
+    visibility_expression = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Visibility expression"),
+        help_text=_("CEL expression; the page is hidden when it evaluates to false"),
+    )
+
+    fields_to_check = ["urn"]
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = _("Quick form page")
+        verbose_name_plural = _("Quick form pages")
+
+    def get_questions_translated(self) -> dict | None:
+        return _translate_questions(self)
+
+    def __str__(self) -> str:
+        return f"{self.quick_form}: {self.get_name_translated}"
+
+
+class QuickFormPublication(NameDescriptionMixin, FolderMixin):
+    """A quick form made available to an audience: the deployment tier between the
+    library-backed form and a response.
+
+    It exists because none of this can live on `QuickForm` — that row is upserted by
+    URN on every library update and would be clobbered — and none of it belongs on a
+    response either, since it is per-(form, audience) policy rather than per-instance
+    state. Crucially it is also the *authorisation*: membership of `audience_groups`
+    is what lets a requester file a request, in place of folder-level
+    `add_quickformresponse` they will not have.
+    """
+
+    quick_form = models.ForeignKey(
+        "QuickForm",
+        on_delete=models.PROTECT,
+        related_name="publications",
+        verbose_name=_("Quick form"),
+    )
+    enabled = models.BooleanField(default=True, verbose_name=_("Enabled"))
+    audience_groups = models.ManyToManyField(
+        "iam.UserGroup",
+        blank=True,
+        related_name="quick_form_publications",
+        verbose_name=_("Audience groups"),
+        help_text=_("Groups that may file this request. Empty means every user."),
+    )
+    submission_folder = models.ForeignKey(
+        "iam.Folder",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="quick_form_submissions",
+        verbose_name=_("Submission domain"),
+        help_text=_(
+            "Where responses land. The publication's own domain when left empty."
+        ),
+    )
+    default_reviewers = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        related_name="quick_form_publications_as_reviewer",
+        verbose_name=_("Default reviewers"),
+    )
+    allow_multiple_drafts = models.BooleanField(
+        default=False,
+        verbose_name=_("Allow multiple drafts"),
+        help_text=_(
+            "Off: a requester with an unfinished draft is handed it back instead of "
+            "starting a new one. Submitted requests are never limited."
+        ),
+    )
+    icon = models.CharField(
+        max_length=64, blank=True, default="", verbose_name=_("Icon")
+    )
+    order = models.IntegerField(default=0, verbose_name=_("Order"))
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        ordering = ["order", "name"]
+        verbose_name = _("Quick form publication")
+        verbose_name_plural = _("Quick form publications")
+
+    @property
+    def target_folder(self):
+        return self.submission_folder or self.folder
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Question(AbstractBaseModel, FolderMixin):
     class Type(models.TextChoices):
         TEXT = "text", _("Text")
@@ -3301,13 +3710,28 @@ class Question(AbstractBaseModel, FolderMixin):
         UNIQUE_CHOICE = "unique_choice", _("Unique choice")
         MULTIPLE_CHOICE = "multiple_choice", _("Multiple choice")
         DATE = "date", _("Date")
+        FILE = "file", _("File")
+        OBJECT_REFERENCE = "object_reference", _("Object reference")
 
+    # Exactly one parent: a requirement node (compliance questionnaire) or a
+    # quick form page (quick form). Enforced by the CheckConstraint below.
     requirement_node = models.ForeignKey(
         RequirementNode,
         on_delete=models.CASCADE,
         related_name="questions",
         verbose_name=_("Requirement node"),
+        null=True,
+        blank=True,
     )
+    page = models.ForeignKey(
+        QuickFormPage,
+        on_delete=models.CASCADE,
+        related_name="questions",
+        verbose_name=_("Quick form page"),
+        null=True,
+        blank=True,
+    )
+    required = models.BooleanField(default=True, verbose_name=_("Required"))
     urn = models.CharField(max_length=255, unique=True, verbose_name=_("URN"))
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
@@ -3332,12 +3756,26 @@ class Question(AbstractBaseModel, FolderMixin):
         ordering = ["order"]
         verbose_name = _("Question")
         verbose_name_plural = _("Questions")
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(requirement_node__isnull=False, page__isnull=True)
+                    | Q(requirement_node__isnull=True, page__isnull=False)
+                ),
+                name="question_exactly_one_parent",
+            ),
+        ]
 
     @property
     def node_id(self) -> str | None:
         from core.utils import extract_node_id
 
         return extract_node_id(self.urn)
+
+    @property
+    def owner(self):
+        """The RequirementNode or QuickFormPage carrying this question."""
+        return self.page if self.page_id else self.requirement_node
 
     def __str__(self) -> str:
         return f"{self.ref_id or self.urn}: {self.text or ''}"
@@ -3482,6 +3920,8 @@ class RequirementMapping(models.Model):
     )
     annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
 
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
     @property
     def coverage(self) -> str:
         if self.relationship == RequirementMapping.Relationship.NOT_RELATED:
@@ -3546,9 +3986,7 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         return self.folder.name + "/" + self.name
 
 
-class SecurityException(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, CustomFieldsMixin
-):
+class SecurityException(NameDescriptionMixin, FolderMixin, CustomFieldsMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
@@ -3596,7 +4034,6 @@ class SecurityException(
         verbose_name=_("Evidences"),
         related_name="security_exceptions",
     )
-    is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     link = models.URLField(
         null=True, blank=True, max_length=2048, verbose_name=_("Link")
@@ -3647,7 +4084,6 @@ class Asset(
     IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
     CustomFieldsMixin,
 ):
@@ -3825,7 +4261,6 @@ class Asset(
         blank=True,
         null=True,
     )
-    is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     is_business_function = models.BooleanField("is_business_function", default=False)
@@ -4618,7 +5053,7 @@ class Asset(
         return result
 
 
-class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class AssetClass(NameDescriptionMixin, FolderMixin):
     parent = models.ForeignKey(
         "AssetClass", on_delete=models.CASCADE, blank=True, null=True
     )
@@ -5077,9 +5512,7 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         ]
 
 
-class Evidence(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
-):
+class Evidence(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
         MISSING = "missing", "Missing"
@@ -5087,8 +5520,6 @@ class Evidence(
         APPROVED = "approved", "Approved"
         REJECTED = "rejected", "Rejected"
         EXPIRED = "expired", "Expired"
-
-    is_published = models.BooleanField(_("published"), default=True)
 
     owner = models.ManyToManyField(
         "core.Actor",
@@ -5106,15 +5537,12 @@ class Evidence(
         null=True,
         verbose_name=_("Expiry date"),
     )
+
     fields_to_check = ["name"]
 
     class Meta:
         verbose_name = _("Evidence")
         verbose_name_plural = _("Evidences")
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.revisions.update(is_published=self.is_published)
 
     @property
     def last_revision(self):
@@ -5200,8 +5628,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         # Set folder to match the evidence's folder
         if hasattr(self.evidence, "folder") and self.evidence.folder:
             self.folder = self.evidence.folder
-
-        self.is_published = self.evidence.is_published
 
         # Compute attachment hash if attachment exists and has changed
         if self.attachment:
@@ -5360,8 +5786,6 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         blank=True,
     )
 
-    is_published = models.BooleanField(_("published"), default=True)
-
     occurred_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("Occurred at")
     )
@@ -5449,7 +5873,6 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         verbose_name="Evidence",
         blank=True,
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     def __str__(self):
         return f"{self.entry}"
@@ -5471,18 +5894,23 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         Incident.objects.filter(pk=incident.pk).update(updated_at=now())
 
 
+# Adding a parent is a one-line change here; the XOR constraint below is generated
+# from it rather than hand-enumerated, which grows with the square of this list.
+COMMENT_PARENT_FIELDS = (
+    "requirement_assessment",
+    "risk_scenario",
+    "applied_control",
+    "finding",
+    "task_template",
+)
+
+
 class Comment(AbstractBaseModel, FolderMixin):
-    PARENT_FIELDS = (
-        "requirement_assessment",
-        "risk_scenario",
-        "applied_control",
-        "finding",
-    )
+    PARENT_FIELDS = COMMENT_PARENT_FIELDS
 
     body = models.TextField(verbose_name=_("Body"))
     is_tainted = models.BooleanField(default=False, verbose_name=_("Edited"))
     is_active = models.BooleanField(default=True, verbose_name=_("Active"))
-    is_published = models.BooleanField(default=True)
 
     author = models.ForeignKey(
         "iam.User",
@@ -5520,36 +5948,29 @@ class Comment(AbstractBaseModel, FolderMixin):
         blank=True,
         related_name="comments",
     )
+    task_template = models.ForeignKey(
+        "TaskTemplate",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
 
     class Meta:
         ordering = ["created_at"]
         constraints = [
             models.CheckConstraint(
-                condition=(
-                    Q(
-                        requirement_assessment__isnull=False,
-                        risk_scenario__isnull=True,
-                        applied_control__isnull=True,
-                        finding__isnull=True,
-                    )
-                    | Q(
-                        requirement_assessment__isnull=True,
-                        risk_scenario__isnull=False,
-                        applied_control__isnull=True,
-                        finding__isnull=True,
-                    )
-                    | Q(
-                        requirement_assessment__isnull=True,
-                        risk_scenario__isnull=True,
-                        applied_control__isnull=False,
-                        finding__isnull=True,
-                    )
-                    | Q(
-                        requirement_assessment__isnull=True,
-                        risk_scenario__isnull=True,
-                        applied_control__isnull=True,
-                        finding__isnull=False,
-                    )
+                condition=reduce(
+                    operator.or_,
+                    (
+                        Q(
+                            **{
+                                f"{field}__isnull": field != parent
+                                for field in COMMENT_PARENT_FIELDS
+                            }
+                        )
+                        for parent in COMMENT_PARENT_FIELDS
+                    ),
                 ),
                 name="comment_exactly_one_parent",
             )
@@ -5557,12 +5978,11 @@ class Comment(AbstractBaseModel, FolderMixin):
 
     @property
     def parent_object(self):
-        return (
-            self.requirement_assessment
-            or self.risk_scenario
-            or self.applied_control
-            or self.finding
-        )
+        for field in self.PARENT_FIELDS:
+            parent = getattr(self, field, None)
+            if parent is not None:
+                return parent
+        return None
 
     def save(self, *args, **kwargs):
         content_object = self.parent_object
@@ -5590,6 +6010,183 @@ class Comment(AbstractBaseModel, FolderMixin):
         return f"Comment by {self.author} on {self.created_at}"
 
 
+class Commitment(AbstractBaseModel, FolderMixin):
+    """One negotiation cycle over a promise to deliver by a date.
+
+    Reopening closes the current row (`is_current`) and opens a new one, so promised
+    dates are not overwritten.
+    """
+
+    class State(models.TextChoices):
+        UNDEFINED = "--", _("Undefined")
+        IN_NEGOTIATION = "in_negotiation", _("In negotiation")
+        COMMITTED = "committed", _("Committed")
+        DECLINED = "declined", _("Declined")
+        FULFILLED = "fulfilled", _("Fulfilled")
+
+    # A cycle is over once it reaches one of these: reopening starts a new row.
+    CLOSING_STATES = (State.COMMITTED, State.DECLINED, State.FULFILLED)
+
+    content_type = models.ForeignKey(
+        "contenttypes.ContentType", on_delete=models.CASCADE
+    )
+    object_id = models.UUIDField()
+    target = GenericForeignKey("content_type", "object_id")
+
+    state = models.CharField(
+        max_length=32,
+        choices=State.choices,
+        default=State.IN_NEGOTIATION,
+        verbose_name=_("Commitment state"),
+    )
+    committed_eta = models.DateField(
+        null=True,
+        blank=True,
+        help_text=_("The date promised, frozen when the commitment is made"),
+        verbose_name=_("Committed date"),
+    )
+    committed_by = models.ForeignKey(
+        "core.Actor",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="commitments",
+        verbose_name=_("Committed by"),
+    )
+    committed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=_("When the promise was made — not the date promised"),
+        verbose_name=_("Committed at"),
+    )
+    notes = models.TextField(null=True, blank=True, verbose_name=_("Commitment notes"))
+    is_current = models.BooleanField(default=True, verbose_name=_("Is current"))
+
+    fields_to_check = []
+
+    class Meta:
+        permissions = [
+            (
+                "transition_commitment",
+                "Can take a commitment step",
+            )
+        ]
+        verbose_name = _("Commitment")
+        verbose_name_plural = _("Commitments")
+        ordering = ["created_at"]
+        indexes = [models.Index(fields=["content_type", "object_id"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["content_type", "object_id"],
+                condition=models.Q(is_current=True),
+                name="unique_current_commitment_per_object",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.get_state_display()} commitment on {self.target}"
+
+    def save(self, *args, **kwargs):
+        # Denormalized for IAM scoping: a commitment is only ever as visible as the
+        # object it is about.
+        if self.target is not None and self.folder_id != self.target.folder_id:
+            self.folder_id = self.target.folder_id
+            if "update_fields" in kwargs and kwargs["update_fields"] is not None:
+                kwargs["update_fields"] = set(kwargs["update_fields"]) | {"folder"}
+        super().save(*args, **kwargs)
+
+    @property
+    def is_breached(self) -> bool:
+        """The promised date passed without delivery. Derived, never stored."""
+        return bool(
+            self.committed_eta
+            and self.state != self.State.FULFILLED
+            and self.committed_eta < date.today()
+        )
+
+
+class CommitmentMixin(models.Model):
+    """Lets a model carry commitments; adds no columns, they live in `Commitment`."""
+
+    # Subclasses point these at their own date / accountable-actor fields.
+    COMMITMENT_DATE_FIELD = "eta"
+    COMMITMENT_ACTOR_FIELD = "owner"
+
+    commitments = GenericRelation(
+        Commitment,
+        content_type_field="content_type",
+        object_id_field="object_id",
+    )
+
+    class Meta:
+        abstract = True
+
+    def refresh_from_db(self, *args, **kwargs):
+        # `refresh_from_db` leaves cached_property values in __dict__, so without this
+        # a reloaded object would still answer from the promises it saw before.
+        super().refresh_from_db(*args, **kwargs)
+        self.__dict__.pop("commitment_entries", None)
+
+    @cached_property
+    def commitment_entries(self) -> list:
+        """Every cycle, cached: `commitments.all()` would be a query per access unprefetched."""
+        return list(self.commitments.all())
+
+    @property
+    def commitment(self):
+        """The live negotiation cycle, if any."""
+        for entry in self.commitment_entries:
+            if entry.is_current:
+                return entry
+        return None
+
+    @property
+    def commitment_history(self):
+        """Closed cycles, oldest first — the sequence of promises made and reopened."""
+        return [entry for entry in self.commitment_entries if not entry.is_current]
+
+    @property
+    def commitment_state(self) -> str:
+        current = self.commitment
+        return current.state if current else Commitment.State.UNDEFINED
+
+    @property
+    def committed_eta(self):
+        current = self.commitment
+        return current.committed_eta if current else None
+
+    @property
+    def committed_by(self):
+        current = self.commitment
+        return current.committed_by if current else None
+
+    @property
+    def commitment_notes(self):
+        current = self.commitment
+        return current.notes if current else None
+
+    @property
+    def commitment_reopen_count(self) -> int:
+        """A cycle per row, so the count of closed ones is the number of reopenings."""
+        return len(self.commitment_history)
+
+    @property
+    def commitment_date(self):
+        return getattr(self, self.COMMITMENT_DATE_FIELD, None)
+
+    @property
+    def commitment_has_slipped(self) -> bool:
+        """The current date is later than the one promised."""
+        promised = self.committed_eta
+        current = self.commitment_date
+        return bool(promised and current and current > promised)
+
+    @property
+    def commitment_is_breached(self) -> bool:
+        current = self.commitment
+        return bool(current and current.is_breached)
+
+
 def _get_default_applied_control_cost():
     return {
         "currency": "€",
@@ -5603,9 +6200,9 @@ class AppliedControl(
     IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
     CustomFieldsMixin,
+    CommitmentMixin,
 ):
     INTEGRATION_MODEL_KEY = "applied_control"
 
@@ -5800,7 +6397,6 @@ class AppliedControl(
         verbose_name="Security exceptions",
         related_name="applied_controls",
     )
-    is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     objectives = models.ManyToManyField(
@@ -6005,7 +6601,6 @@ class AppliedControl(
 class OrganisationIssue(
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
 ):
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
@@ -6073,6 +6668,7 @@ class OrganisationIssue(
         default=Status.DRAFT,
         verbose_name=_("Status"),
     )
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -6083,7 +6679,6 @@ class OrganisationIssue(
 class OrganisationObjective(
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
 ):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
@@ -6152,6 +6747,7 @@ class OrganisationObjective(
         blank=True,
         related_name="organisation_objectives",
     )
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -6185,7 +6781,6 @@ class Vulnerability(
     NameDescriptionMixin,
     ETADueDateMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     class Status(models.TextChoices):
@@ -6245,7 +6840,6 @@ class Vulnerability(
     published_date = models.DateField(
         null=True, blank=True, verbose_name=_("Publication date")
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
 
@@ -6308,6 +6902,8 @@ class HistoricalMetric(models.Model):
     model = models.TextField(verbose_name=_("Model"), db_index=True)
     object_id = models.UUIDField(verbose_name=_("Object ID"), db_index=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         unique_together = ("model", "object_id", "date")
@@ -6539,8 +7135,9 @@ class RiskAssessment(Assessment):
         warnings_lst = list()
         info_lst = list()
         # --- check on the risk risk_assessment:
-        _object = serializers.serialize("json", [self])
-        _object = json.loads(_object)
+        # Same dict shape as every other finding object, so the name renders.
+        _serialized = json.loads(serializers.serialize("json", [self]))[0]
+        _object = {**_serialized["fields"], "id": _serialized["pk"]}
         if self.status == Assessment.Status.IN_PROGRESS:
             info_lst.append(
                 {
@@ -6578,12 +7175,9 @@ class RiskAssessment(Assessment):
 
         # --- checks on the risk scenarios
         # TODO: Refactor this
-        _scenarios = serializers.serialize(
-            "json", self.risk_scenarios.all().order_by("created_at")
+        scenarios = _serialize_for_quality_check(
+            self.risk_scenarios.all().order_by("created_at")
         )
-        scenarios = [x["fields"] for x in json.loads(_scenarios)]
-        for i in range(len(scenarios)):
-            scenarios[i]["id"] = json.loads(_scenarios)[i]["pk"]
         for ri in scenarios:
             if ri["current_level"] < 0:
                 warnings_lst.append(
@@ -6733,15 +7327,11 @@ class RiskAssessment(Assessment):
                     )
 
         # --- checks on the applied controls
-        _measures = serializers.serialize(
-            "json",
-            AppliedControl.objects.filter(
-                risk_scenarios__risk_assessment=self
-            ).order_by("created_at"),
+        measures = _serialize_for_quality_check(
+            AppliedControl.objects.filter(risk_scenarios__risk_assessment=self)
+            .distinct()
+            .order_by("created_at")
         )
-        measures = [x["fields"] for x in json.loads(_measures)]
-        for i in range(len(measures)):
-            measures[i]["id"] = json.loads(_measures)[i]["pk"]
 
         for mtg in measures:
             if not mtg["eta"] and not mtg["status"] == "active":
@@ -6808,15 +7398,11 @@ class RiskAssessment(Assessment):
                 )
 
         # --- checks on the risk acceptances
-        _acceptances = serializers.serialize(
-            "json",
+        acceptances = _serialize_for_quality_check(
             RiskAcceptance.objects.filter(risk_scenarios__risk_assessment=self)
             .distinct()
-            .order_by("created_at"),
+            .order_by("created_at")
         )
-        acceptances = [x["fields"] for x in json.loads(_acceptances)]
-        for i in range(len(acceptances)):
-            acceptances[i]["id"] = json.loads(_acceptances)[i]["pk"]
         for ra in acceptances:
             if not ra["expiry_date"]:
                 warnings_lst.append(
@@ -7295,6 +7881,16 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
 
+    class Kind(models.TextChoices):
+        INTERNAL = "internal", _("Internal")
+        THIRD_PARTY = "third_party", _("Third-party")
+
+    kind = models.CharField(
+        max_length=20,
+        choices=Kind.choices,
+        default=Kind.INTERNAL,
+        verbose_name=_("Kind"),
+    )
     frameworks = models.ManyToManyField(Framework, related_name="campaigns")
     status = models.CharField(
         max_length=100,
@@ -7312,7 +7908,13 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         null=True,
         verbose_name=_("Start date"),
     )
-    perimeters = models.ManyToManyField(Perimeter, related_name="campaigns")
+    perimeters = models.ManyToManyField(Perimeter, related_name="campaigns", blank=True)
+    entities = models.ManyToManyField(
+        "tprm.Entity",
+        related_name="campaigns",
+        blank=True,
+        verbose_name=_("Third parties"),
+    )
 
     class Meta:
         verbose_name = "Campaign"
@@ -7556,7 +8158,7 @@ class ComplianceAssessment(Assessment):
         # Fetch all requirements in a single query
         requirements = RequirementNode.objects.filter(
             framework=self.framework
-        ).select_related()
+        ).select_related("folder")
 
         # If there's a baseline, prefetch all related baseline assessments and answers in one query
         baseline_assessments = {}
@@ -8208,6 +8810,7 @@ class ComplianceAssessment(Assessment):
                 Prefetch("applied_controls"),
                 Prefetch("security_exceptions"),
                 Prefetch("evidences"),
+                Prefetch("task_templates"),
                 Prefetch("requirement__reference_controls"),
                 Prefetch("requirement__threats"),
             )
@@ -8522,8 +9125,9 @@ class ComplianceAssessment(Assessment):
         warnings_lst = list()
         info_lst = list()
         # --- check on the assessment:
-        _object = serializers.serialize("json", [self])
-        _object = json.loads(_object)
+        # Same dict shape as every other finding object, so the name renders.
+        _serialized = json.loads(serializers.serialize("json", [self]))[0]
+        _object = {**_serialized["fields"], "id": _serialized["pk"]}
         if self.status == Assessment.Status.IN_PROGRESS:
             info_lst.append(
                 {
@@ -8550,21 +9154,43 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on requirement assessments:
-        _requirement_assessments = self.requirement_assessments.all().order_by(
-            "created_at"
+        _requirement_assessments = (
+            self.requirement_assessments.select_related("requirement")
+            .prefetch_related("applied_controls")
+            .order_by("created_at")
+        )
+        # Set-based equivalent of RequirementAssessment.has_evidence(), so the
+        # loop below does not issue one query per requirement assessment.
+        ac_through = RequirementAssessment.applied_controls.through.objects.filter(
+            requirementassessment__compliance_assessment=self
+        )
+        ra_ids_with_evidence = set(
+            RequirementAssessment.evidences.through.objects.filter(
+                requirementassessment__compliance_assessment=self
+            ).values_list("requirementassessment_id", flat=True)
+        ) | set(
+            ac_through.filter(appliedcontrol__evidences__isnull=False).values_list(
+                "requirementassessment_id", flat=True
+            )
         )
         requirement_assessments = []
         for ra in _requirement_assessments:
-            ra_dict = json.loads(serializers.serialize("json", [ra]))[0]["fields"]
-            ra_dict["name"] = str(ra)
-            ra_dict["id"] = ra.id
+            # Only the fields the checks below and the X-rays page read: fully
+            # serializing every requirement assessment dominated both the runtime
+            # and the payload of this check on large audits.
+            ra_dict = {
+                "id": ra.id,
+                "name": str(ra),
+                "result": ra.result,
+                "applied_controls": [ac.id for ac in ra.applied_controls.all()],
+            }
             requirement_assessments.append(ra_dict)
 
             # Check if assessable requirement assessment with compliant result has no evidence
             if (
                 ra.requirement.assessable
                 and ra.result == RequirementAssessment.Result.COMPLIANT
-                and not ra.has_evidence()
+                and ra.id not in ra_ids_with_evidence
             ):
                 warnings_lst.append(
                     {
@@ -8597,15 +9223,13 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on applied controls:
-        _applied_controls = serializers.serialize(
-            "json",
+        applied_controls = _serialize_for_quality_check(
             AppliedControl.objects.filter(
                 requirement_assessments__compliance_assessment=self
-            ).order_by("created_at"),
+            )
+            .distinct()
+            .order_by("created_at")
         )
-        applied_controls = [x["fields"] for x in json.loads(_applied_controls)]
-        for i in range(len(applied_controls)):
-            applied_controls[i]["id"] = json.loads(_applied_controls)[i]["pk"]
         for applied_control in applied_controls:
             if not applied_control["reference_control"]:
                 info_lst.append(
@@ -8622,37 +9246,44 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on evidence:
-        evidence_objects = Evidence.objects.filter(
-            applied_controls__in=AppliedControl.objects.filter(
-                requirement_assessments__compliance_assessment=self
+        # Evidence of this audit, on the two paths RequirementAssessment.has_evidence()
+        # follows: attached to a requirement assessment directly, or through one
+        # of its applied controls.
+        evidences = Evidence.objects.filter(
+            models.Q(
+                applied_controls__requirement_assessments__compliance_assessment=self
             )
-        ).order_by("created_at")
+            | models.Q(requirement_assessments__compliance_assessment=self)
+        )
+        # Evidences holding at least one revision with a file or a link, resolved
+        # in a single query instead of two per evidence.
+        evidence_ids_with_content = set(
+            EvidenceRevision.objects.filter(evidence__in=evidences)
+            .filter(
+                (models.Q(attachment__isnull=False) & ~models.Q(attachment=""))
+                | (models.Q(link__isnull=False) & ~models.Q(link=""))
+            )
+            .values_list("evidence_id", flat=True)
+        )
 
-        for evidence_obj in evidence_objects:
-            # Check if evidence has any revisions with attachments or links
-            has_attachment = evidence_obj.revisions.filter(
-                models.Q(attachment__isnull=False) & ~models.Q(attachment="")
-            ).exists()
-            has_link = evidence_obj.revisions.filter(
-                models.Q(link__isnull=False) & ~models.Q(link="")
-            ).exists()
-
-            if not has_attachment and not has_link:
-                evidence_dict = json.loads(
-                    serializers.serialize("json", [evidence_obj])
-                )[0]["fields"]
-                evidence_dict["id"] = evidence_obj.id
-                warnings_lst.append(
-                    {
-                        "msg": _("{}: Evidence has no file or link uploaded").format(
-                            evidence_obj.name
-                        ),
-                        "msgid": "evidenceNoFile",
-                        "link": f"evidences/{evidence_obj.id}",
-                        "obj_type": "evidence",
-                        "object": evidence_dict,
-                    }
-                )
+        # Only the evidences actually reported are serialized, so the m2m
+        # prefetching the helper does is paid for the broken ones alone.
+        for evidence in _serialize_for_quality_check(
+            evidences.exclude(id__in=evidence_ids_with_content)
+            .distinct()
+            .order_by("created_at")
+        ):
+            warnings_lst.append(
+                {
+                    "msg": _("{}: Evidence has no file or link uploaded").format(
+                        evidence["name"]
+                    ),
+                    "msgid": "evidenceNoFile",
+                    "link": f"evidences/{evidence['id']}",
+                    "obj_type": "evidence",
+                    "object": evidence,
+                }
+            )
 
         findings = {
             "errors": errors_lst,
@@ -8818,6 +9449,15 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         IN_PROGRESS = "in_progress", _("In progress")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
 
+    class ReviewState(models.TextChoices):
+        """Per-requirement outcome of a reviewer's pass. RESUBMITTED is what a flag
+        becomes once the respondent has answered it."""
+
+        NONE = "", _("None")
+        CHANGES_REQUESTED = "changes_requested", _("Changes requested")
+        RESUBMITTED = "resubmitted", _("Resubmitted")
+        ACCEPTED = "accepted", _("Accepted")
+
     status = models.CharField(
         max_length=100,
         choices=Status.choices,
@@ -8873,6 +9513,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         blank=True,
         null=True,
         verbose_name=_("Respondent alignment"),
+    )
+    review_state = models.CharField(
+        max_length=32,
+        choices=ReviewState.choices,
+        default=ReviewState.NONE,
+        blank=True,
+        verbose_name=_("Review state"),
     )
     compliance_assessment = models.ForeignKey(
         ComplianceAssessment,
@@ -9492,8 +10139,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     _CEL_RELEVANT_FIELDS = frozenset({"score", "result", "status"})
 
     @classmethod
-    def from_db(cls, db, field_names, values):
-        instance = super().from_db(db, field_names, values)
+    def from_db(cls, db, field_names, values, *, fetch_mode=None):
+        instance = super().from_db(db, field_names, values, fetch_mode=fetch_mode)
         instance._loaded_cel_values = {
             f: getattr(instance, f)
             for f in cls._CEL_RELEVANT_FIELDS
@@ -9546,6 +10193,16 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
         SUBMITTED = "submitted", _("Submitted")
         CLOSED = "closed", _("Closed")
         CHANGES_REQUESTED = "changes_requested", _("Changes Requested")
+
+    # Not the declaration order: "changes requested" is back with the respondent.
+    # Shared so the reported status and the sort order cannot drift.
+    WORKFLOW_ORDER = [
+        Status.DRAFT,
+        Status.IN_PROGRESS,
+        Status.CHANGES_REQUESTED,
+        Status.SUBMITTED,
+        Status.CLOSED,
+    ]
 
     compliance_assessment = models.ForeignKey(
         ComplianceAssessment,
@@ -9620,12 +10277,500 @@ class RequirementAssignmentEvent(AbstractBaseModel, FolderMixin):
         return f"{self.assignment} - {self.event_type} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
+class ProducedObjectLink(AbstractBaseModel):
+    """Which thing caused which other thing to exist.
+
+    A table rather than a JSON list on the source: `JSONField.contains` is unsupported on
+    SQLite, so the reverse lookup would have been a scan.
+    """
+
+    # Both ends are generic, so there is no FK to scope on. Reachable only through the
+    # objects it links, which carry their own folder.
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    source_content_type = models.ForeignKey(
+        "contenttypes.ContentType",
+        on_delete=models.CASCADE,
+        related_name="produced_links_as_source",
+    )
+    source_object_id = models.UUIDField()
+    content_type = models.ForeignKey(
+        "contenttypes.ContentType",
+        on_delete=models.CASCADE,
+        related_name="produced_links_as_target",
+    )
+    object_id = models.UUIDField()
+    source = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        help_text=_("What performed the creation, e.g. the workflow that ran."),
+    )
+
+    source_object = GenericForeignKey("source_content_type", "source_object_id")
+    target_object = GenericForeignKey("content_type", "object_id")
+
+    class Meta:
+        verbose_name = _("Produced object link")
+        verbose_name_plural = _("Produced object links")
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "source_content_type",
+                    "source_object_id",
+                    "content_type",
+                    "object_id",
+                ],
+                name="unique_produced_object_link",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["source_content_type", "source_object_id"]),
+            models.Index(fields=["content_type", "object_id"]),
+        ]
+
+    def __str__(self):
+        return f"{self.source_object} -> {self.target_object}"
+
+    @classmethod
+    def record(cls, source, target, source_label: str = "") -> bool:
+        """Idempotent on the pair; True when the link was new."""
+        from django.contrib.contenttypes.models import ContentType
+
+        _link, created = cls.objects.get_or_create(
+            source_content_type=ContentType.objects.get_for_model(source),
+            source_object_id=source.pk,
+            content_type=ContentType.objects.get_for_model(target),
+            object_id=target.pk,
+            defaults={"source": source_label},
+        )
+        return created
+
+    @classmethod
+    def produced_by(cls, target):
+        """What caused `target` to exist."""
+        from django.contrib.contenttypes.models import ContentType
+
+        return cls.objects.filter(
+            content_type=ContentType.objects.get_for_model(target),
+            object_id=target.pk,
+        ).select_related("source_content_type")
+
+    @classmethod
+    def produced_from(cls, source):
+        from django.contrib.contenttypes.models import ContentType
+
+        return cls.objects.filter(
+            source_content_type=ContentType.objects.get_for_model(source),
+            source_object_id=source.pk,
+        ).select_related("content_type")
+
+    def describe(self, obj) -> dict:
+        """A row the UI can render and link."""
+        if obj is None:
+            return {}
+        ref_id = getattr(obj, "ref_id", "") or ""
+        name = str(getattr(obj, "name", "") or obj)
+        return {
+            "model": obj._meta.model_name,
+            "id": str(obj.pk),
+            "ref_id": ref_id,
+            "name": name,
+            # `str` is what every generic renderer in the frontend already looks for.
+            "str": f"{ref_id} - {name}" if ref_id else name,
+            "at": self.created_at.isoformat() if self.created_at else None,
+            "source": self.source,
+        }
+
+
+class QuickFormResponse(
+    NameDescriptionMixin, ETADueDateMixin, FolderMixin, AbstractBaseModel
+):
+    """One filled instance of a QuickForm. Owns its Answer rows directly
+    (there is no per-page state). Regular RBAC applies: respondents are an
+    informational list plus the notification audience, never a grant."""
+
+    class Status(models.TextChoices):
+        # `draft` rather than `in_progress`: the reviewer has an in-progress phase
+        # too (`in_review`), and one word cannot mean both in a state machine.
+        DRAFT = "draft", _("Draft")
+        SUBMITTED = "submitted", _("Submitted")
+        IN_REVIEW = "in_review", _("In review")
+        CLOSED = "closed", _("Closed")
+
+    class Resolution(models.TextChoices):
+        """How a closed request ended. Status says where it is; this says how it
+        finished, so the three terminal outcomes do not become three statuses that
+        behave identically — and so the queue is reportable."""
+
+        ACCEPTED = "accepted", _("Accepted")
+        REJECTED = "rejected", _("Rejected")
+        DROPPED = "dropped", _("Dropped")
+        AUTO = "auto", _("Closed automatically")
+
+    quick_form = models.ForeignKey(
+        QuickForm,
+        on_delete=models.PROTECT,
+        related_name="responses",
+        verbose_name=_("Quick form"),
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+    )
+    resolution = models.CharField(
+        max_length=20,
+        choices=Resolution.choices,
+        blank=True,
+        default="",
+        verbose_name=_("Resolution"),
+    )
+    assignee = models.ForeignKey(
+        "core.Actor",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="quick_form_responses_as_assignee",
+        verbose_name=_("Assignee"),
+        help_text=_(
+            "The reviewer who picked this up. `reviewers` is the pool and may be a "
+            "team; this is the one person working it."
+        ),
+    )
+    cloned_from = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="clones",
+        verbose_name=_("Cloned from"),
+    )
+    # GFKs do not cascade; this cleans up the source half on delete.
+    produced_links = GenericRelation(
+        "core.ProducedObjectLink",
+        content_type_field="source_content_type",
+        object_id_field="source_object_id",
+    )
+    decided_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="quick_form_responses_decided",
+        verbose_name=_("Decided by"),
+        help_text=_(
+            "Who closed this request. `assignee` is who picked it up and is optional; "
+            "this is who actually rendered the verdict, which is what a produced record "
+            "needs as its approver."
+        ),
+    )
+    respondents = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        related_name="quick_form_responses_as_respondent",
+        verbose_name=_("Respondents"),
+    )
+    reviewers = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        related_name="quick_form_responses_as_reviewer",
+        verbose_name=_("Reviewers"),
+    )
+    computed_outcome = models.JSONField(
+        blank=True, null=True, verbose_name=_("Computed outcome")
+    )
+    # Denormalized mirror of the fired outcome ref_ids, comma-joined and sorted.
+    # `computed_outcome` is a JSON blob: the API cannot filter it and the workflow
+    # engine only filters concrete columns, so routing and reporting need this.
+    outcome_refs = models.TextField(
+        blank=True, default="", verbose_name=_("Outcome refs")
+    )
+    score = models.IntegerField(blank=True, null=True, verbose_name=_("Score"))
+    started_at = models.DateTimeField(
+        blank=True, null=True, verbose_name=_("Started at")
+    )
+    submitted_at = models.DateTimeField(
+        blank=True, null=True, verbose_name=_("Submitted at")
+    )
+    observation = models.TextField(blank=True, null=True, verbose_name=_("Observation"))
+    ref_id = models.CharField(
+        max_length=32,
+        null=True,
+        blank=True,
+        unique=True,
+        verbose_name=_("Reference ID"),
+    )
+    # Who pressed submit, as opposed to who created the row. Load-bearing for
+    # traceability and for keeping a submitter out of their own reviewer set.
+    publication = models.ForeignKey(
+        "QuickFormPublication",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="responses",
+        verbose_name=_("Publication"),
+        help_text=_("Set when the response was filed through a published entry point."),
+    )
+    submitted_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="submitted_quick_form_responses",
+        verbose_name=_("Submitted by"),
+    )
+
+    # Intake records repeat by nature: many people file "Request a derogation"
+    # against the same form. Uniqueness belongs on the generated reference, as on
+    # Incident — never on (name, quick_form).
+    fields_to_check = ["ref_id"]
+
+    def is_deletable(self, user=None) -> bool:
+        """A draft can be deleted by whoever holds it. A submitted or in-review
+        request cannot: it is abandoned by dropping it, which leaves a record.
+
+        A closed request is a record and is administrator-only — the decision has
+        been made and neither the requester nor the reviewer may erase it. Without a
+        user this returns the conservative answer, which is what the UI shows when it
+        does not know who is asking.
+        """
+        if self.status == self.Status.DRAFT:
+            return True
+        if self.status == self.Status.CLOSED and user is not None:
+            return user.is_admin()
+        return False
+
+    class Meta:
+        verbose_name = _("Quick form response")
+        verbose_name_plural = _("Quick form responses")
+        permissions = [
+            (
+                "approve_quickformresponse",
+                "Can decide on a request (close, send back, take in review)",
+            )
+        ]
+
+    def record_produced_object(self, obj, source: str = "") -> bool:
+        """Idempotent on the pair, so a retry cannot double-count. True when new."""
+        return ProducedObjectLink.record(self, obj, source_label=source)
+
+    @property
+    def produced_objects(self) -> list[dict]:
+        """What this request caused to exist, newest last."""
+        return [
+            link.describe(link.target_object)
+            for link in ProducedObjectLink.produced_from(self).order_by("created_at")
+            if link.target_object is not None
+        ]
+
+    @property
+    def awaiting_conversion(self) -> bool:
+        """Accepted but produced nothing — an engine that is down is absent, not loud."""
+        return (
+            self.status == self.Status.CLOSED
+            and self.resolution == self.Resolution.ACCEPTED
+            and not ProducedObjectLink.produced_from(self).exists()
+        )
+
+    def is_requester(self, user) -> bool:
+        """Whoever is on the asking side.
+
+        `submitted_by` not `created_by`: clone and reassign move authorship. A draft with
+        neither submitter nor respondent is unclaimed and belongs to whoever can reach it.
+        """
+        if self.submitted_by_id == user.id:
+            return True
+        # Same actor set as `_own_response`: whoever may fill it is on the asking side.
+        if self.respondents.filter(
+            pk__in=[a.pk for a in Actor.get_all_for_user(user)]
+        ).exists():
+            return True
+        return self.submitted_by_id is None and not self.respondents.exists()
+
+    def get_default_ref_id(self) -> str:
+        """Next free reference for this form's prefix (DER.000001, DER.000002...)."""
+        prefix = self.quick_form.resolved_ref_id_prefix
+        last = (
+            QuickFormResponse.objects.filter(ref_id__startswith=f"{prefix}.")
+            .order_by("-ref_id")
+            .values_list("ref_id", flat=True)
+            .first()
+        )
+        suffix = 0
+        if last:
+            try:
+                suffix = int(last.split(".")[1])
+            except IndexError, ValueError:
+                suffix = 0
+        return f"{prefix}.{suffix + 1:06d}"
+
+    def save(self, *args, **kwargs):
+        # Mint the reference on creation only: later saves pass update_fields and
+        # would not persist it anyway. Retry on the unique collision two
+        # concurrent submissions can produce. Mirrors ValidationFlow.save.
+        from django.db import IntegrityError
+
+        if self._state.adding and not self.ref_id:
+            for attempt in range(3):
+                self.ref_id = self.get_default_ref_id()
+                try:
+                    with transaction.atomic():
+                        super().save(*args, **kwargs)
+                        return
+                except IntegrityError:
+                    if attempt == 2:
+                        raise
+                    self.ref_id = None
+        super().save(*args, **kwargs)
+
+    def refresh_title_from_answers(self) -> None:
+        """Name the response after the answer to the form's title question.
+
+        Applied while the response is still being filled, so the title tracks the
+        answer; a submitted response keeps the name it was submitted with. Does
+        nothing when the form nominates no title question.
+        """
+        urn = self.quick_form.title_question_urn
+        if not urn or self.status != self.Status.DRAFT:
+            return
+        answer = (
+            Answer.objects.filter(response=self, question__urn=urn)
+            .values_list("value", flat=True)
+            .first()
+        )
+        title = str(answer).strip() if isinstance(answer, str) else ""
+        if title and title != self.name:
+            # `.update()` skips validation, so the width has to come from the column.
+            limit = self._meta.get_field("name").max_length
+            QuickFormResponse.objects.filter(pk=self.pk).update(name=title[:limit])
+            self.name = title[:limit]
+
+    def seed_answers(self) -> None:
+        """One empty Answer per question of the form, like audits do at
+        creation, so progress counting and the renderer see every question."""
+        existing = set(self.answers.values_list("question_id", flat=True))
+        answers = [
+            Answer(response=self, question=question, folder_id=self.folder_id)
+            for question in Question.objects.filter(page__quick_form=self.quick_form)
+            if question.id not in existing
+        ]
+        if answers:
+            Answer.objects.bulk_create(answers, batch_size=1000)
+
+    def recompute(self) -> None:
+        """Re-evaluate page visibility, completion, score and outcomes from the
+        current answers. Called after every answer write (deferred once per
+        transaction) and after a library update touched the form."""
+        from core.cel_service import evaluate_quick_form
+
+        evaluate_quick_form(self)
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class AnswerAttachment(AbstractBaseModel, FolderMixin):
+    """A file someone attached while answering a question.
+
+    Hangs off `Answer`, which already carries the XOR parent, so this serves both a
+    quick form request and an audit questionnaire without knowing the difference.
+
+    Deliberately not an `Evidence`. Evidence is folder-scoped and governed, and the
+    people who answer questions — a requester, an auditee — usually hold no
+    permission on the folder the answer lives in. Uploading is cheap and reversible;
+    promoting to Evidence is a reviewer's act, recorded in `promoted_to`.
+    """
+
+    answer = models.ForeignKey(
+        "Answer",
+        on_delete=models.CASCADE,
+        related_name="attachments",
+        verbose_name=_("Answer"),
+    )
+    file = models.FileField(upload_to="answer_attachments", verbose_name=_("File"))
+    filename = models.CharField(max_length=255, verbose_name=_("File name"))
+    size = models.PositiveIntegerField(default=0, verbose_name=_("Size"))
+    mime_type = models.CharField(max_length=127, blank=True, default="")
+    #: sha256 of the bytes. Stored from the start so the evidence de-duplication
+    #: work has something to match on when batch promotion arrives.
+    file_hash = models.CharField(max_length=64, blank=True, default="", db_index=True)
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="answer_attachments",
+        verbose_name=_("Uploaded by"),
+    )
+    promoted_to = models.ForeignKey(
+        "Evidence",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="promoted_from_answers",
+        verbose_name=_("Promoted to evidence"),
+    )
+
+    class Meta:
+        ordering = ["created_at"]
+        verbose_name = _("Answer attachment")
+        verbose_name_plural = _("Answer attachments")
+
+    def __str__(self) -> str:
+        return self.filename
+
+
+class QuickFormOutcome(AbstractBaseModel, FolderMixin):
+    """One outcome rule that currently fires on a response.
+
+    `QuickFormResponse.computed_outcome` is the live evaluation cache; these rows
+    are the queryable, countable projection of it — filterable through the API,
+    joinable for reporting, and carrying `fired_at` so a classification that drove
+    a decision keeps the moment it was reached. Reconciled (not rebuilt) on every
+    evaluation so `fired_at` survives a recompute that leaves the outcome standing.
+    """
+
+    response = models.ForeignKey(
+        QuickFormResponse,
+        on_delete=models.CASCADE,
+        related_name="outcomes",
+        verbose_name=_("Quick form response"),
+    )
+    ref_id = models.CharField(max_length=100, verbose_name=_("Reference ID"))
+    label = models.CharField(max_length=255, blank=True, verbose_name=_("Label"))
+    color = models.CharField(max_length=50, blank=True, verbose_name=_("Color"))
+    fired_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Fired at"))
+
+    class Meta:
+        ordering = ["ref_id"]
+        unique_together = [("response", "ref_id")]
+        verbose_name = _("Quick form outcome")
+        verbose_name_plural = _("Quick form outcomes")
+
+    def __str__(self) -> str:
+        return f"{self.ref_id} on {self.response_id}"
+
+
 class Answer(AbstractBaseModel, FolderMixin):
+    # Exactly one parent: a requirement assessment (compliance questionnaire)
+    # or a quick form response (quick form). Enforced by the CheckConstraint.
     requirement_assessment = models.ForeignKey(
         RequirementAssessment,
         on_delete=models.CASCADE,
         related_name="answers",
         verbose_name=_("Requirement assessment"),
+        null=True,
+        blank=True,
+    )
+    response = models.ForeignKey(
+        QuickFormResponse,
+        on_delete=models.CASCADE,
+        related_name="answers",
+        verbose_name=_("Quick form response"),
+        null=True,
+        blank=True,
     )
     question = models.ForeignKey(
         Question,
@@ -9642,9 +10787,24 @@ class Answer(AbstractBaseModel, FolderMixin):
     )
 
     class Meta:
+        # unique_together is NULL-blind, so the response side gets its own
+        # constraint below.
         unique_together = [("requirement_assessment", "question")]
         verbose_name = _("Answer")
         verbose_name_plural = _("Answers")
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(requirement_assessment__isnull=False, response__isnull=True)
+                    | Q(requirement_assessment__isnull=True, response__isnull=False)
+                ),
+                name="answer_exactly_one_parent",
+            ),
+            models.UniqueConstraint(
+                fields=["response", "question"],
+                name="answer_unique_per_response_question",
+            ),
+        ]
 
     @staticmethod
     def empty_value_q() -> Q:
@@ -9663,7 +10823,12 @@ class Answer(AbstractBaseModel, FolderMixin):
         )
 
     def __str__(self) -> str:
-        return f"Answer to {self.question} for {self.requirement_assessment}"
+        return f"Answer to {self.question} for {self.owner}"
+
+    @property
+    def owner(self):
+        """The RequirementAssessment or QuickFormResponse owning this answer."""
+        return self.response if self.response_id else self.requirement_assessment
 
     def get_choice_urns(self):
         """Return list of selected choice URNs for choice-type questions."""
@@ -9684,8 +10849,24 @@ class Answer(AbstractBaseModel, FolderMixin):
 
         _defer_once("_pending_cel_evaluations", ca.pk, _run)
 
+    def _defer_response_recompute(self):
+        response = self.response
+
+        def _run():
+            response.recompute()
+
+        _defer_once("_pending_quick_form_recomputes", response.pk, _run)
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
+
+        if self.response_id:
+            # Quick form branch: no audit, no implementation groups.
+            QuickFormResponse.objects.filter(pk=self.response_id).update(
+                updated_at=timezone.now()
+            )
+            self._defer_response_recompute()
+            return
 
         # Update parent compliance assessment timestamp
         ComplianceAssessment.objects.filter(
@@ -9739,6 +10920,47 @@ class FindingsAssessment(Assessment, FilteringLabelMixin):
     )
 
     reported_at = models.DateField(null=True, blank=True, verbose_name=_("Reported at"))
+
+    compliance_assessment = models.ForeignKey(
+        "ComplianceAssessment",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="findings_assessments",
+        help_text=_("The audit whose findings this binder captures"),
+        verbose_name=_("Audit"),
+    )
+
+    start_date = models.DateField(null=True, blank=True, verbose_name=_("Start date"))
+
+    objectives = models.TextField(null=True, blank=True, verbose_name=_("Objectives"))
+
+    budget = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        verbose_name=_("Budget"),
+    )
+
+    expenses = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text=_("Budget consumed so far"),
+        verbose_name=_("Expenses"),
+    )
+
+    reference_link = models.URLField(
+        null=True,
+        blank=True,
+        max_length=2048,
+        help_text=_("External url for follow-up (eg. report, Jira ticket)"),
+        verbose_name=_("Reference link"),
+    )
 
     def get_findings_metrics(self):
         findings = self.findings.all()
@@ -9827,7 +11049,12 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     ]
 
     findings_assessment = models.ForeignKey(
-        FindingsAssessment, on_delete=models.CASCADE, related_name="findings"
+        FindingsAssessment,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="findings",
+        verbose_name=_("Findings assessment"),
     )
     threats = models.ManyToManyField(
         Threat,
@@ -9896,6 +11123,16 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         related_name="findings",
         verbose_name=_("Requirement"),
     )
+    # The catalog node above is shared by every audit on that framework, so it cannot
+    # say which assessment raised the finding. This can, and it is the way back.
+    requirement_assessment = models.ForeignKey(
+        "RequirementAssessment",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="findings",
+        verbose_name=_("Requirement assessment"),
+    )
     asset = models.ForeignKey(
         Asset,
         on_delete=models.SET_NULL,
@@ -9906,6 +11143,9 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     )
 
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    recommendation = models.TextField(
+        null=True, blank=True, verbose_name=_("Recommendation")
+    )
 
     class Meta:
         verbose_name = _("Finding")
@@ -9913,12 +11153,14 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
 
     @property
     def is_locked(self) -> bool:
-        return self.findings_assessment.is_locked
+        return self.findings_assessment.is_locked if self.findings_assessment else False
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        if not self.findings_assessment_id:
+            return
         # Update parent findings assessment's updated_at timestamp
-        FindingsAssessment.objects.filter(id=self.findings_assessment.id).update(
+        FindingsAssessment.objects.filter(id=self.findings_assessment_id).update(
             updated_at=timezone.now()
         )
         self.findings_assessment.upsert_daily_metrics()
@@ -9927,7 +11169,7 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
 
 
-class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class RiskAcceptance(NameDescriptionMixin, FolderMixin):
     ACCEPTANCE_STATE = [
         ("created", "Created"),
         ("submitted", "Submitted"),
@@ -10041,7 +11283,14 @@ class TaskTemplateManager(models.Manager):
         return super().create(**kwargs)
 
 
-class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class TaskTemplate(
+    NameDescriptionMixin, FolderMixin, FilteringLabelMixin, CommitmentMixin
+):
+    # A recurrent template is a definition, not a single promise: commitment lives
+    # on one-time tasks only (hidden entirely otherwise).
+    COMMITMENT_DATE_FIELD = "task_date"
+    COMMITMENT_ACTOR_FIELD = "assigned_to"
+
     objects = TaskTemplateManager()
 
     SCHEDULE_JSONSCHEMA = {
@@ -10151,6 +11400,13 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         help_text="Compliance assessments related to the task",
         related_name="task_templates",
     )
+    requirement_assessments = models.ManyToManyField(
+        RequirementAssessment,
+        verbose_name="Requirement assessments",
+        blank=True,
+        help_text="Requirement assessments related to the task",
+        related_name="task_templates",
+    )
     risk_assessments = models.ManyToManyField(
         RiskAssessment,
         verbose_name="Risk assessments",
@@ -10183,6 +11439,11 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name=_("Link"),
     )
 
+    # A resolved annotation is legitimately None when there is no such occurrence, so
+    # `None` cannot double as "not annotated" — that reading sent every template
+    # without a future node back to a per-row query.
+    _NOT_ANNOTATED = object()
+
     def _get_task_node_value(self, field, date_filter=None, order_by=None):
         queryset = TaskNode.objects.filter(task_template=self)
         if date_filter:
@@ -10192,8 +11453,8 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         return queryset.values_list(field, flat=True).first()
 
     def get_next_occurrence(self):
-        annotated = getattr(self, "next_occurrence", None)
-        if annotated is not None:
+        annotated = getattr(self, "next_occurrence", self._NOT_ANNOTATED)
+        if annotated is not self._NOT_ANNOTATED:
             return annotated
         if not self.is_recurrent:
             return self._get_task_node_value("due_date")
@@ -10205,8 +11466,8 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     def get_last_occurrence_status(self):
         if not self.is_recurrent:
             return None
-        annotated = getattr(self, "last_occurrence_status", None)
-        if annotated is not None:
+        annotated = getattr(self, "last_occurrence_status", self._NOT_ANNOTATED)
+        if annotated is not self._NOT_ANNOTATED:
             return annotated
         today = timezone.localdate()
         return self._get_task_node_value(
@@ -10214,8 +11475,8 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         )
 
     def get_next_occurrence_status(self):
-        annotated = getattr(self, "next_occurrence_status", None)
-        if annotated is not None:
+        annotated = getattr(self, "next_occurrence_status", self._NOT_ANNOTATED)
+        if annotated is not self._NOT_ANNOTATED:
             return annotated
         if not self.is_recurrent:
             return self._get_task_node_value("status")
@@ -10223,6 +11484,13 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         return self._get_task_node_value(
             "status", date_filter={"due_date__gte": today}, order_by="due_date"
         )
+
+    @property
+    def status(self):
+        """Status of the single occurrence of a one-time task; None when recurrent."""
+        if self.is_recurrent:
+            return None
+        return self._get_task_node_value("status", order_by="due_date")
 
     class Meta:
         verbose_name = "Task template"
@@ -10580,10 +11848,6 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
     )
     team_email = models.EmailField(verbose_name="Team Email", blank=True, null=True)
 
-    def save(self, *args, **kwargs):
-        self.is_published = True
-        return super().save(*args, **kwargs)
-
     def get_emails(self) -> list[str]:
         emails = []
         if self.team_email:
@@ -10617,6 +11881,9 @@ class Actor(AbstractBaseModel):
         related_name="actor",
     )
 
+    # The "normal" IAM isn't implemented for the `Actor` model, but this model can still be passed to the IAM (the IAM has specific internal routines to handle this model).
+    IAM_SCOPE_FIELD = Folder.IAM_SPECIAL_CASE
+
     class Meta:
         constraints = [
             # Ensure exactly one field is set (XOR logic)
@@ -10629,10 +11896,6 @@ class Actor(AbstractBaseModel):
                 name="actor_exactly_one_link",
             )
         ]
-
-    def save(self, *args, **kwargs):
-        self.is_published = True
-        return super().save(*args, **kwargs)
 
     @property
     def type(self) -> Literal["user", "team", "entity"]:
@@ -10667,18 +11930,28 @@ class Actor(AbstractBaseModel):
         Includes:
         - The user's own actor
         - Actors of teams where the user is leader, deputy, or member
+        - Actors of entities the user represents
+
+        Entities act through their representatives: naming an entity as owner or
+        assignee is naming the people who speak for it, so anything addressed to
+        the entity has to reach them. Without this an entity-assigned object has
+        an accountable actor that resolves to nobody, which is worse than leaving
+        it unassigned.
         """
         actors = []
         if hasattr(user, "actor") and user.actor:
             actors.append(user.actor)
 
-        team_actors = cls.objects.filter(
-            team__in=Team.objects.filter(
-                Q(leader=user) | Q(deputies=user) | Q(members=user)
+        group_actors = cls.objects.filter(
+            Q(
+                team__in=Team.objects.filter(
+                    Q(leader=user) | Q(deputies=user) | Q(members=user)
+                )
             )
+            | Q(entity__representatives__user=user)
         ).distinct()
 
-        return actors + list(team_actors)
+        return actors + list(group_actors)
 
     def __str__(self):
         return str(self.specific)
@@ -10759,6 +12032,8 @@ class PresetJourneyStep(AbstractBaseModel):
         User, null=True, blank=True, on_delete=models.SET_NULL
     )
     notes = models.TextField(blank=True)
+
+    IAM_SCOPE_FIELD = "journey"
 
     class Meta:
         ordering = ["order"]
@@ -10904,6 +12179,11 @@ auditlog.register(
     RequirementAssignment,
     exclude_fields=common_exclude,
     m2m_fields={"actor", "requirement_assessments"},
+)
+auditlog.register(
+    QuickFormResponse,
+    exclude_fields=common_exclude,
+    m2m_fields={"respondents", "reviewers"},
 )
 auditlog.register(
     Preset,

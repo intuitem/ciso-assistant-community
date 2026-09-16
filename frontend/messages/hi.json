@@ -662,7 +662,6 @@
 	"noStatus": "कोई स्थिति नहीं",
 	"actionPlanHelpText": "स्थिति द्वारा अलग और ETA द्वारा क्रमबद्ध",
 	"matchingRequirements": "मेल खाने वाली आवश्यकताएँ",
-	"asZIP": "ZIP के रूप में",
 	"incoming": "आगामी",
 	"outdated": "पुराना",
 	"flashMode": "फ्लैश मोड",
@@ -824,6 +823,8 @@
 	"addRepresentative": "प्रतिनिधि जोड़ें",
 	"phone": "फ़ोन",
 	"role": "भूमिका",
+	"defaultRole": "डिफ़ॉल्ट भूमिका",
+	"defaultRoleHelpText": "यह भूमिका इस डोमेन पर किसी भी उपयोगकर्ता को स्वचालित रूप से प्रदान की जाती है जिसकी इसके किसी उप-डोमेन पर भूमिका असाइनमेंट है।",
 	"questions": "सवाल",
 	"recipientEntity": "प्राप्तकर्ता इकाई",
 	"financial": "वित्तीय",
@@ -868,7 +869,8 @@
 	"mailFailedToSend": "मेल भेजा जाना विफल रहा",
 	"questionOrQuestions": "प्रश्न",
 	"successfullyUpdatedClientSettings": "क्लाइंट सेटिंग्स सफलतापूर्वक अपडेट हो गई हैं, कृपया पेज को रीफ्रेश करें।",
-	"xRaysEmptyMessage": "एक्स-रे का उपयोग करने के लिए आपको कम से कम एक परिधि बनाना होगा।",
+	"xRaysEmptyMessage": "कोई समस्या नहीं मिली। एक्स-रे केवल उन डोमेन को दिखाता है जिनमें खोजें हैं।",
+	"xRaysLoadingError": "एक्स-रे विश्लेषण पूरा नहीं हो सका। विवरण के लिए सर्वर लॉग देखें।",
 	"suggestControls": "नियंत्रण सुझाएँ",
 	"createAppliedControlsFromSuggestionsHelpText": "फ़्रेमवर्क की आवश्यकताओं के सुझाए गए संदर्भ नियंत्रणों से लागू नियंत्रण बनाएँ",
 	"createAppliedControlsFromSuggestionsSuccess": "सुझाए गए संदर्भ नियंत्रणों से सफलतापूर्वक लागू किए गए नियंत्रण बनाए गए",
@@ -1136,15 +1138,6 @@
 	"changeUserGroup": "उपयोगकर्ता समूह बदलें",
 	"deleteUserGroup": "उपयोगकर्ता समूह हटाएं",
 	"viewUserGroup": "उपयोगकर्ता समूह देखें",
-	"changeQuantitativeRiskHypothesis": "सांख्यिकीय जोखिम हाइपोथिसिस बदलें",
-	"deleteQuantitativeRiskHypothesis": "सांख्यिकीय जोखिम हाइपोथिसिस हटाएं",
-	"viewQuantitativeRiskHypothesis": "सांख्यिकीय जोखिम हाइपोथिसिस देखें",
-	"changeQuantitativeRiskScenario": "परिदृश्य बदलें",
-	"deleteQuantitativeRiskScenario": "परिदृश्य हटाएं",
-	"viewQuantitativeRiskScenario": "परिदृश्य देखें",
-	"changeQuantitativeRiskStudy": "जोखिम सांख्यिकी अध्ययन बदलें",
-	"deleteQuantitativeRiskStudy": "जोखिम सांख्यिकी अध्ययन हटाएं",
-	"viewQuantitativeRiskStudy": "जोखिम सांख्यिकी अध्ययन देखें",
 	"dueDateUpdatedSuccessfully": "देय तिथि सफलतापूर्वक अपडेट की गई",
 	"taskScheduleInfo": "पिछले घटनाएँ शेड्यूल परिवर्तनों से सुरक्षित हैं। केवल आने वाले कार्य पुनः गणना किए जाएंगे।",
 	"info": "जानकारी",
@@ -1182,7 +1175,6 @@
 	"syncAppliedControlsMessage": "इस संदर्भ नियंत्रण का उपयोग करने वाले लागू नियंत्रण इसके साथ सिंक किए जाएंगे। कृपया ध्यान दें कि इसे वापस नहीं किया जा सकता।",
 	"syncToAppliedControl": "लागू नियंत्रण के साथ सिंक करें",
 	"syncToReferenceControl": "संदर्भ नियंत्रण के साथ सिंक करें",
-	"exportEcosystem": "पारिस्थितिकी तंत्र निर्यात (XLSX)",
 	"expirationDate": "समाप्ति तिथि",
 	"vulnerabilitySlaPolicyHelpText": "गंभीरता के आधार पर किसी कमजोरी को ठीक करने के लिए अधिकतम दिनों की संख्या निर्धारित करें।",
 	"slaAnchor": "SLA प्रारंभ तिथि",
@@ -1249,19 +1241,12 @@
 	"builderRequirementHint": "मूल्यांकन योग्य, फिर भी चाइल्ड हो सकते हैं",
 	"builderSplashScreen": "स्प्लैश स्क्रीन",
 	"builderSplashScreenHint": "प्रस्तुतिकरण, मूल्यांकन योग्य नहीं",
-	"builderStatusLive": "लाइव",
-	"builderStatusLiveTitle": "ड्राफ्ट वही दिखाता है जो ऑडिट उत्तरदाता देखते हैं।",
-	"builderStatusUnpublishedChanges": "अप्रकाशित परिवर्तन",
-	"builderStatusUnpublishedChangesTitle": "ड्राफ्ट में ऐसे संपादन हैं जो अभी ऑडिट उत्तरदाताओं को दिखाई नहीं देते। लागू करने के लिए प्रकाशित करें।",
-	"builderStatusDraftNothingLive": "ड्राफ्ट — अभी कुछ भी लाइव नहीं",
-	"builderStatusDraftNothingLiveTitle": "ड्राफ्ट में सामग्री है लेकिन अभी तक कुछ भी प्रकाशित नहीं हुआ है। नए ऑडिट तब तक कुछ नहीं देखेंगे जब तक आप प्रकाशित नहीं करते।",
 	"builderStatusEmpty": "खाली",
 	"builderStatusEmptyTitle": "अभी कोई आवश्यकताएँ नहीं हैं। इस फ्रेमवर्क पर बने नए ऑडिट के पास उत्तर देने के लिए कुछ नहीं होगा।",
 	"builderPreview": "पूर्वावलोकन",
 	"builderPreviewSaveFirst": "पूर्वावलोकन के लिए पहले अपना ड्राफ्ट सहेजें",
 	"builderPreviewAsRespondent": "उत्तरदाता के रूप में पूर्वावलोकन (नए टैब में खुलता है)",
 	"builderExportYamlTitle": "फ्रेमवर्क को YAML लाइब्रेरी फ़ाइल के रूप में निर्यात करें",
-	"builderExportYamlUnpublishedWarning": "अप्रकाशित परिवर्तन शामिल नहीं किए जाएंगे। नवीनतम संपादन निर्यात करने के लिए पहले प्रकाशित करें।",
 	"builderCopyBase": "आधार कॉपी करें",
 	"builderCopyBaseTitle": "आधार भाषा का पाठ {lang} में कॉपी करें (मौजूदा अनुवादों को अधिलेखित नहीं करेगा)",
 	"builderCopyBaseQuestion": "आधार पाठ कॉपी करें?",
@@ -1271,82 +1256,7 @@
 	"builderExpandAllCards": "सभी कार्ड विस्तृत करें",
 	"builderCollapseAllCards": "सभी कार्ड संक्षिप्त करें",
 	"builderSaveFailed": "सहेजना विफल",
-	"builderPublishedFlash": "प्रकाशित!",
 	"builderSaveDraftTitle": "ड्राफ्ट सहेजें (Ctrl+S)",
-	"builderDiscardDraftTitle": "ड्राफ्ट त्यागें",
-	"builderDiscard": "त्यागें",
-	"builderDiscardAllChangesQuestion": "सभी परिवर्तन त्यागें?",
-	"builderYesDiscard": "हाँ, त्यागें",
-	"builderPublishDraftToLiveTitle": "ड्राफ्ट को लाइव फ्रेमवर्क पर प्रकाशित करें",
-	"builderPublishing": "प्रकाशित किया जा रहा है...",
-	"builderPublishModalTitle": "ड्राफ्ट को लाइव पर प्रकाशित करें",
-	"builderPublishModalDescription": "यह लाइव फ्रेमवर्क को अपडेट करेगा। नीचे दिए गए परिवर्तनों की समीक्षा करें।",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} आवश्यकताएँ जोड़ी गईं",
-				"countPlural=other": "{count} आवश्यकताएँ जोड़ी गईं"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} प्रश्न",
-				"countPlural=other": "{count} प्रश्न"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} आवश्यकताएँ हटाई गईं",
-				"countPlural=other": "{count} आवश्यकताएँ हटाई गईं"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} प्रश्न",
-				"countPlural=other": "{count} प्रश्न"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "कोई संरचनात्मक परिवर्तन नहीं मिला (केवल मेटाडेटा)।",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} ब्रेकिंग परिवर्तन पाए गए",
-				"countPlural=other": "{count} ब्रेकिंग परिवर्तन पाए गए"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "ये परिवर्तन मौजूदा ऑडिट में स्कोरिंग, दृश्यता या अनुपालन परिणामों को प्रभावित कर सकते हैं।",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} मौजूदा ऑडिट प्रभावित होंगे",
-				"countPlural=other": "{count} मौजूदा ऑडिट प्रभावित होंगे"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "इन ऑडिट में नई आवश्यकताएँ जोड़ी जाएंगी।",
-	"builderAffectedAuditsRemovedHint": "हटाई गई आवश्यकताएँ और उनका मूल्यांकन डेटा इन ऑडिट से हटा दिया जाएगा।",
-	"builderCouldNotLoadPreview": "प्रभाव पूर्वावलोकन लोड नहीं हो सका। सावधानी से आगे बढ़ें।",
-	"builderConfirmPublish": "प्रकाशन की पुष्टि करें",
 	"builderSearchNodes": "नोड खोजें...",
 	"builderExpandSidebar": "साइडबार विस्तृत करें",
 	"builderCollapseSidebar": "साइडबार संक्षिप्त करें",
@@ -1526,7 +1436,6 @@
 	"builderSplashNumberedList": "क्रमांकित सूची",
 	"builderSplashLink": "लिंक",
 	"builderSplashTable": "तालिका",
-	"builderSplashInsertImage": "छवि सम्मिलित करें",
 	"builderUntitledQuestion": "बिना शीर्षक प्रश्न",
 	"builderNotTranslated": "अनुवादित नहीं",
 	"builderQuestionTextPlaceholder": "अपना प्रश्न दर्ज करें...",
@@ -1571,27 +1480,12 @@
 	"builderKbSaveDraft": "ड्राफ्ट सहेजें",
 	"builderKbShowCheatsheet": "यह चीटशीट दिखाएँ",
 	"builderKbCloseDialog": "डायलॉग या ड्रॉपडाउन बंद करें",
-	"builderImportedFramework": "आयातित फ्रेमवर्क",
-	"builderImportedFrameworkDescription": "यह फ्रेमवर्क एक लाइब्रेरी से आयात किया गया था और इसे सीधे संपादित नहीं किया जा सकता। परिवर्तन करने के लिए, एक संपादन योग्य प्रति बनाएँ।",
-	"builderCreateCopyAndEdit": "प्रति बनाएँ और संपादित करें",
-	"builderCreatingCopy": "प्रति बनाई जा रही है...",
-	"builderLoadingEditor": "संपादक लोड हो रहा है...",
-	"builderFailedToStartEditor": "संपादक शुरू करने में विफल",
-	"builderBackToFramework": "फ्रेमवर्क पर वापस",
-	"builderBackToBuilder": "बिल्डर पर वापस",
-	"builderFailedToLoadDraft": "ड्राफ्ट लोड करने में विफल",
-	"builderImplementationGroupsHeader": "कार्यान्वयन समूह",
-	"builderNoItemsToPreview": "पूर्वावलोकन के लिए कोई आइटम नहीं।",
-	"builderNoItemsToPreviewHint": "बिल्डर में मूल्यांकन योग्य आवश्यकताएँ या स्प्लैश स्क्रीन जोड़ें।",
-	"builderBaseLanguageOption": "आधार भाषा",
 	"builderFrameworkNameRequired": "फ्रेमवर्क नाम आवश्यक है।",
 	"builderFrameworkNameTooLong": "फ्रेमवर्क नाम {length} वर्णों का है (अधिकतम 200)।",
 	"builderNodeNameTooLong": "नाम 200 वर्णों से अधिक है ({length}/200)। लंबे पाठ को विवरण फ़ील्ड में ले जाएँ।",
 	"builderRefIdTooLong": "'{label}': ref_id {length} वर्णों का है (अधिकतम 100)।",
 	"builderUrnTooLong": "'{label}': URN {length} वर्णों का है (अधिकतम 255)।",
-	"builderFailedToSaveDraftBeforePublish": "प्रकाशित करने से पहले ड्राफ्ट सहेजने में विफल।",
 	"builderUnsavedChangesNavigation": "आपके पास असहेजे गए परिवर्तन हैं जो खो जाएंगे। फिर भी छोड़ें?",
-	"builderUnpublishedChangesNavigation": "आपके पास अप्रकाशित परिवर्तन हैं। आपका ड्राफ्ट सहेजा गया है और आप बाद में फिर से शुरू कर सकते हैं। फिर भी छोड़ें?",
 	"fieldVisibility": "फ़ील्ड दृश्यता",
 	"fieldVisibilityHelpText": "नियंत्रित करें कि कौन से फ़ील्ड प्रत्येक भूमिका देख और संपादित कर सकती है।",
 	"visibilityAuditorRespondent": "ऑडिटर + प्रत्युत्तरकर्ता",
@@ -1624,7 +1518,6 @@
 	"mfaDisabledSuccessfully": "इस उपयोगकर्ता के लिए MFA अक्षम कर दिया गया है",
 	"errorDisablingMFA": "इस उपयोगकर्ता के लिए MFA अक्षम नहीं किया जा सका",
 	"userHasNoMFAEnabled": "इस उपयोगकर्ता के पास MFA सक्षम नहीं है",
-	"builderChangedOn": "बदला गया",
 	"requirementWeight": "भार",
 	"scim": "SCIM",
 	"scimDescription": "SCIM 2.0 प्रावधान कॉन्फ़िगर करें। अपने पहचान प्रदाता को नीचे दिए गए एंडपॉइंट पर इंगित करें और यहाँ उत्पन्न बियरर टोकन से प्रमाणित करें।",
@@ -1646,6 +1539,9 @@
 	"idpGroups": "IdP समूह",
 	"idpGroupsDescription": "IdP समूह फ़ेडरेशन सक्षम करें (SCIM प्रावधान, IdP समूह मैपिंग, और उपयोगकर्ताओं पर IdP समूह सदस्यताएँ)।",
 	"ebiosRmStudyDomainHelpText": "डोमेन बदलने से अध्ययन और उसकी सभी कार्यशाला वस्तुएँ चयनित डोमेन में स्थानांतरित हो जाती हैं।",
+	"reopenAssignmentForEditing": "संपादन के लिए फिर से खोलें",
+	"forReview": "समीक्षा के लिए",
+	"forEditing": "संपादन के लिए",
 	"serviceAccount": "सेवा खाता",
 	"serviceAccounts": "सेवा खाते",
 	"serviceAccountsDescription": "सेवा खाते सक्षम करता है (OAuth2 क्लाइंट क्रेडेंशियल फ़्लो के माध्यम से मशीन-टू-मशीन API एक्सेस)।",
@@ -1664,7 +1560,6 @@
 	"deactivateServiceAccountConfirm": "इस सेवा खाते को निष्क्रिय करने से सभी लंबित एक्सेस टोकन तुरंत रद्द हो जाएंगे और नए टोकन जारी होने से रुक जाएंगे। जारी रखें?",
 	"gracePeriod": "अनुग्रह अवधि",
 	"gracePeriodHelpText": "रोटेशन के बाद मौजूदा सीक्रेट इतने समय तक काम करता रहता है, ताकि इंटीग्रेशन बिना डाउनटाइम के अपडेट किए जा सकें। अधिकतम 1 महीने तक सीमित।",
-	"gracePeriodTooLong": "अनुग्रह अवधि 1 महीने से अधिक नहीं हो सकती।",
 	"previousSecretValidUntil": "पिछला क्लाइंट सीक्रेट {date} तक मान्य रहता है।",
 	"enableJitProvisioning": "स्वतः-प्रावधान सक्षम करें",
 	"enableJitProvisioningHelpText": "पहली बार SSO के माध्यम से प्रमाणीकरण करने वाले उपयोगकर्ताओं के लिए, नीचे दिए गए डिफ़ॉल्ट उपयोगकर्ता समूहों के साथ स्वचालित रूप से एक खाता बनाएं।",

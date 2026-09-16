@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task
 from core.models import (
+    QuickFormResponse,
     AppliedControl,
     ComplianceAssessment,
     Evidence,
@@ -1484,6 +1485,20 @@ def deactivate_expired_users():
 
     count = 0
     for user in expired_users:
+        # Never expire the deployment out of administration: keep the last
+        # active directly-managed admin, mirroring the API-side guard
+        # (UserWriteSerializer._enforce_last_active_admin) for expiry dates
+        # that predate it.
+        if (
+            user.user_groups.filter(name="BI-UG-ADM").exists()
+            and not User.objects.filter(user_groups__name="BI-UG-ADM", is_active=True)
+            .exclude(pk=user.pk)
+            .exists()
+        ):
+            logger.warning(
+                f"Skipping expiry deactivation of the last active admin: {user.email} (ID: {user.id})"
+            )
+            continue
         user.is_active = False
         user.save()
         count += 1
@@ -1645,6 +1660,40 @@ def send_assignment_submitted_notification(assignment_id):
 
 
 @task()
+def send_assignment_reopened_notification(assignment_id, observation=""):
+    """Send notification when a RequirementAssignment is reset back to draft for editing."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    context = {
+        "assessment_name": ca.name,
+        "reviewer_observation": observation,
+    }
+
+    for actor in assignment.actor.all():
+        for email in actor.get_emails():
+            if email and check_email_configuration(email, [assignment]):
+                rendered = render_email_template(
+                    "assignment_reopened", context, recipient_email=email
+                )
+                if rendered:
+                    send_notification_email(
+                        rendered["subject"],
+                        rendered["body"],
+                        email,
+                        rendered.get("html_body"),
+                    )
+
+
+@task()
 def send_assignment_reviewed_notification(
     assignment_id, decision, reviewer_observation=""
 ):
@@ -1679,3 +1728,143 @@ def send_assignment_reviewed_notification(
                         email,
                         rendered.get("html_body"),
                     )
+
+
+def notify_audit_assignees(audit) -> list:
+    """Email everyone holding an assignment on *audit*. Returns the actors that failed."""
+    from django.utils.translation import gettext_lazy as _
+
+    failed = []
+    # Driven by the assignments, not by `authors`: an actor can be pointed at an
+    # assignment without being an author, and iterating authors skips them silently.
+    for assignment in audit.requirement_assignments.prefetch_related("actor"):
+        for actor in assignment.actor.all():
+            try:
+                specific = actor.specific
+                if not hasattr(specific, "mailing"):
+                    logger.warning(
+                        "Actor has no mailing method, skipping email",
+                        actor=actor,
+                        actor_type=type(specific).__name__,
+                    )
+                    continue
+                specific.mailing(
+                    email_template_name="tprm/third_party_email.html",
+                    subject=_(
+                        "CISO Assistant: A questionnaire has been assigned to you"
+                    ),
+                    object="auditee-assessments",
+                    object_id=assignment.id,
+                )
+            except Exception as e:
+                logger.error("Failed to send email", actor=actor, error=e)
+                failed.append(str(actor))
+    return failed
+
+
+@task()
+def notify_campaign_assignees(campaign_id):
+    """Send a campaign's notifications off the request thread: a fan-out is one SMTP round trip per audit."""
+    audits = ComplianceAssessment.objects.filter(campaign_id=campaign_id)
+    notified = failed = 0
+    for audit in audits:
+        errors = notify_audit_assignees(audit)
+        failed += len(errors)
+        notified += 1
+    logger.info(
+        "campaign notifications sent",
+        campaign_id=str(campaign_id),
+        audits=notified,
+        failed_actors=failed,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Quick form notifications
+# ---------------------------------------------------------------------------
+
+
+def _quick_form_context(response) -> dict:
+    return {
+        "response_name": response.name,
+        "quick_form_name": response.quick_form.name,
+        "due_date": response.due_date.strftime("%Y-%m-%d")
+        if response.due_date
+        else "Not set",
+        "response_id": str(response.id),
+        "observation": response.observation or "",
+    }
+
+
+def _notify_actors(actors, template_name, context, response) -> None:
+    from .email_utils import render_email_template
+
+    recipient_emails = set()
+    for actor in actors:
+        for email in actor.get_emails():
+            if email:
+                recipient_emails.add(email)
+    for email in sorted(recipient_emails):
+        if check_email_configuration(email, [response]):
+            rendered = render_email_template(
+                template_name, context, recipient_email=email
+            )
+            if rendered:
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
+
+
+def _load_quick_form_response(response_id):
+    try:
+        return QuickFormResponse.objects.select_related("quick_form").get(
+            id=response_id
+        )
+    except QuickFormResponse.DoesNotExist:
+        logger.error(f"QuickFormResponse with id {response_id} not found")
+        return None
+
+
+@task()
+def send_quick_form_started_notification(response_id):
+    """Respondents are told a quick form response is ready for their input."""
+    response = _load_quick_form_response(response_id)
+    if response is None:
+        return
+    _notify_actors(
+        response.respondents.all(),
+        "quick_form_started",
+        _quick_form_context(response),
+        response,
+    )
+
+
+@task()
+def send_quick_form_submitted_notification(response_id):
+    """Reviewers are told a quick form response was submitted."""
+    response = _load_quick_form_response(response_id)
+    if response is None:
+        return
+    _notify_actors(
+        response.reviewers.all(),
+        "quick_form_submitted",
+        _quick_form_context(response),
+        response,
+    )
+
+
+@task()
+def send_quick_form_reopened_notification(response_id):
+    """Respondents are told a submitted response was sent back to them."""
+    response = _load_quick_form_response(response_id)
+    if response is None:
+        return
+    _notify_actors(
+        response.respondents.all(),
+        "quick_form_reopened",
+        _quick_form_context(response),
+        response,
+    )

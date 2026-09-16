@@ -74,6 +74,32 @@ def make_def(ct, folder, key, field_type, **kwargs):
 
 
 # --------------------------------------------------------------------------- #
+# empty-value tolerance
+# --------------------------------------------------------------------------- #
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        (None, True),
+        (False, True),
+        ("", True),
+        ([], True),
+        ({}, True),
+        # 0 == False in Python; a numeric field set to 0 is a value, not empty.
+        (0, False),
+        (0.0, False),
+        ("0", False),
+        (True, False),
+        ("x", False),
+        ([0], False),
+    ],
+)
+def test_is_empty_keeps_zero_as_a_value(value, expected):
+    from custom_fields.serializers import CustomFieldsSerializerMixin
+
+    assert CustomFieldsSerializerMixin._is_empty(value) is expected
+
+
+# --------------------------------------------------------------------------- #
 # coercion
 # --------------------------------------------------------------------------- #
 @pytest.mark.parametrize(

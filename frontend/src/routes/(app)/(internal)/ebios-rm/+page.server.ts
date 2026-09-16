@@ -41,10 +41,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model['selectOptions'] = selectOptions;
 
-	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/`;
-	const res = await fetch(endpoint);
-	const data = await res.json().then((res) => res.results);
-
 	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
 		(obj, key, index) => {
 			obj[key] = listViewFields[URLModel as urlModel].head[index];

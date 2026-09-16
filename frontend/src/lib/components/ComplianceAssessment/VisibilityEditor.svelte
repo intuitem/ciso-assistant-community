@@ -30,6 +30,7 @@
 		answers: m.answers,
 		evidences: m.evidences,
 		applied_controls: m.appliedControls,
+		task_templates: m.taskTemplates,
 		respondent_alignment: m.respondentAlignment,
 		comments: m.comments
 	};

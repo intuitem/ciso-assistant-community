@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { resolveBreakdownColor } from '$lib/utils/constants';
@@ -193,47 +195,48 @@
 
 	let chartInstance: any = null;
 
-	onMount(async () => {
-		// Skip ECharts for text widgets - they render markdown, not charts
-		if (widget.chart_type === 'text') {
-			return;
-		}
-		// Skip ECharts for KPI/table with scalar values, but allow for breakdown metrics
-		if ((widget.chart_type === 'kpi_card' || widget.chart_type === 'table') && !isBreakdownMetric) {
-			return; // These don't use ECharts for scalar values
-		}
-		// For breakdown table, we don't need ECharts
-		if (widget.chart_type === 'table' && isBreakdownMetric) {
-			return;
-		}
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			// Skip ECharts for text widgets - they render markdown, not charts
+			if (widget.chart_type === 'text') {
+				return;
+			}
+			// Skip ECharts for KPI/table with scalar values, but allow for breakdown metrics
+			if (
+				(widget.chart_type === 'kpi_card' || widget.chart_type === 'table') &&
+				!isBreakdownMetric
+			) {
+				return; // These don't use ECharts for scalar values
+			}
+			// For breakdown table, we don't need ECharts
+			if (widget.chart_type === 'table' && isBreakdownMetric) {
+				return;
+			}
 
-		const echarts = await import('echarts');
-		const container = document.getElementById(chartId);
-		if (!container) return;
+			const echarts = await import('echarts');
+			if (!active) return;
+			const container = document.getElementById(chartId);
+			if (!container) return;
 
-		chartInstance = echarts.init(
-			container,
-			document.documentElement.classList.contains('dark') ? 'dark' : null,
-			{ renderer: 'svg' }
-		);
+			const disposeChart = mountThemeAwareChart(echarts, container, () => getChartOption(echarts), {
+				onChart: (c: any) => (chartInstance = c)
+			});
 
-		const option = getChartOption(echarts);
-		option.backgroundColor = 'transparent';
-		chartInstance.setOption(option);
+			// the helper only watches window resize; this also catches container-only changes
+			const resizeObserver = new ResizeObserver(() => chartInstance?.resize());
+			resizeObserver.observe(container);
 
-		const resizeHandler = () => chartInstance?.resize();
-		window.addEventListener('resize', resizeHandler);
-
-		// Use ResizeObserver for container size changes
-		const resizeObserver = new ResizeObserver(() => {
-			chartInstance?.resize();
-		});
-		resizeObserver.observe(container);
-
+			dispose = () => {
+				resizeObserver.disconnect();
+				disposeChart();
+				chartInstance = null;
+			};
+		})();
 		return () => {
-			window.removeEventListener('resize', resizeHandler);
-			resizeObserver.disconnect();
-			chartInstance?.dispose();
+			active = false;
+			dispose?.();
 		};
 	});
 

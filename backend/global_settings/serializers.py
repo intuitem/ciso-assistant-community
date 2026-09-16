@@ -14,6 +14,8 @@ from core.net_safety import (
     DnsLookupError,
     assert_public_url_unless_dev,
 )
+from iam.models import User
+
 from .models import GlobalSettings
 
 
@@ -84,6 +86,7 @@ GENERAL_SETTINGS_KEYS = [
     "allow_assignments_to_entities",
     "enforce_mfa",
     "default_language",
+    "default_date_format",
     "llm_provider",
     "ollama_base_url",
     "ollama_model",
@@ -182,6 +185,15 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         {
                             "default_language": f"Invalid language. Must be one of: {valid_codes}"
+                        }
+                    )
+            if key == "default_date_format":
+                # isinstance first: DATE_FORMATS is a set, so an unhashable JSON
+                # value (list/dict) would raise TypeError instead of a 400.
+                if not isinstance(value, str) or value not in User.DATE_FORMATS:
+                    raise serializers.ValidationError(
+                        {
+                            "default_date_format": f"Invalid date format. Must be one of: {sorted(User.DATE_FORMATS)}"
                         }
                     )
             if key == "default_packager":
@@ -310,7 +322,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GlobalSettings
-        exclude = ["is_published", "folder"]
+        exclude = ["folder"]
         read_only_fields = ["name"]
 
 
@@ -395,6 +407,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     outgoing_webhooks = serializers.BooleanField(
         source="value.outgoing_webhooks", required=False, default=False
     )
+    workflows = serializers.BooleanField(
+        source="value.workflows", required=False, default=False
+    )
     metrology = serializers.BooleanField(
         source="value.metrology", required=False, default=True
     )
@@ -418,6 +433,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     )
     auditee_mode = serializers.BooleanField(
         source="value.auditee_mode", required=False, default=True
+    )
+    quick_forms = serializers.BooleanField(
+        source="value.quick_forms", required=False, default=False
     )
     advanced_analytics = serializers.BooleanField(
         source="value.advanced_analytics", required=False, default=True
@@ -444,6 +462,16 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     posture_assessments = serializers.BooleanField(
         source="value.posture_assessments", required=False, default=False
     )
+    commitment_management = serializers.BooleanField(
+        source="value.commitment_management", required=False, default=False
+    )
+    findings_from_requirements = serializers.BooleanField(
+        source="value.findings_from_requirements", required=False, default=False
+    )
+    dora = serializers.BooleanField(source="value.dora", required=False, default=True)
+    external_ratings = serializers.BooleanField(
+        source="value.external_ratings", required=False, default=False
+    )
     jit_provisioning = serializers.BooleanField(
         source="value.jit_provisioning", required=False, default=False
     )
@@ -457,7 +485,6 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "name",
             "value",
             "folder",
-            "is_published",
         ]
         read_only_fields = ["name"]
 
@@ -551,7 +578,6 @@ class VulnerabilitySlaSerializer(serializers.ModelSerializer):
             "name",
             "value",
             "folder",
-            "is_published",
         ]
         read_only_fields = ["name"]
 
@@ -613,7 +639,6 @@ class InfraConfigSerializer(serializers.ModelSerializer):
             "name",
             "value",
             "folder",
-            "is_published",
         ]
         read_only_fields = ["name"]
 
@@ -702,7 +727,6 @@ class SecIntelFeedsSerializer(serializers.ModelSerializer):
             "name",
             "value",
             "folder",
-            "is_published",
         ]
         read_only_fields = ["name"]
 

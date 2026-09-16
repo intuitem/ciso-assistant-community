@@ -4,8 +4,9 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals, cookies, url }) => {
-	if (locals.user) {
-		redirect(302, locals.user.is_auditee ? '/auditee-dashboard' : '/analytics');
+	const user = await locals.getUser();
+	if (user) {
+		redirect(302, user.is_auditee ? '/auditee-dashboard' : '/analytics');
 	}
 
 	const token = cookies.get('token');
@@ -14,7 +15,11 @@ export const load: PageServerLoad = async ({ fetch, locals, cookies, url }) => {
 	}
 
 	const allauthSessionEndpoint = `${BASE_API_URL}/iam/session-token/`;
-	const allauthSessionResponse = await fetch(allauthSessionEndpoint, { method: 'POST' });
+	const ssoSessionKey = cookies.get('sessionid');
+	const allauthSessionResponse = await fetch(allauthSessionEndpoint, {
+		method: 'POST',
+		headers: ssoSessionKey ? { 'X-SSO-Session-Key': ssoSessionKey } : {}
+	});
 
 	if (!allauthSessionResponse.ok) {
 		console.error('Failed to fetch allauth session token:', allauthSessionResponse.status);

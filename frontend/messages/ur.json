@@ -658,7 +658,6 @@
 	"noStatus": "کوئی حیثیت نہیں",
 	"actionPlanHelpText": "حیثیت کے لحاظ سے الگ اور ETA کے لحاظ سے ترتیب دیا گیا",
 	"matchingRequirements": "مماثل تقاضے",
-	"asZIP": "ZIP کے طور پر",
 	"incoming": "آنے والا",
 	"outdated": "پرانا",
 	"flashMode": "فلیش موڈ",
@@ -820,6 +819,8 @@
 	"addRepresentative": "نمائندہ شامل کریں۔",
 	"phone": "فون",
 	"role": "کردار",
+	"defaultRole": "پہلے سے طے شدہ کردار",
+	"defaultRoleHelpText": "وہ کردار جو اس ڈومین پر ہر اس صارف کو خودکار طور پر دیا جاتا ہے جس کی اس کے کسی ذیلی ڈومین پر کردار کی تفویض ہو۔",
 	"questions": "سوالات",
 	"recipientEntity": "وصول کنندہ ادارہ",
 	"financial": "مالیاتی",
@@ -864,7 +865,8 @@
 	"mailFailedToSend": "میل بھیجنے میں ناکام رہا۔",
 	"questionOrQuestions": "سوال (سوال)",
 	"successfullyUpdatedClientSettings": "کلائنٹ کی ترتیبات کو کامیابی کے ساتھ اپ ڈیٹ کیا گیا، براہ کرم صفحہ کو ریفریش کریں۔",
-	"xRaysEmptyMessage": "ایکسرے استعمال کرنے کے لیے آپ کو کم از کم ایک پیریمیٹرز بنانا ہوگا۔",
+	"xRaysEmptyMessage": "کوئی مسئلہ نہیں ملا۔ ایکس رے صرف ان ڈومینز کو دکھاتا ہے جن میں نتائج ہوں۔",
+	"xRaysLoadingError": "ایکس رے تجزیہ مکمل نہیں ہو سکا۔ تفصیلات کے لیے سرور لاگز دیکھیں۔",
 	"suggestControls": "کنٹرولز تجویز کریں۔",
 	"createAppliedControlsFromSuggestionsHelpText": "فریم ورک کی ضروریات کے تجویز کردہ حوالہ کنٹرول سے لاگو کنٹرولز بنائیں",
 	"createAppliedControlsFromSuggestionsSuccess": "تجویز کردہ حوالہ کنٹرولز سے کامیابی کے ساتھ بنائے گئے لاگو کنٹرولز",
@@ -1132,15 +1134,6 @@
 	"changeUserGroup": "صارف گروپ تبدیل کریں",
 	"deleteUserGroup": "صارف گروپ حذف کریں",
 	"viewUserGroup": "صارف گروپ دیکھیں",
-	"changeQuantitativeRiskHypothesis": "مقدارتی خطرہ فرضیہ تبدیل کریں",
-	"deleteQuantitativeRiskHypothesis": "مقدارتی خطرہ فرضیہ حذف کریں",
-	"viewQuantitativeRiskHypothesis": "مقدارتی خطرہ فرضیہ دیکھیں",
-	"changeQuantitativeRiskScenario": "منظرنامہ تبدیل کریں",
-	"deleteQuantitativeRiskScenario": "منظرنامہ حذف کریں",
-	"viewQuantitativeRiskScenario": "منظرنامہ دیکھیں",
-	"changeQuantitativeRiskStudy": "خطرہ کی مقدار کی تحقیق تبدیل کریں",
-	"deleteQuantitativeRiskStudy": "خطرہ کی مقدار کی تحقیق حذف کریں",
-	"viewQuantitativeRiskStudy": "خطرہ کی مقدار کی تحقیق دیکھیں",
 	"dueDateUpdatedSuccessfully": "فہرست کی تاریخ کامیابی کے ساتھ اپ ڈیٹ کی گئی",
 	"taskScheduleInfo": "تغییرات شیڈول کے پچھلے واقعات محفوظ ہیں۔ صرف آئندہ ٹاسک دوبارہ حساب کیے جائیں گے۔",
 	"cascadeDeleteWarning": "انتباہ: اس کو حذف کرنے سے {count} متعلقہ اشیاء کو بھی مستقل طور پر حذف کر دیا جائے گا:",
@@ -1178,7 +1171,6 @@
 	"syncAppliedControlsMessage": "اس حوالہ کنٹرول کو استعمال کرنے والے اطلاق شدہ کنٹرولز اس کے ساتھ ہم آہنگ کر دیے جائیں گے۔ براہ کرم نوٹ کریں کہ یہ عمل واپس نہیں لیا جا سکتا۔",
 	"syncToAppliedControl": "لاگو کنٹرول کے ساتھ ہم آہنگ کریں",
 	"syncToReferenceControl": "حوالہ کنٹرول کے ساتھ ہم آہنگ کریں",
-	"exportEcosystem": "ماحول کی برآمدگی (XLSX)",
 	"expirationDate": "میعاد ختم کی تاریخ",
 	"vulnerabilitySlaPolicyHelpText": "شدت کے مطابق کمزوری کو ٹھیک کرنے کے لیے زیادہ سے زیادہ دن مقرر کریں۔",
 	"slaAnchor": "SLA آغاز کی تاریخ",
@@ -1270,19 +1262,12 @@
 	"builderRequirementHint": "قابل تشخیص، بچے رکھ سکتا ہے",
 	"builderSplashScreen": "سپلیش اسکرین",
 	"builderSplashScreenHint": "پیشکشی، غیر قابل تشخیص",
-	"builderStatusLive": "براہ راست",
-	"builderStatusLiveTitle": "مسودہ اس سے میل کھاتا ہے جو آڈٹ جواب دہندگان دیکھتے ہیں۔",
-	"builderStatusUnpublishedChanges": "غیر شائع شدہ تبدیلیاں",
-	"builderStatusUnpublishedChangesTitle": "مسودے میں ایسی تبدیلیاں ہیں جو ابھی تک آڈٹ جواب دہندگان کو نظر نہیں آتیں۔ لاگو کرنے کے لیے شائع کریں۔",
-	"builderStatusDraftNothingLive": "مسودہ — ابھی کچھ براہ راست نہیں",
-	"builderStatusDraftNothingLiveTitle": "مسودے میں مواد ہے لیکن ابھی تک کچھ شائع نہیں ہوا۔ نئے آڈٹس آپ کے شائع کرنے تک کچھ نہیں دیکھیں گے۔",
 	"builderStatusEmpty": "خالی",
 	"builderStatusEmptyTitle": "ابھی کوئی ضروریات نہیں۔ اس فریم ورک پر مبنی نئے آڈٹس کے پاس جواب دینے کے لیے کچھ نہیں ہوگا۔",
 	"builderPreview": "پیش نظارہ",
 	"builderPreviewSaveFirst": "پیش نظارہ کے لیے پہلے اپنا مسودہ محفوظ کریں",
 	"builderPreviewAsRespondent": "بطور جواب دہندہ پیش نظارہ (نئے ٹیب میں کھلتا ہے)",
 	"builderExportYamlTitle": "فریم ورک کو YAML لائبریری فائل کے طور پر برآمد کریں",
-	"builderExportYamlUnpublishedWarning": "غیر شائع شدہ تبدیلیاں شامل نہیں ہوں گی۔ تازہ ترین ترامیم برآمد کرنے کے لیے پہلے شائع کریں۔",
 	"builderCopyBase": "بنیاد کاپی کریں",
 	"builderCopyBaseTitle": "بنیادی زبان کا متن {lang} میں کاپی کریں (موجودہ ترجموں کو نہیں بدلے گا)",
 	"builderCopyBaseQuestion": "بنیادی متن کاپی کریں؟",
@@ -1292,82 +1277,7 @@
 	"builderExpandAllCards": "تمام کارڈز پھیلائیں",
 	"builderCollapseAllCards": "تمام کارڈز سمیٹیں",
 	"builderSaveFailed": "محفوظ کرنا ناکام",
-	"builderPublishedFlash": "شائع ہو گیا!",
 	"builderSaveDraftTitle": "مسودہ محفوظ کریں (Ctrl+S)",
-	"builderDiscardDraftTitle": "مسودہ ترک کریں",
-	"builderDiscard": "ترک کریں",
-	"builderDiscardAllChangesQuestion": "تمام تبدیلیاں ترک کریں؟",
-	"builderYesDiscard": "ہاں، ترک کریں",
-	"builderPublishDraftToLiveTitle": "مسودے کو براہ راست فریم ورک میں شائع کریں",
-	"builderPublishing": "شائع ہو رہا ہے...",
-	"builderPublishModalTitle": "مسودے کو براہ راست شائع کریں",
-	"builderPublishModalDescription": "یہ براہ راست فریم ورک کو اپ ڈیٹ کرے گا۔ نیچے تبدیلیوں کا جائزہ لیں۔",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} ضروریات شامل کی گئیں",
-				"countPlural=other": "{count} ضروریات شامل کی گئیں"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} سوالات",
-				"countPlural=other": "{count} سوالات"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} ضروریات ہٹا دی گئیں",
-				"countPlural=other": "{count} ضروریات ہٹا دی گئیں"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} سوالات",
-				"countPlural=other": "{count} سوالات"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "کوئی ساختی تبدیلیاں نہیں ملیں (صرف میٹا ڈیٹا)۔",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} نقصان دہ تبدیلیاں ملی ہیں",
-				"countPlural=other": "{count} نقصان دہ تبدیلیاں ملی ہیں"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "یہ تبدیلیاں موجودہ آڈٹس میں اسکورنگ، نمائش یا تعمیل کے نتائج کو متاثر کر سکتی ہیں۔",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} موجودہ آڈٹس متاثر ہوں گے",
-				"countPlural=other": "{count} موجودہ آڈٹس متاثر ہوں گے"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "ان آڈٹس میں نئی ضروریات شامل کی جائیں گی۔",
-	"builderAffectedAuditsRemovedHint": "ہٹائی گئی ضروریات اور ان کا تشخیصی ڈیٹا ان آڈٹس سے حذف کر دیا جائے گا۔",
-	"builderCouldNotLoadPreview": "اثر کا پیش نظارہ لوڈ نہیں ہو سکا۔ احتیاط سے آگے بڑھیں۔",
-	"builderConfirmPublish": "شائع کرنے کی تصدیق کریں",
 	"builderSearchNodes": "نوڈز تلاش کریں...",
 	"builderExpandSidebar": "سائڈ بار پھیلائیں",
 	"builderCollapseSidebar": "سائڈ بار سمیٹیں",
@@ -1547,7 +1457,6 @@
 	"builderSplashNumberedList": "نمبر دار فہرست",
 	"builderSplashLink": "لنک",
 	"builderSplashTable": "جدول",
-	"builderSplashInsertImage": "تصویر داخل کریں",
 	"builderUntitledQuestion": "بے عنوان سوال",
 	"builderNotTranslated": "ترجمہ نہیں ہوا",
 	"builderQuestionTextPlaceholder": "اپنا سوال درج کریں...",
@@ -1592,27 +1501,12 @@
 	"builderKbSaveDraft": "مسودہ محفوظ کریں",
 	"builderKbShowCheatsheet": "یہ چیٹ شیٹ دکھائیں",
 	"builderKbCloseDialog": "ڈائیلاگ بند کریں",
-	"builderImportedFramework": "درآمد شدہ فریم ورک",
-	"builderImportedFrameworkDescription": "یہ فریم ورک لائبریری سے درآمد کیا گیا ہے اور براہ راست ترمیم نہیں کی جا سکتی۔ تبدیلیاں کرنے کے لیے قابل ترمیم نقل بنائیں۔",
-	"builderCreateCopyAndEdit": "نقل بنائیں اور ترمیم کریں",
-	"builderCreatingCopy": "نقل بنائی جا رہی ہے...",
-	"builderLoadingEditor": "ایڈیٹر لوڈ ہو رہا ہے...",
-	"builderFailedToStartEditor": "ایڈیٹر شروع کرنا ناکام",
-	"builderBackToFramework": "فریم ورک پر واپس",
-	"builderBackToBuilder": "بلڈر پر واپس",
-	"builderFailedToLoadDraft": "مسودہ لوڈ کرنا ناکام",
-	"builderImplementationGroupsHeader": "نفاذ کے گروپ",
-	"builderNoItemsToPreview": "پیش نظارہ کے لیے کوئی آئٹمز نہیں۔",
-	"builderNoItemsToPreviewHint": "بلڈر میں قابل تشخیص ضروریات یا سپلیش اسکرینز شامل کریں۔",
-	"builderBaseLanguageOption": "بنیادی زبان",
 	"builderFrameworkNameRequired": "فریم ورک کا نام درکار ہے۔",
 	"builderFrameworkNameTooLong": "فریم ورک کا نام {length} حروف ہے (زیادہ سے زیادہ 200)۔",
 	"builderNodeNameTooLong": "نام 200 حروف سے تجاوز کرتا ہے ({length}/200)۔ طویل متن کو تفصیل فیلڈ میں منتقل کریں۔",
 	"builderRefIdTooLong": "'{label}': ref_id {length} حروف کا ہے (زیادہ سے زیادہ 100)۔",
 	"builderUrnTooLong": "'{label}': URN {length} حروف کا ہے (زیادہ سے زیادہ 255)۔",
-	"builderFailedToSaveDraftBeforePublish": "شائع کرنے سے پہلے مسودہ محفوظ کرنا ناکام۔",
 	"builderUnsavedChangesNavigation": "آپ کے پاس غیر محفوظ شدہ تبدیلیاں ہیں جو ضائع ہو جائیں گی۔ پھر بھی چھوڑیں؟",
-	"builderUnpublishedChangesNavigation": "آپ کے پاس غیر شائع شدہ تبدیلیاں ہیں۔ آپ کا مسودہ محفوظ ہے اور آپ بعد میں دوبارہ شروع کر سکتے ہیں۔ پھر بھی چھوڑیں؟",
 	"fieldVisibility": "فیلڈ کی مرئیت",
 	"fieldVisibilityHelpText": "کنٹرول کریں کہ ہر کردار کون سے فیلڈز دیکھ اور ترمیم کر سکتا ہے۔",
 	"visibilityAuditorRespondent": "آڈیٹر + جواب دہندہ",
@@ -1645,7 +1539,6 @@
 	"mfaDisabledSuccessfully": "اس صارف کے لیے MFA غیر فعال کر دیا گیا ہے",
 	"errorDisablingMFA": "اس صارف کے لیے MFA غیر فعال نہیں کیا جا سکا",
 	"userHasNoMFAEnabled": "اس صارف کا MFA فعال نہیں ہے",
-	"builderChangedOn": "میں تبدیل ہوا",
 	"requirementWeight": "وزن",
 	"scim": "SCIM",
 	"scimDescription": "SCIM 2.0 پرووژننگ کنفیگر کریں۔ اپنے شناختی فراہم کنندہ کو نیچے دیے گئے اینڈ پوائنٹ کی طرف اشارہ کریں اور یہاں تیار کردہ بیئرر ٹوکن سے تصدیق کریں۔",
@@ -1667,6 +1560,9 @@
 	"idpGroups": "IdP گروپس",
 	"idpGroupsDescription": "IdP گروپ فیڈریشن فعال کریں (SCIM پرووژننگ، IdP گروپ میپنگز، اور صارفین پر IdP گروپ ممبرشپس)۔",
 	"ebiosRmStudyDomainHelpText": "ڈومین تبدیل کرنے سے مطالعہ اور اس کی تمام ورکشاپ اشیاء منتخب ڈومین میں منتقل ہو جاتی ہیں۔",
+	"reopenAssignmentForEditing": "ترمیم کے لیے دوبارہ کھولیں",
+	"forReview": "جائزے کے لیے",
+	"forEditing": "ترمیم کے لیے",
 	"serviceAccount": "سروس اکاؤنٹ",
 	"serviceAccounts": "سروس اکاؤنٹس",
 	"serviceAccountsDescription": "سروس اکاؤنٹس فعال کریں (OAuth2 کلائنٹ کریڈینشلز فلو کے ذریعے مشین سے مشین API رسائی)۔",
@@ -1685,7 +1581,6 @@
 	"deactivateServiceAccountConfirm": "اس سروس اکاؤنٹ کو غیر فعال کرنے سے تمام فعال رسائی ٹوکنز فوری طور پر منسوخ ہو جائیں گے اور نئے ٹوکنز جاری ہونے سے رک جائیں گے۔ جاری رکھیں؟",
 	"gracePeriod": "رعایتی مدت",
 	"gracePeriodHelpText": "موجودہ سیکرٹ تبدیلی کے بعد اس وقت تک کام کرتا رہتا ہے تاکہ انضمامات کو بغیر کسی رکاوٹ کے اپ ڈیٹ کیا جا سکے۔ زیادہ سے زیادہ 1 ماہ تک محدود۔",
-	"gracePeriodTooLong": "رعایتی مدت 1 ماہ سے زیادہ نہیں ہو سکتی۔",
 	"previousSecretValidUntil": "پچھلا کلائنٹ سیکرٹ {date} تک درست رہتا ہے۔",
 	"enableJitProvisioning": "خودکار پرووژننگ فعال کریں",
 	"enableJitProvisioningHelpText": "SSO کے ذریعے پہلی بار تصدیق کرنے والے صارفین کے لیے ذیل میں دیے گئے ڈیفالٹ صارف گروپس کے ساتھ خودکار طور پر ایک اکاؤنٹ بنائیں۔",

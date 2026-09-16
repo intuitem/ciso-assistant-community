@@ -19,6 +19,7 @@
 
 	const OBJECT_TYPES = [
 		'frameworks',
+		'quick_forms',
 		'threats',
 		'reference_controls',
 		'risk_matrices',
@@ -31,6 +32,7 @@
 	// by the message). Unknown keys fall back to the raw key.
 	const OBJECT_LABELS: Record<string, (args: { count: number }) => string> = {
 		frameworks: m.lbCountFrameworks,
+		quick_forms: m.lbCountQuickForms,
 		threats: m.lbCountThreats,
 		reference_controls: m.lbCountReferenceControls,
 		risk_matrices: m.lbCountRiskMatrices,
@@ -41,6 +43,7 @@
 
 	const OBJECT_ICONS: Record<string, string> = {
 		frameworks: 'fa-sitemap',
+		quick_forms: 'fa-clipboard-question',
 		threats: 'fa-bolt',
 		reference_controls: 'fa-shield-halved',
 		risk_matrices: 'fa-table-cells',
@@ -400,7 +403,7 @@
 	}
 
 	// Kinds the builder allows at most one of per library.
-	const SINGLE_KINDS = ['frameworks', 'risk_matrices', 'preset'];
+	const SINGLE_KINDS = ['frameworks', 'quick_forms', 'risk_matrices', 'preset'];
 	function singleKindFull(type: string): boolean {
 		return SINGLE_KINDS.includes(type) && objectCount(type) > 0;
 	}
@@ -415,6 +418,7 @@
 		const populated = OBJECT_TYPES.filter((type) => objectCount(type) > 0);
 		if (populated.length !== 1) return null;
 		if (populated[0] === 'frameworks' && objectCount('frameworks') === 1) return 'framework';
+		if (populated[0] === 'quick_forms' && objectCount('quick_forms') === 1) return 'quick_form';
 		if (populated[0] === 'risk_matrices' && objectCount('risk_matrices') === 1) return 'matrix';
 		return null;
 	});
@@ -430,6 +434,8 @@
 
 	// --- Visual framework editor -----------------------------------------------
 	let frameworks = $derived((draft.content?.frameworks ?? []) as any[]);
+	let quickForms = $derived((draft.content?.quick_forms ?? []) as any[]);
+	let addingQuickForm = $state(false);
 	let addingFramework = $state(false);
 
 	// --- Leaf object editors (threats, reference controls) ----------------------
@@ -473,7 +479,7 @@
 						}
 					: {})
 			},
-			translations: { ...(item?.translations ?? {}) }
+			translations: { ...item?.translations }
 		};
 	}
 
@@ -604,6 +610,29 @@
 		)}`;
 	}
 
+	function quickFormEditorHref(quickForm: any): string {
+		return `/experimental/library-builder/${draft.id}/quick-form?quick_form_urn=${encodeURIComponent(
+			quickForm.urn
+		)}`;
+	}
+
+	async function addQuickForm() {
+		addingQuickForm = true;
+		try {
+			const res = await fetch(base(), {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ action: 'add-quick-form' })
+			});
+			const result = await res.json();
+			if (!res.ok) throw new Error(result.error || JSON.stringify(result));
+			window.location.href = quickFormEditorHref({ urn: result.quick_form_urn });
+		} catch (e: any) {
+			setStatus(safeTranslate(e.message), 'error');
+			addingQuickForm = false;
+		}
+	}
+
 	async function addFramework() {
 		addingFramework = true;
 		try {
@@ -644,14 +673,14 @@
 						     identity committed (frozen), by decision or by proof; the
 						     packager/ref_id fields show the (frozen) hint. -->
 						{#if !draft.identity_locked}
-							<span class="badge variant-ghost-surface text-xs">{m.lbListDraft()}</span>
+							<span class="badge preset-outlined-surface-500 text-xs">{m.lbListDraft()}</span>
 						{:else if draft.has_unpublished_changes}
-							<span class="badge variant-filled-warning text-xs">
+							<span class="badge preset-filled-warning-500 text-xs">
 								<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
 								></i>{m.lbListPublishedModified()}
 							</span>
 						{:else}
-							<span class="badge variant-filled-success text-xs">
+							<span class="badge preset-filled-success-500 text-xs">
 								<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
 								></i>{m.lbListPublished()}
 							</span>
@@ -692,7 +721,7 @@
 				{#if primaryKind}
 					<button
 						type="button"
-						class="btn btn-sm variant-ghost-surface"
+						class="btn btn-sm preset-outlined-surface-500"
 						onclick={() => setView(view === 'simple' ? 'full' : 'simple')}
 						title={view === 'simple' ? m.lbDraftFullViewTitle() : m.lbDraftSimpleViewTitle()}
 					>
@@ -705,18 +734,18 @@
 				{/if}
 				<button
 					type="button"
-					class="btn btn-sm variant-ghost-surface"
+					class="btn btn-sm preset-outlined-surface-500"
 					onclick={validateDraft}
 					disabled={validating}
 				>
 					<i class="fa-solid fa-list-check mr-1" aria-hidden="true"></i>{m.validate()}
 				</button>
-				<button type="button" class="btn btn-sm variant-ghost-surface" onclick={exportYaml}>
+				<button type="button" class="btn btn-sm preset-outlined-surface-500" onclick={exportYaml}>
 					<i class="fa-solid fa-file-arrow-down mr-1" aria-hidden="true"></i>{m.exportYaml()}
 				</button>
 				<button
 					type="button"
-					class="btn btn-sm variant-filled-primary"
+					class="btn btn-sm preset-filled-primary-500"
 					onclick={() => publish()}
 					disabled={publishing}
 				>
@@ -792,7 +821,7 @@
 				{#each scoreConflict.strategies ?? [] as strategy}
 					<button
 						type="button"
-						class="btn btn-sm variant-ghost-warning"
+						class="btn btn-sm preset-outlined-warning-500"
 						onclick={() => publish({ strategy: strategy.action, _presetChecked: true })}
 					>
 						{strategy.name}
@@ -930,7 +959,7 @@
 					<div class="flex items-center justify-end gap-2 pt-1 mt-auto">
 						<button
 							type="button"
-							class="btn btn-sm variant-filled-primary"
+							class="btn btn-sm preset-filled-primary-500"
 							onclick={saveMeta}
 							disabled={savingMeta || !metaDirty}
 						>
@@ -1015,7 +1044,7 @@
 					</div>
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={importObjects}
 						disabled={!importSource || importing}
 					>
@@ -1081,13 +1110,16 @@
 								</div>
 							</div>
 							<div class="flex items-center gap-1 shrink-0">
-								<a href={frameworkEditorHref(framework)} class="btn btn-sm variant-filled-primary">
+								<a
+									href={frameworkEditorHref(framework)}
+									class="btn btn-sm preset-filled-primary-500"
+								>
 									<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
 									{m.lbDraftEditVisually()}
 								</a>
 								<button
 									type="button"
-									class="btn btn-sm variant-ghost-error"
+									class="btn btn-sm preset-outlined-error-500"
 									onclick={() => deleteObject(framework)}
 									aria-label={m.lbDraftDeleteFramework()}
 								>
@@ -1107,13 +1139,85 @@
 					</p>
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={addFramework}
 						disabled={addingFramework}
 					>
 						{#if addingFramework}<i class="fa-solid fa-spinner fa-spin mr-1" aria-hidden="true"
 							></i>{:else}<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>{/if}
 						{m.addFramework()}
+					</button>
+				</div>
+			{/if}
+		</div>
+	{/if}
+
+	<!-- Quick forms: visual editor entry points -->
+	{#if view === 'full' || primaryKind === 'quick_form'}
+		<div class="card p-4 space-y-3">
+			<h3
+				class="text-xs font-semibold uppercase tracking-wider text-surface-500 flex items-center gap-1.5"
+			>
+				<i class="fa-solid fa-clipboard-question" aria-hidden="true"></i>{m.quickForm()}
+			</h3>
+			{#if quickForms.length > 0}
+				<ul class="space-y-2">
+					{#each quickForms as quickForm}
+						<li
+							class="flex items-center justify-between gap-3 p-3 rounded-lg border border-surface-200-800 hover:border-primary-300 dark:hover:border-primary-500/50 transition-colors"
+						>
+							<div class="flex items-center gap-3 min-w-0">
+								<span
+									class="shrink-0 w-9 h-9 rounded-lg bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center"
+								>
+									<i class="fa-solid fa-clipboard-question" aria-hidden="true"></i>
+								</span>
+								<div class="min-w-0">
+									<p class="font-medium truncate">{quickForm.name || quickForm.ref_id}</p>
+									<p class="text-xs font-mono text-surface-500 truncate">{quickForm.urn}</p>
+									<p class="text-xs text-surface-500">
+										{m.lbDraftPageCount({ count: (quickForm.pages ?? []).length })}
+									</p>
+								</div>
+							</div>
+							<div class="flex items-center gap-1 shrink-0">
+								<a
+									href={quickFormEditorHref(quickForm)}
+									class="btn btn-sm preset-filled-primary-500"
+								>
+									<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
+									{m.lbDraftEditVisually()}
+								</a>
+								<button
+									type="button"
+									class="btn btn-sm preset-outlined-error-500"
+									onclick={() => deleteObject(quickForm)}
+									aria-label={m.delete()}
+								>
+									<i class="fa-solid fa-trash"></i>
+								</button>
+							</div>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<div
+					class="border border-dashed border-surface-300-700 rounded-lg py-8 px-4 flex flex-col items-center gap-3 text-center"
+				>
+					<i class="fa-solid fa-clipboard-question text-2xl text-surface-300-700" aria-hidden="true"
+					></i>
+					<p class="text-sm text-surface-500 max-w-md">
+						{m.lbDraftNoQuickForm()}
+					</p>
+					<button
+						type="button"
+						class="btn btn-sm preset-filled-primary-500"
+						onclick={addQuickForm}
+						disabled={addingQuickForm}
+					>
+						{#if addingQuickForm}<i class="fa-solid fa-spinner fa-spin mr-1" aria-hidden="true"
+							></i>{:else}<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>{/if}
+						{m.addQuickForm()}
 					</button>
 				</div>
 			{/if}
@@ -1153,13 +1257,13 @@
 								</div>
 							</div>
 							<div class="flex items-center gap-1 shrink-0">
-								<a href={matrixEditorHref(matrix)} class="btn btn-sm variant-filled-primary">
+								<a href={matrixEditorHref(matrix)} class="btn btn-sm preset-filled-primary-500">
 									<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
 									{m.lbDraftEditVisually()}
 								</a>
 								<button
 									type="button"
-									class="btn btn-sm variant-ghost-error"
+									class="btn btn-sm preset-outlined-error-500"
 									onclick={() => deleteObject(matrix)}
 									aria-label={m.lbDraftDeleteMatrix()}
 								>
@@ -1177,7 +1281,7 @@
 					<p class="text-sm text-surface-500 max-w-md">{m.lbDraftNoMatrix()}</p>
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={addMatrix}
 						disabled={addingMatrix}
 					>
@@ -1203,14 +1307,14 @@
 					<div class="flex items-center gap-1">
 						<a
 							href="/experimental/library-builder/{draft.id}/preset"
-							class="btn btn-sm variant-filled-primary"
+							class="btn btn-sm preset-filled-primary-500"
 						>
 							<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
 							{m.lbDraftEditJourney()}
 						</a>
 						<button
 							type="button"
-							class="btn btn-sm variant-ghost-error"
+							class="btn btn-sm preset-outlined-error-500"
 							onclick={deletePreset}
 							aria-label={m.lbDraftRemovePreset()}
 						>
@@ -1248,7 +1352,7 @@
 					</p>
 					<a
 						href="/experimental/library-builder/{draft.id}/preset"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 					>
 						<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>
 						{m.lbDraftCreateJourney()}
@@ -1274,7 +1378,7 @@
 					{#if kind.items.length > 0}
 						<button
 							type="button"
-							class="btn btn-sm variant-ghost-primary"
+							class="btn btn-sm preset-outlined-primary-500"
 							onclick={() => openLeafForm(kind.field)}
 						>
 							<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>
@@ -1342,14 +1446,14 @@
 						<div class="md:col-span-3 flex justify-end gap-2">
 							<button
 								type="button"
-								class="btn btn-sm variant-ghost-surface"
+								class="btn btn-sm preset-outlined-surface-500"
 								onclick={() => (leafForm = null)}
 							>
 								{m.cancel()}
 							</button>
 							<button
 								type="button"
-								class="btn btn-sm variant-filled-primary"
+								class="btn btn-sm preset-filled-primary-500"
 								onclick={saveLeafForm}
 								disabled={savingLeaf || (!leafForm.urn && !leafForm.values.ref_id.trim())}
 							>
@@ -1390,7 +1494,7 @@
 										<td class="space-x-1 text-right">
 											<button
 												type="button"
-												class="btn-icon btn-icon-sm variant-ghost-surface"
+												class="btn-icon btn-icon-sm preset-outlined-surface-500"
 												onclick={() => openLeafForm(kind.field, item)}
 												aria-label={m.edit()}
 											>
@@ -1398,7 +1502,7 @@
 											</button>
 											<button
 												type="button"
-												class="btn-icon btn-icon-sm variant-ghost-error"
+												class="btn-icon btn-icon-sm preset-outlined-error-500"
 												onclick={() => deleteObject(item)}
 												aria-label={m.delete()}
 											>
@@ -1418,7 +1522,7 @@
 						<p class="text-sm text-surface-500">{m.lbDraftNoneYet()}</p>
 						<button
 							type="button"
-							class="btn btn-sm variant-filled-primary"
+							class="btn btn-sm preset-filled-primary-500"
 							onclick={() => openLeafForm(kind.field)}
 						>
 							<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>
@@ -1454,7 +1558,7 @@
 							</div>
 							<button
 								type="button"
-								class="btn btn-sm variant-ghost-error shrink-0"
+								class="btn btn-sm preset-outlined-error-500 shrink-0"
 								onclick={() => deleteObject(mappingSet)}
 								aria-label={m.lbDraftDeleteMappingSet()}
 							>
@@ -1483,7 +1587,7 @@
 							</div>
 							<button
 								type="button"
-								class="btn btn-sm variant-ghost-error shrink-0"
+								class="btn btn-sm preset-outlined-error-500 shrink-0"
 								onclick={() => deleteObject(metric)}
 								aria-label={m.lbDraftDeleteMetricDefinition()}
 							>
@@ -1500,7 +1604,9 @@
 		<p class="text-xs text-surface-500 text-center">
 			{primaryKind === 'framework'
 				? m.lbDraftSimpleViewPackagedFramework({ urn: draft.urn })
-				: m.lbDraftSimpleViewPackagedMatrix({ urn: draft.urn })}
+				: primaryKind === 'quick_form'
+					? m.lbDraftSimpleViewPackagedQuickForm({ urn: draft.urn })
+					: m.lbDraftSimpleViewPackagedMatrix({ urn: draft.urn })}
 		</p>
 	{/if}
 </div>

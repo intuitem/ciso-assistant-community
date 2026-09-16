@@ -20,7 +20,9 @@ from rest_framework.response import Response
 from rest_framework.throttling import SimpleRateThrottle
 from rest_framework.views import APIView
 
+from core.permissions import FeatureFlagRequired
 from core.views import BaseModelViewSet, GenericFilterSet
+from global_settings.utils import ff_is_enabled
 from iam.models import Folder, RoleAssignment
 
 from .actions import authorization_folder, required_permissions
@@ -101,7 +103,17 @@ class WorkflowFilterSet(GenericFilterSet):
         fields = ["folder", "filtering_labels", "is_active"]
 
 
-class WorkflowViewSet(BaseModelViewSet):
+class WorkflowsFeatureGate:
+    """Server-side half of the `workflows` feature flag: flag off must mean
+    the API is off too, not just the sidebar entry."""
+
+    feature_flag = "workflows"
+
+    def get_permissions(self):
+        return super().get_permissions() + [FeatureFlagRequired()]
+
+
+class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     model = Workflow
     serializers_module = "automation.workflows.serializers"
     filterset_class = WorkflowFilterSet
@@ -131,14 +143,10 @@ class WorkflowViewSet(BaseModelViewSet):
             )
         )
 
-    def perform_destroy(self, instance):
-        with transaction.atomic():
-            # Conditions PROTECT their variables; clear the trees before the
-            # cascade so the workflow delete cannot trip ProtectedError.
-            ConditionGroup.objects.filter(
-                branch__node__version__workflow=instance
-            ).delete()
-            instance.delete()
+    def cascade_preclear(self, instance):
+        # Conditions PROTECT their variables and both hang off the version,
+        # so the trees go first or the delete trips ProtectedError.
+        return [ConditionGroup.objects.filter(branch__node__version__workflow=instance)]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get creatable models", url_path="creatable-models")
@@ -154,8 +162,17 @@ class WorkflowViewSet(BaseModelViewSet):
                     "fields": entry["fields"],
                     "fk_fields": {
                         fk_name: endpoint
-                        for fk_name, (_model, endpoint) in entry["fk_fields"].items()
+                        for fk_name, (_model, endpoint) in (
+                            entry.get("fk_fields") or {}
+                        ).items()
                     },
+                    "params": {
+                        name: (target[1] if target else None)
+                        for name, target in (entry.get("params") or {}).items()
+                    },
+                    "required_params": entry.get("required_params") or [],
+                    # A built model is assembled, not matched.
+                    "upsert": not entry.get("constructor"),
                     "match_on": entry.get("match_on", "name"),
                 }
                 for key, entry in CREATABLE_MODELS.items()
@@ -314,7 +331,7 @@ def _clone_into_draft_response(version):
     )
 
 
-class WorkflowVersionViewSet(BaseModelViewSet):
+class WorkflowVersionViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     model = WorkflowVersion
     serializers_module = "automation.workflows.serializers"
     filterset_fields = ["workflow", "status", "folder"]
@@ -467,7 +484,7 @@ class WorkflowVersionViewSet(BaseModelViewSet):
         return _clone_into_draft_response(version)
 
 
-class WorkflowTriggerViewSet(BaseModelViewSet):
+class WorkflowTriggerViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     """Registration rows are publish-managed (workflows.triggers): the API
     surface is read + PATCH of the runtime state, never create/delete."""
 
@@ -528,7 +545,7 @@ class WorkflowTriggerViewSet(BaseModelViewSet):
         return Response(event_key_catalog())
 
 
-class WorkflowSecretViewSet(BaseModelViewSet):
+class WorkflowSecretViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     model = WorkflowSecret
     serializers_module = "automation.workflows.serializers"
     filterset_fields = ["workflow", "folder"]
@@ -536,7 +553,7 @@ class WorkflowSecretViewSet(BaseModelViewSet):
     ordering = ["name"]
 
 
-class WorkflowTokenViewSet(BaseModelViewSet):
+class WorkflowTokenViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     """Operator recovery for stuck runs. Tokens are engine-managed,
     so the only writes are the retry/skip/abort actions, gated by
     change_workflowtoken (domain manager / administrator)."""
@@ -646,7 +663,7 @@ def _deputization_errors(user, version):
     return errors
 
 
-class WorkflowInstanceViewSet(BaseModelViewSet):
+class WorkflowInstanceViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     model = WorkflowInstance
     serializers_module = "automation.workflows.serializers"
     filterset_fields = ["workflow", "version", "status", "trigger", "folder"]
@@ -836,6 +853,10 @@ class WorkflowWebhookView(APIView):
         from django.conf import settings
 
         if not getattr(settings, "WORKFLOWS_INBOUND_HOOKS", True):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        # Flag off = the feature is off for unauthenticated ingress too,
+        # indistinguishable from a wrong URL (no oracle).
+        if not ff_is_enabled("workflows"):
             return Response(status=status.HTTP_404_NOT_FOUND)
         registration = (
             WorkflowTrigger.objects.filter(

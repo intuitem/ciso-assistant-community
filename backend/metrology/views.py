@@ -47,7 +47,6 @@ class MetricDefinitionViewSet(BaseModelViewSet):
         "library",
         "provider",
         "filtering_labels",
-        "is_published",
     ]
     search_fields = ["name", "description", "ref_id", "provider"]
 

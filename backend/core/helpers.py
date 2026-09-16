@@ -2198,8 +2198,14 @@ def duplicate_related_objects(
             # If the object exists in the target folder, link it to the duplicate object
             link_existing_object(duplicate_object, existing_obj, field_name)
 
-        elif obj.folder in target_parent_folders and obj.is_published:
-            # If the object's folder is a parent and it's published, link it
+        elif (
+            obj.folder in target_parent_folders
+            and obj.folder.default_role is not None
+            and obj.folder.default_role.permissions.filter(
+                codename=f"view_{model_class._meta.model_name}"
+            ).exists()
+        ):
+            # Link the object if the user can see it thanks to the `obj.folder.default_role`.
             link_existing_object(duplicate_object, obj, field_name)
 
         elif obj.folder in sub_folders:
@@ -2262,3 +2268,43 @@ def duplicate_related_objects(
             field_name,
             model_class,
         )
+
+
+def scoped_requirement_assessments(
+    compliance_assessment, user, *, include_non_assessable=True
+):
+    """Requirement assessments of `compliance_assessment` that `user` may see.
+
+    Two row-level filters that object-level permissions do not cover:
+    a respondent sees only what is assigned to their actors, and requirements
+    hidden by an unsatisfied `visibility_expression` do not apply at all.
+    Returns `(assessments, hidden_urns)`; callers that also build a requirement
+    tree need `hidden_urns` to prune it the same way.
+    """
+    from core.cel_service import build_cel_context
+    from core.models import Actor, RequirementAssignment
+    from core.utils import get_respondent_scoped_folder_ids
+
+    assessments = list(
+        compliance_assessment.get_requirement_assessments(
+            include_non_assessable=include_non_assessable
+        )
+    )
+
+    respondent_folders = get_respondent_scoped_folder_ids(user)
+    if respondent_folders and compliance_assessment.folder_id in respondent_folders:
+        user_actors = Actor.get_all_for_user(user)
+        assigned_ids = set(
+            RequirementAssignment.objects.filter(
+                compliance_assessment=compliance_assessment,
+                actor__in=user_actors,
+            ).values_list("requirement_assessments__id", flat=True)
+        )
+        assessments = [ra for ra in assessments if ra.id in assigned_ids]
+
+    _ctx, hidden_urns = build_cel_context(compliance_assessment)
+    if hidden_urns:
+        assessments = [
+            ra for ra in assessments if ra.requirement.urn not in hidden_urns
+        ]
+    return assessments, hidden_urns

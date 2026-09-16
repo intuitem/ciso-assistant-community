@@ -8,7 +8,7 @@ This section gathers the **authoring guidelines** — the conventions, structure
 
 Authoring is a separate discipline from running the platform. Once content has been authored, it's loaded through the [Libraries](../libraries/README.md) section and behaves the same as any built-in content — versioned, upgradable, exportable. The pages here focus on _writing the content_, not on loading it.
 
-For frameworks, matrices, and presets, the **recommended path is the in-app visual editor**. These are now unified in a single [Library builder](library-builder.md) under the `/experimental/` namespace: you author a whole library as a **draft document** — never touching live objects — then publish it through the standard loader, or export/import it as YAML. Draft/publish lifecycle, live preview, real-time validation, and multi-language support all apply. Excel-driven authoring remains the right channel for library publishing across instances.
+For frameworks, matrices, and presets, the **recommended path is the in-app visual editor**. These are now unified in a single [Library builder](library-builder.md), in the sidebar under **Catalog**: you author a whole library as a **draft document** — never touching live objects — then publish it through the standard loader, or export/import it as YAML. Draft/publish lifecycle, live preview, real-time validation, and multi-language support all apply. Excel-driven authoring remains the right channel for library publishing across instances.
 
 ## What's in this section
 

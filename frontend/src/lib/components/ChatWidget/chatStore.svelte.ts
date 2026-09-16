@@ -895,23 +895,26 @@ export function getLoadingHistory() {
 export async function loadSessionHistory() {
 	loadingHistory = true;
 	try {
-		const res = await fetch(`${CHAT_API}/sessions`);
-		if (res.ok) {
-			const data = await res.json();
-			sessionHistory = (data.results ?? data)
-				.map((s: any) => ({
-					id: s.id,
-					title: s.title || `Chat ${formatDate(new Date(s.created_at), false, getLocale())}`,
-					folder: s.folder?.str ?? '',
-					message_count: s.message_count ?? 0,
-					created_at: s.created_at
-				}))
-				.sort(
-					(a: ChatSession, b: ChatSession) =>
-						new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-				)
-				.slice(0, 30);
-		}
+		// Single fetch on purpose: only the 30 most recent sessions are kept.
+		// The ordering/limit params make this hold whether the endpoint
+		// returns a plain array (current) or a paginated envelope.
+		const res = await fetch(`${CHAT_API}/sessions?ordering=-created_at&limit=30`);
+		if (!res.ok) throw new Error(`sessions: ${res.status}`);
+		const data = await res.json();
+		const sessions: any[] = Array.isArray(data) ? data : (data.results ?? []);
+		sessionHistory = sessions
+			.map((s: any) => ({
+				id: s.id,
+				title: s.title || `Chat ${formatDate(new Date(s.created_at), false, getLocale())}`,
+				folder: s.folder?.str ?? '',
+				message_count: s.message_count ?? 0,
+				created_at: s.created_at
+			}))
+			.sort(
+				(a: ChatSession, b: ChatSession) =>
+					new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+			)
+			.slice(0, 30);
 	} catch {
 		// Ignore — sidebar just stays empty
 	}

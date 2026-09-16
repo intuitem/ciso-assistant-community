@@ -660,7 +660,6 @@
 	"noStatus": "Sem status",
 	"actionPlanHelpText": "Separados por status e classificados por eta",
 	"matchingRequirements": "Requisitos correspondentes",
-	"asZIP": "em ZIP",
 	"incoming": "aproximação",
 	"outdated": "Desatualizado",
 	"flashMode": "Modo de flash",
@@ -822,6 +821,8 @@
 	"addRepresentative": "Adicionar representante",
 	"phone": "Telefone",
 	"role": "Papel",
+	"defaultRole": "Função padrão",
+	"defaultRoleHelpText": "Função concedida automaticamente neste domínio a qualquer usuário com uma atribuição de função em um dos seus subdomínios.",
 	"questions": "Perguntas",
 	"recipientEntity": "Entidade beneficiária",
 	"financial": "Financeiro",
@@ -868,7 +869,8 @@
 	"mailFailedToSend": "O e-mail não foi enviado",
 	"questionOrQuestions": "Questões)",
 	"successfullyUpdatedClientSettings": "As configurações do cliente foram atualizadas com sucesso. Atualize a página.",
-	"xRaysEmptyMessage": "Você precisa criar pelo menos um âmbito para usar raios X.",
+	"xRaysEmptyMessage": "Nenhum problema detectado. O X-rays exibe apenas os domínios com achados.",
+	"xRaysLoadingError": "Não foi possível concluir a análise do X-rays. Verifique os logs do servidor para mais detalhes.",
 	"suggestControls": "Sugerir controles",
 	"createAppliedControlsFromSuggestionsHelpText": "Crie controles aplicados a partir dos controles de referência sugeridos pelos requisitos da estrutura",
 	"createAppliedControlsFromSuggestionsSuccess": "Controles aplicados criados com sucesso a partir dos controles de referência sugeridos",
@@ -1164,15 +1166,6 @@
 	"changeUserGroup": "Alterar grupo de usuários",
 	"deleteUserGroup": "Excluir grupo de usuários",
 	"viewUserGroup": "Ver grupo de usuários",
-	"changeQuantitativeRiskHypothesis": "Alterar hipótese de risco quantitativo",
-	"deleteQuantitativeRiskHypothesis": "Excluir hipótese de risco quantitativo",
-	"viewQuantitativeRiskHypothesis": "Ver hipótese de risco quantitativo",
-	"changeQuantitativeRiskScenario": "Alterar cenário",
-	"deleteQuantitativeRiskScenario": "Excluir cenário",
-	"viewQuantitativeRiskScenario": "Ver cenário",
-	"changeQuantitativeRiskStudy": "Alterar estudo de quantificação de risco",
-	"deleteQuantitativeRiskStudy": "Excluir estudo de quantificação de risco",
-	"viewQuantitativeRiskStudy": "Ver estudo de quantificação de risco",
 	"dueDateUpdatedSuccessfully": "Data de vencimento atualizada com sucesso",
 	"taskScheduleInfo": "As ocorrências passadas estão protegidas de alterações de agendamento. Apenas tarefas futuras serão recalculadas.",
 	"info": "Informação",
@@ -1297,19 +1290,12 @@
 	"builderRequirementHint": "Avaliável, ainda pode ter filhos",
 	"builderSplashScreen": "Tela de apresentação",
 	"builderSplashScreenHint": "Apresentacional, não avaliável",
-	"builderStatusLive": "Em produção",
-	"builderStatusLiveTitle": "O rascunho corresponde ao que os respondentes da auditoria veem.",
-	"builderStatusUnpublishedChanges": "Alterações não publicadas",
-	"builderStatusUnpublishedChangesTitle": "O rascunho contém alterações que ainda não estão visíveis para os respondentes da auditoria. Publique para aplicá-las.",
-	"builderStatusDraftNothingLive": "Rascunho — nada em produção",
-	"builderStatusDraftNothingLiveTitle": "O rascunho tem conteúdo, mas nada foi publicado ainda. As novas auditorias não verão nada até que você publique.",
 	"builderStatusEmpty": "Vazio",
 	"builderStatusEmptyTitle": "Nenhum requisito ainda. As novas auditorias baseadas neste framework não terão nada para avaliar.",
 	"builderPreview": "Pré-visualizar",
 	"builderPreviewSaveFirst": "Salve seu rascunho primeiro para pré-visualizar",
 	"builderPreviewAsRespondent": "Pré-visualizar como respondente (abre em uma nova aba)",
 	"builderExportYamlTitle": "Exportar o framework como arquivo de biblioteca YAML",
-	"builderExportYamlUnpublishedWarning": "As alterações não publicadas não serão incluídas. Publique primeiro para exportar as últimas modificações.",
 	"builderCopyBase": "Copiar base",
 	"builderCopyBaseTitle": "Copiar o texto do idioma base para {lang} (não sobrescreve as traduções existentes)",
 	"builderCopyBaseQuestion": "Copiar o texto base?",
@@ -1319,82 +1305,7 @@
 	"builderExpandAllCards": "Expandir todos os cartões",
 	"builderCollapseAllCards": "Recolher todos os cartões",
 	"builderSaveFailed": "Falha ao salvar",
-	"builderPublishedFlash": "Publicado!",
 	"builderSaveDraftTitle": "Salvar rascunho (Ctrl+S)",
-	"builderDiscardDraftTitle": "Descartar rascunho",
-	"builderDiscard": "Descartar",
-	"builderDiscardAllChangesQuestion": "Descartar todas as alterações?",
-	"builderYesDiscard": "Sim, descartar",
-	"builderPublishDraftToLiveTitle": "Publicar o rascunho no framework em produção",
-	"builderPublishing": "Publicando...",
-	"builderPublishModalTitle": "Publicar rascunho em produção",
-	"builderPublishModalDescription": "Esta ação atualizará o framework em produção. Revise as alterações abaixo.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} requisitos adicionados",
-				"countPlural=other": "{count} requisitos adicionados"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} perguntas",
-				"countPlural=other": "{count} perguntas"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} requisitos removidos",
-				"countPlural=other": "{count} requisitos removidos"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} perguntas",
-				"countPlural=other": "{count} perguntas"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Nenhuma alteração estrutural detectada (apenas metadados).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} alterações incompatíveis detectadas",
-				"countPlural=other": "{count} alterações incompatíveis detectadas"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Estas alterações podem afetar a pontuação, a visibilidade ou os resultados de conformidade nas auditorias existentes.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} auditorias existentes serão afetadas",
-				"countPlural=other": "{count} auditorias existentes serão afetadas"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Novos requisitos serão adicionados a estas auditorias.",
-	"builderAffectedAuditsRemovedHint": "Os requisitos removidos e seus dados de avaliação serão excluídos destas auditorias.",
-	"builderCouldNotLoadPreview": "Não foi possível carregar a pré-visualização de impacto. Prossiga com cautela.",
-	"builderConfirmPublish": "Confirmar publicação",
 	"builderSearchNodes": "Pesquisar nós...",
 	"builderExpandSidebar": "Expandir barra lateral",
 	"builderCollapseSidebar": "Recolher barra lateral",
@@ -1574,7 +1485,6 @@
 	"builderSplashNumberedList": "Lista numerada",
 	"builderSplashLink": "Link",
 	"builderSplashTable": "Tabela",
-	"builderSplashInsertImage": "Inserir imagem",
 	"builderUntitledQuestion": "Pergunta sem título",
 	"builderNotTranslated": "Não traduzido",
 	"builderQuestionTextPlaceholder": "Digite sua pergunta...",
@@ -1619,27 +1529,12 @@
 	"builderKbSaveDraft": "Salvar rascunho",
 	"builderKbShowCheatsheet": "Mostrar este guia de referência",
 	"builderKbCloseDialog": "Fechar diálogo ou lista suspensa",
-	"builderImportedFramework": "Framework importado",
-	"builderImportedFrameworkDescription": "Este framework foi importado de uma biblioteca e não pode ser editado diretamente. Para fazer alterações, crie uma cópia editável.",
-	"builderCreateCopyAndEdit": "Criar cópia e editar",
-	"builderCreatingCopy": "Criando cópia...",
-	"builderLoadingEditor": "Carregando editor...",
-	"builderFailedToStartEditor": "Falha ao iniciar o editor",
-	"builderBackToFramework": "Voltar ao framework",
-	"builderBackToBuilder": "Voltar ao construtor",
-	"builderFailedToLoadDraft": "Falha ao carregar o rascunho",
-	"builderImplementationGroupsHeader": "Grupos de implementação",
-	"builderNoItemsToPreview": "Nenhum item para pré-visualizar.",
-	"builderNoItemsToPreviewHint": "Adicione requisitos avaliáveis ou telas de apresentação no construtor.",
-	"builderBaseLanguageOption": "Idioma base",
 	"builderFrameworkNameRequired": "O nome do framework é obrigatório.",
 	"builderFrameworkNameTooLong": "O nome do framework tem {length} caracteres (máx. 200).",
 	"builderNodeNameTooLong": "O nome excede 200 caracteres ({length}/200). Mova o texto longo para o campo de descrição.",
 	"builderRefIdTooLong": "«{label}»: ref_id tem {length} caracteres (máx. 100).",
 	"builderUrnTooLong": "«{label}»: URN tem {length} caracteres (máx. 255).",
-	"builderFailedToSaveDraftBeforePublish": "Falha ao salvar o rascunho antes de publicar.",
 	"builderUnsavedChangesNavigation": "Você tem alterações não salvas que serão perdidas. Sair mesmo assim?",
-	"builderUnpublishedChangesNavigation": "Você tem alterações não publicadas. Seu rascunho está salvo e você pode retomá-lo mais tarde. Sair mesmo assim?",
 	"fieldVisibility": "Visibilidade de campos",
 	"fieldVisibilityHelpText": "Controle quais campos cada papel pode ver e editar.",
 	"visibilityAuditorRespondent": "Auditor + Respondente",
@@ -1672,7 +1567,6 @@
 	"mfaDisabledSuccessfully": "A MFA foi desativada para este utilizador",
 	"errorDisablingMFA": "Não foi possível desativar a MFA para este utilizador",
 	"userHasNoMFAEnabled": "Este utilizador não tem MFA ativada",
-	"builderChangedOn": "alterado em",
 	"requirementWeight": "Peso",
 	"scim": "SCIM",
 	"scimDescription": "Configure o provisionamento SCIM 2.0. Aponte o seu provedor de identidade para o endpoint abaixo e autentique-o com um token bearer gerado aqui.",
@@ -1694,6 +1588,9 @@
 	"idpGroups": "Grupos IdP",
 	"idpGroupsDescription": "Ativar a federação de grupos IdP (provisionamento SCIM, mapeamentos de grupos IdP e associações a grupos IdP nos usuários).",
 	"ebiosRmStudyDomainHelpText": "Alterar o domínio move o estudo e todos os objetos dos seus workshops para o domínio selecionado.",
+	"reopenAssignmentForEditing": "Reabrir para edição",
+	"forReview": "Para revisão",
+	"forEditing": "Para edição",
 	"serviceAccount": "Conta de serviço",
 	"serviceAccounts": "Contas de serviço",
 	"serviceAccountsDescription": "Ativa contas de serviço (acesso API máquina a máquina através do fluxo OAuth2 client credentials).",
@@ -1712,7 +1609,6 @@
 	"deactivateServiceAccountConfirm": "Desativar esta conta de serviço irá revogar imediatamente qualquer token de acesso pendente e bloquear a emissão de novos. Continuar?",
 	"gracePeriod": "Período de carência",
 	"gracePeriodHelpText": "O segredo atual continua a funcionar durante este período após a rotação, para que as integrações possam ser atualizadas sem interrupção. Limitado a 1 mês.",
-	"gracePeriodTooLong": "O período de carência não pode ser superior a 1 mês.",
 	"previousSecretValidUntil": "O segredo do cliente anterior permanece válido até {date}.",
 	"enableJitProvisioning": "Ativar aprovisionamento automático",
 	"enableJitProvisioningHelpText": "Cria automaticamente uma conta, com os grupos de usuários padrão abaixo, para usuários que se autenticam via SSO pela primeira vez.",

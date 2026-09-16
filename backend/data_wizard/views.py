@@ -79,7 +79,12 @@ from core.serializers import (
     UserWriteSerializer,
     VulnerabilityWriteSerializer,
 )
-from core.utils import AUDITOR_ONLY, build_questions_dict, get_global_currency
+from core.utils import (
+    AUDITOR_ONLY,
+    build_questions_dict,
+    get_global_currency,
+    parse_answers_cell,
+)
 from data_wizard.arm_helpers import process_arm_file
 from data_wizard.cyfun_helpers import (
     CYFUN_FRAMEWORK_URN,
@@ -101,6 +106,9 @@ from ebios_rm.serializers import (
     EbiosRMStudyWriteSerializer,
     ElementaryActionWriteSerializer,
 )
+from rest_framework.exceptions import PermissionDenied
+
+from core.views import check_folder_add_permission
 from iam.models import Permission, RoleAssignment, User
 from privacy.models import (
     ART6_LAWFUL_BASIS_CHOICES,
@@ -446,6 +454,35 @@ def _resolve_filtering_labels(value: Any) -> list[UUID]:
     return label_ids
 
 
+def _resolve_actors(value: Any) -> list[UUID]:
+    """Resolve separated user emails or team names to Actor IDs.
+
+    Each entry is matched as a user email first, then as a team name; entries that
+    match neither are skipped, since a typo must not silently become a new actor.
+    """
+    if not isinstance(value, str):
+        return []
+
+    actor_ids: list[UUID] = []
+    for entry in re.split(r"[|,;\n]", value):
+        entry = entry.strip()
+        if not entry:
+            continue
+        actor = (
+            Actor.objects.filter(user__email__iexact=entry).first()
+            or Actor.objects.filter(team__name__iexact=entry).first()
+        )
+        if actor is not None:
+            actor_ids.append(actor.id)
+        else:
+            # Masked: owner entries are emails, which have no place in the logs.
+            logger.warning(
+                "Import: could not resolve owner entry (masked: %s***); skipping.",
+                entry[:4],
+            )
+    return actor_ids
+
+
 def _resolve_vulnerabilities(
     value: str | None, folder: "Folder"
 ) -> tuple[list[UUID], list[str]]:
@@ -571,6 +608,34 @@ def _resolve_applied_controls(value: Any, folder: "Folder", request) -> SideObje
         AppliedControlWriteSerializer,
         extra_create_data={"status": "to_do"},
     )
+
+
+def _resolve_owners(value: Any) -> list[UUID]:
+    """Resolve semicolon-separated user emails or team names to Actor IDs.
+
+    Each entry is matched first as a user email, then as a team name.
+    Unresolvable entries are silently skipped.
+    """
+    if not isinstance(value, str):
+        return []
+
+    entries = set(entry.strip() for entry in value.split(";"))
+    actor_ids = []
+
+    for entry in entries:
+        # Try matching as user email first
+        actor = Actor.objects.filter(user__email__iexact=entry).first()
+        if actor is None:
+            # Try matching as team name
+            actor = Actor.objects.filter(team__name__iexact=entry).first()
+        if actor is not None:
+            actor_ids.append(actor.id)
+        else:
+            logger.warning(
+                "Could not resolve an owner reference to a user email or team name during import; skipping."
+            )
+
+    return actor_ids
 
 
 def build_matrix_mappings(risk_matrix: RiskMatrix) -> dict:
@@ -705,6 +770,7 @@ IMPORT_TEMPLATES: dict[ModelType, str] = {
     ModelType.RISK_ASSESSMENT: "risk_assessment_template.xlsx",
     ModelType.BUSINESS_IMPACT_ANALYSIS: "business_impact_analysis_template.xlsx",
     ModelType.TASK_TEMPLATE: "tasks_template.xlsx",
+    ModelType.EVIDENCE: "evidences_template.xlsx",
 }
 
 
@@ -1398,52 +1464,58 @@ class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
         # Always set data["owner"] when the column is present, even if blank,
         # so that UPDATE mode can clear the M2M instead of silently preserving it.
         if "owner" in record:
-            data["owner"] = self._resolve_owners(record.get("owner"))
+            data["owner"] = _resolve_owners(record.get("owner"))
 
         return data, None
 
-    @staticmethod
-    def _resolve_owners(value: Any) -> list[UUID]:
-        """Resolve semicolon-separated user emails or team names to Actor IDs.
-
-        Each entry is matched first as a user email, then as a team name.
-        Unresolvable entries are silently skipped.
-        """
-        if not isinstance(value, str):
-            return []
-
-        entries = set(entry.strip() for entry in value.split(";"))
-        actor_ids = []
-
-        for entry in entries:
-            # Try matching as user email first
-            actor = Actor.objects.filter(user__email__iexact=entry).first()
-            if actor is None:
-                # Try matching as team name
-                actor = Actor.objects.filter(team__name__iexact=entry).first()
-            if actor is not None:
-                actor_ids.append(actor.id)
-            else:
-                logger.warning(
-                    "Could not resolve an owner reference to a user email or team name during Applied Control import; skipping."
-                )
-
-        return actor_ids
-
 
 class EvidenceRecordConsumer(RecordConsumer):
+    """Consumer for importing Evidence definitions.
+
+    Definitions only: an evidence is declared here (what is expected, who owns it,
+    when it expires), while the artifact itself lands later as a revision. The
+    import therefore carries no attachment or link — those belong to a revision.
+    """
+
     SERIALIZER_CLASS = EvidenceWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {"folder": ["domain"]}
+    )
+
+    _STATUS_BY_KEY: ClassVar[dict[str, str]] = {
+        key.lower(): key for key, _ in Evidence.Status.choices
+    }
+    _STATUS_BY_LABEL: ClassVar[dict[str, str]] = {
+        str(label).strip().lower(): key for key, label in Evidence.Status.choices
+    }
 
     def create_context(self):
         return None, None
+
+    def find_existing(self, record_data: dict) -> Optional[Evidence]:
+        # Case-insensitive, matching how a task import resolves an evidence name:
+        # an exact match would import "audit log" as a second "Audit Log".
+        return Evidence.objects.filter(
+            name__iexact=record_data.get("name"),
+            folder_id=record_data.get("folder"),
+        ).first()
+
+    @classmethod
+    def _normalize_status(cls, value) -> Optional[str]:
+        normalized = str(value or "").strip().lower()
+        if not normalized:
+            return None
+        return cls._STATUS_BY_KEY.get(normalized) or cls._STATUS_BY_LABEL.get(
+            normalized
+        )
 
     def prepare_create(
         self, record: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
-        if domain_name is not None:
-            domain = self.folders_map.get(domain_name.lower(), self.folder_id)
+        if domain_name:
+            domain = self.folders_map.get(str(domain_name).lower(), self.folder_id)
 
         name = record.get("name")
         if not name:
@@ -1452,13 +1524,26 @@ class EvidenceRecordConsumer(RecordConsumer):
         data = {
             "name": name,
             "description": record.get("description", ""),
-            "ref_id": record.get("ref_id", ""),
             "folder": domain,
+            "expiry_date": _parse_date(record.get("expiry_date")),
         }
+
+        raw_status = record.get("status")
+        if str(raw_status or "").strip():
+            status_value = self._normalize_status(raw_status)
+            if status_value is None:
+                return {}, Error(
+                    record=record, error=f"Invalid status value: '{raw_status}'"
+                )
+            data["status"] = status_value
 
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
+
+        # Present-but-blank has to reach the serializer so UPDATE mode can clear it.
+        if "owner" in record:
+            data["owner"] = _resolve_actors(record.get("owner"))
 
         return data, None
 
@@ -1693,6 +1778,8 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         {
             "asset": ["asset", "assets", "actif", "actifs"],
             "filtering_labels": ["filtering_labels", "labels", "label"],
+            "applied_controls": ["applied_controls", "controls"],
+            "owner": ["owner"],
         }
     )
     SEVERITY_MAP: Final[dict[Optional[str], int]] = {
@@ -1827,6 +1914,28 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         )
         self._record_side_effects("assets_created", assets)
 
+        # With SKIP/STOP, a row matching an existing Finding never reaches the
+        # serializer — so resolving applied_controls unconditionally would
+        # create (and never link) a control for a row that's about to be
+        # discarded. Peek for that duplicate first, using only the raw
+        # ref_id/name (identical to what find_existing() will check again in
+        # process_records), and skip control resolution entirely when it's
+        # going to be skipped or stop the whole import anyway.
+        is_discarded_duplicate = self.on_conflict in (
+            ConflictMode.SKIP,
+            ConflictMode.STOP,
+        ) and self.find_existing({"ref_id": record.get("ref_id"), "name": name})
+
+        if is_discarded_duplicate:
+            applied_controls = SideObjects()
+        else:
+            applied_controls = _resolve_applied_controls(
+                record.get("applied_controls") or record.get("controls"),
+                context.folder,
+                self.request,
+            )
+            self._record_side_effects("applied_controls_created", applied_controls)
+
         finding_data = {
             "name": name,
             "description": record.get("description"),
@@ -1838,6 +1947,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "due_date": _parse_date(record.get("due_date")),
             "observation": record.get("observation", ""),
             "vulnerabilities": vulnerabilities,
+            "applied_controls": applied_controls.ids,
         }
 
         # Only pass status when the source provides one — a None status fails
@@ -1852,6 +1962,13 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         if assets.ids:
             finding_data["asset"] = assets.ids[0]
 
+        # Resolve owner field (semicolon-separated user emails or team names).
+        # Always set finding_data["owner"] when the column is present, even if
+        # blank, so that UPDATE mode can clear the M2M instead of silently
+        # preserving it.
+        if "owner" in record:
+            finding_data["owner"] = _resolve_owners(record.get("owner"))
+
         unresolved = []
         if failed_vulnerabilities:
             unresolved.append(
@@ -1859,6 +1976,10 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             )
         if assets.failed:
             unresolved.append(f"Could not resolve assets: {', '.join(assets.failed)}")
+        if applied_controls.failed:
+            unresolved.append(
+                f"Could not resolve applied controls: {', '.join(applied_controls.failed)}"
+            )
         if len(asset_tokens) > 1:
             unresolved.append(
                 f"A finding takes a single asset: ignored {', '.join(asset_tokens[1:])}"
@@ -2447,6 +2568,44 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
                 )
         return list(ids)
 
+    def _resolve_or_create_evidences(
+        self, raw: str, accessible_folder_ids: set, folder_id
+    ) -> list[UUID]:
+        """Resolve evidence names to ids, creating the ones the domain lacks.
+
+        An existing evidence wins, preferring the task's own folder so a name reused
+        across domains binds locally; only when nothing matches is one created, in
+        the task's folder.
+
+        Creation is authorized here because it writes through the ORM, ahead of the
+        task's own permission check: without it, `add_tasktemplate` alone would be
+        enough to create evidence.
+        """
+        ids: list[UUID] = []
+        folder = None
+        for entry in re.split(r"[|,\n]", str(raw)):
+            entry = entry.strip()
+            if not entry:
+                continue
+            candidates = list(
+                Evidence.objects.filter(
+                    name__iexact=entry, folder_id__in=accessible_folder_ids
+                )
+            )
+            evidence = next(
+                (c for c in candidates if str(c.folder_id) == str(folder_id)), None
+            ) or (candidates[0] if candidates else None)
+            if evidence is None:
+                if folder is None:
+                    folder = Folder.objects.filter(id=folder_id).first()
+                check_folder_add_permission(self.request.user, folder, Evidence)
+                evidence = Evidence(name=entry, folder_id=folder_id)
+                evidence.full_clean()
+                evidence.save()
+            if evidence.id not in ids:
+                ids.append(evidence.id)
+        return ids
+
     def prepare_create(
         self, record: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
@@ -2557,7 +2716,6 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         for col_name, model in [
             ("assets", Asset),
             ("applied_controls", AppliedControl),
-            ("evidences", Evidence),
             ("compliance_assessments", ComplianceAssessment),
             ("risk_assessments", RiskAssessment),
             ("findings_assessment", FindingsAssessment),
@@ -2570,6 +2728,22 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
                 if raw
                 else []
             )
+
+        # Expected evidence is a declaration, not a pre-existing artifact: naming one
+        # the domain does not have yet creates it there rather than dropping the link.
+        raw_evidences = record.get("evidences") or ""
+        if raw_evidences:
+            try:
+                data["evidences"] = self._resolve_or_create_evidences(
+                    raw_evidences, accessible_folder_ids, folder_id
+                )
+            except PermissionDenied:
+                return {}, Error(
+                    record=record,
+                    error="Not allowed to create evidence in this domain",
+                )
+        else:
+            data["evidences"] = []
 
         if unresolved:
             return data, Error(
@@ -4729,6 +4903,10 @@ class LoadFileView(APIView):
     ):
         """Update matched requirement assessments from the rows; only populated
         cells are written, so blanks never clobber existing audit data."""
+        # Non-fatal per-line problems (an answer we could not match) land here
+        # rather than being dropped silently. Set here so every caller's results
+        # dict carries the key.
+        results.setdefault("warnings", [])
         for record in records:
             ref_id = record.get("ref_id")
             urn = record.get("urn")
@@ -4797,63 +4975,19 @@ class LoadFileView(APIView):
                     answers_cell = record.get("answers")
                     questions_dict = build_questions_dict(ReqNode) if ReqNode else None
                     if answers_cell not in (None, "") and questions_dict:
-                        text_to_question = {}
-                        for q_urn, qdef in questions_dict.items():
-                            q_text = qdef.get("text", "")
-                            if q_text:
-                                text_to_question[q_text] = (q_urn, qdef)
-
-                        answers = {}
-                        has_any_answer = False
-
-                        for line in str(answers_cell).split("\n"):
-                            line = line.strip()
-                            if ">>" not in line:
-                                continue
-                            q_part, _, a_part = line.partition(">>")
-                            q_text = q_part.replace("(multiple)", "").strip()
-                            a_value = a_part.strip()
-                            # Skip template hints
-                            if a_value.startswith("[") and a_value.endswith("]"):
-                                continue
-                            if not a_value:
-                                continue
-
-                            matched = text_to_question.get(q_text)
-                            if not matched:
-                                continue
-                            q_urn, qdef = matched
-                            q_type = qdef.get("type")
-
-                            if q_type in ("text", "date"):
-                                answers[q_urn] = a_value
-                                has_any_answer = True
-                            elif q_type == "multiple_choice":
-                                selected = [
-                                    v.strip() for v in a_value.split("|") if v.strip()
-                                ]
-                                value_to_urn = {
-                                    c.get("value", ""): c["urn"]
-                                    for c in qdef.get("choices", [])
+                        answers, answer_warnings = parse_answers_cell(
+                            answers_cell, questions_dict
+                        )
+                        for warning in answer_warnings:
+                            results["warnings"].append(
+                                {
+                                    "requirement": ReqNode.ref_id or ReqNode.urn,
+                                    "warning": warning,
                                 }
-                                choice_urns = [
-                                    value_to_urn[v]
-                                    for v in selected
-                                    if v in value_to_urn
-                                ]
-                                if choice_urns:
-                                    answers[q_urn] = choice_urns
-                                    has_any_answer = True
-                            elif q_type == "unique_choice":
-                                value_to_urn = {
-                                    c.get("value", ""): c["urn"]
-                                    for c in qdef.get("choices", [])
-                                }
-                                if a_value in value_to_urn:
-                                    answers[q_urn] = value_to_urn[a_value]
-                                    has_any_answer = True
-
-                        if has_any_answer:
+                            )
+                        # An empty dict means every line was a hint or was
+                        # skipped; sending it would be a no-op write.
+                        if answers:
                             requirement_data["answers"] = answers
 
                     override_cell = record.get("is_score_overridden")
@@ -6204,6 +6338,16 @@ class LoadFileView(APIView):
             # Parse ARM Excel file
             excel_file.seek(0)
             arm_data = process_arm_file(excel_file.read())
+
+            missing_sheets = arm_data.get("missing_sheets", [])
+            if missing_sheets:
+                results["warnings"] = [
+                    {
+                        "sheet": key,
+                        "warning": "Sheet not found in the ARM file, related data was not imported",
+                    }
+                    for key in missing_sheets
+                ]
 
             # Generate study name
             study_name = resolve_container_name(request, "EBIOS_RM_Study")

@@ -85,6 +85,7 @@
 	const cBase = 'space-y-1';
 	const cSummary = 'list-none [&::-webkit-details-marker]:hidden items-center cursor-pointer flex';
 	const cSymbol = 'fill-current w-3 text-center transition-transform duration-200';
+
 	const cChildren = 'space-y-1';
 	const cDisabled = 'opacity-50 cursor-not-allowed!';
 

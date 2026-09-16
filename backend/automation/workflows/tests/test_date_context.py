@@ -199,6 +199,98 @@ class TestSeedsAreEngineOwned:
 
 
 @pytest.mark.django_db
+class TestSetVariablesAuthoring:
+    """The value belongs under action_config.variables; an output_mapping on
+    a set_variables node used to be a silent no-op (support ticket)."""
+
+    def _version(self, action_config, output_mapping=None):
+        workflow = Workflow.objects.create(
+            name=f"SetVars {uuid.uuid4()}", folder=make_domain("SetVars")
+        )
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
+        trigger = node("trigger", trigger_config={"type": "manual"})
+        setter = node(
+            "action",
+            ref="set_start_variables",
+            action_config=action_config,
+            output_mapping=output_mapping or {},
+        )
+        log = node(
+            "action",
+            action_config={"type": "log", "message": "token={{authtoken}}"},
+        )
+        save_graph(
+            version,
+            {
+                "nodes": [trigger, setter, log],
+                "edges": [edge(trigger, setter), edge(setter, log)],
+                "variables": [
+                    {"id": str(uuid.uuid4()), "key": "authtoken", "type": "string"}
+                ],
+            },
+        )
+        return version
+
+    def test_publish_flags_missing_variables_and_unresolvable_mapping(self):
+        version = self._version(
+            {"type": "set_variables"}, output_mapping={"authtoken": "test"}
+        )
+        errors = validate_graph(version)
+        codes = {error["code"] for error in errors}
+        assert {
+            "action_set_variables_empty",
+            "action_set_variables_unmapped_output",
+        } <= codes
+        assert all(
+            error["node_id"] for error in errors if error["code"].startswith("action_")
+        )
+
+    def test_mapping_one_of_its_own_keys_passes(self):
+        version = self._version(
+            {"type": "set_variables", "variables": {"authtoken": "test"}},
+            output_mapping={"authtoken": "authtoken"},
+        )
+        codes = {error["code"] for error in validate_graph(version)}
+        assert not codes & {
+            "action_set_variables_empty",
+            "action_set_variables_unmapped_output",
+        }
+
+    def test_skipped_output_mapping_leaves_a_trace_in_the_run_log(self):
+        from automation.workflows.models import WorkflowInstanceLog
+
+        version = self._version(
+            {"type": "set_variables"}, output_mapping={"authtoken": "test"}
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert instance.variables["authtoken"] is None
+        skipped = instance.logs.filter(
+            event_type=WorkflowInstanceLog.EventType.ERROR,
+            node__ref="set_start_variables",
+        )
+        assert skipped.count() == 1
+        assert skipped.get().data == {"variable": "authtoken", "path": "test"}
+        assert "'authtoken'" in skipped.get().message
+
+    def test_present_null_output_is_not_reported_as_absent(self):
+        from automation.workflows.models import WorkflowInstanceLog
+
+        version = self._version(
+            {"type": "set_variables", "variables": {"authtoken": None}},
+            output_mapping={"authtoken": "authtoken"},
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert instance.variables["authtoken"] is None
+        assert not instance.logs.filter(
+            event_type=WorkflowInstanceLog.EventType.ERROR
+        ).exists()
+
+
+@pytest.mark.django_db
 class TestDateOffsetAction:
     def test_defaults_to_the_run_date_and_writes_a_variable(self):
         version = flow(

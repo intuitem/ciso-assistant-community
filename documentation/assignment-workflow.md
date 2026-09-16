@@ -15,6 +15,10 @@ stateDiagram-v2
     Changes_Requested --> Submitted : Re-submit
     Submitted --> Closed : Close
     Closed --> Submitted : Reopen
+    In_Progress --> Draft : Reopen for editing
+    Submitted --> Draft : Reopen for editing
+    Changes_Requested --> Draft : Reopen for editing
+    Closed --> Draft : Reopen for editing
 ```
 
 | State | Respondent can edit? | Description |
@@ -24,6 +28,8 @@ stateDiagram-v2
 | **Submitted** | No | The respondent has submitted their work. It is now read-only and awaiting review. |
 | **Changes Requested** | Yes | The reviewer has sent it back with feedback. The respondent can edit and re-submit. |
 | **Closed** | No | The reviewer has closed the assignment. Can be reopened if needed. |
+
+From any of **In Progress**, **Submitted**, **Changes Requested**, or **Closed**, a reviewer can also send the assignment back to **Draft** via **Reopen for editing** — see [Reopening an assignment](#reopening-an-assignment) below.
 
 ## For Managers / Reviewers
 
@@ -36,9 +42,18 @@ From the **Assignments** page of a compliance assessment:
    - **Close** — mark the assignment as done. The respondent is notified.
    - **Request Changes** — send it back with an observation describing what needs to be fixed. The respondent is notified and can edit again.
 5. **Reopen** — a closed assignment can be reopened, returning it to submitted status for further review.
+6. **Reopen for editing**
 
-> Assignments can only be edited or deleted while in **Draft** or **In Progress** state.
+> Assignments (the actor and requirement selection) can only be edited or deleted while in **Draft** state.
 > Respondents must assess all assigned requirements before they can submit.
+
+### Reopening an assignment
+
+From **Closed**, the reviewer click on one of two actions from the **Reopen** dropdown:
+
+- **For review** (`reopenAssignment`) sends the assignment back to **Submitted**. Notifies the assignee that their assignment was reopened.
+- **For editing** (`reopenAssignmentForEditing`) sends the assignment back to **Draft**. This is also available as a standalone **Reopen for editing** button when the assignment is **In Progress**, **Submitted**, and **Changes Requested**.
+
 
 ## For Respondents (Auditees)
 
@@ -63,4 +78,5 @@ From the **Assessment** page:
 |-------|----------------|
 | Assignment started | Assigned respondents |
 | Respondent submits | Audit reviewers (or authors if no reviewers are set) |
-| Reviewer closes, reopens, or requests changes | Assigned respondents |
+| Reviewer closes, reopens for review, or requests changes | Assigned respondents |
+| Reviewer reopens for editing | Assigned respondents |

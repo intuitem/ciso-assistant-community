@@ -37,6 +37,24 @@ COALESCE_WINDOW = timedelta(minutes=5)
 
 CUD_ACTIONS = ["created", "updated", "deleted"]
 
+# Events a model emits itself, beyond create/update/delete. A CUD event cannot say
+# "this request was submitted": answering a question saves the row too, so a trigger
+# would fire on every keystroke's worth of progress and have to filter by status.
+# A named key makes the trigger say what it means, which is what a starter workflow
+# has to teach.
+CUSTOM_EVENTS = [
+    {
+        "key": "quickformresponse.submitted",
+        "model": "quickformresponse",
+        "action": "submitted",
+    },
+    {
+        "key": "quickformresponse.closed",
+        "model": "quickformresponse",
+        "action": "closed",
+    },
+]
+
 VALID_FILTER_OPS = {choice[0] for choice in Condition.Operator.choices}
 MAX_FILTER_DEPTH = 5
 
@@ -80,13 +98,21 @@ def event_key_catalog():
                     "action": action,
                 }
             )
+    keys.extend(CUSTOM_EVENTS)
     return keys
 
 
 def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
     """Match triggers and start workflows. Returns started instances."""
+    from global_settings.utils import ff_is_enabled
+
     from .engine import EngineError, create_instance
     from .tasks import run_instance_task
+
+    if not ff_is_enabled("workflows"):
+        # Flag off means off: application events fall through silently, same
+        # as when no trigger matches.
+        return []
 
     started = []
     triggers = WorkflowTrigger.objects.filter(

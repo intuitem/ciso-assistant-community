@@ -349,7 +349,6 @@
 	"asPDF": "ως PDF",
 	"asCSV": "ως CSV",
 	"asXLSX": "ως Excel",
-	"asWord": "ως Word",
 	"draft": "Προσχέδιο",
 	"riskMatrixView": "Προβολή πίνακα κινδύνου",
 	"currentInMatrixView": "Τρέχον",
@@ -699,7 +698,6 @@
 	"noStatus": "Χωρίς κατάσταση",
 	"actionPlanHelpText": "Ο μετρητής δείχνει τον αριθμό των συνδεδεμένων απαιτήσεων.",
 	"matchingRequirements": "Αντιστοιχούσες απαιτήσεις",
-	"asZIP": "ως ZIP",
 	"incoming": "Εισερχόμενα",
 	"outdated": "Παλαιωμένα",
 	"flashMode": "Λειτουργία Flash",
@@ -867,6 +865,8 @@
 	"addRepresentative": "Προσθήκη εκπροσώπου",
 	"phone": "Τηλέφωνο",
 	"role": "Ρόλος",
+	"defaultRole": "Προεπιλεγμένος ρόλος",
+	"defaultRoleHelpText": "Ρόλος που παραχωρείται αυτόματα σε αυτόν τον τομέα σε κάθε χρήστη με εκχώρηση ρόλου σε έναν από τους υποτομείς του.",
 	"questions": "Ερωτήσεις",
 	"recipientEntity": "Οντότητα παραλήπτη",
 	"financial": "Οικονομικό",
@@ -912,7 +912,8 @@
 	"mailFailedToSend": "Αποτυχία αποστολής email",
 	"questionOrQuestions": "Ερώτηση(‑εις)",
 	"successfullyUpdatedClientSettings": "Οι ρυθμίσεις πελάτη ενημερώθηκαν επιτυχώς· ανανεώστε τη σελίδα.",
-	"xRaysEmptyMessage": "Πρέπει να δημιουργήσετε τουλάχιστον έναν περίμετρο για να χρησιμοποιήσετε τα X‑rays.",
+	"xRaysEmptyMessage": "Δεν εντοπίστηκε κανένα ζήτημα. Το X‑rays εμφανίζει μόνο τομείς με ευρήματα.",
+	"xRaysLoadingError": "Η ανάλυση X‑rays δεν ολοκληρώθηκε. Ελέγξτε τα αρχεία καταγραφής του διακομιστή για λεπτομέρειες.",
 	"suggestControls": "Πρόταση ελέγχων",
 	"createAppliedControlsFromSuggestionsHelpText": "Δημιουργήστε εφαρμοσμένους ελέγχους από τους προτεινόμενους πρότυπους ελέγχους των απαιτήσεων του πλαισίου",
 	"createAppliedControlsFromSuggestionsSuccess": "Οι εφαρμοσμένοι έλεγχοι δημιουργήθηκαν επιτυχώς από τους προτεινόμενους πρότυπους ελέγχους",
@@ -1391,7 +1392,6 @@
 	"ebiosWs2_3_tooltip": "Χρειάζεται τουλάχιστον ένα ζεύγος ΠΚ/ΣΤ για επιλογή",
 	"ebiosWs3_2_tooltip": "Χρειάζεται τουλάχιστον ένα επιλεγμένο ζεύγος ΠΚ/ΣΤ για στρατηγικό σενάριο",
 	"ebiosWs3_3_tooltip": "Χρειάζεται τουλάχιστον έναν ενδιαφερόμενο για καθορισμό μέτρων",
-	"ebiosWs4_1_tooltip": "Χρειάζεται επιλεγμένη διαδρομή επίθεσης για λειτουργικό σενάριο",
 	"ebiosWs4_2_tooltip": "Χρειάζεται τουλάχιστον ένα λειτουργικό σενάριο για αξιολόγηση πιθανότητας",
 	"ebiosWs5_tooltip": "Δεν έχει διεξαχθεί ακόμη εκτίμηση κινδύνου",
 	"govern": "Καθοδήγηση",
@@ -1662,7 +1662,6 @@
 	"deactivateServiceAccountConfirm": "Η απενεργοποίηση αυτού του λογαριασμού υπηρεσίας θα ανακαλέσει αμέσως όλα τα ενεργά διακριτικά πρόσβασης και θα εμποδίσει την έκδοση νέων. Συνέχεια;",
 	"gracePeriod": "Περίοδος χάριτος",
 	"gracePeriodHelpText": "Το τρέχον μυστικό συνεχίζει να λειτουργεί για αυτό το διάστημα μετά την εναλλαγή, ώστε οι ενσωματώσεις να μπορούν να ενημερωθούν χωρίς διακοπή. Περιορίζεται σε 1 μήνα.",
-	"gracePeriodTooLong": "Η περίοδος χάριτος δεν μπορεί να υπερβαίνει το 1 μήνα.",
 	"previousSecretValidUntil": "Το προηγούμενο μυστικό πελάτη παραμένει έγκυρο έως {date}.",
 	"expiresOn": "Λήγει στις {date}",
 	"personalAccessTokenExpiryHelpText": "Ημέρες μέχρι τη λήξη του διακριτικού",
@@ -1875,15 +1874,6 @@
 	"changeUserGroup": "Αλλαγή ομάδας χρηστών",
 	"deleteUserGroup": "Διαγραφή ομάδας χρηστών",
 	"viewUserGroup": "Προβολή ομάδας χρηστών",
-	"changeQuantitativeRiskHypothesis": "Αλλαγή ποσοτικής υπόθεσης κινδύνου",
-	"deleteQuantitativeRiskHypothesis": "Διαγραφή ποσοτικής υπόθεσης κινδύνου",
-	"viewQuantitativeRiskHypothesis": "Προβολή ποσοτικής υπόθεσης κινδύνου",
-	"changeQuantitativeRiskScenario": "Αλλαγή σεναρίου",
-	"deleteQuantitativeRiskScenario": "Διαγραφή σεναρίου",
-	"viewQuantitativeRiskScenario": "Προβολή σεναρίου",
-	"changeQuantitativeRiskStudy": "Αλλαγή ποσοτικής μελέτης κινδύνου",
-	"deleteQuantitativeRiskStudy": "Διαγραφή ποσοτικής μελέτης κινδύνου",
-	"viewQuantitativeRiskStudy": "Προβολή ποσοτικής μελέτης κινδύνου",
 	"dueDateUpdatedSuccessfully": "Η ημερομηνία λήξης ενημερώθηκε επιτυχώς",
 	"taskScheduleInfo": "Οι προηγούμενες εμφανίσεις προστατεύονται από αλλαγές προγραμματισμού. Μόνο οι επερχόμενες εργασίες θα επανυπολογιστούν.",
 	"cascadeDeleteWarning": "Προειδοποίηση: Η διαγραφή αυτού θα διαγράψει επίσης μόνιμα {count} σχετικό(α) αντικείμενο(α):",
@@ -1973,7 +1963,6 @@
 	"syncCweCatalog": "Λήψη CWE",
 	"syncCweCatalogFailed": "Σφάλμα CWE",
 	"syncToReferenceControl": "Συγχρονισμός με τον πρότυπο έλεγχο",
-	"exportEcosystem": "εξαγωγή οικοσυστήματος (XLSX)",
 	"boolean": "Δυαδική τιμή",
 	"builderEmptyStateTitle": "Πώς θέλετε να δομήσετε αυτό το πλαίσιο;",
 	"builderEmptyStateSubtitle": "Επιλέξτε μια αρχική δομή — μπορείτε να την αλλάξετε ανά πάσα στιγμή.",
@@ -1995,19 +1984,12 @@
 	"builderRequirementHint": "Αξιολογήσιμη, μπορεί να έχει θυγατρικά",
 	"builderSplashScreen": "Οθόνη παρουσίασης",
 	"builderSplashScreenHint": "Παρουσιαστική, μη αξιολογήσιμη",
-	"builderStatusLive": "Ενεργό",
-	"builderStatusLiveTitle": "Το προσχέδιο αντιστοιχεί σε αυτό που βλέπουν οι ερωτώμενοι του ελέγχου.",
-	"builderStatusUnpublishedChanges": "Μη δημοσιευμένες αλλαγές",
-	"builderStatusUnpublishedChangesTitle": "Το προσχέδιο περιέχει αλλαγές που δεν είναι ακόμη ορατές στους ερωτώμενους του ελέγχου. Δημοσιεύστε για να εφαρμοστούν.",
-	"builderStatusDraftNothingLive": "Προσχέδιο — τίποτα δεν είναι ενεργό",
-	"builderStatusDraftNothingLiveTitle": "Το προσχέδιο έχει περιεχόμενο αλλά τίποτα δεν έχει δημοσιευτεί. Οι νέοι έλεγχοι δεν θα βλέπουν τίποτα μέχρι να δημοσιεύσετε.",
 	"builderStatusEmpty": "Κενό",
 	"builderStatusEmptyTitle": "Δεν υπάρχουν ακόμη απαιτήσεις. Οι νέοι έλεγχοι που βασίζονται σε αυτό το πλαίσιο δεν θα έχουν τίποτα να αξιολογήσουν.",
 	"builderPreview": "Προεπισκόπηση",
 	"builderPreviewSaveFirst": "Αποθηκεύστε πρώτα το προσχέδιό σας για προεπισκόπηση",
 	"builderPreviewAsRespondent": "Προεπισκόπηση ως ερωτώμενος (ανοίγει σε νέα καρτέλα)",
 	"builderExportYamlTitle": "Εξαγωγή πλαισίου ως αρχείο βιβλιοθήκης YAML",
-	"builderExportYamlUnpublishedWarning": "Οι μη δημοσιευμένες αλλαγές δεν θα συμπεριληφθούν. Δημοσιεύστε πρώτα για να εξαγάγετε τις τελευταίες αλλαγές.",
 	"builderCopyBase": "Αντιγραφή βάσης",
 	"builderCopyBaseTitle": "Αντιγραφή κειμένου από τη βασική γλώσσα στα {lang} (δεν αντικαθιστά υπάρχουσες μεταφράσεις)",
 	"builderCopyBaseQuestion": "Αντιγραφή του βασικού κειμένου;",
@@ -2017,82 +1999,7 @@
 	"builderExpandAllCards": "Ανάπτυξη όλων των καρτών",
 	"builderCollapseAllCards": "Σύμπτυξη όλων των καρτών",
 	"builderSaveFailed": "Η αποθήκευση απέτυχε",
-	"builderPublishedFlash": "Δημοσιεύτηκε!",
 	"builderSaveDraftTitle": "Αποθήκευση προσχεδίου (Ctrl+S)",
-	"builderDiscardDraftTitle": "Απόρριψη προσχεδίου",
-	"builderDiscard": "Απόρριψη",
-	"builderDiscardAllChangesQuestion": "Απόρριψη όλων των αλλαγών;",
-	"builderYesDiscard": "Ναι, απόρριψη",
-	"builderPublishDraftToLiveTitle": "Δημοσίευση προσχεδίου στο ενεργό πλαίσιο",
-	"builderPublishing": "Δημοσίευση...",
-	"builderPublishModalTitle": "Δημοσίευση προσχεδίου σε ενεργό",
-	"builderPublishModalDescription": "Αυτή η ενέργεια θα ενημερώσει το ενεργό πλαίσιο. Ελέγξτε τις αλλαγές παρακάτω.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} απαιτήσεις προστέθηκαν",
-				"countPlural=other": "{count} απαιτήσεις προστέθηκαν"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} ερωτήσεις",
-				"countPlural=other": "{count} ερωτήσεις"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} απαιτήσεις αφαιρέθηκαν",
-				"countPlural=other": "{count} απαιτήσεις αφαιρέθηκαν"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} ερωτήσεις",
-				"countPlural=other": "{count} ερωτήσεις"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Δεν εντοπίστηκαν δομικές αλλαγές (μόνο μεταδεδομένα).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "Εντοπίστηκαν {count} ασύμβατες αλλαγές",
-				"countPlural=other": "Εντοπίστηκαν {count} ασύμβατες αλλαγές"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Αυτές οι αλλαγές μπορεί να επηρεάσουν τη βαθμολόγηση, την ορατότητα ή τα αποτελέσματα συμμόρφωσης σε υπάρχοντες ελέγχους.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} υπάρχοντες έλεγχοι θα επηρεαστούν",
-				"countPlural=other": "{count} υπάρχοντες έλεγχοι θα επηρεαστούν"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Νέες απαιτήσεις θα προστεθούν σε αυτούς τους ελέγχους.",
-	"builderAffectedAuditsRemovedHint": "Οι αφαιρεθείσες απαιτήσεις και τα δεδομένα αξιολόγησής τους θα διαγραφούν από αυτούς τους ελέγχους.",
-	"builderCouldNotLoadPreview": "Δεν ήταν δυνατή η φόρτωση της προεπισκόπησης επιπτώσεων. Προχωρήστε με προσοχή.",
-	"builderConfirmPublish": "Επιβεβαίωση δημοσίευσης",
 	"builderSearchNodes": "Αναζήτηση κόμβων...",
 	"builderExpandSidebar": "Ανάπτυξη πλαϊνής γραμμής",
 	"builderCollapseSidebar": "Σύμπτυξη πλαϊνής γραμμής",
@@ -2272,7 +2179,6 @@
 	"builderSplashNumberedList": "Αριθμημένη λίστα",
 	"builderSplashLink": "Σύνδεσμος",
 	"builderSplashTable": "Πίνακας",
-	"builderSplashInsertImage": "Εισαγωγή εικόνας",
 	"builderUntitledQuestion": "Ερώτηση χωρίς τίτλο",
 	"builderNotTranslated": "Μη μεταφρασμένο",
 	"builderQuestionTextPlaceholder": "Εισαγάγετε την ερώτησή σας...",
@@ -2317,27 +2223,12 @@
 	"builderKbSaveDraft": "Αποθήκευση προσχεδίου",
 	"builderKbShowCheatsheet": "Εμφάνιση αυτού του οδηγού",
 	"builderKbCloseDialog": "Κλείσιμο διαλόγου ή αναπτυσσόμενης λίστας",
-	"builderImportedFramework": "Εισαγόμενο πλαίσιο",
-	"builderImportedFrameworkDescription": "Αυτό το πλαίσιο εισήχθη από βιβλιοθήκη και δεν μπορεί να επεξεργαστεί απευθείας. Για να κάνετε αλλαγές, δημιουργήστε ένα επεξεργάσιμο αντίγραφο.",
-	"builderCreateCopyAndEdit": "Δημιουργία αντιγράφου και επεξεργασία",
-	"builderCreatingCopy": "Δημιουργία αντιγράφου...",
-	"builderLoadingEditor": "Φόρτωση επεξεργαστή...",
-	"builderFailedToStartEditor": "Αποτυχία εκκίνησης επεξεργαστή",
-	"builderBackToFramework": "Επιστροφή στο πλαίσιο",
-	"builderBackToBuilder": "Επιστροφή στον κατασκευαστή",
-	"builderFailedToLoadDraft": "Αποτυχία φόρτωσης προσχεδίου",
-	"builderImplementationGroupsHeader": "Ομάδες υλοποίησης",
-	"builderNoItemsToPreview": "Δεν υπάρχουν στοιχεία για προεπισκόπηση.",
-	"builderNoItemsToPreviewHint": "Προσθέστε αξιολογήσιμες απαιτήσεις ή οθόνες παρουσίασης στον κατασκευαστή.",
-	"builderBaseLanguageOption": "Βασική γλώσσα",
 	"builderFrameworkNameRequired": "Το όνομα του πλαισίου είναι υποχρεωτικό.",
 	"builderFrameworkNameTooLong": "Το όνομα του πλαισίου έχει {length} χαρακτήρες (μέγ. 200).",
 	"builderNodeNameTooLong": "Το όνομα υπερβαίνει τους 200 χαρακτήρες ({length}/200). Μετακινήστε το μεγάλο κείμενο στο πεδίο περιγραφής.",
 	"builderRefIdTooLong": "«{label}»: το ref_id έχει {length} χαρακτήρες (μέγ. 100).",
 	"builderUrnTooLong": "«{label}»: το URN έχει {length} χαρακτήρες (μέγ. 255).",
-	"builderFailedToSaveDraftBeforePublish": "Αποτυχία αποθήκευσης προσχεδίου πριν τη δημοσίευση.",
 	"builderUnsavedChangesNavigation": "Έχετε μη αποθηκευμένες αλλαγές που θα χαθούν. Έξοδος ούτως ή άλλως;",
-	"builderUnpublishedChangesNavigation": "Έχετε μη δημοσιευμένες αλλαγές. Το προσχέδιό σας έχει αποθηκευτεί και μπορείτε να συνεχίσετε αργότερα. Έξοδος ούτως ή άλλως;",
 	"fieldVisibility": "Ορατότητα πεδίων",
 	"fieldVisibilityHelpText": "Ελέγξτε ποια πεδία μπορεί να βλέπει και να επεξεργάζεται κάθε ρόλος.",
 	"visibilityAuditorRespondent": "Ελεγκτής + Ερωτώμενος",
@@ -2370,7 +2261,6 @@
 	"mfaDisabledSuccessfully": "Το MFA απενεργοποιήθηκε για αυτόν τον χρήστη",
 	"errorDisablingMFA": "Δεν ήταν δυνατή η απενεργοποίηση του MFA για αυτόν τον χρήστη",
 	"userHasNoMFAEnabled": "Αυτός ο χρήστης δεν έχει ενεργοποιημένο MFA",
-	"builderChangedOn": "άλλαξε σε",
 	"requirementWeight": "Βάρος",
 	"scim": "SCIM",
 	"scimDescription": "Διαμορφώστε την παροχή SCIM 2.0. Κατευθύνετε τον πάροχο ταυτότητάς σας στο παρακάτω σημείο πρόσβασης και πιστοποιήστε τον με ένα διακριτικό bearer που δημιουργείται εδώ.",
@@ -2391,6 +2281,9 @@
 	"idpGroups": "Ομάδες IdP",
 	"idpGroupsDescription": "Ενεργοποίηση ομοσπονδίας ομάδων IdP (παροχή SCIM, αντιστοιχίσεις ομάδων IdP και συμμετοχές χρηστών σε ομάδες IdP).",
 	"ebiosRmStudyDomainHelpText": "Η αλλαγή του τομέα μετακινεί τη μελέτη και όλα τα αντικείμενα των εργαστηρίων της στον επιλεγμένο τομέα.",
+	"reopenAssignmentForEditing": "Επανάνοιγμα για επεξεργασία",
+	"forReview": "Για ανασκόπηση",
+	"forEditing": "Για επεξεργασία",
 	"enableJitProvisioning": "Ενεργοποίηση αυτόματης παροχής",
 	"enableJitProvisioningHelpText": "Δημιουργεί αυτόματα έναν λογαριασμό, με τις παρακάτω προεπιλεγμένες ομάδες χρηστών, για χρήστες που πιστοποιούνται μέσω SSO για πρώτη φορά.",
 	"defaultUserGroups": "Προεπιλεγμένες ομάδες χρηστών",

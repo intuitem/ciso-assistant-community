@@ -534,7 +534,6 @@
 	"informationNotAvailable": "Informacija nepasiekiama",
 	"asCSV": "kaip CSV",
 	"asXLSX": "kaip Excel",
-	"asWord": "kaip Word",
 	"exportPdf": "Eksportuoti PDF",
 	"exportExcel": "Excel (beta)",
 	"generating": "Generuojama",
@@ -929,7 +928,6 @@
 	"noStatus": "Nėra būsenos",
 	"actionPlanHelpText": "Skaičius rodo susietų reikalavimų skaičių.",
 	"matchingRequirements": "Atitinkantys reikalavimai",
-	"asZIP": "kaip ZIP",
 	"incoming": "Gaunamas",
 	"outdated": "Pasenęs",
 	"flashMode": "Blykstės režimas",
@@ -1239,6 +1237,8 @@
 	"removeIdentifier": "Pašalinti identifikatorių",
 	"phone": "Telefonas",
 	"role": "Vaidmuo",
+	"defaultRole": "Numatytasis vaidmuo",
+	"defaultRoleHelpText": "Vaidmuo, automatiškai suteikiamas šiame domene kiekvienam naudotojui, turinčiam vaidmens priskyrimą viename iš jo subdomenų.",
 	"questions": "Klausimai",
 	"recipientEntity": "Gavėjo subjektas",
 	"financial": "Finansinis",
@@ -1286,7 +1286,8 @@
 	"mailFailedToSend": "El. laiško išsiųsti nepavyko",
 	"questionOrQuestions": "Klausimas(-ai)",
 	"successfullyUpdatedClientSettings": "Kliento nustatymai sėkmingai atnaujinti, prašome atnaujinti puslapį.",
-	"xRaysEmptyMessage": "Norėdami naudoti X-rays, turite sukurti bent vieną perimetrą.",
+	"xRaysEmptyMessage": "Problemų neaptikta. X-spinduliai rodo tik sritis su išvadomis.",
+	"xRaysLoadingError": "Nepavyko atlikti X-spindulių analizės. Išsamesnės informacijos ieškokite serverio žurnaluose.",
 	"xRaysLoadingData": "Analizuojami duomenys...",
 	"xRaysIssueType": "problemos tipas",
 	"xRaysIssueTypes": "problemų tipai",
@@ -2369,7 +2370,6 @@
 	"deactivateServiceAccountConfirm": "Išjungus šią paslaugos paskyrą, bus iškart panaikinti visi galiojantys prieigos raktai ir blokuojamas naujų išdavimas. Tęsti?",
 	"gracePeriod": "Pereinamasis laikotarpis",
 	"gracePeriodHelpText": "Dabartinė paslaptis po pakeitimo veikia dar šį laiką, kad integracijas būtų galima atnaujinti be prastovų. Apribota iki 1 mėnesio.",
-	"gracePeriodTooLong": "Pereinamasis laikotarpis negali būti ilgesnis nei 1 mėnuo.",
 	"previousSecretValidUntil": "Ankstesnė kliento paslaptis galioja iki {date}.",
 	"expiresOn": "Galioja iki {date}",
 	"expiresIn": "Galioja",
@@ -4018,6 +4018,9 @@
 	"submitForReviewConfirm": "Ar tikrai norite pateikti savo atsakymus peržiūrai? Negalėsite jų redaguoti, kol recenzentas jų negrąžins.",
 	"closeAssignment": "Uždaryti",
 	"reopenAssignment": "Atidaryti iš naujo",
+	"reopenAssignmentForEditing": "Atidaryti iš naujo redagavimui",
+	"forReview": "Peržiūrai",
+	"forEditing": "Redagavimui",
 	"reviewerObservation": "Recenzento pastaba",
 	"reviewerObservationPlaceholder": "Aprašykite, kokie pakeitimai reikalingi...",
 	"assignmentSubmittedBanner": "Jūsų atsakymai pateikti ir peržiūrimi.",
@@ -4250,7 +4253,6 @@
 	"allRequirements": "Visi reikalavimai",
 	"riskCoverage": "Rizikos aprėptis",
 	"soaSelectRiskDescription": "Pasirinkus rizikos vertinimus, taikymo pareiškimas bus praturtintas susietais rizikos scenarijais ir apdorojimo sprendimais",
-	"exportEcosystem": "ekosistemos eksportas (XLSX)",
 	"boolean": "Loginis",
 	"builderEmptyStateTitle": "Kaip norite struktūrizuoti šią sistemą?",
 	"builderEmptyStateSubtitle": "Pasirinkite pradinę struktūrą — galėsite ją pakeisti bet kuriuo metu.",
@@ -4272,19 +4274,12 @@
 	"builderRequirementHint": "Vertinama, gali turėti vaikinių mazgų",
 	"builderSplashScreen": "Pradinis ekranas",
 	"builderSplashScreenHint": "Pristatomasis, nevertinamas",
-	"builderStatusLive": "Veikiantis",
-	"builderStatusLiveTitle": "Juodraštis atitinka tai, ką mato audito respondentai.",
-	"builderStatusUnpublishedChanges": "Nepaskelbti pakeitimai",
-	"builderStatusUnpublishedChangesTitle": "Juodraštyje yra pakeitimų, kurie dar nematomi audito respondentams. Paskelbkite, kad pritaikytumėte.",
-	"builderStatusDraftNothingLive": "Juodraštis — niekas neveikia",
-	"builderStatusDraftNothingLiveTitle": "Juodraštyje yra turinio, bet niekas dar nepaskelbta. Nauji auditai nematys nieko, kol nepaskelbsite.",
 	"builderStatusEmpty": "Tuščia",
 	"builderStatusEmptyTitle": "Reikalavimų dar nėra. Nauji auditai, sukurti šios sistemos pagrindu, neturės ką vertinti.",
 	"builderPreview": "Peržiūra",
 	"builderPreviewSaveFirst": "Pirmiausia išsaugokite juodraštį, kad galėtumėte peržiūrėti",
 	"builderPreviewAsRespondent": "Peržiūra kaip respondentas (atidaroma naujame skirtuke)",
 	"builderExportYamlTitle": "Eksportuoti sistemą kaip YAML bibliotekos failą",
-	"builderExportYamlUnpublishedWarning": "Nepaskelbti pakeitimai nebus įtraukti. Pirmiausia paskelbkite, kad eksportuotumėte naujausius pakeitimus.",
 	"builderCopyBase": "Kopijuoti bazę",
 	"builderCopyBaseTitle": "Kopijuoti bazinės kalbos tekstą į {lang} (esamų vertimų neperrašys)",
 	"builderCopyBaseQuestion": "Kopijuoti bazinį tekstą?",
@@ -4294,82 +4289,7 @@
 	"builderExpandAllCards": "Išskleisti visas korteles",
 	"builderCollapseAllCards": "Sutraukti visas korteles",
 	"builderSaveFailed": "Išsaugoti nepavyko",
-	"builderPublishedFlash": "Paskelbta!",
 	"builderSaveDraftTitle": "Išsaugoti juodraštį (Ctrl+S)",
-	"builderDiscardDraftTitle": "Atmesti juodraštį",
-	"builderDiscard": "Atmesti",
-	"builderDiscardAllChangesQuestion": "Atmesti visus pakeitimus?",
-	"builderYesDiscard": "Taip, atmesti",
-	"builderPublishDraftToLiveTitle": "Paskelbti juodraštį į veikiančią sistemą",
-	"builderPublishing": "Skelbiama...",
-	"builderPublishModalTitle": "Paskelbti juodraštį",
-	"builderPublishModalDescription": "Šis veiksmas atnaujins veikiančią sistemą. Peržiūrėkite pakeitimus žemiau.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} reikalavimai pridėti",
-				"countPlural=other": "{count} reikalavimai pridėti"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} klausimai",
-				"countPlural=other": "{count} klausimai"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} reikalavimai pašalinti",
-				"countPlural=other": "{count} reikalavimai pašalinti"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} klausimai",
-				"countPlural=other": "{count} klausimai"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Struktūrinių pakeitimų neaptikta (tik metaduomenys).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "Aptikti {count} nesuderinami pakeitimai",
-				"countPlural=other": "Aptikti {count} nesuderinami pakeitimai"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Šie pakeitimai gali paveikti vertinimą, matomumą ar atitikties rezultatus esamuose audituose.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} esami auditai bus paveikti",
-				"countPlural=other": "{count} esami auditai bus paveikti"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Į šiuos auditus bus pridėti nauji reikalavimai.",
-	"builderAffectedAuditsRemovedHint": "Pašalinti reikalavimai ir jų vertinimo duomenys bus ištrinti iš šių auditų.",
-	"builderCouldNotLoadPreview": "Nepavyko įkelti poveikio peržiūros. Veikite atsargiai.",
-	"builderConfirmPublish": "Patvirtinti paskelbimą",
 	"builderSearchNodes": "Ieškoti mazgų...",
 	"builderExpandSidebar": "Išskleisti šoninę juostą",
 	"builderCollapseSidebar": "Sutraukti šoninę juostą",
@@ -4549,7 +4469,6 @@
 	"builderSplashNumberedList": "Numeruotas sąrašas",
 	"builderSplashLink": "Nuoroda",
 	"builderSplashTable": "Lentelė",
-	"builderSplashInsertImage": "Įterpti paveikslėlį",
 	"builderUntitledQuestion": "Klausimas be pavadinimo",
 	"builderNotTranslated": "Neišversta",
 	"builderQuestionTextPlaceholder": "Įveskite savo klausimą...",
@@ -4594,27 +4513,12 @@
 	"builderKbSaveDraft": "Išsaugoti juodraštį",
 	"builderKbShowCheatsheet": "Rodyti šią atmintinę",
 	"builderKbCloseDialog": "Uždaryti dialogą ar išskleidžiamąjį meniu",
-	"builderImportedFramework": "Importuota sistema",
-	"builderImportedFrameworkDescription": "Ši sistema buvo importuota iš bibliotekos ir negali būti tiesiogiai redaguojama. Norėdami atlikti pakeitimus, sukurkite redaguojamą kopiją.",
-	"builderCreateCopyAndEdit": "Sukurti kopiją ir redaguoti",
-	"builderCreatingCopy": "Kuriama kopija...",
-	"builderLoadingEditor": "Įkeliamas redaktorius...",
-	"builderFailedToStartEditor": "Nepavyko paleisti redaktoriaus",
-	"builderBackToFramework": "Atgal į sistemą",
-	"builderBackToBuilder": "Atgal į kūrėją",
-	"builderFailedToLoadDraft": "Nepavyko įkelti juodraščio",
-	"builderImplementationGroupsHeader": "Įgyvendinimo grupės",
-	"builderNoItemsToPreview": "Nėra elementų peržiūrai.",
-	"builderNoItemsToPreviewHint": "Pridėkite vertinamus reikalavimus arba pradinius ekranus kūrėjuje.",
-	"builderBaseLanguageOption": "Bazinė kalba",
 	"builderFrameworkNameRequired": "Sistemos pavadinimas yra privalomas.",
 	"builderFrameworkNameTooLong": "Sistemos pavadinimas yra {length} simbolių (daugiausia 200).",
 	"builderNodeNameTooLong": "Pavadinimas viršija 200 simbolių ({length}/200). Perkelkite ilgą tekstą į aprašymo lauką.",
 	"builderRefIdTooLong": "„{label}“: ref_id yra {length} simbolių (daugiausia 100).",
 	"builderUrnTooLong": "„{label}“: URN yra {length} simbolių (daugiausia 255).",
-	"builderFailedToSaveDraftBeforePublish": "Nepavyko išsaugoti juodraščio prieš paskelbiant.",
 	"builderUnsavedChangesNavigation": "Turite neišsaugotų pakeitimų, kurie bus prarasti. Vis tiek išeiti?",
-	"builderUnpublishedChangesNavigation": "Turite nepaskelbtų pakeitimų. Jūsų juodraštis išsaugotas ir galėsite tęsti vėliau. Vis tiek išeiti?",
 	"fieldVisibility": "Laukų matomumas",
 	"fieldVisibilityHelpText": "Valdykite, kuriuos laukus kiekvienas vaidmuo gali matyti ir redaguoti.",
 	"visibilityAuditorRespondent": "Auditorius + Respondentas",
@@ -4647,7 +4551,6 @@
 	"mfaDisabledSuccessfully": "Šio naudotojo MFA išjungta",
 	"errorDisablingMFA": "Nepavyko išjungti šio naudotojo MFA",
 	"userHasNoMFAEnabled": "Šis vartotojas neturi įjungtos MFA",
-	"builderChangedOn": "pakeista",
 	"requirementWeight": "Svoris",
 	"scim": "SCIM",
 	"scimDescription": "Konfigūruokite SCIM 2.0 teikimą. Nukreipkite savo tapatybės teikėją į toliau nurodytą galinį tašką ir autentifikuokite jį čia sugeneruotu bearer žetonu.",

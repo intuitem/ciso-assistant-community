@@ -563,7 +563,7 @@ export DJANGO_DEBUG=True
 # Default url is set to http://localhost:5173 but you can change it, e.g. to use https with a caddy proxy
 export CISO_ASSISTANT_URL=https://localhost:8443
 
-# Setup a development mailer with Mailhog for example
+# Setup a development mailer with Mailpit for example
 export EMAIL_HOST_USER=''
 export EMAIL_HOST_PASSWORD=''
 export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
@@ -868,7 +868,7 @@ The following recommendations apply for production:
   - `/api/accounts/saml/0/acs/`
   - `/api/accounts/saml/0/acs/finish/`
   - `/api/accounts/oidc/openid_connect/login/callback/`
-  - `/api/iam/sso/logout/`
+  - `/api/accounts/saml/0/sls/` (only with SAML single logout enabled)
 - Use non-root deployment, as explained below.
 - Use a valid certificate for the reverse proxy
 - If the reverse proxy is not running on the same host as the backend and frontend, use a VPN like wireguard between the nodes.

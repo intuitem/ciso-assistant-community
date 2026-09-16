@@ -137,7 +137,30 @@
 	// name and deduped against the corpus. The wrapping library is minted
 	// behind the scenes and the user lands straight in the object's editor.
 	const PACKAGER_KEY = 'library-builder:packager';
-	let quickKind: 'framework' | 'matrix' | null = $state(null);
+	type QuickKind = 'framework' | 'matrix' | 'quick_form';
+	// The kind also *is* the URN type token (see URN_TYPE_TOKENS in library/builder.py),
+	// so the preview below can interpolate it directly.
+	const QUICK_COPY: Record<
+		QuickKind,
+		{ label: () => string; placeholder: () => string; help: () => string }
+	> = {
+		framework: {
+			label: m.lbListFrameworkName,
+			placeholder: m.lbListFrameworkNamePlaceholder,
+			help: m.lbListQuickHelpFramework
+		},
+		matrix: {
+			label: m.lbListMatrixName,
+			placeholder: m.lbListMatrixNamePlaceholder,
+			help: m.lbListQuickHelpMatrix
+		},
+		quick_form: {
+			label: m.lbListQuickFormName,
+			placeholder: m.lbListQuickFormNamePlaceholder,
+			help: m.lbListQuickHelpQuickForm
+		}
+	};
+	let quickKind: QuickKind | null = $state(null);
 	let quickName = $state('');
 	let quickPackager = $state('');
 	let quickCreating = $state(false);
@@ -158,7 +181,7 @@
 		}
 	}
 
-	function openQuick(kind: 'framework' | 'matrix') {
+	function openQuick(kind: QuickKind) {
 		quickKind = quickKind === kind ? null : kind;
 		showCreate = false;
 		if (!quickPackager) quickPackager = rememberedPackager() || data.defaultPackager;
@@ -200,7 +223,19 @@
 				throw new Error(created.error ? safeTranslate(created.error) : JSON.stringify(created));
 			const draftBase = `/experimental/library-builder/${created.id}`;
 
-			if (kind === 'framework') {
+			if (kind === 'quick_form') {
+				const res = await fetch(draftBase, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ action: 'add-quick-form', name: quickName, ref_id: refId })
+				});
+				const result = await res.json();
+				if (!res.ok)
+					throw new Error(result.error ? safeTranslate(result.error) : JSON.stringify(result));
+				window.location.href = `${draftBase}/quick-form?quick_form_urn=${encodeURIComponent(
+					result.quick_form_urn
+				)}`;
+			} else if (kind === 'framework') {
 				const res = await fetch(draftBase, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -297,7 +332,15 @@
 				</button>
 				<button
 					type="button"
-					class="btn btn-sm variant-ghost-primary"
+					class="btn btn-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+					onclick={() => openQuick('quick_form')}
+				>
+					<i class="fa-solid fa-clipboard-question mr-1"></i>
+					{m.lbListNewQuickForm()}
+				</button>
+				<button
+					type="button"
+					class="btn btn-sm preset-outlined-primary-500"
 					onclick={() => {
 						showCreate = !showCreate;
 						quickKind = null;
@@ -308,7 +351,7 @@
 					{m.lbListNewLibraryDraft()}
 				</button>
 				<label
-					class="btn btn-sm variant-ghost-primary cursor-pointer"
+					class="btn btn-sm preset-outlined-primary-500 cursor-pointer"
 					title={m.lbListImportYamlTooltip()}
 				>
 					{#if importingYaml}
@@ -347,7 +390,7 @@
 					</select>
 					<button
 						type="button"
-						class="btn btn-sm variant-ghost-primary"
+						class="btn btn-sm preset-outlined-primary-500"
 						onclick={adoptLibrary}
 						disabled={!adoptSource || adopting}
 					>
@@ -365,15 +408,13 @@
 		{#if quickKind}
 			<div class="mt-4 border-t border-surface-200-800 pt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
 				<label class="label text-sm">
-					<span>{quickKind === 'framework' ? m.lbListFrameworkName() : m.lbListMatrixName()}</span>
+					<span>{QUICK_COPY[quickKind].label()}</span>
 					<!-- svelte-ignore a11y_autofocus -->
 					<input
 						class="input placeholder:text-surface-500"
 						type="text"
 						bind:value={quickName}
-						placeholder={quickKind === 'framework'
-							? m.lbListFrameworkNamePlaceholder()
-							: m.lbListMatrixNamePlaceholder()}
+						placeholder={QUICK_COPY[quickKind].placeholder()}
 						autofocus
 						onkeydown={(e) => e.key === 'Enter' && createQuick()}
 					/>
@@ -391,7 +432,7 @@
 				<div class="flex items-end">
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={createQuick}
 						disabled={quickCreating ||
 							!identitySlug(quickName) ||
@@ -415,7 +456,7 @@
 						</p>
 					{/if}
 					<p class="text-surface-500">
-						{quickKind === 'framework' ? m.lbListQuickHelpFramework() : m.lbListQuickHelpMatrix()}
+						{QUICK_COPY[quickKind].help()}
 					</p>
 				</div>
 			</div>
@@ -455,7 +496,7 @@
 				<div class="flex items-end">
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={createDraft}
 						disabled={creating || !IDENTITY_RE.test(newPackager) || !IDENTITY_RE.test(newRefId)}
 					>
@@ -531,14 +572,14 @@
 									     in-use content). Three states: Draft; Published; Published
 									     with edits not yet re-published. -->
 									{#if !draft.identity_locked}
-										<span class="badge variant-ghost-surface text-xs">{m.lbListDraft()}</span>
+										<span class="badge preset-outlined-surface-500 text-xs">{m.lbListDraft()}</span>
 									{:else if draft.has_unpublished_changes}
-										<span class="badge variant-filled-warning text-xs">
+										<span class="badge preset-filled-warning-500 text-xs">
 											<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
 											></i>{m.lbListPublishedModified()}
 										</span>
 									{:else}
-										<span class="badge variant-filled-success text-xs">
+										<span class="badge preset-filled-success-500 text-xs">
 											<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
 											></i>{m.lbListPublished()}
 										</span>
@@ -547,14 +588,14 @@
 								<td class="space-x-1">
 									<a
 										href="/experimental/library-builder/{draft.id}"
-										class="btn btn-sm variant-filled-primary"
+										class="btn btn-sm preset-filled-primary-500"
 									>
 										<i class="fa-solid fa-pen-to-square mr-1"></i>
 										{m.edit()}
 									</a>
 									<button
 										type="button"
-										class="btn btn-sm variant-ghost-error"
+										class="btn btn-sm preset-outlined-error-500"
 										onclick={() => deleteDraft(draft)}
 										aria-label={m.lbListDeleteDraft()}
 									>
