@@ -382,7 +382,7 @@ DATA_WIZARD_COMMANDS = [
             "Import folders (domains) from CSV/Excel.\n"
             "\nRequired columns: name\n\n"
             "Optional columns: description, domain (parent folder name), iam_group "
-            "(yes/true/1/x enables IAM group creation, no/false/0 disables it; "
+            "(yes/true/1/x/oui enables IAM group creation, no/false/0/non disables it; "
             "blank or unrecognized values leave it unchanged)\n"
             "\nConflict detection: by name + parent folder"
         ),
