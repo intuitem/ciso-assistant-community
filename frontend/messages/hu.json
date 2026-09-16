@@ -1596,6 +1596,8 @@
 	"defaultUserGroups": "Alapértelmezett felhasználói csoportok",
 	"defaultUserGroupsHelpText": "Az automatikus kiépítéssel létrehozott felhasználóknak automatikusan biztosított felhasználói csoportok.",
 	"defaultUserGroupsWarning": "Csak egyszer, a fiók létrehozásakor kerül alkalmazásra. E beállítás későbbi módosítása vagy eltávolítása nem érinti a már kiépített felhasználókat. Ha olyan csoporttagságra van szükség, amely idővel is szinkronban marad, használja inkább az IdP-csoport-hozzárendelést.",
+	"oidcAdditionalScopes": "További hatókörök",
+	"oidcAdditionalScopesHelpText": "Opcionális, vesszővel elválasztott OAuth-hatókörök, amelyek hozzáadódnak az alapértelmezett openid, profile és email hatókörökhöz.",
 	"attributeMappingGroups": "Csoportattribútum-hozzárendelés",
 	"attributeMappingGroupsHelpText": "A felhasználó IdP-csoporttagságait hordozó igény (claim) neve/nevei. Az itt talált csoportok minden bejelentkezéskor szinkronizálódnak az IdP-csoportokkal, és megadják azokat a CISO Assistant felhasználói csoportokat, amelyekhez egy adminisztrátor hozzárendelte őket.",
 	"jitProvisioning": "SSO automatikus kiépítés (JIT)",

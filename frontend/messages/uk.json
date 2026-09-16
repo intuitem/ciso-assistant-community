@@ -3520,6 +3520,8 @@
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Метод автентифікації токена",
 	"oauthPKCEEnabled": "OAuth PKCE увімкнено",
+	"oidcAdditionalScopes": "Додаткові області",
+	"oidcAdditionalScopesHelpText": "Необов’язкові області OAuth, розділені комами, які додаються до стандартних областей openid, profile та email.",
 	"suggestedParentheses": "(рекомендовано)",
 	"matchingScenarios": "Відповідні сценарії",
 	"clientSecretAlreadySetHelpText": "Секрет клієнта вже встановлено.",
