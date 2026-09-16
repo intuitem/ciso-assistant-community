@@ -20,6 +20,7 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     applied_controls = FieldsRelatedField(many=True)
     task_templates = FieldsRelatedField(many=True)
     processings = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     classification = serializers.SerializerMethodField()
     document_count = serializers.SerializerMethodField()
