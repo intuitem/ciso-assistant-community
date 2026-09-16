@@ -44,12 +44,6 @@
 		link="/experimental/analytics-export"
 		tags={['analytics', 'export', 'xlsx', 'reporting']}
 	/>
-	<Article
-		title="Mini graph explorer"
-		desc="Relations graph that grows by accretion: click a node to expand it in place, click again to collapse. Expansion never moves what is already on screen. Mock data, no backend."
-		link="/experimental/mini-graph"
-		tags={['graph', 'applied-controls', 'risk-scenarios', 'prototype']}
-	/>
 	{#each experimentalExtras as extra (extra.link)}
 		<Article title={extra.title} desc={extra.desc} link={extra.link} tags={extra.tags} />
 	{/each}

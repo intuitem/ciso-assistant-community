@@ -202,7 +202,8 @@
 				collapseBelowTopLevel();
 				collapseInitialised = true;
 			}
-			for (const id of [...collapsed]) {
+			// Dropping the current key mid-iteration is well-defined for a Set.
+			for (const id of collapsed) {
 				if (!tree.byId.has(id)) collapsed.delete(id);
 			}
 			buildGraph();
