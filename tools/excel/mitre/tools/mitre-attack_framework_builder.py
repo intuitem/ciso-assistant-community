@@ -31,7 +31,14 @@ ATT&CK publishes a handful of mitigations verbatim in several domains (Mobile
 M1013 is Enterprise M1013). Re-declaring one breaks the (ref_id, name)
 uniqueness ReferenceControl enforces per folder, so the Enterprise library is
 read at build time and a repeat is referenced through a library dependency
-instead of being emitted again.
+instead of being emitted again. Under `--domain all` the Enterprise mitigations
+extracted in the same run are used, since the shipped YAML is a release behind
+as soon as Enterprise is rebuilt.
+
+The library version defaults to one past the shipped library, because
+`StoredLibrary.store_library_content` only refreshes the checksum when
+(urn, locale, version) already exists: a rebuild emitted at the shipped version
+silently reaches nobody. Pass `--library-version` to override.
 
 Manual steps for those formulas in the final workbook:
 
@@ -54,7 +61,7 @@ import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Iterable, Mapping, Sequence
 from urllib.parse import urlparse
 
 import requests
@@ -87,7 +94,7 @@ SOURCE_URL = "https://github.com/mitre/cti"
 README_PATH = SCRIPT_DIR / "README.md"
 LICENSE_PATH = SCRIPT_DIR / "LICENSE.txt"
 
-LIBRARY_VERSION = "1"
+FIRST_LIBRARY_VERSION = 1
 LIBRARY_LOCALE = "en"
 LIBRARY_PROVIDER = "Mitre ATT&CK"
 LIBRARY_PACKAGER = "intuitem"
@@ -641,28 +648,66 @@ def _stix_id_to_ref_id(attack_data: MitreAttackData, stix_id: str) -> str | None
         return None
 
 
+def read_library_yaml(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    with path.open(encoding="utf-8") as stream:
+        return yaml.safe_load(stream) or {}
+
+
+def next_library_version(domain: DomainSpec) -> int:
+    """One past the shipped version.
+
+    `StoredLibrary.store_library_content` only refreshes the checksum when
+    (urn, locale, version) already exists, so regenerating at the shipped
+    version reaches nobody.
+    """
+    library = read_library_yaml(domain.shipped_library)
+    if not library or not library.get("version"):
+        return FIRST_LIBRARY_VERSION
+    return int(library["version"]) + 1
+
+
+def mitigation_index(
+    domain: DomainSpec,
+    mitigations: Iterable[AttackRecord],
+) -> dict[str, tuple[str, str]]:
+    """{ref_id: (name, urn)} for the mitigations this domain declares itself."""
+    return {
+        item.ref_id: (
+            item.name,
+            f"{domain.mitigations_base_urn}:{item.ref_id.lower()}",
+        )
+        for item in mitigations
+    }
+
+
 def load_shared_mitigations(
     domain: DomainSpec,
+    built: Mapping[str, tuple[dict[str, tuple[str, str]], str]] | None = None,
 ) -> tuple[dict[str, tuple[str, str]], str]:
     """Reference controls of the library this domain may share mitigations with.
 
+    Prefers an index built earlier in this run (`--domain all`) over the shipped
+    YAML, which is a release behind as soon as the shared domain is rebuilt.
     Returns {ref_id: (name, urn)} and the library URN, or ({}, "") when there is
     no shared library or it is not on disk yet.
     """
     if not domain.shared_library_ref_id:
         return {}, ""
 
+    if built and domain.shared_library_ref_id in built:
+        return built[domain.shared_library_ref_id]
+
     path = LIBRARIES_DIR / f"{domain.shared_library_ref_id}.yaml"
-    if not path.exists():
+    library = read_library_yaml(path)
+    if library is None:
         print(
             f'⚠️  [WARNING] "{display_path(path)}" not found; mitigations repeated '
             "across ATT&CK domains cannot be detected.",
             file=sys.stderr,
         )
         return {}, ""
-
-    with path.open(encoding="utf-8") as stream:
-        library = yaml.safe_load(stream) or {}
 
     controls = {}
     for entry in (library.get("objects") or {}).get("reference_controls") or []:
@@ -675,7 +720,11 @@ def load_shared_mitigations(
     return controls, library.get("urn", "")
 
 
-def extract_domain_content(source: Path, domain: DomainSpec) -> DomainContent:
+def extract_domain_content(
+    source: Path,
+    domain: DomainSpec,
+    built: Mapping[str, tuple[dict[str, tuple[str, str]], str]] | None = None,
+) -> DomainContent:
     attack_data = MitreAttackData(str(source))
 
     tactic_objects = get_matrix_tactics(attack_data)
@@ -694,7 +743,7 @@ def extract_domain_content(source: Path, domain: DomainSpec) -> DomainContent:
         key=lambda item: item.ref_id,
     )
 
-    shared, shared_library_urn = load_shared_mitigations(domain)
+    shared, shared_library_urn = load_shared_mitigations(domain, built)
     aliased_mitigations = {
         item.ref_id: shared[item.ref_id][1]
         for item in all_mitigations
@@ -931,6 +980,7 @@ def build_final_workbook(
     output: Path,
     domain: DomainSpec,
     version: str,
+    library_version: int,
     description: str,
     copyright_text: str,
     content: DomainContent,
@@ -954,7 +1004,7 @@ def build_final_workbook(
     library_rows: list[tuple[str, object]] = [
         ("type", "library"),
         ("urn", domain.library_urn),
-        ("version", LIBRARY_VERSION),
+        ("version", library_version),
         ("locale", LIBRARY_LOCALE),
         ("ref_id", domain.ref_id),
         ("name", library_name),
@@ -1162,6 +1212,14 @@ def parse_args() -> argparse.Namespace:
         help="keep the downloaded sources",
     )
     parser.add_argument(
+        "--library-version",
+        type=int,
+        help=(
+            "library version to emit; defaults to one past the shipped library, "
+            "since re-importing an already stored (urn, locale, version) is a no-op"
+        ),
+    )
+    parser.add_argument(
         "--translation-formulas",
         action="store_true",
         help=(
@@ -1178,7 +1236,9 @@ def build_domain(
     description: str,
     copyright_text: str,
     emit_formulas: bool,
-) -> tuple[Path, list[Path]]:
+    library_version: int | None = None,
+    built: Mapping[str, tuple[dict[str, tuple[str, str]], str]] | None = None,
+) -> tuple[Path, list[Path], dict[str, tuple[str, str]]]:
     downloaded: list[Path] = []
 
     version = get_attack_version(session, domain)
@@ -1187,7 +1247,7 @@ def build_domain(
     download_file(session, domain.bundle_url, domain.local_bundle)
     downloaded.append(domain.local_bundle)
 
-    content = extract_domain_content(domain.local_bundle, domain)
+    content = extract_domain_content(domain.local_bundle, domain, built)
     print(f"✅ [OK] Retrieved {len(content.tactics)} tactics.")
     print(f"✅ [OK] Retrieved {len(content.techniques)} techniques.")
     print(f"✅ [OK] Retrieved {len(content.mitigations)} mitigations.")
@@ -1210,11 +1270,22 @@ def build_domain(
             f"({len(carried)} objects)."
         )
 
+    if library_version is None:
+        library_version = next_library_version(domain)
+        if library_version > FIRST_LIBRARY_VERSION:
+            print(
+                f"ℹ️  [NOTE] Library version {library_version}, one past the shipped "
+                f"{library_version - 1}; a rebuild at the shipped version is ignored "
+                "on import."
+            )
+    print(f"✅ [OK] Library version: {library_version}")
+
     output = SCRIPT_DIR / f"{domain.ref_id}-v{version}.xlsx"
     build_final_workbook(
         output=output,
         domain=domain,
         version=version,
+        library_version=library_version,
         description=description,
         copyright_text=copyright_text,
         content=content,
@@ -1223,7 +1294,7 @@ def build_domain(
     if carried:
         print(f"✅ [OK] Carried {translations.carried_count} French translations.")
     print(f'✅ [OK] Created: "{display_path(output)}"')
-    return output, downloaded
+    return output, downloaded, mitigation_index(domain, content.mitigations)
 
 
 def main() -> None:
@@ -1232,6 +1303,8 @@ def main() -> None:
     outputs: list[tuple[str, Path]] = []
 
     selected = list(DOMAINS) if args.domain == "all" else [args.domain]
+    # a shared library must be built before the domains that borrow from it
+    selected.sort(key=lambda key: DOMAINS[key].shared_library_ref_id is not None)
 
     try:
         with create_session() as session:
@@ -1245,16 +1318,22 @@ def main() -> None:
             copyright_text = extract_attack_license(license_text)
             print("✅ [OK] Read the ATT&CK description and license.")
 
+            # a domain built in this run supersedes its shipped YAML for the
+            # domains that share mitigations with it
+            built: dict[str, tuple[dict[str, tuple[str, str]], str]] = {}
             for step, key in enumerate(selected, start=3):
                 domain = DOMAINS[key]
                 print_step_banner(step, f"Build the {domain.title} library")
-                output, downloaded = build_domain(
+                output, downloaded, mitigations = build_domain(
                     session=session,
                     domain=domain,
                     description=description,
                     copyright_text=copyright_text,
                     emit_formulas=args.translation_formulas,
+                    library_version=args.library_version,
+                    built=built,
                 )
+                built[domain.ref_id] = (mitigations, domain.library_urn)
                 generated_intermediates.extend(downloaded)
                 outputs.append((domain.title, output))
 
