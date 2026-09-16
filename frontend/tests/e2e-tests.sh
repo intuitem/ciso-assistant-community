@@ -228,9 +228,9 @@ if [[ ! " ${SCRIPT_SHORT_ARGS[@]} " =~ " -m " ]]; then
   if command -v docker &>/dev/null; then
     echo "Starting mailer service..."
     if [[ -z "$DO_NOT_USE_SUDO" ]]; then
-      MAILER_PID=$(sudo docker run -d -p "$MAILER_SMTP_SERVER_PORT":1025 -p "$MAILER_WEB_SERVER_PORT":8025 mailhog/mailhog)
+      MAILER_PID=$(sudo docker run -d -p "$MAILER_SMTP_SERVER_PORT":1025 -p "$MAILER_WEB_SERVER_PORT":8025 -e MP_SMTP_AUTH_ACCEPT_ANY=1 -e MP_SMTP_AUTH_ALLOW_INSECURE=1 axllent/mailpit:v1.31.1)
     else
-      MAILER_PID=$(docker run -d -p "$MAILER_SMTP_SERVER_PORT":1025 -p "$MAILER_WEB_SERVER_PORT":8025 mailhog/mailhog)
+      MAILER_PID=$(docker run -d -p "$MAILER_SMTP_SERVER_PORT":1025 -p "$MAILER_WEB_SERVER_PORT":8025 -e MP_SMTP_AUTH_ACCEPT_ANY=1 -e MP_SMTP_AUTH_ALLOW_INSECURE=1 axllent/mailpit:v1.31.1)
     fi
     echo "Mailer service started on ports $MAILER_SMTP_SERVER_PORT/$MAILER_WEB_SERVER_PORT (Container ID: ${MAILER_PID:0:6})"
   else
