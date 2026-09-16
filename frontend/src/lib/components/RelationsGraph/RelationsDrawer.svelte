@@ -191,7 +191,7 @@
 			shadow-[-16px_0_48px_-12px_rgba(2,6,23,0.38)] dark:shadow-[-16px_0_48px_-12px_rgba(0,0,0,0.75)]"
 		style="width: min({wide ? '1100px' : '580px'}, 96vw)"
 		transition:fly={{ x: 420, duration: 220 }}
-		aria-label={m.relations()}
+		aria-label={m.relationsGraph()}
 	>
 		<header class="flex items-start gap-2 p-3 border-b border-surface-200-800">
 			<i class="fa-solid {rootMeta.icon} mt-1.5" style="color:{rootMeta.color}"></i>
@@ -250,7 +250,8 @@
 					{graph}
 					{showLabels}
 					onNodeClick={onNode}
-					onNodeDoubleClick={(n) => !n.aggregate && n.hop > 0 && goToNode(n)}
+					onNodeDoubleClick={(n) =>
+						!n.aggregate && n.hop > 0 && n.navigable !== false && goToNode(n)}
 				/>
 			{/if}
 

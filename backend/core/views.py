@@ -8854,6 +8854,12 @@ class FolderViewSet(BaseModelViewSet):
                 {"moves": "moves and deletes must be lists"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        # Every entry is read with .get(), so a bare string would 500 rather than 400.
+        if not all(isinstance(entry, dict) for entry in (*moves, *deletes)):
+            return Response(
+                {"moves": "each move and delete must be an object"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if not moves and not deletes:
             return Response(
                 {"moves": "At least one move or delete is required"},

@@ -273,6 +273,8 @@
 	/** Stage a move instead of writing it; the access impact is reviewed once, for the
 	 * whole shape, in `applyDraft`. */
 	function requestReparent(childId: string, newParentId: string) {
+		// applyDraft captured the draft already; anything staged now would be cleared.
+		if (busy) return;
 		const reason = rejectionReason(childId, newParentId);
 		if (reason) {
 			toastStore.trigger({ message: reason, background: 'preset-tonal-warning' });
@@ -312,6 +314,7 @@
 	/** Only offered for an empty leaf of the DRAFTED tree, so emptying a domain by
 	 * dragging its children out unlocks removing it in the same apply. */
 	function stageDelete(folderId: string) {
+		if (busy) return;
 		const node = tree.byId.get(folderId);
 		if (!node) return;
 		if (!isDeletableLeaf(tree, folderId)) {
@@ -335,6 +338,7 @@
 	}
 
 	function unstageDelete(folderId: string) {
+		if (busy) return;
 		deleteDraft = deleteDraft.filter((id) => id !== folderId);
 		persistDraft();
 	}
@@ -595,7 +599,7 @@
 	}
 
 	function detachToRoot(folderId: string) {
-		if (!tree.rootId) return;
+		if (busy || !tree.rootId) return;
 		requestReparent(folderId, tree.rootId);
 	}
 

@@ -2265,7 +2265,6 @@
 	"errorFolderGraphMustNotContainCycles": "Le graphe des domaines ne doit pas contenir de boucles.",
 	"subDomainsRequirePro": "Les sous-domaines sont disponibles dans l'édition PRO. Les domaines sont ici créés au premier niveau.",
 	"documentVersion": "Version du document",
-	"relations": "Relations",
 	"relationsGraph": "Graphe des relations",
 	"relationsGraphDescription": "Affiche un bouton Relations sur les pages de détail prises en charge, ouvrant un graphe des objets liés",
 	"relationsLoadFailed": "Impossible de charger les relations de cet objet.",

@@ -5846,7 +5846,6 @@
 	"relationsGraph": "Relations graph",
 	"relationsGraphDescription": "Show a Relations button on supported detail pages, opening a graph of what the object is linked to",
 	"documentVersion": "Document version",
-	"relations": "Relations",
 	"relationsLoadFailed": "Could not load the relations of this object.",
 	"relationsLoadNodeFailed": "Could not load that object.",
 	"relationsNoLinks": "Nothing is linked to this object yet.",

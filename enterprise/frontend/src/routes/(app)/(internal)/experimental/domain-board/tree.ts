@@ -336,25 +336,41 @@ export function applyDraftToTree(tree: FlatTree, moves: Draft): FlatTree {
 	const byId = new Map<string, DomainNode>();
 	for (const [id, node] of tree.byId) byId.set(id, { ...node });
 
-	// A stored draft is replayed against a tree that may have moved under it: the
-	// live parent may since have become a descendant of the node being moved. The
-	// resulting cycle is unreachable from the root, so both would silently vanish
-	// from the canvas rather than loop. Skip the move; the server rejects it too.
-	const wouldCycle = (id: string, parentId: string): boolean => {
-		let cursor: string | null = parentId;
-		for (let hops = 0; cursor !== null && hops <= byId.size; hops++) {
-			if (cursor === id) return true;
-			cursor = byId.get(cursor)?.parentId ?? null;
-		}
-		return cursor !== null; // never reached the root: already cyclic
-	};
+	// Validate the whole proposed shape, never one move against the live links: a
+	// draft may legitimately reorder a chain ({a: a1, a1: root}), which looks cyclic
+	// only while half-applied. A stored draft can still be replayed against a tree
+	// that moved under it, so whatever cannot reach the root is dropped: the cycle
+	// would be unreachable from rootId and those domains would silently vanish.
+	const proposed = new Map<string, string | null>();
+	for (const [id, node] of byId) proposed.set(id, node.parentId);
 
+	const staged: string[] = [];
 	for (const [id, parentId] of Object.entries(moves)) {
 		const node = byId.get(id);
 		if (!node || !byId.has(parentId) || node.parentId === null) continue;
-		if (wouldCycle(id, parentId)) continue;
-		node.parentId = parentId;
+		proposed.set(id, parentId);
+		staged.push(id);
 	}
+
+	const reachesRoot = (id: string): boolean => {
+		let cursor: string | null = id;
+		for (let hops = 0; cursor !== null && hops <= proposed.size; hops++) {
+			cursor = proposed.get(cursor) ?? null;
+		}
+		return cursor === null;
+	};
+
+	for (let settled = false; !settled;) {
+		settled = true;
+		for (const id of staged) {
+			const live = byId.get(id)!.parentId;
+			if (proposed.get(id) === live || reachesRoot(id)) continue;
+			proposed.set(id, live);
+			settled = false;
+		}
+	}
+
+	for (const id of staged) byId.get(id)!.parentId = proposed.get(id) ?? null;
 
 	const childrenOf = new Map<string, string[]>();
 	for (const id of byId.keys()) childrenOf.set(id, []);

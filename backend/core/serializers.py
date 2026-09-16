@@ -2907,7 +2907,14 @@ class FolderWriteSerializer(BaseModelSerializer):
         before any policy — a 403 must beat "this needs PRO".
         """
         if not value:
-            return Folder.get_root_folder()
+            root = Folder.get_root_folder()
+            # Detaching to the root is still an add there. Create is left to `create()`;
+            # without this, `parent_folder: null` was the one target needing no rights.
+            if self.instance is not None and str(self.instance.parent_folder_id) != str(
+                root.id
+            ):
+                self._check_object_perm(self.instance, "add", folder=root)
+            return root
         if self.instance is None:
             # The base class checks this only in `create()`, after field validation —
             # too late for a policy that rejects during `is_valid()`.
