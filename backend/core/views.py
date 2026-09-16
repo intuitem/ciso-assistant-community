@@ -15843,35 +15843,76 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
         return Response({"nodes": nodes, "links": links, "categories": categories})
 
-    @action(detail=True, methods=["get"], url_path="graph_data")
-    def graph_data(self, request, pk=None):
-        obj = StoredLibrary.objects.get(id=pk)
+    @staticmethod
+    def _framework_content(urn, label):
+        lib = StoredLibrary.objects.filter(
+            content__framework__urn=urn,
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        ).first()
+        if not lib:
+            raise NotFound(f"{label} framework library not found")
+        return lib.content["framework"]
+
+    def _mapping_context(self):
+        """Resolve the mapping set and both framework contents.
+
+        get_object() keeps the folder-scoped queryset in play.
+        """
+        obj = self.get_object()
 
         mapping_set = obj.content.get(
             "requirement_mapping_sets",
             [obj.content.get("requirement_mapping_set", {})],
         )[0]
 
-        source_framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn=mapping_set["source_framework_urn"],
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
-        if not source_framework_lib:
-            raise NotFound("Source framework library not found")
+        source_framework = self._framework_content(
+            mapping_set["source_framework_urn"], "Source"
+        )
+        target_framework = self._framework_content(
+            mapping_set["target_framework_urn"], "Target"
+        )
+        return mapping_set, source_framework, target_framework
 
-        target_framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn=mapping_set["target_framework_urn"],
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
-        if not target_framework_lib:
-            raise NotFound("Target framework library not found")
+    @staticmethod
+    def _coverage_meta(
+        source_framework,
+        target_framework,
+        req_mappings,
+        source_urns,
+        target_urns,
+    ):
+        linked_source_urns = {
+            mapping.get("source_requirement_urn")
+            for mapping in req_mappings
+            if mapping.get("source_requirement_urn") in source_urns
+        }
+        linked_target_urns = {
+            mapping.get("target_requirement_urn")
+            for mapping in req_mappings
+            if mapping.get("target_requirement_urn") in target_urns
+        }
 
-        source_framework = source_framework_lib.content["framework"]
-        target_framework = target_framework_lib.content["framework"]
+        return {
+            "display_name": f"{source_framework['name']} ➜ {target_framework['name']}",
+            "source_framework": source_framework["name"],
+            "target_framework": target_framework["name"],
+            "source_coverage": round(len(linked_source_urns) / len(source_urns) * 100)
+            if source_urns
+            else 0,
+            "target_coverage": round(len(linked_target_urns) / len(target_urns) * 100)
+            if target_urns
+            else 0,
+            "source_total": len(source_urns),
+            "source_linked": len(linked_source_urns),
+            "target_total": len(target_urns),
+            "target_linked": len(linked_target_urns),
+        }
+
+    @action(detail=True, methods=["get"], url_path="graph_data")
+    def graph_data(self, request, pk=None):
+        mapping_set, source_framework, target_framework = self._mapping_context()
 
         source_nodes_dict = {
             n.get("urn"): n for n in source_framework["requirement_nodes"]
@@ -15941,46 +15982,79 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
                 }
             )
 
-        # Calculate coverage in both directions
-        source_assessable_count = len(snodes_idx)
-        target_assessable_count = len(tnodes_idx)
-
-        linked_source_urns = set(
-            mapping.get("source_requirement_urn")
-            for mapping in req_mappings
-            if mapping.get("source_requirement_urn") in snodes_idx
+        meta = self._coverage_meta(
+            source_framework,
+            target_framework,
+            req_mappings,
+            snodes_idx.keys(),
+            tnodes_idx.keys(),
         )
-        linked_target_urns = set(
-            mapping.get("target_requirement_urn")
-            for mapping in req_mappings
-            if mapping.get("target_requirement_urn") in tnodes_idx
-        )
-
-        source_coverage = (
-            round(len(linked_source_urns) / source_assessable_count * 100)
-            if source_assessable_count > 0
-            else 0
-        )
-        target_coverage = (
-            round(len(linked_target_urns) / target_assessable_count * 100)
-            if target_assessable_count > 0
-            else 0
-        )
-
-        meta = {
-            "display_name": f"{source_framework['name']} ➜ {target_framework['name']}",
-            "source_framework": source_framework["name"],
-            "target_framework": target_framework["name"],
-            "source_coverage": source_coverage,
-            "target_coverage": target_coverage,
-            "source_total": source_assessable_count,
-            "source_linked": len(linked_source_urns),
-            "target_total": target_assessable_count,
-            "target_linked": len(linked_target_urns),
-        }
 
         return Response(
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
+        )
+
+    @action(detail=True, methods=["get"], url_path="table_data")
+    def table_data(self, request, pk=None):
+        """Flat mapping rows plus both requirement inventories.
+
+        Unmapped requirements ship too: they are the gaps the aggregate views show.
+        """
+        mapping_set, source_framework, target_framework = self._mapping_context()
+
+        def inventory(framework):
+            return {
+                req["urn"]: {
+                    "urn": req["urn"],
+                    "ref_id": req.get("ref_id"),
+                    "name": req.get("name"),
+                    "description": req.get("description"),
+                }
+                for req in framework["requirement_nodes"]
+                if req.get("assessable", False) and req.get("urn")
+            }
+
+        source_requirements = inventory(source_framework)
+        target_requirements = inventory(target_framework)
+
+        rows = []
+        # Libraries repeat links and carry no mapping id; the index is the only row identity.
+        for index, mapping in enumerate(mapping_set.get("requirement_mappings", [])):
+            source = source_requirements.get(mapping.get("source_requirement_urn"))
+            target = target_requirements.get(mapping.get("target_requirement_urn"))
+            if not source or not target:
+                continue
+            rows.append(
+                {
+                    "index": index,
+                    "source_urn": source["urn"],
+                    "source_ref_id": source["ref_id"],
+                    "source_name": source["name"],
+                    "target_urn": target["urn"],
+                    "target_ref_id": target["ref_id"],
+                    "target_name": target["name"],
+                    "relationship": mapping.get("relationship"),
+                    "rationale": mapping.get("rationale"),
+                    "strength_of_relationship": mapping.get("strength_of_relationship"),
+                    "annotation": mapping.get("annotation"),
+                }
+            )
+
+        meta = self._coverage_meta(
+            source_framework,
+            target_framework,
+            mapping_set.get("requirement_mappings", []),
+            source_requirements.keys(),
+            target_requirements.keys(),
+        )
+
+        return Response(
+            {
+                "rows": rows,
+                "source_requirements": list(source_requirements.values()),
+                "target_requirements": list(target_requirements.values()),
+                "meta": meta,
+            }
         )
 
 
