@@ -313,6 +313,9 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	const results: string[] = [];
 	let visibleCount = 0;
 	let answeredVisibleCount = 0;
+	// Best reachable weighted sum: the ceiling for weighted SUM.
+	let reachableWeightedMax = 0;
+	let hasWeightedQuestion = false;
 
 	for (const [q_urn, question] of Object.entries<any>(questions)) {
 		if (!isQuestionVisible(question, answers, questions)) continue;
@@ -323,6 +326,21 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 		if (question.type === 'text') continue;
 
 		visibleCount++;
+
+		const questionWeight = typeof question.weight === 'number' ? question.weight : 1;
+		const choiceScores: number[] = Array.isArray(question.choices)
+			? question.choices
+					.map((choice: any) => choice.add_score)
+					.filter((s: any) => s !== undefined && s !== null)
+			: [];
+		if (choiceScores.length > 0) {
+			const best =
+				question.type === 'multiple_choice'
+					? choiceScores.reduce((acc, s) => (s > 0 ? acc + s : acc), 0)
+					: Math.max(...choiceScores);
+			reachableWeightedMax += best * questionWeight;
+			if (questionWeight !== 1) hasWeightedQuestion = true;
+		}
 
 		const selectedChoiceURNs = answers?.[q_urn];
 		const hasAnswer =
@@ -341,16 +359,14 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 		if (!question.choices || !Array.isArray(question.choices)) continue;
 
-		const weight = typeof question.weight === 'number' ? question.weight : 1;
-
 		for (const urn of choiceURNs) {
 			const selectedChoice = question.choices.find((choice: any) => choice.urn === urn);
 			if (!selectedChoice) continue;
 
 			if (selectedChoice.add_score !== undefined && selectedChoice.add_score !== null) {
 				isScoreComputed = true;
-				totalScore += selectedChoice.add_score * weight;
-				totalWeight += weight;
+				totalScore += selectedChoice.add_score * questionWeight;
+				totalWeight += questionWeight;
 			}
 
 			if (selectedChoice.compute_result !== undefined && selectedChoice.compute_result !== null) {
@@ -362,7 +378,15 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 	let score: number | null;
 	if (isScoreComputed) {
-		const raw = aggregation === 'mean' && totalWeight > 0 ? totalScore / totalWeight : totalScore;
+		let raw: number;
+		if (aggregation === 'mean' && totalWeight > 0) {
+			raw = totalScore / totalWeight;
+		} else if (hasWeightedQuestion && reachableWeightedMax > 0) {
+			// Weights expand the ceiling too, so max_score stays reachable.
+			raw = min_score + (totalScore / reachableWeightedMax) * (max_score - min_score);
+		} else {
+			raw = totalScore;
+		}
 		score = Math.max(min_score, Math.min(max_score, Math.trunc(raw)));
 	} else {
 		score = null;

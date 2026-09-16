@@ -10019,6 +10019,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         total_score = 0
         total_weight = 0
+        # Best reachable weighted sum: the ceiling for weighted SUM.
+        reachable_weighted_max = 0
+        has_weighted_question = False
         scoring = self.get_resolved_scoring()
         min_score = scoring["min_score"] if scoring["min_score"] is not None else 0
         max_score = scoring["max_score"] if scoring["max_score"] is not None else 100
@@ -10068,6 +10071,19 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 continue
 
             visible_questions += 1
+
+            choice_scores = [
+                c.add_score for c in question.choices.all() if c.add_score is not None
+            ]
+            if choice_scores:
+                if question.type == Question.Type.MULTIPLE_CHOICE:
+                    best = sum(s for s in choice_scores if s > 0)
+                else:
+                    best = max(choice_scores)
+                reachable_weighted_max += best * question.weight
+                if question.weight != 1:
+                    has_weighted_question = True
+
             if not has_answer_by_qid.get(question.id):
                 continue
 
@@ -10095,6 +10111,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         if is_score_computed and questionnaire_complete:
             if aggregation == "mean" and total_weight > 0:
                 computed_score = total_score / total_weight
+            elif has_weighted_question and reachable_weighted_max > 0:
+                # Weights expand the ceiling too, so max_score stays reachable.
+                ratio = total_score / reachable_weighted_max
+                computed_score = min_score + ratio * (max_score - min_score)
             else:
                 computed_score = total_score
             new_score = max(min(int(computed_score), max_score), min_score)
