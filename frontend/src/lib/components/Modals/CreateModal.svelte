@@ -16,6 +16,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { FormDataShape } from '$lib/utils/schemas';
 	import { getModalStore } from './stores';
+	import { ensureSelectOptions } from '$lib/utils/select-options';
 	import { onMount, tick } from 'svelte';
 	interface Props {
 		/** Exposes parent props to this component. */
@@ -56,8 +57,19 @@
 		...rest
 	}: Props = $props();
 
-	// Focus the first field when modal opens
+	// The form's choice fields are fetched here rather than during the page load
+	// (see loadDetail), so opening a modal is what costs the requests. Gate the
+	// form on it: every ModelForm reads `model.selectOptions[...]` expecting it to
+	// be there, so rendering before it resolves would empty every dropdown.
+	let optionsReady = $state(false);
+
 	onMount(async () => {
+		try {
+			await ensureSelectOptions(model);
+		} finally {
+			// Show the form even if the fetch failed: empty dropdowns beat no form.
+			optionsReady = true;
+		}
 		await tick(); // Wait for DOM to render
 		const firstField = document.querySelector('input[data-focusindex="0"]');
 		if (firstField instanceof HTMLElement) {
@@ -81,24 +93,26 @@
 				<i class="fa-solid fa-xmark"></i>
 			</button>
 		</div>
-		<ModelForm
-			{form}
-			{customNameDescription}
-			{importFolder}
-			{additionalInitialData}
-			{suggestions}
-			{parent}
-			{invalidateAll}
-			{model}
-			{closeModal}
-			{context}
-			{origin}
-			{duplicate}
-			{taintedMessage}
-			caching={true}
-			action={formAction}
-			{debug}
-			{...rest}
-		/>
+		{#if optionsReady}
+			<ModelForm
+				{form}
+				{customNameDescription}
+				{importFolder}
+				{additionalInitialData}
+				{suggestions}
+				{parent}
+				{invalidateAll}
+				{model}
+				{closeModal}
+				{context}
+				{origin}
+				{duplicate}
+				{taintedMessage}
+				caching={true}
+				action={formAction}
+				{debug}
+				{...rest}
+			/>
+		{/if}
 	</div>
 {/if}
