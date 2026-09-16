@@ -1978,12 +1978,9 @@ class ProvisionFolderAction(BaseAction):
                 content_type=Folder.ContentType.DOMAIN,
                 create_iam_groups=create_groups,
             )
-            if create_groups:
-                Folder.create_default_ug_and_ra(folder)
         elif create_groups and not folder.create_iam_groups:
             folder.create_iam_groups = True
             folder.save(update_fields=["create_iam_groups", "updated_at"])
-            Folder.create_default_ug_and_ra(folder)
         return {
             "folder_id": str(folder.id),
             "folder_name": folder.name,

@@ -1070,7 +1070,9 @@ class TestFolderConsumer:
         assert error is None
         assert record_data["parent_folder"] == domain_folder.id
 
-    @pytest.mark.parametrize("value", ["yes", "true", "1", "YES", "True"])
+    @pytest.mark.parametrize(
+        "value", ["yes", "true", "1", "YES", "True", "x", "oui", 1, 1.0, True]
+    )
     def test_iam_group_column_sets_create_iam_groups(
         self, base_context, root_folder, value
     ):
@@ -1096,12 +1098,14 @@ class TestFolderConsumer:
     ):
         consumer = FolderRecordConsumer(base_context)
         record_data, error = consumer.prepare_create(
-            {"name": "TopLevel", "iam_group": "x"}, None
+            {"name": "TopLevel", "iam_group": "maybe"}, None
         )
         assert error is None
         assert "create_iam_groups" not in record_data
 
-    @pytest.mark.parametrize("value", ["no", "false", "0", "NO", "False"])
+    @pytest.mark.parametrize(
+        "value", ["no", "false", "0", "NO", "False", "non", 0, 0.0, False]
+    )
     def test_falsy_iam_group_column_disables_create_iam_groups(
         self, base_context, root_folder, value
     ):
@@ -1112,6 +1116,50 @@ class TestFolderConsumer:
         assert error is None
         assert record_data["create_iam_groups"] is False
 
+    def test_import_creates_iam_groups(self, base_context, root_folder):
+        result = _run(
+            FolderRecordConsumer,
+            base_context,
+            [{"name": "WithGroups", "iam_group": "yes"}],
+        )
+        assert result.created == 1
+        created = Folder.objects.get(name="WithGroups")
+        assert created.create_iam_groups is True
+        assert UserGroup.objects.filter(folder=created, builtin=True).count() == 6
+
+    def test_import_without_iam_group_creates_no_groups(
+        self, base_context, root_folder
+    ):
+        result = _run(
+            FolderRecordConsumer,
+            base_context,
+            [{"name": "WithoutGroups"}],
+        )
+        assert result.created == 1
+        created = Folder.objects.get(name="WithoutGroups")
+        assert created.create_iam_groups is False
+        assert not UserGroup.objects.filter(folder=created).exists()
+
+    def test_enable_adds_iam_groups_on_existing_folder(
+        self, update_context, root_folder
+    ):
+        existing = Folder.objects.create(
+            name="ToEnable",
+            parent_folder=root_folder,
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=False,
+        )
+
+        result = _run(
+            FolderRecordConsumer,
+            update_context,
+            [{"name": "ToEnable", "iam_group": "yes"}],
+        )
+        assert result.updated == 1
+        existing.refresh_from_db()
+        assert existing.create_iam_groups is True
+        assert UserGroup.objects.filter(folder=existing, builtin=True).count() == 6
+
     def test_disable_removes_iam_groups_without_assigned_users(
         self, update_context, root_folder
     ):
@@ -1121,7 +1169,6 @@ class TestFolderConsumer:
             content_type=Folder.ContentType.DOMAIN,
             create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(existing)
         assert UserGroup.objects.filter(folder=existing).exists()
 
         result = _run(
@@ -1143,7 +1190,6 @@ class TestFolderConsumer:
             content_type=Folder.ContentType.DOMAIN,
             create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(existing)
         ug = UserGroup.objects.filter(folder=existing, builtin=True).first()
         admin_user.user_groups.add(ug)
 

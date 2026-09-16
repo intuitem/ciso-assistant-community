@@ -2255,7 +2255,7 @@ def startup(sender=None, **kwargs):
     for folder in Folder.objects.filter(
         content_type=Folder.ContentType.DOMAIN, create_iam_groups=True
     ):
-        Folder.create_default_ug_and_ra(folder)
+        folder.create_default_ug_and_ra()
     # if global administrators user group does not exist, then create it
     if not UserGroup.objects.filter(
         name="BI-UG-ADM", folder=Folder.get_root_folder()

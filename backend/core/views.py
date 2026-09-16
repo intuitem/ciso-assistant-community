@@ -8820,13 +8820,6 @@ class FolderViewSet(BaseModelViewSet):
     filterset_class = FolderFilter
     search_fields = ["name"]
 
-    def perform_create(self, serializer):
-        """
-        Create the default user groups after domain creation
-        """
-        folder = serializer.save()
-        Folder.create_default_ug_and_ra(folder)
-
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
