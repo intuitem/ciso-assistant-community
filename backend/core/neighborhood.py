@@ -1,9 +1,12 @@
 """Relation neighbourhood for the graph drawer: one pass, minimal columns."""
 
+import structlog
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 from iam.models import RoleAssignment
+
+logger = structlog.get_logger(__name__)
 
 # Beyond this the graph shows a "+N" drawn from the count.
 PER_RELATION = 25
@@ -224,8 +227,10 @@ def build(obj, user) -> dict:
             except NotImplementedError:
                 # Outside IAM (reference data): nothing to scope against.
                 viewable[label] = None
-            except Exception:
-                continue  # never fall back to unscoped
+            except Exception as e:
+                # Never fall back to unscoped; log it, or the relation just vanishes.
+                logger.warning("neighborhood scoping failed", model=label, error=e)
+                continue
         if viewable[label] is not None:
             queryset = queryset.filter(id__in=viewable[label])
 

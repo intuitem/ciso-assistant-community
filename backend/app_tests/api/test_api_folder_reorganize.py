@@ -5,6 +5,7 @@ from rest_framework import status
 
 from core.models import Perimeter
 from core.serializers import FolderWriteSerializer
+from core.views import FolderViewSet
 from iam.models import Folder
 
 ENDPOINT = "/api/folders/reorganize/"
@@ -35,6 +36,24 @@ def nesting_allowed(monkeypatch):
         return self._resolve_parent_folder(value)
 
     monkeypatch.setattr(FolderWriteSerializer, "validate_parent_folder", permissive)
+
+
+@pytest.fixture
+def concurrent_change(monkeypatch):
+    """Run `mutate` inside the request, after the plan is built but before it applies.
+
+    That is the whole TOCTOU window; a second HTTP call could not land in it.
+    """
+    original = FolderViewSet._apply_reorganisation
+
+    def install(mutate):
+        def wrapper(self, planned, planned_deletes):
+            mutate()
+            return original(self, planned, planned_deletes)
+
+        monkeypatch.setattr(FolderViewSet, "_apply_reorganisation", wrapper)
+
+    return install
 
 
 @pytest.mark.django_db
@@ -259,6 +278,95 @@ class TestFolderReorganize:
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"applied": 0, "deleted": 0, "skipped": 1}
+
+    def test_a_move_landing_mid_request_is_refused(
+        self, authenticated_client, nesting_allowed, concurrent_change
+    ):
+        """The plan is read outside the transaction, so it is re-checked under lock."""
+        root, a, a1, b, b1 = _tree()
+        concurrent_change(
+            lambda: Folder.objects.filter(pk=a1.pk).update(parent_folder=b)
+        )
+
+        response = authenticated_client.post(
+            ENDPOINT,
+            {
+                "moves": [
+                    {
+                        "folder": str(a1.id),
+                        "parent_folder": str(b1.id),
+                        "from_parent": str(a.id),  # true when the draft was built
+                    }
+                ]
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_409_CONFLICT
+        conflict = response.json()["conflicts"][0]
+        assert conflict["reason"] == "movedElsewhere"
+        assert conflict["current_parent"] == str(b.id)
+
+        a1.refresh_from_db()
+        assert a1.parent_folder_id == b.id, "the concurrent move must stand"
+
+    def test_a_delete_landing_mid_request_is_refused(
+        self, authenticated_client, nesting_allowed, concurrent_change
+    ):
+        """Folder.save() on a vanished row would raise; it must be a conflict."""
+        root, a, a1, b, b1 = _tree()
+        concurrent_change(lambda: Folder.objects.filter(pk=a1.pk).delete())
+
+        response = authenticated_client.post(
+            ENDPOINT,
+            {
+                "moves": [
+                    {
+                        "folder": str(a1.id),
+                        "parent_folder": str(b.id),
+                        "from_parent": str(a.id),
+                    },
+                    {
+                        "folder": str(b1.id),
+                        "parent_folder": str(a.id),
+                        "from_parent": str(b.id),
+                    },
+                ]
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_409_CONFLICT
+        assert response.json()["conflicts"][0]["reason"] == "folderGone"
+
+        b1.refresh_from_db()
+        assert b1.parent_folder_id == b.id, "the sound move must have rolled back too"
+
+    def test_an_unrelated_edit_mid_request_is_not_clobbered(
+        self, authenticated_client, nesting_allowed, concurrent_change
+    ):
+        """The move must not write back the whole folder as it was read."""
+        root, a, a1, b, b1 = _tree()
+        concurrent_change(
+            lambda: Folder.objects.filter(pk=a1.pk).update(description="renamed live")
+        )
+
+        response = authenticated_client.post(
+            ENDPOINT,
+            {
+                "moves": [
+                    {
+                        "folder": str(a1.id),
+                        "parent_folder": str(b.id),
+                        "from_parent": str(a.id),
+                    }
+                ]
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        a1.refresh_from_db()
+        assert a1.parent_folder_id == b.id
+        assert a1.description == "renamed live"
 
 
 @pytest.mark.django_db

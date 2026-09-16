@@ -129,8 +129,7 @@ class TestFoldersAuthenticated:
             assert not Folder.objects.filter(name=FOLDER_NAME).exists()
 
     def test_create_subfolder_requires_pro(self, test):
-        """Refused by the community serializer. Permission resolves first, so this only
-        asserts the gate for callers who could otherwise have succeeded."""
+        """Refused by the community serializer, for every caller who gets that far."""
         response = test.client.post(
             "/api/folders/",
             {
@@ -141,11 +140,17 @@ class TestFoldersAuthenticated:
             format="json",
         )
 
-        assert response.status_code in (400, 403, 404), (
-            "nesting a domain must never succeed in the community edition"
-        )
-        if response.status_code == 400:
+        # Reaches the serializer only with the permission *and* a role covering the
+        # parent: a Global role covers any folder, a domain role only its own.
+        group = GROUPS_PERMISSIONS[test.user_group]
+        in_scope = group["folder"] == "Global" or test.folder == test.assigned_folder
+        may_create = "add_folder" in group["perms"] and in_scope
+
+        if may_create:
+            assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert response.json()["parent_folder"] == ["subDomainsRequirePro"]
+        else:
+            assert response.status_code == status.HTTP_403_FORBIDDEN
         assert not Folder.objects.filter(
             name=FOLDER_NAME, parent_folder=test.folder
         ).exists()

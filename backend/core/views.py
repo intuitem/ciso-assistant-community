@@ -8946,7 +8946,7 @@ class FolderViewSet(BaseModelViewSet):
 
         try:
             self._apply_reorganisation(planned, planned_deletes)
-        except DraftNotEmptyError as exc:
+        except ReorganisationConflict as exc:
             return Response(
                 {"conflicts": exc.conflicts}, status=status.HTTP_409_CONFLICT
             )
@@ -8991,6 +8991,52 @@ class FolderViewSet(BaseModelViewSet):
 
     def _apply_reorganisation(self, planned, planned_deletes):
         with transaction.atomic():
+            # The plan was built outside this transaction, so re-read every row it
+            # touches under lock: a concurrent move or delete may have invalidated it,
+            # and the stale instances would write back their whole pre-read state.
+            # Ordered, so two reorganisations cannot deadlock against each other.
+            ids = (
+                {folder.id for folder, _, _ in planned}
+                | {target.id for _, target, _ in planned}
+                | {folder.id for folder in planned_deletes}
+            )
+            fresh = {
+                f.id: f
+                for f in Folder.objects.select_for_update()
+                .filter(id__in=ids)
+                .order_by("id")
+            }
+
+            conflicts = []
+            for folder, target, expected in planned:
+                current = fresh.get(folder.id)
+                if current is None:
+                    conflicts.append({"folder": str(folder.id), "reason": "folderGone"})
+                    continue
+                if target.id not in fresh:
+                    conflicts.append({"folder": str(folder.id), "reason": "targetGone"})
+                    continue
+                now = (
+                    str(current.parent_folder_id) if current.parent_folder_id else None
+                )
+                if now != expected:
+                    conflicts.append(
+                        {
+                            "folder": str(folder.id),
+                            "reason": "movedElsewhere",
+                            "name": current.name,
+                            "current_parent": now,
+                        }
+                    )
+            for folder in planned_deletes:
+                if folder.id not in fresh:
+                    conflicts.append({"folder": str(folder.id), "reason": "folderGone"})
+            if conflicts:
+                raise ReorganisationConflict(conflicts)
+
+            planned = [(fresh[f.id], fresh[t.id], e) for f, t, e in planned]
+            planned_deletes = [fresh[f.id] for f in planned_deletes]
+
             # Park every mover at the root first: a valid final arrangement can pass
             # through an intermediate cycle (swapping two subtrees). Bare save, since
             # going via the serializer would demand add permission on the root.
@@ -9022,7 +9068,7 @@ class FolderViewSet(BaseModelViewSet):
                         }
                     )
             if blocked:
-                raise DraftNotEmptyError(blocked)  # inside atomic: rolls moves back too
+                raise ReorganisationConflict(blocked)  # atomic: rolls the moves back
 
             for folder in planned_deletes:
                 self.perform_destroy(folder)
@@ -9917,8 +9963,8 @@ class FrameworkFilter(GenericFilterSet):
         fields = ["provider"]
 
 
-class DraftNotEmptyError(Exception):
-    """A staged folder deletion no longer targets an empty leaf."""
+class ReorganisationConflict(Exception):
+    """The tree moved under a reorganisation, or a staged delete is no longer empty."""
 
     def __init__(self, conflicts):
         self.conflicts = conflicts

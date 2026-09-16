@@ -336,9 +336,23 @@ export function applyDraftToTree(tree: FlatTree, moves: Draft): FlatTree {
 	const byId = new Map<string, DomainNode>();
 	for (const [id, node] of tree.byId) byId.set(id, { ...node });
 
+	// A stored draft is replayed against a tree that may have moved under it: the
+	// live parent may since have become a descendant of the node being moved. The
+	// resulting cycle is unreachable from the root, so both would silently vanish
+	// from the canvas rather than loop. Skip the move; the server rejects it too.
+	const wouldCycle = (id: string, parentId: string): boolean => {
+		let cursor: string | null = parentId;
+		for (let hops = 0; cursor !== null && hops <= byId.size; hops++) {
+			if (cursor === id) return true;
+			cursor = byId.get(cursor)?.parentId ?? null;
+		}
+		return cursor !== null; // never reached the root: already cyclic
+	};
+
 	for (const [id, parentId] of Object.entries(moves)) {
 		const node = byId.get(id);
 		if (!node || !byId.has(parentId) || node.parentId === null) continue;
+		if (wouldCycle(id, parentId)) continue;
 		node.parentId = parentId;
 	}
 
