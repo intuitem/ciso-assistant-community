@@ -1988,8 +1988,7 @@ MAPPING_DATA_ROUTES = (
 
 @pytest.mark.django_db
 def test_mapping_data_reads_respect_rbac(builder_only_client):
-    """The mapping-data actions are doors like any other: a user without
-    view_storedlibrary gets a 404, never the mapping content."""
+    """A user without view_storedlibrary gets a 404, never the mapping content."""
     mapping_set = _store_mapping_fixture()
 
     for route in MAPPING_DATA_ROUTES:
@@ -2015,8 +2014,7 @@ def test_mapping_data_reads_stay_open_for_standard_roles(admin_client):
 
 @pytest.mark.django_db
 def test_mapping_data_reads_404_on_unknown_id(admin_client):
-    """An unknown id is a 404 through the viewset lookup, not a 500 from
-    StoredLibrary.DoesNotExist escaping the handler."""
+    """An unknown id is a 404, not a 500 from StoredLibrary.DoesNotExist."""
     unknown = uuid4()
 
     for route in MAPPING_DATA_ROUTES:
@@ -2026,8 +2024,7 @@ def test_mapping_data_reads_404_on_unknown_id(admin_client):
 
 @pytest.mark.django_db
 def test_mapping_table_data_indexes_every_row(admin_client):
-    """Rows carry their occurrence index: nothing forbids a library from listing
-    the same link twice, and the client keys its table on that index."""
+    """Rows carry an index: libraries may list the same link twice, and the client keys on it."""
     mapping_set = _store_mapping_fixture()
     content = mapping_set.content
     link = content["requirement_mapping_sets"][0]["requirement_mappings"][0]

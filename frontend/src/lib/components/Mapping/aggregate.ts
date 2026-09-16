@@ -3,15 +3,11 @@ import type { MappingRequirement, MappingRow } from './types';
 export type MappingViewMode = 'one_to_one' | 'per_source' | 'per_target';
 export type CoverageFilter = 'all' | 'mapped' | 'unmapped';
 
-/**
- * Strongest first. A group's summary badge is its best link rather than an
- * arbitrary one, and sorting on the relationship column follows this order
- * instead of the alphabet.
- */
+/** Strongest first: drives the group badge and the relationship sort. */
 export const RELATIONSHIP_ORDER = ['equal', 'superset', 'subset', 'intersect', 'not_related'];
 
 export interface Counterpart {
-	/** The originating row's occurrence index — distinguishes repeated links. */
+	/** The originating row's index; distinguishes repeated links. */
 	index: number;
 	urn: string;
 	ref_id: string | null;
@@ -23,7 +19,7 @@ export interface AggregateRow {
 	urn: string;
 	ref_id: string | null;
 	name: string | null;
-	/** The strongest relationship among this group's links, null when unmapped. */
+	/** Strongest relationship in the group; null when unmapped. */
 	relationship: string | null;
 	counterparts: Counterpart[];
 }
@@ -36,12 +32,7 @@ export function bestRelationship(rows: MappingRow[]): string | null {
 	);
 }
 
-/**
- * Group mappings under every assessable requirement of one side.
- *
- * Requirements with no mapping are kept: they are the coverage gaps the
- * aggregate views exist to surface.
- */
+/** Group mappings under every assessable requirement of one side, unmapped ones included. */
 export function aggregateBySide(
 	requirements: MappingRequirement[],
 	rows: MappingRow[],
@@ -79,17 +70,13 @@ export function filterByCoverage(rows: AggregateRow[], coverage: CoverageFilter)
 	return rows;
 }
 
-/** Case-insensitive substring match; `query` need not be normalized by the caller. */
+/** Case-insensitive substring match; normalizes `query` itself. */
 export function matchesQuery(values: (string | null | undefined)[], query: string): boolean {
 	const needle = query.toLowerCase();
 	return values.some((value) => value && value.toLowerCase().includes(needle));
 }
 
-/**
- * Neutralize spreadsheet formula injection, mirroring the backend's
- * `escape_excel_formula`: a value whose first non-blank character is =, +, - or @
- * is executed on open by Excel and Sheets unless it is quoted out.
- */
+/** Frontend counterpart of the backend's `escape_excel_formula`. */
 export function escapeSpreadsheetFormula(value: string): string {
 	return /^\s*[=+\-@]/.test(value) ? `'${value}` : value;
 }

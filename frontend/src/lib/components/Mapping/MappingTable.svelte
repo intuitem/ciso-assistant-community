@@ -56,7 +56,7 @@
 		return RELATIONSHIP_ORDER.filter((relationship) => present.has(relationship));
 	});
 
-	// Most mapping libraries fill only some of these; an all-empty column is noise.
+	// Libraries fill only some of these; an all-empty column is noise.
 	const showAnnotation = $derived(rows.some((row) => row.annotation));
 	const showStrength = $derived(rows.some((row) => row.strength_of_relationship != null));
 	const showRationale = $derived(rows.some((row) => row.rationale));
@@ -70,9 +70,7 @@
 		)
 	);
 
-	// Some frameworks carry requirements with no ref_id and no name (the library
-	// only gives them a description). Without these fallbacks such a row renders
-	// as an empty line the reader cannot identify.
+	// Some requirements carry neither ref_id nor name; without a fallback the row renders blank.
 	function refFor(urn: string, refId: string | null): string {
 		return refId ?? urn.split(':').pop() ?? '';
 	}
@@ -81,9 +79,7 @@
 		return name ?? requirementsByUrn.get(urn)?.description ?? '';
 	}
 
-	// The relationship filter narrows the links themselves. In the aggregate modes
-	// that also empties the groups whose only links were filtered out, so they read
-	// as unmapped — the honest answer under that filter.
+	// Filtering links empties the groups that had only those links; they then read as unmapped.
 	const relationshipFiltered = $derived(
 		relationshipFilter === 'all'
 			? rows
@@ -208,8 +204,7 @@
 		];
 	});
 
-	// A requirement's urn is unique per side; a mapping row's identity is its
-	// occurrence index, since the same link may be listed more than once.
+	// Requirement urns are unique per side; mapping rows repeat, so they key on index.
 	function rowKey(row: MappingRow | AggregateRow): string | number {
 		return 'urn' in row ? row.urn : row.index;
 	}
@@ -225,7 +220,7 @@
 		return /[",\n;]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 	}
 
-	/** The displayed value of a cell — what sorting and the CSV export both act on. */
+	/** Displayed cell value; sorting and CSV export both act on it. */
 	function cellValue(row: MappingRow | AggregateRow, key: string): unknown {
 		if (key === 'counterparts') return (row as AggregateRow).counterparts.length;
 		if (key === 'counterparts_list') {

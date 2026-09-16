@@ -15856,10 +15856,9 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         return lib.content["framework"]
 
     def _mapping_context(self):
-        """Resolve the mapping set and both framework contents for a stored library.
+        """Resolve the mapping set and both framework contents.
 
-        Goes through get_object() so the viewset's folder-scoped queryset applies:
-        a library the caller may not view is a 404 here, as through every other door.
+        get_object() keeps the folder-scoped queryset in play.
         """
         obj = self.get_object()
 
@@ -15999,9 +15998,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
     def table_data(self, request, pk=None):
         """Flat mapping rows plus both requirement inventories.
 
-        The client derives the one-to-one and the two aggregate views from this
-        payload, so unmapped requirements are shipped too: they are the coverage
-        gaps the aggregate modes are there to surface.
+        Unmapped requirements ship too: they are the gaps the aggregate views show.
         """
         mapping_set, source_framework, target_framework = self._mapping_context()
 
@@ -16021,10 +16018,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         target_requirements = inventory(target_framework)
 
         rows = []
-        # Libraries carry no mapping identifier and nothing forbids the same
-        # (source, target, relationship) triple appearing twice — 25 of the shipped
-        # mapping sets do repeat links. The occurrence index is what makes a row
-        # addressable, so the client can key a list on it.
+        # Libraries repeat links and carry no mapping id; the index is the only row identity.
         for index, mapping in enumerate(mapping_set.get("requirement_mappings", [])):
             source = source_requirements.get(mapping.get("source_requirement_urn"))
             target = target_requirements.get(mapping.get("target_requirement_urn"))

@@ -127,9 +127,7 @@ describe('filterByCoverage', () => {
 });
 
 describe('duplicate links', () => {
-	// 25 of the shipped mapping sets repeat the same (source, target, relationship)
-	// triple. Keying a Svelte {#each} on that triple throws each_key_duplicate, so
-	// every key derived here has to stay distinct.
+	// 25 shipped mapping sets repeat a link; keying an {#each} on it throws each_key_duplicate.
 	const duplicated = [mapping(s1, t1, 'intersect'), mapping(s1, t1, 'intersect')];
 
 	it('gives repeated links distinct row indices', () => {

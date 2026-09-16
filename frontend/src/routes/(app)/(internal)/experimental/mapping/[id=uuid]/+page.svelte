@@ -11,8 +11,7 @@
 
 	let { data }: Props = $props();
 
-	// Derived, not destructured: navigating between mapping sets reuses this
-	// component, so captured values would describe the previous set.
+	// Derived, not destructured: navigating between mapping sets reuses this component.
 	const meta = $derived(data.data.meta);
 
 	$effect(() => pageTitle.set(meta.display_name));
