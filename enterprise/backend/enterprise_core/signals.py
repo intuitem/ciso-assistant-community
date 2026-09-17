@@ -31,7 +31,9 @@ def get_client_ip(request):
 
     forwarded = request.headers.get("Forwarded")
     if forwarded:
-        match = re.search(r'for=(?:"([^"]+)"|([^;,\s]+))', forwarded, re.IGNORECASE)
+        match = re.search(
+            r'(?:^|[;,])\s*for=(?:"([^"]+)"|([^;,\s]+))', forwarded, re.IGNORECASE
+        )
         if match:
             return _strip_port((match.group(1) or match.group(2)).strip('"'))
 
