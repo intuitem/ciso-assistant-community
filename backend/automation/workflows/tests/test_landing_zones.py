@@ -173,8 +173,7 @@ class TestAttachEvidenceRevisions:
         assert evidence.status == Evidence.Status.DRAFT
 
     def test_filing_a_revision_needs_its_own_permission(self):
-        """Both modes, not just new_revision: the default one creates a
-        revision too when the evidence has none yet."""
+        """Both modes: the default one creates a revision when there is none."""
         expected = ["change_evidence", "add_evidencerevision"]
         assert required_permissions({"type": "attach_evidence"}) == expected
         assert (
@@ -460,8 +459,7 @@ class TestPostResults:
         assert output["unknown_count"] == 30
         assert len(output["unknown_ref_ids"]) == 20
         assert assessment.results.count() == 0
-        # The run this call opened matched nothing and was dropped, so there is
-        # no id to report and nothing to configure a retry against.
+        # Matched nothing, so the run was dropped and there is no id.
         assert output["run_id"] is None
         assert PostureRun.objects.count() == 0
 
@@ -568,8 +566,7 @@ class TestLandingZoneValidation:
 
     @pytest.mark.parametrize("literal", ['{"a": 1}', "42", '"text"', "null"])
     def test_valid_json_that_is_not_a_list_is_refused(self, literal):
-        """Parsing is not the bar — _resolve_list wants a list, so anything
-        else published clean and failed on the first run."""
+        """_resolve_list wants a list; anything else failed on the first run."""
         codes = {
             c
             for c, _ in validate_post_results_config(
@@ -619,8 +616,7 @@ class TestLandingZoneValidation:
 @pytest.mark.django_db
 class TestLockedAssessment:
     def test_a_locked_assessment_refuses_results(self):
-        """The REST endpoint refuses one; sharing the write path has to mean
-        sharing the refusal."""
+        """Sharing the write path has to mean sharing its refusals."""
         domain = make_domain("Locked")
         assessment, asset = make_posture(domain)
         assessment.is_locked = True

@@ -304,7 +304,7 @@ Delivery happens in the background worker. The step waits for the result. Each r
 | Continue when the answer is an error | Off by default |
 | Continue when the tool cannot be reached | Off by default |
 
-Output: `status`, `body` (parsed JSON, or the first 5000 characters of text). No permission required.
+Output: `status`, `body` (parsed JSON, or the first 5000 characters of text), `unreachable`, `host`, `reason`. Every key is reported on both outcomes, so a condition cannot resolve to nothing on one branch. No permission required.
 
 By default a `4xx` or `5xx` answer fails the step, and a tool that never answered at all fails it too. That is the safe reading: a collection that could not run must not look like one that ran and found nothing.
 

@@ -162,8 +162,7 @@ def ingest_posture_results(
         raise IngestionError({"error": "run_id belongs to another assessment"})
 
     return {
-        # None when the run was dropped: reporting a deleted id would let a
-        # retry be configured against a row that is not there.
+        # None when the run was dropped: a deleted id is not retryable.
         "run_id": str(run.id) if run else None,
         "created": len(to_create),
         "updated": len(to_update),

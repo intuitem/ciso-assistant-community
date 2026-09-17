@@ -13,7 +13,6 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Count, Max, Min, Q
 from django.http import HttpResponse
-from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -28,7 +27,7 @@ from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     escape_excel_formula,
 )
-from iam.models import Folder, RoleAssignment
+from iam.models import RoleAssignment
 
 from .importers import ImportError_, analyze_csv, parse_file, parse_mapped_csv
 from .ingestion import IngestionError, ingest_posture_results

@@ -170,8 +170,7 @@ class TestAttachEvidence:
         assert start_instance(version).status == WorkflowInstance.Status.FAILED
 
     def test_it_needs_the_change_permission(self):
-        """Filing is always in scope: the default mode creates a revision too
-        when the evidence has none yet."""
+        """The default mode creates a revision when the evidence has none."""
         assert required_permissions({"type": "attach_evidence"}) == [
             "change_evidence",
             "add_evidencerevision",

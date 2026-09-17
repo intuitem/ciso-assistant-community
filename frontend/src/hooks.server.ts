@@ -269,12 +269,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 // of those lines. Real failures still go out through the structured logger.
 export const handleError: HandleServerError = ({ error, status, message, event }) => {
 	if (status !== 404) {
-		// Node puts the syscall code on the error, but the global Error type does
-		// not declare it.
+		// The global Error type does not declare Node's syscall code.
 		const errno = (e: Error) => (e as NodeJS.ErrnoException).code;
 		// `TypeError: fetch failed` serializes to just that: undici puts the
-		// reason (ECONNREFUSED, a timeout, a TLS failure) on `cause`, and the
-		// stack says which call made it. Without both, the log names a symptom.
+		// reason on `cause`, and the stack says which call made it.
 		const cause = error instanceof Error ? error.cause : undefined;
 		logger.error('unhandled_server_error', {
 			status,

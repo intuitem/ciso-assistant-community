@@ -110,6 +110,55 @@ class TestUnreachableTool:
         assert "supersecret" not in str(output)
         assert output["host"] == "tool.invalid"
 
+    def test_both_branches_report_the_same_keys(self, monkeypatch):
+        """A key on one branch only resolves to nothing on the other."""
+        monkeypatch.setattr(
+            "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
+        )
+
+        class Answer:
+            status_code = 200
+            text = "{}"
+
+            def json(self):
+                return {"ok": True}
+
+        monkeypatch.setattr("requests.request", lambda *a, **k: Answer())
+        answered = start_instance(
+            fetch_flow(make_domain("Answered"), allow_connection_error=True)
+        )
+
+        def refuse(*args, **kwargs):
+            raise requests.ConnectionError("connection refused")
+
+        monkeypatch.setattr("requests.request", refuse)
+        silent = start_instance(
+            fetch_flow(make_domain("Silent"), allow_connection_error=True)
+        )
+
+        assert set(answered.node_outputs["pull"]) == set(silent.node_outputs["pull"])
+        assert answered.node_outputs["pull"]["unreachable"] is False
+        assert answered.node_outputs["pull"]["host"] == "tool.invalid"
+
+    def test_a_string_false_does_not_opt_in(self, monkeypatch):
+        """Read raw, the same key meant the opposite of attach_evidence's."""
+        monkeypatch.setattr(
+            "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
+        )
+
+        class Answer:
+            status_code = 503
+            text = "down"
+
+            def json(self):
+                raise ValueError
+
+        monkeypatch.setattr("requests.request", lambda *a, **k: Answer())
+        instance = start_instance(
+            fetch_flow(make_domain("Stringly"), allow_error_status="false")
+        )
+        assert instance.status == WorkflowInstance.Status.FAILED
+
     def test_a_condition_can_route_on_it(self, unreachable):
         """One condition handles both a bad answer and no answer."""
         folder = make_domain("Routed")
@@ -300,8 +349,7 @@ class TestUnreachableAttachSource:
         assert output["reason"] == "http_error"
 
     def test_both_branches_report_the_same_keys(self, monkeypatch, evidence):
-        """A key on only one branch is an output mapping that breaks whenever
-        the other one runs."""
+        """A key on one branch only breaks a mapping on the other."""
         obj, folder = evidence
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None

@@ -481,17 +481,14 @@ CREATABLE_MODELS = {
     },
     "entity_score": {
         "model": EntityScore,
-        # A rating a provider published: a measurement, not a verdict. The model
-        # is built for this — one reading per provider per day, dated so they
-        # accumulate as history.
+        # A reading a provider published, dated so readings accumulate.
         "fields": ["score", "scale_max", "grade", "as_of", "url", "observation"],
         "fk_fields": {
             "entity": (Entity, "entities"),
             "provider": (Terminology, "terminologies"),
         },
         "required_fields": ["score", "as_of"],
-        # save() takes the folder from the entity; match there or the upsert
-        # looks in a folder the row never lands in.
+        # save() takes the folder from the entity; match there.
         "folder_from": "entity",
         "match_on": ["entity", "provider", "as_of"],
     },
@@ -501,18 +498,16 @@ CREATABLE_MODELS = {
         "fk_fields": {"incident": (Incident, "incidents")},
         "required_fields": ["entry"],
         "folder_from": "incident",
-        # The model's own split (EntryType.get_manual_entry_types): a run
-        # reports what it observed; severity_changed/status_changed narrate a
-        # lifecycle move and belong to whoever made it.
+        # EntryType.get_manual_entry_types: a run reports what it observed,
+        # it does not narrate a lifecycle move someone else made.
         "allowed_values": {
             "entry_type": frozenset({"detection", "mitigation", "observation"})
         },
     },
     "task_template": {
         "model": TaskTemplate,
-        # Attaching work is explicitly automation's to do. No `schedule`:
-        # objects.create() does not run field validators and that column's shape
-        # is enforced by one, so recurrence stays an authored decision.
+        # No `schedule`: objects.create() skips field validators and that
+        # column's shape is enforced by one.
         "fields": ["name", "description", "ref_id", "task_date"],
         "fk_fields": {},
     },
@@ -710,10 +705,8 @@ class CreateObjectAction(BaseAction):
         obj = None
         created = True
         folder = _creation_folder(instance)
-        # Some rows take their folder from a parent in save() (an entity score is
-        # as visible as its entity). Matching on the instance folder would then
-        # look somewhere the row never lands, so the upsert would miss and the
-        # create would hit the model's own uniqueness constraint instead.
+        # save() may take the folder from a parent. Matching on the instance
+        # folder would then miss and the create would hit a unique constraint.
         folder_from = entry.get("folder_from")
         if folder_from and kwargs.get(folder_from) is not None:
             folder = kwargs[folder_from].folder
@@ -989,8 +982,8 @@ READABLE_MODELS: dict[str, ReadEntry] = {
     ),
     "task_node": ReadEntry(
         model=TaskNode,
-        # One occurrence of a recurring task. Read to find the week a collected
-        # file answers for, so attach_evidence can pin the revision to it.
+        # One occurrence of a recurring task, so a collected file can answer
+        # for it.
         fields=["status", "due_date", "scheduled_date", "observation", "task_template"],
         computed={
             "name": str,
@@ -1803,8 +1796,8 @@ class AttachEvidenceAction(BaseAction):
         if _as_bool(config.get("new_revision")):
             revision = self._file_new_revision(evidence, upload, occurrence)
         else:
-            # Same shape as the upload endpoint: the latest revision carries the
-            # file, and full_clean applies the extension allowlist and the size cap.
+            # Same shape as the upload endpoint: the latest revision carries
+            # the file.
             # Unsaved until it validates: FatalActionError is caught inside
             # the node's transaction, so a row created here would be committed.
             revision = evidence.revisions.order_by("-version").first() or (
@@ -1880,10 +1873,9 @@ class AttachEvidenceAction(BaseAction):
     def _owed_occurrence(instance, evidence):
         """The most recent owed occurrence whose due date has passed.
 
-        'in_progress' is still owed: someone may file a file and leave the
-        occurrence open on purpose. Taking the oldest instead would let a
-        period nobody closed swallow every later file. None when nothing is
-        owed — the file is still filed, and task_node_id says so.
+        'in_progress' is still owed: someone may file a file and leave it open
+        on purpose. The oldest would let an unclosed period swallow every later
+        file. None when nothing is owed; task_node_id says so.
         """
         # The run's own today: a retry answers for the same period.
         today = _as_date(
@@ -2042,8 +2034,8 @@ def _resolve_list(value, context, label):
 
 
 def _scoped_target(model, config, key, context, instance, label, ids=None):
-    """The row a landing-zone action writes into: named by id, inside the
-    workflow's own subtree, and visible to the run identity."""
+    """The row an action writes into: by id, in the workflow's subtree, and
+    visible to the run identity."""
     from . import authz
     from .engine import run_identity
 
@@ -2070,8 +2062,8 @@ def _scoped_target(model, config, key, context, instance, label, ids=None):
 
 @register
 class RecordMeasurementAction(BaseAction):
-    """A number a run measured, filed against a metric instance. The sample is
-    a reading, not a verdict: nothing about the instance itself moves."""
+    """A number a run measured. A reading, not a verdict: nothing on the
+    instance itself moves."""
 
     action_type = "record_measurement"
 
@@ -2106,8 +2098,8 @@ class RecordMeasurementAction(BaseAction):
 
     @staticmethod
     def _shape(raw, metric):
-        """The definition's category decides the envelope, so an author writes
-        a number and cannot mismatch the schema the API validates against."""
+        """The category decides the envelope, so an author writes a number
+        and cannot mismatch the schema the API validates."""
         import math
 
         from metrology.models import MetricDefinition
@@ -2150,8 +2142,7 @@ class RecordMeasurementAction(BaseAction):
             raise ActionError(f"record_measurement: '{raw}' is not an ISO timestamp")
         if timezone.is_naive(parsed):
             parsed = timezone.make_aware(parsed)
-        # Same refusal as CustomMetricSampleWriteSerializer: a reading cannot
-        # be dated after the moment it was taken.
+        # Same refusal as CustomMetricSampleWriteSerializer.
         if parsed > timezone.now():
             raise ActionError("record_measurement: the timestamp is in the future")
         return parsed
@@ -2171,13 +2162,12 @@ class RecordMeasurementAction(BaseAction):
 
 
 def results_max_entries():
-    """Rows one post_results call may carry. A framework's assessable nodes are
-    the real ceiling; this only stops an unbounded remote list."""
+    """Rows one post_results call may carry: a stop on an unbounded remote
+    list, not the real ceiling."""
     return int(getattr(settings, "WORKFLOW_RESULTS_MAX_ENTRIES", 2000))
 
 
-# An unknown ref_id list is remote-controlled and lands in node_outputs, which
-# is persisted: keep a usable sample, report the rest as a count.
+# Remote-controlled and persisted in node_outputs: sample it, count the rest.
 UNKNOWN_REF_SAMPLE = 20
 
 
@@ -2370,6 +2360,9 @@ class HttpRequestAction(BaseAction):
             for key, value in (config.get("headers") or {}).items()
         }
         _assert_credentials_stay_encrypted(url, config, headers, "http_request")
+        # A URL can carry a secret in its query string, so only the host is ever
+        # reported back.
+        host = urlsplit(url).hostname or "target"
         body = render(config.get("body"), context)
         # Clamp both ends: requests raises ValueError on a negative timeout.
         # Publish validation rejects an out-of-range literal, so this only
@@ -2395,23 +2388,17 @@ class HttpRequestAction(BaseAction):
         try:
             response = requests.request(method, url, **kwargs)
         except requests.RequestException as e:
-            # requests exceptions stringify with the full URL (possible secret),
-            # so report the host only. Network failures stay on the retry path.
-            host = urlsplit(url).hostname or "target"
+            # Network failures stay on the retry path.
             if not _as_bool(config.get("allow_connection_error")):
                 raise ActionError(f"http_request: request to '{host}' failed")
-            # Opted in: "the tool is unreachable" is an outcome the graph wants to
-            # route on, not a reason to stop. There is no HTTP status here — the
-            # server never answered — so report 0, which no answer can collide
-            # with, and let a condition branch on it. The reason is the exception
-            # class only, for the same no-secrets-in-the-log rule as above.
-            return {
-                "status": 0,
-                "body": None,
-                "unreachable": True,
-                "host": host,
-                "reason": type(e).__name__,
-            }
+            # Status 0: the server never answered, and no real answer is 0.
+            return self._output(
+                status=0,
+                body=None,
+                host=host,
+                unreachable=True,
+                reason=type(e).__name__,
+            )
 
         try:
             response_body = response.json()
@@ -2420,15 +2407,28 @@ class HttpRequestAction(BaseAction):
         # An error status fails the node right here (and stays retry-eligible)
         # instead of letting downstream nodes run on empty variables. Graphs
         # that want to branch on the status opt in via allow_error_status.
-        if response.status_code >= 400 and not config.get("allow_error_status"):
-            host = urlsplit(url).hostname or "target"
+        if response.status_code >= 400 and not _as_bool(
+            config.get("allow_error_status")
+        ):
             raise ActionError(
                 f"http_request: HTTP {response.status_code} from '{host}': "
                 f"{str(response_body)[:200]}"
             )
         # Secrets never appear here unless the remote echoes them; request
         # details (headers) are deliberately not logged.
-        return {"status": response.status_code, "body": response_body}
+        return self._output(status=response.status_code, body=response_body, host=host)
+
+    @staticmethod
+    def _output(*, status, body, host, unreachable=False, reason=None):
+        """Every key on both branches. A key that appears on only one of them
+        is a condition that resolves to nothing whenever the other one runs."""
+        return {
+            "status": status,
+            "body": body,
+            "unreachable": unreachable,
+            "host": host,
+            "reason": reason,
+        }
 
 
 def json_loads_or_none(value):
@@ -2619,8 +2619,7 @@ class ManageGroupMembershipAction(BaseAction):
             )
 
         operation = config.get("operation", "add")
-        # Anything unrecognized used to fall through to the add branch, which
-        # silently did the opposite of what a typo asked for.
+        # Unrecognized used to fall through to add, so a typo did the opposite.
         if operation not in GROUP_OPERATIONS:
             raise FatalActionError(
                 f"manage_group_membership: unsupported operation '{operation}'"
@@ -2986,9 +2985,8 @@ def validate_create_config(node):
                     f"'{key}' may only be set to {', '.join(sorted(allowed))}",
                 )
             )
-    # Columns the model cannot store empty. The FK loop below covers relations;
-    # without this a missing one is an IntegrityError mid-run, or worse a row
-    # quietly saved with a blank required value.
+    # Columns the model cannot store empty (the FK loop below covers
+    # relations). Without this a row saves with a blank required value.
     for key in entry.get("required_fields") or []:
         if not str(fields.get(key) or "").strip():
             errors.append(

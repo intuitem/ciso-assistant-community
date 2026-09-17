@@ -370,8 +370,8 @@ class TestImport:
         assert not any("Missing secrets" in w for w in warnings)
 
     def test_a_round_trip_warns_about_nothing(self, rich_workflow, root):
-        """`requires` is written by the exporter and read back, so calling it
-        ignored would tell an author to delete their secrets manifest."""
+        """`requires` round-trips, so calling it ignored would tell an author
+        to delete their secrets manifest."""
         document = export_workflow(rich_workflow)
         assert document["requires"] == {"secrets": ["hris_token"]}
         _, warnings = import_workflow(document, root, secrets={"hris_token": "x"})
