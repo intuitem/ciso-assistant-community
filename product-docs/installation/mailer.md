@@ -25,7 +25,7 @@ EMAIL_USE_SSL=False
 EMAIL_USE_TLS=True    # STARTTLS (typically port 587)
 ```
 
-For local development you can run [MailHog](https://github.com/mailhog/MailHog) and point `EMAIL_HOST` at it with both flags set to `False`.
+For local development you can run [Mailpit](https://github.com/axllent/mailpit) and point `EMAIL_HOST` at it with both flags set to `False`.
 
 ### TLS certificate requirements (3.16+)
 

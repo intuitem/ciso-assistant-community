@@ -182,7 +182,6 @@ test('user can create representatives, solutions and entity assessments inside e
 test('third-party representative can set their password', async ({ sideBar, mailer, page }) => {
 	test.slow();
 	await test.step('set password and log in as third party representative', async () => {
-		await expect(mailer.page.getByText('{{').last()).toBeHidden(); // Wait for mailhog to load the emails
 		const welcomeMail = await mailer.getEmailBySubject('Welcome to CISO Assistant!');
 		await welcomeMail.hasWelcomeEmailDetails();
 		await welcomeMail.hasEmailRecipient('third-party@tests.com');

@@ -1,0 +1,259 @@
+name: Container image scan
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Image tag to scan"
+        required: false
+        default: "latest"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: container-scan
+  cancel-in-progress: false
+
+env:
+  SCOUT_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/scout-cli:1.25.0
+
+jobs:
+  scan:
+    if: github.repository == 'intuitem/ciso-assistant-community'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ce-frontend
+            image: ghcr.io/intuitem/ciso-assistant-community/frontend
+          - name: ce-backend
+            image: ghcr.io/intuitem/ciso-assistant-community/backend
+          - name: ce-mcp
+            image: ghcr.io/intuitem/ciso-assistant-community/mcp
+          - name: ee-frontend
+            image: ghcr.io/intuitem/ciso-assistant-enterprise-frontend
+          - name: ee-backend
+            image: ghcr.io/intuitem/ciso-assistant-enterprise-backend
+    steps:
+      - name: Resolve image reference
+        id: ref
+        shell: bash
+        env:
+          IMAGE: ${{ matrix.image }}
+          TAG: ${{ inputs.tag || 'latest' }}
+        run: |
+          set -euo pipefail
+          echo "ref=${IMAGE}:${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Analyse
+        shell: bash
+        env:
+          TARGET: ${{ steps.ref.outputs.ref }}
+          NAME: ${{ matrix.name }}
+          DOCKER_SCOUT_HUB_USER: ${{ secrets.DOCKERHUB_USER }}
+          DOCKER_SCOUT_HUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKER_SCOUT_REGISTRY_USER: ${{ github.actor }}
+          DOCKER_SCOUT_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p scout-out
+          docker run --rm \
+            -e DOCKER_SCOUT_HUB_USER -e DOCKER_SCOUT_HUB_PASSWORD \
+            -e DOCKER_SCOUT_REGISTRY_USER -e DOCKER_SCOUT_REGISTRY_PASSWORD \
+            "$SCOUT_IMAGE" \
+            cves --platform linux/amd64 --format sarif "$TARGET" \
+            > "scout-out/full-$NAME.sarif"
+
+      # Scout only filters at scan time, so scanning unfiltered and slicing the
+      # SARIF here keeps the summary honest about the image while code scanning
+      # and the gate stay narrow. Filtering at scan time is what made every job
+      # report "no vulnerable package detected".
+      - name: Report and gate
+        id: gate
+        shell: bash
+        env:
+          TARGET: ${{ steps.ref.outputs.ref }}
+          NAME: ${{ matrix.name }}
+        run: |
+          set -euo pipefail
+          full="scout-out/full-$NAME.sarif"
+
+          jq -r '
+            [
+              .runs[0].tool.driver.rules[]
+              | {
+                  sev: (.properties.cvssV3_severity // "UNSPECIFIED"),
+                  fixable: (((.properties.fixed_version // "not fixed") | ascii_downcase) != "not fixed")
+                }
+            ] as $v
+            | ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNSPECIFIED"]
+            | map(. as $s | "\($s) \([$v[] | select(.sev == $s)] | length) (\([$v[] | select(.sev == $s and .fixable)] | length) fixable)")
+            | "\($v | length) vulnerabilities — " + join(" · ")
+          ' "$full" > counts.txt
+
+          {
+            echo "### \`$NAME\` — \`$TARGET\`"
+            echo
+            cat counts.txt
+            echo
+            echo "Counts cover \`linux/amd64\`, every severity, fixable or not."
+            echo "Code scanning receives CRITICAL/HIGH; only fixable CRITICAL fails the scan."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          jq '
+            ["CRITICAL", "HIGH"] as $keep
+            | [.runs[0].tool.driver.rules[] | select(.properties.cvssV3_severity as $s | $keep | index($s))] as $rules
+            | ($rules | map(.id)) as $ids
+            | .runs[0].tool.driver.rules = $rules
+            | .runs[0].results |= [
+                .[]
+                | select(.ruleId as $i | $ids | index($i))
+                | . as $res
+                | .ruleIndex = ($ids | index($res.ruleId))
+              ]
+          ' "$full" > "scout-out/scout-$NAME.sarif"
+
+          critical="$(jq '
+            [
+              .runs[0].tool.driver.rules[]
+              | select(.properties.cvssV3_severity == "CRITICAL")
+              | select(((.properties.fixed_version // "not fixed") | ascii_downcase) != "not fixed")
+            ] | length
+          ' "$full")"
+
+          mkdir -p gate
+          if [ "$critical" -gt 0 ]; then
+            printf '%s %s\n' "$NAME" "failure" > "gate/$NAME.txt"
+          else
+            printf '%s %s\n' "$NAME" "success" > "gate/$NAME.txt"
+          fi
+          echo "critical=$critical" >> "$GITHUB_OUTPUT"
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@977e6ceaea7361825998245d787fa3b4d6b9e5df # codeql-bundle-v2.27.0
+        with:
+          sarif_file: scout-out/scout-${{ matrix.name }}.sarif
+          category: scout-${{ matrix.name }}
+
+      - name: Upload gate outcome
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gate-${{ matrix.name }}
+          path: gate/
+          retention-days: 7
+
+      - name: Fail on fixable CRITICAL
+        if: steps.gate.outputs.critical != '0'
+        shell: bash
+        env:
+          COUNT: ${{ steps.gate.outputs.critical }}
+        run: |
+          echo "::error::$COUNT CRITICAL vulnerabilities with a fix available"
+          exit 1
+
+  report:
+    needs: scan
+    if: ${{ !cancelled() && github.repository == 'intuitem/ciso-assistant-community' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Download gate outcomes
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: gate-*
+          merge-multiple: true
+          path: gate
+
+      - name: Classify scan outcome
+        id: classify
+        shell: bash
+        env:
+          RESULT: ${{ needs.scan.result }}
+        run: |
+          set -euo pipefail
+
+          failed=""
+          for f in gate/*.txt; do
+            [ -e "$f" ] || continue
+            name="$(cut -d' ' -f1 "$f")"
+            outcome="$(cut -d' ' -f2 "$f")"
+            if [ "$outcome" = "failure" ]; then
+              failed="${failed:+$failed, }$name"
+            fi
+          done
+
+          if [ -n "$failed" ]; then
+            echo "state=critical" >> "$GITHUB_OUTPUT"
+          elif [ "$RESULT" != "success" ]; then
+            echo "state=broken" >> "$GITHUB_OUTPUT"
+          else
+            echo "state=clean" >> "$GITHUB_OUTPUT"
+          fi
+          echo "images=$failed" >> "$GITHUB_OUTPUT"
+
+      - name: Open, update or close the tracking issue
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          STATE: ${{ steps.classify.outputs.state }}
+          IMAGES: ${{ steps.classify.outputs.images }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ALERTS_URL: ${{ github.server_url }}/${{ github.repository }}/security/code-scanning
+          TAG: ${{ inputs.tag || 'latest' }}
+          LABEL: container-scan
+          TITLE: "Container image scan: fixable CRITICAL vulnerabilities"
+        run: |
+          set -euo pipefail
+
+          gh label create "$LABEL" --color B60205 --description "Automated container image scan" 2>/dev/null || true
+
+          number="$(gh issue list --label "$LABEL" --state open --limit 1 --json number --jq '.[0].number // empty')"
+
+          if [ "$STATE" = "broken" ]; then
+            echo "Scan did not complete; leaving the tracking issue untouched." >&2
+            exit 1
+          fi
+
+          if [ "$STATE" = "clean" ]; then
+            if [ -n "$number" ]; then
+              gh issue close "$number" --comment "No fixable CRITICAL vulnerabilities as of $RUN_URL"
+            fi
+            exit 0
+          fi
+
+          body="$(printf '%s\n' \
+            "Tag scanned: \`$TAG\`" \
+            "" \
+            "These images have CRITICAL vulnerabilities with a fix available: $IMAGES" \
+            "" \
+            "- Run: $RUN_URL" \
+            "- Alerts: $ALERTS_URL" \
+            "" \
+            "This issue is updated automatically and closes when the next scan finds no fixable CRITICAL.")"
+
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body "$body"
+          else
+            gh issue create --title "$TITLE" --label "$LABEL" --body "$body"
+          fi
+
+          exit 1

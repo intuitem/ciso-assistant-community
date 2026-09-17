@@ -369,6 +369,14 @@ class TestImport:
         )
         assert not any("Missing secrets" in w for w in warnings)
 
+    def test_a_round_trip_warns_about_nothing(self, rich_workflow, root):
+        """`requires` round-trips, so calling it ignored would tell an author
+        to delete their secrets manifest."""
+        document = export_workflow(rich_workflow)
+        assert document["requires"] == {"secrets": ["hris_token"]}
+        _, warnings = import_workflow(document, root, secrets={"hris_token": "x"})
+        assert not [w for w in warnings if "unknown key" in w], warnings
+
     def test_publish_blocks_on_missing_secret(self, rich_workflow, root):
         from automation.workflows.models import WorkflowSecret
         from automation.workflows.validation import validate_graph
