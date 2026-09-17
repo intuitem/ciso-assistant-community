@@ -171,7 +171,7 @@
 	}
 </script>
 
-<div class="card bg-white p-4 shadow-lg space-y-3">
+<div class="card bg-surface-50-950 p-4 shadow-lg space-y-3">
 	<div class="flex items-center justify-between flex-wrap gap-2">
 		<span class="font-semibold">{m.commitment()}</span>
 		<span class="badge preset-tonal-surface">
