@@ -116,8 +116,7 @@ def ingest_posture_results(
 
     try:
         with transaction.atomic():
-            # Savepoint: only this statement can clash on the run's identity,
-            # and catching it here keeps the outer transaction usable.
+            # Savepoint: catching here keeps the outer transaction usable.
             try:
                 with transaction.atomic():
                     run, run_created = PostureRun.objects.get_or_create(
@@ -165,8 +164,7 @@ def ingest_posture_results(
                 run.delete()
                 run = None
     except IntegrityError:
-        # Anything else: a result clashed with a concurrent write of the same
-        # run. Reporting it as a run_id problem sent people to the wrong place.
+        # Anything else is a result clash, not a run_id problem.
         raise IngestionError({"error": "results conflicted with a concurrent write"})
 
     return {

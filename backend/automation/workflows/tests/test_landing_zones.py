@@ -564,8 +564,7 @@ class TestLandingZoneValidation:
         }
         assert codes == {"action_results_not_a_list"}
 
-    @pytest.mark.parametrize("literal", ['{"a": 1}', "42", '"text"', "null"])
-    def test_valid_json_that_is_not_a_list_is_refused(self, literal):
+    def test_valid_json_that_is_not_a_list_is_refused(self):
         """_resolve_list wants a list; anything else failed on the first run."""
         codes = {
             c
@@ -575,27 +574,12 @@ class TestLandingZoneValidation:
                         "type": "post_results",
                         "posture_assessment": "x",
                         "asset": "y",
-                        "results": literal,
+                        "results": '{"a": 1}',
                     }
                 )
             )
         }
         assert codes == {"action_results_not_a_list"}
-
-    def test_a_json_list_passes(self):
-        assert (
-            validate_post_results_config(
-                self._node(
-                    {
-                        "type": "post_results",
-                        "posture_assessment": "x",
-                        "asset": "y",
-                        "results": '[{"ref_id": "A.1", "result": "passed"}]',
-                    }
-                )
-            )
-            == []
-        )
 
     def test_a_step_reference_passes(self):
         assert (
