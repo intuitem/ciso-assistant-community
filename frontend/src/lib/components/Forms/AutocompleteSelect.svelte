@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate, translateChoiceLabel } from '$lib/utils/i18n';
 	import { fetchAllByIds, fetchAllPages } from '$lib/utils/pagination';
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount, untrack } from 'svelte';
@@ -165,15 +165,10 @@
 	});
 
 	if (translateOptions) {
-		options = options.map((option) => {
-			const fromLabel = safeTranslate(option.label);
-			if (fromLabel !== option.label) return { ...option, translatedLabel: fromLabel };
-			if (option.label === option.value) {
-				const fromValue = safeTranslate(option.value);
-				if (fromValue !== option.value) return { ...option, translatedLabel: fromValue };
-			}
-			return { ...option, translatedLabel: option.label };
-		});
+		options = options.map((option) => ({
+			...option,
+			translatedLabel: translateChoiceLabel(option.label, option.value)
+		}));
 	}
 
 	let optionHashmap: Record<string, Option> = {};
@@ -499,12 +494,7 @@
 					suggested: optionsSuggestions?.some(
 						(s) => getNestedValue(s, optionsValueField) === valueField
 					),
-					translatedLabel:
-						safeTranslate(fullLabel) !== fullLabel
-							? safeTranslate(fullLabel)
-							: safeTranslate(valueField) !== valueField
-								? safeTranslate(valueField)
-								: fullLabel,
+					translatedLabel: translateChoiceLabel(fullLabel, valueField),
 					path,
 					infoString,
 					contentType: object?.content_type || ''
