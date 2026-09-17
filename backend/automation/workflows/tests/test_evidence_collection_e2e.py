@@ -377,7 +377,9 @@ SHIPPED_RECIPE = (
 
 
 @pytest.mark.django_db
-def test_the_shipped_recipe_warns_when_the_tool_is_down(scene, monkeypatch):
+def test_the_shipped_recipe_warns_when_the_tool_is_down(
+    scene, monkeypatch, settings, django_capture_on_commit_callbacks
+):
     """The library recipe is the thing customers actually install, so the claim
     that it survives an outage has to be checked on the recipe itself, not on a
     graph the test built to resemble it.
@@ -388,13 +390,11 @@ def test_the_shipped_recipe_warns_when_the_tool_is_down(scene, monkeypatch):
     import yaml
     from django.core import mail
 
+    from automation.workflows import actions as workflow_actions
+    from automation.workflows import tasks as workflow_tasks
     from automation.workflows.import_export import import_workflow
 
-    domain, evidence, task, _ = scene
-    occurrence = task.tasknode_set.order_by("due_date").first()
-    assert occurrence is not None, (
-        "the recurring task should have generated occurrences"
-    )
+    domain, evidence, _, _ = scene
 
     entry = yaml.safe_load(SHIPPED_RECIPE.read_text())["objects"]["workflows"][0]
     workflow, _ = import_workflow(
@@ -405,17 +405,22 @@ def test_the_shipped_recipe_warns_when_the_tool_is_down(scene, monkeypatch):
     version.save()
 
     values = {
-        "task_template_id": str(task.id),
-        "evidence_name": evidence.name,
+        "evidence_uuid": str(evidence.id),
         # Nothing listens here, and the guard is bypassed below so the refusal
         # is what the step sees.
-        "export_url": "https://tool.invalid/exports/latest.csv",
+        "tool_url": "https://tool.invalid/exports/latest.csv",
         "warn_to": "soc@example.com",
     }
     for variable in version.variables.all():
         if variable.key in values:
             variable.default_value = values[variable.key]
             variable.save()
+
+    # The warning step is the half that matters here, so the run needs an
+    # outgoing mail configuration to reach it at all.
+    settings.EMAIL_HOST = "smtp.tests.local"
+    settings.EMAIL_PORT = "25"
+    settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
 
     monkeypatch.setattr(
         "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
@@ -426,17 +431,28 @@ def test_the_shipped_recipe_warns_when_the_tool_is_down(scene, monkeypatch):
 
     monkeypatch.setattr("requests.get", refuse)
 
-    instance = start_instance(version)
+    # Delivery runs in the background worker, so the enqueue is captured here
+    # and run by hand; otherwise the run parks on the email step forever.
+    enqueued = []
+    deliver = workflow_tasks.send_email_task.call_local
+    monkeypatch.setattr(
+        workflow_actions, "send_email_task", lambda **kwargs: enqueued.append(kwargs)
+    )
 
-    assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+    with django_capture_on_commit_callbacks(execute=True):
+        instance = start_instance(version)
+
     outputs = instance.node_outputs
-    assert outputs["file_the_export"]["attached"] is False
-    assert outputs["file_the_export"]["status"] == 0
+    assert outputs["collect_the_file"]["attached"] is False
+    assert outputs["collect_the_file"]["status"] == 0
     assert "log_the_outage" in outputs
-    assert "warn_the_team" in outputs
+    assert enqueued, "the outage branch should have queued a warning"
+
+    deliver(**enqueued[0])
+    instance.refresh_from_db()
+    assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
     assert len(mail.outbox) == 1
     assert mail.outbox[0].to == ["soc@example.com"]
-    # The whole point: the week is still owed, and nothing pretends otherwise.
+
+    # The whole point: nothing was filed, and nothing pretends otherwise.
     assert evidence.revisions.count() == 0
-    occurrence.refresh_from_db()
-    assert occurrence.status == "pending"

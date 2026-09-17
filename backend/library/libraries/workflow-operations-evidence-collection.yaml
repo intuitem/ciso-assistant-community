@@ -1,15 +1,20 @@
 urn: urn:intuitem:risk:library:workflow-operations-evidence-collection
 locale: en
 ref_id: workflow-operations-evidence-collection
-name: Evidence collection — pull a recurring task's evidence from a tool
-description: 'A recurring task expects an evidence every week. Instead of someone downloading the export
-  and uploading it by hand, this pulls the file from the tool on a schedule, files it as a new revision
-  and pins it to the occurrence that asked for it, so the task shows its evidence as provided. If the
-  tool cannot be reached, it warns the team instead of failing silently. After importing: set
-  task_template_id (the id in the task''s URL), evidence_name, export_url and warn_to, and add the
-  tool_token secret.'
+name: Evidence collection — pull an evidence file from a tool
+description: 'Pulls a file from a tool on a schedule and files it as a new revision of an evidence,
+  instead of someone downloading it and uploading it by hand. If the tool answers badly or cannot be
+  reached, it warns the team rather than failing quietly. After importing: set evidence_uuid (the id
+  in the evidence''s URL), tool_url and warn_to, and add the tool_token secret. The URL must be https,
+  because the recipe sends the token as a bearer header and credentials are refused over cleartext; if
+  the tool needs no authentication, delete the Authorization header. If a task expects this evidence,
+  the collected file is filed against the occurrence that is currently due, so the task shows its
+  evidence as provided — it is not marked done, which stays a decision someone makes. Optionally the
+  run also records a number the same tool publishes: set metric_uuid and metric_url, where the endpoint
+  answers with a JSON object carrying a numeric "value". Leave metric_uuid empty and that half is
+  skipped.'
 copyright: © intuitem
-version: 2
+version: 5
 publication_date: 2026-09-17
 provider: intuitem
 packager: intuitem
@@ -18,44 +23,42 @@ objects:
   - urn: urn:intuitem:risk:library:workflow-operations-evidence-collection:workflow:evidence-collection
     schema_version: 1
     ref_id: evidence-collection
-    name: Evidence collection — pull a recurring task's evidence from a tool
-    description: 'Every Monday: find the oldest pending occurrence of one named task, download this week''s
-      export, file it as a new revision of the expected evidence and pin it to that occurrence. The evidence
-      moves to In review, because a file nobody has looked at yet is not an approved one. A tool that
-      answered badly or not at all is reported by email rather than stopping the run.'
+    name: Evidence collection — pull an evidence file from a tool
+    description: 'Every Monday: download the current file from the tool and file it as a new revision
+      of one named evidence, then record the number the tool reports alongside it. The evidence moves
+      to In review, because a file nobody has looked at yet is not an approved one. A tool that answered
+      badly or not at all is reported by email rather than stopping the run.'
     requires:
       secrets:
       - tool_token
     graph:
       variables:
-      # Required. Without it the lookup would take the oldest pending occurrence
-      # of ANY task in the domain, which looks right until a second recurring
-      # task exists. Left empty the run stops on "invalid filter value" rather
-      # than collecting against the wrong task.
-      - key: task_template_id
+      # The evidence is named by id, not by name: names are not unique, so a
+      # name would also be a claim about which domain the run looked in.
+      - key: evidence_uuid
         type: string
         default_value: ''
-      - key: evidence_name
-        type: string
-        default_value: Weekly export
-      - key: export_url
+      - key: tool_url
         type: string
         default_value: https://tool.example.com/exports/latest.csv
       - key: warn_to
         type: string
         default_value: ''
-      # A condition reads declared variables, so every step publishes its
-      # hit/miss into one before a branch reads it.
-      - key: week_found
-        type: boolean
-        default_value: false
-      - key: evidence_found
-        type: boolean
-        default_value: false
+      # The second half is optional. An empty metric_uuid means the run files
+      # the file and stops there, so the recipe is useful with only the first
+      # three filled in.
+      - key: metric_uuid
+        type: string
+        default_value: ''
+      - key: metric_url
+        type: string
+        default_value: ''
+      # A condition reads declared variables, never a node's output, so each
+      # step publishes its result into one before a branch reads it.
       - key: collected
         type: boolean
         default_value: false
-      - key: tool_status
+      - key: number_status
         type: number
         default_value: 0
       nodes:
@@ -66,81 +69,34 @@ objects:
           type: schedule
           cron_expression: 0 6 * * 1
           timezone: UTC
-      - ref: find_the_week
+      - ref: collect_the_file
         type: action
-        label: Find the week to answer for
-        action_config:
-          type: read_objects
-          model: task_node
-          mode: first
-          order_by: due_date
-          filters:
-            operator: and
-            conditions:
-            - field: task_template
-              op: eq
-              value: '{{task_template_id}}'
-            - field: status
-              op: eq
-              value: pending
-        output_mapping:
-          week_found: found
-      - ref: find_the_evidence
-        type: action
-        label: Find the expected evidence
-        action_config:
-          type: read_objects
-          model: evidence
-          mode: first
-          filters:
-            operator: and
-            conditions:
-            - field: name
-              op: eq
-              value: '{{evidence_name}}'
-        output_mapping:
-          evidence_found: found
-      - ref: got_both
-        type: condition
-        label: Is there a week and an evidence?
-        branches:
-        - name: Collect
-          condition_groups:
-          - operator: and
-            conditions:
-            - variable: week_found
-              op: eq
-              value: true
-            - variable: evidence_found
-              op: eq
-              value: true
-        - name: Nothing to collect
-          is_default: true
-      - ref: file_the_export
-        type: action
-        label: File this week's export
+        label: Collect the file
         action_config:
           type: attach_evidence
-          evidence: '{{nodes.find_the_evidence.object.id}}'
-          task_node: '{{nodes.find_the_week.object.id}}'
+          evidence: '{{evidence_uuid}}'
           source: url
-          url: '{{export_url}}'
-          filename: export-{{today}}.csv
+          url: '{{tool_url}}'
+          filename: collected-{{today}}.csv
           new_revision: true
+          # If a task expects this evidence, the collected file answers for the
+          # occurrence that is currently due. The occurrence's id changes every
+          # period, so it cannot be a variable — the step works it out. Nothing
+          # happens when no task expects the evidence.
+          find_occurrence: true
           headers:
             Authorization: Bearer {{secrets.tool_token}}
           # Without these two the step fails and the run stops, so a tool that
-          # has been down for a month looks exactly like a quiet week. With
-          # them nothing is filed, the miss is reported, and the branch below
-          # is what makes it visible.
+          # has been down for a month looks exactly like a run with nothing to
+          # collect. With them nothing is filed, the miss is reported, and the
+          # branch below is what makes it visible.
           allow_error_status: true
           allow_connection_error: true
         output_mapping:
           collected: attached
-          tool_status: status
       - ref: did_it_land
         type: condition
-        label: Did the export land?
+        label: Did the file land?
         branches:
         - name: Filed
           condition_groups:
@@ -151,20 +107,72 @@ objects:
               value: true
         - name: Tool did not answer
           is_default: true
-      - ref: nothing_to_do
+      - ref: want_a_number
+        type: condition
+        label: Is a metric configured?
+        branches:
+        - name: Record it
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: metric_uuid
+              op: neq
+              value: ''
+        - name: File only
+          is_default: true
+      - ref: pull_the_number
         type: action
-        label: Say why nothing was collected
+        label: Ask the tool for the number
+        action_config:
+          type: http_request
+          method: GET
+          url: '{{metric_url}}'
+          timeout: 10
+          headers:
+            Authorization: Bearer {{secrets.tool_token}}
+          # The file is already filed by this point, so a missing number must
+          # not undo the run. It is reported and logged instead.
+          allow_error_status: true
+          allow_connection_error: true
+        output_mapping:
+          number_status: status
+      - ref: got_the_number
+        type: condition
+        label: Did the number arrive?
+        branches:
+        - name: Got it
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: number_status
+              op: eq
+              value: 200
+        - name: No number
+          is_default: true
+      - ref: record_the_number
+        type: action
+        label: Record the number
+        action_config:
+          type: record_measurement
+          metric_instance: '{{metric_uuid}}'
+          value: '{{nodes.pull_the_number.body.value}}'
+          # Cites the file it was read alongside, so the sample is auditable.
+          evidence_revision: '{{nodes.collect_the_file.revision_id}}'
+          observation: Collected from the tool on {{today}}
+      - ref: log_no_number
+        type: action
+        label: Say the number is missing
         action_config:
           type: log
-          message: 'No collection on {{today}}: a pending occurrence was found = {{week_found}}, the
-            evidence "{{evidence_name}}" was found = {{evidence_found}}'
+          message: 'The file was filed on {{today}} but no number was recorded: the metric endpoint
+            answered {{number_status}} (0 means it could not be reached at all).'
       - ref: log_the_outage
         type: action
         label: Say the tool did not answer
         action_config:
           type: log
-          message: 'No export filed on {{today}}: the tool answered {{tool_status}} (0 means it could
-            not be reached at all).'
+          message: 'Nothing filed on {{today}}: the tool answered {{nodes.collect_the_file.status}}
+            (0 means it could not be reached at all).'
       - ref: warn_the_team
         type: action
         label: Warn the team
@@ -172,35 +180,42 @@ objects:
           type: send_email
           recipients: '{{warn_to}}'
           subject: 'Evidence collection failed on {{today}}'
-          body: 'This week''s export for "{{evidence_name}}" was not filed: the tool answered
-            {{tool_status}}. A status of 0 means it could not be reached at all. The task occurrence
-            is still pending and nobody has been asked to do anything about it yet.'
+          body: 'No file was collected today: the tool answered
+            {{nodes.collect_the_file.status}}. A status of 0 means it could not be reached at all.
+            The evidence still carries the file from the last run that worked, so check the date on
+            it before relying on it.'
       - ref: done
         type: end
       edges:
       - source: every_monday
-        target: find_the_week
-      - source: find_the_week
-        target: find_the_evidence
-      - source: find_the_evidence
-        target: got_both
-      - source: got_both
-        target: file_the_export
-        source_branch: Collect
-      - source: got_both
-        target: nothing_to_do
-        source_branch: Nothing to collect
-      - source: file_the_export
+        target: collect_the_file
+      - source: collect_the_file
         target: did_it_land
       - source: did_it_land
-        target: done
+        target: want_a_number
         source_branch: Filed
       - source: did_it_land
         target: log_the_outage
         source_branch: Tool did not answer
+      - source: want_a_number
+        target: pull_the_number
+        source_branch: Record it
+      - source: want_a_number
+        target: done
+        source_branch: File only
+      - source: pull_the_number
+        target: got_the_number
+      - source: got_the_number
+        target: record_the_number
+        source_branch: Got it
+      - source: got_the_number
+        target: log_no_number
+        source_branch: No number
+      - source: record_the_number
+        target: done
+      - source: log_no_number
+        target: done
       - source: log_the_outage
         target: warn_the_team
       - source: warn_the_team
-        target: done
-      - source: nothing_to_do
         target: done

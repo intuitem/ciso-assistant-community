@@ -202,17 +202,26 @@ Adds a file to an existing evidence.
 | Source | **Text** writes the rendered text as the file. **URL** downloads the file |
 | Content *expr* | With source Text |
 | URL *expr* | With source URL. Secrets allowed |
-| Task occurrence *expr* | Optional. The occurrence this file answers for |
+| Find the task occurrence automatically | Off by default. Works out the occurrence from the evidence |
+| Task occurrence *expr* | Optional. The occurrence this file answers for, when you name it yourself |
 | Continue when the answer is an error | With source URL. Off by default |
 | Continue when the tool cannot be reached | With source URL. Off by default |
 | File it as a new revision | Off by default. Off replaces the file on the evidence's latest revision. On files a new revision and leaves the previous one untouched |
 
-Output: `object_id`, `attached`, `revision_id`, `version`, `filename`, `bytes`, `task_node_id`. Permission: `change_evidence`, plus `add_evidencerevision` when **File it as a new revision** is on.
+Output: `object_id`, `attached`, `status` (the HTTP status with source URL, empty with source Text), `revision_id`, `version`, `filename`, `bytes`, `task_node_id`. Permission: `change_evidence`, plus `add_evidencerevision` when **File it as a new revision** is on.
 
 {% hint style="info" %}
-**Set Task occurrence to close the loop with a recurring task.** A task that expects an evidence shows it as provided once a revision filed *for that occurrence* exists. A collected file with no occurrence set satisfies nothing, however good the file is — so the task keeps asking.
+**Close the loop with a recurring task.** A task that expects an evidence shows it as provided once a revision filed *for that occurrence* exists. A collected file that answers for no occurrence satisfies nothing, however good the file is — so the task keeps asking.
 
-Find this week's occurrence with a Read objects step on **Task occurrence**, filtering on `status` and ordering by `due_date`, then pass `{{nodes.<that step>.object.id}}` here. The step refuses an occurrence whose task does not expect this evidence, because neither the tick nor the link would ever read it.
+Filing a file never changes the occurrence's status. Attaching the work and deciding the work is done are different calls, and only the second one is a person's.
+
+Turn on **Find the task occurrence automatically** and the step works it out from the evidence — there is nothing to look up and nothing to pass. It answers for the occurrence that is **due and not yet settled**: `completed` and `cancelled` are done with, `in_progress` is not, because someone may file a file and deliberately leave the occurrence open. Of the occurrences that are owed it takes the **most recent one whose due date has passed**, so a period nobody ever closed does not swallow every later file.
+
+This has to be worked out at run time rather than configured: the occurrence due now has a different id every period, so it can never be a setting.
+
+If nothing is owed — the task has not started, or every occurrence is settled — the file is still filed and simply answers for nothing. The step reports `task_node_id`, so a graph can tell the two apart. If **two different tasks** expect the same evidence, the step refuses rather than guessing, and you name the occurrence yourself.
+
+To name it yourself instead, leave the setting off and pass an id to **Task occurrence** — from a Read objects step on **Task occurrence**, filtering on `status` and ordering by `due_date`. Either way the step refuses an occurrence whose task does not expect this evidence, because neither the tick nor the link would ever read it.
 {% endhint %}
 
 {% hint style="info" %}
@@ -222,7 +231,7 @@ A step that runs on a schedule needs **File it as a new revision** on. With it o
 {% hint style="info" %}
 **When the tool is down, the run stops — unless you say otherwise.** By default a source that answers `4xx`/`5xx`, or that never answers at all, fails this step. That is the safe reading: a collection that could not run must not look like one that ran and found nothing.
 
-The two **Continue when…** settings turn each of those into an outcome the graph can route on. Nothing is filed either way; the difference is that the step returns `attached` as `false` instead of failing, along with `status`, `unreachable`, `host` and `reason`. A source that could not be reached reports `status` `0`, which no real answer can produce, so one branch handles both a bad answer and no answer.
+The two **Continue when…** settings turn each of those into an outcome the graph can route on. Nothing is filed either way; the difference is that the step returns `attached` as `false` instead of failing, along with `unreachable`, `host` and `reason`. Branch on `attached`, not on `status` — `status` is reported on both outcomes, so it tells you *what* happened, not *whether* it worked. A source that could not be reached reports `status` `0`, which no real answer can produce, so one branch handles both a bad answer and no answer.
 
 Map `attached` into a variable with an output mapping and branch on it — then log the outage and email whoever owns the tool. Without that branch, opting in only hides the problem. The **Evidence collection** template in the library is wired this way.
 {% endhint %}

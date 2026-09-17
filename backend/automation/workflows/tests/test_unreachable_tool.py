@@ -334,4 +334,7 @@ class TestUnreachableAttachSource:
         output = instance.node_outputs["attach"]
         assert output["attached"] is True
         assert output["version"] == 1
+        # Present on both branches, or an output mapping that reads it logs an
+        # error on the run that worked.
+        assert output["status"] == 200
         assert obj.revisions.count() == 1

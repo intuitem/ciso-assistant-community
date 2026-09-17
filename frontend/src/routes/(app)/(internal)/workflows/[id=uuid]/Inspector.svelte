@@ -205,6 +205,7 @@
 			url: '',
 			allow_error_status: false,
 			allow_connection_error: false,
+			find_occurrence: false,
 			new_revision: false,
 			task_node: ''
 		},
@@ -1796,17 +1797,29 @@
 							></textarea>
 						</label>
 					{/if}
-					<label>
-						{@render fieldLabel(m.taskNode())}
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
 						<input
-							type="text"
-							class="input w-full text-sm"
-							placeholder={'{{nodes.find_the_week.object.id}}'}
-							bind:value={actionConfig.task_node}
-							oninput={onChange}
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.find_occurrence}
+							onchange={onChange}
 						/>
-						<span class="text-[10px] text-surface-500">{m.taskNodeAttachHint()}</span>
+						{m.findOccurrence()}
 					</label>
+					<span class="text-[10px] text-surface-500">{m.findOccurrenceHint()}</span>
+					{#if !actionConfig.find_occurrence}
+						<label>
+							{@render fieldLabel(m.taskNode())}
+							<input
+								type="text"
+								class="input w-full text-sm"
+								placeholder={'{{nodes.find_the_occurrence.object.id}}'}
+								bind:value={actionConfig.task_node}
+								oninput={onChange}
+							/>
+							<span class="text-[10px] text-surface-500">{m.taskNodeAttachHint()}</span>
+						</label>
+					{/if}
 					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
 						<input
 							type="checkbox"

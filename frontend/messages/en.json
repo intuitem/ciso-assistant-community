@@ -5841,6 +5841,8 @@
 	"recordMeasurement": "Record a measurement",
 	"postResults": "Post scan results",
 	"fileAsNewRevision": "File it as a new revision",
+	"findOccurrence": "Find the task occurrence automatically",
+	"findOccurrenceHint": "Answers for the occurrence that is due and not yet settled, worked out from the evidence. The occurrence due now has a different id every period, so it cannot be typed in here. Filing a file never marks the task done.",
 	"taskNodeAttachHint": "Optional. The occurrence this file answers for, so the task shows its evidence as provided. Read it with a Read objects step on Task occurrence.",
 	"attachSourceMissHint": "Without these, the step fails and the run stops. With them, nothing is filed and the step reports attached as false, so a branch can warn instead — a source that never answered is reported as status 0.",
 	"newRevisionHint": "Keeps the previous file and sends the evidence back for review. Off overwrites the latest revision.",

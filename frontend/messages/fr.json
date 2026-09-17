@@ -6379,6 +6379,8 @@
 	"recordMeasurement": "Enregistrer une mesure",
 	"postResults": "Déposer des résultats de scan",
 	"fileAsNewRevision": "Créer une nouvelle révision",
+	"findOccurrence": "Trouver automatiquement l'échéance de la tâche",
+	"findOccurrenceHint": "Répond pour l'échéance due et non encore réglée, déduite de la preuve. L'échéance en cours porte un identifiant différent à chaque période : il ne peut donc pas être saisi ici. Déposer un fichier ne marque jamais la tâche comme faite.",
 	"taskNodeAttachHint": "Facultatif. L'occurrence à laquelle ce fichier répond, pour que la tâche affiche sa preuve comme fournie. À récupérer avec une étape Lire des objets sur Occurrence de tâche.",
 	"attachSourceMissHint": "Sans ces options, l'étape échoue et l'exécution s'arrête. Avec, rien n'est déposé et l'étape indique attached à false, ce qui permet de brancher vers une alerte — une source qui n'a pas répondu est signalée par le statut 0.",
 	"newRevisionHint": "Conserve le fichier précédent et remet la preuve en revue. Sinon, la dernière révision est écrasée.",

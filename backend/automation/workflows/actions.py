@@ -1779,11 +1779,12 @@ class AttachEvidenceAction(BaseAction):
             raise ActionError("attach_evidence: 'filename' is required")
 
         source = config.get("source", "text")
+        status = None
         if source == "text":
             data = str(render(config.get("text", ""), context) or "").encode()
         elif source == "url":
             try:
-                data = self._fetch(config, context)
+                data, status = self._fetch(config, context)
             except _SourceUnavailable as miss:
                 # Nothing was filed. The run continues only because the author
                 # asked it to, and only a branch on 'attached' makes that visible.
@@ -1821,6 +1822,9 @@ class AttachEvidenceAction(BaseAction):
         return {
             "object_id": str(evidence.id),
             "attached": True,
+            # A URL fetch reports its status on success too: an output mapping
+            # that reads it must not break on the branch that worked.
+            "status": status,
             "revision_id": str(revision.id),
             "version": revision.version,
             "filename": revision.attachment.name,
@@ -1830,13 +1834,19 @@ class AttachEvidenceAction(BaseAction):
 
     @staticmethod
     def _occurrence(config, context, instance, evidence):
-        """The task occurrence this file answers for, when the step names one.
+        """The task occurrence this file answers for.
 
         A revision carries the occurrence it was filed for, and that is what
-        marks the week's expected evidence as provided. Without it a collected
-        file satisfies nothing, however good the file is.
+        marks the occurrence's expected evidence as provided. Without it a
+        collected file satisfies nothing, however good the file is.
+
+        Named explicitly, or — since the id of the occurrence that is currently
+        owed changes every period, and so cannot be a setting — found from the
+        evidence itself.
         """
         if not str(render(config.get("task_node", ""), context) or "").strip():
+            if _as_bool(config.get("find_occurrence")):
+                return AttachEvidenceAction._owed_occurrence(instance, evidence)
             return None
         occurrence = _scoped_target(
             TaskNode, config, "task_node", context, instance, "attach_evidence"
@@ -1850,6 +1860,50 @@ class AttachEvidenceAction(BaseAction):
                 f"attach_evidence: '{occurrence}' does not expect '{evidence.name}'"
             )
         return occurrence
+
+    @staticmethod
+    def _owed_occurrence(instance, evidence):
+        """The occurrence this file answers for, worked out from the evidence.
+
+        Owed means due and not settled. 'completed' and 'cancelled' are done
+        with; 'in_progress' is not — someone may attach a file and leave the
+        occurrence open on purpose, and this step must not decide for them. It
+        never writes status: filing the file is not doing the task.
+
+        Of the occurrences that are owed, the one answered for is the most
+        recent one whose due date has passed. Taking the oldest instead would
+        mean a period nobody ever closed keeps swallowing every later file.
+
+        Returns None when nothing is owed yet, which is a real outcome and not
+        an error: the file is still worth filing, and the step reports
+        task_node_id so a graph can tell the difference.
+        """
+        # The run's own today, not the wall clock: a retry must answer for the
+        # same period as the first attempt.
+        today = _as_date(
+            instance.variables.get("today")
+            or temporal_seeds(instance.trigger_registration)["today"],
+            "today",
+        )
+        owed = (
+            TaskNode.objects.filter(
+                task_template__evidences=evidence,
+                status__in=("pending", "in_progress"),
+                due_date__lte=today,
+                folder_id__in=_accessible_folder_ids(instance.folder),
+            )
+            .select_related("task_template")
+            .order_by("-due_date")
+        )
+        # Two tasks expecting the same evidence is a question about intent that
+        # the due dates cannot answer, so the graph has to say which.
+        templates = {node.task_template_id for node in owed}
+        if len(templates) > 1:
+            raise ActionError(
+                f"attach_evidence: {len(templates)} tasks expect "
+                f"'{evidence.name}'; name the occurrence explicitly"
+            )
+        return owed.first()
 
     @staticmethod
     def _file_new_revision(evidence, upload, occurrence=None):
@@ -1903,6 +1957,8 @@ class AttachEvidenceAction(BaseAction):
         return evidence
 
     def _fetch(self, config, context):
+        """Returns (bytes, status). Raises _SourceUnavailable when the step
+        opted into reporting a miss instead of failing."""
         import requests
         from django.conf import settings
 
@@ -1956,7 +2012,7 @@ class AttachEvidenceAction(BaseAction):
                 raise FatalActionError(
                     f"attach_evidence: the file exceeds {settings.ATTACHMENT_MAX_SIZE_MB} MB"
                 )
-        return data
+        return data, response.status_code
 
 
 WHOLE_TEMPLATE_RE = re.compile(r"^\{\{\s*([\w.]+)\s*\}\}$")

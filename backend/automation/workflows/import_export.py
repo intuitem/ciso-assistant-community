@@ -438,6 +438,9 @@ KNOWN_KEYS = {
         "description",
         "graph",
         "secrets",
+        # Written by _export_workflow and read back on import, so a document
+        # that round-trips through this module must not warn about it.
+        "requires",
         "source_urn",
         "source_version",
         "version",
