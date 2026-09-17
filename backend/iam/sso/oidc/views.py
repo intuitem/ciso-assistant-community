@@ -56,12 +56,6 @@ def _get_oidc_scopes(provider, request: HttpRequest) -> list[str]:
     for additional_scope in additional_scopes:
         if additional_scope and additional_scope not in scopes:
             scopes.append(additional_scope)
-    logger.warning(
-        "OIDC scopes resolved",
-        provider=provider.id,
-        scopes=scopes,
-        additional_scopes=additional_scopes,
-    )
     return scopes
 
 
