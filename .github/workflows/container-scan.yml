@@ -54,13 +54,13 @@ jobs:
           echo "ref=${IMAGE}:${TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Analyse and report
+      - name: Analyse
         shell: bash
         env:
           TARGET: ${{ steps.ref.outputs.ref }}
@@ -76,8 +76,73 @@ jobs:
             -e DOCKER_SCOUT_HUB_USER -e DOCKER_SCOUT_HUB_PASSWORD \
             -e DOCKER_SCOUT_REGISTRY_USER -e DOCKER_SCOUT_REGISTRY_PASSWORD \
             "$SCOUT_IMAGE" \
-            cves --platform linux/amd64 --only-severity critical,high --only-fixed \
-              --format sarif "$TARGET" > "scout-out/scout-$NAME.sarif"
+            cves --platform linux/amd64 --format sarif "$TARGET" \
+            > "scout-out/full-$NAME.sarif"
+
+      # Scout only filters at scan time, so scanning unfiltered and slicing the
+      # SARIF here keeps the summary honest about the image while code scanning
+      # and the gate stay narrow. Filtering at scan time is what made every job
+      # report "no vulnerable package detected".
+      - name: Report and gate
+        id: gate
+        shell: bash
+        env:
+          TARGET: ${{ steps.ref.outputs.ref }}
+          NAME: ${{ matrix.name }}
+        run: |
+          set -euo pipefail
+          full="scout-out/full-$NAME.sarif"
+
+          jq -r '
+            [
+              .runs[0].tool.driver.rules[]
+              | {
+                  sev: (.properties.cvssV3_severity // "UNSPECIFIED"),
+                  fixable: (((.properties.fixed_version // "not fixed") | ascii_downcase) != "not fixed")
+                }
+            ] as $v
+            | ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNSPECIFIED"]
+            | map(. as $s | "\($s) \([$v[] | select(.sev == $s)] | length) (\([$v[] | select(.sev == $s and .fixable)] | length) fixable)")
+            | "\($v | length) vulnerabilities — " + join(" · ")
+          ' "$full" > counts.txt
+
+          {
+            echo "### \`$NAME\` — \`$TARGET\`"
+            echo
+            cat counts.txt
+            echo
+            echo "Counts cover \`linux/amd64\`, every severity, fixable or not."
+            echo "Code scanning receives CRITICAL/HIGH; only fixable CRITICAL fails the scan."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          jq '
+            ["CRITICAL", "HIGH"] as $keep
+            | [.runs[0].tool.driver.rules[] | select(.properties.cvssV3_severity as $s | $keep | index($s))] as $rules
+            | ($rules | map(.id)) as $ids
+            | .runs[0].tool.driver.rules = $rules
+            | .runs[0].results |= [
+                .[]
+                | select(.ruleId as $i | $ids | index($i))
+                | . as $res
+                | .ruleIndex = ($ids | index($res.ruleId))
+              ]
+          ' "$full" > "scout-out/scout-$NAME.sarif"
+
+          critical="$(jq '
+            [
+              .runs[0].tool.driver.rules[]
+              | select(.properties.cvssV3_severity == "CRITICAL")
+              | select(((.properties.fixed_version // "not fixed") | ascii_downcase) != "not fixed")
+            ] | length
+          ' "$full")"
+
+          mkdir -p gate
+          if [ "$critical" -gt 0 ]; then
+            printf '%s %s\n' "$NAME" "failure" > "gate/$NAME.txt"
+          else
+            printf '%s %s\n' "$NAME" "success" > "gate/$NAME.txt"
+          fi
+          echo "critical=$critical" >> "$GITHUB_OUTPUT"
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@977e6ceaea7361825998245d787fa3b4d6b9e5df # codeql-bundle-v2.27.0
@@ -85,48 +150,21 @@ jobs:
           sarif_file: scout-out/scout-${{ matrix.name }}.sarif
           category: scout-${{ matrix.name }}
 
-      - name: Gate on CRITICAL
-        id: gate
-        continue-on-error: true
-        shell: bash
-        env:
-          TARGET: ${{ steps.ref.outputs.ref }}
-          DOCKER_SCOUT_HUB_USER: ${{ secrets.DOCKERHUB_USER }}
-          DOCKER_SCOUT_HUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
-          DOCKER_SCOUT_REGISTRY_USER: ${{ github.actor }}
-          DOCKER_SCOUT_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          docker run --rm \
-            -e DOCKER_SCOUT_HUB_USER -e DOCKER_SCOUT_HUB_PASSWORD \
-            -e DOCKER_SCOUT_REGISTRY_USER -e DOCKER_SCOUT_REGISTRY_PASSWORD \
-            "$SCOUT_IMAGE" \
-            cves --platform linux/amd64 --only-severity critical --only-fixed \
-              --exit-code "$TARGET" | tee -a "$GITHUB_STEP_SUMMARY"
-
-      - name: Record gate outcome
-        if: ${{ !cancelled() }}
-        shell: bash
-        env:
-          OUTCOME: ${{ steps.gate.outcome }}
-          NAME: ${{ matrix.name }}
-        run: |
-          set -euo pipefail
-          mkdir -p gate
-          printf '%s %s\n' "$NAME" "$OUTCOME" > "gate/$NAME.txt"
-
       - name: Upload gate outcome
-        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: gate-${{ matrix.name }}
           path: gate/
           retention-days: 7
 
-      - name: Fail on CRITICAL
-        if: steps.gate.outcome == 'failure'
+      - name: Fail on fixable CRITICAL
+        if: steps.gate.outputs.critical != '0'
         shell: bash
-        run: exit 1
+        env:
+          COUNT: ${{ steps.gate.outputs.critical }}
+        run: |
+          echo "::error::$COUNT CRITICAL vulnerabilities with a fix available"
+          exit 1
 
   report:
     needs: scan
@@ -197,7 +235,7 @@ jobs:
 
           if [ "$STATE" = "clean" ]; then
             if [ -n "$number" ]; then
-              gh issue close "$number" --comment "Clean as of $RUN_URL"
+              gh issue close "$number" --comment "No fixable CRITICAL vulnerabilities as of $RUN_URL"
             fi
             exit 0
           fi
@@ -210,7 +248,7 @@ jobs:
             "- Run: $RUN_URL" \
             "- Alerts: $ALERTS_URL" \
             "" \
-            "This issue is updated automatically and closes when the next scan is clean.")"
+            "This issue is updated automatically and closes when the next scan finds no fixable CRITICAL.")"
 
           if [ -n "$number" ]; then
             gh issue edit "$number" --body "$body"
