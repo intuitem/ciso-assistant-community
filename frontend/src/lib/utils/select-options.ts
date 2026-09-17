@@ -25,8 +25,13 @@ export async function ensureSelectOptions(model: Record<string, any>): Promise<v
 	const selectFields: SelectField[] = info?.selectFields ?? [];
 	if (!selectFields.length) return;
 
-	const key = info.endpointUrl ?? info.urlModel ?? model.urlModel;
-	if (!key) return;
+	const urlModel = info.urlModel ?? model.urlModel;
+	if (!urlModel) return;
+
+	const parents = selectFields
+		.map((f) => (f.formNestedField ? model.initialData?.[f.formNestedField] : ''))
+		.join(',');
+	const key = `${urlModel}:${parents}`;
 
 	const cached = cache.get(key);
 	if (cached) {
@@ -34,16 +39,17 @@ export async function ensureSelectOptions(model: Record<string, any>): Promise<v
 		return;
 	}
 
+	let complete = true;
 	const entries = await Promise.all(
 		selectFields.map(async (selectField) => {
-			// Mirrors the two URL shapes the server load built, including the nested
-			// one a few fields need (asset_assessment, ebios_rm_study).
-			const url =
-				selectField.formNestedField && selectField.detail === true
-					? `/${selectField.endpointUrl}/${model.initialData?.[selectField.formNestedField]}/${selectField.field}`
-					: `/${key}/${selectField.field}`;
-			const response = await fetch(url);
+			const query = new URLSearchParams({ field: selectField.field });
+			const parent = selectField.formNestedField
+				? model.initialData?.[selectField.formNestedField]
+				: null;
+			if (parent) query.set('detail', parent);
+			const response = await fetch(`/${urlModel}/select-options?${query}`);
 			if (!response.ok) {
+				complete = false;
 				console.error(`Failed to fetch options for ${selectField.field}: ${response.statusText}`);
 				return [selectField.field, []];
 			}
@@ -52,6 +58,6 @@ export async function ensureSelectOptions(model: Record<string, any>): Promise<v
 	);
 
 	const options = Object.fromEntries(entries);
-	cache.set(key, options);
+	if (complete) cache.set(key, options);
 	model.selectOptions = options;
 }

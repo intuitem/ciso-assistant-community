@@ -8,6 +8,8 @@
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { modelSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages.js';
+	import { onMount } from 'svelte';
+	import { ensureSelectOptions } from '$lib/utils/select-options';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { createModalCache } from '$lib/utils/stores';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
@@ -59,6 +61,11 @@
 	const formAction = '?/create';
 	const timelineForm = data.relatedModels['timeline-entries'].createForm;
 	const model = data.relatedModels['timeline-entries'];
+	let entryTypeOptions = $state(model.selectOptions['entry_type'] ?? []);
+	onMount(async () => {
+		await ensureSelectOptions(model);
+		entryTypeOptions = model.selectOptions['entry_type'] ?? [];
+	});
 	const schema = modelSchema('timeline-entries');
 
 	const _form = superForm(timelineForm, {
@@ -388,7 +395,7 @@
 							<Select
 								{form}
 								disableDoubleDash={true}
-								options={model.selectOptions['entry_type']}
+								options={entryTypeOptions}
 								field="entry_type"
 								label={m.entryType()}
 							/>
