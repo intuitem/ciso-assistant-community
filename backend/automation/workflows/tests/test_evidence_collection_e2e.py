@@ -16,8 +16,10 @@ import uuid
 from datetime import date
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 
 import pytest
+import requests
 from django.test import override_settings
 
 from core.models import Evidence, TaskTemplate
@@ -364,3 +366,77 @@ class TestWeeklyEvidenceCollection:
         assert TaskNodeReadSerializer(february).data["evidence_reviewed"] == [
             evidence.id
         ]
+
+
+SHIPPED_RECIPE = (
+    Path(__file__).resolve().parents[3]
+    / "library"
+    / "libraries"
+    / "workflow-operations-evidence-collection.yaml"
+)
+
+
+@pytest.mark.django_db
+def test_the_shipped_recipe_warns_when_the_tool_is_down(scene, monkeypatch):
+    """The library recipe is the thing customers actually install, so the claim
+    that it survives an outage has to be checked on the recipe itself, not on a
+    graph the test built to resemble it.
+
+    Publishing proves it is well-formed; only running it proves the opt-ins are
+    wired to a branch that leads somewhere.
+    """
+    import yaml
+    from django.core import mail
+
+    from automation.workflows.import_export import import_workflow
+
+    domain, evidence, task, _ = scene
+    occurrence = task.task_nodes.order_by("due_date").first()
+    assert occurrence is not None, (
+        "the recurring task should have generated occurrences"
+    )
+
+    entry = yaml.safe_load(SHIPPED_RECIPE.read_text())["objects"]["workflows"][0]
+    workflow, _ = import_workflow(
+        entry, domain, user=publisher_user(), secrets={"tool_token": "placeholder"}
+    )
+    version = workflow.draft_version
+    version.run_as = publisher_user()
+    version.save()
+
+    values = {
+        "task_template_id": str(task.id),
+        "evidence_name": evidence.name,
+        # Nothing listens here, and the guard is bypassed below so the refusal
+        # is what the step sees.
+        "export_url": "https://tool.invalid/exports/latest.csv",
+        "warn_to": "soc@example.com",
+    }
+    for variable in version.variables.all():
+        if variable.key in values:
+            variable.default_value = values[variable.key]
+            variable.save()
+
+    monkeypatch.setattr(
+        "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
+    )
+
+    def refuse(*args, **kwargs):
+        raise requests.ConnectionError("connection refused")
+
+    monkeypatch.setattr("requests.get", refuse)
+
+    instance = start_instance(version)
+
+    assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+    outputs = instance.node_outputs
+    assert outputs["file_the_export"]["attached"] is False
+    assert outputs["file_the_export"]["status"] == 0
+    assert "log_the_outage" in outputs
+    assert "warn_the_team" in outputs
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].to == ["soc@example.com"]
+    # The whole point: the week is still owed, and nothing pretends otherwise.
+    assert evidence.revisions.count() == 0
+    occurrence.refresh_from_db()
+    assert occurrence.status == "pending"
