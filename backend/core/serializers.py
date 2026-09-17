@@ -6871,6 +6871,7 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
         pk = self.context.get("pk")
         if pk is None:
             return {"direct_links": [], "indirect_links": []}
+        task_evidence_links = self.context.get("task_evidence_links") or {}
 
         # Get requirement assessments for this compliance assessment
         requirement_assessments = RequirementAssessment.objects.filter(
@@ -6893,19 +6894,14 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
                 )
 
         # Indirect links - evidence is linked through an applied control or a
-        # task template (or one of its task nodes) attached to the requirement assessment
+        # task template attached to the requirement assessment
         for req_assessment in requirement_assessments:
             via_names = [
                 applied_control.name
                 for applied_control in req_assessment.applied_controls.all()
                 if obj in applied_control.evidences.all()
             ]
-            via_names += [
-                task_template.name
-                for task_template in req_assessment.task_templates.filter(
-                    Q(evidences=obj) | Q(tasknode__evidences=obj)
-                ).distinct()
-            ]
+            via_names += task_evidence_links.get((req_assessment.id, obj.id), [])
             for via_name in via_names:
                 indirect_links.append(
                     {

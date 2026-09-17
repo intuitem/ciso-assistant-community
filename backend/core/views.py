@@ -7268,8 +7268,42 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update({"pk": self.kwargs["pk"]})
+        context.update(
+            {
+                "pk": self.kwargs["pk"],
+                "task_evidence_links": self._get_task_evidence_links(),
+            }
+        )
         return context
+
+    def _get_task_evidence_links(self):
+        """Map (requirement_assessment_id, evidence_id) -> [task template names]
+        for task templates attached to this compliance assessment's requirement assessments.
+        Computed once per request to avoid per-evidence queries.
+        TaskNode.evidences is deprecated (evidences live on the task template)."""
+        pk = self.kwargs["pk"]
+        task_templates = (
+            TaskTemplate.objects.filter(
+                requirement_assessments__compliance_assessment_id=pk
+            )
+            .distinct()
+            .prefetch_related(
+                "evidences",
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.filter(
+                        compliance_assessment_id=pk
+                    ),
+                ),
+            )
+        )
+        links = defaultdict(list)
+        for task_template in task_templates:
+            evidence_ids = {e.id for e in task_template.evidences.all()}
+            for req_assessment in task_template.requirement_assessments.all():
+                for evidence_id in evidence_ids:
+                    links[(req_assessment.id, evidence_id)].append(task_template.name)
+        return links
 
     def get_queryset(self):
         """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
@@ -7308,17 +7342,16 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
                     if evidence.id in viewable_evidences:
                         evidence_ids.add(evidence.id)
 
-        # Evidences linked through tasks (task templates and their task nodes)
-        # attached to the compliance assessment or its requirement assessments
+        # Evidences linked through task templates attached to the compliance
+        # assessment or its requirement assessments
         task_templates = TaskTemplate.objects.filter(
             Q(compliance_assessments=compliance_assessment)
             | Q(requirement_assessments__compliance_assessment=compliance_assessment)
         ).distinct()
         task_evidence_ids = set(
-            Evidence.objects.filter(
-                Q(task_templates__in=task_templates)
-                | Q(task_nodes__task_template__in=task_templates)
-            ).values_list("id", flat=True)
+            Evidence.objects.filter(task_templates__in=task_templates).values_list(
+                "id", flat=True
+            )
         )
         evidence_ids.update(task_evidence_ids & set(viewable_evidences))
 
