@@ -1,13 +1,8 @@
-"""A tool being unreachable is an outcome a graph can route on, if it opts in.
+"""Opting into status 0 so an unreachable tool is a branch, not a dead run.
 
-`allow_error_status` covers a server that answered badly. It cannot cover one
-that never answered: requests raises before there is a status, so the node fails
-and the run stops — which is right by default (a silent partial run is worse),
-but leaves no way to notice the collector has been down for a week.
-
-`allow_connection_error` turns that into status 0, which no real answer can
-collide with, so the same condition that routes a 503 routes a refused
-connection.
+`allow_error_status` covers a server that answered badly; it cannot cover one
+that never answered, because requests raises before there is a status. Status 0
+collides with no real answer, so one condition routes both.
 """
 
 import uuid
@@ -59,8 +54,6 @@ def fetch_flow(folder, **extra):
         action_config={
             "type": "http_request",
             "method": "GET",
-            # Nothing listens here; the guard is bypassed so the refusal is what
-            # the action sees.
             "url": "https://tool.invalid/coverage.json",
             **extra,
         },
@@ -75,7 +68,7 @@ def fetch_flow(folder, **extra):
 
 @pytest.fixture
 def unreachable(monkeypatch):
-    """The SSRF guard would refuse first; this test is about what happens after."""
+    """The SSRF guard would refuse first; this is about what happens after."""
     monkeypatch.setattr(
         "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
     )
@@ -89,8 +82,7 @@ def unreachable(monkeypatch):
 @pytest.mark.django_db
 class TestUnreachableTool:
     def test_by_default_an_unreachable_tool_fails_the_run(self, unreachable):
-        """The safe default: a collection that could not run must not look like
-        one that ran and found nothing."""
+        """A collection that could not run must not look like an empty one."""
         instance = start_instance(fetch_flow(make_domain("Default")))
         assert instance.status == WorkflowInstance.Status.FAILED
 
@@ -106,8 +98,7 @@ class TestUnreachableTool:
         assert output["reason"] == "ConnectionError"
 
     def test_the_reason_never_carries_the_url(self, unreachable):
-        """A URL can hold a secret in its query string, so the run log gets the
-        host and the exception class, never the address."""
+        """A URL can hold a secret in its query string."""
         instance = start_instance(
             fetch_flow(
                 make_domain("No leak"),
@@ -120,8 +111,7 @@ class TestUnreachableTool:
         assert output["host"] == "tool.invalid"
 
     def test_a_condition_can_route_on_it(self, unreachable):
-        """The point of the flag: one condition handles both a bad answer and no
-        answer, because neither is 200."""
+        """One condition handles both a bad answer and no answer."""
         folder = make_domain("Routed")
         workflow = Workflow.objects.create(name="Routed", folder=folder)
         version = WorkflowVersion.objects.create(
@@ -248,10 +238,8 @@ def evidence():
 
 @pytest.mark.django_db
 class TestUnreachableAttachSource:
-    """`attach_evidence` downloads the file itself, so a graph that collects
-    through it has no http_request to branch on. It carries the same two
-    opt-ins, and reports `attached` so a branch can tell a filed revision from
-    a skipped one."""
+    """attach_evidence downloads the file itself, so a collection graph has no
+    http_request to branch on. Same opt-ins; `attached` is the discriminator."""
 
     def test_by_default_an_unreachable_source_fails_the_run(
         self, unreachable, evidence
@@ -271,7 +259,6 @@ class TestUnreachableAttachSource:
         assert output["status"] == 0
         assert output["reason"] == "ConnectionError"
         assert output["host"] == "tool.invalid"
-        # The point of the flag is a warning, not a silent empty revision.
         assert obj.revisions.count() == 0
 
     def test_the_miss_never_carries_the_url(self, unreachable, evidence):
@@ -287,8 +274,7 @@ class TestUnreachableAttachSource:
         assert "supersecret" not in str(instance.node_outputs["attach"])
 
     def test_a_bad_answer_is_a_separate_opt_in(self, monkeypatch, evidence):
-        """A 503 and a refused connection are different failures; opting into
-        one must not quietly enable the other."""
+        """Opting into one must not enable the other."""
         obj, folder = evidence
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
@@ -314,8 +300,7 @@ class TestUnreachableAttachSource:
         assert output["reason"] == "http_error"
 
     def test_a_filed_revision_reports_attached(self, monkeypatch, evidence):
-        """The discriminator has to be present on the success path too, or a
-        branch on it reads None and takes the failure edge every time."""
+        """Absent on success, a branch on it reads None and always fails."""
         obj, folder = evidence
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
@@ -334,7 +319,5 @@ class TestUnreachableAttachSource:
         output = instance.node_outputs["attach"]
         assert output["attached"] is True
         assert output["version"] == 1
-        # Present on both branches, or an output mapping that reads it logs an
-        # error on the run that worked.
         assert output["status"] == 200
         assert obj.revisions.count() == 1

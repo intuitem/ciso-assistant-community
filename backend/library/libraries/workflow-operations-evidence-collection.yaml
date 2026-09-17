@@ -33,8 +33,7 @@ objects:
       - tool_token
     graph:
       variables:
-      # The evidence is named by id, not by name: names are not unique, so a
-      # name would also be a claim about which domain the run looked in.
+      # By id, not name: names are not unique across domains.
       - key: evidence_uuid
         type: string
         default_value: ''
@@ -44,17 +43,14 @@ objects:
       - key: warn_to
         type: string
         default_value: ''
-      # The second half is optional. An empty metric_uuid means the run files
-      # the file and stops there, so the recipe is useful with only the first
-      # three filled in.
+      # Optional: empty metric_uuid skips that half.
       - key: metric_uuid
         type: string
         default_value: ''
       - key: metric_url
         type: string
         default_value: ''
-      # A condition reads declared variables, never a node's output, so each
-      # step publishes its result into one before a branch reads it.
+      # Conditions read declared variables, never a node's output.
       - key: collected
         type: boolean
         default_value: false
@@ -79,17 +75,13 @@ objects:
           url: '{{tool_url}}'
           filename: collected-{{today}}.csv
           new_revision: true
-          # If a task expects this evidence, the collected file answers for the
-          # occurrence that is currently due. The occurrence's id changes every
-          # period, so it cannot be a variable — the step works it out. Nothing
-          # happens when no task expects the evidence.
+          # The owed occurrence's id changes every period, so the step finds
+          # it rather than taking it as a variable.
           find_occurrence: true
           headers:
             Authorization: Bearer {{secrets.tool_token}}
-          # Without these two the step fails and the run stops, so a tool that
-          # has been down for a month looks exactly like a run with nothing to
-          # collect. With them nothing is filed, the miss is reported, and the
-          # branch below is what makes it visible.
+          # Without these the step fails and the run stops, so a tool down for
+          # a month looks like a quiet one. The branch below is what shows it.
           allow_error_status: true
           allow_connection_error: true
         output_mapping:
@@ -130,8 +122,7 @@ objects:
           timeout: 10
           headers:
             Authorization: Bearer {{secrets.tool_token}}
-          # The file is already filed by this point, so a missing number must
-          # not undo the run. It is reported and logged instead.
+          # The file is already filed: a missing number must not undo the run.
           allow_error_status: true
           allow_connection_error: true
         output_mapping:
@@ -156,7 +147,7 @@ objects:
           type: record_measurement
           metric_instance: '{{metric_uuid}}'
           value: '{{nodes.pull_the_number.body.value}}'
-          # Cites the file it was read alongside, so the sample is auditable.
+          # Cites the file it was read alongside.
           evidence_revision: '{{nodes.collect_the_file.revision_id}}'
           observation: Collected from the tool on {{today}}
       - ref: log_no_number

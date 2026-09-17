@@ -380,13 +380,8 @@ SHIPPED_RECIPE = (
 def test_the_shipped_recipe_warns_when_the_tool_is_down(
     scene, monkeypatch, settings, django_capture_on_commit_callbacks
 ):
-    """The library recipe is the thing customers actually install, so the claim
-    that it survives an outage has to be checked on the recipe itself, not on a
-    graph the test built to resemble it.
-
-    Publishing proves it is well-formed; only running it proves the opt-ins are
-    wired to a branch that leads somewhere.
-    """
+    """Runs the shipped recipe itself, not a lookalike. Publishing proves it is
+    well-formed; only running it proves the opt-ins reach a branch."""
     import yaml
     from django.core import mail
 
@@ -406,8 +401,6 @@ def test_the_shipped_recipe_warns_when_the_tool_is_down(
 
     values = {
         "evidence_uuid": str(evidence.id),
-        # Nothing listens here, and the guard is bypassed below so the refusal
-        # is what the step sees.
         "tool_url": "https://tool.invalid/exports/latest.csv",
         "warn_to": "soc@example.com",
     }
@@ -416,8 +409,7 @@ def test_the_shipped_recipe_warns_when_the_tool_is_down(
             variable.default_value = values[variable.key]
             variable.save()
 
-    # The warning step is the half that matters here, so the run needs an
-    # outgoing mail configuration to reach it at all.
+    # Without a mail configuration the run never reaches the warning step.
     settings.EMAIL_HOST = "smtp.tests.local"
     settings.EMAIL_PORT = "25"
     settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
@@ -431,8 +423,7 @@ def test_the_shipped_recipe_warns_when_the_tool_is_down(
 
     monkeypatch.setattr("requests.get", refuse)
 
-    # Delivery runs in the background worker, so the enqueue is captured here
-    # and run by hand; otherwise the run parks on the email step forever.
+    # Delivery runs in the worker; without this the run parks on the email step.
     enqueued = []
     deliver = workflow_tasks.send_email_task.call_local
     monkeypatch.setattr(

@@ -1756,8 +1756,7 @@ def _resolve_reference(model, value, instance, label, constraints=None):
 
 
 class _SourceUnavailable(Exception):
-    """The source could not hand over a file, and the step opted into reporting
-    that rather than failing. Never escapes this module."""
+    """A miss the step opted into reporting. Never escapes this module."""
 
     def __init__(self, status, host, reason):
         self.status = status
@@ -1786,8 +1785,6 @@ class AttachEvidenceAction(BaseAction):
             try:
                 data, status = self._fetch(config, context)
             except _SourceUnavailable as miss:
-                # Nothing was filed. The run continues only because the author
-                # asked it to, and only a branch on 'attached' makes that visible.
                 return {
                     "object_id": str(evidence.id),
                     "attached": False,
@@ -1822,8 +1819,8 @@ class AttachEvidenceAction(BaseAction):
         return {
             "object_id": str(evidence.id),
             "attached": True,
-            # A URL fetch reports its status on success too: an output mapping
-            # that reads it must not break on the branch that worked.
+            # Reported on success too, or a mapping that reads it breaks on
+            # the branch that worked.
             "status": status,
             "revision_id": str(revision.id),
             "version": revision.version,
@@ -1834,16 +1831,8 @@ class AttachEvidenceAction(BaseAction):
 
     @staticmethod
     def _occurrence(config, context, instance, evidence):
-        """The task occurrence this file answers for.
-
-        A revision carries the occurrence it was filed for, and that is what
-        marks the occurrence's expected evidence as provided. Without it a
-        collected file satisfies nothing, however good the file is.
-
-        Named explicitly, or — since the id of the occurrence that is currently
-        owed changes every period, and so cannot be a setting — found from the
-        evidence itself.
-        """
+        """The occurrence this file answers for: named, or found from the
+        evidence. Without one, a collected file satisfies nothing."""
         if not str(render(config.get("task_node", ""), context) or "").strip():
             if _as_bool(config.get("find_occurrence")):
                 return AttachEvidenceAction._owed_occurrence(instance, evidence)
@@ -1851,10 +1840,8 @@ class AttachEvidenceAction(BaseAction):
         occurrence = _scoped_target(
             TaskNode, config, "task_node", context, instance, "attach_evidence"
         )
-        # Both readers of a revision's occurrence (evidence_reviewed and
-        # evidence_revisions_map) only look at the template's expected list, so
-        # pinning to an occurrence that does not expect this evidence writes a
-        # link nothing will ever read.
+        # Both readers filter on the template's expected list, so this link
+        # would never be read.
         if not occurrence.task_template.evidences.filter(pk=evidence.pk).exists():
             raise ActionError(
                 f"attach_evidence: '{occurrence}' does not expect '{evidence.name}'"
@@ -1863,23 +1850,14 @@ class AttachEvidenceAction(BaseAction):
 
     @staticmethod
     def _owed_occurrence(instance, evidence):
-        """The occurrence this file answers for, worked out from the evidence.
+        """The most recent owed occurrence whose due date has passed.
 
-        Owed means due and not settled. 'completed' and 'cancelled' are done
-        with; 'in_progress' is not — someone may attach a file and leave the
-        occurrence open on purpose, and this step must not decide for them. It
-        never writes status: filing the file is not doing the task.
-
-        Of the occurrences that are owed, the one answered for is the most
-        recent one whose due date has passed. Taking the oldest instead would
-        mean a period nobody ever closed keeps swallowing every later file.
-
-        Returns None when nothing is owed yet, which is a real outcome and not
-        an error: the file is still worth filing, and the step reports
-        task_node_id so a graph can tell the difference.
+        'in_progress' is still owed: someone may file a file and leave the
+        occurrence open on purpose. Taking the oldest instead would let a
+        period nobody closed swallow every later file. None when nothing is
+        owed — the file is still filed, and task_node_id says so.
         """
-        # The run's own today, not the wall clock: a retry must answer for the
-        # same period as the first attempt.
+        # The run's own today: a retry answers for the same period.
         today = _as_date(
             instance.variables.get("today")
             or temporal_seeds(instance.trigger_registration)["today"],
@@ -1895,8 +1873,7 @@ class AttachEvidenceAction(BaseAction):
             .select_related("task_template")
             .order_by("-due_date")
         )
-        # Two tasks expecting the same evidence is a question about intent that
-        # the due dates cannot answer, so the graph has to say which.
+        # Due dates cannot say which task a file answers for.
         templates = {node.task_template_id for node in owed}
         if len(templates) > 1:
             raise ActionError(

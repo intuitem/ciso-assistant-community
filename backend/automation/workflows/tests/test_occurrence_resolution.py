@@ -1,12 +1,8 @@
-"""`attach_evidence` working out which occurrence a collected file answers for.
+"""`attach_evidence` finding the occurrence a collected file answers for.
 
-The id of the occurrence that is currently owed changes every period, so it
-cannot be a setting a graph carries. Before this, closing the loop meant a Read
-objects step in front of every collection graph; now the step can find it from
-the evidence.
-
-What it must never do is decide the task is done. Someone may file a file and
-leave the occurrence in progress on purpose.
+The owed occurrence's id changes every period, so it cannot be a setting — it
+used to need a Read objects step in front of every collection graph. What it
+must never do is decide the task is done.
 """
 
 import uuid
@@ -67,7 +63,7 @@ def an_occurrence(task, domain, due, status="pending"):
 
 
 def attach_flow(domain, evidence):
-    """A collection that is told to find the occurrence itself."""
+    """A collection told to find the occurrence itself."""
     workflow = Workflow.objects.create(name=f"Collect {uuid.uuid4()}", folder=domain)
     version = WorkflowVersion.objects.create(workflow=workflow, run_as=publisher_user())
     start = node(
@@ -101,7 +97,7 @@ def attach_flow(domain, evidence):
 
 
 def collected(domain, evidence):
-    """Run a collection and hand back the attach step's output."""
+    """Run one collection, hand back the attach output."""
     instance = start_instance(attach_flow(domain, evidence))
     assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
     return instance.node_outputs["attach"]
@@ -115,7 +111,7 @@ class TestOwedOccurrence:
         assert collected(domain, evidence)["task_node_id"] == str(owed.id)
 
     def test_the_most_recent_due_period_wins_not_the_oldest(self, domain, evidence):
-        """A period nobody ever closed must not swallow every later file."""
+        """A period nobody closed must not swallow every later file."""
         task = a_task(domain, evidence)
         an_occurrence(task, domain, TODAY - timedelta(days=21))
         an_occurrence(task, domain, TODAY - timedelta(days=14))
@@ -123,8 +119,7 @@ class TestOwedOccurrence:
         assert collected(domain, evidence)["task_node_id"] == str(current.id)
 
     def test_in_progress_is_still_owed(self, domain, evidence):
-        """Someone may attach a file and leave the occurrence open on purpose;
-        only completed and cancelled are settled."""
+        """Only completed and cancelled are settled."""
         task = a_task(domain, evidence)
         open_one = an_occurrence(task, domain, TODAY, status="in_progress")
         assert collected(domain, evidence)["task_node_id"] == str(open_one.id)
@@ -139,14 +134,12 @@ class TestOwedOccurrence:
         task = a_task(domain, evidence)
         an_occurrence(task, domain, TODAY + timedelta(days=7))
         output = collected(domain, evidence)
-        # Nothing is owed yet. The file is still filed; it just answers for
-        # nothing, and the output says so.
+        # Still filed, it just answers for nothing.
         assert output["task_node_id"] is None
         assert output["attached"] is True
 
     def test_filing_never_settles_the_occurrence(self, domain, evidence):
-        """The guardrail: automation may attach the work, a person decides it
-        is done."""
+        """Automation attaches the work; a person decides it is done."""
         task = a_task(domain, evidence)
         owed = an_occurrence(task, domain, TODAY)
         collected(domain, evidence)
@@ -154,8 +147,7 @@ class TestOwedOccurrence:
         assert owed.status == "pending"
 
     def test_two_tasks_expecting_it_is_refused_not_guessed(self, domain, evidence):
-        """Due dates cannot say which task a file answers for, so the graph has
-        to name the occurrence."""
+        """Due dates cannot say which task a file answers for."""
         first = a_task(domain, evidence, "Collect for audit")
         second = a_task(domain, evidence, "Collect for the board")
         an_occurrence(first, domain, TODAY)
