@@ -2056,6 +2056,9 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
             extra_collector.collect(extra_roots)
             for model, objs in extra_collector.model_objs.items():
                 collector.model_objs.setdefault(model, set()).update(objs)
+            # PROTECT/RESTRICT blockers on the extra roots stop the real
+            # delete too, so they belong in the blocked bucket with the rest.
+            collector.protected.update(extra_collector.protected)
 
         deleted_index = set()
         for model, objs in collector.model_objs.items():
