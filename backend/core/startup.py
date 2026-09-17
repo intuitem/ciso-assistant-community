@@ -2016,7 +2016,6 @@ AUDITEE_PERMISSIONS_LIST = [
     "add_answer",
     "change_answer",
     "add_quickformresponse",
-    "view_quickformresponse",
     "view_evidence",
     "add_evidence",
     "change_evidence",

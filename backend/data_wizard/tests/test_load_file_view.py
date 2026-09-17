@@ -1213,7 +1213,12 @@ class TestVulnerabilityFieldContracts:
 
 @pytest.mark.django_db
 class TestFolderEndpoint:
-    def test_create_folder_in_domain(self, api_client, domain_folder, all_accessible):
+    def test_create_folder_in_domain_is_refused(
+        self, api_client, domain_folder, all_accessible
+    ):
+        """Nesting is a PRO feature, so the community importer rejects the row rather
+        than flattening it to the root. The enterprise edition covers the nested case.
+        """
         resp = _post(
             api_client,
             _csv("name,domain\nNew Sub-Folder,Test Domain\n"),
@@ -1222,11 +1227,13 @@ class TestFolderEndpoint:
             domain_folder.id,
         )
         assert resp.status_code == 200
-        assert resp.json()["results"]["created"] == 1
+        results = resp.json()["results"]
+        assert results["created"] == 0
+        assert results["failed"] == 1
+        assert "subDomainsRequirePro" in str(results["errors"])
         from iam.models import Folder
 
-        created = Folder.objects.get(name="New Sub-Folder")
-        assert created.parent_folder == domain_folder
+        assert not Folder.objects.filter(name="New Sub-Folder").exists()
 
     def test_create_folder_without_domain_uses_root(
         self, api_client, root_folder, all_accessible

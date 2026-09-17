@@ -934,6 +934,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'assets',
+				urlModel: 'document-containers',
+				addExisting: {
+					parentField: 'documents'
+				}
+			},
+			{
+				field: 'assets',
 				urlModel: 'compliance-assessments',
 				disableCreate: true,
 				disableDelete: true
@@ -1355,6 +1362,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'task_templates', urlModel: 'task-templates' },
 			{ field: 'processings', urlModel: 'processings' },
+			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'classification', urlModel: 'classification-levels' }
 		],

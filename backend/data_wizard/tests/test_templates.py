@@ -265,6 +265,10 @@ class TestSimpleTemplates:
         assert first.name == "Phishing Attack"
 
     def test_domains_template(self, api_client, root_folder, all_accessible):
+        """The shipped template nests domains under one another, which only the
+        enterprise edition accepts. Here the first nested row is rejected and the
+        import halts, leaving just the top-level domain.
+        """
         resp = _post_template(
             api_client, "domains_template.xlsx", "Folder", root_folder.id
         )
@@ -278,6 +282,12 @@ class TestSimpleTemplates:
         assert it.create_iam_groups is False
         assert UserGroup.objects.filter(folder=acme).exists()
         assert not UserGroup.objects.filter(folder=it).exists()
+        assert results["created"] == 1
+        assert results["failed"] == 1
+        assert results["stopped"] is True
+        assert "subDomainsRequirePro" in str(results["errors"])
+        Folder.objects.get(name="ACME Corp", parent_folder=root_folder)
+        assert not Folder.objects.filter(name="IT Department").exists()
 
     def test_security_exceptions_template(
         self, api_client, domain_folder, template_domains, all_accessible
