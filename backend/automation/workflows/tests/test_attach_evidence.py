@@ -170,7 +170,11 @@ class TestAttachEvidence:
         assert start_instance(version).status == WorkflowInstance.Status.FAILED
 
     def test_it_needs_the_change_permission(self):
-        assert required_permissions({"type": "attach_evidence"}) == ["change_evidence"]
+        """The default mode creates a revision when the evidence has none."""
+        assert required_permissions({"type": "attach_evidence"}) == [
+            "change_evidence",
+            "add_evidencerevision",
+        ]
 
 
 class TestAttachValidation:

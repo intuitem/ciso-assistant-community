@@ -3,7 +3,6 @@ import io
 import json
 import mimetypes
 import os
-import re
 import uuid
 from collections import Counter
 from uuid import UUID
@@ -11,10 +10,9 @@ from uuid import UUID
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from django.db.models import Count, Max, Min, Q
 from django.http import HttpResponse
-from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -29,9 +27,10 @@ from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     escape_excel_formula,
 )
-from iam.models import Folder, RoleAssignment
+from iam.models import RoleAssignment
 
 from .importers import ImportError_, analyze_csv, parse_file, parse_mapped_csv
+from .ingestion import IngestionError, ingest_posture_results
 from .models import PostureAssessment, PostureResult, PostureRun
 
 LONG_CACHE_TTL = 60  # mn
@@ -582,166 +581,19 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         )
 
     def _ingest(self, request, assessment, *, asset_id, entries, run_id, source, tool):
-        if not asset_id or not isinstance(entries, list) or not entries:
-            return Response(
-                {"error": "asset and a non-empty results list are required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if not all(isinstance(e, dict) for e in entries):
-            return Response(
-                {"error": "results entries must be objects"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
         try:
-            asset_id = UUID(str(asset_id))
-        except TypeError, ValueError:
-            return Response(
-                {"error": "asset must be a valid UUID"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        asset = assessment.assets.filter(id=asset_id).first()
-        enrolled = False
-        if asset is None:
-            asset = Asset.objects.filter(id=asset_id).first()
-            if asset is None or not RoleAssignment.is_access_allowed(
+            summary = ingest_posture_results(
+                assessment,
+                asset_id=asset_id,
+                entries=entries,
+                run_id=run_id,
+                source=source,
+                tool=tool,
                 user=request.user,
-                perm=Permission.objects.get(codename="view_asset"),
-                folder=asset.folder if asset else assessment.folder,
-            ):
-                return Response(
-                    {"error": "unknown asset", "asset": asset_id},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            assessment.assets.add(asset)
-            enrolled = True
-
-        valid_results = set(PostureResult.Result.values)
-        invalid = [
-            e.get("ref_id") for e in entries if e.get("result") not in valid_results
-        ]
-        if invalid:
-            return Response(
-                {"error": "invalid result values", "ref_ids": invalid},
-                status=status.HTTP_400_BAD_REQUEST,
             )
-
-        if run_id:
-            try:
-                run_id = UUID(str(run_id))
-            except ValueError:
-                return Response(
-                    {"error": "run_id must be a valid UUID"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            if (
-                PostureRun.objects.filter(id=run_id)
-                .exclude(posture_assessment=assessment)
-                .exists()
-            ):
-                return Response(
-                    {"error": "run_id belongs to another assessment"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-        if source not in PostureResult.Source.values:
-            return Response(
-                {"error": "invalid source"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        timestamp = timezone.now()
-
-        nodes = {
-            node.ref_id: node
-            for node in RequirementNode.objects.filter(
-                framework=assessment.framework, assessable=True
-            )
-            if node.ref_id
-        }
-
-        def match(ref_id):
-            node = nodes.get(ref_id)
-            if node is None and ref_id:
-                node = nodes.get(re.sub(r"^[^0-9]+", "", str(ref_id)))
-            return node
-
-        unknown_refs = [
-            e.get("ref_id") for e in entries if match(e.get("ref_id")) is None
-        ]
-
-        matched = {}
-        for entry in entries:
-            node = match(entry.get("ref_id"))
-            if node is not None:
-                matched[node.id] = entry
-
-        update_fields = [
-            "result",
-            "timestamp",
-            "actual",
-            "expected",
-            "message",
-            "source",
-            "imported_by",
-        ]
-        try:
-            with transaction.atomic():
-                run, run_created = PostureRun.objects.get_or_create(
-                    id=run_id or uuid.uuid4(),
-                    posture_assessment=assessment,
-                    defaults={"started_at": timestamp, "tool": tool},
-                )
-                existing = {
-                    r.requirement_id: r
-                    for r in run.results.filter(asset=asset, requirement_id__in=matched)
-                }
-                to_create, to_update = [], []
-                for node_id, entry in matched.items():
-                    fields = {
-                        "result": entry["result"],
-                        "timestamp": timestamp,
-                        "actual": str(entry.get("actual") or "")[:255],
-                        "expected": str(entry.get("expected") or "")[:255],
-                        "message": str(entry.get("message") or ""),
-                        "source": source,
-                        "imported_by": request.user,
-                    }
-                    obj = existing.get(node_id)
-                    if obj is None:
-                        to_create.append(
-                            PostureResult(
-                                run=run, asset=asset, requirement_id=node_id, **fields
-                            )
-                        )
-                    else:
-                        for key, value in fields.items():
-                            setattr(obj, key, value)
-                        to_update.append(obj)
-                PostureResult.objects.bulk_create(to_create, batch_size=500)
-                if to_update:
-                    PostureResult.objects.bulk_update(
-                        to_update, update_fields, batch_size=500
-                    )
-                if matched:
-                    assessment.prune_history(
-                        {(asset.id, node_id) for node_id in matched}
-                    )
-                elif run_created:
-                    run.delete()
-        except IntegrityError:
-            return Response(
-                {"error": "run_id belongs to another assessment"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return Response(
-            {
-                "run_id": str(run.id),
-                "created": len(to_create),
-                "updated": len(to_update),
-                "unknown_ref_ids": unknown_refs,
-                "enrolled_asset": enrolled,
-            }
-        )
+        except IngestionError as e:
+            return Response(e.payload, status=status.HTTP_400_BAD_REQUEST)
+        return Response(summary)
 
     EXPORT_COLUMNS = [
         "asset",
