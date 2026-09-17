@@ -62,9 +62,14 @@
 	const timelineForm = data.relatedModels['timeline-entries'].createForm;
 	const model = data.relatedModels['timeline-entries'];
 	let entryTypeOptions = $state(model.selectOptions['entry_type'] ?? []);
+	let optionsReady = $state(entryTypeOptions.length > 0);
 	onMount(async () => {
-		await ensureSelectOptions(model);
-		entryTypeOptions = model.selectOptions['entry_type'] ?? [];
+		try {
+			await ensureSelectOptions(model);
+			entryTypeOptions = model.selectOptions['entry_type'] ?? [];
+		} finally {
+			optionsReady = true;
+		}
 	});
 	const schema = modelSchema('timeline-entries');
 
@@ -396,6 +401,7 @@
 								{form}
 								disableDoubleDash={true}
 								options={entryTypeOptions}
+								disabled={!optionsReady}
 								field="entry_type"
 								label={m.entryType()}
 							/>
