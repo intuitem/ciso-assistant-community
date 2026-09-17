@@ -337,6 +337,11 @@
 					description: m.commentsDescription()
 				},
 				{
+					field: 'relations_graph',
+					label: m.relationsGraph(),
+					description: m.relationsGraphDescription()
+				},
+				{
 					field: 'experimental',
 					label: m.experimental(),
 					description: m.experimentalFeatures()
