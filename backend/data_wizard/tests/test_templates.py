@@ -274,20 +274,14 @@ class TestSimpleTemplates:
         )
         assert resp.status_code == 200, resp.json()
         results = resp.json()["results"]
-        assert results["created"] == 4
-        acme = Folder.objects.get(name="ACME Corp", parent_folder=root_folder)
-        it = Folder.objects.get(name="IT Department")
-        assert it.parent_folder == acme
-        assert acme.create_iam_groups is True
-        assert it.create_iam_groups is False
-        assert UserGroup.objects.filter(folder=acme).exists()
-        assert not UserGroup.objects.filter(folder=it).exists()
         assert results["created"] == 1
         assert results["failed"] == 1
         assert results["stopped"] is True
         assert "subDomainsRequirePro" in str(results["errors"])
-        Folder.objects.get(name="ACME Corp", parent_folder=root_folder)
+        acme = Folder.objects.get(name="ACME Corp", parent_folder=root_folder)
         assert not Folder.objects.filter(name="IT Department").exists()
+        assert acme.create_iam_groups is True
+        assert UserGroup.objects.filter(folder=acme, builtin=True).count() == 6
 
     def test_security_exceptions_template(
         self, api_client, domain_folder, template_domains, all_accessible
