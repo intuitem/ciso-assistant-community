@@ -7284,7 +7284,11 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
         pk = self.kwargs["pk"]
         task_templates = (
             TaskTemplate.objects.filter(
-                requirement_assessments__compliance_assessment_id=pk
+                requirement_assessments__compliance_assessment_id=pk,
+                # Only expose task templates the caller is allowed to view
+                id__in=RoleAssignment.get_viewable_object_ids(
+                    self.request.user, TaskTemplate
+                ),
             )
             .distinct()
             .prefetch_related(
@@ -7342,11 +7346,14 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
                     if evidence.id in viewable_evidences:
                         evidence_ids.add(evidence.id)
 
-        # Evidences linked through task templates attached to the compliance
-        # assessment or its requirement assessments
+        # Evidences linked through viewable task templates attached to the
+        # compliance assessment or its requirement assessments
         task_templates = TaskTemplate.objects.filter(
             Q(compliance_assessments=compliance_assessment)
-            | Q(requirement_assessments__compliance_assessment=compliance_assessment)
+            | Q(requirement_assessments__compliance_assessment=compliance_assessment),
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, TaskTemplate
+            ),
         ).distinct()
         task_evidence_ids = set(
             Evidence.objects.filter(task_templates__in=task_templates).values_list(
