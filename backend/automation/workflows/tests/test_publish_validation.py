@@ -322,3 +322,32 @@ class TestItReachesPublish:
         )
         reported = {error["code"] for error in validate_graph(version)}
         assert {"action_http_missing_url", "action_http_bad_method"} <= reported
+
+
+@pytest.mark.django_db
+class TestUrlUserinfo:
+    def test_userinfo_is_a_credential_in_both_actions(self):
+        """requests turns userinfo into Basic auth."""
+        from automation.workflows.actions import (
+            validate_attach_evidence_config,
+            validate_http_request_config,
+        )
+
+        leaky = "http://user:hunter2@tool.example.com/export.csv"
+        http = validate_http_request_config(
+            WorkflowNode(action_config={"type": "http_request", "url": leaky})
+        )
+        assert "action_http_credentials_need_https" in [c for c, _ in http]
+
+        attach = validate_attach_evidence_config(
+            WorkflowNode(
+                action_config={
+                    "type": "attach_evidence",
+                    "evidence": "e",
+                    "filename": "f.csv",
+                    "source": "url",
+                    "url": leaky,
+                }
+            )
+        )
+        assert "action_attach_credentials_need_https" in [c for c, _ in attach]

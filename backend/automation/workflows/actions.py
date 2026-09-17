@@ -1896,7 +1896,7 @@ class AttachEvidenceAction(BaseAction):
                 task_template__evidences=evidence,
                 status__in=("pending", "in_progress"),
                 due_date__lte=today,
-                folder_id__in=_accessible_folder_ids(instance.folder),
+                folder_id__in=_read_scope_folder_ids(instance.folder),
             )
             .select_related("task_template")
             .order_by("-due_date")
@@ -2315,15 +2315,21 @@ def _secrets_context(instance, raw_config):
     return {**_render_context(instance), "secrets": secrets}
 
 
-def _assert_credentials_stay_encrypted(url, config, headers, label):
-    """A secret or an Authorization header must not travel over cleartext,
-    whatever the SSRF guard allows for plain http."""
+def _carries_credentials(url, config, headers):
+    """A secret reference, an Authorization header, or URL userinfo —
+    requests turns the last one into Basic auth."""
     import json as _json
 
-    carries_credentials = bool(SECRETS_REFERENCE_RE.search(_json.dumps(config))) or any(
-        key.lower() == "authorization" for key in headers
+    return (
+        bool(SECRETS_REFERENCE_RE.search(_json.dumps(config)))
+        or any(str(key).lower() == "authorization" for key in (headers or {}))
+        or bool(urlsplit(url).username or urlsplit(url).password)
     )
-    if carries_credentials and urlsplit(url).scheme != "https":
+
+
+def _assert_credentials_stay_encrypted(url, config, headers, label):
+    """Credentials must not travel over cleartext."""
+    if _carries_credentials(url, config, headers) and urlsplit(url).scheme != "https":
         raise FatalActionError(f"{label}: credentials require an https URL")
 
 
@@ -3062,6 +3068,20 @@ def validate_attach_evidence_config(node):
         errors.append(("action_attach_bad_source", f"Unknown source '{source}'"))
     elif source == "url" and not str(config.get("url") or "").strip():
         errors.append(("action_attach_missing_url", "A URL is required"))
+    url = str(config.get("url") or "").strip()
+    if (
+        source == "url"
+        and url
+        and not _is_templated(url)
+        and _carries_credentials(url, config, config.get("headers"))
+        and urlsplit(url).scheme != "https"
+    ):
+        errors.append(
+            (
+                "action_attach_credentials_need_https",
+                "Credentials may only travel over https",
+            )
+        )
     # Both set is ambiguous, and the named one silently wins.
     if (
         _as_bool(config.get("find_occurrence"))
@@ -3119,8 +3139,6 @@ def validate_http_request_config(node):
     """Publish-time checks for http_request. Everything here is also enforced
     at run time; catching it at publish is what stops a graph from looking
     healthy until the first schedule fires."""
-    import json
-
     config = node.action_config or {}
     if config.get("type") != "http_request":
         return []
@@ -3153,20 +3171,19 @@ def validate_http_request_config(node):
                     f"{HTTP_MAX_TIMEOUT} seconds",
                 )
             )
-    # The run-time half of this refuses a secret or an Authorization header over
-    # cleartext. A literal URL can be judged now, so the author hears it while
-    # they are looking at the node rather than from a failed run.
-    carries_credentials = bool(SECRETS_REFERENCE_RE.search(json.dumps(config))) or any(
-        str(key).lower() == "authorization" for key in (headers or {})
-    )
-    if carries_credentials and url and not _is_templated(url):
-        if urlsplit(url).scheme != "https":
-            errors.append(
-                (
-                    "action_http_credentials_need_https",
-                    "Credentials may only travel over https",
-                )
+    # A literal URL can be judged at publish, not on a failed run.
+    if (
+        url
+        and not _is_templated(url)
+        and _carries_credentials(url, config, headers)
+        and urlsplit(url).scheme != "https"
+    ):
+        errors.append(
+            (
+                "action_http_credentials_need_https",
+                "Credentials may only travel over https",
             )
+        )
     return errors
 
 
