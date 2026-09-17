@@ -191,6 +191,24 @@ def test_entity_assessment_preview_reports_enclave_audit_as_deleted(
     assert "VENDOR-AUDIT" not in _bucket_names(res.json()["affected"])
 
 
+def test_entity_assessment_preview_in_shared_enclave_only_deletes_own_audit(
+    admin_client, target_folder
+):
+    from core.models import ComplianceAssessment
+
+    ea = _entity_assessment_with_audit(target_folder, enclave=True)
+    ComplianceAssessment.objects.create(
+        name="SIBLING-AUDIT",
+        folder=ea.compliance_assessment.folder,
+        framework=ea.compliance_assessment.framework,
+    )
+    res = admin_client.get(f"/api/entity-assessments/{ea.id}/cascade-info/")
+    assert res.status_code == 200
+    deleted = _bucket_names(res.json()["deleted"])
+    assert "VENDOR-AUDIT" in deleted
+    assert "SIBLING-AUDIT" not in deleted
+
+
 def test_entity_assessment_preview_keeps_non_enclave_audit_as_affected(
     admin_client, target_folder
 ):
