@@ -183,7 +183,7 @@ Most of what a question costs is not the question. The assistant's fixed instruc
 
 ## What else uses this provider
 
-The chat assistant is not the only caller. The **Ask AI for values** and **Ask AI for text** workflow steps use the same settings, so configuring a provider here also switches those on, and the tokens they spend land on the same bill. A workflow running on a schedule spends without anyone watching, which is the case for setting a limit at the provider. See [AI steps](../features/workflows/actions.md#ai-steps).
+The chat assistant is not the only caller. The **Ask AI for values** and **Ask AI for text** workflow steps appear in the palette when the `chat_mode` feature flag is on, and they read the provider configured here rather than one of their own — so the tokens they spend land on the same bill. A workflow running on a schedule spends without anyone watching, which is the case for setting a limit at the provider. See [AI steps](../features/workflows/actions.md#ai-steps).
 
 ## Related pages
 

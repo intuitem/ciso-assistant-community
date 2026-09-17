@@ -155,12 +155,16 @@ def ingest_posture_results(
             if matched:
                 assessment.prune_history({(asset.id, node_id) for node_id in matched})
             elif run_created:
+                # Nothing matched, so the run this call opened is noise.
                 run.delete()
+                run = None
     except IntegrityError:
         raise IngestionError({"error": "run_id belongs to another assessment"})
 
     return {
-        "run_id": str(run.id),
+        # None when the run was dropped: reporting a deleted id would let a
+        # retry be configured against a row that is not there.
+        "run_id": str(run.id) if run else None,
         "created": len(to_create),
         "updated": len(to_update),
         "unknown_ref_ids": unknown_refs,

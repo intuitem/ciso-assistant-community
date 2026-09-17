@@ -1778,21 +1778,21 @@ class AttachEvidenceAction(BaseAction):
             raise ActionError("attach_evidence: 'filename' is required")
 
         source = config.get("source", "text")
-        status = None
+        status = host = None
         if source == "text":
             data = str(render(config.get("text", ""), context) or "").encode()
         elif source == "url":
             try:
-                data, status = self._fetch(config, context)
+                data, status, host = self._fetch(config, context)
             except _SourceUnavailable as miss:
-                return {
-                    "object_id": str(evidence.id),
-                    "attached": False,
-                    "status": miss.status,
-                    "unreachable": miss.status == 0,
-                    "host": miss.host,
-                    "reason": miss.reason,
-                }
+                return self._output(
+                    evidence,
+                    attached=False,
+                    status=miss.status,
+                    unreachable=miss.status == 0,
+                    host=miss.host,
+                    reason=miss.reason,
+                )
         else:
             raise FatalActionError(f"attach_evidence: unknown source '{source}'")
         if not data:
@@ -1805,9 +1805,11 @@ class AttachEvidenceAction(BaseAction):
         else:
             # Same shape as the upload endpoint: the latest revision carries the
             # file, and full_clean applies the extension allowlist and the size cap.
-            revision = evidence.revisions.order_by(
-                "-version"
-            ).first() or EvidenceRevision.objects.create(evidence=evidence)
+            # Unsaved until it validates: FatalActionError is caught inside
+            # the node's transaction, so a row created here would be committed.
+            revision = evidence.revisions.order_by("-version").first() or (
+                EvidenceRevision(evidence=evidence, folder=evidence.folder)
+            )
             revision.attachment = upload
             if occurrence is not None:
                 revision.task_node = occurrence
@@ -1816,16 +1818,42 @@ class AttachEvidenceAction(BaseAction):
             except ValidationError as e:
                 raise FatalActionError(f"attach_evidence: {'; '.join(e.messages)}")
             revision.save()
+        return self._output(
+            evidence,
+            attached=True,
+            status=status,
+            host=host,
+            revision=revision,
+            size=len(data),
+            occurrence=occurrence,
+        )
+
+    @staticmethod
+    def _output(
+        evidence,
+        *,
+        attached,
+        status=None,
+        unreachable=False,
+        host=None,
+        reason=None,
+        revision=None,
+        size=0,
+        occurrence=None,
+    ):
+        """Every key on both branches. A key that appears on only one of them
+        is an output mapping that breaks whenever the other one runs."""
         return {
             "object_id": str(evidence.id),
-            "attached": True,
-            # Reported on success too, or a mapping that reads it breaks on
-            # the branch that worked.
+            "attached": attached,
             "status": status,
-            "revision_id": str(revision.id),
-            "version": revision.version,
-            "filename": revision.attachment.name,
-            "bytes": len(data),
+            "unreachable": unreachable,
+            "host": host,
+            "reason": reason,
+            "revision_id": str(revision.id) if revision else None,
+            "version": revision.version if revision else None,
+            "filename": revision.attachment.name if revision else None,
+            "bytes": size,
             "task_node_id": str(occurrence.id) if occurrence else None,
         }
 
@@ -1934,8 +1962,8 @@ class AttachEvidenceAction(BaseAction):
         return evidence
 
     def _fetch(self, config, context):
-        """Returns (bytes, status). Raises _SourceUnavailable when the step
-        opted into reporting a miss instead of failing."""
+        """Returns (bytes, status, host). Raises _SourceUnavailable when the
+        step opted into reporting a miss instead of failing."""
         import requests
         from django.conf import settings
 
@@ -1989,7 +2017,7 @@ class AttachEvidenceAction(BaseAction):
                 raise FatalActionError(
                     f"attach_evidence: the file exceeds {settings.ATTACHMENT_MAX_SIZE_MB} MB"
                 )
-        return data, response.status_code
+        return data, response.status_code, host
 
 
 WHOLE_TEMPLATE_RE = re.compile(r"^\{\{\s*([\w.]+)\s*\}\}$")
@@ -2178,6 +2206,10 @@ class PostResultsAction(BaseAction):
             "post_results",
             ids=authz.changeable_ids,
         )
+        # PostureAssessmentViewSet.upload_results refuses a locked assessment;
+        # sharing the write path has to mean sharing the refusal.
+        if assessment.is_locked:
+            raise ActionError("post_results: the assessment is locked")
         entries = _resolve_list(
             config.get("results"), context, "post_results: 'results'"
         )
@@ -2778,10 +2810,9 @@ def required_permissions(action_config):
                 codenames += extra
         return codenames
     if action_type == "attach_evidence":
-        codenames = ["change_evidence"]
-        if _as_bool(action_config.get("new_revision")):
-            codenames.append("add_evidencerevision")
-        return codenames
+        # Both modes can create a revision: the default one does when the
+        # evidence has none yet.
+        return ["change_evidence", "add_evidencerevision"]
     if action_type == "record_measurement":
         return ["add_custommetricsample"]
     if action_type == "post_results":
@@ -3025,6 +3056,17 @@ def validate_attach_evidence_config(node):
         errors.append(("action_attach_bad_source", f"Unknown source '{source}'"))
     elif source == "url" and not str(config.get("url") or "").strip():
         errors.append(("action_attach_missing_url", "A URL is required"))
+    # Both set is ambiguous, and the named one silently wins.
+    if (
+        _as_bool(config.get("find_occurrence"))
+        and str(config.get("task_node") or "").strip()
+    ):
+        errors.append(
+            (
+                "action_attach_occurrence_conflict",
+                "Either name the task occurrence or find it automatically, not both",
+            )
+        )
     return errors
 
 
@@ -3057,7 +3099,7 @@ def validate_post_results_config(node):
     if results in ("", None, [], {}):
         errors.append(("action_results_missing_results", "Results are required"))
     elif isinstance(results, str) and not TEMPLATE_RE.search(results):
-        if json_loads_or_none(results) is None:
+        if not isinstance(json_loads_or_none(results), list):
             errors.append(
                 (
                     "action_results_not_a_list",

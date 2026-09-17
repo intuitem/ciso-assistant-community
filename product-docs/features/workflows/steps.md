@@ -23,7 +23,7 @@ An action does one thing: reads objects, creates one, sends an email, calls an e
 | Update object | Changes fields and links on one existing object |
 | Attach a file to an evidence | Adds a file, typed or downloaded, to an evidence |
 | Record a measurement | Files a number against a metric instance |
-| Post scan results | Files a batch of pass/fail verdicts against a technical posture |
+| Post scan results | Files a batch of results against a technical posture |
 | Read objects | Queries objects with filters, as a page or a single match |
 | HTTP request | Calls an external URL |
 | Send email | Sends plain-text email |

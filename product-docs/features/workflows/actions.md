@@ -105,7 +105,7 @@ Creates an object in the workflow's domain.
 |---|---|
 | Object to create | One of the creatable objects below |
 | Fields | One row per field. Values are *expr* |
-| Update when it already exists | When on, matches an existing object by name in the workflow's domain and updates it instead of creating a duplicate |
+| Update when it already exists | When on, matches an existing object by name and updates it instead of creating a duplicate. Matching happens in the domain the object lands in, which is the workflow's own unless noted below |
 
 Output: `created_object_id`, `created_object_name`, `created_object_model`, `created` (false when an existing object was updated).
 
@@ -208,7 +208,7 @@ Adds a file to an existing evidence.
 | Continue when the tool cannot be reached | With source URL. Off by default |
 | File it as a new revision | Off by default. Off replaces the file on the evidence's latest revision. On files a new revision and leaves the previous one untouched |
 
-Output: `object_id`, `attached`, `status` (the HTTP status with source URL, empty with source Text), `revision_id`, `version`, `filename`, `bytes`, `task_node_id`. Permission: `change_evidence`, plus `add_evidencerevision` when **File it as a new revision** is on.
+Output: `object_id`, `attached`, `status` (the HTTP status with source URL, empty with source Text), `unreachable`, `host`, `reason`, `revision_id`, `version`, `filename`, `bytes`, `task_node_id`. Every key is reported on both outcomes, empty where it does not apply, so an output mapping cannot break on one branch. Permissions: `change_evidence` and `add_evidencerevision`.
 
 {% hint style="info" %}
 **Close the loop with a recurring task.** A task that expects an evidence shows it as provided once a revision filed *for that occurrence* exists. A collected file that answers for no occurrence satisfies nothing, however good the file is — so the task keeps asking.
@@ -231,7 +231,7 @@ A step that runs on a schedule needs **File it as a new revision** on. With it o
 {% hint style="info" %}
 **When the tool is down, the run stops — unless you say otherwise.** By default a source that answers `4xx`/`5xx`, or that never answers at all, fails this step. That is the safe reading: a collection that could not run must not look like one that ran and found nothing.
 
-The two **Continue when…** settings turn each of those into an outcome the graph can route on. Nothing is filed either way; the difference is that the step returns `attached` as `false` instead of failing, along with `unreachable`, `host` and `reason`. Branch on `attached`, not on `status` — `status` is reported on both outcomes, so it tells you *what* happened, not *whether* it worked. A source that could not be reached reports `status` `0`, which no real answer can produce, so one branch handles both a bad answer and no answer.
+The two **Continue when…** settings turn each of those into an outcome the graph can route on. Nothing is filed either way; the difference is that the step returns `attached` as `false` instead of failing, and fills in `unreachable`, `host` and `reason`. Branch on `attached`, not on `status` — `status` is reported on both outcomes, so it tells you *what* happened, not *whether* it worked. A source that could not be reached reports `status` `0`, which no real answer can produce, so one branch handles both a bad answer and no answer.
 
 Map `attached` into a variable with an output mapping and branch on it — then log the outage and email whoever owns the tool. Without that branch, opting in only hides the problem. The **Evidence collection** template in the library is wired this way.
 {% endhint %}
@@ -258,7 +258,7 @@ The metric instance must be inside the workflow's domain or a sub-domain. The sa
 
 ### Post scan results
 
-Files a batch of pass/fail verdicts against a technical posture, for one asset.
+Files a batch of results against a technical posture, for one asset. Each result is `pass`, `fail`, `not_applicable`, `error` or `not_checked`.
 
 | Setting | |
 |---|---|

@@ -1802,7 +1802,12 @@
 							type="checkbox"
 							class="checkbox scale-75"
 							bind:checked={actionConfig.find_occurrence}
-							onchange={onChange}
+							onchange={() => {
+								// Hiding the field is not clearing it, and a named
+								// occurrence wins over the automatic one.
+								if (actionConfig.find_occurrence) actionConfig.task_node = '';
+								onChange();
+							}}
 						/>
 						{m.findOccurrence()}
 					</label>

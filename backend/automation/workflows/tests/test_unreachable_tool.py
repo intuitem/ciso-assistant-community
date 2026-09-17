@@ -299,6 +299,31 @@ class TestUnreachableAttachSource:
         assert output["unreachable"] is False
         assert output["reason"] == "http_error"
 
+    def test_both_branches_report_the_same_keys(self, monkeypatch, evidence):
+        """A key on only one branch is an output mapping that breaks whenever
+        the other one runs."""
+        obj, folder = evidence
+        monkeypatch.setattr(
+            "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
+        )
+
+        class Answer:
+            status_code = 200
+
+            def iter_content(self, _):
+                return iter([b"host,agent\nlaptop-01,ok\n"])
+
+        monkeypatch.setattr("requests.get", lambda *a, **k: Answer())
+        filed = start_instance(attach_flow(folder, obj, allow_connection_error=True))
+
+        def refuse(*args, **kwargs):
+            raise requests.ConnectionError("connection refused")
+
+        monkeypatch.setattr("requests.get", refuse)
+        missed = start_instance(attach_flow(folder, obj, allow_connection_error=True))
+
+        assert set(filed.node_outputs["attach"]) == set(missed.node_outputs["attach"])
+
     def test_a_filed_revision_reports_attached(self, monkeypatch, evidence):
         """Absent on success, a branch on it reads None and always fails."""
         obj, folder = evidence
