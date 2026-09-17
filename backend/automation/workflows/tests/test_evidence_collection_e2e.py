@@ -391,7 +391,7 @@ def test_the_shipped_recipe_warns_when_the_tool_is_down(scene, monkeypatch):
     from automation.workflows.import_export import import_workflow
 
     domain, evidence, task, _ = scene
-    occurrence = task.task_nodes.order_by("due_date").first()
+    occurrence = task.tasknode_set.order_by("due_date").first()
     assert occurrence is not None, (
         "the recurring task should have generated occurrences"
     )
