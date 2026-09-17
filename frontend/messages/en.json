@@ -5842,6 +5842,7 @@
 	"postResults": "Post scan results",
 	"fileAsNewRevision": "File it as a new revision",
 	"taskNodeAttachHint": "Optional. The occurrence this file answers for, so the task shows its evidence as provided. Read it with a Read objects step on Task occurrence.",
+	"attachSourceMissHint": "Without these, the step fails and the run stops. With them, nothing is filed and the step reports attached as false, so a branch can warn instead — a source that never answered is reported as status 0.",
 	"newRevisionHint": "Keeps the previous file and sends the evidence back for review. Off overwrites the latest revision.",
 	"measurementValueHint": "A number for a quantitative metric, a choice index for a qualitative one.",
 	"postResultsHint": "A step output, or a JSON list of rows carrying ref_id, result, actual, expected and message.",

@@ -4,12 +4,13 @@ ref_id: workflow-operations-evidence-collection
 name: Evidence collection — pull a recurring task's evidence from a tool
 description: 'A recurring task expects an evidence every week. Instead of someone downloading the export
   and uploading it by hand, this pulls the file from the tool on a schedule, files it as a new revision
-  and pins it to the occurrence that asked for it, so the task shows its evidence as provided. After
-  importing: set task_template_id (the id in the task''s URL), evidence_name and export_url, and add
-  the tool_token secret.'
+  and pins it to the occurrence that asked for it, so the task shows its evidence as provided. If the
+  tool cannot be reached, it warns the team instead of failing silently. After importing: set
+  task_template_id (the id in the task''s URL), evidence_name, export_url and warn_to, and add the
+  tool_token secret.'
 copyright: © intuitem
-version: 1
-publication_date: 2026-09-16
+version: 2
+publication_date: 2026-09-17
 provider: intuitem
 packager: intuitem
 objects:
@@ -20,7 +21,8 @@ objects:
     name: Evidence collection — pull a recurring task's evidence from a tool
     description: 'Every Monday: find the oldest pending occurrence of one named task, download this week''s
       export, file it as a new revision of the expected evidence and pin it to that occurrence. The evidence
-      moves to In review, because a file nobody has looked at yet is not an approved one.'
+      moves to In review, because a file nobody has looked at yet is not an approved one. A tool that
+      answered badly or not at all is reported by email rather than stopping the run.'
     requires:
       secrets:
       - tool_token
@@ -39,14 +41,23 @@ objects:
       - key: export_url
         type: string
         default_value: https://tool.example.com/exports/latest.csv
-      # A condition reads declared variables, so the two lookups publish their
-      # hit/miss into one before the branch reads them.
+      - key: warn_to
+        type: string
+        default_value: ''
+      # A condition reads declared variables, so every step publishes its
+      # hit/miss into one before a branch reads it.
       - key: week_found
         type: boolean
         default_value: false
       - key: evidence_found
         type: boolean
         default_value: false
+      - key: collected
+        type: boolean
+        default_value: false
+      - key: tool_status
+        type: number
+        default_value: 0
       nodes:
       - ref: every_monday
         type: trigger
@@ -118,6 +129,28 @@ objects:
           new_revision: true
           headers:
             Authorization: Bearer {{secrets.tool_token}}
+          # Without these two the step fails and the run stops, so a tool that
+          # has been down for a month looks exactly like a quiet week. With
+          # them nothing is filed, the miss is reported, and the branch below
+          # is what makes it visible.
+          allow_error_status: true
+          allow_connection_error: true
+        output_mapping:
+          collected: attached
+          tool_status: status
+      - ref: did_it_land
+        type: condition
+        label: Did the export land?
+        branches:
+        - name: Filed
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: collected
+              op: eq
+              value: true
+        - name: Tool did not answer
+          is_default: true
       - ref: nothing_to_do
         type: action
         label: Say why nothing was collected
@@ -125,6 +158,23 @@ objects:
           type: log
           message: 'No collection on {{today}}: a pending occurrence was found = {{week_found}}, the
             evidence "{{evidence_name}}" was found = {{evidence_found}}'
+      - ref: log_the_outage
+        type: action
+        label: Say the tool did not answer
+        action_config:
+          type: log
+          message: 'No export filed on {{today}}: the tool answered {{tool_status}} (0 means it could
+            not be reached at all).'
+      - ref: warn_the_team
+        type: action
+        label: Warn the team
+        action_config:
+          type: send_email
+          recipients: '{{warn_to}}'
+          subject: 'Evidence collection failed on {{today}}'
+          body: 'This week''s export for "{{evidence_name}}" was not filed: the tool answered
+            {{tool_status}}. A status of 0 means it could not be reached at all. The task occurrence
+            is still pending and nobody has been asked to do anything about it yet.'
       - ref: done
         type: end
       edges:
@@ -141,6 +191,16 @@ objects:
         target: nothing_to_do
         source_branch: Nothing to collect
       - source: file_the_export
+        target: did_it_land
+      - source: did_it_land
+        target: done
+        source_branch: Filed
+      - source: did_it_land
+        target: log_the_outage
+        source_branch: Tool did not answer
+      - source: log_the_outage
+        target: warn_the_team
+      - source: warn_the_team
         target: done
       - source: nothing_to_do
         target: done

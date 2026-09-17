@@ -203,9 +203,11 @@ Adds a file to an existing evidence.
 | Content *expr* | With source Text |
 | URL *expr* | With source URL. Secrets allowed |
 | Task occurrence *expr* | Optional. The occurrence this file answers for |
+| Continue when the answer is an error | With source URL. Off by default |
+| Continue when the tool cannot be reached | With source URL. Off by default |
 | File it as a new revision | Off by default. Off replaces the file on the evidence's latest revision. On files a new revision and leaves the previous one untouched |
 
-Output: `object_id`, `revision_id`, `version`, `filename`, `bytes`, `task_node_id`. Permission: `change_evidence`, plus `add_evidencerevision` when **File it as a new revision** is on.
+Output: `object_id`, `attached`, `revision_id`, `version`, `filename`, `bytes`, `task_node_id`. Permission: `change_evidence`, plus `add_evidencerevision` when **File it as a new revision** is on.
 
 {% hint style="info" %}
 **Set Task occurrence to close the loop with a recurring task.** A task that expects an evidence shows it as provided once a revision filed *for that occurrence* exists. A collected file with no occurrence set satisfies nothing, however good the file is — so the task keeps asking.
@@ -217,7 +219,15 @@ Find this week's occurrence with a Read objects step on **Task occurrence**, fil
 A step that runs on a schedule needs **File it as a new revision** on. With it off, every run overwrites the same revision, so a nightly collection keeps one file and no history. With it on, each run files its own revision and the evidence moves back to **In review**: a file nobody has looked at yet does not inherit the previous one's approval.
 {% endhint %}
 
-Downloads respect the instance's attachment size limit and file extension allowlist. Redirects are not followed. A URL containing a secret must use `https`. A refused file name leaves no empty revision behind.
+{% hint style="info" %}
+**When the tool is down, the run stops — unless you say otherwise.** By default a source that answers `4xx`/`5xx`, or that never answers at all, fails this step. That is the safe reading: a collection that could not run must not look like one that ran and found nothing.
+
+The two **Continue when…** settings turn each of those into an outcome the graph can route on. Nothing is filed either way; the difference is that the step returns `attached` as `false` instead of failing, along with `status`, `unreachable`, `host` and `reason`. A source that could not be reached reports `status` `0`, which no real answer can produce, so one branch handles both a bad answer and no answer.
+
+Map `attached` into a variable with an output mapping and branch on it — then log the outage and email whoever owns the tool. Without that branch, opting in only hides the problem. The **Evidence collection** template in the library is wired this way.
+{% endhint %}
+
+Downloads respect the instance's attachment size limit and file extension allowlist. Redirects are not followed. A URL containing a secret must use `https`. A refused file name leaves no empty revision behind. Errors are reported by host only, never with the full URL, so a secret in a query string cannot leak into the log.
 
 ### Record a measurement
 
@@ -282,8 +292,16 @@ Delivery happens in the background worker. The step waits for the result. Each r
 | Headers | Values are *expr*, secrets allowed |
 | Body (JSON or raw text) *expr* | Sent as JSON when it parses as JSON, as raw text otherwise |
 | Timeout (seconds) | 1 to 30, default 15 |
+| Continue when the answer is an error | Off by default |
+| Continue when the tool cannot be reached | Off by default |
 
-Output: `status`, `body` (parsed JSON, or the first 5000 characters of text). No permission required. Any `4xx` or `5xx` answer fails the step.
+Output: `status`, `body` (parsed JSON, or the first 5000 characters of text). No permission required.
+
+By default a `4xx` or `5xx` answer fails the step, and a tool that never answered at all fails it too. That is the safe reading: a collection that could not run must not look like one that ran and found nothing.
+
+The two checkboxes turn each of those into an outcome the graph can route on instead. Map `status` into a variable with an output mapping, then branch on it. A tool that could not be reached is reported as `status` `0`, which no real answer can produce, so one branch handles both a bad answer and no answer. The output also carries `unreachable`, `host` and `reason` (the error class, such as `ConnectionError`).
+
+Use them when the step is followed by a branch that does something about the failure — log it, email the owner, open a task. Without that branch, opting in only hides the problem.
 
 Redirects are not followed. Private addresses are refused. A secret or an `Authorization` header requires `https`. Errors are reported by host only, never with the full URL, so a secret in a query string cannot leak into the log.
 

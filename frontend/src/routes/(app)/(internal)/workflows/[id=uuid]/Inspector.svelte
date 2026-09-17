@@ -203,6 +203,8 @@
 			filename: '',
 			text: '',
 			url: '',
+			allow_error_status: false,
+			allow_connection_error: false,
 			new_revision: false,
 			task_node: ''
 		},
@@ -1764,6 +1766,25 @@
 								oninput={onChange}
 							/>
 						</label>
+						<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+							<input
+								type="checkbox"
+								class="checkbox scale-75"
+								bind:checked={actionConfig.allow_error_status}
+								onchange={onChange}
+							/>
+							{m.httpAllowErrorStatus()}
+						</label>
+						<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+							<input
+								type="checkbox"
+								class="checkbox scale-75"
+								bind:checked={actionConfig.allow_connection_error}
+								onchange={onChange}
+							/>
+							{m.httpAllowConnectionError()}
+						</label>
+						<span class="text-[10px] text-surface-500">{m.attachSourceMissHint()}</span>
 					{:else}
 						<label>
 							{@render fieldLabel(m.content())}

@@ -6380,6 +6380,7 @@
 	"postResults": "Déposer des résultats de scan",
 	"fileAsNewRevision": "Créer une nouvelle révision",
 	"taskNodeAttachHint": "Facultatif. L'occurrence à laquelle ce fichier répond, pour que la tâche affiche sa preuve comme fournie. À récupérer avec une étape Lire des objets sur Occurrence de tâche.",
+	"attachSourceMissHint": "Sans ces options, l'étape échoue et l'exécution s'arrête. Avec, rien n'est déposé et l'étape indique attached à false, ce qui permet de brancher vers une alerte — une source qui n'a pas répondu est signalée par le statut 0.",
 	"newRevisionHint": "Conserve le fichier précédent et remet la preuve en revue. Sinon, la dernière révision est écrasée.",
 	"measurementValueHint": "Un nombre pour une métrique quantitative, un indice de choix pour une métrique qualitative.",
 	"postResultsHint": "La sortie d'une étape, ou une liste JSON de lignes portant ref_id, result, actual, expected et message.",

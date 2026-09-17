@@ -206,3 +206,132 @@ class TestUnreachableTool:
         assert "warned" in instance.node_outputs
         assert "collected" not in instance.node_outputs
         assert instance.node_outputs["warned"]["message"] == "tool unreachable: 0"
+
+
+def attach_flow(folder, evidence, **extra):
+    """trigger -> attach_evidence(source: url) -> end."""
+    workflow = Workflow.objects.create(name=f"Attach {uuid.uuid4()}", folder=folder)
+    version = WorkflowVersion.objects.create(workflow=workflow, run_as=publisher_user())
+    start = node("trigger", "start", trigger_config={"type": "manual"})
+    attach = node(
+        "action",
+        "attach",
+        label="Attach",
+        action_config={
+            "type": "attach_evidence",
+            "evidence": str(evidence.id),
+            "source": "url",
+            "url": "https://tool.invalid/export.csv",
+            "filename": "export.csv",
+            "new_revision": True,
+            **extra,
+        },
+    )
+    done = node("end", "done")
+    save_graph(
+        version,
+        {
+            "nodes": [start, attach, done],
+            "edges": [edge(start, attach), edge(attach, done)],
+        },
+    )
+    return version
+
+
+@pytest.fixture
+def evidence():
+    from core.models import Evidence
+
+    folder = make_domain("Attach")
+    return Evidence.objects.create(name="Weekly export", folder=folder), folder
+
+
+@pytest.mark.django_db
+class TestUnreachableAttachSource:
+    """`attach_evidence` downloads the file itself, so a graph that collects
+    through it has no http_request to branch on. It carries the same two
+    opt-ins, and reports `attached` so a branch can tell a filed revision from
+    a skipped one."""
+
+    def test_by_default_an_unreachable_source_fails_the_run(
+        self, unreachable, evidence
+    ):
+        obj, folder = evidence
+        instance = start_instance(attach_flow(folder, obj))
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert obj.revisions.count() == 0
+
+    def test_opting_in_reports_the_miss_and_files_nothing(self, unreachable, evidence):
+        obj, folder = evidence
+        instance = start_instance(attach_flow(folder, obj, allow_connection_error=True))
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        output = instance.node_outputs["attach"]
+        assert output["attached"] is False
+        assert output["unreachable"] is True
+        assert output["status"] == 0
+        assert output["reason"] == "ConnectionError"
+        assert output["host"] == "tool.invalid"
+        # The point of the flag is a warning, not a silent empty revision.
+        assert obj.revisions.count() == 0
+
+    def test_the_miss_never_carries_the_url(self, unreachable, evidence):
+        obj, folder = evidence
+        instance = start_instance(
+            attach_flow(
+                folder,
+                obj,
+                allow_connection_error=True,
+                url="https://tool.invalid/export.csv?api_key=supersecret",
+            )
+        )
+        assert "supersecret" not in str(instance.node_outputs["attach"])
+
+    def test_a_bad_answer_is_a_separate_opt_in(self, monkeypatch, evidence):
+        """A 503 and a refused connection are different failures; opting into
+        one must not quietly enable the other."""
+        obj, folder = evidence
+        monkeypatch.setattr(
+            "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
+        )
+
+        class Answer:
+            status_code = 503
+
+            def iter_content(self, _):
+                return iter([])
+
+        monkeypatch.setattr("requests.get", lambda *a, **k: Answer())
+
+        failed = start_instance(attach_flow(folder, obj, allow_connection_error=True))
+        assert failed.status == WorkflowInstance.Status.FAILED
+
+        allowed = start_instance(attach_flow(folder, obj, allow_error_status=True))
+        assert allowed.status == WorkflowInstance.Status.COMPLETED, allowed.variables
+        output = allowed.node_outputs["attach"]
+        assert output["attached"] is False
+        assert output["status"] == 503
+        assert output["unreachable"] is False
+        assert output["reason"] == "http_error"
+
+    def test_a_filed_revision_reports_attached(self, monkeypatch, evidence):
+        """The discriminator has to be present on the success path too, or a
+        branch on it reads None and takes the failure edge every time."""
+        obj, folder = evidence
+        monkeypatch.setattr(
+            "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
+        )
+
+        class Answer:
+            status_code = 200
+
+            def iter_content(self, _):
+                return iter([b"host,agent\nlaptop-01,ok\n"])
+
+        monkeypatch.setattr("requests.get", lambda *a, **k: Answer())
+
+        instance = start_instance(attach_flow(folder, obj, allow_connection_error=True))
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        output = instance.node_outputs["attach"]
+        assert output["attached"] is True
+        assert output["version"] == 1
+        assert obj.revisions.count() == 1

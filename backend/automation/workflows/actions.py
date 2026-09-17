@@ -1755,6 +1755,16 @@ def _resolve_reference(model, value, instance, label, constraints=None):
     return target
 
 
+class _SourceUnavailable(Exception):
+    """The source could not hand over a file, and the step opted into reporting
+    that rather than failing. Never escapes this module."""
+
+    def __init__(self, status, host, reason):
+        self.status = status
+        self.host = host
+        self.reason = reason
+
+
 @register
 class AttachEvidenceAction(BaseAction):
     action_type = "attach_evidence"
@@ -1772,7 +1782,19 @@ class AttachEvidenceAction(BaseAction):
         if source == "text":
             data = str(render(config.get("text", ""), context) or "").encode()
         elif source == "url":
-            data = self._fetch(config, context)
+            try:
+                data = self._fetch(config, context)
+            except _SourceUnavailable as miss:
+                # Nothing was filed. The run continues only because the author
+                # asked it to, and only a branch on 'attached' makes that visible.
+                return {
+                    "object_id": str(evidence.id),
+                    "attached": False,
+                    "status": miss.status,
+                    "unreachable": miss.status == 0,
+                    "host": miss.host,
+                    "reason": miss.reason,
+                }
         else:
             raise FatalActionError(f"attach_evidence: unknown source '{source}'")
         if not data:
@@ -1798,6 +1820,7 @@ class AttachEvidenceAction(BaseAction):
             revision.save()
         return {
             "object_id": str(evidence.id),
+            "attached": True,
             "revision_id": str(revision.id),
             "version": revision.version,
             "filename": revision.attachment.name,
@@ -1892,10 +1915,12 @@ class AttachEvidenceAction(BaseAction):
         url = render(config.get("url", ""), context)
         if not url:
             raise ActionError("attach_evidence: 'url' is required")
+        # A URL can carry a secret in its query string, so only the host is ever
+        # reported back.
+        host = urlsplit(url).hostname or "target"
         try:
             assert_public_url_unless_dev(url, allowed_schemes=("https", "http"))
         except (BlockedRequestError, DnsLookupError) as e:
-            host = urlsplit(url).hostname or "target"
             raise ActionError(f"attach_evidence: {type(e).__name__} for host '{host}'")
         headers = {
             str(key): render(str(value), context)
@@ -1915,11 +1940,15 @@ class AttachEvidenceAction(BaseAction):
                 stream=True,
             )
         except requests.RequestException as e:
-            raise ActionError(f"attach_evidence: {type(e).__name__}")
+            if not _as_bool(config.get("allow_connection_error")):
+                raise ActionError(f"attach_evidence: {type(e).__name__}")
+            raise _SourceUnavailable(0, host, type(e).__name__)
         if response.status_code >= 400:
-            raise ActionError(
-                f"attach_evidence: the source answered {response.status_code}"
-            )
+            if not _as_bool(config.get("allow_error_status")):
+                raise ActionError(
+                    f"attach_evidence: the source answered {response.status_code}"
+                )
+            raise _SourceUnavailable(response.status_code, host, "http_error")
         data = b""
         for chunk in response.iter_content(64 * 1024):
             data += chunk
