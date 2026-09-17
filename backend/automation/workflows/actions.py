@@ -1818,7 +1818,6 @@ class AttachEvidenceAction(BaseAction):
             host=host,
             revision=revision,
             size=len(data),
-            occurrence=occurrence,
         )
 
     @staticmethod
@@ -1832,7 +1831,6 @@ class AttachEvidenceAction(BaseAction):
         reason=None,
         revision=None,
         size=0,
-        occurrence=None,
     ):
         """Every key on both branches. A key that appears on only one of them
         is an output mapping that breaks whenever the other one runs."""
@@ -1847,7 +1845,13 @@ class AttachEvidenceAction(BaseAction):
             "version": revision.version if revision else None,
             "filename": revision.attachment.name if revision else None,
             "bytes": size,
-            "task_node_id": str(occurrence.id) if occurrence else None,
+            # From the row, not from what this run resolved: overwriting a
+            # revision keeps the occurrence it already answered for.
+            "task_node_id": (
+                str(revision.task_node_id)
+                if revision and revision.task_node_id
+                else None
+            ),
         }
 
     @staticmethod

@@ -172,6 +172,29 @@ class TestOwedOccurrence:
         an_occurrence(task, elsewhere, TODAY)
         assert collected(domain, evidence)["task_node_id"] is None
 
+    def test_overwriting_keeps_the_occurrence_already_answered_for(
+        self, domain, evidence
+    ):
+        """Clearing it would un-link whoever had answered, and the output has
+        to report the row rather than what this run resolved."""
+        from core.models import EvidenceRevision
+
+        task = a_task(domain, evidence)
+        answered = an_occurrence(task, domain, TODAY, status="completed")
+        existing = EvidenceRevision.objects.create(
+            evidence=evidence, folder=domain, task_node=answered
+        )
+        version = attach_flow(domain, evidence)
+        attach = version.nodes.get(ref="attach")
+        attach.action_config.pop("new_revision", None)
+        attach.save()
+
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        existing.refresh_from_db()
+        assert existing.task_node_id == answered.id
+        assert instance.node_outputs["attach"]["task_node_id"] == str(answered.id)
+
     def test_off_by_default(self, domain, evidence):
         task = a_task(domain, evidence)
         an_occurrence(task, domain, TODAY)
