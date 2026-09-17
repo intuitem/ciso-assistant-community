@@ -25,15 +25,15 @@ def get_client_ip(request):
     if not request:
         return None
 
+    xff = request.headers.get("X-Forwarded-For")
+    if xff:
+        return _strip_port(xff.split(",")[0].strip())
+
     forwarded = request.headers.get("Forwarded")
     if forwarded:
         match = re.search(r'for=(?:"([^"]+)"|([^;,\s]+))', forwarded, re.IGNORECASE)
         if match:
             return _strip_port((match.group(1) or match.group(2)).strip('"'))
-
-    xff = request.headers.get("X-Forwarded-For")
-    if xff:
-        return _strip_port(xff.split(",")[0].strip())
 
     return request.META.get("REMOTE_ADDR")
 
