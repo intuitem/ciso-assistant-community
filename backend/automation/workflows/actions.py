@@ -1811,6 +1811,13 @@ class AttachEvidenceAction(BaseAction):
             except ValidationError as e:
                 raise FatalActionError(f"attach_evidence: {'; '.join(e.messages)}")
             revision.save()
+            # The upload endpoint only resets status when a revision is created,
+            # because a person is there to see what they replaced. This runs on
+            # a schedule, so an approval would silently come to cover a file
+            # nobody has looked at.
+            if evidence.status == Evidence.Status.APPROVED:
+                evidence.status = Evidence.Status.IN_REVIEW
+                evidence.save(update_fields=["status"])
         return self._output(
             evidence,
             attached=True,

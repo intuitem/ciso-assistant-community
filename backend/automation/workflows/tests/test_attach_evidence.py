@@ -169,6 +169,31 @@ class TestAttachEvidence:
         )
         assert start_instance(version).status == WorkflowInstance.Status.FAILED
 
+    def test_overwriting_an_approved_evidence_sends_it_back_for_review(self):
+        """An approval attests to a file. Swapping the file on a schedule would
+        otherwise leave the approval covering one nobody has seen."""
+        from core.models import EvidenceRevision
+
+        domain = make_domain(f"Overwrite {uuid.uuid4().hex[:6]}")
+        evidence = Evidence.objects.create(
+            name="Snapshot", folder=domain, status=Evidence.Status.APPROVED
+        )
+        EvidenceRevision.objects.create(evidence=evidence, folder=domain)
+        version = attach_flow(
+            domain,
+            {
+                "type": "attach_evidence",
+                "evidence": str(evidence.id),
+                "source": "text",
+                "text": "fresh",
+                "filename": "snapshot.csv",
+            },
+        )
+        assert start_instance(version).status == WorkflowInstance.Status.COMPLETED
+        evidence.refresh_from_db()
+        assert evidence.status == Evidence.Status.IN_REVIEW
+        assert evidence.revisions.count() == 1
+
     def test_it_needs_the_change_permission(self):
         """The default mode creates a revision when the evidence has none."""
         assert required_permissions({"type": "attach_evidence"}) == [

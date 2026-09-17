@@ -206,7 +206,7 @@ Adds a file to an existing evidence.
 | Task occurrence *expr* | Optional. The occurrence this file answers for, when you name it yourself |
 | Continue when the answer is an error | With source URL. Off by default |
 | Continue when the tool cannot be reached | With source URL. Off by default |
-| File it as a new revision | Off by default. Off replaces the file on the evidence's latest revision. On files a new revision and leaves the previous one untouched |
+| File it as a new revision | Off by default. Off replaces the file on the evidence's latest revision. On files a new revision and leaves the previous one untouched. Either way an approved evidence goes back to **In review** |
 
 Output: `object_id`, `attached`, `status` (the HTTP status with source URL, empty with source Text), `unreachable`, `host`, `reason`, `revision_id`, `version`, `filename`, `bytes`, `task_node_id`. Every key is reported on both outcomes, empty where it does not apply, so an output mapping cannot break on one branch. Permissions: `change_evidence` and `add_evidencerevision`.
 
@@ -225,7 +225,7 @@ To name it yourself instead, leave the setting off and pass an id to **Task occu
 {% endhint %}
 
 {% hint style="info" %}
-A step that runs on a schedule needs **File it as a new revision** on. With it off, every run overwrites the same revision, so a nightly collection keeps one file and no history. With it on, each run files its own revision and the evidence moves back to **In review**: a file nobody has looked at yet does not inherit the previous one's approval.
+A step that runs on a schedule needs **File it as a new revision** on. With it off, every run overwrites the same revision, so a nightly collection keeps one file and no history. Either way the evidence moves back to **In review** if it was approved: a file nobody has looked at yet does not inherit the previous one's approval.
 {% endhint %}
 
 {% hint style="info" %}

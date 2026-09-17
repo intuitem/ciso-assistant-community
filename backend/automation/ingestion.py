@@ -116,11 +116,17 @@ def ingest_posture_results(
 
     try:
         with transaction.atomic():
-            run, run_created = PostureRun.objects.get_or_create(
-                id=run_id or uuid.uuid4(),
-                posture_assessment=assessment,
-                defaults={"started_at": timestamp, "tool": tool},
-            )
+            # Savepoint: only this statement can clash on the run's identity,
+            # and catching it here keeps the outer transaction usable.
+            try:
+                with transaction.atomic():
+                    run, run_created = PostureRun.objects.get_or_create(
+                        id=run_id or uuid.uuid4(),
+                        posture_assessment=assessment,
+                        defaults={"started_at": timestamp, "tool": tool},
+                    )
+            except IntegrityError:
+                raise IngestionError({"error": "run_id belongs to another assessment"})
             existing = {
                 r.requirement_id: r
                 for r in run.results.filter(asset=asset, requirement_id__in=matched)
@@ -159,7 +165,9 @@ def ingest_posture_results(
                 run.delete()
                 run = None
     except IntegrityError:
-        raise IngestionError({"error": "run_id belongs to another assessment"})
+        # Anything else: a result clashed with a concurrent write of the same
+        # run. Reporting it as a run_id problem sent people to the wrong place.
+        raise IngestionError({"error": "results conflicted with a concurrent write"})
 
     return {
         # None when the run was dropped: a deleted id is not retryable.
