@@ -2300,11 +2300,24 @@ class HttpRequestAction(BaseAction):
                     kwargs["data"] = body
         try:
             response = requests.request(method, url, **kwargs)
-        except requests.RequestException:
+        except requests.RequestException as e:
             # requests exceptions stringify with the full URL (possible secret),
             # so report the host only. Network failures stay on the retry path.
             host = urlsplit(url).hostname or "target"
-            raise ActionError(f"http_request: request to '{host}' failed")
+            if not _as_bool(config.get("allow_connection_error")):
+                raise ActionError(f"http_request: request to '{host}' failed")
+            # Opted in: "the tool is unreachable" is an outcome the graph wants to
+            # route on, not a reason to stop. There is no HTTP status here — the
+            # server never answered — so report 0, which no answer can collide
+            # with, and let a condition branch on it. The reason is the exception
+            # class only, for the same no-secrets-in-the-log rule as above.
+            return {
+                "status": 0,
+                "body": None,
+                "unreachable": True,
+                "host": host,
+                "reason": type(e).__name__,
+            }
 
         try:
             response_body = response.json()

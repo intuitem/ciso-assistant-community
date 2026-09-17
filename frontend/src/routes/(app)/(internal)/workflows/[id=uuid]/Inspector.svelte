@@ -228,7 +228,15 @@
 			limit: 25,
 			offset: ''
 		},
-		http_request: { method: 'GET', url: '', headers: {}, body: '', timeout: 15 },
+		http_request: {
+			method: 'GET',
+			url: '',
+			headers: {},
+			body: '',
+			timeout: 15,
+			allow_error_status: false,
+			allow_connection_error: false
+		},
 		send_email: { recipients: '', subject: '', body: '' },
 		ai_extract: {
 			prompt: '',
@@ -2157,6 +2165,25 @@
 							oninput={onChange}
 						/>
 					</label>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.allow_error_status}
+							onchange={onChange}
+						/>
+						{m.httpAllowErrorStatus()}
+					</label>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.allow_connection_error}
+							onchange={onChange}
+						/>
+						{m.httpAllowConnectionError()}
+					</label>
+					<span class="text-[10px] text-surface-500">{m.httpErrorHandlingHint()}</span>
 					<p class="text-[10px] text-surface-500 leading-relaxed">
 						<i class="fa-solid fa-key mr-1"></i>{m.secretsHint({ syntax: '{{secrets.name}}' })}
 					</p>
