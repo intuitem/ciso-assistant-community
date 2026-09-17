@@ -1,3 +1,4 @@
+import ipaddress
 import re
 
 from django.contrib.auth.signals import user_login_failed
@@ -21,13 +22,23 @@ def _strip_port(address):
     return address
 
 
+def _as_valid_ip(address):
+    try:
+        ipaddress.ip_address(address)
+    except ValueError:
+        return None
+    return address
+
+
 def get_client_ip(request):
     if not request:
         return None
 
     xff = request.headers.get("X-Forwarded-For")
     if xff:
-        return _strip_port(xff.split(",")[0].strip())
+        candidate = _as_valid_ip(_strip_port(xff.split(",")[0].strip()))
+        if candidate:
+            return candidate
 
     forwarded = request.headers.get("Forwarded")
     if forwarded:
@@ -35,7 +46,11 @@ def get_client_ip(request):
             r'(?:^|[;,])\s*for=(?:"([^"]+)"|([^;,\s]+))', forwarded, re.IGNORECASE
         )
         if match:
-            return _strip_port((match.group(1) or match.group(2)).strip('"'))
+            candidate = _as_valid_ip(
+                _strip_port((match.group(1) or match.group(2)).strip('"'))
+            )
+            if candidate:
+                return candidate
 
     return request.META.get("REMOTE_ADDR")
 
