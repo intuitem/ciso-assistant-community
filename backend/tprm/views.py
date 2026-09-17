@@ -1281,32 +1281,34 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         target = self._owned_audit_deletion(instance)
         return [target] if target is not None else []
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.compliance_assessment:
-            audit = instance.compliance_assessment
-            target = self._owned_audit_deletion(instance)
-            if target is None:
-                logger.warning(
-                    "Compliance assessment folder is not an Enclave, skipping deletion",
-                    folder=audit.folder,
-                )
-            elif isinstance(target, Folder):
-                logger.info(
-                    "deleting_compliance_assessment_folder",
-                    folder_id=str(target.id),
-                    content_type=str(target.content_type),
-                )
-                target.delete()
-            else:
-                logger.info(
-                    "deleting_audit_keeping_shared_enclave",
-                    audit_id=str(target.pk),
-                    folder_id=str(target.folder_id),
-                )
-                target.delete()
-
-        return super().destroy(request, *args, **kwargs)
+    def perform_destroy(self, instance):
+        # Here rather than in destroy() so batch deletes take the same path.
+        with transaction.atomic():
+            if instance.compliance_assessment:
+                audit = instance.compliance_assessment
+                target = self._owned_audit_deletion(instance)
+                if target is None:
+                    logger.warning(
+                        "Compliance assessment folder is not an Enclave, skipping deletion",
+                        folder=audit.folder,
+                    )
+                elif isinstance(target, Folder):
+                    logger.info(
+                        "deleting_compliance_assessment_folder",
+                        folder_id=str(target.id),
+                        content_type=str(target.content_type),
+                    )
+                    target.delete()
+                    instance.compliance_assessment = None
+                else:
+                    logger.info(
+                        "deleting_audit_keeping_shared_enclave",
+                        audit_id=str(target.pk),
+                        folder_id=str(target.folder_id),
+                    )
+                    target.delete()
+                    instance.compliance_assessment = None
+            super().perform_destroy(instance)
 
     @action(detail=True, methods=["post"], name="Clone as a new revision")
     def clone(self, request, pk=None):

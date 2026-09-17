@@ -217,3 +217,20 @@ def test_entity_assessment_preview_keeps_non_enclave_audit_as_affected(
     assert res.status_code == 200
     assert "VENDOR-AUDIT" in _bucket_names(res.json()["affected"])
     assert "VENDOR-AUDIT" not in _bucket_names(res.json()["deleted"])
+
+
+def test_entity_assessment_batch_delete_removes_enclave_audit(
+    admin_client, target_folder
+):
+    from core.models import ComplianceAssessment
+
+    ea = _entity_assessment_with_audit(target_folder, enclave=True)
+    audit_id = ea.compliance_assessment_id
+    res = admin_client.post(
+        "/api/entity-assessments/batch-action/",
+        {"action": "delete", "ids": [str(ea.id)]},
+        format="json",
+    )
+    assert res.status_code == 200, res.content
+    assert res.json()["failed"] == []
+    assert not ComplianceAssessment.objects.filter(pk=audit_id).exists()
