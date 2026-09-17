@@ -1,6 +1,6 @@
 name: Mirror third-party images to GHCR
 
-# Copies the third-party images that CI depends on (postgres, mailhog, qdrant,
+# Copies the third-party images that CI depends on (postgres, mailpit, qdrant,
 # caddy, node, python) from Docker Hub into this repo's GHCR namespace so that CI
 # never pulls them anonymously from Docker Hub or ECR Public (both of which
 # rate-limit anonymous pulls on GitHub's shared runner IPs).
@@ -14,7 +14,7 @@ name: Mirror third-party images to GHCR
 
 on:
   schedule:
-    - cron: "17 4 * * 1" # weekly, Monday 04:17 UTC
+    - cron: "17 4 * * *" # daily, 04:17 UTC
   workflow_dispatch:
   push:
     branches: [main]

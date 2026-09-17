@@ -14,13 +14,8 @@ from .models import (
     WorkflowVersion,
 )
 from .actions import AI_ACTION_TYPES, UPDATABLE_MODELS, _writable_values
-from .actions import validate_ai_config as _validate_ai_config
-from .actions import validate_create_config as _validate_create_config
-from .actions import validate_date_offset_config as _validate_date_offset_config
+from .actions import validate_action_config as _validate_action_config
 from .actions import validate_read_config as _validate_read_config
-from .actions import validate_attach_evidence_config as _validate_attach_evidence_config
-from .actions import validate_set_variables_config as _validate_set_variables_config
-from .actions import validate_update_config as _validate_update_config
 from .context import RESERVED_VARIABLE_KEYS
 from .triggers import validate_trigger_config
 
@@ -156,19 +151,7 @@ def validate_graph(version):
                             node=node,
                         )
                     )
-            for code, message in _validate_read_config(node):
-                errors.append(_error(code, message, node=node))
-            for code, message in _validate_create_config(node):
-                errors.append(_error(code, message, node=node))
-            for code, message in _validate_date_offset_config(node):
-                errors.append(_error(code, message, node=node))
-            for code, message in _validate_update_config(node):
-                errors.append(_error(code, message, node=node))
-            for code, message in _validate_set_variables_config(node):
-                errors.append(_error(code, message, node=node))
-            for code, message in _validate_attach_evidence_config(node):
-                errors.append(_error(code, message, node=node))
-            for code, message in _validate_ai_config(node):
+            for code, message in _validate_action_config(node):
                 errors.append(_error(code, message, node=node))
             for code, message in _validate_ai_value_fencing(node, *ai_sources):
                 errors.append(_error(code, message, node=node))

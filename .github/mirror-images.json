@@ -1,8 +1,8 @@
 [
   { "source": "docker.io/library/postgres:16", "target": "postgres:16" },
   { "source": "docker.io/library/postgres:17", "target": "postgres:17" },
-  { "source": "docker.io/mailhog/mailhog:v1.0.1", "target": "mailhog:v1.0.1" },
-  { "source": "docker.io/qdrant/qdrant:v1.14.0", "target": "qdrant:v1.14.0" },
+  { "source": "docker.io/axllent/mailpit:v1.31.1", "target": "mailpit:v1.31.1" },
+  { "source": "docker.io/qdrant/qdrant:v1.19.1", "target": "qdrant:v1.19.1" },
   { "source": "docker.io/library/caddy:2.11.4", "target": "caddy:2.11.4", "platforms": "linux/amd64" },
   { "source": "docker.io/library/node:24-slim", "target": "node:24-slim" },
   { "source": "docker.io/library/python:3.14-slim", "target": "python:3.14-slim" },
@@ -10,5 +10,6 @@
   { "source": "dhi.io/node:24-dev", "target": "dhi-node:24-dev" },
   { "source": "dhi.io/node:24", "target": "dhi-node:24" },
   { "source": "dhi.io/python:3.14-dev", "target": "dhi-python:3.14-dev" },
-  { "source": "dhi.io/python:3.14", "target": "dhi-python:3.14" }
+  { "source": "dhi.io/python:3.14", "target": "dhi-python:3.14" },
+  { "source": "docker.io/docker/scout-cli:1.25.0", "target": "scout-cli:1.25.0", "platforms": "linux/amd64" }
 ]
