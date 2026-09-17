@@ -6892,20 +6892,30 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
                     }
                 )
 
-        # Indirect links - evidence is linked through applied controls
+        # Indirect links - evidence is linked through an applied control or a
+        # task template (or one of its task nodes) attached to the requirement assessment
         for req_assessment in requirement_assessments:
-            for applied_control in req_assessment.applied_controls.all():
-                if obj in applied_control.evidences.all():
-                    indirect_links.append(
-                        {
-                            "requirement_assessment_id": str(req_assessment.id),
-                            "requirement_assessment_name": str(
-                                req_assessment.requirement.safe_display_str
-                            ),
-                            "applied_control_id": str(applied_control.id),
-                            "applied_control_name": applied_control.name,
-                        }
-                    )
+            via_names = [
+                applied_control.name
+                for applied_control in req_assessment.applied_controls.all()
+                if obj in applied_control.evidences.all()
+            ]
+            via_names += [
+                task_template.name
+                for task_template in req_assessment.task_templates.filter(
+                    Q(evidences=obj) | Q(tasknode__evidences=obj)
+                ).distinct()
+            ]
+            for via_name in via_names:
+                indirect_links.append(
+                    {
+                        "requirement_assessment_id": str(req_assessment.id),
+                        "requirement_assessment_name": str(
+                            req_assessment.requirement.safe_display_str
+                        ),
+                        "via_name": via_name,
+                    }
+                )
 
         # Return a simplified format similar to action-plan
         all_links = []
@@ -6923,7 +6933,7 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
         for link in indirect_links:
             all_links.append(
                 {
-                    "str": f"{link['requirement_assessment_name']} (via {link['applied_control_name'][:15]}...)",
+                    "str": f"{link['requirement_assessment_name']} (via {link['via_name'][:15]}...)",
                     "id": link["requirement_assessment_id"],
                 }
             )

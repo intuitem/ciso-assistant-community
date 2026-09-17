@@ -7308,6 +7308,20 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
                     if evidence.id in viewable_evidences:
                         evidence_ids.add(evidence.id)
 
+        # Evidences linked through tasks (task templates and their task nodes)
+        # attached to the compliance assessment or its requirement assessments
+        task_templates = TaskTemplate.objects.filter(
+            Q(compliance_assessments=compliance_assessment)
+            | Q(requirement_assessments__compliance_assessment=compliance_assessment)
+        ).distinct()
+        task_evidence_ids = set(
+            Evidence.objects.filter(
+                Q(task_templates__in=task_templates)
+                | Q(task_nodes__task_template__in=task_templates)
+            ).values_list("id", flat=True)
+        )
+        evidence_ids.update(task_evidence_ids & set(viewable_evidences))
+
         return Evidence.objects.filter(id__in=evidence_ids).distinct()
 
 
