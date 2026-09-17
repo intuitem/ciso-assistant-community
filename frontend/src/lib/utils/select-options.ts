@@ -47,13 +47,16 @@ export async function ensureSelectOptions(model: Record<string, any>): Promise<v
 				? model.initialData?.[selectField.formNestedField]
 				: null;
 			if (parent) query.set('detail', parent);
-			const response = await fetch(`/${urlModel}/select-options?${query}`);
-			if (!response.ok) {
+			const url = `/${urlModel}/select-options?${query}`;
+			try {
+				const response = await fetch(url);
+				if (!response.ok) throw new Error(response.statusText);
+				return [selectField.field, formatSelectFieldData(await response.json(), selectField)];
+			} catch (e) {
 				complete = false;
-				console.error(`Failed to fetch options for ${selectField.field}: ${response.statusText}`);
+				console.error(`Failed to fetch options for ${selectField.field} from ${url}`, e);
 				return [selectField.field, []];
 			}
-			return [selectField.field, formatSelectFieldData(await response.json(), selectField)];
 		})
 	);
 
