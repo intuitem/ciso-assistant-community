@@ -45,8 +45,9 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 
 	await Promise.all(
 		['assets', 'threats', 'vulnerabilities', 'security-exceptions'].map(async (key) => {
-			const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}`;
+			const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}&limit=1`;
 			const response = await fetch(keyEndpoint);
+			await response.body?.cancel();
 			if (response.ok) {
 				const table: TableSource = {
 					head: headData(key),
