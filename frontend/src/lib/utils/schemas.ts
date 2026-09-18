@@ -872,7 +872,15 @@ export const SSOSettingsSchema = z.object({
 		])
 		.optional()
 		.nullable(),
-	oauth_pkce_enabled: z.boolean().optional().default(false)
+	oauth_pkce_enabled: z.boolean().optional().default(false),
+	additional_scopes: z
+		.string()
+		.trim()
+		.max(1000)
+		.regex(
+			/^(?:[\x21\x23-\x2b\x2d-\x5b\x5d-\x7e]+(?:[ \t]*,[ \t]*[\x21\x23-\x2b\x2d-\x5b\x5d-\x7e]+)*)?$/
+		)
+		.optional()
 });
 
 export const EntitiesSchema = z.object({

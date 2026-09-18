@@ -2641,6 +2641,8 @@
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Rakto autentifikavimo metodas",
 	"oauthPKCEEnabled": "OAuth PKCE įgalintas",
+	"oidcAdditionalScopes": "Papildomos aprėptys",
+	"oidcAdditionalScopesHelpText": "Pasirenkamos kableliais atskirtos OAuth aprėptys, pridedamos prie numatytųjų openid, profile ir email aprėpčių.",
 	"suggestedParentheses": "(rekomenduojama)",
 	"matchingScenarios": "Atitinkantys scenarijai",
 	"clientSecretAlreadySetHelpText": "Kliento slaptažodis jau nustatytas.",

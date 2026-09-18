@@ -2695,6 +2695,8 @@
 	"oidcConfiguration": "openid-konfigurácia",
 	"tokenAuthMethod": "Metóda autorizácie tokenu",
 	"oauthPKCEEnabled": "OAuth PKCE povolené",
+	"oidcAdditionalScopes": "Ďalšie rozsahy",
+	"oidcAdditionalScopesHelpText": "Voliteľné rozsahy OAuth oddelené čiarkami, ktoré sa pridajú k predvoleným rozsahom openid, profile a email.",
 	"suggestedParentheses": "(odporúčané)",
 	"matchingScenarios": "Zodpovedajúce scenáre",
 	"clientSecretAlreadySetHelpText": "Tajný kľúč klienta je už nastavený.",

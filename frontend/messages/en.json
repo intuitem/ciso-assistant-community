@@ -3179,6 +3179,8 @@
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Token auth method",
 	"oauthPKCEEnabled": "OAuth PKCE enabled",
+	"oidcAdditionalScopes": "Additional scopes",
+	"oidcAdditionalScopesHelpText": "Optional comma-separated OAuth scopes appended to the default openid, profile, and email scopes.",
 	"suggestedParentheses": "(suggested)",
 	"matchingScenarios": "Matching scenarios",
 	"clientSecretAlreadySetHelpText": "The client secret is already set.",
