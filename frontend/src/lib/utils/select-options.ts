@@ -42,9 +42,9 @@ export async function ensureSelectOptions(
 				fetched[selectField.field] = structuredClone(hit);
 				return;
 			}
-			const query = new URLSearchParams({ field: selectField.field });
+			const query = new URLSearchParams({ model: urlModel, field: selectField.field });
 			if (parent) query.set('detail', parent);
-			const url = `/${urlModel}/select-options?${query}`;
+			const url = `/select-options?${query}`;
 			try {
 				const response = await fetch(url);
 				if (!response.ok) throw new Error(response.statusText);
