@@ -179,6 +179,38 @@ class TestDereference:
         assert len(unwired) == 1
         assert "no URN" in unwired[0]
 
+    def test_a_local_template_keeps_an_unportable_framework_wired(self, catalog):
+        """Save-as-template stays on this instance, so a framework with no URN keeps
+        its id: the design still works here even if it could not travel."""
+        local_only = Framework.objects.create(
+            name="Homegrown", folder=catalog["folder"], locale="en", default_locale=True
+        )
+        portal = _portal(
+            catalog,
+            [{"kind": "assessment", "target": {"framework": str(local_only.id)}}],
+        )
+        content, unwired = dereference(portal.content, keep_local_ids=True)
+        target = content["sections"][0]["items"][0]["target"]
+
+        assert unwired == []
+        assert target == {"framework": str(local_only.id)}
+
+    def test_an_id_that_is_not_a_uuid_is_unwired_not_a_crash(self, catalog):
+        portal = _portal(
+            catalog,
+            [
+                {
+                    "kind": "assessment",
+                    "title": "Legacy",
+                    "target": {"framework": "legacy-id"},
+                }
+            ],
+        )
+        content, unwired = dereference(portal.content)
+
+        assert len(unwired) == 1
+        assert "framework" not in content["sections"][0]["items"][0]["target"]
+
 
 @pytest.mark.django_db
 class TestResolve:
@@ -222,6 +254,29 @@ class TestResolve:
 
         assert len(unwired) == 1
         assert "not loaded" in unwired[0]
+
+    def test_an_id_that_travelled_with_an_unloaded_urn_is_dropped(self, catalog):
+        """A preset keeps the id next to the URN; on another instance that id is
+        dangling, and a dangling id would only make the tile look wired."""
+        content, _unwired = resolve(
+            {
+                "sections": [
+                    {
+                        "items": [
+                            {
+                                "kind": "assessment",
+                                "target": {
+                                    "framework": "00000000-0000-0000-0000-000000000000",
+                                    "framework_urn": "urn:test:absent:fw",
+                                },
+                            }
+                        ]
+                    }
+                ]
+            }
+        )
+
+        assert "framework" not in content["sections"][0]["items"][0]["target"]
 
 
 @pytest.mark.django_db
@@ -355,6 +410,23 @@ class TestPresetValidation:
         error = importer.init()
         assert "ref_id" in error and "urn" in error
 
+    def test_a_urn_another_library_ships_is_refused(self, catalog):
+        preset_data = {
+            "urn": "urn:test:portals:portal_preset:shared",
+            "ref_id": "shared",
+            "name": "Shared",
+            "content": {"sections": [{"items": []}]},
+        }
+        PortalPresetImporter(
+            preset_data, library_urn=catalog["library"].urn
+        ).import_portal_preset(catalog["library"])
+
+        again = PortalPresetImporter(preset_data, library_urn=catalog["library"].urn)
+        other = PortalPresetImporter(preset_data, library_urn="urn:test:other:lib")
+
+        assert again.init() is None
+        assert catalog["library"].urn in other.init()
+
 
 @pytest.mark.django_db
 class TestPublishGate:
@@ -463,6 +535,33 @@ class TestLibraryUpdateRefresh:
         )
         assert [(p.name, p.version) for p in presets] == [("v2", 2)]
 
+    def test_a_preset_the_new_version_dropped_goes_with_it(self, catalog):
+        from core.models import LibraryUpdater
+
+        PortalPresetImporter(
+            {
+                "urn": "urn:test:portals:portal_preset:dropped",
+                "ref_id": "dropped",
+                "name": "Dropped",
+                "content": {"sections": [{"items": []}]},
+            }
+        ).import_portal_preset(catalog["library"])
+        mine = PortalPreset.objects.create(
+            name="Mine", folder=catalog["folder"], content={"sections": []}
+        )
+
+        LibraryUpdater(
+            catalog["library"], self._stored(catalog, 2, "v2")
+        ).update_portal_presets()
+
+        urns = set(
+            PortalPreset.objects.filter(library=catalog["library"]).values_list(
+                "urn", flat=True
+            )
+        )
+        assert urns == {"urn:test:portals:portal_preset:refreshed"}
+        assert PortalPreset.objects.filter(pk=mine.pk).exists()
+
     def test_a_refresh_does_not_touch_portals_cloned_from_it(self, catalog):
         from core.models import LibraryUpdater
 
@@ -487,3 +586,98 @@ class TestLibraryUpdateRefresh:
         clone.refresh_from_db()
 
         assert clone.content["sections"][0]["title"] == "Original"
+
+
+@pytest.mark.django_db
+class TestTemplateEndpoints:
+    """Save as template, then Use: the tile must come back wired."""
+
+    @pytest.fixture
+    def client(self, catalog):
+        from core.apps import startup
+        from global_settings.models import GlobalSettings
+        from iam.models import User, UserGroup
+        from knox.models import AuthToken
+        from rest_framework.test import APIClient
+
+        startup(sender=None, **{})
+        GlobalSettings.objects.update_or_create(
+            name=GlobalSettings.Names.FEATURE_FLAGS,
+            defaults={"value": {"custom_portals": True, "quick_forms": True}},
+        )
+        user = User.objects.create_user(email="portal-admin@test.local")
+        admin_group = UserGroup.objects.get(name="BI-UG-ADM")
+        user.folder = admin_group.folder
+        user.save()
+        admin_group.user_set.add(user)
+        client = APIClient()
+        token = AuthToken.objects.create(user=user)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token[1]}")
+        return client
+
+    def test_save_then_use_keeps_every_tile_wired(self, catalog, client):
+        local_only = Framework.objects.create(
+            name="Homegrown", folder=catalog["folder"], locale="en", default_locale=True
+        )
+        portal = _portal(
+            catalog,
+            [
+                {
+                    "id": "t1",
+                    "kind": "assessment",
+                    "title": "Run the audit",
+                    "target": {"framework": str(catalog["fw"].id)},
+                },
+                {
+                    "id": "t2",
+                    "kind": "assessment",
+                    "title": "Homegrown audit",
+                    "target": {"framework": str(local_only.id)},
+                },
+                {
+                    "id": "t3",
+                    "kind": "quickForm",
+                    "title": "Ask for access",
+                    "target": {"quick_form": str(catalog["qf"].id)},
+                },
+            ],
+        )
+
+        saved = client.post(f"/api/portals/{portal.id}/save-as-preset/", {})
+        assert saved.status_code == 201, saved.json()
+        assert saved.json()["unwired"] == []
+
+        used = client.post(
+            "/api/portals/from-preset/", {"preset": saved.json()["id"]}, format="json"
+        )
+        assert used.status_code == 201, used.json()
+        assert used.json()["unwired"] == []
+
+        clone = Portal.objects.get(pk=used.json()["id"])
+        items = clone.content["sections"][0]["items"]
+        assert items[0]["target"]["framework"] == str(catalog["fw"].id)
+        assert items[1]["target"]["framework"] == str(local_only.id)
+        assert items[2]["target"]["quick_form"] == str(catalog["qf"].id)
+
+    def test_a_second_template_from_the_same_portal_gets_its_own_name(
+        self, catalog, client
+    ):
+        portal = _portal(catalog, [])
+
+        first = client.post(f"/api/portals/{portal.id}/save-as-preset/", {})
+        second = client.post(f"/api/portals/{portal.id}/save-as-preset/", {})
+
+        assert first.json()["name"] == "Onboarding"
+        assert second.json()["name"] == "Onboarding (2)"
+
+    def test_an_oversized_name_is_a_400_on_every_database(self, catalog, client):
+        portal = _portal(catalog, [])
+
+        res = client.post(
+            f"/api/portals/{portal.id}/save-as-preset/",
+            {"name": "x" * 300},
+            format="json",
+        )
+
+        assert res.status_code == 400
+        assert "name" in res.json()

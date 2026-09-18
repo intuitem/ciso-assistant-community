@@ -18,15 +18,6 @@ from dateutil import relativedelta as rd
 from uuid import UUID
 
 
-def free_name(model, name, folder):
-    """A name not already taken in `folder`, suffixed "(2)", "(3)"... if it is."""
-    candidate, suffix = name, 2
-    while model.objects.filter(folder=folder, name__iexact=candidate).exists():
-        candidate = f"{name} ({suffix})"
-        suffix += 1
-    return candidate
-
-
 # Re-export so callers can import from a single utils module.
 from .friendly_names import generate_friendly_name  # noqa: F401
 
@@ -38,6 +29,15 @@ except ImportError:  # libyaml unavailable
     from yaml import SafeLoader
 
 logger = structlog.get_logger(__name__)
+
+
+def free_name(model, name, folder):
+    """A name not already taken in `folder`, suffixed "(2)", "(3)"... if it is."""
+    candidate, suffix = name, 2
+    while model.objects.filter(folder=folder, name__iexact=candidate).exists():
+        candidate = f"{name} ({suffix})"
+        suffix += 1
+    return candidate
 
 
 def yaml_safe_load(stream):

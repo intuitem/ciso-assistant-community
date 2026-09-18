@@ -20,19 +20,23 @@ def _referenced_library_urns(content):
         for fields in URN_TARGET_FIELDS.values()
         for field, model in fields
     }
-    urns = set()
+    wanted = {model: set() for model in by_field.values()}
     for item in _iter_items(content):
         target = item.get("target") or {}
         for key, model in by_field.items():
-            if not target.get(key):
-                continue
-            library_urn = (
-                model.objects.filter(urn=str(target[key]).lower())
-                .values_list("library__urn", flat=True)
-                .first()
+            if target.get(key):
+                wanted[model].add(str(target[key]).lower())
+    urns = set()
+    for model, target_urns in wanted.items():
+        if not target_urns:
+            continue
+        urns.update(
+            u
+            for u in model.objects.filter(urn__in=target_urns).values_list(
+                "library__urn", flat=True
             )
-            if library_urn:
-                urns.add(library_urn)
+            if u
+        )
     return sorted(urns)
 
 

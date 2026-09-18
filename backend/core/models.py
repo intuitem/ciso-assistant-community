@@ -1798,9 +1798,18 @@ class LibraryUpdater:
         from portals.models import PortalPreset
         from portals.references import resolve
 
+        kept_urns = set()
         for new_preset in self.new_portal_presets:
             urn = new_preset["urn"].lower()
-            content, _unresolved = resolve(new_preset.get("content") or {})
+            kept_urns.add(urn)
+            content, unresolved = resolve(new_preset.get("content") or {})
+            for warning in unresolved:
+                logger.warning(
+                    "Portal preset update warning",
+                    library=self.old_library.urn,
+                    preset=urn,
+                    warning=warning,
+                )
             PortalPreset.objects.update_or_create(
                 urn=urn,
                 defaults={
@@ -1826,6 +1835,11 @@ class LibraryUpdater:
                     **self.i18n_object_dict,
                 },
             )
+        # A preset the new version dropped has no owner left: it cannot be edited or
+        # deleted through the API (library-backed), so it goes with the version.
+        PortalPreset.objects.filter(library=self.old_library).exclude(
+            urn__in=kept_urns
+        ).delete()
 
     def update_quick_forms(self):
         """Upsert quick forms, pages and questions by URN, prune what the new

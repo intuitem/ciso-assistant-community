@@ -2,7 +2,7 @@ import json
 import time
 
 from .helpers import get_referential_translation
-from typing import List, Union
+from typing import List, Optional, Union
 
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
@@ -579,12 +579,26 @@ class PortalPresetImporter:
 
     REQUIRED_FIELDS = {"ref_id", "urn"}
 
-    def __init__(self, preset_data: dict):
+    def __init__(self, preset_data: dict, library_urn: Optional[str] = None):
         self.preset_data = preset_data
+        self.library_urn = library_urn
 
     def init(self) -> Union[str, None]:
+        from portals.models import PortalPreset
+
         if missing_fields := self.REQUIRED_FIELDS - set(self.preset_data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
+        urn = str(self.preset_data["urn"]).lower()
+        # update_or_create keys on the URN alone; without this, a second library
+        # shipping the same preset URN would silently take the row over.
+        owner = (
+            PortalPreset.objects.filter(urn=urn, library__isnull=False)
+            .exclude(library__urn=self.library_urn)
+            .values_list("library__urn", flat=True)
+            .first()
+        )
+        if owner:
+            return f"portal preset {urn} is already provided by library {owner}"
         content = self.preset_data.get("content")
         if not isinstance(content, dict):
             return "content must be an object"
@@ -1198,7 +1212,7 @@ class LibraryImporter:
             if not isinstance(preset_data, dict):
                 import_errors.append((index, "must be an object"))
                 continue
-            importer = PortalPresetImporter(preset_data)
+            importer = PortalPresetImporter(preset_data, library_urn=self._library.urn)
             importers.append(importer)
             if (error := importer.init()) is not None:
                 import_errors.append((index, error))

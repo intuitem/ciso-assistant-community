@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 
 from core.models import Actor, QuickFormResponse, RequirementAssignment
 from core.permissions import FeatureFlagRequired
+from core.utils import free_name
 from core.serializers import (
     ComplianceAssessmentWriteSerializer,
     QuickFormResponseWriteSerializer,
@@ -57,11 +58,12 @@ from .models import FrameworkSnapshot, Portal, PortalPreset, PublicDocument
 from .serializers import (
     FrameworkSnapshotReadSerializer,
     PortalPresetReadSerializer,
+    PortalPresetWriteSerializer,
     PortalReadSerializer,
     PortalWriteSerializer,
 )
 from .presets import build_preset_library, _urn_leaf
-from .references import dereference
+from .references import dereference, resolve
 from .snapshots import compute_snapshot
 
 
@@ -204,17 +206,22 @@ class PortalViewSet(CustomPortalsViewSet):
             folder=preset.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
+        # Wired at clone time, not load time: a preset names its targets by URN, and
+        # the row behind a URN can change (library unloaded and reloaded) or only
+        # exist by now (dependency loaded after the preset).
+        content, unwired = resolve(preset.content or {})
         data = {
             "name": request.data.get("name") or preset.name,
             "folder": str(preset.folder_id),
-            "content": preset.content,
+            "content": content,
             "source_ref": preset.urn or preset.ref_id or str(preset.id),
         }
         serializer = PortalWriteSerializer(data=data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         portal = serializer.save()
         return Response(
-            PortalReadSerializer(portal).data, status=status.HTTP_201_CREATED
+            {**PortalReadSerializer(portal).data, "unwired": unwired},
+            status=status.HTTP_201_CREATED,
         )
 
     @action(detail=True, methods=["post"], url_path="regenerate-public-token")
@@ -465,13 +472,24 @@ class PortalViewSet(CustomPortalsViewSet):
             folder=portal.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        content, unwired = dereference(portal.content or {})
-        preset = PortalPreset.objects.create(
-            name=request.data.get("name") or portal.name,
-            description=request.data.get("description") or portal.description,
-            folder=portal.folder,
-            content=content,
+        # The template stays on this instance, so a target with no URN keeps its
+        # local id; only an export has to drop it.
+        content, unwired = dereference(portal.content or {}, keep_local_ids=True)
+        serializer = PortalPresetWriteSerializer(
+            data={
+                "name": free_name(
+                    PortalPreset,
+                    str(request.data.get("name") or portal.name).strip(),
+                    portal.folder,
+                ),
+                "description": request.data.get("description") or portal.description,
+                "folder": str(portal.folder_id),
+                "content": content,
+            },
+            context={"request": request},
         )
+        serializer.is_valid(raise_exception=True)
+        preset = serializer.save()
         return Response(
             {**PortalPresetReadSerializer(preset).data, "unwired": unwired},
             status=status.HTTP_201_CREATED,
