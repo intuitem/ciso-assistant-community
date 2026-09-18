@@ -9,6 +9,7 @@
 	} from '$lib/components/Modals/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { hasPermissionAnywhere } from '$lib/utils/access-control';
+	import { consumeCreateIntent } from '$lib/utils/create-intent';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { listViewFields } from '$lib/utils/table';
 	import { m } from '$paraglide/messages';
@@ -78,6 +79,14 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	$effect(() => {
+		consumeCreateIntent({
+			urlModel: 'validation-flows',
+			modelName: data.model.name,
+			open: modalCreateForm
+		});
+	});
 </script>
 
 <div class="flex flex-col gap-2">
