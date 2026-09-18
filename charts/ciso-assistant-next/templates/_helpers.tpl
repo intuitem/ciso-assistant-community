@@ -240,7 +240,7 @@ Name of the secret holding the OIDC signing key (existing one, or the chart-mana
 RSA private key signing the OIDC tokens issued to service accounts.
 Reuses the key already stored in the release secret, so it stays stable across upgrades.
 Note: `lookup` is a no-op when manifests are rendered without cluster access (helm template,
-ArgoCD, ...), which regenerates the key on every render. Set backend.config.oidcProvider.privateKey
+GitOps tooling), which regenerates the key on every render. Set backend.config.oidcProvider.privateKey
 or existingSecret in that case.
 */}}
 {{- define "ciso-assistant.idpOidcPrivateKey" -}}

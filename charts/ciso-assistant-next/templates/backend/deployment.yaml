@@ -18,8 +18,8 @@ spec:
     metadata:
       annotations:
         checksum/secret-backend: {{ include (print $.Template.BasePath "/backend/secret.yaml") . | sha256sum }}
-        {{- if not .Values.backend.config.oidcProvider.existingSecret }}
-        checksum/secret-backend-oidc: {{ include (print $.Template.BasePath "/backend/oidc-secret.yaml") . | sha256sum }}
+        {{- with .Values.backend.config.oidcProvider.privateKey }}
+        checksum/oidc-private-key: {{ . | sha256sum }}
         {{- end }}
         {{- with .Values.backend.podAnnotations }}
           {{- toYaml . | nindent 8 }}

@@ -99,11 +99,11 @@ backend:
 Switching to an `existingSecret` deletes the chart-managed one, so coming back later issues a new
 key rather than the previous one.
 
-Any change to the key the chart manages rolls the backend pods, so both containers always hold the same
-one. Rotating the content of an `existingSecret` in place does not, the pods have to be restarted by hand
-(same as `djangoExistingSecretKey` and the SMTP one). When manifests are rendered without cluster access
-(`helm template`, ArgoCD, ...), the chart cannot read the generated key back and issues a new one on each
-render, which rolls the pods every time : set `existingSecret` or `privateKey` in that case.
+Changing `privateKey` rolls the backend pods on its own, and so does switching to or from an
+`existingSecret`. Rotating the content of an `existingSecret` in place does not, the pods have to be
+restarted by hand (same as `djangoExistingSecretKey` and the SMTP one). When manifests are rendered
+without cluster access (`helm template`, GitOps tooling), the chart cannot read the generated key back
+and issues a new one on each render : set `existingSecret` or `privateKey` in that case.
 
 ## Values
 
