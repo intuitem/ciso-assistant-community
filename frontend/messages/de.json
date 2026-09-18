@@ -6292,5 +6292,7 @@
 	"exportRiskScenariosData": "Szenariodaten",
 	"exportRiskScenariosDataDesc": "Einfache Szenarioliste mit Risikostufen, Zuständigen und Maßnahmen",
 	"exportRiskScenariosWorkbook": "Szenarien als Excel",
-	"exportRiskScenariosWorkbookDesc": "Vollständige Daten einschließlich Annahmen, Auswirkungen und Behandlung"
+	"exportRiskScenariosWorkbookDesc": "Vollständige Daten einschließlich Annahmen, Auswirkungen und Behandlung",
+	"includeNotApplicableRequirements": "Nicht anwendbare Anforderungen einbeziehen",
+	"excludeNotApplicableRequirements": "Nicht anwendbare Anforderungen ausschließen"
 }

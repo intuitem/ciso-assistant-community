@@ -2353,5 +2353,7 @@
 	"attributeMappingGroups": "Mapowanie atrybutu grup",
 	"attributeMappingGroupsHelpText": "Nazwa(y) roszczenia (claim) przenosząca członkostwo użytkownika w grupach IdP. Grupy znalezione tutaj są synchronizowane z grupami IdP przy każdym logowaniu i przyznają te grupy użytkowników CISO Assistant, do których administrator je zmapował.",
 	"jitProvisioning": "Automatyczne udostępnianie SSO (JIT)",
-	"jitProvisioningDescription": "Włącza automatyczne tworzenie kont przy pierwszym logowaniu SSO oraz synchronizację ich członkostwa w grupach IdP, bez konieczności użycia SCIM."
+	"jitProvisioningDescription": "Włącza automatyczne tworzenie kont przy pierwszym logowaniu SSO oraz synchronizację ich członkostwa w grupach IdP, bez konieczności użycia SCIM.",
+	"includeNotApplicableRequirements": "Uwzględnij wymagania niemające zastosowania",
+	"excludeNotApplicableRequirements": "Wyklucz wymagania niemające zastosowania"
 }

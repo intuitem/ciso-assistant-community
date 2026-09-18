@@ -6551,5 +6551,7 @@
 	"builtinGroup": "Groupe",
 	"membershipOperation": "Opération",
 	"operationAdd": "Ajouter",
-	"operationRemove": "Retirer"
+	"operationRemove": "Retirer",
+	"includeNotApplicableRequirements": "Inclure les exigences non applicables",
+	"excludeNotApplicableRequirements": "Exclure les exigences non applicables"
 }

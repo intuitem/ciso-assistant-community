@@ -6611,5 +6611,7 @@
 				"countPlural=other": "صفحة · {count} سؤال"
 			}
 		}
-	]
+	],
+	"includeNotApplicableRequirements": "تضمين المتطلبات غير القابلة للتطبيق",
+	"excludeNotApplicableRequirements": "استبعاد المتطلبات غير القابلة للتطبيق"
 }

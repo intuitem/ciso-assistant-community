@@ -3632,5 +3632,7 @@
 	"attributeMappingGroups": "Mapeo del atributo de grupos",
 	"attributeMappingGroupsHelpText": "Nombre(s) de la afirmación (claim) que contiene las pertenencias a grupos de IdP del usuario. Los grupos encontrados aquí se sincronizan con los grupos de IdP en cada inicio de sesión y conceden los grupos de usuarios de CISO Assistant que un administrador les haya asignado.",
 	"jitProvisioning": "Aprovisionamiento automático de SSO (JIT)",
-	"jitProvisioningDescription": "Habilita la creación automática de cuentas en el primer inicio de sesión mediante SSO y la sincronización de sus pertenencias a grupos de IdP, sin necesidad de SCIM."
+	"jitProvisioningDescription": "Habilita la creación automática de cuentas en el primer inicio de sesión mediante SSO y la sincronización de sus pertenencias a grupos de IdP, sin necesidad de SCIM.",
+	"includeNotApplicableRequirements": "Incluir requisitos no aplicables",
+	"excludeNotApplicableRequirements": "Excluir requisitos no aplicables"
 }

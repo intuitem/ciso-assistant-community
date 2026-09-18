@@ -4107,5 +4107,7 @@
 	"attributeMappingGroups": "Mapiranje atributa grupa",
 	"attributeMappingGroupsHelpText": "Naziv(i) tvrdnje (claim) koji nosi članstva korisnika u IdP grupama. Grupe pronađene ovdje sinkroniziraju se s IdP grupama pri svakoj prijavi i dodjeljuju korisničke grupe CISO Assistanta koje im je administrator mapirao.",
 	"jitProvisioning": "SSO automatsko pripremanje (JIT)",
-	"jitProvisioningDescription": "Omogućuje automatsko stvaranje računa pri prvoj SSO prijavi i sinkronizaciju njihovih članstava u IdP grupama, bez potrebe za SCIM-om."
+	"jitProvisioningDescription": "Omogućuje automatsko stvaranje računa pri prvoj SSO prijavi i sinkronizaciju njihovih članstava u IdP grupama, bez potrebe za SCIM-om.",
+	"includeNotApplicableRequirements": "Uključi neprimjenjive zahtjeve",
+	"excludeNotApplicableRequirements": "Isključi neprimjenjive zahtjeve"
 }

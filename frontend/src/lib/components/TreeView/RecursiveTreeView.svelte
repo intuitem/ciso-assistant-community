@@ -1,5 +1,30 @@
+<script module lang="ts">
+	import { getContext, setContext } from 'svelte';
+
+	export interface ContextTreeView {
+		/** If `true` exclude `"not_applicable"` requirements from the `requirement.result` percentage calculation of the `<RecursiveTreeViewItem/>` components. */
+		excludeNotApplicableRequirements: boolean;
+	}
+
+	const treeViewContextKey = Symbol('RecursiveTreeView');
+
+	export const DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW: ContextTreeView = {
+		excludeNotApplicableRequirements: false
+	};
+
+	export function getContextRecursiveTreeView(): ContextTreeView {
+		const ctx =
+			getContext<ContextTreeView>(treeViewContextKey) ?? DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW;
+		return ctx;
+	}
+
+	export function setContextRecursiveTreeView(ctx: ContextTreeView) {
+		setContext(treeViewContextKey, ctx);
+	}
+</script>
+
 <script lang="ts">
-	import { createEventDispatcher, onMount, setContext } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 
 	import RecursiveTreeViewItem from '$lib/components/TreeView/RecursiveTreeViewItem.svelte';
 	import type { TreeViewNode } from './types';

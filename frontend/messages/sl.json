@@ -5624,5 +5624,7 @@
 	"attributeMappingGroups": "Preslikava atributa skupin",
 	"attributeMappingGroupsHelpText": "Ime(na) zahtevka (claim), ki vsebuje uporabnikova članstva v skupinah IdP. Tukaj najdene skupine se ob vsaki prijavi sinhronizirajo s skupinami IdP in dodelijo tiste uporabniške skupine CISO Assistant, na katere jih je preslikal skrbnik.",
 	"jitProvisioning": "Samodejno zagotavljanje SSO (JIT)",
-	"jitProvisioningDescription": "Omogoči samodejno ustvarjanje računov ob prvi prijavi prek SSO in sinhronizacijo njihovih članstev v skupinah IdP, brez potrebe po SCIM."
+	"jitProvisioningDescription": "Omogoči samodejno ustvarjanje računov ob prvi prijavi prek SSO in sinhronizacijo njihovih članstev v skupinah IdP, brez potrebe po SCIM.",
+	"includeNotApplicableRequirements": "Vključi neprimerne zahteve",
+	"excludeNotApplicableRequirements": "Izključi neprimerne zahteve"
 }

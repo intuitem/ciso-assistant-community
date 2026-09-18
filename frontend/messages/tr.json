@@ -2346,5 +2346,7 @@
 	"attributeMappingGroups": "Grup özniteliği eşlemesi",
 	"attributeMappingGroupsHelpText": "Kullanıcının IdP grup üyeliklerini taşıyan hak talebi (claim) adı/adları. Burada bulunan gruplar her girişte IdP gruplarıyla senkronize edilir ve bir yöneticinin eşlediği CISO Assistant kullanıcı gruplarını verir.",
 	"jitProvisioning": "SSO otomatik sağlama (JIT)",
-	"jitProvisioningDescription": "İlk SSO girişinde hesapların otomatik olarak oluşturulmasını ve IdP grup üyeliklerinin senkronize edilmesini, SCIM gerektirmeden etkinleştirir."
+	"jitProvisioningDescription": "İlk SSO girişinde hesapların otomatik olarak oluşturulmasını ve IdP grup üyeliklerinin senkronize edilmesini, SCIM gerektirmeden etkinleştirir.",
+	"includeNotApplicableRequirements": "Uygulanamaz gereksinimleri dahil et",
+	"excludeNotApplicableRequirements": "Uygulanamaz gereksinimleri hariç tut"
 }

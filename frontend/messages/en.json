@@ -6551,5 +6551,7 @@
 	"dateLastYear": "Last year",
 	"dateNext7Days": "Next 7 days",
 	"dateNext30Days": "Next 30 days",
-	"dateNext90Days": "Next 90 days"
+	"dateNext90Days": "Next 90 days",
+	"includeNotApplicableRequirements": "Include not applicable requirements",
+	"excludeNotApplicableRequirements": "Exclude not applicable requirements"
 }

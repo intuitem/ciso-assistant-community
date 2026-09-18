@@ -2,7 +2,10 @@
 	import { run } from 'svelte/legacy';
 
 	import { page } from '$app/state';
-	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	import RecursiveTreeView, {
+		setContextRecursiveTreeView,
+		DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW
+	} from '$lib/components/TreeView/RecursiveTreeView.svelte';
 
 	import { onMount } from 'svelte';
 
@@ -48,6 +51,8 @@
 	} from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import ExcludeNotApplicableRequirements from '$lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
+
 	import { derived } from 'svelte/store';
 	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -138,7 +143,6 @@
 	import CompareAuditModal from '$lib/components/Modals/CompareAuditModal.svelte';
 	import MapFromAuditModal from '$lib/components/Modals/MapFromAuditModal.svelte';
 	import MappingDirectionModal from '$lib/components/Modals/MappingDirectionModal.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -311,6 +315,9 @@
 	}
 
 	let expandedNodes: TreeViewNode[] = $state([]);
+
+	const contextTreeView = $state(structuredClone(DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW));
+	setContextRecursiveTreeView(contextTreeView);
 
 	expandedNodes = $expandedNodesState;
 
@@ -1218,6 +1225,9 @@
 			<div class="flex items-center gap-2">
 				{#if treeViewNodes}
 					<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
+					<ExcludeNotApplicableRequirements
+						bind:excludeNotApplicableRequirements={contextTreeView.excludeNotApplicableRequirements}
+					/>
 				{/if}
 				<Popover
 					open={filterPopupOpen}

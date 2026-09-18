@@ -5602,5 +5602,7 @@
 	"attributeMappingGroups": "Mapování atributu skupin",
 	"attributeMappingGroupsHelpText": "Název(y) nároku (claim) obsahujícího členství uživatele ve skupinách IdP. Skupiny nalezené zde jsou při každém přihlášení synchronizovány se skupinami IdP a udělují uživatelské skupiny CISO Assistant, na které je administrátor namapoval.",
 	"jitProvisioning": "Automatické zřizování přes SSO (JIT)",
-	"jitProvisioningDescription": "Povolit automatické vytváření účtů při prvním přihlášení přes SSO a synchronizaci jejich členství ve skupinách IdP, bez nutnosti SCIM."
+	"jitProvisioningDescription": "Povolit automatické vytváření účtů při prvním přihlášení přes SSO a synchronizaci jejich členství ve skupinách IdP, bez nutnosti SCIM.",
+	"includeNotApplicableRequirements": "Zahrnout nepoužitelné požadavky",
+	"excludeNotApplicableRequirements": "Vyloučit nepoužitelné požadavky"
 }

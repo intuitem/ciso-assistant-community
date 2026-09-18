@@ -4292,5 +4292,7 @@
 	"attributeMappingGroups": "그룹 속성 매핑",
 	"attributeMappingGroupsHelpText": "사용자의 IdP 그룹 멤버십을 전달하는 클레임 이름입니다. 여기에서 찾은 그룹은 로그인할 때마다 IdP 그룹과 동기화되며, 관리자가 매핑한 CISO Assistant 사용자 그룹 권한을 부여합니다.",
 	"jitProvisioning": "SSO 자동 프로비저닝(JIT)",
-	"jitProvisioningDescription": "최초 SSO 로그인 시 계정을 자동으로 생성하고 IdP 그룹 멤버십을 동기화하도록 활성화합니다. SCIM이 필요하지 않습니다."
+	"jitProvisioningDescription": "최초 SSO 로그인 시 계정을 자동으로 생성하고 IdP 그룹 멤버십을 동기화하도록 활성화합니다. SCIM이 필요하지 않습니다.",
+	"includeNotApplicableRequirements": "해당되지 않는 요구사항 포함",
+	"excludeNotApplicableRequirements": "해당되지 않는 요구사항 제외"
 }

@@ -1615,5 +1615,7 @@
 	"attributeMappingGroups": "Maparea atributului de grupuri",
 	"attributeMappingGroupsHelpText": "Numele (numele) revendicării (claim) care conține apartenențele la grupuri IdP ale utilizatorului. Grupurile găsite aici sunt sincronizate cu grupurile IdP la fiecare autentificare și acordă grupurile de utilizatori CISO Assistant la care un administrator le-a mapat.",
 	"jitProvisioning": "Provizionare automată SSO (JIT)",
-	"jitProvisioningDescription": "Activează crearea automată a conturilor la prima autentificare SSO și sincronizarea apartenențelor lor la grupuri IdP, fără a necesita SCIM."
+	"jitProvisioningDescription": "Activează crearea automată a conturilor la prima autentificare SSO și sincronizarea apartenențelor lor la grupuri IdP, fără a necesita SCIM.",
+	"includeNotApplicableRequirements": "Includeți cerințele neaplicabile",
+	"excludeNotApplicableRequirements": "Excludeți cerințele neaplicabile"
 }

@@ -8,6 +8,11 @@
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
+		setContextRecursiveTreeView,
+		DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW
+	} from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	import ExcludeNotApplicableRequirements from '$lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
+	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
@@ -493,6 +498,19 @@
 			count: tocSections.filter((s) => s.result === opt.value).length
 		}))
 	);
+
+	const contextTreeView = $state(structuredClone(DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW));
+	setContextRecursiveTreeView(contextTreeView);
+
+	const filteredResultCounts = $derived(
+		resultCounts.filter(({ value }) => {
+			if (contextTreeView.excludeNotApplicableRequirements && value === 'not_applicable') {
+				return false;
+			}
+			return true;
+		})
+	);
+
 	const filteredTocSections = $derived(
 		tocFilterResult
 			? tocSections.filter(
@@ -509,6 +527,17 @@
 	// Audit progress analytics (assessable requirements only).
 	const assessableTotal = $derived(
 		tocSections.filter((s) => s.result !== '__section__' && s.result !== '__splash__').length
+	);
+	const filteredAssessableTotal = $derived(
+		tocSections.filter((s) => {
+			if (s.result === '__section__' || s.result === '__splash__') {
+				return false;
+			}
+			if (contextTreeView.excludeNotApplicableRequirements && s.result === 'not_applicable') {
+				return false;
+			}
+			return true;
+		}).length
 	);
 	const assessedCount = $derived(
 		tocSections.filter(
@@ -798,6 +827,11 @@
 								<i class="fa-solid {allExpanded ? 'fa-compress' : 'fa-expand'} mr-2"></i>
 								{allExpanded ? m.collapseAll() : m.expandAll()}
 							</button>
+							<ExcludeNotApplicableRequirements
+								bind:excludeNotApplicableRequirements={
+									contextTreeView.excludeNotApplicableRequirements
+								}
+							/>
 						{/if}
 						{#if hasQuestions}
 							<div class="flex items-center justify-center space-x-4">
@@ -852,9 +886,9 @@
 									role="img"
 									aria-label="{m.progress()}: {assessedCount}/{assessableTotal}"
 								>
-									{#each resultCounts as opt (opt.value)}
+									{#each filteredResultCounts as opt (opt.value)}
 										{#if opt.count > 0}
-											{@const pct = (opt.count / assessableTotal) * 100}
+											{@const pct = (opt.count / filteredAssessableTotal) * 100}
 											<div
 												class="flex h-full items-center justify-center overflow-hidden"
 												style="width: {pct}%; background-color: {complianceResultColorMap[

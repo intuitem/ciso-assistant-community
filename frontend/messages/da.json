@@ -1896,5 +1896,7 @@
 	"attributeMappingGroups": "Attributtilknytning for grupper",
 	"attributeMappingGroupsHelpText": "Claim-navn(e), der indeholder brugerens IdP-gruppemedlemskaber. Grupper fundet her synkroniseres til IdP-grupper ved hvert login og giver adgang til de CISO Assistant-brugergrupper, som en administrator har tilknyttet dem.",
 	"jitProvisioning": "SSO-automatisk provisionering (JIT)",
-	"jitProvisioningDescription": "Aktivér automatisk oprettelse af konti ved første SSO-login og synkronisering af deres IdP-gruppemedlemskaber, uden krav om SCIM."
+	"jitProvisioningDescription": "Aktivér automatisk oprettelse af konti ved første SSO-login og synkronisering af deres IdP-gruppemedlemskaber, uden krav om SCIM.",
+	"includeNotApplicableRequirements": "Inkluder ikke relevante krav",
+	"excludeNotApplicableRequirements": "Ekskluder ikke relevante krav"
 }

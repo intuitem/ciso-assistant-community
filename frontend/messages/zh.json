@@ -3626,5 +3626,7 @@
 	"attributeMappingGroups": "组属性映射",
 	"attributeMappingGroupsHelpText": "携带用户 IdP 组成员身份的声明（claim）名称。此处找到的组会在每次登录时与 IdP 组同步，并授予管理员已映射的任何 CISO Assistant 用户组。",
 	"jitProvisioning": "SSO 自动预配置（JIT）",
-	"jitProvisioningDescription": "在首次 SSO 登录时启用自动创建帐户，并同步其 IdP 组成员身份，无需 SCIM。"
+	"jitProvisioningDescription": "在首次 SSO 登录时启用自动创建帐户，并同步其 IdP 组成员身份，无需 SCIM。",
+	"includeNotApplicableRequirements": "包含不适用的要求",
+	"excludeNotApplicableRequirements": "排除不适用的要求"
 }

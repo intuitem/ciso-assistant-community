@@ -1590,5 +1590,7 @@
 	"attributeMappingGroups": "گروپس ایٹریبیوٹ میپنگ",
 	"attributeMappingGroupsHelpText": "کلیم کا نام جو صارف کی IdP گروپ رکنیت لے جاتا ہے۔ یہاں پائے جانے والے گروپس ہر لاگ ان پر IdP گروپس کے ساتھ ہم آہنگ کیے جاتے ہیں، اور ایڈمن کے ذریعے میپ کیے گئے کسی بھی CISO Assistant صارف گروپ تک رسائی دیتے ہیں۔",
 	"jitProvisioning": "SSO خودکار پرووژننگ (JIT)",
-	"jitProvisioningDescription": "پہلی SSO لاگ ان پر اکاؤنٹس کی خودکار تخلیق، اور ان کی IdP گروپ رکنیت کی مطابقت پذیری کو فعال کریں، بغیر SCIM کی ضرورت کے۔"
+	"jitProvisioningDescription": "پہلی SSO لاگ ان پر اکاؤنٹس کی خودکار تخلیق، اور ان کی IdP گروپ رکنیت کی مطابقت پذیری کو فعال کریں، بغیر SCIM کی ضرورت کے۔",
+	"includeNotApplicableRequirements": "غیر قابلِ اطلاق ضروریات شامل کریں",
+	"excludeNotApplicableRequirements": "غیر قابلِ اطلاق ضروریات خارج کریں"
 }

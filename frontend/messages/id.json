@@ -1781,5 +1781,7 @@
 	"attributeMappingGroups": "Pemetaan atribut grup",
 	"attributeMappingGroupsHelpText": "Nama klaim (claim) yang membawa keanggotaan grup IdP pengguna. Grup yang ditemukan di sini disinkronkan ke grup IdP setiap kali masuk, dan memberikan grup pengguna CISO Assistant apa pun yang telah dipetakan oleh administrator.",
 	"jitProvisioning": "Penyediaan otomatis SSO (JIT)",
-	"jitProvisioningDescription": "Aktifkan pembuatan akun otomatis saat login SSO pertama kali, dan sinkronisasi keanggotaan grup IdP mereka, tanpa memerlukan SCIM."
+	"jitProvisioningDescription": "Aktifkan pembuatan akun otomatis saat login SSO pertama kali, dan sinkronisasi keanggotaan grup IdP mereka, tanpa memerlukan SCIM.",
+	"includeNotApplicableRequirements": "Sertakan persyaratan yang tidak berlaku",
+	"excludeNotApplicableRequirements": "Kecualikan persyaratan yang tidak berlaku"
 }

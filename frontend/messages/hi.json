@@ -1569,5 +1569,7 @@
 	"attributeMappingGroups": "समूह विशेषता मैपिंग",
 	"attributeMappingGroupsHelpText": "वह क्लेम नाम जो उपयोगकर्ता की IdP समूह सदस्यता ले जाता है। यहाँ पाए गए समूह हर लॉगिन पर IdP समूहों के साथ समन्वयित किए जाते हैं, और व्यवस्थापक द्वारा मैप किए गए किसी भी CISO Assistant उपयोगकर्ता समूह की अनुमति देते हैं।",
 	"jitProvisioning": "SSO स्वतः-प्रावधान (JIT)",
-	"jitProvisioningDescription": "पहली SSO लॉगिन पर खातों का स्वतः निर्माण और उनकी IdP समूह सदस्यता का समन्वयन सक्षम करें, बिना SCIM की आवश्यकता के।"
+	"jitProvisioningDescription": "पहली SSO लॉगिन पर खातों का स्वतः निर्माण और उनकी IdP समूह सदस्यता का समन्वयन सक्षम करें, बिना SCIM की आवश्यकता के।",
+	"includeNotApplicableRequirements": "लागू नहीं होने वाली आवश्यकताएँ शामिल करें",
+	"excludeNotApplicableRequirements": "लागू नहीं होने वाली आवश्यकताएँ बाहर रखें"
 }

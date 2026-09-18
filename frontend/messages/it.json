@@ -4069,5 +4069,7 @@
 	"attributeMappingGroups": "Mappatura dell'attributo gruppi",
 	"attributeMappingGroupsHelpText": "Nome/i della claim che trasporta le appartenenze ai gruppi IdP dell'utente. I gruppi trovati qui vengono sincronizzati con i gruppi IdP a ogni accesso e concedono i gruppi utente di CISO Assistant a cui un amministratore li ha mappati.",
 	"jitProvisioning": "Provisioning automatico SSO (JIT)",
-	"jitProvisioningDescription": "Abilita la creazione automatica degli account al primo accesso SSO e la sincronizzazione delle loro appartenenze ai gruppi IdP, senza richiedere SCIM."
+	"jitProvisioningDescription": "Abilita la creazione automatica degli account al primo accesso SSO e la sincronizzazione delle loro appartenenze ai gruppi IdP, senza richiedere SCIM.",
+	"includeNotApplicableRequirements": "Includi requisiti non applicabili",
+	"excludeNotApplicableRequirements": "Escludi requisiti non applicabili"
 }
