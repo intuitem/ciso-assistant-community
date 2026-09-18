@@ -2,9 +2,12 @@ import { formatSelectFieldData } from '$lib/utils/load';
 import type { SelectField } from '$lib/utils/crud';
 
 /** A model's choice-field options, fetched when a form opens rather than during
- * the server load. A no-op when something already provided them. */
-const cache = new Map<string, Record<string, unknown>>();
-const incomplete = new Set<string>();
+ * the server load. Only fields nobody has provided yet are fetched. */
+
+// Per field, so a page that pre-filled some of them still gets the rest. Values
+// are cloned in and out: consumers rewrite option values in place
+// (AppliedControlPolicyForm), which would otherwise poison the entry.
+const cache = new Map<string, unknown>();
 
 export async function ensureSelectOptions(
 	model: Record<string, any>,
@@ -20,49 +23,42 @@ export async function ensureSelectOptions(
 	const urlModel = info.urlModel ?? model.urlModel;
 	if (!urlModel) return;
 
+	const existing = model.selectOptions ?? {};
+	const missing = selectFields.filter((f) => !(f.field in existing));
+	if (!missing.length) return;
+
 	// Detail pages put the parent id on the model, everyone else passes it in.
 	const parentOf = (field: string) => initialData?.[field] ?? model.initialData?.[field];
-	const parents = selectFields
-		.map((f) => (f.formNestedField ? parentOf(f.formNestedField) : ''))
-		.join(',');
-	const key = `${urlModel}:${parents}`;
 
-	// Already provided, unless a previous attempt only half-filled it.
-	if (!incomplete.has(key) && model.selectOptions && Object.keys(model.selectOptions).length > 0)
-		return;
-
-	const cached = cache.get(key);
-	if (cached) {
-		// AppliedControlPolicyForm rewrites option values in place.
-		model.selectOptions = structuredClone(cached);
-		return;
-	}
-
-	let complete = true;
-	const entries = await Promise.all(
-		selectFields.map(async (selectField) => {
-			const query = new URLSearchParams({ field: selectField.field });
+	const fetched: Record<string, unknown> = {};
+	await Promise.all(
+		missing.map(async (selectField) => {
 			const parent = selectField.formNestedField ? parentOf(selectField.formNestedField) : null;
+			// Parent-scoped options follow that parent's scale, which can be
+			// edited, so they are never cached.
+			const key = parent ? null : `${urlModel}:${selectField.field}`;
+			const hit = key && cache.get(key);
+			if (hit) {
+				fetched[selectField.field] = structuredClone(hit);
+				return;
+			}
+			const query = new URLSearchParams({ field: selectField.field });
 			if (parent) query.set('detail', parent);
 			const url = `/${urlModel}/select-options?${query}`;
 			try {
 				const response = await fetch(url);
 				if (!response.ok) throw new Error(response.statusText);
-				return [selectField.field, formatSelectFieldData(await response.json(), selectField)];
+				const options = formatSelectFieldData(await response.json(), selectField);
+				if (key) cache.set(key, structuredClone(options));
+				fetched[selectField.field] = options;
 			} catch (e) {
-				complete = false;
 				console.error(`Failed to fetch options for ${selectField.field} from ${url}`, e);
-				return [selectField.field, []];
 			}
 		})
 	);
 
-	const options = Object.fromEntries(entries);
-	if (complete) {
-		cache.set(key, options);
-		incomplete.delete(key);
-	} else {
-		incomplete.add(key);
-	}
-	model.selectOptions = options;
+	// Nothing to add and nothing there before: leave it unset so a form with its
+	// own fallback (AppliedControlPolicyForm) can still use it.
+	if (!Object.keys(fetched).length && !model.selectOptions) return;
+	model.selectOptions = { ...existing, ...fetched };
 }

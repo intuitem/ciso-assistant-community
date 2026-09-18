@@ -282,19 +282,16 @@ export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 		: Promise.resolve({});
 
 	// Resolve which dashboard to render: ?dashboard=ID > instance default global setting > none
-	// Resolved before load returns: event.fetch called after that is untracked.
-	let customDashboardPromise: ReturnType<typeof loadCustomDashboard> | Promise<null> =
-		Promise.resolve(null);
-	if (shown('custom')) {
+	const customDashboardPromise = (async () => {
+		if (!shown('custom')) return null;
 		let dashboardId: string | null = url.searchParams.get('dashboard');
 		if (!dashboardId) {
 			const settings = await generalSettingsPromise;
 			dashboardId = settings?.default_custom_analytics_dashboard || null;
 		}
-		if (dashboardId) {
-			customDashboardPromise = loadCustomDashboard(fetch, dashboardId).catch(() => null);
-		}
-	}
+		if (!dashboardId) return null;
+		return loadCustomDashboard(fetch, dashboardId).catch(() => null);
+	})();
 
 	const operationsAnalyticsPromise = Promise.all([
 		detectionPromise,
