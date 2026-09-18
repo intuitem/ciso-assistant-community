@@ -100,8 +100,14 @@ const EXTRA_DESTINATIONS: Destination[] = [
 		// `view_serviceaccount` rather than to `false` if `adminOnly` is ever dropped.
 		nav: { name: 'serviceAccounts', href: '/service-accounts', adminOnly: true }
 	},
-	{ name: 'licenseManagement', href: '/license-management', icon: 'fa-solid fa-certificate' },
-	{ name: 'journeys', href: '/journeys', icon: 'fa-solid fa-route', flag: 'journeys' }
+	{
+		name: 'journeys',
+		href: '/journeys',
+		icon: 'fa-solid fa-route',
+		flag: 'journeys',
+		// The href alone is the rule: it resolves to the `view_presetjourney` check.
+		nav: { name: 'journeys', href: '/journeys' }
+	}
 ];
 
 // Sidebar entries whose href is not the model's own list route.

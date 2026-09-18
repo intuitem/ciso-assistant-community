@@ -245,6 +245,22 @@ describe('buildNavigationCommands', () => {
 		expect(hrefs).toContain('/assets');
 	});
 
+	// Every extra destination must carry its own rule or be all-users by design; falling
+	// through to the flag/visibility check alone offers the page to everyone.
+	it('gives every extra destination a permission rule, or is deliberately public', () => {
+		const PUBLIC = ['/my-profile'];
+		const forNobody = buildNavigationCommands(nobody, allFlags).map((c) => c.href);
+		const sidebarHrefs = new Set(
+			buildNavigationCommands(superuser, allFlags)
+				.map((c) => c.href)
+				.filter((href) => !PUBLIC.includes(href!))
+		);
+		for (const href of forNobody) {
+			expect(PUBLIC, `${href} is offered to a user with no permissions`).toContain(href);
+		}
+		expect(sidebarHrefs.size).toBeGreaterThan(0);
+	});
+
 	// `ServiceAccountViewSet` is `IsGlobalAdmin`; no sidebar entry means no inherited rule.
 	it('hides an admin-only destination from a non-admin, flag notwithstanding', () => {
 		const nonAdmin = { ...superuser, is_admin: false } as unknown as User;
