@@ -143,7 +143,10 @@ export const actions: Actions = {
 			method: 'POST'
 		});
 		if (!res.ok) return fail(res.status, { error: await res.text() });
-		return { success: true };
+		// Tiles the template could not keep wired (snapshots, uploads): the author has
+		// to hear about it, or the template silently ships dead tiles.
+		const { unwired } = await res.json();
+		return { success: true, unwired: (unwired ?? []) as string[] };
 	},
 	duplicate: async ({ params, fetch }) => {
 		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/duplicate/`, { method: 'POST' });
