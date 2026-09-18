@@ -1000,6 +1000,7 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
         AREA = "area", _("Area Chart")
         GAUGE = "gauge", _("Gauge")
         SPARKLINE = "sparkline", _("Sparkline")
+        SMALL_MULTIPLES = "small_multiples", _("Small Multiples")
         TABLE = "table", _("Table")
         TEXT = "text", _("Text")
 
