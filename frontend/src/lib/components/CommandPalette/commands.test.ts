@@ -3,7 +3,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { CREATE_INTENT_PARAM, createIntentHref } from '$lib/utils/create-intent';
 import { NON_CREATABLE_URL_MODELS, URL_MODEL_MAP } from '$lib/utils/crud';
 import type { User } from '$lib/utils/types';
-import { buildCreateCommands, buildNavigationCommands } from './commands';
+import {
+	awaitingArgument,
+	buildCreateCommands,
+	buildNavigationCommands,
+	matchCommands,
+	type PaletteCommand
+} from './commands';
 
 const ROOT = '00000000-0000-0000-0000-000000000000';
 
@@ -62,6 +68,104 @@ describe('buildCreateCommands', () => {
 		for (const command of buildCreateCommands(superuser, allFlags)) {
 			expect(command.label).not.toMatch(/^add-/);
 		}
+	});
+});
+
+describe('matchCommands', () => {
+	const note: PaletteCommand = {
+		label: 'Add note',
+		group: 'action',
+		keywords: ['note', 'annoter'],
+		run: () => {}
+	};
+	const chat: PaletteCommand = { label: 'AI engine (Chat)', group: 'action', run: () => {} };
+	const pool = [note, chat];
+
+	it('filters on labels while a single token is being typed', () => {
+		expect(matchCommands(pool, 'not').items).toEqual([note]);
+		expect(matchCommands(pool, 'not').verbCommand).toBeUndefined();
+		expect(matchCommands(pool, 'not').argument).toBe('');
+	});
+
+	it('binds the rest of the input as the argument once a verb is followed by a space', () => {
+		const match = matchCommands(pool, 'note call the auditor');
+		expect(match.verbCommand).toBe(note);
+		expect(match.items).toEqual([note]);
+		expect(match.argument).toBe('call the auditor');
+	});
+
+	it('keeps the command selected before any argument is typed', () => {
+		const match = matchCommands(pool, 'note ');
+		expect(match.verbCommand).toBe(note);
+		expect(match.argument).toBe('');
+	});
+
+	it('preserves the argument verbatim, including its inner spacing and case', () => {
+		expect(matchCommands(pool, 'note  Rapport  ISO 27001 ').argument).toBe(' Rapport  ISO 27001 ');
+	});
+
+	it('matches a localised verb and is accent-insensitive', () => {
+		expect(matchCommands(pool, 'annoter ceci').verbCommand).toBe(note);
+		expect(matchCommands(pool, 'ANNOTER ceci').verbCommand).toBe(note);
+	});
+
+	it('falls back to label filtering when the first token names no command', () => {
+		const match = matchCommands(pool, 'nope some text');
+		expect(match.verbCommand).toBeUndefined();
+		expect(match.items).toEqual([]);
+		expect(match.argument).toBe('');
+	});
+
+	it('never binds an argument to a command that takes none', () => {
+		expect(matchCommands(pool, 'AI engine (Chat)').verbCommand).toBeUndefined();
+	});
+
+	it('lists everything on an empty query', () => {
+		expect(matchCommands(pool, '').items).toEqual(pool);
+	});
+
+	/**
+	 * A verb is compared against the first token, so one containing a space could never be
+	 * matched — it would be dead config, and silently so. Guards the `commandKeyword*`
+	 * messages against a translation that renders a verb as two words.
+	 */
+	it('cannot match a multi-word keyword, which is why verbs must be single words', () => {
+		const broken: PaletteCommand = {
+			label: 'Ask AI',
+			group: 'action',
+			keywords: ["demander à l'IA"]
+		};
+		expect(matchCommands([broken], "demander à l'IA something").verbCommand).toBeUndefined();
+	});
+});
+
+describe('shipped command keywords', () => {
+	it('are single words in every locale', async () => {
+		const { baseLocale, locales } = await import('$paraglide/runtime');
+		const { commandKeywordAsk, commandKeywordSearch } = await import('$paraglide/messages');
+		for (const locale of locales) {
+			for (const message of [commandKeywordSearch, commandKeywordAsk]) {
+				const keyword = message({}, { locale });
+				expect(keyword, `${keyword} in ${locale}`).not.toMatch(/\s/);
+				expect(keyword.length, `${keyword} in ${locale}`).toBeGreaterThan(0);
+			}
+		}
+		expect(locales).toContain(baseLocale);
+	});
+});
+
+describe('awaitingArgument', () => {
+	const note: PaletteCommand = { label: 'Add note', group: 'action', keywords: ['note'] };
+	const chat: PaletteCommand = { label: 'Chat', group: 'action' };
+
+	it('holds a keyword command until it has input', () => {
+		expect(awaitingArgument(note, '')).toBe(true);
+		expect(awaitingArgument(note, '   ')).toBe(true);
+		expect(awaitingArgument(note, 'something')).toBe(false);
+	});
+
+	it('never holds a command that takes no argument', () => {
+		expect(awaitingArgument(chat, '')).toBe(false);
 	});
 });
 

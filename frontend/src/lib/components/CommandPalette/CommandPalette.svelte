@@ -3,12 +3,19 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { page } from '$app/state';
-	import { expandChat } from '../ChatWidget/chatStore.svelte';
+	import {
+		expandChat,
+		getIsStreaming,
+		sendMessage,
+		setInputText
+	} from '../ChatWidget/chatStore.svelte';
 	import { m } from '$paraglide/messages';
 	import { createIntentHref } from '$lib/utils/create-intent';
 	import {
+		awaitingArgument,
 		buildCreateCommands,
 		buildNavigationCommands,
+		matchCommands,
 		type PaletteCommand,
 		type PaletteGroup
 	} from './commands';
@@ -21,9 +28,23 @@
 	const navigationCommands = $derived(buildNavigationCommands(featureFlags));
 	const createCommands = $derived(buildCreateCommands(page.data?.user, featureFlags));
 
-	const actionCommands: PaletteCommand[] = $derived(
-		featureFlags.chat_mode
+	const actionCommands: PaletteCommand[] = $derived([
+		{
+			label: safeTranslate('search'),
+			group: 'action' as const,
+			icon: 'fa-solid fa-magnifying-glass',
+			keywords: [m.commandKeywordSearch(), 'search'],
+			run: (argument: string) => runSearch(argument)
+		},
+		...(featureFlags.chat_mode
 			? [
+					{
+						label: safeTranslate('askAi'),
+						group: 'action' as const,
+						icon: 'fa-solid fa-wand-magic-sparkles',
+						keywords: [m.commandKeywordAsk(), 'ask'],
+						run: askAi
+					},
 					{
 						label: safeTranslate('openAssistant'),
 						group: 'action' as const,
@@ -31,13 +52,8 @@
 						run: expandChat
 					}
 				]
-			: []
-	);
-
-	// Strip accents/diacritics for accent-insensitive matching
-	function normalize(str: string): string {
-		return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-	}
+			: [])
+	]);
 
 	let selected = $state(0);
 	let searchText = $state('');
@@ -63,9 +79,10 @@
 				: [...navigationCommands, ...actionCommands]
 	);
 
-	const items = $derived(
-		pool.filter((command) => normalize(command.label).includes(normalize(query)))
-	);
+	const match = $derived(matchCommands(pool, query));
+	const items = $derived(match.items);
+	const argument = $derived(match.argument);
+	const verbCommand = $derived(match.verbCommand);
 
 	const MODE_ICONS: Record<PaletteMode, string> = {
 		create: 'fa-plus',
@@ -97,8 +114,15 @@
 	}
 
 	function execute(command: PaletteCommand) {
+		if (awaitingArgument(command, argument)) {
+			// Commit the verb into the input instead of firing: the next keystrokes are its
+			// argument, and the palette stays open to take them.
+			searchText = `/${command.keywords![0]} `;
+			selected = 0;
+			return;
+		}
 		opened = false;
-		if (command.run) return command.run();
+		if (command.run) return command.run(argument.trim());
 		if (!command.href) return;
 		goto(command.opensCreateForm ? createIntentHref(command.href) : command.href, {
 			label: command.breadcrumb ?? command.label,
@@ -106,9 +130,17 @@
 		});
 	}
 
-	function runSearch() {
+	function askAi(question: string) {
+		expandChat();
+		// `streamResponse` aborts whatever is in flight, so sending now would kill an answer
+		// mid-sentence. Hand the question to the composer instead and let the user send it.
+		if (getIsStreaming()) return setInputText(question);
+		sendMessage(question);
+	}
+
+	function runSearch(text: string) {
 		opened = false;
-		goto(`/search?q=${encodeURIComponent(searchText.trim())}`, {
+		goto(`/search?q=${encodeURIComponent(text.trim())}`, {
 			label: 'search',
 			breadcrumbAction: 'replace'
 		});
@@ -145,7 +177,7 @@
 				execute(items[selected]);
 			} else if (mode === 'search' && searchText.trim()) {
 				// No match — launch universal search
-				runSearch();
+				runSearch(searchText);
 			}
 		}
 	}
@@ -217,7 +249,19 @@
 											: 'text-surface-400-600'}"
 									></i>
 								{/if}
-								<span class="flex-1 truncate">{item.label}</span>
+								<span class="shrink-0">{item.label}</span>
+								{#if item === verbCommand && argument.trim()}
+									<span
+										class="min-w-0 flex-1 truncate rounded bg-violet-100 px-1.5 py-0.5 text-[11px] text-violet-700"
+										>{argument}</span
+									>
+								{:else if awaitingArgument(item, argument)}
+									<span class="min-w-0 flex-1 truncate text-[11px] text-surface-400-600 italic"
+										>{m.commandPaletteArgumentHint()}</span
+									>
+								{:else}
+									<span class="min-w-0 flex-1"></span>
+								{/if}
 								{#if selected === index}
 									<span class="text-[10px] text-violet-400">↵</span>
 								{/if}
@@ -231,7 +275,7 @@
 						{#if mode === 'search' && searchText.trim()}
 							<button
 								class="mt-3 flex items-center gap-2 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-100 transition-colors cursor-pointer"
-								onclick={runSearch}
+								onclick={() => runSearch(searchText)}
 							>
 								<i class="fa-solid fa-arrow-right text-[10px]"></i>
 								{m.commandPaletteSearchHint()}

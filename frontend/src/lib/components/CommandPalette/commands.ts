@@ -18,7 +18,59 @@ export interface PaletteCommand {
 	opensCreateForm?: boolean;
 	/** Breadcrumb label for the navigation, defaulting to the i18n key behind `label`. */
 	breadcrumb?: string;
-	run?: () => void;
+	/**
+	 * Verbs selecting this command in `/` mode, the rest of the input becoming its argument —
+	 * `/search acme` runs the `search` command with `acme`. List the localised verb and the
+	 * English one, so both work whatever the locale. A command with keywords takes an
+	 * argument and does nothing without one.
+	 *
+	 * Each verb must be a SINGLE WORD: matching compares it to the first token, so anything
+	 * containing a space can never match. Translate them through their own `commandKeyword*`
+	 * messages rather than reusing a label, which a locale may well render as two words.
+	 */
+	keywords?: string[];
+	run?: (argument: string) => void;
+}
+
+/** Strip accents/diacritics so matching is accent-insensitive. */
+export function normalize(str: string): string {
+	return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
+export interface CommandMatch {
+	items: PaletteCommand[];
+	/** The command the first token names, once an argument has been started. */
+	verbCommand?: PaletteCommand;
+	/** Everything after the verb, verbatim — empty unless `verbCommand` is set. */
+	argument: string;
+}
+
+/**
+ * Resolve what the typed query selects. Two grammars share one input: `verb the rest`, where
+ * the first token names a command and the remainder is its argument, and plain filtering over
+ * labels. The verb grammar only engages once a space is typed, so `/sea` still filters labels
+ * normally and only `/search acme` binds an argument.
+ */
+export function matchCommands(pool: PaletteCommand[], query: string): CommandMatch {
+	const tokens = query.split(' ');
+	if (tokens.length > 1) {
+		const verb = normalize(tokens[0]);
+		const verbCommand = pool.find((command) =>
+			command.keywords?.some((keyword) => normalize(keyword) === verb)
+		);
+		if (verbCommand) {
+			return { items: [verbCommand], verbCommand, argument: tokens.slice(1).join(' ') };
+		}
+	}
+	return {
+		items: pool.filter((command) => normalize(command.label).includes(normalize(query))),
+		argument: ''
+	};
+}
+
+/** A keyword command is only actionable once it has input to act on. */
+export function awaitingArgument(command: PaletteCommand, argument: string): boolean {
+	return Boolean(command.keywords?.length) && !argument.trim();
 }
 
 interface Destination {
