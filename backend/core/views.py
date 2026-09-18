@@ -10573,6 +10573,7 @@ class RequirementViewSet(BaseModelViewSet):
                 "evidences",
                 "applied_controls",
                 "security_exceptions",
+                "findings",
             )
         )
         serialized_requirement_assessments = RequirementAssessmentReadSerializer(
@@ -15671,6 +15672,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
         requirement_assessment = self.get_object()
         audit = requirement_assessment.compliance_assessment
+        if audit.is_locked:
+            return Response(
+                {"error": "Cannot raise a finding on a locked audit"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         # `add_findingsassessment` on the audit's folder is what authorizes creating it.
         if not RoleAssignment.is_access_allowed(
@@ -15748,6 +15754,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "applied_controls",  # ManyToManyField to AppliedControl
                 "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
+                "findings",  # Reverse FK from Finding serialized as FieldsRelatedField
                 "answers",  # Reverse FK from Answer, used by get_answers() in read serializer
                 "answers__question",  # Needed by build_answers_dict() to get question.urn and question.type
                 "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
@@ -17232,6 +17239,11 @@ class FindingFilterSet(GenericFilterSet):
     findings_assessment = NullableModelChoiceFilter(
         queryset=FindingsAssessment.objects.all()
     )
+    # Same convention: the requirement assessment picker asks for the unbound
+    # findings alongside its own.
+    requirement_assessment = NullableModelChoiceFilter(
+        queryset=RequirementAssessment.objects.all()
+    )
 
     class Meta:
         model = Finding
@@ -17244,7 +17256,6 @@ class FindingFilterSet(GenericFilterSet):
             "priority": ["exact"],
             "asset": ["exact"],
             "requirement_node": ["exact"],
-            "requirement_assessment": ["exact"],
             "filtering_labels": ["exact"],
             "applied_controls": ["exact"],
             "evidences": ["exact"],
