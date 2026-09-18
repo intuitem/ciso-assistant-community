@@ -88,6 +88,7 @@
 	const showComments = $derived(fieldVis.showComments);
 	const showStatus = $derived(fieldVis.showStatus);
 	const showExtendedResult = $derived(fieldVis.showExtendedResult);
+	const showAnnotation = $derived(fieldVis.showAnnotation);
 
 	// Single assignment — the URL param (params.id) IS the assignment ID
 	let assignment = $derived(data.assignment);
@@ -1212,12 +1213,12 @@
 				{/if}
 
 				<!-- Additional info (annotation, typical evidence) -->
-				{#if requirement.annotation || requirement.typical_evidence}
+				{#if (requirement.annotation && showAnnotation) || requirement.typical_evidence}
 					<div class="card p-4 preset-tonal-secondary text-sm flex flex-col space-y-2 w-full">
 						<h4 class="font-semibold text-base">
 							<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
 						</h4>
-						{#if requirement.annotation}
+						{#if requirement.annotation && showAnnotation}
 							<div>
 								<p class="font-medium"><i class="fa-solid fa-pencil mr-1"></i>{m.annotation()}</p>
 								<MarkdownRenderer content={requirement.annotation} />

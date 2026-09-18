@@ -1796,6 +1796,8 @@ DEFAULT_VISIBILITY = {
     # Off unless the audit opts in: existing audits track remediation through
     # applied controls or findings, and should not sprout a tasks tab.
     "task_templates": HIDDEN,
+    # Annotations are meant to help the auditor interpret/answer the requirement, respondents don't really need it.
+    "annotation": AUDITOR_ONLY,
 }
 
 
@@ -1815,6 +1817,7 @@ THIRD_PARTY_VISIBILITY = {
     "evidences": EVERYONE_EDIT,
     "observation": EVERYONE_EDIT,
     "comments": EVERYONE_EDIT,
+    "annotation": AUDITOR_ONLY,
 }
 
 
