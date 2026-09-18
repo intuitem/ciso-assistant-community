@@ -13,6 +13,7 @@ Covered:
 """
 
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
 import yaml
@@ -1921,6 +1922,123 @@ def test_stored_library_reads_stay_open_for_standard_roles(admin_client):
     assert detail.status_code == status.HTTP_200_OK
     content = admin_client.get(reverse("stored-libraries-content", args=[source_urn]))
     assert content.status_code == status.HTTP_200_OK
+
+
+def _store_mapping_fixture():
+    """A mapping set plus the two frameworks it spans, stored as libraries."""
+    root = Folder.get_root_folder()
+    common = {"folder": root, "locale": "en", "version": 1, "packager": "tests"}
+
+    def framework(slug, ref_id):
+        return StoredLibrary.objects.create(
+            urn=f"urn:tests:risk:library:{slug}",
+            name=slug,
+            ref_id=slug,
+            hash_checksum=slug,
+            content={
+                "framework": {
+                    "urn": f"urn:tests:risk:framework:{slug}",
+                    "name": slug,
+                    "requirement_nodes": [
+                        {
+                            "urn": f"urn:tests:risk:req_node:{slug}:r1",
+                            "ref_id": ref_id,
+                            "name": f"{ref_id} requirement",
+                            "assessable": True,
+                        }
+                    ],
+                }
+            },
+            **common,
+        )
+
+    framework("mapsrc", "S.1")
+    framework("maptgt", "T.1")
+
+    return StoredLibrary.objects.create(
+        urn="urn:tests:risk:library:mapset",
+        name="mapset",
+        ref_id="mapset",
+        hash_checksum="mapset",
+        content={
+            "requirement_mapping_sets": [
+                {
+                    "urn": "urn:tests:risk:req_mapping_set:mapset",
+                    "source_framework_urn": "urn:tests:risk:framework:mapsrc",
+                    "target_framework_urn": "urn:tests:risk:framework:maptgt",
+                    "requirement_mappings": [
+                        {
+                            "source_requirement_urn": "urn:tests:risk:req_node:mapsrc:r1",
+                            "target_requirement_urn": "urn:tests:risk:req_node:maptgt:r1",
+                            "relationship": "equal",
+                        }
+                    ],
+                }
+            ]
+        },
+        **common,
+    )
+
+
+MAPPING_DATA_ROUTES = (
+    "requirement-mapping-sets-graph-data",
+    "requirement-mapping-sets-table-data",
+)
+
+
+@pytest.mark.django_db
+def test_mapping_data_reads_respect_rbac(builder_only_client):
+    """A user without view_storedlibrary gets a 404, never the mapping content."""
+    mapping_set = _store_mapping_fixture()
+
+    for route in MAPPING_DATA_ROUTES:
+        response = builder_only_client.get(reverse(route, args=[mapping_set.pk]))
+        assert response.status_code == status.HTTP_404_NOT_FOUND, route
+
+
+@pytest.mark.django_db
+def test_mapping_data_reads_stay_open_for_standard_roles(admin_client):
+    """Sanity: the RBAC lookup changes nothing for a role that may read libraries."""
+    mapping_set = _store_mapping_fixture()
+
+    for route in MAPPING_DATA_ROUTES:
+        response = admin_client.get(reverse(route, args=[mapping_set.pk]))
+        assert response.status_code == status.HTTP_200_OK, route
+
+    table = admin_client.get(
+        reverse("requirement-mapping-sets-table-data", args=[mapping_set.pk])
+    )
+    assert [row["source_ref_id"] for row in table.data["rows"]] == ["S.1"]
+    assert [row["target_ref_id"] for row in table.data["rows"]] == ["T.1"]
+
+
+@pytest.mark.django_db
+def test_mapping_data_reads_404_on_unknown_id(admin_client):
+    """An unknown id is a 404, not a 500 from StoredLibrary.DoesNotExist."""
+    unknown = uuid4()
+
+    for route in MAPPING_DATA_ROUTES:
+        response = admin_client.get(reverse(route, args=[unknown]))
+        assert response.status_code == status.HTTP_404_NOT_FOUND, route
+
+
+@pytest.mark.django_db
+def test_mapping_table_data_indexes_every_row(admin_client):
+    """Rows carry an index: libraries may list the same link twice, and the client keys on it."""
+    mapping_set = _store_mapping_fixture()
+    content = mapping_set.content
+    link = content["requirement_mapping_sets"][0]["requirement_mappings"][0]
+    content["requirement_mapping_sets"][0]["requirement_mappings"] = [link, dict(link)]
+    mapping_set.content = content
+    mapping_set.save()
+
+    response = admin_client.get(
+        reverse("requirement-mapping-sets-table-data", args=[mapping_set.pk])
+    )
+    rows = response.data["rows"]
+
+    assert len(rows) == 2
+    assert [row["index"] for row in rows] == [0, 1]
 
 
 @pytest.mark.django_db

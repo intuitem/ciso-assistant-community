@@ -68,7 +68,12 @@
 		hasPermissionAnywhere
 	} from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
-	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
+	import {
+		tableHandlers,
+		tableRefreshers,
+		tableStates,
+		tableColumnStates
+	} from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
@@ -123,6 +128,7 @@
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
 		expectedCount?: number;
+		loading?: boolean;
 		onFilterChange?: (filters: Record<string, any>) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
@@ -189,6 +195,7 @@
 		forcePreventDelete = false,
 		forcePreventEdit = false,
 		expectedCount = undefined,
+		loading = false,
 		onFilterChange = () => {},
 		quickFilters,
 		optButton,
@@ -381,9 +388,28 @@
 
 	const toastStore = getToastStore();
 
-	if (hasRemoteSource)
-		handler.onChange((state: State) =>
-			loadTableData({
+	// Rows arrive from the API, so on a slow connection an empty table would
+	// otherwise be indistinguishable from a table with no data loaded. Requests
+	// can overlap (search, sort, filters), so count them rather than flag them,
+	// and only show placeholders until the first page has landed: a later
+	// refetch keeps the previous rows on screen.
+	let inFlight = $state(0);
+	let hasLoadedOnce = $state(false);
+	const isFetching = $derived(inFlight > 0 && !hasLoadedOnce);
+	let currentLoad: Promise<any[]> = Promise.resolve([]);
+
+	if (hasRemoteSource) {
+		// The trigger handler calls our reload synchronously before its first
+		// await, so once invalidate() returns, currentLoad is the new request.
+		$tableRefreshers[baseEndpoint] = () => {
+			handler.invalidate();
+			return currentLoad;
+		};
+		handler.onChange((state: State) => {
+			inFlight += 1;
+			// Per request, so a failure cannot mask a success that overlapped it.
+			let failed = false;
+			currentLoad = loadTableData({
 				state,
 				URLModel,
 				endpoint: baseEndpoint,
@@ -404,11 +430,17 @@
 								},
 				featureFlags: page.data?.featureflags,
 				onError: (error) => {
+					failed = true;
 					console.error(error);
 					toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
 				}
-			})
-		);
+			}).finally(() => {
+				inFlight -= 1;
+				if (!failed) hasLoadedOnce = true;
+			});
+			return currentLoad;
+		});
+	}
 
 	onMount(() => {
 		if (orderBy) {
@@ -416,6 +448,13 @@
 				? handler.sortAsc(orderBy.identifier)
 				: handler.sortDesc(orderBy.identifier);
 		}
+		return () => {
+			if (hasRemoteSource)
+				tableRefreshers.update((r) => {
+					delete r[baseEndpoint];
+					return r;
+				});
+		};
 	});
 
 	const actionsURLModel = URLModel;
@@ -540,7 +579,8 @@
 	$effect(() => {
 		if (hasRemoteSource && page.form?.form?.posted && page.form?.form?.valid) {
 			console.debug('Form posted, invalidating table');
-			handler.invalidate();
+			// untracked: the reload writes inFlight, which would retrigger this effect
+			untrack(() => handler.invalidate());
 		}
 	});
 
@@ -757,6 +797,13 @@
 	};
 
 	let openState = $state(false);
+	// Popover.Content renders while closed and every filter widget fetches its
+	// options on mount, so keep them out of the tree until the first open. Kept
+	// once mounted so reopening does not refetch.
+	let filtersMounted = $state(false);
+	$effect(() => {
+		if (openState) filtersMounted = true;
+	});
 
 	// Search state lifted here so it survives BatchActionBar show/hide cycles
 	let searchValue = $state('');
@@ -856,50 +903,54 @@
 						<Popover.Content
 							class="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200-800"
 						>
-							<SuperForm {_form} validators={zod(z.object({}))}>
-								{#snippet children({ form })}
-									{#each filteredFields as field}
-										{#if filters[field]?.component}
-											{@const FilterComponent = filters[field].component}
-											{#key filterResetKey}
-												<FilterComponent
-													{form}
-													{field}
-													{...filters[field].props}
-													fieldContext="filter"
-													label={safeTranslate(filters[field].props?.label)}
-													filterValue={filterValues[field]}
-													onChange={(value) => {
-														const arrayValue = Array.isArray(value) ? value : [value];
-														const sanitizedArrayValue = arrayValue.filter(
-															(v) => v !== null && v !== undefined && v !== ''
-														);
+							{#if filtersMounted}
+								<SuperForm {_form} validators={zod(z.object({}))}>
+									{#snippet children({ form })}
+										{#each filteredFields as field}
+											{#if filters[field]?.component}
+												{@const FilterComponent = filters[field].component}
+												{#key filterResetKey}
+													<FilterComponent
+														{form}
+														{field}
+														{...filters[field].props}
+														fieldContext="filter"
+														label={safeTranslate(filters[field].props?.label)}
+														filterValue={filterValues[field]}
+														onChange={(value) => {
+															const arrayValue = Array.isArray(value) ? value : [value];
+															const sanitizedArrayValue = arrayValue.filter(
+																(v) => v !== null && v !== undefined && v !== ''
+															);
 
-														filterValues[field] = sanitizedArrayValue.map((v) =>
-															typeof v === 'object' && v !== null && 'value' in v ? v : { value: v }
-														);
+															filterValues[field] = sanitizedArrayValue.map((v) =>
+																typeof v === 'object' && v !== null && 'value' in v
+																	? v
+																	: { value: v }
+															);
+														}}
+													/>
+												{/key}
+											{/if}
+										{/each}
+										{#if filterCount > 0}
+											<div class="flex justify-end pt-1">
+												<button
+													type="button"
+													class="btn preset-tonal-surface text-sm"
+													onclick={() => {
+														resetFilters();
+														openState = false;
 													}}
-												/>
-											{/key}
+												>
+													<i class="fa-solid fa-rotate-left mr-2"></i>
+													{m.resetFilters()}
+												</button>
+											</div>
 										{/if}
-									{/each}
-									{#if filterCount > 0}
-										<div class="flex justify-end pt-1">
-											<button
-												type="button"
-												class="btn preset-tonal-surface text-sm"
-												onclick={() => {
-													resetFilters();
-													openState = false;
-												}}
-											>
-												<i class="fa-solid fa-rotate-left mr-2"></i>
-												{m.resetFilters()}
-											</button>
-										</div>
-									{/if}
-								{/snippet}
-							</SuperForm>
+									{/snippet}
+								</SuperForm>
+							{/if}
 						</Popover.Content>
 					</Popover.Positioner>
 				</Popover>
@@ -1269,6 +1320,28 @@
 								{/if}
 							</tr>
 						{/each}
+						{#if (loading || isFetching) && $rows.length === 0}
+							{#each Array(5) as _}
+								<tr class="even:bg-surface-100-900" data-testid="row-skeleton">
+									{#if hasBatchActions}
+										<td class="w-10"></td>
+									{/if}
+									{#each renderColumnKeys as key (key)}
+										<td>
+											<div class={regionCell}>
+												<div class="space-y-2 py-2 animate-pulse">
+													<div class="h-4 rounded bg-surface-200-800"></div>
+													<div class="h-4 w-3/5 rounded bg-surface-200-800"></div>
+												</div>
+											</div>
+										</td>
+									{/each}
+									{#if displayActions}
+										<td class="text-end {regionCell}"></td>
+									{/if}
+								</tr>
+							{/each}
+						{/if}
 					</tbody>
 				{/snippet}
 			</ContextMenu.Trigger>

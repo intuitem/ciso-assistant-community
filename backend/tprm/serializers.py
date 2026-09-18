@@ -705,7 +705,7 @@ class RepresentativeReadSerializer(BaseModelSerializer):
     def get_language(self, obj):
         if not obj.user:
             return None
-        code = obj.user.get_preferences().get("lang")
+        code = obj.user.language_code()
         return dict(settings.LANGUAGES).get(code, code)
 
     class Meta:
