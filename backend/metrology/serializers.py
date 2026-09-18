@@ -2,6 +2,7 @@ import json
 
 import jsonschema
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
@@ -499,23 +500,54 @@ class DashboardWidgetReadSerializer(BaseModelSerializer):
 
     def get_target_content_type_display(self, obj):
         """Get the content type model name for builtin metrics"""
-        if obj.target_content_type:
-            # Return the actual model class name (PascalCase) to match BUILTIN_METRICS keys
-            model_class = obj.target_content_type.model_class()
-            if model_class:
-                return model_class.__name__
-        return None
+        if not obj.target_content_type_id:
+            return None
+        # get_for_id is process-cached, so this never hits the database twice.
+        model_class = ContentType.objects.get_for_id(
+            obj.target_content_type_id
+        ).model_class()
+        return model_class.__name__ if model_class else None
+
+    def _target_name_map(self):
+        """Resolve every widget's generic target in one query per content type.
+
+        The target is a GenericForeignKey, so it cannot be select_related. Fetching
+        it per widget is one query each; on a dashboard where most widgets point at
+        Folders that is the bulk of the request. The whole page is resolved once and
+        cached on the serializer instead.
+        """
+        if not hasattr(self, "_cached_target_names"):
+            widgets = self.instance if self.parent is None else self.parent.instance
+            if widgets is None:
+                widgets = []
+            elif isinstance(widgets, DashboardWidget):
+                widgets = [widgets]
+
+            by_type: dict = {}
+            for widget in widgets:
+                if widget.target_content_type_id and widget.target_object_id:
+                    by_type.setdefault(widget.target_content_type_id, set()).add(
+                        widget.target_object_id
+                    )
+
+            names: dict = {}
+            for content_type_id, object_ids in by_type.items():
+                content_type = ContentType.objects.get_for_id(content_type_id)
+                model_class = content_type.model_class()
+                if model_class is None:
+                    continue
+                for target in model_class.objects.filter(id__in=object_ids):
+                    names[(content_type_id, target.id)] = str(target)
+            self._cached_target_names = names
+        return self._cached_target_names
 
     def get_target_object_name(self, obj):
         """Get the name of the target object for builtin metrics"""
-        if obj.target_content_type and obj.target_object_id:
-            try:
-                model_class = obj.target_content_type.model_class()
-                target_obj = model_class.objects.get(id=obj.target_object_id)
-                return str(target_obj)
-            except model_class.DoesNotExist, AttributeError:
-                return None
-        return None
+        if not (obj.target_content_type_id and obj.target_object_id):
+            return None
+        return self._target_name_map().get(
+            (obj.target_content_type_id, obj.target_object_id)
+        )
 
 
 # BuiltinMetricSample serializers
