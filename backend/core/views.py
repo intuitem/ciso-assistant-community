@@ -199,16 +199,13 @@ from dateutil import relativedelta as rd
 
 from ebios_rm.models import (
     EbiosRMStudy,
-    FearedEvent,
     RoTo,
-    StrategicScenario,
     Stakeholder,
-    AttackPath,
 )
 
-from tprm.models import Entity, Solution, Contract
-from privacy.models import Processing, DataBreach, RightRequest
-from resilience.models import AssetAssessment, BusinessImpactAnalysis
+from tprm.models import Entity
+from privacy.models import Processing, DataBreach
+from resilience.models import AssetAssessment
 
 from .models import *
 from .serializers import *
@@ -1265,6 +1262,19 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
             filterset=GenericFilterSet,
             fields=self.filterset_fields or [],
         )
+
+    @action(detail=True, name="Get the object's relation neighbourhood")
+    def neighborhood(self, request, pk=None):
+        """One pass over the curated relations, for the graph drawer."""
+        from core.neighborhood import build
+
+        # The action hangs off the base viewset, so the flag is checked here rather
+        # than with FeatureFlagRequired — that attribute would gate every model's
+        # whole API, not this one action.
+        if not ff_is_enabled("relations_graph"):
+            raise PermissionDenied("This feature is not enabled.")
+
+        return Response(build(self.get_object(), request.user))
 
     def get_queryset(self) -> models.query.QuerySet:
         if not self.model:
@@ -8827,6 +8837,256 @@ class FolderViewSet(BaseModelViewSet):
         folder = serializer.save()
         Folder.create_default_ug_and_ra(folder)
 
+    @action(detail=False, methods=["post"])
+    def reorganize(self, request):
+        """Apply a set of folder moves and deletions as one transaction.
+
+        Payload: {"moves": [{"folder", "parent_folder", "from_parent"}],
+                  "deletes": [{"folder"}]}
+        """
+        moves = request.data.get("moves") or []
+        deletes = request.data.get("deletes") or []
+        if not isinstance(moves, list) or not isinstance(deletes, list):
+            return Response(
+                {"moves": "moves and deletes must be lists"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Every entry is read with .get(), so a bare string would 500 rather than 400.
+        if not all(isinstance(entry, dict) for entry in (*moves, *deletes)):
+            return Response(
+                {"moves": "each move and delete must be an object"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not moves and not deletes:
+            return Response(
+                {"moves": "At least one move or delete is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Each delete scans every model for a folder FK, so an unbounded batch is
+        # folder count times model count in one request.
+        if len(moves) + len(deletes) > BATCH_SIZE_LIMIT:
+            return Response(
+                {"error": "too many ids", "max": BATCH_SIZE_LIMIT},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        seen: set[str] = set()
+        for move in moves:
+            folder_id = str(move.get("folder", ""))
+            if folder_id in seen:
+                return Response(
+                    {"moves": f"Folder {folder_id} appears more than once"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            seen.add(folder_id)
+            # Required: guards against overwriting a concurrent change.
+            if not move.get("from_parent"):
+                return Response(
+                    {
+                        "moves": f"Move for folder {folder_id} is missing from_parent, "
+                        "which is required so a concurrent change cannot be overwritten"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # An unreadable folder reads as missing rather than as a target.
+        visible = {str(f.id): f for f in self.get_queryset()}
+
+        conflicts = []
+        planned = []
+        for move in moves:
+            folder_id = str(move.get("folder", ""))
+            target_id = str(move.get("parent_folder", ""))
+            folder = visible.get(folder_id)
+            target = visible.get(target_id)
+
+            if folder is None:
+                conflicts.append({"folder": folder_id, "reason": "folderGone"})
+                continue
+            if target is None:
+                conflicts.append({"folder": folder_id, "reason": "targetGone"})
+                continue
+
+            expected = move.get("from_parent")
+            current = str(folder.parent_folder_id) if folder.parent_folder_id else None
+            if str(expected) != str(current):
+                conflicts.append(
+                    {
+                        "folder": folder_id,
+                        "reason": "movedElsewhere",
+                        "name": folder.name,
+                        "current_parent": current,
+                    }
+                )
+                continue
+
+            if current == target_id:
+                continue  # already where the draft wants it
+
+            planned.append((folder, target, current))
+
+        planned_deletes = []
+        seen_deletes: set[str] = set()
+        for entry in deletes:
+            folder_id = str(entry.get("folder", ""))
+            if folder_id in seen_deletes:
+                continue  # destroying it twice would double the reported count
+            seen_deletes.add(folder_id)
+            folder = visible.get(folder_id)
+            if folder is None:
+                conflicts.append({"folder": folder_id, "reason": "folderGone"})
+                continue
+            if folder.content_type == Folder.ContentType.ROOT:
+                conflicts.append({"folder": folder_id, "reason": "cannotDeleteRoot"})
+                continue
+            if folder_id in seen:
+                conflicts.append({"folder": folder_id, "reason": "movedAndDeleted"})
+                continue
+            planned_deletes.append(folder)
+
+        if conflicts:
+            return Response({"conflicts": conflicts}, status=status.HTTP_409_CONFLICT)
+
+        try:
+            self._apply_reorganisation(planned, planned_deletes)
+        except ReorganisationConflict as exc:
+            return Response(
+                {"conflicts": exc.conflicts}, status=status.HTTP_409_CONFLICT
+            )
+
+        # No inverse is returned: replaying a stale one would overwrite concurrent
+        # changes. Reverting means drafting the moves back.
+        return Response(
+            {
+                "applied": len(planned),
+                "deleted": len(planned_deletes),
+                "skipped": len(moves) - len(planned),
+            }
+        )
+
+    @staticmethod
+    def _folder_content_models() -> list:
+        """Every model that could hold a folder's content.
+
+        Exhaustive rather than curated: deletion cascades through every FK. The IAM
+        objects every domain auto-provisions are exempt, or nothing would be deletable.
+        Models whose table this edition never created are dropped up front: probing one
+        raises, and on PostgreSQL that aborts the surrounding transaction, so the error
+        cannot simply be caught and skipped.
+        """
+        from django.apps import apps
+        from django.db import connection
+
+        tables = set(connection.introspection.table_names())
+        exempt = {"iam.UserGroup", "iam.RoleAssignment"}
+        return [
+            model
+            for model in apps.get_models()
+            if model is not Folder
+            and model._meta.label not in exempt
+            and model._meta.db_table in tables
+            and any(
+                f.name == "folder" and f.related_model is Folder
+                for f in model._meta.fields
+            )
+        ]
+
+    @staticmethod
+    def _folder_emptiness_blocker(folder, content_models) -> "str | None":
+        """Why this folder may not be deleted, or None."""
+        if Folder.objects.filter(parent_folder=folder).exists():
+            return "hasSubDomains"
+        for model in content_models:
+            if model.objects.filter(folder=folder).exists():
+                return "notEmpty"
+        return None
+
+    def _apply_reorganisation(self, planned, planned_deletes):
+        with transaction.atomic():
+            # The plan was built outside this transaction, so re-read every row it
+            # touches under lock: a concurrent move or delete may have invalidated it,
+            # and the stale instances would write back their whole pre-read state.
+            # Ordered, so two reorganisations cannot deadlock against each other.
+            ids = (
+                {folder.id for folder, _, _ in planned}
+                | {target.id for _, target, _ in planned}
+                | {folder.id for folder in planned_deletes}
+            )
+            fresh = {
+                f.id: f
+                for f in Folder.objects.select_for_update()
+                .filter(id__in=ids)
+                .order_by("id")
+            }
+
+            conflicts = []
+            for folder, target, expected in planned:
+                current = fresh.get(folder.id)
+                if current is None:
+                    conflicts.append({"folder": str(folder.id), "reason": "folderGone"})
+                    continue
+                if target.id not in fresh:
+                    conflicts.append({"folder": str(folder.id), "reason": "targetGone"})
+                    continue
+                now = (
+                    str(current.parent_folder_id) if current.parent_folder_id else None
+                )
+                if now != expected:
+                    conflicts.append(
+                        {
+                            "folder": str(folder.id),
+                            "reason": "movedElsewhere",
+                            "name": current.name,
+                            "current_parent": now,
+                        }
+                    )
+            for folder in planned_deletes:
+                if folder.id not in fresh:
+                    conflicts.append({"folder": str(folder.id), "reason": "folderGone"})
+            if conflicts:
+                raise ReorganisationConflict(conflicts)
+
+            planned = [(fresh[f.id], fresh[t.id], e) for f, t, e in planned]
+            planned_deletes = [fresh[f.id] for f in planned_deletes]
+
+            # Park every mover at the root first: a valid final arrangement can pass
+            # through an intermediate cycle (swapping two subtrees). Bare save, since
+            # going via the serializer would demand add permission on the root.
+            root = Folder.get_root_folder()
+            for folder, _, _ in planned:
+                folder.parent_folder = root
+                folder.save()
+
+            for folder, target, _ in planned:
+                serializer = self.get_serializer_class(action="partial_update")(
+                    folder,
+                    data={"parent_folder": str(target.id)},
+                    partial=True,
+                    context=self.get_serializer_context(),
+                )
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+
+            # Last, so a folder emptied by the moves above qualifies. The model scan
+            # is resolved once for the whole batch, not per folder.
+            blocked = []
+            content_models = self._folder_content_models() if planned_deletes else []
+            for folder in planned_deletes:
+                reason = self._folder_emptiness_blocker(folder, content_models)
+                if reason:
+                    blocked.append(
+                        {
+                            "folder": str(folder.id),
+                            "name": folder.name,
+                            "reason": reason,
+                        }
+                    )
+            if blocked:
+                raise ReorganisationConflict(blocked)  # atomic: rolls the moves back
+
+            for folder in planned_deletes:
+                self.perform_destroy(folder)
+
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -8850,14 +9110,26 @@ class FolderViewSet(BaseModelViewSet):
 
         viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
 
-        # Add ancestors so viewable folders aren't orphaned
-        needed_folders = set(viewable_objects)
+        children_by_parent, parent_of, perimeters_by_folder = build_folder_indexes(
+            include_perimeters=include_perimeters
+        )
 
+        # Opt-in: one grouped query per curated content model.
+        with_counts = request.query_params.get("with_counts", "").lower() in [
+            "true",
+            "1",
+            "yes",
+        ]
+        content_counts = folder_direct_content_counts() if with_counts else None
+
+        # Ancestors, so viewable folders aren't orphaned. In memory: against the DB
+        # this cost one query per folder per level.
+        needed_folders = set(viewable_objects)
         for folder_id in viewable_objects:
-            current = Folder.objects.get(pk=folder_id)
-            while current and current.parent_folder_id:
-                needed_folders.add(current.parent_folder_id)
-                current = Folder.objects.get(pk=current.parent_folder_id)
+            current = parent_of.get(folder_id)
+            while current is not None and current not in needed_folders:
+                needed_folders.add(current)
+                current = parent_of.get(current)
 
         # Optional per-node writable annotation
         write_perm_codename = request.query_params.get("write_perm")
@@ -8865,37 +9137,36 @@ class FolderViewSet(BaseModelViewSet):
         if write_perm_codename:
             perm = Permission.objects.filter(codename=write_perm_codename).first()
             if perm is not None:
-                writable_ids = {
-                    f.id
-                    for f in Folder.objects.filter(id__in=needed_folders)
-                    if RoleAssignment.is_access_allowed(
-                        user=request.user, perm=perm, folder=f
-                    )
-                }
+                # In bulk: the per-folder is_access_allowed loop dominated the endpoint.
+                writable_ids = set(
+                    RoleAssignment.get_allowed_folder_ids(request.user, perm)
+                )
             else:
                 writable_ids = set()
 
+        root_folder = Folder.get_root_folder()
+
         folders_list = []
-        for folder in (
-            Folder.objects.exclude(content_type="GL")
-            .filter(id__in=needed_folders, parent_folder=Folder.get_root_folder())
-            .distinct()
-        ):
+        for folder in children_by_parent.get(root_folder.id, ()):
+            if folder["content_type"] == "GL" or folder["id"] not in needed_folders:
+                continue
             # Skip enclaves at top level if not included
             if (
                 not include_enclaves
-                and folder.content_type == Folder.ContentType.ENCLAVE
+                and folder["content_type"] == Folder.ContentType.ENCLAVE
             ):
                 continue
             entry = {
-                "name": folder.name,
-                "uuid": folder.id,
-                "viewable": folder.id in viewable_objects,
-                "writable": writable_ids is None or folder.id in writable_ids,
-                "content_type": folder.content_type,
+                "name": folder["name"],
+                "uuid": folder["id"],
+                "viewable": folder["id"] in viewable_objects,
+                "writable": writable_ids is None or folder["id"] in writable_ids,
+                "content_type": folder["content_type"],
             }
+            if content_counts is not None and entry["viewable"]:
+                entry["content_count"] = content_counts.get(folder["id"], 0)
             # Add enclave-specific styling
-            if folder.content_type == Folder.ContentType.ENCLAVE:
+            if folder["content_type"] == Folder.ContentType.ENCLAVE:
                 entry.update(
                     {
                         "symbol": "triangle",
@@ -8904,27 +9175,29 @@ class FolderViewSet(BaseModelViewSet):
                     }
                 )
             folder_content = get_folder_content(
-                folder,
+                folder["id"],
                 include_perimeters=include_perimeters,
                 include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
+                children_by_parent=children_by_parent,
+                perimeters_by_folder=perimeters_by_folder,
                 writable_ids=writable_ids,
+                content_counts=content_counts,
             )
             if len(folder_content) > 0:
                 entry.update({"children": folder_content})
             folders_list.append(entry)
-
-        root_folder = Folder.get_root_folder()
-        return Response(
-            {
-                "name": root_folder.name,
-                "uuid": str(root_folder.id),
-                "content_type": root_folder.content_type,
-                "writable": writable_ids is None or root_folder.id in writable_ids,
-                "children": folders_list,
-            }
-        )
+        root_entry = {
+            "name": root_folder.name,
+            "uuid": str(root_folder.id),
+            "content_type": root_folder.content_type,
+            "writable": writable_ids is None or root_folder.id in writable_ids,
+            "children": folders_list,
+        }
+        if content_counts is not None and root_folder.id in viewable_objects:
+            root_entry["content_count"] = content_counts.get(root_folder.id, 0)
+        return Response(root_entry)
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -9702,6 +9975,14 @@ class FrameworkFilter(GenericFilterSet):
     class Meta:
         model = Framework
         fields = ["provider"]
+
+
+class ReorganisationConflict(Exception):
+    """The tree moved under a reorganisation, or a staged delete is no longer empty."""
+
+    def __init__(self, conflicts):
+        self.conflicts = conflicts
+        super().__init__("Folders staged for deletion are not empty")
 
 
 class DraftValidationError(Exception):
@@ -15850,35 +16131,76 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
         return Response({"nodes": nodes, "links": links, "categories": categories})
 
-    @action(detail=True, methods=["get"], url_path="graph_data")
-    def graph_data(self, request, pk=None):
-        obj = StoredLibrary.objects.get(id=pk)
+    @staticmethod
+    def _framework_content(urn, label):
+        lib = StoredLibrary.objects.filter(
+            content__framework__urn=urn,
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        ).first()
+        if not lib:
+            raise NotFound(f"{label} framework library not found")
+        return lib.content["framework"]
+
+    def _mapping_context(self):
+        """Resolve the mapping set and both framework contents.
+
+        get_object() keeps the folder-scoped queryset in play.
+        """
+        obj = self.get_object()
 
         mapping_set = obj.content.get(
             "requirement_mapping_sets",
             [obj.content.get("requirement_mapping_set", {})],
         )[0]
 
-        source_framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn=mapping_set["source_framework_urn"],
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
-        if not source_framework_lib:
-            raise NotFound("Source framework library not found")
+        source_framework = self._framework_content(
+            mapping_set["source_framework_urn"], "Source"
+        )
+        target_framework = self._framework_content(
+            mapping_set["target_framework_urn"], "Target"
+        )
+        return mapping_set, source_framework, target_framework
 
-        target_framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn=mapping_set["target_framework_urn"],
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
-        if not target_framework_lib:
-            raise NotFound("Target framework library not found")
+    @staticmethod
+    def _coverage_meta(
+        source_framework,
+        target_framework,
+        req_mappings,
+        source_urns,
+        target_urns,
+    ):
+        linked_source_urns = {
+            mapping.get("source_requirement_urn")
+            for mapping in req_mappings
+            if mapping.get("source_requirement_urn") in source_urns
+        }
+        linked_target_urns = {
+            mapping.get("target_requirement_urn")
+            for mapping in req_mappings
+            if mapping.get("target_requirement_urn") in target_urns
+        }
 
-        source_framework = source_framework_lib.content["framework"]
-        target_framework = target_framework_lib.content["framework"]
+        return {
+            "display_name": f"{source_framework['name']} ➜ {target_framework['name']}",
+            "source_framework": source_framework["name"],
+            "target_framework": target_framework["name"],
+            "source_coverage": round(len(linked_source_urns) / len(source_urns) * 100)
+            if source_urns
+            else 0,
+            "target_coverage": round(len(linked_target_urns) / len(target_urns) * 100)
+            if target_urns
+            else 0,
+            "source_total": len(source_urns),
+            "source_linked": len(linked_source_urns),
+            "target_total": len(target_urns),
+            "target_linked": len(linked_target_urns),
+        }
+
+    @action(detail=True, methods=["get"], url_path="graph_data")
+    def graph_data(self, request, pk=None):
+        mapping_set, source_framework, target_framework = self._mapping_context()
 
         source_nodes_dict = {
             n.get("urn"): n for n in source_framework["requirement_nodes"]
@@ -15948,46 +16270,79 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
                 }
             )
 
-        # Calculate coverage in both directions
-        source_assessable_count = len(snodes_idx)
-        target_assessable_count = len(tnodes_idx)
-
-        linked_source_urns = set(
-            mapping.get("source_requirement_urn")
-            for mapping in req_mappings
-            if mapping.get("source_requirement_urn") in snodes_idx
+        meta = self._coverage_meta(
+            source_framework,
+            target_framework,
+            req_mappings,
+            snodes_idx.keys(),
+            tnodes_idx.keys(),
         )
-        linked_target_urns = set(
-            mapping.get("target_requirement_urn")
-            for mapping in req_mappings
-            if mapping.get("target_requirement_urn") in tnodes_idx
-        )
-
-        source_coverage = (
-            round(len(linked_source_urns) / source_assessable_count * 100)
-            if source_assessable_count > 0
-            else 0
-        )
-        target_coverage = (
-            round(len(linked_target_urns) / target_assessable_count * 100)
-            if target_assessable_count > 0
-            else 0
-        )
-
-        meta = {
-            "display_name": f"{source_framework['name']} ➜ {target_framework['name']}",
-            "source_framework": source_framework["name"],
-            "target_framework": target_framework["name"],
-            "source_coverage": source_coverage,
-            "target_coverage": target_coverage,
-            "source_total": source_assessable_count,
-            "source_linked": len(linked_source_urns),
-            "target_total": target_assessable_count,
-            "target_linked": len(linked_target_urns),
-        }
 
         return Response(
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
+        )
+
+    @action(detail=True, methods=["get"], url_path="table_data")
+    def table_data(self, request, pk=None):
+        """Flat mapping rows plus both requirement inventories.
+
+        Unmapped requirements ship too: they are the gaps the aggregate views show.
+        """
+        mapping_set, source_framework, target_framework = self._mapping_context()
+
+        def inventory(framework):
+            return {
+                req["urn"]: {
+                    "urn": req["urn"],
+                    "ref_id": req.get("ref_id"),
+                    "name": req.get("name"),
+                    "description": req.get("description"),
+                }
+                for req in framework["requirement_nodes"]
+                if req.get("assessable", False) and req.get("urn")
+            }
+
+        source_requirements = inventory(source_framework)
+        target_requirements = inventory(target_framework)
+
+        rows = []
+        # Libraries repeat links and carry no mapping id; the index is the only row identity.
+        for index, mapping in enumerate(mapping_set.get("requirement_mappings", [])):
+            source = source_requirements.get(mapping.get("source_requirement_urn"))
+            target = target_requirements.get(mapping.get("target_requirement_urn"))
+            if not source or not target:
+                continue
+            rows.append(
+                {
+                    "index": index,
+                    "source_urn": source["urn"],
+                    "source_ref_id": source["ref_id"],
+                    "source_name": source["name"],
+                    "target_urn": target["urn"],
+                    "target_ref_id": target["ref_id"],
+                    "target_name": target["name"],
+                    "relationship": mapping.get("relationship"),
+                    "rationale": mapping.get("rationale"),
+                    "strength_of_relationship": mapping.get("strength_of_relationship"),
+                    "annotation": mapping.get("annotation"),
+                }
+            )
+
+        meta = self._coverage_meta(
+            source_framework,
+            target_framework,
+            mapping_set.get("requirement_mappings", []),
+            source_requirements.keys(),
+            target_requirements.keys(),
+        )
+
+        return Response(
+            {
+                "rows": rows,
+                "source_requirements": list(source_requirements.values()),
+                "target_requirements": list(target_requirements.values()),
+                "meta": meta,
+            }
         )
 
 
@@ -19569,286 +19924,6 @@ class AnswerViewSet(BaseModelViewSet):
         if ca_id:
             qs = qs.filter(requirement_assessment__compliance_assessment_id=ca_id)
         return qs
-
-
-# ---------------------------------------------------------------------------
-# Universal Search
-# ---------------------------------------------------------------------------
-
-
-def _search_entry(model, slug, *, ref_id=False, limit=200, extra_search=None):
-    """Helper to build a search config entry."""
-    return {
-        "model": model,
-        "slug": slug,
-        "ref_id": ref_id,
-        "limit": limit,
-        # Additional fields to search on (icontains) beyond name/description/ref_id.
-        # These are ORM lookup paths, e.g. "framework__name" for a FK join.
-        "extra_search": extra_search or [],
-    }
-
-
-SEARCHABLE_MODELS = [
-    # limit: per-model cap on broad fetch. Large tables (RequirementNode,
-    # ReferenceControl) get a tighter limit to avoid starving smaller models.
-    # extra_search: additional fields to query via icontains for this model.
-    # --- Organization ---
-    _search_entry(Folder, "folders"),
-    _search_entry(Perimeter, "perimeters", ref_id=True),
-    # --- Catalog ---
-    _search_entry(Framework, "frameworks", ref_id=True),
-    _search_entry(Threat, "threats", ref_id=True, limit=100, extra_search=["provider"]),
-    _search_entry(ReferenceControl, "reference-controls", ref_id=True, limit=100),
-    _search_entry(RiskMatrix, "risk-matrices", ref_id=True, limit=50),
-    _search_entry(RequirementNode, "requirement-nodes", ref_id=True, limit=100),
-    # --- Assets ---
-    _search_entry(Asset, "assets", ref_id=True),
-    _search_entry(Vulnerability, "vulnerabilities", ref_id=True, limit=100),
-    # --- Operations ---
-    _search_entry(AppliedControl, "applied-controls", ref_id=True),
-    _search_entry(Policy, "policies", ref_id=True),
-    _search_entry(Incident, "incidents", ref_id=True),
-    _search_entry(Finding, "findings", ref_id=True),
-    _search_entry(SecurityException, "security-exceptions", ref_id=True),
-    _search_entry(TaskTemplate, "task-templates", ref_id=True, limit=100),
-    _search_entry(Evidence, "evidences"),
-    # --- Governance ---
-    _search_entry(RiskAcceptance, "risk-acceptances"),
-    # --- Risk ---
-    _search_entry(RiskAssessment, "risk-assessments", ref_id=True),
-    _search_entry(
-        RiskScenario,
-        "risk-scenarios",
-        ref_id=True,
-        extra_search=["risk_assessment__name"],
-    ),
-    # --- Compliance ---
-    _search_entry(
-        ComplianceAssessment,
-        "compliance-assessments",
-        ref_id=True,
-        extra_search=["framework__name"],
-    ),
-    # --- TPRM ---
-    _search_entry(Entity, "entities", ref_id=True),
-    _search_entry(Solution, "solutions", extra_search=["provider_entity__name"]),
-    _search_entry(Contract, "contracts", ref_id=True),
-    # --- EBIOS RM ---
-    _search_entry(EbiosRMStudy, "ebios-rm"),
-    _search_entry(FearedEvent, "feared-events"),
-    _search_entry(StrategicScenario, "strategic-scenarios"),
-    _search_entry(AttackPath, "attack-paths"),
-    # --- Privacy ---
-    _search_entry(Processing, "processings", ref_id=True),
-    _search_entry(DataBreach, "data-breaches", ref_id=True),
-    _search_entry(RightRequest, "right-requests", ref_id=True),
-    # --- Resilience ---
-    _search_entry(BusinessImpactAnalysis, "business-impact-analysis"),
-]
-
-
-_ACCENT_MAP = {
-    "a": "[aàáâãäåæ]",
-    "e": "[eèéêë]",
-    "i": "[iìíîï]",
-    "o": "[oòóôõöø]",
-    "u": "[uùúûü]",
-    "c": "[cç]",
-    "n": "[nñ]",
-    "y": "[yýÿ]",
-    "s": "[sß]",
-}
-
-
-def _accent_regex(word: str) -> str:
-    """Convert a word to a regex pattern that matches accented variants.
-
-    E.g. "referentiel" -> "r[eèéêë]f[eèéêë]r[eèéêë][nñ]t[iìíîï][eèéêë]l"
-    Works on both SQLite and PostgreSQL with __iregex.
-    """
-    return "".join(_ACCENT_MAP.get(c, re.escape(c)) for c in word.lower())
-
-
-@api_view(["GET"])
-@permission_classes([permissions.IsAuthenticated])
-def global_search(request):
-    """
-    Universal fuzzy search across all searchable models.
-
-    GET /api/search/?q=firewall+policy&type=applied-controls,assets
-    """
-    from rapidfuzz import fuzz
-
-    EMPTY_RESPONSE = {"results": [], "query": "", "count": 0, "total_candidates": 0}
-
-    # Cap query length to avoid excessive icontains processing across all models.
-    # 200 chars is far beyond any realistic search; words capped at 20 since each
-    # word generates 2-3 Q objects per model (~1000+ total at the limit).
-    # Minimum 2 chars to avoid single-character fan-out (e.g. q=a matching everything).
-    query = request.query_params.get("q", "").strip()[:200]
-    if len(query) < 2:
-        return Response(EMPTY_RESPONSE)
-
-    type_filter = request.query_params.get("type", "")
-    allowed_types = set(type_filter.split(",")) if type_filter else None
-
-    words = query.split()[:20]
-    # Build prefix set for typo-tolerant broad fetch (first 3 chars of each word)
-    prefixes = {w[:3].lower() for w in words if len(w) >= 3}
-
-    candidates = []
-
-    for entry in SEARCHABLE_MODELS:
-        model_class = entry["model"]
-        url_slug = entry["slug"]
-        has_ref_id = entry["ref_id"]
-        max_per_model = entry["limit"]
-        extra_search = entry["extra_search"]
-
-        if allowed_types and url_slug not in allowed_types:
-            continue
-
-        # Permission-aware queryset
-        accessible_ids = RoleAssignment.get_viewable_object_ids(
-            request.user, model_class
-        )
-        qs = model_class.objects.filter(id__in=accessible_ids)
-
-        # ComplianceAssessment has extra respondent scoping: users who lack the
-        # full auditor view (view_compliance_assessment_full) in a folder can only see
-        # assessments where they have a requirement assignment. Mirror the logic
-        # from ComplianceAssessmentViewSet.
-        if model_class is ComplianceAssessment:
-            respondent_folders = get_respondent_scoped_folder_ids(request.user)
-            if respondent_folders:
-                user_actors = Actor.get_all_for_user(request.user)
-                qs = qs.filter(
-                    ~Q(folder_id__in=respondent_folders)
-                    | Q(requirement_assignments__actor__in=user_actors)
-                ).distinct()
-
-        # Build Q filter for each word on searchable fields.
-        # Uses iregex with accent-folding character classes so that e.g.
-        # "referentiel" matches "RÉFÉRENTIEL" on SQLite (whose LIKE is
-        # ASCII-only and can't fold accents).
-        field_names = {f.name for f in model_class._meta.get_fields()}
-        searchable = ["name", "description"]
-        if has_ref_id:
-            searchable.append("ref_id")
-        # Models with i18n translations store localized names/descriptions in a
-        # JSONField. Searching it catches all translated variants at once.
-        if "translations" in field_names:
-            searchable.append("translations")
-        searchable.extend(extra_search)
-
-        q_filter = Q()
-        for word in words:
-            pattern = _accent_regex(word)
-            word_q = Q()
-            for field in searchable:
-                word_q |= Q(**{f"{field}__iregex": pattern})
-            q_filter |= word_q
-
-        # Also add prefix-based matching for typo tolerance (name + ref_id only)
-        for prefix in prefixes:
-            prefix_pattern = _accent_regex(prefix)
-            prefix_q = Q(**{"name__iregex": prefix_pattern})
-            if has_ref_id:
-                prefix_q |= Q(**{"ref_id__iregex": prefix_pattern})
-            q_filter |= prefix_q
-
-        # Detect optional display fields present on this model (reuses field_names from above)
-        extra_fields = []
-        if has_ref_id:
-            extra_fields.append("ref_id")
-        if "folder" in field_names:
-            extra_fields.append("folder__name")
-        if "provider_entity" in field_names:
-            extra_fields.append("provider_entity__name")
-        if model_class is RequirementNode:
-            extra_fields.append("framework_id")
-
-        results = qs.filter(q_filter).values(
-            "id",
-            "name",
-            "description",
-            *extra_fields,
-        )[:max_per_model]
-
-        for row in results:
-            candidates.append(
-                {
-                    "type": url_slug,
-                    "id": str(row["id"]),
-                    "name": row["name"] or "",
-                    "ref_id": row.get("ref_id", "") or "",
-                    "description": row.get("description") or "",
-                    "folder": row.get("folder__name", "") or "",
-                    "provider": row.get("provider_entity__name", "") or "",
-                    "framework_id": str(row["framework_id"])
-                    if row.get("framework_id")
-                    else None,
-                }
-            )
-
-    # Strip accents/diacritics for accent-insensitive matching and scoring.
-    # SQLite's LIKE is only ASCII case-insensitive, and rapidfuzz treats
-    # accented chars as distinct — normalizing levels the playing field.
-    import unicodedata
-
-    def strip_accents(s: str) -> str:
-        return "".join(
-            c
-            for c in unicodedata.normalize("NFD", s)
-            if unicodedata.category(c) != "Mn"
-        ).lower()
-
-    query_norm = strip_accents(query)
-
-    # Score and rank with rapidfuzz
-    for candidate in candidates:
-        name_norm = strip_accents(candidate["name"])
-        ref_norm = strip_accents(candidate["ref_id"])
-        desc_norm = strip_accents(candidate["description"])
-
-        # Fuzzy scores (on normalized strings for accent-insensitive comparison)
-        name_score = fuzz.WRatio(query_norm, name_norm)
-        ref_score = fuzz.WRatio(query_norm, ref_norm) if ref_norm else 0
-        desc_score = fuzz.partial_ratio(query_norm, desc_norm) * 0.4
-
-        # Substring bonus: literal match in name or ref_id should rank very
-        # high. WRatio penalizes long names unfairly (e.g. "recyf" vs
-        # "RECYF : REFERENTIEL CYBER France..." scores only 24).
-        substring_bonus = 0
-        if query_norm in name_norm:
-            substring_bonus = 95 if name_norm.startswith(query_norm) else 90
-        if query_norm in ref_norm:
-            substring_bonus = max(substring_bonus, 95)
-
-        candidate["score"] = max(name_score, ref_score, desc_score, substring_bonus)
-
-    # Sort by score descending, return top 50
-    candidates.sort(key=lambda c: c["score"], reverse=True)
-    top_results = candidates[:50]
-
-    # Build final response: add URLs and truncate descriptions for the wire
-    for r in top_results:
-        if r["type"] == "requirement-nodes" and r.get("framework_id"):
-            # Link to parent framework (no standalone requirement detail page yet)
-            r["url"] = f"/frameworks/{r['framework_id']}"
-        else:
-            r["url"] = f"/{r['type']}/{r['id']}"
-        r["description"] = r["description"][:200]
-
-    return Response(
-        {
-            "results": top_results,
-            "query": query,
-            "count": len(top_results),
-            "total_candidates": len(candidates),
-        }
-    )
 
 
 def metrics_view(request):

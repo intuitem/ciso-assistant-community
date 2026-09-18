@@ -21,6 +21,7 @@ from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
 from threat_modeling.models import ThreatModel
 from pmbok.models import GenericCollection
+from doc_management.models import DocumentContainer
 from global_settings.utils import ff_is_enabled
 
 from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
@@ -796,6 +797,11 @@ class AssetWriteSerializer(
         queryset=SecurityException.objects.all(),
         required=False,
     )
+    documents = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=DocumentContainer.objects.all(),
+        required=False,
+    )
     applied_controls = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=AppliedControl.objects.all(),
@@ -899,6 +905,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     overridden_children_capabilities = FieldsRelatedField(["id", "name"], many=True)
     solutions = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
+    documents = FieldsRelatedField(many=True)
 
     children_assets = serializers.SerializerMethodField()
     security_objectives = serializers.SerializerMethodField()
@@ -2892,20 +2899,44 @@ class FolderWriteSerializer(BaseModelSerializer):
             )
         return value
 
-    def validate_parent_folder(self, value):
-        """
-        If parent_folder is empty or None, default to the root folder.
-        On update, check add permission on the target parent folder.
+    def _resolve_parent_folder(self, value):
+        """Normalise and authorise a target parent, independent of edition policy.
+
+        Kept out of `validate_parent_folder` so that editions which allow nesting can
+        override the policy without losing these rules, and so permission is resolved
+        before any policy — a 403 must beat "this needs PRO".
         """
         if not value:
-            return Folder.get_root_folder()
-        if (
-            self.instance is not None
-            and self.instance.parent_folder_id
-            and str(value.id) != str(self.instance.parent_folder_id)
+            root = Folder.get_root_folder()
+            # Detaching to the root is still an add there. Create is left to `create()`;
+            # without this, `parent_folder: null` was the one target needing no rights.
+            if self.instance is not None and str(self.instance.parent_folder_id) != str(
+                root.id
+            ):
+                self._check_object_perm(self.instance, "add", folder=root)
+            return root
+        if self.instance is None:
+            # The base class checks this only in `create()`, after field validation —
+            # too late for a policy that rejects during `is_valid()`.
+            self._check_object_perm(None, "add", folder=value)
+        elif self.instance.parent_folder_id and str(value.id) != str(
+            self.instance.parent_folder_id
         ):
             self._check_object_perm(self.instance, "add", folder=value)
         return value
+
+    def validate_parent_folder(self, value):
+        """Community domains sit directly under the root; nesting is a PRO capability.
+
+        Only *changing* the nesting is gated: an already-nested folder stays editable,
+        so downgrading from PRO never strands existing data.
+        """
+        parent_folder = self._resolve_parent_folder(value)
+        if parent_folder == Folder.get_root_folder():
+            return parent_folder
+        if self.instance is not None and parent_folder == self.instance.parent_folder:
+            return parent_folder
+        raise serializers.ValidationError("subDomainsRequirePro")
 
 
 class FolderReadSerializer(BaseModelSerializer):
@@ -6433,12 +6464,26 @@ class TaskNodeReadSerializer(BaseModelSerializer):
         return obj.task_template.name if obj.task_template else ""
 
     def get_evidence_reviewed(self, obj):
-        evidence_reviewed = []
-        for evidence in obj.expected_evidence:
-            last_revision = evidence.last_revision
-            if last_revision and last_revision.task_node == obj:
-                evidence_reviewed.append(evidence.id)
-        return evidence_reviewed
+        """Which expected evidences this occurrence has a file for.
+
+        Read from the occurrence's own revisions, the same source as
+        get_evidence_revisions_map below. The evidence's *latest* revision is
+        the wrong question: expected_evidence is the template's list, shared by
+        every occurrence, so February filing v2 used to un-tick January, and a
+        revision filed by anything other than an occurrence (a workflow
+        collecting the file, say) used to un-tick whoever had answered.
+        """
+        expected = {evidence.id for evidence in obj.expected_evidence}
+        reviewed = []
+        # An occurrence may hold several revisions of one evidence; the tick is
+        # per evidence, so report each at most once.
+        for revision in obj.evidence_revisions.all():
+            if (
+                revision.evidence_id in expected
+                and revision.evidence_id not in reviewed
+            ):
+                reviewed.append(revision.evidence_id)
+        return reviewed
 
     def get_evidence_revisions_map(self, obj):
         """Returns a mapping of evidence ID to revision ID for this task node"""

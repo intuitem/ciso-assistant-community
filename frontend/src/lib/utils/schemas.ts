@@ -469,6 +469,7 @@ export const AssetSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	documents: z.string().uuid().optional().array().optional(),
 	ref_id: z.string().max(100).optional(),
 	observation: z.string().optional().nullable(),
 	overridden_children_capabilities: z.string().uuid().optional().array().optional(),
@@ -764,6 +765,7 @@ export const FeatureFlagsSchema = z.object({
 	quick_forms: z.boolean().optional(),
 	advanced_analytics: z.boolean().optional(),
 	comments: z.boolean().optional(),
+	relations_graph: z.boolean().optional(),
 	journeys: z.boolean().optional(),
 	policy_documents: z.boolean().optional(),
 	document_management: z.boolean().optional(),
@@ -2072,6 +2074,7 @@ export const DocumentContainerSchema = z.object({
 	applied_controls: z.array(z.string().uuid()).optional().default([]),
 	task_templates: z.array(z.string().uuid()).optional().default([]),
 	processings: z.array(z.string().uuid()).optional().default([]),
+	assets: z.array(z.string().uuid()).optional().default([]),
 	filtering_labels: z.array(z.string()).optional().default([])
 });
 

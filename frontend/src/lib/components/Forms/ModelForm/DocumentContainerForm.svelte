@@ -129,4 +129,15 @@
 		cacheLock={cacheLocks['processings']}
 		bind:cachedValue={formDataCache['processings']}
 	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="assets"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="assets"
+		label={m.assets()}
+		cacheLock={cacheLocks['assets']}
+		bind:cachedValue={formDataCache['assets']}
+	/>
 </Dropdown>
