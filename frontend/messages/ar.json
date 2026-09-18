@@ -3613,6 +3613,8 @@
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "طريقة مصادقة الرمز",
 	"oauthPKCEEnabled": "تفعيل OAuth PKCE",
+	"oidcAdditionalScopes": "نطاقات إضافية",
+	"oidcAdditionalScopesHelpText": "نطاقات OAuth اختيارية مفصولة بفواصل، وتُضاف إلى النطاقات الافتراضية openid وprofile وemail.",
 	"suggestedParentheses": "(مقترح)",
 	"clientSecretAlreadySetHelpText": "سر العميل مضبوط بالفعل.",
 	"resetClientSecret": "إعادة تعيين سر العميل",

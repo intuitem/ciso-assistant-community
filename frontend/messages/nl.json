@@ -2198,6 +2198,8 @@
 	"noticePeriodProvider": "Opzegtermijn voor provider (dagen)",
 	"novemberShort": "Nov",
 	"oauthPKCEEnabled": "OAuth PKCE ingeschakeld",
+	"oidcAdditionalScopes": "Aanvullende scopes",
+	"oidcAdditionalScopesHelpText": "Optionele, door komma's gescheiden OAuth-scopes die aan de standaardscopes openid, profile en email worden toegevoegd.",
 	"object": "Object",
 	"objectRepr": "Object",
 	"objection": "Bezwaar",

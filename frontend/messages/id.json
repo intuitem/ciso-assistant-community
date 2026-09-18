@@ -1778,6 +1778,8 @@
 	"defaultUserGroups": "Grup pengguna default",
 	"defaultUserGroupsHelpText": "Grup pengguna yang secara otomatis diberikan kepada pengguna yang dibuat melalui penyediaan otomatis.",
 	"defaultUserGroupsWarning": "Diterapkan hanya sekali, saat pembuatan akun. Mengubah atau menghapus pengaturan ini nanti tidak memengaruhi pengguna yang sudah disediakan. Untuk keanggotaan grup yang tetap sinkron dari waktu ke waktu, gunakan pemetaan grup IdP sebagai gantinya.",
+	"oidcAdditionalScopes": "Cakupan tambahan",
+	"oidcAdditionalScopesHelpText": "Cakupan OAuth opsional yang dipisahkan koma dan ditambahkan ke cakupan default openid, profile, dan email.",
 	"attributeMappingGroups": "Pemetaan atribut grup",
 	"attributeMappingGroupsHelpText": "Nama klaim (claim) yang membawa keanggotaan grup IdP pengguna. Grup yang ditemukan di sini disinkronkan ke grup IdP setiap kali masuk, dan memberikan grup pengguna CISO Assistant apa pun yang telah dipetakan oleh administrator.",
 	"jitProvisioning": "Penyediaan otomatis SSO (JIT)",
