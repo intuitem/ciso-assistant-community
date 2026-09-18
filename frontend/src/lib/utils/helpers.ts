@@ -313,9 +313,9 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	const results: string[] = [];
 	let visibleCount = 0;
 	let answeredVisibleCount = 0;
-	// Best reachable weighted sum: the ceiling for weighted SUM.
-	let reachableWeightedMax = 0;
-	let hasWeightedQuestion = false;
+	// Weighted SUM rescales the weights to average 1.
+	let scoredQuestionCount = 0;
+	let scoredQuestionWeight = 0;
 
 	for (const [q_urn, question] of Object.entries<any>(questions)) {
 		if (!isQuestionVisible(question, answers, questions)) continue;
@@ -329,19 +329,14 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 		// A negative weight has no defined meaning; 0 means "does not count".
 		const questionWeight = Math.max(typeof question.weight === 'number' ? question.weight : 1, 0);
-		const choiceScores: number[] = Array.isArray(question.choices)
-			? question.choices
-					.map((choice: any) => choice.add_score)
-					.filter((s: any) => s !== undefined && s !== null)
-			: [];
-		if (choiceScores.length > 0) {
-			const positives = choiceScores.filter((s) => s > 0);
-			const best =
-				question.type === 'multiple_choice' && positives.length > 0
-					? positives.reduce((acc, s) => acc + s, 0)
-					: Math.max(...choiceScores);
-			reachableWeightedMax += best * questionWeight;
-			if (questionWeight !== 1) hasWeightedQuestion = true;
+		const hasScoredChoice =
+			Array.isArray(question.choices) &&
+			question.choices.some(
+				(choice: any) => choice.add_score !== undefined && choice.add_score !== null
+			);
+		if (hasScoredChoice) {
+			scoredQuestionCount++;
+			scoredQuestionWeight += questionWeight;
 		}
 
 		const selectedChoiceURNs = answers?.[q_urn];
@@ -383,9 +378,9 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 		let raw: number;
 		if (aggregation === 'mean' && totalWeight > 0) {
 			raw = totalScore / totalWeight;
-		} else if (hasWeightedQuestion && reachableWeightedMax > 0) {
-			// Weights expand the ceiling too, so max_score stays reachable.
-			raw = min_score + (totalScore / reachableWeightedMax) * (max_score - min_score);
+		} else if (scoredQuestionWeight > 0) {
+			// Weights average to 1, so they redistribute the sum without inflating it.
+			raw = (totalScore * scoredQuestionCount) / scoredQuestionWeight;
 		} else {
 			raw = totalScore;
 		}
