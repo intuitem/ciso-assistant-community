@@ -11,6 +11,8 @@
 	} from '$lib/components/Modals/ExportModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { buildCustomFieldFilters, listViewFields } from '$lib/utils/table';
+	import { NON_CREATABLE_URL_MODELS } from '$lib/utils/crud';
+	import { consumeCreateIntent } from '$lib/utils/create-intent';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { driverInstance, tableRefreshers } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
@@ -312,16 +314,8 @@
 			// Prevent default 'c' key behavior
 			event.preventDefault();
 
-			// Check if the add button exists and is not in a disabled list
-			if (
-				![
-					'risk-matrices',
-					'frameworks',
-					'requirement-mapping-sets',
-					'user-groups',
-					'role-assignments'
-				].includes(URLModel)
-			) {
+			// Same gate as the add button, or `c` opens a form the button deliberately hides.
+			if (!NON_CREATABLE_URL_MODELS.includes(URLModel)) {
 				modalAddForm();
 			}
 		}
@@ -332,6 +326,10 @@
 			$driverInstance?.moveNext();
 		}, 300);
 	}
+	$effect(() => {
+		consumeCreateIntent({ urlModel: URLModel, modelName: data.model.name, open: modalAddForm });
+	});
+
 	onMount(() => {
 		// Add event listener when component mounts
 		window.addEventListener('keydown', handleKeyDown);
@@ -406,7 +404,7 @@
 									aria-label={safeTranslate('add-' + data.model.localName)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</a>
-							{:else if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications', 'commitments', 'quick-form-responses'].includes(URLModel)}
+							{:else if !NON_CREATABLE_URL_MODELS.includes(URLModel)}
 								<button
 									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 									data-testid="add-button"
