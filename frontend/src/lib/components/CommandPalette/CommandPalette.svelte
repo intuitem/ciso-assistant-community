@@ -25,7 +25,7 @@
 
 	const featureFlags = $derived(page.data?.featureflags ?? {});
 
-	const navigationCommands = $derived(buildNavigationCommands(featureFlags));
+	const navigationCommands = $derived(buildNavigationCommands(page.data?.user, featureFlags));
 	const createCommands = $derived(buildCreateCommands(page.data?.user, featureFlags));
 
 	const actionCommands: PaletteCommand[] = $derived([

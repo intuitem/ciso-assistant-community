@@ -12,8 +12,13 @@ const ROUTES = resolve(__dirname, '../../../routes/(app)');
 
 const superuser = {
 	root_folder_id: ROOT,
+	is_admin: true,
+	roles: ['BI-RL-GLA'],
 	domain_permissions: {
-		[ROOT]: Object.values(URL_MODEL_MAP).map((model) => `add_${model.name}`)
+		[ROOT]: Object.values(URL_MODEL_MAP).flatMap((model) => [
+			`add_${model.name}`,
+			`view_${model.name}`
+		])
 	}
 } as unknown as User;
 

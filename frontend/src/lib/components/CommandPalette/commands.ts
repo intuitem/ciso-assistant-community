@@ -4,6 +4,7 @@ import { safeTranslate } from '$lib/utils/i18n';
 import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
 import type { User } from '$lib/utils/types';
 import { navData } from '../SideBar/navData';
+import { canSeeNavItem, type NavItem } from '../SideBar/navVisibility';
 
 export type PaletteGroup = 'navigation' | 'create' | 'action';
 
@@ -79,24 +80,18 @@ interface Destination {
 	icon?: string;
 	/** Feature flag gating a destination that has no sidebar entry to inherit one from. */
 	flag?: string;
+	/** The sidebar entry this came from, carrying its permission rules. */
+	nav?: NavItem;
 }
 
 type FeatureFlags = Record<string, boolean>;
 
-// `navData` entries carry per-section shapes that widen to a union; the palette only ever
-// needs the three fields every leaf has.
-interface NavLeaf {
-	name?: string;
-	href?: string;
-	fa_icon?: string;
-}
-
-const sidebarDestinations: Destination[] = ((navData.items ?? []) as { items?: NavLeaf[] }[])
+const sidebarDestinations: Destination[] = ((navData.items ?? []) as { items?: NavItem[] }[])
 	.flatMap((section) => section.items ?? [])
-	.filter((item): item is NavLeaf & { name: string; href: string } =>
+	.filter((item): item is NavItem & { name: string; href: string } =>
 		Boolean(item?.name && item?.href)
 	)
-	.map((item) => ({ name: item.name, href: item.href, icon: item.fa_icon }));
+	.map((item) => ({ name: item.name, href: item.href, icon: item.fa_icon, nav: item }));
 
 // Reachable pages with no sidebar entry of their own.
 const EXTRA_DESTINATIONS: Destination[] = [
@@ -118,19 +113,29 @@ const HREF_URL_MODEL: Record<string, string> = {
 
 const destinations = [...sidebarDestinations, ...EXTRA_DESTINATIONS];
 
+/**
+ * Two independent axes decide whether a destination is offered: the feature flags, and the
+ * user's own permissions. A destination the sidebar hides must not be reachable here either,
+ * otherwise the palette offers a page that answers 403.
+ */
 function isVisible(
 	destination: Destination,
+	user: User | null | undefined,
 	featureFlags: FeatureFlags,
 	visible: Record<string, boolean>
 ): boolean {
+	if (destination.nav && !canSeeNavItem(destination.nav, user)) return false;
 	if (destination.flag) return featureFlags[destination.flag] === true;
 	return visible[destination.name] !== false;
 }
 
-export function buildNavigationCommands(featureFlags: FeatureFlags): PaletteCommand[] {
+export function buildNavigationCommands(
+	user: User | null | undefined,
+	featureFlags: FeatureFlags
+): PaletteCommand[] {
 	const visible = getSidebarVisibleItems(featureFlags);
 	return destinations
-		.filter((destination) => isVisible(destination, featureFlags, visible))
+		.filter((destination) => isVisible(destination, user, featureFlags, visible))
 		.map((destination) => ({
 			label: safeTranslate(destination.name),
 			breadcrumb: destination.name,
@@ -154,7 +159,7 @@ export function buildCreateCommands(
 	const visible = getSidebarVisibleItems(featureFlags);
 	const commands: PaletteCommand[] = [];
 	for (const destination of sidebarDestinations) {
-		if (!isVisible(destination, featureFlags, visible)) continue;
+		if (!isVisible(destination, user, featureFlags, visible)) continue;
 
 		const urlModel = HREF_URL_MODEL[destination.href] ?? destination.href.replace(/^\//, '');
 		const model = URL_MODEL_MAP[urlModel];

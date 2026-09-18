@@ -13,11 +13,28 @@ import {
 
 const ROOT = '00000000-0000-0000-0000-000000000000';
 
-/** A user holding `add_<model>` on the root folder for every model in the map. */
+const everyPermission = Object.values(URL_MODEL_MAP).flatMap((model) => [
+	`add_${model.name}`,
+	`view_${model.name}`,
+	`change_${model.name}`,
+	`delete_${model.name}`
+]);
+
+/** Holds every permission on the root folder, and a role no sidebar entry excludes. */
 const superuser = {
 	root_folder_id: ROOT,
+	is_admin: true,
+	roles: ['BI-RL-GLA'],
+	domain_permissions: { [ROOT]: everyPermission }
+} as unknown as User;
+
+/** Can see every page, but may create nothing. */
+const readOnly = {
+	root_folder_id: ROOT,
+	is_admin: true,
+	roles: ['BI-RL-GLA'],
 	domain_permissions: {
-		[ROOT]: Object.values(URL_MODEL_MAP).map((model) => `add_${model.name}`)
+		[ROOT]: everyPermission.filter((codename) => !codename.startsWith('add_'))
 	}
 } as unknown as User;
 
@@ -30,6 +47,27 @@ describe('buildCreateCommands', () => {
 	it('returns nothing without the add permission', () => {
 		expect(buildCreateCommands(nobody, allFlags)).toEqual([]);
 		expect(buildCreateCommands(null, allFlags)).toEqual([]);
+	});
+
+	/**
+	 * The same gate `ModelTable.canCreateObject` applies to the add button on a list page, so
+	 * the palette never offers a create the user would be rejected for.
+	 */
+	it('offers nothing to a user who may view every page but create nothing', () => {
+		expect(buildCreateCommands(readOnly, allFlags)).toEqual([]);
+	});
+
+	it('offers only the models a partially-privileged user may add', () => {
+		const assetsOnly = {
+			root_folder_id: ROOT,
+			is_admin: true,
+			roles: ['BI-RL-GLA'],
+			domain_permissions: {
+				[ROOT]: [...everyPermission.filter((c) => !c.startsWith('add_')), 'add_asset']
+			}
+		} as unknown as User;
+		const hrefs = buildCreateCommands(assetsOnly, allFlags).map((command) => command.href);
+		expect(hrefs).toEqual(['/assets']);
 	});
 
 	it('offers a create command for the models a user may add', () => {
@@ -188,14 +226,32 @@ describe('createIntentHref', () => {
 
 describe('buildNavigationCommands', () => {
 	it('labels and links every visible destination', () => {
-		const commands = buildNavigationCommands(allFlags);
+		const commands = buildNavigationCommands(superuser, allFlags);
 		expect(commands.length).toBeGreaterThan(40);
 		expect(commands.every((command) => command.group === 'navigation')).toBe(true);
 		expect(commands.every((command) => command.href?.startsWith('/'))).toBe(true);
 	});
 
 	it('includes destinations that have no sidebar entry', () => {
-		const hrefs = buildNavigationCommands(allFlags).map((command) => command.href);
+		const hrefs = buildNavigationCommands(superuser, allFlags).map((command) => command.href);
 		expect(hrefs).toContain('/my-profile');
+	});
+
+	/**
+	 * The palette must not offer a page the sidebar hides — following the link would only
+	 * produce a 403. Same rule as `SideBarNavigation`, via the shared `canSeeNavItem`.
+	 */
+	it('hides sidebar destinations the user has no permission for', () => {
+		const commands = buildNavigationCommands(nobody, allFlags);
+		const hrefs = commands.map((command) => command.href);
+		expect(hrefs).not.toContain('/assets');
+		expect(hrefs).not.toContain('/compliance-assessments');
+		// Destinations with no sidebar entry carry no permission rules of their own.
+		expect(hrefs).toContain('/my-profile');
+	});
+
+	it('still offers a page to a user who may view but not create', () => {
+		const hrefs = buildNavigationCommands(readOnly, allFlags).map((command) => command.href);
+		expect(hrefs).toContain('/assets');
 	});
 });
