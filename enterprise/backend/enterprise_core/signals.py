@@ -1,3 +1,6 @@
+import ipaddress
+import re
+
 from django.contrib.auth.signals import user_login_failed
 from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
@@ -11,12 +14,53 @@ logger = structlog.get_logger(__name__)
 User = get_user_model()
 
 
+def _strip_port(address):
+    if address.startswith("["):
+        return address[1:].split("]")[0]
+    if address.count(":") == 1:
+        return address.split(":")[0]
+    return address
+
+
+def _as_valid_ip(address):
+    try:
+        ipaddress.ip_address(address)
+    except ValueError:
+        return None
+    return address
+
+
+def get_client_ip(request):
+    if not request:
+        return None
+
+    xff = request.headers.get("X-Forwarded-For")
+    if xff:
+        candidate = _as_valid_ip(_strip_port(xff.split(",")[0].strip()))
+        if candidate:
+            return candidate
+
+    forwarded = request.headers.get("Forwarded")
+    if forwarded:
+        match = re.search(
+            r'(?:^|[;,])\s*for=(?:"([^"]+)"|([^;,\s]+))', forwarded, re.IGNORECASE
+        )
+        if match:
+            candidate = _as_valid_ip(
+                _strip_port((match.group(1) or match.group(2)).strip('"'))
+            )
+            if candidate:
+                return candidate
+
+    return request.META.get("REMOTE_ADDR")
+
+
 @receiver(user_login_failed)
 def log_login_failed(sender, credentials, request, **kwargs):
     username = credentials.get("username", None)
     if username is None:
         return
-    remote_addr = request.META.get("REMOTE_ADDR") if request else None
+    remote_addr = get_client_ip(request)
 
     logger.info(
         "Failed login attempt",

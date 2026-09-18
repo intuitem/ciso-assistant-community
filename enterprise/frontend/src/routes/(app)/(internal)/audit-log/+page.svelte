@@ -35,6 +35,7 @@
 				actor: 'actor',
 				action: 'action',
 				content_type: 'content_type',
+				remote_addr: 'remoteAddr',
 				timestamp: 'timestamp',
 				folder: 'folder'
 			},
@@ -47,7 +48,7 @@
 		}}
 		URLModel="audit-log"
 		baseEndpoint="/audit-log"
-		fields={['actor', 'action', 'content_type', 'timestamp', 'folder']}
+		fields={['actor', 'action', 'content_type', 'remote_addr', 'timestamp', 'folder']}
 		thFilter={true}
 		thFilterFields={['actor', 'folder']}
 	/>
