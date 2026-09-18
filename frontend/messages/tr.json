@@ -1828,6 +1828,8 @@
 	"oidcConfiguration": "openid-configuration (OIDC yapilandirmasi)",
 	"tokenAuthMethod": "Token kimlik doğrulama yontemi",
 	"oauthPKCEEnabled": "OAuth PKCE etkin",
+	"oidcAdditionalScopes": "Ek kapsamlar",
+	"oidcAdditionalScopesHelpText": "Varsayılan openid, profile ve email kapsamlarına eklenen, virgülle ayrılmış isteğe bağlı OAuth kapsamları.",
 	"suggestedParentheses": "(önerilen)",
 	"matchingScenarios": "Eşlesen senaryolar",
 	"clientSecretAlreadySetHelpText": "İstemci gizliliği zaten ayarlanmış.",
