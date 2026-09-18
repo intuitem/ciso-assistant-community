@@ -287,6 +287,40 @@ export function isQuestionVisible(
 	return false;
 }
 
+/**
+ * Lowest and highest total a completed choice question can reach (mirrors
+ * core.utils.question_score_bounds). A unique choice reaches exactly one score,
+ * a multiple choice every positive (or every negative) one at once.
+ */
+export function questionScoreBounds(scores: number[], multiple: boolean): [number, number] {
+	if (scores.length === 0) return [0, 0];
+	if (multiple) {
+		const positives = scores.filter((s) => s > 0);
+		const negatives = scores.filter((s) => s < 0);
+		const hi = positives.length ? positives.reduce((a, b) => a + b, 0) : Math.max(...scores);
+		const lo = negatives.length ? negatives.reduce((a, b) => a + b, 0) : Math.min(...scores);
+		return [lo, hi];
+	}
+	return [Math.min(...scores), Math.max(...scores)];
+}
+
+/**
+ * Map a weighted SUM total back onto the unweighted scale of the same questions
+ * (mirrors core.utils.project_weighted_sum). With every weight at 1 the two
+ * ranges coincide and the total comes back unchanged.
+ */
+export function projectWeightedSum(
+	total: number,
+	weightedLo: number,
+	weightedHi: number,
+	lo: number,
+	hi: number
+): number {
+	const span = weightedHi - weightedLo;
+	if (span <= 0) return total;
+	return lo + ((total - weightedLo) * (hi - lo)) / span;
+}
+
 export function computeRequirementScoreAndResult(requirementAssessment: any, answers: any) {
 	const questions = requirementAssessment.requirement.questions;
 
@@ -313,9 +347,13 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	const results: string[] = [];
 	let visibleCount = 0;
 	let answeredVisibleCount = 0;
-	// Weighted SUM rescales the weights to average 1.
-	let scoredQuestionCount = 0;
-	let scoredQuestionWeight = 0;
+	// Reachable range of the visible scored questions, weighted and not: the
+	// weighted SUM is projected from the former onto the latter (mirrors
+	// RequirementAssessment.recompute_assessment).
+	let weightedLo = 0;
+	let weightedHi = 0;
+	let unweightedLo = 0;
+	let unweightedHi = 0;
 
 	for (const [q_urn, question] of Object.entries<any>(questions)) {
 		if (!isQuestionVisible(question, answers, questions)) continue;
@@ -327,16 +365,19 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 		visibleCount++;
 
-		// A negative weight has no defined meaning; 0 means "does not count".
+		// A negative weight has no defined meaning; treat it as 0.
 		const questionWeight = Math.max(typeof question.weight === 'number' ? question.weight : 1, 0);
-		const hasScoredChoice =
-			Array.isArray(question.choices) &&
-			question.choices.some(
-				(choice: any) => choice.add_score !== undefined && choice.add_score !== null
-			);
-		if (hasScoredChoice) {
-			scoredQuestionCount++;
-			scoredQuestionWeight += questionWeight;
+		const choiceScores: number[] = Array.isArray(question.choices)
+			? question.choices
+					.map((choice: any) => choice.add_score)
+					.filter((s: any) => s !== undefined && s !== null)
+			: [];
+		if (choiceScores.length > 0) {
+			const [lo, hi] = questionScoreBounds(choiceScores, question.type === 'multiple_choice');
+			unweightedLo += lo;
+			unweightedHi += hi;
+			weightedLo += lo * questionWeight;
+			weightedHi += hi * questionWeight;
 		}
 
 		const selectedChoiceURNs = answers?.[q_urn];
@@ -378,9 +419,8 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 		let raw: number;
 		if (aggregation === 'mean' && totalWeight > 0) {
 			raw = totalScore / totalWeight;
-		} else if (scoredQuestionWeight > 0) {
-			// Weights average to 1, so they redistribute the sum without inflating it.
-			raw = (totalScore * scoredQuestionCount) / scoredQuestionWeight;
+		} else if (aggregation === 'sum') {
+			raw = projectWeightedSum(totalScore, weightedLo, weightedHi, unweightedLo, unweightedHi);
 		} else {
 			raw = totalScore;
 		}

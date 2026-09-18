@@ -1255,6 +1255,40 @@ def build_answers_dict(answers_qs):
     return result
 
 
+def question_score_bounds(scores, multiple: bool) -> tuple[int, int]:
+    """Lowest and highest total a completed choice question can reach.
+
+    `scores` are the add_score values of the question's scored choices. A completed
+    question has at least one choice selected, so a unique choice reaches exactly one
+    score, and a multiple choice reaches every positive (or every negative) one at once.
+    """
+    scores = list(scores)
+    if not scores:
+        return 0, 0
+    if multiple:
+        positives = [s for s in scores if s > 0]
+        negatives = [s for s in scores if s < 0]
+        hi = sum(positives) if positives else max(scores)
+        lo = sum(negatives) if negatives else min(scores)
+        return lo, hi
+    return min(scores), max(scores)
+
+
+def project_weighted_sum(total, weighted_lo, weighted_hi, lo, hi):
+    """Map a weighted SUM total back onto the unweighted scale of the same questions.
+
+    Weights multiply the answers but not the scale the library author designed, so a
+    raw weighted total saturates at max_score whatever the answers. Projecting it from
+    the weighted reachable range [weighted_lo, weighted_hi] onto the unweighted one
+    [lo, hi] keeps every point of the original scale reachable: with all weights at 1
+    the two ranges coincide and the total comes back unchanged.
+    """
+    span = weighted_hi - weighted_lo
+    if span <= 0:
+        return total
+    return lo + (total - weighted_lo) * (hi - lo) / span
+
+
 def _build_answer_context(questions_qs, answers_qs):
     """Build lookup dicts used for question visibility and score computation.
 

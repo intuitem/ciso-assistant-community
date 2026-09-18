@@ -1318,3 +1318,116 @@ def test_respondent_may_start_a_request_but_sees_only_their_own(app_config):
         == 200
     )
     assert client.post(f"{base}submit/", {}, format="json").status_code == 200
+
+
+WEIGHTED_SUM_LIBRARY = """
+urn: urn:test:risk:library:qf-weighted-sum
+locale: en
+ref_id: qf-weighted-sum
+name: Quick form weighted sum
+description: Weighted SUM scoring
+copyright: Test
+version: 1
+publication_date: 2026-09-18
+provider: test-provider
+packager: test
+objects:
+  quick_forms:
+    - urn: urn:test:risk:quick_form:weighted-sum
+      ref_id: weighted-sum
+      name: Weighted sum
+      description: Two 0/50 questions weighing 3 and 1
+      scores_definition:
+        min: 0
+        max: 100
+        aggregation: sum
+      pages:
+        - urn: urn:test:risk:qf_page:weighted-sum:only
+          ref_id: only
+          name: Only page
+          order: 1
+          questions:
+            urn:test:risk:qf_page:weighted-sum:only:question:heavy:
+              type: unique_choice
+              text: Heavy
+              order: 1
+              weight: 3
+              choices:
+                - urn: urn:test:risk:qf_page:weighted-sum:only:question:heavy:choice:good
+                  value: good
+                  add_score: 50
+                - urn: urn:test:risk:qf_page:weighted-sum:only:question:heavy:choice:bad
+                  value: bad
+                  add_score: 0
+            urn:test:risk:qf_page:weighted-sum:only:question:light:
+              type: unique_choice
+              text: Light
+              order: 2
+              weight: 1
+              choices:
+                - urn: urn:test:risk:qf_page:weighted-sum:only:question:light:choice:good
+                  value: good
+                  add_score: 50
+                - urn: urn:test:risk:qf_page:weighted-sum:only:question:light:choice:bad
+                  value: bad
+                  add_score: 0
+"""
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "heavy,light,expected",
+    [
+        ("good", "bad", 75),
+        ("bad", "good", 25),
+        ("good", "good", 100),
+        ("bad", "bad", 0),
+    ],
+)
+def test_weighted_sum_scores_like_an_audit(app_config, heavy, light, expected):
+    """Question weights mean the same thing in a quick form as in a requirement
+    assessment: the weighted total is projected onto the unweighted 0-100 scale,
+    on the live path and in the editor preview alike."""
+    from core.cel_service import evaluate_quick_form, evaluate_quick_form_document
+    from core.utils import apply_answers_dict
+
+    stored, error = StoredLibrary.store_library_content(
+        WEIGHTED_SUM_LIBRARY.encode("utf-8")
+    )
+    assert error is None, error
+    assert stored.load() is None
+    form = QuickForm.objects.get(urn="urn:test:risk:quick_form:weighted-sum")
+    folder = Folder.objects.create(
+        name="qf-wsum", parent_folder=Folder.get_root_folder()
+    )
+    response = QuickFormResponse.objects.create(
+        name="weighted", quick_form=form, folder=folder
+    )
+    base = "urn:test:risk:qf_page:weighted-sum:only:question"
+    answers = {
+        f"{base}:heavy": f"{base}:heavy:choice:{heavy}",
+        f"{base}:light": f"{base}:light:choice:{light}",
+    }
+    questions = {q.urn: q for q in Question.objects.filter(page__quick_form=form)}
+    apply_answers_dict("response", response, questions, answers)
+
+    live = evaluate_quick_form(response, persist=False)["score"]
+    preview = evaluate_quick_form_document(
+        {
+            "urn": form.urn,
+            "scores_definition": form.scores_definition,
+            "pages": [
+                {
+                    "urn": p.urn,
+                    "ref_id": p.ref_id,
+                    "name": p.name,
+                    "order": p.order,
+                    "questions": p.get_questions_translated() or {},
+                }
+                for p in form.pages.all().order_by("order")
+            ],
+        },
+        answers,
+    )["score"]
+    assert live == expected
+    assert preview == expected

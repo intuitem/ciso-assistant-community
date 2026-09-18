@@ -64,6 +64,8 @@ from .base_models import (
 from .utils import (
     aggregate_compute_results,
     camel_case,
+    project_weighted_sum,
+    question_score_bounds,
     resolve_compute_result,
     sha256,
     update_selected_implementation_groups,
@@ -10019,9 +10021,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         total_score = 0
         total_weight = 0
-        # Weighted SUM rescales the weights to average 1.
-        scored_question_count = 0
-        scored_question_weight = 0
+        # Reachable range of the visible scored questions, weighted and not: the
+        # weighted SUM is projected from the former onto the latter.
+        weighted_lo = weighted_hi = 0
+        unweighted_lo = unweighted_hi = 0
         scoring = self.get_resolved_scoring()
         min_score = scoring["min_score"] if scoring["min_score"] is not None else 0
         max_score = scoring["max_score"] if scoring["max_score"] is not None else 100
@@ -10051,10 +10054,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 aggregation = "mean"
 
         for question in questions_qs:
+            choices = list(question.choices.all())
             # Detect result-driven capability across ALL choices (selection /
             # visibility agnostic). Short-circuits across questions once set.
             if not is_result_driven:
-                for choice in question.choices.all():
+                for choice in choices:
                     if choice.compute_result is None:
                         continue
                     if resolve_compute_result(choice.compute_result) is not None:
@@ -10072,11 +10076,17 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
             visible_questions += 1
 
-            # A negative weight has no defined meaning; 0 means "does not count".
+            # A negative weight has no defined meaning; treat it as 0.
             weight = max(question.weight, 0)
-            if any(c.add_score is not None for c in question.choices.all()):
-                scored_question_count += 1
-                scored_question_weight += weight
+            scores = [c.add_score for c in choices if c.add_score is not None]
+            if scores:
+                lo, hi = question_score_bounds(
+                    scores, question.type == Question.Type.MULTIPLE_CHOICE
+                )
+                unweighted_lo += lo
+                unweighted_hi += hi
+                weighted_lo += lo * weight
+                weighted_hi += hi * weight
 
             if not has_answer_by_qid.get(question.id):
                 continue
@@ -10084,7 +10094,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             answered_visible_questions += 1
 
             selected_pks = selected_choice_pks_by_qid.get(question.id, set())
-            for choice in question.choices.all():
+            for choice in choices:
                 if choice.id in selected_pks:
                     if choice.add_score is not None:
                         is_score_computed = True
@@ -10105,10 +10115,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         if is_score_computed and questionnaire_complete:
             if aggregation == "mean" and total_weight > 0:
                 computed_score = total_score / total_weight
-            elif scored_question_weight > 0:
-                # Weights average to 1, so they redistribute the sum without inflating it.
-                computed_score = (
-                    total_score * scored_question_count / scored_question_weight
+            elif aggregation == "sum":
+                computed_score = project_weighted_sum(
+                    total_score, weighted_lo, weighted_hi, unweighted_lo, unweighted_hi
                 )
             else:
                 computed_score = total_score
