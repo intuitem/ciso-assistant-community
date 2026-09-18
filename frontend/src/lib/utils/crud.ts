@@ -211,6 +211,28 @@ export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 	vulnerabilities: 'vulnerabilities'
 };
 
+// Models never created from their list page: library-managed content, membership rows
+// written elsewhere, or records that only exist as a child of something else.
+export const NON_CREATABLE_URL_MODELS = [
+	'risk-matrices',
+	'frameworks',
+	'requirement-mapping-sets',
+	'user-groups',
+	'role-assignments',
+	'qualifications',
+	'commitments',
+	'quick-form-responses',
+	'quick-forms',
+	// Own a list route with no create affordance on it.
+	'presets',
+	'ttp-catalogs'
+];
+
+// Models whose creation is a page, not a modal on the list.
+export const CREATE_ROUTE_OVERRIDES: Record<string, string> = {
+	'document-containers': '/documents/new'
+};
+
 export interface ModelMapEntry {
 	name: string;
 	localName: string;
@@ -934,6 +956,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'assets',
+				urlModel: 'document-containers',
+				addExisting: {
+					parentField: 'documents'
+				}
+			},
+			{
+				field: 'assets',
 				urlModel: 'compliance-assessments',
 				disableCreate: true,
 				disableDelete: true
@@ -1355,6 +1384,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'task_templates', urlModel: 'task-templates' },
 			{ field: 'processings', urlModel: 'processings' },
+			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'classification', urlModel: 'classification-levels' }
 		],

@@ -165,6 +165,7 @@ class DocumentContainerFilter(GenericFilterSet):
             "applied_controls",
             "task_templates",
             "processings",
+            "assets",
         ]
 
     def filter_status(self, queryset, name, value):
@@ -205,6 +206,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 "applied_controls",
                 "task_templates",
                 "processings",
+                "assets",
                 models.Prefetch(
                     "documents",
                     # `revisions` feeds the serializer's pending_revision — without
