@@ -2,6 +2,7 @@ import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
+import { UUID_REGEX } from '$lib/utils/constants';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const field = url.searchParams.get('field');
@@ -9,6 +10,8 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const model = getModelInfo(params.model);
 	const selectField = model.selectFields?.find((f) => f.field === field);
 	if (!selectField) error(404, `Unknown select field '${field}' on '${params.model}'`);
+	// Interpolated into a backend path, and `../` normalises away the API prefix.
+	if (detail && !new RegExp(`^${UUID_REGEX}$`).test(detail)) error(400, 'Invalid detail id');
 
 	const endpoint =
 		selectField.formNestedField && selectField.detail === true && detail

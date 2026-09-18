@@ -1,26 +1,18 @@
 import { formatSelectFieldData } from '$lib/utils/load';
 import type { SelectField } from '$lib/utils/crud';
 
-/**
- * Fetch a model's choice-field options on demand, client-side.
- *
- * Detail pages used to populate these during the server load, one request per
- * select field per related tab, on every page view — for create forms most
- * visits never open. `loadDetail` now leaves them empty and this fills them when
- * a form is actually opened.
- *
- * A no-op when options are already present, so the pages that still provide them
- * server-side are unaffected.
- */
+/** A model's choice-field options, fetched when a form opens rather than during
+ * the server load. A no-op when something already provided them. */
 const cache = new Map<string, Record<string, unknown>>();
+const incomplete = new Set<string>();
 
-export async function ensureSelectOptions(model: Record<string, any>): Promise<void> {
+export async function ensureSelectOptions(
+	model: Record<string, any>,
+	initialData: Record<string, any> = {}
+): Promise<void> {
 	if (!model) return;
-	// Already provided (server load, or a previous open of this modal).
-	if (model.selectOptions && Object.keys(model.selectOptions).length > 0) return;
 
-	// Call sites pass either a ModelInfo or a detail page's related-model entry,
-	// which carries the ModelInfo under `info`.
+	// A ModelInfo, or a detail page's related entry carrying one under `info`.
 	const info = model.info ?? model;
 	const selectFields: SelectField[] = info?.selectFields ?? [];
 	if (!selectFields.length) return;
@@ -28,14 +20,21 @@ export async function ensureSelectOptions(model: Record<string, any>): Promise<v
 	const urlModel = info.urlModel ?? model.urlModel;
 	if (!urlModel) return;
 
+	// Detail pages put the parent id on the model, everyone else passes it in.
+	const parentOf = (field: string) => initialData?.[field] ?? model.initialData?.[field];
 	const parents = selectFields
-		.map((f) => (f.formNestedField ? model.initialData?.[f.formNestedField] : ''))
+		.map((f) => (f.formNestedField ? parentOf(f.formNestedField) : ''))
 		.join(',');
 	const key = `${urlModel}:${parents}`;
 
+	// Already provided, unless a previous attempt only half-filled it.
+	if (!incomplete.has(key) && model.selectOptions && Object.keys(model.selectOptions).length > 0)
+		return;
+
 	const cached = cache.get(key);
 	if (cached) {
-		model.selectOptions = cached;
+		// AppliedControlPolicyForm rewrites option values in place.
+		model.selectOptions = structuredClone(cached);
 		return;
 	}
 
@@ -43,9 +42,7 @@ export async function ensureSelectOptions(model: Record<string, any>): Promise<v
 	const entries = await Promise.all(
 		selectFields.map(async (selectField) => {
 			const query = new URLSearchParams({ field: selectField.field });
-			const parent = selectField.formNestedField
-				? model.initialData?.[selectField.formNestedField]
-				: null;
+			const parent = selectField.formNestedField ? parentOf(selectField.formNestedField) : null;
 			if (parent) query.set('detail', parent);
 			const url = `/${urlModel}/select-options?${query}`;
 			try {
@@ -61,6 +58,11 @@ export async function ensureSelectOptions(model: Record<string, any>): Promise<v
 	);
 
 	const options = Object.fromEntries(entries);
-	if (complete) cache.set(key, options);
+	if (complete) {
+		cache.set(key, options);
+		incomplete.delete(key);
+	} else {
+		incomplete.add(key);
+	}
 	model.selectOptions = options;
 }

@@ -148,7 +148,7 @@
 		// A fresh URL: goto() on the mutated live object skips the load.
 		const next = new URL(page.url);
 		next.searchParams.set('tab', tabValue);
-		goto(next, { invalidateAll: true });
+		goto(next);
 	}
 
 	async function handleCustomDashboardChange(dashboardId: string): Promise<void> {

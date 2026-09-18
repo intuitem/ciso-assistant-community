@@ -256,12 +256,8 @@ export const loadDetail = async ({ event, model, id }) => {
 
 					const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 
-					// Deliberately empty: a tab's create-form dropdowns are fetched when
-					// that form is opened, not on page load. Filling them here cost one
-					// request per select field per tab — the bulk of a detail page's
-					// fan-out — for a form most visits never open. DetailView's
-					// modalCreateForm hydrates this before the modal renders, so the
-					// forms still see a populated object.
+					// Filled when a create form opens, not on page load: one request
+					// per select field per tab was the bulk of a detail page's fan-out.
 					const selectOptions: Record<string, any> = {};
 					relatedModels[e.urlModel] = {
 						urlModel,

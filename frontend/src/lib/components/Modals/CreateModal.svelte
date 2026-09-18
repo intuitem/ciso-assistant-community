@@ -57,17 +57,14 @@
 		...rest
 	}: Props = $props();
 
-	// The form's choice fields are fetched here rather than during the page load
-	// (see loadDetail), so opening a modal is what costs the requests. Gate the
-	// form on it: every ModelForm reads `model.selectOptions[...]` expecting it to
-	// be there, so rendering before it resolves would empty every dropdown.
+	// ModelForm reads model.selectOptions[...] expecting it to be there.
 	let optionsReady = $state(false);
 
 	onMount(async () => {
 		try {
-			await ensureSelectOptions(model);
+			await ensureSelectOptions(model, additionalInitialData);
 		} finally {
-			// Show the form even if the fetch failed: empty dropdowns beat no form.
+			// Empty dropdowns beat no form.
 			optionsReady = true;
 		}
 		await tick(); // Wait for DOM to render
