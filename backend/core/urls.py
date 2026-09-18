@@ -1,4 +1,5 @@
 from .views import *
+from .search import global_search
 from sec_intel.views import (
     SecurityAdvisoryViewSet,
     CWEViewSet,
