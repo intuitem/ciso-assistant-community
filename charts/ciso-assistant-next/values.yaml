@@ -146,6 +146,19 @@ backend:
       # -- Enable the AI assistant / chat feature (sets ENABLE_CHAT)
       enabled: false
 
+    ## OIDC provider signing key, used to sign the tokens issued to service accounts
+    ## Ref: https://github.com/intuitem/ciso-assistant-community/blob/main/documentation/service-accounts.md
+    ## Note: left empty, the chart generates an RSA key on first install, stores it in the
+    ## `<release>-backend-oidc` secret and injects it as IDP_OIDC_PRIVATE_KEY into the backend and
+    ## Huey containers, so the key survives restarts and is shared by every replica. Without it each
+    ## container writes its own key to IDP_OIDC_PRIVATE_KEY_FILE and loses it on every restart.
+    oidcProvider:
+      # -- RSA private key (PEM) signing the OIDC tokens
+      # @default -- `""` (generated once, then kept in the `<release>-backend-oidc` secret)
+      privateKey: ""
+      # -- Name of an existing secret resource containing the RSA private key in a 'idp-oidc-private-key' key
+      existingSecret: ""
+
   # -- Set extra volumes for backend
   extraVolumes: []
     #   - name: ca-certs
@@ -163,6 +176,12 @@ backend:
   huey:
     # -- Huey container name
     name: huey
+
+    # -- Override the Huey container entrypoint
+    command: ["/bin/sh"]
+
+    # -- Override the Huey container arguments
+    args: ["-c", "python manage.py run_huey -w 2 --scheduler-interval 60"]
 
     # -- Environment variables to pass to Huey
     env: []
@@ -199,6 +218,9 @@ backend:
       existingClaim: ""
     localStorage:
       # -- Enable Local Storage persistence
+      ## Note: required for file uploads (evidences, attachments, chat documents).
+      ## Disabled, each container falls back to its own ephemeral path and the backend
+      ## and Huey containers no longer see the same files.
       enabled: false
       # -- Local Storage persistant volume size
       size: 5Gi
@@ -244,6 +266,14 @@ backend:
 
   # -- Affinity rules for backend
   affinity: {} # @schema additionalProperties: true
+
+  # -- Override the backend container entrypoint
+  # @default -- `[]` (image entrypoint)
+  command: []
+
+  # -- Override the backend container arguments
+  # @default -- `[]` (image arguments)
+  args: []
 
   # -- Environment variables to pass to backend
   env: []
@@ -341,6 +371,14 @@ frontend:
 
   # -- Affinity rules for frontend
   affinity: {} # @schema additionalProperties: true
+
+  # -- Override the frontend container entrypoint
+  # @default -- `[]` (image entrypoint)
+  command: []
+
+  # -- Override the frontend container arguments
+  # @default -- `[]` (image arguments)
+  args: []
 
   # -- Environment variables to pass to frontend
   env: []
@@ -471,14 +509,38 @@ externalPgsql:
 ## Deployed via the official Qdrant chart (https://github.com/qdrant/qdrant-helm)
 ## as a StatefulSet with persistence and health probes out of the box.
 ## When enabled, QDRANT_URL is injected into the backend and Huey containers.
-## Any key below is passed through to the Qdrant subchart, refer to its values for
-## the full set of options (replicaCount, persistence, image, resources, ...).
+## The keys below are the ones most often customized, but the whole section is passed
+## through to the Qdrant subchart: any key from its own values.yaml can be set here
+## (nodeSelector, tolerations, securityContext, service, ingress, ...) and is preserved
+## across chart upgrades.
+## Ref: https://github.com/qdrant/qdrant-helm/blob/main/charts/qdrant/values.yaml
 qdrant: # @schema additionalProperties: true
   # -- Deploy the bundled Qdrant (official subchart) and inject QDRANT_URL
   enabled: false
 
   # -- Number of Qdrant replicas (requires `qdrant.config.cluster.enabled`)
   replicaCount: 1
+
+  ## Qdrant image
+  ## Note: the Qdrant subchart has its own image settings, `global.image.*` does not apply
+  image: # @schema additionalProperties: true
+    # -- Qdrant image repository, registry included (point it at your own mirror if needed)
+    repository: docker.io/qdrant/qdrant
+    # -- Tag to use for Qdrant
+    # @default -- `""` (defaults to the Qdrant subchart appVersion)
+    tag: ""
+    # -- Image pull policy for Qdrant
+    pullPolicy: IfNotPresent
+
+  # -- Secrets with credentials to pull the Qdrant image from a private registry
+  ## Note: the Qdrant subchart has its own pull secrets, `global.imagePullSecrets` does not apply
+  imagePullSecrets: []
+
+  # -- Environment variables to pass to Qdrant
+  env: []
+
+  # -- Resources for Qdrant
+  resources: {} # @schema additionalProperties: true
 
   # -- Qdrant storage persistence
   persistence: # @schema additionalProperties: true

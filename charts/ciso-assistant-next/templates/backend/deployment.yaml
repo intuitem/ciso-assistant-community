@@ -18,6 +18,9 @@ spec:
     metadata:
       annotations:
         checksum/secret-backend: {{ include (print $.Template.BasePath "/backend/secret.yaml") . | sha256sum }}
+        {{- with .Values.backend.config.oidcProvider.privateKey }}
+        checksum/oidc-private-key: {{ . | sha256sum }}
+        {{- end }}
         {{- with .Values.backend.podAnnotations }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -47,6 +50,14 @@ spec:
       - name: {{ .Values.backend.name }}
         image: {{ default .Values.global.image.registry .Values.backend.image.registry }}/{{ .Values.backend.image.repository }}:{{ default (include "ciso-assistant.defaultTag" .) .Values.backend.image.tag }}
         imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.backend.image.imagePullPolicy }}
+        {{- with .Values.backend.command }}
+        command:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.backend.args }}
+        args:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         env:
           {{- with .Values.backend.env }}
             {{- toYaml . | nindent 10 }}
@@ -108,6 +119,15 @@ spec:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 {{- end }}
                 key: django-secret-key
+          {{- if not (include "ciso-assistant.definesEnv" (dict "env" .Values.backend.env "name" "IDP_OIDC_PRIVATE_KEY")) }}
+          {{- if not (include "ciso-assistant.definesEnv" (dict "env" .Values.backend.huey.env "name" "IDP_OIDC_PRIVATE_KEY")) }}
+          - name: IDP_OIDC_PRIVATE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "ciso-assistant.idpOidcSecretName" . }}
+                key: idp-oidc-private-key
+          {{- end }}
+          {{- end }}
           - name: CISO_ASSISTANT_SUPERUSER_EMAIL
             value: {{ .Values.backend.config.emailAdmin }}
           - name: CISO_ASSISTANT_URL
@@ -186,8 +206,14 @@ spec:
       - name: {{ .Values.backend.huey.name }}
         image: {{ default .Values.global.image.registry .Values.backend.image.registry }}/{{ .Values.backend.image.repository }}:{{ default (include "ciso-assistant.defaultTag" .) .Values.backend.image.tag }}
         imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.backend.image.imagePullPolicy }}
-        command: ["/bin/sh"]
-        args: ["-c", "python manage.py run_huey -w 2 --scheduler-interval 60"]
+        {{- with .Values.backend.huey.command }}
+        command:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.backend.huey.args }}
+        args:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         env:
           {{- with .Values.backend.huey.env }}
             {{- toYaml . | nindent 10 }}
@@ -207,6 +233,10 @@ spec:
           {{- else }}
           - name: HUEY_FILE_PATH
             value: /tmp/huey.db
+          {{- end }}
+          {{- if .Values.backend.persistence.localStorage.enabled }}
+          - name: LOCAL_STORAGE_DIRECTORY
+            value: /ciso/localStorage
           {{- end }}
           {{- if eq .Values.backend.config.databaseType "pgsql" }}
           - name: DB_HOST
@@ -253,6 +283,11 @@ spec:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 {{- end }}
                 key: django-secret-key
+          - name: IDP_OIDC_PRIVATE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "ciso-assistant.idpOidcSecretName" . }}
+                key: idp-oidc-private-key
           - name: CISO_ASSISTANT_SUPERUSER_EMAIL
             value: {{ .Values.backend.config.emailAdmin }}
           - name: CISO_ASSISTANT_URL
@@ -304,6 +339,10 @@ spec:
           {{- if .Values.backend.persistence.sqlite.enabled }}
           - name: sqlite-data
             mountPath: /ciso/db
+          {{- end }}
+          {{- if .Values.backend.persistence.localStorage.enabled }}
+          - name: localstorage-data
+            mountPath: /ciso/localStorage
           {{- end }}
           {{- if and .Values.backend.huey.extraVolumeMounts (not .Values.backend.extraVolumes) }}
             {{- fail "backend.huey.extraVolumeMounts can't be set without backend.extraVolumes" }}

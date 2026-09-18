@@ -228,3 +228,43 @@ Frontend pod volume: the raw CA secret.
         path: {{ .Values.global.extraCerts.fileName }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Name of the secret holding the OIDC signing key (existing one, or the chart-managed one).
+*/}}
+{{- define "ciso-assistant.idpOidcSecretName" -}}
+{{- default (printf "%s-backend-oidc" (include "ciso-assistant.fullname" .)) .Values.backend.config.oidcProvider.existingSecret -}}
+{{- end -}}
+
+{{/*
+RSA private key signing the OIDC tokens issued to service accounts.
+Reuses the key already stored in the release secret, so it stays stable across upgrades.
+Note: `lookup` is a no-op when manifests are rendered without cluster access (helm template,
+ArgoCD, ...), which regenerates the key on every render. Set backend.config.oidcProvider.privateKey
+or existingSecret in that case.
+*/}}
+{{- define "ciso-assistant.idpOidcPrivateKey" -}}
+{{- if .Values.backend.config.oidcProvider.privateKey -}}
+{{- .Values.backend.config.oidcProvider.privateKey -}}
+{{- else -}}
+{{- $secret := lookup "v1" "Secret" .Release.Namespace (include "ciso-assistant.idpOidcSecretName" .) -}}
+{{- $existing := "" -}}
+{{- if $secret -}}
+{{- $existing = index (default dict $secret.data) "idp-oidc-private-key" | default "" -}}
+{{- end -}}
+{{- if $existing -}}
+{{- b64dec $existing -}}
+{{- else -}}
+{{- genPrivateKey "rsa" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether a user-supplied env list already defines a variable. Expects "env" and "name".
+*/}}
+{{- define "ciso-assistant.definesEnv" -}}
+{{- range .env -}}
+{{- if eq (default "" .name) $.name -}}true{{- end -}}
+{{- end -}}
+{{- end -}}
