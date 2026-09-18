@@ -14,7 +14,8 @@ export interface User {
 	keep_local_login: boolean;
 	date_joined: string;
 	user_groups: Record<string, any>[];
-	roles: Record<string, any>[];
+	/** Role names — `User.get_roles()` serialises `roleassignment__role__name`, not objects. */
+	roles: string[];
 	is_third_party: boolean;
 	is_auditee: boolean;
 	is_admin: boolean;
