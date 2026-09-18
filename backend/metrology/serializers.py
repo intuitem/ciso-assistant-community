@@ -2,7 +2,6 @@ import json
 
 import jsonschema
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 

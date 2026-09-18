@@ -18,6 +18,7 @@
 	let { panels = [], categories = [] }: Props = $props();
 
 	let holders: HTMLElement[] = $state([]);
+	let echartsModule = $state<any>(null);
 
 	const summaries = $derived(
 		panels.map((panel) => {
@@ -28,65 +29,95 @@
 		})
 	);
 
+	// A breakdown key can be user-supplied text — qualification names reach the
+	// breakdown as keys — and an ECharts formatter that returns a string has it
+	// rendered as HTML.
+	const HTML_ESCAPES: Record<string, string> = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#39;'
+	};
+
+	function escapeHtml(value: unknown): string {
+		return String(value).replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
+	}
+
 	onMount(() => {
-		let disposers: Array<() => void> = [];
 		let active = true;
-
-		(async () => {
-			const echarts = await import('echarts');
-			if (!active) return;
-
-			panels.forEach((panel, index) => {
-				const el = holders[index];
-				if (!el) return;
-				const values = panel.values;
-				const last = values.length ? values[values.length - 1] : 0;
-
-				disposers.push(
-					mountThemeAwareChart(echarts, el, () => ({
-						grid: { left: 2, right: 2, top: 6, bottom: 2 },
-						tooltip: {
-							trigger: 'axis',
-							confine: true,
-							formatter: (params: any) =>
-								`${params[0].axisValue}<br/>${params[0].marker}${panel.label}: <b>${params[0].value}</b>`
-						},
-						xAxis: { type: 'category', data: categories, show: false, boundaryGap: false },
-						// Each panel is padded to its own range, so a flat series reads as flat
-						// instead of as noise amplified to fill the box.
-						yAxis: {
-							type: 'value',
-							show: false,
-							min: (v: any) => Math.max(0, v.min - Math.max(1, (v.max - v.min) * 0.5)),
-							max: (v: any) => v.max + Math.max(1, (v.max - v.min) * 0.5)
-						},
-						series: [
-							{
-								name: panel.label,
-								type: 'line',
-								smooth: true,
-								showSymbol: false,
-								lineStyle: { width: 2, color: panel.color },
-								areaStyle: { opacity: 0.16, color: panel.color },
-								markPoint: {
-									symbol: 'circle',
-									symbolSize: 7,
-									label: { show: false },
-									itemStyle: { color: panel.color },
-									data: [{ coord: [categories.length - 1, last] }]
-								},
-								data: values
-							}
-						]
-					}))
-				);
-			});
-		})();
-
+		import('echarts').then((module) => {
+			if (active) echartsModule = module;
+		});
 		return () => {
 			active = false;
-			disposers.forEach((dispose) => dispose());
 		};
+	});
+
+	// The parent keys this component on sample-array length, but a day's snapshot
+	// is updated in place, so the same length can carry different values — and a
+	// newly appearing status adds a panel without changing that length either.
+	// Rebuilding on every input change is what keeps the panels truthful.
+	$effect(() => {
+		const echarts = echartsModule;
+		const currentPanels = panels;
+		const currentCategories = categories;
+		if (!echarts || currentPanels.length === 0) return;
+
+		const disposers: Array<() => void> = [];
+		currentPanels.forEach((panel, index) => {
+			const element = holders[index];
+			if (!element) return;
+			const values = panel.values;
+			const last = values.length ? values[values.length - 1] : 0;
+
+			disposers.push(
+				mountThemeAwareChart(echarts, element, () => ({
+					grid: { left: 2, right: 2, top: 6, bottom: 2 },
+					tooltip: {
+						trigger: 'axis',
+						confine: true,
+						formatter: (params: any) =>
+							`${escapeHtml(params[0].axisValue)}<br/>${params[0].marker}` +
+							`${escapeHtml(panel.label)}: <b>${escapeHtml(params[0].value)}</b>`
+					},
+					xAxis: {
+						type: 'category',
+						data: currentCategories,
+						show: false,
+						boundaryGap: false
+					},
+					// Each panel is padded to its own range, so a flat series reads as flat
+					// instead of as noise amplified to fill the box.
+					yAxis: {
+						type: 'value',
+						show: false,
+						min: (v: any) => Math.max(0, v.min - Math.max(1, (v.max - v.min) * 0.5)),
+						max: (v: any) => v.max + Math.max(1, (v.max - v.min) * 0.5)
+					},
+					series: [
+						{
+							name: panel.label,
+							type: 'line',
+							smooth: true,
+							showSymbol: false,
+							lineStyle: { width: 2, color: panel.color },
+							areaStyle: { opacity: 0.16, color: panel.color },
+							markPoint: {
+								symbol: 'circle',
+								symbolSize: 7,
+								label: { show: false },
+								itemStyle: { color: panel.color },
+								data: [{ coord: [currentCategories.length - 1, last] }]
+							},
+							data: values
+						}
+					]
+				}))
+			);
+		});
+
+		return () => disposers.forEach((dispose) => dispose());
 	});
 </script>
 
