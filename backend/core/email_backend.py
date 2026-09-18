@@ -13,8 +13,7 @@ from django.core.mail.backends.smtp import EmailBackend as SMTPEmailBackend
 from django.utils.functional import cached_property
 
 
-def build_tls12_context() -> ssl.SSLContext:
-    context = ssl.create_default_context()
+def pin_tls12(context: ssl.SSLContext) -> ssl.SSLContext:
     context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.maximum_version = ssl.TLSVersion.TLSv1_2
     context.set_ciphers("ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
@@ -24,6 +23,9 @@ def build_tls12_context() -> ssl.SSLContext:
 class EmailBackend(SMTPEmailBackend):
     @cached_property
     def ssl_context(self):
+        # Pin Django's own context in place so EMAIL_SSL_CERTFILE /
+        # EMAIL_SSL_KEYFILE keep applying alongside the TLS 1.2 restriction.
+        context = super().ssl_context
         if getattr(settings, "EMAIL_FORCE_TLS_1_2", False):
-            return build_tls12_context()
-        return super().ssl_context
+            pin_tls12(context)
+        return context

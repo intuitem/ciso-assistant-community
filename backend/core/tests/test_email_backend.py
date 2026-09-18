@@ -5,6 +5,7 @@ the setting into a silent no-op. The pin now lives in ``core.email_backend``.
 """
 
 import ssl
+from unittest.mock import patch
 
 import pytest
 from django.test import override_settings
@@ -21,6 +22,19 @@ def test_ssl_context_is_pinned_to_tls12_when_flag_on():
     assert context.maximum_version == ssl.TLSVersion.TLSv1_2
     assert context.verify_mode == ssl.CERT_REQUIRED
     assert context.check_hostname is True
+
+
+@override_settings(EMAIL_FORCE_TLS_1_2=True)
+def test_tls12_pin_keeps_client_certificate():
+    with patch.object(ssl.SSLContext, "load_cert_chain") as load_cert_chain:
+        context = EmailBackend(
+            ssl_certfile="/etc/ssl/client.pem", ssl_keyfile="/etc/ssl/client.key"
+        ).ssl_context
+    load_cert_chain.assert_called_once_with(
+        "/etc/ssl/client.pem", "/etc/ssl/client.key"
+    )
+    assert context.minimum_version == ssl.TLSVersion.TLSv1_2
+    assert context.maximum_version == ssl.TLSVersion.TLSv1_2
 
 
 @override_settings(EMAIL_FORCE_TLS_1_2=False)
