@@ -327,16 +327,18 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 		visibleCount++;
 
-		const questionWeight = typeof question.weight === 'number' ? question.weight : 1;
+		// A negative weight has no defined meaning; 0 means "does not count".
+		const questionWeight = Math.max(typeof question.weight === 'number' ? question.weight : 1, 0);
 		const choiceScores: number[] = Array.isArray(question.choices)
 			? question.choices
 					.map((choice: any) => choice.add_score)
 					.filter((s: any) => s !== undefined && s !== null)
 			: [];
 		if (choiceScores.length > 0) {
+			const positives = choiceScores.filter((s) => s > 0);
 			const best =
-				question.type === 'multiple_choice'
-					? choiceScores.reduce((acc, s) => (s > 0 ? acc + s : acc), 0)
+				question.type === 'multiple_choice' && positives.length > 0
+					? positives.reduce((acc, s) => acc + s, 0)
 					: Math.max(...choiceScores);
 			reachableWeightedMax += best * questionWeight;
 			if (questionWeight !== 1) hasWeightedQuestion = true;

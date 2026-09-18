@@ -10072,16 +10072,19 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
             visible_questions += 1
 
+            # A negative weight has no defined meaning; 0 means "does not count".
+            weight = max(question.weight, 0)
             choice_scores = [
                 c.add_score for c in question.choices.all() if c.add_score is not None
             ]
             if choice_scores:
-                if question.type == Question.Type.MULTIPLE_CHOICE:
-                    best = sum(s for s in choice_scores if s > 0)
+                positives = [s for s in choice_scores if s > 0]
+                if question.type == Question.Type.MULTIPLE_CHOICE and positives:
+                    best = sum(positives)
                 else:
                     best = max(choice_scores)
-                reachable_weighted_max += best * question.weight
-                if question.weight != 1:
+                reachable_weighted_max += best * weight
+                if weight != 1:
                     has_weighted_question = True
 
             if not has_answer_by_qid.get(question.id):
@@ -10094,8 +10097,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 if choice.id in selected_pks:
                     if choice.add_score is not None:
                         is_score_computed = True
-                        total_score += choice.add_score * question.weight
-                        total_weight += question.weight
+                        total_score += choice.add_score * weight
+                        total_weight += weight
 
                     if choice.compute_result is not None:
                         resolved_cr = resolve_compute_result(choice.compute_result)
