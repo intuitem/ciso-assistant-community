@@ -1,14 +1,7 @@
-import { formatSelectFieldData } from '$lib/utils/load';
+import { formatSelectFieldData } from '$lib/utils/select-field';
 import type { SelectField } from '$lib/utils/crud';
 
-/** A model's choice-field options, fetched when a form opens rather than during
- * the server load. Only fields nobody has provided yet are fetched. */
-
-// Per field, so a page that pre-filled some of them still gets the rest. Values
-// are cloned in and out: consumers rewrite option values in place
-// (AppliedControlPolicyForm), which would otherwise poison the entry.
-const cache = new Map<string, unknown>();
-
+/** Choice-field options, fetched when a form opens rather than on page load. */
 export async function ensureSelectOptions(
 	model: Record<string, any>,
 	initialData: Record<string, any> = {}
@@ -25,7 +18,6 @@ export async function ensureSelectOptions(
 
 	const existing = model.selectOptions ?? {};
 	const missing = selectFields.filter((f) => !(f.field in existing));
-	if (!missing.length) return;
 
 	// Detail pages put the parent id on the model, everyone else passes it in.
 	const parentOf = (field: string) => initialData?.[field] ?? model.initialData?.[field];
@@ -33,32 +25,21 @@ export async function ensureSelectOptions(
 	const fetched: Record<string, unknown> = {};
 	await Promise.all(
 		missing.map(async (selectField) => {
-			const parent = selectField.formNestedField ? parentOf(selectField.formNestedField) : null;
-			// Parent-scoped options follow that parent's scale, which can be
-			// edited, so they are never cached.
-			const key = parent ? null : `${urlModel}:${selectField.field}`;
-			const hit = key && cache.get(key);
-			if (hit) {
-				fetched[selectField.field] = structuredClone(hit);
-				return;
-			}
 			const query = new URLSearchParams({ model: urlModel, field: selectField.field });
+			const parent = selectField.formNestedField ? parentOf(selectField.formNestedField) : null;
 			if (parent) query.set('detail', parent);
 			const url = `/select-options?${query}`;
 			try {
 				const response = await fetch(url);
 				if (!response.ok) throw new Error(response.statusText);
-				const options = formatSelectFieldData(await response.json(), selectField);
-				if (key) cache.set(key, structuredClone(options));
-				fetched[selectField.field] = options;
+				fetched[selectField.field] = formatSelectFieldData(await response.json(), selectField);
 			} catch (e) {
 				console.error(`Failed to fetch options for ${selectField.field} from ${url}`, e);
 			}
 		})
 	);
 
-	// Nothing to add and nothing there before: leave it unset so a form with its
-	// own fallback (AppliedControlPolicyForm) can still use it.
-	if (!Object.keys(fetched).length && !model.selectOptions) return;
-	model.selectOptions = { ...existing, ...fetched };
+	// Always set: forms index it unguarded. Always fresh: they rewrite option
+	// values in place, and the model can outlive the modal.
+	model.selectOptions = structuredClone({ ...existing, ...fetched });
 }

@@ -1,4 +1,6 @@
 import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
+import { formatSelectFieldData } from '$lib/utils/select-field';
+export { formatSelectFieldData };
 import {
 	getModelInfo,
 	MODEL_FEATURE_FLAGS,
@@ -33,32 +35,6 @@ interface LoadValidationFlowFormDataParams {
  * The return value is meant to be assigned to `model.selectOptions[field]` inside load functions.
  * The data will then be usable by components like `<AutoCompleteSelect {...} />` / `<Select {...} />`.
  */
-export function formatSelectFieldData(
-	responseData: Record<string, string>,
-	selectField: SelectField
-): SelectFieldData[] {
-	const isNumber = selectField.valueType === 'number';
-	const isOptionList = Array.isArray(responseData);
-
-	let fieldOptions = [];
-
-	if (isOptionList) {
-		fieldOptions = responseData.map((option) => ({
-			label: option.label,
-			value: isNumber ? parseInt(option.value) : option.value
-		}));
-	} else {
-		fieldOptions = Object.entries(responseData).map(([key, value]) => ({
-			label: value,
-			value: isNumber ? parseInt(key) : key
-		}));
-	}
-
-	if (isNumber) {
-		fieldOptions.sort((a, b) => a.value - b.value);
-	}
-	return fieldOptions;
-}
 
 /**
  * Load validation flow form data with preset values and select options.
@@ -256,8 +232,7 @@ export const loadDetail = async ({ event, model, id }) => {
 
 					const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 
-					// Filled when a create form opens, not on page load: one request
-					// per select field per tab was the bulk of a detail page's fan-out.
+					// Filled when a create form opens: see ensureSelectOptions.
 					const selectOptions: Record<string, any> = {};
 					relatedModels[e.urlModel] = {
 						urlModel,

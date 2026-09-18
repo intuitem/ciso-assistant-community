@@ -52,9 +52,8 @@ async function loadCustomDashboard(fetch: typeof globalThis.fetch, dashboardId: 
 export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 	const currentYear = new Date().getFullYear();
 
-	// Scoped to the active tab: a tab switch is a navigation, so an ungated
-	// loader refetches every panel on every switch.
-	const tab = url.searchParams.get('tab') ?? 'summary';
+	// Scoped to the active tab: a tab switch is a navigation.
+	const tab = url.searchParams.get('tab') || 'summary';
 	const shown = (...tabs: string[]) => tabs.includes(tab);
 
 	function assertOk(res: Response) {

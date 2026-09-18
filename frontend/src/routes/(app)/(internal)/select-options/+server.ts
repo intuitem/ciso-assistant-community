@@ -8,8 +8,8 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 	const field = url.searchParams.get('field');
 	const detail = url.searchParams.get('detail');
 
-	// URL_MODEL_MAP, not URL_MODEL: models without a generic route (ebios-rm,
-	// vulnerability-sla, sec-intel-feeds) still have select fields.
+	// URL_MODEL_MAP, not URL_MODEL: models without a generic route still have
+	// select fields.
 	const model = getModelInfo(urlModel);
 	const selectField = model.selectFields?.find((f) => f.field === field);
 	if (!selectField) error(404, `Unknown select field '${field}' on '${urlModel}'`);
