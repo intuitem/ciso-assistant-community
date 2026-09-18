@@ -7281,12 +7281,15 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
         pk = self.kwargs["pk"]
         links = defaultdict(list)
 
+        # Only expose applied controls and task templates the caller is allowed to view
         applied_controls = AppliedControl.objects.filter(
-            requirement_assessments__compliance_assessment_id=pk
+            requirement_assessments__compliance_assessment_id=pk,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, AppliedControl
+            ),
         ).distinct()
         task_templates = TaskTemplate.objects.filter(
             requirement_assessments__compliance_assessment_id=pk,
-            # Only expose task templates the caller is allowed to view
             id__in=RoleAssignment.get_viewable_object_ids(
                 self.request.user, TaskTemplate
             ),
@@ -7322,14 +7325,23 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
 
         compliance_assessment = ComplianceAssessment.objects.get(id=compliance_id)
 
-        # Get all requirement assessments for this compliance assessment
-        requirement_assessments = RequirementAssessment.objects.filter(
-            compliance_assessment=compliance_assessment
-        ).prefetch_related("evidences", "applied_controls__evidences")
-
         # Get visible evidences to filter result
         viewable_evidences = RoleAssignment.get_viewable_object_ids(
             self.request.user, Evidence
+        )
+
+        # Get all requirement assessments for this compliance assessment,
+        # only walking through applied controls the caller is allowed to view
+        viewable_applied_controls = AppliedControl.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, AppliedControl
+            )
+        ).prefetch_related("evidences")
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment
+        ).prefetch_related(
+            "evidences",
+            Prefetch("applied_controls", queryset=viewable_applied_controls),
         )
 
         # Collect evidence IDs from global, direct and indirect relationships
