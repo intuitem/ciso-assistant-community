@@ -52,114 +52,140 @@ async function loadCustomDashboard(fetch: typeof globalThis.fetch, dashboardId: 
 export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 	const currentYear = new Date().getFullYear();
 
-	// All data is streamed — nothing blocks the initial page render.
+	// Streamed, and scoped to the active tab: a tab switch is a navigation, so
+	// an ungated loader refetches every panel on every switch.
+	const tab = url.searchParams.get('tab') ?? 'summary';
+	const shown = (...tabs: string[]) => tabs.includes(tab);
 
 	function assertOk(res: Response) {
 		if (!res.ok) throw new Error(`HTTP ${res.status}`);
 		return res;
 	}
 
-	const appliedControlStatusPromise = fetch(`${BASE_API_URL}/applied-controls/per_status/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.then((res) => res.results)
-		.catch(() => null);
+	const appliedControlStatusPromise = shown('governance')
+		? fetch(`${BASE_API_URL}/applied-controls/per_status/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.then((res) => res.results)
+				.catch(() => null)
+		: Promise.resolve(null);
 
-	const taskTemplateStatusPromise = fetch(`${BASE_API_URL}/task-templates/per_status/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.then((res) => res.results)
-		.catch(() => null);
+	const taskTemplateStatusPromise = shown('operations')
+		? fetch(`${BASE_API_URL}/task-templates/per_status/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.then((res) => res.results)
+				.catch(() => null)
+		: Promise.resolve(null);
 
-	const risksCountPerLevelPromise = fetch(`${BASE_API_URL}/risk-scenarios/count_per_level/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.then((res) => res.results)
-		.catch(() => ({ current: [], residual: [] }));
+	const risksCountPerLevelPromise = shown('risk', 'summary')
+		? fetch(`${BASE_API_URL}/risk-scenarios/count_per_level/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.then((res) => res.results)
+				.catch(() => ({ current: [], residual: [] }))
+		: Promise.resolve({ current: [], residual: [] });
 
-	const threatsCountPromise = fetch(`${BASE_API_URL}/threats/threats_count/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch(() => ({ results: { labels: [], values: [] } }));
+	const threatsCountPromise = shown('risk')
+		? fetch(`${BASE_API_URL}/threats/threats_count/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch(() => ({ results: { labels: [], values: [] } }))
+		: Promise.resolve({ results: { labels: [], values: [] } });
 
-	const qualificationsCountPromise = fetch(`${BASE_API_URL}/risk-scenarios/qualifications_count/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch(() => ({ results: { labels: [], values: [] } }));
+	const qualificationsCountPromise = shown('risk')
+		? fetch(`${BASE_API_URL}/risk-scenarios/qualifications_count/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch(() => ({ results: { labels: [], values: [] } }))
+		: Promise.resolve({ results: { labels: [], values: [] } });
 
-	const complianceAnalyticsPromise = fetch(`${BASE_API_URL}/compliance-assessments/analytics/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch(() => ({}));
+	const complianceAnalyticsPromise = shown('compliance')
+		? fetch(`${BASE_API_URL}/compliance-assessments/analytics/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch(() => ({}))
+		: Promise.resolve({});
 
-	const metricsPromise = fetch(`${BASE_API_URL}/get_metrics/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.then((data) => data.results)
-		.catch((error) => {
-			console.error('Failed to fetch or parse metrics:', error);
-			return null;
-		});
+	const metricsPromise = shown('summary')
+		? fetch(`${BASE_API_URL}/get_metrics/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.then((data) => data.results)
+				.catch((error) => {
+					console.error('Failed to fetch or parse metrics:', error);
+					return null;
+				})
+		: Promise.resolve(null);
 
-	const auditsMetricsPromise = fetch(`${BASE_API_URL}/get_audits_metrics/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.then((data) => data.results)
-		.catch((error) => {
-			console.error('Failed to fetch or parse audits metrics:', error);
-			return null;
-		});
+	const auditsMetricsPromise = shown('summary')
+		? fetch(`${BASE_API_URL}/get_audits_metrics/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.then((data) => data.results)
+				.catch((error) => {
+					console.error('Failed to fetch or parse audits metrics:', error);
+					return null;
+				})
+		: Promise.resolve(null);
 
-	const countersPromise = fetch(`${BASE_API_URL}/get_counters/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.then((data) => data.results)
-		.catch((error) => {
-			console.error('failed to fetch or parse counters:', error);
-			return null;
-		});
+	const countersPromise = shown('governance')
+		? fetch(`${BASE_API_URL}/get_counters/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.then((data) => data.results)
+				.catch((error) => {
+					console.error('failed to fetch or parse counters:', error);
+					return null;
+				})
+		: Promise.resolve(null);
 
-	const combinedAssessmentsStatusPromise = fetch(`${BASE_API_URL}/get_combined_assessments_status/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.then((data) => data.results)
-		.catch((error) => {
-			console.error('failed to fetch or parse combined assessments status:', error);
-			return null;
-		});
+	const combinedAssessmentsStatusPromise = shown('governance')
+		? fetch(`${BASE_API_URL}/get_combined_assessments_status/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.then((data) => data.results)
+				.catch((error) => {
+					console.error('failed to fetch or parse combined assessments status:', error);
+					return null;
+				})
+		: Promise.resolve(null);
 
-	const governanceCalendarDataPromise = fetch(
-		`${BASE_API_URL}/get_governance_calendar_data/?year=${currentYear}`
-	)
-		.then(assertOk)
-		.then((res) => res.json())
-		.then((data) => data.results)
-		.catch((error) => {
-			console.error('Failed to fetch governance calendar data:', error);
-			return [];
-		});
+	const governanceCalendarDataPromise = shown('governance')
+		? fetch(`${BASE_API_URL}/get_governance_calendar_data/?year=${currentYear}`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.then((data) => data.results)
+				.catch((error) => {
+					console.error('Failed to fetch governance calendar data:', error);
+					return [];
+				})
+		: Promise.resolve([]);
 
-	const vulnerabilitySankeyDataPromise = fetch(`${BASE_API_URL}/vulnerabilities/sankey_data/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch vulnerability sankey data:', error);
-			return [];
-		});
+	const vulnerabilitySankeyDataPromise = shown('risk')
+		? fetch(`${BASE_API_URL}/vulnerabilities/sankey_data/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch vulnerability sankey data:', error);
+					return [];
+				})
+		: Promise.resolve([]);
 
-	const findingsAssessmentSunburstDataPromise = fetch(
-		`${BASE_API_URL}/findings-assessments/sunburst_data/`
-	)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch findings assessment sunburst data:', error);
-			return [];
-		});
+	const findingsAssessmentSunburstDataPromise = shown('governance')
+		? fetch(`${BASE_API_URL}/findings-assessments/sunburst_data/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch findings assessment sunburst data:', error);
+					return [];
+				})
+		: Promise.resolve([]);
 
 	// Start all operations analytics fetches in parallel; skip the incident
 	// endpoints entirely when the incidents feature flag is off.
-	const incidentsEnabled = Boolean((await locals.getFeatureFlags())?.incidents);
+	const incidentsEnabled =
+		shown('operations') && Boolean((await locals.getFeatureFlags())?.incidents);
 
 	const detectionPromise = incidentsEnabled
 		? fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
@@ -213,55 +239,61 @@ export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 				})
 		: Promise.resolve({ results: { labels: [], values: [] } });
 
-	const exceptionSankeyPromise = fetch(`${BASE_API_URL}/security-exceptions/sankey_data/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch security exception Sankey data:', error);
-			return { results: { nodes: [], links: [] } };
-		});
+	const exceptionSankeyPromise = shown('governance', 'operations')
+		? fetch(`${BASE_API_URL}/security-exceptions/sankey_data/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch security exception Sankey data:', error);
+					return { results: { nodes: [], links: [] } };
+				})
+		: Promise.resolve({ results: { nodes: [], links: [] } });
 
-	const sunburstPromise = fetch(`${BASE_API_URL}/applied-controls/sunburst_data/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch applied controls sunburst data:', error);
-			return { results: [] };
-		});
+	const sunburstPromise = shown('operations')
+		? fetch(`${BASE_API_URL}/applied-controls/sunburst_data/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch applied controls sunburst data:', error);
+					return { results: [] };
+				})
+		: Promise.resolve({ results: [] });
 
-	const findingsSankeyPromise = fetch(`${BASE_API_URL}/findings/sankey_data/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch findings Sankey data:', error);
-			return { results: { nodes: [], links: [] } };
-		});
+	const findingsSankeyPromise = shown('operations')
+		? fetch(`${BASE_API_URL}/findings/sankey_data/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch findings Sankey data:', error);
+					return { results: { nodes: [], links: [] } };
+				})
+		: Promise.resolve({ results: { nodes: [], links: [] } });
 
 	// Custom tab: list of dashboards (always) + selected dashboard data (if any)
-	const dashboardsListPromise = fetchAllPages(fetch, `${BASE_API_URL}/metrology/dashboards/`).catch(
-		() => []
-	);
+	const dashboardsListPromise = shown('custom')
+		? fetchAllPages(fetch, `${BASE_API_URL}/metrology/dashboards/`).catch(() => [])
+		: Promise.resolve([]);
 
-	const generalSettingsPromise = fetch(`${BASE_API_URL}/settings/general/object/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch(() => ({}));
+	const generalSettingsPromise = shown('custom')
+		? fetch(`${BASE_API_URL}/settings/general/object/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch(() => ({}))
+		: Promise.resolve({});
 
 	// Resolve which dashboard to render: ?dashboard=ID > instance default global setting > none
-	const customDashboardPromise = (async () => {
-		const queryParamId = url.searchParams.get('dashboard');
-		let dashboardId: string | null = queryParamId;
+	// Resolved before load returns: event.fetch called after that is untracked.
+	let customDashboardPromise: Promise<unknown> = Promise.resolve(null);
+	if (shown('custom')) {
+		let dashboardId: string | null = url.searchParams.get('dashboard');
 		if (!dashboardId) {
 			const settings = await generalSettingsPromise;
 			dashboardId = settings?.default_custom_analytics_dashboard || null;
 		}
-		if (!dashboardId) return null;
-		try {
-			return await loadCustomDashboard(fetch, dashboardId);
-		} catch {
-			return null;
+		if (dashboardId) {
+			customDashboardPromise = loadCustomDashboard(fetch, dashboardId).catch(() => null);
 		}
-	})();
+	}
 
 	const operationsAnalyticsPromise = Promise.all([
 		detectionPromise,
