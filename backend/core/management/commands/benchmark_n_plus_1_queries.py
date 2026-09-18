@@ -11,7 +11,6 @@ from collections import defaultdict
 from django.core.management.base import BaseCommand
 from django.apps import apps
 from django.db import models, connection, transaction, reset_queries
-from django.db.models import query
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
@@ -28,6 +27,7 @@ from core.models import (
     Actor,
     Comment,
     AppliedControl,
+    Commitment,
 )
 from tprm.models import SolutionSubcontractor
 from ebios_rm.models import KillChain
@@ -211,7 +211,7 @@ class CustomObjectCreator:
         picked_applied_control = random.choice(list(remaining_users))
         picked_applied_controls.add(picked_applied_control)
 
-        return Comment(
+        return Comment.objects.create(
             body="xxx",
             applied_control=picked_applied_control,
         )
@@ -383,7 +383,7 @@ class ObjectCreator:
         return instance
 
     def generate_value_from_field(self, field: models.Field):
-        has_custom_value_generator = field in self.custom_fields_value_generators
+        has_custom_value_generator = field.name in self.custom_fields_value_generators
         if has_custom_value_generator:
             return
 
@@ -845,7 +845,7 @@ class Command(BaseCommand):
         output_filename = options["output"]
         object_to_create_count = options["object_to_create_count"]
 
-        if object_to_create_count <= 1:
+        if object_to_create_count <= 0:
             self.stdout.write(
                 "The --object-to-create-count argument MUST be superior to 0."
             )
@@ -866,6 +866,7 @@ class Command(BaseCommand):
                     GlobalSettings,
                     SSOSettings,
                     DashboardWidget,
+                    Commitment,
                 },
             )
 
@@ -875,6 +876,8 @@ class Command(BaseCommand):
                 query_count_diff = object_creator.create()
 
                 model_to_query_count_diff.append((model.__qualname__, query_count_diff))
+
+            transaction.set_rollback(True)
 
         sorted_model_to_query_count_diff = sorted(
             model_to_query_count_diff,
