@@ -799,6 +799,9 @@ class GenericFilterSet(df.FilterSet):
     # enough to make it filterable from the table UI. On a DateTimeField the `date`
     # transform is what the UI uses: a bare `lte` on a timestamp would drop its last day.
     DATE_LOOKUPS = ("exact", "gte", "lte", "gt", "lt", "isnull")
+    # `lt`/`gt` are the half-open bounds BI clients need: Power BI incremental
+    # refresh partitions on `updated_at >= RangeStart and updated_at < RangeEnd`,
+    # and an inclusive `lte` would import the boundary row into two partitions.
     DATETIME_LOOKUPS = (
         "date",
         "date__gte",
@@ -807,6 +810,8 @@ class GenericFilterSet(df.FilterSet):
         "date__lt",
         "gte",
         "lte",
+        "gt",
+        "lt",
         "isnull",
     )
     ALWAYS_FILTERABLE_DATES = ("created_at", "updated_at")
@@ -901,18 +906,6 @@ class GenericFilterSet(df.FilterSet):
                 "filter_class": df.IsoDateTimeFilter,
             },
         }
-
-
-class TimestampRangeFilterMixin(df.FilterSet):
-    """ISO-8601 created_at/updated_at range params for BI clients
-    (Power BI incremental refresh). Mix into FilterSets of viewsets
-    that use filterset_class; list-style viewsets declare the same
-    lookups via dict-form filterset_fields."""
-
-    created_at__gte = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="gte")
-    created_at__lt = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="lt")
-    updated_at__gte = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="gte")
-    updated_at__lt = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="lt")
 
 
 class SmartOrderingFilter(filters.OrderingFilter):
@@ -1237,7 +1230,61 @@ class AutocompleteMixin:
         return Response(data)
 
 
-class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
+class SparseFieldsMixin:
+    """``?fields=a,b,c`` trims a GET response to a subset of the columns.
+
+    Strictly subtractive: the parameter can only remove fields the serializer
+    already exposes for this caller, so it is no path to anything withheld.
+    Feature-flag gating (``FLAGGED_FIELDS``) runs first, in the serializer's
+    ``__init__``, and per-role redaction runs afterwards in
+    ``to_representation`` — both over whatever survives here. A name the
+    serializer does not expose is a 400 rather than a silent omission: a
+    consumer that asks for a column it will not receive should be told, not
+    handed a narrower table than it thinks it has.
+
+    Only the top-level serializer is trimmed. Nested serializers share this
+    request's context and would otherwise be cut by the same names.
+
+    Exists for bulk read clients (Power BI, exports) that need one identifier
+    column and one relation out of a wide row. It reduces serialization and
+    payload, not the queryset's prefetching.
+    """
+
+    sparse_fields_param = "fields"
+    # Rows are joined on `id` downstream, so it stays even when not asked for.
+    sparse_fields_always = frozenset({"id"})
+
+    def get_serializer(self, *args, **kwargs):
+        serializer = super().get_serializer(*args, **kwargs)
+        request = getattr(self, "request", None)
+        if request is None or request.method != "GET":
+            return serializer
+
+        raw = request.query_params.get(self.sparse_fields_param)
+        if not raw:
+            return serializer
+        requested = {name.strip() for name in raw.split(",") if name.strip()}
+        if not requested:
+            return serializer
+
+        target = getattr(serializer, "child", serializer)
+        available = set(getattr(target, "fields", {}))
+        unknown = requested - available
+        if unknown:
+            raise DRFValidationError(
+                {
+                    self.sparse_fields_param: (
+                        f"unknown field(s): {', '.join(sorted(unknown))}"
+                    )
+                }
+            )
+
+        for name in available - (requested | self.sparse_fields_always):
+            target.fields.pop(name)
+        return serializer
+
+
+class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -2531,7 +2578,7 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
-class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):
+class AssetFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
     asset_class__isnull = df.BooleanFilter(
@@ -5352,7 +5399,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
 APPLIED_CONTROL_LINKED_FIELD_NAMES = [f[0] for f in APPLIED_CONTROL_LINKED_FIELDS]
 
 
-class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
+class AppliedControlFilterSet(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     reference_control = df.ModelMultipleChoiceFilter(
         queryset=ReferenceControl.objects.all()
@@ -7384,7 +7431,7 @@ class IntegerInFilter(df.BaseInFilter, df.NumberFilter):
     field_class = FormIntegerField
 
 
-class RiskScenarioFilter(TimestampRangeFilterMixin, GenericFilterSet):
+class RiskScenarioFilter(GenericFilterSet):
     risk_assessment = df.ModelMultipleChoiceFilter(
         queryset=RiskAssessment.objects.all()
     )
@@ -10733,7 +10780,7 @@ class RequirementViewSet(BaseModelViewSet):
         )
 
 
-class EvidenceFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
+class EvidenceFilterSet(GenericFilterSet):
     owner = NullableModelChoiceFilter(queryset=Actor.objects.all())
 
     class Meta:

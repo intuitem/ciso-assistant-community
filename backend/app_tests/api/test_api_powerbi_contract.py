@@ -9,6 +9,7 @@ Power BI refreshes.
 """
 
 import json
+import math
 import re
 from datetime import date, timedelta
 from pathlib import Path
@@ -74,6 +75,7 @@ def bi_dataset(db):
     from core.models import (
         AppliedControl,
         Asset,
+        Campaign,
         ComplianceAssessment,
         Evidence,
         EvidenceRevision,
@@ -87,14 +89,18 @@ def bi_dataset(db):
         ReferenceControl,
         RequirementAssessment,
         RequirementNode,
+        RiskAcceptance,
         RiskAssessment,
         RiskMatrix,
         RiskScenario,
         SecurityException,
+        TaskNode,
+        TaskTemplate,
         Threat,
         Vulnerability,
     )
-    from iam.models import Folder
+    from iam.models import Folder, User
+    from tprm.models import Contract, Entity, EntityAssessment, Solution
 
     root = Folder.get_root_folder()
     domain = Folder.objects.create(
@@ -262,6 +268,84 @@ def bi_dataset(db):
     parent_asset = Asset.objects.create(name="BI Parent Asset", folder=domain)
     asset.parent_assets.add(parent_asset)
 
+    entity = Entity.objects.create(
+        name="BI Entity",
+        folder=domain,
+        ref_id="ENT-1",
+        mission="BI provider",
+        reference_link="https://example.com/entity",
+    )
+    # Saving a User/Team/Entity creates its Actor (core.base_models), which is
+    # what every owner/assignee M2M points at. A user-backed one is used here
+    # because /api/actors/ only lists entity actors when the instance allows
+    # assigning work to entities.
+    approver = User.objects.create(email="bi-approver@tests.com")
+    actor = approver.actor
+    solution = Solution.objects.create(
+        name="BI Solution",
+        ref_id="SOL-1",
+        provider_entity=entity,
+        recipient_entity=entity,
+        criticality=1,
+    )
+    contract = Contract.objects.create(
+        name="BI Contract",
+        ref_id="CTR-1",
+        folder=domain,
+        provider_entity=entity,
+        beneficiary_entity=entity,
+        start_date=date.today(),
+        end_date=date.today() + timedelta(days=365),
+        annual_expense=1234.56,
+        notice_period_entity=30,
+        notice_period_provider=60,
+    )
+    entity_assessment = EntityAssessment.objects.create(
+        name="BI Entity Assessment",
+        folder=domain,
+        entity=entity,
+        perimeter=perimeter,
+        compliance_assessment=compliance_assessment,
+        criticality=2,
+        version="1.0",
+        eta=date.today(),
+        due_date=date.today() + timedelta(days=30),
+        expiry_date=date.today() + timedelta(days=365),
+        observation="observation",
+        reference_link="https://example.com/entity-assessment",
+    )
+    task_template = TaskTemplate.objects.create(
+        name="BI Task Template",
+        ref_id="TSK-1",
+        folder=domain,
+        task_date=date.today(),
+        link="https://example.com/task",
+    )
+    # Occurrences are generated from the template; only fall back to an
+    # explicit one if that ever stops happening.
+    task_node = TaskNode.objects.filter(task_template=task_template).first()
+    if task_node is None:
+        task_node = TaskNode.objects.create(
+            task_template=task_template,
+            folder=domain,
+            due_date=date.today(),
+            scheduled_date=date.today(),
+        )
+    risk_acceptance = RiskAcceptance.objects.create(
+        name="BI Risk Acceptance",
+        folder=domain,
+        approver=approver,
+        expiry_date=date.today() + timedelta(days=180),
+        justification="justification",
+    )
+    campaign = Campaign.objects.create(
+        name="BI Campaign",
+        folder=domain,
+        start_date=date.today(),
+        eta=date.today(),
+        due_date=date.today() + timedelta(days=60),
+    )
+
     requirement_assessment.applied_controls.add(applied_control)
     requirement_assessment.evidences.add(evidence)
     applied_control.evidences.add(evidence)
@@ -282,6 +366,21 @@ def bi_dataset(db):
     vulnerability.assets.add(asset)
     vulnerability.applied_controls.add(applied_control)
     vulnerability.filtering_labels.add(label)
+    applied_control.owner.add(actor)
+    applied_control.assets.add(asset)
+    finding.owner.add(actor)
+    risk_scenario.owner.add(actor)
+    asset.owner.add(actor)
+    incident.owners.add(actor)
+    contract.owner.add(actor)
+    contract.solutions.add(solution)
+    solution.assets.add(asset)
+    entity_assessment.solutions.add(solution)
+    # The occurrence reads assignees and controls off its template.
+    task_template.assigned_to.add(actor)
+    task_template.applied_controls.add(applied_control)
+    risk_acceptance.risk_scenarios.add(risk_scenario)
+    campaign.compliance_assessments.add(compliance_assessment)
 
     return {
         "requirement-assessments": requirement_assessment,
@@ -303,11 +402,27 @@ def bi_dataset(db):
         "reference-controls": reference_control,
         "findings-assessments": findings_assessment,
         "filtering-labels": label,
+        "task-nodes": task_node,
+        "entity-assessments": entity_assessment,
+        "contracts": contract,
+        "risk-acceptances": risk_acceptance,
+        "actors": actor,
+        "entities": entity,
+        "solutions": solution,
+        "task-templates": task_template,
+        "campaigns": campaign,
     }
 
 
+# Base query params the connector sends for a table (CisoAssistant.pq,
+# GetEntityTable's baseQuery), mirrored so the tests read the same rows.
+ENDPOINT_QUERY = {"actors": {"include_third_parties": "true"}}
+
+
 def _get_row(client, endpoint, obj_id):
-    response = client.get(f"/api/{endpoint}/", {"limit": 1000})
+    response = client.get(
+        f"/api/{endpoint}/", {"limit": 1000, **ENDPOINT_QUERY.get(endpoint, {})}
+    )
     assert response.status_code == 200, f"{endpoint}: {response.status_code}"
     payload = response.json()
     assert "results" in payload and "count" in payload, (
@@ -351,6 +466,10 @@ def test_powerbi_bridge_contract(authenticated_client, bi_dataset):
 def test_powerbi_incremental_refresh_params(authenticated_client, bi_dataset):
     for table in CONTRACT["tables"].values():
         endpoint = table["endpoint"]
+        # Every table the connector declares as foldable (foldDates = true in
+        # CisoAssistant.pq): incremental refresh folds RangeStart/RangeEnd into
+        # these params, and a filterset that silently drops `__lt` would widen
+        # each partition to the whole table.
         if endpoint not in (
             "requirement-assessments",
             "applied-controls",
@@ -361,6 +480,10 @@ def test_powerbi_incremental_refresh_params(authenticated_client, bi_dataset):
             "vulnerabilities",
             "security-exceptions",
             "assets",
+            "task-nodes",
+            "entity-assessments",
+            "contracts",
+            "risk-acceptances",
         ):
             continue
         past = authenticated_client.get(
@@ -392,3 +515,167 @@ def test_powerbi_incremental_refresh_params(authenticated_client, bi_dataset):
             f"/api/{endpoint}/", {"updated_at__gte": "not-a-date"}
         )
         assert invalid.status_code == 400, f"{endpoint}: invalid date should 400"
+
+
+#
+# Pagination contract.
+#
+# The connector pages with limit/offset and derives its stride from the rows
+# the server actually served, because `limit` is clamped to PAGINATE_MAX.
+# These tests are a Python port of GetAllRows / GetTopRows
+# (automation/powerbi/connector/CisoAssistant.pq) run against the live API,
+# so the algorithm is exercised where CI can see it — M itself only runs on
+# the Windows validation VM.
+#
+
+CONNECTOR_PAGE_SIZE = 5000  # `PageSize` in CisoAssistant.pq
+
+
+def _connector_get_all_rows(client, endpoint, extra=None):
+    query = dict(extra or {})
+    first = client.get(
+        f"/api/{endpoint}/", {**query, "limit": CONNECTOR_PAGE_SIZE, "offset": 0}
+    )
+    assert first.status_code == 200, f"{endpoint}: {first.status_code}"
+    payload = first.json()
+    rows = list(payload["results"])
+    total = payload["count"]
+    served = len(rows)
+    page_count = 0 if served == 0 else math.ceil(total / served)
+    for i in range(1, page_count):
+        page = client.get(
+            f"/api/{endpoint}/", {**query, "limit": served, "offset": i * served}
+        )
+        assert page.status_code == 200, f"{endpoint}: {page.status_code}"
+        rows.extend(page.json()["results"])
+    return total, rows
+
+
+def _connector_get_top_rows(client, endpoint, count, extra=None):
+    query = dict(extra or {})
+    first_limit = min(CONNECTOR_PAGE_SIZE, count)
+    first = client.get(
+        f"/api/{endpoint}/", {**query, "limit": first_limit, "offset": 0}
+    )
+    assert first.status_code == 200, f"{endpoint}: {first.status_code}"
+    rows = list(first.json()["results"])
+    served = len(rows)
+    page_count = (
+        0 if served == 0 or served >= count else math.ceil((count - served) / served)
+    )
+    for i in range(1, page_count + 1):
+        page_limit = min(served, count - (i * served))
+        page = client.get(
+            f"/api/{endpoint}/",
+            {**query, "limit": page_limit, "offset": i * served},
+        )
+        assert page.status_code == 200, f"{endpoint}: {page.status_code}"
+        rows.extend(page.json()["results"])
+    return rows[:count]
+
+
+@pytest.fixture
+def clamped_pagination(monkeypatch):
+    """Serve tiny pages, the way an instance with a low PAGINATE_MAX does.
+
+    `max_limit` is read off settings at class-definition time, so
+    `override_settings` cannot move it.
+    """
+    from core.pagination import CustomLimitOffsetPagination
+
+    monkeypatch.setattr(CustomLimitOffsetPagination, "max_limit", 2)
+    return 2
+
+
+@pytest.fixture
+def many_applied_controls(bi_dataset):
+    from core.models import AppliedControl
+
+    folder = bi_dataset["applied-controls"].folder
+    return [
+        AppliedControl.objects.create(name=f"BI Paging Control {i}", folder=folder)
+        for i in range(6)
+    ]
+
+
+@pytest.mark.django_db
+def test_pagination_clamps_limit_but_keeps_true_count(
+    authenticated_client, many_applied_controls, clamped_pagination
+):
+    """The premise the connector relies on: a clamped page still reports `count`."""
+    response = authenticated_client.get(
+        "/api/applied-controls/", {"limit": CONNECTOR_PAGE_SIZE, "offset": 0}
+    )
+    assert response.status_code == 200
+    payload = response.json()
+
+    assert len(payload["results"]) == clamped_pagination
+    assert payload["count"] > clamped_pagination
+    assert payload["next"] is not None
+
+
+@pytest.mark.django_db
+def test_connector_paging_retrieves_every_row_when_clamped(
+    authenticated_client, many_applied_controls, clamped_pagination
+):
+    total, rows = _connector_get_all_rows(authenticated_client, "applied-controls")
+
+    assert total > clamped_pagination, "fixture must span more than one served page"
+    assert len(rows) == total
+    ids = [row["id"] for row in rows]
+    assert len(set(ids)) == total, "offset paging returned duplicate rows"
+
+    # Guard the specific defect fixed in connector 1.1.0: a stride taken from the
+    # requested PageSize instead of the served length imports one page and stops.
+    truncated = math.ceil(total / CONNECTOR_PAGE_SIZE) * clamped_pagination
+    assert truncated < total, "fixture no longer reproduces the truncation"
+
+
+@pytest.mark.django_db
+def test_connector_paging_handles_empty_table(authenticated_client, clamped_pagination):
+    total, rows = _connector_get_all_rows(
+        authenticated_client,
+        "applied-controls",
+        extra={"updated_at__gte": "2100-01-01T00:00:00Z"},
+    )
+
+    assert total == 0
+    assert rows == []
+
+
+@pytest.mark.django_db
+def test_connector_preview_paging_returns_requested_count(
+    authenticated_client, many_applied_controls, clamped_pagination
+):
+    """OnTake previews carried the same defect as the full load."""
+    total = authenticated_client.get("/api/applied-controls/", {"limit": 1}).json()[
+        "count"
+    ]
+    wanted = total - 1
+    assert wanted > clamped_pagination
+
+    rows = _connector_get_top_rows(authenticated_client, "applied-controls", wanted)
+
+    assert len(rows) == wanted
+    assert len({row["id"] for row in rows}) == wanted
+
+
+@pytest.mark.django_db
+def test_powerbi_bridge_projection_is_accepted(authenticated_client, bi_dataset):
+    """Bridges fetch `?fields=id,<m2m>`; an unknown name there is a 400.
+
+    The connector falls back to the full row on error, so this failing means
+    a silent loss of the optimisation rather than a broken refresh — but it
+    is still drift, and the fallback should not become the normal path.
+    """
+    for bridge in CONTRACT["bridges"]:
+        endpoint = bridge["endpoint"]
+        list_field = bridge["list_field"]
+        response = authenticated_client.get(
+            f"/api/{endpoint}/", {"fields": f"id,{list_field}", "limit": 10}
+        )
+        assert response.status_code == 200, (
+            f"{bridge['name']}: ?fields=id,{list_field} → {response.status_code}"
+        )
+        for row in response.json()["results"]:
+            assert set(row) == {"id", list_field}, bridge["name"]

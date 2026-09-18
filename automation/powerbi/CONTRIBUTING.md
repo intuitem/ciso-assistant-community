@@ -7,6 +7,7 @@ automation/powerbi/
 ├── DESIGN.md            # architecture decisions — read first
 ├── README.md            # user-facing install/usage doc
 ├── contract.json        # data contract shared by the connector and backend tests
+├── audit_navigator.py   # CI guard: navigator entries may only be appended
 ├── connector/           # Power Query SDK project (CisoAssistant.pq + assets)
 ├── signing/             # certificate generation + customer trust runbooks
 └── samples/             # starter .pbit template
@@ -113,6 +114,41 @@ without Power BI:
 curl -H "Authorization: Token $PAT" \
   "https://localhost:8443/api/applied-controls/?limit=2&offset=0&updated_at__gte=2026-01-01T00:00:00Z" -k
 ```
+
+### Validating pagination changes
+
+The server caps `limit` at `PAGINATE_MAX`, so the connector takes its page
+stride from the number of rows a response actually contains. That makes the
+page size a *server* variable: run the backend with `PAGINATE_MAX` set low
+and the connector must still import every row.
+
+```bash
+PAGINATE_MAX=200 python manage.py runserver 0.0.0.0:8000
+```
+
+`backend/app_tests/api/test_api_powerbi_contract.py` ports the algorithm to
+Python and runs it against a clamped API in CI, which catches the arithmetic.
+What only the VM can confirm is that M behaves the same:
+
+- a table with more rows than the ceiling → imported row count equals the
+  count shown in CISO Assistant (`PAGINATE_MAX=200`, then again unset)
+- an empty table → no error, zero rows
+- an OnTake preview (Navigator table preview, or `Table.FirstN`) returns the
+  rows asked for, not one page of them
+- `samples/starter.pbit` refreshes end to end against the clamped instance
+
+## Adding a table or a bridge
+
+Append the navigator entry to the end of its group — never insert or reorder.
+Reports built with connector ≤ 1.0.1 navigate by position, so moving an entry
+silently repoints their queries at a different table. CI enforces this on every
+PR (`automation/powerbi/audit_navigator.py`, run against the PR's base).
+
+Then keep `contract.json` in step with the column spec: the backend contract
+test reads it and fails when a path the connector consumes stops existing.
+Adding a table means seeding one instance of it in that test's `bi_dataset`
+fixture, and a fact declared `foldDates = true` also belongs in the
+incremental-refresh test's endpoint list.
 
 ## Versioning & release
 

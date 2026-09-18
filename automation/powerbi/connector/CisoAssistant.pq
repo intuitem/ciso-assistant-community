@@ -1,4 +1,4 @@
-[Version = "1.0.2"]
+[Version = "1.1.0"]
 section CisoAssistant;
 
 //
@@ -127,39 +127,53 @@ GetJson = (BaseUrl as text, relativePath as text, query as record) as any =>
 
 // Walks DRF's {count, next, previous, results} envelope with limit/offset
 // paging until every row is retrieved. Users never see any of this.
+//
+// The stride is the number of rows the first page actually SERVED, never the
+// PageSize requested: the server caps `limit` at its own PAGINATE_MAX, and
+// deriving the page count from the requested size truncates every table on an
+// instance whose ceiling is lower — silently, with no error and no warning.
+// Reading it back from the response keeps this correct against any ceiling,
+// so the connector and the backend can be upgraded independently.
 GetAllRows = (BaseUrl as text, endpoint as text, extraQuery as record) as list =>
     let
         path = "api/" & endpoint & "/",
         firstPage = GetJson(BaseUrl, path, extraQuery & [ limit = Number.ToText(PageSize), offset = "0" ]),
+        firstRows = firstPage[results],
         totalCount = firstPage[count],
-        pageCount = Number.RoundUp(totalCount / PageSize),
+        served = List.Count(firstRows),
+        pageCount = if served = 0 then 0 else Number.RoundUp(totalCount / served),
         remaining =
             if pageCount <= 1 then
                 {}
             else
                 List.Transform(
                     { 1 .. pageCount - 1 },
-                    (i) => GetJson(BaseUrl, path, extraQuery & [ limit = Number.ToText(PageSize), offset = Number.ToText(i * PageSize) ])[results]
+                    (i) => GetJson(BaseUrl, path, extraQuery & [ limit = Number.ToText(served), offset = Number.ToText(i * served) ])[results]
                 )
     in
-        List.Combine({ firstPage[results] } & remaining);
+        List.Combine({ firstRows } & remaining);
 
 // Bounded fetch for OnTake: pages up to `count` rows so previews stay
 // cheap while Table.FirstN with count > PageSize remains correct.
+// Same rule as GetAllRows — the first page teaches us the effective page
+// size, and every subsequent offset steps by that, not by what we asked for.
 GetTopRows = (BaseUrl as text, endpoint as text, extraQuery as record, count as number) as list =>
     let
         path = "api/" & endpoint & "/",
-        pageCount = Number.RoundUp(count / PageSize),
-        pages = List.Transform(
-            { 0 .. pageCount - 1 },
+        firstLimit = List.Min({ PageSize, count }),
+        firstRows = GetJson(BaseUrl, path, extraQuery & [ limit = Number.ToText(firstLimit), offset = "0" ])[results],
+        served = List.Count(firstRows),
+        pageCount = if served = 0 or served >= count then 0 else Number.RoundUp((count - served) / served),
+        remaining = List.Transform(
+            { 1 .. pageCount },
             (i) =>
                 let
-                    pageLimit = List.Min({ PageSize, count - (i * PageSize) })
+                    pageLimit = List.Min({ served, count - (i * served) })
                 in
-                    GetJson(BaseUrl, path, extraQuery & [ limit = Number.ToText(pageLimit), offset = Number.ToText(i * PageSize) ])[results]
+                    GetJson(BaseUrl, path, extraQuery & [ limit = Number.ToText(pageLimit), offset = Number.ToText(i * served) ])[results]
         )
     in
-        List.FirstN(List.Combine(pages), count);
+        List.FirstN(List.Combine({ firstRows } & remaining), count);
 
 //
 // Schema machinery
@@ -211,8 +225,9 @@ BuildTable = (rows as list, spec as list) as table =>
 // instead of the full table. Unfoldable filters raise, letting the
 // engine fall back to local evaluation over GetRows.
 //
-GetEntityTable = (BaseUrl as text, endpoint as text, spec as list, foldDates as logical) as table =>
+GetEntityTable = (BaseUrl as text, endpoint as text, spec as list, foldDates as logical, optional baseQuery as nullable record) as table =>
     let
+        initialQuery = if baseQuery = null then [] else baseQuery,
         View = (extraQuery as record) =>
             Table.View(
                 null,
@@ -235,7 +250,7 @@ GetEntityTable = (BaseUrl as text, endpoint as text, spec as list, foldDates as 
                 ]
             )
     in
-        View([]);
+        View(initialQuery);
 
 //
 // Filter-folding helpers (incremental refresh)
@@ -310,9 +325,23 @@ FormatDateParam = (value as any) as text =>
 // (IAM-scoped) fact payloads, so they can never expose rows the user
 // cannot read.
 //
+// A bridge re-reads its parent endpoint, and several bridges share one
+// parent, so a refresh scans some endpoints half a dozen times. `?fields=`
+// narrows each of those scans to the identifier and the one M2M column the
+// bridge needs. The parameter is a recent addition on the API side: older
+// instances ignore unknown query parameters and return the full row, which
+// still works, and anything else falls back to the unnarrowed request rather
+// than failing a refresh over an optimisation.
+//
+GetBridgeRows = (BaseUrl as text, endpoint as text, listField as text) as list =>
+    let
+        narrowed = try GetAllRows(BaseUrl, endpoint, [ fields = "id," & listField ])
+    in
+        if narrowed[HasError] then GetAllRows(BaseUrl, endpoint, []) else narrowed[Value];
+
 GetBridgeTable = (BaseUrl as text, endpoint as text, parentColumn as text, listField as text, childColumn as text) as table =>
     let
-        rows = GetAllRows(BaseUrl, endpoint, []),
+        rows = GetBridgeRows(BaseUrl, endpoint, listField),
         pairs = List.Combine(
             List.Transform(
                 rows,
@@ -699,6 +728,177 @@ FolderSpec = {
     { "updated_at", { "updated_at" }, type datetime, "utcdatetime" }
 };
 
+TaskNodeSpec = {
+    { "id", { "id" }, type text },
+    { "name", { "name" }, type text },
+    { "task_template_id", { "task_template", "id" }, type text },
+    { "task_template_name", { "task_template", "str" }, type text },
+    { "folder_id", { "folder", "id" }, type text },
+    { "folder_name", { "folder", "str" }, type text },
+    { "status", { "status" }, type text },
+    { "due_date", { "due_date" }, type date },
+    { "scheduled_date", { "scheduled_date" }, type date },
+    { "is_recurrent", { "is_recurrent" }, type logical },
+    { "observation", { "observation" }, type text },
+    { "created_at", { "created_at" }, type datetime, "utcdatetime" },
+    { "updated_at", { "updated_at" }, type datetime, "utcdatetime" }
+};
+
+EntityAssessmentSpec = {
+    { "id", { "id" }, type text },
+    { "name", { "name" }, type text },
+    { "description", { "description" }, type text },
+    { "folder_id", { "folder", "id" }, type text },
+    { "folder_name", { "folder", "str" }, type text },
+    { "entity_id", { "entity", "id" }, type text },
+    { "entity_name", { "entity", "str" }, type text },
+    { "perimeter_id", { "perimeter", "id" }, type text },
+    { "perimeter_name", { "perimeter", "str" }, type text },
+    { "compliance_assessment_id", { "compliance_assessment", "id" }, type text },
+    { "compliance_assessment_name", { "compliance_assessment", "str" }, type text },
+    { "status", { "status" }, type text },
+    { "conclusion", { "conclusion" }, type text },
+    { "criticality", { "criticality" }, Int64.Type },
+    // Respondent-side progress; review_progress is the auditor's.
+    { "completion", { "completion" }, Int64.Type },
+    { "review_progress", { "review_progress" }, Int64.Type },
+    { "version", { "version" }, type text },
+    { "eta", { "eta" }, type date },
+    { "due_date", { "due_date" }, type date },
+    { "expiry_date", { "expiry_date" }, type date },
+    { "is_locked", { "is_locked" }, type logical },
+    { "observation", { "observation" }, type text },
+    { "created_at", { "created_at" }, type datetime, "utcdatetime" },
+    { "updated_at", { "updated_at" }, type datetime, "utcdatetime" }
+};
+
+ContractSpec = {
+    { "id", { "id" }, type text },
+    { "name", { "name" }, type text },
+    { "ref_id", { "ref_id" }, type text },
+    { "description", { "description" }, type text },
+    { "folder_id", { "folder", "id" }, type text },
+    { "folder_name", { "folder", "str" }, type text },
+    { "provider_entity_id", { "provider_entity", "id" }, type text },
+    { "provider_entity_name", { "provider_entity", "str" }, type text },
+    { "beneficiary_entity_id", { "beneficiary_entity", "id" }, type text },
+    { "beneficiary_entity_name", { "beneficiary_entity", "str" }, type text },
+    { "overarching_contract_id", { "overarching_contract", "id" }, type text },
+    { "status", { "status" }, type text },
+    { "start_date", { "start_date" }, type date },
+    { "end_date", { "end_date" }, type date },
+    { "annual_expense", { "annual_expense" }, type number },
+    { "currency", { "currency" }, type text },
+    { "is_intragroup", { "is_intragroup" }, type logical },
+    { "notice_period_entity", { "notice_period_entity" }, Int64.Type },
+    { "notice_period_provider", { "notice_period_provider" }, Int64.Type },
+    { "created_at", { "created_at" }, type datetime, "utcdatetime" },
+    { "updated_at", { "updated_at" }, type datetime, "utcdatetime" }
+};
+
+RiskAcceptanceSpec = {
+    { "id", { "id" }, type text },
+    { "name", { "name" }, type text },
+    { "description", { "description" }, type text },
+    { "folder_id", { "folder", "id" }, type text },
+    { "folder_name", { "folder", "str" }, type text },
+    { "approver_id", { "approver", "id" }, type text },
+    { "approver_name", { "approver", "str" }, type text },
+    { "state", { "state" }, type text },
+    { "expiry_date", { "expiry_date" }, type date },
+    { "accepted_at", { "accepted_at" }, type datetime, "utcdatetime" },
+    { "rejected_at", { "rejected_at" }, type datetime, "utcdatetime" },
+    { "revoked_at", { "revoked_at" }, type datetime, "utcdatetime" },
+    { "justification", { "justification" }, type text },
+    { "created_at", { "created_at" }, type datetime, "utcdatetime" },
+    { "updated_at", { "updated_at" }, type datetime, "utcdatetime" }
+};
+
+// The dimension that makes owner/assignee columns reportable: every
+// owner-style M2M in the API points here, whether it wraps a user, a team
+// or an entity.
+ActorSpec = {
+    { "id", { "id" }, type text },
+    { "name", { "str" }, type text },
+    { "type", { "type" }, type text },
+    { "specific_id", { "specific", "id" }, type text },
+    { "specific_name", { "specific", "str" }, type text }
+};
+
+EntitySpec = {
+    { "id", { "id" }, type text },
+    { "name", { "name" }, type text },
+    { "ref_id", { "ref_id" }, type text },
+    { "description", { "description" }, type text },
+    { "folder_id", { "folder", "id" }, type text },
+    { "folder_name", { "folder", "str" }, type text },
+    { "parent_entity_id", { "parent_entity", "id" }, type text },
+    { "parent_entity_name", { "parent_entity", "str" }, type text },
+    { "is_active", { "is_active" }, type logical },
+    { "builtin", { "builtin" }, type logical },
+    { "mission", { "mission" }, type text },
+    { "country", { "country" }, type text },
+    { "currency", { "currency" }, type text },
+    { "default_criticality", { "default_criticality" }, type number },
+    { "last_assessment_status", { "last_assessment_status" }, type text },
+    { "last_assessment_date", { "last_assessment_date" }, type datetime, "utcdatetime" },
+    { "subcontracts_count", { "subcontracts_count" }, Int64.Type },
+    { "created_at", { "created_at" }, type datetime, "utcdatetime" },
+    { "updated_at", { "updated_at" }, type datetime, "utcdatetime" }
+};
+
+SolutionSpec = {
+    { "id", { "id" }, type text },
+    { "name", { "name" }, type text },
+    { "ref_id", { "ref_id" }, type text },
+    { "description", { "description" }, type text },
+    { "folder_id", { "folder", "id" }, type text },
+    { "folder_name", { "folder", "str" }, type text },
+    { "provider_entity_id", { "provider_entity", "id" }, type text },
+    { "provider_entity_name", { "provider_entity", "str" }, type text },
+    { "recipient_entity_id", { "recipient_entity", "id" }, type text },
+    { "recipient_entity_name", { "recipient_entity", "str" }, type text },
+    { "criticality", { "criticality" }, Int64.Type },
+    { "is_active", { "is_active" }, type logical },
+    { "created_at", { "created_at" }, type datetime, "utcdatetime" },
+    { "updated_at", { "updated_at" }, type datetime, "utcdatetime" }
+};
+
+TaskTemplateSpec = {
+    { "id", { "id" }, type text },
+    { "name", { "name" }, type text },
+    { "ref_id", { "ref_id" }, type text },
+    { "description", { "description" }, type text },
+    { "folder_id", { "folder", "id" }, type text },
+    { "folder_name", { "folder", "str" }, type text },
+    { "task_date", { "task_date" }, type date },
+    { "is_recurrent", { "is_recurrent" }, type logical },
+    { "enabled", { "enabled" }, type logical },
+    // Null on a recurrent definition: there the state lives on the occurrences.
+    { "status", { "status" }, type text },
+    { "last_occurrence_status", { "last_occurrence_status" }, type text },
+    { "next_occurrence_status", { "next_occurrence_status" }, type text },
+    { "next_occurrence", { "next_occurrence" }, type date },
+    { "link", { "link" }, type text },
+    { "created_at", { "created_at" }, type datetime, "utcdatetime" },
+    { "updated_at", { "updated_at" }, type datetime, "utcdatetime" }
+};
+
+CampaignSpec = {
+    { "id", { "id" }, type text },
+    { "name", { "name" }, type text },
+    { "description", { "description" }, type text },
+    { "folder_id", { "folder", "id" }, type text },
+    { "folder_name", { "folder", "str" }, type text },
+    { "status", { "status" }, type text },
+    { "kind", { "kind" }, type text },
+    { "start_date", { "start_date" }, type date },
+    { "eta", { "eta" }, type date },
+    { "due_date", { "due_date" }, type date },
+    { "created_at", { "created_at" }, type datetime, "utcdatetime" },
+    { "updated_at", { "updated_at" }, type datetime, "utcdatetime" }
+};
+
 //
 // Navigator
 //
@@ -715,7 +915,13 @@ Navigator = (base as text) as table =>
                 { "Risk Scenarios", GetEntityTable(base, "risk-scenarios", RiskScenarioSpec, true), "Table", "Table", true },
                 { "Vulnerabilities", GetEntityTable(base, "vulnerabilities", VulnerabilitySpec, true), "Table", "Table", true },
                 { "Security Exceptions", GetEntityTable(base, "security-exceptions", SecurityExceptionSpec, true), "Table", "Table", true },
-                { "Assets", GetEntityTable(base, "assets", AssetSpec, true), "Table", "Table", true }
+                { "Assets", GetEntityTable(base, "assets", AssetSpec, true), "Table", "Table", true },
+                // Appended, never inserted: reports built on connector <= 1.0.1
+                // navigate by position (see ToNavigationTable).
+                { "Task Nodes", GetEntityTable(base, "task-nodes", TaskNodeSpec, true), "Table", "Table", true },
+                { "Entity Assessments", GetEntityTable(base, "entity-assessments", EntityAssessmentSpec, true), "Table", "Table", true },
+                { "Contracts", GetEntityTable(base, "contracts", ContractSpec, true), "Table", "Table", true },
+                { "Risk Acceptances", GetEntityTable(base, "risk-acceptances", RiskAcceptanceSpec, true), "Table", "Table", true }
             }
         ),
         dimensions = #table(
@@ -730,7 +936,16 @@ Navigator = (base as text) as table =>
                 { "Threats", GetEntityTable(base, "threats", ThreatSpec, false), "Table", "Table", true },
                 { "Reference Controls", GetEntityTable(base, "reference-controls", ReferenceControlSpec, false), "Table", "Table", true },
                 { "Findings Assessments", GetEntityTable(base, "findings-assessments", FindingsAssessmentSpec, false), "Table", "Table", true },
-                { "Labels", GetEntityTable(base, "filtering-labels", FilteringLabelSpec, false), "Table", "Table", true }
+                { "Labels", GetEntityTable(base, "filtering-labels", FilteringLabelSpec, false), "Table", "Table", true },
+                // The endpoint hides third-party actors by default, since it
+                // mainly serves assignee pickers. A dimension has to cover every
+                // id the ownership bridges can carry, or those rows join to
+                // nothing, so ask for them explicitly.
+                { "Actors", GetEntityTable(base, "actors", ActorSpec, false, [ include_third_parties = "true" ]), "Table", "Table", true },
+                { "Entities", GetEntityTable(base, "entities", EntitySpec, false), "Table", "Table", true },
+                { "Solutions", GetEntityTable(base, "solutions", SolutionSpec, false), "Table", "Table", true },
+                { "Task Templates", GetEntityTable(base, "task-templates", TaskTemplateSpec, false), "Table", "Table", true },
+                { "Campaigns", GetEntityTable(base, "campaigns", CampaignSpec, false), "Table", "Table", true }
             }
         ),
         bridges = #table(
@@ -757,7 +972,25 @@ Navigator = (base as text) as table =>
                 { "Finding - Label", GetBridgeTable(base, "findings", "finding_id", "filtering_labels", "label_id"), "Table", "Table", true },
                 { "Incident - Label", GetBridgeTable(base, "incidents", "incident_id", "filtering_labels", "label_id"), "Table", "Table", true },
                 { "Risk Scenario - Label", GetBridgeTable(base, "risk-scenarios", "risk_scenario_id", "filtering_labels", "label_id"), "Table", "Table", true },
-                { "Vulnerability - Label", GetBridgeTable(base, "vulnerabilities", "vulnerability_id", "filtering_labels", "label_id"), "Table", "Table", true }
+                { "Vulnerability - Label", GetBridgeTable(base, "vulnerabilities", "vulnerability_id", "filtering_labels", "label_id"), "Table", "Table", true },
+                // Ownership: every one of these M2Ms points at Actor, so they
+                // all join to the Actors dimension.
+                { "Applied Control - Owner", GetBridgeTable(base, "applied-controls", "applied_control_id", "owner", "actor_id"), "Table", "Table", true },
+                { "Finding - Owner", GetBridgeTable(base, "findings", "finding_id", "owner", "actor_id"), "Table", "Table", true },
+                { "Risk Scenario - Owner", GetBridgeTable(base, "risk-scenarios", "risk_scenario_id", "owner", "actor_id"), "Table", "Table", true },
+                { "Asset - Owner", GetBridgeTable(base, "assets", "asset_id", "owner", "actor_id"), "Table", "Table", true },
+                { "Incident - Owner", GetBridgeTable(base, "incidents", "incident_id", "owners", "actor_id"), "Table", "Table", true },
+                { "Contract - Owner", GetBridgeTable(base, "contracts", "contract_id", "owner", "actor_id"), "Table", "Table", true },
+                { "Task Node - Assignee", GetBridgeTable(base, "task-nodes", "task_node_id", "assigned_to", "actor_id"), "Table", "Table", true },
+                { "Task Template - Assignee", GetBridgeTable(base, "task-templates", "task_template_id", "assigned_to", "actor_id"), "Table", "Table", true },
+                { "Applied Control - Asset", GetBridgeTable(base, "applied-controls", "applied_control_id", "assets", "asset_id"), "Table", "Table", true },
+                { "Task Node - Applied Control", GetBridgeTable(base, "task-nodes", "task_node_id", "applied_controls", "applied_control_id"), "Table", "Table", true },
+                { "Task Template - Applied Control", GetBridgeTable(base, "task-templates", "task_template_id", "applied_controls", "applied_control_id"), "Table", "Table", true },
+                { "Risk Acceptance - Risk Scenario", GetBridgeTable(base, "risk-acceptances", "risk_acceptance_id", "risk_scenarios", "risk_scenario_id"), "Table", "Table", true },
+                { "Entity Assessment - Solution", GetBridgeTable(base, "entity-assessments", "entity_assessment_id", "solutions", "solution_id"), "Table", "Table", true },
+                { "Contract - Solution", GetBridgeTable(base, "contracts", "contract_id", "solutions", "solution_id"), "Table", "Table", true },
+                { "Solution - Asset", GetBridgeTable(base, "solutions", "solution_id", "assets", "asset_id"), "Table", "Table", true },
+                { "Campaign - Compliance Assessment", GetBridgeTable(base, "campaigns", "campaign_id", "compliance_assessments", "compliance_assessment_id"), "Table", "Table", true }
             }
         ),
         root = #table(
