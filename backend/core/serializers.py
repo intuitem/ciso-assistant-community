@@ -2866,10 +2866,7 @@ class FolderWriteSerializer(BaseModelSerializer):
         if create_flag_changed:
             new_value = validated_data["create_iam_groups"]
             if new_value:
-                with transaction.atomic():
-                    updated_instance = super().update(instance, validated_data)
-                    Folder.create_default_ug_and_ra(updated_instance)
-                return updated_instance
+                return super().update(instance, validated_data)
 
             auto_groups = UserGroup.objects.filter(folder=instance, builtin=True)
             auto_groups_exist = auto_groups.exists()
@@ -5888,7 +5885,6 @@ class QuickStartSerializer(serializers.Serializer):
             if not folder_serializer.is_valid(raise_exception=True):
                 return None
             folder = folder_serializer.save()
-            Folder.create_default_ug_and_ra(folder)
 
         perimeter_data = {
             "folder": folder.id,

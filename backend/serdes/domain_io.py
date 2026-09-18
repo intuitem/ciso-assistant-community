@@ -499,7 +499,6 @@ def import_objects(
                 create_iam_groups=True,
             )
             link_dump_database_ids["base_folder"] = base_folder
-            Folder.create_default_ug_and_ra(base_folder)
 
             for library in required_libraries:
                 if not LoadedLibrary.objects.filter(

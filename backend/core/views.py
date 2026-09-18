@@ -8833,13 +8833,6 @@ class FolderViewSet(BaseModelViewSet):
     filterset_class = FolderFilter
     search_fields = ["name"]
 
-    def perform_create(self, serializer):
-        """
-        Create the default user groups after domain creation
-        """
-        folder = serializer.save()
-        Folder.create_default_ug_and_ra(folder)
-
     @action(detail=False, methods=["post"])
     def reorganize(self, request):
         """Apply a set of folder moves and deletions as one transaction.
