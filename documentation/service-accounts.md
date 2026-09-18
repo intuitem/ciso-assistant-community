@@ -103,3 +103,9 @@ resolved in order from: the `IDP_OIDC_PRIVATE_KEY` environment variable, the
 PEM file at `IDP_OIDC_PRIVATE_KEY_FILE` (default
 `<BASE_DIR>/db/idp_oidc_private_key.pem`), or auto-generated on first start
 (RSA 2048, file mode 0600).
+
+When that path is not writable (Kubernetes running the container under a non-root
+UID, read-only root filesystem), the generated key is kept in memory and a warning
+is logged. It then differs between processes and rotates on every restart, so set
+`IDP_OIDC_PRIVATE_KEY` from a secret in that case. On Kubernetes the Helm chart does
+it for you.
