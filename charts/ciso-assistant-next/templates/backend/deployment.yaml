@@ -120,13 +120,11 @@ spec:
                 {{- end }}
                 key: django-secret-key
           {{- if not (include "ciso-assistant.definesEnv" (dict "env" .Values.backend.env "name" "IDP_OIDC_PRIVATE_KEY")) }}
-          {{- if not (include "ciso-assistant.definesEnv" (dict "env" .Values.backend.huey.env "name" "IDP_OIDC_PRIVATE_KEY")) }}
           - name: IDP_OIDC_PRIVATE_KEY
             valueFrom:
               secretKeyRef:
                 name: {{ include "ciso-assistant.idpOidcSecretName" . }}
                 key: idp-oidc-private-key
-          {{- end }}
           {{- end }}
           - name: CISO_ASSISTANT_SUPERUSER_EMAIL
             value: {{ .Values.backend.config.emailAdmin }}
@@ -283,11 +281,13 @@ spec:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 {{- end }}
                 key: django-secret-key
+          {{- if not (include "ciso-assistant.definesEnv" (dict "env" .Values.backend.huey.env "name" "IDP_OIDC_PRIVATE_KEY")) }}
           - name: IDP_OIDC_PRIVATE_KEY
             valueFrom:
               secretKeyRef:
                 name: {{ include "ciso-assistant.idpOidcSecretName" . }}
                 key: idp-oidc-private-key
+          {{- end }}
           - name: CISO_ASSISTANT_SUPERUSER_EMAIL
             value: {{ .Values.backend.config.emailAdmin }}
           - name: CISO_ASSISTANT_URL

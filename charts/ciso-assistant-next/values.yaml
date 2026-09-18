@@ -269,11 +269,11 @@ backend:
 
   # -- Override the backend container entrypoint
   # @default -- `[]` (image entrypoint)
-  command: []
+  command: [] # @schema item: string
 
   # -- Override the backend container arguments
   # @default -- `[]` (image arguments)
-  args: []
+  args: [] # @schema item: string
 
   # -- Environment variables to pass to backend
   env: []
@@ -374,11 +374,11 @@ frontend:
 
   # -- Override the frontend container entrypoint
   # @default -- `[]` (image entrypoint)
-  command: []
+  command: [] # @schema item: string
 
   # -- Override the frontend container arguments
   # @default -- `[]` (image arguments)
-  args: []
+  args: [] # @schema item: string
 
   # -- Environment variables to pass to frontend
   env: []
