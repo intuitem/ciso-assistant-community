@@ -508,6 +508,7 @@ export const RequirementAssessmentSchema = z.object({
 	observation: z.string().optional().nullable(),
 	respondent_alignment: z.string().optional().nullable(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional(),
 	noRedirect: z.boolean().default(false),
 	nextRequirementAssessmentId: z.string().uuid().optional().nullable()
 });
