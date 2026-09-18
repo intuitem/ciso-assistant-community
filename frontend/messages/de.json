@@ -2198,6 +2198,8 @@
 	"noticePeriodProvider": "Kündigungsfrist für Anbieter (Tage)",
 	"novemberShort": "Nov",
 	"oauthPKCEEnabled": "OAuth PKCE aktiviert",
+	"oidcAdditionalScopes": "Zusätzliche Scopes",
+	"oidcAdditionalScopesHelpText": "Optionale, durch Kommas getrennte OAuth-Scopes, die an die Standard-Scopes openid, profile und email angehängt werden.",
 	"object": "Objekt",
 	"objectRepr": "Objekt",
 	"objection": "Einwand",
