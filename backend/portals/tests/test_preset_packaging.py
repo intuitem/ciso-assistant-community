@@ -320,6 +320,82 @@ class TestRoundTrip:
         assert items[1]["target"]["quick_form"] == str(catalog["qf"].id)
         assert items[2]["target"]["model"] == "incidents"
 
+    def test_an_exported_portal_loads_through_the_library_store(self, catalog):
+        """The whole path a shipped design takes: YAML in the store, load, a preset
+        owned by the new library with its tiles wired to the local rows."""
+        from core.models import StoredLibrary
+
+        portal = _portal(
+            catalog,
+            [
+                {
+                    "id": "t1",
+                    "kind": "assessment",
+                    "title": "Run the audit",
+                    "target": {"framework": str(catalog["fw"].id)},
+                }
+            ],
+        )
+        portal.name = "Shipped design"
+        portal.save()
+        document, _unwired = build_preset_library(portal)
+
+        stored, error = StoredLibrary.store_library_content(
+            yaml.safe_dump(document, allow_unicode=True).encode("utf-8")
+        )
+        assert error is None, error
+        assert stored.objects_meta == {"portal_presets": 1}
+        assert stored.load() is None
+
+        library = LoadedLibrary.objects.get(urn=document["urn"])
+        preset = PortalPreset.objects.get(
+            urn=document["objects"]["portal_presets"][0]["urn"]
+        )
+        assert preset.library_id == library.id
+        assert preset.provider == "personal"
+        assert list(library.dependencies.values_list("urn", flat=True)) == [
+            catalog["library"].urn
+        ]
+        target = preset.content["sections"][0]["items"][0]["target"]
+        assert target["framework"] == str(catalog["fw"].id)
+        assert target["framework_urn"] == "urn:test:portals:fw"
+
+    def test_a_stored_newer_version_updates_the_loaded_preset(self, catalog):
+        from core.models import StoredLibrary
+
+        portal = _portal(
+            catalog, [{"kind": "create", "target": {"model": "incidents"}}]
+        )
+        portal.name = "Updated design"
+        portal.save()
+        document, _unwired = build_preset_library(portal)
+        stored, error = StoredLibrary.store_library_content(
+            yaml.safe_dump(document, allow_unicode=True).encode("utf-8")
+        )
+        assert error is None, error
+        assert stored.load() is None
+
+        document["version"] = 2
+        document["objects"]["portal_presets"][0]["name"] = "Updated design v2"
+        document["objects"]["portal_presets"][0]["content"]["sections"][0]["title"] = (
+            "Start over"
+        )
+        stored_v2, error = StoredLibrary.store_library_content(
+            yaml.safe_dump(document, allow_unicode=True).encode("utf-8")
+        )
+        assert error is None, error
+        library = LoadedLibrary.objects.get(urn=document["urn"])
+        assert library.update() is None
+
+        library.refresh_from_db()
+        preset = PortalPreset.objects.get(
+            urn=document["objects"]["portal_presets"][0]["urn"]
+        )
+        assert library.version == 2
+        assert (preset.name, preset.version) == ("Updated design v2", 2)
+        assert preset.content["sections"][0]["title"] == "Start over"
+        assert preset.library_id == library.id
+
     def test_loading_without_the_dependency_leaves_the_tile_unwired(self, catalog):
         preset_data = {
             "urn": "urn:test:portals:portal_preset:orphan",
@@ -464,6 +540,24 @@ class TestPublishGate:
         )
         # Only `status` is sent, so the gate has to reach for the instance's content.
         serializer = self._serializer(catalog, instance=portal, status="published")
+
+        assert not serializer.is_valid()
+        assert "Audit" in str(serializer.errors["status"])
+
+    def test_a_published_portal_refuses_incomplete_content(self, catalog):
+        """The direction the editor's Save button hits: the portal is live, and the
+        PATCH carries content only."""
+        portal = Portal.objects.create(
+            name="P",
+            folder=catalog["folder"],
+            status=Portal.Status.PUBLISHED,
+            content={"sections": []},
+        )
+        from portals.serializers import PortalWriteSerializer
+
+        serializer = PortalWriteSerializer(
+            portal, data={"content": self._half_wired()}, partial=True
+        )
 
         assert not serializer.is_valid()
         assert "Audit" in str(serializer.errors["status"])
