@@ -1834,6 +1834,8 @@
 	"oidcConfiguration": "Openid-Configuration",
 	"tokenAuthMethod": "Metoda tokenu",
 	"oauthPKCEEnabled": "OAuth PKCE włączone",
+	"oidcAdditionalScopes": "Dodatkowe zakresy",
+	"oidcAdditionalScopesHelpText": "Opcjonalne zakresy OAuth rozdzielone przecinkami, dodawane do domyślnych zakresów openid, profile i email.",
 	"suggestedParentheses": "(sugerowane)",
 	"clientSecretAlreadySetHelpText": "Sekret klienta jest już ustawiony.",
 	"resetClientSecret": "Zresetuj sekret klienta",

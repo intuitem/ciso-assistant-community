@@ -2449,6 +2449,8 @@
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "토큰 인증 방식",
 	"oauthPKCEEnabled": "OAuth PKCE 사용",
+	"oidcAdditionalScopes": "추가 범위",
+	"oidcAdditionalScopesHelpText": "쉼표로 구분된 선택적 OAuth 범위이며 기본 범위인 openid, profile 및 email에 추가됩니다.",
 	"suggestedParentheses": "(권장)",
 	"matchingScenarios": "일치하는 시나리오",
 	"clientSecretAlreadySetHelpText": "클라이언트 시크릿이 이미 설정되어 있습니다.",

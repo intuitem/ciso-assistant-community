@@ -3456,6 +3456,8 @@
 	"oidcConfiguration": "Konfigurace OpenID (openid-configuration)",
 	"tokenAuthMethod": "Způsob ověření tokenu",
 	"oauthPKCEEnabled": "Povoleno OAuth PKCE",
+	"oidcAdditionalScopes": "Další rozsahy",
+	"oidcAdditionalScopesHelpText": "Volitelné rozsahy OAuth oddělené čárkami, které se přidají k výchozím rozsahům openid, profile a email.",
 	"suggestedParentheses": "(navrženo)",
 	"clientSecretAlreadySetHelpText": "Tajný klíč klienta (Client secret) je již nastaven.",
 	"resetClientSecret": "Obnovit tajný klíč klienta",
