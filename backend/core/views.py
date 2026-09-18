@@ -7268,27 +7268,32 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
         context.update(
             {
                 "pk": self.kwargs["pk"],
-                "task_evidence_links": self._get_task_evidence_links(),
+                "indirect_evidence_links": self._get_indirect_evidence_links(),
             }
         )
         return context
 
-    def _get_task_evidence_links(self):
-        """Map (requirement_assessment_id, evidence_id) -> [task template names]
-        for task templates attached to this compliance assessment's requirement assessments.
+    def _get_indirect_evidence_links(self):
+        """Map (requirement_assessment_id, evidence_id) -> [names] of the applied
+        controls and task templates linking that evidence to that requirement assessment.
         Computed once per request to avoid per-evidence queries.
         TaskNode.evidences is deprecated (evidences live on the task template)."""
         pk = self.kwargs["pk"]
-        task_templates = (
-            TaskTemplate.objects.filter(
-                requirement_assessments__compliance_assessment_id=pk,
-                # Only expose task templates the caller is allowed to view
-                id__in=RoleAssignment.get_viewable_object_ids(
-                    self.request.user, TaskTemplate
-                ),
-            )
-            .distinct()
-            .prefetch_related(
+        links = defaultdict(list)
+
+        applied_controls = AppliedControl.objects.filter(
+            requirement_assessments__compliance_assessment_id=pk
+        ).distinct()
+        task_templates = TaskTemplate.objects.filter(
+            requirement_assessments__compliance_assessment_id=pk,
+            # Only expose task templates the caller is allowed to view
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, TaskTemplate
+            ),
+        ).distinct()
+
+        for queryset in (applied_controls, task_templates):
+            queryset = queryset.prefetch_related(
                 "evidences",
                 Prefetch(
                     "requirement_assessments",
@@ -7297,13 +7302,11 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
                     ),
                 ),
             )
-        )
-        links = defaultdict(list)
-        for task_template in task_templates:
-            evidence_ids = {e.id for e in task_template.evidences.all()}
-            for req_assessment in task_template.requirement_assessments.all():
-                for evidence_id in evidence_ids:
-                    links[(req_assessment.id, evidence_id)].append(task_template.name)
+            for via in queryset:
+                evidence_ids = {e.id for e in via.evidences.all()}
+                for req_assessment in via.requirement_assessments.all():
+                    for evidence_id in evidence_ids:
+                        links[(req_assessment.id, evidence_id)].append(via.name)
         return links
 
     def get_queryset(self):
