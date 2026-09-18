@@ -261,10 +261,12 @@ or existingSecret in that case.
 {{- end -}}
 
 {{/*
-Whether a user-supplied env list already defines a variable. Expects "env" and "name".
+Whether a user-supplied env list already defines one of the given variables.
+Expects "env" and "names".
 */}}
 {{- define "ciso-assistant.definesEnv" -}}
+{{- $names := .names -}}
 {{- range .env -}}
-{{- if eq (default "" .name) $.name -}}true{{- end -}}
+{{- if has (default "" .name) $names -}}true{{- end -}}
 {{- end -}}
 {{- end -}}

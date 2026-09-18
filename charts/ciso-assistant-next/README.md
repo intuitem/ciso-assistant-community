@@ -103,7 +103,9 @@ Changing `privateKey` rolls the backend pods on its own, and so does switching t
 `existingSecret`. Rotating the content of an `existingSecret` in place does not, the pods have to be
 restarted by hand (same as `djangoExistingSecretKey` and the SMTP one). When manifests are rendered
 without cluster access (`helm template`, GitOps tooling), the chart cannot read the generated key back
-and issues a new one on each render : set `existingSecret` or `privateKey` in that case.
+and writes a new one on every render. The pod template is unchanged, so nothing restarts : running pods
+keep signing with the key they started with, and the next pod to restart picks up a different one, which
+breaks verification between them. Always set `existingSecret` or `privateKey` in that case.
 
 ## Values
 
@@ -147,7 +149,7 @@ and issues a new one on each render : set `existingSecret` or `privateKey` in th
 | backend.name | string | `"backend"` | Backend container name |
 | backend.nodeSelector | object | `{}` | Default node selector for backend |
 | backend.persistence.localStorage.accessMode | string | `"ReadWriteOnce"` | Local Storage persistant volume accessMode |
-| backend.persistence.localStorage.enabled | bool | `false` | Enable Local Storage persistence # Note: required for file uploads (evidences, attachments, chat documents). # Disabled, each container falls back to its own ephemeral path and the backend # and Huey containers no longer see the same files. |
+| backend.persistence.localStorage.enabled | bool | `false` | Enable Local Storage persistence |
 | backend.persistence.localStorage.existingClaim | string | `""` | Name of an existing PersistentVolumeClaim for local storage. Must be different from sqlite PVC |
 | backend.persistence.localStorage.size | string | `"5Gi"` | Local Storage persistant volume size |
 | backend.persistence.localStorage.storageClass | string | `""` | Local Storage persistant volume storageClass |
@@ -239,7 +241,7 @@ and issues a new one on each render : set `existingSecret` or `privateKey` in th
 | qdrant.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for Qdrant |
 | qdrant.image.repository | string | `"docker.io/qdrant/qdrant"` | Qdrant image repository, registry included (point it at your own mirror if needed) |
 | qdrant.image.tag | string | `""` (defaults to the Qdrant subchart appVersion) | Tag to use for Qdrant |
-| qdrant.imagePullSecrets | list | `[]` | Secrets with credentials to pull the Qdrant image from a private registry # Note: the Qdrant subchart has its own pull secrets, `global.imagePullSecrets` does not apply |
+| qdrant.imagePullSecrets | list | `[]` | Secrets with credentials to pull the Qdrant image from a private registry |
 | qdrant.persistence | object | `{"accessModes":["ReadWriteOnce"],"additionalLabels":{},"annotations":{},"size":"10Gi"}` | Qdrant storage persistence |
 | qdrant.replicaCount | int | `1` | Number of Qdrant replicas (requires `qdrant.config.cluster.enabled`) |
 | qdrant.resources | object | `{}` | Resources for Qdrant |

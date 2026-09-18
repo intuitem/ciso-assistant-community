@@ -177,6 +177,8 @@ backend:
     # -- Huey container name
     name: huey
 
+    ## Note: command and args go together, clearing only one leaves the other
+    ## dangling on the image entrypoint
     # -- Override the Huey container entrypoint
     command: ["/bin/sh"]
 
@@ -217,10 +219,10 @@ backend:
       # -- Name of an existing PersistentVolumeClaim for sqlite
       existingClaim: ""
     localStorage:
-      # -- Enable Local Storage persistence
       ## Note: required for file uploads (evidences, attachments, chat documents).
       ## Disabled, each container falls back to its own ephemeral path and the backend
       ## and Huey containers no longer see the same files.
+      # -- Enable Local Storage persistence
       enabled: false
       # -- Local Storage persistant volume size
       size: 5Gi
@@ -532,8 +534,8 @@ qdrant: # @schema additionalProperties: true
     # -- Image pull policy for Qdrant
     pullPolicy: IfNotPresent
 
-  # -- Secrets with credentials to pull the Qdrant image from a private registry
   ## Note: the Qdrant subchart has its own pull secrets, `global.imagePullSecrets` does not apply
+  # -- Secrets with credentials to pull the Qdrant image from a private registry
   imagePullSecrets: []
 
   # -- Environment variables to pass to Qdrant
