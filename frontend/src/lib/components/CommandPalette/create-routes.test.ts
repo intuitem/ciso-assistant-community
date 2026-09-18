@@ -25,9 +25,8 @@ const superuser = {
 const allFlags = new Proxy({}, { get: () => true }) as Record<string, boolean>;
 
 /**
- * Which `+page.svelte` actually serves a list route. Two generic routes exist and their
- * matchers overlap: the models in `THIRD_PARTY_URL_MODEL` are served by the `(third-party)`
- * one, not `(internal)/[model=urlmodel]`. A dedicated directory wins over both.
+ * Two generic routes exist with overlapping matchers: `THIRD_PARTY_URL_MODEL` models are
+ * served by the `(third-party)` one. A dedicated directory wins over both.
  */
 function servingPage(urlModel: string): string {
 	const dedicated = `${ROUTES}/(internal)/${urlModel}/+page.svelte`;
@@ -39,12 +38,9 @@ function servingPage(urlModel: string): string {
 }
 
 /**
- * A create command is only as good as the page it lands on: the palette navigates with
- * `?create` and the page must consume it. Nothing at runtime connects the two, so this
- * walks every generated command back to the route file that will serve it.
- *
- * Regression: `compliance-assessments` (and `evidences`) resolve to the `(third-party)`
- * generic route, which had no `consumeCreateIntent` — so `+audit` navigated and did nothing.
+ * Nothing at runtime connects a command to its landing page, so walk each one back to the
+ * route file that serves it. Caught `compliance-assessments` and `evidences` resolving to
+ * the `(third-party)` route, which had no `consumeCreateIntent`.
  */
 describe('every create command lands on a page that opens the form', () => {
 	const commands = buildCreateCommands(superuser, allFlags);

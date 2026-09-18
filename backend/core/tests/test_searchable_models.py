@@ -1,8 +1,7 @@
 """Structural checks on SEARCHABLE_MODELS.
 
-`core.search.global_search` builds its ORM filters from these entries, so a wrong field name is a
-runtime FieldError on a user's search rather than an import-time failure, and a forgotten
-`ref_id=True` is silent: the model simply stops being findable by its reference.
+The entries build ORM filters, so a wrong field name surfaces as a FieldError on a user's
+search, not at import — and a forgotten `ref_id=True` is silent.
 """
 
 import pytest
@@ -20,7 +19,7 @@ def _ids(entries):
 
 @pytest.mark.parametrize("entry", SEARCHABLE_MODELS, ids=_ids(SEARCHABLE_MODELS))
 def test_searchable_model_has_the_base_fields(entry):
-    """`name` and `description` are searched unconditionally for every entry."""
+    """Both are searched unconditionally."""
     fields = _field_names(entry["model"])
     assert "name" in fields, f"{entry['model'].__name__} has no `name` field"
     assert "description" in fields, (
@@ -30,8 +29,7 @@ def test_searchable_model_has_the_base_fields(entry):
 
 @pytest.mark.parametrize("entry", SEARCHABLE_MODELS, ids=_ids(SEARCHABLE_MODELS))
 def test_ref_id_flag_matches_the_model(entry):
-    """The flag is opt-in, so a model that has a ref_id but does not declare it is simply
-    not findable by reference — exactly the gap this pins."""
+    """Opt-in and silent: a model with a ref_id but no flag is unfindable by reference."""
     has_field = "ref_id" in _field_names(entry["model"])
     assert entry["ref_id"] == has_field, (
         f"{entry['model'].__name__}: ref_id={entry['ref_id']} but the model "
@@ -41,7 +39,7 @@ def test_ref_id_flag_matches_the_model(entry):
 
 @pytest.mark.parametrize("entry", SEARCHABLE_MODELS, ids=_ids(SEARCHABLE_MODELS))
 def test_extra_search_paths_resolve(entry):
-    """Every `extra_search` lookup must be a traversable ORM path."""
+    """A bad path is a runtime FieldError."""
     for path in entry["extra_search"]:
         model = entry["model"]
         for part in path.split("__"):

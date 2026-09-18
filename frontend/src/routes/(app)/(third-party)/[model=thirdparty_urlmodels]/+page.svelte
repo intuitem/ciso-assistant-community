@@ -39,10 +39,8 @@
 		modalStore.trigger(modal);
 	}
 
-	// This route also serves internal users: `THIRD_PARTY_URL_MODEL` overlaps `URL_MODEL`, and
-	// for those models it wins over `(internal)/[model=urlmodel]`, so the create intent has to
-	// be consumed here too. The palette is hidden from third-party users, and the permission
-	// gate inside applies regardless.
+	// `THIRD_PARTY_URL_MODEL` overlaps `URL_MODEL`, and for those models this route wins over
+	// `(internal)/[model=urlmodel]` — for internal users too. So the intent lands here.
 	$effect(() => {
 		consumeCreateIntent({ urlModel: URLModel, modelName: data.model.name, open: modalCreateForm });
 	});

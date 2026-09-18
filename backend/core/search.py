@@ -1,17 +1,15 @@
 """Universal fuzzy search across GRC objects, backing ``GET /api/search/``.
 
-Extracted from ``core.views``, which it only ever touched through this one endpoint.
-
-Scoping is delegated to ``RoleAssignment.get_viewable_object_ids`` — the same primitive
-``BaseModelViewSet.get_queryset`` uses — and applied *before* text matching, so search is
-never more permissive than the corresponding list endpoint.
+Scoped with ``RoleAssignment.get_viewable_object_ids`` — the primitive
+``BaseModelViewSet.get_queryset`` uses — applied before matching, never after.
 """
 
 import re
 
 from automation.models import PostureAssessment
 from crq.models import QuantitativeRiskScenario, QuantitativeRiskStudy
-from django.db.models import Q
+from django.db.models import Q, TextField
+from django.db.models.functions import Cast
 from ebios_rm.models import AttackPath, EbiosRMStudy, FearedEvent, StrategicScenario
 from iam.models import Folder, RoleAssignment
 from pmbok.models import Accreditation
@@ -227,10 +225,11 @@ def global_search(request):
         searchable = ["name", "description"]
         if has_ref_id:
             searchable.append("ref_id")
-        # Models with i18n translations store localized names/descriptions in a
-        # JSONField. Searching it catches all translated variants at once.
+        # `translations` holds the localized name/description. Cast first: a regex against
+        # the JSONField itself is `jsonb ~* text` on PostgreSQL, which has no operator.
         if "translations" in field_names:
-            searchable.append("translations")
+            qs = qs.annotate(translations_text=Cast("translations", TextField()))
+            searchable.append("translations_text")
         searchable.extend(extra_search)
 
         q_filter = Q()
@@ -260,12 +259,18 @@ def global_search(request):
         if model_class is RequirementNode:
             extra_fields.append("framework_id")
 
-        results = qs.filter(q_filter).values(
-            "id",
-            "name",
-            "description",
-            *extra_fields,
-        )[:max_per_model]
+        # The cap truncates before ranking, so order first. `id` breaks ties: library
+        # imports share one timestamp across thousands of rows.
+        results = (
+            qs.filter(q_filter)
+            .order_by("-updated_at", "id")
+            .values(
+                "id",
+                "name",
+                "description",
+                *extra_fields,
+            )[:max_per_model]
+        )
 
         for row in results:
             candidates.append(

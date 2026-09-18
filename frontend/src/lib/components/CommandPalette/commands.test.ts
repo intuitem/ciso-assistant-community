@@ -49,10 +49,7 @@ describe('buildCreateCommands', () => {
 		expect(buildCreateCommands(null, allFlags)).toEqual([]);
 	});
 
-	/**
-	 * The same gate `ModelTable.canCreateObject` applies to the add button on a list page, so
-	 * the palette never offers a create the user would be rejected for.
-	 */
+	// Same gate as `ModelTable.canCreateObject`.
 	it('offers nothing to a user who may view every page but create nothing', () => {
 		expect(buildCreateCommands(readOnly, allFlags)).toEqual([]);
 	});
@@ -162,11 +159,7 @@ describe('matchCommands', () => {
 		expect(matchCommands(pool, '').items).toEqual(pool);
 	});
 
-	/**
-	 * A verb is compared against the first token, so one containing a space could never be
-	 * matched — it would be dead config, and silently so. Guards the `commandKeyword*`
-	 * messages against a translation that renders a verb as two words.
-	 */
+	// Guards `commandKeyword*` against a locale rendering a verb as two words.
 	it('cannot match a multi-word keyword, which is why verbs must be single words', () => {
 		const broken: PaletteCommand = {
 			label: 'Ask AI',
@@ -237,10 +230,7 @@ describe('buildNavigationCommands', () => {
 		expect(hrefs).toContain('/my-profile');
 	});
 
-	/**
-	 * The palette must not offer a page the sidebar hides — following the link would only
-	 * produce a 403. Same rule as `SideBarNavigation`, via the shared `canSeeNavItem`.
-	 */
+	// Same rule as `SideBarNavigation`, via the shared `canSeeNavItem`.
 	it('hides sidebar destinations the user has no permission for', () => {
 		const commands = buildNavigationCommands(nobody, allFlags);
 		const hrefs = commands.map((command) => command.href);
@@ -253,5 +243,18 @@ describe('buildNavigationCommands', () => {
 	it('still offers a page to a user who may view but not create', () => {
 		const hrefs = buildNavigationCommands(readOnly, allFlags).map((command) => command.href);
 		expect(hrefs).toContain('/assets');
+	});
+
+	// `ServiceAccountViewSet` is `IsGlobalAdmin`; no sidebar entry means no inherited rule.
+	it('hides an admin-only destination from a non-admin, flag notwithstanding', () => {
+		const nonAdmin = { ...superuser, is_admin: false } as unknown as User;
+		const hrefs = buildNavigationCommands(nonAdmin, allFlags).map((command) => command.href);
+		expect(hrefs).not.toContain('/service-accounts');
+		expect(hrefs).toContain('/my-profile');
+	});
+
+	it('offers it to an admin', () => {
+		const hrefs = buildNavigationCommands(superuser, allFlags).map((command) => command.href);
+		expect(hrefs).toContain('/service-accounts');
 	});
 });

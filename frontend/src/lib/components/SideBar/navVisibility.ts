@@ -12,16 +12,14 @@ export interface NavItem {
 }
 
 /**
- * Whether a sidebar entry is visible to this user, independently of feature flags.
- *
- * Shared by the sidebar and the command palette: an entry the sidebar hides must not be
- * reachable from the palette either, or we offer a page that answers 403. Feature-flag
- * visibility is a separate axis, handled by `getSidebarVisibleItems`.
+ * Permission visibility of a sidebar entry, shared by the sidebar and the command palette so
+ * the two cannot offer different pages. Feature flags are a separate axis
+ * (`getSidebarVisibleItems`).
  */
 export function canSeeNavItem(item: NavItem, user: User | null | undefined): boolean {
 	if (item.adminOnly) return Boolean(user?.is_admin);
-	// Preserved verbatim from the sidebar: true when the user holds any role that is not
-	// excluded, not when they hold none of the excluded ones.
+	// Note the existing semantics: true when the user holds any non-excluded role, not when
+	// they hold none of the excluded ones.
 	if (item.exclude) {
 		return user?.roles?.some((role: string) => !item.exclude!.includes(role)) ?? false;
 	}

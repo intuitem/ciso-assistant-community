@@ -9,31 +9,27 @@ import { canSeeNavItem, type NavItem } from '../SideBar/navVisibility';
 export type PaletteGroup = 'navigation' | 'create' | 'action';
 
 export interface PaletteCommand {
-	/** Already translated — the palette matches and renders this verbatim. */
+	/** Already translated — matched and rendered verbatim. */
 	label: string;
 	group: PaletteGroup;
 	icon?: string;
-	/** Navigation target. Every command is a destination unless it carries `run`. */
+	/** A destination, unless the command carries `run`. */
 	href?: string;
-	/** `href` is a list page to be asked to open its create form, not a plain destination. */
+	/** `href` is a list page to ask for its create form, not a plain destination. */
 	opensCreateForm?: boolean;
-	/** Breadcrumb label for the navigation, defaulting to the i18n key behind `label`. */
+	/** i18n key for the breadcrumb. */
 	breadcrumb?: string;
 	/**
-	 * Verbs selecting this command in `/` mode, the rest of the input becoming its argument —
-	 * `/search acme` runs the `search` command with `acme`. List the localised verb and the
-	 * English one, so both work whatever the locale. A command with keywords takes an
-	 * argument and does nothing without one.
-	 *
-	 * Each verb must be a SINGLE WORD: matching compares it to the first token, so anything
-	 * containing a space can never match. Translate them through their own `commandKeyword*`
-	 * messages rather than reusing a label, which a locale may well render as two words.
+	 * Verbs selecting this command in `/` mode; the rest of the input is its argument.
+	 * Each must be a SINGLE WORD — matching compares against the first token, so a verb
+	 * with a space can never match. Hence the dedicated `commandKeyword*` messages: a
+	 * label may be two words in some locale. List the localised verb and the English one.
 	 */
 	keywords?: string[];
 	run?: (argument: string) => void;
 }
 
-/** Strip accents/diacritics so matching is accent-insensitive. */
+/** Accent-insensitive matching. */
 export function normalize(str: string): string {
 	return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 }
@@ -42,15 +38,13 @@ export interface CommandMatch {
 	items: PaletteCommand[];
 	/** The command the first token names, once an argument has been started. */
 	verbCommand?: PaletteCommand;
-	/** Everything after the verb, verbatim — empty unless `verbCommand` is set. */
+	/** Verbatim; empty unless `verbCommand` is set. */
 	argument: string;
 }
 
 /**
- * Resolve what the typed query selects. Two grammars share one input: `verb the rest`, where
- * the first token names a command and the remainder is its argument, and plain filtering over
- * labels. The verb grammar only engages once a space is typed, so `/sea` still filters labels
- * normally and only `/search acme` binds an argument.
+ * Two grammars over one input: `verb the rest`, and plain label filtering. The verb grammar
+ * only engages once a space is typed, so `/sea` still filters labels.
  */
 export function matchCommands(pool: PaletteCommand[], query: string): CommandMatch {
 	const tokens = query.split(' ');
@@ -69,7 +63,7 @@ export function matchCommands(pool: PaletteCommand[], query: string): CommandMat
 	};
 }
 
-/** A keyword command is only actionable once it has input to act on. */
+/** A keyword command is only actionable once it has input. */
 export function awaitingArgument(command: PaletteCommand, argument: string): boolean {
 	return Boolean(command.keywords?.length) && !argument.trim();
 }
@@ -78,9 +72,9 @@ interface Destination {
 	name: string;
 	href: string;
 	icon?: string;
-	/** Feature flag gating a destination that has no sidebar entry to inherit one from. */
+	/** For destinations with no sidebar entry to inherit a flag from. */
 	flag?: string;
-	/** The sidebar entry this came from, carrying its permission rules. */
+	/** Carries the permission rules. */
 	nav?: NavItem;
 }
 
@@ -93,14 +87,18 @@ const sidebarDestinations: Destination[] = ((navData.items ?? []) as { items?: N
 	)
 	.map((item) => ({ name: item.name, href: item.href, icon: item.fa_icon, nav: item }));
 
-// Reachable pages with no sidebar entry of their own.
+// Pages with no sidebar entry, so no permission rules to inherit: whatever the target's API
+// enforces must be restated as a `nav` rule, or the palette offers a link that answers 403.
 const EXTRA_DESTINATIONS: Destination[] = [
 	{ name: 'myProfile', href: '/my-profile', icon: 'fa-solid fa-user' },
 	{
 		name: 'serviceAccounts',
 		href: '/service-accounts',
 		icon: 'fa-solid fa-user-gear',
-		flag: 'service_accounts'
+		flag: 'service_accounts',
+		// `ServiceAccountViewSet` is IsGlobalAdmin. The href keeps the rule degrading to
+		// `view_serviceaccount` rather than to `false` if `adminOnly` is ever dropped.
+		nav: { name: 'serviceAccounts', href: '/service-accounts', adminOnly: true }
 	},
 	{ name: 'licenseManagement', href: '/license-management', icon: 'fa-solid fa-certificate' },
 	{ name: 'journeys', href: '/journeys', icon: 'fa-solid fa-route', flag: 'journeys' }
@@ -113,11 +111,7 @@ const HREF_URL_MODEL: Record<string, string> = {
 
 const destinations = [...sidebarDestinations, ...EXTRA_DESTINATIONS];
 
-/**
- * Two independent axes decide whether a destination is offered: the feature flags, and the
- * user's own permissions. A destination the sidebar hides must not be reachable here either,
- * otherwise the palette offers a page that answers 403.
- */
+/** Two axes: feature flags, and the user's permissions. Both must allow it. */
 function isVisible(
 	destination: Destination,
 	user: User | null | undefined,
@@ -146,11 +140,8 @@ export function buildNavigationCommands(
 }
 
 /**
- * One create command per sidebar destination backed by a model the user may create.
- * Deriving from the sidebar rather than from `URL_MODEL_MAP` keeps the command set in step
- * with feature flags and guarantees the list route it lands on exists; the page opens its
- * own create modal on `?create`. `EXTRA_DESTINATIONS` are navigation-only — they are pages
- * we reach past the sidebar, not lists that own a create form.
+ * Derived from the sidebar, not from `URL_MODEL_MAP`: that keeps the set in step with feature
+ * flags and guarantees the landing route exists. `EXTRA_DESTINATIONS` are navigation-only.
  */
 export function buildCreateCommands(
 	user: User | null | undefined,

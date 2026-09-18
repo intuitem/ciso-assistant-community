@@ -314,16 +314,8 @@
 			// Prevent default 'c' key behavior
 			event.preventDefault();
 
-			// Check if the add button exists and is not in a disabled list
-			if (
-				![
-					'risk-matrices',
-					'frameworks',
-					'requirement-mapping-sets',
-					'user-groups',
-					'role-assignments'
-				].includes(URLModel)
-			) {
+			// Same gate as the add button, or `c` opens a form the button deliberately hides.
+			if (!NON_CREATABLE_URL_MODELS.includes(URLModel)) {
 				modalAddForm();
 			}
 		}

@@ -58,8 +58,8 @@
 	let selected = $state(0);
 	let searchText = $state('');
 
-	// A leading sigil narrows the palette to one namespace: `+` to make something, `/` to do
-	// something. Keeping them apart stops the create list from burying the verbs.
+	// `+` to make something, `/` to do something. Kept apart so the create list does not
+	// bury the verbs.
 	type PaletteMode = 'create' | 'action' | 'search';
 
 	function modeFor(sigil: string | undefined): PaletteMode {
@@ -115,8 +115,7 @@
 
 	function execute(command: PaletteCommand) {
 		if (awaitingArgument(command, argument)) {
-			// Commit the verb into the input instead of firing: the next keystrokes are its
-			// argument, and the palette stays open to take them.
+			// Commit the verb instead of firing; the palette stays open for the argument.
 			searchText = `/${command.keywords![0]} `;
 			selected = 0;
 			return;
@@ -132,8 +131,8 @@
 
 	function askAi(question: string) {
 		expandChat();
-		// `streamResponse` aborts whatever is in flight, so sending now would kill an answer
-		// mid-sentence. Hand the question to the composer instead and let the user send it.
+		// `streamResponse` aborts whatever is in flight, so sending now would cut off an
+		// answer mid-sentence. Hand it to the composer instead.
 		if (getIsStreaming()) return setInputText(question);
 		sendMessage(question);
 	}
