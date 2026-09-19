@@ -143,7 +143,7 @@
 	function areAllChildrenHiddenRecursive(node: TreeViewNode): boolean {
 		if (!node.children || node.children.length === 0) return false;
 		return node.children.every(
-			(child) => child.contentProps.hidden || areAllChildrenHiddenRecursive(child)
+			(child) => child.contentProps?.hidden || areAllChildrenHiddenRecursive(child)
 		);
 	}
 </script>
