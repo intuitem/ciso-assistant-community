@@ -7,3 +7,19 @@ export function contentDispositionHeader(fileName: string): string {
 	const asciiFileName = fileName.replace(/[^\x20-\x7E]/g, '-').replace(/[;"%\\]/g, '-');
 	return `attachment; filename="${asciiFileName}"; filename*=utf-8''${encodeURIComponent(fileName)}`;
 }
+
+// The inverse, for proxies that re-emit a header the backend sent. `filename*` wins:
+// the plain param is only the lossy ASCII fallback. Splitting on "filename=" instead
+// would swallow the `filename*` part that follows it.
+export function parseContentDispositionFilename(header: string): string | null {
+	const extended = /filename\*\s*=\s*[^']*'[^']*'([^;]+)/i.exec(header);
+	if (extended) {
+		try {
+			return decodeURIComponent(extended[1].trim());
+		} catch {
+			// A malformed escape: fall through to the ASCII form rather than throwing.
+		}
+	}
+	const plain = /filename\s*=\s*(?:"([^"]*)"|([^;]+))/i.exec(header);
+	return plain ? (plain[1] ?? plain[2]).trim() || null : null;
+}

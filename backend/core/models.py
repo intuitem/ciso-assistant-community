@@ -72,6 +72,7 @@ from .utils import (
     _build_answer_context,
 )
 from .validators import (
+    sanitize_file_name,
     validate_file_name,
     validate_html_template_file_name,
     validate_file_size,
@@ -5607,6 +5608,12 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         verbose_name=_("Attachment SHA256 Hash"),
         help_text=_("SHA256 hash of the attachment file for integrity verification"),
     )
+    original_filename = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Original file name"),
+        help_text=_("The name the file was uploaded with"),
+    )
     link = models.URLField(
         blank=True,
         null=True,
@@ -5631,6 +5638,16 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         # Compute attachment hash if attachment exists and has changed
         if self.attachment:
+            # The storage layer is about to rewrite the name it will live under —
+            # spaces become underscores, quotes and parentheses are dropped — so the
+            # readable name has to be kept beside it, or an auditor extracting an
+            # archive never sees it again (SUP-1791). Uncommitted means the file has
+            # not reached storage yet, so `.name` is still the one the client sent.
+            if not self.attachment._committed and not self.original_filename:
+                self.original_filename = sanitize_file_name(
+                    os.path.basename(self.attachment.name or "")
+                )[:255]
+
             # Check if this is a new attachment or if it has changed
             should_compute_hash = False
 
@@ -5682,7 +5699,9 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     def filename(self) -> str | None:
         if not self.attachment:
             return None
-        return os.path.basename(self.attachment.name)
+        # Revisions uploaded before original_filename existed only have the name the
+        # storage layer gave them.
+        return self.original_filename or os.path.basename(self.attachment.name)
 
     def get_size(self):
         if not self.attachment or not self.attachment.storage.exists(

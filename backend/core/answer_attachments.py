@@ -156,6 +156,9 @@ def promote_to_evidence(attachment, user):
             evidence=evidence,
             attachment=attachment.file,
             attachment_hash=attachment.file_hash,
+            # The file is already in storage under its sanitized name; only the
+            # attachment row still knows what the answerer called it.
+            original_filename=attachment.filename,
             folder_id=attachment.folder_id,
         )
         attachment.promoted_to = evidence
@@ -210,7 +213,7 @@ INLINE_SAFE_TYPES = {
 }
 
 
-def _safe_filename_header(disposition, filename):
+def safe_filename_header(disposition, filename):
     """A Content-Disposition value that a filename cannot break out of."""
     from urllib.parse import quote
 
@@ -238,7 +241,7 @@ def serve(attachment):
     content_type = guessed if inline else "application/octet-stream"
 
     body = FileResponse(attachment.file, content_type=content_type)
-    body["Content-Disposition"] = _safe_filename_header(
+    body["Content-Disposition"] = safe_filename_header(
         "inline" if inline else "attachment", attachment.filename
     )
     body["X-Content-Type-Options"] = "nosniff"

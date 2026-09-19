@@ -18,6 +18,7 @@ import zipfile
 import tempfile
 from datetime import date, datetime, timedelta, timezone
 from types import MappingProxyType
+from collections.abc import Sequence
 from typing import Dict, Any, List, Tuple, Final
 import time
 from django.db.models import (
@@ -166,6 +167,7 @@ from core.answer_attachments import (
     add_attachment,
     attachments_for,
     promote_to_evidence,
+    safe_filename_header,
 )
 from core.answer_attachments import serialize as serialize_attachment
 from core.answer_attachments import serve as serve_attachment
@@ -10809,7 +10811,11 @@ class EvidenceViewSet(BaseModelViewSet):
                 response = HttpResponse(
                     revision.attachment,
                     content_type=mimetypes.guess_type(filename)[0],
-                    headers={"Content-Disposition": f"attachment; filename={filename}"},
+                    headers={
+                        "Content-Disposition": safe_filename_header(
+                            "attachment", filename
+                        )
+                    },
                     status=status.HTTP_200_OK,
                 )
         return response
@@ -11178,7 +11184,11 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
                     evidence.attachment,
                     content_type=content_type,
                     headers={
-                        "Content-Disposition": f"attachment; filename={evidence.filename()}"
+                        # A name now carries spaces and accents: unquoted, it would
+                        # truncate the header at the first space.
+                        "Content-Disposition": safe_filename_header(
+                            "attachment", evidence.filename()
+                        )
                     },
                     status=status.HTTP_200_OK,
                 )
@@ -14071,7 +14081,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         if UUID(pk) in object_ids_view:
             compliance_assessment = self.get_object()
-            (index_content, evidences) = generate_html(compliance_assessment)
+            (index_content, evidences, archive_names) = generate_html(
+                compliance_assessment
+            )
             zip_name = f"{sanitize_filename(compliance_assessment.name)}-{sanitize_filename(compliance_assessment.framework.name)}-{datetime.now():%Y-%m-%d-%H-%M}.zip"
 
             # Create temporary file that will be automatically deleted
@@ -14091,12 +14103,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                                 evidence.last_revision.attachment.name
                             ) as attachment_file:
                                 zipf.writestr(
-                                    os.path.join(
-                                        "evidences",
-                                        os.path.basename(
-                                            evidence.last_revision.attachment.name
-                                        ),
-                                    ),
+                                    f"evidences/{archive_names[evidence.id]}",
                                     attachment_file.read(),
                                 )
                     zipf.writestr("index.html", index_content)
@@ -16412,9 +16419,34 @@ def get_build(request):
 # NOTE: Important functions/classes from old views.py, to be reviewed
 
 
+def build_evidence_archive_names(evidences: Sequence[Evidence]) -> dict:
+    """The zip entry name for each evidence, unique within one archive.
+
+    The report links to these names, so they are computed once and handed to both the
+    template and the zip writer — a divergence between the two is a dead link. Two
+    evidences may well carry the same attachment basename; the second gets a suffix.
+    """
+    names = {}
+    taken = set()
+    for evidence in sorted(evidences, key=lambda e: str(e.id)):
+        revision = evidence.last_revision
+        if not revision or not revision.attachment:
+            continue
+        base = revision.filename()
+        stem, extension = os.path.splitext(base)
+        candidate, counter = base, 1
+        # Case-insensitively: the archive is often extracted on Windows or macOS.
+        while candidate.lower() in taken:
+            counter += 1
+            candidate = f"{stem} ({counter}){extension}"
+        taken.add(candidate.lower())
+        names[evidence.id] = candidate
+    return names
+
+
 def generate_html(
     compliance_assessment: ComplianceAssessment,
-) -> Tuple[str, list[Evidence]]:
+) -> Tuple[str, list[Evidence], dict]:
     selected_evidences = []
 
     requirement_nodes = RequirementNode.objects.filter(
@@ -16547,16 +16579,18 @@ def generate_html(
         top_level_nodes_data.append(node_data)
         selected_evidences += node_evidences
 
+    evidences = list(set(selected_evidences))
+    archive_names = build_evidence_archive_names(evidences)
+
     data = {
         "compliance_assessment": compliance_assessment,
         "top_level_nodes": top_level_nodes_data,
         "assessments": assessments,
         "ancestors": ancestors,
+        "archive_names": archive_names,
     }
 
-    return render_to_string("core/audit_report.html", data), list(
-        set(selected_evidences)
-    )
+    return render_to_string("core/audit_report.html", data), evidences, archive_names
 
 
 def export_mp_csv(request):
