@@ -448,9 +448,8 @@ else:
 PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
 # Ceiling we intend to converge on; requests above it are logged, not clamped.
 PAGINATE_TARGET_MAX = 200
-# Held at 5000: Power BI connector <= 1.0.2 truncates silently below it. 1.1.0
-# fixes that, so the gate is adoption of it, not the fix.
-# Lowering plan: product-docs/configuration/settings/api-pagination.md.
+# Held at 5000: connector <= 1.0.2 truncates silently below it, 1.1.0 fixes that,
+# so the gate is adoption. Plan: product-docs/configuration/settings/api-pagination.md.
 PAGINATE_MAX = int(os.environ.get("PAGINATE_MAX", default=max(5000, PAGINATE_BY)))
 PAGINATE_BY = min(PAGINATE_BY, PAGINATE_MAX)
 if PAGINATE_BY < 1 or PAGINATE_MAX < 1:
