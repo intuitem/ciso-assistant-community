@@ -799,9 +799,7 @@ class GenericFilterSet(df.FilterSet):
     # enough to make it filterable from the table UI. On a DateTimeField the `date`
     # transform is what the UI uses: a bare `lte` on a timestamp would drop its last day.
     DATE_LOOKUPS = ("exact", "gte", "lte", "gt", "lt", "isnull")
-    # `lt`/`gt` are the half-open bounds BI clients need: Power BI incremental
-    # refresh partitions on `updated_at >= RangeStart and updated_at < RangeEnd`,
-    # and an inclusive `lte` would import the boundary row into two partitions.
+    # `lt`/`gt`: half-open bounds, so a BI partition boundary lands in one page.
     DATETIME_LOOKUPS = (
         "date",
         "date__gte",
@@ -1233,29 +1231,23 @@ class AutocompleteMixin:
 class SparseFieldsMixin:
     """``?fields=a,b,c`` trims a GET response to a subset of the columns.
 
-    Strictly subtractive: the parameter can only remove fields the serializer
-    already exposes for this caller, so it is no path to anything withheld.
-    Feature-flag gating (``FLAGGED_FIELDS``) runs first, in the serializer's
-    ``__init__``, and per-role redaction runs afterwards in
-    ``to_representation`` — both over whatever survives here. A name the
-    serializer does not expose is a 400 rather than a silent omission: a
-    consumer that asks for a column it will not receive should be told, not
-    handed a narrower table than it thinks it has.
-
-    Only the top-level serializer is trimmed. Nested serializers share this
-    request's context and would otherwise be cut by the same names.
-
-    Exists for bulk read clients (Power BI, exports) that need one identifier
-    column and one relation out of a wide row. It reduces serialization and
-    payload, not the queryset's prefetching.
+    Subtractive only, and only the top-level serializer: nested ones share this
+    request's context and would be cut by the same names. An unknown name is a
+    400. Reduces serialization, not the queryset's prefetching.
     """
 
     sparse_fields_param = "fields"
-    # Rows are joined on `id` downstream, so it stays even when not asked for.
     sparse_fields_always = frozenset({"id"})
 
     def get_serializer(self, *args, **kwargs):
-        serializer = super().get_serializer(*args, **kwargs)
+        return self.apply_sparse_fields(super().get_serializer(*args, **kwargs))
+
+    def apply_sparse_fields(self, serializer):
+        """Trim a serializer to the requested fields.
+
+        An action building its own serializer must call this, or ``fields`` is
+        silently ignored there.
+        """
         request = getattr(self, "request", None)
         if request is None or request.method != "GET":
             return serializer
@@ -3001,7 +2993,9 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         context = self.get_serializer_context()
         context["optimized_data"] = optimized_data
 
-        serializer = AssetReadSerializer(objects, many=True, context=context)
+        serializer = self.apply_sparse_fields(
+            AssetReadSerializer(objects, many=True, context=context)
+        )
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)
         if field_models:
@@ -5958,8 +5952,8 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         context = self.get_serializer_context()
         context["daily_rate"] = GlobalSettings.get_daily_rate()
 
-        serializer = AppliedControlBulkReadSerializer(
-            objects, many=True, context=context
+        serializer = self.apply_sparse_fields(
+            AppliedControlBulkReadSerializer(objects, many=True, context=context)
         )
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)

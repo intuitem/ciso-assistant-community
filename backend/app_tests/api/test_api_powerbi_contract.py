@@ -275,10 +275,7 @@ def bi_dataset(db):
         mission="BI provider",
         reference_link="https://example.com/entity",
     )
-    # Saving a User/Team/Entity creates its Actor (core.base_models), which is
-    # what every owner/assignee M2M points at. A user-backed one is used here
-    # because /api/actors/ only lists entity actors when the instance allows
-    # assigning work to entities.
+    # User-backed: /api/actors/ hides entity actors by default.
     approver = User.objects.create(email="bi-approver@tests.com")
     actor = approver.actor
     solution = Solution.objects.create(
@@ -321,8 +318,6 @@ def bi_dataset(db):
         task_date=date.today(),
         link="https://example.com/task",
     )
-    # Occurrences are generated from the template; only fall back to an
-    # explicit one if that ever stops happening.
     task_node = TaskNode.objects.filter(task_template=task_template).first()
     if task_node is None:
         task_node = TaskNode.objects.create(
@@ -376,7 +371,6 @@ def bi_dataset(db):
     contract.solutions.add(solution)
     solution.assets.add(asset)
     entity_assessment.solutions.add(solution)
-    # The occurrence reads assignees and controls off its template.
     task_template.assigned_to.add(actor)
     task_template.applied_controls.add(applied_control)
     risk_acceptance.risk_scenarios.add(risk_scenario)
@@ -414,8 +408,7 @@ def bi_dataset(db):
     }
 
 
-# Base query params the connector sends for a table (CisoAssistant.pq,
-# GetEntityTable's baseQuery), mirrored so the tests read the same rows.
+# Mirrors GetEntityTable's baseQuery in CisoAssistant.pq.
 ENDPOINT_QUERY = {"actors": {"include_third_parties": "true"}}
 
 
@@ -466,10 +459,8 @@ def test_powerbi_bridge_contract(authenticated_client, bi_dataset):
 def test_powerbi_incremental_refresh_params(authenticated_client, bi_dataset):
     for table in CONTRACT["tables"].values():
         endpoint = table["endpoint"]
-        # Every table the connector declares as foldable (foldDates = true in
-        # CisoAssistant.pq): incremental refresh folds RangeStart/RangeEnd into
-        # these params, and a filterset that silently drops `__lt` would widen
-        # each partition to the whole table.
+        # Tables the connector declares foldDates = true; a filterset dropping
+        # `__lt` would widen every incremental partition to the whole table.
         if endpoint not in (
             "requirement-assessments",
             "applied-controls",
@@ -517,16 +508,7 @@ def test_powerbi_incremental_refresh_params(authenticated_client, bi_dataset):
         assert invalid.status_code == 400, f"{endpoint}: invalid date should 400"
 
 
-#
-# Pagination contract.
-#
-# The connector pages with limit/offset and derives its stride from the rows
-# the server actually served, because `limit` is clamped to PAGINATE_MAX.
-# These tests are a Python port of GetAllRows / GetTopRows
-# (automation/powerbi/connector/CisoAssistant.pq) run against the live API,
-# so the algorithm is exercised where CI can see it — M itself only runs on
-# the Windows validation VM.
-#
+# Python port of GetAllRows / GetTopRows (CisoAssistant.pq): M runs only on the VM.
 
 CONNECTOR_PAGE_SIZE = 5000  # `PageSize` in CisoAssistant.pq
 
@@ -561,8 +543,7 @@ def _connector_get_top_rows(client, endpoint, count, extra=None):
     payload = first.json()
     rows = list(payload["results"])
     served = len(rows)
-    # A short page means either a clamped limit or the end of the table; only
-    # `count` tells them apart, so the walk targets whichever is smaller.
+    # Short page = clamped limit or end of table; only `count` separates them.
     wanted = min(count, payload["count"])
     page_count = (
         0 if served == 0 or served >= wanted else math.ceil((wanted - served) / served)
@@ -580,11 +561,8 @@ def _connector_get_top_rows(client, endpoint, count, extra=None):
 
 @pytest.fixture
 def clamped_pagination(monkeypatch):
-    """Serve tiny pages, the way an instance with a low PAGINATE_MAX does.
-
-    `max_limit` is read off settings at class-definition time, so
-    `override_settings` cannot move it.
-    """
+    """Serve tiny pages: `max_limit` is read at class-definition time, so
+    `override_settings` cannot move it."""
     from core.pagination import CustomLimitOffsetPagination
 
     monkeypatch.setattr(CustomLimitOffsetPagination, "max_limit", 2)
@@ -629,8 +607,7 @@ def test_connector_paging_retrieves_every_row_when_clamped(
     ids = [row["id"] for row in rows]
     assert len(set(ids)) == total, "offset paging returned duplicate rows"
 
-    # Guard the specific defect fixed in connector 1.1.0: a stride taken from the
-    # requested PageSize instead of the served length imports one page and stops.
+    # A stride taken from PageSize instead of the served length stops after one page.
     truncated = math.ceil(total / CONNECTOR_PAGE_SIZE) * clamped_pagination
     assert truncated < total, "fixture no longer reproduces the truncation"
 
@@ -666,12 +643,8 @@ def test_connector_preview_paging_returns_requested_count(
 
 @pytest.mark.django_db
 def test_powerbi_bridge_projection_is_accepted(authenticated_client, bi_dataset):
-    """Bridges fetch `?fields=id,<m2m>`; an unknown name there is a 400.
-
-    The connector falls back to the full row on error, so this failing means
-    a silent loss of the optimisation rather than a broken refresh — but it
-    is still drift, and the fallback should not become the normal path.
-    """
+    """Bridges fetch `?fields=id,<m2m>`; the connector falls back on a 400, so
+    this failing is silent drift rather than a broken refresh."""
     for bridge in CONTRACT["bridges"]:
         endpoint = bridge["endpoint"]
         list_field = bridge["list_field"]
@@ -701,14 +674,7 @@ class _CountingClient:
 def test_connector_preview_stops_at_the_end_of_a_short_table(
     authenticated_client, many_applied_controls, clamped_pagination
 ):
-    """A preview may ask for far more rows than the table holds.
-
-    The stride is the served page size, so without the envelope's `count` to
-    bound it the walk keeps stepping toward the requested `count` long after
-    the rows run out — one request per stride, all of them empty. The smaller
-    the table, the more requests. Row counts stay correct throughout, which is
-    why this is asserted on the number of calls.
-    """
+    """Row counts stay correct when this regresses, so assert on call count."""
     total = authenticated_client.get("/api/applied-controls/", {"limit": 1}).json()[
         "count"
     ]

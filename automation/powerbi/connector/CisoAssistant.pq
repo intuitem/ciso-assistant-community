@@ -127,13 +127,7 @@ GetJson = (BaseUrl as text, relativePath as text, query as record) as any =>
 
 // Walks DRF's {count, next, previous, results} envelope with limit/offset
 // paging until every row is retrieved. Users never see any of this.
-//
-// The stride is the number of rows the first page actually SERVED, never the
-// PageSize requested: the server caps `limit` at its own PAGINATE_MAX, and
-// deriving the page count from the requested size truncates every table on an
-// instance whose ceiling is lower — silently, with no error and no warning.
-// Reading it back from the response keeps this correct against any ceiling,
-// so the connector and the backend can be upgraded independently.
+// Stride is the rows SERVED, never PageSize: the server caps `limit`.
 GetAllRows = (BaseUrl as text, endpoint as text, extraQuery as record) as list =>
     let
         path = "api/" & endpoint & "/",
@@ -155,14 +149,7 @@ GetAllRows = (BaseUrl as text, endpoint as text, extraQuery as record) as list =
 
 // Bounded fetch for OnTake: pages up to `count` rows so previews stay
 // cheap while Table.FirstN with count > PageSize remains correct.
-// Same rule as GetAllRows — the first page teaches us the effective page
-// size, and every subsequent offset steps by that, not by what we asked for.
-//
-// `served` alone cannot say why a page was short: the server may have capped
-// the limit, or the table may simply have ended. Only the envelope's `count`
-// separates them, so the target is the smaller of what was asked for and what
-// exists — otherwise a preview of 1000 rows against a 5-row table would step
-// 5 at a time to 1000 and spend 199 requests collecting nothing.
+// Bounded by the envelope's `count` too, or a short table pages on to `count`.
 GetTopRows = (BaseUrl as text, endpoint as text, extraQuery as record, count as number) as list =>
     let
         path = "api/" & endpoint & "/",
@@ -333,14 +320,7 @@ FormatDateParam = (value as any) as text =>
 // (IAM-scoped) fact payloads, so they can never expose rows the user
 // cannot read.
 //
-// A bridge re-reads its parent endpoint, and several bridges share one
-// parent, so a refresh scans some endpoints half a dozen times. `?fields=`
-// narrows each of those scans to the identifier and the one M2M column the
-// bridge needs. The parameter is a recent addition on the API side: older
-// instances ignore unknown query parameters and return the full row, which
-// still works, and anything else falls back to the unnarrowed request rather
-// than failing a refresh over an optimisation.
-//
+// Narrows the scan to id + the one M2M; falls back if the server rejects it.
 GetBridgeRows = (BaseUrl as text, endpoint as text, listField as text) as list =>
     let
         narrowed = try GetAllRows(BaseUrl, endpoint, [ fields = "id," & listField ])
@@ -822,9 +802,6 @@ RiskAcceptanceSpec = {
     { "updated_at", { "updated_at" }, type datetime, "utcdatetime" }
 };
 
-// The dimension that makes owner/assignee columns reportable: every
-// owner-style M2M in the API points here, whether it wraps a user, a team
-// or an entity.
 ActorSpec = {
     { "id", { "id" }, type text },
     { "name", { "str" }, type text },
@@ -924,8 +901,7 @@ Navigator = (base as text) as table =>
                 { "Vulnerabilities", GetEntityTable(base, "vulnerabilities", VulnerabilitySpec, true), "Table", "Table", true },
                 { "Security Exceptions", GetEntityTable(base, "security-exceptions", SecurityExceptionSpec, true), "Table", "Table", true },
                 { "Assets", GetEntityTable(base, "assets", AssetSpec, true), "Table", "Table", true },
-                // Appended, never inserted: reports built on connector <= 1.0.1
-                // navigate by position (see ToNavigationTable).
+                // Append only: <= 1.0.1 reports navigate by position.
                 { "Task Nodes", GetEntityTable(base, "task-nodes", TaskNodeSpec, true), "Table", "Table", true },
                 { "Entity Assessments", GetEntityTable(base, "entity-assessments", EntityAssessmentSpec, true), "Table", "Table", true },
                 { "Contracts", GetEntityTable(base, "contracts", ContractSpec, true), "Table", "Table", true },
@@ -945,10 +921,7 @@ Navigator = (base as text) as table =>
                 { "Reference Controls", GetEntityTable(base, "reference-controls", ReferenceControlSpec, false), "Table", "Table", true },
                 { "Findings Assessments", GetEntityTable(base, "findings-assessments", FindingsAssessmentSpec, false), "Table", "Table", true },
                 { "Labels", GetEntityTable(base, "filtering-labels", FilteringLabelSpec, false), "Table", "Table", true },
-                // The endpoint hides third-party actors by default, since it
-                // mainly serves assignee pickers. A dimension has to cover every
-                // id the ownership bridges can carry, or those rows join to
-                // nothing, so ask for them explicitly.
+                // Must cover every id the ownership bridges carry, third parties included.
                 { "Actors", GetEntityTable(base, "actors", ActorSpec, false, [ include_third_parties = "true" ]), "Table", "Table", true },
                 { "Entities", GetEntityTable(base, "entities", EntitySpec, false), "Table", "Table", true },
                 { "Solutions", GetEntityTable(base, "solutions", SolutionSpec, false), "Table", "Table", true },
@@ -981,8 +954,6 @@ Navigator = (base as text) as table =>
                 { "Incident - Label", GetBridgeTable(base, "incidents", "incident_id", "filtering_labels", "label_id"), "Table", "Table", true },
                 { "Risk Scenario - Label", GetBridgeTable(base, "risk-scenarios", "risk_scenario_id", "filtering_labels", "label_id"), "Table", "Table", true },
                 { "Vulnerability - Label", GetBridgeTable(base, "vulnerabilities", "vulnerability_id", "filtering_labels", "label_id"), "Table", "Table", true },
-                // Ownership: every one of these M2Ms points at Actor, so they
-                // all join to the Actors dimension.
                 { "Applied Control - Owner", GetBridgeTable(base, "applied-controls", "applied_control_id", "owner", "actor_id"), "Table", "Table", true },
                 { "Finding - Owner", GetBridgeTable(base, "findings", "finding_id", "owner", "actor_id"), "Table", "Table", true },
                 { "Risk Scenario - Owner", GetBridgeTable(base, "risk-scenarios", "risk_scenario_id", "owner", "actor_id"), "Table", "Table", true },

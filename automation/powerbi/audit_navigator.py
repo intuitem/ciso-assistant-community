@@ -1,11 +1,7 @@
 """Check that the connector's navigator only ever grew at the end.
 
-Reports built with connector <= 1.0.1 navigate by position (`Source{0}[Data]`)
-because the navigator declared no key before 1.0.2. For those, inserting or
-reordering an entry in Facts / Dimensions / Bridges silently repoints a query
-at a different table — same shape, wrong data, no error. New entries therefore
-have to be appended to the end of their group, and that cohort never expires,
-so this is permanent discipline rather than a migration.
+Reports built with connector <= 1.0.1 navigate by position, so a moved entry
+silently repoints their queries at another table.
 
 Usage: python automation/powerbi/audit_navigator.py [baseline-ref]
 """
@@ -19,13 +15,32 @@ PQ_PATH = "automation/powerbi/connector/CisoAssistant.pq"
 GROUPS = ("facts", "dimensions", "bridges")
 
 
+# Matched on row shape, not the data expression: an unrecognised row would
+# shorten the list. The unquoted second element excludes the column header.
+ROW = re.compile(r'\{ "([^"]+)",\s*[^"\s]')
+ROW_LINE = re.compile(r'^\s*\{ "')
+HEADER_LINE = re.compile(r'^\s*\{ "Name", "Data"')
+
+
 def navigator_entries(source):
     entries = {}
     for group in GROUPS:
         block = re.search(rf"{group} = #table\((.*?)\n        \)", source, re.S)
         if not block:
             raise SystemExit(f"{group}: navigator group not found")
-        entries[group] = re.findall(r'\{ "([^"]+)", Get', block.group(1))
+        body = block.group(1)
+        names = ROW.findall(body)
+        rows = [
+            line
+            for line in body.splitlines()
+            if ROW_LINE.match(line) and not HEADER_LINE.match(line)
+        ]
+        if len(names) != len(rows):
+            raise SystemExit(
+                f"{group}: matched {len(names)} names in {len(rows)} rows — the "
+                f"row shape changed, update this script before trusting it"
+            )
+        entries[group] = names
     return entries
 
 

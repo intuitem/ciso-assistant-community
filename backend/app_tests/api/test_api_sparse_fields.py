@@ -1,17 +1,11 @@
-"""`?fields=` sparse fieldsets (core.views.SparseFieldsMixin).
-
-The parameter exists so bulk read clients (Power BI bridge tables, exports)
-can ask for two columns out of a wide row. It must only ever *remove*
-columns: these tests pin that it cannot reach a field the serializer
-withholds, and that it does not run ahead of per-role redaction.
-"""
+"""`?fields=` sparse fieldsets (core.views.SparseFieldsMixin)."""
 
 import pytest
 
 
 @pytest.fixture
 def sparse_dataset(db):
-    from core.models import AppliedControl, ComplianceAssessment, Framework
+    from core.models import Asset, AppliedControl, ComplianceAssessment, Framework
     from core.models import LoadedLibrary, RequirementAssessment, RequirementNode
     from iam.models import Folder
 
@@ -47,8 +41,7 @@ def sparse_dataset(db):
         assessable=True,
         order_id=1,
     )
-    # No field_visibility override: score is hidden by default
-    # (core.utils.DEFAULT_VISIBILITY).
+    # No field_visibility override: score is hidden by default.
     compliance_assessment = ComplianceAssessment.objects.create(
         name="Sparse Audit", framework=framework, folder=domain
     )
@@ -62,9 +55,11 @@ def sparse_dataset(db):
     applied_control = AppliedControl.objects.create(
         name="Sparse Control", folder=domain, ref_id="AC-1"
     )
+    asset = Asset.objects.create(name="Sparse Asset", folder=domain)
     return {
         "domain": domain,
         "applied_control": applied_control,
+        "asset": asset,
         "requirement_assessment": requirement_assessment,
     }
 
@@ -104,7 +99,6 @@ def test_unknown_field_is_rejected(authenticated_client, sparse_dataset):
 def test_cannot_reach_a_field_the_serializer_withholds(
     authenticated_client, sparse_dataset
 ):
-    """`fields` is subtractive: a model column outside the serializer stays out."""
     response = authenticated_client.get("/api/users/", {"fields": "id,password"})
 
     assert response.status_code == 400
@@ -117,7 +111,6 @@ def test_cannot_reach_a_field_the_serializer_withholds(
 
 @pytest.mark.django_db
 def test_does_not_bypass_per_role_redaction(authenticated_client, sparse_dataset):
-    """Redaction runs in to_representation, after this trimming."""
     response = authenticated_client.get(
         "/api/requirement-assessments/", {"fields": "id,score"}
     )
@@ -131,7 +124,6 @@ def test_does_not_bypass_per_role_redaction(authenticated_client, sparse_dataset
 
 @pytest.mark.django_db
 def test_m2m_only_projection(authenticated_client, sparse_dataset):
-    """The shape the Power BI connector's bridge tables ask for."""
     response = authenticated_client.get(
         "/api/applied-controls/", {"fields": "id,filtering_labels"}
     )
@@ -154,14 +146,35 @@ def test_applies_to_retrieve(authenticated_client, sparse_dataset):
 
 @pytest.mark.django_db
 def test_absent_parameter_returns_the_full_row(authenticated_client, sparse_dataset):
-    """Trimming is per-request: it must not narrow the next caller's response.
-
-    `get_serializer` builds a new serializer every call and `serializer.fields`
-    is a per-instance copy of `_declared_fields`, so popping from it cannot
-    reach the class. This runs after the narrowing tests in the same process,
-    which is what makes it a check on that and not just on the default path.
-    """
+    """Runs after the narrowing tests in-process: trimming must not leak."""
     response = authenticated_client.get("/api/applied-controls/")
 
     assert response.status_code == 200
     assert len(response.json()["results"][0]) > 3
+
+
+@pytest.mark.parametrize("endpoint", ["assets", "applied-controls"])
+@pytest.mark.django_db
+def test_full_actions_honor_the_parameter(
+    authenticated_client, sparse_dataset, endpoint
+):
+    """`full` builds its own serializer, so it must opt into the trimming."""
+    response = authenticated_client.get(f"/api/{endpoint}/full/", {"fields": "id,name"})
+
+    assert response.status_code == 200
+    rows = response.json()["results"]
+    assert rows
+    for row in rows:
+        assert set(row) == {"id", "name"}
+
+
+@pytest.mark.parametrize("endpoint", ["assets", "applied-controls"])
+@pytest.mark.django_db
+def test_full_actions_reject_unknown_fields(
+    authenticated_client, sparse_dataset, endpoint
+):
+    response = authenticated_client.get(
+        f"/api/{endpoint}/full/", {"fields": "id,nonexistent"}
+    )
+
+    assert response.status_code == 400
