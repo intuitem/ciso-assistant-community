@@ -62,11 +62,15 @@
 		const echarts = echartsModule;
 		const currentPanels = panels;
 		const currentCategories = categories;
+		// Read every holder up front rather than inside the loop: the loop is
+		// skipped entirely when there are no panels yet, and a dependency that is
+		// only registered on some runs is one the effect cannot be woken by.
+		const currentHolders = holders.slice();
 		if (!echarts || currentPanels.length === 0) return;
 
 		const disposers: Array<() => void> = [];
 		currentPanels.forEach((panel, index) => {
-			const element = holders[index];
+			const element = currentHolders[index];
 			if (!element) return;
 			const values = panel.values;
 			const last = values.length ? values[values.length - 1] : 0;
