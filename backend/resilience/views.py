@@ -410,6 +410,18 @@ class AssetAssessmentViewSet(BaseModelViewSet):
     search_fields = ["bia__name", "asset__name"]
     ordering = ["asset"]
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("bia", "asset", "asset__folder")
+            .prefetch_related(
+                "dependencies",
+                "evidences",
+                "associated_controls",
+            )
+        )
+
     def _get_asset_verdict(self, asset):
         """
         Calculate verdict based on security and recovery objectives vs capabilities.

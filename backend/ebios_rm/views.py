@@ -58,6 +58,23 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
     model = EbiosRMStudy
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "reference_entity", "risk_matrix")
+            .prefetch_related(
+                "assets__folder",
+                "compliance_assessments",
+                "risk_assessments",
+                "authors",
+                "reviewers",
+                "validationflow_set__approver",
+                "roto_set",
+                "operational_scenarios",
+            )
+        )
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
