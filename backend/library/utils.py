@@ -2,7 +2,7 @@ import json
 import time
 
 from .helpers import get_referential_translation
-from typing import List, Union
+from typing import List, Optional, Union
 
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
@@ -572,6 +572,79 @@ class QuickFormImporter:
             ).delete()
 
 
+class PortalPresetImporter:
+    """Loads a portal design as a catalog entry, keyed on its URN so a later version
+    refreshes it in place. Tile references arrive as URNs; one that cannot be resolved
+    leaves its tile unwired rather than failing the load, and the editor flags it."""
+
+    REQUIRED_FIELDS = {"ref_id", "urn"}
+
+    def __init__(self, preset_data: dict, library_urn: Optional[str] = None):
+        self.preset_data = preset_data
+        self.library_urn = library_urn
+
+    def init(self) -> Union[str, None]:
+        from portals.models import PortalPreset
+
+        if missing_fields := self.REQUIRED_FIELDS - set(self.preset_data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+        urn = str(self.preset_data["urn"]).lower()
+        # update_or_create keys on the URN alone; without this, a second library
+        # shipping the same preset URN would silently take the row over.
+        owner = (
+            PortalPreset.objects.filter(urn=urn, library__isnull=False)
+            .exclude(library__urn=self.library_urn)
+            .values_list("library__urn", flat=True)
+            .first()
+        )
+        if owner:
+            return f"portal preset {urn} is already provided by library {owner}"
+        content = self.preset_data.get("content")
+        if not isinstance(content, dict):
+            return "content must be an object"
+        sections = content.get("sections")
+        if not isinstance(sections, list) or not sections:
+            return "content.sections must be a non-empty list"
+        for index, section in enumerate(sections):
+            if not isinstance(section, dict):
+                return f"content.sections[{index}] must be an object"
+            items = section.get("items", [])
+            if not isinstance(items, list) or any(
+                not isinstance(item, dict) for item in items
+            ):
+                return f"content.sections[{index}].items must be a list of objects"
+        return None
+
+    def import_portal_preset(self, library_object: LoadedLibrary):
+        from portals.models import PortalPreset
+        from portals.references import resolve
+
+        urn = self.preset_data["urn"].lower()
+        content, unresolved = resolve(self.preset_data.get("content") or {})
+        for warning in unresolved:
+            logger.warning(
+                "Portal preset load warning",
+                library=library_object.urn,
+                warning=warning,
+            )
+        PortalPreset.objects.update_or_create(
+            urn=urn,
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                library=library_object,
+                ref_id=self.preset_data["ref_id"],
+                name=self.preset_data.get("name"),
+                description=self.preset_data.get("description"),
+                version=library_object.version,
+                provider=library_object.provider,
+                locale=library_object.locale,
+                default_locale=library_object.default_locale,
+                translations=self.preset_data.get("translations", {}),
+                content=content,
+            ),
+        )
+
+
 class ReferentialImporterMixin:
     REQUIRED_FIELDS = {"ref_id", "urn"}
 
@@ -877,6 +950,7 @@ class LibraryImporter:
         "framework",  # This field name is deprecated
         "frameworks",
         "quick_forms",
+        "portal_presets",
         "requirement_mapping_set",  # This field name is deprecated
         "requirement_mapping_sets",
         "preset",
@@ -892,6 +966,7 @@ class LibraryImporter:
         self._library = library
         self._frameworks = []
         self._quick_forms = []
+        self._portal_presets = []
         self._ttp_catalogs = []
         self._tactics = []
         self._techniques = []
@@ -1130,6 +1205,28 @@ class LibraryImporter:
             )
         return None
 
+    def init_portal_presets(self, portal_presets: List[dict]) -> Union[str, None]:
+        importers = []
+        import_errors = []
+        for index, preset_data in enumerate(portal_presets):
+            if not isinstance(preset_data, dict):
+                import_errors.append((index, "must be an object"))
+                continue
+            importer = PortalPresetImporter(preset_data, library_urn=self._library.urn)
+            importers.append(importer)
+            if (error := importer.init()) is not None:
+                import_errors.append((index, error))
+        self._portal_presets = importers
+        if import_errors:
+            index, error = import_errors[0]
+            ordinal = {1: "st", 2: "nd", 3: "rd"}.get(index + 1, "th")
+            return (
+                f"[PORTAL_PRESET_ERROR] {len(import_errors)} invalid portal preset"
+                f"{'s' if len(import_errors) > 1 else ''} detected, the "
+                f"{index + 1}{ordinal} portal preset has the following error : {error}"
+            )
+        return None
+
     def init(self) -> Union[str, None]:
         """missing_fields = self.REQUIRED_FIELDS - set(self._library_data.keys())
         if missing_fields:
@@ -1183,6 +1280,18 @@ class LibraryImporter:
                 return "[QUICK_FORM_ERROR] The 'quick_forms' field must be a list."
             if (error := self.init_quick_forms(quick_forms_data)) is not None:
                 logger.error("Quick form import error", error=error)
+                return error
+
+        if "portal_presets" in library_objects:
+            presets_data = library_objects["portal_presets"]
+            if isinstance(presets_data, dict):
+                presets_data = [presets_data]
+            if not isinstance(presets_data, list):
+                return (
+                    "[PORTAL_PRESET_ERROR] The 'portal_presets' field must be a list."
+                )
+            if (error := self.init_portal_presets(presets_data)) is not None:
+                logger.error("Portal preset import error", error=error)
                 return error
 
         if (
@@ -1369,6 +1478,9 @@ class LibraryImporter:
 
         for quick_form in self._quick_forms:
             quick_form.import_quick_form(library_object)
+
+        for portal_preset in self._portal_presets:
+            portal_preset.import_portal_preset(library_object)
 
         for requirement_mapping_set in self._requirement_mapping_sets:
             requirement_mapping_set.load(library_object)
