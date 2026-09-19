@@ -1893,6 +1893,8 @@
 	"defaultUserGroups": "Standardbrugergrupper",
 	"defaultUserGroupsHelpText": "Brugergrupper, der automatisk tildeles brugere oprettet via automatisk provisionering.",
 	"defaultUserGroupsWarning": "Anvendes kun én gang, ved kontooprettelse. Ændring eller fjernelse af denne indstilling senere påvirker ikke brugere, der allerede er provisioneret. Til gruppemedlemskab, der forbliver synkroniseret over tid, skal du i stedet bruge IdP-gruppetilknytning.",
+	"oidcAdditionalScopes": "Yderligere scopes",
+	"oidcAdditionalScopesHelpText": "Valgfrie kommaseparerede OAuth-scopes, der føjes til standardscopene openid, profile og email.",
 	"attributeMappingGroups": "Attributtilknytning for grupper",
 	"attributeMappingGroupsHelpText": "Claim-navn(e), der indeholder brugerens IdP-gruppemedlemskaber. Grupper fundet her synkroniseres til IdP-grupper ved hvert login og giver adgang til de CISO Assistant-brugergrupper, som en administrator har tilknyttet dem.",
 	"jitProvisioning": "SSO-automatisk provisionering (JIT)",
