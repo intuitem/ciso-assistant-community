@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from core.models import Answer, AnswerAttachment, Evidence, EvidenceRevision, Question
+from core.validators import sanitize_file_name
 
 #: Extension and magic are both checked — a renamed .exe is still an .exe.
 BLOCKED_EXTENSIONS = {
@@ -115,7 +116,9 @@ def add_attachment(answer, upload, user):
     return AnswerAttachment.objects.create(
         answer=answer,
         file=upload,
-        filename=(upload.name or "file")[:255],
+        # Whatever the client called it, kept only as a label — it is echoed back on
+        # download and follows the file if it is ever promoted to evidence.
+        filename=(sanitize_file_name(upload.name or "") or "file")[:255],
         size=upload.size,
         mime_type=(getattr(upload, "content_type", "") or "")[:127],
         file_hash=digest.hexdigest(),

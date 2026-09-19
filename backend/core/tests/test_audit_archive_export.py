@@ -165,3 +165,29 @@ class TestAuditArchiveExport:
             f"evidences/{ACCENTED_NAME}",
             "evidences/Procédure de gestion (2).pdf",
         }
+
+    def test_a_hostile_original_filename_cannot_escape_the_archive(
+        self, admin_client, audit
+    ):
+        """original_filename set directly, as promote_to_evidence sets it.
+
+        It carries a name typed by an external respondent, so it is sanitized on write
+        as well as at the zip boundary.
+        """
+        evidence = _attach(audit.folder, "Promue", "rapport.pdf")
+        revision = evidence.last_revision
+        revision.original_filename = "../../etc/passwd.pdf"
+        revision.save()
+
+        revision.refresh_from_db()
+        assert revision.original_filename == "passwd.pdf"
+
+        ra = RequirementAssessment.objects.filter(
+            compliance_assessment=audit, requirement__assessable=True
+        ).first()
+        ra.evidences.add(evidence)
+
+        with _archive(admin_client, audit) as archive:
+            entries = [n for n in archive.namelist() if n.startswith("evidences/")]
+
+        assert entries == ["evidences/passwd.pdf"]

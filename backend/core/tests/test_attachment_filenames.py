@@ -63,7 +63,7 @@ def test_unsafe_names_are_defused(uploaded, stored):
 
 
 def test_a_name_sanitized_down_to_nothing_still_yields_a_file():
-    assert _sanitized("/tmp/. .pdf") == "file.pdf"
+    assert _sanitized(". .pdf") == "file.pdf"
 
 
 def test_extension_allowlist_still_applies():
@@ -118,3 +118,39 @@ def test_archive_names_disambiguate_collisions():
     assert names["3"] == "PROCÉDURE (3).pdf"
     assert "4" not in names
     assert len({n.lower() for n in names.values()}) == len(names)
+
+
+@pytest.mark.parametrize(
+    "hostile",
+    [
+        "../../etc/passwd.pdf",
+        "../../../root/.ssh/authorized_keys.txt",
+        r"..\..\Windows\System32\drivers\etc\hosts.txt",
+        "evidences/../../escape.pdf",
+        "/absolute/path.pdf",
+    ],
+)
+def test_archive_entry_names_cannot_traverse(hostile):
+    """A zip entry name is never trusted, whatever put it in original_filename.
+
+    AnswerAttachment.filename is typed by an external respondent and follows the file
+    into EvidenceRevision on promotion, so the archive builder re-sanitizes.
+    """
+    from core.views import build_evidence_archive_names
+
+    class _Revision:
+        def __init__(self, name):
+            self.attachment = SimpleNamespace(name="evidence/stored.pdf")
+            self.filename = lambda: name
+
+    class _Evidence:
+        def __init__(self, id, name):
+            self.id = id
+            self.last_revision = _Revision(name)
+
+    entry = build_evidence_archive_names([_Evidence("1", hostile)])["1"]
+
+    assert "/" not in entry
+    assert "\\" not in entry
+    assert not entry.startswith(".")
+    assert ".." not in entry.split(".pdf")[0]

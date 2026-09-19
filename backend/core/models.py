@@ -5644,9 +5644,12 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             # archive never sees it again (SUP-1791). Uncommitted means the file has
             # not reached storage yet, so `.name` is still the one the client sent.
             if not self.attachment._committed and not self.original_filename:
-                self.original_filename = sanitize_file_name(
-                    os.path.basename(self.attachment.name or "")
-                )[:255]
+                self.original_filename = os.path.basename(self.attachment.name or "")
+
+            # Sanitized on every write, not just on capture: a promoted answer
+            # attachment carries a name typed by an external respondent, and this
+            # field becomes a zip entry name in the audit archive.
+            self.original_filename = sanitize_file_name(self.original_filename)[:255]
 
             # Check if this is a new attachment or if it has changed
             should_compute_hash = False

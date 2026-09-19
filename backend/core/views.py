@@ -161,6 +161,7 @@ from rest_framework.exceptions import (
 
 
 from core.helpers import *
+from core.validators import sanitize_file_name
 from core.answer_attachments import (
     answer_for_upload,
     AttachmentError,
@@ -16439,7 +16440,10 @@ def build_evidence_archive_names(evidences: Sequence[Evidence]) -> dict:
         revision = evidence.last_revision
         if not revision or not revision.attachment:
             continue
-        base = revision.filename()
+        # Re-sanitized at the boundary rather than trusted: rows written before
+        # original_filename was sanitized on write would otherwise become a
+        # traversal-capable zip entry.
+        base = sanitize_file_name(revision.filename() or "") or "file"
         stem, extension = os.path.splitext(base)
         candidate, counter = base, 1
         # Case-insensitively: the archive is often extracted on Windows or macOS.
