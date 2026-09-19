@@ -18,6 +18,7 @@ import zipfile
 import tempfile
 from datetime import date, datetime, timedelta, timezone
 from types import MappingProxyType
+from collections.abc import Sequence
 from typing import Dict, Any, List, Tuple, Final
 import time
 from django.db.models import (
@@ -160,12 +161,14 @@ from rest_framework.exceptions import (
 
 
 from core.helpers import *
+from core.validators import sanitize_file_name
 from core.answer_attachments import (
     answer_for_upload,
     AttachmentError,
     add_attachment,
     attachments_for,
     promote_to_evidence,
+    safe_filename_header,
 )
 from core.answer_attachments import serialize as serialize_attachment
 from core.answer_attachments import serve as serve_attachment
@@ -10851,7 +10854,11 @@ class EvidenceViewSet(BaseModelViewSet):
                 response = HttpResponse(
                     revision.attachment,
                     content_type=mimetypes.guess_type(filename)[0],
-                    headers={"Content-Disposition": f"attachment; filename={filename}"},
+                    headers={
+                        "Content-Disposition": safe_filename_header(
+                            "attachment", filename
+                        )
+                    },
                     status=status.HTTP_200_OK,
                 )
         return response
@@ -11220,7 +11227,9 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
                     evidence.attachment,
                     content_type=content_type,
                     headers={
-                        "Content-Disposition": f"attachment; filename={evidence.filename()}"
+                        "Content-Disposition": safe_filename_header(
+                            "attachment", evidence.filename()
+                        )
                     },
                     status=status.HTTP_200_OK,
                 )
@@ -14113,7 +14122,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         if UUID(pk) in object_ids_view:
             compliance_assessment = self.get_object()
-            (index_content, evidences) = generate_html(compliance_assessment)
+            (index_content, evidences, archive_names) = generate_html(
+                compliance_assessment
+            )
             zip_name = f"{sanitize_filename(compliance_assessment.name)}-{sanitize_filename(compliance_assessment.framework.name)}-{datetime.now():%Y-%m-%d-%H-%M}.zip"
 
             # Create temporary file that will be automatically deleted
@@ -14122,25 +14133,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             try:
                 with zipfile.ZipFile(temp_file, "w") as zipf:
                     for evidence in evidences:
-                        if (
-                            evidence.last_revision
-                            and evidence.last_revision.attachment
-                            and default_storage.exists(
-                                evidence.last_revision.attachment.name
+                        # last_revision re-queries; omit one file rather than abort.
+                        entry_name = archive_names.get(evidence.id)
+                        revision = evidence.last_revision
+                        if not entry_name or not revision or not revision.attachment:
+                            continue
+                        if not default_storage.exists(revision.attachment.name):
+                            continue
+                        with default_storage.open(
+                            revision.attachment.name
+                        ) as attachment_file:
+                            zipf.writestr(
+                                f"evidences/{entry_name}", attachment_file.read()
                             )
-                        ):
-                            with default_storage.open(
-                                evidence.last_revision.attachment.name
-                            ) as attachment_file:
-                                zipf.writestr(
-                                    os.path.join(
-                                        "evidences",
-                                        os.path.basename(
-                                            evidence.last_revision.attachment.name
-                                        ),
-                                    ),
-                                    attachment_file.read(),
-                                )
                     zipf.writestr("index.html", index_content)
 
                 # Seek to beginning for reading
@@ -16460,9 +16465,33 @@ def get_build(request):
 # NOTE: Important functions/classes from old views.py, to be reviewed
 
 
+def build_evidence_archive_names(evidences: Sequence[Evidence]) -> dict:
+    """Zip entry name per evidence, unique within one archive.
+
+    Computed once for both the template and the zip writer: a divergence is a dead link.
+    """
+    names = {}
+    taken = set()
+    for evidence in sorted(evidences, key=lambda e: str(e.id)):
+        revision = evidence.last_revision
+        if not revision or not revision.attachment:
+            continue
+        # Never trusted: an unsanitized row would be a traversal-capable zip entry.
+        base = sanitize_file_name(revision.filename() or "") or "file"
+        stem, extension = os.path.splitext(base)
+        candidate, counter = base, 1
+        # Case-insensitive: the archive is often extracted on Windows or macOS.
+        while candidate.lower() in taken:
+            counter += 1
+            candidate = f"{stem} ({counter}){extension}"
+        taken.add(candidate.lower())
+        names[evidence.id] = candidate
+    return names
+
+
 def generate_html(
     compliance_assessment: ComplianceAssessment,
-) -> Tuple[str, list[Evidence]]:
+) -> Tuple[str, list[Evidence], dict]:
     selected_evidences = []
 
     requirement_nodes = RequirementNode.objects.filter(
@@ -16595,16 +16624,18 @@ def generate_html(
         top_level_nodes_data.append(node_data)
         selected_evidences += node_evidences
 
+    evidences = list(set(selected_evidences))
+    archive_names = build_evidence_archive_names(evidences)
+
     data = {
         "compliance_assessment": compliance_assessment,
         "top_level_nodes": top_level_nodes_data,
         "assessments": assessments,
         "ancestors": ancestors,
+        "archive_names": archive_names,
     }
 
-    return render_to_string("core/audit_report.html", data), list(
-        set(selected_evidences)
-    )
+    return render_to_string("core/audit_report.html", data), evidences, archive_names
 
 
 def export_mp_csv(request):
