@@ -917,29 +917,29 @@ Reference is `en.json`; coverage = share of reference keys present in each local
 
 ## Built With 💜
 
+- [Caddy](https://caddyserver.com) - The coolest reverse Proxy
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
 - [Django REST Framework](https://www.django-rest-framework.org/) - Toolkit for building Web APIs
 - [django-allauth](https://allauth.org/) - Authentication, MFA and SSO
-- [Huey](https://huey.readthedocs.io/en/latest/) - A lightweight task queue
-- [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
-- [Svelte](https://svelte.dev) & [SvelteKit](https://svelte.dev/docs/kit) - Frontend Framework
-- [Skeleton](https://www.skeleton.dev) - UI toolkit for Svelte and Tailwind
-- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
-- [Vite](https://vite.dev) - Frontend build tool
+- [Docker](https://www.docker.com/) - Container Engine
 - [eCharts](https://echarts.apache.org) - Charting library
-- [unovis](https://unovis.dev) - Complementary charting library
-- [Svelte Flow](https://svelteflow.dev) - Node-based graph editors
 - [Font Awesome](https://fontawesome.com) - Icons
+- [Gitbook](https://www.gitbook.com) - Documentation platform
+- [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
+- [Huey](https://huey.readthedocs.io/en/latest/) - A lightweight task queue
 - [inlang](https://inlang.com/) - The ecosystem to globalize your software
-- [WeasyPrint](https://weasyprint.org/) - HTML to PDF rendering
-- [Typst](https://typst.app) - The new foundation for documents
+- [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
 - [Qdrant](https://qdrant.tech) - Vector database powering the AI features
 - [Sentence Transformers](https://sbert.net) - Embeddings for semantic search
-- [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
+- [Skeleton](https://www.skeleton.dev) - UI toolkit for Svelte and Tailwind
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
-- [Docker](https://www.docker.com/) - Container Engine
-- [Caddy](https://caddyserver.com) - The coolest reverse Proxy
-- [Gitbook](https://www.gitbook.com) - Documentation platform
+- [Svelte](https://svelte.dev) & [SvelteKit](https://svelte.dev/docs/kit) - Frontend Framework
+- [Svelte Flow](https://svelteflow.dev) - Node-based graph editors
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- [Typst](https://typst.app) - The new foundation for documents
+- [unovis](https://unovis.dev) - Complementary charting library
+- [Vite](https://vite.dev) - Frontend build tool
+- [WeasyPrint](https://weasyprint.org/) - HTML to PDF rendering
 
 ## Security
 
