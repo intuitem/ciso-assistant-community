@@ -156,6 +156,10 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         {Status.VALIDATED, Status.PUBLISHED, Status.DEPRECATED}
     )
 
+    ACTIVE_STATUSES = frozenset(
+        {Status.DRAFT, Status.CHANGE_REQUESTED, Status.IN_REVIEW, Status.VALIDATED}
+    )
+
     document = models.ForeignKey(
         ManagedDocument, on_delete=models.CASCADE, related_name="revisions"
     )
