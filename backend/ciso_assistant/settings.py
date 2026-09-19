@@ -17,7 +17,6 @@ import logging.config
 import structlog
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
-import ssl
 from . import meta
 
 
@@ -585,17 +584,9 @@ EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in 
     "yes",
 )
 logger.info("EMAIL_FORCE_TLS_1_2: %s", EMAIL_FORCE_TLS_1_2)
-
-
-def _build_tls12_context():
-    context = ssl.create_default_context()
-    context.minimum_version = ssl.TLSVersion.TLSv1_2
-    context.maximum_version = ssl.TLSVersion.TLSv1_2
-    context.set_ciphers("ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
-    return context
-
-
-EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS_1_2 else None
+# Applies EMAIL_FORCE_TLS_1_2 (see core.email_backend). Overridden below when
+# MAIL_DEBUG is on.
+EMAIL_BACKEND = "core.email_backend.EmailBackend"
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
 logger.info("EMAIL_TIMEOUT: %s", EMAIL_TIMEOUT)
