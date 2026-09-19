@@ -4007,6 +4007,8 @@ export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 const FIELD_COMPONENT_MAP = {
 	notifications: {
+		// `title` has no value in the payload; the component computes it (see
+		// NotificationTitle).
 		title: NotificationTitle
 	},
 	commitments: {

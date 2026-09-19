@@ -24,7 +24,6 @@ class Notification(AbstractBaseModel, FolderMixin):
         verbose_name=_("Recipient"),
     )
     type = models.CharField(max_length=100, db_index=True, verbose_name=_("Type"))
-    title = models.CharField(max_length=255, verbose_name=_("Title"))
 
     content_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, verbose_name=_("Target type")
@@ -32,10 +31,10 @@ class Notification(AbstractBaseModel, FolderMixin):
     object_id = models.UUIDField(verbose_name=_("Target id"))
     target = GenericForeignKey("content_type", "object_id")
 
-    # The variables the title renders from, so the frontend can re-render it in the
-    # viewer's current language instead of the one frozen at write time. `title` stays
-    # as the written-once fallback: it keeps server-side search working and still
-    # renders if a type or its message is unknown to the client.
+    # The variables the row's title renders from. The title itself is not stored: it
+    # is a presentation concern, rendered client-side from the message catalogs in
+    # whatever language the viewer is using. Storing it would freeze the language at
+    # write time and duplicate 25 locales' worth of strings the product already has.
     context = models.JSONField(default=dict, blank=True, verbose_name=_("Context"))
 
     is_read = models.BooleanField(default=False, verbose_name=_("Read"))
@@ -55,4 +54,4 @@ class Notification(AbstractBaseModel, FolderMixin):
         ]
 
     def __str__(self) -> str:
-        return self.title
+        return f"{self.type} ({self.recipient_id})"

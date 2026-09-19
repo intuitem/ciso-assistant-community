@@ -25,7 +25,10 @@ class NotificationViewSet(BaseModelViewSet):
     serializers_module = "notifications.serializers"
     permission_classes = [IsAuthenticated, IsRecipient]
     filterset_fields = ["is_read", "type", "folder", "content_type"]
-    search_fields = ["title"]
+    # Titles are rendered client-side, so there is no text column to search. `type`
+    # keeps the search box functional (it matches the type key); the real filters are
+    # read state and category.
+    search_fields = ["type"]
     ordering = ["-created_at"]
 
     def get_queryset(self) -> models.query.QuerySet:

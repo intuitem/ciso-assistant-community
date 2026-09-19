@@ -76,7 +76,7 @@ def test_the_inbox_row_persists_across_the_whole_window(folder, owner, days_out)
         check_evidences_expiring_soon.call_local()
     row = _rows().get()
     assert row.object_id == ev.id
-    assert f"{days_out} day" in row.title
+    assert row.context["days_remaining"] == str(days_out)
 
 
 def test_the_row_clears_when_the_condition_stops_being_true(folder, owner):

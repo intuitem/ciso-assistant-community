@@ -2,16 +2,15 @@
 	import { m } from '$paraglide/messages';
 
 	/**
-	 * Render a notification's title in the *viewer's* current language.
+	 * Render a notification's title in the viewer's current language.
 	 *
-	 * The row stores a title rendered once, in whatever language the recipient
-	 * preferred when it was written — so switching language left old rows stranded,
-	 * and the 25 locales with no backend title file were stranded permanently. The
-	 * row also carries the variables it was rendered from, so the title can be
-	 * rebuilt here from the normal message catalogs instead.
+	 * Nothing about the title is stored: the row carries its `type` and the variables
+	 * it needs, and the wording lives in the message catalogs like every other string
+	 * in the product. That is what lets a language switch take effect on rows already
+	 * written, and what gives the other 25 locales titles for free.
 	 *
-	 * The stored title remains the fallback: an unknown type, or a locale whose
-	 * catalog has not been filled yet, still shows something rather than nothing.
+	 * This is a computed column: `cell` is empty because the API returns no title
+	 * field at all. Everything comes from `meta`.
 	 */
 	interface Props {
 		cell: any;
@@ -32,21 +31,14 @@
 
 	const title = $derived.by(() => {
 		const message = messageKey ? (m as Record<string, any>)[messageKey] : undefined;
-		const context = meta?.context;
-		// Rows written before the context was stored have none. Re-rendering those
-		// would print the parameter names verbatim, which is worse than a title in
-		// the wrong language.
-		if (typeof message !== 'function' || !context || Object.keys(context).length === 0) {
-			return cell;
-		}
+		// A type with no catalog entry yet: show the key rather than an empty cell, so
+		// the gap is visible instead of looking like a row with nothing in it.
+		if (typeof message !== 'function') return meta?.type ?? '';
 		try {
-			const rendered = message(context);
-			// A message whose parameters do not match the stored context leaves them
-			// unsubstituted; the frozen title is at least complete.
-			return /\{[a-z_]+\}/.test(rendered) ? cell : rendered;
+			return message(meta?.context ?? {});
 		} catch (error) {
 			console.error(`Could not render ${messageKey}:`, error);
-			return cell;
+			return meta?.type ?? '';
 		}
 	});
 </script>

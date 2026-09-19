@@ -16,7 +16,6 @@ class NotificationReadSerializer(BaseModelSerializer):
             "id",
             "type",
             "category",
-            "title",
             "context",
             "content_type",
             "target_model",

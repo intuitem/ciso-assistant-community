@@ -4,6 +4,7 @@ artefacts describing one set of notification types. Nothing but these tests stop
 them drifting apart.
 """
 
+import json
 import re
 from pathlib import Path
 
@@ -11,7 +12,6 @@ import pytest
 
 from core.email_utils import TEMPLATE_BASE_PATH
 from notifications.registry import NOTIFICATION_REGISTRY
-from notifications.service import resolve_title
 
 LOCALES = ("en", "fr")
 CATEGORIES = {"assignments", "approvals", "deadlines", "updates", "account"}
@@ -44,52 +44,9 @@ def test_email_template_is_present_exactly_when_email_is_a_channel(key, meta):
 
 
 @pytest.mark.parametrize("key,meta", ENTRIES)
-def test_in_app_types_have_a_title_in_every_locale(key, meta):
-    for locale in LOCALES:
-        title = resolve_title(key, locale)
-        if "in_app" in meta["channels"]:
-            assert title, f"{key}/{locale} is an in-app type with no title"
-        else:
-            assert title is None, (
-                f"{key}/{locale} has no in-app channel but has a title"
-            )
-
-
-@pytest.mark.parametrize("key,meta", ENTRIES)
-def test_title_placeholders_are_declared_as_context(key, meta):
-    """A title's variables are the *notification's* context, declared in this layer.
-
-    Deliberately not checked against the email template's variables: a condition
-    type's email is a digest (${control_count}, ${control_list}) while its inbox row
-    is per object (${control_name}). They are different contexts on purpose, which is
-    why the registries are layered rather than merged.
-    """
-    declared = set(meta["context"])
-    for locale in LOCALES:
-        title = resolve_title(key, locale)
-        if not title:
-            continue
-        used = set(PLACEHOLDER.findall(title))
-        assert used <= declared, (
-            f"{key}/{locale} uses undeclared {sorted(used - declared)}"
-        )
-
-
-@pytest.mark.parametrize("key,meta", ENTRIES)
 def test_context_is_empty_exactly_for_types_with_no_inbox_row(key, meta):
     if "in_app" not in meta["channels"]:
         assert meta["context"] == [], key
-
-
-def test_titles_files_have_no_entry_for_a_type_without_an_inbox():
-    from notifications.service import _titles
-
-    for locale in LOCALES:
-        for key in _titles(locale):
-            assert key in NOTIFICATION_REGISTRY, f"{locale}: unknown type {key}"
-            assert "in_app" in NOTIFICATION_REGISTRY[key]["channels"], (
-                f"{locale}: {key}"
-            )
 
 
 def test_account_types_are_email_only():
@@ -109,19 +66,50 @@ def test_condition_mode_matches_the_deadlines_category():
     assert len(conditions) == 10
 
 
-@pytest.mark.django_db
-@pytest.mark.parametrize("locale", LOCALES)
-def test_an_email_override_cannot_reach_the_title(locale):
-    """The layering, asserted: titles live above the email templates, so an
-    enterprise override of a template leaves the inbox row untouched."""
-    from core.models import CustomEmailTemplate
+def _catalog(locale: str):
+    """The frontend message catalog, or None when it is not in this checkout.
 
-    before = resolve_title("expired_controls", locale)
-    CustomEmailTemplate.objects.create(
-        template_key="expired_controls",
-        language=locale,
-        subject="overridden subject",
-        body="overridden body",
-        is_active=True,
+    Titles moved into the product's message catalogs so they follow the viewer's
+    language, which leaves this as the only thing tying a notification type to the
+    string that names it. The backend image does not ship the frontend, so this
+    skips rather than fails there.
+    """
+    path = (
+        Path(__file__).resolve().parents[3] / "frontend" / "messages" / f"{locale}.json"
     )
-    assert resolve_title("expired_controls", locale) == before
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
+
+@pytest.mark.parametrize("locale", LOCALES)
+def test_every_in_app_type_has_a_title_message(locale):
+    catalog = _catalog(locale)
+    if catalog is None:
+        pytest.skip("frontend messages not present in this checkout")
+
+    missing = [
+        key
+        for key, meta in NOTIFICATION_REGISTRY.items()
+        if "in_app" in meta["channels"]
+        and f"notificationTitle{''.join(w.capitalize() for w in key.split('_'))}"
+        not in catalog
+    ]
+    assert not missing, f"{locale}: no title message for {missing}"
+
+
+@pytest.mark.parametrize("locale", LOCALES)
+def test_title_messages_only_use_declared_context(locale):
+    """A message referencing a variable the producer never sends would render the
+    parameter name to the user."""
+    catalog = _catalog(locale)
+    if catalog is None:
+        pytest.skip("frontend messages not present in this checkout")
+
+    for key, meta in NOTIFICATION_REGISTRY.items():
+        name = f"notificationTitle{''.join(w.capitalize() for w in key.split('_'))}"
+        message = catalog.get(name)
+        if not message:
+            continue
+        used = set(re.findall(r"\{([a-z_]+)\}", message))
+        assert used <= set(meta["context"]), (
+            f"{locale}/{key} uses undeclared {sorted(used - set(meta['context']))}"
+        )

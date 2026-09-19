@@ -25,7 +25,8 @@ Fields:
                   (${control_count}, ${control_list}) while its inbox row is per object
                   (${control_name}). That difference is the point of the layering.
 
-Row titles are not here: they are per-locale, in notifications/titles/{en,fr}.yaml.
+Row titles are not here and not stored: the frontend renders them from `context`
+using the normal message catalogs, in the viewer's language.
 """
 
 NOTIFICATION_REGISTRY = {

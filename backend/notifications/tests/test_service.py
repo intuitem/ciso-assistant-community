@@ -31,13 +31,13 @@ def rows(user=None):
     return qs.filter(recipient=user) if user else qs
 
 
-def test_writes_one_row_and_renders_the_title(user, control):
+def test_writes_one_row_with_its_context(user, control):
     assert (
         len(notify("expired_controls", [user], control, {"control_name": control.name}))
         == 1
     )
     row = rows(user).get()
-    assert row.title == "Control 'Encrypt backups' has expired"
+    assert row.context == {"control_name": "Encrypt backups"}
     assert row.is_read is False
     assert row.target == control
     assert row.folder == control.folder
@@ -96,8 +96,10 @@ def test_a_target_without_a_folder_is_refused(user):
 
 
 def test_a_missing_context_variable_still_writes_a_row(user, control):
+    """The title renders client-side, so a producer that forgets a variable leaves a
+    gap in one row rather than losing the notification."""
     assert len(notify("expired_controls", [user], control, {})) == 1
-    assert "${control_name}" in rows(user).get().title
+    assert rows(user).get().context == {}
 
 
 def test_third_party_users_get_no_inbox(control, db):

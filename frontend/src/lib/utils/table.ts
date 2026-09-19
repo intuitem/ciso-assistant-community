@@ -55,6 +55,10 @@ interface ListViewFieldsConfig {
 		optionalFields?: { head: string[]; body: string[] };
 		meta?: string[];
 		breadcrumb_link_disabled?: boolean;
+		// `description` is offered as an opt-in column on every model, since most have
+		// one. Set false for a model that does not: otherwise the column picker offers
+		// a column that can only ever be blank.
+		hasDescription?: boolean;
 		// Give rows matching a condition more visual weight, the way an inbox bolds
 		// what you have not dealt with. Purely presentational: it never changes what
 		// is listed, only how loudly. `equals` defaults to true, `class` to a
@@ -3018,7 +3022,12 @@ export const listViewFields = {
 	},
 	notifications: {
 		head: ['read', 'category', 'title', 'created_at'],
+		// `title` is a computed column: the API returns no such field, it is built
+		// client-side by NotificationTitle from `type` + `context` so it renders in
+		// the viewer's language. tableSourceMapper keeps the key even with no value,
+		// which is what lets a column be computed rather than stored.
 		body: ['is_read', 'category', 'title', 'created_at'],
+		hasDescription: false,
 		rowEmphasis: { field: 'is_read', equals: false },
 		rowNavigation: { modelField: 'target_model', idField: 'object_id', markField: 'is_read' },
 		filters: {
