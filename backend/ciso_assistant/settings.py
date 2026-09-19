@@ -486,6 +486,7 @@ INSTALLED_APPS = [
     "doc_management",
     "portals",
     "core",
+    "notifications",
     "cal",
     "django_filters",
     "library",

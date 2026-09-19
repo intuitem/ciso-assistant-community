@@ -32,10 +32,14 @@ const POLARITY_MAP: Map<string, BooleanPolarity> = new Map([
 	['recovery_documented', 'warning_when_false'],
 	['recovery_tested', 'warning_when_false'],
 	['recovery_targets_met', 'warning_when_false'],
-	['within_tolerance', 'warning_when_false']
+	['within_tolerance', 'warning_when_false'],
 
 	// Model-specific overrides — use "urlmodel:field" format, e.g.:
 	// ['contracts:is_active', 'warning'],
+
+	// An inbox emphasises what you have NOT dealt with: unread is the loud state,
+	// read is the quiet one. Without this the dot draws the eye to handled rows.
+	['notifications:is_read', 'warning_when_false']
 ]);
 
 export function getBooleanPolarity(fieldName: string, urlModel?: string): BooleanPolarity {

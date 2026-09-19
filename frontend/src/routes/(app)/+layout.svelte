@@ -27,6 +27,7 @@
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle/ThemeToggle.svelte';
+	import NotificationBell from '$lib/components/NotificationBell/NotificationBell.svelte';
 	import ChatWidget from '$lib/components/ChatWidget/ChatWidget.svelte';
 	import {
 		interceptExternalLinks,
@@ -191,6 +192,9 @@
 				{/if}
 			</div>
 			<div class="flex items-center gap-2">
+				{#if !data?.user?.is_third_party}
+					<NotificationBell />
+				{/if}
 				<ThemeToggle />
 				{#if data?.featureflags?.custom_portals && !data?.user?.is_third_party}
 					<a

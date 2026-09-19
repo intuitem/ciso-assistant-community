@@ -25,6 +25,10 @@
 		// Optional i18n key for an action-specific warning (receives {count}),
 		// e.g. a cascade disclosure on delete.
 		confirmMessage?: string;
+		// A change_field action whose value is fixed by its config ("mark as read")
+		// rather than chosen by the user. Skips the picker entirely: the modal becomes
+		// a plain confirmation and this value is what gets sent.
+		fixedValue?: string;
 		onConfirm: (value?: string | string[]) => void;
 	}
 
@@ -36,6 +40,7 @@
 		enableDoubleDash = false,
 		multiSelect = false,
 		confirmMessage = undefined,
+		fixedValue = undefined,
 		onConfirm
 	}: Props = $props();
 
@@ -47,6 +52,8 @@
 	let deleteConfirmInput: string = $state('');
 
 	const isValueAction = actionType !== 'delete';
+	// Only a value action *without* a fixed value needs the user to choose something.
+	const needsSelection = isValueAction && fixedValue === undefined;
 	const yes = m.yes().toLowerCase();
 
 	const filteredOptions = $derived(
@@ -85,7 +92,7 @@
 	}
 
 	onMount(async () => {
-		if (isValueAction && optionsEndpoint) {
+		if (needsSelection && optionsEndpoint) {
 			loading = true;
 			try {
 				const res = await fetch(`/${optionsEndpoint}`);
@@ -107,6 +114,8 @@
 	function handleConfirm() {
 		if (actionType === 'delete') {
 			onConfirm();
+		} else if (fixedValue !== undefined) {
+			onConfirm(fixedValue);
 		} else if (multiSelect) {
 			onConfirm(selectedValues);
 		} else {
@@ -127,9 +136,11 @@
 	const canConfirm = $derived(
 		actionType === 'delete'
 			? !!deleteConfirmInput && deleteConfirmInput.trim().toLowerCase() === yes
-			: multiSelect
-				? selectedValues.length > 0
-				: selectedValue !== ''
+			: fixedValue !== undefined
+				? true
+				: multiSelect
+					? selectedValues.length > 0
+					: selectedValue !== ''
 	);
 </script>
 
@@ -170,7 +181,9 @@
 				</article>
 			{/if}
 
-			{#if loading}
+			{#if !needsSelection}
+				<!-- value comes from the action's config; nothing to pick -->
+			{:else if loading}
 				<div class="text-sm text-surface-600-400">Loading...</div>
 			{:else if multiSelect}
 				<div class="space-y-2">

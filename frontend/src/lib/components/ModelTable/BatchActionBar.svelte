@@ -133,6 +133,7 @@
 				enableDoubleDash: action.enableDoubleDash ?? false,
 				multiSelect: action.multiSelect ?? false,
 				confirmMessage: action.confirmMessage,
+				fixedValue: action.value,
 				onConfirm: async (value?: string | string[]) => {
 					try {
 						const res = await fetch(`/${URLModel}/batch-action`, {

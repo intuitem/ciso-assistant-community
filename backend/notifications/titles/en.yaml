@@ -1,0 +1,34 @@
+# Inbox row titles, one per notification type, per locale.
+#
+# These live in the notification layer, NOT inside the email templates: a title is
+# what the in-app row says, an email template is one channel's rendering. Keeping
+# them apart is also what stops an enterprise CustomEmailTemplate override — which
+# stores subject and body only, and replaces the built-in file rather than merging
+# over it — from silently erasing the title of a type it customises.
+#
+# Types with no in_app channel have no entry here.
+applied_control_assignment: "You have been assigned to control '${control_name}'"
+applied_control_expiring_soon: "Control '${control_name}' expires in ${days_remaining} day(s)"
+assignment_activated: "Your assignment on audit '${assessment_name}' has started"
+assignment_reopened: "Your assignment on audit '${assessment_name}' was reopened"
+assignment_reviewed: "Your assignment on audit '${assessment_name}' was ${decision}"
+assignment_submitted: "An assignment on audit '${assessment_name}' awaits your review"
+compliance_assessment_assignment: "You have been assigned to audit '${assessment_name}'"
+compliance_assessment_due_soon: "Audit '${assessment_name}' is due in ${days_remaining} day(s)"
+evidence_expiring_soon: "Evidence '${evidence_name}' expires in ${days_remaining} day(s)"
+expired_controls: "Control '${control_name}' has expired"
+expired_evidences: "Evidence '${evidence_name}' has expired"
+expired_security_exceptions: "Exception '${exception_name}' has expired"
+quick_form_reopened: "Quick form '${response_name}' was sent back to you"
+quick_form_started: "Quick form '${response_name}' is ready for your input"
+quick_form_submitted: "Quick form '${response_name}' awaits your review"
+risk_scenario_assignment: "You have been assigned to risk scenario '${scenario_name}'"
+security_exception_assignment: "You have been assigned to exception '${exception_name}'"
+security_exception_expiring_soon: "Exception '${exception_name}' expires in ${days_remaining} day(s)"
+security_exception_status_changed: "Exception '${exception_name}' is now ${new_status}"
+task_node_due_soon: "Task '${task_name}' is due in ${days_remaining} day(s)"
+task_node_overdue: "Task '${task_name}' is overdue"
+task_template_assignment: "You have been assigned to task '${task_name}'"
+validation_deadline: "Validation '${validation_ref_id}' is due in ${days} day(s)"
+validation_flow_created: "Validation '${validation_ref_id}' needs your approval"
+validation_flow_updated: "Validation '${validation_ref_id}' is now ${new_status}"

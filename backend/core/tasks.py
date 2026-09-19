@@ -29,9 +29,20 @@ import structlog
 
 
 from django.core.management import call_command
+from notifications.service import clear_stale, notify
 
 logging.config.dictConfig(settings.LOGGING)
 logger = structlog.getLogger(__name__)
+
+# Days before a deadline on which email escalates. Descending: the first is also the
+# width of the window the inbox tracks continuously (see check_evidences_expiring_soon).
+EXPIRY_NOTICE_DAYS = (30, 7, 1)
+
+
+def _actor_emails(actors) -> set:
+    """Flatten actors to addresses. notify() resolves them back to Users for the
+    in-app channel; an actor with no internal user simply gets email only."""
+    return {email for actor in actors for email in actor.get_emails() if email}
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
@@ -195,69 +206,52 @@ def check_applied_controls_expiring_tomorrow():
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="27"))
-def check_evidences_expiring_in_month():
-    """Check for Evidences expiring in 30 days"""
-    target_date = date.today() + timedelta(days=30)
-    evidences_expiring_soon = (
-        Evidence.objects.filter(expiry_date=target_date)
+def check_evidences_expiring_soon():
+    """Evidences approaching expiry.
+
+    Replaces the in_month / in_week / tomorrow trio. Email keeps exactly the
+    escalation it has always had -- one digest per recipient on the day an evidence
+    is 30, 7 or 1 days out -- while the inbox tracks the condition *continuously*,
+    because a row that appeared on day 30 and vanished on day 29 would not be a
+    condition at all. The two need different queries, which is why the three tasks
+    had to become one: only a task that sees the whole window can say which rows are
+    stale, and any one of the three would have cleared the other two's.
+    """
+    today = date.today()
+    expiring = (
+        Evidence.objects.filter(
+            expiry_date__gt=today,
+            expiry_date__lte=today + timedelta(days=EXPIRY_NOTICE_DAYS[0]),
+        )
         .exclude(status__in=["expired"])
         .prefetch_related("owner")
     )
 
-    owner_evidences = defaultdict(list)
-    for evidence in evidences_expiring_soon:
-        for owner in evidence.owner.all():
-            for email in owner.get_emails():
-                owner_evidences[email].append(evidence)
+    still_true = set()
+    by_horizon = {days: defaultdict(list) for days in EXPIRY_NOTICE_DAYS}
 
-    for owner_email, evidences in owner_evidences.items():
-        send_evidence_expiring_soon_notification(owner_email, evidences, days=30)
+    for evidence in expiring:
+        days_remaining = (evidence.expiry_date - today).days
+        recipients = {
+            email for owner in evidence.owner.all() for email in owner.get_emails()
+        }
+        for row in notify(
+            "evidence_expiring_soon",
+            recipients,
+            evidence,
+            {"evidence_name": str(evidence), "days_remaining": days_remaining},
+        ):
+            still_true.add((row.recipient_id, row.object_id))
 
+        if days_remaining in by_horizon:
+            for email in recipients:
+                by_horizon[days_remaining][email].append(evidence)
 
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="6", minute="30"))
-def check_evidences_expiring_in_week():
-    """Check for Evidences expiring in 7 days"""
-    target_date = date.today() + timedelta(days=7)
-    evidences_expiring_soon = (
-        Evidence.objects.filter(expiry_date=target_date)
-        .exclude(status__in=["expired"])
-        .prefetch_related("owner")
-    )
+    clear_stale("evidence_expiring_soon", still_true)
 
-    # Group by individual owner
-    owner_evidences = defaultdict(list)
-    for evidence in evidences_expiring_soon:
-        for owner in evidence.owner.all():
-            for email in owner.get_emails():
-                owner_evidences[email].append(evidence)
-
-    # Send personalized email to each owner
-    for owner_email, evidences in owner_evidences.items():
-        send_evidence_expiring_soon_notification(owner_email, evidences, days=7)
-
-
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="6", minute="35"))
-def check_evidences_expiring_tomorrow():
-    """Check for Evidences expiring in 1 day"""
-    target_date = date.today() + timedelta(days=1)
-    evidences_expiring_tomorrow = (
-        Evidence.objects.filter(expiry_date=target_date)
-        .exclude(status__in=["expired"])
-        .prefetch_related("owner")
-    )
-
-    # Group by individual owner
-    owner_evidences = defaultdict(list)
-    for evidence in evidences_expiring_tomorrow:
-        for owner in evidence.owner.all():
-            for email in owner.get_emails():
-                owner_evidences[email].append(evidence)
-
-    # Send personalized email to each owner
-    for owner_email, evidences in owner_evidences.items():
-        send_evidence_expiring_soon_notification(owner_email, evidences, days=1)
+    for days, owner_evidences in by_horizon.items():
+        for owner_email, evidences in owner_evidences.items():
+            send_evidence_expiring_soon_notification(owner_email, evidences, days=days)
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
@@ -274,6 +268,17 @@ def check_evidences_expired():
         for owner in evidence.owner.all():
             for email in owner.get_emails():
                 owner_evidences[email].append(evidence)
+
+    still_true = set()
+    for evidence in expired_evidences:
+        recipients = {
+            email for owner in evidence.owner.all() for email in owner.get_emails()
+        }
+        for row in notify(
+            "expired_evidences", recipients, evidence, {"evidence_name": str(evidence)}
+        ):
+            still_true.add((row.recipient_id, row.object_id))
+    clear_stale("expired_evidences", still_true)
 
     # Send personalized email to each owner
     for owner_email, evidences in owner_evidences.items():
@@ -823,6 +828,8 @@ def send_applied_control_assignment_notification(control_id, assigned_user_email
         "folder_name": control.folder.name if control.folder else "Default",
     }
 
+    notify("applied_control_assignment", assigned_user_emails, control, context)
+
     for email in assigned_user_emails:
         if email and check_email_configuration(email, [control]):
             rendered = render_email_template(
@@ -864,6 +871,8 @@ def send_task_template_assignment_notification(task_template_id, emails):
         "is_recurrent": "Yes" if task_template.is_recurrent else "No",
         "folder_name": task_template.folder.name if task_template.folder else "Default",
     }
+
+    notify("task_template_assignment", emails, task_template, context)
 
     for email in emails:
         if email and check_email_configuration(email, [task_template]):
@@ -912,6 +921,10 @@ def send_compliance_assessment_assignment_notification(
         "folder_name": assessment.folder.name if assessment.folder else "Default",
     }
 
+    notify(
+        "compliance_assessment_assignment", assigned_user_emails, assessment, context
+    )
+
     for email in assigned_user_emails:
         if email and check_email_configuration(email, [assessment]):
             rendered = render_email_template(
@@ -950,6 +963,8 @@ def send_risk_scenario_assignment_notification(scenario_id, assigned_user_emails
         "scenario_treatment": scenario.get_treatment_display(),
         "folder_name": scenario.folder.name if scenario.folder else "Default",
     }
+
+    notify("risk_scenario_assignment", assigned_user_emails, scenario, context)
 
     for email in assigned_user_emails:
         if email and check_email_configuration(email, [scenario]):
@@ -1182,6 +1197,13 @@ def send_security_exception_assignment_notification(exception_id, assigned_user_
         else "Default",
     }
 
+    notify(
+        "security_exception_assignment",
+        assigned_user_emails,
+        security_exception,
+        context,
+    )
+
     for email in assigned_user_emails:
         if email and check_email_configuration(email, [security_exception]):
             rendered = render_email_template(
@@ -1222,6 +1244,13 @@ def send_security_exception_status_notification(
         else "Default",
     }
 
+    notify(
+        "security_exception_status_changed",
+        recipient_emails,
+        security_exception,
+        context,
+    )
+
     for email in set(recipient_emails):
         if email and check_email_configuration(email, [security_exception]):
             rendered = render_email_template(
@@ -1246,6 +1275,16 @@ def send_validation_flow_created_notification(validation_flow):
         return
 
     approver_email = validation_flow.approver.email
+
+    notify(
+        "validation_flow_created",
+        [approver_email],
+        validation_flow,
+        {"validation_ref_id": validation_flow.ref_id},
+    )
+
+    # Below is the email channel only: it may be unusable while the inbox above still
+    # works, so the guard must not come before the notify() call.
     if not check_email_configuration(approver_email, [validation_flow]):
         return
 
@@ -1300,13 +1339,21 @@ def send_validation_flow_updated_notification(
     validation_flow_id, recipient_email, new_status, actor_name, event_notes
 ):
     """Send notification when a validation flow status changes."""
-    if not check_email_configuration(recipient_email, [validation_flow_id]):
-        return
-
     try:
         validation_flow = ValidationFlow.objects.get(id=validation_flow_id)
     except ValidationFlow.DoesNotExist:
         logger.error(f"ValidationFlow with id {validation_flow_id} not found")
+        return
+
+    notify(
+        "validation_flow_updated",
+        [recipient_email],
+        validation_flow,
+        {"validation_ref_id": validation_flow.ref_id, "new_status": new_status},
+    )
+
+    # Email channel only, hence after the inbox write (see above).
+    if not check_email_configuration(recipient_email, [validation_flow_id]):
         return
 
     from .email_utils import render_email_template
@@ -1596,6 +1643,8 @@ def send_assignment_activated_notification(assignment_id):
         "due_date": ca.due_date.strftime("%Y-%m-%d") if ca.due_date else "Not set",
     }
 
+    notify("assignment_activated", _actor_emails(assignment.actor.all()), ca, context)
+
     for actor in assignment.actor.all():
         for email in actor.get_emails():
             if email and check_email_configuration(email, [assignment]):
@@ -1645,6 +1694,8 @@ def send_assignment_submitted_notification(assignment_id):
             if email:
                 recipient_emails.add(email)
 
+    notify("assignment_submitted", recipient_emails, ca, context)
+
     for email in recipient_emails:
         if check_email_configuration(email, [assignment]):
             rendered = render_email_template(
@@ -1677,6 +1728,8 @@ def send_assignment_reopened_notification(assignment_id, observation=""):
         "assessment_name": ca.name,
         "reviewer_observation": observation,
     }
+
+    notify("assignment_reopened", _actor_emails(assignment.actor.all()), ca, context)
 
     for actor in assignment.actor.all():
         for email in actor.get_emails():
@@ -1714,6 +1767,8 @@ def send_assignment_reviewed_notification(
         "decision": decision.replace("_", " ").title(),
         "reviewer_observation": reviewer_observation,
     }
+
+    notify("assignment_reviewed", _actor_emails(assignment.actor.all()), ca, context)
 
     for actor in assignment.actor.all():
         for email in actor.get_emails():
@@ -1799,11 +1854,9 @@ def _quick_form_context(response) -> dict:
 def _notify_actors(actors, template_name, context, response) -> None:
     from .email_utils import render_email_template
 
-    recipient_emails = set()
-    for actor in actors:
-        for email in actor.get_emails():
-            if email:
-                recipient_emails.add(email)
+    recipient_emails = _actor_emails(actors)
+    notify(template_name, recipient_emails, response, context)
+
     for email in sorted(recipient_emails):
         if check_email_configuration(email, [response]):
             rendered = render_email_template(

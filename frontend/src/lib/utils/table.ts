@@ -20,6 +20,7 @@ import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/Ch
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
 import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
+import ToggleBooleanField from '$lib/components/ContextMenu/ToggleBooleanField.svelte';
 import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
 import MetricInstanceEditValue from '$lib/components/ContextMenu/metric-instances/EditValue.svelte';
 
@@ -54,6 +55,17 @@ interface ListViewFieldsConfig {
 		optionalFields?: { head: string[]; body: string[] };
 		meta?: string[];
 		breadcrumb_link_disabled?: boolean;
+		// Give rows matching a condition more visual weight, the way an inbox bolds
+		// what you have not dealt with. Purely presentational: it never changes what
+		// is listed, only how loudly. `equals` defaults to true, `class` to a
+		// semibold weight.
+		rowEmphasis?: { field: string; equals?: unknown; class?: string };
+		// Send a row click somewhere other than this model's own detail page. A
+		// notification is a pointer: opening one means opening the thing it is about.
+		// `modelField` holds the target's Django model name, `idField` its id, and the
+		// optional `markField` is a boolean PATCHed to true on open -- a row you opened
+		// is a row you saw.
+		rowNavigation?: { modelField: string; idField: string; markField?: string };
 		filters?: {
 			[key: string]: ListViewFilterConfig | undefined;
 		};
@@ -958,6 +970,27 @@ export const RISK_PROBABILITY_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		multiple: true
+	}
+};
+
+export const NOTIFICATION_READ_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'read',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+// `category` is a property of the notification type, not a column: the backend
+// expands it to type__in from the registry, so the options are a fixed vocabulary
+// rather than an endpoint.
+export const NOTIFICATION_CATEGORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'category',
+		optionsEndpoint: 'notifications/category',
+		multiple: false
 	}
 };
 
@@ -2983,6 +3016,17 @@ export const listViewFields = {
 		head: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator'],
 		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
 	},
+	notifications: {
+		head: ['read', 'category', 'title', 'created_at'],
+		body: ['is_read', 'category', 'title', 'created_at'],
+		rowEmphasis: { field: 'is_read', equals: false },
+		rowNavigation: { modelField: 'target_model', idField: 'object_id', markField: 'is_read' },
+		filters: {
+			is_read: NOTIFICATION_READ_FILTER,
+			category: NOTIFICATION_CATEGORY_FILTER,
+			created_at: CREATED_AT_FILTER
+		}
+	},
 	'security-exceptions': {
 		head: [
 			'ref_id',
@@ -3711,6 +3755,20 @@ export type FilterKeys = {
 }[keyof typeof listViewFields];
 
 export const contextMenuActions = {
+	// One click to flip read/unread: with only two values, picking from a submenu is
+	// an extra step for something you always want the opposite of.
+	notifications: [
+		{
+			component: ToggleBooleanField,
+			props: {
+				field: 'is_read',
+				labelWhenTrue: 'markAsUnread',
+				labelWhenFalse: 'markAsRead',
+				iconWhenTrue: 'fa-solid fa-envelope',
+				iconWhenFalse: 'fa-solid fa-envelope-open'
+			}
+		}
+	],
 	findings: [
 		{ component: ChangeChoiceField, props: { field: 'status', labelKey: 'changeStatus' } },
 		{ component: ChangeChoiceField, props: { field: 'severity', labelKey: 'changeSeverity' } },
@@ -3767,6 +3825,10 @@ export interface BatchActionConfig {
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
+	// A change_field action with a value fixed by config ("mark as read") rather than
+	// picked by the user. Mutually exclusive with optionsEndpoint: it skips the picker,
+	// so the whole action is one click plus a confirm.
+	value?: string;
 	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
 	children?: BatchActionConfig[];
@@ -3791,6 +3853,25 @@ export interface ParentActionConfig {
 export type TableBatchAction = BatchActionConfig | ParentActionConfig;
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
+	// Mark read and delete are the whole vocabulary: read stops the reminder,
+	// delete removes the message (docs/notification_center_shaping.md §4).
+	notifications: [
+		{
+			type: 'change_field',
+			label: 'markAsRead',
+			icon: 'fa-solid fa-envelope-open',
+			field: 'is_read',
+			value: 'true'
+		},
+		{
+			type: 'change_field',
+			label: 'markAsUnread',
+			icon: 'fa-solid fa-envelope',
+			field: 'is_read',
+			value: 'false'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	'document-templates': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	'asset-assessments': [
 		{
