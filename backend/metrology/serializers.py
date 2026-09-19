@@ -3,6 +3,7 @@ import json
 import jsonschema
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
+import structlog
 from rest_framework import serializers
 
 from core.models import OrganisationObjective
@@ -17,6 +18,8 @@ from metrology.models import (
     DashboardWidget,
 )
 from metrology.builtin_metrics import get_available_metrics_for_model
+
+logger = structlog.getLogger(__name__)
 
 QUALITATIVE_VALUE_SCHEMA = {
     "type": "object",
@@ -583,29 +586,66 @@ class BuiltinMetricSampleReadSerializer(BaseModelSerializer):
             "updated_at",
         ]
 
+    def _resolved(self):
+        """Per-serializer memo for values shared by many samples.
+
+        A sample carries a content type and a GenericForeignKey target, and
+        neither can be select_related. Resolving them per row costs two queries
+        each, while a history is by definition many samples of the *same* object:
+        for_object returns one object's whole series, so every row resolves the
+        identical pair. The memo is on the serializer, which DRF reuses as
+        `self.child` for every row of a many=True render.
+        """
+        if not hasattr(self, "_resolved_cache"):
+            self._resolved_cache = {}
+        return self._resolved_cache
+
     def get_content_type_display(self, obj):
         """Get the human-readable content type name"""
-        return obj.content_type.model.title()
+        # get_for_id is process-cached, so this does not hit the database.
+        return ContentType.objects.get_for_id(obj.content_type_id).model.title()
 
     def get_object_name(self, obj):
         """Get the name of the target object"""
-        try:
-            target_obj = obj.object
-            if target_obj:
-                return str(target_obj)
-        except Exception:
-            pass
-        return None
+        cache = self._resolved()
+        key = ("name", obj.content_type_id, obj.object_id)
+        if key not in cache:
+            name = None
+            try:
+                model_class = ContentType.objects.get_for_id(
+                    obj.content_type_id
+                ).model_class()
+                if model_class is not None:
+                    target = model_class.objects.filter(id=obj.object_id).first()
+                    name = str(target) if target is not None else None
+            except Exception:
+                logger.warning(
+                    "Could not resolve builtin metric sample target",
+                    sample_id=str(obj.pk),
+                    exc_info=True,
+                )
+            cache[key] = name
+        return cache[key]
 
     def get_available_metrics(self, obj):
         """Get the list of available metrics for this object type"""
-        model_name = obj.content_type.model_class().__name__
-        metrics = get_available_metrics_for_model(model_name)
-        return {
-            key: {
-                "label": str(meta["label"]),
-                "type": meta["type"],
-                "description": str(meta["description"]),
+        cache = self._resolved()
+        key = ("metrics", obj.content_type_id)
+        if key not in cache:
+            model_class = ContentType.objects.get_for_id(
+                obj.content_type_id
+            ).model_class()
+            metrics = (
+                get_available_metrics_for_model(model_class.__name__)
+                if model_class is not None
+                else {}
+            )
+            cache[key] = {
+                key_name: {
+                    "label": str(meta["label"]),
+                    "type": meta["type"],
+                    "description": str(meta["description"]),
+                }
+                for key_name, meta in metrics.items()
             }
-            for key, meta in metrics.items()
-        }
+        return cache[key]

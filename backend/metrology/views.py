@@ -275,9 +275,13 @@ class BuiltinMetricSampleViewSet(BaseModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        samples = BuiltinMetricSample.objects.filter(
-            content_type=content_type, object_id=object_id
-        ).order_by("-date")
+        samples = (
+            BuiltinMetricSample.objects.filter(
+                content_type=content_type, object_id=object_id
+            )
+            .select_related("content_type")
+            .order_by("-date")
+        )
 
         serializer = BuiltinMetricSampleReadSerializer(samples, many=True)
         return Response(serializer.data)
