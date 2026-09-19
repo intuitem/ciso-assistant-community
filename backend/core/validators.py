@@ -73,28 +73,32 @@ ALLOWED_UPLOAD_EXTENSIONS = [
 ]
 
 
-#: Reserved as path structure, or by Windows. Everything else — spaces, accents,
-#: case — is kept: this name is what an auditor reads in an exported archive.
+#: Path structure and Windows-reserved. Spaces, accents and case are kept.
 _UNSAFE_FILENAME_CHARS = re.compile(r'[<>:"/\\|?*]')
 
 
-def sanitize_file_name(name: str) -> str:
-    """Make an uploaded file name safe to store without making it unreadable.
+def sanitize_file_name(name: str, max_length: int = 255) -> str:
+    """Strip what is unsafe in a path, keep what makes the name readable.
 
-    Only the load-bearing characters go: path separators, traversal, reserved
-    characters and control codes. Spaces, case and Unicode letters survive, so the
-    file an auditor downloads still carries the name that was uploaded.
+    Over `max_length` the stem is cut, not the tail, so the extension survives.
     """
-    # A Windows client sends a full path; only the last segment is the name.
+    # A Windows client sends a full path.
     name = name.replace("\\", "/").rsplit("/", 1)[-1]
-    # Compose accents, so one name always yields the same bytes on disk.
+    # Compose accents: one name, one byte sequence.
     name = unicodedata.normalize("NFC", name)
     name = _UNSAFE_FILENAME_CHARS.sub("-", name)
     name = "".join(c for c in name if c.isprintable())
     name = re.sub(r"\s+", " ", name)
-    # A leading dot hides the file; Windows drops trailing dots and spaces, which
-    # would desynchronise the stored name from the one on disk.
-    return name.strip(" .")
+    # A leading dot hides the file; Windows drops trailing dots and spaces.
+    name = name.strip(" .")
+
+    if len(name) > max_length:
+        stem, extension = os.path.splitext(name)
+        if len(extension) < max_length:
+            name = stem[: max_length - len(extension)].rstrip(" .") + extension
+        else:
+            name = name[:max_length]
+    return name
 
 
 def _validate_file_extension_and_sanitize(value, allowed_extensions):

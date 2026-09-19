@@ -169,9 +169,6 @@ export async function defaultWriteFormAction({
 			const fileUploadEndpoint = `${BASE_API_URL}/${urlModel}/${writtenObject.id}/upload/`;
 			const fileUploadRequestInitOptions: RequestInit = {
 				headers: {
-					// Percent-encoding the name into a plain `filename=` param reaches the
-					// backend undecoded ("Proc%C3%A9dure%20de%20gestion.pdf"), which is then
-					// stored verbatim. RFC 5987 `filename*` carries UTF-8 and Django decodes it.
 					'Content-Disposition': contentDispositionHeader(file.name)
 				},
 				method: 'POST',

@@ -5638,18 +5638,12 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         # Compute attachment hash if attachment exists and has changed
         if self.attachment:
-            # The storage layer is about to rewrite the name it will live under —
-            # spaces become underscores, quotes and parentheses are dropped — so the
-            # readable name has to be kept beside it, or an auditor extracting an
-            # archive never sees it again (SUP-1791). Uncommitted means the file has
-            # not reached storage yet, so `.name` is still the one the client sent.
+            # Uncommitted: not yet in storage, so `.name` is still the client's.
             if not self.attachment._committed and not self.original_filename:
                 self.original_filename = os.path.basename(self.attachment.name or "")
 
-            # Sanitized on every write, not just on capture: a promoted answer
-            # attachment carries a name typed by an external respondent, and this
-            # field becomes a zip entry name in the audit archive.
-            self.original_filename = sanitize_file_name(self.original_filename)[:255]
+            # Every write, not just capture: promotion sets it from external input.
+            self.original_filename = sanitize_file_name(self.original_filename)
 
             # Check if this is a new attachment or if it has changed
             should_compute_hash = False
@@ -5702,8 +5696,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     def filename(self) -> str | None:
         if not self.attachment:
             return None
-        # Revisions uploaded before original_filename existed only have the name the
-        # storage layer gave them.
         return self.original_filename or os.path.basename(self.attachment.name)
 
     def get_size(self):

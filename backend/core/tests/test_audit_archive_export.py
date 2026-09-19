@@ -1,8 +1,4 @@
-"""End-to-end guard for the audit "Archive" export (SUP-1791).
-
-An auditor extracting the zip must find the evidence under the name it was uploaded
-with, and the link in index.html must resolve to that entry.
-"""
+"""The archive entry and the index.html link must both carry the real name."""
 
 import io
 import zipfile
@@ -86,7 +82,6 @@ def admin_client(app_config):
 
 @pytest.fixture
 def audit(app_config, settings, tmp_path):
-    # Attachments land on disk; keep them out of the developer's MEDIA_ROOT.
     settings.MEDIA_ROOT = str(tmp_path)
 
     stored, error = StoredLibrary.store_library_content(
@@ -112,7 +107,7 @@ def audit(app_config, settings, tmp_path):
 
 
 def _attach(folder, evidence_name, upload_name):
-    """One evidence carrying an attachment, uploaded the way the view does it."""
+    """Uploaded the way the view does it."""
     evidence = Evidence.objects.create(name=evidence_name, folder=folder)
     revision = evidence.revisions.order_by("-version").first() or (
         EvidenceRevision.objects.create(evidence=evidence, folder=folder)
@@ -146,7 +141,6 @@ class TestAuditArchiveExport:
             assert f"evidences/{ACCENTED_NAME}" in archive.namelist()
             index = archive.read("index.html").decode("utf-8")
 
-        # The link is percent-encoded in the href but points at that same entry.
         assert "evidences/Proc%C3%A9dure%20de%20gestion.pdf" in index
 
     def test_two_evidences_sharing_a_filename_both_land(self, admin_client, audit):
@@ -169,11 +163,7 @@ class TestAuditArchiveExport:
     def test_a_hostile_original_filename_cannot_escape_the_archive(
         self, admin_client, audit
     ):
-        """original_filename set directly, as promote_to_evidence sets it.
-
-        It carries a name typed by an external respondent, so it is sanitized on write
-        as well as at the zip boundary.
-        """
+        """Set directly, as promote_to_evidence does, from external input."""
         evidence = _attach(audit.folder, "Promue", "rapport.pdf")
         revision = evidence.last_revision
         revision.original_filename = "../../etc/passwd.pdf"
@@ -191,3 +181,20 @@ class TestAuditArchiveExport:
             entries = [n for n in archive.namelist() if n.startswith("evidences/")]
 
         assert entries == ["evidences/passwd.pdf"]
+
+    def test_export_omits_a_file_rather_than_failing_on_a_missing_name(
+        self, admin_client, audit, monkeypatch
+    ):
+        """A desynchronised pass costs one file, not the whole archive."""
+        import core.views
+
+        evidence = _attach(audit.folder, "Preuve", "rapport.pdf")
+        ra = RequirementAssessment.objects.filter(
+            compliance_assessment=audit, requirement__assessable=True
+        ).first()
+        ra.evidences.add(evidence)
+
+        monkeypatch.setattr(core.views, "build_evidence_archive_names", lambda ev: {})
+
+        with _archive(admin_client, audit) as archive:
+            assert archive.namelist() == ["index.html"]

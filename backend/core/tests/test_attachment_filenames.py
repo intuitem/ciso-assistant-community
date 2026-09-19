@@ -1,9 +1,4 @@
-"""Uploaded file names must survive the round trip to an exported archive.
-
-SUP-1791: an evidence uploaded as "Procédure de gestion.pdf" came out of the audit
-archive as "procc3a9dure20de20gestion.pdf" — the frontend percent-encoded the name into
-a plain `filename=` param, and the backend then slugified whatever reached it.
-"""
+"""Uploaded names must survive the round trip to an exported archive."""
 
 from types import SimpleNamespace
 
@@ -19,7 +14,7 @@ from core.validators import (
 
 
 class _Upload:
-    """Stands in for an UploadedFile: the validator only touches `.name`."""
+    """The validator only touches `.name`."""
 
     def __init__(self, name):
         self.name = name
@@ -37,8 +32,6 @@ def _sanitized(name):
         ("Procédure de gestion.pdf", "Procédure de gestion.pdf"),
         ("ÉTAT des lieux (v2).docx", "ÉTAT des lieux (v2).docx"),
         ("Plan d'action 2026.xlsx", "Plan d'action 2026.xlsx"),
-        # The extension is matched case-insensitively but must not be spliced out of
-        # the middle of the stem, which `name.replace(extension, "")` used to do.
         ("Rapport.PDF", "Rapport.pdf"),
         ("pdf-guide.pdf", "pdf-guide.pdf"),
     ],
@@ -53,7 +46,6 @@ def test_readable_names_survive(uploaded, stored):
         ("../../etc/passwd.txt", "passwd.txt"),
         (r"C:\Users\bob\Plan.xlsx", "Plan.xlsx"),
         ("a\x00b\tc.png", "abc.png"),
-        # A leading dot hides the file; Windows drops trailing dots and spaces.
         ("  ..hidden..  .txt", "hidden.txt"),
         ("re<port>:1.csv", "re-port--1.csv"),
     ],
@@ -69,17 +61,13 @@ def test_a_name_sanitized_down_to_nothing_still_yields_a_file():
 def test_extension_allowlist_still_applies():
     with pytest.raises(ValidationError):
         _sanitized("payload.exe")
-    # A dotfile has no extension to match, whatever it is named after the dot.
+    # A dotfile has no extension to match.
     with pytest.raises(ValidationError):
         _sanitized("///.pdf")
 
 
 def test_rfc5987_header_reaches_the_backend_intact():
-    """What `contentDispositionHeader()` emits is what Django must decode.
-
-    Kept in sync by hand with frontend/src/lib/utils/contentDisposition.ts — this is
-    the seam the bug lived in.
-    """
+    """Mirrors frontend/src/lib/utils/contentDisposition.ts by hand."""
     name = "Procédure de gestion.pdf"
     ascii_fallback = "Proc-dure de gestion.pdf"
     header = (
@@ -107,7 +95,6 @@ def test_archive_names_disambiguate_collisions():
     evidences = [
         _Evidence("1", "Procédure.pdf"),
         _Evidence("2", "Procédure.pdf"),
-        # Case-insensitive: the archive is often extracted on Windows or macOS.
         _Evidence("3", "PROCÉDURE.pdf"),
         _Evidence("4", None),
     ]
@@ -131,11 +118,7 @@ def test_archive_names_disambiguate_collisions():
     ],
 )
 def test_archive_entry_names_cannot_traverse(hostile):
-    """A zip entry name is never trusted, whatever put it in original_filename.
-
-    AnswerAttachment.filename is typed by an external respondent and follows the file
-    into EvidenceRevision on promotion, so the archive builder re-sanitizes.
-    """
+    """AnswerAttachment.filename is external input and follows the file on promotion."""
     from core.views import build_evidence_archive_names
 
     class _Revision:
@@ -154,3 +137,24 @@ def test_archive_entry_names_cannot_traverse(hostile):
     assert "\\" not in entry
     assert not entry.startswith(".")
     assert ".." not in entry.split(".pdf")[0]
+
+
+def test_a_long_name_keeps_its_extension():
+    """Answer attachments cap size but not name length."""
+    long_stem = "Procédure " * 40
+    sanitized = sanitize_file_name(f"{long_stem}.pdf")
+
+    assert len(sanitized) <= 255
+    assert sanitized.endswith(".pdf")
+    assert sanitized.startswith("Procédure")
+
+
+def test_truncation_does_not_leave_a_trailing_space_before_the_extension():
+    sanitized = sanitize_file_name("a" * 250 + " b.pdf")
+    assert len(sanitized) <= 255
+    assert ". " not in sanitized and " ." not in sanitized
+
+
+def test_a_name_that_is_all_extension_is_still_bounded():
+    sanitized = sanitize_file_name("x." + "y" * 300, max_length=50)
+    assert len(sanitized) == 50

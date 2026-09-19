@@ -11186,8 +11186,6 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
                     evidence.attachment,
                     content_type=content_type,
                     headers={
-                        # A name now carries spaces and accents: unquoted, it would
-                        # truncate the header at the first space.
                         "Content-Disposition": safe_filename_header(
                             "attachment", evidence.filename()
                         )
@@ -14094,20 +14092,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             try:
                 with zipfile.ZipFile(temp_file, "w") as zipf:
                     for evidence in evidences:
-                        if (
-                            evidence.last_revision
-                            and evidence.last_revision.attachment
-                            and default_storage.exists(
-                                evidence.last_revision.attachment.name
+                        # last_revision re-queries; omit one file rather than abort.
+                        entry_name = archive_names.get(evidence.id)
+                        revision = evidence.last_revision
+                        if not entry_name or not revision or not revision.attachment:
+                            continue
+                        if not default_storage.exists(revision.attachment.name):
+                            continue
+                        with default_storage.open(
+                            revision.attachment.name
+                        ) as attachment_file:
+                            zipf.writestr(
+                                f"evidences/{entry_name}", attachment_file.read()
                             )
-                        ):
-                            with default_storage.open(
-                                evidence.last_revision.attachment.name
-                            ) as attachment_file:
-                                zipf.writestr(
-                                    f"evidences/{archive_names[evidence.id]}",
-                                    attachment_file.read(),
-                                )
                     zipf.writestr("index.html", index_content)
 
                 # Seek to beginning for reading
@@ -16428,11 +16425,9 @@ def get_build(request):
 
 
 def build_evidence_archive_names(evidences: Sequence[Evidence]) -> dict:
-    """The zip entry name for each evidence, unique within one archive.
+    """Zip entry name per evidence, unique within one archive.
 
-    The report links to these names, so they are computed once and handed to both the
-    template and the zip writer — a divergence between the two is a dead link. Two
-    evidences may well carry the same attachment basename; the second gets a suffix.
+    Computed once for both the template and the zip writer: a divergence is a dead link.
     """
     names = {}
     taken = set()
@@ -16440,13 +16435,11 @@ def build_evidence_archive_names(evidences: Sequence[Evidence]) -> dict:
         revision = evidence.last_revision
         if not revision or not revision.attachment:
             continue
-        # Re-sanitized at the boundary rather than trusted: rows written before
-        # original_filename was sanitized on write would otherwise become a
-        # traversal-capable zip entry.
+        # Never trusted: an unsanitized row would be a traversal-capable zip entry.
         base = sanitize_file_name(revision.filename() or "") or "file"
         stem, extension = os.path.splitext(base)
         candidate, counter = base, 1
-        # Case-insensitively: the archive is often extracted on Windows or macOS.
+        # Case-insensitive: the archive is often extracted on Windows or macOS.
         while candidate.lower() in taken:
             counter += 1
             candidate = f"{stem} ({counter}){extension}"

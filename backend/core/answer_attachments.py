@@ -116,9 +116,7 @@ def add_attachment(answer, upload, user):
     return AnswerAttachment.objects.create(
         answer=answer,
         file=upload,
-        # Whatever the client called it, kept only as a label — it is echoed back on
-        # download and follows the file if it is ever promoted to evidence.
-        filename=(sanitize_file_name(upload.name or "") or "file")[:255],
+        filename=sanitize_file_name(upload.name or "") or "file",
         size=upload.size,
         mime_type=(getattr(upload, "content_type", "") or "")[:127],
         file_hash=digest.hexdigest(),
@@ -159,8 +157,6 @@ def promote_to_evidence(attachment, user):
             evidence=evidence,
             attachment=attachment.file,
             attachment_hash=attachment.file_hash,
-            # The file is already in storage under its sanitized name; only the
-            # attachment row still knows what the answerer called it.
             original_filename=attachment.filename,
             folder_id=attachment.folder_id,
         )
