@@ -8830,6 +8830,7 @@ class ComplianceAssessment(Assessment):
                 Prefetch("security_exceptions"),
                 Prefetch("evidences"),
                 Prefetch("task_templates"),
+                Prefetch("findings"),
                 Prefetch("requirement__reference_controls"),
                 Prefetch("requirement__threats"),
             )
