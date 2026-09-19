@@ -1547,6 +1547,7 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
     """
 
     model = Solution
+
     export_config = {
         "filename": "solutions_export",
         "fields": {
@@ -1598,7 +1599,17 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
 
     def get_queryset(self):
         # folder is serialized via source="provider_entity.folder"; pull it in one join
-        return super().get_queryset().select_related("provider_entity__folder")
+        return (
+            super()
+            .get_queryset()
+            .select_related("provider_entity__folder", "recipient_entity")
+            .prefetch_related(
+                "assets",
+                "contracts",
+                "owner",
+                "subcontracting_chain",
+            )
+        )
 
     @action(detail=False, name="Get data location storage choices")
     def data_location_storage(self, request):
