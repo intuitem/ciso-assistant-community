@@ -103,7 +103,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 
 <!-- FEATURES:START -->
 <details>
-<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 59 features)</summary>
+<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 69 features)</summary>
 
 **Compliance & frameworks**
 - Audit and campaigns management
@@ -118,14 +118,20 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 **Risk management**
 - Risk assessments and registers
 - EBIOS RM module
+- Threat modeling
 - Risk acceptance workflows
 - Business Impact Analysis
 - Cyber Risk Quantification
 - Vulnerability management
 - Vulnerability enrichment
+- Security advisories & CWE
+- TTP catalogs
 
 **Third-party risk**
 - Third-party risk management
+- Contracts management
+- DORA register of information
+- External security ratings
 
 **Operations & remediation**
 - Action plan tracking and prioritization
@@ -138,6 +144,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Technical posture management
 - Exceptions tracking
 - Incidents management
+- DORA incident reporting
 - Validation & approval flows
 - Email reminders
 
@@ -150,11 +157,14 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 
 **Collaboration & productivity**
 - Assignments & respondent mode
+- Requests management
+- Quick forms
 - Comments & collaboration
 - Universal search
 - Command palette
 
 **Automation & integrations**
+- Workflow automation
 - Comprehensive REST API
 - CLI for automation
 - Data import wizard

@@ -63,7 +63,7 @@
 	});
 
 	onMount(async () => {
-		if (!model.selectOptions) {
+		if (!Object.keys(model.selectOptions ?? {}).length) {
 			const selectOptions = {
 				status: await fetch('/applied-controls/status').then((r) => r.json()),
 				priority: await fetch('/applied-controls/priority').then((r) => r.json()),
