@@ -10,6 +10,7 @@ from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     GenericFilterSet,
     SmartOrderingFilter,
+    actor_prefetch,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
@@ -67,8 +68,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 "assets__folder",
                 "compliance_assessments",
                 "risk_assessments",
-                "authors",
-                "reviewers",
+                actor_prefetch("authors"),
+                actor_prefetch("reviewers"),
                 "validationflow_set__approver",
                 "roto_set",
                 "operational_scenarios",

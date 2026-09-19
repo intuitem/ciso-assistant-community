@@ -17,6 +17,7 @@ from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
     GenericFilterSet,
+    actor_prefetch,
     escape_excel_formula,
 )
 from core.models import (
@@ -33,6 +34,7 @@ from tprm.models import (
     EntityScore,
     Representative,
     Solution,
+    SolutionSubcontractor,
     EntityAssessment,
     Contract,
 )
@@ -1606,8 +1608,15 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
             .prefetch_related(
                 "assets",
                 "contracts",
-                "owner",
-                "subcontracting_chain",
+                actor_prefetch("owner"),
+                # The nested serializer reads subcontractor and recipient on every
+                # chain row: join them in the prefetch query.
+                Prefetch(
+                    "subcontracting_chain",
+                    queryset=SolutionSubcontractor.objects.select_related(
+                        "subcontractor", "recipient"
+                    ),
+                ),
             )
         )
 

@@ -3866,6 +3866,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
                 "security_exceptions",
                 "security_advisories",
                 "cwes",
+                "filtering_labels__folder",
             )
         )
 
@@ -7688,19 +7689,26 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
             "risk_assessment__perimeter",
             "risk_assessment__perimeter__folder",
             "risk_origin",
-            "operational_scenario",
+            "operational_scenario__ebios_rm_study",
         ).prefetch_related(
             "threats",
             "assets",
             "applied_controls",
             "existing_applied_controls",
-            "owner",
+            actor_prefetch("owner"),
             "security_exceptions",
             "threat_models",
             "vulnerabilities",
             "incidents",
             "qualifications",
-            "antecedent_scenarios",
+            # str(antecedent) renders folder and risk_assessment: join them in the
+            # prefetch query instead of two lookups per rendered scenario.
+            Prefetch(
+                "antecedent_scenarios",
+                queryset=RiskScenario.objects.select_related(
+                    "folder", "risk_assessment"
+                ),
+            ),
         )
 
     def _perform_write(self, serializer):
@@ -16584,7 +16592,9 @@ def generate_html(
         answers_dict_by_urn[a.requirement.urn] = build_answers_dict(a.answers.all())
 
     questions_dict_by_urn = {}
-    for node in requirement_nodes.prefetch_related("questions__choices"):
+    # requirement_nodes is already evaluated (node_per_urn) with questions__choices
+    # prefetched; calling prefetch_related() again would clone and re-run it.
+    for node in requirement_nodes:
         # A question hidden by an unsatisfied depends_on does not apply here, so
         # the report must not list it as unanswered.
         qd = visible_questions(
