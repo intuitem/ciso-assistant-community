@@ -64,12 +64,19 @@ repo mounted via Parallels shared folders.
    (`CisoAssistant.proj`) names it `CisoAssistant.mez` after the project.
    `.vscode/settings.json` points at the MakePQX name.
 7. Copy the `.mez` to the Custom Connectors folder — resolve it via the
-   known folder (OneDrive may redirect Documents, especially on fresh VMs):
+   known folder (OneDrive may redirect Documents, especially on fresh VMs).
+   Run this from VS Code's integrated terminal, which starts in the workspace
+   root; a plain PowerShell window starts in your home directory, where the
+   relative source path resolves to nothing:
    ```powershell
    $dir = Join-Path ([Environment]::GetFolderPath("MyDocuments")) "Power BI Desktop\Custom Connectors"
    New-Item -ItemType Directory -Force $dir | Out-Null
    Copy-Item bin\AnyCPU\Debug\connector.mez "$dir\CisoAssistant.mez" -Force
+   Get-Item "$dir\CisoAssistant.mez" | Select-Object Name, LastWriteTime
    ```
+   Check that timestamp. A stale `connector.mez` left in `bin\` by an earlier
+   session copies over without complaint, and Desktop then tests the old
+   connector while you read the new source.
    Allow uncertified extensions in Power BI Desktop's security options,
    restart Desktop, and test **Get Data → CISO Assistant** end-to-end.
 8. Run *TestConnection* task before touching gateway-related code.
@@ -133,9 +140,22 @@ What only the VM can confirm is that M behaves the same:
 - a table with more rows than the ceiling → imported row count equals the
   count shown in CISO Assistant (`PAGINATE_MAX=200`, then again unset)
 - an empty table → no error, zero rows
-- an OnTake preview (Navigator table preview, or `Table.FirstN`) returns the
-  rows asked for, not one page of them
 - `samples/starter.pbit` refreshes end to end against the clamped instance
+
+**Watch the backend request log, not just the row counts.** Paging defects
+come in two kinds and only one of them is visible in Desktop. Fetching too
+*few* rows shows up as a short table. Fetching too *many times* does not show
+up at all — the rows are correct, the refresh is just slow — so it has to be
+counted at the server. Keep `runserver`'s log in view and check:
+
+- a preview of a table **smaller** than the requested count issues **one**
+  request, not one per stride to the end of the count (the regression that
+  reached review in 1.1.0: `count = 1000` against a 5-row table fired 200
+  requests and returned the right 5 rows)
+- a full load of a table of N rows issues about `N / served` requests, where
+  `served` is the page size the first response actually returned
+- each bridge scan carries `fields=id,<m2m>`; if those are absent the
+  narrowing silently fell back to full rows (`GetBridgeRows`' `try`)
 
 ## Adding a table or a bridge
 

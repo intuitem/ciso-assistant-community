@@ -558,13 +558,17 @@ def _connector_get_top_rows(client, endpoint, count, extra=None):
         f"/api/{endpoint}/", {**query, "limit": first_limit, "offset": 0}
     )
     assert first.status_code == 200, f"{endpoint}: {first.status_code}"
-    rows = list(first.json()["results"])
+    payload = first.json()
+    rows = list(payload["results"])
     served = len(rows)
+    # A short page means either a clamped limit or the end of the table; only
+    # `count` tells them apart, so the walk targets whichever is smaller.
+    wanted = min(count, payload["count"])
     page_count = (
-        0 if served == 0 or served >= count else math.ceil((count - served) / served)
+        0 if served == 0 or served >= wanted else math.ceil((wanted - served) / served)
     )
     for i in range(1, page_count + 1):
-        page_limit = min(served, count - (i * served))
+        page_limit = min(served, wanted - (i * served))
         page = client.get(
             f"/api/{endpoint}/",
             {**query, "limit": page_limit, "offset": i * served},
@@ -679,3 +683,38 @@ def test_powerbi_bridge_projection_is_accepted(authenticated_client, bi_dataset)
         )
         for row in response.json()["results"]:
             assert set(row) == {"id", list_field}, bridge["name"]
+
+
+class _CountingClient:
+    """Tallies the requests an algorithm issues, for cost assertions."""
+
+    def __init__(self, client):
+        self._client = client
+        self.calls = 0
+
+    def get(self, *args, **kwargs):
+        self.calls += 1
+        return self._client.get(*args, **kwargs)
+
+
+@pytest.mark.django_db
+def test_connector_preview_stops_at_the_end_of_a_short_table(
+    authenticated_client, many_applied_controls, clamped_pagination
+):
+    """A preview may ask for far more rows than the table holds.
+
+    The stride is the served page size, so without the envelope's `count` to
+    bound it the walk keeps stepping toward the requested `count` long after
+    the rows run out — one request per stride, all of them empty. The smaller
+    the table, the more requests. Row counts stay correct throughout, which is
+    why this is asserted on the number of calls.
+    """
+    total = authenticated_client.get("/api/applied-controls/", {"limit": 1}).json()[
+        "count"
+    ]
+    client = _CountingClient(authenticated_client)
+
+    rows = _connector_get_top_rows(client, "applied-controls", 1000)
+
+    assert len(rows) == total
+    assert client.calls == math.ceil(total / clamped_pagination)

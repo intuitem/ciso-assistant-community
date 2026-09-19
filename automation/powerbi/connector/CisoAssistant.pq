@@ -157,18 +157,26 @@ GetAllRows = (BaseUrl as text, endpoint as text, extraQuery as record) as list =
 // cheap while Table.FirstN with count > PageSize remains correct.
 // Same rule as GetAllRows — the first page teaches us the effective page
 // size, and every subsequent offset steps by that, not by what we asked for.
+//
+// `served` alone cannot say why a page was short: the server may have capped
+// the limit, or the table may simply have ended. Only the envelope's `count`
+// separates them, so the target is the smaller of what was asked for and what
+// exists — otherwise a preview of 1000 rows against a 5-row table would step
+// 5 at a time to 1000 and spend 199 requests collecting nothing.
 GetTopRows = (BaseUrl as text, endpoint as text, extraQuery as record, count as number) as list =>
     let
         path = "api/" & endpoint & "/",
         firstLimit = List.Min({ PageSize, count }),
-        firstRows = GetJson(BaseUrl, path, extraQuery & [ limit = Number.ToText(firstLimit), offset = "0" ])[results],
+        firstPage = GetJson(BaseUrl, path, extraQuery & [ limit = Number.ToText(firstLimit), offset = "0" ]),
+        firstRows = firstPage[results],
         served = List.Count(firstRows),
-        pageCount = if served = 0 or served >= count then 0 else Number.RoundUp((count - served) / served),
+        wanted = List.Min({ count, firstPage[count] }),
+        pageCount = if served = 0 or served >= wanted then 0 else Number.RoundUp((wanted - served) / served),
         remaining = List.Transform(
             { 1 .. pageCount },
             (i) =>
                 let
-                    pageLimit = List.Min({ served, count - (i * served) })
+                    pageLimit = List.Min({ served, wanted - (i * served) })
                 in
                     GetJson(BaseUrl, path, extraQuery & [ limit = Number.ToText(pageLimit), offset = Number.ToText(i * served) ])[results]
         )

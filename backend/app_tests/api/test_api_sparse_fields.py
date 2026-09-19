@@ -154,6 +154,13 @@ def test_applies_to_retrieve(authenticated_client, sparse_dataset):
 
 @pytest.mark.django_db
 def test_absent_parameter_returns_the_full_row(authenticated_client, sparse_dataset):
+    """Trimming is per-request: it must not narrow the next caller's response.
+
+    `get_serializer` builds a new serializer every call and `serializer.fields`
+    is a per-instance copy of `_declared_fields`, so popping from it cannot
+    reach the class. This runs after the narrowing tests in the same process,
+    which is what makes it a check on that and not just on the default path.
+    """
     response = authenticated_client.get("/api/applied-controls/")
 
     assert response.status_code == 200
