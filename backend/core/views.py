@@ -799,6 +799,7 @@ class GenericFilterSet(df.FilterSet):
     # enough to make it filterable from the table UI. On a DateTimeField the `date`
     # transform is what the UI uses: a bare `lte` on a timestamp would drop its last day.
     DATE_LOOKUPS = ("exact", "gte", "lte", "gt", "lt", "isnull")
+    # `lt`/`gt`: half-open bounds, so a BI partition boundary lands in one page.
     DATETIME_LOOKUPS = (
         "date",
         "date__gte",
@@ -807,6 +808,8 @@ class GenericFilterSet(df.FilterSet):
         "date__lt",
         "gte",
         "lte",
+        "gt",
+        "lt",
         "isnull",
     )
     ALWAYS_FILTERABLE_DATES = ("created_at", "updated_at")
@@ -901,18 +904,6 @@ class GenericFilterSet(df.FilterSet):
                 "filter_class": df.IsoDateTimeFilter,
             },
         }
-
-
-class TimestampRangeFilterMixin(df.FilterSet):
-    """ISO-8601 created_at/updated_at range params for BI clients
-    (Power BI incremental refresh). Mix into FilterSets of viewsets
-    that use filterset_class; list-style viewsets declare the same
-    lookups via dict-form filterset_fields."""
-
-    created_at__gte = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="gte")
-    created_at__lt = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="lt")
-    updated_at__gte = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="gte")
-    updated_at__lt = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="lt")
 
 
 class SmartOrderingFilter(filters.OrderingFilter):
@@ -1237,7 +1228,55 @@ class AutocompleteMixin:
         return Response(data)
 
 
-class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
+class SparseFieldsMixin:
+    """``?fields=a,b,c`` trims a GET response to a subset of the columns.
+
+    Subtractive only, and only the top-level serializer: nested ones share this
+    request's context and would be cut by the same names. An unknown name is a
+    400. Reduces serialization, not the queryset's prefetching.
+    """
+
+    sparse_fields_param = "fields"
+    sparse_fields_always = frozenset({"id"})
+
+    def get_serializer(self, *args, **kwargs):
+        return self.apply_sparse_fields(super().get_serializer(*args, **kwargs))
+
+    def apply_sparse_fields(self, serializer):
+        """Trim a serializer to the requested fields.
+
+        An action building its own serializer must call this, or ``fields`` is
+        silently ignored there.
+        """
+        request = getattr(self, "request", None)
+        if request is None or request.method != "GET":
+            return serializer
+
+        raw = request.query_params.get(self.sparse_fields_param)
+        if not raw:
+            return serializer
+        requested = {name.strip() for name in raw.split(",") if name.strip()}
+        if not requested:
+            return serializer
+
+        target = getattr(serializer, "child", serializer)
+        available = set(getattr(target, "fields", {}))
+        unknown = requested - available
+        if unknown:
+            raise DRFValidationError(
+                {
+                    self.sparse_fields_param: (
+                        f"unknown field(s): {', '.join(sorted(unknown))}"
+                    )
+                }
+            )
+
+        for name in available - (requested | self.sparse_fields_always):
+            target.fields.pop(name)
+        return serializer
+
+
+class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -2531,7 +2570,7 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
-class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):
+class AssetFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
     asset_class__isnull = df.BooleanFilter(
@@ -2954,7 +2993,9 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         context = self.get_serializer_context()
         context["optimized_data"] = optimized_data
 
-        serializer = AssetReadSerializer(objects, many=True, context=context)
+        serializer = self.apply_sparse_fields(
+            AssetReadSerializer(objects, many=True, context=context)
+        )
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)
         if field_models:
@@ -5352,7 +5393,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
 APPLIED_CONTROL_LINKED_FIELD_NAMES = [f[0] for f in APPLIED_CONTROL_LINKED_FIELDS]
 
 
-class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
+class AppliedControlFilterSet(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     reference_control = df.ModelMultipleChoiceFilter(
         queryset=ReferenceControl.objects.all()
@@ -5911,8 +5952,8 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         context = self.get_serializer_context()
         context["daily_rate"] = GlobalSettings.get_daily_rate()
 
-        serializer = AppliedControlBulkReadSerializer(
-            objects, many=True, context=context
+        serializer = self.apply_sparse_fields(
+            AppliedControlBulkReadSerializer(objects, many=True, context=context)
         )
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)
@@ -7384,7 +7425,7 @@ class IntegerInFilter(df.BaseInFilter, df.NumberFilter):
     field_class = FormIntegerField
 
 
-class RiskScenarioFilter(TimestampRangeFilterMixin, GenericFilterSet):
+class RiskScenarioFilter(GenericFilterSet):
     risk_assessment = df.ModelMultipleChoiceFilter(
         queryset=RiskAssessment.objects.all()
     )
@@ -10734,7 +10775,7 @@ class RequirementViewSet(BaseModelViewSet):
         )
 
 
-class EvidenceFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
+class EvidenceFilterSet(GenericFilterSet):
     owner = NullableModelChoiceFilter(queryset=Actor.objects.all())
 
     class Meta:
