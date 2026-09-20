@@ -84,10 +84,20 @@ pnpm run dev --port "$FRONTEND_PORT" --strictPort >/dev/null 2>&1 &
 FRONTEND_PID=$!
 
 echo "waiting for http://localhost:$FRONTEND_PORT ..."
+READY=0
 for _ in $(seq 1 60); do
-  if curl -sfo /dev/null "http://localhost:$FRONTEND_PORT/login"; then break; fi
+  if curl -sfo /dev/null "http://localhost:$FRONTEND_PORT/login"; then
+    READY=1
+    break
+  fi
   sleep 2
 done
+if [[ $READY -eq 0 ]]; then
+  # Without this the capture starts against a dead server and every shot fails
+  # as an opaque navigation timeout rather than a startup error.
+  echo "frontend did not come up on port $FRONTEND_PORT after 120s" >&2
+  exit 1
+fi
 
 pnpm exec playwright test --config=playwright.docs.config.ts ${PW_ARGS[@]+"${PW_ARGS[@]}"}
 echo "screenshots written to product-docs/.gitbook/assets/"

@@ -60,11 +60,12 @@ Add an entry to `manifest.ts`:
 
 ## Known caveats
 
-- **ECharts canvases are not byte-stable.** Every DOM-only shot reproduces
-  exactly across database rebuilds; chart pages differ by a handful of
-  antialiased pixels (measured: 114 px of 1,296,000, 0.009%, with identical
-  values and colours). Compare chart shots with a small pixel threshold rather
-  than a checksum.
+- **Chart pages have drifted once, intermittently.** All 13 shots now reproduce
+  byte-for-byte across two full database rebuilds, but an earlier pair of runs
+  showed `audit-detail`'s ECharts donut differing by 114 px of 1,296,000
+  (0.009%) with identical values and colours. It has not recurred. Treat chart
+  shots with a small pixel threshold rather than a checksum until there is
+  more evidence either way.
 - The sticky breadcrumb bar can overlap a clipped card near the top of a page.
 - Sidebar sections render collapsed; expand them in a `then` step if a shot
   needs a specific menu open.

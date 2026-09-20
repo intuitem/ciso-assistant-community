@@ -205,17 +205,20 @@ SCENARIOS = [
 ]
 
 # Result distribution walked in order, so the compliance donut is stable.
+# Two of every ten are left unassessed on purpose: an audit whose every
+# requirement carries a verdict shows 100% progress, which contradicts its
+# "In progress" status in the list view.
 RESULT_CYCLE = [
     "compliant",
     "compliant",
     "partially_compliant",
     "compliant",
     "non_compliant",
-    "compliant",
+    "not_assessed",
     "partially_compliant",
     "not_applicable",
     "compliant",
-    "partially_compliant",
+    "not_assessed",
 ]
 
 
@@ -233,7 +236,14 @@ class Command(BaseCommand):
         random.seed(SEED)
 
         if options["flush"]:
-            deleted, _ = Folder.objects.filter(name=DOMAIN).delete()
+            # Scoped to a root-level demo domain: a bare name filter would
+            # cascade-delete any same-named folder anywhere in someone's tree,
+            # and run.sh passes --flush on every run.
+            deleted, _ = Folder.objects.filter(
+                name=DOMAIN,
+                parent_folder=Folder.get_root_folder(),
+                content_type=Folder.ContentType.DOMAIN,
+            ).delete()
             self.stdout.write(f"flushed {deleted} objects under {DOMAIN}")
 
         self.load_libraries()
@@ -264,26 +274,29 @@ class Command(BaseCommand):
         # Library-loaded referentials are stamped at import time, so they drift
         # too whenever the database is rebuilt — and their detail pages show
         # Created at / Updated at.
+        # The sort key has to be a natural, stable field. Falling back to `id`
+        # would hand the stagger itself a random order and reintroduce exactly
+        # the drift this method exists to remove — RequirementAssessment has no
+        # `name`, which is why the key is spelled out per model.
         models = (
-            Asset,
-            AppliedControl,
-            ComplianceAssessment,
-            Framework,
-            Perimeter,
-            RequirementAssessment,
-            RiskAssessment,
-            RiskMatrix,
-            RiskScenario,
-            Threat,
+            (Asset, "name"),
+            (AppliedControl, "name"),
+            (ComplianceAssessment, "name"),
+            (Framework, "name"),
+            (Perimeter, "name"),
+            (RequirementAssessment, "requirement__order_id"),
+            (RiskAssessment, "name"),
+            (RiskMatrix, "name"),
+            (RiskScenario, "name"),
+            (Threat, "name"),
         )
-        for model in models:
+        for model, order in models:
             fields = {f.name for f in model._meta.get_fields() if hasattr(f, "attname")}
             stamped = {"created_at", "updated_at"} & fields
             if not stamped:
                 continue
-            order = "name" if "name" in fields else "id"
             for offset, pk in enumerate(
-                model.objects.order_by(order).values_list("pk", flat=True)
+                model.objects.order_by(order, "pk").values_list("pk", flat=True)
             ):
                 stamp = base + timedelta(minutes=offset)
                 model.objects.filter(pk=pk).update(**{n: stamp for n in stamped})
