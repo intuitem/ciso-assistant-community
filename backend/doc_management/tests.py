@@ -1,5 +1,6 @@
 """Integration coverage for SSRF guard wiring in doc_management."""
 
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
@@ -18,7 +19,12 @@ from doc_management.serializers import (
     DocumentContainerReadSerializer,
     ManagedDocumentWriteSerializer,
 )
-from doc_management.views import DocumentRevisionViewSet, _safe_url_fetcher
+from core.views import BaseModelViewSet
+from doc_management.views import (
+    DocumentContainerViewSet,
+    DocumentRevisionViewSet,
+    _safe_url_fetcher,
+)
 from iam.models import Folder, User
 
 
@@ -463,3 +469,43 @@ class TestContainerPendingRevision:
         viewset's `current_revision` select_related, so a naive lookup is one
         query per row."""
         assert self._revision_queries(5) == self._revision_queries(1)
+
+
+@pytest.mark.django_db
+class TestCatalogQueryCount:
+    """`catalog` reads five revision fields the list serializer never touches.
+
+    Goes through the real action rather than a copy of the queryset: the defect
+    lives in the seam between `get_queryset` and `catalog`.
+    """
+
+    def _published_container(self, suffix):
+        folder = Folder.objects.create(
+            name=f"CAT-{suffix}", parent_folder=Folder.get_root_folder()
+        )
+        s = ManagedDocumentWriteSerializer(
+            data={"folder": str(folder.id), "locale": "en", "name": "Doc"},
+            context={},
+        )
+        s.is_valid(raise_exception=True)
+        doc = s.save()
+        doc.revisions.first().publish()
+
+    def _revision_queries(self, count):
+        batch = uuid4().hex[:6]
+        for i in range(count):
+            self._published_container(f"{batch}-{i}")
+        scoped = DocumentContainer.objects.filter(
+            folder__name__startswith=f"CAT-{batch}"
+        )
+        view = DocumentContainerViewSet()
+        with patch.object(BaseModelViewSet, "get_queryset", return_value=scoped):
+            with CaptureQueriesContext(connection) as ctx:
+                response = view.catalog(request=None)
+        assert len(response.data) == count
+        return sum(
+            1 for q in ctx.captured_queries if "documentrevision" in q["sql"].lower()
+        )
+
+    def test_catalog_does_not_query_per_published_revision(self):
+        assert self._revision_queries(3) == self._revision_queries(1)

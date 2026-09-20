@@ -2,7 +2,10 @@
 	import { m } from '$paraglide/messages';
 	import { invalidateAll, goto } from '$app/navigation';
 	import { LOCALE_MAP } from '$lib/utils/locales';
-	import { APPROVED_REVISION_STATUSES, pickInForceRevision } from '$lib/utils/documentRevisions';
+	import {
+		APPROVED_REVISION_STATUSES,
+		pickInForceRevisionToShow
+	} from '$lib/utils/documentRevisions';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/state';
 	import { canPerformActionOnObject } from '$lib/utils/access-control';
@@ -60,10 +63,7 @@
 	};
 
 	let status = $derived(currentRevision?.status as string | undefined);
-	let inForceRevision = $derived(pickInForceRevision(revisions));
-	let showsInForceRevision = $derived(
-		inForceRevision != null && inForceRevision.id !== currentRevision?.id
-	);
+	let inForceRevision = $derived(pickInForceRevisionToShow(revisions, currentRevision?.id));
 	// RBACPermissions maps POST to add_<model>, hence add_documentrevision here.
 	let canTransition = $derived(
 		canPerformActionOnObject({
@@ -240,7 +240,7 @@
 				</h1>
 				{#if currentRevision}
 					<div class="mt-1 flex flex-wrap items-center gap-1.5">
-						{#if showsInForceRevision}
+						{#if inForceRevision}
 							<span class="badge {statusStyles.published} text-xs">
 								{m.published()} · v{inForceRevision.version_number}
 							</span>

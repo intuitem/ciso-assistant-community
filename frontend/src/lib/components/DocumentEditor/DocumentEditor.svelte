@@ -7,7 +7,11 @@
 	import DocumentLinkModal from './DocumentLinkModal.svelte';
 	import { documentTypeLabel } from '$lib/utils/documentTypes';
 	import { fetchAllPages } from '$lib/utils/pagination';
-	import { pickWorkingRevision, APPROVED_REVISION_STATUSES } from '$lib/utils/documentRevisions';
+	import {
+		pickWorkingRevision,
+		pickInForceRevisionToShow,
+		APPROVED_REVISION_STATUSES
+	} from '$lib/utils/documentRevisions';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
@@ -748,6 +752,7 @@
 	let canEdit = $derived((isDraft || isChangeRequested) && hasLock);
 	let isInReview = $derived(currentRevision?.status === 'in_review');
 	let hasDraft = $derived(revisions.some((r: any) => r.status === 'draft'));
+	let inForceRevision = $derived(pickInForceRevisionToShow(revisions, currentRevision?.id));
 	let hasActiveRevision = $derived(
 		revisions.some(
 			(r: any) =>
@@ -972,6 +977,16 @@
 							</div>
 						{/if}
 					</div>
+				{/if}
+
+				{#if inForceRevision}
+					{@const inForceStyle = getStatusStyle('published')}
+					<span
+						class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border {inForceStyle.bg} {inForceStyle.text}"
+					>
+						<i class="fa-solid {inForceStyle.icon} text-[10px]"></i>
+						{m.published()} · v{inForceRevision.version_number}
+					</span>
 				{/if}
 
 				{#if currentRevision}

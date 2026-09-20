@@ -15,6 +15,7 @@ export const APPROVED_REVISION_STATUSES: RevisionStatus[] = [
 ];
 
 interface RevisionLike {
+	id: string;
 	status: RevisionStatus;
 	version_number: number;
 }
@@ -53,4 +54,19 @@ export function pickInForceRevision<T extends RevisionLike>(revisions: T[]): T |
 			(best, r) => (best !== null && best.version_number >= r.version_number ? best : r),
 			null
 		);
+}
+
+/**
+ * Return the revision in force to show next to the one on screen, or `null`.
+ *
+ * `null` when nothing is published, and also when the revision in force is the
+ * one already displayed: a document whose latest version is live would
+ * otherwise show the same version twice, on two badges.
+ */
+export function pickInForceRevisionToShow<T extends RevisionLike>(
+	revisions: T[],
+	displayedRevisionId: string | undefined
+): T | null {
+	const inForce = pickInForceRevision(revisions);
+	return inForce !== null && inForce.id !== displayedRevisionId ? inForce : null;
 }
