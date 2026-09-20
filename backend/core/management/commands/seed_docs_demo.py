@@ -254,10 +254,10 @@ class Command(BaseCommand):
             controls = self.build_controls(domain, assets)
             self.build_audit(domain, controls)
             self.build_risk_assessment(domain, assets, controls)
-            self.freeze_timestamps()
+            self.freeze_timestamps(domain)
         self.stdout.write(self.style.SUCCESS("demo dataset ready"))
 
-    def freeze_timestamps(self):
+    def freeze_timestamps(self, domain):
         """Pin created_at / updated_at to fixed, *distinct* values.
 
         Both are auto_now_add / auto_now, so without this every run stamps the
@@ -278,32 +278,41 @@ class Command(BaseCommand):
         # would hand the stagger itself a random order and reintroduce exactly
         # the drift this method exists to remove — RequirementAssessment has no
         # `name`, which is why the key is spelled out per model.
-        # `requirement__order_id` alone is NOT unique: every audit on the same
-        # framework repeats the whole requirement tree, so each order_id is
-        # shared by one row per audit and the sort falls back to the UUID again.
-        # The (audit, requirement) pair is what identifies a row.
+        # Every entry is scoped: this is a management command, so it can be run
+        # against a populated database, and an unfiltered update() would rewrite
+        # timestamps on records that have nothing to do with the fixture.
+        #
+        # `requirement__order_id` alone is NOT unique as a sort key: every audit
+        # on the same framework repeats the whole requirement tree, so each
+        # order_id is shared by one row per audit and the sort would fall back
+        # to the UUID again. The (audit, requirement) pair identifies a row.
         models = (
-            (Asset, ("name",)),
-            (AppliedControl, ("name",)),
-            (ComplianceAssessment, ("name",)),
-            (Framework, ("name",)),
-            (Perimeter, ("name",)),
+            (Asset, {"folder": domain}, ("name",)),
+            (AppliedControl, {"folder": domain}, ("name",)),
+            (ComplianceAssessment, {"folder": domain}, ("name",)),
+            (Perimeter, {"folder": domain}, ("name",)),
             (
                 RequirementAssessment,
+                {"compliance_assessment__folder": domain},
                 ("compliance_assessment__ref_id", "requirement__order_id"),
             ),
-            (RiskAssessment, ("name",)),
-            (RiskMatrix, ("name",)),
-            (RiskScenario, ("name",)),
-            (Threat, ("name",)),
+            (RiskAssessment, {"folder": domain}, ("name",)),
+            (RiskScenario, {"risk_assessment__folder": domain}, ("name",)),
+            (Threat, {"folder": domain}, ("name",)),
+            # Referentials live in the root folder and are shared, so they are
+            # narrowed to exactly the libraries this seed loads.
+            (Framework, {"library__urn__in": LIBRARIES}, ("name",)),
+            (RiskMatrix, {"library__urn__in": LIBRARIES}, ("name",)),
         )
-        for model, order in models:
+        for model, scope, order in models:
             fields = {f.name for f in model._meta.get_fields() if hasattr(f, "attname")}
             stamped = {"created_at", "updated_at"} & fields
             if not stamped:
                 continue
             for offset, pk in enumerate(
-                model.objects.order_by(*order).values_list("pk", flat=True)
+                model.objects.filter(**scope)
+                .order_by(*order)
+                .values_list("pk", flat=True)
             ):
                 stamp = base + timedelta(minutes=offset)
                 model.objects.filter(pk=pk).update(**{n: stamp for n in stamped})

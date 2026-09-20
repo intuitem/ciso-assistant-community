@@ -13,11 +13,49 @@ description: |
 # Product-docs screenshots
 
 Screenshots in `product-docs/` are **generated, not taken by hand**. One command
-rebuilds the demo database, starts the stack, and re-captures every shot. Two
-runs produce byte-identical PNGs, so a diff means the UI changed.
+rebuilds the demo database, starts the stack, and re-captures every shot. The
+fixture is deterministic, so every DOM-only capture reproduces byte for byte and
+a diff means the UI changed. Chart captures can drift by a few antialiased
+pixels without a UI change — compare those with a small pixel threshold.
 
 Never paste a hand-captured screenshot into `product-docs/`. If an image is
 needed, add it to the manifest so the next person can regenerate it.
+
+## Two modes
+
+**Attach mode is the normal path** for documenting a feature that was just
+built. It captures against the stack the developer already has running, using
+the data they built the feature against — no seeding, seconds rather than
+minutes:
+
+```bash
+DOCS_SHOTS_BASE_URL=http://localhost:5173 \
+  ./tests/docs-screenshots/run.sh --attach -- --grep my-new-shot
+```
+
+It refuses to run without an explicit `DOCS_SHOTS_BASE_URL` and an explicit
+`--grep`. Both guards exist because it writes directly into
+`product-docs/.gitbook/assets/`, and a bare run would replace every committed
+screenshot with images of whatever happened to be listening on that port.
+
+**Fixture mode** (the default when no flag is given) rebuilds the demo database
+and starts its own stack. It backs the core pages that need to stay
+regenerable, and it is how a stale screenshot gets refreshed years later. Do not
+extend the fixture just to document a new feature — attach instead.
+
+### Screening a dev-database screenshot
+
+A dev database usually holds real customer and prospect data. **Before a shot
+captured in attach mode goes into `product-docs/`, read it and check for:**
+
+- customer, prospect or partner names in any list, breadcrumb or domain column
+- real people's names or email addresses (including the signed-in user, bottom
+  left of the sidebar)
+- imported spreadsheet content, entity names, or anything from a real engagement
+- `TEST-` prefixed junk from the `populate_*` commands, half-finished records
+
+If any of it is there, do not ship the image. Either re-capture against a clean
+domain, or use fixture mode. Published GitBook pages are public.
 
 ## The loop
 
@@ -29,20 +67,25 @@ Locate the page under `product-docs/` and check `SUMMARY.md` — GitBook only
 renders pages listed there. Read the page first and pick the section the image
 belongs to; a figure at the top of a concept page is usually the wrong place.
 
-### 2. Check the fixture covers the feature
+### 2. Pick the mode
 
-`backend/core/management/commands/seed_docs_demo.py` seeds one demo domain
-(`Northwind Trading`) with perimeters, assets, applied controls, three audits on
-ISO 27001:2022, and a risk assessment with six scenarios.
+For a feature that was just built, use **attach mode** against the developer's
+running stack — that is where the feature's data already exists. Ask which URL
+and which records to shoot; do not guess a port.
 
-If the page documents a module the fixture does not cover (EBIOS RM, BIA,
-incidents, tasks, vulnerabilities, TPRM, privacy, findings, quantitative risk),
-**extend the seed first** — a screenshot of an empty list is worse than none.
-Follow the conventions already in the file:
+Use **fixture mode** when the page is one of the core pages already backed by
+`seed_docs_demo` (domains, perimeters, assets, applied controls, audits, risk
+assessments), or when refreshing a stale screenshot.
+
+Only extend `backend/core/management/commands/seed_docs_demo.py` if the user
+asks for a screenshot that must stay regenerable. It is not a prerequisite for
+documenting a new feature. If extending it, follow the conventions in the file:
 
 - seed the RNG (`random.seed(SEED)`) and use a fixed vocabulary
 - derive dates from `TODAY`, never `date.today()`
-- add the new model to `freeze_timestamps` with an explicit natural sort key
+- add the new model to `freeze_timestamps` with both a scope filter (this is a
+  management command; it must never rewrite timestamps outside the fixture) and
+  an explicit natural sort key
 
 There are `populate_*` management commands for several modules, but they do
 **not** seed the RNG, so their output is different on every run. Do not call
@@ -57,7 +100,7 @@ In `frontend/tests/docs-screenshots/manifest.ts`:
   slug: 'audit-detail',              // → product-docs/.gitbook/assets/audit-detail.png
   url: '/compliance-assessments',
   usedBy: ['concepts/audits.md'],    // so a stale shot is traceable to its pages
-  then: openDetail('compliance-assessments', 'AUD.2026.01'),
+  act: openDetail('compliance-assessments', 'AUD.2026.01'),
   clip: (page) => page.getByRole('heading', { name: '…' })
                       .locator('xpath=ancestor::div[contains(@class,"card")][1]')
 }
@@ -98,6 +141,10 @@ looks authoritative even when the sentence beside it is invented.
 While reading it, also check the shot is worth shipping: right record selected,
 no empty charts, no placeholder `--` columns dominating the frame.
 
+If it came from attach mode, run the screening checklist above in the same pass
+— customer names and real email addresses are the failure that actually matters,
+and the only place it gets caught is here.
+
 ### 6. Insert the figure
 
 ```html
@@ -111,7 +158,8 @@ button does not say that.
 ### 7. Verify
 
 - every `src="...png"` in the page resolves on disk
-- re-run the harness twice and confirm the PNGs are byte-identical
+- re-run the harness twice and confirm the PNGs are byte-identical (chart shots
+  may differ by a few antialiased pixels; compare those with a threshold)
 - cite the `file:line` sources you used in the chat reply, not in the doc body
 
 ## Traps
@@ -128,6 +176,7 @@ These all cost time to rediscover.
 | ECharts canvases | drifted once by 114 px with identical data | compare chart shots with a pixel threshold, not a checksum |
 | macOS + WeasyPrint | backend dies on `libgobject` at import | `run.sh` exports `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` |
 | A git worktree has no `.venv` | the repo-root venv does not carry | `run.sh` falls back to `uv run python3`; or set `DOCS_SHOTS_PYTHON` |
+| Naming a file here `*.spec.ts` / `*.test.ts` | the e2e matrix globs those patterns across `tests/` and runs the shot against the e2e stack | keep the `capture.shots.ts` naming |
 
 ## Reference
 

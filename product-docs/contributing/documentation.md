@@ -61,7 +61,10 @@ Plain Markdown renders fine on GitHub too, so PRs are easy to review without the
 
 Screenshots are **generated from a running instance**, not captured by hand. The
 harness lives in `frontend/tests/docs-screenshots/` and seeds its own demo
-database, so two runs produce identical images and a diff means the UI changed.
+database. The fixture is deterministic, so a re-run reproduces every ordinary
+capture unchanged and a diff means the UI changed. Screenshots of chart pages can
+vary by a few pixels without any UI change, so compare those by eye rather than
+treating the difference as a regression.
 
 1. Add an entry to `frontend/tests/docs-screenshots/manifest.ts` — a `slug` (which
    becomes the filename), the route, and the doc pages it's `usedBy`. Use `clip`
