@@ -1346,12 +1346,21 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         )
         queryset = self.model.objects.filter(id__in=object_ids_view)
 
-        model_field_names = {f.name for f in self.model._meta.get_fields()}
+        model_fields = {f.name: f for f in self.model._meta.get_fields()}
 
-        if "parent_folder" in model_field_names:
-            queryset = queryset.select_related("parent_folder")
+        # Folder itself carries a *reverse* relation named "folder"; select_related
+        # only accepts forward FKs, so match on the descriptor, not on the name.
+        joinable = [
+            name
+            for name in ("folder", "parent_folder")
+            if (f := model_fields.get(name)) is not None
+            and f.many_to_one
+            and f.concrete
+        ]
+        if joinable:
+            queryset = queryset.select_related(*joinable)
 
-        if "filtering_labels" in model_field_names:
+        if "filtering_labels" in model_fields:
             queryset = queryset.prefetch_related("filtering_labels")
 
         return queryset
@@ -2336,24 +2345,24 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         folders = {f.id: f for f in Folder.objects.all()}
         for obj in initial_objects:
             path = []
-            if hasattr(obj, "folder"):
-                queue = deque([obj.folder.id])
-            elif hasattr(obj, "parent_folder") and obj.parent_folder:
-                queue = deque([obj.parent_folder.id])
+            if getattr(obj, "folder_id", None):
+                queue = deque([obj.folder_id])
+            elif getattr(obj, "parent_folder_id", None):
+                queue = deque([obj.parent_folder_id])
             else:
                 continue
             while queue:
                 folder_id = queue.popleft()
                 folder = folders[folder_id]
-                if folder.parent_folder:
+                if folder.parent_folder_id:
                     path.append(
                         {
                             "str": str(folder),
                             "id": folder.id,
-                            "parent_id": folder.parent_folder.id,
+                            "parent_id": folder.parent_folder_id,
                         }
                     )
-                    queue.append(folder.parent_folder.id)
+                    queue.append(folder.parent_folder_id)
             path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
 
         return {
@@ -3851,6 +3860,20 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "due_date": ["exact"],
     }
     search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "applied_controls",
+                "assets",
+                "security_exceptions",
+                "security_advisories",
+                "cwes",
+                "filtering_labels__folder",
+            )
+        )
 
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
@@ -7670,13 +7693,27 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
             "risk_assessment__risk_matrix",
             "risk_assessment__perimeter",
             "risk_assessment__perimeter__folder",
+            "risk_origin",
+            "operational_scenario__ebios_rm_study",
         ).prefetch_related(
             "threats",
             "assets",
             "applied_controls",
             "existing_applied_controls",
-            "owner",
+            actor_prefetch("owner"),
             "security_exceptions",
+            "threat_models",
+            "vulnerabilities",
+            "incidents",
+            "qualifications",
+            # str(antecedent) renders folder and risk_assessment: join them in the
+            # prefetch query instead of two lookups per rendered scenario.
+            Prefetch(
+                "antecedent_scenarios",
+                queryset=RiskScenario.objects.select_related(
+                    "folder", "risk_assessment"
+                ),
+            ),
         )
 
     def _perform_write(self, serializer):
@@ -13858,7 +13895,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related("reference_controls", "threats", "questions__choices")
             .all(),
         )
         tree = get_sorted_requirement_nodes(
@@ -16533,13 +16570,22 @@ def generate_html(
 ) -> Tuple[str, list[Evidence], dict]:
     selected_evidences = []
 
-    requirement_nodes = RequirementNode.objects.filter(
-        framework=compliance_assessment.framework
-    ).order_by("order_id")
+    requirement_nodes = (
+        RequirementNode.objects.filter(framework=compliance_assessment.framework)
+        .order_by("order_id")
+        .prefetch_related("questions__choices")
+    )
 
-    assessments = RequirementAssessment.objects.filter(
-        compliance_assessment=compliance_assessment,
-    ).all()
+    assessments = (
+        RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+        )
+        .select_related("requirement")
+        .prefetch_related(
+            "answers__question",
+            "answers__selected_choices",
+        )
+    )
 
     implementation_groups = compliance_assessment.selected_implementation_groups
     graph = get_sorted_requirement_nodes(
@@ -16585,7 +16631,9 @@ def generate_html(
         answers_dict_by_urn[a.requirement.urn] = build_answers_dict(a.answers.all())
 
     questions_dict_by_urn = {}
-    for node in requirement_nodes.prefetch_related("questions__choices"):
+    # requirement_nodes is already evaluated (node_per_urn) with questions__choices
+    # prefetched; calling prefetch_related() again would clone and re-run it.
+    for node in requirement_nodes:
         # A question hidden by an unsatisfied depends_on does not apply here, so
         # the report must not list it as unanswered.
         qd = visible_questions(

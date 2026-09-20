@@ -372,7 +372,7 @@
 										{/if}
 									</span>
 									<span class="flex flex-row space-x-2">
-										<h6 class="h6 base-font-color">{m.authenticatorApp()}</h6>
+										<h6 class="h6 text-typo-base-light">{m.authenticatorApp()}</h6>
 										<p class="badge h-fit preset-tonal-secondary">{m.recommended()}</p>
 									</span>
 									<p class="text-sm text-surface-800-200 max-w-[50ch]">
@@ -415,7 +415,7 @@
 										{/if}
 									</span>
 									<span class="flex flex-row space-x-2">
-										<h6 class="h6 base-font-color">{m.securityKeys()}</h6>
+										<h6 class="h6 text-typo-base-light">{m.securityKeys()}</h6>
 									</span>
 									<p class="text-sm text-surface-800-200 max-w-[50ch]">
 										{m.securityKeyDescription()}

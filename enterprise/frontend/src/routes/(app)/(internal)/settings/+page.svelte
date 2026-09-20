@@ -245,7 +245,7 @@
 											{/if}
 										</span>
 										<span class="flex flex-row space-x-2">
-											<h6 class="h6 base-font-color">{m.jira()}</h6>
+											<h6 class="h6 text-typo-base-light">{m.jira()}</h6>
 										</span>
 									</div>
 								</a>
@@ -260,7 +260,7 @@
 											{/if}
 										</span>
 										<span class="flex flex-row space-x-2">
-											<h6 class="h6 base-font-color">{m.serviceNow()}</h6>
+											<h6 class="h6 text-typo-base-light">{m.serviceNow()}</h6>
 										</span>
 									</div>
 								</a>
