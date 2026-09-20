@@ -278,17 +278,24 @@ class Command(BaseCommand):
         # would hand the stagger itself a random order and reintroduce exactly
         # the drift this method exists to remove — RequirementAssessment has no
         # `name`, which is why the key is spelled out per model.
+        # `requirement__order_id` alone is NOT unique: every audit on the same
+        # framework repeats the whole requirement tree, so each order_id is
+        # shared by one row per audit and the sort falls back to the UUID again.
+        # The (audit, requirement) pair is what identifies a row.
         models = (
-            (Asset, "name"),
-            (AppliedControl, "name"),
-            (ComplianceAssessment, "name"),
-            (Framework, "name"),
-            (Perimeter, "name"),
-            (RequirementAssessment, "requirement__order_id"),
-            (RiskAssessment, "name"),
-            (RiskMatrix, "name"),
-            (RiskScenario, "name"),
-            (Threat, "name"),
+            (Asset, ("name",)),
+            (AppliedControl, ("name",)),
+            (ComplianceAssessment, ("name",)),
+            (Framework, ("name",)),
+            (Perimeter, ("name",)),
+            (
+                RequirementAssessment,
+                ("compliance_assessment__ref_id", "requirement__order_id"),
+            ),
+            (RiskAssessment, ("name",)),
+            (RiskMatrix, ("name",)),
+            (RiskScenario, ("name",)),
+            (Threat, ("name",)),
         )
         for model, order in models:
             fields = {f.name for f in model._meta.get_fields() if hasattr(f, "attname")}
@@ -296,7 +303,7 @@ class Command(BaseCommand):
             if not stamped:
                 continue
             for offset, pk in enumerate(
-                model.objects.order_by(order, "pk").values_list("pk", flat=True)
+                model.objects.order_by(*order).values_list("pk", flat=True)
             ):
                 stamp = base + timedelta(minutes=offset)
                 model.objects.filter(pk=pk).update(**{n: stamp for n in stamped})
@@ -328,12 +335,15 @@ class Command(BaseCommand):
 
     def build_org(self):
         root = Folder.get_root_folder()
+        # The lookup has to carry the same constraints as --flush. Matching on
+        # name alone would seed into any folder that happens to share the name,
+        # and the scoped delete would then never clean those records up.
         domain, _ = Folder.objects.get_or_create(
             name=DOMAIN,
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
             defaults={
                 "description": "Demo organisation used across the documentation.",
-                "parent_folder": root,
-                "content_type": Folder.ContentType.DOMAIN,
             },
         )
         for name in SUBDOMAINS:

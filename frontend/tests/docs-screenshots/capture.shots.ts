@@ -27,7 +27,7 @@ test.describe('documentation screenshots', () => {
 		test(shot.slug, async ({ page }) => {
 			await page.goto(shot.url);
 			await page.locator('body[data-hydrated="true"]').waitFor();
-			await shot.then?.(page);
+			await shot.act?.(page);
 
 			// Let tables, charts and lazy autocompletes settle before freezing the page.
 			await page.waitForLoadState('networkidle');

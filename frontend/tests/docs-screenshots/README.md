@@ -1,9 +1,16 @@
 # Documentation screenshots
 
 Captures the images used by `product-docs/` from a real, logged-in instance
-against a deterministic demo dataset. Two runs on the same checkout produce
-byte-identical PNGs, so a diff means the UI changed — not that someone re-ran
-the capture.
+against a deterministic demo dataset. Two runs on the same checkout reproduce
+every DOM-only capture byte for byte, so a diff means the UI changed — not that
+someone re-ran the capture. Chart captures are compared with a small pixel
+threshold instead; see the caveats below.
+
+> **Do not name files in this directory `*.spec.ts` or `*.test.ts`.** The e2e
+> workflow globs those patterns across the whole of `tests/`
+> (`.github/workflows/functional-tests.yml`), and a screenshot spec swept into
+> that matrix runs against the e2e stack with no demo data and no auth state —
+> it burned 24 minutes before failing on PR #4866. Hence `capture.shots.ts`.
 
 ## Running
 
@@ -48,15 +55,15 @@ Add an entry to `manifest.ts`:
 
 ## What keeps the output stable
 
-| Source of drift | How it is handled |
-| --- | --- |
-| `created_at` / `updated_at` columns | `seed_docs_demo` bulk-`update()`s them to fixed stamps, bypassing the auto fields |
-| Row order across database rebuilds | the same stamps must be **distinct** per row: `BaseModelViewSet.ordering = ["created_at"]` and `SmartOrderingFilter` appends `pk` as the pagination tiebreaker (`core/views.py:955`), and `pk` is a random UUID — so any tie on `created_at` shuffles lists on every rebuild |
-| Random fixture content | `seed_docs_demo` seeds the RNG and uses a fixed vocabulary — unlike the `populate_*` commands |
-| Animations, spinners, caret blink | CSS injected before capture, plus `animations: 'disabled'` |
-| Locale, timezone, colour scheme | pinned to `en-GB` / `UTC` / `light` in the config |
-| Viewport | 1440×900, re-declared *after* the `devices[…]` spread, which carries its own viewport and would otherwise win |
-| "Get Started" onboarding CTA | `show_get_started` global setting turned off by the seed |
+| Source of drift                     | How it is handled                                                                                                                                                                                                                                                            |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `created_at` / `updated_at` columns | `seed_docs_demo` bulk-`update()`s them to fixed stamps, bypassing the auto fields                                                                                                                                                                                            |
+| Row order across database rebuilds  | the same stamps must be **distinct** per row: `BaseModelViewSet.ordering = ["created_at"]` and `SmartOrderingFilter` appends `pk` as the pagination tiebreaker (`core/views.py:955`), and `pk` is a random UUID — so any tie on `created_at` shuffles lists on every rebuild |
+| Random fixture content              | `seed_docs_demo` seeds the RNG and uses a fixed vocabulary — unlike the `populate_*` commands                                                                                                                                                                                |
+| Animations, spinners, caret blink   | CSS injected before capture, plus `animations: 'disabled'`                                                                                                                                                                                                                   |
+| Locale, timezone, colour scheme     | pinned to `en-GB` / `UTC` / `light` in the config                                                                                                                                                                                                                            |
+| Viewport                            | 1440×900, re-declared _after_ the `devices[…]` spread, which carries its own viewport and would otherwise win                                                                                                                                                                |
+| "Get Started" onboarding CTA        | `show_get_started` global setting turned off by the seed                                                                                                                                                                                                                     |
 
 ## Known caveats
 

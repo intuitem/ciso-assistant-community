@@ -12,7 +12,7 @@ export interface Shot {
 	/** Restrict the capture to one element — usually what a doc actually needs. */
 	clip?: (page: Page) => Locator;
 	/** Extra interaction to run once the route has settled. */
-	then?: (page: Page) => Promise<void>;
+	act?: (page: Page) => Promise<void>;
 	/**
 	 * Draw callout boxes over elements before capturing — the annotated,
 	 * step-by-step genre the Guidde frames use. Each entry outlines its target;
@@ -79,13 +79,13 @@ export const shots: Shot[] = [
 		slug: 'audit-detail',
 		url: '/compliance-assessments',
 		usedBy: ['concepts/audits.md', 'guides/basic-audit.md'],
-		then: openDetail('compliance-assessments', 'AUD.2026.01')
+		act: openDetail('compliance-assessments', 'AUD.2026.01')
 	},
 	{
 		slug: 'risk-assessment-detail',
 		url: '/risk-assessments',
 		usedBy: ['concepts/risk-assessments.md', 'guides/first-risk-assessment.md'],
-		then: openDetail('risk-assessments', 'RA.2026.01')
+		act: openDetail('risk-assessments', 'RA.2026.01')
 	},
 	{
 		// The detail header is what `concepts/risk-assessments.md` needs; the
@@ -93,7 +93,7 @@ export const shots: Shot[] = [
 		slug: 'risk-scenarios-table',
 		url: '/risk-assessments',
 		usedBy: ['concepts/risk-assessments.md'],
-		then: openDetail('risk-assessments', 'RA.2026.01'),
+		act: openDetail('risk-assessments', 'RA.2026.01'),
 		clip: (page) =>
 			page
 				.getByRole('heading', { name: 'Associated risk scenarios' })
@@ -105,7 +105,7 @@ export const shots: Shot[] = [
 		slug: 'risk-assessment-annotated',
 		url: '/risk-assessments',
 		usedBy: ['guides/first-risk-assessment.md'],
-		then: openDetail('risk-assessments', 'RA.2026.01'),
+		act: openDetail('risk-assessments', 'RA.2026.01'),
 		annotate: (page) => [
 			{ at: page.getByRole('link', { name: 'Action plan' }).first(), label: '1' },
 			{ at: page.getByRole('button', { name: 'Add risk scenario' }).first(), label: '2' }
@@ -128,7 +128,7 @@ export const shots: Shot[] = [
 		slug: 'risk-matrix-detail',
 		url: '/risk-matrices',
 		usedBy: ['concepts/risk-matrices.md'],
-		then: openDetail('risk-matrices', '5x5 ISO-27005'),
+		act: openDetail('risk-matrices', '5x5 ISO-27005'),
 		// The route renders a raw field dump above the grid; anchor on the
 		// matrix's own axis header and climb to the wrapper it is mounted in.
 		clip: (page) =>

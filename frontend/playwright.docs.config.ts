@@ -40,7 +40,7 @@ export default defineConfig({
 		},
 		{
 			name: 'shots',
-			testMatch: /capture\.spec\.ts/,
+			testMatch: /capture\.shots\.ts/,
 			dependencies: ['setup'],
 			use: {
 				...devices['Desktop Chrome'],
