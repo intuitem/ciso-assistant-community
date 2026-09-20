@@ -10,6 +10,7 @@
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
 	import SCIMSettings from '$lib/components/Settings/SCIMSettings.svelte';
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
+	import NotificationChannelsSettings from '$lib/components/Settings/NotificationChannelsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
 	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
 	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
@@ -35,6 +36,7 @@
 	// page never initialises on a hidden tab (e.g. `scim` with idp_groups off).
 	const FLAG_GATED_TABS: Record<string, string> = {
 		scim: 'idp_groups',
+		notificationChannels: 'notification_centre',
 		webhooks: 'outgoing_webhooks',
 		auditLogForwarding: 'audit_log_forwarding',
 		infraConfig: 'infra_config_management'
@@ -44,6 +46,7 @@
 		'sso',
 		'scim',
 		'featureFlags',
+		'notificationChannels',
 		'vulnerabilitySla',
 		'secIntelFeeds',
 		'webhooks',
@@ -129,6 +132,11 @@
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
 		>
+		{#if page.data?.featureflags?.notification_centre}
+			<Tabs.Trigger value="notificationChannels"
+				><i class="fa-solid fa-bell"></i> {m.notifications()}</Tabs.Trigger
+			>
+		{/if}
 		<Tabs.Trigger value="vulnerabilitySla"
 			><i class="fa-solid fa-bug"></i> {m.vulnerabilitySlaPolicy()}</Tabs.Trigger
 		>
@@ -191,6 +199,9 @@
 	<Tabs.Content value="featureFlags">
 		<FeatureFlagsSettings {data} />
 	</Tabs.Content>
+	<Tabs.Content value="notificationChannels">
+		<NotificationChannelsSettings />
+	</Tabs.Content>
 	<Tabs.Content value="vulnerabilitySla">
 		<VulnerabilitySlaSettings {data} />
 	</Tabs.Content>
@@ -245,7 +256,7 @@
 											{/if}
 										</span>
 										<span class="flex flex-row space-x-2">
-											<h6 class="h6 base-font-color">{m.jira()}</h6>
+											<h6 class="h6 text-typo-base-light">{m.jira()}</h6>
 										</span>
 									</div>
 								</a>
@@ -260,7 +271,7 @@
 											{/if}
 										</span>
 										<span class="flex flex-row space-x-2">
-											<h6 class="h6 base-font-color">{m.serviceNow()}</h6>
+											<h6 class="h6 text-typo-base-light">{m.serviceNow()}</h6>
 										</span>
 									</div>
 								</a>
