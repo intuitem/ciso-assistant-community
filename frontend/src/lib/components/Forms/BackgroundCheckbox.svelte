@@ -32,7 +32,6 @@
 		tooltip?: string;
 		hidden?: boolean;
 		disabled?: boolean;
-		errors?: string[];
 		/** Whose setting this is: `primary` for the instance, `tertiary` for the
 		 * viewer's own. */
 		accent?: CheckboxAccent;
@@ -49,7 +48,6 @@
 		tooltip,
 		hidden = false,
 		disabled = false,
-		errors = [],
 		accent = 'primary',
 		classes = '',
 		classesContainer = ''
@@ -117,12 +115,4 @@
 			</p>
 		{/if}
 	</div>
-
-	{#if errors.length}
-		<div class="mt-1">
-			{#each errors as error (error)}
-				<p class="text-red-500 text-xs font-medium">{error}</p>
-			{/each}
-		</div>
-	{/if}
 </div>

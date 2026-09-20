@@ -185,13 +185,23 @@
 	let moduleSaving = $state<string | null>(null);
 	let moduleResetting = $state(false);
 
-	const visibleModuleCount = $derived(
-		hideableFlags.filter((flag) => moduleVisible[flag] !== false).length
-	);
-
 	function availableOnInstance(flag: string): boolean {
 		return instanceFlags[flag] === true;
 	}
+
+	// What the user actually sees: a module the organization disabled is not
+	// visible either, however this user left their own switch.
+	const visibleModuleCount = $derived(
+		hideableFlags.filter((flag) => availableOnInstance(flag) && moduleVisible[flag] !== false)
+			.length
+	);
+
+	// What the reset would undo — the user's own hides alone, which is why it is
+	// not `visibleModuleCount === hideableFlags.length`: an organization-disabled
+	// module is nothing this user can reset.
+	const hiddenByUserCount = $derived(
+		hideableFlags.filter((flag) => moduleVisible[flag] === false).length
+	);
 
 	async function saveModulePreferences(patch: Record<string, boolean>) {
 		const response = await fetch('/fe-api/user-preferences', {
@@ -599,7 +609,7 @@
 						type="button"
 						class="btn btn-sm preset-tonal ml-auto"
 						data-testid="reset-module-visibility"
-						disabled={moduleResetting || visibleModuleCount === hideableFlags.length}
+						disabled={moduleResetting || hiddenByUserCount === 0}
 						onclick={resetModulesToOrganization}
 					>
 						<i class="fa-solid fa-rotate-left mr-1"></i>{m.resetToOrganizationSettings()}
