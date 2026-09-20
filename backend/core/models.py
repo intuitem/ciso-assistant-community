@@ -27,7 +27,9 @@ from django.core.validators import (
     RegexValidator,
     MinValueValidator,
 )
+from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.core.files.uploadedfile import UploadedFile
 from django.db import models, transaction
 from django.db.models import F, Q, Exists, OuterRef, Subquery, Prefetch, Count, Value
 from django.db.models.functions import Coalesce
@@ -5697,6 +5699,13 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         if not self.attachment:
             return None
         return self.original_filename or os.path.basename(self.attachment.name)
+
+    def set_new_attachment(self, uploaded_file: UploadedFile | ContentFile):
+        """Set `self.attachment` to a new `uploaded_file` (and update `self.origina_filename` accordingly)."""
+        self.attachment = uploaded_file
+        original_filename = uploaded_file.name
+        if original_filename:
+            self.original_filename = original_filename
 
     def get_size(self):
         if not self.attachment or not self.attachment.storage.exists(
