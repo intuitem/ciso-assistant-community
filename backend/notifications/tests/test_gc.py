@@ -222,3 +222,35 @@ def test_the_cap_still_bites_when_everything_is_unread(folder, user):
 
     assert enforce_per_recipient_cap() == 20
     assert Notification.objects.filter(recipient=user).count() == MAX_PER_RECIPIENT
+
+
+def test_turning_the_channel_off_does_not_wipe_existing_rows(folder, user):
+    """An empty `keep` legitimately means "nothing is true any more, delete it all".
+    It must not also mean "the channel is off", or disabling a type destroys its
+    history on the next nightly sweep."""
+    from unittest.mock import patch
+
+    from notifications.service import clear_stale, notify
+
+    control = AppliedControl.objects.create(name="Encrypt backups", folder=folder)
+    notify("expired_controls", [user], control, {"control_name": str(control)})
+    assert Notification.objects.count() == 1
+
+    with patch("notifications.service.in_app_enabled", return_value=False):
+        # What the sweep does: notify_many returns [] because the channel is off, so
+        # the keep set it hands over is empty.
+        clear_stale("expired_controls", set())
+
+    assert Notification.objects.count() == 1, "rows survive a disabled channel"
+
+
+def test_an_empty_keep_still_clears_when_the_channel_is_on(folder, user):
+    """The other side: that is how a condition going false re-arms the type."""
+    from notifications.service import clear_stale, notify
+
+    control = AppliedControl.objects.create(name="Rotate keys", folder=folder)
+    notify("expired_controls", [user], control, {"control_name": str(control)})
+
+    clear_stale("expired_controls", set())
+
+    assert Notification.objects.count() == 0

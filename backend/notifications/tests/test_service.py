@@ -296,3 +296,13 @@ def test_recipient_count_follows_the_audience_on_a_re_fire(control, user):
     notify("expired_controls", [user, later], control, {})
 
     assert {r.recipient_count for r in rows()} == {2}
+
+
+def test_addresses_resolve_regardless_of_case(control):
+    """`User.email` is a CharField, so an exact `email__in` is case-sensitive, while
+    the email leg of this same feature resolves with `iexact`."""
+    User.objects.create(email="Mixed.Case@Test.Local")
+
+    notify("expired_controls", ["mixed.case@test.local"], control, {})
+
+    assert rows().count() == 1

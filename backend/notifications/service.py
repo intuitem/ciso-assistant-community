@@ -2,6 +2,8 @@ import structlog
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 
+from django.db.models.functions import Lower
+
 from global_settings.utils import ff_is_enabled
 from iam.models import User
 from notifications.models import Notification
@@ -21,10 +23,19 @@ def in_app_enabled(notification_type: str) -> bool:
 def _user_resolver(all_recipients):
     """Resolve every address the caller will use in one query, then hand back a
     per-item lookup. A sweep resolves the same owners for every object it walks."""
-    emails = {r for r in all_recipients if not isinstance(r, User)}
+    # `User.email` is a CharField, so `email__in` is case-sensitive. Everything else
+    # resolving an address does it case-insensitively -- including this feature's own
+    # email leg (core/email_utils.py) -- and two rules in one feature is the bug.
+    emails = {str(r).lower() for r in all_recipients if not isinstance(r, User)}
     by_email = {
-        user.email: user
-        for user in (User.objects.filter(email__in=emails) if emails else ())
+        user.email.lower(): user
+        for user in (
+            User.objects.annotate(email_lower=Lower("email")).filter(
+                email_lower__in=emails
+            )
+            if emails
+            else ()
+        )
         if not user.is_third_party
     }
 
@@ -34,7 +45,7 @@ def _user_resolver(all_recipients):
             if isinstance(recipient, User):
                 if not recipient.is_third_party:
                     users.append(recipient)
-            elif (user := by_email.get(recipient)) is not None:
+            elif (user := by_email.get(str(recipient).lower())) is not None:
                 users.append(user)
         return users
 
@@ -126,6 +137,11 @@ def clear_stale(notification_type: str, keep) -> int:
     """
     if NOTIFICATION_REGISTRY.get(notification_type, {}).get("mode") != "condition":
         logger.error("clear_stale on a non-condition type", type=notification_type)
+        return 0
+    if not in_app_enabled(notification_type):
+        # notify_many wrote nothing, so the sweep hands over an empty `keep`. Without
+        # this the first run after a type is switched off deletes its whole history --
+        # an empty keep must keep meaning "nothing is true any more", not "no channel".
         return 0
 
     keep = {(str(r), str(o)) for r, o in keep}

@@ -101,9 +101,12 @@
 	}
 
 	async function applyToGroup(group: Row[], channel: Channel, enabled: boolean) {
-		for (const row of group) {
-			if (row[`supports_${channel}`] && row[channel] !== enabled) {
-				await apply(row.type, channel, enabled);
+		// Re-read each row from `rows` rather than the snapshot this loop started with:
+		// every apply() replaces `rows` with the server's new matrix.
+		for (const { type } of group) {
+			const current = rows.find((row) => row.type === type);
+			if (current?.[`supports_${channel}`] && current[channel] !== enabled) {
+				await apply(type, channel, enabled);
 			}
 		}
 	}
