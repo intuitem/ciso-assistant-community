@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import structlog
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -17,6 +19,18 @@ from notifications.registry import NOTIFICATION_REGISTRY
 from notifications.permissions import IsRecipient
 
 logger = structlog.getLogger(__name__)
+
+
+def _uuids(values) -> list[UUID]:
+    """Keep the well-formed ids. Filtering a UUIDField on a malformed string raises
+    Django's ValidationError, which DRF does not map — it surfaces as a 500."""
+    parsed = []
+    for value in values:
+        try:
+            parsed.append(UUID(str(value)))
+        except ValueError, AttributeError, TypeError:
+            continue
+    return parsed
 
 
 class NotificationViewSet(BaseModelViewSet):
@@ -61,6 +75,9 @@ class NotificationViewSet(BaseModelViewSet):
         model which objects are in the domain, then match ids. One query per content
         type, and only on an explicit filter.
         """
+        folders = _uuids(folders)
+        if not folders:
+            return queryset.none()
         matched = Q(pk__in=[])
         content_type_ids = queryset.values_list("content_type", flat=True).distinct()
         for content_type_id in content_type_ids:
@@ -136,7 +153,7 @@ class NotificationViewSet(BaseModelViewSet):
             )
 
         # Same response shape as BaseModelViewSet.batch_action: lists, not counts.
-        rows = {str(n.id): n for n in self.get_queryset().filter(id__in=ids)}
+        rows = {str(n.id): n for n in self.get_queryset().filter(id__in=_uuids(ids))}
         succeeded = [{"id": str(n.id), "name": str(n)} for n in rows.values()]
         failed = [
             {"id": str(i), "error": "Object not found or access denied"}
