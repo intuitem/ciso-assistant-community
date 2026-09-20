@@ -1736,6 +1736,8 @@
 	"moduleVisibility": "Modules",
 	"moduleVisibilityDescription": "Choose which modules appear in your own navigation. This only changes what you see — it does not affect anyone else, and it cannot turn on a module your organization has disabled.",
 	"moduleDisabledByOrganization": "Disabled by your organization.",
+	"modulesVisibleCount": "{count} of {total} visible",
+	"resetToOrganizationSettings": "Reset to organization settings",
 	"theme": "Theme",
 	"themeDescription": "Choose the color theme used across the application.",
 	"themeLight": "Light",

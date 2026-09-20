@@ -30,6 +30,7 @@
 	} from '$lib/components/Modals/stores';
 	import CreatePatModal from './pat/components/CreatePATModal.svelte';
 	import { getFeatureFlagGroups } from '$lib/utils/feature-flag-groups';
+	import FeatureFlagGroupList from '$lib/components/Forms/FeatureFlagGroupList.svelte';
 
 	interface Props {
 		data: PageData;
@@ -161,22 +162,46 @@
 		}
 	}
 
-	const hideableFlags: string[] = data.moduleVisibility?.hideable ?? [];
-	const moduleGroups = getFeatureFlagGroups(hideableFlags);
+	// Derived, not read once: a toggle ends in `invalidateAll()`, and an admin may
+	// have disabled a module in the meantime.
+	const hideableFlags: string[] = $derived(data.moduleVisibility?.hideable ?? []);
+	const moduleGroups = $derived(getFeatureFlagGroups(hideableFlags));
 
 	// The un-narrowed values: a module the organisation disabled is shown as
 	// unavailable rather than as something this user switched off. `flags` cannot
 	// tell the two apart — it is false either way.
-	const instanceFlags: Record<string, boolean> = data.moduleVisibility?.instance ?? {};
-	const hiddenByUser: string[] = data.moduleVisibility?.hidden ?? [];
+	const instanceFlags: Record<string, boolean> = $derived(data.moduleVisibility?.instance ?? {});
 
+	// Seeded once and then owned locally, so a toggle paints immediately instead of
+	// waiting for the round-trip.
 	let moduleVisible = $state(
-		Object.fromEntries(hideableFlags.map((flag) => [flag, !hiddenByUser.includes(flag)]))
+		Object.fromEntries(
+			(data.moduleVisibility?.hideable ?? []).map((flag: string) => [
+				flag,
+				!(data.moduleVisibility?.hidden ?? []).includes(flag)
+			])
+		)
 	);
 	let moduleSaving = $state<string | null>(null);
+	let moduleResetting = $state(false);
+
+	const visibleModuleCount = $derived(
+		hideableFlags.filter((flag) => moduleVisible[flag] !== false).length
+	);
 
 	function availableOnInstance(flag: string): boolean {
 		return instanceFlags[flag] === true;
+	}
+
+	async function saveModulePreferences(patch: Record<string, boolean>) {
+		const response = await fetch('/fe-api/user-preferences', {
+			method: 'PATCH',
+			body: JSON.stringify({ feature_flags: patch })
+		});
+		if (!response.ok) throw new Error(`status ${response.status}`);
+		// The sidebar, the palette and the flagged tables are all built server-side
+		// from the effective flags, so the whole tree has to be reloaded.
+		await invalidateAll();
 	}
 
 	async function handleModuleChange(flag: string, visible: boolean) {
@@ -184,21 +209,27 @@
 		moduleVisible[flag] = visible;
 		moduleSaving = flag;
 		try {
-			const response = await fetch('/fe-api/user-preferences', {
-				method: 'PATCH',
-				body: JSON.stringify({ feature_flags: { [flag]: visible } })
-			});
-			if (!response.ok) {
-				moduleVisible[flag] = previous;
-				return;
-			}
-			// The sidebar and the flagged tables are built server-side from the
-			// effective flags, so the whole tree has to be reloaded.
-			await invalidateAll();
+			await saveModulePreferences({ [flag]: visible });
 		} catch {
 			moduleVisible[flag] = previous;
 		} finally {
 			moduleSaving = null;
+		}
+	}
+
+	async function resetModulesToOrganization() {
+		const previous = { ...moduleVisible };
+		// Every hideable flag sent as visible: the backend drops a `true` instead of
+		// storing it, so each one goes back to following the organization.
+		const patch = Object.fromEntries(hideableFlags.map((flag) => [flag, true]));
+		moduleVisible = patch;
+		moduleResetting = true;
+		try {
+			await saveModulePreferences(patch);
+		} catch {
+			moduleVisible = previous;
+		} finally {
+			moduleResetting = false;
 		}
 	}
 
@@ -557,37 +588,32 @@
 					<p class="text-sm text-surface-800-200">{m.moduleVisibilityDescription()}</p>
 				</div>
 				<hr />
-				{#each moduleGroups as group (group.category)}
-					<section class="flex flex-col space-y-2">
-						<h4 class="h4 font-medium">{group.category}</h4>
-						<p class="text-sm text-surface-600-400">{group.description}</p>
-						<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
-							{#each group.fields as flag (flag.field)}
-								{@const available = availableOnInstance(flag.field)}
-								<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-									<dt class="font-medium">{flag.label}</dt>
-									<dd class="text-surface-900-100 sm:col-span-2">
-										<div class="flex flex-col space-y-1">
-											<label class="flex items-center space-x-2">
-												<input
-													class="checkbox"
-													type="checkbox"
-													disabled={!available || moduleSaving === flag.field}
-													checked={available && moduleVisible[flag.field]}
-													data-testid="module-visibility-{flag.field}"
-													onchange={(e) => handleModuleChange(flag.field, e.currentTarget.checked)}
-												/>
-												<span class="text-sm">
-													{available ? flag.description : m.moduleDisabledByOrganization()}
-												</span>
-											</label>
-										</div>
-									</dd>
-								</div>
-							{/each}
-						</dl>
-					</section>
-				{/each}
+				<div class="flex flex-wrap items-center gap-3">
+					<span class="text-sm text-surface-600-400">
+						{m.modulesVisibleCount({
+							count: visibleModuleCount,
+							total: hideableFlags.length
+						})}
+					</span>
+					<button
+						type="button"
+						class="btn btn-sm preset-tonal ml-auto"
+						data-testid="reset-module-visibility"
+						disabled={moduleResetting || visibleModuleCount === hideableFlags.length}
+						onclick={resetModulesToOrganization}
+					>
+						<i class="fa-solid fa-rotate-left mr-1"></i>{m.resetToOrganizationSettings()}
+					</button>
+				</div>
+				<FeatureFlagGroupList
+					groups={moduleGroups}
+					accent="tertiary"
+					isEnabled={(field) => availableOnInstance(field) && moduleVisible[field]}
+					isDisabled={(field) => !availableOnInstance(field) || moduleSaving === field}
+					tooltipFor={(field) =>
+						availableOnInstance(field) ? undefined : m.moduleDisabledByOrganization()}
+					onToggle={handleModuleChange}
+				/>
 			</div>
 		</Tabs.Content>
 	{/if}

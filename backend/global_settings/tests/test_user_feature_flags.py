@@ -223,6 +223,26 @@ def test_preferences_write_unhides(client, flags_row):
     assert client.user.preferences["feature_flags"] == {}
 
 
+def test_preferences_write_resets_every_flag_to_the_instance(client, flags_row):
+    """ "Reset to organization settings" sends every hideable flag as visible.
+    Each `true` drops its key rather than storing one, so the user ends up with
+    nothing stored and follows the instance again."""
+    client.user.preferences = {
+        "feature_flags": {"incidents": False, "xrays": False, "vulnerabilities": False}
+    }
+    client.user.save(update_fields=["preferences"])
+
+    hideable = get_user_hideable_feature_flags()
+    response = client.patch(
+        "/api/user-preferences/",
+        {"feature_flags": {flag: True for flag in hideable}},
+        format="json",
+    )
+    assert response.status_code == 200
+    client.user.refresh_from_db()
+    assert client.user.preferences["feature_flags"] == {}
+
+
 def test_preferences_write_rejects_a_non_hideable_flag(client, flags_row):
     response = client.patch(
         "/api/user-preferences/",

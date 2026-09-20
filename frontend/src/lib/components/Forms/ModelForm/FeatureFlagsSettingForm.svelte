@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { m } from '$paraglide/messages';
-	import BackgroundCheckbox from '$lib/components/Forms/BackgroundCheckbox.svelte';
+	import FeatureFlagGroupList from '$lib/components/Forms/FeatureFlagGroupList.svelte';
 	import { page } from '$app/state';
 	import { getFeatureFlagGroups } from '$lib/utils/feature-flag-groups';
 
@@ -195,52 +195,32 @@
 		<div class="text-center text-surface-600-400 py-12">{m.noFeatureFlagsMatch()}</div>
 	{/if}
 
-	{#each filteredGroups as group (group.category)}
-		{@const groupFields = group.fields.map((f) => f.field)}
-		{@const groupEnabled = groupFields.filter((f) => $formData[f]).length}
-		<div class="bg-surface-50-950 shadow-sm rounded-xl p-6 border border-surface-200-800">
-			<div class="mb-4 flex items-start justify-between gap-4">
-				<div>
-					<h2 class="text-xl font-bold text-surface-950-50">{group.category}</h2>
-					<p class="text-sm text-surface-600-400 mt-1">{group.description}</p>
-				</div>
-				<div class="flex items-center gap-2 shrink-0">
-					<span class="text-xs text-surface-600-400 whitespace-nowrap"
-						>{groupEnabled}/{groupFields.length}</span
-					>
-					<button
-						type="button"
-						class="btn btn-sm preset-tonal-primary"
-						title={m.enableAll()}
-						onclick={() => setFields(groupFields, true)}
-					>
-						<i class="fa-solid fa-check"></i>
-					</button>
-					<button
-						type="button"
-						class="btn btn-sm preset-tonal"
-						title={m.disableAll()}
-						onclick={() => setFields(groupFields, false)}
-					>
-						<i class="fa-solid fa-xmark"></i>
-					</button>
-				</div>
-			</div>
-			<div
-				class="grid gap-4"
-				style="grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); grid-auto-rows: 1fr;"
+	<FeatureFlagGroupList
+		groups={filteredGroups}
+		isEnabled={(field) => Boolean($formData[field])}
+		onToggle={(field, next) => setFields([field], next)}
+	>
+		{#snippet groupActions(group)}
+			{@const groupFields = group.fields.map((f) => f.field)}
+			<span class="text-xs text-surface-600-400 whitespace-nowrap"
+				>{groupFields.filter((f) => $formData[f]).length}/{groupFields.length}</span
 			>
-				{#each group.fields as { field, label, description } (field)}
-					<BackgroundCheckbox
-						{form}
-						{field}
-						{label}
-						helpText={description}
-						classesContainer="h-full"
-						classes="h-full"
-					/>
-				{/each}
-			</div>
-		</div>
-	{/each}
+			<button
+				type="button"
+				class="btn btn-sm preset-tonal-primary"
+				title={m.enableAll()}
+				onclick={() => setFields(groupFields, true)}
+			>
+				<i class="fa-solid fa-check"></i>
+			</button>
+			<button
+				type="button"
+				class="btn btn-sm preset-tonal"
+				title={m.disableAll()}
+				onclick={() => setFields(groupFields, false)}
+			>
+				<i class="fa-solid fa-xmark"></i>
+			</button>
+		{/snippet}
+	</FeatureFlagGroupList>
 </div>
