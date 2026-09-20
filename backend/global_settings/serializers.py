@@ -479,6 +479,58 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.relations_graph", required=False, default=False
     )
 
+    # Flags a user may switch off for themselves, from their own profile. Strictly
+    # opt-in, like batch actions: a flag added by a release is not hideable until
+    # it is listed here, which is the safe default.
+    #
+    # Eligible means the flag hides a navigation area and nothing else. Excluded
+    # are the flags that also gate data rendering (custom_fields), a write path,
+    # role behaviour (auditee_mode, focus_mode), or IAM/admin configuration
+    # (idp_groups, jit_provisioning, service_accounts, terminologies) — there a
+    # per-user value would make two users read different data, not a different menu.
+    USER_HIDEABLE_FLAGS = frozenset(
+        {
+            "bia",
+            "commitment_management",
+            "compliance",
+            "contracts",
+            "control_plan",
+            "custom_portals",
+            "data_breaches",
+            "document_management",
+            "ebiosrm",
+            "exceptions",
+            "experimental",
+            "follow_up",
+            "incidents",
+            "journeys",
+            "metrology",
+            "organisation_issues",
+            "organisation_objectives",
+            "personal_data",
+            "posture_assessments",
+            "privacy",
+            "project_management",
+            "purposes",
+            "quantitative_risk_studies",
+            "quick_forms",
+            "reports",
+            "right_requests",
+            "risk_acceptances",
+            "scoring_assistant",
+            "security_advisories",
+            "cwes",
+            "tasks",
+            "threat_modeling",
+            "tprm",
+            "ttps",
+            "validation_flows",
+            "vulnerabilities",
+            "workflows",
+            "xrays",
+        }
+    )
+
     class Meta:
         model = GlobalSettings
         exclude = [

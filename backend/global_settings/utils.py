@@ -87,22 +87,37 @@ def redact_secret_value(value: str) -> str:
     return SETTINGS_MASK_PLACEHOLDER
 
 
-@functools.cache
-def get_supported_feature_flags() -> frozenset:
-    """Flags supported by this edition, derived from the edition's
-    FeatureFlags serializer — the single source of truth. The enterprise
-    overlay swaps that serializer in via MODULE_PATHS["serializers"], so no
+def _edition_feature_flags_serializer():
+    """The FeatureFlags serializer of this edition — the single source of truth
+    for the flag vocabulary, their defaults and which of them a user may hide.
+    The enterprise overlay swaps it in via MODULE_PATHS["serializers"], so no
     separate flag list exists anywhere."""
     serializer_class = FeatureFlagsSerializer
     module_path = django_settings.MODULE_PATHS.get("serializers")
     if module_path:
         module = importlib.import_module(module_path)
         serializer_class = getattr(module, "FeatureFlagsSerializer", serializer_class)
+    return serializer_class
+
+
+@functools.cache
+def get_supported_feature_flags() -> frozenset:
+    """Flags supported by this edition."""
     return frozenset(
         field.source.split(".")[-1]
-        for field in serializer_class().fields.values()
+        for field in _edition_feature_flags_serializer()().fields.values()
         if getattr(field, "source", None) and field.source.startswith("value.")
     )
+
+
+@functools.cache
+def get_user_hideable_feature_flags() -> frozenset:
+    """Flags a user may switch off for themselves. Intersected with the
+    supported set so an edition can never declare one it doesn't have."""
+    declared = getattr(
+        _edition_feature_flags_serializer(), "USER_HIDEABLE_FLAGS", frozenset()
+    )
+    return frozenset(declared) & get_supported_feature_flags()
 
 
 def get_feature_flag_defaults() -> dict:
@@ -110,11 +125,7 @@ def get_feature_flag_defaults() -> dict:
     edition's serializer like `get_supported_feature_flags`."""
     from rest_framework.fields import empty
 
-    serializer_class = FeatureFlagsSerializer
-    module_path = django_settings.MODULE_PATHS.get("serializers")
-    if module_path:
-        module = importlib.import_module(module_path)
-        serializer_class = getattr(module, "FeatureFlagsSerializer", serializer_class)
+    serializer_class = _edition_feature_flags_serializer()
     defaults = {}
     for field in serializer_class().fields.values():
         source = getattr(field, "source", None)
@@ -168,6 +179,59 @@ def ff_is_enabled(feature_flag: str):
         return False
 
     return flag
+
+
+USER_FEATURE_FLAGS_PREFERENCE_KEY = "feature_flags"
+
+
+def get_user_hidden_feature_flags(user) -> dict:
+    """The user's own hide choices, sanitised: only supported, hideable flags,
+    and only the value False. Stored sparse — a flag the user never touched is
+    absent, so a flag added by a release is visible without a backfill."""
+    preferences = getattr(user, "preferences", None)
+    stored = (
+        preferences.get(USER_FEATURE_FLAGS_PREFERENCE_KEY)
+        if isinstance(preferences, dict)
+        else None
+    )
+    if not isinstance(stored, dict):
+        return {}
+    hideable = get_user_hideable_feature_flags()
+    return {
+        name: False
+        for name, value in stored.items()
+        if value is False and name in hideable
+    }
+
+
+def get_instance_feature_flags() -> dict:
+    """Every supported flag with its instance-wide value: the row, backed by the
+    declared defaults for the keys a release added and the row has not caught up
+    with yet.
+
+    Restricted to the supported set, because an env-gated flag (chat_mode,
+    infra_config_management) may linger in the row after being switched off and
+    the serializer drops it from the admin view — this must match.
+    """
+    supported = get_supported_feature_flags()
+    stored = {
+        name: value
+        for name, value in (get_feature_flags() or {}).items()
+        if name in supported
+    }
+    return get_feature_flag_defaults() | stored
+
+
+def resolve_feature_flags(user) -> dict:
+    """The flags as *this user* should see them: the instance flags, narrowed by
+    the user's own hide choices.
+
+    Narrowing only, by construction — a user choice can turn a flag off, never
+    on. That is what keeps `ff_is_enabled` out of this: enforcement stays
+    instance-wide and correct, and this resolution only drives what the UI
+    offers. Callers that gate access must keep using `ff_is_enabled`.
+    """
+    return get_instance_feature_flags() | get_user_hidden_feature_flags(user)
 
 
 def idp_group_role_inheritance_enabled() -> bool:

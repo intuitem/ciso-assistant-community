@@ -14,6 +14,12 @@ from core.serializers import SerializerFactory
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
+from .utils import (
+    get_instance_feature_flags,
+    get_user_hidden_feature_flags,
+    get_user_hideable_feature_flags,
+    resolve_feature_flags,
+)
 from .serializers import (
     GeneralSettingsSerializer,
     FeatureFlagsSerializer,
@@ -86,6 +92,32 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
         obj, _ = self.model.objects.get_or_create(name="feature-flags")
         self.check_object_permissions(self.request, obj)
         return obj
+
+    @action(detail=True, methods=["get"], permission_classes=[IsAuthenticated])
+    def effective(self, request, pk=None):
+        """The flags as the calling user should see them: the instance flags
+        narrowed by the user's own hide choices.
+
+        Deliberately separate from `retrieve`, which stays the raw row: the
+        admin settings form reads that one and PUTs the whole form back, so
+        serving the narrowed view there would write an admin's personal hides
+        instance-wide on their next save.
+        """
+        hideable = get_user_hideable_feature_flags()
+        instance_flags = get_instance_feature_flags()
+        return Response(
+            {
+                "flags": resolve_feature_flags(request.user),
+                "hideable": sorted(hideable),
+                "hidden": sorted(get_user_hidden_feature_flags(request.user)),
+                # The un-narrowed value of each hideable flag, so the profile page
+                # can tell "you switched this off" from "your organisation did" —
+                # which `flags` alone cannot, both being false.
+                "instance": {
+                    name: instance_flags.get(name, False) for name in hideable
+                },
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def defaults(self, request, pk=None):
