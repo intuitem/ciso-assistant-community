@@ -5,6 +5,8 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from auditlog.registry import auditlog
+
 from core.base_models import AbstractBaseModel
 from core.models import FilteringLabelMixin, I18nObjectMixin
 from core.validators import validate_file_name, validate_file_size
@@ -483,3 +485,25 @@ def recompute_references(container) -> None:
             ],
             ignore_conflicts=True,
         )
+
+
+common_exclude = ["created_at", "updated_at"]
+
+# Registered so document work leaves an audit trail — and, through it, fires the
+# engine's internal-event triggers, which derive their model list from this
+# registry.
+auditlog.register(
+    DocumentContainer,
+    m2m_fields={"policies", "applied_controls", "task_templates", "assets"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(ManagedDocument, exclude_fields=common_exclude)
+auditlog.register(
+    DocumentRevision,
+    # `content` is excluded, so a content-only save writes no log row: DocumentEdit
+    # already snapshots every save of a draft, and mirroring whole markdown diffs
+    # here would make these the largest rows in the log by far. What remains —
+    # the revision appearing, and its status moving through review to published —
+    # is the lifecycle a reader (or a trigger) is after.
+    exclude_fields=common_exclude + ["content", "file", "pdf_snapshot"],
+)

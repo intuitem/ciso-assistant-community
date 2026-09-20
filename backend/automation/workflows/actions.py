@@ -62,6 +62,13 @@ from core.models import (
     Vulnerability,
 )
 from core.tasks import get_missing_email_settings
+from doc_management.models import (
+    DocumentContainer,
+    DocumentEdit,
+    DocumentRevision,
+    DocumentTemplate,
+    ManagedDocument,
+)
 from privacy.models import (
     DataContractor,
     DataRecipient,
@@ -526,6 +533,39 @@ CREATABLE_MODELS = {
         "fk_fields": {},
         "required_fields": ["requested_on"],
     },
+    "document_container": {
+        "model": DocumentContainer,
+        # The language-independent identity. Its locale variants are separate
+        # rows, so a container is created once and documents hang off it.
+        "fields": ["name", "description", "ref_id", "document_type"],
+        "fk_fields": {},
+    },
+    "managed_document": {
+        "model": ManagedDocument,
+        # `name` titles this locale variant; the container carries the
+        # language-independent one.
+        "fields": ["name", "description", "locale", "template_used"],
+        "fk_fields": {"container": (DocumentContainer, "document-containers")},
+        # The column is nullable — a container-less document is a legacy shape —
+        # but a run has no business creating one: the container is where the
+        # folder, the type and the catalog entry come from.
+        "required_fks": ["container"],
+        # Not a column on this model: the first revision's markdown.
+        "params": {"content": None},
+        "folder_from": "container",
+        "constructor": "_construct_managed_document",
+        # The constructor writes the first revision too.
+        "extra_permissions": ["add_documentrevision"],
+    },
+    "document_revision": {
+        "model": DocumentRevision,
+        # Authored markdown only: an uploaded or linked revision is a file, and
+        # no action can produce one.
+        "fields": ["content", "change_summary"],
+        "fk_fields": {"document": (ManagedDocument, "managed-documents")},
+        "folder_from": "document",
+        "constructor": "_construct_document_revision",
+    },
     "entity_assessment": {
         "model": EntityAssessment,
         "fields": ["name", "description"],
@@ -600,6 +640,114 @@ def _construct_entity_assessment(kwargs, params, instance):
             _implementation_groups(params.get("implementation_groups"), framework),
         )
     return assessment
+
+
+def _document_template_content(ref_id, locale, instance):
+    """A built-in template, or one the run identity may see — matched on ref_id
+    and locale with the same `en` fallback the editor uses."""
+    from . import authz
+    from .engine import run_identity
+
+    visible = DocumentTemplate.objects.filter(
+        Q(id__in=authz.viewable_ids(run_identity(instance), DocumentTemplate))
+        | Q(builtin=True)
+    )
+    template = (
+        visible.filter(ref_id=ref_id, locale=locale).first()
+        or visible.filter(ref_id=ref_id, locale="en").first()
+    )
+    if template is None:
+        raise FatalActionError(
+            f"create_object: no document template '{ref_id}' in {locale} or en"
+        )
+    return template.content
+
+
+def _construct_managed_document(kwargs, params, instance):
+    """A document is its content: a ManagedDocument with no revision serves
+    nothing, so v1 is written with it — the shape
+    ManagedDocumentWriteSerializer.create builds for the editor.
+
+    Seeding order is explicit `content`, then the template named by
+    `template_used`, then empty.
+    """
+    from .engine import run_identity
+
+    container = kwargs.get("container")
+    if container is None:
+        raise FatalActionError("create_object: 'container' is required")
+    locale = kwargs.get("locale") or "en"
+    content = params.get("content") or ""
+    if not content and kwargs.get("template_used"):
+        content = _document_template_content(kwargs["template_used"], locale, instance)
+    # save() takes it from the container anyway; set it so the create and the
+    # revision that follows agree.
+    kwargs["folder"] = container.folder
+    kwargs["locale"] = locale
+    with transaction.atomic():
+        # Lock the CONTAINER, not its documents: there is no row to lock when
+        # the locale is new, which is exactly the case the check below guards.
+        # Same reason ManagedDocumentWriteSerializer.create locks it.
+        container = DocumentContainer.objects.select_for_update().get(pk=container.pk)
+        siblings = ManagedDocument.objects.filter(container=container)
+        if siblings.filter(locale=locale).exists():
+            # (container, locale) is the document's identity: a second row for
+            # one locale would make `default_locale` and the catalog ambiguous.
+            raise FatalActionError(
+                f"create_object: '{container}' already has a {locale} document"
+            )
+        kwargs["container"] = container
+        document = ManagedDocument.objects.create(
+            default_locale=not siblings.exists(), **kwargs
+        )
+        document.current_revision = DocumentRevision.objects.create(
+            document=document,
+            version_number=1,
+            content=content,
+            author=run_identity(instance),
+        )
+        document.save()
+    return document
+
+
+def _construct_document_revision(kwargs, params, instance):
+    """The next draft of an existing document. Version numbering and the
+    one-open-draft rule are the editor's (doc_management create-new-draft), held
+    under the same row lock; with no `content` the draft clones what is current,
+    which is what opening a draft in the editor does."""
+    from .engine import run_identity
+
+    document = kwargs.pop("document", None)
+    if document is None:
+        raise FatalActionError("create_object: 'document' is required")
+    content = kwargs.pop("content", None)
+    # save() derives it from the document; the create kwarg would be overwritten.
+    kwargs.pop("folder", None)
+    with transaction.atomic():
+        # One locked read, then both decisions in Python — no aggregate over a
+        # locked queryset, and the lock covers the numbering and the draft check
+        # together.
+        locked = list(
+            DocumentRevision.objects.select_for_update()
+            .filter(document=document)
+            .values_list("version_number", "status")
+        )
+        if any(status == DocumentRevision.Status.DRAFT for _version, status in locked):
+            # Fatal: a retry would find the same draft.
+            raise FatalActionError(
+                f"create_object: '{document.display_name}' already has an open draft"
+            )
+        if content is None:
+            source = document.current_revision or document.revisions.first()
+            content = source.content if source else ""
+        return DocumentRevision.objects.create(
+            document=document,
+            version_number=max((version for version, _s in locked), default=0) + 1,
+            content=content,
+            author=run_identity(instance),
+            status=DocumentRevision.Status.DRAFT,
+            **kwargs,
+        )
 
 
 def _implementation_groups(value, framework):
@@ -697,7 +845,8 @@ class CreateObjectAction(BaseAction):
             _record_provenance(instance, obj)
             return {
                 "created_object_id": str(obj.id),
-                "created_object_name": obj.name,
+                # A built model need not be named: a document revision is "v3".
+                "created_object_name": getattr(obj, "name", None) or str(obj),
                 "created_object_model": config.get("model"),
                 "created": True,
             }
@@ -784,7 +933,7 @@ def _triggering_object(instance):
         model_name = "quickformresponse"
     if not (model_name and pk):
         return None
-    for app_label in ("core", "tprm", "privacy", "resilience"):
+    for app_label in ("core", "tprm", "privacy", "resilience", "doc_management"):
         try:
             model = apps.get_model(app_label, model_name)
         except LookupError:
@@ -824,6 +973,9 @@ class ReadEntry:
     skip_unrated: frozenset[str] = frozenset()
     #: Relations the computed callables dereference per row.
     select_related: list[str] = dataclass_field(default_factory=list)
+    #: The same, for the to-many relations a computed walks — without it a
+    #: read pays one query per row per relation.
+    prefetch_related: list[str] = dataclass_field(default_factory=list)
 
     def readable_fields(self) -> list[str]:
         """Return the field names a read node may output, filter and order
@@ -842,6 +994,49 @@ def _quick_form_answers(response):
         response.answers.select_related("question").prefetch_related("selected_choices")
     )
     return {extract_node_id(urn) or urn: value for urn, value in by_urn.items()}
+
+
+def _evidence_summary(evidence):
+    """What a reader needs to judge whether a piece of evidence backs anything:
+    what it is, whether a file or link is actually attached, and whether it has
+    lapsed. Never `get_size`/`attachment_hash` — those stat and hash the file.
+    `last_revision` sorts the prefetched revisions in Python, so it costs no
+    query once `…__revisions` is prefetched."""
+    revision = evidence.last_revision
+    return {
+        "id": str(evidence.id),
+        "name": evidence.name,
+        "status": evidence.get_status_display(),
+        "expiry_date": (
+            evidence.expiry_date.isoformat() if evidence.expiry_date else None
+        ),
+        # The distinction that matters when a claim is being checked: an
+        # evidence row can exist with nothing behind it.
+        "attached": bool(revision and (revision.attachment or revision.link)),
+    }
+
+
+def _requirement_backing(assessment):
+    """The controls a requirement leans on, each carrying its own evidence.
+
+    Evidence reaches a requirement two ways — attached to the requirement
+    assessment, or attached to one of its controls — and anything weighing a
+    result against what supports it needs both. Nesting the indirect evidence
+    under its control keeps that distinction visible instead of merging the two
+    into one undifferentiated pile."""
+    return [
+        {
+            "id": str(control.id),
+            "ref_id": control.ref_id,
+            "name": control.name,
+            "status": control.get_status_display(),
+            "eta": control.eta.isoformat() if control.eta else None,
+            "evidences": [
+                _evidence_summary(evidence) for evidence in control.evidences.all()
+            ],
+        }
+        for control in assessment.applied_controls.all()
+    ]
 
 
 def _requirements_breakdown(assessment):
@@ -976,6 +1171,69 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "answers": _quick_form_answers,
         },
     ),
+    "document_container": ReadEntry(
+        model=DocumentContainer,
+        fields=["description", "ref_id", "document_type"],
+        computed={"document_type": lambda c: c.get_document_type_display()},
+    ),
+    "managed_document": ReadEntry(
+        model=ManagedDocument,
+        fields=["description", "locale", "default_locale", "container"],
+        computed={
+            # The variant's own title is optional; the container names it then.
+            "name": lambda d: d.display_name,
+            "container": lambda d: (
+                {
+                    "str": str(d.container),
+                    "id": str(d.container_id),
+                    "name": d.container.name,
+                }
+                if d.container_id
+                else None
+            ),
+            "document_type": lambda d: (
+                d.container.document_type if d.container_id else None
+            ),
+            # The served revision, so a read can branch on what is published
+            # without a second read.
+            "current_revision": lambda d: (
+                {
+                    "id": str(d.current_revision_id),
+                    "version_number": d.current_revision.version_number,
+                    "status": d.current_revision.status,
+                }
+                if d.current_revision_id
+                else None
+            ),
+        },
+        select_related=["container", "current_revision"],
+    ),
+    "document_revision": ReadEntry(
+        model=DocumentRevision,
+        # `content` is the markdown itself: node outputs cap a string leaf at
+        # MAX_LEAF_CHARS, so a whole document reaches an AI step through
+        # output_mapping (variables are not capped), never through
+        # {{nodes.<ref>...}}.
+        fields=[
+            "version_number",
+            "status",
+            "source",
+            "change_summary",
+            "content",
+            "published_at",
+            "document",
+        ],
+        computed={
+            "name": str,
+            "status": lambda r: r.get_status_display(),
+            "document": lambda r: {
+                "str": str(r.document),
+                "id": str(r.document_id),
+                "name": r.document.display_name,
+            },
+        },
+        select_related=["document", "document__container"],
+    ),
     "entity_assessment": ReadEntry(
         model=EntityAssessment,
         fields=["description", "status", "eta", "due_date"],
@@ -1009,6 +1267,9 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "documentation_score",
             "eta",
             "due_date",
+            # The assessor's own note. It was writable before it was readable,
+            # which left a run able to overwrite a note it could not see.
+            "observation",
             "compliance_assessment",
         ],
         # Identify the requirement and the audit on every row, under the
@@ -1019,7 +1280,15 @@ READABLE_MODELS: dict[str, ReadEntry] = {
                 "id": str(ra.requirement_id),
                 "ref_id": ra.requirement.ref_id,
                 "name": ra.requirement.name,
+                # The expectation itself. Without it a reader is working from
+                # a title.
+                "description": ra.requirement.description,
             },
+            # What is claimed to satisfy the requirement, and what backs it.
+            "applied_controls": _requirement_backing,
+            "evidences": lambda ra: [
+                _evidence_summary(evidence) for evidence in ra.evidences.all()
+            ],
             # Subset of the API's FieldsRelatedField dict.
             "compliance_assessment": lambda ra: {
                 "str": str(ra.compliance_assessment),
@@ -1028,6 +1297,10 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             },
         },
         select_related=["requirement", "compliance_assessment"],
+        prefetch_related=[
+            "applied_controls__evidences__revisions",
+            "evidences__revisions",
+        ],
     ),
     "risk_scenario": ReadEntry(
         model=RiskScenario,
@@ -1286,6 +1559,8 @@ class ReadObjectsAction(BaseAction):
         # Computed callables dereference these per row otherwise.
         if entry.select_related:
             queryset = queryset.select_related(*entry.select_related)
+        if entry.prefetch_related:
+            queryset = queryset.prefetch_related(*entry.prefetch_related)
         return entry, fields, queryset
 
     def execute(self, config, instance):
@@ -1345,6 +1620,15 @@ class UpdateEntry:
     m2m_fields: dict[str, tuple[type[Model], str]] = dataclass_field(
         default_factory=dict
     )
+    #: Rows this model is writable on at all, when only some of them are (a
+    #: published document revision is a record, its open draft is work).
+    base_filter: Q | None = None
+    #: What base_filter means, appended to the not-found error so a run says
+    #: why the row was refused rather than blaming scope.
+    scope_note: str = ""
+    #: Bookkeeping the API does around its own write — called (obj, updated
+    #: field names, instance) after save() so a run leaves the same trail.
+    after_save: Callable | None = None
 
 
 _ACTOR = (Actor, "actors")
@@ -1358,6 +1642,31 @@ _EXCEPTIONS = (SecurityException, "security-exceptions")
 _ASSESSMENT_STATUSES = frozenset(
     {"planned", "in_progress", "in_review", "done", "deprecated"}
 )
+
+
+def _record_document_edit(revision, updated, instance):
+    """The editor snapshots every content change of a draft (doc_management
+    perform_update). A run's rewrite belongs in that same history, under the
+    identity the run holds — otherwise the only trace of what a machine wrote
+    is the revision itself.
+
+    Deliberately NOT declared as an extra permission: no role grants
+    `add_documentedit` (core/startup.py grants `view_documentedit` only) because
+    the platform writes these rows itself, under `change_documentrevision`.
+    Declaring it would refuse to publish a workflow whose author can do the same
+    thing through the API, which is the one direction the engine must not take.
+    """
+    from .engine import run_identity
+
+    if "content" not in updated:
+        return
+    DocumentEdit.objects.create(
+        revision=revision,
+        editor=run_identity(instance),
+        summary=revision.change_summary or "",
+        content_snapshot=revision.content,
+    )
+
 
 UPDATABLE_MODELS: dict[str, UpdateEntry] = {
     # Triage, not judgment. A run may widen the reviewer pool, tighten the date and
@@ -1517,6 +1826,43 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
             "security_exceptions": _EXCEPTIONS,
         },
     ),
+    "document_container": UpdateEntry(
+        model=DocumentContainer,
+        # The language-independent facts and the objects the document answers
+        # for. Publication state lives on the revisions.
+        fields=["description", "ref_id", "document_type"],
+        m2m_fields={
+            "applied_controls": _CONTROLS,
+            "assets": _ASSETS,
+            "filtering_labels": _LABELS,
+        },
+    ),
+    "managed_document": UpdateEntry(
+        model=ManagedDocument,
+        # No `current_revision`: which revision is served is publish()'s to
+        # move, together with deprecating the one it replaces.
+        fields=["description"],
+    ),
+    "document_revision": UpdateEntry(
+        model=DocumentRevision,
+        # The draft's text and the note that explains it. `status` is absent:
+        # publish() deprecates the previous published revision and repoints the
+        # document's current one, so a column write would leave the chain
+        # inconsistent — the reason ValidationFlow and RiskAcceptance are absent
+        # from this registry too.
+        fields=["content", "change_summary"],
+        # What doc_management's own perform_update allows: a revision still
+        # being worked on. Once submitted, validated or published its text is
+        # frozen and the next draft is the way to change it.
+        base_filter=Q(
+            status__in=(
+                DocumentRevision.Status.DRAFT,
+                DocumentRevision.Status.CHANGE_REQUESTED,
+            )
+        ),
+        scope_note="a revision is only rewritable while it is being drafted",
+        after_save=_record_document_edit,
+    ),
     "risk_scenario": UpdateEntry(
         model=RiskScenario,
         # No treatment, no ratings: attach the control, leave the call.
@@ -1601,22 +1947,19 @@ class UpdateObjectAction(BaseAction):
         # Subtree AND changeable by the run identity: the same two-part scope
         # as a read, with change instead of view.
         try:
-            obj = (
-                entry.model.objects.filter(
-                    folder_id__in=_read_scope_folder_ids(instance.folder)
-                )
-                .filter(
-                    id__in=authz.changeable_ids(run_identity(instance), entry.model)
-                )
-                .filter(id=target_id)
-                .first()
-            )
+            rows = entry.model.objects.filter(
+                folder_id__in=_read_scope_folder_ids(instance.folder)
+            ).filter(id__in=authz.changeable_ids(run_identity(instance), entry.model))
+            if entry.base_filter is not None:
+                rows = rows.filter(entry.base_filter)
+            obj = rows.filter(id=target_id).first()
         except ValueError, ValidationError:
             obj = None
         if obj is None:
+            note = f" ({entry.scope_note})" if entry.scope_note else ""
             raise ActionError(
                 f"update_object: no {config.get('model')} '{target_id}' "
-                "in this workflow's scope"
+                f"in this workflow's scope{note}"
             )
 
         fields = render(config.get("fields") or {}, context)
@@ -1637,6 +1980,8 @@ class UpdateObjectAction(BaseAction):
                 obj.save()
             except ValidationError as e:
                 raise ActionError(f"update_object: {'; '.join(e.messages)}")
+            if entry.after_save is not None:
+                entry.after_save(obj, updated, instance)
 
         relations = {}
         for field_name, spec in (config.get("m2m") or {}).items():
@@ -2690,7 +3035,10 @@ AI_SYSTEM_PROMPT = (
 )
 
 AI_INPUT_MAX_CHARS = 20000
-AI_TEXT_MAX_CHARS = 5000
+# ai_generate's backstop, not its control: `max_words` is what an author sets,
+# and its 2000-word ceiling is ~14000 characters, so a lower cap here would cut
+# a long draft (a policy, say) mid-sentence with nothing saying why.
+AI_TEXT_MAX_CHARS = 20000
 # ai_extract's parsed object flows into variables uncapped (output_mapping
 # copies from the output, which the engine's node_outputs cap never sees), so
 # the completion is bounded before it is parsed.
@@ -2821,7 +3169,8 @@ def required_permissions(action_config):
         for param, extra in (entry.get("constructor_permissions") or {}).items():
             if fields.get(param):
                 codenames += extra
-        return codenames
+        # What it builds every time, whatever the config says.
+        return codenames + list(entry.get("extra_permissions") or [])
     if action_type == "attach_evidence":
         # Both modes can create a revision: the default one does when the
         # evidence has none yet.
@@ -3041,8 +3390,11 @@ def validate_create_config(node):
                     )
                 )
         # execute_action skips empty FKs, so a missing non-nullable one only
-        # surfaces as an IntegrityError mid-run.
-        if entry["model"]._meta.get_field(fk_name).null:
+        # surfaces as an IntegrityError mid-run. `required_fks` covers the
+        # column the model leaves nullable but this action cannot do without.
+        if entry["model"]._meta.get_field(fk_name).null and fk_name not in (
+            entry.get("required_fks") or ()
+        ):
             continue
         if not fields.get(fk_name):
             errors.append(

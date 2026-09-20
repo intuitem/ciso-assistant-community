@@ -76,7 +76,10 @@ Each row carries `id`, `name`, `created_at`, `updated_at` plus the fields below.
 | `compliance_assessment` | description, ref_id, status, eta, due_date, plus computed `computed_outcome`, `scores`, `requirements` (total and count per result) |
 | `risk_assessment` | description, ref_id, status, eta, due_date |
 | `entity_assessment` | description, status, eta, due_date |
-| `requirement_assessment` | status, result, extended_result, score, is_scored, documentation_score, eta, due_date, compliance_assessment, plus `requirement` (id, ref_id, name). Only assessable requirements |
+| `document_container` | description, ref_id, document_type |
+| `managed_document` | description, locale, default_locale, container, plus `document_type` and `current_revision` (id, version number, status). A locale variant with no title of its own reads under the document's name |
+| `document_revision` | version_number, status, source, change_summary, content, published_at, document. `content` is the markdown itself, so a long one is truncated in `{{nodes.…}}`; map it to a variable to pass a whole document to an AI step |
+| `requirement_assessment` | status, result, extended_result, score, is_scored, documentation_score, eta, due_date, observation, compliance_assessment, plus `requirement` (id, ref_id, name, description), `applied_controls` (each with its own `evidences`) and `evidences` attached to the requirement itself. Every evidence says whether anything is `attached`. Only assessable requirements |
 | `risk_scenario` | description, ref_id, treatment, inherent_level, current_level, residual_level, risk_assessment. Level filters ignore unrated scenarios |
 | `risk_acceptance` | description, state, expiry_date, justification |
 | `validation_flow` | ref_id, status, validation_deadline |
@@ -138,6 +141,9 @@ Some objects live in their parent's domain rather than the workflow's: a purpose
 | `data_recipient` | name, **category**, description | processing |
 | `data_contractor` | name, **relationship_type**, **country**, description, documentation_link | processing, entity |
 | `data_transfer` | name, **country**, description, transfer_mechanism, guarantees, documentation_link | processing, entity |
+| `document_container` | name, description, ref_id, document_type | |
+| `managed_document` | name, description, locale, template_used | **container**, content. The first draft revision is created with it, seeded from `content` or from the template named by `template_used`. One document per locale. Upsert not available |
+| `document_revision` | content, change_summary | **document**. Opens the next draft, numbered after the last revision and cloning the current content when `content` is left empty. Only one draft may be open at a time. Upsert not available |
 | `entity_assessment` | name, description | entity, perimeter, framework, implementation_groups. With a framework, the questionnaire and its enclave are built too. Upsert not available |
 | `entity_score` | **score**, **as_of**, scale_max, grade, url, observation | entity, provider |
 | `timeline_entry` | **entry**, entry_type, timestamp, observation | incident |
@@ -186,8 +192,13 @@ The object must be inside the workflow's subtree and changeable by the run ident
 | `entity_assessment` | status (planning states), eta, due_date, description, observation | |
 | `requirement_assessment` | status, eta, due_date, observation | applied_controls, evidences, security_exceptions |
 | `risk_scenario` | description, ref_id | applied_controls, owner, assets |
+| `document_container` | description, ref_id, document_type | applied_controls, assets, filtering_labels |
+| `managed_document` | description | |
+| `document_revision` | content, change_summary — while the revision is still being drafted | |
 
 Planning states are `planned`, `in_progress`, `in_review`, `done`, `deprecated`. Names are never writable. Results, scores, levels and decisions are never writable.
+
+A document revision's status is not writable either, and a submitted, validated or published revision's markdown cannot be touched at all — the same rule the document editor applies. Publishing deprecates the revision it replaces and repoints the document at the new one, which a field write would not do. A workflow writes the draft; someone publishes it, and the rewrite is recorded in the document's edit history under the identity the workflow runs as.
 
 **Replace** replaces the whole relation. It refuses to detach objects outside the workflow's scope, so a workflow cannot silently unlink a parent-domain object.
 
@@ -391,15 +402,17 @@ Asks the model for prose — a summary, a description, an explanatory note.
 
 Output: `text`, plus `_input_truncated` when the input was cut.
 
+For anything longer than a note — a drafted policy, say — map `text` to a variable in the step's outputs and write `{{that_variable}}` into the field. A `{{nodes.…}}` reference is shortened to 1 000 characters (it says so, in the value itself); a variable carries the whole text.
+
 ### What the model is and is not allowed to do
 
 {% hint style="warning" %}
-An AI answer cannot be written into a field that accepts a fixed set of values — a status, a severity, a result. Publishing refuses it, and routing the answer through a variable first does not get around the check: the builder follows where the value came from. Branch on the answer with a Condition and write the value you want on each branch.
+An AI answer cannot be written into a field that accepts a fixed set of values — a status, a severity, a result — whether the step creates the object or updates one. Publishing refuses it, and routing the answer through a variable first does not get around the check: the builder follows where the value came from. Branch on the answer with a Condition and write the value you want on each branch.
 
 The reason is the audit trail. A field with a fixed set of values is read as a decision someone made; letting a model fill it in would record a guess as a fact.
 {% endhint %}
 
-The input is capped at 20 000 characters and cut rather than refused, so a step never fails just because a document was long — check `_input_truncated` in the output if that matters to you. A generated text is stored up to 5 000 characters.
+The input is capped at 20 000 characters and cut rather than refused, so a step never fails just because a document was long — check `_input_truncated` in the output if that matters to you. A generated text is stored up to 20 000 characters, so the word limit is what actually bounds it.
 
 The step tells the model that its input is data and not instructions, so text inside a fetched document cannot redirect it. Treat that as a reduction in risk and not as a guarantee: do not let a model's answer reach anything you would not let the document's author write.
 
