@@ -6,13 +6,12 @@
 
 	import { onMount } from 'svelte';
 
-	import type { ModalComponent, ModalSettings, TreeViewNode } from '@skeletonlabs/skeleton-svelte';
+	import type { TreeViewNode } from '$lib/components/TreeView/types';
 
 	import { Switch, Progress, Popover, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
 
-	import {} from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 
@@ -134,7 +133,12 @@
 	}
 
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 	import CompareAuditModal from '$lib/components/Modals/CompareAuditModal.svelte';
 	import MapFromAuditModal from '$lib/components/Modals/MapFromAuditModal.svelte';
 	import MappingDirectionModal from '$lib/components/Modals/MappingDirectionModal.svelte';
@@ -295,12 +299,12 @@
 			};
 		});
 	}
-	let treeViewNodes: TreeViewNode[] = $state();
+	let treeViewNodes: TreeViewNode[] | undefined = $state();
 
 	function assessableNodesCount(nodes: TreeViewNode[], onlyVisible = false): number {
 		let count = 0;
 		for (const node of nodes) {
-			if (node.contentProps.assessable && !(onlyVisible && node.contentProps.hidden)) {
+			if (node.contentProps?.assessable && !(onlyVisible && node.contentProps?.hidden)) {
 				count++;
 			}
 			if (node.children) {
@@ -310,7 +314,7 @@
 		return count;
 	}
 
-	let expandedNodes: TreeViewNode[] = $state([]);
+	let expandedNodes: string[] = $state([]);
 
 	expandedNodes = $expandedNodesState;
 

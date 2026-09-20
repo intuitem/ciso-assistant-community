@@ -49,7 +49,7 @@
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
-	import type { SvelteEvent } from '@skeletonlabs/skeleton-svelte';
+	import type { SvelteEvent } from '$lib/utils/types';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -1087,7 +1087,7 @@
 											{:else}
 												<div
 													data-testid="model-table-td-array-elem"
-													class="base-font-family whitespace-pre-line break-words"
+													class="font-typo-base whitespace-pre-line break-words"
 												>
 													{#if Array.isArray(value)}
 														{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}

@@ -9,7 +9,7 @@ import {
 	type SelectField,
 	type SelectFieldData
 } from '$lib/utils/crud';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { type TableSource } from '$lib/components/ModelTable/types';
 
 import { modelSchema, type FormDataShape } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
