@@ -4,12 +4,15 @@ artefacts describing one set of notification types. Nothing but these tests stop
 them drifting apart.
 """
 
+import ast
 import json
 import re
+from collections import Counter
 from pathlib import Path
 
 import pytest
 
+from core import tasks
 from core.email_utils import TEMPLATE_BASE_PATH
 from notifications.registry import NOTIFICATION_REGISTRY
 
@@ -113,3 +116,39 @@ def test_title_messages_only_use_declared_context(locale):
         assert used <= set(meta["context"]), (
             f"{locale}/{key} uses undeclared {sorted(used - set(meta['context']))}"
         )
+
+
+def _declared_owners() -> Counter:
+    """Which producer claims authority over which condition type.
+
+    `clear_stale` deletes every row of a type that is not in the `keep` set it is
+    handed, so the caller is asserting it examined the whole population. Two callers
+    for one type delete each other's rows on alternate nights -- which is what the
+    in_month / in_week / tomorrow trio did before they were consolidated.
+    """
+    tree = ast.parse(Path(tasks.__file__).read_text(encoding="utf-8"))
+    owners = Counter()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        # `_sweep_deadline` clears on the caller's behalf, so it counts as the owner.
+        if getattr(node.func, "id", None) not in ("clear_stale", "_sweep_deadline"):
+            continue
+        first = node.args[0] if node.args else None
+        if isinstance(first, ast.Constant) and isinstance(first.value, str):
+            owners[first.value] += 1
+    return owners
+
+
+def test_every_condition_type_has_exactly_one_owner():
+    owners = _declared_owners()
+    conditions = {
+        k for k, v in NOTIFICATION_REGISTRY.items() if v["mode"] == "condition"
+    }
+    assert set(owners) == conditions, (
+        "a condition type is unowned, or a non-condition type clears"
+    )
+    duplicated = {k: n for k, n in owners.items() if n > 1}
+    assert not duplicated, (
+        f"two producers clear the same type; they will delete each other's rows: {duplicated}"
+    )

@@ -7,6 +7,10 @@
 	 *
 	 * A computed column: the API returns no title field, so `cell` is empty and
 	 * everything comes from `meta`.
+	 *
+	 * The audience badge rides along here rather than taking a column of its own: it
+	 * is blank for the common case of one recipient, and a column that is usually
+	 * empty is worse than no column.
 	 */
 	interface Props {
 		cell: any;
@@ -36,6 +40,18 @@
 			return meta?.type ?? '';
 		}
 	});
+
+	const others = $derived(Math.max(0, Number(meta?.recipient_count ?? 1) - 1));
 </script>
 
-<span>{title}</span>
+<span class="inline-flex items-center gap-2">
+	<span>{title}</span>
+	{#if others > 0}
+		<span
+			class="inline-flex items-center gap-1 rounded-full bg-surface-200-800 px-2 py-0.5 text-[10px] text-surface-700-300"
+			title={m.alsoNotified({ count: others })}
+		>
+			<i class="fa-solid fa-user-group"></i>{others + 1}
+		</span>
+	{/if}
+</span>

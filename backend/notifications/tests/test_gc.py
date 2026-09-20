@@ -5,6 +5,7 @@ that have aged out, and the cap is a ceiling on one inbox regardless of state.
 """
 
 from datetime import timedelta
+from uuid import uuid4
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
@@ -181,3 +182,43 @@ def test_email_column_reads_and_writes_the_existing_mute_list():
 
     set_channel("expired_controls", "email", True)
     assert "expired_controls" not in get_disabled_email_templates()
+
+
+def _bulk(user, n, *, is_read, prefix):
+    """Rows straight into the table: the cap does not resolve targets, and 1000 saves
+    through the ORM would dominate the test's runtime."""
+    content_type = ContentType.objects.get_for_model(AppliedControl)
+    rows = [
+        Notification(
+            recipient=user,
+            type="expired_controls",
+            context={"control_name": f"{prefix} {i}"},
+            content_type=content_type,
+            object_id=uuid4(),
+            is_read=is_read,
+        )
+        for i in range(n)
+    ]
+    return Notification.objects.bulk_create(rows)
+
+
+def test_the_cap_sacrifices_read_rows_before_unread(folder, user):
+    """A full inbox should lose history, not work."""
+    unread = _bulk(user, MAX_PER_RECIPIENT, is_read=False, prefix="unread")
+    _bulk(user, 50, is_read=True, prefix="read")
+
+    assert enforce_per_recipient_cap() == 50
+    survivors = set(
+        Notification.objects.filter(recipient=user).values_list("id", flat=True)
+    )
+    assert survivors == {n.id for n in unread}, (
+        "every read row went, every unread stayed"
+    )
+
+
+def test_the_cap_still_bites_when_everything_is_unread(folder, user):
+    """Otherwise a runaway producer, which writes unread, has no ceiling at all."""
+    _bulk(user, MAX_PER_RECIPIENT + 20, is_read=False, prefix="flood")
+
+    assert enforce_per_recipient_cap() == 20
+    assert Notification.objects.filter(recipient=user).count() == MAX_PER_RECIPIENT

@@ -41,6 +41,7 @@ class NotificationReadSerializer(BaseModelSerializer):
             "content_type",
             "target_model",
             "object_id",
+            "recipient_count",
             "is_read",
             "read_at",
             "folder",

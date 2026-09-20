@@ -10,6 +10,10 @@
 	 * two are what keep it from sitting stale for a minute after you read something.
 	 */
 	const POLL_INTERVAL_MS = 60_000;
+	// Navigation and tab focus are signals that the count *might* be stale, not that it
+	// is. Without a floor, clicking through ten pages fires ten requests for an answer
+	// the timer would have given anyway.
+	const MIN_REFRESH_GAP_MS = 30_000;
 	// Past this the exact number is noise, and the badge would grow into the toolbar.
 	const MAX_DISPLAYED = 99;
 
@@ -21,7 +25,12 @@
 	const label = $derived(count > MAX_DISPLAYED ? `${MAX_DISPLAYED}+` : String(count));
 	const title = $derived(count > 0 ? m.unreadNotifications({ count }) : m.noUnreadNotifications());
 
-	async function refresh() {
+	let lastRefresh = 0;
+
+	async function refresh({ force = false } = {}) {
+		const now = Date.now();
+		if (!force && now - lastRefresh < MIN_REFRESH_GAP_MS) return;
+		lastRefresh = now;
 		try {
 			const res = await fetch('/fe-api/notifications/unread-count');
 			if (!res.ok) throw new Error(String(res.status));
@@ -37,7 +46,7 @@
 
 	onMount(() => {
 		// No initial refresh here: the $effect below already fires on mount.
-		const interval = setInterval(refresh, POLL_INTERVAL_MS);
+		const interval = setInterval(() => refresh({ force: true }), POLL_INTERVAL_MS);
 		const onFocus = () => {
 			if (document.visibilityState === 'visible') refresh();
 		};
@@ -48,7 +57,8 @@
 		};
 	});
 
-	// Re-poll on navigation: the count changes as a side effect of using the inbox.
+	// Re-poll on navigation, subject to the floor above. Mutations already push their
+	// own count into the store, so this only has to catch what other tabs did.
 	$effect(() => {
 		page.url.pathname;
 		refresh();

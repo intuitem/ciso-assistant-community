@@ -981,6 +981,20 @@ export const NOTIFICATION_READ_FILTER: ListViewFilterConfig = {
 	}
 };
 
+// Not the raw count: "is anyone else on this" is the question, and the backend turns
+// it into recipient_count > 1.
+export const NOTIFICATION_SHARED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'recipients',
+		options: [
+			{ label: 'sharedWithOthers', value: 'true' },
+			{ label: 'onlyYou', value: 'false' }
+		],
+		multiple: false
+	}
+};
+
 // `category` is a property of the notification type, not a column: the backend
 // expands it to type__in from the registry, so the options are a fixed vocabulary
 // rather than an endpoint.
@@ -3037,6 +3051,7 @@ export const listViewFields = {
 		filters: {
 			is_read: NOTIFICATION_READ_FILTER,
 			category: NOTIFICATION_CATEGORY_FILTER,
+			shared: NOTIFICATION_SHARED_FILTER,
 			folder: DOMAIN_FILTER,
 			created_at: CREATED_AT_FILTER,
 			read_at: dateFilter('read_at', { isDateTime: true })

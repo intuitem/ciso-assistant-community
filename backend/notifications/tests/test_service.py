@@ -268,3 +268,31 @@ def test_mutation_responses_report_the_new_unread_count(user, control, folder, p
     assert response.status_code == 200
     assert response.data["unread_count"] == expected
     assert rows(user).filter(is_read=False).count() == expected
+
+
+def test_recipient_count_is_the_size_of_the_in_app_audience(control):
+    alice = User.objects.create(email="alice@test.local")
+    bob = User.objects.create(email="bob@test.local")
+    carol = User.objects.create(email="carol@test.local")
+
+    notify("expired_controls", [alice, bob, carol], control, {})
+
+    assert {r.recipient_count for r in rows()} == {3}
+
+
+def test_recipient_count_ignores_addresses_with_no_user(control, user):
+    """A team's shared mailbox is in get_emails() but is not a User, so it gets the
+    email and no inbox row -- it must not inflate the count either."""
+    notify("expired_controls", [user.email, "team-mailbox@test.local"], control, {})
+
+    assert rows().get().recipient_count == 1
+
+
+def test_recipient_count_follows_the_audience_on_a_re_fire(control, user):
+    notify("expired_controls", [user], control, {})
+    assert rows().get().recipient_count == 1
+
+    later = User.objects.create(email="joined@test.local")
+    notify("expired_controls", [user, later], control, {})
+
+    assert {r.recipient_count for r in rows()} == {2}

@@ -6638,8 +6638,8 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "Page \u00b7 {count} question",
-				"countPlural=other": "Page \u00b7 {count} questions"
+				"countPlural=one": "Page · {count} question",
+				"countPlural=other": "Page · {count} questions"
 			}
 		}
 	],
@@ -6683,5 +6683,14 @@
 	"notRelated": "Not related",
 	"syntactic": "Syntactic",
 	"semantic": "Semantic",
-	"functional": "Functional"
+	"functional": "Functional",
+	"sharedWithOthers": "Shared with others",
+	"onlyYou": "Only you",
+	"alsoNotified": "{count} other people were notified",
+	"recipients": "Recipients",
+	"myTeams": "My teams",
+	"teamLeader": "Leader",
+	"teamDeputy": "Deputy",
+	"teamMember": "Member",
+	"noTeams": "You do not belong to any team."
 }

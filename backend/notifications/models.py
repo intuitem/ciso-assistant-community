@@ -38,6 +38,13 @@ class Notification(AbstractBaseModel):
     # it client-side keeps it in the viewer's language, not the firing one.
     context = models.JSONField(default=dict, blank=True, verbose_name=_("Context"))
 
+    # How many inbox rows the same fire wrote for this target: "am I the only one on
+    # this". Counts Users who got a row, so a team's shared mailbox is not in it, and
+    # neither are third-party recipients. Refreshed on every re-fire.
+    recipient_count = models.PositiveIntegerField(
+        default=1, verbose_name=_("Recipients")
+    )
+
     is_read = models.BooleanField(default=False, verbose_name=_("Read"))
     # `updated_at` cannot stand in: a nightly sweep touches it on every condition row.
     read_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Read at"))

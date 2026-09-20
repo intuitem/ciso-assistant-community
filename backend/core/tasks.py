@@ -51,15 +51,16 @@ def _sweep_deadline(
 ) -> None:
     """One sweep per deadline type, replacing the in_month / in_week / tomorrow trio.
 
-    Email keeps its exact-day escalation; the inbox tracks the condition continuously,
-    so the two need different queries. Only a sweep seeing the whole window can say
-    which rows are stale -- any one of the three would have cleared the others' rows.
+    Both channels escalate on the same days; the inbox additionally keeps the row in
+    between, which is why it needs the whole window and email only needs today. Only a
+    sweep seeing the whole window can say which rows are stale -- any one of the three
+    would have cleared the others' rows.
 
     `objects` must cover the whole window. `skip(obj, days_remaining)` drops an object
     from both channels.
     """
     today = date.today()
-    items = []
+    steady, escalating = [], []
     by_horizon = {days: defaultdict(list) for days in EXPIRY_NOTICE_DAYS}
 
     for obj in objects:
@@ -73,13 +74,19 @@ def _sweep_deadline(
         if not emails:
             continue
 
-        items.append((emails, obj, context(obj, days_remaining)))
-
+        item = (emails, obj, context(obj, days_remaining))
+        # The same test decides both channels: today is an escalation day, or it is not.
         if days_remaining in by_horizon:
+            escalating.append(item)
             for email in emails:
                 by_horizon[days_remaining][email].append(obj)
+        else:
+            steady.append(item)
 
-    clear_stale(notification_type, _written(notify_many(notification_type, items)))
+    written = notify_many(notification_type, steady) + notify_many(
+        notification_type, escalating, renotify=True
+    )
+    clear_stale(notification_type, _written(written))
 
     for days, per_recipient in by_horizon.items():
         for email, batch in per_recipient.items():

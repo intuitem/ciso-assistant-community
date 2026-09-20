@@ -209,3 +209,55 @@ def test_expired_controls_single_sweep_writes_and_clears(folder, owner, control)
     assert Notification.objects.filter(type="expired_controls").count() == 0, (
         "marking the control active is what the reminder said would stop it"
     )
+
+
+def _sweep():
+    from core.tasks import check_evidences_expiring_soon
+
+    with patch("core.tasks.send_evidence_expiring_soon_notification"):
+        check_evidences_expiring_soon.call_local()
+
+
+def _move_to(ev, days_out):
+    ev.expiry_date = date.today() + timedelta(days=days_out)
+    ev.save()
+
+
+@pytest.mark.parametrize("days_out", [7, 1])
+def test_a_read_row_reopens_when_the_deadline_escalates(folder, owner, days_out):
+    """Reading "expires in 30 days" must not silence "expires in 1 day". The inbox
+    escalates on exactly the days email does."""
+    ev = _evidence(folder, owner, 30)
+    _sweep()
+    _rows().update(is_read=True, read_at=date.today())
+
+    _move_to(ev, days_out)
+    _sweep()
+
+    row = _rows().get()
+    assert row.is_read is False
+    assert row.read_at is None
+    assert row.context["days_remaining"] == str(days_out)
+
+
+@pytest.mark.parametrize("days_out", [29, 10, 2])
+def test_a_read_row_stays_read_on_a_non_escalation_day(folder, owner, days_out):
+    """The other side of it: the sweep runs nightly, so re-opening on any day the
+    condition merely still holds would nag daily."""
+    ev = _evidence(folder, owner, 30)
+    _sweep()
+    _rows().update(is_read=True)
+
+    _move_to(ev, days_out)
+    _sweep()
+
+    assert _rows().get().is_read is True
+
+
+def test_escalation_still_writes_exactly_one_row(folder, owner):
+    """The sweep now calls notify_many twice; the natural key must still collapse."""
+    ev = _evidence(folder, owner, 30)
+    _sweep()
+    _move_to(ev, 7)
+    _sweep()
+    assert _rows().count() == 1

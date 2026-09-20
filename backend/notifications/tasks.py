@@ -29,8 +29,13 @@ def prune_read_notifications() -> int:
 
 
 def enforce_per_recipient_cap() -> int:
-    """Keep the newest MAX_PER_RECIPIENT rows per recipient, read or not: an unread
-    row is not more durable than the cap."""
+    """Keep the most useful MAX_PER_RECIPIENT rows per recipient.
+
+    Ordered unread-first, then newest-first, so the surplus taken off the tail is read
+    history before it is anything else. Unread rows are still capped -- a filter that
+    spared them would make the ceiling soft in the one case it exists for, since a
+    runaway producer writes unread.
+    """
     over_cap = (
         Notification.objects.values("recipient")
         .annotate(total=Count("id"))
@@ -40,7 +45,7 @@ def enforce_per_recipient_cap() -> int:
     for row in over_cap:
         surplus = list(
             Notification.objects.filter(recipient=row["recipient"])
-            .order_by("-created_at")
+            .order_by("is_read", "-created_at")
             .values_list("id", flat=True)[MAX_PER_RECIPIENT:]
         )
         if surplus:

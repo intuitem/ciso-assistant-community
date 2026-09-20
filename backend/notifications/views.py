@@ -45,7 +45,14 @@ class NotificationViewSet(BaseModelViewSet):
     # Titles render client-side, so there is no text column to search.
     search_fields = ["type"]
     # `folder` is derived, so it can be filtered (below) but never ordered by.
-    ordering_fields = ["created_at", "updated_at", "read_at", "is_read", "type"]
+    ordering_fields = [
+        "created_at",
+        "updated_at",
+        "read_at",
+        "is_read",
+        "type",
+        "recipient_count",
+    ]
     ordering = ["-created_at"]
 
     def get_queryset(self) -> models.query.QuerySet:
@@ -62,6 +69,15 @@ class NotificationViewSet(BaseModelViewSet):
                     if entry["category"] == category
                 ]
             )
+
+        # Not a filterset field: the useful question is "is anyone else on this",
+        # not an exact count.
+        shared = self.request.query_params.get("shared")
+        if shared is not None:
+            if str(shared).strip().lower() == "true":
+                queryset = queryset.filter(recipient_count__gt=1)
+            else:
+                queryset = queryset.filter(recipient_count__lte=1)
 
         if folders := self.request.query_params.getlist("folder"):
             queryset = self._filter_by_folder(queryset, folders)

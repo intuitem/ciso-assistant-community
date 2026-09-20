@@ -57,10 +57,17 @@ def notify(
     return notify_many(notification_type, [(recipients, target, context)])
 
 
-def notify_many(notification_type: str, items) -> list[Notification]:
+def notify_many(
+    notification_type: str, items, *, renotify: bool = False
+) -> list[Notification]:
     """`notify` over a whole sweep. `items` is an iterable of
     (recipients, target, context); the channel state and the address resolution are
-    constant across it, so only the upsert is per row."""
+    constant across it, so only the upsert is per row.
+
+    `renotify` re-opens a row the recipient had already read. A condition sweep runs
+    nightly and must not, or every deadline would nag daily -- but the days the
+    condition *escalates* are news, and the caller is what knows them.
+    """
     entry = NOTIFICATION_REGISTRY.get(notification_type)
     if entry is None:
         logger.error("Unknown notification type", type=notification_type)
@@ -74,8 +81,9 @@ def notify_many(notification_type: str, items) -> list[Notification]:
     resolve = _user_resolver({r for recipients, _, _ in items for r in recipients})
 
     # A re-fire bumps an event row back to unread; on a condition row `is_read` is the
-    # latch that stops the nightly sweep re-opening what you have dealt with.
-    bump_unread = entry["mode"] == "event"
+    # latch that stops the nightly sweep re-opening what you have dealt with, except on
+    # the days the caller calls escalation.
+    bump_unread = entry["mode"] == "event" or renotify
     written = []
 
     for recipients, target, context in items:
@@ -88,8 +96,9 @@ def notify_many(notification_type: str, items) -> list[Notification]:
             if key in entry["context"]
         }
 
-        for user in resolve(recipients):
-            defaults = {"context": declared}
+        users = resolve(recipients)
+        for user in users:
+            defaults = {"context": declared, "recipient_count": len(users)}
             if bump_unread:
                 defaults["is_read"] = False
                 defaults["read_at"] = None
