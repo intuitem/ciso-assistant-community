@@ -1275,6 +1275,21 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "quantitative_risk_scenario",
+                "quantitative_risk_scenario__quantitative_risk_study",
+            )
+            .prefetch_related(
+                "existing_applied_controls",
+                "added_applied_controls",
+                "removed_applied_controls",
+            )
+        )
+
     def _perform_write(self, serializer):
         if not serializer.validated_data.get(
             "ref_id"

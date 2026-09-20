@@ -2,8 +2,12 @@
 	import { page } from '$app/stores';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 	import { getModelInfo } from '$lib/utils/crud';
 	import { ThreatModelSchema } from '$lib/utils/schemas';
 	import { defaults } from 'sveltekit-superforms';
