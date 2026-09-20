@@ -6551,5 +6551,9 @@
 	"dateLastYear": "Last year",
 	"dateNext7Days": "Next 7 days",
 	"dateNext30Days": "Next 30 days",
-	"dateNext90Days": "Next 90 days"
+	"dateNext90Days": "Next 90 days",
+	"europeanUnion": "European Union",
+	"europeanEconomicArea": "European Economic Area",
+	"otherCountries": "Other Countries",
+	"notShownOnMap": "Not shown on map"
 }

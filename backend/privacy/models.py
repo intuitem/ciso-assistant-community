@@ -4,7 +4,7 @@ from tprm.models import Entity
 from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
 from core.models import FilteringLabelMixin, Terminology
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
-from core.constants import COUNTRY_CHOICES
+from core.constants import PRIVACY_COUNTRY_CHOICES
 from django.db.models import Count
 
 from auditlog.registry import auditlog
@@ -385,7 +385,7 @@ class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
     relationship_type = models.CharField(
         max_length=255, choices=RELATIONSHIP_TYPE_CHOICES
     )
-    country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
+    country = models.CharField(max_length=3, choices=PRIVACY_COUNTRY_CHOICES)
     documentation_link = models.URLField(blank=True, max_length=2048)
 
     fields_to_check = ["entity", "relationship_type", "processing"]
@@ -414,7 +414,7 @@ class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
         null=True,
         blank=True,
     )
-    country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
+    country = models.CharField(max_length=3, choices=PRIVACY_COUNTRY_CHOICES)
     transfer_mechanism = models.CharField(
         max_length=255, choices=TRANSFER_MECHANISM_CHOICES, blank=True
     )

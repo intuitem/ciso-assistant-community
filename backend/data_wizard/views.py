@@ -28,7 +28,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.base_models import AbstractBaseModel
-from core.constants import COUNTRY_CHOICES
+from core.constants import PRIVACY_COUNTRY_CHOICES
 from core.models import (
     Actor,
     AppliedControl,
@@ -3424,7 +3424,7 @@ class DataContractorRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer)
                 error=f"Unknown relationship type '{record.get('relationship_type')}'",
             )
 
-        country = self._choice_key(record.get("country"), COUNTRY_CHOICES)
+        country = self._choice_key(record.get("country"), PRIVACY_COUNTRY_CHOICES)
         if country is None:
             return {}, Error(
                 record=record, error=f"Unknown country '{record.get('country')}'"
@@ -3457,7 +3457,7 @@ class DataTransferRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
         if error:
             return {}, error
 
-        country = self._choice_key(record.get("country"), COUNTRY_CHOICES)
+        country = self._choice_key(record.get("country"), PRIVACY_COUNTRY_CHOICES)
         if country is None:
             return {}, Error(
                 record=record, error=f"Unknown country '{record.get('country')}'"
