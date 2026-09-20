@@ -143,7 +143,9 @@ Evidence justifies the status of a compliance requirement or proves that an appl
 
 ## Raising findings
 
-With the **findings_from_requirements** [feature flag](../configuration/settings/feature-flags.md) on, a requirement assessment gains a **Findings** tab and a **Raise a finding** action, so a non-compliance is recorded without leaving the requirement. The audit's findings collect in a [findings binder](findings-assessments.md#raising-a-finding-from-a-requirement) created on first use.
+With the **findings_from_requirements** [feature flag](../configuration/settings/feature-flags.md) on, a requirement assessment gains a **Findings** tab. **Raise a finding** records a non-compliance without leaving the requirement; the picker next to it binds an existing finding, so an issue raised elsewhere (a pentest binder, say) is tied to the requirement it violates. The audit's own findings collect in a [findings binder](findings-assessments.md#raising-a-finding-from-a-requirement) created on first use.
+
+A finding belongs to one requirement assessment at a time. The picker only offers findings not bound to another requirement; to move one, edit the finding itself. Binding and unbinding are refused while the finding's binder is locked, and a locked audit does not take new findings. Raising needs permission to add findings, picking needs permission to change them.
 
 ## Related
 

@@ -1949,6 +1949,8 @@
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "令牌认证方法",
 	"oauthPKCEEnabled": "OAuth PKCE已启用",
+	"oidcAdditionalScopes": "附加作用域",
+	"oidcAdditionalScopesHelpText": "以逗号分隔的可选 OAuth 作用域，将附加到默认的 openid、profile 和 email 作用域。",
 	"suggestedParentheses": "（建议）",
 	"matchingScenarios": "匹配的场景",
 	"clientSecretAlreadySetHelpText": "客户端密钥已设置。",

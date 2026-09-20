@@ -2887,6 +2887,8 @@
 	"oidcConfiguration": "openid-konfiguracija",
 	"tokenAuthMethod": "Metoda avtentikacije žetona",
 	"oauthPKCEEnabled": "OAuth PKCE omogočen",
+	"oidcAdditionalScopes": "Dodatni obsegi",
+	"oidcAdditionalScopesHelpText": "Izbirni obsegi OAuth, ločeni z vejicami, ki se dodajo privzetim obsegom openid, profile in email.",
 	"suggestedParentheses": "(predlagano)",
 	"matchingScenarios": "Ujemajoči se scenariji",
 	"clientSecretAlreadySetHelpText": "Skrivni ključ stranke (client secret) je že nastavljen.",

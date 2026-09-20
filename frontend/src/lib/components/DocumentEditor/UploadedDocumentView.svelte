@@ -17,6 +17,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import PdfPreview from '$lib/components/AttachmentPreview/PdfPreview.svelte';
 
 	interface Props {
 		parent: { id: string; name: string };
@@ -324,11 +325,7 @@
 				<i class="fa-solid fa-download mr-2"></i>{m.download()}
 			</a>
 			{#if isPdf}
-				<iframe
-					src={currentFileUrl}
-					title={parent?.name}
-					class="h-[70vh] w-full rounded-xl border border-surface-200-800"
-				></iframe>
+				<PdfPreview src={currentFileUrl} title={parent?.name} />
 			{/if}
 		{:else}
 			<p class="text-sm text-surface-500">{m.noFileUploaded()}</p>
