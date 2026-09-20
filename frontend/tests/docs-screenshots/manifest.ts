@@ -91,13 +91,30 @@ export const shots: Shot[] = [
 	{
 		slug: 'applied-controls-full',
 		url: '/applied-controls',
-		usedBy: ['features/applied-controls.md'],
+		usedBy: ['concepts/applied-controls.md'],
 		fullPage: true
 	},
 	{
 		slug: 'risk-matrices-list',
 		url: '/risk-matrices',
-		usedBy: ['concepts/risk-matrices.md']
+		usedBy: ['concepts/libraries.md']
+	},
+	{
+		// The concept page is about the grid, not the catalogue row — the list
+		// view shows none of the anatomy the prose describes.
+		slug: 'risk-matrix-detail',
+		url: '/risk-matrices',
+		usedBy: ['concepts/risk-matrices.md'],
+		then: openDetail('risk-matrices', '5x5 ISO-27005'),
+		// The route renders a raw field dump above the grid; anchor on the
+		// matrix's own axis header and climb to the wrapper it is mounted in.
+		clip: (page) =>
+			page
+				.locator('[data-testid="x-axis-header-0"]')
+				// `wrapperClass` lands on the grid itself (RiskMatrix.svelte:160);
+				// the axis titles and the risk-level legend are its siblings, so
+				// the clip has to be the grid's parent.
+				.locator('xpath=ancestor::div[contains(@class,"mt-8")][1]/..')
 	},
 	{
 		slug: 'libraries-catalog',

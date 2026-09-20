@@ -64,19 +64,95 @@ SUPPORTING_ASSETS = [
     ("Okta tenant", "Workforce identity provider, SAML and SCIM."),
 ]
 
+# ref_id, name, category, csf_function, status, priority, effort, eta offset.
+# csf_function is spread across all six functions on purpose: the analytics
+# summary renders a CSF radar, and controls left unset collapse into a single
+# "--" wedge that makes the chart useless as a documentation image.
 CONTROLS = [
-    ("Quarterly access review", "technical", "in_progress", 1, "M", 30),
-    ("Privileged session recording", "technical", "to_do", 1, "L", 75),
-    ("Backup restore test", "process", "active", 2, "S", -20),
-    ("Supplier security questionnaire", "process", "in_progress", 2, "M", 45),
-    ("Endpoint disk encryption", "technical", "active", 1, "M", -60),
-    ("Secure development training", "policy", "to_do", 3, "S", 90),
-    ("Network segmentation review", "technical", "on_hold", 2, "L", 120),
-    ("Incident response tabletop", "process", "active", 2, "M", -10),
-    ("Log retention policy", "policy", "active", 3, "XS", -120),
-    ("Vulnerability scanning cadence", "technical", "in_progress", 1, "S", 15),
-    ("Data retention schedule", "policy", "to_do", 4, "M", 150),
-    ("Physical access badge audit", "physical", "active", 3, "S", -45),
+    (
+        "AC.001",
+        "Quarterly access review",
+        "technical",
+        "protect",
+        "in_progress",
+        1,
+        "M",
+        30,
+    ),
+    (
+        "AC.002",
+        "Privileged session recording",
+        "technical",
+        "detect",
+        "to_do",
+        1,
+        "L",
+        75,
+    ),
+    ("AC.003", "Backup restore test", "process", "recover", "active", 2, "S", -20),
+    (
+        "AC.004",
+        "Supplier security questionnaire",
+        "process",
+        "govern",
+        "in_progress",
+        2,
+        "M",
+        45,
+    ),
+    (
+        "AC.005",
+        "Endpoint disk encryption",
+        "technical",
+        "protect",
+        "active",
+        1,
+        "M",
+        -60,
+    ),
+    ("AC.006", "Secure development training", "policy", "protect", "to_do", 3, "S", 90),
+    (
+        "AC.007",
+        "Network segmentation review",
+        "technical",
+        "protect",
+        "on_hold",
+        2,
+        "L",
+        120,
+    ),
+    (
+        "AC.008",
+        "Incident response tabletop",
+        "process",
+        "respond",
+        "active",
+        2,
+        "M",
+        -10,
+    ),
+    ("AC.009", "Log retention policy", "policy", "detect", "active", 3, "XS", -120),
+    (
+        "AC.010",
+        "Vulnerability scanning cadence",
+        "technical",
+        "identify",
+        "in_progress",
+        1,
+        "S",
+        15,
+    ),
+    ("AC.011", "Data retention schedule", "policy", "govern", "to_do", 4, "M", 150),
+    (
+        "AC.012",
+        "Physical access badge audit",
+        "physical",
+        "recover",
+        "active",
+        3,
+        "S",
+        -45,
+    ),
 ]
 
 AUDITS = [
@@ -185,13 +261,18 @@ class Command(BaseCommand):
         come back shuffled after each database rebuild.
         """
         base = datetime.combine(TODAY, time(9, 0), tzinfo=timezone.utc)
+        # Library-loaded referentials are stamped at import time, so they drift
+        # too whenever the database is rebuilt — and their detail pages show
+        # Created at / Updated at.
         models = (
             Asset,
             AppliedControl,
             ComplianceAssessment,
+            Framework,
             Perimeter,
             RequirementAssessment,
             RiskAssessment,
+            RiskMatrix,
             RiskScenario,
             Threat,
         )
@@ -280,14 +361,23 @@ class Command(BaseCommand):
     def build_controls(self, domain, assets):
         references = list(ReferenceControl.objects.order_by("urn")[:12])
         controls = []
-        for index, (name, category, status, priority, effort, eta_offset) in enumerate(
-            CONTROLS
-        ):
+        for index, (
+            ref_id,
+            name,
+            category,
+            csf_function,
+            status,
+            priority,
+            effort,
+            eta_offset,
+        ) in enumerate(CONTROLS):
             control, created = AppliedControl.objects.get_or_create(
                 name=name,
                 folder=domain,
                 defaults={
+                    "ref_id": ref_id,
                     "category": category,
+                    "csf_function": csf_function,
                     "status": status,
                     "priority": priority,
                     "effort": effort,
