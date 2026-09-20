@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { type TableSource } from '$lib/components/ModelTable/types';
 import { formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
 import { headData } from '$lib/utils/table';

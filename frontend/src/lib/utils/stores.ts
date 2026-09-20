@@ -3,7 +3,6 @@ import { browser } from '$app/environment';
 import { persisted, type Persisted } from 'svelte-persisted-store';
 import type { Driver } from 'driver.js';
 import { DataHandler } from '@vincjo/datatables/remote';
-import type { TreeViewNode } from '$lib/components/TreeView/types';
 
 // Focus mode
 export interface FocusModeState {
@@ -55,7 +54,7 @@ export const showAllEvents = persisted('showAllEvents', true, {
 
 export const lastAccordionItem = persisted('lastAccordionItem', ['']);
 
-const expandedNodes: TreeViewNode[] = [];
+const expandedNodes: string[] = [];
 
 export const expandedNodesState = persisted('expandedNodes', expandedNodes, {
 	storage: 'session'
