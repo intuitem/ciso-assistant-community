@@ -199,9 +199,11 @@
 	<Tabs.Content value="featureFlags">
 		<FeatureFlagsSettings {data} />
 	</Tabs.Content>
-	<Tabs.Content value="notificationChannels">
-		<NotificationChannelsSettings />
-	</Tabs.Content>
+	{#if page.data?.featureflags?.notification_centre}
+		<Tabs.Content value="notificationChannels">
+			<NotificationChannelsSettings />
+		</Tabs.Content>
+	{/if}
 	<Tabs.Content value="vulnerabilitySla">
 		<VulnerabilitySlaSettings {data} />
 	</Tabs.Content>

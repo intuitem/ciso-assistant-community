@@ -1418,7 +1418,7 @@
 						{/each}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 					{/if}
-					{#if contextMenuRowIsNavigable && !disableEdit}
+					{#if contextMenuDisplayEdit}
 						<ContextMenu.Item
 							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
