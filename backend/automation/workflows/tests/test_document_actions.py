@@ -69,10 +69,13 @@ def action_flow(folder, config, label="Do it"):
     return version
 
 
-def make_document(folder, content="# Access control\n\nOriginal.", locale="en"):
+def make_document(
+    folder, content="# Access control\n\nOriginal.", locale="en", name="Access control"
+):
     """A container, its locale variant and a published v1 — what the editor
-    leaves behind once someone has published a document."""
-    container = DocumentContainer.objects.create(name="Access control", folder=folder)
+    leaves behind once someone has published a document. `name` is a parameter
+    because a container's name is unique within its folder."""
+    container = DocumentContainer.objects.create(name=name, folder=folder)
     document = ManagedDocument.objects.create(container=container, locale=locale)
     revision = DocumentRevision.objects.create(
         document=document,
@@ -387,6 +390,30 @@ class TestReadingDocuments:
         assert row["content"] == "# Access control\n\nOriginal."
         assert row["version_number"] == 1
 
+    def test_more_rows_do_not_cost_more_queries(self):
+        """Both entries' computed values dereference relations per row — the
+        document its container and current revision, the revision its document
+        and that document's container. Measured as a delta between two sizes:
+        a run is an engine, an authorization kernel and a log, none of which is
+        what this is about."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        def queries_for(model, rows):
+            domain = make_domain(f"Scale {model} {rows}")
+            for index in range(rows):
+                make_document(domain, content=f"# Doc {index}", name=f"Doc {index}")
+            version = self.read_flow(domain, {"model": model, "mode": "list"})
+            with CaptureQueriesContext(connection) as captured:
+                instance = start_instance(version)
+            assert instance.node_outputs["fetch_rows"]["count"] == rows
+            return len(captured)
+
+        for model in ("managed_document", "document_revision"):
+            small = queries_for(model, 2)
+            large = queries_for(model, 6)
+            assert large - small <= 2, f"{model}: {small} for 2 rows, {large} for 6"
+
     def test_another_domain_is_not_in_scope(self):
         domain = make_domain("Mine")
         make_document(make_domain("Theirs"))
@@ -394,6 +421,43 @@ class TestReadingDocuments:
             self.read_flow(domain, {"model": "managed_document", "mode": "list"})
         )
         assert instance.node_outputs["fetch_rows"]["count"] == 0
+
+
+@pytest.mark.django_db
+class TestTheAuditLogStaysProportionate:
+    """Registering the document models puts a log row — and the event
+    producer's trigger match — on every document write. The editor autosaves a
+    draft constantly, so the hot path had better not reach either."""
+
+    def entries_for(self, revision):
+        from auditlog.models import LogEntry
+
+        return LogEntry.objects.get_for_object(revision).count()
+
+    def test_a_content_only_save_writes_no_log_row(self):
+        domain = make_domain("Autosave")
+        _container, document, _published = make_document(domain)
+        draft = DocumentRevision.objects.create(
+            document=document, version_number=2, content="draft"
+        )
+        before = self.entries_for(draft)
+        for index in range(5):
+            draft.content = f"draft {index}"
+            draft.save()
+        assert self.entries_for(draft) == before
+
+    def test_a_lifecycle_move_does_write_one(self):
+        """What the log is for: the revision going somewhere, not the prose
+        changing under it."""
+        domain = make_domain("Submitted")
+        _container, document, _published = make_document(domain)
+        draft = DocumentRevision.objects.create(
+            document=document, version_number=2, content="draft"
+        )
+        before = self.entries_for(draft)
+        draft.status = DocumentRevision.Status.IN_REVIEW
+        draft.save()
+        assert self.entries_for(draft) == before + 1
 
 
 class TestDocumentsAreTriggerable:
