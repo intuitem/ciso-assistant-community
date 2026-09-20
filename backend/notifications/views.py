@@ -215,12 +215,30 @@ class NotificationChannelsView(APIView):
         return Response(matrix())
 
     def post(self, request):
-        try:
-            set_channel(
-                request.data.get("type"),
-                request.data.get("channel"),
-                bool(request.data.get("enabled")),
+        notification_type = request.data.get("type")
+        channel = request.data.get("channel")
+        enabled = request.data.get("enabled")
+
+        # Not bool(): bool("false") is True, so a string would switch the channel *on*
+        # while the caller asked for the opposite.
+        if not isinstance(enabled, bool):
+            return Response(
+                {"error": "enabled must be a boolean"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
+
+        try:
+            set_channel(notification_type, channel, enabled)
         except ValueError as error:
-            return Response({"error": str(error)}, status=status.HTTP_400_BAD_REQUEST)
+            # The detail goes to the log, not the response.
+            logger.warning(
+                "Rejected notification channel change",
+                type=notification_type,
+                channel=channel,
+                error=error,
+            )
+            return Response(
+                {"error": "unsupported notification type or channel"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(matrix())

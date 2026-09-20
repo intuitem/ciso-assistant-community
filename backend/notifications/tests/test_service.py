@@ -161,13 +161,11 @@ def test_clear_stale_is_scoped_to_its_own_type(user, control):
 def test_the_feature_flag_stops_rows_being_written(user, control, monkeypatch):
     """Off means nothing is written, not written-and-hidden: filtering on read would
     accumulate invisible rows and hand the GC a backlog for an unused feature."""
-    import notifications.service as service
-
-    monkeypatch.setattr(service, "ff_is_enabled", lambda flag: False)
+    monkeypatch.setattr("notifications.service.ff_is_enabled", lambda flag: False)
     assert notify("expired_controls", [user], control, {"control_name": "x"}) == []
     assert rows().count() == 0
 
-    monkeypatch.setattr(service, "ff_is_enabled", lambda flag: True)
+    monkeypatch.setattr("notifications.service.ff_is_enabled", lambda flag: True)
     assert len(notify("expired_controls", [user], control, {"control_name": "x"})) == 1
 
 
