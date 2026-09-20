@@ -5,20 +5,16 @@
 	import { onMount } from 'svelte';
 
 	/**
-	 * Unread badge for the app bar.
-	 *
-	 * The stack is WSGI + Huey with no websockets, so the count is polled rather than
-	 * pushed: on an interval, on navigation, and when the tab regains focus. The last
-	 * two are what make it feel live -- marking things read on /notifications and
-	 * coming back should not show a stale number for another minute.
+	 * Unread badge for the app bar. No websockets in this stack, so the count is
+	 * polled: on an interval, on navigation, and when the tab regains focus. The last
+	 * two are what keep it from sitting stale for a minute after you read something.
 	 */
 	const POLL_INTERVAL_MS = 60_000;
-	// Past this the exact number stops being information and starts being noise; the
-	// badge also has to stay a badge rather than grow into the toolbar.
+	// Past this the exact number is noise, and the badge would grow into the toolbar.
 	const MAX_DISPLAYED = 99;
 
-	// The count lives in a store so a mutation elsewhere can set it without a round
-	// trip; polling below is the safety net for changes this tab did not make.
+	// In a store so a mutation elsewhere can set it without a round trip; the poll is
+	// the safety net for changes this tab did not make.
 	const count = $derived($unreadNotificationCount);
 	let failed = $state(false);
 

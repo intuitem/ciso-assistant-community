@@ -215,7 +215,7 @@ export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 // Models never created from their list page: library-managed content, membership rows
 // written elsewhere, or records that only exist as a child of something else.
 export const NON_CREATABLE_URL_MODELS = [
-	// System-generated: the inbox is written by producers, never by a user.
+	// System-generated: written by producers, never by a user.
 	'notifications',
 	'risk-matrices',
 	'frameworks',
@@ -4007,8 +4007,7 @@ export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 const FIELD_COMPONENT_MAP = {
 	notifications: {
-		// `title` has no value in the payload; the component computes it (see
-		// NotificationTitle).
+		// No value in the payload; NotificationTitle computes it.
 		title: NotificationTitle
 	},
 	commitments: {

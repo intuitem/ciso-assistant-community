@@ -20,34 +20,26 @@ logger = structlog.getLogger(__name__)
 
 
 class NotificationViewSet(BaseModelViewSet):
-    """
-    The inbox. Scoped on `recipient` alone — `folder` is metadata here, not an
-    access gate, so all three of the inherited folder-RBAC enforcement points are
-    replaced rather than composed with (docs/notification_center_shaping.md §5).
-    """
+    """The inbox. Scoped on `recipient` alone: `folder` is metadata, not an access
+    gate, so the inherited folder-RBAC enforcement points are replaced (docs §5)."""
 
     model = Notification
     serializers_module = "notifications.serializers"
     permission_classes = [IsAuthenticated, IsRecipient, FeatureFlagRequired]
     feature_flag = "notification_centre"
     filterset_fields = ["is_read", "read_at", "type", "content_type"]
-    # Titles are rendered client-side, so there is no text column to search. `type`
-    # keeps the search box functional (it matches the type key); the real filters are
-    # read state and category.
+    # Titles render client-side, so there is no text column to search.
     search_fields = ["type"]
-    # `folder` is derived from the target, so it is not a column: it can be filtered
-    # (below) but never ordered by.
+    # `folder` is derived, so it can be filtered (below) but never ordered by.
     ordering_fields = ["created_at", "updated_at", "read_at", "is_read", "type"]
     ordering = ["-created_at"]
 
     def get_queryset(self) -> models.query.QuerySet:
-        # Deliberately not super().get_queryset(): that filters on the folders the
-        # user holds view_notification in, which returns nothing for a recipient
-        # who holds no role in the target's domain.
+        # Not super().get_queryset(): that filters on the folders the user holds
+        # view_notification in, which is empty for a recipient with no role there.
         queryset = Notification.objects.filter(recipient=self.request.user)
 
-        # `category` groups types; it is not a column, so it expands here rather than
-        # in filterset_fields. Keeps the vocabulary in the registry (docs §7).
+        # `category` is not a column, so it expands from the registry here.
         if category := self.request.query_params.get("category"):
             queryset = queryset.filter(
                 type__in=[
@@ -65,11 +57,9 @@ class NotificationViewSet(BaseModelViewSet):
     def _filter_by_folder(self, queryset, folders):
         """Narrow to notifications whose *target* lives in one of these domains.
 
-        The folder is derived, not stored (Notification.folder), so this resolves the
-        other way round: for each content type present, ask that model which of its
-        objects are in the domain, then match on those ids. One query per content type
-        in the current queryset — a handful — and only on an explicit filter, never on
-        the polled badge count.
+        The folder is derived, so this resolves backwards: per content type, ask that
+        model which objects are in the domain, then match ids. One query per content
+        type, and only on an explicit filter.
         """
         matched = Q(pk__in=[])
         content_type_ids = queryset.values_list("content_type", flat=True).distinct()
@@ -86,8 +76,7 @@ class NotificationViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Read state choices")
     def is_read(self, request):
-        """Options for the batch bar's read/unread action. A plain boolean has no
-        choices of its own, and the batch modal needs a labelled pair."""
+        """A plain boolean has no choices of its own; the batch modal needs a pair."""
         return Response({"true": "read", "false": "unread"})
 
     @action(detail=False, name="Category choices")
@@ -106,7 +95,6 @@ class NotificationViewSet(BaseModelViewSet):
         )
 
     def _unread_count(self) -> int:
-        """Covered count on the (recipient, is_read, -created_at) index."""
         return self.get_queryset().filter(is_read=False).count()
 
     @action(detail=False, name="Unread count")
@@ -114,12 +102,8 @@ class NotificationViewSet(BaseModelViewSet):
         return Response({"count": self._unread_count()})
 
     def partial_update(self, request, *args, **kwargs):
-        """Answer with the new unread count.
-
-        Marking a row read from inside the inbox does not navigate, so the badge has
-        no other cue and would sit wrong until the next poll. Returning the count the
-        server already knows costs nothing and beats the client guessing.
-        """
+        """Answer with the new unread count: marking a row read from inside the inbox
+        does not navigate, so the badge has no other cue until the next poll."""
         response = super().partial_update(request, *args, **kwargs)
         if response.status_code == status.HTTP_200_OK:
             response.data["unread_count"] = self._unread_count()
@@ -127,11 +111,8 @@ class NotificationViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="batch-action")
     def batch_action(self, request):
-        """
-        Narrower than the inherited version, which re-checks every object against
-        folder RBAC independently of the queryset. Here the recipient-scoped queryset
-        is the whole permission check: an id the caller does not own is simply absent.
-        """
+        """Narrower than the inherited version: the recipient-scoped queryset is the
+        whole permission check, so an id the caller does not own is simply absent."""
         action_type = request.data.get("action")
         ids = request.data.get("ids", [])
 
@@ -154,8 +135,7 @@ class NotificationViewSet(BaseModelViewSet):
                 {"error": "field not editable"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Same response shape as BaseModelViewSet.batch_action: the batch bar reads
-        # `succeeded`/`failed` as lists and reports their lengths.
+        # Same response shape as BaseModelViewSet.batch_action: lists, not counts.
         rows = {str(n.id): n for n in self.get_queryset().filter(id__in=ids)}
         succeeded = [{"id": str(n.id), "name": str(n)} for n in rows.values()]
         failed = [
@@ -169,9 +149,7 @@ class NotificationViewSet(BaseModelViewSet):
             if action_type == "delete":
                 queryset.delete()
             else:
-                # The modal posts the config's value, so it arrives as the string
-                # "true"/"false". bool("false") is True, which would silently mark
-                # everything read when the user asked for the opposite.
+                # The modal posts "true"/"false" as a string, and bool("false") is True.
                 raw = request.data.get("value")
                 is_read = (
                     raw if isinstance(raw, bool) else str(raw).strip().lower() == "true"
@@ -190,18 +168,13 @@ class NotificationViewSet(BaseModelViewSet):
             {
                 "succeeded": succeeded,
                 "failed": failed,
-                # Same reasoning as partial_update: the badge has no other cue here.
                 "unread_count": self._unread_count(),
             }
         )
 
 
 class NotificationChannelsView(APIView):
-    """The admin channel matrix (§7).
-
-    Built in the community tree for development convenience; configuring
-    notifications is an enterprise feature and this moves there before release.
-    """
+    """The admin channel matrix (§7)."""
 
     permission_classes = [IsAuthenticated, IsGlobalAdmin]
 

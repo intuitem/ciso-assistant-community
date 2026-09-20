@@ -11,23 +11,16 @@ from notifications.models import Notification
 
 logger = structlog.getLogger(__name__)
 
-# Rows are pruned mostly by their condition going false (clear_stale); this is the
-# backstop, and the only thing that removes the event types. 90 mirrors
-# AUDITLOG_RETENTION_DAYS. A plain constant, deliberately not a setting.
+# Backstop: condition rows mostly leave via clear_stale, so this is what removes the
+# event types. Mirrors AUDITLOG_RETENTION_DAYS.
 RETENTION_DAYS = 90
 
-# Backstop against a runaway producer or a large fan-out. Nobody scrolls past this,
-# and an inbox this long means something upstream is wrong, not that the rows matter.
+# Ceiling on one inbox. Past this, something upstream is wrong.
 MAX_PER_RECIPIENT = 1000
 
 
 def prune_read_notifications() -> int:
-    """Delete read rows past the retention window.
-
-    Condition rows mostly leave via clear_stale when their condition goes false
-    (§11). This is what removes the 15 event types, which have no condition to
-    stop being true and would otherwise accumulate forever.
-    """
+    """Delete read rows past the retention window."""
     cutoff = timezone.now() - timedelta(days=RETENTION_DAYS)
     deleted, _ = Notification.objects.filter(
         is_read=True, updated_at__lt=cutoff
@@ -36,11 +29,8 @@ def prune_read_notifications() -> int:
 
 
 def enforce_per_recipient_cap() -> int:
-    """Keep the newest MAX_PER_RECIPIENT rows per recipient, read or not.
-
-    Deliberately ignores `is_read`: the point is a ceiling on one inbox, and an
-    unread row is not more durable than the cap.
-    """
+    """Keep the newest MAX_PER_RECIPIENT rows per recipient, read or not: an unread
+    row is not more durable than the cap."""
     over_cap = (
         Notification.objects.values("recipient")
         .annotate(total=Count("id"))
@@ -60,14 +50,11 @@ def enforce_per_recipient_cap() -> int:
 
 
 def prune_orphaned_notifications() -> int:
-    """Delete rows whose target no longer exists.
+    """Delete rows whose target no longer exists: a GenericForeignKey has no database
+    cascade.
 
-    A GenericForeignKey has no database cascade, so deleting the object a row points
-    at leaves the row behind. Done as a nightly sweep rather than the `post_delete`
-    receiver §11 first proposed: that receiver would run on *every* delete in the
-    product, and a cascading domain delete would fire it thousands of times for a
-    handful of rows. Immediacy buys nothing here — click-to-open already degrades
-    safely on an orphan, marking the row read without navigating.
+    A nightly sweep rather than a `post_delete` receiver, which would run on every
+    delete in the product. Click-to-open already degrades safely on an orphan.
     """
     deleted = 0
     for content_type_id in Notification.objects.values_list(
@@ -99,12 +86,8 @@ def prune_orphaned_notifications() -> int:
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="3", minute="30"))
 def notification_housekeeping():
-    """Retention, cap and orphans in one nightly pass.
-
-    One schedule entry rather than three: they are the same job, they touch the same
-    table, and running them together keeps the write contention in one window. Each
-    step is a plain function so it can be tested without Huey.
-    """
+    """Retention, cap and orphans in one nightly pass: same table, one write window.
+    Each step is a plain function so it can be tested without Huey."""
     try:
         expired = prune_read_notifications()
         capped = enforce_per_recipient_cap()

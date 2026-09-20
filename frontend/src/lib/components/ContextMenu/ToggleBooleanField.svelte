@@ -9,11 +9,8 @@
 	import { getFlash } from 'sveltekit-flash-message';
 
 	/**
-	 * Flip a boolean field on one row, in one click.
-	 *
-	 * ChangeChoiceField opens a submenu and asks which value you want, which is an
-	 * extra step when there are only two and you always want the other one. The
-	 * labels name the *action offered*, so they read as verbs rather than states.
+	 * Flip a boolean field on one row in one click, where ChangeChoiceField would open
+	 * a submenu to ask. Labels name the action offered, not the current state.
 	 */
 	interface Props {
 		row: any;

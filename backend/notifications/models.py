@@ -9,17 +9,15 @@ from iam.models import Folder, User
 
 
 class Notification(AbstractBaseModel):
-    """
-    A row in a user's inbox. `type` is the notification type, identical to the
-    email template key, and the registry entry for it declares how the row
-    behaves (see docs/notification_center_shaping.md).
+    """A row in a user's inbox. `type` is the notification type, identical to the
+    email template key; its registry entry declares how the row behaves (docs).
 
-    Deliberately not registered with auditlog: this is the highest-volume table
-    in the product and `is_read` is telemetry, never evidence.
+    Not registered with auditlog: highest-volume table in the product, and `is_read`
+    is telemetry, never evidence.
     """
 
-    # Access is `recipient` and nothing else (docs §5); folder RBAC is replaced
-    # rather than composed with, so the IAM is genuinely not implemented here.
+    # Access is `recipient` and nothing else (docs §5): folder RBAC is replaced here,
+    # not composed with.
     IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     recipient = models.ForeignKey(
@@ -36,15 +34,12 @@ class Notification(AbstractBaseModel):
     object_id = models.UUIDField(verbose_name=_("Target id"))
     target = GenericForeignKey("content_type", "object_id")
 
-    # The variables the row's title renders from. The title itself is not stored: it
-    # is a presentation concern, rendered client-side from the message catalogs in
-    # whatever language the viewer is using. Storing it would freeze the language at
-    # write time and duplicate 25 locales' worth of strings the product already has.
+    # The variables the title renders from. The title itself is not stored: rendering
+    # it client-side keeps it in the viewer's language, not the firing one.
     context = models.JSONField(default=dict, blank=True, verbose_name=_("Context"))
 
     is_read = models.BooleanField(default=False, verbose_name=_("Read"))
-    # When it was read, for people who want to see it; never load-bearing. `updated_at`
-    # cannot stand in: a nightly sweep touches that on every condition row.
+    # `updated_at` cannot stand in: a nightly sweep touches it on every condition row.
     read_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Read at"))
 
     class Meta:
@@ -63,30 +58,22 @@ class Notification(AbstractBaseModel):
 
     @property
     def folder(self):
-        """The domain this notification is about, read from the target rather than
-        stored.
+        """The target's domain, derived rather than stored -- nothing gates on it, and
+        a copy would go stale the moment the object moved domain.
 
-        A denormalised copy went stale the moment an object moved domain, and nothing
-        here gates on it — so deriving costs a lookup and removes a whole class of
-        drift. `Folder.get_folder` tries `["folder"]` first, so this also makes the
-        generic helper work on a Notification.
-
-        Not queryable: a GenericForeignKey cannot be joined, so ordering by it is not
-        possible and filtering resolves the other way round (see NotificationViewSet).
+        Not queryable: a GenericForeignKey cannot be joined, so ordering is impossible
+        and filtering resolves the other way round (see NotificationViewSet).
         """
         target = self.target
         return Folder.get_folder(target) if target is not None else None
 
     @classmethod
     def set_read(cls, queryset, is_read: bool) -> int:
-        """Flip read state on a queryset, keeping `read_at` honest.
+        """Flip read state, stamping `read_at` only on an actual transition: marking an
+        already-read row read again keeps its original timestamp.
 
-        The single place this transition happens, because it happens on three paths —
-        the detail PATCH, the batch bar, and an event re-firing — and a rule applied in
-        two of three would be worse than no rule.
-
-        Only a transition stamps: marking an already-read row read again leaves its
-        original timestamp alone, which is what "when did I read this" means.
+        One place for it because three paths do it -- detail PATCH, batch bar, event
+        re-fire.
         """
         if is_read:
             return queryset.filter(is_read=False).update(
@@ -95,13 +82,9 @@ class Notification(AbstractBaseModel):
         return queryset.update(is_read=False, read_at=None)
 
     def get_scope(self):
-        """Uniqueness scope, overridden because `folder` here is a property.
-
-        AbstractBaseModel.get_scope checks `hasattr(self, "folder")` and then filters
-        on it, which would build a query against a column this model does not have.
-        There is nothing to scope anyway: uniqueness is the database constraint on
-        (recipient, type, content_type, object_id), not a name within a domain — and
-        this runs on every save of the highest-volume table in the product.
+        """Overridden because `folder` here is a property: AbstractBaseModel.get_scope
+        would filter on a column this model does not have. Uniqueness is the database
+        constraint, not a name within a domain.
         """
         return self.__class__.objects.none()
 

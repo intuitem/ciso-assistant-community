@@ -168,20 +168,13 @@ function createPersistedAuditFilters() {
 export const auditFiltersStore = createPersistedAuditFilters();
 
 // Unread notification count, shared between the app-bar bell and whatever changes it.
-//
-// The bell polls (interval, navigation, tab focus), which covers changes made anywhere
-// else. It does not cover the one case you are looking straight at: marking rows read
-// from inside the inbox never navigates, so the badge would sit wrong for up to a
-// minute. The mutation endpoints answer with the new count, and `applyUnreadCount`
-// puts it here — no extra request, and the server stays the authority rather than the
-// client guessing how many rows it just changed.
+// The bell's poll covers changes made elsewhere, but marking rows read inside the inbox
+// never navigates, so the mutation endpoints answer with the new count instead.
 export const unreadNotificationCount = writable<number>(0);
 
 /**
- * Update the badge from any mutation response that reports a count.
- *
- * Deliberately shaped as "if the response mentions it, use it" so the generic
- * components that call it (the batch bar, the table row click) stay model-agnostic.
+ * Update the badge from any mutation response that reports a count. Shaped as "if the
+ * response mentions it, use it" so the generic callers stay model-agnostic.
  */
 export function applyUnreadCount(payload: unknown): void {
 	const count = (payload as { unread_count?: unknown } | null)?.unread_count;

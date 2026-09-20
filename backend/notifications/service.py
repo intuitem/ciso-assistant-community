@@ -11,32 +11,39 @@ logger = structlog.getLogger(__name__)
 
 
 def in_app_enabled(notification_type: str) -> bool:
-    """Whether this type writes inbox rows.
-
-    The registry declares the supported channels and they are all on; an admin may
-    narrow them, never widen them. The narrowing layer is enterprise-only and not
-    built yet, so today this is the registry alone.
-    """
     if not ff_is_enabled("notification_centre"):
         return False
-    # The registry is the ceiling; the admin matrix may narrow it (§7).
     from notifications.channels import in_app_allowed
 
     return in_app_allowed(notification_type)
 
 
-def _as_users(recipients) -> list[User]:
-    """In-app notification needs a real internal User; anything else is email-only.
+def _user_resolver(all_recipients):
+    """Resolve every address the caller will use in one query, then hand back a
+    per-item lookup. A sweep resolves the same owners for every object it walks."""
+    emails = {r for r in all_recipients if not isinstance(r, User)}
+    by_email = {
+        user.email: user
+        for user in (User.objects.filter(email__in=emails) if emails else ())
+        if not user.is_third_party
+    }
 
-    Producers group by email address, so accept either and resolve. Third-party
-    users are excluded by design for v1.
-    """
-    users, emails = [], []
-    for recipient in recipients:
-        (users if isinstance(recipient, User) else emails).append(recipient)
-    if emails:
-        users.extend(User.objects.filter(email__in=emails))
-    return [u for u in users if not u.is_third_party]
+    def resolve(recipients) -> list[User]:
+        users = []
+        for recipient in recipients:
+            if isinstance(recipient, User):
+                if not recipient.is_third_party:
+                    users.append(recipient)
+            elif (user := by_email.get(recipient)) is not None:
+                users.append(user)
+        return users
+
+    return resolve
+
+
+def _as_users(recipients) -> list[User]:
+    recipients = list(recipients)
+    return _user_resolver(recipients)(recipients)
 
 
 def notify(
@@ -45,21 +52,15 @@ def notify(
     target,
     context: dict | None = None,
 ) -> list[Notification]:
-    """
-    Write one inbox row per recipient for `target`, or update the one already there.
+    """Write one inbox row per recipient for `target`, or update the one already
+    there. In-app only; email keeps its own path (docs §7)."""
+    return notify_many(notification_type, [(recipients, target, context)])
 
-    In-app only. Email keeps its own path: a producer calls its existing send
-    alongside this, so nothing about the email channel has to change for a type to
-    gain an inbox (docs/notification_center_shaping.md §7).
 
-    Upsert is keyed on (recipient, type, target). A re-fire bumps an `event` row back
-    to unread, because you have genuinely been assigned the thing again; it leaves a
-    `condition` row alone, because `is_read` is the latch that stops a nightly sweep
-    re-opening something you have dealt with.
-
-    Returns the rows written, so a condition sweep can accumulate them into the `keep`
-    set that clear_stale takes.
-    """
+def notify_many(notification_type: str, items) -> list[Notification]:
+    """`notify` over a whole sweep. `items` is an iterable of
+    (recipients, target, context); the channel state and the address resolution are
+    constant across it, so only the upsert is per row."""
     entry = NOTIFICATION_REGISTRY.get(notification_type)
     if entry is None:
         logger.error("Unknown notification type", type=notification_type)
@@ -67,50 +68,52 @@ def notify(
     if not in_app_enabled(notification_type):
         return []
 
-    content_type = ContentType.objects.get_for_model(target)
+    items = [
+        (list(recipients), target, context) for recipients, target, context in items
+    ]
+    resolve = _user_resolver({r for recipients, _, _ in items for r in recipients})
+
+    # A re-fire bumps an event row back to unread; on a condition row `is_read` is the
+    # latch that stops the nightly sweep re-opening what you have dealt with.
     bump_unread = entry["mode"] == "event"
     written = []
 
-    # Only the variables the registry declares for this type: the producers' context
-    # dicts also carry email-only material (descriptions, URLs, formatted lists) that
-    # the title never uses and the inbox should not store.
-    declared = {
-        key: str(value)
-        for key, value in (context or {}).items()
-        if key in entry["context"]
-    }
+    for recipients, target, context in items:
+        content_type = ContentType.objects.get_for_model(target)
 
-    for user in _as_users(recipients):
-        defaults = {"context": declared}
-        if bump_unread:
-            # Unread again, so the previous read time no longer describes this row.
-            defaults["is_read"] = False
-            defaults["read_at"] = None
-        row, _ = Notification.objects.update_or_create(
-            recipient=user,
-            type=notification_type,
-            content_type=content_type,
-            object_id=target.pk,
-            defaults=defaults,
-        )
-        written.append(row)
+        # Producers' context also carries email-only material the title never uses.
+        declared = {
+            key: str(value)
+            for key, value in (context or {}).items()
+            if key in entry["context"]
+        }
+
+        for user in resolve(recipients):
+            defaults = {"context": declared}
+            if bump_unread:
+                defaults["is_read"] = False
+                defaults["read_at"] = None
+            row, _ = Notification.objects.update_or_create(
+                recipient=user,
+                type=notification_type,
+                content_type=content_type,
+                object_id=target.pk,
+                defaults=defaults,
+            )
+            written.append(row)
 
     return written
 
 
 @transaction.atomic
 def clear_stale(notification_type: str, keep) -> int:
-    """
-    Delete rows of `notification_type` whose condition no longer holds.
+    """Delete rows of `notification_type` whose condition no longer holds. `keep` is
+    every (recipient_id, object_id) pair the sweep just found still true.
 
-    `keep` is every (recipient_id, object_id) pair the sweep just found still true.
-    Deleting rather than stamping is what re-arms the type: the natural key is freed,
-    so a recurrence creates a fresh unread row (§4).
-
-    The caller must be authoritative for the whole type. Several periodic tasks share
-    one type today -- evidence_expiring_soon is fed by the in_month, in_week and
-    tomorrow sweeps -- so this cannot be called from inside one of them without the
-    others' rows being deleted. It takes the union.
+    Deleting rather than stamping re-arms the type: the natural key is freed, so a
+    recurrence creates a fresh unread row (§4). The caller must be authoritative for
+    the whole type -- several sweeps share one type, and one of them calling this
+    would delete the others' rows.
     """
     if NOTIFICATION_REGISTRY.get(notification_type, {}).get("mode") != "condition":
         logger.error("clear_stale on a non-condition type", type=notification_type)

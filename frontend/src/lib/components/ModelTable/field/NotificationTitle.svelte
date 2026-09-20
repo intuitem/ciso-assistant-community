@@ -2,15 +2,11 @@
 	import { m } from '$paraglide/messages';
 
 	/**
-	 * Render a notification's title in the viewer's current language.
+	 * Title rendered from `type` + `context` against the message catalogs, so it
+	 * follows the viewer's language rather than the one it fired in.
 	 *
-	 * Nothing about the title is stored: the row carries its `type` and the variables
-	 * it needs, and the wording lives in the message catalogs like every other string
-	 * in the product. That is what lets a language switch take effect on rows already
-	 * written, and what gives the other 25 locales titles for free.
-	 *
-	 * This is a computed column: `cell` is empty because the API returns no title
-	 * field at all. Everything comes from `meta`.
+	 * A computed column: the API returns no title field, so `cell` is empty and
+	 * everything comes from `meta`.
 	 */
 	interface Props {
 		cell: any;
@@ -31,8 +27,7 @@
 
 	const title = $derived.by(() => {
 		const message = messageKey ? (m as Record<string, any>)[messageKey] : undefined;
-		// A type with no catalog entry yet: show the key rather than an empty cell, so
-		// the gap is visible instead of looking like a row with nothing in it.
+		// No catalog entry yet: show the key, so the gap is visible.
 		if (typeof message !== 'function') return meta?.type ?? '';
 		try {
 			return message(meta?.context ?? {});

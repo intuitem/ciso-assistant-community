@@ -1,10 +1,29 @@
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import FieldDoesNotExist
+from django.db.models import ForeignKey, OneToOneField
 from rest_framework import serializers
 
 from core.serializers import BaseModelSerializer
 from iam.models import Folder
 from notifications.models import Notification
 from notifications.registry import NOTIFICATION_REGISTRY
+
+
+def _folder_path(model) -> str | None:
+    """The select_related path that pre-loads what Folder.get_folder will read.
+    A model that reaches its domain some other way falls back to the per-object walk."""
+    for candidate in ("folder", "parent_folder", "perimeter", "entity", "processing"):
+        try:
+            field = model._meta.get_field(candidate)
+        except FieldDoesNotExist:
+            continue
+        if isinstance(field, (ForeignKey, OneToOneField)):
+            return (
+                candidate
+                if candidate in ("folder", "parent_folder")
+                else f"{candidate}__folder"
+            )
+    return None
 
 
 class NotificationReadSerializer(BaseModelSerializer):
@@ -30,17 +49,13 @@ class NotificationReadSerializer(BaseModelSerializer):
         ]
 
     def get_category(self, obj) -> str | None:
-        """A property of the type, not of the row (docs §6), so it is read from the
-        registry rather than stored — recategorising stays a dict edit."""
+        """Read from the registry, not stored: a property of the type, not the row."""
         entry = NOTIFICATION_REGISTRY.get(obj.type)
         return entry["category"] if entry else None
 
     def get_folder(self, obj) -> dict | None:
         """The target's domain, derived rather than stored (see Notification.folder).
-
-        Targets are resolved once per page rather than per row: a GenericForeignKey
-        cannot be select_related, so touching obj.target per row is two queries each.
-        """
+        Targets resolve once per page: a GenericForeignKey cannot be select_related."""
         target = self._targets().get((obj.content_type_id, obj.object_id))
         if target is None:
             return None
@@ -61,15 +76,19 @@ class NotificationReadSerializer(BaseModelSerializer):
                 model = ContentType.objects.get_for_id(content_type_id).model_class()
                 if model is None:
                     continue
-                for obj in model.objects.filter(pk__in=ids):
+                queryset = model.objects.filter(pk__in=ids)
+                if path := _folder_path(model):
+                    # Without this, get_folder walks obj.folder once per row -- and the
+                    # inbox is not paginated (PAGE_SIZE 5000).
+                    queryset = queryset.select_related(path)
+                for obj in queryset:
                     resolved[(content_type_id, obj.pk)] = obj
             self._target_cache = resolved
         return self._target_cache
 
     def get_target_model(self, obj) -> str:
-        """Django model name, which the frontend maps to a route segment through
-        urlModelForDjangoName() in crud.ts. get_for_id is process-cached, so this
-        costs no query."""
+        """Django model name; crud.ts maps it to a route through
+        urlModelForDjangoName(). get_for_id is process-cached, so this costs no query."""
         return ContentType.objects.get_for_id(obj.content_type_id).model
 
 
@@ -82,8 +101,7 @@ class NotificationWriteSerializer(BaseModelSerializer):
         fields = ["is_read"]
 
     def update(self, instance, validated_data):
-        """Route the flip through Notification.set_read so `read_at` is stamped here
-        exactly as it is for the batch bar."""
+        """Through set_read so `read_at` is stamped exactly as for the batch bar."""
         if "is_read" in validated_data:
             Notification.set_read(
                 Notification.objects.filter(pk=instance.pk), validated_data["is_read"]
@@ -93,10 +111,6 @@ class NotificationWriteSerializer(BaseModelSerializer):
         return super().update(instance, validated_data)
 
     def _check_object_perm(self, *args, **kwargs) -> None:
-        """No-op: the inbox is scoped on `recipient`, not on the target's folder.
-
-        BaseModelSerializer checks `change_/delete_notification` against
-        Folder.get_folder(obj) on update and destroy, which 403s a user marking
-        their own notification read in a domain where they hold no role. The
-        recipient-scoped queryset in NotificationViewSet is the access check.
-        """
+        """No-op: the inbox is scoped on `recipient`, not on the target's folder. The
+        inherited check would 403 a user marking their own notification read in a
+        domain where they hold no role; the recipient-scoped queryset is the check."""

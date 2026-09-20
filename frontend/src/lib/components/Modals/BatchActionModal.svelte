@@ -25,9 +25,8 @@
 		// Optional i18n key for an action-specific warning (receives {count}),
 		// e.g. a cascade disclosure on delete.
 		confirmMessage?: string;
-		// A change_field action whose value is fixed by its config ("mark as read")
-		// rather than chosen by the user. Skips the picker entirely: the modal becomes
-		// a plain confirmation and this value is what gets sent.
+		// Value fixed by config ("mark as read"): skips the picker, so the modal is a
+		// plain confirmation and this is what gets sent.
 		fixedValue?: string;
 		onConfirm: (value?: string | string[]) => void;
 	}

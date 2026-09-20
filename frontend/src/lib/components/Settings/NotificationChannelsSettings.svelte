@@ -6,11 +6,9 @@
 	import { onMount } from 'svelte';
 
 	/**
-	 * Which channels carry which notification type.
-	 *
-	 * The registry is the ceiling: a switch is disabled for a channel its type does not
-	 * support, so an admin can narrow but never widen (docs §7). Grouped by category
-	 * because 29 rows in one flat list is unusable.
+	 * Which channels carry which notification type. The registry is the ceiling: a
+	 * switch is disabled where its type does not support the channel, so an admin can
+	 * narrow but never widen (docs §7). Grouped by category; 29 flat rows is unusable.
 	 */
 	type Channel = 'in_app' | 'email';
 	type Row = {
@@ -87,8 +85,7 @@
 				body: JSON.stringify({ type, channel, enabled })
 			});
 			if (!res.ok) throw new Error(String(res.status));
-			// The endpoint answers with the whole matrix, so the view cannot drift from
-			// stored state after a partial failure.
+			// The endpoint answers with the whole matrix, so the view cannot drift.
 			rows = await res.json();
 		} catch (error) {
 			toastStore.trigger({

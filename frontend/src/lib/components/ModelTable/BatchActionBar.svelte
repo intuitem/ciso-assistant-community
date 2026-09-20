@@ -157,8 +157,7 @@
 						}
 
 						const result = await res.json();
-						// Generic on purpose: any endpoint reporting an unread count updates
-						// the badge, so this stays model-agnostic.
+						// Any endpoint reporting an unread count updates the badge.
 						applyUnreadCount(result);
 						const succeededCount = result.succeeded?.length ?? 0;
 						const failedCount = result.failed?.length ?? 0;

@@ -16,7 +16,6 @@
 	} from '$lib/utils/crud';
 
 	// Presentational row weighting, declared per model in listViewFields.rowEmphasis.
-	// Reads the row's own meta, so it works for any model without touching this file.
 	function rowEmphasisClass(row: TableSource): string {
 		const config = listViewFields[URLModel]?.rowEmphasis;
 		if (!config) return '';
@@ -120,10 +119,9 @@
 		displayActions?: boolean;
 		disableCreate?: boolean;
 		disableEdit?: boolean;
-		// `disableEdit` suppresses the edit *page* (pencil, context-menu Edit) and, by
-		// default, field-changing batch actions too. A model with no edit form can still
-		// have a field worth changing in bulk -- an inbox's read flag -- so the two are
-		// separable. Defaults to `disableEdit`, so existing callers are unaffected.
+		// A model with no edit form can still have a field worth changing in bulk (an
+		// inbox's read flag), so this is separable from `disableEdit` -- which it
+		// defaults to, leaving existing callers unaffected.
 		disableBatchEdit?: boolean;
 		disableDelete?: boolean;
 		disableView?: boolean;
@@ -321,11 +319,8 @@
 	}
 
 	/**
-	 * Open the object a row points at, rather than the row itself.
-	 *
-	 * Returns true when it handled the click. The mark-and-navigate pair is
-	 * deliberate: a row you opened is a row you saw, and the PATCH is fire-and-forget
-	 * so navigation never waits on it.
+	 * Open the object a row points at, rather than the row itself. Returns true when it
+	 * handled the click. The PATCH is fire-and-forget so navigation never waits on it.
 	 */
 	function followRowNavigation(rowMetaData: Record<string, any>): boolean {
 		const nav = listViewFields[URLModel]?.rowNavigation;
@@ -345,8 +340,8 @@
 		const targetModel = urlModelForDjangoName(rowMetaData[nav.modelField]);
 		const targetId = rowMetaData[nav.idField];
 		if (!targetModel || !targetId) {
-			// Unmapped model, or a target deleted out from under the row. Opening it
-			// still counts as reading it, so only the navigation is skipped.
+			// Unmapped model, or a target deleted under the row: still counts as read,
+			// so only the navigation is skipped.
 			handler.invalidate();
 			return true;
 		}
@@ -678,8 +673,7 @@
 			!['frameworks', 'risk-matrices', 'ebios-rm', ...LIBRARY_MANAGED_URL_MODELS].includes(URLModel)
 	);
 
-	// The context menu used to offer Edit and View on the sole condition that the row
-	// was not builtin, ignoring disableEdit/disableView entirely -- so a model that
+	// The context menu ignored disableEdit/disableView entirely, so a model that
 	// suppressed them in the row actions still offered them on right-click.
 	let contextMenuRowIsNavigable = $derived(
 		!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||

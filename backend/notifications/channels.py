@@ -1,19 +1,14 @@
-"""
-The admin channel matrix: which channels carry which notification type.
+"""The admin channel matrix: which channels carry which notification type.
 
-Three layers, each able only to subtract (docs/notification_center_shaping.md §7):
-the registry declares what a type supports and defaults them all on; this matrix
-narrows that; per-user preferences would narrow it further and do not exist.
-
-The two channels are stored separately, and deliberately so:
+Layers can only subtract (docs §7): the registry is the ceiling, this matrix narrows
+it, per-user preferences would narrow further and do not exist.
 
   in_app  GlobalSettings(name="general").value["notification_channels"]
   email   GlobalSettings(name="general").value["disabled_email_templates"]
 
-`disabled_email_templates` predates all of this and already governs email everywhere
-(`is_email_template_enabled`, the enterprise override page). Migrating it into a new
-structure would mean rewriting an admin's existing choices; reading it as the email
-column instead means the matrix reports and edits the truth that is already there.
+`disabled_email_templates` predates this and already governs email everywhere, so it
+is read as the email column rather than migrated -- an admin's existing choices stay
+where they are.
 """
 
 import structlog
@@ -28,6 +23,8 @@ EMAIL_KEY = "disabled_email_templates"
 
 
 def _general() -> GlobalSettings:
+    """The writable row. Readers use `_general_value`, which does not create a settings
+    row as a side effect of being asked a question."""
     settings, _ = GlobalSettings.objects.get_or_create(
         name="general", defaults={"value": {}}
     )
@@ -36,18 +33,20 @@ def _general() -> GlobalSettings:
     return settings
 
 
+def _general_value() -> dict:
+    settings = GlobalSettings.objects.filter(name="general").only("value").first()
+    value = settings.value if settings is not None else None
+    return value if isinstance(value, dict) else {}
+
+
 def _in_app_overrides() -> dict:
-    overrides = _general().value.get(IN_APP_KEY, {})
+    overrides = _general_value().get(IN_APP_KEY, {})
     return overrides if isinstance(overrides, dict) else {}
 
 
 def in_app_allowed(notification_type: str) -> bool:
-    """Whether the matrix permits an inbox row for this type.
-
-    The registry is the ceiling: an admin may turn a channel off, never on for a type
-    that does not support it. An absent entry means "not narrowed", i.e. the registry
-    default — so a type added by a release is on without anyone touching settings.
-    """
+    """Whether the matrix permits an inbox row for this type. An absent entry means
+    "not narrowed", so a type added by a release is on with no settings change."""
     entry = NOTIFICATION_REGISTRY.get(notification_type)
     if not entry or "in_app" not in entry["channels"]:
         return False
@@ -56,8 +55,10 @@ def in_app_allowed(notification_type: str) -> bool:
 
 def matrix() -> list[dict]:
     """Every type with its current channel state, for the settings UI."""
-    overrides = _in_app_overrides()
-    disabled_emails = set(_general().value.get(EMAIL_KEY, []) or [])
+    general = _general_value()
+    overrides = general.get(IN_APP_KEY, {})
+    overrides = overrides if isinstance(overrides, dict) else {}
+    disabled_emails = set(general.get(EMAIL_KEY, []) or [])
     rows = []
     for key, entry in NOTIFICATION_REGISTRY.items():
         supports_in_app = "in_app" in entry["channels"]
@@ -77,12 +78,8 @@ def matrix() -> list[dict]:
 
 
 def set_channel(notification_type: str, channel: str, enabled: bool) -> None:
-    """Narrow or restore one channel for one type.
-
-    Raises ValueError rather than silently ignoring an unsupported combination: an
-    admin toggling something the registry forbids should see it fail, not watch the
-    switch spring back with no explanation.
-    """
+    """Narrow or restore one channel for one type. Raises rather than ignoring an
+    unsupported combination, so the switch does not silently spring back."""
     entry = NOTIFICATION_REGISTRY.get(notification_type)
     if entry is None:
         raise ValueError(f"unknown notification type: {notification_type}")
@@ -93,7 +90,8 @@ def set_channel(notification_type: str, channel: str, enabled: bool) -> None:
 
     settings = _general()
     if channel == "in_app":
-        overrides = dict(_in_app_overrides())
+        overrides = settings.value.get(IN_APP_KEY, {})
+        overrides = dict(overrides) if isinstance(overrides, dict) else {}
         overrides[notification_type] = enabled
         settings.value[IN_APP_KEY] = overrides
     else:

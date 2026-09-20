@@ -1,15 +1,8 @@
-"""
-The notification type registry.
+"""The notification type registry: a layer *above* the email templates, not a
+replacement. `enterprise_core.template_registry` keeps describing emails, untouched.
 
-This is a layer *above* the email templates, not a replacement for them. An entry
-describes a notification -- what it asks of the recipient, whether the system
-re-checks it, and which channels carry it -- and points at an email template when
-one of those channels is email. `enterprise_core.template_registry` keeps describing
-emails, and is untouched by this.
-
-The layering is what makes an in-app-exclusive notification possible: set
-`email_template` to None and the type simply has no email rendering. Nothing about
-the email path has to change to allow it.
+The layering is what allows an in-app-exclusive type: `email_template` None and the
+type simply has no email rendering.
 
 Fields:
   category        inbox filter and matrix grouping, on the axis "what it asks of you":
@@ -22,11 +15,10 @@ Fields:
                   core/templates/emails/{en,fr}/, or None for in-app-exclusive types
   context         variables a producer must supply to render this type's title. NOT the
                   email template's variables: a condition type's email is a digest
-                  (${control_count}, ${control_list}) while its inbox row is per object
-                  (${control_name}). That difference is the point of the layering.
+                  (${control_count}) while its inbox row is per object (${control_name})
 
-Row titles are not here and not stored: the frontend renders them from `context`
-using the normal message catalogs, in the viewer's language.
+Titles are not here and not stored: the frontend renders them from `context` using the
+message catalogs, in the viewer's language.
 """
 
 NOTIFICATION_REGISTRY = {

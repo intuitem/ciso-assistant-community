@@ -55,20 +55,15 @@ interface ListViewFieldsConfig {
 		optionalFields?: { head: string[]; body: string[] };
 		meta?: string[];
 		breadcrumb_link_disabled?: boolean;
-		// `description` is offered as an opt-in column on every model, since most have
-		// one. Set false for a model that does not: otherwise the column picker offers
-		// a column that can only ever be blank.
+		// Offered on every model since most have a description; set false for one that
+		// does not, or the column picker offers a column that can only be blank.
 		hasDescription?: boolean;
-		// Give rows matching a condition more visual weight, the way an inbox bolds
-		// what you have not dealt with. Purely presentational: it never changes what
-		// is listed, only how loudly. `equals` defaults to true, `class` to a
-		// semibold weight.
+		// Give rows matching a condition more visual weight. Purely presentational.
+		// `equals` defaults to true, `class` to a semibold weight.
 		rowEmphasis?: { field: string; equals?: unknown; class?: string };
-		// Send a row click somewhere other than this model's own detail page. A
-		// notification is a pointer: opening one means opening the thing it is about.
+		// Send a row click somewhere other than this model's own detail page.
 		// `modelField` holds the target's Django model name, `idField` its id, and the
-		// optional `markField` is a boolean PATCHed to true on open -- a row you opened
-		// is a row you saw.
+		// optional `markField` is a boolean PATCHed to true on open.
 		rowNavigation?: { modelField: string; idField: string; markField?: string };
 		filters?: {
 			[key: string]: ListViewFilterConfig | undefined;
@@ -994,8 +989,7 @@ export const NOTIFICATION_CATEGORY_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'category',
 		optionsEndpoint: 'notifications/category',
-		// The proxy hands back {label, value}; AutocompleteSelect looks for `name` by
-		// default, so without these the list renders blank entries.
+		// The proxy hands back {label, value}; AutocompleteSelect defaults to `name`.
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		browserCache: 'force-cache',
@@ -3027,17 +3021,15 @@ export const listViewFields = {
 	},
 	notifications: {
 		head: ['read', 'category', 'title', 'created_at'],
-		// `title` is a computed column: the API returns no such field, it is built
-		// client-side by NotificationTitle from `type` + `context` so it renders in
-		// the viewer's language. tableSourceMapper keeps the key even with no value,
-		// which is what lets a column be computed rather than stored.
+		// Computed column: the API returns no `title`, NotificationTitle builds it from
+		// `type` + `context`. tableSourceMapper keeps keys with no value, which is what
+		// makes a computed column possible.
 		body: ['is_read', 'category', 'title', 'created_at'],
 		hasDescription: false,
 		rowEmphasis: { field: 'is_read', equals: false },
 		rowNavigation: { modelField: 'target_model', idField: 'object_id', markField: 'is_read' },
-		// `folder` is an optional column and a filter, but NOT sortable: it is derived
-		// from the target, and a GenericForeignKey cannot be joined or ordered by.
-		// `read_at` is a real column, so it sorts and filters normally.
+		// `folder` is derived from the target, so it filters but never sorts -- a
+		// GenericForeignKey cannot be joined. `read_at` is a real column.
 		optionalFields: {
 			head: ['domain', 'readAt'],
 			body: ['folder', 'read_at']
@@ -3778,8 +3770,7 @@ export type FilterKeys = {
 }[keyof typeof listViewFields];
 
 export const contextMenuActions = {
-	// One click to flip read/unread: with only two values, picking from a submenu is
-	// an extra step for something you always want the opposite of.
+	// One click to flip read/unread: a submenu is an extra step for two values.
 	notifications: [
 		{
 			component: ToggleBooleanField,
@@ -3848,9 +3839,8 @@ export interface BatchActionConfig {
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
-	// A change_field action with a value fixed by config ("mark as read") rather than
-	// picked by the user. Mutually exclusive with optionsEndpoint: it skips the picker,
-	// so the whole action is one click plus a confirm.
+	// A change_field value fixed by config ("mark as read") rather than picked by the
+	// user. Mutually exclusive with optionsEndpoint: skips the picker.
 	value?: string;
 	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
@@ -3876,8 +3866,7 @@ export interface ParentActionConfig {
 export type TableBatchAction = BatchActionConfig | ParentActionConfig;
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
-	// Mark read and delete are the whole vocabulary: read stops the reminder,
-	// delete removes the message (docs/notification_center_shaping.md §4).
+	// The whole vocabulary: read stops the reminder, delete removes the message (§4).
 	notifications: [
 		{
 			type: 'change_field',

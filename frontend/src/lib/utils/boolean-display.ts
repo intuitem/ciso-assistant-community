@@ -37,8 +37,7 @@ const POLARITY_MAP: Map<string, BooleanPolarity> = new Map([
 	// Model-specific overrides — use "urlmodel:field" format, e.g.:
 	// ['contracts:is_active', 'warning'],
 
-	// An inbox emphasises what you have NOT dealt with: unread is the loud state,
-	// read is the quiet one. Without this the dot draws the eye to handled rows.
+	// Unread is the loud state; without this the dot draws the eye to handled rows.
 	['notifications:is_read', 'warning_when_false']
 ]);
 

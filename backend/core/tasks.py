@@ -29,7 +29,7 @@ import structlog
 
 
 from django.core.management import call_command
-from notifications.service import clear_stale, notify
+from notifications.service import clear_stale, notify, notify_many
 
 logging.config.dictConfig(settings.LOGGING)
 logger = structlog.getLogger(__name__)
@@ -51,21 +51,15 @@ def _sweep_deadline(
 ) -> None:
     """One sweep per deadline type, replacing the in_month / in_week / tomorrow trio.
 
-    Email keeps exactly the escalation it has always had -- one digest per recipient
-    on the day an object is 30, 7 or 1 days out -- while the inbox tracks the
-    condition *continuously*, because a row that appeared on day 30 and vanished on
-    day 29 would not be a condition at all.
+    Email keeps its exact-day escalation; the inbox tracks the condition continuously,
+    so the two need different queries. Only a sweep seeing the whole window can say
+    which rows are stale -- any one of the three would have cleared the others' rows.
 
-    The two therefore need different queries, which is why the three tasks had to
-    become one: only a sweep that sees the whole window can say which rows are stale,
-    and any one of the three would have cleared the other two's rows.
-
-    `objects` must already cover the whole window. `skip(obj, days_remaining)` drops
-    an object from both channels -- a task recurring weekly should not be announced a
-    month out, in either.
+    `objects` must cover the whole window. `skip(obj, days_remaining)` drops an object
+    from both channels.
     """
     today = date.today()
-    still_true = set()
+    items = []
     by_horizon = {days: defaultdict(list) for days in EXPIRY_NOTICE_DAYS}
 
     for obj in objects:
@@ -79,25 +73,28 @@ def _sweep_deadline(
         if not emails:
             continue
 
-        for row in notify(notification_type, emails, obj, context(obj, days_remaining)):
-            still_true.add((row.recipient_id, row.object_id))
+        items.append((emails, obj, context(obj, days_remaining)))
 
         if days_remaining in by_horizon:
             for email in emails:
                 by_horizon[days_remaining][email].append(obj)
 
-    clear_stale(notification_type, still_true)
+    clear_stale(notification_type, _written(notify_many(notification_type, items)))
 
     for days, per_recipient in by_horizon.items():
         for email, batch in per_recipient.items():
-            # Keyword, as every one of these senders was called before: their
-            # signatures are (recipient, objects, days) and the tests read kwargs.
+            # Keyword: these senders' signatures are (recipient, objects, days) and
+            # the tests read kwargs.
             send(email, batch, days=days)
 
 
+def _written(rows) -> set:
+    """The pairs a sweep just wrote, in the shape clear_stale takes."""
+    return {(row.recipient_id, row.object_id) for row in rows}
+
+
 def _actor_emails(actors) -> set:
-    """Flatten actors to addresses. notify() resolves them back to Users for the
-    in-app channel; an actor with no internal user simply gets email only."""
+    """Flatten actors to addresses; an actor with no internal user gets email only."""
     return {email for actor in actors for email in actor.get_emails() if email}
 
 
@@ -115,14 +112,18 @@ def check_controls_with_expired_eta():
         for owner in control.owner.all():
             for email in owner.get_emails():
                 owner_controls[email].append(control)
-    still_true = set()
-    for control in expired_controls:
-        recipients = _actor_emails(control.owner.all())
-        for row in notify(
-            "expired_controls", recipients, control, {"control_name": str(control)}
-        ):
-            still_true.add((row.recipient_id, row.object_id))
-    clear_stale("expired_controls", still_true)
+    rows = notify_many(
+        "expired_controls",
+        (
+            (
+                _actor_emails(control.owner.all()),
+                control,
+                {"control_name": str(control)},
+            )
+            for control in expired_controls
+        ),
+    )
+    clear_stale("expired_controls", _written(rows))
 
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
@@ -213,16 +214,18 @@ def check_evidences_expired():
             for email in owner.get_emails():
                 owner_evidences[email].append(evidence)
 
-    still_true = set()
-    for evidence in expired_evidences:
-        recipients = {
-            email for owner in evidence.owner.all() for email in owner.get_emails()
-        }
-        for row in notify(
-            "expired_evidences", recipients, evidence, {"evidence_name": str(evidence)}
-        ):
-            still_true.add((row.recipient_id, row.object_id))
-    clear_stale("expired_evidences", still_true)
+    rows = notify_many(
+        "expired_evidences",
+        (
+            (
+                _actor_emails(evidence.owner.all()),
+                evidence,
+                {"evidence_name": str(evidence)},
+            )
+            for evidence in expired_evidences
+        ),
+    )
+    clear_stale("expired_evidences", _written(rows))
 
     # Send personalized email to each owner
     for owner_email, evidences in owner_evidences.items():
@@ -294,17 +297,18 @@ def check_security_exceptions_expired():
         .prefetch_related("owners")
     )
 
-    still_true = set()
-    for exception in expired_exceptions:
-        recipients = _actor_emails(exception.owners.all())
-        for row in notify(
-            "expired_security_exceptions",
-            recipients,
-            exception,
-            {"exception_name": str(exception)},
-        ):
-            still_true.add((row.recipient_id, row.object_id))
-    clear_stale("expired_security_exceptions", still_true)
+    rows = notify_many(
+        "expired_security_exceptions",
+        (
+            (
+                _actor_emails(exception.owners.all()),
+                exception,
+                {"exception_name": str(exception)},
+            )
+            for exception in expired_exceptions
+        ),
+    )
+    clear_stale("expired_security_exceptions", _written(rows))
 
     for owner_email, exceptions in _group_security_exceptions_by_owner(
         expired_exceptions
@@ -400,14 +404,18 @@ def check_task_nodes_overdue():
             for email in actor.get_emails():
                 actor_nodes[email].append(node)
 
-    still_true = set()
-    for node in overdue_nodes:
-        recipients = _actor_emails(node.task_template.assigned_to.all())
-        for row in notify(
-            "task_node_overdue", recipients, node, {"task_name": str(node)}
-        ):
-            still_true.add((row.recipient_id, row.object_id))
-    clear_stale("task_node_overdue", still_true)
+    rows = notify_many(
+        "task_node_overdue",
+        (
+            (
+                _actor_emails(node.task_template.assigned_to.all()),
+                node,
+                {"task_name": str(node)},
+            )
+            for node in overdue_nodes
+        ),
+    )
+    clear_stale("task_node_overdue", _written(rows))
 
     for email, nodes in actor_nodes.items():
         send_task_node_overdue_notification(email, nodes)

@@ -197,13 +197,9 @@ export const ISO_8601_REGEX =
 	/^([+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24:?00)([.,]\d+(?!:))?)?(\17[0-5]\d([.,]\d+)?)?([zZ]|([+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$/;
 
 /**
- * Fields rendered as localised dates when their value is an ISO 8601 string.
- *
- * The regex alone is not the test: some values are ISO strings that should stay
- * verbatim, so a field has to be declared a date as well. This list was previously
- * duplicated — an inline `key === '…' || …` chain in ModelTable and a separate default
- * in DetailView — which meant the same field could format in a detail view and render
- * raw in a table. This is the union of the two.
+ * Fields rendered as localised dates when their value is an ISO 8601 string. The regex
+ * alone is not the test: some ISO values stay verbatim, so the field must be declared
+ * too. Union of the two lists ModelTable and DetailView used to keep separately.
  */
 export const DATE_FIELDS_TO_FORMAT = [
 	'accepted_at',
