@@ -1,5 +1,7 @@
 """Tests for audit-log → SIEM forwarding (Phase 1: OCSF body + dispatch)."""
 
+import json
+import time
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
@@ -390,3 +392,280 @@ def test_update_preserves_headers_when_omitted(root_folder):
     ep.refresh_from_db()
     assert ep.url == "https://siem.example/v2"
     assert ep.headers == {"Authorization": "Splunk token"}
+
+
+# --- OAuth 2.0 client credentials + body envelope ---------------------------
+
+
+@pytest.fixture(autouse=True)
+def _clear_oauth_cache():
+    from webhooks import oauth
+
+    oauth._cache.clear()
+    yield
+    oauth._cache.clear()
+
+
+def _oauth_sink(folder, **kwargs):
+    return _make_audit_sink(
+        folder,
+        headers={},
+        auth_type=WebhookEndpoint.AuthType.OAUTH2_CC,
+        oauth_config={
+            "token_url": "https://login.microsoftonline.com/t/oauth2/v2.0/token",
+            "client_id": "cid",
+            "client_secret": "csecret",
+            "scope": "https://monitor.azure.com//.default",
+        },
+        **kwargs,
+    )
+
+
+def _token_response(token="tok", expires_in=3600):
+    response = MagicMock()
+    response.status_code = 200
+    response.json.return_value = {"access_token": token, "expires_in": expires_in}
+    return response
+
+
+def _minted(token):
+    return (token, time.monotonic() + 3600)
+
+
+# webhooks.tasks.requests and webhooks.oauth.requests are the same module object,
+# so patching both paths in one test collides. Delivery tests stub oauth._fetch;
+# the token request itself is covered by the oauth-module tests below.
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_send_audit_request_sends_oauth_bearer(root_folder):
+    ep = _oauth_sink(root_folder)
+    sink_response = MagicMock()
+    sink_response.status_code = 200
+    with patch("webhooks.oauth._fetch", return_value=_minted("tok")):
+        with patch("webhooks.tasks.requests.post", return_value=sink_response) as post:
+            result = tasks.send_audit_request.call_local(
+                str(ep.id), {"class_uid": 6003}
+            )
+
+    assert result.startswith("Success")
+    assert post.call_args.kwargs["headers"]["Authorization"] == "Bearer tok"
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_oauth_token_is_cached_across_sends(root_folder):
+    ep = _oauth_sink(root_folder)
+    sink_response = MagicMock()
+    sink_response.status_code = 200
+    with patch("webhooks.oauth._fetch", return_value=_minted("tok")) as fetch:
+        with patch("webhooks.tasks.requests.post", return_value=sink_response):
+            tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
+            tasks.send_audit_request.call_local(str(ep.id), {"a": 2})
+
+    assert fetch.call_count == 1
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_oauth_refreshes_once_on_401(root_folder):
+    ep = _oauth_sink(root_folder)
+    unauthorized = MagicMock()
+    unauthorized.status_code = 401
+    ok = MagicMock()
+    ok.status_code = 200
+    with patch(
+        "webhooks.oauth._fetch", side_effect=[_minted("stale"), _minted("fresh")]
+    ) as fetch:
+        with patch(
+            "webhooks.tasks.requests.post", side_effect=[unauthorized, ok]
+        ) as post:
+            result = tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
+
+    assert result.startswith("Success")
+    assert fetch.call_count == 2
+    assert post.call_args_list[0].kwargs["headers"]["Authorization"] == "Bearer stale"
+    assert post.call_args_list[1].kwargs["headers"]["Authorization"] == "Bearer fresh"
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_oauth_failure_propagates_for_retry(root_folder):
+    from webhooks.oauth import OAuthError
+
+    ep = _oauth_sink(root_folder)
+    with patch("webhooks.oauth._fetch", side_effect=OAuthError("denied")):
+        with patch("webhooks.tasks.requests.post") as post:
+            with pytest.raises(OAuthError):
+                tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
+    # The event is never sent unauthenticated.
+    post.assert_not_called()
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_static_auth_does_not_fetch_a_token(root_folder):
+    ep = _make_audit_sink(root_folder)
+    sink_response = MagicMock()
+    sink_response.status_code = 200
+    with patch("webhooks.oauth._fetch") as fetch:
+        with patch("webhooks.tasks.requests.post", return_value=sink_response):
+            tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
+    fetch.assert_not_called()
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_oauth_token_request_is_an_rfc6749_form_post(root_folder):
+    from webhooks import oauth
+
+    ep = _oauth_sink(root_folder)
+    with patch("webhooks.oauth.requests.post", return_value=_token_response()) as post:
+        assert oauth.get_token(ep) == "tok"
+
+    assert post.call_args.args[0] == ep.oauth_config["token_url"]
+    sent = post.call_args.kwargs["data"]
+    assert sent["grant_type"] == "client_credentials"
+    assert sent["client_id"] == "cid"
+    assert sent["client_secret"] == "csecret"
+    assert sent["scope"] == "https://monitor.azure.com//.default"
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_oauth_rejects_token_endpoint_error(root_folder):
+    from webhooks import oauth
+
+    ep = _oauth_sink(root_folder)
+    denied = MagicMock()
+    denied.status_code = 401
+    with patch("webhooks.oauth.requests.post", return_value=denied):
+        with pytest.raises(oauth.OAuthError):
+            oauth.get_token(ep)
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_oauth_renews_within_the_expiry_skew(root_folder):
+    from webhooks import oauth
+
+    # A lifetime shorter than the skew must never be served from cache.
+    ep = _oauth_sink(root_folder)
+    with patch(
+        "webhooks.oauth.requests.post", return_value=_token_response(expires_in=30)
+    ) as post:
+        oauth.get_token(ep)
+        oauth.get_token(ep)
+
+    assert post.call_count == 2
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_body_wrapper_array_wraps_the_event(root_folder):
+    # Azure Monitor Logs Ingestion rejects a bare object.
+    ep = _make_audit_sink(root_folder, body_wrapper=WebhookEndpoint.BodyWrapper.ARRAY)
+    sink_response = MagicMock()
+    sink_response.status_code = 200
+    with patch("webhooks.tasks.requests.post", return_value=sink_response) as post:
+        tasks.send_audit_request.call_local(str(ep.id), {"class_uid": 6003})
+
+    assert json.loads(post.call_args.kwargs["data"]) == [{"class_uid": 6003}]
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_body_wrapper_none_sends_bare_object(root_folder):
+    ep = _make_audit_sink(root_folder)
+    sink_response = MagicMock()
+    sink_response.status_code = 200
+    with patch("webhooks.tasks.requests.post", return_value=sink_response) as post:
+        tasks.send_audit_request.call_local(str(ep.id), {"class_uid": 6003})
+
+    assert json.loads(post.call_args.kwargs["data"]) == {"class_uid": 6003}
+
+
+@pytest.mark.django_db
+def test_serializer_hides_client_secret(root_folder):
+    from webhooks.serializers import AuditSinkSerializer
+
+    ep = _oauth_sink(root_folder)
+    data = AuditSinkSerializer(ep).data
+    assert data["has_client_secret"] is True
+    assert "client_secret" not in data["oauth_config"]
+    # token_url/client_id/scope are kept for edit prefill.
+    assert data["oauth_config"]["client_id"] == "cid"
+    assert data["oauth_config"]["scope"] == "https://monitor.azure.com//.default"
+
+
+@pytest.mark.django_db
+def test_update_preserves_client_secret_when_blank(root_folder):
+    from webhooks.serializers import AuditSinkSerializer
+
+    ep = _oauth_sink(root_folder)
+    with override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True):
+        AuditSinkSerializer().update(
+            ep,
+            {
+                "oauth_config": {
+                    "token_url": "https://login.microsoftonline.com/t/oauth2/v2.0/token",
+                    "client_id": "cid2",
+                }
+            },
+        )
+    ep.refresh_from_db()
+    assert ep.oauth_config["client_id"] == "cid2"
+    assert ep.oauth_config["client_secret"] == "csecret"
+
+
+def test_validate_oauth_requires_token_url_and_client_id():
+    from rest_framework import serializers as drf
+    from webhooks.serializers import AuditSinkSerializer
+
+    serializer = AuditSinkSerializer()
+    with pytest.raises(drf.ValidationError) as exc:
+        serializer.validate(
+            {
+                "transport": WebhookEndpoint.Transport.HTTP,
+                "auth_type": WebhookEndpoint.AuthType.OAUTH2_CC,
+                "oauth_config": {"scope": "s"},
+            }
+        )
+    message = str(exc.value)
+    assert "token_url" in message and "client_id" in message
+
+
+def test_validate_oauth_config_rejects_non_string_values():
+    from rest_framework import serializers as drf
+    from webhooks.serializers import AuditSinkSerializer
+
+    with pytest.raises(drf.ValidationError):
+        AuditSinkSerializer().validate_oauth_config({"client_id": {"nested": 1}})
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=False)
+def test_oauth_token_url_must_be_public(root_folder):
+    from django.core.exceptions import ValidationError
+    from core.net_safety import BlockedRequestError
+
+    # The token endpoint is an outbound request from our server, so it faces the
+    # same SSRF guard as the sink URL. Stubbed to keep DNS out of the test.
+    def guard(url, **kwargs):
+        if "127.0.0.1" in url:
+            raise BlockedRequestError("blocked")
+
+    ep = WebhookEndpoint(
+        name="siem",
+        url="https://siem.example/collector",
+        kind=WebhookEndpoint.Kind.AUDIT_SINK,
+        transport=WebhookEndpoint.Transport.HTTP,
+        auth_type=WebhookEndpoint.AuthType.OAUTH2_CC,
+        oauth_config={"token_url": "http://127.0.0.1/token", "client_id": "c"},
+        folder=root_folder,
+    )
+    with patch("webhooks.models.assert_public_url", side_effect=guard):
+        with pytest.raises(ValidationError) as exc:
+            ep.clean()
+    assert "oauth_config" in exc.value.message_dict

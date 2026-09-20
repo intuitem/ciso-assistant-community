@@ -18,6 +18,7 @@ from global_settings.utils import ff_is_enabled
 from iam.models import Folder
 
 from .models import WebhookEndpoint
+from .oauth import OAuthError, get_token, invalidate as invalidate_token
 from .ocsf import build_audit_body
 
 import structlog
@@ -153,12 +154,35 @@ def dispatch_audit_event(log_entry_pk):
         _deliver(endpoint, build_audit_body(log_entry, endpoint.body_format))
 
 
+def _bearer(endpoint, *, force_refresh=False):
+    try:
+        return f"Bearer {get_token(endpoint, force_refresh=force_refresh)}"
+    except OAuthError as exc:
+        logger.error(
+            "OAuth token acquisition failed",
+            endpoint_id=str(endpoint.id),
+            error=exc,
+        )
+        raise
+
+
+def _post_audit(endpoint, json_payload, headers):
+    return requests.post(
+        endpoint.url,
+        data=json_payload.encode("utf-8"),
+        headers=headers,
+        timeout=15,
+        allow_redirects=False,
+    )
+
+
 @db_task(retries=5, retry_delay=60, retry_backoff=2.0)
 def send_audit_request(endpoint_id, body):
     """
     Deliver one audit event to a SIEM HTTP endpoint. Unlike send_webhook_request,
     there is no HMAC envelope: the body is the canonical event (OCSF by default)
-    and auth is the endpoint's static headers (e.g. a Splunk HEC token).
+    and auth is the endpoint's static headers (e.g. a Splunk HEC token) or an
+    OAuth2 client-credentials bearer token.
     """
     try:
         endpoint = WebhookEndpoint.objects.get(id=endpoint_id, is_active=True)
@@ -166,6 +190,10 @@ def send_audit_request(endpoint_id, body):
         logger.warning("Audit sink deleted. Task aborted.", endpoint_id=endpoint_id)
         return f"Aborted: audit sink {endpoint_id} not found"
 
+    # Azure Monitor Logs Ingestion (and other batch-shaped APIs) reject a bare
+    # object; the sink declares the envelope it needs.
+    if endpoint.body_wrapper == WebhookEndpoint.BodyWrapper.ARRAY:
+        body = [body]
     json_payload = json.dumps(body, separators=(",", ":"), cls=DjangoJSONEncoder)
     headers = {"Content-Type": "application/json", **(endpoint.headers or {})}
 
@@ -180,14 +208,21 @@ def send_audit_request(endpoint_id, body):
         )
         return f"Blocked: {endpoint_id} URL points to a non-public address"
 
+    uses_oauth = endpoint.auth_type == WebhookEndpoint.AuthType.OAUTH2_CC
+    if uses_oauth:
+        headers["Authorization"] = _bearer(endpoint)
+
     try:
-        response = requests.post(
-            endpoint.url,
-            data=json_payload.encode("utf-8"),
-            headers=headers,
-            timeout=15,
-            allow_redirects=False,
-        )
+        response = _post_audit(endpoint, json_payload, headers)
+        if response.status_code == 401 and uses_oauth:
+            # Credentials rotated, or the provider expired the token early: mint
+            # a fresh one once before falling through to Huey's backoff.
+            invalidate_token(endpoint)
+            retry_headers = {
+                **headers,
+                "Authorization": _bearer(endpoint, force_refresh=True),
+            }
+            response = _post_audit(endpoint, json_payload, retry_headers)
         if 200 <= response.status_code < 300:
             return f"Success: Sent audit event to {endpoint.url}"
         elif 300 <= response.status_code < 400:

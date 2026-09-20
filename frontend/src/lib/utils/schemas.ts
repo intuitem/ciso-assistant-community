@@ -2266,8 +2266,15 @@ export const auditSinkSchema = z.object({
 	transport: z.enum(['http', 'kafka']).default('http'),
 	url: z.string().url().optional().or(z.literal('')),
 	body_format: z.enum(['ocsf', 'raw']).default('ocsf'),
+	body_wrapper: z.enum(['none', 'array']).default('none'),
 	// HTTP: JSON of auth headers, parsed server-side.
 	headers: z.string().optional(),
+	auth_type: z.enum(['static', 'oauth2_client_credentials']).default('static'),
+	// OAuth2: assembled server-side into oauth_config.
+	token_url: z.string().url().optional().or(z.literal('')),
+	client_id: z.string().optional(),
+	client_secret: z.string().optional(),
+	scope: z.string().optional(),
 	// Kafka: assembled server-side into kafka_config {bootstrap_servers, topic, config}.
 	bootstrap_servers: z.string().optional(),
 	topic: z.string().optional(),

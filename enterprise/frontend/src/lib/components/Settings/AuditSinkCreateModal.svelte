@@ -43,10 +43,12 @@
 	});
 
 	const { value: transport } = formFieldProxy(_form, 'transport');
+	const { value: authType } = formFieldProxy(_form, 'auth_type');
 
 	if (initialData) {
 		const cfg = initialData.kafka_config ?? {};
 		const sasl = cfg.config ?? {};
+		const oauth = initialData.oauth_config ?? {};
 		_form.form.update((d) => ({
 			...d,
 			id: initialData.id,
@@ -54,6 +56,12 @@
 			description: initialData.description,
 			transport: initialData.transport,
 			body_format: initialData.body_format,
+			body_wrapper: initialData.body_wrapper ?? 'none',
+			auth_type: initialData.auth_type ?? 'static',
+			token_url: oauth.token_url ?? '',
+			client_id: oauth.client_id ?? '',
+			scope: oauth.scope ?? '',
+			client_secret: '',
 			is_active: initialData.is_active,
 			url: initialData.url ?? '',
 			headers:
@@ -178,6 +186,16 @@
 					</Dropdown>
 				{:else}
 					<TextField {form} field="url" label={m.url()} autocomplete="off" />
+					<Select
+						{form}
+						field="body_wrapper"
+						label={m.bodyWrapper()}
+						options={[
+							{ label: m.none(), value: 'none' },
+							{ label: m.jsonArray(), value: 'array' }
+						]}
+						helpText={m.bodyWrapperHelpText()}
+					/>
 					<TextField
 						{form}
 						field="headers"
@@ -187,6 +205,51 @@
 							? m.leaveBlankToKeepSecret()
 							: m.httpHeadersHelpText()}
 					/>
+					<RadioGroup
+						{form}
+						field="auth_type"
+						label={m.authentication()}
+						possibleOptions={[
+							{ label: m.staticHeaders(), value: 'static' },
+							{ label: m.oauth2ClientCredentials(), value: 'oauth2_client_credentials' }
+						]}
+						labelKey="label"
+						valueKey="value"
+					/>
+					{#if $authType === 'oauth2_client_credentials'}
+						<Dropdown
+							open={true}
+							style="hover:text-primary-700"
+							icon="fa-solid fa-key"
+							header={m.oauth2ClientCredentials()}
+						>
+							<TextField
+								{form}
+								field="token_url"
+								label={m.tokenUrl()}
+								autocomplete="off"
+								helpText={m.tokenUrlHelpText()}
+							/>
+							<TextField {form} field="client_id" label={m.clientId()} autocomplete="off" />
+							<TextField
+								{form}
+								field="client_secret"
+								label={m.clientSecret()}
+								type="password"
+								autocomplete="off"
+								helpText={initialData?.has_client_secret
+									? m.leaveBlankToKeepSecret()
+									: undefined}
+							/>
+							<TextField
+								{form}
+								field="scope"
+								label={m.oauthScope()}
+								autocomplete="off"
+								helpText={m.oauthScopeHelpText()}
+							/>
+						</Dropdown>
+					{/if}
 				{/if}
 				<AutocompleteSelect
 					{form}

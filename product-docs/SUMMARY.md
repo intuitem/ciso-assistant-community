@@ -216,6 +216,7 @@
 * [Service accounts](integrations/service-accounts.md)
 * [Outgoing webhooks](integrations/webhooks.md)
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
+* [Microsoft Sentinel](integrations/sentinel.md)
 * [Hosted AI providers](integrations/ai-providers.md)
 * [MCP setup guide](integrations/mcp.md)
 * [Power BI connector](integrations/powerbi.md)

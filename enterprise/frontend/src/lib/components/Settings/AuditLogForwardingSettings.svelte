@@ -99,6 +99,11 @@
 									{sink.is_active ? m.active() : m.inactive()}
 								</span>
 								<span class="badge preset-tonal-primary uppercase">{sink.body_format}</span>
+								{#if sink.auth_type === 'oauth2_client_credentials'}
+									<span class="badge preset-tonal-secondary">
+										<i class="fa-solid fa-key mr-1"></i>OAuth 2.0
+									</span>
+								{/if}
 							</div>
 							<span class="text-sm text-gray-500 truncate">
 								{#if sink.transport === 'kafka'}

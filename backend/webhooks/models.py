@@ -49,6 +49,14 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         OCSF = "ocsf", "OCSF"
         RAW = "raw", "Raw LogEntry"
 
+    class AuthType(models.TextChoices):
+        STATIC = "static", "Static headers"
+        OAUTH2_CC = "oauth2_client_credentials", "OAuth 2.0 client credentials"
+
+    class BodyWrapper(models.TextChoices):
+        NONE = "none", "None"
+        ARRAY = "array", "JSON array"
+
     payload_format = models.CharField(
         verbose_name="Payload Format",
         max_length=10,
@@ -82,6 +90,27 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         blank=True,
         help_text="Static headers added to each request, e.g. "
         '{"Authorization": "Splunk <token>"}. Used for audit-sink auth.',
+    )
+    # Static headers are merged either way; OAUTH2_CC additionally acquires a
+    # bearer token and renews it before expiry (Sentinel, Chronicle, gateways).
+    auth_type = models.CharField(
+        max_length=32,
+        choices=AuthType.choices,
+        default=AuthType.STATIC,
+        help_text="Authentication for HTTP audit sinks.",
+    )
+    oauth_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="OAuth2 client credentials: "
+        "{token_url, client_id, client_secret, scope, extra_params}.",
+    )
+    body_wrapper = models.CharField(
+        max_length=10,
+        choices=BodyWrapper.choices,
+        default=BodyWrapper.NONE,
+        help_text="Envelope applied to the HTTP body. "
+        "Azure Monitor Logs Ingestion requires an array.",
     )
 
     owner = models.ForeignKey(
@@ -148,6 +177,13 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
                     "(no private, loopback, or internal addresses)."
                 }
             )
+        if self.auth_type == self.AuthType.OAUTH2_CC:
+            try:
+                assert_public_url((self.oauth_config or {}).get("token_url") or "")
+            except BlockedRequestError:
+                raise ValidationError(
+                    {"oauth_config": "Token URL must be a public HTTPS endpoint."}
+                )
 
     def save(self, *args, **kwargs):
         """Run full model validation (clean + field checks) before persisting."""
@@ -155,11 +191,12 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         super().save(*args, **kwargs)
 
 
-# secret, headers (SIEM token) and kafka_config (SASL password) are redacted.
+# secret, headers (SIEM token), kafka_config (SASL password) and oauth_config
+# (client secret) are redacted.
 auditlog.register(
     WebhookEndpoint,
     exclude_fields=["created_at", "updated_at"],
-    mask_fields=["headers", "kafka_config", "secret"],
+    mask_fields=["headers", "kafka_config", "oauth_config", "secret"],
     mask_callable="global_settings.utils.redact_secret_value",
     m2m_fields={"event_types", "target_folders"},
 )
