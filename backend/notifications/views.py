@@ -1,13 +1,18 @@
 import structlog
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed
+from core.permissions import FeatureFlagRequired, IsGlobalAdmin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from core.views import BATCH_SIZE_LIMIT, BaseModelViewSet
 from notifications.models import Notification
+from notifications.channels import matrix, set_channel
 from notifications.registry import NOTIFICATION_REGISTRY
 from notifications.permissions import IsRecipient
 
@@ -23,12 +28,16 @@ class NotificationViewSet(BaseModelViewSet):
 
     model = Notification
     serializers_module = "notifications.serializers"
-    permission_classes = [IsAuthenticated, IsRecipient]
-    filterset_fields = ["is_read", "type", "folder", "content_type"]
+    permission_classes = [IsAuthenticated, IsRecipient, FeatureFlagRequired]
+    feature_flag = "notification_centre"
+    filterset_fields = ["is_read", "read_at", "type", "content_type"]
     # Titles are rendered client-side, so there is no text column to search. `type`
     # keeps the search box functional (it matches the type key); the real filters are
     # read state and category.
     search_fields = ["type"]
+    # `folder` is derived from the target, so it is not a column: it can be filtered
+    # (below) but never ordered by.
+    ordering_fields = ["created_at", "updated_at", "read_at", "is_read", "type"]
     ordering = ["-created_at"]
 
     def get_queryset(self) -> models.query.QuerySet:
@@ -47,7 +56,30 @@ class NotificationViewSet(BaseModelViewSet):
                     if entry["category"] == category
                 ]
             )
+
+        if folders := self.request.query_params.getlist("folder"):
+            queryset = self._filter_by_folder(queryset, folders)
+
         return queryset
+
+    def _filter_by_folder(self, queryset, folders):
+        """Narrow to notifications whose *target* lives in one of these domains.
+
+        The folder is derived, not stored (Notification.folder), so this resolves the
+        other way round: for each content type present, ask that model which of its
+        objects are in the domain, then match on those ids. One query per content type
+        in the current queryset — a handful — and only on an explicit filter, never on
+        the polled badge count.
+        """
+        matched = Q(pk__in=[])
+        content_type_ids = queryset.values_list("content_type", flat=True).distinct()
+        for content_type_id in content_type_ids:
+            model = ContentType.objects.get_for_id(content_type_id).model_class()
+            if model is None or not hasattr(model, "folder"):
+                continue
+            ids = model.objects.filter(folder__in=folders).values_list("pk", flat=True)
+            matched |= Q(content_type=content_type_id, object_id__in=list(ids))
+        return queryset.filter(matched)
 
     def create(self, request, *args, **kwargs):
         raise MethodNotAllowed("POST")
@@ -128,7 +160,7 @@ class NotificationViewSet(BaseModelViewSet):
                 is_read = (
                     raw if isinstance(raw, bool) else str(raw).strip().lower() == "true"
                 )
-                queryset.update(is_read=is_read)
+                Notification.set_read(queryset, is_read)
 
         logger.info(
             "Notification batch action",
@@ -139,3 +171,27 @@ class NotificationViewSet(BaseModelViewSet):
             user=request.user.id,
         )
         return Response({"succeeded": succeeded, "failed": failed})
+
+
+class NotificationChannelsView(APIView):
+    """The admin channel matrix (§7).
+
+    Built in the community tree for development convenience; configuring
+    notifications is an enterprise feature and this moves there before release.
+    """
+
+    permission_classes = [IsAuthenticated, IsGlobalAdmin]
+
+    def get(self, request):
+        return Response(matrix())
+
+    def post(self, request):
+        try:
+            set_channel(
+                request.data.get("type"),
+                request.data.get("channel"),
+                bool(request.data.get("enabled")),
+            )
+        except ValueError as error:
+            return Response({"error": str(error)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(matrix())

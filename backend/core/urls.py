@@ -23,7 +23,7 @@ from library.views import (
     LoadedLibraryViewSet,
 )
 from custom_fields.views import CustomFieldDefinitionViewSet
-from notifications.views import NotificationViewSet
+from notifications.views import NotificationChannelsView, NotificationViewSet
 import importlib
 
 
@@ -197,6 +197,11 @@ for route in ROUTES:
 
 
 urlpatterns = [
+    path(
+        "notification-channels/",
+        NotificationChannelsView.as_view(),
+        name="notification-channels",
+    ),
     path("", include(router.urls)),
     path("iam/", include("iam.urls")),
     path("serdes/", include("serdes.urls")),

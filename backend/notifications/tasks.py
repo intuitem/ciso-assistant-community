@@ -1,0 +1,123 @@
+from datetime import timedelta
+
+import structlog
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Count
+from django.utils import timezone
+from huey import crontab
+from huey.contrib.djhuey import db_periodic_task
+
+from notifications.models import Notification
+
+logger = structlog.getLogger(__name__)
+
+# Rows are pruned mostly by their condition going false (clear_stale); this is the
+# backstop, and the only thing that removes the event types. 90 mirrors
+# AUDITLOG_RETENTION_DAYS. A plain constant, deliberately not a setting.
+RETENTION_DAYS = 90
+
+# Backstop against a runaway producer or a large fan-out. Nobody scrolls past this,
+# and an inbox this long means something upstream is wrong, not that the rows matter.
+MAX_PER_RECIPIENT = 1000
+
+
+def prune_read_notifications() -> int:
+    """Delete read rows past the retention window.
+
+    Condition rows mostly leave via clear_stale when their condition goes false
+    (§11). This is what removes the 15 event types, which have no condition to
+    stop being true and would otherwise accumulate forever.
+    """
+    cutoff = timezone.now() - timedelta(days=RETENTION_DAYS)
+    deleted, _ = Notification.objects.filter(
+        is_read=True, updated_at__lt=cutoff
+    ).delete()
+    return deleted
+
+
+def enforce_per_recipient_cap() -> int:
+    """Keep the newest MAX_PER_RECIPIENT rows per recipient, read or not.
+
+    Deliberately ignores `is_read`: the point is a ceiling on one inbox, and an
+    unread row is not more durable than the cap.
+    """
+    over_cap = (
+        Notification.objects.values("recipient")
+        .annotate(total=Count("id"))
+        .filter(total__gt=MAX_PER_RECIPIENT)
+    )
+    deleted = 0
+    for row in over_cap:
+        surplus = list(
+            Notification.objects.filter(recipient=row["recipient"])
+            .order_by("-created_at")
+            .values_list("id", flat=True)[MAX_PER_RECIPIENT:]
+        )
+        if surplus:
+            count, _ = Notification.objects.filter(id__in=surplus).delete()
+            deleted += count
+    return deleted
+
+
+def prune_orphaned_notifications() -> int:
+    """Delete rows whose target no longer exists.
+
+    A GenericForeignKey has no database cascade, so deleting the object a row points
+    at leaves the row behind. Done as a nightly sweep rather than the `post_delete`
+    receiver §11 first proposed: that receiver would run on *every* delete in the
+    product, and a cascading domain delete would fire it thousands of times for a
+    handful of rows. Immediacy buys nothing here — click-to-open already degrades
+    safely on an orphan, marking the row read without navigating.
+    """
+    deleted = 0
+    for content_type_id in Notification.objects.values_list(
+        "content_type", flat=True
+    ).distinct():
+        content_type = ContentType.objects.get_for_id(content_type_id)
+        model = content_type.model_class()
+        targets = set(
+            Notification.objects.filter(content_type=content_type)
+            .values_list("object_id", flat=True)
+            .distinct()
+        )
+        if model is None:
+            # The model itself is gone (an app removed between releases).
+            stale = targets
+        else:
+            alive = set(
+                model.objects.filter(pk__in=targets).values_list("pk", flat=True)
+            )
+            stale = targets - alive
+        if stale:
+            count, _ = Notification.objects.filter(
+                content_type=content_type, object_id__in=stale
+            ).delete()
+            deleted += count
+    return deleted
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="3", minute="30"))
+def notification_housekeeping():
+    """Retention, cap and orphans in one nightly pass.
+
+    One schedule entry rather than three: they are the same job, they touch the same
+    table, and running them together keeps the write contention in one window. Each
+    step is a plain function so it can be tested without Huey.
+    """
+    try:
+        expired = prune_read_notifications()
+        capped = enforce_per_recipient_cap()
+        orphaned = prune_orphaned_notifications()
+    except Exception:
+        logger.error("Notification housekeeping failed", exc_info=True)
+        return
+
+    if expired or capped or orphaned:
+        logger.info(
+            "Notification housekeeping",
+            expired=expired,
+            over_cap=capped,
+            orphaned=orphaned,
+            retention_days=RETENTION_DAYS,
+        )

@@ -87,12 +87,26 @@ def test_an_unknown_type_writes_nothing(user, control):
     assert rows().count() == 0
 
 
-def test_a_target_without_a_folder_is_refused(user):
-    """FolderMixin defaults to the root folder rather than raising, so a missing
-    folder would silently expose the row to every root-level role."""
+def test_the_folder_follows_the_target(user, control, folder):
+    """The folder is derived, never stored: moving the target moves the notification
+    with it, which is the whole reason the column went away."""
+    notify("expired_controls", [user], control, {"control_name": control.name})
+    assert rows(user).get().folder == folder
+
+    moved = Folder.objects.create(
+        name="Elsewhere", content_type=Folder.ContentType.DOMAIN
+    )
+    control.folder = moved
+    control.save()
+    assert rows(user).get().folder == moved
+
+
+def test_a_target_without_a_folder_still_notifies(user):
+    """Nothing gates on the folder, so a folderless target is no longer a refusal —
+    it simply has no domain to report."""
     orphan = ContentType.objects.get_for_model(ContentType)
-    assert notify("expired_controls", [user], orphan, {"control_name": "x"}) == []
-    assert rows().count() == 0
+    assert len(notify("expired_controls", [user], orphan, {"control_name": "x"})) == 1
+    assert rows(user).get().folder is None
 
 
 def test_a_missing_context_variable_still_writes_a_row(user, control):
@@ -142,3 +156,65 @@ def test_clear_stale_is_scoped_to_its_own_type(user, control):
     notify("applied_control_assignment", [user], control, {"control_name": "x"})
     clear_stale("expired_controls", set())
     assert [n.type for n in rows(user)] == ["applied_control_assignment"]
+
+
+def test_the_feature_flag_stops_rows_being_written(user, control, monkeypatch):
+    """Off means nothing is written, not written-and-hidden: filtering on read would
+    accumulate invisible rows and hand the GC a backlog for an unused feature."""
+    import notifications.service as service
+
+    monkeypatch.setattr(service, "ff_is_enabled", lambda flag: False)
+    assert notify("expired_controls", [user], control, {"control_name": "x"}) == []
+    assert rows().count() == 0
+
+    monkeypatch.setattr(service, "ff_is_enabled", lambda flag: True)
+    assert len(notify("expired_controls", [user], control, {"control_name": "x"})) == 1
+
+
+# --- read_at ---------------------------------------------------------------------------
+
+
+def test_read_at_is_stamped_on_the_transition_only(user, control):
+    """ "When did I read this" must not move every time the row is touched."""
+    notify("expired_controls", [user], control, {"control_name": "x"})
+    row = rows(user).get()
+    assert row.read_at is None
+
+    Notification.set_read(rows(user), True)
+    first = rows(user).get().read_at
+    assert first is not None
+
+    # Marking an already-read row read again leaves the original stamp alone.
+    Notification.set_read(rows(user), True)
+    assert rows(user).get().read_at == first
+
+
+def test_marking_unread_clears_read_at(user, control):
+    notify("expired_controls", [user], control, {"control_name": "x"})
+    Notification.set_read(rows(user), True)
+    assert rows(user).get().read_at is not None
+
+    Notification.set_read(rows(user), False)
+    row = rows(user).get()
+    assert row.is_read is False and row.read_at is None
+
+
+def test_an_event_refire_clears_read_at_with_the_unread_flip(user, control):
+    """The row is asking again, so the old read time no longer describes it."""
+    notify("applied_control_assignment", [user], control, {"control_name": "x"})
+    Notification.set_read(rows(user), True)
+    assert rows(user).get().read_at is not None
+
+    notify("applied_control_assignment", [user], control, {"control_name": "x"})
+    row = rows(user).get()
+    assert row.is_read is False and row.read_at is None
+
+
+def test_a_condition_refire_leaves_a_read_row_and_its_stamp_alone(user, control):
+    notify("expired_controls", [user], control, {"control_name": "x"})
+    Notification.set_read(rows(user), True)
+    stamp = rows(user).get().read_at
+
+    notify("expired_controls", [user], control, {"control_name": "x"})
+    row = rows(user).get()
+    assert row.is_read is True and row.read_at == stamp

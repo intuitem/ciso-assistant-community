@@ -39,6 +39,62 @@ logger = structlog.getLogger(__name__)
 EXPIRY_NOTICE_DAYS = (30, 7, 1)
 
 
+def _sweep_deadline(
+    notification_type: str,
+    objects,
+    *,
+    due_date,
+    recipients,
+    context,
+    send,
+    skip=None,
+) -> None:
+    """One sweep per deadline type, replacing the in_month / in_week / tomorrow trio.
+
+    Email keeps exactly the escalation it has always had -- one digest per recipient
+    on the day an object is 30, 7 or 1 days out -- while the inbox tracks the
+    condition *continuously*, because a row that appeared on day 30 and vanished on
+    day 29 would not be a condition at all.
+
+    The two therefore need different queries, which is why the three tasks had to
+    become one: only a sweep that sees the whole window can say which rows are stale,
+    and any one of the three would have cleared the other two's rows.
+
+    `objects` must already cover the whole window. `skip(obj, days_remaining)` drops
+    an object from both channels -- a task recurring weekly should not be announced a
+    month out, in either.
+    """
+    today = date.today()
+    still_true = set()
+    by_horizon = {days: defaultdict(list) for days in EXPIRY_NOTICE_DAYS}
+
+    for obj in objects:
+        due = due_date(obj)
+        if due is None:
+            continue
+        days_remaining = (due - today).days
+        if skip and skip(obj, days_remaining):
+            continue
+        emails = recipients(obj)
+        if not emails:
+            continue
+
+        for row in notify(notification_type, emails, obj, context(obj, days_remaining)):
+            still_true.add((row.recipient_id, row.object_id))
+
+        if days_remaining in by_horizon:
+            for email in emails:
+                by_horizon[days_remaining][email].append(obj)
+
+    clear_stale(notification_type, still_true)
+
+    for days, per_recipient in by_horizon.items():
+        for email, batch in per_recipient.items():
+            # Keyword, as every one of these senders was called before: their
+            # signatures are (recipient, objects, days) and the tests read kwargs.
+            send(email, batch, days=days)
+
+
 def _actor_emails(actors) -> set:
     """Flatten actors to addresses. notify() resolves them back to Users for the
     in-app channel; an actor with no internal user simply gets email only."""
@@ -59,6 +115,15 @@ def check_controls_with_expired_eta():
         for owner in control.owner.all():
             for email in owner.get_emails():
                 owner_controls[email].append(control)
+    still_true = set()
+    for control in expired_controls:
+        recipients = _actor_emails(control.owner.all())
+        for row in notify(
+            "expired_controls", recipients, control, {"control_name": str(control)}
+        ):
+            still_true.add((row.recipient_id, row.object_id))
+    clear_stale("expired_controls", still_true)
+
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
         send_notification_email_expired_eta(owner_email, controls)
@@ -66,192 +131,71 @@ def check_controls_with_expired_eta():
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="5"))
-def check_compliance_assessments_due_in_month():
-    """Check for ComplianceAssessments due in 30 days"""
-    target_date = date.today() + timedelta(days=30)
-    assessments_due_soon = (
-        ComplianceAssessment.objects.filter(due_date=target_date)
-        .exclude(status__in=["done", "deprecated"])
-        .prefetch_related("authors")
-    )
-
-    author_assessments = defaultdict(list)
-    for assessment in assessments_due_soon:
-        for author in assessment.authors.all():
-            for email in author.get_emails():
-                author_assessments[email].append(assessment)
-
-    for author_email, assessments in author_assessments.items():
-        send_compliance_assessment_due_soon_notification(
-            author_email, assessments, days=30
+def check_compliance_assessments_due_soon():
+    """Audits approaching their due date. Replaces the in_month/in_week/tomorrow trio."""
+    today = date.today()
+    _sweep_deadline(
+        "compliance_assessment_due_soon",
+        ComplianceAssessment.objects.filter(
+            due_date__gt=today,
+            due_date__lte=today + timedelta(days=EXPIRY_NOTICE_DAYS[0]),
         )
-
-
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="6", minute="10"))
-def check_compliance_assessments_due_in_week():
-    """Check for ComplianceAssessments due in 7 days"""
-    target_date = date.today() + timedelta(days=7)
-    assessments_due_soon = (
-        ComplianceAssessment.objects.filter(due_date=target_date)
         .exclude(status__in=["done", "deprecated"])
-        .prefetch_related("authors")
+        .prefetch_related("authors"),
+        due_date=lambda assessment: assessment.due_date,
+        recipients=lambda assessment: _actor_emails(assessment.authors.all()),
+        context=lambda assessment, days: {
+            "assessment_name": str(assessment),
+            "days_remaining": days,
+        },
+        send=send_compliance_assessment_due_soon_notification,
     )
-
-    # Group by individual author
-    author_assessments = defaultdict(list)
-    for assessment in assessments_due_soon:
-        for author in assessment.authors.all():
-            for email in author.get_emails():
-                author_assessments[email].append(assessment)
-
-    # Send personalized email to each author
-    for author_email, assessments in author_assessments.items():
-        send_compliance_assessment_due_soon_notification(
-            author_email, assessments, days=7
-        )
-
-
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="6", minute="15"))
-def check_compliance_assessments_due_tomorrow():
-    """Check for ComplianceAssessments due in 1 day"""
-    target_date = date.today() + timedelta(days=1)
-    assessments_due_tomorrow = (
-        ComplianceAssessment.objects.filter(due_date=target_date)
-        .exclude(status__in=["done", "deprecated"])
-        .prefetch_related("authors")
-    )
-
-    # Group by individual author
-    author_assessments = defaultdict(list)
-    for assessment in assessments_due_tomorrow:
-        for author in assessment.authors.all():
-            for email in author.get_emails():
-                author_assessments[email].append(assessment)
-
-    # Send personalized email to each author
-    for author_email, assessments in author_assessments.items():
-        send_compliance_assessment_due_soon_notification(
-            author_email, assessments, days=1
-        )
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="17"))
-def check_applied_controls_expiring_in_month():
-    """Check for AppliedControls expiring in 30 days"""
-    target_date = date.today() + timedelta(days=30)
-    controls_expiring_soon = (
-        AppliedControl.objects.filter(expiry_date=target_date)
+def check_applied_controls_expiring_soon():
+    """Controls approaching expiry. Replaces the in_month / in_week / tomorrow trio."""
+    today = date.today()
+    _sweep_deadline(
+        "applied_control_expiring_soon",
+        AppliedControl.objects.filter(
+            expiry_date__gt=today,
+            expiry_date__lte=today + timedelta(days=EXPIRY_NOTICE_DAYS[0]),
+        )
         .exclude(status__in=["deprecated"])
-        .prefetch_related("owner")
+        .prefetch_related("owner"),
+        due_date=lambda control: control.expiry_date,
+        recipients=lambda control: _actor_emails(control.owner.all()),
+        context=lambda control, days: {
+            "control_name": str(control),
+            "days_remaining": days,
+        },
+        send=send_applied_control_expiring_soon_notification,
     )
-
-    owner_controls = defaultdict(list)
-    for control in controls_expiring_soon:
-        for owner in control.owner.all():
-            for email in owner.get_emails():
-                owner_controls[email].append(control)
-
-    for owner_email, controls in owner_controls.items():
-        send_applied_control_expiring_soon_notification(owner_email, controls, days=30)
-
-
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="6", minute="20"))
-def check_applied_controls_expiring_in_week():
-    """Check for AppliedControls due in 7 days"""
-    target_date = date.today() + timedelta(days=7)
-    controls_due_soon = (
-        AppliedControl.objects.filter(expiry_date=target_date)
-        .exclude(status__in=["deprecated"])
-        .prefetch_related("owner")
-    )
-
-    # Group by individual owner
-    owner_controls = defaultdict(list)
-    for control in controls_due_soon:
-        for owner in control.owner.all():
-            for email in owner.get_emails():
-                owner_controls[email].append(control)
-
-    # Send personalized email to each owner
-    for owner_email, controls in owner_controls.items():
-        send_applied_control_expiring_soon_notification(owner_email, controls, days=7)
-
-
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="6", minute="25"))
-def check_applied_controls_expiring_tomorrow():
-    """Check for AppliedControls due in 1 day"""
-    target_date = date.today() + timedelta(days=1)
-    controls_due_tomorrow = (
-        AppliedControl.objects.filter(expiry_date=target_date)
-        .exclude(status__in=["deprecated"])
-        .prefetch_related("owner")
-    )
-
-    # Group by individual owner
-    owner_controls = defaultdict(list)
-    for control in controls_due_tomorrow:
-        for owner in control.owner.all():
-            for email in owner.get_emails():
-                owner_controls[email].append(control)
-
-    # Send personalized email to each owner
-    for owner_email, controls in owner_controls.items():
-        send_applied_control_expiring_soon_notification(owner_email, controls, days=1)
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="27"))
 def check_evidences_expiring_soon():
-    """Evidences approaching expiry.
-
-    Replaces the in_month / in_week / tomorrow trio. Email keeps exactly the
-    escalation it has always had -- one digest per recipient on the day an evidence
-    is 30, 7 or 1 days out -- while the inbox tracks the condition *continuously*,
-    because a row that appeared on day 30 and vanished on day 29 would not be a
-    condition at all. The two need different queries, which is why the three tasks
-    had to become one: only a task that sees the whole window can say which rows are
-    stale, and any one of the three would have cleared the other two's.
-    """
+    """Evidences approaching expiry. Replaces the in_month / in_week / tomorrow trio."""
     today = date.today()
-    expiring = (
+    _sweep_deadline(
+        "evidence_expiring_soon",
         Evidence.objects.filter(
             expiry_date__gt=today,
             expiry_date__lte=today + timedelta(days=EXPIRY_NOTICE_DAYS[0]),
         )
         .exclude(status__in=["expired"])
-        .prefetch_related("owner")
+        .prefetch_related("owner"),
+        due_date=lambda evidence: evidence.expiry_date,
+        recipients=lambda evidence: _actor_emails(evidence.owner.all()),
+        context=lambda evidence, days: {
+            "evidence_name": str(evidence),
+            "days_remaining": days,
+        },
+        send=send_evidence_expiring_soon_notification,
     )
-
-    still_true = set()
-    by_horizon = {days: defaultdict(list) for days in EXPIRY_NOTICE_DAYS}
-
-    for evidence in expiring:
-        days_remaining = (evidence.expiry_date - today).days
-        recipients = {
-            email for owner in evidence.owner.all() for email in owner.get_emails()
-        }
-        for row in notify(
-            "evidence_expiring_soon",
-            recipients,
-            evidence,
-            {"evidence_name": str(evidence), "days_remaining": days_remaining},
-        ):
-            still_true.add((row.recipient_id, row.object_id))
-
-        if days_remaining in by_horizon:
-            for email in recipients:
-                by_horizon[days_remaining][email].append(evidence)
-
-    clear_stale("evidence_expiring_soon", still_true)
-
-    for days, owner_evidences in by_horizon.items():
-        for owner_email, evidences in owner_evidences.items():
-            send_evidence_expiring_soon_notification(owner_email, evidences, days=days)
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
@@ -319,59 +263,25 @@ def _group_security_exceptions_by_owner(security_exceptions):
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="7", minute="15"))
-def check_security_exceptions_expiring_in_month():
-    """Check for SecurityExceptions expiring in 30 days"""
-    target_date = date.today() + timedelta(days=30)
-    exceptions_expiring_soon = (
-        SecurityException.objects.filter(expiration_date=target_date)
-        .exclude(status__in=SECURITY_EXCEPTION_TERMINAL_STATUSES)
-        .prefetch_related("owners")
-    )
-
-    for owner_email, exceptions in _group_security_exceptions_by_owner(
-        exceptions_expiring_soon
-    ).items():
-        send_security_exception_expiring_soon_notification(
-            owner_email, exceptions, days=30
+def check_security_exceptions_expiring_soon():
+    """Exceptions approaching expiry. Replaces the in_month/in_week/tomorrow trio."""
+    today = date.today()
+    _sweep_deadline(
+        "security_exception_expiring_soon",
+        SecurityException.objects.filter(
+            expiration_date__gt=today,
+            expiration_date__lte=today + timedelta(days=EXPIRY_NOTICE_DAYS[0]),
         )
-
-
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="7", minute="20"))
-def check_security_exceptions_expiring_in_week():
-    """Check for SecurityExceptions expiring in 7 days"""
-    target_date = date.today() + timedelta(days=7)
-    exceptions_expiring_soon = (
-        SecurityException.objects.filter(expiration_date=target_date)
         .exclude(status__in=SECURITY_EXCEPTION_TERMINAL_STATUSES)
-        .prefetch_related("owners")
+        .prefetch_related("owners"),
+        due_date=lambda exception: exception.expiration_date,
+        recipients=lambda exception: _actor_emails(exception.owners.all()),
+        context=lambda exception, days: {
+            "exception_name": str(exception),
+            "days_remaining": days,
+        },
+        send=send_security_exception_expiring_soon_notification,
     )
-
-    for owner_email, exceptions in _group_security_exceptions_by_owner(
-        exceptions_expiring_soon
-    ).items():
-        send_security_exception_expiring_soon_notification(
-            owner_email, exceptions, days=7
-        )
-
-
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="7", minute="25"))
-def check_security_exceptions_expiring_tomorrow():
-    """Check for SecurityExceptions expiring in 1 day"""
-    target_date = date.today() + timedelta(days=1)
-    exceptions_expiring_tomorrow = (
-        SecurityException.objects.filter(expiration_date=target_date)
-        .exclude(status__in=SECURITY_EXCEPTION_TERMINAL_STATUSES)
-        .prefetch_related("owners")
-    )
-
-    for owner_email, exceptions in _group_security_exceptions_by_owner(
-        exceptions_expiring_tomorrow
-    ).items():
-        send_security_exception_expiring_soon_notification(
-            owner_email, exceptions, days=1
-        )
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
@@ -383,6 +293,18 @@ def check_security_exceptions_expired():
         .exclude(status__in=SECURITY_EXCEPTION_TERMINAL_STATUSES)
         .prefetch_related("owners")
     )
+
+    still_true = set()
+    for exception in expired_exceptions:
+        recipients = _actor_emails(exception.owners.all())
+        for row in notify(
+            "expired_security_exceptions",
+            recipients,
+            exception,
+            {"exception_name": str(exception)},
+        ):
+            still_true.add((row.recipient_id, row.object_id))
+    clear_stale("expired_security_exceptions", still_true)
 
     for owner_email, exceptions in _group_security_exceptions_by_owner(
         expired_exceptions
@@ -396,69 +318,26 @@ def check_security_exceptions_expired():
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="37"))
-def check_validation_flows_deadline_in_month():
-    """Check for ValidationFlows with deadline in 30 days (only submitted status)"""
-    target_date = date.today() + timedelta(days=30)
-    validations_due_soon = ValidationFlow.objects.filter(
-        validation_deadline=target_date, status=ValidationFlow.Status.SUBMITTED
+def check_validation_flows_deadline_soon():
+    """Validations approaching their deadline. Replaces the in_month/in_week/tomorrow trio."""
+    today = date.today()
+    _sweep_deadline(
+        "validation_deadline",
+        ValidationFlow.objects.filter(
+            validation_deadline__gt=today,
+            validation_deadline__lte=today + timedelta(days=EXPIRY_NOTICE_DAYS[0]),
+            status=ValidationFlow.Status.SUBMITTED,
+        ).select_related("approver"),
+        due_date=lambda flow: flow.validation_deadline,
+        recipients=lambda flow: (
+            {flow.approver.email} if flow.approver and flow.approver.email else set()
+        ),
+        context=lambda flow, days: {
+            "validation_ref_id": flow.ref_id,
+            "days": days,
+        },
+        send=send_validation_deadline_notification,
     )
-
-    approver_validations = {}
-    for validation in validations_due_soon:
-        if validation.approver and validation.approver.email:
-            approver_email = validation.approver.email
-            if approver_email not in approver_validations:
-                approver_validations[approver_email] = []
-            approver_validations[approver_email].append(validation)
-
-    for approver_email, validations in approver_validations.items():
-        send_validation_deadline_notification(approver_email, validations, days=30)
-
-
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="6", minute="40"))
-def check_validation_flows_deadline_in_week():
-    """Check for ValidationFlows with deadline in 7 days (only submitted status)"""
-    target_date = date.today() + timedelta(days=7)
-    validations_due_soon = ValidationFlow.objects.filter(
-        validation_deadline=target_date, status=ValidationFlow.Status.SUBMITTED
-    )
-
-    # Group by individual approver
-    approver_validations = {}
-    for validation in validations_due_soon:
-        if validation.approver and validation.approver.email:
-            approver_email = validation.approver.email
-            if approver_email not in approver_validations:
-                approver_validations[approver_email] = []
-            approver_validations[approver_email].append(validation)
-
-    # Send personalized email to each approver
-    for approver_email, validations in approver_validations.items():
-        send_validation_deadline_notification(approver_email, validations, days=7)
-
-
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="6", minute="45"))
-def check_validation_flows_deadline_tomorrow():
-    """Check for ValidationFlows with deadline in 1 day (only submitted status)"""
-    target_date = date.today() + timedelta(days=1)
-    validations_due_tomorrow = ValidationFlow.objects.filter(
-        validation_deadline=target_date, status=ValidationFlow.Status.SUBMITTED
-    )
-
-    # Group by individual approver
-    approver_validations = {}
-    for validation in validations_due_tomorrow:
-        if validation.approver and validation.approver.email:
-            approver_email = validation.approver.email
-            if approver_email not in approver_validations:
-                approver_validations[approver_email] = []
-            approver_validations[approver_email].append(validation)
-
-    # Send personalized email to each approver
-    for approver_email, validations in approver_validations.items():
-        send_validation_deadline_notification(approver_email, validations, days=1)
 
 
 def _get_task_recurrence_interval_days(task_template):
@@ -474,81 +353,34 @@ def _get_task_recurrence_interval_days(task_template):
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="55"))
-def check_task_nodes_due_in_month():
-    """Check for TaskNodes due in 30 days. Skip if the recurrence interval is < 30 days."""
-    target_date = date.today() + timedelta(days=30)
-    nodes_due_soon = (
+def check_task_nodes_due_soon():
+    """Tasks approaching their due date. Replaces the in_month/in_week/tomorrow trio.
+
+    A task that recurs more often than the horizon is not announced that far out --
+    a weekly task has no business appearing a month ahead, in either channel.
+    """
+    today = date.today()
+
+    def recurs_sooner_than(node, days_remaining):
+        interval = _get_task_recurrence_interval_days(node.task_template)
+        return interval is not None and interval < days_remaining
+
+    _sweep_deadline(
+        "task_node_due_soon",
         TaskNode.objects.filter(
-            due_date=target_date, status__in=["pending", "in_progress"]
+            due_date__gt=today,
+            due_date__lte=today + timedelta(days=EXPIRY_NOTICE_DAYS[0]),
+            status__in=["pending", "in_progress"],
         )
         .select_related("task_template")
         .filter(task_template__enabled=True)
-        .prefetch_related("task_template__assigned_to")
+        .prefetch_related("task_template__assigned_to"),
+        due_date=lambda node: node.due_date,
+        recipients=lambda node: _actor_emails(node.task_template.assigned_to.all()),
+        context=lambda node, days: {"task_name": str(node), "days_remaining": days},
+        send=send_task_node_due_soon_notification,
+        skip=recurs_sooner_than,
     )
-
-    actor_nodes = defaultdict(list)
-    for node in nodes_due_soon:
-        interval_days = _get_task_recurrence_interval_days(node.task_template)
-        if interval_days is not None and interval_days < 30:
-            continue
-        for actor in node.task_template.assigned_to.all():
-            for email in actor.get_emails():
-                actor_nodes[email].append(node)
-
-    for email, nodes in actor_nodes.items():
-        send_task_node_due_soon_notification(email, nodes, days=30)
-
-
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="7", minute="0"))
-def check_task_nodes_due_in_week():
-    """Check for TaskNodes due in 7 days. Skip if the recurrence interval is < 7 days."""
-    target_date = date.today() + timedelta(days=7)
-    nodes_due_soon = (
-        TaskNode.objects.filter(
-            due_date=target_date, status__in=["pending", "in_progress"]
-        )
-        .select_related("task_template")
-        .filter(task_template__enabled=True)
-        .prefetch_related("task_template__assigned_to")
-    )
-
-    # Group by actor email, skipping high-frequency recurrent tasks
-    actor_nodes = defaultdict(list)
-    for node in nodes_due_soon:
-        interval_days = _get_task_recurrence_interval_days(node.task_template)
-        if interval_days is not None and interval_days < 7:
-            continue
-        for actor in node.task_template.assigned_to.all():
-            for email in actor.get_emails():
-                actor_nodes[email].append(node)
-
-    for email, nodes in actor_nodes.items():
-        send_task_node_due_soon_notification(email, nodes, days=7)
-
-
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="7", minute="5"))
-def check_task_nodes_due_tomorrow():
-    """Check for TaskNodes due in 1 day."""
-    target_date = date.today() + timedelta(days=1)
-    nodes_due_tomorrow = (
-        TaskNode.objects.filter(
-            due_date=target_date, status__in=["pending", "in_progress"]
-        )
-        .select_related("task_template")
-        .filter(task_template__enabled=True)
-        .prefetch_related("task_template__assigned_to")
-    )
-
-    actor_nodes = defaultdict(list)
-    for node in nodes_due_tomorrow:
-        for actor in node.task_template.assigned_to.all():
-            for email in actor.get_emails():
-                actor_nodes[email].append(node)
-
-    for email, nodes in actor_nodes.items():
-        send_task_node_due_soon_notification(email, nodes, days=1)
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
@@ -567,6 +399,15 @@ def check_task_nodes_overdue():
         for actor in node.task_template.assigned_to.all():
             for email in actor.get_emails():
                 actor_nodes[email].append(node)
+
+    still_true = set()
+    for node in overdue_nodes:
+        recipients = _actor_emails(node.task_template.assigned_to.all())
+        for row in notify(
+            "task_node_overdue", recipients, node, {"task_name": str(node)}
+        ):
+            still_true.add((row.recipient_id, row.object_id))
+    clear_stale("task_node_overdue", still_true)
 
     for email, nodes in actor_nodes.items():
         send_task_node_overdue_notification(email, nodes)

@@ -20,9 +20,7 @@
 	let failed = $state(false);
 
 	const label = $derived(count > MAX_DISPLAYED ? `${MAX_DISPLAYED}+` : String(count));
-	const title = $derived(
-		count > 0 ? m.unreadNotifications({ count }) : m.noUnreadNotifications()
-	);
+	const title = $derived(count > 0 ? m.unreadNotifications({ count }) : m.noUnreadNotifications());
 
 	async function refresh() {
 		try {
@@ -63,7 +61,7 @@
 	class="relative flex items-center justify-center w-9 h-9 rounded-lg text-surface-600-400
 	hover:bg-surface-200-800 hover:text-surface-900-100 transition-colors duration-150"
 	aria-label={title}
-	title={title}
+	{title}
 	data-testid="notification-bell"
 >
 	<i class="fa-regular fa-bell text-lg" class:text-surface-400-600={failed}></i>

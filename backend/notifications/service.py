@@ -2,7 +2,8 @@ import structlog
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 
-from iam.models import Folder, User
+from global_settings.utils import ff_is_enabled
+from iam.models import User
 from notifications.models import Notification
 from notifications.registry import NOTIFICATION_REGISTRY
 
@@ -16,8 +17,12 @@ def in_app_enabled(notification_type: str) -> bool:
     narrow them, never widen them. The narrowing layer is enterprise-only and not
     built yet, so today this is the registry alone.
     """
-    entry = NOTIFICATION_REGISTRY.get(notification_type)
-    return bool(entry) and "in_app" in entry["channels"]
+    if not ff_is_enabled("notification_centre"):
+        return False
+    # The registry is the ceiling; the admin matrix may narrow it (§7).
+    from notifications.channels import in_app_allowed
+
+    return in_app_allowed(notification_type)
 
 
 def _as_users(recipients) -> list[User]:
@@ -62,17 +67,6 @@ def notify(
     if not in_app_enabled(notification_type):
         return []
 
-    folder = Folder.get_folder(target)
-    if folder is None:
-        # FolderMixin defaults to the root folder rather than raising, which would
-        # quietly expose the row to every root-level role. Refuse instead.
-        logger.error(
-            "Notification target has no folder, skipping",
-            type=notification_type,
-            target=repr(target),
-        )
-        return []
-
     content_type = ContentType.objects.get_for_model(target)
     bump_unread = entry["mode"] == "event"
     written = []
@@ -87,9 +81,11 @@ def notify(
     }
 
     for user in _as_users(recipients):
-        defaults = {"context": declared, "folder": folder}
+        defaults = {"context": declared}
         if bump_unread:
+            # Unread again, so the previous read time no longer describes this row.
             defaults["is_read"] = False
+            defaults["read_at"] = None
         row, _ = Notification.objects.update_or_create(
             recipient=user,
             type=notification_type,

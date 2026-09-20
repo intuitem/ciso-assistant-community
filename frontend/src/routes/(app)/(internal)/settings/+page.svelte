@@ -5,6 +5,7 @@
 	import GeneralSettings from '$lib/components/Settings/GeneralSettings.svelte';
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
+	import NotificationChannelsSettings from '$lib/components/Settings/NotificationChannelsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
 	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
 	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
@@ -28,6 +29,11 @@
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
 		>
+		{#if page.data?.featureflags?.notification_centre}
+			<Tabs.Trigger value="notificationChannels"
+				><i class="fa-solid fa-bell"></i> {m.notifications()}</Tabs.Trigger
+			>
+		{/if}
 		<Tabs.Trigger value="vulnerabilitySla"
 			><i class="fa-solid fa-bug"></i> {m.vulnerabilitySlaPolicy()}</Tabs.Trigger
 		>
@@ -68,6 +74,9 @@
 	</Tabs.Content>
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="notificationChannels">
+		<NotificationChannelsSettings />
 	</Tabs.Content>
 	<Tabs.Content value="vulnerabilitySla">
 		<VulnerabilitySlaSettings {data} />

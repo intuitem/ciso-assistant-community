@@ -1,4 +1,5 @@
 type SidebarBackendKeys = {
+	notification_centre: boolean;
 	xrays: boolean;
 	incidents: boolean;
 	tasks: boolean;
@@ -49,6 +50,7 @@ type SidebarBackendKeys = {
 };
 
 type SidebarFrontendKeys = {
+	notifications: boolean;
 	xRays: boolean;
 	incidents: boolean;
 	tasks: boolean;
@@ -101,6 +103,10 @@ export function getSidebarVisibleItems(
 	featureFlags: Partial<SidebarBackendKeys> | undefined
 ): SidebarFrontendKeys {
 	return {
+		// Default true: unlike the others this is not a module you opt into, it is the
+		// notification channel that works out of the box (notifications_enable_mailing
+		// defaults off, so email alone leaves most installs silent).
+		notifications: featureFlags?.notification_centre ?? true,
 		xRays: featureFlags?.xrays ?? false,
 		incidents: featureFlags?.incidents ?? false,
 		tasks: featureFlags?.tasks ?? false,

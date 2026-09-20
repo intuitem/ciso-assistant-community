@@ -115,3 +115,97 @@ def test_one_row_per_object_not_one_per_sweep(folder, owner):
         with patch("core.tasks.send_evidence_expiring_soon_notification"):
             check_evidences_expiring_soon.call_local()
     assert _rows().count() == 1, "five nights, one row -- the whole point of the upsert"
+
+
+# --- the consolidated deadline sweeps -------------------------------------------------
+# Each replaced an in_month / in_week / tomorrow trio. The invariant is the same for all:
+# email fires on exactly the old days, the inbox tracks the whole window.
+
+
+@pytest.fixture
+def control(folder):
+    from core.models import AppliedControl
+
+    return AppliedControl.objects.create(name="Encrypt backups", folder=folder)
+
+
+def _assign(obj, owner, field="owner"):
+    getattr(obj, field).set([owner.actor])
+    return obj
+
+
+@pytest.mark.parametrize(
+    "days_out,fires",
+    [(30, True), (7, True), (1, True), (29, False), (12, False), (2, False)],
+)
+def test_control_expiry_email_fires_only_on_the_old_days(
+    folder, owner, control, days_out, fires
+):
+    from core.tasks import check_applied_controls_expiring_soon
+
+    control.expiry_date = date.today() + timedelta(days=days_out)
+    control.save()
+    _assign(control, owner)
+    with patch("core.tasks.send_applied_control_expiring_soon_notification") as send:
+        check_applied_controls_expiring_soon.call_local()
+    assert (send.call_count == 1) is fires
+    if fires:
+        assert send.call_args.kwargs["days"] == days_out
+
+
+@pytest.mark.parametrize("days_out", [30, 29, 12, 7, 2, 1])
+def test_control_expiry_row_persists_across_the_window(
+    folder, owner, control, days_out
+):
+    from core.tasks import check_applied_controls_expiring_soon
+
+    control.expiry_date = date.today() + timedelta(days=days_out)
+    control.save()
+    _assign(control, owner)
+    with patch("core.tasks.send_applied_control_expiring_soon_notification"):
+        check_applied_controls_expiring_soon.call_local()
+    row = Notification.objects.get(type="applied_control_expiring_soon")
+    assert row.context["days_remaining"] == str(days_out)
+
+
+def test_control_expiry_row_clears_when_pushed_out_of_the_window(
+    folder, owner, control
+):
+    from core.tasks import check_applied_controls_expiring_soon
+
+    control.expiry_date = date.today() + timedelta(days=10)
+    control.save()
+    _assign(control, owner)
+    with patch("core.tasks.send_applied_control_expiring_soon_notification"):
+        check_applied_controls_expiring_soon.call_local()
+    assert (
+        Notification.objects.filter(type="applied_control_expiring_soon").count() == 1
+    )
+
+    control.expiry_date = date.today() + timedelta(days=365)
+    control.save()
+    with patch("core.tasks.send_applied_control_expiring_soon_notification"):
+        check_applied_controls_expiring_soon.call_local()
+    assert (
+        Notification.objects.filter(type="applied_control_expiring_soon").count() == 0
+    )
+
+
+def test_expired_controls_single_sweep_writes_and_clears(folder, owner, control):
+    from core.tasks import check_controls_with_expired_eta
+
+    control.eta = date.today() - timedelta(days=3)
+    control.status = "to_do"
+    control.save()
+    _assign(control, owner)
+    with patch("core.tasks.send_notification_email_expired_eta"):
+        check_controls_with_expired_eta.call_local()
+    assert Notification.objects.filter(type="expired_controls").count() == 1
+
+    control.status = "active"
+    control.save()
+    with patch("core.tasks.send_notification_email_expired_eta"):
+        check_controls_with_expired_eta.call_local()
+    assert Notification.objects.filter(type="expired_controls").count() == 0, (
+        "marking the control active is what the reminder said would stop it"
+    )

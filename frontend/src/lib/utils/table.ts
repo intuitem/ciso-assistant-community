@@ -994,6 +994,11 @@ export const NOTIFICATION_CATEGORY_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'category',
 		optionsEndpoint: 'notifications/category',
+		// The proxy hands back {label, value}; AutocompleteSelect looks for `name` by
+		// default, so without these the list renders blank entries.
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
 		multiple: false
 	}
 };
@@ -3030,10 +3035,19 @@ export const listViewFields = {
 		hasDescription: false,
 		rowEmphasis: { field: 'is_read', equals: false },
 		rowNavigation: { modelField: 'target_model', idField: 'object_id', markField: 'is_read' },
+		// `folder` is an optional column and a filter, but NOT sortable: it is derived
+		// from the target, and a GenericForeignKey cannot be joined or ordered by.
+		// `read_at` is a real column, so it sorts and filters normally.
+		optionalFields: {
+			head: ['domain', 'readAt'],
+			body: ['folder', 'read_at']
+		},
 		filters: {
 			is_read: NOTIFICATION_READ_FILTER,
 			category: NOTIFICATION_CATEGORY_FILTER,
-			created_at: CREATED_AT_FILTER
+			folder: DOMAIN_FILTER,
+			created_at: CREATED_AT_FILTER,
+			read_at: dateFilter('read_at', { isDateTime: true })
 		}
 	},
 	'security-exceptions': {
