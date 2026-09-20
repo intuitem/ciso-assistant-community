@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { getModelInfo } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { applyUnreadCount } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { ContextMenu } from 'bits-ui';
@@ -51,6 +52,7 @@
 				body: JSON.stringify({ [field]: !current })
 			});
 			if (!res.ok) throw new Error(String(res.status));
+			applyUnreadCount(await res.json());
 			flash.set({
 				type: 'success',
 				message: m.successfullyUpdatedObject({ object: objectLabel })

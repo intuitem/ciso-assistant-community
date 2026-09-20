@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
+	import { unreadNotificationCount } from '$lib/utils/stores';
 	import { onMount } from 'svelte';
 
 	/**
@@ -16,7 +17,9 @@
 	// badge also has to stay a badge rather than grow into the toolbar.
 	const MAX_DISPLAYED = 99;
 
-	let count = $state(0);
+	// The count lives in a store so a mutation elsewhere can set it without a round
+	// trip; polling below is the safety net for changes this tab did not make.
+	const count = $derived($unreadNotificationCount);
 	let failed = $state(false);
 
 	const label = $derived(count > MAX_DISPLAYED ? `${MAX_DISPLAYED}+` : String(count));
@@ -27,7 +30,7 @@
 			const res = await fetch('/fe-api/notifications/unread-count');
 			if (!res.ok) throw new Error(String(res.status));
 			const data = await res.json();
-			count = Number(data?.count ?? 0);
+			unreadNotificationCount.set(Number(data?.count ?? 0));
 			failed = false;
 		} catch (error) {
 			// A failed poll must never break the app bar; keep the last known count.

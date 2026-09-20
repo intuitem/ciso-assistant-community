@@ -40,6 +40,7 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount, tick, untrack } from 'svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import { applyUnreadCount } from '$lib/utils/stores';
 
 	// Types
 	import { browser } from '$app/environment';
@@ -335,7 +336,10 @@
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ [nav.markField]: true })
-			}).catch((error) => console.error(`Could not mark ${nav.markField}:`, error));
+			})
+				.then((res) => (res.ok ? res.json() : null))
+				.then(applyUnreadCount)
+				.catch((error) => console.error(`Could not mark ${nav.markField}:`, error));
 		}
 
 		const targetModel = urlModelForDjangoName(rowMetaData[nav.modelField]);

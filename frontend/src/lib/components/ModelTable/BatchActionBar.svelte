@@ -10,6 +10,7 @@
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
 	import BatchActionModal from '$lib/components/Modals/BatchActionModal.svelte';
+	import { applyUnreadCount } from '$lib/utils/stores';
 	import MergeAppliedControlsModal from '$lib/components/Modals/MergeAppliedControlsModal.svelte';
 	import type { BatchActionConfig, TableBatchAction } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types';
@@ -156,6 +157,9 @@
 						}
 
 						const result = await res.json();
+						// Generic on purpose: any endpoint reporting an unread count updates
+						// the badge, so this stays model-agnostic.
+						applyUnreadCount(result);
 						const succeededCount = result.succeeded?.length ?? 0;
 						const failedCount = result.failed?.length ?? 0;
 

@@ -218,3 +218,53 @@ def test_a_condition_refire_leaves_a_read_row_and_its_stamp_alone(user, control)
     notify("expired_controls", [user], control, {"control_name": "x"})
     row = rows(user).get()
     assert row.is_read is True and row.read_at == stamp
+
+
+# --- the badge gets its count from the mutation, not a second request ------------------
+
+
+@pytest.mark.parametrize("path", ["detail", "batch"])
+def test_mutation_responses_report_the_new_unread_count(user, control, folder, path):
+    """Marking rows read inside the inbox never navigates, so the badge has no other
+    cue; the response carries the count rather than the client guessing."""
+    from rest_framework.test import APIClient
+
+    from core.models import AppliedControl
+
+    others = [
+        AppliedControl.objects.create(name=f"unread-{i}", folder=folder)
+        for i in range(3)
+    ]
+    for target in [control, *others]:
+        notify("expired_controls", [user], target, {"control_name": str(target)})
+    assert rows(user).filter(is_read=False).count() == 4
+
+    client = APIClient()
+    client.force_authenticate(user=user)
+    row = rows(user).first()
+
+    if path == "detail":
+        response = client.patch(
+            f"/api/notifications/{row.id}/",
+            {"is_read": True},
+            format="json",
+            HTTP_HOST="localhost",
+        )
+        expected = 3
+    else:
+        response = client.post(
+            "/api/notifications/batch-action/",
+            {
+                "action": "change_field",
+                "field": "is_read",
+                "value": "true",
+                "ids": [str(r.id) for r in rows(user)[:2]],
+            },
+            format="json",
+            HTTP_HOST="localhost",
+        )
+        expected = 2
+
+    assert response.status_code == 200
+    assert response.data["unread_count"] == expected
+    assert rows(user).filter(is_read=False).count() == expected

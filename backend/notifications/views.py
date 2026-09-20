@@ -105,9 +105,25 @@ class NotificationViewSet(BaseModelViewSet):
             }
         )
 
+    def _unread_count(self) -> int:
+        """Covered count on the (recipient, is_read, -created_at) index."""
+        return self.get_queryset().filter(is_read=False).count()
+
     @action(detail=False, name="Unread count")
     def unread_count(self, request):
-        return Response({"count": self.get_queryset().filter(is_read=False).count()})
+        return Response({"count": self._unread_count()})
+
+    def partial_update(self, request, *args, **kwargs):
+        """Answer with the new unread count.
+
+        Marking a row read from inside the inbox does not navigate, so the badge has
+        no other cue and would sit wrong until the next poll. Returning the count the
+        server already knows costs nothing and beats the client guessing.
+        """
+        response = super().partial_update(request, *args, **kwargs)
+        if response.status_code == status.HTTP_200_OK:
+            response.data["unread_count"] = self._unread_count()
+        return response
 
     @action(detail=False, methods=["post"], url_path="batch-action")
     def batch_action(self, request):
@@ -170,7 +186,14 @@ class NotificationViewSet(BaseModelViewSet):
             failed=len(failed),
             user=request.user.id,
         )
-        return Response({"succeeded": succeeded, "failed": failed})
+        return Response(
+            {
+                "succeeded": succeeded,
+                "failed": failed,
+                # Same reasoning as partial_update: the badge has no other cue here.
+                "unread_count": self._unread_count(),
+            }
+        )
 
 
 class NotificationChannelsView(APIView):
