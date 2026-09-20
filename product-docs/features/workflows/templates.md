@@ -26,6 +26,7 @@ Every template follows the same rules:
 | Non-compliant requirement, open and link a remediation control | Requirement assessment updated | Creates an applied control, links it to the requirement, notifies the owner. Never touches the result. |
 | Validation decided, route the outcome | Validation flow updated | Branches on the decision and sends a different email per outcome. The reference example for branches. |
 | Validation requested, notify the approver | Validation flow created | Emails the approver with the deadline. |
+| Audit, AI evidence challenge | Manual | Takes the requirements the audit calls compliant or partially compliant and asks the configured AI provider whether what is attached actually supports the claim, then files the answers as a Record document linking back to the audit. Results and scores are never touched — no workflow can write them. Twelve requirements per run, which keeps it inside the AI call budget. Needs the `chat_mode` flag and a provider. Set `audit_id`. |
 
 ## Risk
 
