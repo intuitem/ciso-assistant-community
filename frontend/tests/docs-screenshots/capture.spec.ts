@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
+import { annotate } from './annotate.js';
 import { shots } from './manifest.js';
 
 const ASSETS = path.resolve('../product-docs/.gitbook/assets');
@@ -33,6 +34,10 @@ test.describe('documentation screenshots', () => {
 			await page.addStyleTag({ content: FREEZE });
 			// Some detail routes nest a second <main>; the outer one is enough.
 			await expect(page.locator('main').first()).toBeVisible();
+
+			if (shot.annotate) {
+				await annotate(page, shot.annotate(page));
+			}
 
 			const target = shot.clip ? shot.clip(page) : page;
 			await target.screenshot({

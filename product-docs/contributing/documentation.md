@@ -59,9 +59,22 @@ Plain Markdown renders fine on GitHub too, so PRs are easy to review without the
 
 ## Adding screenshots
 
-1. Drop the image into `product-docs/.gitbook/assets/` using a descriptive filename (avoid the GitBook-generated `image (47).png` style if you can — they're fine if you can't).
-2. Reference it via `<figure><img src="../.gitbook/assets/your-image.png" alt=""><figcaption></figcaption></figure>` (the figure wrapper renders nicely in GitBook; the bare `![]()` syntax also works).
-3. Adjust the relative path depth (`../`, `../../`) based on where the Markdown file sits.
+Screenshots are **generated from a running instance**, not captured by hand. The
+harness lives in `frontend/tests/docs-screenshots/` and seeds its own demo
+database, so two runs produce identical images and a diff means the UI changed.
+
+1. Add an entry to `frontend/tests/docs-screenshots/manifest.ts` — a `slug` (which
+   becomes the filename), the route, and the doc pages it's `usedBy`. Use `clip`
+   to capture a single card, or `annotate` for numbered callouts on a walkthrough.
+2. Run `./tests/docs-screenshots/run.sh --reseed` from `frontend/`. The PNG lands
+   in `product-docs/.gitbook/assets/<slug>.png`.
+3. Reference it via `<figure><img src="../.gitbook/assets/<slug>.png" alt=""><figcaption><p>Caption</p></figcaption></figure>`, adjusting the relative
+   path depth (`../`, `../../`) for where the Markdown file sits.
+4. Quote any UI label in the caption verbatim from `frontend/messages/en.json`.
+
+See `frontend/tests/docs-screenshots/README.md` for the full contract. Older
+pages still carry hand-captured and externally hosted images; those are being
+migrated to generated ones page by page.
 
 ## Adding a new page
 

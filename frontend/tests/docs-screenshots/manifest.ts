@@ -13,6 +13,17 @@ export interface Shot {
 	clip?: (page: Page) => Locator;
 	/** Extra interaction to run once the route has settled. */
 	then?: (page: Page) => Promise<void>;
+	/**
+	 * Draw callout boxes over elements before capturing — the annotated,
+	 * step-by-step genre the Guidde frames use. Each entry outlines its target;
+	 * a `label` adds a numbered badge so the prose can refer to it.
+	 */
+	annotate?: (page: Page) => Annotation[];
+}
+
+export interface Annotation {
+	at: Locator;
+	label?: string;
 }
 
 /**
@@ -87,6 +98,18 @@ export const shots: Shot[] = [
 			page
 				.getByRole('heading', { name: 'Associated risk scenarios' })
 				.locator('xpath=ancestor::div[contains(@class,"card")][1]')
+	},
+	{
+		// Annotated variant, for the step-by-step guide genre. Labels are the
+		// step numbers the surrounding prose refers to.
+		slug: 'risk-assessment-annotated',
+		url: '/risk-assessments',
+		usedBy: ['guides/first-risk-assessment.md'],
+		then: openDetail('risk-assessments', 'RA.2026.01'),
+		annotate: (page) => [
+			{ at: page.getByRole('link', { name: 'Action plan' }).first(), label: '1' },
+			{ at: page.getByRole('button', { name: 'Add risk scenario' }).first(), label: '2' }
+		]
 	},
 	{
 		slug: 'applied-controls-full',
