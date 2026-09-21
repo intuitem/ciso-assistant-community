@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.util
+import json
 import re
 import sys
 from dataclasses import dataclass, field
@@ -68,8 +69,8 @@ FRAMEWORK_DESCRIPTION = (
     "National Cyber Security Centre - Cyber Assessment Framework, assessed the way "
     "the framework is designed to be used: the contributing outcome is the unit of "
     "assessment, and every indicator of good practice is answered true or false. "
-    "Each outcome closes with a status question that turns those answers into "
-    "Achieved, Partially achieved or Not achieved.\n"
+    "Those answers decide the outcome status - Achieved, Partially achieved or "
+    "Not achieved - by the rule the indicator tables print.\n"
     f"{NCSC_COLLECTION_URL}"
 )
 COPYRIGHT = f"NCSC {NCSC_COLLECTION_URL}"
@@ -91,6 +92,20 @@ LIBRARY_META_ROWS = [
     ("publication_date", PUBLICATION_DATE),
 ]
 
+# Seeded into every new audit. The CAF has no numeric scale and no
+# certification vocabulary, so the scoring and nonconformity dimensions are
+# noise on the requirement page; the indicators, the outcome status and the
+# evidence behind it are the whole assessment.
+#
+# Hiding `status` also switches the audit from status-driven to result-driven
+# progress (ComplianceAssessment.progress_mode_from_visibility): an outcome
+# counts as assessed once the answers produce a verdict, which is the only
+# notion of "done" this framework has.
+FIELD_VISIBILITY = {
+    field: {"auditor": "hidden", "respondent": "hidden"}
+    for field in ("score", "documentation_score", "extended_result", "status")
+}
+
 FRAMEWORK_META_ROWS = [
     ("type", "framework"),
     ("base_urn", f"urn:intuitem:risk:req_node:{FRAMEWORK_SLUG}"),
@@ -100,6 +115,7 @@ FRAMEWORK_META_ROWS = [
     ("description", FRAMEWORK_DESCRIPTION),
     ("answers_definition", "answers"),
     ("result_aggregation", "tiered_all"),
+    ("field_visibility", json.dumps(FIELD_VISIBILITY)),
 ]
 
 CONTENT_HEADERS = [
@@ -158,6 +174,9 @@ ANNOTATION_TWO = (
 # 2-column tables where Achieved starts at ~305.
 THREE_COLUMN_BOUNDS = (("NA", 0.0, 150.0), ("PA", 150.0, 350.0), ("A", 350.0, 1e4))
 TWO_COLUMN_BOUNDS = (("NA", 0.0, 200.0), ("A", 200.0, 1e4))
+# Where each column's text normally starts, used to pick the closest open
+# statement when a continuation is rendered outside its own column.
+COLUMN_ANCHORS = {3: {"NA": 50.0, "PA": 220.0, "A": 390.0}, 2: {"NA": 50.0, "A": 305.0}}
 
 # Every wording the v4.0 tables use for the two instruction rows, longest first.
 # A handful of tables word them slightly differently (B4.d "statements below
@@ -176,7 +195,7 @@ INSTRUCTION_RE = re.compile(
 EXPECTED_OBJECTIVES = 4
 EXPECTED_PRINCIPLES = 14
 EXPECTED_OUTCOMES = 41
-EXPECTED_STATEMENTS = {"NA": 184, "PA": 147, "A": 225}
+EXPECTED_STATEMENTS = {"NA": 184, "PA": 148, "A": 225}
 
 # The Achieved column is also shipped, statement by statement, by the sibling
 # builder. Comparing against it is the regression test for this extraction.
@@ -213,6 +232,10 @@ class Outcome:
     statements: dict[str, list[str]] = field(
         default_factory=lambda: {"NA": [], "PA": [], "A": []}
     )
+    # The statement each column is currently building, so a continuation can be
+    # matched to the column it actually belongs to rather than to where the PDF
+    # happened to draw it.
+    open_text: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -238,6 +261,55 @@ def column_of(x0: float, columns: int) -> str:
         if low <= x0 < high:
             return name
     return bounds[-1][0]
+
+
+def statement_is_open(text: str) -> bool:
+    """Whether a statement is still waiting for its continuation.
+
+    Unfinished punctuation is the usual sign, but several statements break
+    across a page inside a parenthetical ("... reviewed recently (e.g." +
+    "within the last 12 months)."), which ends on a full stop while clearly
+    being incomplete - hence the bracket count.
+    """
+    return not text.rstrip().endswith((".", "!", "?")) or text.count("(") > text.count(
+        ")"
+    )
+
+
+def owning_column(outcome: Outcome, column: str, body: str, x0: float) -> str:
+    """Re-file a continuation that the PDF drew under the wrong column.
+
+    On the A4.b page break the continuation of a Partially Achieved statement
+    is rendered at the Not Achieved x-position. Geometry alone therefore
+    misfiles it, corrupting two statements: the fragment is glued to whatever
+    the other column said last, and its real statement is left truncated.
+
+    A continuation whose own column has nothing open belongs to a column that
+    does; where several are open, the nearest one to where the fragment was
+    drawn wins.
+    """
+    if not body[:1].islower():
+        return column
+
+    own = outcome.open_text.get(column)
+    if own and statement_is_open(own):
+        return column
+
+    candidates = [
+        candidate
+        for candidate, text in outcome.open_text.items()
+        if candidate != column and statement_is_open(text)
+    ]
+    if not candidates:
+        return column
+
+    anchors = COLUMN_ANCHORS[outcome.columns]
+    target = min(candidates, key=lambda c: abs(anchors[c] - x0))
+    print(
+        f"note: {outcome.ref_id}: continuation drawn at x0={x0:.0f} "
+        f"({column} column) re-filed under {target}: {body[:60]}..."
+    )
+    return target
 
 
 def strip_instructions(text: str) -> str:
@@ -317,10 +389,21 @@ def parse_pdf(pdf_path: Path) -> list[Node]:
         if not body or caf.is_table_instruction(body):
             continue
 
-        current.segments[column_of(block.x0, current.columns)].append(
+        column = owning_column(
+            current, column_of(block.x0, current.columns), body, block.x0
+        )
+        current.segments[column].append(
             caf.AchievedSegment(
                 page=block.page, x0=block.x0, y0=block.y0, y1=block.y1, text=body
             )
+        )
+        # Mirror how split_statements will merge these blocks, so the next
+        # continuation can be matched against the right open statement.
+        previous = current.open_text.get(column, "")
+        current.open_text[column] = (
+            f"{previous} {body}"
+            if previous and caf.is_statement_continuation(previous, body)
+            else body
         )
 
     for node in nodes:
