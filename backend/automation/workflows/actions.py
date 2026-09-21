@@ -1803,7 +1803,8 @@ class AttachEvidenceAction(BaseAction):
             revision = evidence.revisions.order_by("-version").first() or (
                 EvidenceRevision(evidence=evidence, folder=evidence.folder)
             )
-            revision.attachment = upload
+            revision.set_new_attachment(upload)
+
             if occurrence is not None:
                 revision.task_node = occurrence
             try:
