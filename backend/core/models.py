@@ -5650,7 +5650,10 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             # Check if this is a new attachment or if it has changed
             should_compute_hash = False
 
-            if self.pk:  # Existing record
+            # Uncommitted: a pending replacement, whatever it is named.
+            if not self.attachment._committed:
+                should_compute_hash = True
+            elif self.pk:  # Existing record
                 try:
                     old_instance = EvidenceRevision.objects.get(pk=self.pk)
                     # Check if attachment changed
@@ -5682,7 +5685,7 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
                     logger.warning(
                         "Failed to compute attachment hash",
                         revision_id=self.pk,
-                        error=str(e),
+                        error=e,
                     )
                     self.attachment_hash = None
         else:
@@ -5696,29 +5699,18 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             return None
         return self.original_filename or os.path.basename(self.attachment.name)
 
-    def set_new_attachment(self, uploaded_file: UploadedFile | ContentFile):
-        """
-        Set `self.attachment` to a new `uploaded_file` (and update `self.origina_filename` accordingly), call `self.save()` after.
-
-        Also take care of deleting the previous attachment (if it's a different one) from the underlying storage.
-        """
-        old_attachment = self.attachment
-        old_attachment_name = old_attachment.name
+    def set_new_attachment(
+        self, uploaded_file: UploadedFile | ContentFile
+    ) -> str | None:
+        """Set `self.attachment` to a new `uploaded_file` (and update `self.original_filename`
+        accordingly), returning the superseded file's name for the caller to delete once
+        saved: the old `FieldFile` is bound to this instance and nulls it on delete."""
+        superseded_name = self.attachment.name
         self.attachment = uploaded_file
-
-        try:
-            self.full_clean()
-        except ValidationError:
-            self.attachment = old_attachment
-            raise
-        else:
-            original_filename = uploaded_file.name
-            if original_filename:
-                self.original_filename = original_filename
-            self.save()
-
-            if old_attachment_name and old_attachment_name != self.attachment.name:
-                self.attachment.storage.delete(old_attachment_name)
+        original_filename = uploaded_file.name
+        if original_filename:
+            self.original_filename = original_filename
+        return superseded_name
 
     def get_size(self):
         if not self.attachment or not self.attachment.storage.exists(
