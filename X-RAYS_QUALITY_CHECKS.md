@@ -8,6 +8,8 @@ The X-rays feature performs automated quality checks on:
 - **Risk Assessments** - Including risk scenarios, applied controls, and risk acceptances
 - **Compliance Assessments** - Including requirement assessments, applied controls, and evidence
 
+An *issue* is one rule tripped on one object; the objects behind a rule are its *occurrences*. The word "finding" is avoided here, it names a different concept in the product (findings assessments).
+
 Quality checks are categorized into three severity levels:
 - **🐛 Errors** - Critical issues that need immediate attention
 - **⚠️ Warnings** - Important issues that should be addressed
@@ -67,6 +69,7 @@ X-rays can be accessed via:
 | `appliedControlNoETA` | Does not have an ETA | Non-active control missing estimated time of arrival |
 | `appliedControlNoEffort` | Does not have an estimated effort. This will help you for prioritization | Missing effort estimation |
 | `appliedControlNoCost` | Does not have an estimated cost. This will help you for prioritization | Missing cost estimation |
+| `appliedControlActiveNoEvidence` | Applied control is active but has no evidence attached | Active control with no evidence to back it |
 
 #### Info
 | Rule ID | Message | Description |
@@ -110,6 +113,11 @@ X-rays can be accessed via:
 |---------|---------|-------------|
 | `appliedControlNoReferenceControl` | Applied control has no reference control selected | Control lacks linkage to a reference control framework |
 
+#### Warning
+| Rule ID | Message | Description |
+|---------|---------|-------------|
+| `appliedControlActiveNoEvidence` | Applied control is active but has no evidence attached | Active control with no evidence to back it |
+
 ### Evidence Checks
 
 #### Warning
@@ -128,19 +136,32 @@ Quality checks are implemented in `backend/core/models.py`:
 Both methods return a dictionary with:
 ```python
 {
-    "errors": [],      # List of error findings
-    "warnings": [],    # List of warning findings
-    "info": [],        # List of info findings
-    "count": 0         # Total number of findings
+    "errors": [],      # List of error issues
+    "warnings": [],    # List of warning issues
+    "info": [],        # List of info issues
+    "count": 0         # Total number of issues
 }
 ```
 
-Each finding contains:
+Each issue contains:
 - `msg` - Human-readable message (translated)
 - `msgid` - Message identifier for i18n
-- `obj_type` - Type of object (e.g., "risk_assessment", "appliedcontrol")
-- `object` - Serialized object data
+- `obj_type` - Type of object (e.g., "riskscenario", "appliedcontrol")
+- `object` - Compact object built by `_issue_object()`: `id`, `name`, plus the few
+  metadata fields the X-rays table shows as columns. The full serialized object is
+  deliberately *not* shipped, it used to be repeated for every issue raised on it.
 - `link` - Optional direct link to edit the object (format: `model-name/id`)
+
+Metadata carried per object type:
+
+| `obj_type` | Extra fields |
+|---|---|
+| `appliedcontrol` | `status`, `eta`, `priority` |
+| `riskscenario` | `ref_id`, `treatment` |
+| `requirementassessment` | `result`, `status` |
+| `riskacceptance` | `state`, `expiry_date` |
+| `evidence` | none |
+| `risk_assessment`, `complianceassessment` | `status` |
 
 ### API Implementation
 
@@ -154,11 +175,17 @@ The X-rays page is implemented in:
 - `frontend/src/routes/(app)/(internal)/x-rays/+page.svelte`
 - `frontend/src/routes/(app)/(internal)/x-rays/+page.server.ts`
 
+Shared components live in `frontend/src/lib/components/XRays/`:
+- `utils.ts` - severity table, per-`obj_type` column config, aggregation
+- `AssessmentIssues.svelte` - one assessment, collapsed by default
+- `IssueTable.svelte` - occurrences of one rule, paginated client-side
+
 Features:
-- Groups findings by perimeter
+- Groups issues by domain, then assessment, then rule (msgid)
 - Separate tabs for compliance and risk assessments
-- Aggregates issues by type (msgid)
-- Shows count of findings per issue type
+- Severity filter to hide whole tiers
+- Everything collapsed by default; assessments with no issue are not rendered
+- Occurrences shown in a paginated table with per-type metadata columns
 - Direct links to edit affected objects
 - Color-coded badges (red=errors, yellow=warnings, blue=info)
 

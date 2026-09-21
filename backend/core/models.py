@@ -138,6 +138,16 @@ def _serialize_for_quality_check(queryset) -> list[dict]:
     return [{**item["fields"], "id": item["pk"]} for item in json.loads(payload)]
 
 
+def _issue_object(obj, *fields) -> dict:
+    """Identity plus the few fields the X-rays table shows as columns.
+
+    An issue used to carry the whole serialized object, repeated for every issue
+    raised on it.
+    """
+    get = obj.get if isinstance(obj, dict) else lambda name: getattr(obj, name)
+    return {"id": get("id"), "name": get("name"), **{f: get(f) for f in fields}}
+
+
 def _translate_questions(owner) -> dict | None:
     """Questions of a RequirementNode or QuickFormPage as the {urn: definition}
     dict the frontend renderer consumes, translated to the active language."""
@@ -7149,9 +7159,7 @@ class RiskAssessment(Assessment):
         warnings_lst = list()
         info_lst = list()
         # --- check on the risk risk_assessment:
-        # Same dict shape as every other finding object, so the name renders.
-        _serialized = json.loads(serializers.serialize("json", [self]))[0]
-        _object = {**_serialized["fields"], "id": _serialized["pk"]}
+        _object = _issue_object(self, "status")
         if self.status == Assessment.Status.IN_PROGRESS:
             info_lst.append(
                 {
@@ -7193,6 +7201,7 @@ class RiskAssessment(Assessment):
             self.risk_scenarios.all().order_by("created_at")
         )
         for ri in scenarios:
+            ri_object = _issue_object(ri, "ref_id", "treatment")
             if ri["current_level"] < 0:
                 warnings_lst.append(
                     {
@@ -7202,7 +7211,7 @@ class RiskAssessment(Assessment):
                         "msgid": "riskScenarioNoCurrentLevel",
                         "link": f"risk-scenarios/{ri['id']}",
                         "obj_type": "riskscenario",
-                        "object": ri,
+                        "object": ri_object,
                     }
                 )
             if ri["residual_level"] < 0 and ri["current_level"] >= 0:
@@ -7213,7 +7222,7 @@ class RiskAssessment(Assessment):
                         ).format(ri["name"]),
                         "msgid": "riskScenarioNoResidualLevel",
                         "obj_type": "riskscenario",
-                        "object": ri,
+                        "object": ri_object,
                     }
                 )
             if ri["residual_level"] > ri["current_level"]:
@@ -7225,7 +7234,7 @@ class RiskAssessment(Assessment):
                         "msgid": "riskScenarioResidualHigherThanCurrent",
                         "link": f"risk-scenarios/{ri['id']}",
                         "obj_type": "riskscenario",
-                        "object": ri,
+                        "object": ri_object,
                     }
                 )
             if ri["residual_proba"] > ri["current_proba"]:
@@ -7237,7 +7246,7 @@ class RiskAssessment(Assessment):
                         "msgid": "riskScenarioResidualProbaHigherThanCurrent",
                         "link": f"risk-scenarios/{ri['id']}",
                         "obj_type": "riskscenario",
-                        "object": ri,
+                        "object": ri_object,
                     }
                 )
             if ri["residual_impact"] > ri["current_impact"]:
@@ -7249,7 +7258,7 @@ class RiskAssessment(Assessment):
                         "msgid": "riskScenarioResidualImpactHigherThanCurrent",
                         "link": f"risk-scenarios/{ri['id']}",
                         "obj_type": "riskscenario",
-                        "object": ri,
+                        "object": ri_object,
                     }
                 )
 
@@ -7270,7 +7279,7 @@ class RiskAssessment(Assessment):
                             "msgid": "riskScenarioResidualLoweredWithoutMeasures",
                             "link": f"risk-scenarios/{ri['id']}",
                             "obj_type": "riskscenario",
-                            "object": ri,
+                            "object": ri_object,
                         }
                     )
 
@@ -7284,7 +7293,7 @@ class RiskAssessment(Assessment):
                             "msgid": "riskScenarioAcceptedNoAcceptance",
                             "link": f"risk-scenarios/{ri['id']}",
                             "obj_type": "riskscenario",
-                            "object": ri,
+                            "object": ri_object,
                         }
                     )
 
@@ -7315,10 +7324,9 @@ class RiskAssessment(Assessment):
                         "msgid": "controlInBothLists",
                         "link": f"applied-controls/{duplicate_control.id}",
                         "obj_type": "appliedcontrol",
-                        "object": {
-                            "name": duplicate_control.name,
-                            "id": duplicate_control.id,
-                        },
+                        "object": _issue_object(
+                            duplicate_control, "status", "eta", "priority"
+                        ),
                     }
                 )
 
@@ -7333,10 +7341,9 @@ class RiskAssessment(Assessment):
                             "msgid": "existingControlNotActive",
                             "link": f"applied-controls/{existing_control.id}",
                             "obj_type": "appliedcontrol",
-                            "object": {
-                                "name": existing_control.name,
-                                "id": existing_control.id,
-                            },
+                            "object": _issue_object(
+                                existing_control, "status", "eta", "priority"
+                            ),
                         }
                     )
 
@@ -7348,6 +7355,7 @@ class RiskAssessment(Assessment):
         )
 
         for mtg in measures:
+            mtg_object = _issue_object(mtg, "status", "eta", "priority")
             if not mtg["eta"] and not mtg["status"] == "active":
                 warnings_lst.append(
                     {
@@ -7355,7 +7363,7 @@ class RiskAssessment(Assessment):
                         "msgid": "appliedControlNoETA",
                         "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
-                        "object": {"name": mtg["name"], "id": mtg["id"]},
+                        "object": mtg_object,
                     }
                 )
             elif mtg["eta"] and not mtg["status"] == "active":
@@ -7368,7 +7376,7 @@ class RiskAssessment(Assessment):
                             "msgid": "appliedControlETAInPast",
                             "link": f"applied-controls/{mtg['id']}",
                             "obj_type": "appliedcontrol",
-                            "object": {"name": mtg["name"], "id": mtg["id"]},
+                            "object": mtg_object,
                         }
                     )
 
@@ -7381,7 +7389,7 @@ class RiskAssessment(Assessment):
                         "msgid": "appliedControlNoEffort",
                         "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
-                        "object": {"name": mtg["name"], "id": mtg["id"]},
+                        "object": mtg_object,
                     }
                 )
 
@@ -7394,7 +7402,20 @@ class RiskAssessment(Assessment):
                         "msgid": "appliedControlNoCost",
                         "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
-                        "object": {"name": mtg["name"], "id": mtg["id"]},
+                        "object": mtg_object,
+                    }
+                )
+
+            if mtg["status"] == "active" and not mtg["evidences"]:
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{}: Applied control is active but has no evidence attached"
+                        ).format(mtg["name"]),
+                        "msgid": "appliedControlActiveNoEvidence",
+                        "link": f"applied-controls/{mtg['id']}",
+                        "obj_type": "appliedcontrol",
+                        "object": mtg_object,
                     }
                 )
 
@@ -7407,7 +7428,7 @@ class RiskAssessment(Assessment):
                         "msgid": "appliedControlNoLink",
                         "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
-                        "object": {"name": mtg["name"], "id": mtg["id"]},
+                        "object": mtg_object,
                     }
                 )
 
@@ -7418,6 +7439,7 @@ class RiskAssessment(Assessment):
             .order_by("created_at")
         )
         for ra in acceptances:
+            ra_object = _issue_object(ra, "state", "expiry_date")
             if not ra["expiry_date"]:
                 warnings_lst.append(
                     {
@@ -7426,8 +7448,8 @@ class RiskAssessment(Assessment):
                         ),
                         "msgid": "riskAcceptanceNoExpiryDate",
                         "link": f"risk-acceptances/{ra['id']}",
-                        "obj_type": "appliedcontrol",
-                        "object": ra,
+                        "obj_type": "riskacceptance",
+                        "object": ra_object,
                     }
                 )
                 continue
@@ -7440,7 +7462,7 @@ class RiskAssessment(Assessment):
                         "msgid": "riskAcceptanceExpired",
                         "link": f"risk-acceptances/{ra['id']}",
                         "obj_type": "riskacceptance",
-                        "object": ra,
+                        "object": ra_object,
                     }
                 )
 
@@ -9140,9 +9162,7 @@ class ComplianceAssessment(Assessment):
         warnings_lst = list()
         info_lst = list()
         # --- check on the assessment:
-        # Same dict shape as every other finding object, so the name renders.
-        _serialized = json.loads(serializers.serialize("json", [self]))[0]
-        _object = {**_serialized["fields"], "id": _serialized["pk"]}
+        _object = _issue_object(self, "status")
         if self.status == Assessment.Status.IN_PROGRESS:
             info_lst.append(
                 {
@@ -9197,9 +9217,11 @@ class ComplianceAssessment(Assessment):
                 "id": ra.id,
                 "name": str(ra),
                 "result": ra.result,
+                "status": ra.status,
                 "applied_controls": [ac.id for ac in ra.applied_controls.all()],
             }
             requirement_assessments.append(ra_dict)
+            ra_object = _issue_object(ra_dict, "result", "status")
 
             # Check if assessable requirement assessment with compliant result has no evidence
             if (
@@ -9215,7 +9237,7 @@ class ComplianceAssessment(Assessment):
                         "msgid": "requirementAssessmentCompliantNoEvidence",
                         "link": f"requirement-assessments/{ra.id}",
                         "obj_type": "requirementassessment",
-                        "object": ra_dict,
+                        "object": ra_object,
                     }
                 )
 
@@ -9232,7 +9254,9 @@ class ComplianceAssessment(Assessment):
                         "msgid": "requirementAssessmentNoAppliedControl",
                         "link": f"requirement-assessments/{requirement_assessment['id']}",
                         "obj_type": "requirementassessment",
-                        "object": requirement_assessment,
+                        "object": _issue_object(
+                            requirement_assessment, "result", "status"
+                        ),
                     }
                 )
         # ---
@@ -9246,6 +9270,22 @@ class ComplianceAssessment(Assessment):
             .order_by("created_at")
         )
         for applied_control in applied_controls:
+            ac_object = _issue_object(applied_control, "status", "eta", "priority")
+            if (
+                applied_control["status"] == "active"
+                and not applied_control["evidences"]
+            ):
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{}: Applied control is active but has no evidence attached"
+                        ).format(applied_control["name"]),
+                        "msgid": "appliedControlActiveNoEvidence",
+                        "link": f"applied-controls/{applied_control['id']}",
+                        "obj_type": "appliedcontrol",
+                        "object": ac_object,
+                    }
+                )
             if not applied_control["reference_control"]:
                 info_lst.append(
                     {
@@ -9255,7 +9295,7 @@ class ComplianceAssessment(Assessment):
                         "msgid": "appliedControlNoReferenceControl",
                         "link": f"applied-controls/{applied_control['id']}",
                         "obj_type": "appliedcontrol",
-                        "object": applied_control,
+                        "object": ac_object,
                     }
                 )
         # ---
@@ -9296,7 +9336,7 @@ class ComplianceAssessment(Assessment):
                     "msgid": "evidenceNoFile",
                     "link": f"evidences/{evidence['id']}",
                     "obj_type": "evidence",
-                    "object": evidence,
+                    "object": _issue_object(evidence),
                 }
             )
 
