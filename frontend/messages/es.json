@@ -2200,6 +2200,8 @@
 	"noticePeriodProvider": "Período de Aviso para Proveedor (días)",
 	"novemberShort": "Nov",
 	"oauthPKCEEnabled": "OAuth PKCE habilitado",
+	"oidcAdditionalScopes": "Ámbitos adicionales",
+	"oidcAdditionalScopesHelpText": "Ámbitos de OAuth opcionales separados por comas que se añaden a los ámbitos predeterminados openid, profile y email.",
 	"object": "Objeto",
 	"objectRepr": "Objeto",
 	"objection": "Objeción",

@@ -3147,6 +3147,8 @@
 	"notSet": "--",
 	"novemberShort": "Nov",
 	"oauthPKCEEnabled": "OAuth PKCE abilitato",
+	"oidcAdditionalScopes": "Ambiti aggiuntivi",
+	"oidcAdditionalScopesHelpText": "Ambiti OAuth facoltativi separati da virgole, aggiunti agli ambiti predefiniti openid, profile ed email.",
 	"observationHelpText": "Note aggiuntive e commenti in formato markdown",
 	"observationSensitivePoint": "Osservazione / punto sensibile",
 	"offTrack": "Fuori rotta",

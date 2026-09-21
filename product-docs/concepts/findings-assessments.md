@@ -73,7 +73,7 @@ The same model serves every source, which is what makes cross-source reporting p
 
 ### Raising a finding from a requirement
 
-With the **findings_from_requirements** [feature flag](../configuration/settings/feature-flags.md) on, a requirement assessment gains a **Findings** tab and a **Raise a finding** action, so an auditor records the issue without leaving the requirement.
+With the **findings_from_requirements** [feature flag](../configuration/settings/feature-flags.md) on, a requirement assessment gains a **Findings** tab. **Raise a finding** records the issue without leaving the requirement, and the picker binds an existing finding from any binder to the requirement. A finding is bound to one requirement assessment at a time: the picker skips findings bound elsewhere, and moving one is done from the finding. A locked binder keeps its findings where they are, and a locked audit refuses new ones.
 
 The first finding raised on an audit creates that audit's binder automatically — named after the audit, in the audit's domain and perimeter, with the *Audit* category — and every later finding on the same audit joins it. Creating it needs permission to add a findings binder in the audit's domain. If the audit already has binders, the oldest one is used.
 

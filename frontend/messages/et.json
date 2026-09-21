@@ -2800,6 +2800,8 @@
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Tokeni autentimismeetod",
 	"oauthPKCEEnabled": "OAuth PKCE lubatud",
+	"oidcAdditionalScopes": "Täiendavad kehtivusalad",
+	"oidcAdditionalScopesHelpText": "Valikulised komadega eraldatud OAuthi kehtivusalad, mis lisatakse vaikimisi kehtivusaladele openid, profile ja email.",
 	"suggestedParentheses": "(soovitatud)",
 	"matchingScenarios": "Sobivad stsenaariumid",
 	"clientSecretAlreadySetHelpText": "Kliendisaladus on juba määratud.",

@@ -14,7 +14,12 @@
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getSecureRedirect, getFieldVisibility, alignmentColorMap } from '$lib/utils/helpers';
+	import {
+		getSecureRedirect,
+		getFieldVisibility,
+		isFieldVisible,
+		alignmentColorMap
+	} from '$lib/utils/helpers';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import { hideSuggestions } from '$lib/utils/stores';
@@ -118,6 +123,16 @@
 				object: data.requirementAssessment
 			})
 	);
+	// Picking an existing finding edits that finding, so it needs change rather than add.
+	const canBindFinding = $derived(
+		!!page.data?.featureflags?.findings_from_requirements &&
+			canPerformActionOnObject({
+				user: page.data.user,
+				action: 'change',
+				model: 'finding',
+				object: data.requirementAssessment
+			})
+	);
 
 	const flash = getFlash(pageStore);
 
@@ -148,7 +163,7 @@
 					},
 					zod(FindingSchema)
 				),
-				formAction: '/findings?/create',
+				formAction: '?/createFinding',
 				model: findingModel,
 				debug: false
 			}
@@ -156,10 +171,7 @@
 		modalStore.trigger({
 			type: 'component',
 			component: modalComponent,
-			title: m.raiseFinding(),
-			response: (r: boolean) => {
-				if (r) refreshKey = !refreshKey;
-			}
+			title: m.raiseFinding()
 		});
 	}
 
@@ -393,12 +405,18 @@
 
 	const isAuditor = $derived(viewerRole === 'auditor');
 	const canShowAppliedControls = $derived(showAppliedControls && !page.data.user.is_third_party);
+	// Same gate as applied controls, on top of the finding permissions.
+	const showFindings = $derived(
+		(canRaiseFinding || canBindFinding) &&
+			isFieldVisible(complianceAssessment, 'findings', viewerRole) &&
+			!page.data.user.is_third_party
+	);
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';
 		if (showTaskTemplates) return 'task_templates';
 		if (showEvidences) return 'evidences';
-		if (canRaiseFinding) return 'findings';
+		if (showFindings) return 'findings';
 		// Security exceptions are auditor-only — not part of the per-CA visibility model.
 		if (isAuditor) return 'security_exceptions';
 		return 'applied_controls';
@@ -463,6 +481,20 @@
 				{ taint: false }
 			);
 			form.newSecurityException = undefined;
+		}
+	});
+
+	$effect(() => {
+		if (form?.newFinding) {
+			refreshKey = !refreshKey;
+			requirementAssessmentForm.form.update(
+				(current: Record<string, any>) => ({
+					...current,
+					findings: [...(current.findings ?? []), form?.newFinding]
+				}),
+				{ taint: false }
+			);
+			form.newFinding = undefined;
 		}
 	});
 
@@ -633,7 +665,7 @@
 			{...rest}
 		>
 			{#snippet children({ form, data })}
-				{#if canShowAppliedControls || showTaskTemplates || showEvidences || canRaiseFinding || isAuditor}
+				{#if canShowAppliedControls || showTaskTemplates || showEvidences || showFindings || isAuditor}
 					<div class="card shadow-lg bg-surface-50-950">
 						<Tabs
 							value={group}
@@ -660,7 +692,7 @@
 								{#if isAuditor}
 									<Tabs.Trigger value="security_exceptions">{m.securityExceptions()}</Tabs.Trigger>
 								{/if}
-								{#if canRaiseFinding}
+								{#if showFindings}
 									<Tabs.Trigger value="findings" data-testid="findings-tab"
 										>{m.findings()}</Tabs.Trigger
 									>
@@ -856,23 +888,39 @@
 									</div>
 								</Tabs.Content>
 							{/if}
-							{#if canRaiseFinding}
+							{#if showFindings}
 								<Tabs.Content value="findings">
 									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-										<span class="flex flex-row justify-end items-center">
-											<button
-												class="btn preset-filled-primary-500 self-end"
-												onclick={modalFindingCreateForm}
-												data-testid="raise-finding-button"
-												type="button"
-												><i class="fa-solid fa-plus mr-2"></i>{m.raiseFinding()}</button
-											>
-										</span>
+										{#if canRaiseFinding}
+											<span class="flex flex-row justify-end items-center">
+												<button
+													class="btn preset-filled-primary-500 self-end"
+													onclick={modalFindingCreateForm}
+													data-testid="raise-finding-button"
+													type="button"
+													><i class="fa-solid fa-plus mr-2"></i>{m.raiseFinding()}</button
+												>
+											</span>
+										{/if}
 										{#key refreshKey}
+											{#if canBindFinding}
+												<AutocompleteSelect
+													multiple
+													{form}
+													optionsEndpoint="findings"
+													optionsDetailedUrlParameters={[
+														['requirement_assessment', '--'],
+														['requirement_assessment', page.data.requirementAssessment.id]
+													]}
+													optionsExtraFields={[['folder', 'str']]}
+													field="findings"
+												/>
+											{/if}
 											<ModelTable
 												source={page.data.tables['findings']}
 												hideFilters={true}
 												URLModel="findings"
+												expectedCount={countMasked(page.data.requirementAssessment.findings)}
 												baseEndpoint="/findings?requirement_assessment={page.data
 													.requirementAssessment.id}"
 											/>

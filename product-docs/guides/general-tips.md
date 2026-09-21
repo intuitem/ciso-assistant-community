@@ -14,3 +14,5 @@ That said, here are some standard recommendations to get the most of it when you
 8. Share the insights with your organisation, review the priorities, and keep it alive.
 9. Expand your coverage: periodic tasks, incidents, third-party risk, findings management.
 10. Always keep focus on the actions and reflect their data on the other concepts.
+
+<figure><img src="../.gitbook/assets/analytics-overview.png" alt=""><figcaption><p>The Analytics summary, where steps 6 to 8 above show up as numbers</p></figcaption></figure>

@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from core.models import Answer, AnswerAttachment, Evidence, EvidenceRevision, Question
+from core.validators import sanitize_file_name
 
 #: Extension and magic are both checked — a renamed .exe is still an .exe.
 BLOCKED_EXTENSIONS = {
@@ -115,7 +116,7 @@ def add_attachment(answer, upload, user):
     return AnswerAttachment.objects.create(
         answer=answer,
         file=upload,
-        filename=(upload.name or "file")[:255],
+        filename=sanitize_file_name(upload.name or "") or "file",
         size=upload.size,
         mime_type=(getattr(upload, "content_type", "") or "")[:127],
         file_hash=digest.hexdigest(),
@@ -156,6 +157,7 @@ def promote_to_evidence(attachment, user):
             evidence=evidence,
             attachment=attachment.file,
             attachment_hash=attachment.file_hash,
+            original_filename=attachment.filename,
             folder_id=attachment.folder_id,
         )
         attachment.promoted_to = evidence
@@ -210,7 +212,7 @@ INLINE_SAFE_TYPES = {
 }
 
 
-def _safe_filename_header(disposition, filename):
+def safe_filename_header(disposition, filename):
     """A Content-Disposition value that a filename cannot break out of."""
     from urllib.parse import quote
 
@@ -238,7 +240,7 @@ def serve(attachment):
     content_type = guessed if inline else "application/octet-stream"
 
     body = FileResponse(attachment.file, content_type=content_type)
-    body["Content-Disposition"] = _safe_filename_header(
+    body["Content-Disposition"] = safe_filename_header(
         "inline" if inline else "attachment", attachment.filename
     )
     body["X-Content-Type-Options"] = "nosniff"

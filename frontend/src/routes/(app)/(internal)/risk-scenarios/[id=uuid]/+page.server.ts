@@ -2,7 +2,7 @@ import type { Actions, PageServerLoad } from './$types';
 
 import { BASE_API_URL } from '$lib/utils/constants';
 import { fetchAllPages } from '$lib/utils/pagination';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { type TableSource } from '$lib/components/ModelTable/types';
 import { headData } from '$lib/utils/table';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
