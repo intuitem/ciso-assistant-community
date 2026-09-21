@@ -6,8 +6,10 @@ import { expect, test, type Page } from '../utils/test-utils.js';
  * commands then share an href, Svelte throws `each_key_duplicate` as the result list renders,
  * and the palette comes up empty. Community has no sidebar entry for the page, so it never
  * collides; that is the whole reason this has to be switched on before the palette is opened.
+ *
+ * Returns what the flag was, or null where this edition does not offer it.
  */
-async function enableServiceAccounts(page: Page): Promise<void> {
+async function setServiceAccounts(page: Page, enabled: boolean): Promise<boolean | null> {
 	await page.goto('/settings');
 	await page.waitForLoadState('networkidle');
 
@@ -19,19 +21,30 @@ async function enableServiceAccounts(page: Page): Promise<void> {
 		.locator('[role="checkbox"]')
 		.filter({ has: page.locator('span.font-semibold', { hasText: 'Service accounts' }) });
 	// An edition that does not offer the flag cannot produce the collision.
-	if ((await card.count()) === 0) return;
+	if ((await card.count()) === 0) return null;
 
-	if ((await card.getAttribute('aria-checked')) !== 'true') {
+	const was = (await card.getAttribute('aria-checked')) === 'true';
+	if (was !== enabled) {
 		await card.click();
-		await expect(card).toHaveAttribute('aria-checked', 'true');
+		await expect(card).toHaveAttribute('aria-checked', String(enabled));
 		await page.getByRole('button', { name: /save/i }).click();
 		await expect(page.getByTestId('toast')).toBeVisible();
 	}
-
-	// The layout reads the flags server-side, so the palette needs a fresh load to see it.
-	await page.goto('/analytics');
-	await page.waitForLoadState('networkidle');
+	return was;
 }
+
+/** Null until the flag has actually been changed, so a failure before that restores nothing. */
+let previousServiceAccounts: boolean | null = null;
+
+// The flag is global state and the suite shares one backend, so put it back. This is a hook
+// rather than a `finally`: a throwing `finally` would replace the assertion error that failed
+// the test, while Playwright reports a failing hook alongside it — and still runs it on failure.
+test.afterEach(async ({ page }) => {
+	if (previousServiceAccounts === null) return;
+	const restore = previousServiceAccounts;
+	previousServiceAccounts = null;
+	await setServiceAccounts(page, restore);
+});
 
 test('command palette opens and lists commands', async ({ logedPage, page }) => {
 	// A keyed-`{#each}` collision is the one crash that leaves the palette looking merely
@@ -47,7 +60,10 @@ test('command palette opens and lists commands', async ({ logedPage, page }) => 
 	await test.step('put the sidebar in the shape that collides', async () => {
 		// Also asserts we landed on /analytics with no modal left to swallow the keypress.
 		await logedPage.skipWelcome();
-		await enableServiceAccounts(page);
+		previousServiceAccounts = await setServiceAccounts(page, true);
+		// The layout reads the flags server-side, so the palette needs a fresh load to see it.
+		await page.goto('/analytics');
+		await page.waitForLoadState('networkidle');
 	});
 
 	await test.step('the keyboard shortcut opens it', async () => {
