@@ -3,26 +3,19 @@ from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
 from auditlog.models import LogEntry
-import structlog
 
 from enterprise_core.models import LogEntryAction
+from iam.adapter import resolve_client_ip
 
-logger = structlog.get_logger(__name__)
 User = get_user_model()
 
 
 @receiver(user_login_failed)
 def log_login_failed(sender, credentials, request, **kwargs):
-    username = credentials.get("username", None)
+    username = credentials.get("username") or credentials.get("email")
     if username is None:
         return
-    remote_addr = request.META.get("REMOTE_ADDR") if request else None
-
-    logger.info(
-        "Failed login attempt",
-        remote_addr=remote_addr,
-        username=username,
-    )
+    remote_addr = resolve_client_ip(request)
 
     LogEntry.objects.create(
         action=LogEntryAction.LOGIN_FAILED,
