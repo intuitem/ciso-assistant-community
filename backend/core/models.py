@@ -5663,31 +5663,27 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
             if should_compute_hash:
                 try:
-                    # Compute SHA256 hash using chunked reading to avoid OOM
                     hash_obj = hashlib.sha256()
-                    if default_storage.exists(self.attachment.name):
+                    if not self.attachment._committed and hasattr(
+                        self.attachment, "chunks"
+                    ):
+                        for chunk in self.attachment.chunks(chunk_size=1024 * 1024):
+                            hash_obj.update(chunk)
+                        self.attachment_hash = hash_obj.hexdigest()
+                        if hasattr(self.attachment, "seek"):
+                            self.attachment.seek(0)
+
+                    elif default_storage.exists(self.attachment.name):
                         with default_storage.open(self.attachment.name, "rb") as f:
-                            for chunk in iter(
-                                lambda: f.read(1024 * 1024), b""
-                            ):  # 1MB chunks
+                            for chunk in iter(lambda: f.read(1024 * 1024), b""):
                                 hash_obj.update(chunk)
                         self.attachment_hash = hash_obj.hexdigest()
-                    else:
-                        # File not yet saved to storage, try reading from UploadedFile
-                        if hasattr(self.attachment, "chunks"):
-                            for chunk in self.attachment.chunks(chunk_size=1024 * 1024):
-                                hash_obj.update(chunk)
-                            self.attachment_hash = hash_obj.hexdigest()
-                            # Reset file position for subsequent operations
-                            if hasattr(self.attachment, "seek"):
-                                self.attachment.seek(0)
                 except Exception as e:
                     logger.warning(
                         "Failed to compute attachment hash",
                         revision_id=self.pk,
                         error=str(e),
                     )
-                    # Don't fail the save if hash computation fails
                     self.attachment_hash = None
         else:
             # No attachment, clear the hash
@@ -5701,11 +5697,28 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         return self.original_filename or os.path.basename(self.attachment.name)
 
     def set_new_attachment(self, uploaded_file: UploadedFile | ContentFile):
-        """Set `self.attachment` to a new `uploaded_file` (and update `self.origina_filename` accordingly)."""
+        """
+        Set `self.attachment` to a new `uploaded_file` (and update `self.origina_filename` accordingly), call `self.save()` after.
+
+        Also take care of deleting the previous attachment (if it's a different one) from the underlying storage.
+        """
+        old_attachment = self.attachment
+        old_attachment_name = old_attachment.name
         self.attachment = uploaded_file
-        original_filename = uploaded_file.name
-        if original_filename:
-            self.original_filename = original_filename
+
+        try:
+            self.full_clean()
+        except ValidationError:
+            self.attachment = old_attachment
+            raise
+        else:
+            original_filename = uploaded_file.name
+            if original_filename:
+                self.original_filename = original_filename
+            self.save()
+
+            if old_attachment_name and old_attachment_name != self.attachment.name:
+                self.attachment.storage.delete(old_attachment_name)
 
     def get_size(self):
         if not self.attachment or not self.attachment.storage.exists(

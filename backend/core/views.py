@@ -11345,13 +11345,9 @@ class UploadAttachmentView(APIView):
         attachment = request.FILES.get("file")
         if attachment and attachment.name != "undefined":
             if not revision.attachment or revision.attachment != attachment:
-                old_attachment = revision.attachment
-                revision.set_new_attachment(attachment)
-
                 try:
-                    revision.full_clean()
+                    revision.set_new_attachment(attachment)
                 except ValidationError as e:
-                    revision.attachment = old_attachment
                     messages = []
                     if hasattr(e, "message_dict"):
                         for field_messages in e.message_dict.values():
@@ -11364,9 +11360,6 @@ class UploadAttachmentView(APIView):
                         {"detail": " ".join(messages)},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
-                if old_attachment:
-                    old_attachment.delete()
-                revision.save()
 
         return Response(status=status.HTTP_200_OK)
 
