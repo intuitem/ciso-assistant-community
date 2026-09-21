@@ -41,6 +41,8 @@ from .models import (
 )
 from core.permissions import IsGlobalAdmin, FeatureFlagRequired
 from iam.sso.slo import copy_slo_state_from_session_key
+from iam.tasks import send_password_reset_email
+from iam.utils import revoke_all_user_tokens
 from .service_accounts import (
     UNSET as UNSET_FIELD,
     get_selectable_permissions,
@@ -310,23 +312,10 @@ class PasswordResetView(views.APIView):
         associated_user = User.objects.filter(email__iexact=email).first()
         if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
             if associated_user is not None and associated_user.is_local:
-                try:
-                    logger.info(
-                        "Attempting to send password reset email", recipient=email
-                    )
-                    associated_user.mailing(
-                        email_template_name="registration/password_reset_email.html",
-                        subject=_("CISO Assistant: Password Reset"),
-                    )
-                    logger.info(
-                        "Password reset email request processed", recipient=email
-                    )
-                except Exception as e:
-                    logger.error(
-                        "Failed to send password reset email",
-                        recipient=email,
-                        error=str(e),
-                    )
+                logger.info("Enqueuing password reset email", recipient=email)
+                send_password_reset_email(
+                    associated_user.id, str(_("CISO Assistant: Password Reset"))
+                )
             else:
                 # Provide detailed logging about why password reset was not sent
                 if associated_user is None:
@@ -410,6 +399,7 @@ class ResetPasswordConfirmView(views.APIView):
             if self.token_generator.check_token(user, token):
                 user.set_password(new_password)
                 user.save()
+                revoke_all_user_tokens(user)
                 return Response(status=status.HTTP_200_OK)
         return Response(
             data={"error": "The link is invalid or has expired."},
@@ -457,6 +447,7 @@ class SetPasswordView(views.APIView):
         user = serializer.validated_data.get("user")
         user.set_password(new_password)
         user.save()
+        revoke_all_user_tokens(user)
         try:
             email_address = EmailAddress.objects.get(user=user, primary=True)
             email_address.verified = True
