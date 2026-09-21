@@ -1431,3 +1431,71 @@ def test_weighted_sum_scores_like_an_audit(app_config, heavy, light, expected):
     )["score"]
     assert live == expected
     assert preview == expected
+
+
+def _preview_form(questions):
+    """A one-page quick form document, scored 0-100 as a weighted sum."""
+    base = "urn:test:risk:qf_page:preview:only"
+    return {
+        "urn": "urn:test:risk:quick_form:preview",
+        "scores_definition": {"min": 0, "max": 100, "aggregation": "sum"},
+        "pages": [
+            {
+                "urn": base,
+                "ref_id": "only",
+                "name": "Only page",
+                "order": 1,
+                "questions": {
+                    f"{base}:question:{key}": {
+                        "type": "unique_choice",
+                        "text": key,
+                        "order": order,
+                        **extra,
+                        "choices": [
+                            {
+                                "urn": f"{base}:question:{key}:choice:good",
+                                "value": "good",
+                                "add_score": 50,
+                            },
+                            {
+                                "urn": f"{base}:question:{key}:choice:bad",
+                                "value": "bad",
+                                "add_score": 0,
+                            },
+                        ],
+                    }
+                    for order, (key, extra) in enumerate(questions.items(), start=1)
+                },
+            }
+        ],
+    }
+
+
+def _preview_score(questions, answers):
+    from core.cel_service import evaluate_quick_form_document
+
+    base = "urn:test:risk:qf_page:preview:only:question"
+    return evaluate_quick_form_document(
+        _preview_form(questions),
+        {
+            f"{base}:{key}": f"{base}:{key}:choice:{value}"
+            for key, value in answers.items()
+        },
+    )["score"]
+
+
+def test_preview_keeps_an_explicit_zero_weight():
+    """Weight 0 means the question does not count, and must not default to 1."""
+    questions = {"ignored": {"weight": 0}, "counted": {"weight": 1}}
+    assert _preview_score(questions, {"ignored": "good", "counted": "bad"}) == 0
+    assert _preview_score(questions, {"ignored": "bad", "counted": "good"}) == 100
+
+
+def test_preview_ignores_an_unanswered_optional_question():
+    """Only answered questions widen the projection range, as on the live path:
+    a blank optional question used to shrink the answered ones' share."""
+    questions = {
+        "optional": {"weight": 3, "required": False},
+        "answered": {"weight": 1},
+    }
+    assert _preview_score(questions, {"answered": "good"}) == 50

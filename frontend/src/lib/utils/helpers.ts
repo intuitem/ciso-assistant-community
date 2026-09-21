@@ -289,8 +289,9 @@ export function isQuestionVisible(
 
 /**
  * Lowest and highest total a completed choice question can reach (mirrors
- * core.utils.question_score_bounds). A unique choice reaches exactly one score,
- * a multiple choice every positive (or every negative) one at once.
+ * core.utils.question_score_bounds). `scores` is the contribution of every
+ * selectable choice, an unscored one counting as 0. A unique choice reaches
+ * exactly one score, a multiple choice every positive (or every negative) one.
  */
 export function questionScoreBounds(scores: number[], multiple: boolean): [number, number] {
 	if (scores.length === 0) return [0, 0];
@@ -367,13 +368,14 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 		// A negative weight has no defined meaning; treat it as 0.
 		const questionWeight = Math.max(typeof question.weight === 'number' ? question.weight : 1, 0);
-		const choiceScores: number[] = Array.isArray(question.choices)
-			? question.choices
-					.map((choice: any) => choice.add_score)
-					.filter((s: any) => s !== undefined && s !== null)
-			: [];
+		const choices: any[] = Array.isArray(question.choices) ? question.choices : [];
+		const choiceScores: number[] = choices
+			.map((choice: any) => choice.add_score)
+			.filter((s: any) => s !== undefined && s !== null);
 		if (choiceScores.length > 0) {
-			const [lo, hi] = questionScoreBounds(choiceScores, question.type === 'multiple_choice');
+			// An unscored choice is selectable and contributes 0.
+			const reachable = choices.map((choice: any) => choice.add_score ?? 0);
+			const [lo, hi] = questionScoreBounds(reachable, question.type === 'multiple_choice');
 			unweightedLo += lo;
 			unweightedHi += hi;
 			weightedLo += lo * questionWeight;

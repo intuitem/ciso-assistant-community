@@ -84,6 +84,16 @@ describe('computeRequirementScoreAndResult with weighted SUM', () => {
 		).toBe(50);
 	});
 
+	it('counts an unscored choice as zero in the reachable range', () => {
+		const ra = weightedSumRa([3, 1]);
+		ra.requirement.questions['urn:q2'].choices[1].add_score = null;
+		const score = (q1: string, q2: string) =>
+			computeRequirementScoreAndResult(ra, { 'urn:q1': `urn:q1:${q1}`, 'urn:q2': `urn:q2:${q2}` })
+				.score;
+		expect(score('good', 'bad')).toBe(75);
+		expect(score('bad', 'bad')).toBe(0);
+	});
+
 	it('treats a negative weight as 0', () => {
 		const ra = weightedSumRa([-2, 1]);
 		expect(

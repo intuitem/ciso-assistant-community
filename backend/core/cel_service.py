@@ -373,10 +373,11 @@ def _quick_form_snapshot(response) -> dict:
         score = sum(
             (c.add_score or 0) * weight for c in selected if c.add_score is not None
         )
-        scores = [
-            c.add_score for c in question.choices.all() if c.add_score is not None
-        ]
-        lo, hi = question_score_bounds(scores, question.type == "multiple_choice")
+        choices = list(question.choices.all())
+        scores = [c.add_score for c in choices if c.add_score is not None]
+        lo, hi = question_score_bounds(
+            [c.add_score or 0 for c in choices], question.type == "multiple_choice"
+        )
         per_question[question.id] = {
             "question": question,
             "page_id": question.page_id,
@@ -441,7 +442,7 @@ def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
                     for c in entry["selected"]
                     if extract_node_id(c.urn)
                 ],
-                "weight": question.weight,
+                "weight": entry["weight"],
                 "type": question.type,
                 "answered": entry["answered"],
             }
@@ -694,13 +695,17 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
 
     def weight_of(entry):
         # A negative weight has no defined meaning; treat it as 0.
-        return max(int(entry.get("weight") or 1), 0)
+        raw = entry.get("weight")
+        return max(int(1 if raw is None else raw), 0)
+
+    def has_score(entry):
+        return any(
+            choice.get("add_score") is not None for choice in entry.get("choices") or []
+        )
 
     def bounds_of(entry):
         scores = [
-            int(choice.get("add_score") or 0)
-            for choice in entry.get("choices") or []
-            if choice.get("add_score") is not None
+            int(choice.get("add_score") or 0) for choice in entry.get("choices") or []
         ]
         return question_score_bounds(scores, entry.get("type") == "multiple_choice")
 
@@ -714,7 +719,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         )
 
     def max_score_of(entry):
-        weight = int(entry.get("weight") or 1)
+        weight = weight_of(entry)
         scores = [
             int(choice.get("add_score") or 0) * weight
             for choice in entry.get("choices") or []
@@ -759,13 +764,13 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                     totals["missing"] += 1
                 if entry.get("type") in ("unique_choice", "multiple_choice"):
                     totals["max"] += max_score_of(entry)
-                    lo, hi = bounds_of(entry)
-                    weight = weight_of(entry)
-                    reach["lo"] += lo
-                    reach["hi"] += hi
-                    reach["weighted_lo"] += lo * weight
-                    reach["weighted_hi"] += hi * weight
-                    if answered:
+                    if answered and has_score(entry):
+                        weight = weight_of(entry)
+                        lo, hi = bounds_of(entry)
+                        reach["lo"] += lo
+                        reach["hi"] += hi
+                        reach["weighted_lo"] += lo * weight
+                        reach["weighted_hi"] += hi * weight
                         totals["sum"] += score_of(entry)
                         totals["weight"] += weight
                 q_node_id = extract_node_id(entry["urn"])
@@ -778,7 +783,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                             for u in selected_of(entry)
                             if extract_node_id(u)
                         ],
-                        "weight": int(entry.get("weight") or 1),
+                        "weight": weight_of(entry),
                         "type": entry.get("type") or "text",
                         "answered": answered,
                     }

@@ -1258,9 +1258,10 @@ def build_answers_dict(answers_qs):
 def question_score_bounds(scores, multiple: bool) -> tuple[int, int]:
     """Lowest and highest total a completed choice question can reach.
 
-    `scores` are the add_score values of the question's scored choices. A completed
-    question has at least one choice selected, so a unique choice reaches exactly one
-    score, and a multiple choice reaches every positive (or every negative) one at once.
+    `scores` is the contribution of every selectable choice, an unscored one counting
+    as 0. A completed question has at least one choice selected, so a unique choice
+    reaches exactly one score, and a multiple choice reaches every positive (or every
+    negative) one at once.
     """
     scores = list(scores)
     if not scores:

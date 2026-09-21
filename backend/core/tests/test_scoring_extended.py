@@ -1594,6 +1594,15 @@ class TestWeightedSum:
         assert _answer(d, "good", "bad") == 0
         assert _answer(d, "bad", "good") == 100
 
+    def test_unscored_choice_counts_as_zero(self, weighted_sum_setup):
+        """An unscored choice is a valid answer worth 0, so it belongs to the
+        reachable range: leaving it out pushed the floor up to the scored choice."""
+        d = weighted_sum_setup
+        d["q2_bad"].add_score = None
+        d["q2_bad"].save(update_fields=["add_score"])
+        assert _answer(d, "good", "bad") == 75
+        assert _answer(d, "bad", "bad") == 0
+
     def test_mean_is_untouched_by_the_projection(self, weighted_sum_setup):
         d = weighted_sum_setup
         ca = d["ra"].compliance_assessment

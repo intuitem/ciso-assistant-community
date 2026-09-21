@@ -10081,7 +10081,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             scores = [c.add_score for c in choices if c.add_score is not None]
             if scores:
                 lo, hi = question_score_bounds(
-                    scores, question.type == Question.Type.MULTIPLE_CHOICE
+                    [c.add_score or 0 for c in choices],
+                    question.type == Question.Type.MULTIPLE_CHOICE,
                 )
                 unweighted_lo += lo
                 unweighted_hi += hi
