@@ -1406,8 +1406,7 @@ objects:
         urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:4:
           type: unique_choice
           text: '[A4.b.NA.4] Vulnerabilities are discovered in software despite the
-            negligible difficulty of implementing mitigations. be appropriate and
-            proportionate within the context of common threats.'
+            negligible difficulty of implementing mitigations.'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:4:choice:1
             value: 'True'
@@ -1438,10 +1437,8 @@ objects:
           type: unique_choice
           text: '[A4.b.PA.3] You consider the security of environments (e.g. development,
             test and production), including source code and repositories, used in
-            the production of software to The testing regime uses a range of different
-            approaches (e.g. static and dynamic analysis, unit and integration testing
-            and point in time assessments) that verify all aspects of the development
-            lifecycle covering both functional and non-functional testing.'
+            the production of software to be appropriate and proportionate within
+            the context of common threats.'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:7:choice:1
             value: 'True'
@@ -1450,8 +1447,10 @@ objects:
             value: 'False'
         urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:8:
           type: unique_choice
-          text: '[A4.b.PA.4] You have arrangements in place with your software supplier
-            to receive timely security updates, patches and notifications.'
+          text: '[A4.b.PA.4] The testing regime uses a range of different approaches
+            (e.g. static and dynamic analysis, unit and integration testing and point
+            in time assessments) that verify all aspects of the development lifecycle
+            covering both functional and non-functional testing.'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:8:choice:1
             value: 'True'
@@ -1460,8 +1459,8 @@ objects:
             value: 'False'
         urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:9:
           type: unique_choice
-          text: '[A4.b.PA.5] Software, including updates and patches, is obtained
-            from your supplier(s) via secure channels.'
+          text: '[A4.b.PA.5] You have arrangements in place with your software supplier
+            to receive timely security updates, patches and notifications.'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:9:choice:1
             value: 'True'
@@ -1470,8 +1469,8 @@ objects:
             value: 'False'
         urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:10:
           type: unique_choice
-          text: '[A4.b.PA.6] Your software supplier(s) has processes in place to identify,
-            report and mitigate security vulnerabilities.'
+          text: '[A4.b.PA.6] Software, including updates and patches, is obtained
+            from your supplier(s) via secure channels.'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:10:choice:1
             value: 'True'
@@ -1480,9 +1479,8 @@ objects:
             value: 'False'
         urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:11:
           type: unique_choice
-          text: '[A4.b.PA.7] You have arrangements in place with your software supplier
-            to be notified of any significant events that may adversely impact network
-            and information systems supporting your essential function(s).'
+          text: '[A4.b.PA.7] Your software supplier(s) has processes in place to identify,
+            report and mitigate security vulnerabilities.'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:11:choice:1
             value: 'True'
@@ -1491,9 +1489,9 @@ objects:
             value: 'False'
         urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:12:
           type: unique_choice
-          text: '[A4.b.PA.8] If open-source software is used, you have taken appropriate
-            and proportionate steps to establish and maintain sufficient confidence
-            in its security for its use.'
+          text: '[A4.b.PA.8] You have arrangements in place with your software supplier
+            to be notified of any significant events that may adversely impact network
+            and information systems supporting your essential function(s).'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:12:choice:1
             value: 'True'
@@ -1502,8 +1500,9 @@ objects:
             value: 'False'
         urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:13:
           type: unique_choice
-          text: '[A4.b.PA.9] You have appropriate support and maintenance arrangements
-            in place.'
+          text: '[A4.b.PA.9] If open-source software is used, you have taken appropriate
+            and proportionate steps to establish and maintain sufficient confidence
+            in its security for its use.'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:13:choice:1
             value: 'True'
@@ -1512,23 +1511,19 @@ objects:
             value: 'False'
         urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:14:
           type: unique_choice
-          text: '[A4.b.A.1] Your software supplier(s) leverages an established secure
-            software development framework (e.g. NIST Secure Software Development
-            Framework (SSDF), Microsoft Secure Development Lifecycle (SDL)).'
+          text: '[A4.b.PA.10] You have appropriate support and maintenance arrangements
+            in place.'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:14:choice:1
             value: 'True'
-            compute_result: compliant
+            compute_result: partially_compliant
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:14:choice:2
             value: 'False'
-            compute_result: non_compliant
         urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:15:
           type: unique_choice
-          text: '[A4.b.A.2] Your software supplier can demonstrate a thorough understanding
-            of the composition and provenance of software provided to you, including
-            any third-party components used in the development of that software, and
-            those components are being monitored for new vulnerabilities throughout
-            the lifespan of the product.'
+          text: '[A4.b.A.1] Your software supplier(s) leverages an established secure
+            software development framework (e.g. NIST Secure Software Development
+            Framework (SSDF), Microsoft Secure Development Lifecycle (SDL)).'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:15:choice:1
             value: 'True'
@@ -1538,10 +1533,11 @@ objects:
             compute_result: non_compliant
         urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:16:
           type: unique_choice
-          text: '[A4.b.A.3] You consider the security of environments (e.g. development,
-            test, and production), including source code and repositories, used in
-            the production of software to be appropriate and proportionate within
-            the context of capable and well-resourced threat actors.'
+          text: '[A4.b.A.2] Your software supplier can demonstrate a thorough understanding
+            of the composition and provenance of software provided to you, including
+            any third-party components used in the development of that software, and
+            those components are being monitored for new vulnerabilities throughout
+            the lifespan of the product.'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:16:choice:1
             value: 'True'
@@ -1551,10 +1547,10 @@ objects:
             compute_result: non_compliant
         urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:17:
           type: unique_choice
-          text: '[A4.b.A.4] The software development lifecycle is informed by a detailed
-            and up to date understanding of threat and applies appropriate techniques,
-            such as threat modelling, to identify and assess potential vulnerabilities
-            and attack vectors.'
+          text: '[A4.b.A.3] You consider the security of environments (e.g. development,
+            test, and production), including source code and repositories, used in
+            the production of software to be appropriate and proportionate within
+            the context of capable and well-resourced threat actors.'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:17:choice:1
             value: 'True'
@@ -1564,13 +1560,26 @@ objects:
             compute_result: non_compliant
         urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:18:
           type: unique_choice
-          text: '[A4.b.A.5] You can attest to the authenticity and integrity of software,
-            including updates and patches.'
+          text: '[A4.b.A.4] The software development lifecycle is informed by a detailed
+            and up to date understanding of threat and applies appropriate techniques,
+            such as threat modelling, to identify and assess potential vulnerabilities
+            and attack vectors.'
           choices:
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:18:choice:1
             value: 'True'
             compute_result: compliant
           - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:18:choice:2
+            value: 'False'
+            compute_result: non_compliant
+        urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:19:
+          type: unique_choice
+          text: '[A4.b.A.5] You can attest to the authenticity and integrity of software,
+            including updates and patches.'
+          choices:
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:19:choice:1
+            value: 'True'
+            compute_result: compliant
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a4.b:question:19:choice:2
             value: 'False'
             compute_result: non_compliant
     - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:b

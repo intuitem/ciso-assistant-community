@@ -39,8 +39,30 @@ FRAMEWORK_URN = f"urn:intuitem:risk:framework:{REF_ID}"
 EXPECTED_OBJECTIVES = 4
 EXPECTED_PRINCIPLES = 14
 EXPECTED_OUTCOMES = 41
-# 184 Not Achieved + 147 Partially Achieved + 225 Achieved statements.
-EXPECTED_STATEMENTS = {"NA": 184, "PA": 147, "A": 225}
+# 184 Not Achieved + 148 Partially Achieved + 225 Achieved statements.
+EXPECTED_STATEMENTS = {"NA": 184, "PA": 148, "A": 225}
+# A4.b is the one table whose page break puts a Partially Achieved continuation
+# at the Not Achieved x-position. Pinned verbatim from the PDF: a regression
+# here means the builder has gone back to filing that fragment by geometry,
+# which truncates one statement and corrupts another.
+A4B_PAGE_BREAK = {
+    "A4.b.NA.4": (
+        "Vulnerabilities are discovered in software despite the negligible "
+        "difficulty of implementing mitigations."
+    ),
+    "A4.b.PA.3": (
+        "You consider the security of environments (e.g. development, test and "
+        "production), including source code and repositories, used in the "
+        "production of software to be appropriate and proportionate within the "
+        "context of common threats."
+    ),
+    "A4.b.PA.4": (
+        "The testing regime uses a range of different approaches (e.g. static "
+        "and dynamic analysis, unit and integration testing and point in time "
+        "assessments) that verify all aspects of the development lifecycle "
+        "covering both functional and non-functional testing."
+    ),
+}
 # What a True answer states, per column, and what a False answer states.
 EXPECTED_TIERS = {
     "NA": ["non_compliant", None],
@@ -155,6 +177,20 @@ class TestLibraryShape:
                 assert not columns["PA"], f"{node.ref_id} should have no PA column"
             else:
                 assert columns["PA"], f"{node.ref_id} should have a PA column"
+
+    def test_the_a4b_page_break_statements_are_whole(self, framework):
+        texts = {}
+        for question in Question.objects.filter(
+            requirement_node__framework=framework,
+            requirement_node__ref_id="A4.b",
+        ):
+            match = STATEMENT_RE.match(question.text)
+            texts[f"{match.group(1)}.{match.group(2)}.{match.group(3)}"] = (
+                question.text[match.end() :].strip()
+            )
+
+        for ref_id, expected in A4B_PAGE_BREAK.items():
+            assert texts.get(ref_id) == expected, ref_id
 
     def test_statements_are_indexed_the_way_the_caf_indexes_them(self, framework):
         node = outcome(framework, "A2.a")

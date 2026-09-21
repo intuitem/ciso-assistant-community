@@ -136,7 +136,7 @@ def aggregate_tiered_results(question_results: list[tuple]) -> str | None:
             return tier
 
     # Nothing states a tier - only blocking statements, none of them triggered.
-    if not any(holds_by_tier.values()):
+    if not holds_by_tier["compliant"] and not holds_by_tier["partially_compliant"]:
         return "compliant"
     return "non_compliant"
 
