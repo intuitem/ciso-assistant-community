@@ -38,15 +38,29 @@ LIBRARY = (
     / "workflow-compliance-audit-ai-review.yaml"
 )
 
-VERDICTS = [
-    json.dumps({"verdict": "supported", "note": "Access review signed and current."}),
-    json.dumps({"verdict": "thin", "note": "No evidence attached to the control."}),
-]
-WRITE_UP = (
-    "Two requirements were examined and one came back as anything other than "
-    "supported.\n\n## Questions to answer\n\n- A.5.2 — ask for the evidence "
-    "behind the logging control."
+# Only the backed requirement reaches the model: the other one's verdict is
+# settled by counting, which is the point of the routing.
+JUDGEMENT = json.dumps(
+    {
+        "reasoning": "The control names an access review and the evidence has a link.",
+        "verdict": "supported",
+        "note": "The signed access review is attached and dated this quarter.",
+    }
 )
+# What a reasoning model does when the schema gives it nowhere to think: the
+# working-out lands in the reviewer-facing field. Over the cap, so it is
+# refused and retried rather than filed as a finding.
+SPILLED = json.dumps(
+    {
+        "reasoning": "",
+        "verdict": "thin",
+        "note": "analysis<|message|>We need to answer verdict and note. " + "x" * 300,
+    }
+)
+NOTHING_SECTION = "Nothing in this group."
+LOOK_SECTION = "- A.5.2 — ask for the access review record behind this control."
+BACKED_SECTION = "- A.5.1 — the signed access review is attached."
+SECTIONS = [NOTHING_SECTION, LOOK_SECTION, BACKED_SECTION]
 
 
 class FakeLLM:
@@ -163,7 +177,7 @@ class TestAuditReviewSample:
 
     @pytest.fixture
     def llm(self, monkeypatch):
-        fake = FakeLLM(*VERDICTS, WRITE_UP)
+        fake = FakeLLM(JUDGEMENT, *SECTIONS)
         monkeypatch.setattr("chat.providers.get_llm_strict", lambda: fake, raising=True)
         return fake
 
@@ -181,8 +195,9 @@ class TestAuditReviewSample:
         )
 
         assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
-        # One call per requirement, plus the write-up.
-        assert len(fake.calls) == 3
+        # One judgement — only the backed requirement needs one — plus the three
+        # section writers. The thin requirement never reaches the model.
+        assert len(fake.calls) == 4
 
         container = DocumentContainer.objects.get(folder=domain)
         assert container.document_type == DocumentContainer.DocumentType.RECORD
@@ -193,9 +208,35 @@ class TestAuditReviewSample:
         assert revision.version_number == 1
         assert revision.status == "draft"
         content = revision.content
-        assert "Questions to answer" in content
+        assert "## Needs a look" in content
         # The audit is reachable from the record, via a plain internal link.
         assert f"(/compliance-assessments/{audit.id})" in content
+
+    def test_each_requirement_is_collected_as_a_record(
+        self, dispatch, django_capture_on_commit_callbacks, llm
+    ):
+        """The loop collects structured records, so which section a requirement
+        lands in is a fact in the data rather than something the write-up has to
+        infer from a sentence."""
+        domain = Folder.objects.create(
+            name="Audit review records",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        audit, _rows = make_audit(domain)
+        instance, _fake = self.run_it(
+            domain, audit, dispatch, django_capture_on_commit_callbacks, llm
+        )
+        records = instance.node_outputs["per_requirement"]["results"]
+        assert [r["ref_id"] for r in records] == ["A.5.1", "A.5.2"]
+        assert [r["verdict"] for r in records] == ["supported", "thin"]
+        assert all(
+            set(r) == {"ref_id", "name", "claimed", "verdict", "note"} for r in records
+        )
+        assert records[0]["claimed"] == "compliant"
+        # The thin one was settled by counting, so its note states the counts
+        # rather than quoting a model.
+        assert "none of them attached and current" in records[1]["note"]
 
     def test_the_audit_itself_is_untouched(
         self, dispatch, django_capture_on_commit_callbacks, llm
@@ -222,10 +263,9 @@ class TestAuditReviewSample:
         write-up. The record has to say that happened, or it reads as though the
         requirement was reviewed and found fine."""
         fake = FakeLLM(
-            VERDICTS[0],
             "not json at all",
             "not json at all",  # max_attempts: 2
-            WRITE_UP,
+            *SECTIONS,
         )
         monkeypatch.setattr("chat.providers.get_llm_strict", lambda: fake, raising=True)
         domain = Folder.objects.create(
@@ -241,7 +281,8 @@ class TestAuditReviewSample:
         assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
         loop_output = instance.node_outputs["per_requirement"]
         assert loop_output["count"] == 2
-        assert len(loop_output["results"]) == 1
+        # The counted one still lands; only the judged one is lost.
+        assert [r["verdict"] for r in loop_output["results"]] == ["thin"]
         assert len(loop_output["errors"]) == 1
 
         content = ManagedDocument.objects.get(
@@ -266,6 +307,40 @@ class TestAuditReviewSample:
         ).current_revision.content
         assert "2 requirement(s) entered the review" in content
         assert "absent from the list above: []" in content
+        # The three sections are the document's shape, whatever the model wrote
+        # inside them.
+        for heading in (
+            "## Nothing recorded",
+            "## Needs a look",
+            "## Backed by evidence",
+        ):
+            assert heading in content
+
+    def test_a_note_that_spills_the_working_out_is_refused_and_retried(
+        self, dispatch, django_capture_on_commit_callbacks, monkeypatch
+    ):
+        """The cap lives in the schema, so an over-long note fails validation
+        and buys a retry (max_attempts: 2). The prompt asking for brevity is
+        not what enforces it."""
+        fake = FakeLLM(SPILLED, JUDGEMENT, *SECTIONS)
+        monkeypatch.setattr("chat.providers.get_llm_strict", lambda: fake, raising=True)
+        domain = Folder.objects.create(
+            name="Audit review spill",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        audit, _rows = make_audit(domain)
+        instance, _fake = self.run_it(
+            domain, audit, dispatch, django_capture_on_commit_callbacks, fake
+        )
+
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        loop_output = instance.node_outputs["per_requirement"]
+        assert loop_output["errors"] == []
+        notes = [record["note"] for record in loop_output["results"]]
+        # The retry's answer is what was collected; the spill never reached it.
+        assert not any("<|message|>" in note for note in notes)
+        assert any("The signed access review is attached" in note for note in notes)
 
     def test_the_model_is_shown_the_evidence_on_the_control(
         self, dispatch, django_capture_on_commit_callbacks, llm
@@ -283,11 +358,16 @@ class TestAuditReviewSample:
         _instance, fake = self.run_it(
             domain, audit, dispatch, django_capture_on_commit_callbacks, llm
         )
-        backed, thin = fake.calls[0]["context"], fake.calls[1]["context"]
+        backed = fake.calls[0]["context"]
         assert "Review A.5.1" in backed
         assert '"attached": true' in backed
         assert "The organisation restricts and reviews access." in backed
         assert "Checked with the platform team." in backed
-        # The unbacked one names its control but carries no evidence at all.
-        assert "Control A.5.2" in thin
-        assert "Review A.5.1" not in thin
+        # The unbacked requirement is never put to the model as a *judgement*:
+        # its verdict is a counting result, so asking would only invite it to be
+        # overruled. (The section writers do see every record — they are writing
+        # prose about them, not deciding them, which is why the schema is what
+        # tells the two kinds of call apart.)
+        judgements = [call for call in fake.calls if call.get("schema")]
+        assert len(judgements) == 1
+        assert "A.5.2" not in judgements[0]["context"]

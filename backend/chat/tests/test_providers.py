@@ -485,3 +485,47 @@ class TestSchemaFallback:
         llm = self._llm(200)
         llm.generate(prompt="p", context="", schema=self.SCHEMA)
         assert len(llm.client.bodies) == 1
+
+
+class TestStripReasoning:
+    """Harmony-format models (gpt-oss and kin) tag their output with channels.
+    When the server does not parse them, the analysis channel arrives inside
+    `content` and reads as part of the answer."""
+
+    def test_the_final_channel_is_the_answer(self):
+        from chat.providers import strip_reasoning
+
+        raw = (
+            "<|start|>assistant<|channel|>analysis<|message|>We need to weigh"
+            " the evidence..<|end|>"
+            "<|start|>assistant<|channel|>final<|message|>The control is not"
+            " evidenced.<|return|>"
+        )
+        assert strip_reasoning(raw) == "The control is not evidenced."
+
+    def test_a_mangled_leak_still_loses_its_markers(self):
+        """Leaks arrive half-parsed as often as not — no opening channel tag,
+        just the marker and the monologue."""
+        from chat.providers import strip_reasoning
+
+        raw = "analysis<|message|>We need to answer verdict and note. Example:"
+        assert "<|message|>" not in strip_reasoning(raw)
+        assert "We need to answer" not in strip_reasoning(raw)
+
+    def test_think_blocks_still_go(self):
+        from chat.providers import strip_reasoning
+
+        assert strip_reasoning("<think>hmm</think>Answer") == "Answer"
+
+    def test_ordinary_prose_is_untouched(self):
+        """`analysis` is an ordinary word in this product's vocabulary."""
+        from chat.providers import strip_reasoning
+
+        text = "Root cause analysis of the logs is missing."
+        assert strip_reasoning(text) == text
+
+    def test_json_survives(self):
+        from chat.providers import strip_reasoning
+
+        payload = '{"verdict": "thin", "note": "clean"}'
+        assert strip_reasoning(payload) == payload

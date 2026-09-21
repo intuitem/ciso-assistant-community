@@ -6,9 +6,11 @@ description: 'Walks the requirements an audit calls compliant or partially compl
   AI provider whether what is attached actually supports that claim, and files the answers as a managed
   document of type Record. Run it with audit_id set to the audit you want reviewed. The model never
   changes a result or a score — those are not writable by any workflow — so the review lands as a
-  document a person reads, next to the audit it questions. Reviews 12 requirements per run by default,
-  which keeps it inside the AI call budget (WORKFLOW_AI_MAX_CALLS_PER_RUN, 50 by default: one call per
-  requirement plus one for the write-up). Needs an AI provider configured in Global settings — without
+  document a person reads, next to the audit it questions. Reviews up to 25 requirements per run.
+  Requirements with nothing recorded, and those whose evidence is neither attached nor current, are
+  settled by counting and cost no AI call at all — the model is asked only whether an attached, current
+  document shows what the requirement asks for. Three more calls write the three sections, so a run
+  stays well inside WORKFLOW_AI_MAX_CALLS_PER_RUN (50 by default). Needs an AI provider configured in Global settings — without
   one the AI steps fail and the run stops rather than guessing.'
 copyright: © intuitem
 version: 1
@@ -33,13 +35,38 @@ objects:
       - key: audit_name
         type: string
         default_value: ''
+      # What the database already knows about each requirement, lifted into
+      # variables so a branch can route on it. Conditions read declared
+      # variables, and they coerce by the declared type — numbers here, so
+      # "0" compares as 0 and not as a string.
+      - key: cov_controls
+        type: number
+        default_value: 0
+      - key: cov_records
+        type: number
+        default_value: 0
+      - key: cov_usable
+        type: number
+        default_value: 0
+      - key: cov_expired
+        type: number
+        default_value: 0
       - key: ai_verdict
         type: string
         default_value: ''
       - key: ai_note
         type: string
         default_value: ''
-      - key: write_up
+      - key: record
+        type: json
+        default_value: {}
+      - key: write_nothing
+        type: string
+        default_value: ''
+      - key: write_look
+        type: string
+        default_value: ''
+      - key: write_backed
         type: string
         default_value: ''
       nodes:
@@ -112,7 +139,10 @@ objects:
           model: requirement_assessment
           mode: list
           order_by: created_at
-          limit: 12
+          # One call per requirement plus one for the write-up, so this stays
+          # inside WORKFLOW_AI_MAX_CALLS_PER_RUN (50 by default). Raising it
+          # costs calls and widens the read, which the node-output cap bounds.
+          limit: 25
           filters:
             operator: and
             conditions:
@@ -127,39 +157,123 @@ objects:
         label: One requirement at a time
         loop_config:
           collection: '{{nodes.fetch.results}}'
-          collect: '{{item.requirement.ref_id}} {{item.requirement.name}} — claimed {{item.result}} —
-            {{ai_verdict}} — {{ai_note}}'
+          # A single {{path}} keeps the value's type, so the loop collects real
+          # records rather than sentences. Which section each one lands in is
+          # then a fact in the data, not something the write-up has to infer.
+          collect: '{{record}}'
           on_item_error: continue
+      - ref: facts
+        type: action
+        label: Read what is recorded
+        action_config:
+          type: set_variables
+          variables:
+            cov_controls: '{{item.coverage.controls}}'
+            cov_records: '{{item.coverage.evidence_records}}'
+            cov_usable: '{{item.coverage.evidence_usable}}'
+            cov_expired: '{{item.coverage.evidence_expired}}'
+      - ref: route
+        type: condition
+        label: Does this need judgement at all?
+        branches:
+        # Nothing recorded: no control, no evidence. There is no question here,
+        # so no call is made.
+        - name: nothing
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: cov_controls
+              op: eq
+              value: '0'
+            - variable: cov_records
+              op: eq
+              value: '0'
+        # Something is recorded and none of it is attached and current. Also
+        # settled by counting.
+        - name: unusable
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: cov_usable
+              op: eq
+              value: '0'
+        # Something usable is attached: whether it shows what the requirement
+        # asks for is the one question a model is needed for.
+        - name: judge
+          is_default: true
+      - ref: pack_nothing
+        type: action
+        label: Nothing recorded
+        action_config:
+          type: set_variables
+          variables:
+            record:
+              ref_id: '{{item.requirement.ref_id}}'
+              name: '{{item.requirement.name}}'
+              claimed: '{{item.result}}'
+              verdict: unsupported
+              # Names the requirement so no two of these notes are identical:
+              # six bullets carrying the same sentence word for word read as a
+              # repetition to condense, and a section writer duly condensed them.
+              note: 'No control and no evidence is recorded for {{item.requirement.name}}.'
+      - ref: pack_unusable
+        type: action
+        label: Recorded, nothing behind it
+        action_config:
+          type: set_variables
+          variables:
+            record:
+              ref_id: '{{item.requirement.ref_id}}'
+              name: '{{item.requirement.name}}'
+              claimed: '{{item.result}}'
+              verdict: thin
+              note: '{{cov_controls}} control(s) and {{cov_records}} evidence record(s) are recorded,
+                none of them attached and current ({{cov_expired}} expired). Ask for the document behind
+                them.'
       - ref: challenge
         type: action
-        label: Does the evidence hold it up?
+        label: Does the evidence match the expectation?
         action_config:
           type: ai_extract
-          prompt: 'An auditor has recorded that this requirement is met. Weigh that claim against what
-            is actually attached to it, and answer with one of three verdicts:
+          prompt: 'An auditor has recorded that this requirement is met, and at least one evidence is
+            attached and still current. Whether something is attached has already been counted — that
+            part is settled. Your only question is whether what is attached shows what this requirement
+            actually asks for.
 
-            supported — a control is in place AND at least one piece of evidence is attached, unexpired,
-            and plausibly shows what the requirement asks for.
+            Read the requirement''s description first: that is the expectation. Then read the names and
+            descriptions of the evidence, and the controls they hang off.
 
-            thin — controls are named but the evidence is missing, has nothing attached ("attached": false),
-            has expired, or does not show what this particular requirement asks for. Also use this when a
-            single generic document is the only support for a specific technical expectation.
+            Answer "supported" if at least one attached, current evidence plausibly shows what the
+            description asks for.
 
-            unsupported — nothing is attached at all, or what is attached addresses a different subject
-            than the requirement.
+            Answer "thin" if none of them do — because the document is about a different subject, because
+            it describes a plan, a design or a draft rather than something performed, because the control
+            that would carry it is not yet in operation, or because what is attached is too old to show
+            the current state.
 
-            Evidence reaches a requirement two ways and both count: attached to the requirement itself,
-            and attached to one of its controls. An evidence record whose "attached" field is false is a
-            title with no document behind it — treat it as absent.
+            Today''s date is given below. Expiry dates have already been checked, but most documents
+            carry no expiry date at all: a report whose own name or description places it a year or more
+            before today does not show what is happening now, however firmly it is attached. When that is
+            why you answer "thin", say so and name the period you would want instead.
+
+            The evidence may be written in a language other than English. That says nothing about whether
+            it supports the requirement.
 
             You are raising a question for a human, not overruling the auditor: never say the result is
-            wrong, say what a reviewer should ask for. Keep the note under 30 words and name the specific
-            thing that is missing rather than describing the requirement back.'
-          input: 'Requirement {{item.requirement.ref_id}} — {{item.requirement.name}}
+            wrong, say what a reviewer should ask for.
 
-            What it asks for: {{item.requirement.description}}
+            Work it out in the "reasoning" field — that is what it is for, and nobody reads it. Then put
+            in "note" only the finished sentence a reviewer will read: under 30 words, naming the
+            specific document you would ask for, or the one that was found. Never let working-out,
+            self-talk or formatting markers into "note". An ellipsis or a placeholder is not an answer.'
+          input: 'Today is {{today}}. Judge currency against that date, not against whatever period the
+            documents mention.
 
-            Auditor''s result: {{item.result}} (score {{item.score}}, documentation score {{item.documentation_score}})
+            Requirement {{item.requirement.ref_id}} — {{item.requirement.name}}
+
+            The expectation, in the standard''s own words: {{item.requirement.description}}
+
+            Already counted, and not in question: {{item.coverage}}
 
             Auditor''s note: {{item.observation}}
 
@@ -169,43 +283,117 @@ objects:
           schema:
             type: object
             properties:
+              reasoning:
+                type: string
+                maxLength: 800
               verdict:
                 type: string
                 enum:
                 - supported
                 - thin
-                - unsupported
               note:
                 type: string
+                minLength: 40
+                maxLength: 200
             required:
+            - reasoning
             - verdict
             - note
           max_attempts: 2
         output_mapping:
           ai_verdict: verdict
           ai_note: note
-      - ref: compose
+      - ref: pack
         type: action
-        label: Write the review
+        label: Keep the answer
+        action_config:
+          type: set_variables
+          variables:
+            record:
+              ref_id: '{{item.requirement.ref_id}}'
+              name: '{{item.requirement.name}}'
+              claimed: '{{item.result}}'
+              verdict: '{{ai_verdict}}'
+              note: '{{ai_note}}'
+      - ref: write_nothing_section
+        type: action
+        label: Write "Nothing recorded"
         action_config:
           type: ai_generate
-          prompt: 'You are writing the body of a short review record for the person who owns this audit.
-            Each line below is one requirement the audit claims is satisfied, followed by a reviewer''s
-            verdict and note.
+          prompt: 'Below is one record per requirement an audit claims is satisfied, each with a verdict.
 
-            Open with one sentence saying how many requirements are in the list below and how many came
-            back as anything other than supported. Count the lines you were given and nothing else. Then, under a "## Questions to answer" heading, list only the
-            thin and unsupported ones as bullets, each naming the requirement and what a reviewer should
-            ask for. If every requirement came back supported, say so plainly in one sentence and write
-            no bullet list. Close with one sentence stating that this was produced automatically and that
-            no result or score was changed.
+            Write bullets for ONLY the records whose verdict is exactly "unsupported". Ignore every other
+            record completely — they belong to sections you are not writing.
 
-            Markdown, no title — the document already has one. Do not invent requirements that are not
-            in the list.'
+            Open with one sentence: these are claims with nothing recorded in the tool, which is not the
+            same as the work not being done — it is what an auditor asks for first. Then one bullet per
+            record: the reference, the name, and what to ask for, taken from its note.
+
+            Write one bullet for every record with that verdict — including records whose notes say the
+            same thing as each other. They are different requirements, and one that never reaches the
+            page is one nobody knows to look at. Never merge two records into a bullet, never summarise
+            a group of them, and never leave one out.
+
+            If no record has that verdict, write one sentence saying there are none, and no bullets.
+
+            Markdown bullets, no heading — the document supplies it. Do not count anything.'
           input: '{{nodes.per_requirement.results}}'
-          max_words: 400
+          max_words: 320
         output_mapping:
-          write_up: text
+          write_nothing: text
+      - ref: write_look_section
+        type: action
+        label: Write "Needs a look"
+        action_config:
+          type: ai_generate
+          prompt: 'Below is one record per requirement an audit claims is satisfied, each with a verdict.
+
+            Write bullets for ONLY the records whose verdict is exactly "thin". Ignore every other record
+            completely — they belong to sections you are not writing.
+
+            Open with one sentence: something is recorded against these, but it does not carry the claim
+            on its own. Then one bullet per record: the reference, the name, and the specific thing that
+            is missing, stale or off-subject, taken from its note.
+
+            Write one bullet for every record with that verdict — including records whose notes say the
+            same thing as each other. They are different requirements, and one that never reaches the
+            page is one nobody knows to look at. Never merge two records into a bullet, never summarise
+            a group of them, and never leave one out.
+
+            If no record has that verdict, write one sentence saying there are none, and no bullets.
+
+            Markdown bullets, no heading — the document supplies it. Do not count anything.'
+          input: '{{nodes.per_requirement.results}}'
+          max_words: 320
+        output_mapping:
+          write_look: text
+      - ref: write_backed_section
+        type: action
+        label: Write "Backed by evidence"
+        action_config:
+          type: ai_generate
+          prompt: 'Below is one record per requirement an audit claims is satisfied, each with a verdict.
+
+            Write bullets for ONLY the records whose verdict is exactly "supported". Ignore every other
+            record completely — they belong to sections you are not writing.
+
+            Open with one sentence: these claims have a current, attached document behind them that
+            matches the expectation. Then one bullet per record: the reference, the name, and what was
+            found, taken from its note. Name what was found, never what is missing — a bullet here that
+            asks for something is a bullet in the wrong section.
+
+            Write one bullet for every record with that verdict — including records whose notes say the
+            same thing as each other. They are different requirements, and one that never reaches the
+            page is one nobody knows to look at. Never merge two records into a bullet, never summarise
+            a group of them, and never leave one out.
+
+            If no record has that verdict, write one sentence saying there are none, and no bullets.
+
+            Markdown bullets, no heading — the document supplies it. Do not count anything.'
+          input: '{{nodes.per_requirement.results}}'
+          max_words: 320
+        output_mapping:
+          write_backed: text
       - ref: open_record
         type: action
         label: Open the record
@@ -213,7 +401,11 @@ objects:
           type: create_object
           model: document_container
           fields:
-            name: 'Audit review — {{audit_name}} — {{today}}'
+            # {{now}}, not {{today}}: a container's name is unique within its
+            # folder, so a second review of the same audit on the same day used
+            # to fail here — after every AI call had been paid for. A review is
+            # per run, and its own timestamp is what says which run.
+            name: 'Audit evidence review — {{audit_name}} — {{now}}'
             document_type: record
             description: 'Automated evidence review of the audit "{{audit_name}}", produced on {{today}}.'
       - ref: write_record
@@ -223,16 +415,34 @@ objects:
           type: create_object
           model: managed_document
           fields:
-            name: 'Audit review — {{audit_name}} — {{today}}'
+            name: 'Audit evidence review — {{audit_name}} — {{now}}'
             container: '{{nodes.open_record.created_object_id}}'
-            content: '# Audit review — {{audit_name}}
+            content: '# Audit evidence review — {{audit_name}}
 
 
-              Produced automatically on {{today}} over the requirements this audit records as compliant
-              or partially compliant.
+              Produced automatically on {{today}} over every requirement this audit records as compliant
+              or partially compliant. Each was checked against what is recorded behind it: whether a
+              control exists, whether an evidence has a file or link attached and still current, and
+              whether that document matches what the requirement asks for. What follows is what the
+              records show — not a judgement on whether the work is being done.
 
 
-              {{write_up}}
+              ## Nothing recorded
+
+
+              {{write_nothing}}
+
+
+              ## Needs a look
+
+
+              {{write_look}}
+
+
+              ## Backed by evidence
+
+
+              {{write_backed}}
 
 
               ---
@@ -241,8 +451,11 @@ objects:
               Source audit: [{{audit_name}}](/compliance-assessments/{{audit_id}})
 
 
-              Run record: {{nodes.per_requirement.count}} requirement(s) entered the review. Steps that
-              failed, and are therefore absent from the list above: {{nodes.per_requirement.errors}}
+              Run record, counted by the engine rather than written by the model:
+              {{nodes.per_requirement.count}} requirement(s) entered the review. If the summary above
+              states a different number, take this one — and read the list twice, because something was
+              dropped or miscounted. Steps that failed, and are therefore absent from the list above:
+              {{nodes.per_requirement.errors}}
 
 
               This document is a draft. Nothing in the audit was changed: a workflow cannot write a
@@ -273,14 +486,35 @@ objects:
       - source: fetch
         target: per_requirement
       - source: per_requirement
-        target: challenge
+        target: facts
         source_port: each
+      - source: facts
+        target: route
+      - source: route
+        target: pack_nothing
+        source_branch: nothing
+      - source: route
+        target: pack_unusable
+        source_branch: unusable
+      - source: route
+        target: challenge
+        source_branch: judge
       - source: challenge
+        target: pack
+      - source: pack_nothing
+        target: per_requirement
+      - source: pack_unusable
+        target: per_requirement
+      - source: pack
         target: per_requirement
       - source: per_requirement
-        target: compose
+        target: write_nothing_section
         source_port: done
-      - source: compose
+      - source: write_nothing_section
+        target: write_look_section
+      - source: write_look_section
+        target: write_backed_section
+      - source: write_backed_section
         target: open_record
       - source: open_record
         target: write_record

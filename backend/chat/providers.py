@@ -119,6 +119,48 @@ def strip_thinking(text: str) -> str:
     return re.sub(r"<think>[\s\S]*?</think>\s*", "", text).lstrip()
 
 
+# Harmony-format models (gpt-oss and kin) tag their output with channels:
+# an `analysis` channel carrying the reasoning and a `final` channel carrying
+# the answer. A server that parses the format returns only the final channel,
+# but one that does not — or one pushed into constrained decoding — leaks the
+# analysis into `content`, where it reads as part of the answer. Leaks arrive
+# mangled as often as not (a stray `analysis<|message|>` with no opening
+# `<|channel|>`), so the markers are stripped wherever they appear rather than
+# only in well-formed pairs.
+_HARMONY_FINAL_RE = re.compile(
+    r"<\|channel\|>final<\|message\|>([\s\S]*?)(?:<\|(?:end|return)\|>|\Z)"
+)
+_HARMONY_ANALYSIS_RE = re.compile(
+    r"(?:<\|channel\|>)?(?:analysis|commentary)<\|message\|>[\s\S]*?"
+    r"(?:<\|(?:end|return)\|>|(?=<\|channel\|>)|\Z)"
+)
+_HARMONY_TOKENS_RE = re.compile(r"<\|(?:start|end|return|message|channel|constrain)\|>")
+
+
+def strip_reasoning(text: str) -> str:
+    """The answer, with a reasoning model's working-out removed.
+
+    Handles both conventions: `<think>` blocks, and harmony channels. When a
+    final channel is present it *is* the answer and everything else is
+    scaffolding; otherwise the analysis segments and any stray channel tokens
+    are cut. Text with neither convention comes back untouched.
+
+    This cannot rescue reasoning that landed *inside* a JSON field under
+    constrained decoding — nothing outside the model can. Give the schema its
+    own field for the working-out instead.
+    """
+    if not isinstance(text, str):
+        return text
+    text = strip_thinking(text)
+    if "<|" not in text and "analysis" not in text:
+        return text
+    final = _HARMONY_FINAL_RE.search(text)
+    if final:
+        return final.group(1).strip()
+    text = _HARMONY_ANALYSIS_RE.sub("", text)
+    return _HARMONY_TOKENS_RE.sub("", text).strip()
+
+
 def filter_thinking_tokens(
     token_stream: Iterator[str],
 ) -> Iterator[tuple[str, str]]:
@@ -408,7 +450,7 @@ class OllamaLLM:
             body["format"] = schema
         resp = self.client.post(f"{self.base_url}/api/chat", json=body)
         resp.raise_for_status()
-        return strip_thinking(resp.json()["message"]["content"])
+        return strip_reasoning(resp.json()["message"]["content"])
 
     def _raw_stream(
         self,
@@ -561,7 +603,7 @@ class OpenAICompatibleLLM:
             body["response_format"] = {"type": "json_object"}
             resp = self.client.post(self._chat_url(), json=body)
         resp.raise_for_status()
-        return strip_thinking(resp.json()["choices"][0]["message"]["content"])
+        return strip_reasoning(resp.json()["choices"][0]["message"]["content"])
 
     def _raw_stream(
         self,

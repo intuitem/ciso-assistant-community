@@ -938,6 +938,61 @@ class TestRequirementBacking:
         assert row["applied_controls"] == []
         assert row["evidences"] == []
 
+    def test_coverage_counts_both_paths(self):
+        """The countable half of the question, so a reader is handed it instead
+        of deriving it from a list of titles."""
+        domain = make_domain("Backing coverage")
+        self.make_audit(domain)
+        row = self.read(domain)
+        assert row["coverage"] == {
+            "controls": 1,
+            "controls_active": 0,
+            # One on the requirement, one on the control.
+            "evidence_records": 2,
+            "evidence_attached": 1,
+            "evidence_usable": 1,
+            "evidence_expired": 0,
+            "has_observation": True,
+            "nothing_recorded": False,
+        }
+
+    def test_coverage_says_when_nothing_is_recorded(self):
+        """The one line that settles unsupported without any judgement."""
+        domain = make_domain("Backing empty coverage")
+        self.make_audit(domain, with_backing=False)
+        row = self.read(domain)
+        assert row["coverage"]["nothing_recorded"] is True
+        assert row["coverage"]["evidence_usable"] == 0
+
+    def test_an_expired_evidence_is_attached_but_not_usable(self):
+        """Attachment and currency are different questions, and the gap between
+        them is exactly where a claim quietly stops being carried."""
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from core.models import Evidence, EvidenceRevision
+
+        domain = make_domain("Backing expiry")
+        audit = self.make_audit(domain, with_backing=False)
+        assessment = audit.requirement_assessments.first()
+        evidence = Evidence.objects.create(
+            name="Lapsed report",
+            folder=domain,
+            status="expired",
+            expiry_date=timezone.now().date() - timedelta(days=30),
+        )
+        EvidenceRevision.objects.create(
+            evidence=evidence, version=1, link="https://example.test/lapsed"
+        )
+        assessment.evidences.add(evidence)
+
+        row = self.read(domain)
+        assert row["coverage"]["evidence_attached"] == 1
+        assert row["coverage"]["evidence_usable"] == 0
+        assert row["coverage"]["evidence_expired"] == 1
+        assert row["coverage"]["nothing_recorded"] is False
+
     def test_the_relations_are_not_filterable(self):
         """They are computed, so they never become a filter surface — the
         field list is concrete columns only."""

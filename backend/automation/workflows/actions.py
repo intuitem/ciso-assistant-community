@@ -1042,6 +1042,52 @@ def _requirement_backing(assessment):
     ]
 
 
+def _evidence_is_usable(evidence):
+    """Attached, and not past its own expiry — by date or by status."""
+    revision = evidence.last_revision
+    if not (revision and (revision.attachment or revision.link)):
+        return False
+    if evidence.status == "expired":
+        return False
+    return not (evidence.expiry_date and evidence.expiry_date < datetime.date.today())
+
+
+def _coverage_summary(assessment):
+    """What is recorded against a requirement, counted rather than judged.
+
+    Whether a document is attached, current, or absent is a fact the database
+    can answer exactly; whether it *shows what the requirement asks for* is not,
+    and never will be. Splitting the two means a reader — or a model — is handed
+    the countable half instead of having to infer it from a list of titles,
+    which is where judgement tends to slip.
+
+    Counts span both paths: evidence on the requirement and evidence on its
+    controls.
+    """
+    controls = list(assessment.applied_controls.all())
+    evidences = list(assessment.evidences.all()) + [
+        evidence for control in controls for evidence in control.evidences.all()
+    ]
+    usable = [evidence for evidence in evidences if _evidence_is_usable(evidence)]
+    attached = [
+        evidence
+        for evidence in evidences
+        if evidence.last_revision
+        and (evidence.last_revision.attachment or evidence.last_revision.link)
+    ]
+    return {
+        "controls": len(controls),
+        "controls_active": sum(1 for c in controls if c.status == "active"),
+        "evidence_records": len(evidences),
+        "evidence_attached": len(attached),
+        "evidence_usable": len(usable),
+        "evidence_expired": len(attached) - len(usable),
+        "has_observation": bool((assessment.observation or "").strip()),
+        # The one line that settles "is there anything here at all".
+        "nothing_recorded": not controls and not evidences,
+    }
+
+
 def _requirements_breakdown(assessment):
     """Total assessable requirement assessments and their count per result —
     stable shape: every result key present, zeroes included."""
@@ -1290,6 +1336,9 @@ READABLE_MODELS: dict[str, ReadEntry] = {
                 # a title.
                 "description": ra.requirement.description,
             },
+            # The countable facts, so a reader does not have to derive them
+            # from the lists below.
+            "coverage": _coverage_summary,
             # What is claimed to satisfy the requirement, and what backs it.
             "applied_controls": _requirement_backing,
             "evidences": lambda ra: [
