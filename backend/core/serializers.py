@@ -3708,6 +3708,23 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     )
 
     def validate(self, attrs):
+        # Drop implementation groups that don't exist in the framework.
+        if "selected_implementation_groups" in attrs:
+            framework = attrs.get("framework") or getattr(
+                self.instance, "framework", None
+            )
+            defined = {
+                ig.get("ref_id")
+                for ig in (
+                    getattr(framework, "implementation_groups_definition", None) or []
+                )
+            }
+            selected = attrs["selected_implementation_groups"]
+            selected = selected if isinstance(selected, list) else []
+            attrs["selected_implementation_groups"] = [
+                g for g in selected if g in defined
+            ]
+
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
             # If we're unlocking (setting is_locked to False), allow the operation
             if "is_locked" in attrs and attrs["is_locked"] is False:
