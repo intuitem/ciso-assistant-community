@@ -189,11 +189,16 @@ build_frontend() {
 # itself: it only changes once a build has run, so every source edit after the first build
 # looked unchanged and the enterprise tests silently ran against stale code.
 compute_frontend_hash() {
+  local sources=("$APP_DIR"/frontend/{src,messages})
   if [[ -n "$ENTERPRISE" ]]; then
-    find "$APP_DIR"/frontend/{src,messages} "$APP_DIR"/enterprise/frontend/src -type f \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" \) -print0 | xargs -0 md5sum | md5sum
-  else
-    find "$APP_DIR"/frontend/{src,messages} -type f \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" \) -print0 | xargs -0 md5sum | md5sum
+    sources+=("$APP_DIR"/enterprise/frontend/src)
   fi
+  # app.css and app.html go into the bundle too, so an edit to either has to invalidate it.
+  # `find` walks in directory order, which is not stable here, so sort before the digest:
+  # unsorted, the same tree hashed differently run to run and nothing was ever reused.
+  find "${sources[@]}" -type f \
+    \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" -o -name "*.css" -o -name "*.html" \) \
+    -print0 | xargs -0 md5sum | LC_ALL=C sort | md5sum
 }
 
 run_tests() {
