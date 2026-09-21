@@ -65,8 +65,10 @@ from .base_models import (
 )
 from .utils import (
     aggregate_compute_results,
+    aggregate_tiered_results,
     camel_case,
     resolve_compute_result,
+    resolve_result_tier,
     sha256,
     update_selected_implementation_groups,
     yaml_safe_load,
@@ -1273,6 +1275,10 @@ class LibraryUpdater:
                     framework_dict["outcomes_definition"] = []
                 # An omitted IG definition means that the framework no longer defines implementation groups.
                 framework_dict.setdefault("implementation_groups_definition", None)
+                # Same for the result rule: dropping the key reverts to the default.
+                framework_dict.setdefault(
+                    "result_aggregation", Framework.ResultAggregation.PER_ANSWER
+                )
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
@@ -1339,7 +1345,7 @@ class LibraryUpdater:
                 existing_requirement_assessment_objects = defaultdict(list)
                 for ra in RequirementAssessment.objects.filter(
                     requirement__framework=new_framework
-                ).select_related("compliance_assessment"):
+                ).select_related("compliance_assessment", "requirement__framework"):
                     existing_requirement_assessment_objects[
                         ra.requirement.urn.lower()
                     ].append(ra)
@@ -3130,8 +3136,24 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Framework(ReferentialObjectMixin, I18nObjectMixin):
+    class ResultAggregation(models.TextChoices):
+        PER_ANSWER = "per_answer", _("Per answer")
+        TIERED_ALL = "tiered_all", _("Tiered, all statements of a tier must hold")
+
     min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
     max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
+    result_aggregation = models.CharField(
+        max_length=20,
+        choices=ResultAggregation.choices,
+        default=ResultAggregation.PER_ANSWER,
+        verbose_name=_("Result aggregation"),
+        help_text=_(
+            "How questionnaire answers combine into a requirement result. "
+            "'per_answer' lets each answer stand on its own, so answers that "
+            "disagree land on partially compliant; 'tiered_all' groups the "
+            "statements into tiers and awards a tier only when all of it holds."
+        ),
+    )
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
@@ -10047,6 +10069,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         min_score = scoring["min_score"] if scoring["min_score"] is not None else 0
         max_score = scoring["max_score"] if scoring["max_score"] is not None else 100
         results = []
+        question_results = []
         visible_questions = 0
         answered_visible_questions = 0
         is_score_computed = False
@@ -10098,7 +10121,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             answered_visible_questions += 1
 
             selected_pks = selected_choice_pks_by_qid.get(question.id, set())
+            selected_results = []
+            choice_results = []
             for choice in question.choices.all():
+                choice_results.append(choice.compute_result)
                 if choice.id in selected_pks:
                     if choice.add_score is not None:
                         is_score_computed = True
@@ -10109,6 +10135,14 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         resolved_cr = resolve_compute_result(choice.compute_result)
                         if resolved_cr is not None:
                             results.append(resolved_cr)
+                            selected_results.append(resolved_cr)
+
+            # Tiered aggregation needs to know which tier the question states,
+            # not just what was answered, so it can tell "every Achieved
+            # statement holds" from "some of them do".
+            question_results.append(
+                (resolve_result_tier(choice_results), selected_results)
+            )
 
         # A score is only committed once every visible question has an answer:
         # a committed score marks the RA as assessed in the progress cascade,
@@ -10140,7 +10174,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             elif not results:
                 new_result = self.Result.NOT_ASSESSED
             else:
-                aggregated = aggregate_compute_results(results)
+                if (
+                    self.requirement.framework.result_aggregation
+                    == Framework.ResultAggregation.TIERED_ALL
+                ):
+                    aggregated = aggregate_tiered_results(question_results)
+                else:
+                    aggregated = aggregate_compute_results(results)
                 result_map = {
                     "compliant": self.Result.COMPLIANT,
                     "partially_compliant": self.Result.PARTIALLY_COMPLIANT,

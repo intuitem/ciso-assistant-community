@@ -4002,7 +4002,15 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             "progress_status_enabled",
             "extended_result_enabled",
             "field_visibility",
-            {"framework": ["implementation_groups_definition", "field_visibility"]},
+            {
+                "framework": [
+                    "implementation_groups_definition",
+                    "field_visibility",
+                    # The edit page recomputes the result client-side, so it
+                    # needs the rule the backend will apply on save.
+                    "result_aggregation",
+                ]
+            },
         ]
     )
     folder = FieldsRelatedField()

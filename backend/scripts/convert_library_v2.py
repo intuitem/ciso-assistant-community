@@ -1211,6 +1211,15 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
     if "max_score" in meta:
         framework["max_score"] = int(meta["max_score"])
 
+    if meta.get("result_aggregation"):
+        result_aggregation = str(meta["result_aggregation"]).strip().lower()
+        if result_aggregation not in ("per_answer", "tiered_all"):
+            raise ValueError(
+                f'(framework) Invalid result_aggregation "{result_aggregation}": '
+                "expected per_answer or tiered_all."
+            )
+        framework["result_aggregation"] = result_aggregation
+
     if meta.get("field_visibility"):
         try:
             field_visibility = json.loads(meta["field_visibility"])
