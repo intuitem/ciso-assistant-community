@@ -70,7 +70,12 @@ export const actions: Actions = {
 			logger.warning('Login failed', { status: res.status });
 			if (res.errors) {
 				res.errors.forEach((error) => {
-					setError(form, error.param, error.code);
+					// non-field errors (e.g. too_many_login_attempts) have no param
+					if (error.param) {
+						setError(form, error.param, error.code);
+					} else {
+						setError(form, error.code);
+					}
 				});
 				return fail(res.status, { form });
 			}
