@@ -130,23 +130,3 @@ class TestAccountAdapterAuthenticate:
         assert [attempt("198.51.100.10") for _ in range(3)] == [False, False, True]
         # Different real client, same container REMOTE_ADDR -> not blocked.
         assert attempt("203.0.113.50") is False
-
-    @override_settings(
-        ACCOUNT_RATE_LIMITS={"login_failed": "1000/m/ip,2/300s/key"},
-        EMAIL_HOST="smtp.example.com",
-    )
-    def test_throttle_notifies_once_per_episode(self):
-        from unittest.mock import patch
-
-        req = self._request()
-        with patch("iam.tasks.notify_login_throttled") as notify:
-            for _ in range(2):
-                self.adapter.authenticate(
-                    req, email="local@example.com", password="nope"
-                )
-            for _ in range(3):
-                with pytest.raises(ValidationError):
-                    self.adapter.authenticate(
-                        req, email="local@example.com", password="nope"
-                    )
-        assert notify.call_count == 1

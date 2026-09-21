@@ -31,22 +31,6 @@ def resolve_client_ip(request):
     return request.headers.get("X-Real-IP") or request.META.get("REMOTE_ADDR")
 
 
-LOGIN_THROTTLE_NOTIFY_COOLDOWN = 3600
-
-
-def notify_throttle_once(email, client_ip):
-    if not email or not (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE):
-        return
-    from django.core.cache import cache
-
-    key = f"login-throttle-notified:{email}:{client_ip}"
-    if not cache.add(key, True, timeout=LOGIN_THROTTLE_NOTIFY_COOLDOWN):
-        return
-    from iam.tasks import notify_login_throttled
-
-    notify_login_throttled(email, client_ip)
-
-
 class AccountAdapter(DefaultAccountAdapter):
     def is_safe_url(self, url):
         allowed_hosts = {urlparse(settings.CISO_ASSISTANT_URL).hostname} | set(
@@ -70,7 +54,6 @@ class AccountAdapter(DefaultAccountAdapter):
                 email = credentials.get("username") or credentials.get("email")
                 client_ip = resolve_client_ip(request)
                 logger.warning("login_throttled", username=email, client_ip=client_ip)
-                notify_throttle_once(email, client_ip)
             raise
         if user is not None and not user.is_local:
             return None

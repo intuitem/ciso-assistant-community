@@ -825,7 +825,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
-ACCOUNT_RATE_LIMITS = {"login_failed": "10/m/ip,2/300s/key"}
+ACCOUNT_RATE_LIMITS = {"login_failed": "10/m/ip,5/300s/key"}
 
 # NOTE: The reauthentication flow has not been implemented in the frontend yet, hence the long timeout.
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
@@ -906,6 +906,17 @@ HUEY = {
 
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
+# Security events (e.g. failed logins) are pruned under their own count quota so
+# a login flood cannot push business audit history past AUDITLOG_MAX_RECORDS and
+# evict it. Values are LogEntry.action ints; 4 = LOGIN_FAILED (enterprise).
+AUDITLOG_SECURITY_MAX_RECORDS = int(
+    os.environ.get("AUDITLOG_SECURITY_MAX_RECORDS", 5000)
+)
+AUDITLOG_SECURITY_ACTIONS = [
+    int(a)
+    for a in os.environ.get("AUDITLOG_SECURITY_ACTIONS", "4").split(",")
+    if a.strip()
+]
 
 # Run workflow instances in a Huey worker instead of the triggering request.
 # False only moves the engine into the request: a Huey consumer is required
