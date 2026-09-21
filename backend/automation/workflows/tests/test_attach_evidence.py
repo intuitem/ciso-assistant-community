@@ -5,9 +5,12 @@ import uuid
 
 import pytest
 
-from core.models import Evidence
+from django.core.files.base import ContentFile
+
+from core.models import Evidence, EvidenceRevision
 from iam.models import Folder
 from automation.workflows.actions import (
+    AttachEvidenceAction,
     required_permissions,
     validate_attach_evidence_config,
 )
@@ -87,6 +90,72 @@ class TestAttachEvidence:
         revision = evidence.revisions.order_by("-version").first()
         assert revision.attachment.read() == b"name,status\nthing,ok\n"
         assert instance.node_outputs["attach"]["bytes"] == 21
+
+    def test_replacing_a_file_drops_the_superseded_blob(
+        self, settings, tmp_path, django_capture_on_commit_callbacks
+    ):
+        """Overwriting the last revision must not leave the old file behind."""
+        settings.MEDIA_ROOT = str(tmp_path)
+        domain = make_domain("Replace attach")
+        evidence = Evidence.objects.create(name="Weekly digest", folder=domain)
+        revision = EvidenceRevision(evidence=evidence, folder=domain)
+        revision.set_new_attachment(ContentFile(b"old\n", name="digest.csv"))
+        revision.save()
+        superseded = revision.attachment.name
+
+        version = attach_flow(
+            domain,
+            {
+                "evidence": str(evidence.id),
+                "source": "text",
+                "filename": "digest.csv",
+                "text": "new\n",
+            },
+        )
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+
+        revision.refresh_from_db()
+        assert revision.attachment.read() == b"new\n"
+        assert not revision.attachment.storage.exists(superseded)
+
+    def test_a_failed_node_keeps_the_file_it_did_not_replace(
+        self, settings, tmp_path, monkeypatch, django_capture_on_commit_callbacks
+    ):
+        """Storage is not transactional: the rollback must not cost the blob."""
+        settings.MEDIA_ROOT = str(tmp_path)
+        domain = make_domain("Rollback attach")
+        evidence = Evidence.objects.create(name="Kept digest", folder=domain)
+        revision = EvidenceRevision(evidence=evidence, folder=domain)
+        revision.set_new_attachment(ContentFile(b"old\n", name="kept.csv"))
+        revision.save()
+        kept = revision.attachment.name
+
+        version = attach_flow(
+            domain,
+            {
+                "evidence": str(evidence.id),
+                "source": "text",
+                "filename": "kept.csv",
+                "text": "new\n",
+            },
+        )
+
+        # Blow up after the save, with the delete already queued.
+        def explode(*args, **kwargs):
+            raise RuntimeError("boom")
+
+        monkeypatch.setattr(
+            AttachEvidenceAction, "_output", staticmethod(explode), raising=True
+        )
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        assert instance.status != WorkflowInstance.Status.COMPLETED
+
+        revision.refresh_from_db()
+        assert revision.attachment.name == kept
+        assert revision.attachment.read() == b"old\n"
 
     def test_fetches_a_url_without_following_redirects(self, monkeypatch):
         domain = make_domain("Url attach")

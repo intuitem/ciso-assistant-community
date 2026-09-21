@@ -7,6 +7,7 @@ automation/powerbi/
 ├── DESIGN.md            # architecture decisions — read first
 ├── README.md            # user-facing install/usage doc
 ├── contract.json        # data contract shared by the connector and backend tests
+├── audit_navigator.py   # CI guard: navigator entries may only be appended
 ├── connector/           # Power Query SDK project (CisoAssistant.pq + assets)
 ├── signing/             # certificate generation + customer trust runbooks
 └── samples/             # starter .pbit template
@@ -63,12 +64,19 @@ repo mounted via Parallels shared folders.
    (`CisoAssistant.proj`) names it `CisoAssistant.mez` after the project.
    `.vscode/settings.json` points at the MakePQX name.
 7. Copy the `.mez` to the Custom Connectors folder — resolve it via the
-   known folder (OneDrive may redirect Documents, especially on fresh VMs):
+   known folder (OneDrive may redirect Documents, especially on fresh VMs).
+   Run this from VS Code's integrated terminal, which starts in the workspace
+   root; a plain PowerShell window starts in your home directory, where the
+   relative source path resolves to nothing:
    ```powershell
    $dir = Join-Path ([Environment]::GetFolderPath("MyDocuments")) "Power BI Desktop\Custom Connectors"
    New-Item -ItemType Directory -Force $dir | Out-Null
    Copy-Item bin\AnyCPU\Debug\connector.mez "$dir\CisoAssistant.mez" -Force
+   Get-Item "$dir\CisoAssistant.mez" | Select-Object Name, LastWriteTime
    ```
+   Check that timestamp. A stale `connector.mez` left in `bin\` by an earlier
+   session copies over without complaint, and Desktop then tests the old
+   connector while you read the new source.
    Allow uncertified extensions in Power BI Desktop's security options,
    restart Desktop, and test **Get Data → CISO Assistant** end-to-end.
 8. Run *TestConnection* task before touching gateway-related code.
@@ -113,6 +121,54 @@ without Power BI:
 curl -H "Authorization: Token $PAT" \
   "https://localhost:8443/api/applied-controls/?limit=2&offset=0&updated_at__gte=2026-01-01T00:00:00Z" -k
 ```
+
+### Validating pagination changes
+
+The server caps `limit` at `PAGINATE_MAX`, so the connector takes its page
+stride from the number of rows a response actually contains. That makes the
+page size a *server* variable: run the backend with `PAGINATE_MAX` set low
+and the connector must still import every row.
+
+```bash
+PAGINATE_MAX=200 python manage.py runserver 0.0.0.0:8000
+```
+
+`backend/app_tests/api/test_api_powerbi_contract.py` ports the algorithm to
+Python and runs it against a clamped API in CI, which catches the arithmetic.
+What only the VM can confirm is that M behaves the same:
+
+- a table with more rows than the ceiling → imported row count equals the
+  count shown in CISO Assistant (`PAGINATE_MAX=200`, then again unset)
+- an empty table → no error, zero rows
+- `samples/starter.pbit` refreshes end to end against the clamped instance
+
+**Watch the backend request log, not just the row counts.** Paging defects
+come in two kinds and only one of them is visible in Desktop. Fetching too
+*few* rows shows up as a short table. Fetching too *many times* does not show
+up at all — the rows are correct, the refresh is just slow — so it has to be
+counted at the server. Keep `runserver`'s log in view and check:
+
+- a preview of a table **smaller** than the requested count issues **one**
+  request, not one per stride to the end of the count (the regression that
+  reached review in 1.1.0: `count = 1000` against a 5-row table fired 200
+  requests and returned the right 5 rows)
+- a full load of a table of N rows issues about `N / served` requests, where
+  `served` is the page size the first response actually returned
+- each bridge scan carries `fields=id,<m2m>`; if those are absent the
+  narrowing silently fell back to full rows (`GetBridgeRows`' `try`)
+
+## Adding a table or a bridge
+
+Append the navigator entry to the end of its group — never insert or reorder.
+Reports built with connector ≤ 1.0.1 navigate by position, so moving an entry
+silently repoints their queries at a different table. CI enforces this on every
+PR (`automation/powerbi/audit_navigator.py`, run against the PR's base).
+
+Then keep `contract.json` in step with the column spec: the backend contract
+test reads it and fails when a path the connector consumes stops existing.
+Adding a table means seeding one instance of it in that test's `bi_dataset`
+fixture, and a fact declared `foldDates = true` also belongs in the
+incremental-refresh test's endpoint list.
 
 ## Versioning & release
 

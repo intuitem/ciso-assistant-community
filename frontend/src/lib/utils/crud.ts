@@ -3058,6 +3058,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'incidents',
 				disableCreate: true,
 				disableDelete: true
+			},
+			{
+				field: 'task_templates',
+				urlModel: 'findings',
+				disableCreate: true,
+				disableDelete: true
 			}
 		]
 	},

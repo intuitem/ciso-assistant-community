@@ -18,7 +18,8 @@ import zipfile
 import tempfile
 from datetime import date, datetime, timedelta, timezone
 from types import MappingProxyType
-from typing import Dict, Any, List, Tuple, Final
+from collections.abc import Sequence
+from typing import Dict, Any, List, Tuple, Final, Optional
 import time
 from django.db.models import (
     F,
@@ -87,6 +88,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
+from django.core.files.uploadedfile import UploadedFile
 
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from core.constants import LEGACY_TTP_LIBRARIES
@@ -124,7 +126,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models, transaction
 from django.forms import IntegerField as FormIntegerField
 from django.forms import ValidationError
-from django.http import FileResponse, HttpResponse, StreamingHttpResponse
+from django.http import FileResponse, HttpResponse, StreamingHttpResponse, HttpRequest
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
@@ -160,12 +162,14 @@ from rest_framework.exceptions import (
 
 
 from core.helpers import *
+from core.validators import sanitize_file_name
 from core.answer_attachments import (
     answer_for_upload,
     AttachmentError,
     add_attachment,
     attachments_for,
     promote_to_evidence,
+    safe_filename_header,
 )
 from core.answer_attachments import serialize as serialize_attachment
 from core.answer_attachments import serve as serve_attachment
@@ -799,6 +803,7 @@ class GenericFilterSet(df.FilterSet):
     # enough to make it filterable from the table UI. On a DateTimeField the `date`
     # transform is what the UI uses: a bare `lte` on a timestamp would drop its last day.
     DATE_LOOKUPS = ("exact", "gte", "lte", "gt", "lt", "isnull")
+    # `lt`/`gt`: half-open bounds, so a BI partition boundary lands in one page.
     DATETIME_LOOKUPS = (
         "date",
         "date__gte",
@@ -807,6 +812,8 @@ class GenericFilterSet(df.FilterSet):
         "date__lt",
         "gte",
         "lte",
+        "gt",
+        "lt",
         "isnull",
     )
     ALWAYS_FILTERABLE_DATES = ("created_at", "updated_at")
@@ -901,18 +908,6 @@ class GenericFilterSet(df.FilterSet):
                 "filter_class": df.IsoDateTimeFilter,
             },
         }
-
-
-class TimestampRangeFilterMixin(df.FilterSet):
-    """ISO-8601 created_at/updated_at range params for BI clients
-    (Power BI incremental refresh). Mix into FilterSets of viewsets
-    that use filterset_class; list-style viewsets declare the same
-    lookups via dict-form filterset_fields."""
-
-    created_at__gte = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="gte")
-    created_at__lt = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="lt")
-    updated_at__gte = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="gte")
-    updated_at__lt = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="lt")
 
 
 class SmartOrderingFilter(filters.OrderingFilter):
@@ -1237,7 +1232,55 @@ class AutocompleteMixin:
         return Response(data)
 
 
-class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
+class SparseFieldsMixin:
+    """``?fields=a,b,c`` trims a GET response to a subset of the columns.
+
+    Subtractive only, and only the top-level serializer: nested ones share this
+    request's context and would be cut by the same names. An unknown name is a
+    400. Reduces serialization, not the queryset's prefetching.
+    """
+
+    sparse_fields_param = "fields"
+    sparse_fields_always = frozenset({"id"})
+
+    def get_serializer(self, *args, **kwargs):
+        return self.apply_sparse_fields(super().get_serializer(*args, **kwargs))
+
+    def apply_sparse_fields(self, serializer):
+        """Trim a serializer to the requested fields.
+
+        An action building its own serializer must call this, or ``fields`` is
+        silently ignored there.
+        """
+        request = getattr(self, "request", None)
+        if request is None or request.method != "GET":
+            return serializer
+
+        raw = request.query_params.get(self.sparse_fields_param)
+        if not raw:
+            return serializer
+        requested = {name.strip() for name in raw.split(",") if name.strip()}
+        if not requested:
+            return serializer
+
+        target = getattr(serializer, "child", serializer)
+        available = set(getattr(target, "fields", {}))
+        unknown = requested - available
+        if unknown:
+            raise DRFValidationError(
+                {
+                    self.sparse_fields_param: (
+                        f"unknown field(s): {', '.join(sorted(unknown))}"
+                    )
+                }
+            )
+
+        for name in available - (requested | self.sparse_fields_always):
+            target.fields.pop(name)
+        return serializer
+
+
+class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -1299,12 +1342,21 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         )
         queryset = self.model.objects.filter(id__in=object_ids_view)
 
-        model_field_names = {f.name for f in self.model._meta.get_fields()}
+        model_fields = {f.name: f for f in self.model._meta.get_fields()}
 
-        if "parent_folder" in model_field_names:
-            queryset = queryset.select_related("parent_folder")
+        # Folder itself carries a *reverse* relation named "folder"; select_related
+        # only accepts forward FKs, so match on the descriptor, not on the name.
+        joinable = [
+            name
+            for name in ("folder", "parent_folder")
+            if (f := model_fields.get(name)) is not None
+            and f.many_to_one
+            and f.concrete
+        ]
+        if joinable:
+            queryset = queryset.select_related(*joinable)
 
-        if "filtering_labels" in model_field_names:
+        if "filtering_labels" in model_fields:
             queryset = queryset.prefetch_related("filtering_labels")
 
         return queryset
@@ -2289,24 +2341,24 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         folders = {f.id: f for f in Folder.objects.all()}
         for obj in initial_objects:
             path = []
-            if hasattr(obj, "folder"):
-                queue = deque([obj.folder.id])
-            elif hasattr(obj, "parent_folder") and obj.parent_folder:
-                queue = deque([obj.parent_folder.id])
+            if getattr(obj, "folder_id", None):
+                queue = deque([obj.folder_id])
+            elif getattr(obj, "parent_folder_id", None):
+                queue = deque([obj.parent_folder_id])
             else:
                 continue
             while queue:
                 folder_id = queue.popleft()
                 folder = folders[folder_id]
-                if folder.parent_folder:
+                if folder.parent_folder_id:
                     path.append(
                         {
                             "str": str(folder),
                             "id": folder.id,
-                            "parent_id": folder.parent_folder.id,
+                            "parent_id": folder.parent_folder_id,
                         }
                     )
-                    queue.append(folder.parent_folder.id)
+                    queue.append(folder.parent_folder_id)
             path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
 
         return {
@@ -2531,7 +2583,7 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
-class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):
+class AssetFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
     asset_class__isnull = df.BooleanFilter(
@@ -2954,7 +3006,9 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         context = self.get_serializer_context()
         context["optimized_data"] = optimized_data
 
-        serializer = AssetReadSerializer(objects, many=True, context=context)
+        serializer = self.apply_sparse_fields(
+            AssetReadSerializer(objects, many=True, context=context)
+        )
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)
         if field_models:
@@ -3802,6 +3856,20 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "due_date": ["exact"],
     }
     search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "applied_controls",
+                "assets",
+                "security_exceptions",
+                "security_advisories",
+                "cwes",
+                "filtering_labels__folder",
+            )
+        )
 
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
@@ -5352,7 +5420,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
 APPLIED_CONTROL_LINKED_FIELD_NAMES = [f[0] for f in APPLIED_CONTROL_LINKED_FIELDS]
 
 
-class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
+class AppliedControlFilterSet(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     reference_control = df.ModelMultipleChoiceFilter(
         queryset=ReferenceControl.objects.all()
@@ -5911,8 +5979,8 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         context = self.get_serializer_context()
         context["daily_rate"] = GlobalSettings.get_daily_rate()
 
-        serializer = AppliedControlBulkReadSerializer(
-            objects, many=True, context=context
+        serializer = self.apply_sparse_fields(
+            AppliedControlBulkReadSerializer(objects, many=True, context=context)
         )
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)
@@ -7456,7 +7524,7 @@ class IntegerInFilter(df.BaseInFilter, df.NumberFilter):
     field_class = FormIntegerField
 
 
-class RiskScenarioFilter(TimestampRangeFilterMixin, GenericFilterSet):
+class RiskScenarioFilter(GenericFilterSet):
     risk_assessment = df.ModelMultipleChoiceFilter(
         queryset=RiskAssessment.objects.all()
     )
@@ -7693,13 +7761,27 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
             "risk_assessment__risk_matrix",
             "risk_assessment__perimeter",
             "risk_assessment__perimeter__folder",
+            "risk_origin",
+            "operational_scenario__ebios_rm_study",
         ).prefetch_related(
             "threats",
             "assets",
             "applied_controls",
             "existing_applied_controls",
-            "owner",
+            actor_prefetch("owner"),
             "security_exceptions",
+            "threat_models",
+            "vulnerabilities",
+            "incidents",
+            "qualifications",
+            # str(antecedent) renders folder and risk_assessment: join them in the
+            # prefetch query instead of two lookups per rendered scenario.
+            Prefetch(
+                "antecedent_scenarios",
+                queryset=RiskScenario.objects.select_related(
+                    "folder", "risk_assessment"
+                ),
+            ),
         )
 
     def _perform_write(self, serializer):
@@ -10645,6 +10727,7 @@ class RequirementViewSet(BaseModelViewSet):
                 "evidences",
                 "applied_controls",
                 "security_exceptions",
+                "findings",
             )
         )
         serialized_requirement_assessments = RequirementAssessmentReadSerializer(
@@ -10805,7 +10888,7 @@ class RequirementViewSet(BaseModelViewSet):
         )
 
 
-class EvidenceFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
+class EvidenceFilterSet(GenericFilterSet):
     owner = NullableModelChoiceFilter(queryset=Actor.objects.all())
 
     class Meta:
@@ -10881,7 +10964,11 @@ class EvidenceViewSet(BaseModelViewSet):
                 response = HttpResponse(
                     revision.attachment,
                     content_type=mimetypes.guess_type(filename)[0],
-                    headers={"Content-Disposition": f"attachment; filename={filename}"},
+                    headers={
+                        "Content-Disposition": safe_filename_header(
+                            "attachment", filename
+                        )
+                    },
                     status=status.HTTP_200_OK,
                 )
         return response
@@ -10904,7 +10991,7 @@ class EvidenceViewSet(BaseModelViewSet):
         url_path="batch-upload",
         parser_classes=[MultiPartParser, FormParser],
     )
-    def batch_upload(self, request):
+    def batch_upload(self, request: HttpRequest):
         """
         Bulk-upload evidences from a multipart payload.
 
@@ -11000,6 +11087,9 @@ class EvidenceViewSet(BaseModelViewSet):
             field = entry.get("field")
             name = (entry.get("name") or field or "").strip()
             rel_path = entry.get("rel_path") or None
+            if not isinstance(rel_path, str):
+                rel_path = None
+
             result = {"field": field, "name": name, "rel_path": rel_path}
 
             upload = request.FILES.get(field) if field else None
@@ -11138,7 +11228,15 @@ class EvidenceViewSet(BaseModelViewSet):
         result["revision_id"] = str(revision.id) if revision else None
         result["version"] = revision.version if revision else 1
 
-    def _batch_add_revision(self, result, summary, evidence, upload, rel_path, request):
+    def _batch_add_revision(
+        self,
+        result: dict,
+        summary: dict,
+        evidence: Evidence,
+        upload: UploadedFile,
+        rel_path: Optional[str],
+        request: HttpRequest,
+    ):
         """Create a new EvidenceRevision against an existing Evidence (auto-bumps version)."""
         rev_serializer = EvidenceRevisionWriteSerializer(
             data={
@@ -11166,13 +11264,20 @@ class EvidenceViewSet(BaseModelViewSet):
         result["version"] = revision.version
         summary["revision_added"] += 1
 
-    def _batch_replace_revision(self, result, summary, evidence, upload, rel_path):
+    def _batch_replace_revision(
+        self,
+        result: dict,
+        summary: dict,
+        evidence: Evidence,
+        upload: UploadedFile,
+        rel_path: Optional[str],
+    ):
         """Overwrite the last revision's attachment in place — preserves Evidence id and M2M links."""
         revision = evidence.last_revision
         if revision is None:
             revision = EvidenceRevision(evidence=evidence)
-        old_attachment = revision.attachment
-        revision.attachment = upload
+        superseded_name = revision.set_new_attachment(upload)
+
         if rel_path:
             revision.observation = f"path: {rel_path}"
         try:
@@ -11190,9 +11295,10 @@ class EvidenceViewSet(BaseModelViewSet):
             result["error"] = " ".join(messages)
             summary["errors"] += 1
             return
+
         revision.save()
-        if old_attachment:
-            old_attachment.delete(save=False)
+        if superseded_name and superseded_name != revision.attachment.name:
+            revision.attachment.storage.delete(superseded_name)
         result["outcome"] = "replaced"
         result["evidence_id"] = str(evidence.id)
         result["revision_id"] = str(revision.id)
@@ -11200,7 +11306,7 @@ class EvidenceViewSet(BaseModelViewSet):
         summary["replaced"] += 1
 
     @staticmethod
-    def _batch_find_unique_name(name, folder):
+    def _batch_find_unique_name(name: str, folder: Folder) -> str:
         """Append ' (1)', ' (2)' ... before the extension until the name is free in folder."""
         if "." in name:
             base, _, ext = name.rpartition(".")
@@ -11250,7 +11356,9 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
                     evidence.attachment,
                     content_type=content_type,
                     headers={
-                        "Content-Disposition": f"attachment; filename={evidence.filename()}"
+                        "Content-Disposition": safe_filename_header(
+                            "attachment", evidence.filename()
+                        )
                     },
                     status=status.HTTP_200_OK,
                 )
@@ -11279,19 +11387,22 @@ class UploadAttachmentView(APIView):
         revision = None
         evidence = None
 
-        # RBAC: scope to objects the user has change permission on (upload is a write)
-        accessible_evidence_ids = RoleAssignment.get_changeable_object_ids(
-            request.user, Evidence
-        )
-
         try:
-            revision = EvidenceRevision.objects.get(
-                pk=pk, evidence__id__in=accessible_evidence_ids
-            )
+            if not RoleAssignment.is_object_accessible(
+                request.user, "change", EvidenceRevision, pk
+            ):
+                raise EvidenceRevision.DoesNotExist
+
+            revision = EvidenceRevision.objects.get(pk=pk)
             evidence = revision.evidence
         except EvidenceRevision.DoesNotExist:
             try:
-                evidence = Evidence.objects.get(pk=pk, id__in=accessible_evidence_ids)
+                if not RoleAssignment.is_object_accessible(
+                    request.user, "change", Evidence, pk
+                ):
+                    raise Evidence.DoesNotExist
+
+                evidence = Evidence.objects.get(pk=pk)
             except Evidence.DoesNotExist:
                 return Response(
                     {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND
@@ -11304,28 +11415,30 @@ class UploadAttachmentView(APIView):
 
         attachment = request.FILES.get("file")
         if attachment and attachment.name != "undefined":
-            if not revision.attachment or revision.attachment != attachment:
-                old_attachment = revision.attachment
-                revision.attachment = attachment
-                try:
-                    revision.full_clean()
-                except ValidationError as e:
-                    revision.attachment = old_attachment
-                    messages = []
-                    if hasattr(e, "message_dict"):
-                        for field_messages in e.message_dict.values():
-                            messages.extend(field_messages)
-                    elif hasattr(e, "messages"):
-                        messages = e.messages
-                    else:
-                        messages = [str(e.message)]
-                    return Response(
-                        {"detail": " ".join(messages)},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                if old_attachment:
-                    old_attachment.delete()
-                revision.save()
+            old_attachment = revision.attachment
+            old_original_filename = revision.original_filename
+            superseded_name = revision.set_new_attachment(attachment)
+
+            try:
+                revision.full_clean()
+            except ValidationError as e:
+                revision.attachment = old_attachment
+                revision.original_filename = old_original_filename
+                messages = []
+                if hasattr(e, "message_dict"):
+                    for field_messages in e.message_dict.values():
+                        messages.extend(field_messages)
+                elif hasattr(e, "messages"):
+                    messages = e.messages
+                else:
+                    messages = [str(e.message)]
+                return Response(
+                    {"detail": " ".join(messages)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            revision.save()
+            if superseded_name and superseded_name != revision.attachment.name:
+                revision.attachment.storage.delete(superseded_name)
 
         return Response(status=status.HTTP_200_OK)
 
@@ -13840,7 +13953,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related("reference_controls", "threats", "questions__choices")
             .all(),
         )
         tree = get_sorted_requirement_nodes(
@@ -14143,7 +14256,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         if UUID(pk) in object_ids_view:
             compliance_assessment = self.get_object()
-            (index_content, evidences) = generate_html(compliance_assessment)
+            (index_content, evidences, archive_names) = generate_html(
+                compliance_assessment
+            )
             zip_name = f"{sanitize_filename(compliance_assessment.name)}-{sanitize_filename(compliance_assessment.framework.name)}-{datetime.now():%Y-%m-%d-%H-%M}.zip"
 
             # Create temporary file that will be automatically deleted
@@ -14152,25 +14267,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             try:
                 with zipfile.ZipFile(temp_file, "w") as zipf:
                     for evidence in evidences:
-                        if (
-                            evidence.last_revision
-                            and evidence.last_revision.attachment
-                            and default_storage.exists(
-                                evidence.last_revision.attachment.name
+                        # last_revision re-queries; omit one file rather than abort.
+                        entry_name = archive_names.get(evidence.id)
+                        revision = evidence.last_revision
+                        if not entry_name or not revision or not revision.attachment:
+                            continue
+                        if not default_storage.exists(revision.attachment.name):
+                            continue
+                        with default_storage.open(
+                            revision.attachment.name
+                        ) as attachment_file:
+                            zipf.writestr(
+                                f"evidences/{entry_name}", attachment_file.read()
                             )
-                        ):
-                            with default_storage.open(
-                                evidence.last_revision.attachment.name
-                            ) as attachment_file:
-                                zipf.writestr(
-                                    os.path.join(
-                                        "evidences",
-                                        os.path.basename(
-                                            evidence.last_revision.attachment.name
-                                        ),
-                                    ),
-                                    attachment_file.read(),
-                                )
                     zipf.writestr("index.html", index_content)
 
                 # Seek to beginning for reading
@@ -15743,6 +15852,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
         requirement_assessment = self.get_object()
         audit = requirement_assessment.compliance_assessment
+        if audit.is_locked:
+            return Response(
+                {"error": "Cannot raise a finding on a locked audit"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         # `add_findingsassessment` on the audit's folder is what authorizes creating it.
         if not RoleAssignment.is_access_allowed(
@@ -15820,6 +15934,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "applied_controls",  # ManyToManyField to AppliedControl
                 "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
+                "findings",  # Reverse FK from Finding serialized as FieldsRelatedField
                 "answers",  # Reverse FK from Answer, used by get_answers() in read serializer
                 "answers__question",  # Needed by build_answers_dict() to get question.urn and question.type
                 "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
@@ -16484,18 +16599,51 @@ def get_build(request):
 # NOTE: Important functions/classes from old views.py, to be reviewed
 
 
+def build_evidence_archive_names(evidences: Sequence[Evidence]) -> dict:
+    """Zip entry name per evidence, unique within one archive.
+
+    Computed once for both the template and the zip writer: a divergence is a dead link.
+    """
+    names = {}
+    taken = set()
+    for evidence in sorted(evidences, key=lambda e: str(e.id)):
+        revision = evidence.last_revision
+        if not revision or not revision.attachment:
+            continue
+        # Never trusted: an unsanitized row would be a traversal-capable zip entry.
+        base = sanitize_file_name(revision.filename() or "") or "file"
+        stem, extension = os.path.splitext(base)
+        candidate, counter = base, 1
+        # Case-insensitive: the archive is often extracted on Windows or macOS.
+        while candidate.lower() in taken:
+            counter += 1
+            candidate = f"{stem} ({counter}){extension}"
+        taken.add(candidate.lower())
+        names[evidence.id] = candidate
+    return names
+
+
 def generate_html(
     compliance_assessment: ComplianceAssessment,
-) -> Tuple[str, list[Evidence]]:
+) -> Tuple[str, list[Evidence], dict]:
     selected_evidences = []
 
-    requirement_nodes = RequirementNode.objects.filter(
-        framework=compliance_assessment.framework
-    ).order_by("order_id")
+    requirement_nodes = (
+        RequirementNode.objects.filter(framework=compliance_assessment.framework)
+        .order_by("order_id")
+        .prefetch_related("questions__choices")
+    )
 
-    assessments = RequirementAssessment.objects.filter(
-        compliance_assessment=compliance_assessment,
-    ).all()
+    assessments = (
+        RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+        )
+        .select_related("requirement")
+        .prefetch_related(
+            "answers__question",
+            "answers__selected_choices",
+        )
+    )
 
     implementation_groups = compliance_assessment.selected_implementation_groups
     graph = get_sorted_requirement_nodes(
@@ -16541,7 +16689,9 @@ def generate_html(
         answers_dict_by_urn[a.requirement.urn] = build_answers_dict(a.answers.all())
 
     questions_dict_by_urn = {}
-    for node in requirement_nodes.prefetch_related("questions__choices"):
+    # requirement_nodes is already evaluated (node_per_urn) with questions__choices
+    # prefetched; calling prefetch_related() again would clone and re-run it.
+    for node in requirement_nodes:
         # A question hidden by an unsatisfied depends_on does not apply here, so
         # the report must not list it as unanswered.
         qd = visible_questions(
@@ -16619,16 +16769,18 @@ def generate_html(
         top_level_nodes_data.append(node_data)
         selected_evidences += node_evidences
 
+    evidences = list(set(selected_evidences))
+    archive_names = build_evidence_archive_names(evidences)
+
     data = {
         "compliance_assessment": compliance_assessment,
         "top_level_nodes": top_level_nodes_data,
         "assessments": assessments,
         "ancestors": ancestors,
+        "archive_names": archive_names,
     }
 
-    return render_to_string("core/audit_report.html", data), list(
-        set(selected_evidences)
-    )
+    return render_to_string("core/audit_report.html", data), evidences, archive_names
 
 
 def export_mp_csv(request):
@@ -17304,6 +17456,11 @@ class FindingFilterSet(GenericFilterSet):
     findings_assessment = NullableModelChoiceFilter(
         queryset=FindingsAssessment.objects.all()
     )
+    # Same convention: the requirement assessment picker asks for the unbound
+    # findings alongside its own.
+    requirement_assessment = NullableModelChoiceFilter(
+        queryset=RequirementAssessment.objects.all()
+    )
 
     class Meta:
         model = Finding
@@ -17316,11 +17473,11 @@ class FindingFilterSet(GenericFilterSet):
             "priority": ["exact"],
             "asset": ["exact"],
             "requirement_node": ["exact"],
-            "requirement_assessment": ["exact"],
             "filtering_labels": ["exact"],
             "applied_controls": ["exact"],
             "evidences": ["exact"],
             "vulnerabilities": ["exact"],
+            "task_templates": ["exact"],
             "due_date": ["exact"],
             "created_at": ["gte", "lt"],
             "updated_at": ["gte", "lt"],

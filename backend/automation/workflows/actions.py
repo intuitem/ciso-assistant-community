@@ -1803,7 +1803,8 @@ class AttachEvidenceAction(BaseAction):
             revision = evidence.revisions.order_by("-version").first() or (
                 EvidenceRevision(evidence=evidence, folder=evidence.folder)
             )
-            revision.attachment = upload
+            superseded_name = revision.set_new_attachment(upload)
+
             if occurrence is not None:
                 revision.task_node = occurrence
             try:
@@ -1811,6 +1812,11 @@ class AttachEvidenceAction(BaseAction):
             except ValidationError as e:
                 raise FatalActionError(f"attach_evidence: {'; '.join(e.messages)}")
             revision.save()
+            if superseded_name and superseded_name != revision.attachment.name:
+                # on_commit: inside the node's transaction, a rollback must not
+                # cost the blob the surviving row still points at.
+                storage = revision.attachment.storage
+                transaction.on_commit(lambda: storage.delete(superseded_name))
             # Unattended: an approval must not come to cover a file nobody
             # has looked at.
             if evidence.status == Evidence.Status.APPROVED:

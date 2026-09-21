@@ -30,6 +30,10 @@ Everything technical is handled for you:
 | Facts | Vulnerabilities | Vulnerabilities with severity, status, SLA state, key dates |
 | Facts | Security Exceptions | Exceptions with severity, status, expiration date |
 | Facts | Assets | Asset inventory (type, class, primary flag) |
+| Facts | Task Nodes | Task occurrences with status, due and scheduled dates |
+| Facts | Entity Assessments | Third-party assessments (criticality, completion, conclusion) |
+| Facts | Contracts | Contracts with status, term dates, annual expense |
+| Facts | Risk Acceptances | Acceptances with state, approver, expiry |
 | Dimensions | Compliance Assessments | Audits (name, framework, perimeter, progress) |
 | Dimensions | Frameworks | Loaded frameworks |
 | Dimensions | Requirement Nodes | Framework requirements (for drill-down by ref_id) |
@@ -40,9 +44,20 @@ Everything technical is handled for you:
 | Dimensions | Reference Controls | Control catalog (category, CSF function) |
 | Dimensions | Findings Assessments | Findings campaigns (category, treatment progress) |
 | Dimensions | Labels | Your own cross-cutting labels |
-| Bridges | 20 link tables | Many-to-many links (e.g. Requirement Assessment ↔ Applied Control, Risk Scenario ↔ Threat, Vulnerability ↔ Asset, fact ↔ Label) |
+| Dimensions | Actors | Owners and assignees (user, team or entity) |
+| Dimensions | Entities | Third parties (criticality, last assessment, country) |
+| Dimensions | Solutions | Services provided by third parties |
+| Dimensions | Task Templates | Task definitions (cadence, next occurrence) |
+| Dimensions | Campaigns | Audit campaigns (kind, status, dates) |
+| Bridges | 36 link tables | Many-to-many links (e.g. Requirement Assessment ↔ Applied Control, Applied Control ↔ Owner, Risk Scenario ↔ Threat, Contract ↔ Solution, fact ↔ Label) |
 
 Datetime columns are normalised to UTC.
+
+Owner and assignee columns are not on the fact tables: they are many-to-many,
+so they arrive as bridges (Applied Control ↔ Owner, Task Node ↔ Assignee, …)
+that join to the **Actors** dimension. That is what makes "controls per owner"
+or "overdue tasks per assignee" answerable — put a column from the bridge in
+the visual's values to force the join.
 
 ## Installation (Power BI Desktop)
 
@@ -139,6 +154,15 @@ table. Re-doing the navigation steps against 1.0.2+ produces the name-based
 form and removes the hazard; until then, new entries must be appended to the
 end of their group.
 
+**Upgrade to 1.1.0 or later if your instance caps page sizes.** Versions up to
+1.0.2 assumed the server always returned the 5000 rows they asked for. The API
+caps `limit` at `PAGINATE_MAX`, and on an instance configured below 5000 those
+versions import only the first page of every table — no error, just fewer rows
+than the instance holds. 1.1.0 reads the page size back from the response, so
+it is correct against any ceiling. A report built on an older connector picks
+up the fix as soon as the connector file is replaced; nothing in the report
+itself has to change.
+
 ## Modeling tips
 
 - Relate facts to dimensions on the `*_id` columns
@@ -172,6 +196,20 @@ connectors in the gateway settings. See Microsoft's
 
 ## Troubleshooting
 
+- **An ownership bridge has rows that match nothing in Actors** — the Actors
+  table lists owners that are entities only when **Allow assignments to
+  entities** is enabled in the instance's general settings. If an object was
+  assigned to an entity
+  before that was turned off, its bridge rows point at an actor the dimension
+  does not carry, and those rows fall out of the join. Turning the setting back
+  on brings them back.
+- **A table holds fewer rows than the application shows** — check the
+  connector version first. Up to 1.0.2 a table was truncated to one page
+  whenever the instance capped `limit` below 5000 (see Upgrading). Compare a
+  table's row count against the same list in CISO Assistant; if they differ,
+  install 1.1.0+ and refresh. Row counts can also legitimately differ because
+  the PAT's own permissions scope every table — a user who cannot see a
+  domain does not get its rows.
 - **Power BI created strange relationships (e.g. between two `ref_id`
   columns)** — that's Desktop's relationship autodetect matching same-named
   columns across tables. Disable it in File → Options → Current file →

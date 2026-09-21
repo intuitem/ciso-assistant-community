@@ -3155,6 +3155,8 @@
 	"oidcConfiguration": "Configuration OpenID",
 	"tokenAuthMethod": "Méthode d’authentification par token",
 	"oauthPKCEEnabled": "OAuth PKCE activé",
+	"oidcAdditionalScopes": "Portées supplémentaires",
+	"oidcAdditionalScopesHelpText": "Portées OAuth facultatives séparées par des virgules, ajoutées aux portées par défaut openid, profile et email.",
 	"suggestedParentheses": "(suggéré)",
 	"clientSecretAlreadySetHelpText": "Le secret client est déjà défini.",
 	"resetClientSecret": "Effacer le secret client",

@@ -10,6 +10,7 @@ from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     GenericFilterSet,
     SmartOrderingFilter,
+    actor_prefetch,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
@@ -57,6 +58,23 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "assets", "genericcollection"]
 
     model = EbiosRMStudy
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "reference_entity", "risk_matrix")
+            .prefetch_related(
+                "assets__folder",
+                "compliance_assessments",
+                "risk_assessments",
+                actor_prefetch("authors"),
+                actor_prefetch("reviewers"),
+                "validationflow_set__approver",
+                "roto_set",
+                "operational_scenarios",
+            )
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
