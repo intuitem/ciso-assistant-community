@@ -438,9 +438,15 @@ export function aggregateTieredResults(
 	const answered = questionResults.filter((entry) => entry.tier);
 	if (answered.length === 0) return null;
 
-	const contributing = answered.filter(
-		(entry) => !(entry.selected.length > 0 && entry.selected.every((r) => r === 'not_applicable'))
-	);
+	// not_applicable is neutral, as in aggregateComputeResults: on a multiple
+	// choice answer it drops out of the selection rather than failing the tier,
+	// and a question answered entirely not_applicable stops contributing.
+	const contributing: { tier: string | null; selected: string[] }[] = [];
+	for (const { tier, selected } of answered) {
+		const effective = selected.filter((r) => r !== 'not_applicable');
+		if (selected.length > 0 && effective.length === 0) continue;
+		contributing.push({ tier, selected: effective });
+	}
 	if (contributing.length === 0) return 'not_applicable';
 
 	const holdsByTier: Record<string, boolean[]> = { compliant: [], partially_compliant: [] };

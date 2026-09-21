@@ -13293,9 +13293,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             # Find the requirement assessment first so we can validate score
             # against the per-RA resolved scale (Node override > CA bounds).
-            requirement_assessment = RequirementAssessment.objects.filter(
-                compliance_assessment=compliance_assessment, requirement__urn=urn
-            ).first()
+            requirement_assessment = (
+                RequirementAssessment.objects.filter(
+                    compliance_assessment=compliance_assessment, requirement__urn=urn
+                )
+                # The requirement is read below, and its framework carries the
+                # result aggregation rule a recompute needs.
+                .select_related("requirement__framework")
+                .first()
+            )
 
             if not requirement_assessment:
                 return Response(

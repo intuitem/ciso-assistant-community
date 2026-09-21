@@ -178,6 +178,29 @@ class TestLibraryShape:
             else:
                 assert columns["PA"], f"{node.ref_id} should have a PA column"
 
+    def test_irrelevant_dimensions_are_hidden_by_default(self, framework):
+        """The CAF has no numeric scale and no certification vocabulary, so new
+        audits should not offer scoring or nonconformity fields, and the
+        outcome status is the verdict rather than a workflow state."""
+        assert framework.field_visibility == {
+            field: {"auditor": "hidden", "respondent": "hidden"}
+            for field in ("score", "documentation_score", "extended_result", "status")
+        }
+        # What the assessment is actually made of stays on the page.
+        for field in ("answers", "result", "observation", "evidences"):
+            assert field not in framework.field_visibility
+
+    def test_progress_follows_the_result(self, framework):
+        """Hiding `status` is what moves an audit off status-driven progress,
+        so an outcome counts as assessed once its answers produce a verdict."""
+        status_driven, result_visible = (
+            ComplianceAssessment.progress_mode_from_visibility(
+                None, framework.field_visibility
+            )
+        )
+        assert not status_driven
+        assert result_visible
+
     def test_the_a4b_page_break_statements_are_whole(self, framework):
         texts = {}
         for question in Question.objects.filter(

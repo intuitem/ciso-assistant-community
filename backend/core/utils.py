@@ -113,11 +113,16 @@ def aggregate_tiered_results(question_results: list[tuple]) -> str | None:
     if not answered:
         return None
 
-    contributing = [
-        (tier, selected)
-        for tier, selected in answered
-        if not (selected and all(result == "not_applicable" for result in selected))
-    ]
+    # `not_applicable` is neutral, as in `aggregate_compute_results`: on a
+    # multiple choice answer it drops out of the selection rather than failing
+    # the tier, and a question answered entirely `not_applicable` stops
+    # contributing at all.
+    contributing = []
+    for tier, selected in answered:
+        effective = [result for result in selected if result != "not_applicable"]
+        if selected and not effective:
+            continue
+        contributing.append((tier, effective))
     if not contributing:
         return "not_applicable"
 

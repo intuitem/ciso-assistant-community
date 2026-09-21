@@ -86,6 +86,21 @@ describe('aggregateTieredResults', () => {
 		expect(aggregateTieredResults([tier('compliant', 'not_applicable')])).toBe('not_applicable');
 	});
 
+	it('ignores not_applicable inside a mixed multiple-choice selection', () => {
+		expect(
+			aggregateTieredResults([
+				tier('compliant', 'compliant', 'not_applicable'),
+				tier('compliant', 'compliant')
+			])
+		).toBe('compliant');
+		expect(
+			aggregateTieredResults([
+				tier('compliant', 'compliant', 'not_applicable'),
+				tier('partially_compliant', 'not_applicable', 'partially_compliant')
+			])
+		).toBe('compliant');
+	});
+
 	it('ignores questions that state no tier', () => {
 		expect(aggregateTieredResults([])).toBe(null);
 		expect(aggregateTieredResults([tier(null, 'compliant')])).toBe(null);

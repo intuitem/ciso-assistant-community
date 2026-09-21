@@ -6,9 +6,9 @@ ref_id: ncsc-caf-4.0-igp
 name: NCSC - Cyber Assessment Framework (CAF) v4.0 - IGP questionnaire
 description: 'National Cyber Security Centre - Cyber Assessment Framework, assessed
   the way the framework is designed to be used: the contributing outcome is the unit
-  of assessment, and every indicator of good practice is answered true or false. Each
-  outcome closes with a status question that turns those answers into Achieved, Partially
-  achieved or Not achieved.
+  of assessment, and every indicator of good practice is answered true or false. Those
+  answers decide the outcome status - Achieved, Partially achieved or Not achieved
+  - by the rule the indicator tables print.
 
   https://www.ncsc.gov.uk/collection/cyber-assessment-framework'
 copyright: NCSC https://www.ncsc.gov.uk/collection/cyber-assessment-framework
@@ -24,11 +24,24 @@ objects:
     description: 'National Cyber Security Centre - Cyber Assessment Framework, assessed
       the way the framework is designed to be used: the contributing outcome is the
       unit of assessment, and every indicator of good practice is answered true or
-      false. Each outcome closes with a status question that turns those answers into
-      Achieved, Partially achieved or Not achieved.
+      false. Those answers decide the outcome status - Achieved, Partially achieved
+      or Not achieved - by the rule the indicator tables print.
 
       https://www.ncsc.gov.uk/collection/cyber-assessment-framework'
     result_aggregation: tiered_all
+    field_visibility:
+      score:
+        auditor: hidden
+        respondent: hidden
+      documentation_score:
+        auditor: hidden
+        respondent: hidden
+      extended_result:
+        auditor: hidden
+        respondent: hidden
+      status:
+        auditor: hidden
+        respondent: hidden
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp:a
       assessable: false

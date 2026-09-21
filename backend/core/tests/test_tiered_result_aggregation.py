@@ -105,6 +105,21 @@ class TestAggregateTieredResults:
         ]
         assert aggregate_tiered_results(answers) == "compliant"
 
+    def test_not_applicable_is_neutral_inside_a_multiple_choice_answer(self):
+        """A multiple choice answer can select both; the neutral one must not
+        fail the tier the other one holds."""
+        answers = [
+            ("compliant", ["compliant", "not_applicable"]),
+            ("compliant", ["compliant"]),
+        ]
+        assert aggregate_tiered_results(answers) == "compliant"
+
+        mixed_partial = [
+            ("compliant", ["compliant", "not_applicable"]),
+            ("partially_compliant", ["not_applicable", "partially_compliant"]),
+        ]
+        assert aggregate_tiered_results(mixed_partial) == "compliant"
+
     def test_everything_not_applicable(self):
         answers = [("compliant", ["not_applicable"])] * 2
         assert aggregate_tiered_results(answers) == "not_applicable"
