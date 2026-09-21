@@ -6,7 +6,7 @@
 	import { writable } from 'svelte/store';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
-	import type { TreeViewNode } from '@skeletonlabs/skeleton-svelte';
+	import type { TreeViewNode } from '$lib/components/TreeView/types';
 	import type { PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';

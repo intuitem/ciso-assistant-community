@@ -1,8 +1,8 @@
 """API tests for RequirementAssignmentViewSet.set_status.
 
-Covers the transition matrix introduced/extended by SUP-1488 (reopening a
-submitted/changes_requested/in_progress/closed assignment back to "draft"),
-plus the EDITABLE_STATUSES guard on update/partial_update/destroy.
+Covers the transition matrix for reopening a submitted/changes_requested/
+in_progress/closed assignment back to "draft", plus the EDITABLE_STATUSES
+guard on update/partial_update/destroy.
 
 reviewer_only / actor_only are exercised by monkeypatching the same seams
 used elsewhere in this test suite (get_respondent_scoped_folder_ids,
@@ -112,8 +112,8 @@ class TestSetStatusTransitions:
     def test_reviewer_can_reopen_to_draft(
         self, assignment_fixture, start_status, target_status
     ):
-        """New transitions added by SUP-1488: any non-draft status can be
-        reset to draft by a reviewer, unlocking the assignment for editing."""
+        """Any non-draft status can be reset to draft by a reviewer, unlocking
+        the assignment for editing."""
         assignment = assignment_fixture["assignment"]
         assignment.status = start_status
         assignment.save(update_fields=["status"])
@@ -220,8 +220,8 @@ class TestSetStatusTransitions:
 
 @pytest.mark.django_db
 class TestEditableStatuses:
-    """SUP-1488 narrowed EDITABLE_STATUSES to ("draft",) once "Reopen for
-    editing" became the only supported path back into an editable state."""
+    """EDITABLE_STATUSES is ("draft",): "Reopen for editing" is the only
+    supported path back into an editable state."""
 
     def _patch(self, client, assignment):
         return client.patch(

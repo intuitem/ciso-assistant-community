@@ -1866,6 +1866,8 @@
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Token auth method",
 	"oauthPKCEEnabled": "OAuth PKCE enabled",
+	"oidcAdditionalScopes": "Dodatni opsezi",
+	"oidcAdditionalScopesHelpText": "Neobavezni OAuth opsezi odvojeni zarezima koji se dodaju zadanim opsezima openid, profile i email.",
 	"suggestedParentheses": "(predloženo)",
 	"matchingScenarios": "Odgovarajući scenariji",
 	"clientSecretAlreadySetHelpText": "Tajni ključ klijenta je već postavljen.",
