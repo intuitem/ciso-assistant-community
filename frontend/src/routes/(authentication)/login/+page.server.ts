@@ -1,6 +1,7 @@
 import { getSecureRedirect } from '$lib/utils/helpers';
 
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
+import { safeTranslate } from '$lib/utils/i18n';
 import { logger } from '$lib/server/logger';
 import { loginSchema } from '$lib/utils/schemas';
 import type { LoginRequestBody } from '$lib/utils/types';
@@ -72,9 +73,9 @@ export const actions: Actions = {
 				res.errors.forEach((error) => {
 					// non-field errors (e.g. too_many_login_attempts) have no param
 					if (error.param) {
-						setError(form, error.param, error.code);
+						setError(form, error.param, safeTranslate(error.code));
 					} else {
-						setError(form, error.code);
+						setError(form, safeTranslate(error.code));
 					}
 				});
 				return fail(res.status, { form });
