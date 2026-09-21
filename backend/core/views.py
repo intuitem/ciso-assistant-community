@@ -10421,7 +10421,9 @@ class FrameworkViewSet(BaseModelViewSet):
         detail=True, methods=["get"], name="Get framework coverage data from mappings"
     )
     def mapping_stats(self, request, pk):
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         framework_urn = Framework.objects.filter(id=pk).values_list("urn")[0][0]
         res = engine.paths_and_coverages(framework_urn)
@@ -12196,7 +12198,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ).get(id=has_mapping_path_to)
             except ComplianceAssessment.DoesNotExist, ValueError:
                 return qs.none()
-            from core.mappings.engine import engine
+            from core.mappings.engine import MappingEngine
+
+            engine = MappingEngine()
 
             max_depth = get_mapping_max_depth()
             source_urns = engine.get_source_framework_urns(
@@ -12481,7 +12485,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     )
     def frameworks(self, request, pk):
         audit = self.get_object()
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         audit_from_results = engine.load_audit_fields(audit)
         max_depth = get_mapping_max_depth()
@@ -13433,7 +13439,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         create_applied_controls = serializer.validated_data.pop(
             "create_applied_controls_from_suggestions", False
         )
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         with transaction.atomic():
             instance: ComplianceAssessment = serializer.save()
@@ -13448,18 +13456,26 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 best_results, _ = engine.best_mapping_inferences(
                     audit_from_results, source_urn, dest_urn, max_depth
                 )
+                # Empty when no mapping path exists between the two
+                # frameworks, which is a legitimate outcome: the audit is
+                # created, just not pre-filled.
+                inferences = best_results.get("requirement_assessments", {})
+                if not inferences:
+                    logger.warning(
+                        "No mapping path between the baseline and the target framework",
+                        source=source_urn,
+                        dest=dest_urn,
+                    )
 
                 requirement_assessments_to_update: list[RequirementAssessment] = []
 
                 target_requirement_assessments = RequirementAssessment.objects.filter(
                     compliance_assessment=instance,
-                    requirement__urn__in=best_results["requirement_assessments"],
+                    requirement__urn__in=inferences,
                 )
 
                 for req in target_requirement_assessments:
-                    source = best_results["requirement_assessments"][
-                        req.requirement.urn
-                    ]
+                    source = inferences[req.requirement.urn]
                     for field in [
                         "result",
                         "status",
@@ -13492,37 +13508,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for ra in requirement_assessments_to_update:
-                    if best_results["requirement_assessments"][ra.requirement.urn].get(
-                        "applied_controls"
-                    ):
+                    if inferences[ra.requirement.urn].get("applied_controls"):
                         ra.applied_controls.add(
                             *[
                                 control
-                                for control in best_results["requirement_assessments"][
-                                    ra.requirement.urn
-                                ]["applied_controls"]
+                                for control in inferences[ra.requirement.urn][
+                                    "applied_controls"
+                                ]
                             ]
                         )
-                    if best_results["requirement_assessments"][ra.requirement.urn].get(
-                        "evidences"
-                    ):
+                    if inferences[ra.requirement.urn].get("evidences"):
                         ra.evidences.add(
                             *[
                                 evidence
-                                for evidence in best_results["requirement_assessments"][
-                                    ra.requirement.urn
-                                ]["evidences"]
+                                for evidence in inferences[ra.requirement.urn][
+                                    "evidences"
+                                ]
                             ]
                         )
-                    if best_results["requirement_assessments"][ra.requirement.urn].get(
-                        "security_exceptions"
-                    ):
+                    if inferences[ra.requirement.urn].get("security_exceptions"):
                         ra.security_exceptions.add(
                             *[
                                 exception
-                                for exception in best_results[
-                                    "requirement_assessments"
-                                ][ra.requirement.urn]["security_exceptions"]
+                                for exception in inferences[ra.requirement.urn][
+                                    "security_exceptions"
+                                ]
                             ]
                         )
 
@@ -14771,7 +14781,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         target_ras = target_data["requirement_assessments"]
         current_results = engine.summary_results(target_data)
@@ -16085,7 +16097,9 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="graph-data")
     def graph_data_list(self, request):
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         max_depth = get_mapping_max_depth()
 

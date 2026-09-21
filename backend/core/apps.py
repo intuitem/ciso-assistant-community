@@ -14,7 +14,6 @@ class CoreConfig(AppConfig):
         # This import runs the @webhook_registry.register decorator
         import core.webhooks
         import core.signals
-        import core.mappings.signals
 
         # avoid post_migrate handler if we are in the main, as it interferes with restore
         if not os.environ.get("RUN_MAIN"):
