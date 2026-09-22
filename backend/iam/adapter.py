@@ -16,6 +16,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
 
+import ipaddress
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -28,7 +29,19 @@ DEFAULT_ATTRIBUTE_MAPPING_GROUPS = ["groups"]
 def resolve_client_ip(request):
     if request is None:
         return None
-    return request.headers.get("X-Real-IP") or request.META.get("REMOTE_ADDR")
+
+    request_ip = request.META.get("REMOTE_ADDR")
+    header_ip = request.headers.get("X-Real-IP")
+
+    if not request_ip:
+        return header_ip
+    if not header_ip:
+        return request_ip
+
+    request_ip_info = ipaddress.ip_address(request_ip)
+    if request_ip_info.is_private or request_ip_info.is_loopback:
+        return header_ip
+    return request_ip
 
 
 class AccountAdapter(DefaultAccountAdapter):

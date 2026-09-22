@@ -23,10 +23,32 @@ class TestPasswordResetEnumeration:
         assert hit.content == miss.content
 
     @override_settings(EMAIL_HOST="smtp.example.com")
-    def test_email_is_enqueued_only_for_existing_local_user(self):
-        user = User.objects.create_user(email="real2@example.com", password=PW)
+    def test_email_is_always_enqueued_regardless_of_match(self):
+        # The view must not branch on whether the email matches an account:
+        # a request-side queue write present only for matches is itself a
+        # timing oracle. Eligibility is resolved inside the task instead.
+        User.objects.create_user(email="real2@example.com", password=PW)
         with patch("iam.views.send_password_reset_email") as enqueue:
             APIClient().post(URL, {"email": "real2@example.com"}, format="json")
             APIClient().post(URL, {"email": "ghost@example.com"}, format="json")
-        assert enqueue.call_count == 1
-        assert enqueue.call_args[0][0] == user.id
+        assert enqueue.call_count == 2
+        enqueued_emails = {call.args[0] for call in enqueue.call_args_list}
+        assert enqueued_emails == {"real2@example.com", "ghost@example.com"}
+
+
+@pytest.mark.django_db
+class TestSendPasswordResetEmailTask:
+    def test_skips_nonexistent_user(self):
+        from iam.tasks import send_password_reset_email
+
+        # .call_local() runs the huey task body synchronously in tests.
+        send_password_reset_email.call_local("ghost@example.com", "subject")
+
+    def test_sends_for_existing_local_user(self):
+        from iam.tasks import send_password_reset_email
+
+        User.objects.create_user(email="real3@example.com", password=PW)
+        with patch("iam.models.User.mailing") as mailing:
+            send_password_reset_email.call_local("real3@example.com", "subject")
+        assert mailing.call_count == 1
+        assert mailing.call_args.kwargs["subject"] == "subject"

@@ -6,11 +6,44 @@ from django.test import RequestFactory, override_settings
 from structlog.testing import capture_logs
 
 from global_settings.models import GlobalSettings
-from iam.adapter import AccountAdapter
+from iam.adapter import AccountAdapter, resolve_client_ip
 
 User = get_user_model()
 
 PASSWORD = "correct-horse-battery-staple"
+
+
+class TestResolveClientIp:
+    def setup_method(self):
+        self.factory = RequestFactory()
+
+    def test_no_request_returns_none(self):
+        assert resolve_client_ip(None) is None
+
+    def test_public_remote_addr_ignores_spoofed_header(self):
+        # Direct internet request (no trusted reverse proxy in the middle):
+        # a self-supplied X-Real-IP must not override the real peer address.
+        req = self.factory.post(
+            "/login", REMOTE_ADDR="8.8.8.8", HTTP_X_REAL_IP="1.2.3.4"
+        )
+        assert resolve_client_ip(req) == "8.8.8.8"
+
+    def test_private_remote_addr_trusts_forwarded_header(self):
+        # Request arrived via our own reverse proxy on an internal network.
+        req = self.factory.post(
+            "/login", REMOTE_ADDR="10.0.0.1", HTTP_X_REAL_IP="203.0.113.7"
+        )
+        assert resolve_client_ip(req) == "203.0.113.7"
+
+    def test_loopback_remote_addr_trusts_forwarded_header(self):
+        req = self.factory.post(
+            "/login", REMOTE_ADDR="127.0.0.1", HTTP_X_REAL_IP="203.0.113.7"
+        )
+        assert resolve_client_ip(req) == "203.0.113.7"
+
+    def test_no_header_falls_back_to_remote_addr(self):
+        req = self.factory.post("/login", REMOTE_ADDR="8.8.8.8")
+        assert resolve_client_ip(req) == "8.8.8.8"
 
 
 @pytest.mark.django_db
