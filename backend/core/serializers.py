@@ -3173,6 +3173,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     requirement_assessments = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
+    task_templates = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     owner = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")

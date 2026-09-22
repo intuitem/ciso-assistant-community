@@ -484,6 +484,16 @@ class TestEvidenceTaskTemplateLink:
         assert response.status_code == 200, response.json()
         assert list(evidence.task_templates.all()) == [task]
 
+    def test_retrieve_exposes_the_linked_tasks(self, authenticated_client):
+        task = self._task()
+        evidence = Evidence.objects.create(
+            name="Linked", folder=Folder.get_root_folder()
+        )
+        evidence.task_templates.set([task])
+        response = authenticated_client.get(f"/api/evidences/{evidence.id}/")
+        assert response.status_code == 200, response.json()
+        assert [t["id"] for t in response.json()["task_templates"]] == [str(task.id)]
+
     def test_omitting_the_field_keeps_existing_links(self, authenticated_client):
         task = self._task()
         evidence = Evidence.objects.create(
