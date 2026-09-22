@@ -18,6 +18,7 @@ import structlog
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
 from . import meta
+from .mailers import build_mailers, describe
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -542,53 +543,21 @@ logger.info("FORCE_CREATE_ADMIN: %s", FORCE_CREATE_ADMIN)
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 logger.info("DEFAULT_FROM_EMAIL: %s", DEFAULT_FROM_EMAIL)
 
-EMAIL_HOST = os.environ.get("EMAIL_HOST")
-logger.info("EMAIL_HOST: %s", EMAIL_HOST)
-EMAIL_PORT = os.environ.get("EMAIL_PORT")
-logger.info("EMAIL_PORT: %s", EMAIL_PORT)
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
-logger.info("EMAIL_USE_TLS: %s", EMAIL_USE_TLS)
-EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False").lower() in ("true", "1", "yes")
-logger.info("EMAIL_USE_SSL: %s", EMAIL_USE_SSL)
-if EMAIL_USE_TLS and EMAIL_USE_SSL:
-    raise ValueError("EMAIL_USE_TLS and EMAIL_USE_SSL are mutually exclusive")
-# rescue mail
-EMAIL_HOST_RESCUE = os.environ.get("EMAIL_HOST_RESCUE")
-logger.info("EMAIL_HOST_RESCUE: %s", EMAIL_HOST_RESCUE)
-EMAIL_PORT_RESCUE = os.environ.get("EMAIL_PORT_RESCUE")
-logger.info("EMAIL_PORT_RESCUE: %s", EMAIL_PORT_RESCUE)
-EMAIL_HOST_USER_RESCUE = os.environ.get("EMAIL_HOST_USER_RESCUE")
-EMAIL_HOST_PASSWORD_RESCUE = os.environ.get("EMAIL_HOST_PASSWORD_RESCUE")
-EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() in (
-    "true",
-    "1",
-    "yes",
-)
-logger.info("EMAIL_USE_TLS_RESCUE: %s", EMAIL_USE_TLS_RESCUE)
-EMAIL_USE_SSL_RESCUE = os.environ.get("EMAIL_USE_SSL_RESCUE", "False").lower() in (
-    "true",
-    "1",
-    "yes",
-)
-logger.info("EMAIL_USE_SSL_RESCUE: %s", EMAIL_USE_SSL_RESCUE)
-if EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE:
-    raise ValueError(
-        "EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE are mutually exclusive"
-    )
+# Outgoing mail. The EMAIL_* environment variables are the operator interface
+# and keep their names; they feed Django's MAILERS, tried in order by
+# core.mailer (primary, then the _RESCUE server). Django's own EMAIL_* settings
+# are deprecated in 6.1 and not defined here.
 EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in (
     "true",
     "1",
     "yes",
 )
 logger.info("EMAIL_FORCE_TLS_1_2: %s", EMAIL_FORCE_TLS_1_2)
-# Applies EMAIL_FORCE_TLS_1_2 (see core.email_backend). Overridden below when
-# MAIL_DEBUG is on.
-EMAIL_BACKEND = "core.email_backend.EmailBackend"
-
-EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
-logger.info("EMAIL_TIMEOUT: %s", EMAIL_TIMEOUT)
+MAILERS = build_mailers(os.environ, mail_debug=MAIL_DEBUG)
+for _line in describe(MAILERS):
+    logger.info(_line)
+if not MAILERS:
+    logger.info("no mailer configured (EMAIL_HOST unset): mailing is disabled")
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
@@ -876,7 +845,6 @@ MFA_PASSKEY_SIGNUP_ENABLED = False
 MFA_ADAPTER = "iam.adapter.MFAAdapter"
 
 if MAIL_DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
 
 

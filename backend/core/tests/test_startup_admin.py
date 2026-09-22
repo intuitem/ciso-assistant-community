@@ -19,8 +19,7 @@ pytestmark = [
 @override_settings(
     CISO_ASSISTANT_SUPERUSER_EMAIL="new@test.com",
     FORCE_CREATE_ADMIN=False,
-    EMAIL_HOST=None,
-    EMAIL_HOST_RESCUE=None,
+    MAILERS={},
 )
 def test_create_superuser_when_admin_group_empty(administrators):
     """First boot: no admins, email set, user doesn't exist -> create."""
@@ -36,8 +35,7 @@ def test_create_superuser_when_admin_group_empty(administrators):
 @override_settings(
     CISO_ASSISTANT_SUPERUSER_EMAIL="other@test.com",
     FORCE_CREATE_ADMIN=False,
-    EMAIL_HOST=None,
-    EMAIL_HOST_RESCUE=None,
+    MAILERS={},
 )
 def test_no_create_when_admin_group_not_empty_and_no_force(administrators):
     """Admin group has members, no FORCE -> nothing happens."""
@@ -54,8 +52,7 @@ def test_no_create_when_admin_group_not_empty_and_no_force(administrators):
 @override_settings(
     CISO_ASSISTANT_SUPERUSER_EMAIL="forced@test.com",
     FORCE_CREATE_ADMIN=True,
-    EMAIL_HOST=None,
-    EMAIL_HOST_RESCUE=None,
+    MAILERS={},
 )
 def test_force_create_new_user(administrators):
     """FORCE_CREATE_ADMIN + email set + user doesn't exist -> create."""
@@ -69,8 +66,7 @@ def test_force_create_new_user(administrators):
 @override_settings(
     CISO_ASSISTANT_SUPERUSER_EMAIL="regular@test.com",
     FORCE_CREATE_ADMIN=True,
-    EMAIL_HOST=None,
-    EMAIL_HOST_RESCUE=None,
+    MAILERS={},
 )
 def test_force_promote_existing_user(administrators):
     """FORCE_CREATE_ADMIN + user exists but not superuser -> promote."""
@@ -86,8 +82,7 @@ def test_force_promote_existing_user(administrators):
 @override_settings(
     CISO_ASSISTANT_SUPERUSER_EMAIL="regular@test.com",
     FORCE_CREATE_ADMIN=False,
-    EMAIL_HOST=None,
-    EMAIL_HOST_RESCUE=None,
+    MAILERS={},
 )
 def test_no_promote_without_force(administrators):
     """Existing user, admin group empty, no FORCE -> don't promote."""
@@ -104,8 +99,7 @@ def test_no_promote_without_force(administrators):
 @override_settings(
     CISO_ASSISTANT_SUPERUSER_EMAIL=None,
     FORCE_CREATE_ADMIN=True,
-    EMAIL_HOST=None,
-    EMAIL_HOST_RESCUE=None,
+    MAILERS={},
 )
 def test_no_email_does_nothing(administrators):
     """No CISO_ASSISTANT_SUPERUSER_EMAIL -> no user created."""
@@ -120,8 +114,7 @@ def test_no_email_does_nothing(administrators):
 @override_settings(
     CISO_ASSISTANT_SUPERUSER_EMAIL="super@test.com",
     FORCE_CREATE_ADMIN=True,
-    EMAIL_HOST=None,
-    EMAIL_HOST_RESCUE=None,
+    MAILERS={},
 )
 def test_already_superuser_stays_in_group(administrators):
     """User already superuser -> just ensure they're in admin group."""
@@ -137,8 +130,7 @@ def test_already_superuser_stays_in_group(administrators):
 @override_settings(
     CISO_ASSISTANT_SUPERUSER_EMAIL="inactive@test.com",
     FORCE_CREATE_ADMIN=True,
-    EMAIL_HOST=None,
-    EMAIL_HOST_RESCUE=None,
+    MAILERS={},
 )
 def test_force_promote_inactive_user_reactivates(administrators):
     """FORCE_CREATE_ADMIN + inactive user -> promote and reactivate."""

@@ -29,6 +29,7 @@ from rest_framework.status import (
 from django.conf import settings
 
 from global_settings.models import GlobalSettings
+from core import mailer
 from core.models import Actor
 from core.utils import RoleCodename
 from .models import (
@@ -308,7 +309,7 @@ class PasswordResetView(views.APIView):
     def post(self, request):
         email = request.data["email"]  # type: ignore
         associated_user = User.objects.filter(email__iexact=email).first()
-        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
+        if mailer.mailing_enabled():
             if associated_user is not None and associated_user.is_local:
                 try:
                     logger.info(

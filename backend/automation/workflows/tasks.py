@@ -3,12 +3,12 @@ from datetime import timedelta
 import structlog
 from auditlog.models import LogEntry
 from django.conf import settings
-from django.core.mail import get_connection
 from django.db import transaction
 from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task, db_task
 
+from core import mailer
 from core.tasks import send_email_now
 
 # .engine / .models / .scheduling / .events imports stay function-scoped:
@@ -71,7 +71,7 @@ def send_email_task(
     try:
         # One connection for the whole batch (not one handshake per
         # recipient); individual messages so recipients don't see each other.
-        with get_connection() as connection:
+        with mailer.open_connection() as connection:
             for email in recipients:
                 try:
                     send_email_now(subject, body, email, connection=connection)

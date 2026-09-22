@@ -9,6 +9,7 @@ from django.db.models import F, Q
 from django.utils import timezone
 
 from django.conf import settings
+from core import mailer
 from core.models import *
 from core.serializer_fields import (
     FieldsRelatedField,
@@ -2607,7 +2608,7 @@ class UserWriteSerializer(BaseModelSerializer):
         return data
 
     def create(self, validated_data):
-        send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
+        send_mail = mailer.mailing_enabled()
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
             perm=Permission.objects.get(
