@@ -1529,10 +1529,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             )
             return stored_assignments.exists()
 
-        # Everything below dereferences `folder`; no folder means no answer.
-        if folder is None:
-            return False
-
         focused_folder_id = Folder.get_focused_folder_id()
         if focused_folder_id is not None:
             is_folder_focused = (
