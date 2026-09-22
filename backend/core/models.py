@@ -7344,7 +7344,10 @@ class RiskAssessment(Assessment):
 
         # --- checks on the applied controls
         measures = _serialize_for_quality_check(
-            AppliedControl.objects.filter(risk_scenarios__risk_assessment=self)
+            AppliedControl.objects.filter(
+                models.Q(risk_scenarios__risk_assessment=self)
+                | models.Q(risk_scenarios_e__risk_assessment=self)
+            )
             .distinct()
             .order_by("created_at")
         )
