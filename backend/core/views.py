@@ -19609,7 +19609,13 @@ class ObjectClassificationViewSet(BaseModelViewSet):
 
 class ClassificationLevelViewSet(BaseModelViewSet):
     model = ClassificationLevel
-    filterset_fields = ["object_classification", "folder", "is_visible", "builtin"]
+    filterset_fields = [
+        "object_classification",
+        "object_classification__is_visible",
+        "folder",
+        "is_visible",
+        "builtin",
+    ]
     search_fields = ["name", "description", "abbreviation"]
     ordering = ["object_classification", "rank"]
 

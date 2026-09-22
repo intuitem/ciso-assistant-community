@@ -3434,7 +3434,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'object-classifications': {
-		name: 'objectClassification',
+		name: 'objectclassification',
 		localName: 'objectClassification',
 		localNamePlural: 'objectClassifications',
 		verboseName: 'Object classification',
@@ -3452,7 +3452,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'classification-levels': {
-		name: 'classificationLevel',
+		name: 'classificationlevel',
 		localName: 'classificationLevel',
 		localNamePlural: 'classificationLevels',
 		verboseName: 'Classification level',

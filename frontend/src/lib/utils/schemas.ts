@@ -1845,7 +1845,7 @@ export const ObjectClassificationSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
 	is_visible: z.boolean().default(true),
-	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+	translations: z.record(z.string().min(1), z.any()).optional()
 });
 
 export const ClassificationLevelSchema = z.object({
@@ -1855,7 +1855,7 @@ export const ClassificationLevelSchema = z.object({
 	abbreviation: z.string().optional().default(''),
 	hexcolor: z.string().optional().default(''),
 	is_visible: z.boolean().default(true),
-	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+	translations: z.record(z.string().min(1), z.any()).optional()
 });
 
 export const AssetClassSchema = z.object({
