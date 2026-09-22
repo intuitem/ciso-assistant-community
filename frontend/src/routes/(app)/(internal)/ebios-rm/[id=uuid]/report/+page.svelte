@@ -831,7 +831,7 @@
 									{/each}
 								</div>
 							{/if}
-							{#if opScenario.techniques && opScenario.techniques.length > 0}
+							{#if data.featureflags?.ttps && opScenario.techniques && opScenario.techniques.length > 0}
 								<div class="mt-2 text-sm">
 									<span class="font-semibold text-surface-700-300">{m.techniques()}:</span>
 									{#each opScenario.techniques as technique, index}

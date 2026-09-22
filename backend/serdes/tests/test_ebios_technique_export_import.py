@@ -17,7 +17,7 @@ from ebios_rm.models import (
     StrategicScenario,
 )
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
-from sec_intel.models import Technique
+from sec_intel.models import Technique, TTPCatalog
 from serdes.domain_io import export_domain, import_objects, process_uploaded_file
 from serdes.utils import get_domain_export_objects
 
@@ -102,6 +102,12 @@ def ebios_domain(root_folder, ttp_library):
     )
     custom_technique = Technique.objects.create(
         ref_id="TTPX-C1", name="Custom Technique", folder=domain
+    )
+    # Decoys: urn is unique but nullable, so SQL permits many NULL rows. A
+    # lookup by a null urn must not resolve to one of these.
+    TTPCatalog.objects.create(ref_id="TTPX-DECOY", name="Decoy Catalog")
+    Technique.objects.create(
+        ref_id="TTPX-DECOY-T", name="Decoy Technique", folder=root_folder
     )
     threat = Threat.objects.create(name="TTPX threat", folder=domain)
 
@@ -197,3 +203,7 @@ class TestTechniqueRoundTrip:
         rebuilt = scenario.techniques.get(ref_id="TTPX-C1")
         assert rebuilt.pk != ebios_domain["custom_technique"].pk
         assert rebuilt.folder == imported
+        # A null catalog/parent in the dump must stay null, not bind to
+        # whichever null-urn row the DB happens to return first.
+        assert rebuilt.catalog is None
+        assert rebuilt.parent is None

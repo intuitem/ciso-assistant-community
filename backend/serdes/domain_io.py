@@ -1209,12 +1209,18 @@ def process_model_relationships(
         case "technique":
             # Library techniques never reach here: create_batch maps them to
             # their urn. A custom one still carries referential links as urns.
-            _fields["catalog"] = TTPCatalog.objects.filter(
-                urn=_fields.get("catalog")
-            ).first()
-            _fields["parent"] = Technique.objects.filter(
-                urn=_fields.get("parent")
-            ).first()
+            # urn is unique but nullable, so `urn=None` matches every custom
+            # row — never look one up for a missing link.
+            catalog_urn = _fields.get("catalog")
+            _fields["catalog"] = (
+                TTPCatalog.objects.filter(urn=catalog_urn).first()
+                if catalog_urn
+                else None
+            )
+            parent_urn = _fields.get("parent")
+            _fields["parent"] = (
+                Technique.objects.filter(urn=parent_urn).first() if parent_urn else None
+            )
             many_to_many_map_ids["tactic_urns"] = _fields.pop("tactics", [])
             many_to_many_map_ids["reference_control_urns"] = _fields.pop(
                 "reference_controls", []
