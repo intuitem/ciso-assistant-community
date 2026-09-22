@@ -26,8 +26,8 @@ The page lists every domain you have access to, with two tabs per domain — one
 Everything is collapsed by default, so the page opens as a map rather than a wall of text:
 
 1. A domain is a closed row carrying its issue counts per severity.
-2. Opening it shows its audits and risk assessments, each a closed card with its own counts.
-3. Opening an assessment lists the rules it trips, each with the number of objects affected.
+2. Opening it shows its audits and risk assessments, each a closed card with its own counts, on whichever tab holds the most severe issues.
+3. Opening an assessment lists the rules it trips, each with the number and kind of objects affected ("4 requirements", not a bare "4").
 4. Opening a rule shows those objects in a paginated table, with the columns that matter for triage (status, ETA, priority for a control; result and status for a requirement; treatment for a scenario). Past ten objects, the table gains a search box that matches the name and every column.
 
 Domains and assessments with no issue are not listed at all, and a domain's content is only built when you open it, so a workspace with hundreds of domains stays responsive.

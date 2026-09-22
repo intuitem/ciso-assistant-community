@@ -75,6 +75,18 @@
 		);
 	};
 
+	const bucketWeight = (bucket: any) =>
+		(activeSeverities.errors ? bucket.errors.length * 1e8 : 0) +
+		(activeSeverities.warnings ? bucket.warnings.length * 1e4 : 0) +
+		(activeSeverities.info ? bucket.info.length : 0);
+
+	// Sorting domains by severity is misleading if the domain then opens on a tab
+	// with nothing severe in it.
+	const defaultTab = (folder: any) =>
+		bucketWeight(folder.risk_assessments) > bucketWeight(folder.compliance_assessments)
+			? 'risk_assessments'
+			: 'compliance_assessments';
+
 	const allOpen = (folders: any[]) =>
 		folders.length > 0 && folders.every((folder) => openDomains[folder.id]);
 
@@ -101,6 +113,7 @@
 			{:else}
 				<div class="flex flex-wrap items-center gap-x-4 gap-y-2">
 					<div class="flex flex-wrap items-center gap-2">
+						<i class="fa-solid fa-filter text-xs text-surface-500" title={m.filters()}></i>
 						{#each SEVERITIES as severity (severity.key)}
 							<button
 								type="button"
@@ -168,12 +181,12 @@
 
 			{#each shown as folder (folder.id)}
 				<details
-					class="group/domain border border-surface-200-800 rounded-lg overflow-hidden"
+					class="group/domain border-b border-surface-200-800 last:border-b-0"
 					open={openDomains[folder.id] ?? false}
 					ontoggle={(e) => (openDomains[folder.id] = e.currentTarget.open)}
 				>
 					<summary
-						class="flex items-center gap-3 px-5 py-3 cursor-pointer list-none bg-surface-100-900/40 hover:bg-surface-100-900 transition-colors"
+						class="flex items-center gap-3 py-3 cursor-pointer list-none hover:bg-surface-100-900/40 transition-colors"
 					>
 						<i
 							class="fa-solid fa-chevron-right text-xs text-surface-500 transition-transform group-open/domain:rotate-90"
@@ -187,7 +200,7 @@
 							class="anchor underline underline-offset-2 text-xs shrink-0 whitespace-nowrap"
 						>
 							<i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-							{m.xRaysView()}
+							{m.xRaysOpenDomain()}
 						</Anchor>
 						<div class="ml-auto flex items-center gap-1.5 shrink-0">
 							{#each SEVERITIES as severity (severity.key)}
@@ -209,9 +222,9 @@
 							folder.compliance_assessments.objects
 						) as any[]}
 						{@const risk_assessments = Object.values(folder.risk_assessments.objects) as any[]}
-						<div class="px-5 py-3 bg-surface-50-950">
+						<div class="pb-4 pl-6">
 							<Tabs
-								value={tabStates[folder.id] || 'compliance_assessments'}
+								value={tabStates[folder.id] || defaultTab(folder)}
 								onValueChange={(e) => {
 									tabStates[folder.id] = e.value;
 								}}

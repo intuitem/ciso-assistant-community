@@ -56,12 +56,28 @@ export const ISSUE_COLUMNS: Record<string, Column[]> = {
 	],
 	requirementassessment: [
 		{ key: 'result', label: () => m.result(), kind: 'enum' },
-		{ key: 'status', label: () => m.status(), kind: 'enum' }
+		{ key: 'status', label: () => m.xRaysAssessmentStatus(), kind: 'enum' }
 	],
 	riskacceptance: [
 		{ key: 'state', label: () => m.state(), kind: 'enum' },
 		{ key: 'expiry_date', label: () => m.expiryDate(), kind: 'date' }
 	]
+};
+
+// What a rule's occurrences actually are, so the count on an issue row reads
+// "4 requirements" rather than a bare "4".
+const OBJECT_LABELS: Record<string, () => string> = {
+	appliedcontrol: () => m.appliedControls(),
+	riskscenario: () => m.riskScenarios(),
+	requirementassessment: () => m.requirements(),
+	riskacceptance: () => m.riskAcceptances(),
+	evidence: () => m.evidences()
+};
+
+export const occurrenceLabel = (objType: string, count: number): string => {
+	const noun =
+		OBJECT_LABELS[objType]?.() ?? (count === 1 ? m.xRaysOccurrence() : m.xRaysOccurrences());
+	return `${count} ${noun.toLowerCase()}`;
 };
 
 export const formatCell = (value: any, kind: Column['kind']): string => {

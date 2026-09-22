@@ -3,7 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import IssueTable from './IssueTable.svelte';
-	import { SEVERITIES, aggregateIssuesByType, type SeverityKey } from './utils';
+	import { SEVERITIES, aggregateIssuesByType, occurrenceLabel, type SeverityKey } from './utils';
 
 	interface Props {
 		assessment: any;
@@ -49,7 +49,7 @@
 				class="anchor underline underline-offset-2 text-xs shrink-0 whitespace-nowrap"
 			>
 				<i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-				{m.xRaysView()}
+				{assessmentType === 'risk-assessments' ? m.xRaysOpenRiskAssessment() : m.xRaysOpenAudit()}
 			</Anchor>
 			<div class="ml-auto flex items-center gap-1.5 shrink-0">
 				{#each groups as group (group.key)}
@@ -69,7 +69,7 @@
 						<span class="text-xs font-bold uppercase tracking-wide {group.text}">
 							{group.label()}
 						</span>
-						<span class="text-xs text-surface-500">
+						<span class="text-xs text-surface-700-300">
 							{group.issues.length}
 							{group.issues.length === 1 ? m.xRaysIssue() : m.xRaysIssues()} · {group.total}
 							{group.total === 1 ? m.xRaysOccurrence() : m.xRaysOccurrences()}
@@ -78,21 +78,19 @@
 					</div>
 
 					{#each group.issues as issue (issue.msgid)}
-						<details
-							class="group/issue rounded-md border-l-4 {group.border} bg-surface-100-900/40 overflow-hidden"
-						>
+						<details class="group/issue border-l-4 {group.border} pl-3">
 							<summary
-								class="flex items-center gap-2 px-3 py-2 cursor-pointer list-none hover:bg-surface-200-800/40 transition-colors"
+								class="flex items-center gap-2 py-1.5 cursor-pointer list-none hover:text-primary-600-400 transition-colors"
 							>
 								<i
 									class="fa-solid fa-chevron-right text-[10px] text-surface-500 transition-transform group-open/issue:rotate-90"
 								></i>
 								<span class="text-sm font-medium">{safeTranslate(issue.msgid)}</span>
-								<span class="ml-auto badge preset-tonal-surface text-xs shrink-0">
-									{issue.occurrences.length}
+								<span class="ml-auto text-xs text-surface-700-300 shrink-0 whitespace-nowrap">
+									{occurrenceLabel(issue.objType, issue.occurrences.length)}
 								</span>
 							</summary>
-							<div class="bg-surface-50-950 px-2 pb-1">
+							<div class="pb-2">
 								<IssueTable {issue} />
 							</div>
 						</details>
