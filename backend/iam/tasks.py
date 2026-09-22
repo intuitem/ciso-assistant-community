@@ -1,7 +1,24 @@
-from huey.contrib.djhuey import db_task
+from datetime import timedelta
+
+from django.conf import settings
+from django.utils import timezone
+from huey import crontab
+from huey.contrib.djhuey import db_periodic_task, db_task
 import structlog
 
 logger = structlog.get_logger(__name__)
+
+
+@db_periodic_task(crontab(minute="*/30"))
+def prune_login_attempts():
+    from iam.models import LoginAttempt
+
+    cutoff = timezone.now() - timedelta(
+        seconds=settings.LOGIN_ATTEMPT_RETENTION_SECONDS
+    )
+    deleted, _ = LoginAttempt.objects.filter(window_start__lt=cutoff).delete()
+    if deleted:
+        logger.info("pruned login attempts", count=deleted)
 
 
 @db_task()

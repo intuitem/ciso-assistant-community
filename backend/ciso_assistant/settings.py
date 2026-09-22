@@ -826,6 +826,16 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
 ACCOUNT_RATE_LIMITS = {"login_failed": "10/m/ip,5/300s/key"}
 
+# Cross-worker login throttle backed by the DB (iam.LoginAttempt)
+# Complements the per-worker allauth limit above.
+LOGIN_ATTEMPT_MAX_FAILURES = int(os.environ.get("LOGIN_ATTEMPT_MAX_FAILURES", 5))
+LOGIN_ATTEMPT_WINDOW_SECONDS = int(
+    os.environ.get("LOGIN_ATTEMPT_WINDOW_SECONDS", 5 * 60)
+)
+LOGIN_ATTEMPT_RETENTION_SECONDS = int(
+    os.environ.get("LOGIN_ATTEMPT_RETENTION_SECONDS", 24 * 60 * 60)
+)
+
 # NOTE: The reauthentication flow has not been implemented in the frontend yet, hence the long timeout.
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
 ACCOUNT_REAUTHENTICATION_TIMEOUT = 24 * 60 * 60  # 24 hours

@@ -59,15 +59,29 @@ class AccountAdapter(DefaultAccountAdapter):
         return False
 
     def authenticate(self, request, **credentials):
+        from iam.models import LoginAttempt
+
+        email = credentials.get("username") or credentials.get("email")
+        client_ip = resolve_client_ip(request)
+
+        if email and LoginAttempt.is_blocked(email, client_ip):
+            logger.warning("login_throttled", username=email, client_ip=client_ip)
+            raise self.validation_error("too_many_login_attempts")
+
         try:
             user = super().authenticate(request, **credentials)
         except ValidationError as error:
             # must propagate, not be swallowed by the broad except
             if getattr(error, "code", None) == "too_many_login_attempts":
-                email = credentials.get("username") or credentials.get("email")
-                client_ip = resolve_client_ip(request)
                 logger.warning("login_throttled", username=email, client_ip=client_ip)
             raise
+
+        if email:
+            if user is not None and user.is_local:
+                LoginAttempt.reset(email, client_ip)
+            elif user is None:
+                LoginAttempt.record_failure(email, client_ip)
+
         if user is not None and not user.is_local:
             return None
         return user

@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from typing import Any, List, Literal, Optional, Final
 from typing import TYPE_CHECKING, cast
+import hashlib
 import secrets
 import uuid
 from allauth.account.models import EmailAddress
@@ -2448,3 +2449,54 @@ def _skip_builtin_rbac(sender, instance, **kwargs):
 
 for _rbac_model in (RoleAssignment, Role, UserGroup):
     pre_log.connect(_skip_builtin_rbac, sender=_rbac_model)
+
+
+class LoginAttempt(models.Model):
+    username_hash = models.CharField(max_length=64, db_index=True)
+    ip = models.CharField(max_length=45, default="", blank=True)
+    failure_count = models.PositiveIntegerField(default=0)
+    window_start = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["username_hash", "ip"], name="unique_login_attempt_key"
+            )
+        ]
+
+    @staticmethod
+    def _hash(email: str) -> str:
+        return hashlib.sha256(email.strip().lower().encode("utf-8")).hexdigest()
+
+    @classmethod
+    def _window(cls) -> timedelta:
+        return timedelta(seconds=settings.LOGIN_ATTEMPT_WINDOW_SECONDS)
+
+    @classmethod
+    def is_blocked(cls, email: str, ip: str | None) -> bool:
+        row = cls.objects.filter(username_hash=cls._hash(email), ip=ip or "").first()
+        if row is None:
+            return False
+        if row.window_start < timezone.now() - cls._window():
+            return False
+        return row.failure_count >= settings.LOGIN_ATTEMPT_MAX_FAILURES
+
+    @classmethod
+    def record_failure(cls, email: str, ip: str | None) -> None:
+        now = timezone.now()
+        row, created = cls.objects.get_or_create(
+            username_hash=cls._hash(email),
+            ip=ip or "",
+            defaults={"failure_count": 1, "window_start": now},
+        )
+        if created:
+            return
+        if row.window_start < now - cls._window():
+            cls.objects.filter(pk=row.pk).update(failure_count=1, window_start=now)
+        else:
+            cls.objects.filter(pk=row.pk).update(failure_count=F("failure_count") + 1)
+
+    @classmethod
+    def reset(cls, email: str, ip: str | None) -> None:
+        cls.objects.filter(username_hash=cls._hash(email), ip=ip or "").delete()
