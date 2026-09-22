@@ -1766,7 +1766,7 @@ export const ElementaryActionSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	threat: z.string().uuid().optional(),
+	threat: z.string().uuid().optional().nullable(),
 	icon: z.string().optional().nullable(),
 	attack_stage: z.number().default(0),
 	operating_modes: z.string().uuid().optional().array().optional()
