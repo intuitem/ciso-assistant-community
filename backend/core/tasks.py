@@ -691,8 +691,7 @@ def send_email_now(
     Raises RuntimeError when the backend reports the message unsent;
     connection/backend exceptions propagate as-is."""
     if connection is None:
-        ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
-        scope = get_connection(ssl_context=ssl_context)
+        scope = get_connection()
     else:
         scope = nullcontext(connection)
     with scope as conn:
