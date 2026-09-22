@@ -831,6 +831,20 @@
 									{/each}
 								</div>
 							{/if}
+							{#if opScenario.techniques && opScenario.techniques.length > 0}
+								<div class="mt-2 text-sm">
+									<span class="font-semibold text-surface-700-300">{m.techniques()}:</span>
+									{#each opScenario.techniques as technique, index}
+										{index > 0 ? ', ' : ''}
+										<Anchor
+											href={`/techniques/${technique.id}`}
+											label={technique.str}
+											class="space-x-2 text-primary-800-200 hover:text-primary-600-400"
+											>{technique.str}</Anchor
+										>
+									{/each}
+								</div>
+							{/if}
 							{#if opScenario.stakeholders && opScenario.stakeholders.length > 0}
 								<div class="mt-2 text-sm">
 									<span class="font-semibold text-surface-700-300">{m.stakeholders()}:</span>
