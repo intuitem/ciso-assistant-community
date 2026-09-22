@@ -282,8 +282,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'notification',
 		localNamePlural: 'notifications',
 		verboseName: 'Notification',
-		verboseNamePlural: 'Notifications',
-		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }]
+		verboseNamePlural: 'Notifications'
+		// No `foreignKeyFields`: the domain is the derived `target_folder`, and linking it
+		// would 404 for a recipient holding no role there -- which is the normal case (ADR
+		// notification-recipient-scoped-access).
 	},
 	folders: {
 		name: 'folder',

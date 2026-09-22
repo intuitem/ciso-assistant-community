@@ -261,3 +261,64 @@ def test_escalation_still_writes_exactly_one_row(folder, owner):
     _move_to(ev, 7)
     _sweep()
     assert _rows().count() == 1
+
+
+# --- assignment notifications: one row per audit, not per assignment ------------------
+
+
+@pytest.fixture
+def audit(folder):
+    from core.models import ComplianceAssessment, Framework, Perimeter
+
+    framework = Framework.objects.create(
+        name="FW", folder=folder, urn="urn:test:fw:assignments"
+    )
+    perimeter = Perimeter.objects.create(name="P", folder=folder)
+    return ComplianceAssessment.objects.create(
+        name="ISO audit", framework=framework, folder=folder, perimeter=perimeter
+    )
+
+
+def _assignment(audit, folder, actor_user):
+    from core.models import RequirementAssignment
+
+    assignment = RequirementAssignment.objects.create(
+        compliance_assessment=audit, folder=folder
+    )
+    assignment.actor.set([actor_user.actor])
+    return assignment
+
+
+def test_two_assignments_in_one_audit_share_one_row(audit, folder, owner):
+    """Deliberate (§12.5): the target is the audit, which is both the dedup key and the
+    click destination. The declared context is audit-level, so per-assignment rows would
+    be identical duplicates."""
+    from core.tasks import send_assignment_activated_notification
+
+    first = _assignment(audit, folder, owner)
+    second = _assignment(audit, folder, owner)
+
+    send_assignment_activated_notification.call_local(first.id)
+    send_assignment_activated_notification.call_local(second.id)
+
+    rows = Notification.objects.filter(type="assignment_activated", recipient=owner)
+    assert rows.count() == 1
+    assert rows.get().object_id == audit.id
+
+
+def test_the_newest_review_decision_is_the_one_on_the_row(audit, folder, owner):
+    """The cost of sharing a row: `decision` is per-assignment, so the second review
+    overwrites the first. Accepted -- the row re-opens unread, so the user sees the
+    latest and opens the audit for the rest."""
+    from core.tasks import send_assignment_reviewed_notification
+
+    first = _assignment(audit, folder, owner)
+    second = _assignment(audit, folder, owner)
+
+    send_assignment_reviewed_notification.call_local(first.id, "changes_requested")
+    Notification.objects.filter(type="assignment_reviewed").update(is_read=True)
+    send_assignment_reviewed_notification.call_local(second.id, "closed")
+
+    row = Notification.objects.get(type="assignment_reviewed", recipient=owner)
+    assert row.context["decision"] == "Closed"
+    assert row.is_read is False, "a new decision re-opens the row"
