@@ -113,7 +113,7 @@
 
 <div class="card space-y-2 p-4 bg-surface-50-950 shadow-sm">
 	<div class="flex flex-row space-x-2 items-center">
-		<code class="code">{data.requirement.urn}</code>
+		<code>{data.requirement.urn}</code>
 		{#if showStatus}
 			<span
 				class="badge h-fit"

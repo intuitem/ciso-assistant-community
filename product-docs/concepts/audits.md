@@ -37,6 +37,8 @@ An audit assesses compliance against the chosen framework. The evaluation of a s
 
 A requirement assessment is not a single value — it captures _several dimensions_ at once, separating **the compliance result** from **how the work got done** and from **the depth of the implementation**. The point is that the same row tracks the auditor's view, the analyst's progress, and the maturity of the underlying implementation without conflating them.
 
+<figure><img src="../.gitbook/assets/audits-list.png" alt=""><figcaption><p>Audits listed with their framework, perimeter and Progress percentage</p></figcaption></figure>
+
 ### Progress column
 
 Every audit in the audit tables (and on dashboards and campaigns) shows a **Progress** percentage. It answers a single question: _how much of the audit has been assessed?_
@@ -88,6 +90,8 @@ For questionnaire-driven frameworks (whether authored in the [library builder](.
 Text type questions are not taken into account for the result computation: leaving one empty does not hold the requirement at **Not assessed**.
 
 If you maintain a tenant whose audits were produced under the older boolean-collapse logic, see [Special cases — Recompute assessment results](../installation/special-cases.md#recompute-assessment-results-after-the-semantic-compute_result-upgrade) for the realignment procedure.
+
+<figure><img src="../.gitbook/assets/audit-detail.png" alt=""><figcaption><p>The audit page — the compliance donut summarises the results across every assessable requirement</p></figcaption></figure>
 
 ### Analyst dimension (assignee + workflow status)
 
@@ -143,7 +147,9 @@ Evidence justifies the status of a compliance requirement or proves that an appl
 
 ## Raising findings
 
-With the **findings_from_requirements** [feature flag](../configuration/settings/feature-flags.md) on, a requirement assessment gains a **Findings** tab and a **Raise a finding** action, so a non-compliance is recorded without leaving the requirement. The audit's findings collect in a [findings binder](findings-assessments.md#raising-a-finding-from-a-requirement) created on first use.
+With the **findings_from_requirements** [feature flag](../configuration/settings/feature-flags.md) on, a requirement assessment gains a **Findings** tab. **Raise a finding** records a non-compliance without leaving the requirement; the picker next to it binds an existing finding, so an issue raised elsewhere (a pentest binder, say) is tied to the requirement it violates. The audit's own findings collect in a [findings binder](findings-assessments.md#raising-a-finding-from-a-requirement) created on first use.
+
+A finding belongs to one requirement assessment at a time. The picker only offers findings not bound to another requirement; to move one, edit the finding itself. Binding and unbinding are refused while the finding's binder is locked, and a locked audit does not take new findings. Raising needs permission to add findings, picking needs permission to change them.
 
 ## Related
 

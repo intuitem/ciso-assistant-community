@@ -508,6 +508,7 @@ export const RequirementAssessmentSchema = z.object({
 	observation: z.string().optional().nullable(),
 	respondent_alignment: z.string().optional().nullable(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional(),
 	noRedirect: z.boolean().default(false),
 	nextRequirementAssessmentId: z.string().uuid().optional().nullable()
 });
@@ -871,7 +872,15 @@ export const SSOSettingsSchema = z.object({
 		])
 		.optional()
 		.nullable(),
-	oauth_pkce_enabled: z.boolean().optional().default(false)
+	oauth_pkce_enabled: z.boolean().optional().default(false),
+	additional_scopes: z
+		.string()
+		.trim()
+		.max(1000)
+		.regex(
+			/^(?:[\x21\x23-\x2b\x2d-\x5b\x5d-\x7e]+(?:[ \t]*,[ \t]*[\x21\x23-\x2b\x2d-\x5b\x5d-\x7e]+)*)?$/
+		)
+		.optional()
 });
 
 export const EntitiesSchema = z.object({

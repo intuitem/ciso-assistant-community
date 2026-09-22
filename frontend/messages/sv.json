@@ -1610,6 +1610,8 @@
 	"defaultUserGroups": "Standardanvändargrupper",
 	"defaultUserGroupsHelpText": "Användargrupper som automatiskt tilldelas användare som skapats via automatisk provisionering.",
 	"defaultUserGroupsWarning": "Tillämpas endast en gång, vid kontoskapande. Att ändra eller ta bort denna inställning senare påverkar inte användare som redan har provisionerats. För gruppmedlemskap som förblir synkroniserat över tid, använd istället IdP-gruppmappning.",
+	"oidcAdditionalScopes": "Ytterligare omfång",
+	"oidcAdditionalScopesHelpText": "Valfria kommaseparerade OAuth-omfång som läggs till standardomfången openid, profile och email.",
 	"attributeMappingGroups": "Attributmappning för grupper",
 	"attributeMappingGroupsHelpText": "Namn på anspråket (claim) som bär användarens IdP-gruppmedlemskap. Grupper som hittas här synkroniseras med IdP-grupper vid varje inloggning och beviljar de CISO Assistant-användargrupper som en administratör har mappat dem till.",
 	"jitProvisioning": "SSO-automatisk provisionering (JIT)",
