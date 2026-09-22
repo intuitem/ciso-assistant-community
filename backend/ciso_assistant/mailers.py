@@ -23,7 +23,8 @@ def _flag(env: Mapping[str, str], name: str) -> bool:
 def smtp_mailer(env: Mapping[str, str], suffix: str = "") -> dict | None:
     """One SMTP mailer from ``EMAIL_*{suffix}`` variables, or None when the
     host is unset. Raises ValueError on contradictory TLS settings, as the
-    settings module always did."""
+    settings module always did, and on a non-numeric port. An unset port is
+    left to the backend: 465 with SSL, 587 with STARTTLS, 25 otherwise."""
     host = env.get(f"EMAIL_HOST{suffix}")
     if not host:
         return None
@@ -34,7 +35,9 @@ def smtp_mailer(env: Mapping[str, str], suffix: str = "") -> dict | None:
             f"EMAIL_USE_TLS{suffix} and EMAIL_USE_SSL{suffix} are mutually exclusive"
         )
     port = env.get(f"EMAIL_PORT{suffix}") or None
-    if port is not None and port.isdigit():
+    if port is not None:
+        if not port.isdigit():
+            raise ValueError(f"EMAIL_PORT{suffix} must be a number, got {port!r}")
         port = int(port)
     return {
         "BACKEND": SMTP_BACKEND,

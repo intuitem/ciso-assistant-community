@@ -38,6 +38,13 @@ class SilentDropBackend(LocmemBackend):
         return 0
 
 
+class UncleanCloseBackend(LocmemBackend):
+    """Delivers, then QUIT fails: cleanup noise, not a delivery failure."""
+
+    def close(self):
+        raise RuntimeError("421 closing transmission channel")
+
+
 @pytest.fixture(autouse=True)
 def reset_counters():
     RefusingBackend.opened = 0
@@ -130,6 +137,13 @@ def test_build_mailers_rejects_tls_and_ssl_together():
         )
 
 
+def test_build_mailers_rejects_non_numeric_port():
+    with pytest.raises(ValueError, match="EMAIL_PORT_RESCUE must be a number"):
+        build_mailers(
+            {"EMAIL_HOST_RESCUE": "smtp2.example", "EMAIL_PORT_RESCUE": "smtp"}
+        )
+
+
 def test_build_mailers_mail_debug_uses_console_only():
     mailers = build_mailers({"EMAIL_HOST": "smtp.example"}, mail_debug=True)
     assert mailers == {"default": {"BACKEND": CONSOLE_BACKEND}}
@@ -205,6 +219,21 @@ def test_zero_sent_is_a_failure(settings):
     settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
     with pytest.raises(RuntimeError, match="0 of 1"):
         mailer.send("S", "body", "a@tests.local")
+
+
+def test_unclean_close_does_not_fail_a_delivered_message(settings):
+    settings.MAILERS = {"default": {"BACKEND": f"{HERE}.UncleanCloseBackend"}}
+    settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
+    mailer.send("S", "body", "a@tests.local")
+    assert len(mail.outbox) == 1
+
+
+def test_unclean_close_does_not_mask_the_callers_error(settings):
+    settings.MAILERS = {"default": {"BACKEND": f"{HERE}.UncleanCloseBackend"}}
+    settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
+    with pytest.raises(ValueError, match="from the caller"):
+        with mailer.open_connection():
+            raise ValueError("from the caller")
 
 
 def test_open_connection_batches_on_one_mailer(settings):

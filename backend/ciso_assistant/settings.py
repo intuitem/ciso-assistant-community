@@ -558,6 +558,9 @@ for _line in describe(MAILERS):
     logger.info(_line)
 if not MAILERS:
     logger.info("no mailer configured (EMAIL_HOST unset): mailing is disabled")
+# An empty MAILERS is the supported "mailing off" state; Django would otherwise
+# warn about the missing "default" entry on every check and migrate.
+SILENCED_SYSTEM_CHECKS = ["mail.W001"]
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [

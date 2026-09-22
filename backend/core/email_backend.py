@@ -1,9 +1,8 @@
 """SMTP email backend honouring the EMAIL_FORCE_TLS_1_2 setting.
 
 Django 6 removed the ``ssl_context`` kwarg from the SMTP backend and turned it
-into a ``cached_property`` built from ``EMAIL_SSL_CERTFILE`` /
-``EMAIL_SSL_KEYFILE``. Passing ``ssl_context=`` to ``get_connection()`` is now
-silently dropped, so the TLS 1.2 pin has to be applied by the backend itself.
+into a ``cached_property`` built from the ``ssl_certfile`` / ``ssl_keyfile``
+options, so the TLS 1.2 pin has to be applied by the backend itself.
 """
 
 import ssl
@@ -23,8 +22,8 @@ def pin_tls12(context: ssl.SSLContext) -> ssl.SSLContext:
 class EmailBackend(SMTPEmailBackend):
     @cached_property
     def ssl_context(self):
-        # Pin Django's own context in place so EMAIL_SSL_CERTFILE /
-        # EMAIL_SSL_KEYFILE keep applying alongside the TLS 1.2 restriction.
+        # Pin Django's own context in place so a client certificate passed in
+        # OPTIONS keeps applying alongside the TLS 1.2 restriction.
         context = super().ssl_context
         if getattr(settings, "EMAIL_FORCE_TLS_1_2", False):
             pin_tls12(context)

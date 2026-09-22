@@ -15,12 +15,9 @@ from contextlib import contextmanager
 
 import structlog
 from django.conf import settings
-from django.core.mail import EmailMessage
-from django.utils.module_loading import import_string
+from django.core.mail import EmailMessage, mailers
 
 logger = structlog.get_logger(__name__)
-
-DEFAULT_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 
 class NoMailerAvailable(Exception):
@@ -47,12 +44,6 @@ def mailing_enabled() -> bool:
     return not missing_configuration()
 
 
-def _build(alias: str):
-    config = settings.MAILERS[alias]
-    backend_class = import_string(config.get("BACKEND", DEFAULT_BACKEND))
-    return backend_class(alias=alias, **config.get("OPTIONS", {}))
-
-
 @contextmanager
 def open_connection():
     """Yield the first mailer that accepts a connection, closed on exit.
@@ -66,7 +57,7 @@ def open_connection():
         raise NoMailerAvailable("no mailer configured (set EMAIL_HOST)")
     last_error = None
     for alias in aliases:
-        backend = _build(alias)
+        backend = mailers[alias]
         try:
             backend.open()
         except Exception as error:
@@ -81,11 +72,22 @@ def open_connection():
         try:
             yield backend
         finally:
-            backend.close()
+            _close(backend, alias)
         return
     raise NoMailerAvailable(
         f"no mailer reachable, tried {', '.join(aliases)}"
     ) from last_error
+
+
+def _close(backend, alias: str) -> None:
+    """Closing is cleanup: a failed QUIT must not turn a message the server
+    already accepted into a reported failure, nor mask the caller's error."""
+    try:
+        backend.close()
+    except Exception as error:
+        logger.warning(
+            "mailer connection did not close cleanly", mailer=alias, error=str(error)
+        )
 
 
 def send(

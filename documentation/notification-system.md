@@ -39,7 +39,7 @@ There is **no notification model** in the database. Notifications are fire-and-f
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `EMAIL_HOST` | Yes | SMTP server hostname |
-| `EMAIL_PORT` | No | SMTP server port (default 25) |
+| `EMAIL_PORT` | No | SMTP server port (default: 465 with SSL, 587 with TLS, 25 otherwise) |
 | `EMAIL_HOST_USER` | No | SMTP username |
 | `EMAIL_HOST_PASSWORD` | No | SMTP password |
 | `EMAIL_USE_TLS` | No | Enable TLS (`true`/`false`, default `false`) |
@@ -237,7 +237,7 @@ These use a separate mechanism (`User.mailing()` in `backend/iam/models.py`) wit
 | User creation (welcome) | `registration/first_connexion_email.html` | `User.save()` / management command `welcome_mail` |
 | User creation (SSO) | `registration/first_connexion_email_sso.html` | SSO user provisioning |
 
-These emails support the **rescue (fallback) email server**. Notification emails (from `tasks.py`) currently use only the primary server.
+All of these, like the notification emails, go through `core.mailer` and therefore the rescue server.
 
 ### 5. Non-Notification Periodic Tasks
 
