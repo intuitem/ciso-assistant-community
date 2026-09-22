@@ -88,6 +88,14 @@ export const breakdownSemanticColorMap: { [key: string]: string } = {
 	in_progress: '#f59e0b',
 	in_review: '#3b82f6',
 	done: '#86efac',
+	// Applied control statuses. '--' is AppliedControl.Status.UNDEFINED, the field
+	// default, so it is usually the largest series: keep it muted so the statuses
+	// that carry the signal stay legible next to it.
+	'--': '#cbd5e1',
+	active: '#22c55e',
+	on_hold: '#a855f7',
+	degraded: '#f97316',
+	deprecated: '#64748b',
 	// Severity (findings, incidents, vulnerabilities, exceptions)
 	critical: '#dc2626',
 	high: '#ea580c',

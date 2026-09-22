@@ -1612,6 +1612,8 @@
 	"defaultUserGroups": "Grupuri de utilizatori implicite",
 	"defaultUserGroupsHelpText": "Grupuri de utilizatori acordate automat utilizatorilor creați prin provizionare automată.",
 	"defaultUserGroupsWarning": "Se aplică o singură dată, la crearea contului. Modificarea sau eliminarea ulterioară a acestei setări nu afectează utilizatorii deja provizionați. Pentru o apartenență la grup care rămâne sincronizată în timp, utilizați în schimb maparea grupurilor IdP.",
+	"oidcAdditionalScopes": "Domenii suplimentare",
+	"oidcAdditionalScopesHelpText": "Domenii OAuth opționale separate prin virgule, adăugate la domeniile implicite openid, profile și email.",
 	"attributeMappingGroups": "Maparea atributului de grupuri",
 	"attributeMappingGroupsHelpText": "Numele (numele) revendicării (claim) care conține apartenențele la grupuri IdP ale utilizatorului. Grupurile găsite aici sunt sincronizate cu grupurile IdP la fiecare autentificare și acordă grupurile de utilizatori CISO Assistant la care un administrator le-a mapat.",
 	"jitProvisioning": "Provizionare automată SSO (JIT)",
