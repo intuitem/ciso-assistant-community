@@ -208,19 +208,25 @@
 	async function saveModulePreferences(patch: Record<string, boolean>, rollback: () => void) {
 		modulePendingWrites += 1;
 		try {
-			const response = await fetch('/fe-api/user-preferences', {
-				method: 'PATCH',
-				body: JSON.stringify({ feature_flags: patch })
-			});
+			let response: Response;
+			try {
+				response = await fetch('/fe-api/user-preferences', {
+					method: 'PATCH',
+					body: JSON.stringify({ feature_flags: patch })
+				});
+			} catch {
+				rollback();
+				return;
+			}
 			if (!response.ok) {
 				rollback();
 				return;
 			}
-			// Sidebar, palette and flagged tables are all built server-side from
-			// the effective flags.
-			await invalidateAll();
-		} catch {
-			rollback();
+			// Past this point the write landed, so a failed reload leaves the rest
+			// of the tree stale — rolling the toggle back would make it wrong.
+			// Sidebar, palette and flagged tables are built server-side from the
+			// effective flags, hence the reload at all.
+			await invalidateAll().catch(() => {});
 		} finally {
 			modulePendingWrites -= 1;
 		}
