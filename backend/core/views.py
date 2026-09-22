@@ -19,7 +19,7 @@ import tempfile
 from datetime import date, datetime, timedelta, timezone
 from types import MappingProxyType
 from collections.abc import Sequence
-from typing import Dict, Any, List, Tuple, Final
+from typing import Dict, Any, List, Tuple, Final, Optional
 import time
 from django.db.models import (
     F,
@@ -88,6 +88,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
+from django.core.files.uploadedfile import UploadedFile
 
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from core.constants import LEGACY_TTP_LIBRARIES
@@ -125,7 +126,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models, transaction
 from django.forms import IntegerField as FormIntegerField
 from django.forms import ValidationError
-from django.http import FileResponse, HttpResponse, StreamingHttpResponse
+from django.http import FileResponse, HttpResponse, StreamingHttpResponse, HttpRequest
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
@@ -10859,6 +10860,7 @@ class EvidenceViewSet(BaseModelViewSet):
                 "requirement_assessments",
                 "security_exceptions",
                 "contracts",
+                "task_templates",
                 "filtering_labels",
                 actor_prefetch("owner"),
             )
@@ -10918,7 +10920,7 @@ class EvidenceViewSet(BaseModelViewSet):
         url_path="batch-upload",
         parser_classes=[MultiPartParser, FormParser],
     )
-    def batch_upload(self, request):
+    def batch_upload(self, request: HttpRequest):
         """
         Bulk-upload evidences from a multipart payload.
 
@@ -11014,6 +11016,9 @@ class EvidenceViewSet(BaseModelViewSet):
             field = entry.get("field")
             name = (entry.get("name") or field or "").strip()
             rel_path = entry.get("rel_path") or None
+            if not isinstance(rel_path, str):
+                rel_path = None
+
             result = {"field": field, "name": name, "rel_path": rel_path}
 
             upload = request.FILES.get(field) if field else None
@@ -11152,7 +11157,15 @@ class EvidenceViewSet(BaseModelViewSet):
         result["revision_id"] = str(revision.id) if revision else None
         result["version"] = revision.version if revision else 1
 
-    def _batch_add_revision(self, result, summary, evidence, upload, rel_path, request):
+    def _batch_add_revision(
+        self,
+        result: dict,
+        summary: dict,
+        evidence: Evidence,
+        upload: UploadedFile,
+        rel_path: Optional[str],
+        request: HttpRequest,
+    ):
         """Create a new EvidenceRevision against an existing Evidence (auto-bumps version)."""
         rev_serializer = EvidenceRevisionWriteSerializer(
             data={
@@ -11180,13 +11193,20 @@ class EvidenceViewSet(BaseModelViewSet):
         result["version"] = revision.version
         summary["revision_added"] += 1
 
-    def _batch_replace_revision(self, result, summary, evidence, upload, rel_path):
+    def _batch_replace_revision(
+        self,
+        result: dict,
+        summary: dict,
+        evidence: Evidence,
+        upload: UploadedFile,
+        rel_path: Optional[str],
+    ):
         """Overwrite the last revision's attachment in place — preserves Evidence id and M2M links."""
         revision = evidence.last_revision
         if revision is None:
             revision = EvidenceRevision(evidence=evidence)
-        old_attachment = revision.attachment
-        revision.attachment = upload
+        superseded_name = revision.set_new_attachment(upload)
+
         if rel_path:
             revision.observation = f"path: {rel_path}"
         try:
@@ -11204,9 +11224,10 @@ class EvidenceViewSet(BaseModelViewSet):
             result["error"] = " ".join(messages)
             summary["errors"] += 1
             return
+
         revision.save()
-        if old_attachment:
-            old_attachment.delete(save=False)
+        if superseded_name and superseded_name != revision.attachment.name:
+            revision.attachment.storage.delete(superseded_name)
         result["outcome"] = "replaced"
         result["evidence_id"] = str(evidence.id)
         result["revision_id"] = str(revision.id)
@@ -11214,7 +11235,7 @@ class EvidenceViewSet(BaseModelViewSet):
         summary["replaced"] += 1
 
     @staticmethod
-    def _batch_find_unique_name(name, folder):
+    def _batch_find_unique_name(name: str, folder: Folder) -> str:
         """Append ' (1)', ' (2)' ... before the extension until the name is free in folder."""
         if "." in name:
             base, _, ext = name.rpartition(".")
@@ -11295,19 +11316,22 @@ class UploadAttachmentView(APIView):
         revision = None
         evidence = None
 
-        # RBAC: scope to objects the user has change permission on (upload is a write)
-        accessible_evidence_ids = RoleAssignment.get_changeable_object_ids(
-            request.user, Evidence
-        )
-
         try:
-            revision = EvidenceRevision.objects.get(
-                pk=pk, evidence__id__in=accessible_evidence_ids
-            )
+            if not RoleAssignment.is_object_accessible(
+                request.user, "change", EvidenceRevision, pk
+            ):
+                raise EvidenceRevision.DoesNotExist
+
+            revision = EvidenceRevision.objects.get(pk=pk)
             evidence = revision.evidence
         except EvidenceRevision.DoesNotExist:
             try:
-                evidence = Evidence.objects.get(pk=pk, id__in=accessible_evidence_ids)
+                if not RoleAssignment.is_object_accessible(
+                    request.user, "change", Evidence, pk
+                ):
+                    raise Evidence.DoesNotExist
+
+                evidence = Evidence.objects.get(pk=pk)
             except Evidence.DoesNotExist:
                 return Response(
                     {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND
@@ -11320,28 +11344,30 @@ class UploadAttachmentView(APIView):
 
         attachment = request.FILES.get("file")
         if attachment and attachment.name != "undefined":
-            if not revision.attachment or revision.attachment != attachment:
-                old_attachment = revision.attachment
-                revision.attachment = attachment
-                try:
-                    revision.full_clean()
-                except ValidationError as e:
-                    revision.attachment = old_attachment
-                    messages = []
-                    if hasattr(e, "message_dict"):
-                        for field_messages in e.message_dict.values():
-                            messages.extend(field_messages)
-                    elif hasattr(e, "messages"):
-                        messages = e.messages
-                    else:
-                        messages = [str(e.message)]
-                    return Response(
-                        {"detail": " ".join(messages)},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                if old_attachment:
-                    old_attachment.delete()
-                revision.save()
+            old_attachment = revision.attachment
+            old_original_filename = revision.original_filename
+            superseded_name = revision.set_new_attachment(attachment)
+
+            try:
+                revision.full_clean()
+            except ValidationError as e:
+                revision.attachment = old_attachment
+                revision.original_filename = old_original_filename
+                messages = []
+                if hasattr(e, "message_dict"):
+                    for field_messages in e.message_dict.values():
+                        messages.extend(field_messages)
+                elif hasattr(e, "messages"):
+                    messages = e.messages
+                else:
+                    messages = [str(e.message)]
+                return Response(
+                    {"detail": " ".join(messages)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            revision.save()
+            if superseded_name and superseded_name != revision.attachment.name:
+                revision.attachment.storage.delete(superseded_name)
 
         return Response(status=status.HTTP_200_OK)
 
