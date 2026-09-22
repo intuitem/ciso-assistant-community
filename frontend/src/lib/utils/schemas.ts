@@ -629,6 +629,7 @@ export const EvidenceSchema = z.object({
 	security_exceptions: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	timeline_entries: z.string().optional().array().optional(),
 	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
+	task_templates: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	link: z
 		.string()
@@ -1767,7 +1768,7 @@ export const ElementaryActionSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	threat: z.string().uuid().optional(),
+	threat: z.string().uuid().optional().nullable(),
 	icon: z.string().optional().nullable(),
 	attack_stage: z.number().default(0),
 	operating_modes: z.string().uuid().optional().array().optional()
