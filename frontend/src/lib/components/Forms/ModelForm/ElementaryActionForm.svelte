@@ -34,6 +34,7 @@
 />
 <AutocompleteSelect
 	{form}
+	nullable
 	optionsEndpoint="threats"
 	field="threat"
 	optionsLabelField="auto"
