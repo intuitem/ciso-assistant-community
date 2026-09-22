@@ -9,6 +9,7 @@
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"docs:shots": "./tests/docs-screenshots/run.sh",
 		"test": "vitest",
 		"test:ci": "vitest run",
 		"test:ui": "vitest --ui",

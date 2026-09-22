@@ -27,7 +27,9 @@ from django.core.validators import (
     RegexValidator,
     MinValueValidator,
 )
+from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.core.files.uploadedfile import UploadedFile
 from django.db import models, transaction
 from django.db.models import F, Q, Exists, OuterRef, Subquery, Prefetch, Count, Value
 from django.db.models.functions import Coalesce
@@ -5648,7 +5650,10 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             # Check if this is a new attachment or if it has changed
             should_compute_hash = False
 
-            if self.pk:  # Existing record
+            # Uncommitted: a pending replacement, whatever it is named.
+            if not self.attachment._committed:
+                should_compute_hash = True
+            elif self.pk:  # Existing record
                 try:
                     old_instance = EvidenceRevision.objects.get(pk=self.pk)
                     # Check if attachment changed
@@ -5661,31 +5666,27 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
             if should_compute_hash:
                 try:
-                    # Compute SHA256 hash using chunked reading to avoid OOM
                     hash_obj = hashlib.sha256()
-                    if default_storage.exists(self.attachment.name):
+                    if not self.attachment._committed and hasattr(
+                        self.attachment, "chunks"
+                    ):
+                        for chunk in self.attachment.chunks(chunk_size=1024 * 1024):
+                            hash_obj.update(chunk)
+                        self.attachment_hash = hash_obj.hexdigest()
+                        if hasattr(self.attachment, "seek"):
+                            self.attachment.seek(0)
+
+                    elif default_storage.exists(self.attachment.name):
                         with default_storage.open(self.attachment.name, "rb") as f:
-                            for chunk in iter(
-                                lambda: f.read(1024 * 1024), b""
-                            ):  # 1MB chunks
+                            for chunk in iter(lambda: f.read(1024 * 1024), b""):
                                 hash_obj.update(chunk)
                         self.attachment_hash = hash_obj.hexdigest()
-                    else:
-                        # File not yet saved to storage, try reading from UploadedFile
-                        if hasattr(self.attachment, "chunks"):
-                            for chunk in self.attachment.chunks(chunk_size=1024 * 1024):
-                                hash_obj.update(chunk)
-                            self.attachment_hash = hash_obj.hexdigest()
-                            # Reset file position for subsequent operations
-                            if hasattr(self.attachment, "seek"):
-                                self.attachment.seek(0)
                 except Exception as e:
                     logger.warning(
                         "Failed to compute attachment hash",
                         revision_id=self.pk,
-                        error=str(e),
+                        error=e,
                     )
-                    # Don't fail the save if hash computation fails
                     self.attachment_hash = None
         else:
             # No attachment, clear the hash
@@ -5697,6 +5698,19 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         if not self.attachment:
             return None
         return self.original_filename or os.path.basename(self.attachment.name)
+
+    def set_new_attachment(
+        self, uploaded_file: UploadedFile | ContentFile
+    ) -> str | None:
+        """Set `self.attachment` to a new `uploaded_file` (and update `self.original_filename`
+        accordingly), returning the superseded file's name for the caller to delete once
+        saved: the old `FieldFile` is bound to this instance and nulls it on delete."""
+        superseded_name = self.attachment.name
+        self.attachment = uploaded_file
+        original_filename = uploaded_file.name
+        if original_filename:
+            self.original_filename = original_filename
+        return superseded_name
 
     def get_size(self):
         if not self.attachment or not self.attachment.storage.exists(

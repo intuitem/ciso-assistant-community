@@ -3375,6 +3375,7 @@ class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
             "observation",
             "version",
             "attachment",
+            "original_filename",
             "link",
             "created_at",
             "updated_at",
