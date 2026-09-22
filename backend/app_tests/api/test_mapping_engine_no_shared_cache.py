@@ -8,6 +8,7 @@ predates a library loaded elsewhere (#4791).
 import pytest
 from rest_framework import status
 
+import core.mappings.engine as engine_module
 from core.models import StoredLibrary
 
 SRC = "urn:intuitem:risk:framework:iso27001-2022"
@@ -39,8 +40,6 @@ def _mapping_library(source_urn: str) -> StoredLibrary:
 
 
 def test_the_module_exposes_no_shared_engine():
-    import core.mappings.engine as engine_module
-
     assert not hasattr(engine_module, "engine"), (
         "a module-level instance is one cache per worker, never invalidated"
     )
@@ -48,15 +47,13 @@ def test_the_module_exposes_no_shared_engine():
 
 @pytest.mark.django_db
 def test_a_new_engine_sees_a_library_stored_without_its_signal():
-    from core.mappings.engine import MappingEngine
-
-    assert (SRC, TGT) not in MappingEngine().direct_mappings
+    assert (SRC, TGT) not in engine_module.MappingEngine().direct_mappings
 
     # bulk_create sends no post_save, which is what another worker's write
     # looks like from here.
     StoredLibrary.objects.bulk_create([_mapping_library(SRC)])
 
-    assert (SRC, TGT) in MappingEngine().direct_mappings
+    assert (SRC, TGT) in engine_module.MappingEngine().direct_mappings
 
 
 @pytest.mark.django_db
