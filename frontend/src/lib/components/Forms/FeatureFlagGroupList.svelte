@@ -13,6 +13,7 @@
 		/** Overrides the flag's own description. */
 		helpTextFor?: (field: string, description: string) => string;
 		tooltipFor?: (field: string) => string | undefined;
+		errorsFor?: (field: string) => string[];
 		accent?: CheckboxAccent;
 		/** Per-group header controls (bulk enable/disable, counts). */
 		groupActions?: Snippet<[FeatureFlagGroup]>;
@@ -25,6 +26,7 @@
 		isDisabled = () => false,
 		helpTextFor = (_field, description) => description,
 		tooltipFor = () => undefined,
+		errorsFor = () => [],
 		accent = 'primary',
 		groupActions
 	}: Props = $props();
@@ -56,6 +58,7 @@
 					disabled={isDisabled(field)}
 					helpText={helpTextFor(field, description)}
 					tooltip={tooltipFor(field)}
+					errors={errorsFor(field)}
 					onToggle={(next) => onToggle(field, next)}
 					classesContainer="h-full"
 					classes="h-full"

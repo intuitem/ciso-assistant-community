@@ -195,6 +195,9 @@
 		return moduleVisible[flag] !== false;
 	}
 
+	// Both sides of the ratio count only what this user can act on, so someone who
+	// has hidden nothing reads "9 of 9" rather than a total they cannot reach.
+	const availableModuleCount = $derived(hideableFlags.filter(availableOnInstance).length);
 	const visibleModuleCount = $derived(
 		hideableFlags.filter((flag) => availableOnInstance(flag) && isModuleVisible(flag)).length
 	);
@@ -610,7 +613,7 @@
 					<span class="text-sm text-surface-600-400">
 						{m.modulesVisibleCount({
 							count: visibleModuleCount,
-							total: hideableFlags.length
+							total: availableModuleCount
 						})}
 					</span>
 					<button

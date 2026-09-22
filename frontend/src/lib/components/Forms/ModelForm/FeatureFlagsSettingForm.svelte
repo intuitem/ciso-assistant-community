@@ -11,7 +11,7 @@
 
 	let { form }: Props = $props();
 
-	const { form: formData } = form;
+	const { form: formData, errors } = form;
 
 	const availableKeys: string[] = Object.keys(page.data.featureFlagSettings ?? {});
 
@@ -197,6 +197,7 @@
 
 	<FeatureFlagGroupList
 		groups={filteredGroups}
+		errorsFor={(field) => $errors[field] ?? []}
 		isEnabled={(field) => Boolean($formData[field])}
 		onToggle={(field, next) => setFields([field], next)}
 	>

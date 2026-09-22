@@ -30,6 +30,9 @@
 		tooltip?: string;
 		hidden?: boolean;
 		disabled?: boolean;
+		/** Supplied by the caller, which owns the form — the backend maps field
+		 * errors back onto it via `handleErrorResponse`. */
+		errors?: string[];
 		/** `primary` for an instance setting, `tertiary` for the viewer's own. */
 		accent?: CheckboxAccent;
 		classes?: string;
@@ -45,6 +48,7 @@
 		tooltip,
 		hidden = false,
 		disabled = false,
+		errors = [],
 		accent = 'primary',
 		classes = '',
 		classesContainer = ''
@@ -112,4 +116,12 @@
 			</p>
 		{/if}
 	</div>
+
+	{#if errors.length}
+		<div class="mt-1">
+			{#each errors as error (error)}
+				<p class="text-red-500 text-xs font-medium">{error}</p>
+			{/each}
+		</div>
+	{/if}
 </div>
