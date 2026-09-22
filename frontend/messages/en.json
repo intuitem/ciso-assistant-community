@@ -6648,5 +6648,8 @@
 	"requirementAssessmentNonCompliantNoObservation": "Non-compliant with no observation",
 	"requirementAssessmentPartialNoObservation": "Partially compliant with no observation",
 	"requirementAssessmentResultWithoutProgress": "Has a result while still marked to do",
-	"requirementAssessmentDoneNotAssessed": "Marked done but has no result"
+	"requirementAssessmentDoneNotAssessed": "Marked done but has no result",
+	"readInclude": "Extra data to include",
+	"readIncludeHelpText": "Computed on every row that is read, so only ask for what the workflow branches on.",
+	"quality_check": "Quality check"
 }
