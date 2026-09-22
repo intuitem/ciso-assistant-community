@@ -142,6 +142,43 @@ def test_evidence_attached_directly_to_a_requirement_is_checked(
 
 
 @pytest.mark.django_db
+def test_active_control_without_evidence_is_reported(audit_with_shared_control):
+    compliance_assessment, control = audit_with_shared_control
+    control.status = AppliedControl.Status.ACTIVE
+    control.save()
+
+    reported = [
+        f
+        for f in compliance_assessment.quality_check()["warnings"]
+        if f["msgid"] == "appliedControlActiveNoEvidence"
+    ]
+    assert [f["link"] for f in reported] == [f"applied-controls/{control.id}"]
+
+    control.evidences.add(
+        Evidence.objects.create(name="Proof", folder=compliance_assessment.folder)
+    )
+
+    assert not [
+        f
+        for f in compliance_assessment.quality_check()["warnings"]
+        if f["msgid"] == "appliedControlActiveNoEvidence"
+    ]
+
+
+@pytest.mark.django_db
+def test_control_that_is_not_active_needs_no_evidence(audit_with_shared_control):
+    compliance_assessment, control = audit_with_shared_control
+    control.status = AppliedControl.Status.TO_DO
+    control.save()
+
+    assert not [
+        f
+        for f in compliance_assessment.quality_check()["warnings"]
+        if f["msgid"] == "appliedControlActiveNoEvidence"
+    ]
+
+
+@pytest.mark.django_db
 def test_ordering_by_authors_works_outside_the_list_action(audit_with_shared_control):
     """`ordering_remap` rewrites `authors` on every action, not just `list`, so
     the annotation it points at has to be there too. Any action handed the list

@@ -129,9 +129,8 @@ def match_urn(urn_string):
 def _serialize_for_quality_check(queryset) -> list[dict]:
     """Serialize a queryset to plain dicts, with the object id folded in.
 
-    serializers.serialize() fetches every m2m field one object at a time, so the
-    m2m fields are prefetched here to keep quality checks at a constant number of
-    queries whatever the size of the assessment.
+    m2m fields are prefetched: serializers.serialize() fetches them one object at
+    a time.
     """
     m2m_fields = [f.name for f in queryset.model._meta.many_to_many]
     payload = serializers.serialize("json", queryset.prefetch_related(*m2m_fields))
@@ -139,11 +138,7 @@ def _serialize_for_quality_check(queryset) -> list[dict]:
 
 
 def _issue_object(obj, *fields) -> dict:
-    """Identity plus the few fields the X-rays table shows as columns.
-
-    An issue used to carry the whole serialized object, repeated for every issue
-    raised on it.
-    """
+    """Identity plus the few fields the X-rays table shows as columns."""
     get = obj.get if isinstance(obj, dict) else lambda name: getattr(obj, name)
     return {"id": get("id"), "name": get("name"), **{f: get(f) for f in fields}}
 

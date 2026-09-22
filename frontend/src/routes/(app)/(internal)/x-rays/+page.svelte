@@ -55,43 +55,51 @@
 	const countBySeverity = (folders: any[], key: SeverityKey) =>
 		folders.reduce((acc, folder) => acc + folderCount(folder, key), 0);
 
-	// Errors outrank any number of warnings, warnings outrank any number of info.
-	const severityWeight = (folder: any) =>
-		(activeSeverities.errors ? folderCount(folder, 'errors') * 1e8 : 0) +
-		(activeSeverities.warnings ? folderCount(folder, 'warnings') * 1e4 : 0) +
-		(activeSeverities.info ? folderCount(folder, 'info') : 0);
+	const activeOrder = () => SEVERITIES.map(({ key }) => key).filter((key) => activeSeverities[key]);
+
+	const folderCounts = (folder: any) => activeOrder().map((key) => folderCount(folder, key));
+
+	const bucketCounts = (bucket: any) => activeOrder().map((key) => bucket[key].length);
+
+	// Descending comparator on [errors, warnings, info].
+	const compareCounts = (a: number[], b: number[]) => {
+		for (let i = 0; i < a.length; i++) {
+			if (a[i] !== b[i]) return b[i] - a[i];
+		}
+		return 0;
+	};
 
 	const visibleFolders = (folders: any[]) => {
 		const needle = domainSearch.trim().toLowerCase();
 		const kept = folders.filter(
 			(folder) =>
-				severityWeight(folder) > 0 &&
+				folderCounts(folder).some((count) => count > 0) &&
 				(needle === '' || folder.folder.name.toLowerCase().includes(needle))
 		);
 		return kept.sort((a, b) =>
 			sortBy === 'name'
 				? a.folder.name.localeCompare(b.folder.name)
-				: severityWeight(b) - severityWeight(a)
+				: compareCounts(folderCounts(a), folderCounts(b))
 		);
 	};
 
-	const bucketWeight = (bucket: any) =>
-		(activeSeverities.errors ? bucket.errors.length * 1e8 : 0) +
-		(activeSeverities.warnings ? bucket.warnings.length * 1e4 : 0) +
-		(activeSeverities.info ? bucket.info.length : 0);
-
-	// Sorting domains by severity is misleading if the domain then opens on a tab
-	// with nothing severe in it.
 	const defaultTab = (folder: any) =>
-		bucketWeight(folder.risk_assessments) > bucketWeight(folder.compliance_assessments)
+		compareCounts(
+			bucketCounts(folder.risk_assessments),
+			bucketCounts(folder.compliance_assessments)
+		) < 0
 			? 'risk_assessments'
 			: 'compliance_assessments';
 
 	const allOpen = (folders: any[]) =>
 		folders.length > 0 && folders.every((folder) => openDomains[folder.id]);
 
+	// Merged so hidden domains keep their state.
 	const setAllOpen = (folders: any[], open: boolean) => {
-		openDomains = Object.fromEntries(folders.map((folder) => [folder.id, open]));
+		openDomains = {
+			...openDomains,
+			...Object.fromEntries(folders.map((folder) => [folder.id, open]))
+		};
 	};
 </script>
 

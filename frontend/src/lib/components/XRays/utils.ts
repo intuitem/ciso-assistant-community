@@ -42,8 +42,7 @@ export const SEVERITIES: {
 
 type Column = { key: string; label: () => string; kind?: 'enum' | 'date' | 'priority' };
 
-// Columns beyond the name, per object type. Keys match the metadata the
-// backend puts on each issue's object.
+// Columns beyond the name, per object type.
 export const ISSUE_COLUMNS: Record<string, Column[]> = {
 	appliedcontrol: [
 		{ key: 'status', label: () => m.status(), kind: 'enum' },
@@ -61,11 +60,11 @@ export const ISSUE_COLUMNS: Record<string, Column[]> = {
 	riskacceptance: [
 		{ key: 'state', label: () => m.state(), kind: 'enum' },
 		{ key: 'expiry_date', label: () => m.expiryDate(), kind: 'date' }
-	]
+	],
+	risk_assessment: [{ key: 'status', label: () => m.status(), kind: 'enum' }],
+	complianceassessment: [{ key: 'status', label: () => m.status(), kind: 'enum' }]
 };
 
-// What a rule's occurrences actually are, so the count on an issue row reads
-// "4 requirements" rather than a bare "4".
 const OBJECT_LABELS: Record<string, () => string> = {
 	appliedcontrol: () => m.appliedControls(),
 	riskscenario: () => m.riskScenarios(),
@@ -139,12 +138,12 @@ export const aggregateQualityChecks = (item: any): Record<SeverityKey, any[]> =>
 			result[key] = [];
 			return;
 		}
-		result[key] = Object.entries(item.objects).reduce((acc: any[], [entryKey, value]: any) => {
-			if (entryKey !== 'object' && value?.quality_check?.[key]) {
-				acc = [...acc, ...value.quality_check[key]];
-			}
-			return acc;
-		}, []);
+		const collected: any[] = [];
+		for (const [entryKey, value] of Object.entries<any>(item.objects)) {
+			if (entryKey === 'object') continue;
+			for (const issue of value?.quality_check?.[key] ?? []) collected.push(issue);
+		}
+		result[key] = collected;
 	});
 
 	return result;

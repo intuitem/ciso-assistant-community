@@ -148,8 +148,7 @@ Each issue contains:
 - `msgid` - Message identifier for i18n
 - `obj_type` - Type of object (e.g., "riskscenario", "appliedcontrol")
 - `object` - Compact object built by `_issue_object()`: `id`, `name`, plus the few
-  metadata fields the X-rays table shows as columns. The full serialized object is
-  deliberately *not* shipped, it used to be repeated for every issue raised on it.
+  metadata fields the X-rays table shows as columns.
 - `link` - Optional direct link to edit the object (format: `model-name/id`)
 
 Metadata carried per object type:

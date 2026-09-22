@@ -23,7 +23,7 @@ X-rays inspects two assessment families today:
 
 The page lists every domain you have access to, with two tabs per domain — one for audits, one for risk assessments — and the assessments inside each tab. Domain badges show the count of errors / warnings / info so you can spot the worst-affected domains at a glance. A severity filter at the top lets you hide whole tiers, so you can sweep errors first and come back to the info items later.
 
-Everything is collapsed by default, so the page opens as a map rather than a wall of text:
+Everything is collapsed by default:
 
 1. A domain is a closed row carrying its issue counts per severity.
 2. Opening it shows its audits and risk assessments, each a closed card with its own counts, on whichever tab holds the most severe issues.
@@ -34,11 +34,11 @@ Domains and assessments with no issue are not listed at all, and a domain's cont
 
 A toolbar above the list carries a domain search, a sort (by severity, so the worst domains come first, or by name), and expand / collapse all.
 
-If no domain has any assessment to inspect, the page shows _"You have to create at least one perimeter to use X-rays."_
+If nothing is flagged anywhere, the page shows _"No issue detected. X-rays only lists domains that have issues."_
 
 ## Severity tiers
 
-Every finding is tagged with one of three severities:
+Every issue is tagged with one of three severities:
 
 | Tier | Icon | What it means |
 |---|---|---|
@@ -46,7 +46,7 @@ Every finding is tagged with one of three severities:
 | **Warning** | ⚠️ (amber) | A likely gap that the analyst should confirm or fill in (e.g. compliant requirement with no evidence, applied control without a cost estimate, empty risk assessment). |
 | **Info** | ℹ️ (blue) | Hints and reminders — non-blocking, useful for hygiene (e.g. assessment still in progress, no author assigned, applied control without an external link). |
 
-Within each assessment, issues are grouped by **rule** (so 17 controls missing an ETA are one row saying 17, not 17 separate entries), and the objects behind a rule are called its **occurrences**. "Finding" is deliberately avoided here: it means something else in the platform, see [findings assessments](../concepts/findings-assessments.md).
+Within each assessment, issues are grouped by **rule** (so 17 controls missing an ETA are one row saying 17, not 17 separate entries), and the objects behind a rule are called its **occurrences**. "Finding" names a different concept in the platform, see [findings assessments](../concepts/findings-assessments.md).
 
 ## The catalogue of checks
 
