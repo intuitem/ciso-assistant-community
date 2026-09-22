@@ -10,7 +10,7 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 
 from core.models import Team
 from core.views import UserViewSet
-from iam.models import Folder, User
+from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
 pytestmark = pytest.mark.django_db
 
@@ -33,9 +33,24 @@ def folder(db):
     )
 
 
+def reader_in(folder, email):
+    """`view_team` is folder-scoped, so a user with no role sees no teams at all."""
+    user = User.objects.create(email=email)
+    group = UserGroup.objects.create(folder=folder, name=f"readers-{email}")
+    assignment = RoleAssignment.objects.create(
+        user_group=group,
+        role=Role.objects.get(name="BI-RL-AUD"),
+        folder=Folder.get_root_folder(),
+        is_recursive=True,
+    )
+    assignment.perimeter_folders.add(folder)
+    group.user_set.add(user)
+    return user
+
+
 @pytest.fixture
-def user(db):
-    return User.objects.create(email="member@test.local")
+def user(folder):
+    return reader_in(folder, "member@test.local")
 
 
 def test_each_relation_reports_its_own_role(folder, user):
@@ -84,3 +99,18 @@ def test_reading_someone_else_is_exactly_as_permitted_as_reading_their_record(
     baseline = detail(request, pk=str(other.id))
 
     assert call(user, other).status_code == baseline.status_code
+
+
+def test_a_team_in_a_domain_the_requester_cannot_view_is_not_disclosed(folder, user):
+    """`view_user` is not `view_team`. Reading the record must not disclose teams --
+    name, domain or shared mailbox -- from domains the requester cannot browse."""
+    elsewhere = Folder.objects.create(
+        name="Other domain", content_type=Folder.ContentType.DOMAIN
+    )
+    visible = Team.objects.create(name="SRE", folder=folder, leader=user)
+    hidden = Team.objects.create(name="Payroll", folder=elsewhere, leader=user)
+
+    rows = call(user, user).data
+
+    assert [r["id"] for r in rows] == [str(visible.id)]
+    assert str(hidden) not in str(rows)

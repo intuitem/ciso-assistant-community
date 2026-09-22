@@ -374,6 +374,7 @@ EMAIL_TEMPLATE_REGISTRY = {
         "variables": [
             "assessment_name",
             "reviewer_observation",
+            "ciso_assistant_url",
         ],
     },
     "quick_form_started": {

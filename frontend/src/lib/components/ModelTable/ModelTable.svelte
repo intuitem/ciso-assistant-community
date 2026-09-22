@@ -326,23 +326,25 @@
 		const nav = listViewFields[URLModel]?.rowNavigation;
 		if (!nav) return false;
 
-		if (nav.markField && rowMetaData[nav.markField] === false) {
-			fetch(`/${URLModel}/${rowMetaData[identifierField]}/${nav.markField}`, {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ [nav.markField]: true })
-			})
-				.then((res) => (res.ok ? res.json() : null))
-				.then(applyUnreadCount)
-				.catch((error) => console.error(`Could not mark ${nav.markField}:`, error));
-		}
+		const marked =
+			nav.markField && rowMetaData[nav.markField] === false
+				? fetch(`/${URLModel}/${rowMetaData[identifierField]}/${nav.markField}`, {
+						method: 'PATCH',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ [nav.markField]: true })
+					})
+						.then((res) => (res.ok ? res.json() : null))
+						.then(applyUnreadCount)
+						.catch((error) => console.error(`Could not mark ${nav.markField}:`, error))
+				: Promise.resolve();
 
 		const targetModel = urlModelForDjangoName(rowMetaData[nav.modelField]);
 		const targetId = rowMetaData[nav.idField];
 		if (!targetModel || !targetId) {
-			// Unmapped model, or a target deleted under the row: still counts as read,
-			// so only the navigation is skipped.
-			handler.invalidate();
+			// Unmapped model, or a target deleted under the row: still counts as read, so
+			// only the navigation is skipped. Refetching before the PATCH lands would
+			// bring the row back unread.
+			marked.finally(() => handler.invalidate());
 			return true;
 		}
 
@@ -674,13 +676,9 @@
 	);
 
 	// The context menu ignored disableEdit/disableView entirely, so a model that
-	// suppressed them in the row actions still offered them on right-click.
-	let contextMenuRowIsNavigable = $derived(
-		!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
-			URLModel === 'terminologies' ||
-			URLModel === 'entities'
-	);
-	let contextMenuDisplayView = $derived(contextMenuRowIsNavigable && !disableView);
+	// suppressed them in the row actions still offered them on right-click. View
+	// matches TableRowActions: builtin/urn restricts editing, never reading.
+	let contextMenuDisplayView = $derived(!disableView);
 
 	let contextMenuCanDeleteObject = $derived(
 		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&

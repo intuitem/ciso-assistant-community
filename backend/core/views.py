@@ -8447,10 +8447,15 @@ class UserViewSet(BaseModelViewSet):
         deputy = set(user.deputy_teams.values_list("id", flat=True))
         member = set(user.teams.values_list("id", flat=True))
 
+        # `view_user` is not `view_team`: retrieving the user must not disclose teams
+        # in domains the requester cannot browse. Same masking `retrieve` applies to
+        # the `user_groups` beside this on the profile page.
+        viewable = set(RoleAssignment.get_viewable_object_ids(request.user, Team))
+
         rows = []
-        for team in Team.objects.filter(id__in=led | deputy | member).select_related(
-            "folder"
-        ):
+        for team in Team.objects.filter(
+            id__in=(led | deputy | member) & viewable
+        ).select_related("folder"):
             rows.append(
                 {
                     "id": str(team.id),

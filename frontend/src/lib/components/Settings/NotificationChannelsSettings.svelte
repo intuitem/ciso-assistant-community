@@ -68,6 +68,12 @@
 		try {
 			const res = await fetch('/fe-api/notification-channels');
 			if (res.ok) rows = await res.json();
+		} catch (error) {
+			toastStore.trigger({
+				message: m.anErrorOccurred(),
+				background: 'preset-filled-error-500'
+			});
+			console.error('Could not load notification channels:', error);
 		} finally {
 			loading = false;
 		}
