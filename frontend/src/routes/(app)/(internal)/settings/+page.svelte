@@ -29,7 +29,7 @@
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
 		>
-		{#if page.data?.featureflags?.notification_centre}
+		{#if page.data?.featureflags?.notification_center}
 			<Tabs.Trigger value="notificationChannels"
 				><i class="fa-solid fa-bell"></i> {m.notifications()}</Tabs.Trigger
 			>
@@ -75,7 +75,7 @@
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} />
 	</Tabs.Content>
-	{#if page.data?.featureflags?.notification_centre}
+	{#if page.data?.featureflags?.notification_center}
 		<Tabs.Content value="notificationChannels">
 			<NotificationChannelsSettings />
 		</Tabs.Content>

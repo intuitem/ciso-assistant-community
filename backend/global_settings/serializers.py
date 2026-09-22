@@ -424,8 +424,8 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     )
     # Default on: the inbox is the channel that works out of the box, where
     # notifications_enable_mailing defaults off and most installs get nothing.
-    notification_centre = serializers.BooleanField(
-        source="value.notification_centre", required=False, default=True
+    notification_center = serializers.BooleanField(
+        source="value.notification_center", required=False, default=True
     )
     data_breaches = serializers.BooleanField(
         source="value.data_breaches", required=False, default=True

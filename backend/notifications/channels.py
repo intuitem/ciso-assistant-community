@@ -9,6 +9,11 @@ it, per-user preferences would narrow further and do not exist.
 `disabled_email_templates` predates this and already governs email everywhere, so it
 is read as the email column rather than migrated -- an admin's existing choices stay
 where they are.
+
+Account types (password_reset, welcome, welcome_sso) are switchable like any other:
+the confirm-before-disabling guard the enterprise template page used to show was
+retired with that page's toggle, deliberately. Muting them blocks the flow they
+carry -- User.mailing() skips a disabled template -- which the settings tab says.
 """
 
 import structlog

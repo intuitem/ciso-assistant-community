@@ -36,7 +36,7 @@
 	// page never initialises on a hidden tab (e.g. `scim` with idp_groups off).
 	const FLAG_GATED_TABS: Record<string, string> = {
 		scim: 'idp_groups',
-		notificationChannels: 'notification_centre',
+		notificationChannels: 'notification_center',
 		webhooks: 'outgoing_webhooks',
 		auditLogForwarding: 'audit_log_forwarding',
 		infraConfig: 'infra_config_management'
@@ -132,7 +132,7 @@
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
 		>
-		{#if page.data?.featureflags?.notification_centre}
+		{#if page.data?.featureflags?.notification_center}
 			<Tabs.Trigger value="notificationChannels"
 				><i class="fa-solid fa-bell"></i> {m.notifications()}</Tabs.Trigger
 			>
@@ -199,7 +199,7 @@
 	<Tabs.Content value="featureFlags">
 		<FeatureFlagsSettings {data} />
 	</Tabs.Content>
-	{#if page.data?.featureflags?.notification_centre}
+	{#if page.data?.featureflags?.notification_center}
 		<Tabs.Content value="notificationChannels">
 			<NotificationChannelsSettings />
 		</Tabs.Content>

@@ -13,7 +13,7 @@ logger = structlog.getLogger(__name__)
 
 
 def in_app_enabled(notification_type: str) -> bool:
-    if not ff_is_enabled("notification_centre"):
+    if not ff_is_enabled("notification_center"):
         return False
     from notifications.channels import in_app_allowed
 

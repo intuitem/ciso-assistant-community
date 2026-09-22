@@ -1375,9 +1375,6 @@
 	"notificationEmails": "E-mails de notification",
 	"notificationEmailsDescription": "Notifications d'affectation, de rappel et d'expiration",
 	"emailSendingDisabled": "Désactivé",
-	"toggleEmailSending": "Activer ou désactiver l'envoi de cet e-mail",
-	"disableCoreEmailTitle": "Désactiver cet e-mail essentiel ?",
-	"disableCoreEmailWarning": "Cet e-mail sert à des actions clés (ex. réinitialisation de mot de passe, première connexion ou invitations aux questionnaires).\nS'il est désactivé, les utilisateurs ne le recevront plus.\nLe désactiver quand même ?",
 	"templateKey": "Modèle",
 	"templateSubject": "Objet",
 	"templateBody": "Corps",
@@ -1456,9 +1453,9 @@
 	"readAt": "Lu le",
 	"emailTemplatesSendingHint": "L'envoi de chaque notification et ses canaux se configurent dans Paramètres → Notifications. Cette page ne modifie que leur formulation.",
 	"inApp": "Dans l'application",
-	"notificationChannelsDescription": "Choisissez les canaux de diffusion de chaque notification. Un canal non pris en charge par un type ne peut pas être activé.",
+	"notificationChannelsDescription": "Choisissez les canaux de diffusion de chaque notification. Un canal non pris en charge par un type ne peut pas être activé. Les e-mails de compte (réinitialisation du mot de passe, première connexion) conditionnent la connexion : les désactiver bloque ces parcours.",
 	"channelNotSupported": "Ce type de notification ne prend pas en charge ce canal",
-	"notificationCentreDescription": "Boîte de réception intégrée : affectations, approbations et échéances",
+	"notificationCenterDescription": "Boîte de réception intégrée : affectations, approbations et échéances",
 	"notificationTitleAppliedControlAssignment": "La mesure « {control_name} » vous a été attribuée",
 	"notificationTitleAppliedControlExpiringSoon": "La mesure « {control_name} » expire dans {days_remaining} jour(s)",
 	"notificationTitleAssignmentActivated": "Votre affectation sur l'audit « {assessment_name} » a démarré",
@@ -1484,7 +1481,16 @@
 	"notificationTitleValidationDeadline": "La validation « {validation_ref_id} » est à traiter dans {days} jour(s)",
 	"notificationTitleValidationFlowCreated": "La validation « {validation_ref_id} » attend votre approbation",
 	"notificationTitleValidationFlowUpdated": "La validation « {validation_ref_id} » est désormais {new_status}",
-	"unreadNotifications": "{count} notifications non lues",
+	"unreadNotifications": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} notification non lue",
+				"countPlural=other": "{count} notifications non lues"
+			}
+		}
+	],
 	"noUnreadNotifications": "Aucune notification non lue",
 	"markAsRead": "Marquer comme lu",
 	"markAsUnread": "Marquer comme non lu",
@@ -1492,7 +1498,6 @@
 	"notifications": "Notifications",
 	"notificationsDescription": "Ce qui requiert votre attention",
 	"read": "Lu",
-	"readState": "État de lecture",
 	"unread": "Non lu",
 	"approvals": "Approbations",
 	"deadlines": "Échéances",
@@ -6698,7 +6703,16 @@
 	"functional": "Fonctionnel",
 	"sharedWithOthers": "Partagée avec d'autres",
 	"onlyYou": "Vous seulement",
-	"alsoNotified": "{count} autres personnes ont été notifiées",
+	"alsoNotified": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} autre personne a été notifiée",
+				"countPlural=other": "{count} autres personnes ont été notifiées"
+			}
+		}
+	],
 	"recipients": "Destinataires",
 	"myTeams": "Mes équipes",
 	"teamLeader": "Responsable",

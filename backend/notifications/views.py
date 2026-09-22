@@ -40,7 +40,7 @@ class NotificationViewSet(BaseModelViewSet):
     model = Notification
     serializers_module = "notifications.serializers"
     permission_classes = [IsAuthenticated, IsRecipient, FeatureFlagRequired]
-    feature_flag = "notification_centre"
+    feature_flag = "notification_center"
     filterset_fields = ["is_read", "read_at", "type", "content_type"]
     # Titles render client-side, so there is no text column to search.
     search_fields = ["type"]
