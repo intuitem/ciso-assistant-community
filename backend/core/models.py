@@ -7351,9 +7351,31 @@ class RiskAssessment(Assessment):
             .distinct()
             .order_by("created_at")
         )
+        planned_ids = {
+            str(pk)
+            for pk in AppliedControl.objects.filter(
+                risk_scenarios__risk_assessment=self
+            ).values_list("id", flat=True)
+        }
 
         for mtg in measures:
             mtg_object = _issue_object(mtg, "status", "eta", "priority")
+            if mtg["status"] == "active" and not mtg["evidences"]:
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{}: Applied control is active but has no evidence attached"
+                        ).format(mtg["name"]),
+                        "msgid": "appliedControlActiveNoEvidence",
+                        "link": f"applied-controls/{mtg['id']}",
+                        "obj_type": "appliedcontrol",
+                        "object": mtg_object,
+                    }
+                )
+
+            if mtg["id"] not in planned_ids:
+                continue
+
             if not mtg["eta"] and not mtg["status"] == "active":
                 warnings_lst.append(
                     {
@@ -7398,19 +7420,6 @@ class RiskAssessment(Assessment):
                             "{} does not have an estimated cost. This will help you for prioritization"
                         ).format(mtg["name"]),
                         "msgid": "appliedControlNoCost",
-                        "link": f"applied-controls/{mtg['id']}",
-                        "obj_type": "appliedcontrol",
-                        "object": mtg_object,
-                    }
-                )
-
-            if mtg["status"] == "active" and not mtg["evidences"]:
-                warnings_lst.append(
-                    {
-                        "msg": _(
-                            "{}: Applied control is active but has no evidence attached"
-                        ).format(mtg["name"]),
-                        "msgid": "appliedControlActiveNoEvidence",
                         "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
                         "object": mtg_object,
