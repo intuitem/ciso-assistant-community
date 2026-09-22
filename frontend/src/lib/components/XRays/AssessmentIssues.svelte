@@ -39,9 +39,18 @@
 			<i
 				class="fa-solid {assessmentType === 'risk-assessments'
 					? 'fa-biohazard'
-					: 'fa-list-check'} text-surface-500"
+					: 'fa-list-check'} text-secondary-500"
 			></i>
-			<span class="font-semibold truncate">{assessment.object.name}</span>
+			<span class="font-semibold truncate text-secondary-950-50">{assessment.object.name}</span>
+			<Anchor
+				href="/{assessmentType}/{assessment.object.id}"
+				label={assessment.object.name}
+				stopPropagation
+				class="anchor underline underline-offset-2 text-xs shrink-0 whitespace-nowrap"
+			>
+				<i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+				{m.xRaysView()}
+			</Anchor>
 			<div class="ml-auto flex items-center gap-1.5 shrink-0">
 				{#each groups as group (group.key)}
 					<span class="badge {group.preset} text-xs">
@@ -49,14 +58,6 @@
 						{group.total}
 					</span>
 				{/each}
-				<Anchor
-					href="/{assessmentType}/{assessment.object.id}"
-					label={assessment.object.name}
-					stopPropagation
-					class="btn btn-sm preset-outlined-surface-500 text-xs cursor-pointer"
-				>
-					{m.xRaysView()}
-				</Anchor>
 			</div>
 		</summary>
 

@@ -178,14 +178,16 @@
 						<i
 							class="fa-solid fa-chevron-right text-xs text-surface-500 transition-transform group-open/domain:rotate-90"
 						></i>
-						<i class="fa-solid fa-folder-open text-primary-500"></i>
+						<i class="fa-solid fa-folder-open text-secondary-500"></i>
+						<span class="font-bold truncate text-secondary-950-50">{folder.folder.name}</span>
 						<Anchor
-							class="font-bold hover:underline text-primary-600-400 truncate"
 							href="/folders/{folder.folder.id}"
 							label={folder.folder.name}
 							stopPropagation
+							class="anchor underline underline-offset-2 text-xs shrink-0 whitespace-nowrap"
 						>
-							{folder.folder.name}
+							<i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+							{m.xRaysView()}
 						</Anchor>
 						<div class="ml-auto flex items-center gap-1.5 shrink-0">
 							{#each SEVERITIES as severity (severity.key)}
