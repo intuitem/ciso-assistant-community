@@ -2475,9 +2475,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Operational scenario',
 		verboseNamePlural: 'Operational scenarios',
 		markdownFields: ['operating_modes_description'],
+		flaggedFields: {
+			techniques: 'ttps'
+		},
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'techniques', urlModel: 'techniques' },
 			{
 				field: 'attack_path',
 				urlModel: 'attack-paths',
