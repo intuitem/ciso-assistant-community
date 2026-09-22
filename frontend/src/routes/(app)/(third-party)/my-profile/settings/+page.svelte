@@ -182,18 +182,28 @@
 			])
 		)
 	);
-	let moduleSaving = $state<string | null>(null);
-	let moduleResetting = $state(false);
+	// A count, not a flag: a toggle and a reset — or two toggles — can overlap, and
+	// the backend merges each sparse PATCH through its own read-modify-save, so a
+	// second write started mid-flight can lose the first. Every control is blocked
+	// while any write is pending, which orders them by construction.
+	let modulePendingWrites = $state(0);
+	const moduleBusy = $derived(modulePendingWrites > 0);
 
 	function availableOnInstance(flag: string): boolean {
 		return instanceFlags[flag] === true;
 	}
 
+	// Absent means visible: `moduleVisible` is seeded once, so a flag added to
+	// `hideable` by a later refresh has no local value, and the stored form is
+	// sparse anyway — only an explicit `false` is a hide.
+	function isModuleVisible(flag: string): boolean {
+		return moduleVisible[flag] !== false;
+	}
+
 	// What the user actually sees: a module the organization disabled is not
 	// visible either, however this user left their own switch.
 	const visibleModuleCount = $derived(
-		hideableFlags.filter((flag) => availableOnInstance(flag) && moduleVisible[flag] !== false)
-			.length
+		hideableFlags.filter((flag) => availableOnInstance(flag) && isModuleVisible(flag)).length
 	);
 
 	// What the reset would undo — the user's own hides alone, which is why it is
@@ -203,28 +213,33 @@
 		hideableFlags.filter((flag) => moduleVisible[flag] === false).length
 	);
 
-	async function saveModulePreferences(patch: Record<string, boolean>) {
-		const response = await fetch('/fe-api/user-preferences', {
-			method: 'PATCH',
-			body: JSON.stringify({ feature_flags: patch })
-		});
-		if (!response.ok) throw new Error(`status ${response.status}`);
-		// The sidebar, the palette and the flagged tables are all built server-side
-		// from the effective flags, so the whole tree has to be reloaded.
-		await invalidateAll();
+	async function saveModulePreferences(patch: Record<string, boolean>, rollback: () => void) {
+		modulePendingWrites += 1;
+		try {
+			const response = await fetch('/fe-api/user-preferences', {
+				method: 'PATCH',
+				body: JSON.stringify({ feature_flags: patch })
+			});
+			if (!response.ok) {
+				rollback();
+				return;
+			}
+			// The sidebar, the palette and the flagged tables are all built
+			// server-side from the effective flags, so the whole tree is reloaded.
+			await invalidateAll();
+		} catch {
+			rollback();
+		} finally {
+			modulePendingWrites -= 1;
+		}
 	}
 
 	async function handleModuleChange(flag: string, visible: boolean) {
 		const previous = moduleVisible[flag];
 		moduleVisible[flag] = visible;
-		moduleSaving = flag;
-		try {
-			await saveModulePreferences({ [flag]: visible });
-		} catch {
+		await saveModulePreferences({ [flag]: visible }, () => {
 			moduleVisible[flag] = previous;
-		} finally {
-			moduleSaving = null;
-		}
+		});
 	}
 
 	async function resetModulesToOrganization() {
@@ -233,14 +248,9 @@
 		// storing it, so each one goes back to following the organization.
 		const patch = Object.fromEntries(hideableFlags.map((flag) => [flag, true]));
 		moduleVisible = patch;
-		moduleResetting = true;
-		try {
-			await saveModulePreferences(patch);
-		} catch {
+		await saveModulePreferences(patch, () => {
 			moduleVisible = previous;
-		} finally {
-			moduleResetting = false;
-		}
+		});
 	}
 
 	// setTheme applies the theme immediately and persists it to the backend (ui.theme).
@@ -609,7 +619,7 @@
 						type="button"
 						class="btn btn-sm preset-tonal ml-auto"
 						data-testid="reset-module-visibility"
-						disabled={moduleResetting || hiddenByUserCount === 0}
+						disabled={moduleBusy || hiddenByUserCount === 0}
 						onclick={resetModulesToOrganization}
 					>
 						<i class="fa-solid fa-rotate-left mr-1"></i>{m.resetToOrganizationSettings()}
@@ -618,8 +628,8 @@
 				<FeatureFlagGroupList
 					groups={moduleGroups}
 					accent="tertiary"
-					isEnabled={(field) => availableOnInstance(field) && moduleVisible[field]}
-					isDisabled={(field) => !availableOnInstance(field) || moduleSaving === field}
+					isEnabled={(field) => availableOnInstance(field) && isModuleVisible(field)}
+					isDisabled={(field) => !availableOnInstance(field) || moduleBusy}
 					tooltipFor={(field) =>
 						availableOnInstance(field) ? undefined : m.moduleDisabledByOrganization()}
 					onToggle={handleModuleChange}

@@ -9645,7 +9645,17 @@ class UserPreferencesView(APIView):
         return Response(prefs, status=status.HTTP_200_OK)
 
     def patch(self, request) -> Response:
-        prefs = request.user.get_preferences()
+        # Locked for the whole read-modify-save: `preferences` is one JSON column,
+        # so two concurrent patches (a theme switch and a module toggle, say) would
+        # otherwise both save a snapshot taken before the other's write, and the
+        # later save would silently drop it. ATOMIC_REQUESTS is off, so the
+        # transaction has to be explicit.
+        with transaction.atomic():
+            user = User.objects.select_for_update().get(pk=request.user.pk)
+            return self._patch_preferences(request, user)
+
+    def _patch_preferences(self, request, user) -> Response:
+        prefs = user.get_preferences()
 
         if "lang" in request.data:
             new_language = request.data.get("lang")
@@ -9737,8 +9747,10 @@ class UserPreferencesView(APIView):
                     hidden[name] = False
             prefs[USER_FEATURE_FLAGS_PREFERENCE_KEY] = hidden
 
+        user.preferences = prefs
+        user.save(update_fields=["preferences"])
+        # The request's own instance would otherwise keep the pre-patch snapshot.
         request.user.preferences = prefs
-        request.user.save(update_fields=["preferences"])
         return Response({}, status=status.HTTP_200_OK)
 
 

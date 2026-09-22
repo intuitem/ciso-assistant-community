@@ -14,6 +14,7 @@ from global_settings.models import GlobalSettings
 from global_settings.serializers import FeatureFlagsSerializer
 from global_settings.utils import (
     clear_feature_flags_cache,
+    ff_is_enabled,
     get_supported_feature_flags,
     get_user_hidden_feature_flags,
     get_user_hideable_feature_flags,
@@ -32,7 +33,14 @@ def flags_row(db):
     gs, _ = GlobalSettings.objects.get_or_create(
         name=GlobalSettings.Names.FEATURE_FLAGS
     )
-    gs.value = {"incidents": True, "xrays": True, "vulnerabilities": False}
+    # `auditee_mode` is here to be a non-hideable flag that is on: keys absent
+    # from the row now read False, so it has to be stated to mean anything.
+    gs.value = {
+        "incidents": True,
+        "xrays": True,
+        "vulnerabilities": False,
+        "auditee_mode": True,
+    }
     gs.save(update_fields=["value"])
     clear_feature_flags_cache()
     return gs
@@ -144,16 +152,36 @@ def test_a_malformed_preference_blob_is_ignored(flags_row, user):
         assert get_user_hidden_feature_flags(user) == {}
 
 
-def test_resolution_falls_back_to_declared_defaults(db, user):
-    # A flag a release added is absent from an existing row; the serializer
-    # default answers, not KeyError.
+def test_a_key_the_row_is_missing_reads_false(db, user):
+    # `incidents` defaults to True in the serializer but is absent from the row,
+    # and `ff_is_enabled` answers False for it. The effective view must agree —
+    # offering a module the API refuses is the failure mode.
     GlobalSettings.objects.update_or_create(
         name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {"xrays": False}}
     )
     clear_feature_flags_cache()
     resolved = resolve_feature_flags(user)
     assert resolved["xrays"] is False
-    assert resolved["incidents"] is True
+    assert resolved["incidents"] is False
+
+
+@pytest.mark.parametrize("value", [[], {}, "nonsense"])
+def test_a_missing_or_malformed_row_disables_everything(db, user, value):
+    GlobalSettings.objects.update_or_create(
+        name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": value}
+    )
+    clear_feature_flags_cache()
+    assert set(resolve_feature_flags(user).values()) <= {False}
+
+
+def test_the_effective_view_never_exceeds_enforcement(flags_row, user):
+    """The invariant the whole design rests on: what the UI offers is a subset of
+    what `ff_is_enabled` permits, so a user can never be shown a module the API
+    will refuse."""
+    user.preferences = {"feature_flags": {"incidents": False}}
+    for name, effective in resolve_feature_flags(user).items():
+        if effective:
+            assert ff_is_enabled(name), name
 
 
 # --- endpoints --------------------------------------------------------------

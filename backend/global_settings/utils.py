@@ -205,21 +205,22 @@ def get_user_hidden_feature_flags(user) -> dict:
 
 
 def get_instance_feature_flags() -> dict:
-    """Every supported flag with its instance-wide value: the row, backed by the
-    declared defaults for the keys a release added and the row has not caught up
-    with yet.
+    """Every supported flag with its instance-wide value, answering exactly as
+    `ff_is_enabled` would.
+
+    Mirroring it is the point: this drives what the UI offers, `ff_is_enabled`
+    decides what the API allows, and the view must never claim more than
+    enforcement grants. So an absent or malformed row reads False for every
+    flag, and so does a key the row is missing — the declared defaults are *not*
+    a fallback here, because `ff_is_enabled` does not use them either (startup's
+    `seed_feature_flag_defaults` is what puts a new release's flags in the row).
 
     Restricted to the supported set, because an env-gated flag (chat_mode,
     infra_config_management) may linger in the row after being switched off and
     the serializer drops it from the admin view — this must match.
     """
-    supported = get_supported_feature_flags()
-    stored = {
-        name: value
-        for name, value in (get_feature_flags() or {}).items()
-        if name in supported
-    }
-    return get_feature_flag_defaults() | stored
+    flags = get_feature_flags() or {}
+    return {name: bool(flags.get(name)) for name in get_supported_feature_flags()}
 
 
 def resolve_feature_flags(user) -> dict:
