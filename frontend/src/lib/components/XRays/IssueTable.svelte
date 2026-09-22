@@ -89,7 +89,7 @@
 			<div class="ml-auto flex items-center gap-1">
 				<button
 					type="button"
-					class="btn btn-sm preset-outlined-surface-500 text-xs"
+					class="btn btn-sm preset-outlined-surface-500 text-xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
 					disabled={currentPage <= 1}
 					onclick={() => (pageNumber = Math.max(1, currentPage - 1))}
 				>
@@ -98,7 +98,7 @@
 				<span class="px-2">{currentPage} / {pageCount}</span>
 				<button
 					type="button"
-					class="btn btn-sm preset-outlined-surface-500 text-xs"
+					class="btn btn-sm preset-outlined-surface-500 text-xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
 					disabled={currentPage >= pageCount}
 					onclick={() => (pageNumber = Math.min(pageCount, currentPage + 1))}
 				>

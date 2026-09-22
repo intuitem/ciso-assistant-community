@@ -25,11 +25,14 @@ The page lists every domain you have access to, with two tabs per domain — one
 
 Everything is collapsed by default, so the page opens as a map rather than a wall of text:
 
-1. An assessment is a closed card carrying its issue counts per severity.
-2. Opening it lists the rules it trips, each with the number of objects affected.
-3. Opening a rule shows those objects in a paginated table, with the columns that matter for triage (status, ETA, priority for a control; result and status for a requirement; treatment for a scenario).
+1. A domain is a closed row carrying its issue counts per severity.
+2. Opening it shows its audits and risk assessments, each a closed card with its own counts.
+3. Opening an assessment lists the rules it trips, each with the number of objects affected.
+4. Opening a rule shows those objects in a paginated table, with the columns that matter for triage (status, ETA, priority for a control; result and status for a requirement; treatment for a scenario). Past ten objects, the table gains a search box that matches the name and every column.
 
-Assessments with no issue are not listed at all.
+Domains and assessments with no issue are not listed at all, and a domain's content is only built when you open it, so a workspace with hundreds of domains stays responsive.
+
+A toolbar above the list carries a domain search, a sort (by severity, so the worst domains come first, or by name), and expand / collapse all.
 
 If no domain has any assessment to inspect, the page shows _"You have to create at least one perimeter to use X-rays."_
 
@@ -92,8 +95,8 @@ The check list is intentionally opinionated — these are mistakes the team has 
 
 X-rays is designed to be a **one-click-away-from-fixing** surface, not a static report:
 
-1. Open **X-rays** — scan the domain badges, pick the domain with the most red.
-2. Switch to the right tab (audits / risk assessments), open an assessment, skim the rules it trips.
+1. Open **X-rays** — the domains come sorted worst-first, so the top row is where the fire is.
+2. Open it, switch to the right tab (audits / risk assessments), open an assessment, skim the rules it trips.
 3. Open a rule and click any row — the link opens the offending object's **edit** page directly (control, scenario, evidence, requirement assessment, risk acceptance).
 4. Fix it, save, return to x-rays — the row is gone on next refresh.
 

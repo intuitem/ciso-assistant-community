@@ -184,8 +184,10 @@ Features:
 - Groups issues by domain, then assessment, then rule (msgid)
 - Separate tabs for compliance and risk assessments
 - Severity filter to hide whole tiers
-- Everything collapsed by default; assessments with no issue are not rendered
-- Occurrences shown in a paginated table with per-type metadata columns
+- Domain search, sort by severity or name, expand / collapse all
+- Everything collapsed by default; domains and assessments with no issue are not rendered
+- A domain's tabs mount only once it is opened, so hundreds of domains stay cheap
+- Occurrences shown in a paginated, searchable table with per-type metadata columns
 - Direct links to edit affected objects
 - Color-coded badges (red=errors, yellow=warnings, blue=info)
 

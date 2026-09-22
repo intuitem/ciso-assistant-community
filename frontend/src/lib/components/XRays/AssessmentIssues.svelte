@@ -53,7 +53,7 @@
 					href="/{assessmentType}/{assessment.object.id}"
 					label={assessment.object.name}
 					stopPropagation
-					class="btn btn-sm preset-outlined-surface-500 text-xs"
+					class="btn btn-sm preset-outlined-surface-500 text-xs cursor-pointer"
 				>
 					{m.xRaysView()}
 				</Anchor>
