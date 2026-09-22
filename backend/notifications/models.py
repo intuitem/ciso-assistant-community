@@ -16,8 +16,8 @@ class Notification(AbstractBaseModel):
     is telemetry, never evidence.
     """
 
-    # Access is `recipient` and nothing else (docs §5): folder RBAC is replaced here,
-    # not composed with.
+    # Access is `recipient` alone; folder RBAC is replaced, not composed with
+    # (ADR notification-recipient-scoped-access).
     IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     recipient = models.ForeignKey(
@@ -64,9 +64,9 @@ class Notification(AbstractBaseModel):
         ]
 
     @property
-    def folder(self):
-        """The target's domain, derived rather than stored -- nothing gates on it, and
-        a copy would go stale the moment the object moved domain.
+    def target_folder(self):
+        """The *target's* domain. A label, never a gate -- hence not `folder`, which
+        everywhere else is the row's own IAM scope.
 
         Not queryable: a GenericForeignKey cannot be joined, so ordering is impossible
         and filtering resolves the other way round (see NotificationViewSet).
@@ -89,10 +89,8 @@ class Notification(AbstractBaseModel):
         return queryset.update(is_read=False, read_at=None)
 
     def get_scope(self):
-        """Overridden because `folder` here is a property: AbstractBaseModel.get_scope
-        would filter on a column this model does not have. Uniqueness is the database
-        constraint, not a name within a domain.
-        """
+        """No folder, so the base would fall through to `objects.all()`. Uniqueness
+        here is the database constraint, not a name within a domain."""
         return self.__class__.objects.none()
 
     def __str__(self) -> str:

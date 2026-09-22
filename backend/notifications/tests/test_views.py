@@ -49,7 +49,7 @@ def post_batch(user, payload):
 
 
 def test_malformed_folder_filter_is_empty_not_a_crash(user, row):
-    response = get(user, folder="not-a-uuid")
+    response = get(user, target_folder="not-a-uuid")
     assert response.status_code == 200
     assert response.data["results"] == []
 

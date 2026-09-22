@@ -3042,17 +3042,17 @@ export const listViewFields = {
 		hasDescription: false,
 		rowEmphasis: { field: 'is_read', equals: false },
 		rowNavigation: { modelField: 'target_model', idField: 'object_id', markField: 'is_read' },
-		// `folder` is derived from the target, so it filters but never sorts -- a
-		// GenericForeignKey cannot be joined. `read_at` is a real column.
+		// `target_folder` is the target's domain, not this row's IAM scope: derived, so
+		// it filters but never sorts -- a GenericForeignKey cannot be joined.
 		optionalFields: {
 			head: ['domain', 'readAt'],
-			body: ['folder', 'read_at']
+			body: ['target_folder', 'read_at']
 		},
 		filters: {
 			is_read: NOTIFICATION_READ_FILTER,
 			category: NOTIFICATION_CATEGORY_FILTER,
 			shared: NOTIFICATION_SHARED_FILTER,
-			folder: DOMAIN_FILTER,
+			target_folder: DOMAIN_FILTER,
 			created_at: CREATED_AT_FILTER,
 			read_at: dateFilter('read_at', { isDateTime: true })
 		}

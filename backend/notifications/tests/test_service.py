@@ -40,7 +40,7 @@ def test_writes_one_row_with_its_context(user, control):
     assert row.context == {"control_name": "Encrypt backups"}
     assert row.is_read is False
     assert row.target == control
-    assert row.folder == control.folder
+    assert row.target_folder == control.folder
 
 
 def test_accepts_an_email_address_as_recipient(user, control):
@@ -91,14 +91,14 @@ def test_the_folder_follows_the_target(user, control, folder):
     """The folder is derived, never stored: moving the target moves the notification
     with it, which is the whole reason the column went away."""
     notify("expired_controls", [user], control, {"control_name": control.name})
-    assert rows(user).get().folder == folder
+    assert rows(user).get().target_folder == folder
 
     moved = Folder.objects.create(
         name="Elsewhere", content_type=Folder.ContentType.DOMAIN
     )
     control.folder = moved
     control.save()
-    assert rows(user).get().folder == moved
+    assert rows(user).get().target_folder == moved
 
 
 def test_a_target_without_a_folder_still_notifies(user):
@@ -106,7 +106,7 @@ def test_a_target_without_a_folder_still_notifies(user):
     it simply has no domain to report."""
     orphan = ContentType.objects.get_for_model(ContentType)
     assert len(notify("expired_controls", [user], orphan, {"control_name": "x"})) == 1
-    assert rows(user).get().folder is None
+    assert rows(user).get().target_folder is None
 
 
 def test_a_missing_context_variable_still_writes_a_row(user, control):

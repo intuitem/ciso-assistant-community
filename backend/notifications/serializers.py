@@ -29,7 +29,7 @@ def _folder_path(model) -> str | None:
 class NotificationReadSerializer(BaseModelSerializer):
     target_model = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
-    folder = serializers.SerializerMethodField()
+    target_folder = serializers.SerializerMethodField()
 
     class Meta:
         model = Notification
@@ -44,7 +44,7 @@ class NotificationReadSerializer(BaseModelSerializer):
             "recipient_count",
             "is_read",
             "read_at",
-            "folder",
+            "target_folder",
             "created_at",
             "updated_at",
         ]
@@ -54,9 +54,8 @@ class NotificationReadSerializer(BaseModelSerializer):
         entry = NOTIFICATION_REGISTRY.get(obj.type)
         return entry["category"] if entry else None
 
-    def get_folder(self, obj) -> dict | None:
-        """The target's domain, derived rather than stored (see Notification.folder).
-        Targets resolve once per page: a GenericForeignKey cannot be select_related."""
+    def get_target_folder(self, obj) -> dict | None:
+        """Targets resolve once per page: a GFK cannot be select_related."""
         target = self._targets().get((obj.content_type_id, obj.object_id))
         if target is None:
             return None

@@ -34,8 +34,8 @@ def _uuids(values) -> list[UUID]:
 
 
 class NotificationViewSet(BaseModelViewSet):
-    """The inbox. Scoped on `recipient` alone: `folder` is metadata, not an access
-    gate, so the inherited folder-RBAC enforcement points are replaced (docs §5)."""
+    """The inbox. Scoped on `recipient` alone, so every inherited folder-RBAC
+    enforcement point is replaced (ADR notification-recipient-scoped-access)."""
 
     model = Notification
     serializers_module = "notifications.serializers"
@@ -44,7 +44,7 @@ class NotificationViewSet(BaseModelViewSet):
     filterset_fields = ["is_read", "read_at", "type", "content_type"]
     # Titles render client-side, so there is no text column to search.
     search_fields = ["type"]
-    # `folder` is derived, so it can be filtered (below) but never ordered by.
+    # `target_folder` is derived, so it can be filtered (below) but never ordered by.
     ordering_fields = [
         "created_at",
         "updated_at",
@@ -79,12 +79,12 @@ class NotificationViewSet(BaseModelViewSet):
             else:
                 queryset = queryset.filter(recipient_count__lte=1)
 
-        if folders := self.request.query_params.getlist("folder"):
-            queryset = self._filter_by_folder(queryset, folders)
+        if folders := self.request.query_params.getlist("target_folder"):
+            queryset = self._filter_by_target_folder(queryset, folders)
 
         return queryset
 
-    def _filter_by_folder(self, queryset, folders):
+    def _filter_by_target_folder(self, queryset, folders):
         """Narrow to notifications whose *target* lives in one of these domains.
 
         The folder is derived, so this resolves backwards: per content type, ask that
@@ -106,6 +106,18 @@ class NotificationViewSet(BaseModelViewSet):
 
     def create(self, request, *args, **kwargs):
         raise MethodNotAllowed("POST")
+
+    @action(detail=True, methods=["get"], url_path="cascade-info")
+    def cascade_info(self, request, pk=None):
+        """A leaf: nothing cascades. The inherited version also asked for
+        `delete_notification` on the target's folder, which a recipient need not hold."""
+        self.get_object()  # recipient-scoped: that is the whole check
+        return Response(
+            {
+                bucket: {"count": 0, "grouped_objects": [], "related_objects": []}
+                for bucket in ("deleted", "affected", "blocked")
+            }
+        )
 
     @action(detail=False, name="Read state choices")
     def is_read(self, request):
