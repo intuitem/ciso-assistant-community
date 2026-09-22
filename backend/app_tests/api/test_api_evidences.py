@@ -3,6 +3,7 @@ import pytest
 from rest_framework.test import APIClient
 from core.models import AppliedControl
 from core.models import Evidence
+from core.models import TaskTemplate
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
@@ -430,3 +431,69 @@ class TestEvidenceRevisionFolderAuthorization:
         assert EvidenceRevision.objects.count() == before
         evidence.refresh_from_db()
         assert evidence.status != Evidence.Status.IN_REVIEW
+
+
+@pytest.mark.django_db
+class TestEvidenceTaskTemplateLink:
+    """Creating an evidence from a task's evidence table has to link it back:
+    task_templates is a reverse M2M, so it only travels if declared."""
+
+    def _task(self, name="Recurring task"):
+        return TaskTemplate.objects.create(name=name, folder=Folder.get_root_folder())
+
+    def test_create_links_the_task(self, authenticated_client):
+        task = self._task()
+        response = authenticated_client.post(
+            "/api/evidences/",
+            {
+                "name": "Quarterly report",
+                "folder": str(Folder.get_root_folder().id),
+                "task_templates": [str(task.id)],
+            },
+            format="json",
+        )
+        assert response.status_code == 201, response.json()
+        evidence = Evidence.objects.get(id=response.json()["id"])
+        assert list(evidence.task_templates.all()) == [task]
+
+    def test_a_task_accepts_several_evidences(self, authenticated_client):
+        task = self._task()
+        for name in ("First deposit", "Second deposit"):
+            response = authenticated_client.post(
+                "/api/evidences/",
+                {
+                    "name": name,
+                    "folder": str(Folder.get_root_folder().id),
+                    "task_templates": [str(task.id)],
+                },
+                format="json",
+            )
+            assert response.status_code == 201, response.json()
+        assert task.evidences.count() == 2
+
+    def test_update_links_the_task(self, authenticated_client):
+        task = self._task()
+        evidence = Evidence.objects.create(
+            name="Existing", folder=Folder.get_root_folder()
+        )
+        response = authenticated_client.patch(
+            f"/api/evidences/{evidence.id}/",
+            {"task_templates": [str(task.id)]},
+            format="json",
+        )
+        assert response.status_code == 200, response.json()
+        assert list(evidence.task_templates.all()) == [task]
+
+    def test_omitting_the_field_keeps_existing_links(self, authenticated_client):
+        task = self._task()
+        evidence = Evidence.objects.create(
+            name="Existing", folder=Folder.get_root_folder()
+        )
+        evidence.task_templates.set([task])
+        response = authenticated_client.patch(
+            f"/api/evidences/{evidence.id}/",
+            {"name": "Renamed"},
+            format="json",
+        )
+        assert response.status_code == 200, response.json()
+        assert list(evidence.task_templates.all()) == [task]
