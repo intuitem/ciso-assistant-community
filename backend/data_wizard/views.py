@@ -4907,6 +4907,7 @@ class LoadFileView(APIView):
         # rather than being dropped silently. Set here so every caller's results
         # dict carries the key.
         results.setdefault("warnings", [])
+        controls_created: list[str] = []
         for record in records:
             ref_id = record.get("ref_id")
             urn = record.get("urn")
@@ -4955,6 +4956,22 @@ class LoadFileView(APIView):
                         requirement_data["status"] = requirement_progress
                     if observations not in (None, ""):
                         requirement_data["observation"] = observations
+                    controls_cell = record.get("applied_controls") or record.get(
+                        "controls"
+                    )
+                    if controls_cell not in (None, ""):
+                        controls = _resolve_applied_controls(
+                            controls_cell, compliance_assessment.folder, request
+                        )
+                        controls_created.extend(controls.created)
+                        requirement_data["applied_controls"] = controls.ids
+                        if controls.failed:
+                            results["warnings"].append(
+                                {
+                                    "requirement": ReqNode.ref_id or ReqNode.urn,
+                                    "warning": f"Could not resolve controls: {', '.join(controls.failed)}",
+                                }
+                            )
                     impl_score = record.get("implementation_score")
                     doc_score = record.get("documentation_score")
                     score = record.get("score")
@@ -5051,6 +5068,10 @@ class LoadFileView(APIView):
                 results["failed"] += 1
                 results["errors"].append({"record": record, "error": str(e)})
 
+        if controls_created:
+            results.setdefault("details", {})["applied_controls_created"] = len(
+                controls_created
+            )
         logger.info(
             f"Compliance Assessment import complete. Success: {results['successful']}, Failed: {results['failed']}"
         )
