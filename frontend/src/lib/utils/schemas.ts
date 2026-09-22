@@ -629,6 +629,7 @@ export const EvidenceSchema = z.object({
 	security_exceptions: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	timeline_entries: z.string().optional().array().optional(),
 	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
+	task_templates: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	link: z
 		.string()
@@ -1433,6 +1434,7 @@ export const operationalScenarioSchema = z.object({
 	ebios_rm_study: z.string(),
 	attack_path: z.string().uuid(),
 	threats: z.string().uuid().optional().array().optional(),
+	techniques: z.string().uuid().optional().array().optional(),
 	operating_modes_description: z.string().optional(),
 	likelihood: z.number().optional().default(-1),
 	is_selected: z.boolean().default(true),
@@ -1767,7 +1769,7 @@ export const ElementaryActionSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	threat: z.string().uuid().optional(),
+	threat: z.string().uuid().optional().nullable(),
 	icon: z.string().optional().nullable(),
 	attack_stage: z.number().default(0),
 	operating_modes: z.string().uuid().optional().array().optional()
@@ -1845,7 +1847,7 @@ export const ObjectClassificationSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
 	is_visible: z.boolean().default(true),
-	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+	translations: z.record(z.string().min(1), z.any()).optional()
 });
 
 export const ClassificationLevelSchema = z.object({
@@ -1855,7 +1857,7 @@ export const ClassificationLevelSchema = z.object({
 	abbreviation: z.string().optional().default(''),
 	hexcolor: z.string().optional().default(''),
 	is_visible: z.boolean().default(true),
-	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+	translations: z.record(z.string().min(1), z.any()).optional()
 });
 
 export const AssetClassSchema = z.object({

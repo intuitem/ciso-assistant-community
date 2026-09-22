@@ -2488,9 +2488,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Operational scenario',
 		verboseNamePlural: 'Operational scenarios',
 		markdownFields: ['operating_modes_description'],
+		flaggedFields: {
+			techniques: 'ttps'
+		},
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'techniques', urlModel: 'techniques' },
 			{
 				field: 'attack_path',
 				urlModel: 'attack-paths',
@@ -3447,7 +3451,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'object-classifications': {
-		name: 'objectClassification',
+		name: 'objectclassification',
 		localName: 'objectClassification',
 		localNamePlural: 'objectClassifications',
 		verboseName: 'Object classification',
@@ -3465,7 +3469,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'classification-levels': {
-		name: 'classificationLevel',
+		name: 'classificationlevel',
 		localName: 'classificationLevel',
 		localNamePlural: 'classificationLevels',
 		verboseName: 'Classification level',
