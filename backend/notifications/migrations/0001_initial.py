@@ -46,6 +46,10 @@ class Migration(migrations.Migration):
                     "context",
                     models.JSONField(blank=True, default=dict, verbose_name="Context"),
                 ),
+                (
+                    "recipient_count",
+                    models.PositiveIntegerField(default=1, verbose_name="Recipients"),
+                ),
                 ("is_read", models.BooleanField(default=False, verbose_name="Read")),
                 (
                     "read_at",
