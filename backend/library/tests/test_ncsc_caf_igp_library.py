@@ -35,6 +35,9 @@ LIBRARIES_DIR = Path(__file__).resolve().parents[2] / "library" / "libraries"
 REF_ID = "ncsc-caf-4.0-igp"
 LIBRARY_URN = f"urn:intuitem:risk:library:{REF_ID}"
 FRAMEWORK_URN = f"urn:intuitem:risk:framework:{REF_ID}"
+GROUPED_REF_ID = "ncsc-caf-4.0-igp-grouped"
+GROUPED_LIBRARY_URN = f"urn:intuitem:risk:library:{GROUPED_REF_ID}"
+GROUPED_FRAMEWORK_URN = f"urn:intuitem:risk:framework:{GROUPED_REF_ID}"
 
 EXPECTED_OBJECTIVES = 4
 EXPECTED_PRINCIPLES = 14
@@ -97,6 +100,18 @@ def framework(db) -> Framework:
             assert error is None, f"could not store {REF_ID}: {error}"
         assert stored.load() is None
     return Framework.objects.get(urn=FRAMEWORK_URN)
+
+
+@pytest.fixture
+def grouped_framework(db) -> Framework:
+    if not LoadedLibrary.objects.filter(urn=GROUPED_LIBRARY_URN).exists():
+        stored = StoredLibrary.objects.filter(urn=GROUPED_LIBRARY_URN).first()
+        if stored is None:
+            content = (LIBRARIES_DIR / f"{GROUPED_REF_ID}.yaml").read_bytes()
+            stored, error = StoredLibrary.store_library_content(content)
+            assert error is None, f"could not store {GROUPED_REF_ID}: {error}"
+        assert stored.load() is None
+    return Framework.objects.get(urn=GROUPED_FRAMEWORK_URN)
 
 
 def outcome(framework: Framework, ref_id: str) -> RequirementNode:
@@ -223,6 +238,55 @@ class TestLibraryShape:
         assert prefixes[0] == "[A2.a.NA.1]"
         assert "[A2.a.PA.1]" in prefixes
         assert "[A2.a.A.1]" in prefixes
+
+
+@pytest.mark.django_db
+class TestGroupedLibraryShape:
+    def test_groups_cover_every_question_once_in_caf_column_order(
+        self, grouped_framework
+    ):
+        nodes = RequirementNode.objects.filter(
+            framework=grouped_framework, assessable=True
+        ).prefetch_related("questions")
+        assert nodes.count() == EXPECTED_OUTCOMES
+
+        for node in nodes:
+            groups = node.questions_properties.get("groups")
+            assert isinstance(groups, dict), node.ref_id
+            ordered_groups = [groups[key] for key in sorted(groups, key=int)]
+            expected_descriptions = (
+                ["Not Achieved", "Achieved"]
+                if node.ref_id in TWO_STATE_OUTCOMES
+                else ["Not Achieved", "Partially Achieved", "Achieved"]
+            )
+            assert [group["description"] for group in ordered_groups] == (
+                expected_descriptions
+            )
+
+            questions = list(node.questions.order_by("order"))
+            questions_by_urn = {question.urn: question for question in questions}
+            grouped_urns = [
+                question_urn
+                for group in ordered_groups
+                for question_urn in group["order"]
+            ]
+            assert grouped_urns == [question.urn for question in questions]
+            assert len(grouped_urns) == len(set(grouped_urns))
+
+            expected_columns = ["NA", "A"]
+            if node.ref_id not in TWO_STATE_OUTCOMES:
+                expected_columns.insert(1, "PA")
+            for group, expected_column in zip(ordered_groups, expected_columns):
+                assert {
+                    column_of(questions_by_urn[question_urn])
+                    for question_urn in group["order"]
+                } == {expected_column}
+
+    def test_grouping_does_not_change_the_calculation_rule(self, grouped_framework):
+        assert (
+            grouped_framework.result_aggregation
+            == Framework.ResultAggregation.TIERED_ALL
+        )
 
 
 @pytest.mark.django_db

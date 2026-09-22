@@ -289,6 +289,7 @@ def get_sorted_requirement_nodes(
                 "ref_id": node.ref_id,
                 "name": get_referential_translation(node, "name"),
                 "implementation_groups": node.implementation_groups or None,
+                "questions_properties": node.questions_properties or None,
                 "ra_id": str(req_as.id) if req_as else None,
                 "status": req_as.status if req_as else None,
                 "result": req_as.result if req_as else None,

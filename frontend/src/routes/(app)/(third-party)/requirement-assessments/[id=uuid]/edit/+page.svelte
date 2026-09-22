@@ -942,6 +942,7 @@
 								{form}
 								field="answers"
 								questions={page.data.requirementAssessment.requirement.questions}
+								groups={page.data.requirementAssessment.requirement.questions_properties?.groups}
 								label={m.questionSingular()}
 							/>
 						</div>

@@ -203,6 +203,7 @@ def live_framework_to_object(framework) -> dict:
                 "annotation": node.annotation,
                 "typical_evidence": node.typical_evidence,
                 "implementation_groups": node.implementation_groups,
+                "questions_properties": node.questions_properties or None,
                 "visibility_expression": node.visibility_expression,
                 "translations": node.translations or None,
             }

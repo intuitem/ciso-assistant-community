@@ -1350,6 +1350,7 @@
 												<div class="flex flex-col w-full space-y-2">
 													<Question
 														questions={requirementAssessment.requirement.questions}
+														groups={requirementAssessment.requirement.questions_properties?.groups}
 														initialValue={requirementAssessment.answers}
 														field="answers"
 														disabled={isReadOnly || !questionnaireMode}

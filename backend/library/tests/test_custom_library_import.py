@@ -95,6 +95,12 @@ objects:
       parent_urn: urn:intuitem:test:req_node:sample-fw-reg:cat-1
       name: Requirement 1.1
       description: A sample assessable requirement
+      questions_properties:
+        groups:
+          1:
+            description: First group
+            order:
+            - urn:intuitem:test:req_node:sample-fw-reg:cat-1.1:question:1
     - urn: urn:intuitem:test:req_node:sample-fw-reg:cat-1.2
       assessable: true
       depth: 2
@@ -411,6 +417,16 @@ class TestCustomLibraryImportYAML:
             parent_urn="urn:intuitem:test:req_node:sample-fw-reg:cat-1"
         )
         assert child_nodes.count() == 2
+        assert nodes.get(ref_id="CAT-1.1").questions_properties == {
+            "groups": {
+                "1": {
+                    "description": "First group",
+                    "order": [
+                        "urn:intuitem:test:req_node:sample-fw-reg:cat-1.1:question:1"
+                    ],
+                }
+            }
+        }
 
     def test_upload_risk_matrix_yaml(self, admin_client, upload_url):
         """Test uploading a valid YAML risk matrix library."""

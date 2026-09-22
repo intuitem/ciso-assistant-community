@@ -3974,6 +3974,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "associated_threats",
                 "parent_requirement",
                 "questions",
+                "questions_properties",
                 "implementation_groups",
                 "display_mode",
                 "min_score",

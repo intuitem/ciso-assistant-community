@@ -3310,6 +3310,12 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     implementation_groups = models.JSONField(
         null=True, verbose_name=_("Implementation groups")
     )
+    questions_properties = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Questions properties"),
+        help_text=_("Presentation metadata for the requirement questions."),
+    )
     assessable = models.BooleanField(null=False, verbose_name=_("Assessable"))
     typical_evidence = models.TextField(
         null=True, blank=True, verbose_name=_("Typical evidence")

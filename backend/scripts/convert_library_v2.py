@@ -403,6 +403,7 @@ def inject_questions_into_node(
     raw_answer_str = qa_data.get("answer")
     raw_depends_on_str = qa_data.get("depends_on")
     raw_condition_str = qa_data.get("condition")
+    raw_group_order = qa_data.get("answer_group_order")
 
     if not raw_question_str:
         return
@@ -469,9 +470,11 @@ def inject_questions_into_node(
         )
 
     question_block = {}
+    question_answer_ids = []
 
     for idx, question_text in enumerate(question_lines):
         answer_id = answer_ids[0] if len(answer_ids) == 1 else answer_ids[idx]
+        question_answer_ids.append(answer_id)
         answer_meta = answers_dict.get(answer_id)
 
         if not answer_meta:
@@ -572,6 +575,55 @@ def inject_questions_into_node(
         question_block[q_urn] = question_entry
     if question_block:
         node["questions"] = question_block
+
+    if raw_group_order:
+        group_answer_ids = _parse_multiline_with_pipe(raw_group_order)
+        if len(group_answer_ids) != len(set(group_answer_ids)):
+            raise ValueError(
+                f"Duplicate answer ID in 'answer_group_order' for node {node.get('urn')}"
+            )
+
+        used_answer_ids = set(question_answer_ids)
+        ordered_answer_ids = set(group_answer_ids)
+        if used_answer_ids != ordered_answer_ids:
+            missing = sorted(used_answer_ids - ordered_answer_ids)
+            unused = sorted(ordered_answer_ids - used_answer_ids)
+            details = []
+            if missing:
+                details.append(f"missing answer IDs: {missing}")
+            if unused:
+                details.append(f"unused answer IDs: {unused}")
+            raise ValueError(
+                f"Invalid 'answer_group_order' for node {node.get('urn')}: "
+                + "; ".join(details)
+            )
+
+        question_urns = list(question_block)
+        groups = {}
+        for group_index, answer_id in enumerate(group_answer_ids, start=1):
+            answer_meta = answers_dict.get(answer_id)
+            if not answer_meta:
+                raise ValueError(
+                    f"Unknown answer ID in 'answer_group_order': {answer_id} "
+                    f"for node {node.get('urn')}"
+                )
+            description = answer_meta.get("group_description")
+            if not description:
+                raise ValueError(
+                    f"Missing 'group_description' for grouped answer ID: {answer_id}"
+                )
+            groups[group_index] = {
+                "description": description,
+                "order": [
+                    question_urn
+                    for question_urn, question_answer_id in zip(
+                        question_urns, question_answer_ids
+                    )
+                    if question_answer_id == answer_id
+                ],
+            }
+
+        node["questions_properties"] = {"groups": groups}
 
 
 # --- risk matrix management ------------------------------------------------------------
@@ -1184,6 +1236,11 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 answers_dict[answer_id] = {
                     "type": answer_type,
                     "choices": choices,
+                    "group_description": (
+                        str(data.get("group_description")).strip()
+                        if data.get("group_description") is not None
+                        else None
+                    ),
                 }
     else:
         if verbose:

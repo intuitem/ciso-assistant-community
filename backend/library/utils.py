@@ -148,6 +148,9 @@ class RequirementNodeImporter:
                 implementation_groups=self.requirement_data.get(
                     "implementation_groups"
                 ),
+                questions_properties=self.requirement_data.get(
+                    "questions_properties", {}
+                ),
                 display_mode=display_mode,
                 weight=self.requirement_data.get("weight", 1),
                 min_score=self.requirement_data.get("min_score"),

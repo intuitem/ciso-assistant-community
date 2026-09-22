@@ -457,6 +457,7 @@
 								<div class="mt-4">
 									<Question
 										questions={currentQuestions}
+										groups={requirement?.questions_properties?.groups}
 										initialValue={currentRequirementAssessment.answers ?? {}}
 										field="answers"
 										disabled={isReadOnly}
