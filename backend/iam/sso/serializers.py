@@ -103,6 +103,15 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         default=False,
         source="settings.oauth_pkce_enabled",
     )  # NOTE: Only used for OIDC
+    trust_email_without_verified_claim = serializers.BooleanField(
+        default=False,
+        source="settings.trust_email_without_verified_claim",
+        help_text=(
+            "Accept the identity provider's email when the token carries no "
+            "email_verified (or xms_edov) claim. Required for Microsoft Entra ID, "
+            "which emits neither by default. An explicit false is always rejected."
+        ),
+    )  # NOTE: Only used for OIDC
     additional_scopes = serializers.RegexField(
         regex=(
             r"^[\x21\x23-\x2b\x2d-\x5b\x5d-\x7e]+"

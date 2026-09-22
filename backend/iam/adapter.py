@@ -10,6 +10,7 @@ from allauth.socialaccount.adapter import (
 from allauth.socialaccount.models import app_settings
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
 from rest_framework.authtoken.serializers import AuthTokenSerializer
@@ -130,6 +131,54 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                     values.extend(v for v in value if isinstance(v, str) and v)
         return values
 
+    @staticmethod
+    def _require_verified_email(extra, sso_settings):
+        """Accept the IdP's email only on the IdP's own word (OIDC).
+
+        `email_verified` (standard) and `xms_edov` (Microsoft Entra ID) are read
+        from every claim source. An explicit false anywhere rejects the login.
+        An explicit true accepts it. No claim at all is accepted only when the
+        operator enabled "trust email without verification claim" for this
+        provider, which Entra ID tenants need because Entra emits neither claim
+        by default. Anything else present is not proof and is rejected rather
+        than guessed at.
+        """
+        from .sso.errors import AuthError
+
+        sources = (extra, extra.get("userinfo") or {}, extra.get("id_token") or {})
+        verdicts = [
+            str(source[claim]).strip().lower()
+            for source in sources
+            for claim in ("email_verified", "xms_edov")
+            if claim in source
+        ]
+        if verdicts:
+            if all(verdict == "true" for verdict in verdicts):
+                return
+            logger.error(
+                "pre_social_login: IdP does not vouch for the email, refusing login",
+                verdicts=verdicts,
+            )
+            raise ValidationError(
+                "Email not verified by the identity provider.",
+                code=AuthError.EMAIL_NOT_VERIFIED,
+            )
+        if sso_settings and (sso_settings.settings or {}).get(
+            "trust_email_without_verified_claim"
+        ):
+            logger.debug(
+                "pre_social_login: no email verification claim, trusted by setting"
+            )
+            return
+        logger.error(
+            "pre_social_login: IdP sent no email verification claim and "
+            "'trust email without verification claim' is off, refusing login"
+        )
+        raise ValidationError(
+            "The identity provider sent no email verification claim.",
+            code=AuthError.EMAIL_VERIFICATION_CLAIM_MISSING,
+        )
+
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data
         logger.debug(
@@ -137,6 +186,20 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             extra_data=extra,
             provider=sociallogin.account.provider,
         )
+        from global_settings.utils import ff_is_enabled
+        from .sso.models import SSOSettings
+        from .utils import sync_user_idp_groups
+
+        try:
+            sso_settings = SSOSettings.objects.get()
+        except SSOSettings.DoesNotExist:
+            sso_settings = None
+
+        # SAML assertions are resolved by the SAML ACS view; the verification
+        # claim rule is OIDC's.
+        if sso_settings is None or sso_settings.provider != "saml":
+            self._require_verified_email(extra, sso_settings)
+
         # Primary lookup (legacy format)
         email_address = extra.get("email") or extra.get("email_address")
         # allauth 65.8.0+ stores userinfo under "userinfo" key
@@ -183,14 +246,6 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             provider=sociallogin.account.provider,
         )
 
-        from global_settings.utils import ff_is_enabled
-        from .sso.models import SSOSettings
-        from .utils import sync_user_idp_groups
-
-        try:
-            sso_settings = SSOSettings.objects.get()
-        except SSOSettings.DoesNotExist:
-            sso_settings = None
         jit_provisioning_active = (
             bool(sso_settings)
             and sso_settings.jit_provisioning_enabled

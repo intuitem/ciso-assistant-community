@@ -224,6 +224,14 @@
 						cacheLock={cacheLocks['oauth_pkce_enabled']}
 						helpText={m.oidcPKCEEnabledHelpText()}
 					/>
+					<Checkbox
+						{form}
+						field="trust_email_without_verified_claim"
+						label={m.oidcTrustEmailWithoutVerifiedClaim()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['trust_email_without_verified_claim']}
+						helpText={m.oidcTrustEmailWithoutVerifiedClaimHelpText()}
+					/>
 					<TextField
 						{form}
 						field="additional_scopes"

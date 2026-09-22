@@ -34,6 +34,10 @@ Once you've retrieved the **Client ID**, the **Client Secret** and the **Issuer 
 {% endhint %}
 
 {% hint style="info" %}
+CISO Assistant only accepts an email address the identity provider vouches for. A token whose `email_verified` claim (or Microsoft's `xms_edov`) is `false` is rejected, and so is a token that carries no such claim at all, unless **Trust email without verification claim** is enabled under **Advanced settings**. Enable it only for providers that never send the claim, such as Microsoft Entra ID. Leave it off for Keycloak, Okta, Google Workspace and Auth0, which always send it.
+{% endhint %}
+
+{% hint style="info" %}
 CISO Assistant automatically sends a standards-compliant `state` and `nonce` on every OIDC authorization request (43 characters matching `^[A-Za-z0-9-._~]{43,128}$`), and validates the `nonce` claim returned in the `id_token`. No configuration is required. This is helpful for identity providers that enforce format or length constraints on these parameters. Per OIDC Core 3.1.3.7, the `nonce` sent in the authorization request must be present and match in the `id_token` — a missing or mismatched nonce will reject the login.
 {% endhint %}
 
