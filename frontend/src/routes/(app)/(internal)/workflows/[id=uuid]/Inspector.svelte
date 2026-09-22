@@ -588,9 +588,7 @@
 
 	function toggleReadInclude(name: string, checked: boolean) {
 		const current: string[] = actionConfig.include ?? [];
-		actionConfig.include = checked
-			? [...current, name]
-			: current.filter((entry) => entry !== name);
+		actionConfig.include = checked ? [...current, name] : current.filter((entry) => entry !== name);
 		onChange();
 	}
 
