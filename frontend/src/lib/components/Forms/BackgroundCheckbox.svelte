@@ -1,8 +1,8 @@
 <script lang="ts" module>
 	export type CheckboxAccent = 'primary' | 'tertiary';
 
-	// Full literal class strings: Tailwind scans the source, so a built-up
-	// `from-${accent}-400` would never be emitted.
+	// Literal strings: Tailwind scans the source, so `from-${accent}-400` would
+	// never be emitted.
 	const ACCENT_CLASSES: Record<CheckboxAccent, { checked: string; helpText: string }> = {
 		primary: {
 			checked: 'bg-gradient-to-br from-primary-400 to-primary-500 border-primary text-white',
@@ -21,19 +21,16 @@
 	interface Props {
 		label?: string;
 		field: string;
-		/** Controlled: the caller owns the value, wherever it lives (a superform
-		 * store, local state, a server round-trip). */
+		/** Controlled — the caller owns the value, wherever it lives. */
 		checked: boolean;
 		onToggle: (next: boolean) => void;
 		helpText?: string;
-		/** Hover hint — chiefly why a disabled tile cannot be toggled. Rendered as
-		 * `title`, which is also the accessible description once `aria-label`
-		 * supplies the name. */
+		/** Hover hint, chiefly why a disabled tile cannot be toggled. Rendered as
+		 * `title`, which `aria-label` leaves free to be the description. */
 		tooltip?: string;
 		hidden?: boolean;
 		disabled?: boolean;
-		/** Whose setting this is: `primary` for the instance, `tertiary` for the
-		 * viewer's own. */
+		/** `primary` for an instance setting, `tertiary` for the viewer's own. */
 		accent?: CheckboxAccent;
 		classes?: string;
 		classesContainer?: string;

@@ -88,10 +88,9 @@ def redact_secret_value(value: str) -> str:
 
 
 def _edition_feature_flags_serializer():
-    """The FeatureFlags serializer of this edition — the single source of truth
-    for the flag vocabulary, their defaults and which of them a user may hide.
-    The enterprise overlay swaps it in via MODULE_PATHS["serializers"], so no
-    separate flag list exists anywhere."""
+    """The edition's FeatureFlags serializer — the single source of truth for the
+    flag vocabulary, defaults and hideable set. The enterprise overlay swaps it
+    in via MODULE_PATHS["serializers"]."""
     serializer_class = FeatureFlagsSerializer
     module_path = django_settings.MODULE_PATHS.get("serializers")
     if module_path:
@@ -112,8 +111,8 @@ def get_supported_feature_flags() -> frozenset:
 
 @functools.cache
 def get_user_hideable_feature_flags() -> frozenset:
-    """Flags a user may switch off for themselves. Intersected with the
-    supported set so an edition can never declare one it doesn't have."""
+    """Flags a user may switch off for themselves, intersected with the supported
+    set so an edition cannot declare one it doesn't have."""
     declared = getattr(
         _edition_feature_flags_serializer(), "USER_HIDEABLE_FLAGS", frozenset()
     )
@@ -185,9 +184,8 @@ USER_FEATURE_FLAGS_PREFERENCE_KEY = "feature_flags"
 
 
 def get_user_hidden_feature_flags(user) -> dict:
-    """The user's own hide choices, sanitised: only supported, hideable flags,
-    and only the value False. Stored sparse — a flag the user never touched is
-    absent, so a flag added by a release is visible without a backfill."""
+    """The user's own hide choices: hideable flags set to False, nothing else.
+    Sparse, so a flag a release adds is visible without a backfill."""
     preferences = getattr(user, "preferences", None)
     stored = (
         preferences.get(USER_FEATURE_FLAGS_PREFERENCE_KEY)
@@ -205,32 +203,22 @@ def get_user_hidden_feature_flags(user) -> dict:
 
 
 def get_instance_feature_flags() -> dict:
-    """Every supported flag with its instance-wide value, answering exactly as
-    `ff_is_enabled` would.
+    """Every supported flag, answering exactly as `ff_is_enabled` would — this
+    drives what the UI offers, so it must never claim more than enforcement
+    grants. Hence a missing row, a malformed one and an absent key all read
+    False, and the declared defaults are not a fallback.
 
-    Mirroring it is the point: this drives what the UI offers, `ff_is_enabled`
-    decides what the API allows, and the view must never claim more than
-    enforcement grants. So an absent or malformed row reads False for every
-    flag, and so does a key the row is missing — the declared defaults are *not*
-    a fallback here, because `ff_is_enabled` does not use them either (startup's
-    `seed_feature_flag_defaults` is what puts a new release's flags in the row).
-
-    Restricted to the supported set, because an env-gated flag (chat_mode,
-    infra_config_management) may linger in the row after being switched off and
-    the serializer drops it from the admin view — this must match.
+    Supported-only: an env-gated flag (chat_mode) can linger in the row after
+    being switched off, and the serializer drops it from the admin view.
     """
     flags = get_feature_flags() or {}
     return {name: bool(flags.get(name)) for name in get_supported_feature_flags()}
 
 
 def resolve_feature_flags(user) -> dict:
-    """The flags as *this user* should see them: the instance flags, narrowed by
-    the user's own hide choices.
-
-    Narrowing only, by construction — a user choice can turn a flag off, never
-    on. That is what keeps `ff_is_enabled` out of this: enforcement stays
-    instance-wide and correct, and this resolution only drives what the UI
-    offers. Callers that gate access must keep using `ff_is_enabled`.
+    """The instance flags narrowed by this user's hides. Narrowing only, by
+    construction: a user choice can turn a flag off, never on. Gating access
+    stays with `ff_is_enabled`.
     """
     return get_instance_feature_flags() | get_user_hidden_feature_flags(user)
 

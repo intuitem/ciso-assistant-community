@@ -14,11 +14,10 @@ export interface FeatureFlagGroup {
 
 /**
  * The flag taxonomy, shared by the instance settings form and the per-user module
- * preferences so that labels and grouping cannot drift between the two.
+ * preferences so labels and grouping cannot drift.
  *
- * `availableKeys` narrows it to the flags the caller may show: every flag the
- * edition exposes, for the admin form; only the user-hideable ones, for the
- * profile page. A group left with no field is dropped.
+ * `availableKeys` narrows it to what the caller may show — every exposed flag for
+ * the admin form, only the hideable ones for the profile page. Empty groups drop.
  */
 export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[] {
 	return [

@@ -75,9 +75,8 @@ export const load: PageServerLoad = async (event) => {
 		personalAccessTokens = await personalAccessTokensResponse.json();
 	}
 
-	// The effective view, which also carries which flags this user is allowed to
-	// hide and which they already have. A failure here must not take the whole
-	// settings page down — the modules section simply doesn't render.
+	// Null on failure rather than throwing: the modules section just doesn't
+	// render, instead of taking the whole settings page down.
 	const moduleVisibility = await event
 		.fetch(`${BASE_API_URL}/settings/feature-flags/effective/`)
 		.then((res) => (res.ok ? res.json() : null))

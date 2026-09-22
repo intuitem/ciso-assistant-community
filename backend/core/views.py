@@ -9645,11 +9645,9 @@ class UserPreferencesView(APIView):
         return Response(prefs, status=status.HTTP_200_OK)
 
     def patch(self, request) -> Response:
-        # Locked for the whole read-modify-save: `preferences` is one JSON column,
-        # so two concurrent patches (a theme switch and a module toggle, say) would
-        # otherwise both save a snapshot taken before the other's write, and the
-        # later save would silently drop it. ATOMIC_REQUESTS is off, so the
-        # transaction has to be explicit.
+        # `preferences` is one JSON column, so concurrent patches would each save a
+        # snapshot taken before the other's write. ATOMIC_REQUESTS is off, so the
+        # transaction is explicit.
         with transaction.atomic():
             user = User.objects.select_for_update().get(pk=request.user.pk)
             return self._patch_preferences(request, user)
@@ -9736,8 +9734,8 @@ class UserPreferencesView(APIView):
                     {"error": "Feature flag preferences must be booleans."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            # Sparse and false-only: a flag set back to true is dropped rather than
-            # stored, so it follows the instance again — and can never widen it.
+            # Sparse and false-only: a flag set back to true is dropped, so it
+            # follows the instance again and can never widen it.
             hidden = prefs.get(USER_FEATURE_FLAGS_PREFERENCE_KEY)
             hidden = dict(hidden) if isinstance(hidden, dict) else {}
             for name, visible in new_flags.items():

@@ -240,10 +240,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 			const headers = authorized();
 			if (!headers) return undefined;
 			try {
-				// `effective`, not the raw row: the instance flags narrowed by this
-				// user's own hides. The raw row stays the admin form's source — it
-				// PUTs the whole body back, so a personal hide read from there would
-				// be saved instance-wide.
+				// `effective`, not the raw row: the raw row stays the admin form's
+				// source, and it PUTs the whole body back.
 				const featureFlagSettings = await fetch(
 					`${BASE_API_URL}/settings/feature-flags/effective/`,
 					{

@@ -162,18 +162,15 @@
 		}
 	}
 
-	// Derived, not read once: a toggle ends in `invalidateAll()`, and an admin may
-	// have disabled a module in the meantime.
+	// Derived, not read once: every toggle ends in `invalidateAll()`.
 	const hideableFlags: string[] = $derived(data.moduleVisibility?.hideable ?? []);
 	const moduleGroups = $derived(getFeatureFlagGroups(hideableFlags));
 
-	// The un-narrowed values: a module the organisation disabled is shown as
-	// unavailable rather than as something this user switched off. `flags` cannot
-	// tell the two apart — it is false either way.
+	// Un-narrowed, so "your organisation disabled it" can be told apart from "you
+	// hid it" — false in `flags` either way.
 	const instanceFlags: Record<string, boolean> = $derived(data.moduleVisibility?.instance ?? {});
 
-	// Seeded once and then owned locally, so a toggle paints immediately instead of
-	// waiting for the round-trip.
+	// Seeded once, then owned locally so a toggle paints before the round-trip.
 	let moduleVisible = $state(
 		Object.fromEntries(
 			(data.moduleVisibility?.hideable ?? []).map((flag: string) => [
@@ -182,10 +179,9 @@
 			])
 		)
 	);
-	// A count, not a flag: a toggle and a reset — or two toggles — can overlap, and
-	// the backend merges each sparse PATCH through its own read-modify-save, so a
-	// second write started mid-flight can lose the first. Every control is blocked
-	// while any write is pending, which orders them by construction.
+	// A count, not a flag: a toggle and a reset can overlap, and the backend merges
+	// each sparse PATCH read-modify-save, so a write started mid-flight can lose
+	// the first. Blocking every control while any is pending orders them.
 	let modulePendingWrites = $state(0);
 	const moduleBusy = $derived(modulePendingWrites > 0);
 
@@ -193,22 +189,18 @@
 		return instanceFlags[flag] === true;
 	}
 
-	// Absent means visible: `moduleVisible` is seeded once, so a flag added to
-	// `hideable` by a later refresh has no local value, and the stored form is
-	// sparse anyway — only an explicit `false` is a hide.
+	// Absent means visible: the stored form is sparse, and a flag added to
+	// `hideable` by a later refresh has no local value yet.
 	function isModuleVisible(flag: string): boolean {
 		return moduleVisible[flag] !== false;
 	}
 
-	// What the user actually sees: a module the organization disabled is not
-	// visible either, however this user left their own switch.
 	const visibleModuleCount = $derived(
 		hideableFlags.filter((flag) => availableOnInstance(flag) && isModuleVisible(flag)).length
 	);
 
-	// What the reset would undo — the user's own hides alone, which is why it is
-	// not `visibleModuleCount === hideableFlags.length`: an organization-disabled
-	// module is nothing this user can reset.
+	// What the reset would undo, hence not `visibleModuleCount === hideableFlags
+	// .length`: an organisation-disabled module is nothing this user can reset.
 	const hiddenByUserCount = $derived(
 		hideableFlags.filter((flag) => moduleVisible[flag] === false).length
 	);
@@ -224,8 +216,8 @@
 				rollback();
 				return;
 			}
-			// The sidebar, the palette and the flagged tables are all built
-			// server-side from the effective flags, so the whole tree is reloaded.
+			// Sidebar, palette and flagged tables are all built server-side from
+			// the effective flags.
 			await invalidateAll();
 		} catch {
 			rollback();

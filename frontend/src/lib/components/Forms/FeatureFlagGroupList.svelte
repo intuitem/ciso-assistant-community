@@ -5,16 +5,13 @@
 
 	interface Props {
 		groups: FeatureFlagGroup[];
-		/** Controlled by the caller: the instance form reads a superform store, the
-		 * profile page reads its own state and PATCHes on change. */
+		/** Controlled — the instance form reads a superform store, the profile page
+		 * its own state. */
 		isEnabled: (field: string) => boolean;
 		onToggle: (field: string, next: boolean) => void;
-		/** A flag the caller cannot offer — e.g. a module the organisation disabled,
-		 * which a user may not switch back on for themselves. */
 		isDisabled?: (field: string) => boolean;
 		/** Overrides the flag's own description. */
 		helpTextFor?: (field: string, description: string) => string;
-		/** Hover hint, chiefly why a disabled flag cannot be toggled. */
 		tooltipFor?: (field: string) => string | undefined;
 		accent?: CheckboxAccent;
 		/** Per-group header controls (bulk enable/disable, counts). */

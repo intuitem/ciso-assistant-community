@@ -479,15 +479,10 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.relations_graph", required=False, default=False
     )
 
-    # Flags a user may switch off for themselves, from their own profile. Strictly
-    # opt-in, like batch actions: a flag added by a release is not hideable until
-    # it is listed here, which is the safe default.
-    #
-    # Eligible means the flag hides a navigation area and nothing else. Excluded
-    # are the flags that also gate data rendering (custom_fields), a write path,
-    # role behaviour (auditee_mode, focus_mode), or IAM/admin configuration
-    # (idp_groups, jit_provisioning, service_accounts, terminologies) — there a
-    # per-user value would make two users read different data, not a different menu.
+    # Flags a user may switch off for themselves. Opt-in, like batch actions: a
+    # new flag is not hideable until listed. Eligible means it hides a navigation
+    # area and nothing else — a flag that also gates data rendering, a write path,
+    # role behaviour or IAM config would make two users read different data.
     USER_HIDEABLE_FLAGS = frozenset(
         {
             "bia",

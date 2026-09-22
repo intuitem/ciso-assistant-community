@@ -1,8 +1,7 @@
 """
-Tests for the per-user feature-flag layer: resolution narrows the instance
-flags and can never widen them, the effective endpoint is separate from the
-raw row the admin form reads, and the preference write only accepts flags the
-edition declares hideable.
+Tests for the per-user feature-flag layer: resolution narrows and never widens,
+the effective endpoint stays separate from the raw row the admin form reads, and
+the preference write only accepts flags the edition declares hideable.
 """
 
 import pytest
@@ -53,8 +52,7 @@ def user(db):
 
 @pytest.fixture
 def client(app_config):
-    """An authenticated non-admin: the per-user layer is everyone's, and it must
-    not need `view_globalsettings`."""
+    """A non-admin: the per-user layer must not need `view_globalsettings`."""
     user = User.objects.create_user(email="ff-prefs-api@wow.com")
     folder = Folder.objects.create(
         name="ff-prefs-domain",
@@ -96,9 +94,8 @@ def test_hideable_flags_are_declared_on_the_serializer():
 
 
 def test_every_supported_flag_declares_a_default():
-    """`get_instance_feature_flags` is only total because every flag field carries
-    a `default`. A flag added without one would read as missing on a row that
-    predates it."""
+    """The admin form's "Reset to defaults" reads them off the serializer, so a
+    flag declared without one would silently drop out of that reset."""
     from global_settings.utils import get_feature_flag_defaults
 
     assert get_supported_feature_flags() == set(get_feature_flag_defaults())
@@ -139,7 +136,7 @@ def test_a_user_cannot_widen_an_instance_flag(flags_row, user):
 
 
 def test_a_non_hideable_flag_in_preferences_is_ignored(flags_row, user):
-    # `auditee_mode` defaults to True and is not the user's to switch off.
+    # `auditee_mode` is on in the row and is not the user's to switch off.
     user.preferences = {"feature_flags": {"auditee_mode": False, "incidents": False}}
     resolved = resolve_feature_flags(user)
     assert resolved["auditee_mode"] is True  # untouched by the user layer
@@ -153,9 +150,8 @@ def test_a_malformed_preference_blob_is_ignored(flags_row, user):
 
 
 def test_a_key_the_row_is_missing_reads_false(db, user):
-    # `incidents` defaults to True in the serializer but is absent from the row,
-    # and `ff_is_enabled` answers False for it. The effective view must agree —
-    # offering a module the API refuses is the failure mode.
+    # `incidents` declares default=True but is absent from the row, so
+    # `ff_is_enabled` answers False and the effective view has to agree.
     GlobalSettings.objects.update_or_create(
         name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {"xrays": False}}
     )
@@ -175,9 +171,8 @@ def test_a_missing_or_malformed_row_disables_everything(db, user, value):
 
 
 def test_the_effective_view_never_exceeds_enforcement(flags_row, user):
-    """The invariant the whole design rests on: what the UI offers is a subset of
-    what `ff_is_enabled` permits, so a user can never be shown a module the API
-    will refuse."""
+    """The invariant the design rests on: what the UI offers is a subset of what
+    `ff_is_enabled` permits."""
     user.preferences = {"feature_flags": {"incidents": False}}
     for name, effective in resolve_feature_flags(user).items():
         if effective:
@@ -217,9 +212,8 @@ def test_effective_endpoint_separates_the_two_reasons_a_flag_is_off(client, flag
 
 
 def test_raw_retrieve_is_unchanged_by_a_users_choice(client, flags_row):
-    """The admin form reads `retrieve` and PUTs the whole body back. If a
-    personal hide leaked into it, saving any toggle would take the module away
-    from everyone."""
+    """The admin form reads `retrieve` and PUTs the whole body back, so a personal
+    hide leaking into it would take the module away from everyone."""
     client.user.preferences = {"feature_flags": {"incidents": False}}
     client.user.save(update_fields=["preferences"])
 
@@ -252,9 +246,8 @@ def test_preferences_write_unhides(client, flags_row):
 
 
 def test_preferences_write_resets_every_flag_to_the_instance(client, flags_row):
-    """ "Reset to organization settings" sends every hideable flag as visible.
-    Each `true` drops its key rather than storing one, so the user ends up with
-    nothing stored and follows the instance again."""
+    """ "Reset to organization settings" sends every hideable flag as visible, and
+    each `true` drops its key rather than storing one."""
     client.user.preferences = {
         "feature_flags": {"incidents": False, "xrays": False, "vulnerabilities": False}
     }
@@ -305,3 +298,83 @@ def test_preferences_write_leaves_other_preferences_alone(client, flags_row):
     client.user.refresh_from_db()
     assert client.user.preferences["lang"] == "fr"
     assert client.user.preferences["feature_flags"] == {"incidents": False}
+
+
+# --- adversarial ------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "hostile",
+    [
+        {"vulnerabilities": True},  # instance-disabled, user asks for it
+        {"vulnerabilities": 1},  # truthy non-bool
+        {"vulnerabilities": "true"},
+        {"vulnerabilities": [1]},
+        {"vulnerabilities": {"nested": True}},
+        {"auditee_mode": True},  # not hideable at all
+        {"inherent_risk": True},
+        {"__proto__": True},
+        {"": True},
+    ],
+)
+def test_a_hostile_preferences_blob_cannot_widen(flags_row, user, hostile):
+    """Even writing straight to the column — bypassing the endpoint's validation
+    entirely — must not turn a flag on."""
+    user.preferences = {"feature_flags": hostile}
+    resolved = resolve_feature_flags(user)
+    for name, effective in resolved.items():
+        if effective:
+            assert ff_is_enabled(name), name
+    assert resolved["vulnerabilities"] is False
+
+
+def test_a_falsy_non_bool_is_not_a_hide(flags_row, user):
+    """`0` and `""` are equal to False but are not it; only JSON `false` hides,
+    so a sloppy client cannot hide a module by accident."""
+    user.preferences = {"feature_flags": {"incidents": 0, "xrays": ""}}
+    assert get_user_hidden_feature_flags(user) == {}
+    assert resolve_feature_flags(user)["incidents"] is True
+
+
+def test_the_write_endpoint_rejects_non_bool_values(client, flags_row):
+    for value in (1, 0, "false", None, [], {}):
+        response = client.patch(
+            "/api/user-preferences/",
+            {"feature_flags": {"incidents": value}},
+            format="json",
+        )
+        assert response.status_code == 400, value
+    client.user.refresh_from_db()
+    assert not (client.user.preferences or {}).get("feature_flags")
+
+
+def test_a_user_cannot_patch_another_users_preferences(client, flags_row, user):
+    """The endpoint takes no user id — it always acts on request.user."""
+    client.patch(
+        "/api/user-preferences/",
+        {
+            "feature_flags": {"incidents": False},
+            "user": str(user.pk),
+            "id": str(user.pk),
+        },
+        format="json",
+    )
+    user.refresh_from_db()
+    assert not (user.preferences or {}).get("feature_flags")
+    client.user.refresh_from_db()
+    assert client.user.preferences["feature_flags"] == {"incidents": False}
+
+
+def test_hiding_everything_still_leaves_the_flags_resolvable(client, flags_row):
+    """The profile page is not itself flag-gated, so a user who hides every
+    module can still reach it to undo — the endpoint must keep answering."""
+    hideable = get_user_hideable_feature_flags()
+    response = client.patch(
+        "/api/user-preferences/",
+        {"feature_flags": {flag: False for flag in hideable}},
+        format="json",
+    )
+    assert response.status_code == 200
+    body = client.get("/api/settings/feature-flags/effective/").json()
+    assert sorted(body["hidden"]) == sorted(hideable)
+    assert set(body["hideable"]) == set(hideable)

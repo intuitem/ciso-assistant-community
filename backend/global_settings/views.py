@@ -95,13 +95,11 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], permission_classes=[IsAuthenticated])
     def effective(self, request, pk=None):
-        """The flags as the calling user should see them: the instance flags
-        narrowed by the user's own hide choices.
+        """The instance flags narrowed by the caller's hides.
 
-        Deliberately separate from `retrieve`, which stays the raw row: the
-        admin settings form reads that one and PUTs the whole form back, so
-        serving the narrowed view there would write an admin's personal hides
-        instance-wide on their next save.
+        Separate from `retrieve`, which stays the raw row: the admin form reads
+        that one and PUTs the whole body back, so serving the narrowed view
+        there would save an admin's personal hides instance-wide.
         """
         hideable = get_user_hideable_feature_flags()
         instance_flags = get_instance_feature_flags()
@@ -110,9 +108,8 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
                 "flags": resolve_feature_flags(request.user),
                 "hideable": sorted(hideable),
                 "hidden": sorted(get_user_hidden_feature_flags(request.user)),
-                # The un-narrowed value of each hideable flag, so the profile page
-                # can tell "you switched this off" from "your organisation did" —
-                # which `flags` alone cannot, both being false.
+                # Un-narrowed, so the UI can tell "you hid this" from "your
+                # organisation disabled it" — false in `flags` either way.
                 "instance": {
                     name: instance_flags.get(name, False) for name in hideable
                 },

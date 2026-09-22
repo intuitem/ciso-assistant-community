@@ -320,10 +320,8 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
         source="value.service_accounts", required=False, default=False
     )
 
-    # `campaigns` is the only enterprise flag that merely hides a navigation area.
-    # focus_mode and object_audit_trail change what a user sees of the data,
-    # audit_log_forwarding is an obligation, and custom_fields / idp_groups /
-    # service_accounts are configuration — none of those are a user's to switch off.
+    # The only enterprise flag that merely hides a navigation area; the rest
+    # change what the data means or are configuration.
     USER_HIDEABLE_FLAGS = CommunityFeatureFlagSerializer.USER_HIDEABLE_FLAGS | {
         "campaigns"
     }
