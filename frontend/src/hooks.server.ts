@@ -369,7 +369,11 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 						reauthenticationFlows.includes(flow.id)
 					)
 				) {
-					if (event.locals.user?.is_sso) {
+					// Resolved rather than read off locals.user, which a form action
+					// leaves unset by running before any load. getUser() memoizes,
+					// so a load that already called it costs nothing here.
+					const user = await event.locals.getUser();
+					if (user?.is_sso) {
 						// SSO users: don't log out — let the page handle the 401
 						// gracefully. Logging out forces a full IdP round-trip.
 					} else {
