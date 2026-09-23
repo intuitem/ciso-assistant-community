@@ -6546,6 +6546,8 @@
 	"quickFormClose": "Close",
 	"quickFormIncomplete": "Answer every required question on every visible page before submitting.",
 	"quickFormAnsweredProgress": "{answered} of {total} questions answered",
+	"questionGroupedView": "Grouped view",
+	"questionFlatView": "Full view",
 	"quickFormComplete": "All required questions are answered.",
 	"quickFormReopenPrompt": "Note for the respondents (optional)",
 	"quickFormReviewerObservation": "Reviewer note",

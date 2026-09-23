@@ -6259,6 +6259,8 @@
 	"quickFormClose": "Clore",
 	"quickFormIncomplete": "Répondez à toutes les questions obligatoires de chaque page visible avant de soumettre.",
 	"quickFormAnsweredProgress": "{answered} questions répondues sur {total}",
+	"questionGroupedView": "Vue par groupes",
+	"questionFlatView": "Vue complète",
 	"quickFormComplete": "Toutes les questions obligatoires sont répondues.",
 	"quickFormReopenPrompt": "Note pour les répondants (optionnel)",
 	"quickFormReviewerObservation": "Note du relecteur",
