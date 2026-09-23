@@ -320,6 +320,12 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
         source="value.service_accounts", required=False, default=False
     )
 
+    # The only enterprise flag that merely hides a navigation area; the rest
+    # change what the data means or are configuration.
+    USER_HIDEABLE_FLAGS = CommunityFeatureFlagSerializer.USER_HIDEABLE_FLAGS | {
+        "campaigns"
+    }
+
 
 class ServiceAccountWriteSerializer(CommunityServiceAccountWriteSerializer):
     """License cap: at most one *active* service account per licensed seat.
