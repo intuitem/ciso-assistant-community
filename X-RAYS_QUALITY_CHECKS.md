@@ -100,11 +100,42 @@ X-rays can be accessed via:
 
 ### Requirement Assessment Checks
 
+Every rule below is skipped when the requirement is not assessable, when it falls
+outside the audit's selected implementation groups, or when the audit hides a
+field the rule reads — an audit that hides `status` or `result` cannot be judged
+on it.
+
+Expiry is decided on the date rather than the status: `mark_expired_evidences`
+only runs under Huey, and applied controls are never marked expired at all
+(CA-1869).
+
+#### Error
+| Rule ID | Message | Description |
+|---------|---------|-------------|
+| `requirementAssessmentControlExpired` | Requirement assessment relies on an applied control past its expiry date | Compliance claimed on a control that has lapsed |
+
 #### Warning
 | Rule ID | Message | Description |
 |---------|---------|-------------|
 | `requirementAssessmentCompliantNoEvidence` | Requirement assessment is compliant but has no evidence attached | Assessable requirement marked compliant without supporting evidence |
 | `requirementAssessmentNoAppliedControl` | Requirement assessment result is compliant or partially compliant with no applied control applied | Compliance claimed without any controls applied |
+| `requirementAssessmentCompliantNoActiveControl` | Requirement assessment is compliant but none of its applied controls is active | Controls exist, but nothing is live yet |
+| `requirementAssessmentControlDeprecatedOrDegraded` | Requirement assessment relies on a deprecated or degraded applied control | Compliance rests on a control that has been retired or is only partly working |
+| `requirementAssessmentPartialNoStartedControl` | Requirement assessment is partially compliant but none of its applied controls has started | "Partially compliant" with nothing under way is non-compliance with a plan |
+| `requirementAssessmentControlEtaMissed` | Requirement assessment depends on an applied control whose ETA has passed | The remediation this requirement depends on has slipped |
+| `requirementAssessmentEvidenceExpired` | Every evidence supporting this requirement assessment has expired | Nothing current substantiates the verdict |
+| `requirementAssessmentEvidenceRejected` | Requirement assessment relies on an evidence that was rejected | A reviewer already refused this evidence |
+| `requirementAssessmentEvidenceAllDraft` | Requirement assessment is compliant but none of its evidence has left draft | Nothing supporting the verdict has been reviewed |
+| `requirementAssessmentNotApplicableNoJustification` | Requirement assessment is not applicable with no justification | An external auditor asks for this one every time |
+| `requirementAssessmentDoneNotAssessed` | Requirement assessment is marked done but has no result | Marked finished with no verdict recorded |
+
+#### Info
+| Rule ID | Message | Description |
+|---------|---------|-------------|
+| `requirementAssessmentNonCompliantActiveControls` | Requirement assessment is non-compliant while all its applied controls are active | Either the verdict or the control statuses are out of date |
+| `requirementAssessmentNonCompliantNoObservation` | Requirement assessment is non-compliant with no observation | The gap is recorded without saying what it is |
+| `requirementAssessmentPartialNoObservation` | Requirement assessment is partially compliant with no observation | What is missing is not written down |
+| `requirementAssessmentResultWithoutProgress` | Requirement assessment has a result while still marked to do | The progress status contradicts the verdict |
 
 ### Applied Control Checks (Compliance Assessments)
 
@@ -130,10 +161,19 @@ X-rays can be accessed via:
 ### Backend Implementation
 
 Quality checks are implemented in `backend/core/models.py`:
-- `RiskAssessment.quality_check()` - Line 3838
-- `ComplianceAssessment.quality_check()` - Line 5085
+- `RiskAssessment.quality_check()`
+- `ComplianceAssessment.quality_check()`
+- `RequirementAssessment.quality_check()`, also exposed as
+  `GET /requirement-assessments/{id}/quality_check/`
 
-Both methods return a dictionary with:
+The requirement rules live on `RequirementAssessment`; the audit-level check only
+decides which requirements are in scope and calls the same rules, so a finding
+cannot differ between the two surfaces. They are evaluated against a
+`RequirementAssessmentQualityContext` resolved in three queries for the whole
+audit — the rules themselves issue none, so the query count does not grow with
+the number of requirements.
+
+All three methods return a dictionary with:
 ```python
 {
     "errors": [],      # List of error issues

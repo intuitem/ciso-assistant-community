@@ -56,13 +56,31 @@ Below is the full list of checks the platform runs today — useful when you wan
 
 | Severity | Check | Triggers when |
 |---|---|---|
+| Error | Requirement relies on an applied control past its expiry date | A compliant or partially-compliant requirement is justified by a control whose expiry date has passed |
 | Info | Audit is still in progress | The audit's status is `in_progress` |
 | Info | No author assigned to this audit | No author set on the audit |
 | Info | Applied control has no reference control selected | An applied control linked to the audit isn't templated from a reference control |
+| Info | Requirement is non-compliant while all its applied controls are active | Either the verdict or the control statuses are out of date |
+| Info | Requirement is non-compliant with no observation | A non-compliant requirement records no observation |
+| Info | Requirement is partially compliant with no observation | A partially-compliant requirement records no observation |
+| Info | Requirement has a result while still marked to do | A result is recorded but the progress status is still `to_do` |
 | Warning | Requirement is marked compliant but has no evidence attached (direct or indirect) | A compliant requirement assessment can't point to any evidence — directly or through its applied controls |
 | Warning | Requirement is marked compliant or partially compliant with no applied control | A compliant / partially-compliant requirement assessment has zero applied controls |
+| Warning | Requirement is compliant but none of its applied controls is active | The requirement has controls, but not one of them has reached `active` |
+| Warning | Requirement relies on a deprecated or degraded applied control | A compliant or partially-compliant requirement is justified by a control that is `deprecated` or `degraded` |
+| Warning | Requirement is partially compliant but none of its applied controls has started | Every linked control is still `to_do` or undefined |
+| Warning | Requirement depends on an applied control whose ETA has passed | A linked control has an ETA in the past and isn't `active` yet |
+| Warning | Every evidence supporting the requirement has expired | All evidence reachable from the requirement is past its expiry date or marked expired |
+| Warning | Requirement relies on an evidence that was rejected | Evidence reachable from a compliant or partially-compliant requirement is marked `rejected` |
+| Warning | Requirement is compliant but none of its evidence has left draft | Every evidence reachable from a compliant requirement is still `draft` |
+| Warning | Requirement is not applicable with no justification | A requirement marked not applicable records no observation explaining why |
+| Warning | Requirement is marked done but has no result | The progress status is `done` while the result is still `not_assessed` |
 | Warning | Applied control is active but has no evidence attached | An applied control linked to the audit is `active` but has no evidence attached |
 | Warning | Evidence has no file uploaded | An evidence object has no attachment and no external link on any revision |
+
+{% hint style="info" %}
+Requirement checks are skipped when the requirement isn't assessable, when it falls outside the audit's selected implementation groups, or when the audit hides a field the check reads — an audit that hides **Status** or **Result** isn't judged on it.
+{% endhint %}
 
 ### On risk assessments
 
