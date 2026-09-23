@@ -1522,6 +1522,7 @@
 	"mission": "Mission",
 	"ownedFolders": "Owned domains",
 	"thirdParty": "Third party",
+	"thirdPartyAudit": "Third-party audit",
 	"thirdPartyCategory": "Third parties",
 	"thirdPartyDescription": "Management of third-party entities and their representatives, contracts, solutions and assessments.",
 	"thirdPartiesImportHelpText": "Import entities, representatives, solutions, entity assessments and contracts of your third parties from the multi-sheet excel template",
