@@ -1,6 +1,7 @@
 // Incident report — English.
 // Payload: `core.generators.incident_context` via sys.inputs.data.
 
+#import "_markdown.typ": md
 #let d = json(bytes(sys.inputs.data))
 #let inc = d.incident
 
@@ -118,12 +119,12 @@
 
 #if inc.description != "" [
   = Description
-  #inc.description
+  #md(inc.description)
 ]
 
 #if inc.resolution != "" [
   = Resolution
-  #inc.resolution
+  #md(inc.resolution)
 ]
 
 #let scope = (
@@ -183,7 +184,7 @@
     ]
     #if entry.observation != "" [
       #v(3pt)
-      #entry.observation
+      #md(entry.observation)
     ]
     #if entry.evidences.len() > 0 [
       #v(3pt)

@@ -4,7 +4,12 @@ import pymupdf
 import pytest
 
 from core.generators import risk_assessment_context
-from core.typst_render import TEMPLATE_DIR, localized_template, render_pdf
+from core.typst_render import (
+    SHARED_MODULES,
+    TEMPLATE_DIR,
+    localized_template,
+    render_pdf,
+)
 
 
 class FakeMatrix:
@@ -394,6 +399,8 @@ def test_each_template_declares_its_own_language():
     import re
 
     for template in sorted(TEMPLATE_DIR.glob("*.typ")):
+        if template.name in SHARED_MODULES:
+            continue
         expected = template.stem.rsplit("_", 1)[1]
         match = re.search(r'#set text\([^)]*lang: "(\w+)"\)', template.read_text())
         assert match, f"{template.name} sets no language"

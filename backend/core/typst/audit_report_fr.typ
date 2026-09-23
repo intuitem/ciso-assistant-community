@@ -1,6 +1,7 @@
 // Rapport d'audit — français.
 // Payload: `core.generators.audit_context_for_typst` via sys.inputs.data.
 
+#import "_markdown.typ": md
 #let d = json(bytes(sys.inputs.data))
 #let field(record, key, fallback: "-") = record.at(key, default: fallback)
 #let shown(key) = key not in d.hidden_fields
@@ -64,7 +65,7 @@
       #block(width: 75%)[
         #set text(9.5pt, fill: muted)
         #set par(justify: false)
-        #align(center)[#d.audit.framework.description]
+        #align(center)[#md(d.audit.framework.description)]
       ]
     ]
     #v(2em)
@@ -162,7 +163,7 @@
   )
 #if d.audit.description != "-" [
   == Périmètre
-  #d.audit.description
+  #md(d.audit.description)
 ]
 
 #let drifts = field(d, "drifts_per_domain", fallback: ())
@@ -271,7 +272,7 @@
 
     #if field(ra, "description") != "-" [
       #v(2pt)
-      #text(fill: muted)[#ra.description]
+      #text(fill: muted)[#md(ra.description)]
     ]
     #let answers = ra.at("answers", default: ())
     #if answers.len() > 0 [
@@ -284,7 +285,7 @@
     ]
     #if field(ra, "observation") != "-" [
       #v(2pt)
-      *"Observation":* #ra.observation
+      *"Observation":* #md(ra.observation)
     ]
     #let ra-tasks = ra.at("task_templates", default: ())
     #if ra-tasks.len() > 0 [

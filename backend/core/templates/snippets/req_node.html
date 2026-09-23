@@ -31,8 +31,8 @@
         </div>
       </div>
       {% if node.assessments.requirement.description %}
-        <div class="text-left w-full">
-          {{ node.assessments.requirement.get_description_translated }}
+        <div class="text-left w-full markdown">
+          {{ node.assessments.requirement.get_description_translated|markdown }}
         </div>
       {% endif %}
 
@@ -61,7 +61,7 @@
       {% if node.assessments.observation %}
           <div class="text-left w-full">
             <p class="font-semibold">{% trans "Observation:" %}</p>
-            <p>{{ node.assessments.observation|linebreaksbr }}</p>
+            <div class="markdown">{{ node.assessments.observation|markdown }}</div>
           </div>
       {% endif %}
     </div>

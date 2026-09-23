@@ -1,6 +1,7 @@
 // Action plan — English.
 // Payload: `core.generators.action_plan_context` via sys.inputs.data.
 
+#import "_markdown.typ": md
 #let d = json(bytes(sys.inputs.data))
 #let field(record, key, fallback: "-") = record.at(key, default: fallback)
 
@@ -108,7 +109,7 @@
       .controls
       .map(c => (
         [#c.name],
-        [#text(8pt)[#c.description]],
+        [#text(8pt)[#md(c.description)]],
         [#category-label.at(c.category_key, default: "-")],
         [#c.owner],
         [#c.eta],

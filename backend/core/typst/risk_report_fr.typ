@@ -1,6 +1,7 @@
 // Rapport d'analyse de risque — français.
 // Payload: `core.generators.risk_assessment_context` via sys.inputs.data.
 
+#import "_markdown.typ": md
 #let d = json(bytes(sys.inputs.data))
 #let ra = d.assessment
 
@@ -79,7 +80,7 @@
     #text(14pt, fill: muted)[Analyse de risque — #ra.version]
     #if ra.description != "" [
       #v(0.6em)
-      #block(width: 75%)[#text(9.5pt, fill: muted)[#ra.description]]
+      #block(width: 75%)[#text(9.5pt, fill: muted)[#md(ra.description)]]
     ]
     #v(2em)
     #block(width: 75%)[
@@ -173,7 +174,7 @@
     // Jumps to the matching block under "Risk scenarios".
     [#text(8pt)[#link(label("scn-" + str(index)))[#scenario.ref_id]]],
     [#text(8pt)[#scenario.name]],
-    [#text(8pt)[#scenario.description]],
+    [#text(8pt)[#md(scenario.description)]],
   ) + (if with-inherent { (level-badge(scenario.inherent),) } else { () }) + (
     level-badge(scenario.current),
     level-badge(scenario.residual),
@@ -207,7 +208,7 @@
       column-gutter: 6pt,
       row-gutter: 3pt,
       ..(
-        if scenario.description != "" { row("Description", [#scenario.description]) } else { () }
+        if scenario.description != "" { row("Description", [#md(scenario.description)]) } else { () }
           + if scenario.qualifications.len() > 0 { row(qualification-label, [#scenario.qualifications.join(", ")]) } else { () }
           + if scenario.assets.len() > 0 { row("Actifs", [#scenario.assets.join(", ")]) } else { () }
           + if scenario.threats.len() > 0 { row("Menaces", [#scenario.threats.join(", ")]) } else { () }
@@ -218,7 +219,7 @@
           + row("Niveau résiduel", level-badge(scenario.residual))
           + row("Force de la connaissance", [#scenario.strength_of_knowledge])
           + row("Traitement", [#treatment-label.at(scenario.treatment_key, default: scenario.treatment_key)])
-          + if scenario.justification != "" { row("Justification", [#scenario.justification]) } else { () }
+          + if scenario.justification != "" { row("Justification", [#md(scenario.justification)]) } else { () }
       ),
     )
   ]

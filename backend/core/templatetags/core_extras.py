@@ -6,6 +6,7 @@ from django.conf import settings
 from core.utils import COUNTRY_FLAGS, LANGUAGES
 from core.models import RequirementAssessment
 from core.helpers import color_css_class
+from core.markdown_render import markdown_html
 
 register = template.Library()
 
@@ -34,6 +35,11 @@ def get_requirements(applied_control, compliance_assessment):
 @register.filter("class")
 def _class(obj):
     return obj.__class__.__name__ if obj else ""
+
+
+@register.filter
+def markdown(value):
+    return mark_safe(markdown_html(value))
 
 
 @register.filter

@@ -198,3 +198,18 @@ class TestAuditArchiveExport:
 
         with _archive(admin_client, audit) as archive:
             assert archive.namelist() == ["index.html"]
+
+    def test_observation_is_rendered_as_markdown(self, admin_client, audit):
+        ra = RequirementAssessment.objects.filter(
+            compliance_assessment=audit, requirement__assessable=True
+        ).first()
+        ra.observation = "**Gap** found\n\n- item\n\n<script>alert(1)</script>"
+        ra.save()
+
+        with _archive(admin_client, audit) as archive:
+            index = archive.read("index.html").decode("utf-8")
+
+        assert "<strong>Gap</strong>" in index
+        assert "<li>item</li>" in index
+        assert "<script>alert(1)</script>" not in index
+        assert "&lt;script&gt;" in index

@@ -1,6 +1,7 @@
 // Rapport de constats — français.
 // Payload: `core.generators.findings_assessment_context` via sys.inputs.data.
 
+#import "_markdown.typ": md
 #let d = json(bytes(sys.inputs.data))
 #let field(record, key, fallback: "-") = record.at(key, default: fallback)
 
@@ -89,7 +90,7 @@
     #text(14pt, fill: muted)[Rapport de constats — #category-label.at(d.assessment.category_key, default: d.assessment.category_key)]
     #if d.assessment.description != "" [
       #v(0.6em)
-      #block(width: 75%)[#text(9.5pt, fill: muted)[#d.assessment.description]]
+      #block(width: 75%)[#text(9.5pt, fill: muted)[#md(d.assessment.description)]]
     ]
     #v(2em)
     #block(width: 75%)[
@@ -174,7 +175,7 @@
 #if d.assessment.observation != "" [
   #v(0.8em)
   == Observation
-  #d.assessment.observation
+  #md(d.assessment.observation)
 ]
 
 // ------------------------------------------------------------------ findings
@@ -220,11 +221,11 @@
       )
       #if finding.description != "" [
         #v(3pt)
-        #text(fill: muted)[#finding.description]
+        #text(fill: muted)[#md(finding.description)]
       ]
       #if finding.observation != "" [
         #v(2pt)
-        *Observation :* #finding.observation
+        *Observation :* #md(finding.observation)
       ]
       #if finding.controls.len() > 0 [
         #v(2pt)

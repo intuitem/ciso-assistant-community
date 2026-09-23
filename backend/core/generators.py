@@ -10,6 +10,7 @@ from docx.shared import Cm
 from docxtpl import InlineImage
 from library.helpers import get_referential_translation
 
+from .markdown_render import markdown_tree
 from .utils import is_field_visible_to
 
 from .models import (
@@ -412,7 +413,7 @@ def action_plan_context(assessment, controls, lang="en", linked=None):
         buckets.setdefault(control.status or "--", []).append(
             {
                 "name": control.name or "-",
-                "description": control.description or "-",
+                "description": markdown_tree(control.description or "-"),
                 "category_key": control.category or "",
                 "owner": ", ".join(str(actor) for actor in control.owner.all()) or "-",
                 "eta": _date_str(control.eta),
@@ -487,8 +488,8 @@ def findings_assessment_context(assessment, findings, lang="en"):
                 "name": finding.name or "-",
                 "severity_key": _SEVERITY_KEYS.get(finding.severity, "undefined"),
                 "status_key": finding.status or "--",
-                "description": finding.description or "",
-                "observation": getattr(finding, "observation", "") or "",
+                "description": markdown_tree(finding.description or ""),
+                "observation": markdown_tree(getattr(finding, "observation", "") or ""),
                 "owners": ", ".join(str(a) for a in finding.owner.all()) or "-",
                 "eta": _date_str(finding.eta),
                 "due_date": _date_str(finding.due_date),
@@ -520,11 +521,11 @@ def findings_assessment_context(assessment, findings, lang="en"):
         "assessment": {
             "name": assessment.name or "-",
             "ref_id": assessment.ref_id or "-",
-            "description": assessment.description or "",
+            "description": markdown_tree(assessment.description or ""),
             "category_key": assessment.category or "--",
             "status_key": assessment.status or "",
             "folder": str(assessment.folder) if assessment.folder else "-",
-            "observation": getattr(assessment, "observation", "") or "",
+            "observation": markdown_tree(getattr(assessment, "observation", "") or ""),
             "authors": ", ".join(str(a) for a in assessment.authors.all()) or "-",
             "reviewers": ", ".join(str(r) for r in assessment.reviewers.all()) or "-",
         },
@@ -567,7 +568,7 @@ def incident_context(incident, timeline_entries, lang="en"):
                 "type_key": entry.entry_type or "observation",
                 "timestamp": _timestamp_str(entry.timestamp),
                 "author": str(entry.author) if entry.author else "",
-                "observation": entry.observation or "",
+                "observation": markdown_tree(entry.observation or ""),
                 "evidences": [e.name for e in entry.evidences.all()],
             }
         )
@@ -584,8 +585,8 @@ def incident_context(incident, timeline_entries, lang="en"):
             "status_key": incident.status or "",
             "detection_key": incident.detection or "",
             "folder": str(incident.folder) if incident.folder else "-",
-            "description": incident.description or "",
-            "resolution": getattr(incident, "resolution", "") or "",
+            "description": markdown_tree(incident.description or ""),
+            "resolution": markdown_tree(getattr(incident, "resolution", "") or ""),
             "is_bcp_activated": bool(incident.is_bcp_activated),
             "owners": ", ".join(str(o) for o in incident.owners.all()) or "-",
             "qualifications": [q.name for q in incident.qualifications.all()],
@@ -691,7 +692,7 @@ def risk_assessment_context(
         row = {
             "ref_id": scenario.ref_id or "-",
             "name": scenario.name or "-",
-            "description": getattr(scenario, "description", "") or "",
+            "description": markdown_tree(getattr(scenario, "description", "") or ""),
             "qualifications": [
                 str(q) for q in getattr(scenario, "qualifications", _EMPTY).all()
             ],
@@ -702,7 +703,7 @@ def risk_assessment_context(
             ],
             "controls": [c.name for c in scenario.applied_controls.all()],
             "treatment_key": scenario.treatment or "",
-            "justification": scenario.justification or "",
+            "justification": markdown_tree(scenario.justification or ""),
             "strength_of_knowledge": str(scenario.strength_of_knowledge or "-"),
             "current": _risk_level(scenario.get_current_risk()),
             "residual": _risk_level(scenario.get_residual_risk()),
@@ -719,7 +720,7 @@ def risk_assessment_context(
             "folder": str(assessment.folder) if assessment.folder else "-",
             "matrix": str(matrix),
             "status_key": assessment.status or "",
-            "description": assessment.description or "",
+            "description": markdown_tree(assessment.description or ""),
             "authors": ", ".join(str(a) for a in assessment.authors.all()) or "-",
             "reviewers": ", ".join(str(r) for r in assessment.reviewers.all()) or "-",
             "eta": _date_str(assessment.eta),
@@ -1433,6 +1434,28 @@ def audit_context_for_typst(
             for ra in payload.get("requirement_assessments", [])
         ]
     payload["hidden_fields"] = sorted(hidden)
+
+    # Here rather than in `gen_audit_context`, which also feeds the Word report.
+    audit_data = payload["audit"]
+    payload["audit"] = {
+        **audit_data,
+        "description": markdown_tree(audit_data["description"]),
+        "framework": {
+            **audit_data["framework"],
+            "description": markdown_tree(audit_data["framework"]["description"]),
+        },
+    }
+    payload["requirement_assessments"] = [
+        {
+            **ra,
+            **{
+                key: markdown_tree(ra[key])
+                for key in ("description", "observation")
+                if key in ra
+            },
+        }
+        for ra in payload.get("requirement_assessments", [])
+    ]
 
     images = {}
     for key in AUDIT_CHART_KEYS:

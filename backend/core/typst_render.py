@@ -15,6 +15,8 @@ import typst
 
 TEMPLATE_DIR = Path(__file__).resolve().parent / "typst"
 DEFAULT_LOCALE = "en"
+# Copied next to every template so it can `#import` them.
+SHARED_MODULES = ("_markdown.typ",)
 
 
 def localized_template(stem: str, lang: str) -> str:
@@ -52,6 +54,9 @@ def render_pdf(
         for name, payload in (images or {}).items():
             target = root_path / Path(name).name
             target.write_bytes(payload)
+
+        for name in SHARED_MODULES:
+            (root_path / name).write_bytes((TEMPLATE_DIR / name).read_bytes())
 
         packages = root_path / "packages"
         packages.mkdir()
