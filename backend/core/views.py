@@ -12204,29 +12204,45 @@ def _preview_suggestions_for_compliance_assessment(
     return list(best.values())
 
 
+class ComplianceAssessmentFilterSet(GenericFilterSet):
+    is_tprm = df.BooleanFilter(method="filter_is_tprm", label="Third-party audit")
+
+    class Meta:
+        model = ComplianceAssessment
+        fields = [
+            "name",
+            "ref_id",
+            "folder",
+            "framework",
+            "perimeter",
+            "campaign",
+            "status",
+            "ebios_rm_studies",
+            "assets",
+            "evidences",
+            "authors",
+            "reviewers",
+            "genericcollection",
+            "due_date",
+            "eta",
+        ]
+
+    def filter_is_tprm(self, queryset, name, value):
+        if value is None:
+            return queryset
+        if value:
+            return queryset.filter(entityassessment__isnull=False).distinct()
+        return queryset.exclude(entityassessment__isnull=False)
+
+
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
     """
 
     model = ComplianceAssessment
-    filterset_fields = [
-        "name",
-        "ref_id",
-        "folder",
-        "framework",
-        "perimeter",
-        "campaign",
-        "status",
-        "ebios_rm_studies",
-        "assets",
-        "evidences",
-        "authors",
-        "reviewers",
-        "genericcollection",
-        "due_date",
-        "eta",
-    ]
+    filterset_class = ComplianceAssessmentFilterSet
+    filterset_fields = ComplianceAssessmentFilterSet.Meta.fields
     search_fields = ["name", "description", "ref_id", "framework__name"]
     ordering_remap = {"authors": "authors_label"}
     ordering_nulls_last = ("authors_label",)
