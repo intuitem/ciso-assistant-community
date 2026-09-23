@@ -413,7 +413,8 @@ DATA_WIZARD_COMMANDS = [
             "Creates a new assessment and updates matching requirement results.\n"
             "\nRequired columns: ref_id or urn, assessable (must be truthy)\n\n"
             "Optional columns: compliance_result, requirement_progress, observations, "
-            "score, implementation_score, documentation_score, answers\n"
+            "score, implementation_score, documentation_score, answers, "
+            "applied_controls (ref_id or name, created in the audit's domain if missing)\n"
             "\nNote: always creates a new assessment; conflict management is not applicable."
         ),
         "requires_folder": False,

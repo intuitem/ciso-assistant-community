@@ -19,7 +19,7 @@ import tempfile
 from datetime import date, datetime, timedelta, timezone
 from types import MappingProxyType
 from collections.abc import Sequence
-from typing import Dict, Any, List, Tuple, Final
+from typing import Dict, Any, List, Tuple, Final, Optional
 import time
 from django.db.models import (
     F,
@@ -88,6 +88,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
+from django.core.files.uploadedfile import UploadedFile
 
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from core.constants import LEGACY_TTP_LIBRARIES
@@ -125,7 +126,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models, transaction
 from django.forms import IntegerField as FormIntegerField
 from django.forms import ValidationError
-from django.http import FileResponse, HttpResponse, StreamingHttpResponse
+from django.http import FileResponse, HttpResponse, StreamingHttpResponse, HttpRequest
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
@@ -8433,6 +8434,45 @@ class UserViewSet(BaseModelViewSet):
     def language(self, request):
         return Response(dict(settings.LANGUAGES))
 
+    @action(detail=True, name="Teams the user belongs to")
+    def teams(self, request, pk=None):
+        """Membership is three separate relations, and which one matched is the useful
+        part -- it is why the user is addressed when the team is.
+
+        Its own action rather than a field on UserReadSerializer: that serializer feeds
+        the users list, where three relation lookups per row would be an N+1.
+        """
+        user = self.get_object()
+        led = set(Team.objects.filter(leader=user).values_list("id", flat=True))
+        deputy = set(user.deputy_teams.values_list("id", flat=True))
+        member = set(user.teams.values_list("id", flat=True))
+
+        # `view_user` is not `view_team`: retrieving the user must not disclose teams
+        # in domains the requester cannot browse. Same masking `retrieve` applies to
+        # the `user_groups` beside this on the profile page.
+        viewable = set(RoleAssignment.get_viewable_object_ids(request.user, Team))
+
+        rows = []
+        for team in Team.objects.filter(
+            id__in=(led | deputy | member) & viewable
+        ).select_related("folder"):
+            rows.append(
+                {
+                    "id": str(team.id),
+                    "str": str(team),
+                    "role": "leader"
+                    if team.id in led
+                    else "deputy"
+                    if team.id in deputy
+                    else "member",
+                    "folder": {"id": str(team.folder_id), "str": str(team.folder)}
+                    if team.folder_id
+                    else None,
+                    "team_email": team.team_email or None,
+                }
+            )
+        return Response(sorted(rows, key=lambda r: r["str"].lower()))
+
     def get_queryset(self):
         # Use base IAM filtering
         # but ensure current user is always included
@@ -10852,6 +10892,7 @@ class EvidenceViewSet(BaseModelViewSet):
                 "requirement_assessments",
                 "security_exceptions",
                 "contracts",
+                "task_templates",
                 "filtering_labels",
                 actor_prefetch("owner"),
             )
@@ -10911,7 +10952,7 @@ class EvidenceViewSet(BaseModelViewSet):
         url_path="batch-upload",
         parser_classes=[MultiPartParser, FormParser],
     )
-    def batch_upload(self, request):
+    def batch_upload(self, request: HttpRequest):
         """
         Bulk-upload evidences from a multipart payload.
 
@@ -11007,6 +11048,9 @@ class EvidenceViewSet(BaseModelViewSet):
             field = entry.get("field")
             name = (entry.get("name") or field or "").strip()
             rel_path = entry.get("rel_path") or None
+            if not isinstance(rel_path, str):
+                rel_path = None
+
             result = {"field": field, "name": name, "rel_path": rel_path}
 
             upload = request.FILES.get(field) if field else None
@@ -11145,7 +11189,15 @@ class EvidenceViewSet(BaseModelViewSet):
         result["revision_id"] = str(revision.id) if revision else None
         result["version"] = revision.version if revision else 1
 
-    def _batch_add_revision(self, result, summary, evidence, upload, rel_path, request):
+    def _batch_add_revision(
+        self,
+        result: dict,
+        summary: dict,
+        evidence: Evidence,
+        upload: UploadedFile,
+        rel_path: Optional[str],
+        request: HttpRequest,
+    ):
         """Create a new EvidenceRevision against an existing Evidence (auto-bumps version)."""
         rev_serializer = EvidenceRevisionWriteSerializer(
             data={
@@ -11173,13 +11225,20 @@ class EvidenceViewSet(BaseModelViewSet):
         result["version"] = revision.version
         summary["revision_added"] += 1
 
-    def _batch_replace_revision(self, result, summary, evidence, upload, rel_path):
+    def _batch_replace_revision(
+        self,
+        result: dict,
+        summary: dict,
+        evidence: Evidence,
+        upload: UploadedFile,
+        rel_path: Optional[str],
+    ):
         """Overwrite the last revision's attachment in place — preserves Evidence id and M2M links."""
         revision = evidence.last_revision
         if revision is None:
             revision = EvidenceRevision(evidence=evidence)
-        old_attachment = revision.attachment
-        revision.attachment = upload
+        superseded_name = revision.set_new_attachment(upload)
+
         if rel_path:
             revision.observation = f"path: {rel_path}"
         try:
@@ -11197,9 +11256,10 @@ class EvidenceViewSet(BaseModelViewSet):
             result["error"] = " ".join(messages)
             summary["errors"] += 1
             return
+
         revision.save()
-        if old_attachment:
-            old_attachment.delete(save=False)
+        if superseded_name and superseded_name != revision.attachment.name:
+            revision.attachment.storage.delete(superseded_name)
         result["outcome"] = "replaced"
         result["evidence_id"] = str(evidence.id)
         result["revision_id"] = str(revision.id)
@@ -11207,7 +11267,7 @@ class EvidenceViewSet(BaseModelViewSet):
         summary["replaced"] += 1
 
     @staticmethod
-    def _batch_find_unique_name(name, folder):
+    def _batch_find_unique_name(name: str, folder: Folder) -> str:
         """Append ' (1)', ' (2)' ... before the extension until the name is free in folder."""
         if "." in name:
             base, _, ext = name.rpartition(".")
@@ -11288,19 +11348,22 @@ class UploadAttachmentView(APIView):
         revision = None
         evidence = None
 
-        # RBAC: scope to objects the user has change permission on (upload is a write)
-        accessible_evidence_ids = RoleAssignment.get_changeable_object_ids(
-            request.user, Evidence
-        )
-
         try:
-            revision = EvidenceRevision.objects.get(
-                pk=pk, evidence__id__in=accessible_evidence_ids
-            )
+            if not RoleAssignment.is_object_accessible(
+                request.user, "change", EvidenceRevision, pk
+            ):
+                raise EvidenceRevision.DoesNotExist
+
+            revision = EvidenceRevision.objects.get(pk=pk)
             evidence = revision.evidence
         except EvidenceRevision.DoesNotExist:
             try:
-                evidence = Evidence.objects.get(pk=pk, id__in=accessible_evidence_ids)
+                if not RoleAssignment.is_object_accessible(
+                    request.user, "change", Evidence, pk
+                ):
+                    raise Evidence.DoesNotExist
+
+                evidence = Evidence.objects.get(pk=pk)
             except Evidence.DoesNotExist:
                 return Response(
                     {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND
@@ -11313,28 +11376,30 @@ class UploadAttachmentView(APIView):
 
         attachment = request.FILES.get("file")
         if attachment and attachment.name != "undefined":
-            if not revision.attachment or revision.attachment != attachment:
-                old_attachment = revision.attachment
-                revision.attachment = attachment
-                try:
-                    revision.full_clean()
-                except ValidationError as e:
-                    revision.attachment = old_attachment
-                    messages = []
-                    if hasattr(e, "message_dict"):
-                        for field_messages in e.message_dict.values():
-                            messages.extend(field_messages)
-                    elif hasattr(e, "messages"):
-                        messages = e.messages
-                    else:
-                        messages = [str(e.message)]
-                    return Response(
-                        {"detail": " ".join(messages)},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                if old_attachment:
-                    old_attachment.delete()
-                revision.save()
+            old_attachment = revision.attachment
+            old_original_filename = revision.original_filename
+            superseded_name = revision.set_new_attachment(attachment)
+
+            try:
+                revision.full_clean()
+            except ValidationError as e:
+                revision.attachment = old_attachment
+                revision.original_filename = old_original_filename
+                messages = []
+                if hasattr(e, "message_dict"):
+                    for field_messages in e.message_dict.values():
+                        messages.extend(field_messages)
+                elif hasattr(e, "messages"):
+                    messages = e.messages
+                else:
+                    messages = [str(e.message)]
+                return Response(
+                    {"detail": " ".join(messages)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            revision.save()
+            if superseded_name and superseded_name != revision.attachment.name:
+                revision.attachment.storage.delete(superseded_name)
 
         return Response(status=status.HTTP_200_OK)
 
@@ -12132,29 +12197,45 @@ def _preview_suggestions_for_compliance_assessment(
     return list(best.values())
 
 
+class ComplianceAssessmentFilterSet(GenericFilterSet):
+    is_tprm = df.BooleanFilter(method="filter_is_tprm", label="Third-party audit")
+
+    class Meta:
+        model = ComplianceAssessment
+        fields = [
+            "name",
+            "ref_id",
+            "folder",
+            "framework",
+            "perimeter",
+            "campaign",
+            "status",
+            "ebios_rm_studies",
+            "assets",
+            "evidences",
+            "authors",
+            "reviewers",
+            "genericcollection",
+            "due_date",
+            "eta",
+        ]
+
+    def filter_is_tprm(self, queryset, name, value):
+        if value is None:
+            return queryset
+        if value:
+            return queryset.filter(entityassessment__isnull=False).distinct()
+        return queryset.exclude(entityassessment__isnull=False)
+
+
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
     """
 
     model = ComplianceAssessment
-    filterset_fields = [
-        "name",
-        "ref_id",
-        "folder",
-        "framework",
-        "perimeter",
-        "campaign",
-        "status",
-        "ebios_rm_studies",
-        "assets",
-        "evidences",
-        "authors",
-        "reviewers",
-        "genericcollection",
-        "due_date",
-        "eta",
-    ]
+    filterset_class = ComplianceAssessmentFilterSet
+    filterset_fields = ComplianceAssessmentFilterSet.Meta.fields
     search_fields = ["name", "description", "ref_id", "framework__name"]
     ordering_remap = {"authors": "authors_label"}
     ordering_nulls_last = ("authors_label",)
@@ -12537,6 +12618,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "requirement_progress",
                 "score",
                 "observations",
+                "applied_controls",
                 "answers",
             ]
             writer.writerow(columns)
@@ -12566,9 +12648,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         req.status,
                         req.score,
                         req.observation,
+                        ",".join(c.name for c in req.applied_controls.all()),
                     ]
                 else:
-                    row += ["", "", "", "", ""]
+                    row += ["", "", "", "", "", ""]
                 row.append(
                     render_answers_cell(
                         req_node.get_questions_translated,
@@ -12636,6 +12719,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "extended_result": req.extended_result,
                 "requirement_progress": req.status,
                 "observations": escape_excel_formula(req.observation),
+                "applied_controls": ", ".join(
+                    escape_excel_formula(c.name) for c in req.applied_controls.all()
+                ),
             }
             if show_documentation_score:
                 entry["implementation_score"] = req.score
@@ -15736,6 +15822,15 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     # Raising a finding is an edit of the requirement assessment, not an "add" of one:
     # nobody has add_requirementassessment, they are created with the audit.
     permission_overrides = {"findings_binder": "change_requirementassessment"}
+
+    @action(detail=True, methods=["get"], url_path="quality_check")
+    def quality_check_detail(self, request, pk):
+        """Quality findings for a single requirement assessment.
+
+        The audit-level check at /compliance-assessments/{id}/quality_check runs
+        the very same rules over every requirement in scope.
+        """
+        return Response(self.get_object().quality_check())
 
     @action(detail=True, methods=["post"], url_path="findings-binder")
     def findings_binder(self, request, pk=None):
@@ -19576,7 +19671,13 @@ class ObjectClassificationViewSet(BaseModelViewSet):
 
 class ClassificationLevelViewSet(BaseModelViewSet):
     model = ClassificationLevel
-    filterset_fields = ["object_classification", "folder", "is_visible", "builtin"]
+    filterset_fields = [
+        "object_classification",
+        "object_classification__is_visible",
+        "folder",
+        "is_visible",
+        "builtin",
+    ]
     search_fields = ["name", "description", "abbreviation"]
     ordering = ["object_classification", "rank"]
 

@@ -115,7 +115,15 @@ const HREF_URL_MODEL: Record<string, string> = {
 	'/documents': 'document-containers'
 };
 
-const destinations = [...sidebarDestinations, ...EXTRA_DESTINATIONS];
+const sidebarHrefs = new Set(sidebarDestinations.map((destination) => destination.href));
+
+// `SideBar/navData.ts` is shadowed by the Enterprise overlay, so a page listed above may well
+// have a sidebar entry there. The sidebar entry wins: it carries that edition's own rules, and
+// two destinations sharing an href would collide on the palette's keyed `{#each}`.
+const destinations = [
+	...sidebarDestinations,
+	...EXTRA_DESTINATIONS.filter((destination) => !sidebarHrefs.has(destination.href))
+];
 
 /** Two axes: feature flags, and the user's permissions. Both must allow it. */
 function isVisible(

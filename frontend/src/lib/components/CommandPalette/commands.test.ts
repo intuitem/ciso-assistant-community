@@ -225,6 +225,13 @@ describe('buildNavigationCommands', () => {
 		expect(commands.every((command) => command.href?.startsWith('/'))).toBe(true);
 	});
 
+	// `SideBar/navData.ts` is shadowed by the Enterprise overlay, so this assertion runs again
+	// there against a different sidebar. A duplicate href crashes the palette's keyed `{#each}`.
+	it('offers each destination exactly once', () => {
+		const hrefs = buildNavigationCommands(superuser, allFlags).map((command) => command.href);
+		expect(new Set(hrefs).size).toBe(hrefs.length);
+	});
+
 	it('includes destinations that have no sidebar entry', () => {
 		const hrefs = buildNavigationCommands(superuser, allFlags).map((command) => command.href);
 		expect(hrefs).toContain('/my-profile');

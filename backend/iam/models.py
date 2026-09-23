@@ -1568,7 +1568,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         model: type[models.Model],
         id: uuid.UUID,
     ) -> bool:
-        """Return `True` if the `user` has the (`perm_prefix`, `model`) permission on the specific object identified by `id`."""
+        """
+        Return `True` if the `user` has the (`perm_prefix`, `model`) permission on the specific object identified by `id`.
+
+        Return `False` otherwise.
+        """
         from core.models import Actor
 
         if not isinstance(user, User):

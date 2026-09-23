@@ -13,6 +13,8 @@ How to create an audit
 3. You can edit it if needed, or go directly into the assessment. Each **requirement** has a <mark style="color:purple;">To do</mark> status by default.
 4. Finally, we can select a requirement and start its assessment by adding applied controls or evidences and update its status to complete the progress bars.
 
+<figure><img src="../.gitbook/assets/audits-list.png" alt=""><figcaption><p>The new audit in the audit list</p></figcaption></figure>
+
 {% hint style="success" %}
 Now that you're familiar with audit, let's go a step further with risk assessment.
 {% endhint %}

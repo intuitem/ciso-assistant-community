@@ -218,10 +218,14 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
   * numbers: only `0` (false) and `1` (true) are accepted; any other number is rejected.
   * Only meaningful on requirements that carry questions: it decides whether the imported score is pinned or recomputed from the answers. Leave the cell blank (or the column out entirely) and any imported score on a question-driven requirement is pinned automatically.
 * observations
+* applied\_controls\
+  Pipe-, newline-, semicolon- or comma-separated control names or ref\_ids, looked up in the audit's domain (ref\_id first, then name). Missing controls are auto-created there with the status `to_do`, provided you may add controls — otherwise the name is reported as a warning on the row. `controls` is accepted as an alias.
 
 ### Special considerations
 
 * The wizard will attempt to match based on the ref\_id and fallback to the urn otherwise. If none could be used, the row will be skipped.
+* A filled `applied_controls` cell replaces the controls linked to the requirement; a blank cell leaves them untouched. Controls from other domains are not matched, so a name that only exists elsewhere creates a new control in the audit's domain.
+* The audit's Excel export includes the `applied_controls` column, so it can be re-imported as is.
 * name and description columns are not used but serve as an anchor point for reference.
 * Assessable will fallback to false
 * Unassessable rows are skipped.
