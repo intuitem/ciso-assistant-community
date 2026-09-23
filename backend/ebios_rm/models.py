@@ -1048,6 +1048,13 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         related_name="operational_scenarios",
         help_text=_("Threats leveraged by the operational scenario"),
     )
+    techniques = models.ManyToManyField(
+        "sec_intel.Technique",
+        verbose_name=_("Techniques"),
+        blank=True,
+        related_name="operational_scenarios",
+        help_text=_("Adversary techniques leveraged by the operational scenario"),
+    )
 
     operating_modes_description = models.TextField(
         verbose_name=_("Operating modes description"),

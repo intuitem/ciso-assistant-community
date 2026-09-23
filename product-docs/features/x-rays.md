@@ -6,7 +6,7 @@ description: Automated consistency and quality checks across every audit and ris
 
 **X-rays** is the platform's standing quality-control surface — a single page that scans every audit and risk assessment you have access to and surfaces inconsistencies, missing data, and likely modelling mistakes. It's how you find _"the things you forgot"_ at the end of an assessment campaign without having to open each assessment one by one.
 
-The page runs on every load — there's no "trigger" button. Findings are shown grouped by domain, then by assessment type, then by issue type, with a direct link from each finding to the object you need to fix.
+The page runs on every load — there's no "trigger" button. Issues are shown grouped by domain, then by assessment type, then by rule, with a direct link from each affected object to the form where you fix it.
 
 ## Where to find it
 
@@ -21,13 +21,24 @@ X-rays inspects two assessment families today:
 - **Audits** (compliance assessments) — plus the requirement assessments, applied controls, and evidences they touch.
 - **Risk assessments** — plus their risk scenarios, applied controls, and risk acceptances.
 
-The findings page lists every domain you have access to, with two tabs per domain — one for audits, one for risk assessments — and the assessments inside each tab. Domain badges show the count of errors / warnings / info findings so you can spot the worst-affected domains at a glance.
+The page lists every domain you have access to, with two tabs per domain — one for audits, one for risk assessments — and the assessments inside each tab. Domain badges show the count of errors / warnings / info so you can spot the worst-affected domains at a glance. A severity filter at the top lets you hide whole tiers, so you can sweep errors first and come back to the info items later.
 
-If no domain has any assessment to inspect, the page shows _"You have to create at least one perimeter to use X-rays."_
+Everything is collapsed by default:
+
+1. A domain is a closed row carrying its issue counts per severity.
+2. Opening it shows its audits and risk assessments, each a closed card with its own counts, on whichever tab holds the most severe issues.
+3. Opening an assessment lists the rules it trips, each with the number and kind of objects affected ("4 requirements").
+4. Opening a rule shows those objects in a paginated table, with the columns that matter for triage (status, ETA, priority for a control; result and status for a requirement; treatment for a scenario). Past ten objects, the table gains a search box that matches the name and every column.
+
+Domains and assessments with no issue are not listed at all, and a domain's content is only built when you open it, so a workspace with hundreds of domains stays responsive.
+
+A toolbar above the list carries a domain search, a sort (by severity, so the worst domains come first, or by name), and expand / collapse all.
+
+If nothing is flagged anywhere, the page shows _"No issue detected. X-rays only lists domains that have issues."_
 
 ## Severity tiers
 
-Every finding is tagged with one of three severities:
+Every issue is tagged with one of three severities:
 
 | Tier | Icon | What it means |
 |---|---|---|
@@ -35,11 +46,11 @@ Every finding is tagged with one of three severities:
 | **Warning** | ⚠️ (amber) | A likely gap that the analyst should confirm or fill in (e.g. compliant requirement with no evidence, applied control without a cost estimate, empty risk assessment). |
 | **Info** | ℹ️ (blue) | Hints and reminders — non-blocking, useful for hygiene (e.g. assessment still in progress, no author assigned, applied control without an external link). |
 
-Within each assessment, findings are first grouped by **issue type** (so 17 controls missing an ETA become one section with 17 entries, not 17 separate sections), then listed individually so you can click straight through to fix each one.
+Within each assessment, issues are grouped by **rule** (so 17 controls missing an ETA are one row saying 17, not 17 separate entries), and the objects behind a rule are called its **occurrences**. "Finding" names a different concept in the platform, see [findings assessments](../concepts/findings-assessments.md).
 
 ## The catalogue of checks
 
-Below is the full list of checks the platform runs today — useful when you want to know _why_ a finding showed up, or to predict what x-rays will say before you open the page.
+Below is the full list of checks the platform runs today — useful when you want to know _why_ an issue showed up, or to predict what x-rays will say before you open the page.
 
 ### On audits
 
@@ -50,6 +61,7 @@ Below is the full list of checks the platform runs today — useful when you wan
 | Info | Applied control has no reference control selected | An applied control linked to the audit isn't templated from a reference control |
 | Warning | Requirement is marked compliant but has no evidence attached (direct or indirect) | A compliant requirement assessment can't point to any evidence — directly or through its applied controls |
 | Warning | Requirement is marked compliant or partially compliant with no applied control | A compliant / partially-compliant requirement assessment has zero applied controls |
+| Warning | Applied control is active but has no evidence attached | An applied control linked to the audit is `active` but has no evidence attached |
 | Warning | Evidence has no file uploaded | An evidence object has no attachment and no external link on any revision |
 
 ### On risk assessments
@@ -65,6 +77,7 @@ Below is the full list of checks the platform runs today — useful when you wan
 | Warning | Does not have an ETA | An applied control that isn't `active` has no ETA |
 | Warning | Does not have an estimated effort | An applied control has no `effort` set |
 | Warning | Does not have an estimated cost | An applied control has no `cost` set |
+| Warning | Applied control is active but has no evidence attached | An applied control linked to a scenario is `active` but has no evidence attached |
 | Warning | Acceptance has no expiry date | A risk acceptance has no `expiry_date` |
 | Error | Residual risk level has not been assessed | `residual_level` unset while `current_level` is set |
 | Error | Residual risk level is higher than the current one | `residual_level > current_level` — usually a data-entry mistake |
@@ -82,12 +95,12 @@ The check list is intentionally opinionated — these are mistakes the team has 
 
 X-rays is designed to be a **one-click-away-from-fixing** surface, not a static report:
 
-1. Open **X-rays** — scan the domain badges, pick the domain with the most red.
-2. Switch to the right tab (audits / risk assessments) and skim the issue-type groups.
-3. Click any finding — the link opens the offending object's **edit** page directly (control, scenario, evidence, requirement assessment, risk acceptance).
-4. Fix the issue, save, return to x-rays — the finding is gone on next refresh.
+1. Open **X-rays** — the domains come sorted worst-first, so the top row is where the fire is.
+2. Open it, switch to the right tab (audits / risk assessments), open an assessment, skim the rules it trips.
+3. Open a rule and click any row — the link opens the offending object's **edit** page directly (control, scenario, evidence, requirement assessment, risk acceptance).
+4. Fix it, save, return to x-rays — the row is gone on next refresh.
 
-The "go straight to the edit page" behaviour matters: every finding the platform raises is something you can fix in one form. There's no triage step.
+The "go straight to the edit page" behaviour matters: every issue the platform raises is something you can fix in one form. There's no triage step.
 
 ## When to use it
 

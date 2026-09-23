@@ -14,6 +14,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { loadFeatureFlags } from '$lib/feature-flags';
 import { logger, installJsonConsole } from '$lib/server/logger';
 import { paraglideMiddleware } from '$paraglide/server';
+import { sequence } from '@sveltejs/kit/hooks';
 import { defineCustomServerStrategy, toLocale } from '$paraglide/runtime';
 
 // Runs once at server start. When LOG_FORMAT=json, routes the whole SSR stdout
@@ -160,7 +161,23 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 	return res.json();
 }
 
-export const handle: Handle = async ({ event, resolve }) => {
+/**
+ * Authenticated JSON, never cached.
+ *
+ * Every `/fe-api/` route proxies a cookie-authenticated backend call, and the browser
+ * cache key is the constant proxy URL rather than the session — so a cached response
+ * can outlive a sign-out or an account switch in the same browser. One place rather
+ * than 17, and it covers routes nobody has written yet.
+ */
+const noStoreForFeApi: Handle = async ({ event, resolve }) => {
+	const response = await resolve(event);
+	if (event.url.pathname.startsWith('/fe-api/')) {
+		response.headers.set('Cache-Control', 'no-store');
+	}
+	return response;
+};
+
+const handleRequest: Handle = async ({ event, resolve }) => {
 	// Inbound webhook passthrough: unauthenticated by design (the
 	// URL secret is the credential) — skip locale middleware, CSRF-token fetch
 	// and session validation, none of which apply to machine deliveries.
@@ -267,6 +284,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 		});
 	});
 };
+
+export const handle: Handle = sequence(noStoreForFeApi, handleRequest);
 
 // Replaces SvelteKit's default error logger, which printed every unmatched path
 // as a two-line stderr entry. A 404 on a path that was never a route is not an

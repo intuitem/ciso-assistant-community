@@ -43,6 +43,7 @@ export interface LoginRequestBody {
 }
 
 export const URL_MODEL = [
+	'notifications',
 	'folders',
 	'perimeters',
 	'risk-matrices',
