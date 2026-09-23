@@ -505,6 +505,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "incidents",
             "journeys",
             "metrology",
+            "notification_center",
             "organisation_issues",
             "organisation_objectives",
             "personal_data",
