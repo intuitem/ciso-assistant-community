@@ -196,6 +196,43 @@ export const LOCALE_DISPLAY_MAP = {
 export const ISO_8601_REGEX =
 	/^([+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24:?00)([.,]\d+(?!:))?)?(\17[0-5]\d([.,]\d+)?)?([zZ]|([+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$/;
 
+/**
+ * Fields rendered as localised dates when their value is an ISO 8601 string. The regex
+ * alone is not the test: some ISO values stay verbatim, so the field must be declared
+ * too. Union of the two lists ModelTable and DetailView used to keep separately.
+ */
+export const DATE_FIELDS_TO_FORMAT = [
+	'accepted_at',
+	'as_of',
+	'authority_notified_on',
+	'closed_at',
+	'closing_date',
+	'commission_date',
+	'created_at',
+	'detected_at',
+	'discovered_on',
+	'due_date',
+	'end_date',
+	'eta',
+	'expiration_date',
+	'expiry_date',
+	'exploited_date_added',
+	'last_assessment_date',
+	'occurred_at',
+	'published_date',
+	'read_at',
+	'rejected_at',
+	'reported_at',
+	'requested_on',
+	'resolved_at',
+	'revoked_at',
+	'start_date',
+	'subjects_notified_on',
+	'timestamp',
+	'updated_at',
+	'validation_deadline'
+];
+
 export const SECURITY_OBJECTIVE_SCALE_MAP = {
 	'1-3': ['1', '2', '3', '3', '3'],
 	'0-3': ['0', '1', '2', '3', '3'],
