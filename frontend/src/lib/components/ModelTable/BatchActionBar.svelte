@@ -10,6 +10,7 @@
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
 	import BatchActionModal from '$lib/components/Modals/BatchActionModal.svelte';
+	import { applyUnreadCount } from '$lib/utils/stores';
 	import MergeAppliedControlsModal from '$lib/components/Modals/MergeAppliedControlsModal.svelte';
 	import type { BatchActionConfig, TableBatchAction } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types';
@@ -133,6 +134,7 @@
 				enableDoubleDash: action.enableDoubleDash ?? false,
 				multiSelect: action.multiSelect ?? false,
 				confirmMessage: action.confirmMessage,
+				fixedValue: action.value,
 				onConfirm: async (value?: string | string[]) => {
 					try {
 						const res = await fetch(`/${URLModel}/batch-action`, {
@@ -155,6 +157,8 @@
 						}
 
 						const result = await res.json();
+						// Any endpoint reporting an unread count updates the badge.
+						applyUnreadCount(result);
 						const succeededCount = result.succeeded?.length ?? 0;
 						const failedCount = result.failed?.length ?? 0;
 

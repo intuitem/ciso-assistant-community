@@ -82,9 +82,23 @@
 		field="threats"
 		cacheLock={cacheLocks['threats']}
 		bind:cachedValue={formDataCache['threats']}
-		label={m.elementaryActionsTechniques()}
+		label={m.threats()}
 		helpText={m.operationalScenarioThreatsHelpText()}
 	/>
+	{#if page.data.featureflags?.ttps}
+		<AutocompleteSelect
+			{form}
+			multiple
+			lazy
+			optionsEndpoint="techniques"
+			optionsLabelField="str"
+			field="techniques"
+			cacheLock={cacheLocks['techniques']}
+			bind:cachedValue={formDataCache['techniques']}
+			label={m.techniques()}
+			helpText={m.operationalScenarioTechniquesHelpText()}
+		/>
+	{/if}
 	<MarkdownField
 		{form}
 		field="operating_modes_description"

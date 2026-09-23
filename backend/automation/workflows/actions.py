@@ -967,6 +967,9 @@ class ReadEntry:
     fields: list[str]
     #: Output-only values, key -> callable(row); never filterable/orderable.
     computed: dict[str, Callable] = dataclass_field(default_factory=dict)
+    #: Same, but resolved only when the node config names them in `include`.
+    #: For values too expensive to pay for on every read of the model.
+    optional_computed: dict[str, Callable] = dataclass_field(default_factory=dict)
     #: Restriction every read of this model must satisfy.
     base_filter: Q | None = None
     #: Integer columns where -1 means "not rated"; range filters skip it.
@@ -1148,6 +1151,9 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "scores": lambda ca: ca.get_global_score(),
             "requirements": _requirements_breakdown,
         },
+        # Opt-in: one call walks every requirement of the audit with its
+        # controls and evidences, so no unrelated read pays for it.
+        optional_computed={"quality_check": lambda ca: ca.quality_check()},
     ),
     "risk_assessment": ReadEntry(
         model=RiskAssessment,
@@ -1296,6 +1302,10 @@ READABLE_MODELS: dict[str, ReadEntry] = {
                 "name": ra.compliance_assessment.name,
             },
         },
+        # Opt-in: each call resolves its own context, so a list read pays for
+        # it per row. Reading the audit's quality check once is cheaper when
+        # the whole audit is in question.
+        optional_computed={"quality_check": lambda ra: ra.quality_check()},
         select_related=["requirement", "compliance_assessment"],
         prefetch_related=[
             "applied_controls__evidences__revisions",
@@ -1502,6 +1512,29 @@ def _read_filters_to_q(tree, entry, allowed_fields, context):
     return _read_group_to_q(tree, entry, allowed_fields, context)
 
 
+def _effective_computed(entry, config):
+    """Always-on computed values, plus the optional ones this node asked for.
+
+    Opt-in because an optional value may cost a query storm per row: a quality
+    check walks a whole audit, which no unrelated read of that model should pay
+    for. Unknown names fail loudly rather than returning a row that silently
+    lacks the field a downstream condition branches on.
+    """
+    requested = config.get("include") or []
+    if isinstance(requested, str):
+        requested = [requested]
+    unknown = [name for name in requested if name not in entry.optional_computed]
+    if unknown:
+        raise ActionError(
+            f"read_objects: '{unknown[0]}' is not includable for model "
+            f"'{config.get('model')}'"
+        )
+    return {
+        **entry.computed,
+        **{name: entry.optional_computed[name] for name in requested},
+    }
+
+
 def _serialize_read_row(obj, fields, computed=None):
     from django.db.models import Model
 
@@ -1567,11 +1600,12 @@ class ReadObjectsAction(BaseAction):
         context = _render_context(instance)
         try:
             entry, fields, queryset = self._queryset(config, instance)
+            computed = _effective_computed(entry, config)
             if config.get("mode", "list") == "first":
                 obj = queryset.first()
                 return {
                     "found": obj is not None,
-                    "object": _serialize_read_row(obj, fields, entry.computed)
+                    "object": _serialize_read_row(obj, fields, computed)
                     if obj
                     else None,
                 }
@@ -1585,7 +1619,7 @@ class ReadObjectsAction(BaseAction):
                 "offset": offset,
                 "next_offset": offset + limit if offset + limit < count else 0,
                 "results": [
-                    _serialize_read_row(obj, fields, entry.computed)
+                    _serialize_read_row(obj, fields, computed)
                     for obj in queryset[offset : offset + limit]
                 ],
             }
@@ -2148,7 +2182,8 @@ class AttachEvidenceAction(BaseAction):
             revision = evidence.revisions.order_by("-version").first() or (
                 EvidenceRevision(evidence=evidence, folder=evidence.folder)
             )
-            revision.attachment = upload
+            superseded_name = revision.set_new_attachment(upload)
+
             if occurrence is not None:
                 revision.task_node = occurrence
             try:
@@ -2156,6 +2191,11 @@ class AttachEvidenceAction(BaseAction):
             except ValidationError as e:
                 raise FatalActionError(f"attach_evidence: {'; '.join(e.messages)}")
             revision.save()
+            if superseded_name and superseded_name != revision.attachment.name:
+                # on_commit: inside the node's transaction, a rollback must not
+                # cost the blob the surviving row still points at.
+                storage = revision.attachment.storage
+                transaction.on_commit(lambda: storage.delete(superseded_name))
             # Unattended: an approval must not come to cover a file nobody
             # has looked at.
             if evidence.status == Evidence.Status.APPROVED:
@@ -3959,8 +3999,9 @@ def read_page(node, instance, read_config, ids):
     action = ACTION_REGISTRY["read_objects"]
     try:
         entry, fields, queryset = action._queryset(config, instance)
+        computed = _effective_computed(entry, config)
         rows = {
-            str(obj.id): _serialize_read_row(obj, fields, entry.computed)
+            str(obj.id): _serialize_read_row(obj, fields, computed)
             for obj in queryset.filter(id__in=ids)
         }
     except (ValidationError, ValueError, TypeError) as e:

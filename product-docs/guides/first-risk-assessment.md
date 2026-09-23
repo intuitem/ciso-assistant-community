@@ -13,6 +13,8 @@ How to create a risk assessment
 3. We find three parts: details about the assessment, the list of associated risk scenarios and the risk matrix view.&#x20;
 4. Let's add the first **scenario** and do the current assessment of it.
 
+<figure><img src="../.gitbook/assets/risk-assessment-detail.png" alt=""><figcaption><p>The risk assessment page: assessment details above, associated risk scenarios below</p></figcaption></figure>
+
 {% hint style="warning" %}
 You can see that I didn't find the threat I was looking for in the imported library, so I decided to create my custom threat.
 {% endhint %}
