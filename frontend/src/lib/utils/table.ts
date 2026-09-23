@@ -1080,6 +1080,15 @@ export const USER_IS_THIRD_PARTY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const IS_TPRM_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'thirdPartyAudit',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 export const IS_ASSESSABLE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2283,6 +2292,7 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			framework: FRAMEWORK_FILTER,
 			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
+			is_tprm: IS_TPRM_FILTER,
 			authors: AUTHOR_FILTER,
 			due_date: dateFilter('due_date'),
 			eta: dateFilter('eta'),
