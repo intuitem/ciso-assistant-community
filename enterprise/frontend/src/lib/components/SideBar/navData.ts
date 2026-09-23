@@ -39,6 +39,17 @@ export const navData = {
 					]
 				},
 				{
+					name: 'notifications',
+					fa_icon: 'fa-solid fa-bell',
+					href: '/notifications',
+					// `exclude` short-circuits `permissions` in canSeeNavItem, so the latter
+					// documents intent rather than gating -- same shape as myAssignments
+					// below. Third-party respondents are email-only in v1, so hide a page
+					// that would always be empty for them.
+					permissions: ['view_notification'],
+					exclude: ['BI-RL-TPR']
+				},
+				{
 					name: 'myRequests',
 					fa_icon: 'fa-solid fa-hand',
 					href: '/my-requests',

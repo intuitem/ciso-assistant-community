@@ -57,7 +57,7 @@
 		subprocessCandidates: Option[];
 		creatableModels?: any[];
 		updatableModels?: any[];
-		readableModels?: { key: string; fields: string[] }[];
+		readableModels?: { key: string; fields: string[]; includable?: string[] }[];
 		fkOptions?: Record<string, Option[]>;
 		workflowId: string;
 		registrationsByRef?: Record<string, any>;
@@ -159,6 +159,8 @@
 		'create_object',
 		'update_object',
 		'attach_evidence',
+		'record_measurement',
+		'post_results',
 		'read_objects',
 		'http_request',
 		'send_email',
@@ -195,16 +197,50 @@
 		date_offset: { base: '', days: 30, weeks: 0, output: '' },
 		create_object: { model: 'applied_control', fields: { name: '' }, upsert: false },
 		update_object: { model: 'applied_control', id: '', fields: {}, m2m: {} },
-		attach_evidence: { evidence: '', source: 'text', filename: '', text: '', url: '' },
+		attach_evidence: {
+			evidence: '',
+			source: 'text',
+			filename: '',
+			text: '',
+			url: '',
+			allow_error_status: false,
+			allow_connection_error: false,
+			find_occurrence: false,
+			new_revision: false,
+			task_node: ''
+		},
+		record_measurement: {
+			metric_instance: '',
+			value: '',
+			timestamp: '',
+			observation: '',
+			evidence_revision: ''
+		},
+		post_results: {
+			posture_assessment: '',
+			asset: '',
+			results: '',
+			run_id: '',
+			tool: ''
+		},
 		read_objects: {
 			model: 'applied_control',
 			mode: 'list',
 			filters: {},
 			order_by: '-created_at',
 			limit: 25,
-			offset: ''
+			offset: '',
+			include: []
 		},
-		http_request: { method: 'GET', url: '', headers: {}, body: '', timeout: 15 },
+		http_request: {
+			method: 'GET',
+			url: '',
+			headers: {},
+			body: '',
+			timeout: 15,
+			allow_error_status: false,
+			allow_connection_error: false
+		},
 		send_email: { recipients: '', subject: '', body: '' },
 		ai_extract: {
 			prompt: '',
@@ -322,6 +358,8 @@
 		update_object: 'object_id',
 		create_audit: 'created_object_id',
 		attach_evidence: 'filename',
+		record_measurement: 'object_id',
+		post_results: 'created',
 		create_entity_assessment: 'created_object_id',
 		read_objects: 'results.0.name',
 		provision_folder: 'folder_id',
@@ -538,11 +576,27 @@
 
 	function resetReadModel() {
 		// Field whitelists differ per model: stale filters/ordering would fail
-		// publish validation.
+		// publish validation. Includes are per-model too — the backend rejects
+		// a name the new model does not offer.
 		actionConfig.filters = {};
 		actionConfig.order_by = '-created_at';
+		actionConfig.include = [];
 		readFilterGroups = [];
 		readFilterRawMode = false;
+		onChange();
+	}
+
+	// The backend accepts a bare string as well as a list, so a config authored
+	// through the API or imported from a library can carry either. Spreading a
+	// string would store its characters one by one, and filtering one throws.
+	function readIncludeList(value: unknown): string[] {
+		if (Array.isArray(value)) return value as string[];
+		return typeof value === 'string' && value ? [value] : [];
+	}
+
+	function toggleReadInclude(name: string, checked: boolean) {
+		const current = readIncludeList(actionConfig.include);
+		actionConfig.include = checked ? [...current, name] : current.filter((entry) => entry !== name);
 		onChange();
 	}
 
@@ -1455,8 +1509,12 @@
 						{/if}
 					</label>
 					{#each creatableEntry?.fields ?? [] as field (field)}
+						{@const narrowed = creatableEntry?.allowed_values?.[field]}
 						<label>
-							{@render fieldLabel(safeTranslate(field))}
+							{@render fieldLabel(
+								safeTranslate(field) +
+									(creatableEntry?.required_fields?.includes(field) ? ' *' : '')
+							)}
 							{#if field === 'description'}
 								<textarea
 									class="input w-full text-sm"
@@ -1464,6 +1522,17 @@
 									bind:value={actionConfig.fields[field]}
 									oninput={onChange}
 								></textarea>
+							{:else if narrowed?.length}
+								<select
+									class="select w-full text-sm"
+									bind:value={actionConfig.fields[field]}
+									onchange={onChange}
+								>
+									<option value={''}>—</option>
+									{#each narrowed as choice (choice)}
+										<option value={choice}>{safeTranslate(choice)}</option>
+									{/each}
+								</select>
 							{:else}
 								<input
 									type="text"
@@ -1715,6 +1784,25 @@
 								oninput={onChange}
 							/>
 						</label>
+						<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+							<input
+								type="checkbox"
+								class="checkbox scale-75"
+								bind:checked={actionConfig.allow_error_status}
+								onchange={onChange}
+							/>
+							{m.httpAllowErrorStatus()}
+						</label>
+						<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+							<input
+								type="checkbox"
+								class="checkbox scale-75"
+								bind:checked={actionConfig.allow_connection_error}
+								onchange={onChange}
+							/>
+							{m.httpAllowConnectionError()}
+						</label>
+						<span class="text-[10px] text-surface-500">{m.attachSourceMissHint()}</span>
 					{:else}
 						<label>
 							{@render fieldLabel(m.content())}
@@ -1726,6 +1814,147 @@
 							></textarea>
 						</label>
 					{/if}
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							checked={actionConfig.find_occurrence}
+							onchange={(e) => {
+								// Hiding the field is not clearing it, and a named
+								// occurrence wins.
+								actionConfig.find_occurrence = e.currentTarget.checked;
+								if (actionConfig.find_occurrence) actionConfig.task_node = '';
+								onChange();
+							}}
+						/>
+						{m.findOccurrence()}
+					</label>
+					<span class="text-[10px] text-surface-500">{m.findOccurrenceHint()}</span>
+					{#if !actionConfig.find_occurrence}
+						<label>
+							{@render fieldLabel(m.taskNode())}
+							<input
+								type="text"
+								class="input w-full text-sm"
+								placeholder={'{{nodes.find_the_occurrence.object.id}}'}
+								bind:value={actionConfig.task_node}
+								oninput={onChange}
+							/>
+							<span class="text-[10px] text-surface-500">{m.taskNodeAttachHint()}</span>
+						</label>
+					{/if}
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.new_revision}
+							onchange={onChange}
+						/>
+						{m.fileAsNewRevision()}
+					</label>
+					<span class="text-[10px] text-surface-500">{m.newRevisionHint()}</span>
+				{:else if actionConfig.type === 'record_measurement'}
+					<label>
+						{@render fieldLabel(m.metricInstance())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{metric_id}}'}
+							bind:value={actionConfig.metric_instance}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.value())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{nodes.fetch.body.coverage}}'}
+							bind:value={actionConfig.value}
+							oninput={onChange}
+						/>
+						<span class="text-[10px] text-surface-500">{m.measurementValueHint()}</span>
+					</label>
+					<label>
+						{@render fieldLabel(m.timestamp())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{now}}'}
+							bind:value={actionConfig.timestamp}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.observation())}
+						<textarea
+							class="input w-full text-sm"
+							rows="2"
+							bind:value={actionConfig.observation}
+							oninput={onChange}
+						></textarea>
+					</label>
+					<label>
+						{@render fieldLabel(m.evidenceRevision())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{nodes.attach.revision_id}}'}
+							bind:value={actionConfig.evidence_revision}
+							oninput={onChange}
+						/>
+					</label>
+				{:else if actionConfig.type === 'post_results'}
+					<label>
+						{@render fieldLabel(m.postureAssessment())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{assessment_id}}'}
+							bind:value={actionConfig.posture_assessment}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.asset())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{item.asset_id}}'}
+							bind:value={actionConfig.asset}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.results())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{nodes.fetch.body.checks}}'}
+							bind:value={actionConfig.results}
+							oninput={onChange}
+						/>
+						<span class="text-[10px] text-surface-500">{m.postResultsHint()}</span>
+					</label>
+					<label>
+						{@render fieldLabel(m.tool())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							bind:value={actionConfig.tool}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.runId())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							bind:value={actionConfig.run_id}
+							oninput={onChange}
+						/>
+						<span class="text-[10px] text-surface-500">{m.postResultsRunIdHint()}</span>
+					</label>
 				{:else if actionConfig.type === 'read_objects'}
 					<label>
 						{@render fieldLabel(m.objectToRead())}
@@ -1750,6 +1979,24 @@
 							<option value="first">{m.readModeFirst()}</option>
 						</select>
 					</label>
+
+					{#if readableEntry?.includable?.length}
+						{@render fieldLabel(m.readInclude())}
+						<p class="text-[10px] text-surface-500">{m.readIncludeHelpText()}</p>
+						<div class="flex flex-col gap-1">
+							{#each readableEntry.includable as name (name)}
+								<label class="flex items-center gap-2 text-sm">
+									<input
+										type="checkbox"
+										class="checkbox"
+										checked={readIncludeList(actionConfig.include).includes(name)}
+										onchange={(e) => toggleReadInclude(name, e.currentTarget.checked)}
+									/>
+									<span>{safeTranslate(name)}</span>
+								</label>
+							{/each}
+						</div>
+					{/if}
 
 					{@render fieldLabel(m.readFilters())}
 					{#if readFilterRawMode}
@@ -1993,6 +2240,25 @@
 							oninput={onChange}
 						/>
 					</label>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.allow_error_status}
+							onchange={onChange}
+						/>
+						{m.httpAllowErrorStatus()}
+					</label>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.allow_connection_error}
+							onchange={onChange}
+						/>
+						{m.httpAllowConnectionError()}
+					</label>
+					<span class="text-[10px] text-surface-500">{m.httpErrorHandlingHint()}</span>
 					<p class="text-[10px] text-surface-500 leading-relaxed">
 						<i class="fa-solid fa-key mr-1"></i>{m.secretsHint({ syntax: '{{secrets.name}}' })}
 					</p>

@@ -14,7 +14,8 @@ export interface User {
 	keep_local_login: boolean;
 	date_joined: string;
 	user_groups: Record<string, any>[];
-	roles: Record<string, any>[];
+	/** Role names — `User.get_roles()` serialises `roleassignment__role__name`, not objects. */
+	roles: string[];
 	is_third_party: boolean;
 	is_auditee: boolean;
 	is_admin: boolean;
@@ -42,6 +43,7 @@ export interface LoginRequestBody {
 }
 
 export const URL_MODEL = [
+	'notifications',
 	'folders',
 	'perimeters',
 	'risk-matrices',
@@ -284,3 +286,8 @@ export interface CacheLock {
 	promise: Promise<any>;
 	resolve: (_: any) => any;
 }
+
+/** A DOM event with `currentTarget` narrowed to the element the handler is bound to. */
+export type SvelteEvent<E extends Event = Event, T extends EventTarget = Element> = E & {
+	currentTarget: EventTarget & T;
+};

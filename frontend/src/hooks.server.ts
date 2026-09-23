@@ -14,6 +14,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { loadFeatureFlags } from '$lib/feature-flags';
 import { logger, installJsonConsole } from '$lib/server/logger';
 import { paraglideMiddleware } from '$paraglide/server';
+import { sequence } from '@sveltejs/kit/hooks';
 import { defineCustomServerStrategy, toLocale } from '$paraglide/runtime';
 
 // Runs once at server start. When LOG_FORMAT=json, routes the whole SSR stdout
@@ -160,7 +161,23 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 	return res.json();
 }
 
-export const handle: Handle = async ({ event, resolve }) => {
+/**
+ * Authenticated JSON, never cached.
+ *
+ * Every `/fe-api/` route proxies a cookie-authenticated backend call, and the browser
+ * cache key is the constant proxy URL rather than the session — so a cached response
+ * can outlive a sign-out or an account switch in the same browser. One place rather
+ * than 17, and it covers routes nobody has written yet.
+ */
+const noStoreForFeApi: Handle = async ({ event, resolve }) => {
+	const response = await resolve(event);
+	if (event.url.pathname.startsWith('/fe-api/')) {
+		response.headers.set('Cache-Control', 'no-store');
+	}
+	return response;
+};
+
+const handleRequest: Handle = async ({ event, resolve }) => {
 	// Inbound webhook passthrough: unauthenticated by design (the
 	// URL secret is the credential) — skip locale middleware, CSRF-token fetch
 	// and session validation, none of which apply to machine deliveries.
@@ -263,17 +280,29 @@ export const handle: Handle = async ({ event, resolve }) => {
 	});
 };
 
+export const handle: Handle = sequence(noStoreForFeApi, handleRequest);
+
 // Replaces SvelteKit's default error logger, which printed every unmatched path
 // as a two-line stderr entry. A 404 on a path that was never a route is not an
 // application error: vulnerability scanners alone can produce tens of thousands
 // of those lines. Real failures still go out through the structured logger.
 export const handleError: HandleServerError = ({ error, status, message, event }) => {
 	if (status !== 404) {
+		// The global Error type does not declare Node's syscall code.
+		const errno = (e: Error) => (e as NodeJS.ErrnoException).code;
+		// `TypeError: fetch failed` serializes to just that: undici puts the
+		// reason on `cause`, and the stack says which call made it.
+		const cause = error instanceof Error ? error.cause : undefined;
 		logger.error('unhandled_server_error', {
 			status,
 			method: event.request.method,
 			path: event.url.pathname,
-			error
+			error,
+			cause:
+				cause instanceof Error
+					? `${cause.name}: ${cause.message}${errno(cause) ? ` (${errno(cause)})` : ''}`
+					: cause,
+			stack: error instanceof Error ? error.stack : undefined
 		});
 	}
 	return { message };

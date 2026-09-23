@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { contentDispositionHeader } from '$lib/utils/contentDisposition';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 
 import { m } from '$paraglide/messages';
@@ -174,7 +175,7 @@ export async function defaultWriteFormAction({
 			const fileUploadEndpoint = `${BASE_API_URL}/${urlModel}/${writtenObject.id}/upload/`;
 			const fileUploadRequestInitOptions: RequestInit = {
 				headers: {
-					'Content-Disposition': `attachment; filename=${encodeURIComponent(file.name)}`
+					'Content-Disposition': contentDispositionHeader(file.name)
 				},
 				method: 'POST',
 				body: file

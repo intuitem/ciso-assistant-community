@@ -69,6 +69,7 @@
 		bar: 'Bar',
 		donut: 'Donut',
 		pie: 'Pie',
+		small_multiples: 'Small Multiples',
 		table: 'Table'
 	};
 

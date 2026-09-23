@@ -337,6 +337,11 @@
 					description: m.commentsDescription()
 				},
 				{
+					field: 'notification_center',
+					label: m.notifications(),
+					description: m.notificationCenterDescription()
+				},
+				{
 					field: 'relations_graph',
 					label: m.relationsGraph(),
 					description: m.relationsGraphDescription()

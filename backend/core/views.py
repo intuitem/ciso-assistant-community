@@ -18,7 +18,8 @@ import zipfile
 import tempfile
 from datetime import date, datetime, timedelta, timezone
 from types import MappingProxyType
-from typing import Dict, Any, List, Tuple, Final
+from collections.abc import Sequence
+from typing import Dict, Any, List, Tuple, Final, Optional
 import time
 from django.db.models import (
     F,
@@ -87,6 +88,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
+from django.core.files.uploadedfile import UploadedFile
 
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from core.constants import LEGACY_TTP_LIBRARIES
@@ -124,7 +126,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models, transaction
 from django.forms import IntegerField as FormIntegerField
 from django.forms import ValidationError
-from django.http import FileResponse, HttpResponse, StreamingHttpResponse
+from django.http import FileResponse, HttpResponse, StreamingHttpResponse, HttpRequest
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
@@ -160,12 +162,14 @@ from rest_framework.exceptions import (
 
 
 from core.helpers import *
+from core.validators import sanitize_file_name
 from core.answer_attachments import (
     answer_for_upload,
     AttachmentError,
     add_attachment,
     attachments_for,
     promote_to_evidence,
+    safe_filename_header,
 )
 from core.answer_attachments import serialize as serialize_attachment
 from core.answer_attachments import serve as serve_attachment
@@ -199,16 +203,13 @@ from dateutil import relativedelta as rd
 
 from ebios_rm.models import (
     EbiosRMStudy,
-    FearedEvent,
     RoTo,
-    StrategicScenario,
     Stakeholder,
-    AttackPath,
 )
 
-from tprm.models import Entity, Solution, Contract
-from privacy.models import Processing, DataBreach, RightRequest
-from resilience.models import AssetAssessment, BusinessImpactAnalysis
+from tprm.models import Entity
+from privacy.models import Processing, DataBreach
+from resilience.models import AssetAssessment
 
 from .models import *
 from .serializers import *
@@ -802,6 +803,7 @@ class GenericFilterSet(df.FilterSet):
     # enough to make it filterable from the table UI. On a DateTimeField the `date`
     # transform is what the UI uses: a bare `lte` on a timestamp would drop its last day.
     DATE_LOOKUPS = ("exact", "gte", "lte", "gt", "lt", "isnull")
+    # `lt`/`gt`: half-open bounds, so a BI partition boundary lands in one page.
     DATETIME_LOOKUPS = (
         "date",
         "date__gte",
@@ -810,6 +812,8 @@ class GenericFilterSet(df.FilterSet):
         "date__lt",
         "gte",
         "lte",
+        "gt",
+        "lt",
         "isnull",
     )
     ALWAYS_FILTERABLE_DATES = ("created_at", "updated_at")
@@ -904,18 +908,6 @@ class GenericFilterSet(df.FilterSet):
                 "filter_class": df.IsoDateTimeFilter,
             },
         }
-
-
-class TimestampRangeFilterMixin(df.FilterSet):
-    """ISO-8601 created_at/updated_at range params for BI clients
-    (Power BI incremental refresh). Mix into FilterSets of viewsets
-    that use filterset_class; list-style viewsets declare the same
-    lookups via dict-form filterset_fields."""
-
-    created_at__gte = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="gte")
-    created_at__lt = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="lt")
-    updated_at__gte = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="gte")
-    updated_at__lt = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="lt")
 
 
 class SmartOrderingFilter(filters.OrderingFilter):
@@ -1240,7 +1232,55 @@ class AutocompleteMixin:
         return Response(data)
 
 
-class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
+class SparseFieldsMixin:
+    """``?fields=a,b,c`` trims a GET response to a subset of the columns.
+
+    Subtractive only, and only the top-level serializer: nested ones share this
+    request's context and would be cut by the same names. An unknown name is a
+    400. Reduces serialization, not the queryset's prefetching.
+    """
+
+    sparse_fields_param = "fields"
+    sparse_fields_always = frozenset({"id"})
+
+    def get_serializer(self, *args, **kwargs):
+        return self.apply_sparse_fields(super().get_serializer(*args, **kwargs))
+
+    def apply_sparse_fields(self, serializer):
+        """Trim a serializer to the requested fields.
+
+        An action building its own serializer must call this, or ``fields`` is
+        silently ignored there.
+        """
+        request = getattr(self, "request", None)
+        if request is None or request.method != "GET":
+            return serializer
+
+        raw = request.query_params.get(self.sparse_fields_param)
+        if not raw:
+            return serializer
+        requested = {name.strip() for name in raw.split(",") if name.strip()}
+        if not requested:
+            return serializer
+
+        target = getattr(serializer, "child", serializer)
+        available = set(getattr(target, "fields", {}))
+        unknown = requested - available
+        if unknown:
+            raise DRFValidationError(
+                {
+                    self.sparse_fields_param: (
+                        f"unknown field(s): {', '.join(sorted(unknown))}"
+                    )
+                }
+            )
+
+        for name in available - (requested | self.sparse_fields_always):
+            target.fields.pop(name)
+        return serializer
+
+
+class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -1302,12 +1342,21 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         )
         queryset = self.model.objects.filter(id__in=object_ids_view)
 
-        model_field_names = {f.name for f in self.model._meta.get_fields()}
+        model_fields = {f.name: f for f in self.model._meta.get_fields()}
 
-        if "parent_folder" in model_field_names:
-            queryset = queryset.select_related("parent_folder")
+        # Folder itself carries a *reverse* relation named "folder"; select_related
+        # only accepts forward FKs, so match on the descriptor, not on the name.
+        joinable = [
+            name
+            for name in ("folder", "parent_folder")
+            if (f := model_fields.get(name)) is not None
+            and f.many_to_one
+            and f.concrete
+        ]
+        if joinable:
+            queryset = queryset.select_related(*joinable)
 
-        if "filtering_labels" in model_field_names:
+        if "filtering_labels" in model_fields:
             queryset = queryset.prefetch_related("filtering_labels")
 
         return queryset
@@ -2292,24 +2341,24 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         folders = {f.id: f for f in Folder.objects.all()}
         for obj in initial_objects:
             path = []
-            if hasattr(obj, "folder"):
-                queue = deque([obj.folder.id])
-            elif hasattr(obj, "parent_folder") and obj.parent_folder:
-                queue = deque([obj.parent_folder.id])
+            if getattr(obj, "folder_id", None):
+                queue = deque([obj.folder_id])
+            elif getattr(obj, "parent_folder_id", None):
+                queue = deque([obj.parent_folder_id])
             else:
                 continue
             while queue:
                 folder_id = queue.popleft()
                 folder = folders[folder_id]
-                if folder.parent_folder:
+                if folder.parent_folder_id:
                     path.append(
                         {
                             "str": str(folder),
                             "id": folder.id,
-                            "parent_id": folder.parent_folder.id,
+                            "parent_id": folder.parent_folder_id,
                         }
                     )
-                    queue.append(folder.parent_folder.id)
+                    queue.append(folder.parent_folder_id)
             path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
 
         return {
@@ -2534,7 +2583,7 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
-class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):
+class AssetFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
     asset_class__isnull = df.BooleanFilter(
@@ -2957,7 +3006,9 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         context = self.get_serializer_context()
         context["optimized_data"] = optimized_data
 
-        serializer = AssetReadSerializer(objects, many=True, context=context)
+        serializer = self.apply_sparse_fields(
+            AssetReadSerializer(objects, many=True, context=context)
+        )
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)
         if field_models:
@@ -3805,6 +3856,20 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "due_date": ["exact"],
     }
     search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "applied_controls",
+                "assets",
+                "security_exceptions",
+                "security_advisories",
+                "cwes",
+                "filtering_labels__folder",
+            )
+        )
 
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
@@ -5355,7 +5420,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
 APPLIED_CONTROL_LINKED_FIELD_NAMES = [f[0] for f in APPLIED_CONTROL_LINKED_FIELDS]
 
 
-class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
+class AppliedControlFilterSet(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     reference_control = df.ModelMultipleChoiceFilter(
         queryset=ReferenceControl.objects.all()
@@ -5914,8 +5979,8 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         context = self.get_serializer_context()
         context["daily_rate"] = GlobalSettings.get_daily_rate()
 
-        serializer = AppliedControlBulkReadSerializer(
-            objects, many=True, context=context
+        serializer = self.apply_sparse_fields(
+            AppliedControlBulkReadSerializer(objects, many=True, context=context)
         )
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)
@@ -7387,7 +7452,7 @@ class IntegerInFilter(df.BaseInFilter, df.NumberFilter):
     field_class = FormIntegerField
 
 
-class RiskScenarioFilter(TimestampRangeFilterMixin, GenericFilterSet):
+class RiskScenarioFilter(GenericFilterSet):
     risk_assessment = df.ModelMultipleChoiceFilter(
         queryset=RiskAssessment.objects.all()
     )
@@ -7624,13 +7689,27 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
             "risk_assessment__risk_matrix",
             "risk_assessment__perimeter",
             "risk_assessment__perimeter__folder",
+            "risk_origin",
+            "operational_scenario__ebios_rm_study",
         ).prefetch_related(
             "threats",
             "assets",
             "applied_controls",
             "existing_applied_controls",
-            "owner",
+            actor_prefetch("owner"),
             "security_exceptions",
+            "threat_models",
+            "vulnerabilities",
+            "incidents",
+            "qualifications",
+            # str(antecedent) renders folder and risk_assessment: join them in the
+            # prefetch query instead of two lookups per rendered scenario.
+            Prefetch(
+                "antecedent_scenarios",
+                queryset=RiskScenario.objects.select_related(
+                    "folder", "risk_assessment"
+                ),
+            ),
         )
 
     def _perform_write(self, serializer):
@@ -8354,6 +8433,45 @@ class UserViewSet(BaseModelViewSet):
     @action(detail=False, name="Get language choices")
     def language(self, request):
         return Response(dict(settings.LANGUAGES))
+
+    @action(detail=True, name="Teams the user belongs to")
+    def teams(self, request, pk=None):
+        """Membership is three separate relations, and which one matched is the useful
+        part -- it is why the user is addressed when the team is.
+
+        Its own action rather than a field on UserReadSerializer: that serializer feeds
+        the users list, where three relation lookups per row would be an N+1.
+        """
+        user = self.get_object()
+        led = set(Team.objects.filter(leader=user).values_list("id", flat=True))
+        deputy = set(user.deputy_teams.values_list("id", flat=True))
+        member = set(user.teams.values_list("id", flat=True))
+
+        # `view_user` is not `view_team`: retrieving the user must not disclose teams
+        # in domains the requester cannot browse. Same masking `retrieve` applies to
+        # the `user_groups` beside this on the profile page.
+        viewable = set(RoleAssignment.get_viewable_object_ids(request.user, Team))
+
+        rows = []
+        for team in Team.objects.filter(
+            id__in=(led | deputy | member) & viewable
+        ).select_related("folder"):
+            rows.append(
+                {
+                    "id": str(team.id),
+                    "str": str(team),
+                    "role": "leader"
+                    if team.id in led
+                    else "deputy"
+                    if team.id in deputy
+                    else "member",
+                    "folder": {"id": str(team.folder_id), "str": str(team.folder)}
+                    if team.folder_id
+                    else None,
+                    "team_email": team.team_email or None,
+                }
+            )
+        return Response(sorted(rows, key=lambda r: r["str"].lower()))
 
     def get_queryset(self):
         # Use base IAM filtering
@@ -10576,6 +10694,7 @@ class RequirementViewSet(BaseModelViewSet):
                 "evidences",
                 "applied_controls",
                 "security_exceptions",
+                "findings",
             )
         )
         serialized_requirement_assessments = RequirementAssessmentReadSerializer(
@@ -10736,7 +10855,7 @@ class RequirementViewSet(BaseModelViewSet):
         )
 
 
-class EvidenceFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
+class EvidenceFilterSet(GenericFilterSet):
     owner = NullableModelChoiceFilter(queryset=Actor.objects.all())
 
     class Meta:
@@ -10780,6 +10899,7 @@ class EvidenceViewSet(BaseModelViewSet):
                 "requirement_assessments",
                 "security_exceptions",
                 "contracts",
+                "task_templates",
                 "filtering_labels",
                 actor_prefetch("owner"),
             )
@@ -10812,7 +10932,11 @@ class EvidenceViewSet(BaseModelViewSet):
                 response = HttpResponse(
                     revision.attachment,
                     content_type=mimetypes.guess_type(filename)[0],
-                    headers={"Content-Disposition": f"attachment; filename={filename}"},
+                    headers={
+                        "Content-Disposition": safe_filename_header(
+                            "attachment", filename
+                        )
+                    },
                     status=status.HTTP_200_OK,
                 )
         return response
@@ -10835,7 +10959,7 @@ class EvidenceViewSet(BaseModelViewSet):
         url_path="batch-upload",
         parser_classes=[MultiPartParser, FormParser],
     )
-    def batch_upload(self, request):
+    def batch_upload(self, request: HttpRequest):
         """
         Bulk-upload evidences from a multipart payload.
 
@@ -10931,6 +11055,9 @@ class EvidenceViewSet(BaseModelViewSet):
             field = entry.get("field")
             name = (entry.get("name") or field or "").strip()
             rel_path = entry.get("rel_path") or None
+            if not isinstance(rel_path, str):
+                rel_path = None
+
             result = {"field": field, "name": name, "rel_path": rel_path}
 
             upload = request.FILES.get(field) if field else None
@@ -11069,7 +11196,15 @@ class EvidenceViewSet(BaseModelViewSet):
         result["revision_id"] = str(revision.id) if revision else None
         result["version"] = revision.version if revision else 1
 
-    def _batch_add_revision(self, result, summary, evidence, upload, rel_path, request):
+    def _batch_add_revision(
+        self,
+        result: dict,
+        summary: dict,
+        evidence: Evidence,
+        upload: UploadedFile,
+        rel_path: Optional[str],
+        request: HttpRequest,
+    ):
         """Create a new EvidenceRevision against an existing Evidence (auto-bumps version)."""
         rev_serializer = EvidenceRevisionWriteSerializer(
             data={
@@ -11097,13 +11232,20 @@ class EvidenceViewSet(BaseModelViewSet):
         result["version"] = revision.version
         summary["revision_added"] += 1
 
-    def _batch_replace_revision(self, result, summary, evidence, upload, rel_path):
+    def _batch_replace_revision(
+        self,
+        result: dict,
+        summary: dict,
+        evidence: Evidence,
+        upload: UploadedFile,
+        rel_path: Optional[str],
+    ):
         """Overwrite the last revision's attachment in place — preserves Evidence id and M2M links."""
         revision = evidence.last_revision
         if revision is None:
             revision = EvidenceRevision(evidence=evidence)
-        old_attachment = revision.attachment
-        revision.attachment = upload
+        superseded_name = revision.set_new_attachment(upload)
+
         if rel_path:
             revision.observation = f"path: {rel_path}"
         try:
@@ -11121,9 +11263,10 @@ class EvidenceViewSet(BaseModelViewSet):
             result["error"] = " ".join(messages)
             summary["errors"] += 1
             return
+
         revision.save()
-        if old_attachment:
-            old_attachment.delete(save=False)
+        if superseded_name and superseded_name != revision.attachment.name:
+            revision.attachment.storage.delete(superseded_name)
         result["outcome"] = "replaced"
         result["evidence_id"] = str(evidence.id)
         result["revision_id"] = str(revision.id)
@@ -11131,7 +11274,7 @@ class EvidenceViewSet(BaseModelViewSet):
         summary["replaced"] += 1
 
     @staticmethod
-    def _batch_find_unique_name(name, folder):
+    def _batch_find_unique_name(name: str, folder: Folder) -> str:
         """Append ' (1)', ' (2)' ... before the extension until the name is free in folder."""
         if "." in name:
             base, _, ext = name.rpartition(".")
@@ -11181,7 +11324,9 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
                     evidence.attachment,
                     content_type=content_type,
                     headers={
-                        "Content-Disposition": f"attachment; filename={evidence.filename()}"
+                        "Content-Disposition": safe_filename_header(
+                            "attachment", evidence.filename()
+                        )
                     },
                     status=status.HTTP_200_OK,
                 )
@@ -11210,19 +11355,22 @@ class UploadAttachmentView(APIView):
         revision = None
         evidence = None
 
-        # RBAC: scope to objects the user has change permission on (upload is a write)
-        accessible_evidence_ids = RoleAssignment.get_changeable_object_ids(
-            request.user, Evidence
-        )
-
         try:
-            revision = EvidenceRevision.objects.get(
-                pk=pk, evidence__id__in=accessible_evidence_ids
-            )
+            if not RoleAssignment.is_object_accessible(
+                request.user, "change", EvidenceRevision, pk
+            ):
+                raise EvidenceRevision.DoesNotExist
+
+            revision = EvidenceRevision.objects.get(pk=pk)
             evidence = revision.evidence
         except EvidenceRevision.DoesNotExist:
             try:
-                evidence = Evidence.objects.get(pk=pk, id__in=accessible_evidence_ids)
+                if not RoleAssignment.is_object_accessible(
+                    request.user, "change", Evidence, pk
+                ):
+                    raise Evidence.DoesNotExist
+
+                evidence = Evidence.objects.get(pk=pk)
             except Evidence.DoesNotExist:
                 return Response(
                     {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND
@@ -11235,28 +11383,30 @@ class UploadAttachmentView(APIView):
 
         attachment = request.FILES.get("file")
         if attachment and attachment.name != "undefined":
-            if not revision.attachment or revision.attachment != attachment:
-                old_attachment = revision.attachment
-                revision.attachment = attachment
-                try:
-                    revision.full_clean()
-                except ValidationError as e:
-                    revision.attachment = old_attachment
-                    messages = []
-                    if hasattr(e, "message_dict"):
-                        for field_messages in e.message_dict.values():
-                            messages.extend(field_messages)
-                    elif hasattr(e, "messages"):
-                        messages = e.messages
-                    else:
-                        messages = [str(e.message)]
-                    return Response(
-                        {"detail": " ".join(messages)},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                if old_attachment:
-                    old_attachment.delete()
-                revision.save()
+            old_attachment = revision.attachment
+            old_original_filename = revision.original_filename
+            superseded_name = revision.set_new_attachment(attachment)
+
+            try:
+                revision.full_clean()
+            except ValidationError as e:
+                revision.attachment = old_attachment
+                revision.original_filename = old_original_filename
+                messages = []
+                if hasattr(e, "message_dict"):
+                    for field_messages in e.message_dict.values():
+                        messages.extend(field_messages)
+                elif hasattr(e, "messages"):
+                    messages = e.messages
+                else:
+                    messages = [str(e.message)]
+                return Response(
+                    {"detail": " ".join(messages)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            revision.save()
+            if superseded_name and superseded_name != revision.attachment.name:
+                revision.attachment.storage.delete(superseded_name)
 
         return Response(status=status.HTTP_200_OK)
 
@@ -12054,29 +12204,45 @@ def _preview_suggestions_for_compliance_assessment(
     return list(best.values())
 
 
+class ComplianceAssessmentFilterSet(GenericFilterSet):
+    is_tprm = df.BooleanFilter(method="filter_is_tprm", label="Third-party audit")
+
+    class Meta:
+        model = ComplianceAssessment
+        fields = [
+            "name",
+            "ref_id",
+            "folder",
+            "framework",
+            "perimeter",
+            "campaign",
+            "status",
+            "ebios_rm_studies",
+            "assets",
+            "evidences",
+            "authors",
+            "reviewers",
+            "genericcollection",
+            "due_date",
+            "eta",
+        ]
+
+    def filter_is_tprm(self, queryset, name, value):
+        if value is None:
+            return queryset
+        if value:
+            return queryset.filter(entityassessment__isnull=False).distinct()
+        return queryset.exclude(entityassessment__isnull=False)
+
+
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
     """
 
     model = ComplianceAssessment
-    filterset_fields = [
-        "name",
-        "ref_id",
-        "folder",
-        "framework",
-        "perimeter",
-        "campaign",
-        "status",
-        "ebios_rm_studies",
-        "assets",
-        "evidences",
-        "authors",
-        "reviewers",
-        "genericcollection",
-        "due_date",
-        "eta",
-    ]
+    filterset_class = ComplianceAssessmentFilterSet
+    filterset_fields = ComplianceAssessmentFilterSet.Meta.fields
     search_fields = ["name", "description", "ref_id", "framework__name"]
     ordering_remap = {"authors": "authors_label"}
     ordering_nulls_last = ("authors_label",)
@@ -12459,6 +12625,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "requirement_progress",
                 "score",
                 "observations",
+                "applied_controls",
                 "answers",
             ]
             writer.writerow(columns)
@@ -12488,9 +12655,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         req.status,
                         req.score,
                         req.observation,
+                        ",".join(c.name for c in req.applied_controls.all()),
                     ]
                 else:
-                    row += ["", "", "", "", ""]
+                    row += ["", "", "", "", "", ""]
                 row.append(
                     render_answers_cell(
                         req_node.get_questions_translated,
@@ -12558,6 +12726,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "extended_result": req.extended_result,
                 "requirement_progress": req.status,
                 "observations": escape_excel_formula(req.observation),
+                "applied_controls": ", ".join(
+                    escape_excel_formula(c.name) for c in req.applied_controls.all()
+                ),
             }
             if show_documentation_score:
                 entry["implementation_score"] = req.score
@@ -13771,7 +13942,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related("reference_controls", "threats", "questions__choices")
             .all(),
         )
         tree = get_sorted_requirement_nodes(
@@ -14074,7 +14245,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         if UUID(pk) in object_ids_view:
             compliance_assessment = self.get_object()
-            (index_content, evidences) = generate_html(compliance_assessment)
+            (index_content, evidences, archive_names) = generate_html(
+                compliance_assessment
+            )
             zip_name = f"{sanitize_filename(compliance_assessment.name)}-{sanitize_filename(compliance_assessment.framework.name)}-{datetime.now():%Y-%m-%d-%H-%M}.zip"
 
             # Create temporary file that will be automatically deleted
@@ -14083,25 +14256,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             try:
                 with zipfile.ZipFile(temp_file, "w") as zipf:
                     for evidence in evidences:
-                        if (
-                            evidence.last_revision
-                            and evidence.last_revision.attachment
-                            and default_storage.exists(
-                                evidence.last_revision.attachment.name
+                        # last_revision re-queries; omit one file rather than abort.
+                        entry_name = archive_names.get(evidence.id)
+                        revision = evidence.last_revision
+                        if not entry_name or not revision or not revision.attachment:
+                            continue
+                        if not default_storage.exists(revision.attachment.name):
+                            continue
+                        with default_storage.open(
+                            revision.attachment.name
+                        ) as attachment_file:
+                            zipf.writestr(
+                                f"evidences/{entry_name}", attachment_file.read()
                             )
-                        ):
-                            with default_storage.open(
-                                evidence.last_revision.attachment.name
-                            ) as attachment_file:
-                                zipf.writestr(
-                                    os.path.join(
-                                        "evidences",
-                                        os.path.basename(
-                                            evidence.last_revision.attachment.name
-                                        ),
-                                    ),
-                                    attachment_file.read(),
-                                )
                     zipf.writestr("index.html", index_content)
 
                 # Seek to beginning for reading
@@ -15663,6 +15830,15 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     # nobody has add_requirementassessment, they are created with the audit.
     permission_overrides = {"findings_binder": "change_requirementassessment"}
 
+    @action(detail=True, methods=["get"], url_path="quality_check")
+    def quality_check_detail(self, request, pk):
+        """Quality findings for a single requirement assessment.
+
+        The audit-level check at /compliance-assessments/{id}/quality_check runs
+        the very same rules over every requirement in scope.
+        """
+        return Response(self.get_object().quality_check())
+
     @action(detail=True, methods=["post"], url_path="findings-binder")
     def findings_binder(self, request, pk=None):
         """Return the audit's findings binder, creating it on first use."""
@@ -15674,6 +15850,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
         requirement_assessment = self.get_object()
         audit = requirement_assessment.compliance_assessment
+        if audit.is_locked:
+            return Response(
+                {"error": "Cannot raise a finding on a locked audit"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         # `add_findingsassessment` on the audit's folder is what authorizes creating it.
         if not RoleAssignment.is_access_allowed(
@@ -15751,6 +15932,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "applied_controls",  # ManyToManyField to AppliedControl
                 "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
+                "findings",  # Reverse FK from Finding serialized as FieldsRelatedField
                 "answers",  # Reverse FK from Answer, used by get_answers() in read serializer
                 "answers__question",  # Needed by build_answers_dict() to get question.urn and question.type
                 "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
@@ -16415,18 +16597,51 @@ def get_build(request):
 # NOTE: Important functions/classes from old views.py, to be reviewed
 
 
+def build_evidence_archive_names(evidences: Sequence[Evidence]) -> dict:
+    """Zip entry name per evidence, unique within one archive.
+
+    Computed once for both the template and the zip writer: a divergence is a dead link.
+    """
+    names = {}
+    taken = set()
+    for evidence in sorted(evidences, key=lambda e: str(e.id)):
+        revision = evidence.last_revision
+        if not revision or not revision.attachment:
+            continue
+        # Never trusted: an unsanitized row would be a traversal-capable zip entry.
+        base = sanitize_file_name(revision.filename() or "") or "file"
+        stem, extension = os.path.splitext(base)
+        candidate, counter = base, 1
+        # Case-insensitive: the archive is often extracted on Windows or macOS.
+        while candidate.lower() in taken:
+            counter += 1
+            candidate = f"{stem} ({counter}){extension}"
+        taken.add(candidate.lower())
+        names[evidence.id] = candidate
+    return names
+
+
 def generate_html(
     compliance_assessment: ComplianceAssessment,
-) -> Tuple[str, list[Evidence]]:
+) -> Tuple[str, list[Evidence], dict]:
     selected_evidences = []
 
-    requirement_nodes = RequirementNode.objects.filter(
-        framework=compliance_assessment.framework
-    ).order_by("order_id")
+    requirement_nodes = (
+        RequirementNode.objects.filter(framework=compliance_assessment.framework)
+        .order_by("order_id")
+        .prefetch_related("questions__choices")
+    )
 
-    assessments = RequirementAssessment.objects.filter(
-        compliance_assessment=compliance_assessment,
-    ).all()
+    assessments = (
+        RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+        )
+        .select_related("requirement")
+        .prefetch_related(
+            "answers__question",
+            "answers__selected_choices",
+        )
+    )
 
     implementation_groups = compliance_assessment.selected_implementation_groups
     graph = get_sorted_requirement_nodes(
@@ -16472,7 +16687,9 @@ def generate_html(
         answers_dict_by_urn[a.requirement.urn] = build_answers_dict(a.answers.all())
 
     questions_dict_by_urn = {}
-    for node in requirement_nodes.prefetch_related("questions__choices"):
+    # requirement_nodes is already evaluated (node_per_urn) with questions__choices
+    # prefetched; calling prefetch_related() again would clone and re-run it.
+    for node in requirement_nodes:
         # A question hidden by an unsatisfied depends_on does not apply here, so
         # the report must not list it as unanswered.
         qd = visible_questions(
@@ -16550,16 +16767,18 @@ def generate_html(
         top_level_nodes_data.append(node_data)
         selected_evidences += node_evidences
 
+    evidences = list(set(selected_evidences))
+    archive_names = build_evidence_archive_names(evidences)
+
     data = {
         "compliance_assessment": compliance_assessment,
         "top_level_nodes": top_level_nodes_data,
         "assessments": assessments,
         "ancestors": ancestors,
+        "archive_names": archive_names,
     }
 
-    return render_to_string("core/audit_report.html", data), list(
-        set(selected_evidences)
-    )
+    return render_to_string("core/audit_report.html", data), evidences, archive_names
 
 
 def export_mp_csv(request):
@@ -17235,6 +17454,11 @@ class FindingFilterSet(GenericFilterSet):
     findings_assessment = NullableModelChoiceFilter(
         queryset=FindingsAssessment.objects.all()
     )
+    # Same convention: the requirement assessment picker asks for the unbound
+    # findings alongside its own.
+    requirement_assessment = NullableModelChoiceFilter(
+        queryset=RequirementAssessment.objects.all()
+    )
 
     class Meta:
         model = Finding
@@ -17247,11 +17471,11 @@ class FindingFilterSet(GenericFilterSet):
             "priority": ["exact"],
             "asset": ["exact"],
             "requirement_node": ["exact"],
-            "requirement_assessment": ["exact"],
             "filtering_labels": ["exact"],
             "applied_controls": ["exact"],
             "evidences": ["exact"],
             "vulnerabilities": ["exact"],
+            "task_templates": ["exact"],
             "due_date": ["exact"],
             "created_at": ["gte", "lt"],
             "updated_at": ["gte", "lt"],
@@ -19454,7 +19678,13 @@ class ObjectClassificationViewSet(BaseModelViewSet):
 
 class ClassificationLevelViewSet(BaseModelViewSet):
     model = ClassificationLevel
-    filterset_fields = ["object_classification", "folder", "is_visible", "builtin"]
+    filterset_fields = [
+        "object_classification",
+        "object_classification__is_visible",
+        "folder",
+        "is_visible",
+        "builtin",
+    ]
     search_fields = ["name", "description", "abbreviation"]
     ordering = ["object_classification", "rank"]
 
@@ -19916,286 +20146,6 @@ class AnswerViewSet(BaseModelViewSet):
         if ca_id:
             qs = qs.filter(requirement_assessment__compliance_assessment_id=ca_id)
         return qs
-
-
-# ---------------------------------------------------------------------------
-# Universal Search
-# ---------------------------------------------------------------------------
-
-
-def _search_entry(model, slug, *, ref_id=False, limit=200, extra_search=None):
-    """Helper to build a search config entry."""
-    return {
-        "model": model,
-        "slug": slug,
-        "ref_id": ref_id,
-        "limit": limit,
-        # Additional fields to search on (icontains) beyond name/description/ref_id.
-        # These are ORM lookup paths, e.g. "framework__name" for a FK join.
-        "extra_search": extra_search or [],
-    }
-
-
-SEARCHABLE_MODELS = [
-    # limit: per-model cap on broad fetch. Large tables (RequirementNode,
-    # ReferenceControl) get a tighter limit to avoid starving smaller models.
-    # extra_search: additional fields to query via icontains for this model.
-    # --- Organization ---
-    _search_entry(Folder, "folders"),
-    _search_entry(Perimeter, "perimeters", ref_id=True),
-    # --- Catalog ---
-    _search_entry(Framework, "frameworks", ref_id=True),
-    _search_entry(Threat, "threats", ref_id=True, limit=100, extra_search=["provider"]),
-    _search_entry(ReferenceControl, "reference-controls", ref_id=True, limit=100),
-    _search_entry(RiskMatrix, "risk-matrices", ref_id=True, limit=50),
-    _search_entry(RequirementNode, "requirement-nodes", ref_id=True, limit=100),
-    # --- Assets ---
-    _search_entry(Asset, "assets", ref_id=True),
-    _search_entry(Vulnerability, "vulnerabilities", ref_id=True, limit=100),
-    # --- Operations ---
-    _search_entry(AppliedControl, "applied-controls", ref_id=True),
-    _search_entry(Policy, "policies", ref_id=True),
-    _search_entry(Incident, "incidents", ref_id=True),
-    _search_entry(Finding, "findings", ref_id=True),
-    _search_entry(SecurityException, "security-exceptions", ref_id=True),
-    _search_entry(TaskTemplate, "task-templates", ref_id=True, limit=100),
-    _search_entry(Evidence, "evidences"),
-    # --- Governance ---
-    _search_entry(RiskAcceptance, "risk-acceptances"),
-    # --- Risk ---
-    _search_entry(RiskAssessment, "risk-assessments", ref_id=True),
-    _search_entry(
-        RiskScenario,
-        "risk-scenarios",
-        ref_id=True,
-        extra_search=["risk_assessment__name"],
-    ),
-    # --- Compliance ---
-    _search_entry(
-        ComplianceAssessment,
-        "compliance-assessments",
-        ref_id=True,
-        extra_search=["framework__name"],
-    ),
-    # --- TPRM ---
-    _search_entry(Entity, "entities", ref_id=True),
-    _search_entry(Solution, "solutions", extra_search=["provider_entity__name"]),
-    _search_entry(Contract, "contracts", ref_id=True),
-    # --- EBIOS RM ---
-    _search_entry(EbiosRMStudy, "ebios-rm"),
-    _search_entry(FearedEvent, "feared-events"),
-    _search_entry(StrategicScenario, "strategic-scenarios"),
-    _search_entry(AttackPath, "attack-paths"),
-    # --- Privacy ---
-    _search_entry(Processing, "processings", ref_id=True),
-    _search_entry(DataBreach, "data-breaches", ref_id=True),
-    _search_entry(RightRequest, "right-requests", ref_id=True),
-    # --- Resilience ---
-    _search_entry(BusinessImpactAnalysis, "business-impact-analysis"),
-]
-
-
-_ACCENT_MAP = {
-    "a": "[aàáâãäåæ]",
-    "e": "[eèéêë]",
-    "i": "[iìíîï]",
-    "o": "[oòóôõöø]",
-    "u": "[uùúûü]",
-    "c": "[cç]",
-    "n": "[nñ]",
-    "y": "[yýÿ]",
-    "s": "[sß]",
-}
-
-
-def _accent_regex(word: str) -> str:
-    """Convert a word to a regex pattern that matches accented variants.
-
-    E.g. "referentiel" -> "r[eèéêë]f[eèéêë]r[eèéêë][nñ]t[iìíîï][eèéêë]l"
-    Works on both SQLite and PostgreSQL with __iregex.
-    """
-    return "".join(_ACCENT_MAP.get(c, re.escape(c)) for c in word.lower())
-
-
-@api_view(["GET"])
-@permission_classes([permissions.IsAuthenticated])
-def global_search(request):
-    """
-    Universal fuzzy search across all searchable models.
-
-    GET /api/search/?q=firewall+policy&type=applied-controls,assets
-    """
-    from rapidfuzz import fuzz
-
-    EMPTY_RESPONSE = {"results": [], "query": "", "count": 0, "total_candidates": 0}
-
-    # Cap query length to avoid excessive icontains processing across all models.
-    # 200 chars is far beyond any realistic search; words capped at 20 since each
-    # word generates 2-3 Q objects per model (~1000+ total at the limit).
-    # Minimum 2 chars to avoid single-character fan-out (e.g. q=a matching everything).
-    query = request.query_params.get("q", "").strip()[:200]
-    if len(query) < 2:
-        return Response(EMPTY_RESPONSE)
-
-    type_filter = request.query_params.get("type", "")
-    allowed_types = set(type_filter.split(",")) if type_filter else None
-
-    words = query.split()[:20]
-    # Build prefix set for typo-tolerant broad fetch (first 3 chars of each word)
-    prefixes = {w[:3].lower() for w in words if len(w) >= 3}
-
-    candidates = []
-
-    for entry in SEARCHABLE_MODELS:
-        model_class = entry["model"]
-        url_slug = entry["slug"]
-        has_ref_id = entry["ref_id"]
-        max_per_model = entry["limit"]
-        extra_search = entry["extra_search"]
-
-        if allowed_types and url_slug not in allowed_types:
-            continue
-
-        # Permission-aware queryset
-        accessible_ids = RoleAssignment.get_viewable_object_ids(
-            request.user, model_class
-        )
-        qs = model_class.objects.filter(id__in=accessible_ids)
-
-        # ComplianceAssessment has extra respondent scoping: users who lack the
-        # full auditor view (view_compliance_assessment_full) in a folder can only see
-        # assessments where they have a requirement assignment. Mirror the logic
-        # from ComplianceAssessmentViewSet.
-        if model_class is ComplianceAssessment:
-            respondent_folders = get_respondent_scoped_folder_ids(request.user)
-            if respondent_folders:
-                user_actors = Actor.get_all_for_user(request.user)
-                qs = qs.filter(
-                    ~Q(folder_id__in=respondent_folders)
-                    | Q(requirement_assignments__actor__in=user_actors)
-                ).distinct()
-
-        # Build Q filter for each word on searchable fields.
-        # Uses iregex with accent-folding character classes so that e.g.
-        # "referentiel" matches "RÉFÉRENTIEL" on SQLite (whose LIKE is
-        # ASCII-only and can't fold accents).
-        field_names = {f.name for f in model_class._meta.get_fields()}
-        searchable = ["name", "description"]
-        if has_ref_id:
-            searchable.append("ref_id")
-        # Models with i18n translations store localized names/descriptions in a
-        # JSONField. Searching it catches all translated variants at once.
-        if "translations" in field_names:
-            searchable.append("translations")
-        searchable.extend(extra_search)
-
-        q_filter = Q()
-        for word in words:
-            pattern = _accent_regex(word)
-            word_q = Q()
-            for field in searchable:
-                word_q |= Q(**{f"{field}__iregex": pattern})
-            q_filter |= word_q
-
-        # Also add prefix-based matching for typo tolerance (name + ref_id only)
-        for prefix in prefixes:
-            prefix_pattern = _accent_regex(prefix)
-            prefix_q = Q(**{"name__iregex": prefix_pattern})
-            if has_ref_id:
-                prefix_q |= Q(**{"ref_id__iregex": prefix_pattern})
-            q_filter |= prefix_q
-
-        # Detect optional display fields present on this model (reuses field_names from above)
-        extra_fields = []
-        if has_ref_id:
-            extra_fields.append("ref_id")
-        if "folder" in field_names:
-            extra_fields.append("folder__name")
-        if "provider_entity" in field_names:
-            extra_fields.append("provider_entity__name")
-        if model_class is RequirementNode:
-            extra_fields.append("framework_id")
-
-        results = qs.filter(q_filter).values(
-            "id",
-            "name",
-            "description",
-            *extra_fields,
-        )[:max_per_model]
-
-        for row in results:
-            candidates.append(
-                {
-                    "type": url_slug,
-                    "id": str(row["id"]),
-                    "name": row["name"] or "",
-                    "ref_id": row.get("ref_id", "") or "",
-                    "description": row.get("description") or "",
-                    "folder": row.get("folder__name", "") or "",
-                    "provider": row.get("provider_entity__name", "") or "",
-                    "framework_id": str(row["framework_id"])
-                    if row.get("framework_id")
-                    else None,
-                }
-            )
-
-    # Strip accents/diacritics for accent-insensitive matching and scoring.
-    # SQLite's LIKE is only ASCII case-insensitive, and rapidfuzz treats
-    # accented chars as distinct — normalizing levels the playing field.
-    import unicodedata
-
-    def strip_accents(s: str) -> str:
-        return "".join(
-            c
-            for c in unicodedata.normalize("NFD", s)
-            if unicodedata.category(c) != "Mn"
-        ).lower()
-
-    query_norm = strip_accents(query)
-
-    # Score and rank with rapidfuzz
-    for candidate in candidates:
-        name_norm = strip_accents(candidate["name"])
-        ref_norm = strip_accents(candidate["ref_id"])
-        desc_norm = strip_accents(candidate["description"])
-
-        # Fuzzy scores (on normalized strings for accent-insensitive comparison)
-        name_score = fuzz.WRatio(query_norm, name_norm)
-        ref_score = fuzz.WRatio(query_norm, ref_norm) if ref_norm else 0
-        desc_score = fuzz.partial_ratio(query_norm, desc_norm) * 0.4
-
-        # Substring bonus: literal match in name or ref_id should rank very
-        # high. WRatio penalizes long names unfairly (e.g. "recyf" vs
-        # "RECYF : REFERENTIEL CYBER France..." scores only 24).
-        substring_bonus = 0
-        if query_norm in name_norm:
-            substring_bonus = 95 if name_norm.startswith(query_norm) else 90
-        if query_norm in ref_norm:
-            substring_bonus = max(substring_bonus, 95)
-
-        candidate["score"] = max(name_score, ref_score, desc_score, substring_bonus)
-
-    # Sort by score descending, return top 50
-    candidates.sort(key=lambda c: c["score"], reverse=True)
-    top_results = candidates[:50]
-
-    # Build final response: add URLs and truncate descriptions for the wire
-    for r in top_results:
-        if r["type"] == "requirement-nodes" and r.get("framework_id"):
-            # Link to parent framework (no standalone requirement detail page yet)
-            r["url"] = f"/frameworks/{r['framework_id']}"
-        else:
-            r["url"] = f"/{r['type']}/{r['id']}"
-        r["description"] = r["description"][:200]
-
-    return Response(
-        {
-            "results": top_results,
-            "query": query,
-            "count": len(top_results),
-            "total_candidates": len(candidates),
-        }
-    )
 
 
 def metrics_view(request):

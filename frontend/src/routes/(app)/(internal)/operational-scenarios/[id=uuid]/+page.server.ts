@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { type TableSource } from '$lib/components/ModelTable/types';
 import { getModelInfo } from '$lib/utils/crud';
 import type { PageServerLoad } from './$types';
 import type { Actions } from '@sveltejs/kit';
