@@ -586,8 +586,16 @@
 		onChange();
 	}
 
+	// The backend accepts a bare string as well as a list, so a config authored
+	// through the API or imported from a library can carry either. Spreading a
+	// string would store its characters one by one, and filtering one throws.
+	function readIncludeList(value: unknown): string[] {
+		if (Array.isArray(value)) return value as string[];
+		return typeof value === 'string' && value ? [value] : [];
+	}
+
 	function toggleReadInclude(name: string, checked: boolean) {
-		const current: string[] = actionConfig.include ?? [];
+		const current = readIncludeList(actionConfig.include);
 		actionConfig.include = checked ? [...current, name] : current.filter((entry) => entry !== name);
 		onChange();
 	}
@@ -1981,7 +1989,7 @@
 									<input
 										type="checkbox"
 										class="checkbox"
-										checked={(actionConfig.include ?? []).includes(name)}
+										checked={readIncludeList(actionConfig.include).includes(name)}
 										onchange={(e) => toggleReadInclude(name, e.currentTarget.checked)}
 									/>
 									<span>{safeTranslate(name)}</span>

@@ -319,6 +319,10 @@ def test_requirements_outside_selected_implementation_groups_are_skipped(
     compliance_assessment.save()
 
     assert not _findings_for(compliance_assessment, ra)
+    # The per-requirement surface has to agree: it feeds the API endpoint and
+    # the workflow computed value, which must not report what the audit hides.
+    ra.refresh_from_db()
+    assert ra.quality_check()["count"] == 0
 
 
 @pytest.mark.django_db

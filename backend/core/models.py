@@ -9559,14 +9559,15 @@ class ComplianceAssessment(Assessment):
         # the selected implementation groups, and non-assessable nodes, are not
         # the auditor's to answer, so they are not judged.
         quality_context = _build_requirement_assessment_quality_context(self)
-        selected_groups = set(self.selected_implementation_groups or [])
         for ra in self.requirement_assessments.select_related("requirement").order_by(
             "created_at"
         ):
-            if not ra.requirement.assessable:
-                continue
-            if selected_groups and selected_groups.isdisjoint(
-                set(ra.requirement.implementation_groups or [])
+            # Same predicate as RequirementAssessment.quality_check(), called on
+            # `self` rather than through `ra.compliance_assessment` so the loop
+            # does not fetch the audit back once per requirement.
+            if (
+                not ra.requirement.assessable
+                or not self.requirement_matches_selected_groups(ra.requirement)
             ):
                 continue
 
@@ -10198,7 +10199,15 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         the shared context once and calls the same rules, so a finding can never
         differ between the two surfaces.
         """
-        if not self.requirement.assessable:
+        # Same predicate the audit applies when it decides what is in scope: a
+        # requirement the auditor was never asked to answer must not be judged
+        # here either, or this surface would report findings the X-rays page
+        # does not show.
+        if not self.requirement.assessable or not (
+            self.compliance_assessment.requirement_matches_selected_groups(
+                self.requirement
+            )
+        ):
             return {"errors": [], "warnings": [], "info": [], "count": 0}
 
         context = _build_requirement_assessment_quality_context(
