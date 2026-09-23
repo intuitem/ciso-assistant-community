@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import SoaTreeSection from './SoaTreeSection.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -240,7 +241,10 @@
 										<div class="font-medium text-surface-900-100">{ac.reference_control.name}</div>
 										{#if ac.reference_control.description}
 											<div class="text-xs text-surface-600-400 mt-0.5">
-												{ac.reference_control.description}
+												<MarkdownRenderer
+													content={ac.reference_control.description}
+													class="text-xs"
+												/>
 											</div>
 										{/if}
 									{:else}
@@ -249,7 +253,9 @@
 								</td>
 								<!-- Justification -->
 								<td class="px-3 py-2 text-sm text-surface-600-400 align-top overflow-hidden">
-									<span class="break-words">{ac.observation || ''}</span>
+									{#if ac.observation}
+										<MarkdownRenderer content={ac.observation} class="text-sm" />
+									{/if}
 								</td>
 								<!-- Risk Coverage -->
 								<td class="px-3 py-2 text-center align-top">

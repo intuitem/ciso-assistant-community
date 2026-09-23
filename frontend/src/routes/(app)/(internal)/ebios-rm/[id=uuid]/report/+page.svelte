@@ -319,7 +319,9 @@
 						{#if event.description}
 							<div class="mt-2 text-sm">
 								<span class="font-semibold text-surface-700-300">{m.description()}:</span>
-								<p class="mt-1 text-surface-600-400">{event.description}</p>
+								<div class="mt-1 text-surface-600-400">
+									<MarkdownRenderer content={event.description} />
+								</div>
 							</div>
 						{/if}
 					</div>
@@ -533,7 +535,9 @@
 						{#if roto.justification}
 							<div class="mt-2 text-sm">
 								<span class="font-semibold text-surface-700-300">{m.justification()}:</span>
-								<span class="ml-2 text-surface-600-400">{roto.justification}</span>
+								<div class="ml-2 text-surface-600-400">
+									<MarkdownRenderer content={roto.justification} />
+								</div>
 							</div>
 						{/if}
 					</div>
@@ -596,7 +600,9 @@
 						{#if stakeholder.justification}
 							<div class="mt-2 text-sm">
 								<span class="font-semibold text-surface-700-300">{m.justification()}:</span>
-								<span class="ml-2 text-surface-600-400">{stakeholder.justification}</span>
+								<div class="ml-2 text-surface-600-400">
+									<MarkdownRenderer content={stakeholder.justification} />
+								</div>
 							</div>
 						{/if}
 					</div>
@@ -665,7 +671,9 @@
 								<i class="fa-solid fa-chess-knight mr-2"></i>{scenario.name}
 							</h3>
 							{#if scenario.description}
-								<p class="text-surface-700-300 text-sm mb-3">{scenario.description}</p>
+								<div class="text-surface-700-300 text-sm mb-3">
+									<MarkdownRenderer content={scenario.description} />
+								</div>
 							{/if}
 							<div class="flex flex-wrap gap-4 text-sm">
 								<div>
@@ -865,7 +873,9 @@
 							{#if opScenario.justification}
 								<div class="mt-2 text-sm">
 									<span class="font-semibold text-surface-700-300">{m.justification()}:</span>
-									<p class="ml-2 text-surface-600-400 mt-1">{opScenario.justification}</p>
+									<div class="ml-2 text-surface-600-400 mt-1">
+										<MarkdownRenderer content={opScenario.justification} />
+									</div>
 								</div>
 							{/if}
 						</div>
@@ -892,7 +902,9 @@
 												<div class="flex-1">
 													<div class="font-medium text-surface-950-50 text-sm">{mode.name}</div>
 													{#if mode.description}
-														<p class="text-surface-600-400 text-xs mt-1">{mode.description}</p>
+														<div class="text-surface-600-400 text-xs mt-1">
+															<MarkdownRenderer content={mode.description} class="text-xs" />
+														</div>
 													{/if}
 												</div>
 											</div>

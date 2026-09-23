@@ -2,6 +2,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		nodeId: string;
@@ -94,7 +95,7 @@
 			{/if}
 			{#if node.description}
 				<div class="text-xs mt-0.5 {isNotApplicable ? 'text-surface-400' : 'text-surface-600-400'}">
-					{node.description}
+					<MarkdownRenderer content={node.description} class="text-xs" />
 				</div>
 			{/if}
 		</td>
@@ -125,8 +126,8 @@
 					<i class="fas fa-exclamation-triangle text-[10px]"></i>
 					{m.observationMissing()}
 				</span>
-			{:else}
-				<span class="break-words">{node.observation || ''}</span>
+			{:else if node.observation}
+				<MarkdownRenderer content={node.observation} class="text-sm" />
 			{/if}
 		</td>
 		<!-- Implementation -->
