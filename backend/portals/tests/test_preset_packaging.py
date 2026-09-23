@@ -117,6 +117,57 @@ class TestDereference:
         assert unwired == []
         assert target == {"quick_form_urn": "urn:test:portals:qf"}
 
+    def test_a_publication_wired_tile_travels_as_its_quick_form(self, catalog):
+        """The editor's recommended wiring for outside respondents is a publication
+        alone. The publication is local, the form behind it is not."""
+        from core.models import QuickFormPublication
+
+        publication = QuickFormPublication.objects.create(
+            name="Access requests",
+            folder=catalog["folder"],
+            quick_form=catalog["qf"],
+        )
+        portal = _portal(
+            catalog,
+            [
+                {
+                    "kind": "quickForm",
+                    "title": "Ask for access",
+                    "target": {"publication": str(publication.id)},
+                }
+            ],
+        )
+
+        exported, unwired = dereference(portal.content)
+        assert unwired == []
+        assert exported["sections"][0]["items"][0]["target"] == {
+            "quick_form_urn": "urn:test:portals:qf"
+        }
+
+        local, unwired = dereference(portal.content, keep_local_ids=True)
+        assert unwired == []
+        assert local["sections"][0]["items"][0]["target"] == {
+            "publication": str(publication.id),
+            "quick_form_urn": "urn:test:portals:qf",
+        }
+
+    def test_a_publication_that_is_gone_is_reported(self, catalog):
+        portal = _portal(
+            catalog,
+            [
+                {
+                    "kind": "quickForm",
+                    "title": "Ask for access",
+                    "target": {"publication": "00000000-0000-0000-0000-000000000000"},
+                }
+            ],
+        )
+        content, unwired = dereference(portal.content)
+
+        assert len(unwired) == 1
+        assert "publication" in unwired[0]
+        assert content["sections"][0]["items"][0]["target"] == {}
+
     @pytest.mark.parametrize(
         "item,dropped",
         [
@@ -474,6 +525,7 @@ class TestPresetValidation:
             {
                 "urn": "urn:test:portals:portal_preset:bad",
                 "ref_id": "bad",
+                "name": "Bad",
                 "content": content,
             }
         )
@@ -484,7 +536,34 @@ class TestPresetValidation:
         importer = PortalPresetImporter({"content": {"sections": [{"items": []}]}})
 
         error = importer.init()
-        assert "ref_id" in error and "urn" in error
+        assert "ref_id" in error and "urn" in error and "name" in error
+
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            ("name", "x" * 201),
+            ("name", ""),
+            ("name", 42),
+            ("urn", "urn:test:" + "x" * 250),
+            ("ref_id", "x" * 256),
+        ],
+    )
+    def test_a_column_postgres_would_reject_fails_the_load_everywhere(
+        self, field, value
+    ):
+        """PostgreSQL raises on an oversized CharField and SQLite stores it; the
+        importer has to give the same answer on both."""
+        importer = PortalPresetImporter(
+            {
+                "urn": "urn:test:portals:portal_preset:long",
+                "ref_id": "long",
+                "name": "Long",
+                "content": {"sections": [{"items": []}]},
+                field: value,
+            }
+        )
+
+        assert field in importer.init()
 
     def test_a_urn_another_library_ships_is_refused(self, catalog):
         preset_data = {

@@ -6,7 +6,7 @@ import copy
 
 from django.core.exceptions import ValidationError
 
-from core.models import Framework, QuickForm
+from core.models import Framework, QuickForm, QuickFormPublication
 
 URN_TARGET_FIELDS = {
     "assessment": [("framework", Framework)],
@@ -35,13 +35,40 @@ def _iter_items(content):
                 yield item
 
 
-def _urn_of(model, pk):
-    """The URN behind a local id, or None. Content is author-written JSON, so the
-    id may not even be a UUID; that is "not found", not a crash."""
+def _first(queryset, field, pk):
+    """One column of the row behind a local id, or None. Content is author-written
+    JSON, so the id may not even be a UUID; that is "not found", not a crash."""
     try:
-        return model.objects.filter(pk=pk).values_list("urn", flat=True).first()
+        return queryset.filter(pk=pk).values_list(field, flat=True).first()
     except ValidationError, ValueError:
         return None
+
+
+def _urn_of(model, pk):
+    return _first(model.objects, "urn", pk)
+
+
+def _carry_publication_form(target, title, unwired, keep_local_ids):
+    """A quick form tile may be wired through a publication alone. The publication
+    is local (audience, submission folder), but the form behind it can travel, so
+    the tile leaves as `quick_form` and is rewired to the form on arrival."""
+    publication = target.get("publication")
+    if not publication:
+        target.pop("publication", None)
+        return
+    if not target.get("quick_form"):
+        form_id = _first(QuickFormPublication.objects, "quick_form_id", publication)
+        if form_id is None:
+            if not keep_local_ids:
+                target.pop("publication", None)
+                unwired.append(
+                    f"'{title}' travels unwired: its publication is not on this "
+                    "instance, so there is no quick form to travel under."
+                )
+            return
+        target["quick_form"] = str(form_id)
+    if not keep_local_ids:
+        target.pop("publication", None)
 
 
 def dereference(content, keep_local_ids=False):
@@ -60,6 +87,8 @@ def dereference(content, keep_local_ids=False):
         unportable = UNPORTABLE_TARGET_FIELDS.get(item.get("kind"))
         if unportable and target.pop(unportable[0], None):
             unwired.append(f"'{title}' travels unwired: {unportable[1]}.")
+        if item.get("kind") == "quickForm":
+            _carry_publication_form(target, title, unwired, keep_local_ids)
         for field, model in URN_TARGET_FIELDS.get(item.get("kind"), []):
             value = target.get(field)
             if not value:
@@ -76,8 +105,6 @@ def dereference(content, keep_local_ids=False):
                 continue
             target.pop(field, None)
             target[f"{field}_urn"] = urn
-        # The quick form itself travels, so the tile survives losing its publication.
-        target.pop("publication", None)
         for field in LOCAL_ONLY_FIELDS:
             target.pop(field, None)
     return out, unwired

@@ -577,7 +577,10 @@ class PortalPresetImporter:
     refreshes it in place. Tile references arrive as URNs; one that cannot be resolved
     leaves its tile unwired rather than failing the load, and the editor flags it."""
 
-    REQUIRED_FIELDS = {"ref_id", "urn"}
+    REQUIRED_FIELDS = {"ref_id", "urn", "name"}
+    # Checked here so a bad document fails the load with a message on every
+    # database; PostgreSQL rejects an oversized column, SQLite stores it.
+    MAX_LENGTHS = {"name": 200, "ref_id": 255, "urn": 255}
 
     def __init__(self, preset_data: dict, library_urn: Optional[str] = None):
         self.preset_data = preset_data
@@ -587,7 +590,15 @@ class PortalPresetImporter:
         from portals.models import PortalPreset
 
         if missing_fields := self.REQUIRED_FIELDS - set(self.preset_data.keys()):
-            return "Missing the following fields : {}".format(", ".join(missing_fields))
+            return "Missing the following fields : {}".format(
+                ", ".join(sorted(missing_fields))
+            )
+        for field, max_length in self.MAX_LENGTHS.items():
+            value = self.preset_data[field]
+            if not isinstance(value, str) or not value.strip():
+                return f"{field} must be a non-empty string"
+            if len(value) > max_length:
+                return f"{field} must be at most {max_length} characters"
         urn = str(self.preset_data["urn"]).lower()
         # update_or_create keys on the URN alone; without this, a second library
         # shipping the same preset URN would silently take the row over.
