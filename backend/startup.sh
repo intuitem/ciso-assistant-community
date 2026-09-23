@@ -16,6 +16,11 @@ while ! python manage.py showmigrations iam >/dev/null; do
   sleep 15
 done
 python manage.py migrate --settings="${DJANGO_SETTINGS_MODULE}"
+if [ -n "$CACHE_DB_PATH" ]; then
+  python manage.py createcachetable --database=cache_db --settings="${DJANGO_SETTINGS_MODULE}"
+else
+  python manage.py createcachetable --settings="${DJANGO_SETTINGS_MODULE}"
+fi
 python manage.py storelibraries --settings="${DJANGO_SETTINGS_MODULE}"
 if [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
   python manage.py createsuperuser --noinput --settings="${DJANGO_SETTINGS_MODULE}"

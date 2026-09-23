@@ -16,7 +16,7 @@ CISO Assistant is open source and welcomes patches — bug fixes, performance im
 
 Follow the [Local installation guide](../installation/local.md) to get a development instance running. Briefly:
 
-- **Backend:** Python 3.14+, uv 0.9+, run `uv sync` then `uv run manage.py migrate` and `uv run manage.py runserver`.
+- **Backend:** Python 3.14+, uv 0.9+, run `uv sync` then `uv run manage.py migrate`, `uv run manage.py createcachetable` and `uv run manage.py runserver`. The `createcachetable` step is required: login throttling and feature flags read from a database cache, and without that table both fail with `no such table: auth_throttle_cache`.
 - **Frontend:** Node 22+, pnpm 9.0+, run `pnpm install` then `pnpm run dev`.
 
 A virtual environment is kept at the repo root (`.venv/`) — you can invoke `.venv/bin/python` directly.

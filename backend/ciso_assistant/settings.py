@@ -802,6 +802,43 @@ else:
 
 logger.info("DATABASE ENGINE: %s", DATABASES["default"]["ENGINE"])
 
+# Login rate limiting (ACCOUNT_RATE_LIMITS below) is backed by DatabaseCache so
+# its counters are shared across gunicorn workers, unlike the default per-process
+# LocMemCache. CACHE_DB_PATH optionally isolates that cache table to its own
+# SQLite file, so a login flood's writes don't contend with the main database's
+# single-writer lock. Left unset, everything falls back to "default" via
+# Django's normal router-chain fallback (empty DATABASE_ROUTERS => None => "default").
+CACHE_DB_PATH = os.environ.get("CACHE_DB_PATH")
+
+if CACHE_DB_PATH:
+    DATABASES["cache_db"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": CACHE_DB_PATH,
+        # Mirrors "default": this file absorbs the login flood, so without WAL
+        # its writers would block the throttle's own reads, and the 5s default
+        # busy timeout would surface as "database is locked" during one.
+        "OPTIONS": {
+            "timeout": 120,
+            "transaction_mode": "IMMEDIATE",
+            "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;",
+        },
+    }
+    DATABASE_ROUTERS = ["ciso_assistant.routers.CacheDBRouter"]
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "auth_throttle_cache",
+        # Django's MAX_ENTRIES default is 300, and culling evicts the
+        # lowest-sorting third by cache_key, not the least recently used. An
+        # attacker spraying from enough IPs would push past 300 and evict their
+        # own throttle counter, bypassing the limit. Entries are short-lived
+        # (60s/300s) and expired rows are purged before any cull, so a high cap
+        # costs only the per-write COUNT(*): 0.17ms at 100k rows.
+        "OPTIONS": {"MAX_ENTRIES": 100_000, "CULL_FREQUENCY": 4},
+    }
+}
+
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
