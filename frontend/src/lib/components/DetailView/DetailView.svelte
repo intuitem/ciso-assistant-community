@@ -13,7 +13,7 @@
 	import CustomFieldsDisplay from '$lib/components/Forms/CustomFieldsDisplay.svelte';
 	import { hasRelationGraph } from '$lib/components/RelationsGraph/relations';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
 	import { getModelInfo, getMarkdownFields, isFieldFlagEnabled } from '$lib/utils/crud';
 	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
@@ -93,25 +93,7 @@
 		fields = [],
 		exclude = $bindable([]),
 		displayModelTable = true,
-		dateFieldsToFormat = [
-			'created_at',
-			'updated_at',
-			'expiry_date',
-			'accepted_at',
-			'rejected_at',
-			'revoked_at',
-			'eta',
-			'expiration_date',
-			'validation_deadline',
-			'timestamp',
-			'reported_at',
-			'occurred_at',
-			'resolved_at',
-			'due_date',
-			'start_date',
-			'closing_date',
-			'commission_date'
-		],
+		dateFieldsToFormat = DATE_FIELDS_TO_FORMAT,
 		widgets,
 		widgetsEnabled = true,
 		actions,

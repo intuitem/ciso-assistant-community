@@ -1,6 +1,7 @@
 // define the content of forms
 
 import EvidenceFileName from '$lib/components/ModelTable/field/EvidenceFileName.svelte';
+import NotificationTitle from '$lib/components/ModelTable/field/NotificationTitle.svelte';
 import CommitmentTarget from '$lib/components/ModelTable/field/CommitmentTarget.svelte';
 import ScheduleDisplay from '$lib/components/ModelTable/field/ScheduleDisplay.svelte';
 import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
@@ -214,6 +215,8 @@ export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 // Models never created from their list page: library-managed content, membership rows
 // written elsewhere, or records that only exist as a child of something else.
 export const NON_CREATABLE_URL_MODELS = [
+	// System-generated: written by producers, never by a user.
+	'notifications',
 	'risk-matrices',
 	'frameworks',
 	'requirement-mapping-sets',
@@ -274,6 +277,16 @@ type ModelMap = {
 };
 
 export const URL_MODEL_MAP: ModelMap = {
+	notifications: {
+		name: 'notification',
+		localName: 'notification',
+		localNamePlural: 'notifications',
+		verboseName: 'Notification',
+		verboseNamePlural: 'Notifications'
+		// No `foreignKeyFields`: the domain is the derived `target_folder`, and linking it
+		// would 404 for a recipient holding no role there -- which is the normal case (ADR
+		// notification-recipient-scoped-access).
+	},
 	folders: {
 		name: 'folder',
 		localName: 'domain',
@@ -3999,6 +4012,10 @@ export const URL_MODEL_MAP: ModelMap = {
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 const FIELD_COMPONENT_MAP = {
+	notifications: {
+		// No value in the payload; NotificationTitle computes it.
+		title: NotificationTitle
+	},
 	commitments: {
 		target: CommitmentTarget
 	},

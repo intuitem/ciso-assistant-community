@@ -1347,9 +1347,6 @@
 	"notificationEmails": "Notification emails",
 	"notificationEmailsDescription": "Assignment, reminder and expiration notifications",
 	"emailSendingDisabled": "Disabled",
-	"toggleEmailSending": "Enable or disable sending of this email",
-	"disableCoreEmailTitle": "Disable this core email?",
-	"disableCoreEmailWarning": "This email supports key flows (e.g. password reset, first connection or questionnaire invitations).\nIf disabled, users won't receive it at all.\nDisable anyway?",
 	"templateKey": "Template",
 	"templateSubject": "Subject",
 	"templateBody": "Body",
@@ -1409,6 +1406,75 @@
 	"templateAuditReportDescription": "Audit Word report",
 	"templateDocumentPdfName": "Document PDF layout",
 	"templateDocumentPdfDescription": "Managed document PDF layout (cover page, headers and footers)",
+	"templateAssignmentReopenedName": "Assignment reopened",
+	"templateAssignmentReopenedDescription": "Sent to a respondent when their audit assignment is reopened for editing",
+	"templateExpiredSecurityExceptionsName": "Expired exceptions",
+	"templateExpiredSecurityExceptionsDescription": "Sent when security exceptions have expired",
+	"templateQuickFormReopenedName": "Quick form reopened",
+	"templateQuickFormReopenedDescription": "Sent to a respondent when their quick form response is sent back for changes",
+	"templateQuickFormStartedName": "Quick form started",
+	"templateQuickFormStartedDescription": "Sent to a respondent when a quick form is ready for their input",
+	"templateQuickFormSubmittedName": "Quick form submitted",
+	"templateQuickFormSubmittedDescription": "Sent to a reviewer when a quick form response is submitted",
+	"templateSecurityExceptionAssignmentName": "Exception assignment",
+	"templateSecurityExceptionAssignmentDescription": "Sent when a security exception is assigned",
+	"templateSecurityExceptionExpiringSoonName": "Exception expiring soon",
+	"templateSecurityExceptionExpiringSoonDescription": "Sent when security exceptions are about to expire",
+	"templateSecurityExceptionStatusChangedName": "Exception status changed",
+	"templateSecurityExceptionStatusChangedDescription": "Sent when a security exception status changes",
+	"readAt": "Read at",
+	"emailTemplatesSendingHint": "Whether each notification is sent, and over which channels, is configured in Settings → Notifications. This page only changes their wording.",
+	"inApp": "In-app",
+	"notificationChannelsDescription": "Choose which channels carry each notification. A channel a notification type does not support cannot be enabled. Account emails (password reset, first connection) gate sign-in flows: disabling them blocks those flows.",
+	"channelNotSupported": "This notification type does not support this channel",
+	"notificationCenterDescription": "In-app inbox for assignments, approvals and deadlines",
+	"notificationTitleAppliedControlAssignment": "You have been assigned to control '{control_name}'",
+	"notificationTitleAppliedControlExpiringSoon": "Control '{control_name}' expires in {days_remaining} day(s)",
+	"notificationTitleAssignmentActivated": "Your assignment on audit '{assessment_name}' has started",
+	"notificationTitleAssignmentReopened": "Your assignment on audit '{assessment_name}' was reopened",
+	"notificationTitleAssignmentReviewed": "Your assignment on audit '{assessment_name}' was {decision}",
+	"notificationTitleAssignmentSubmitted": "An assignment on audit '{assessment_name}' awaits your review",
+	"notificationTitleComplianceAssessmentAssignment": "You have been assigned to audit '{assessment_name}'",
+	"notificationTitleComplianceAssessmentDueSoon": "Audit '{assessment_name}' is due in {days_remaining} day(s)",
+	"notificationTitleEvidenceExpiringSoon": "Evidence '{evidence_name}' expires in {days_remaining} day(s)",
+	"notificationTitleExpiredControls": "Control '{control_name}' has expired",
+	"notificationTitleExpiredEvidences": "Evidence '{evidence_name}' has expired",
+	"notificationTitleExpiredSecurityExceptions": "Exception '{exception_name}' has expired",
+	"notificationTitleQuickFormReopened": "Quick form '{response_name}' was sent back to you",
+	"notificationTitleQuickFormStarted": "Quick form '{response_name}' is ready for your input",
+	"notificationTitleQuickFormSubmitted": "Quick form '{response_name}' awaits your review",
+	"notificationTitleRiskScenarioAssignment": "You have been assigned to risk scenario '{scenario_name}'",
+	"notificationTitleSecurityExceptionAssignment": "You have been assigned to exception '{exception_name}'",
+	"notificationTitleSecurityExceptionExpiringSoon": "Exception '{exception_name}' expires in {days_remaining} day(s)",
+	"notificationTitleSecurityExceptionStatusChanged": "Exception '{exception_name}' is now {new_status}",
+	"notificationTitleTaskNodeDueSoon": "Task '{task_name}' is due in {days_remaining} day(s)",
+	"notificationTitleTaskNodeOverdue": "Task '{task_name}' is overdue",
+	"notificationTitleTaskTemplateAssignment": "You have been assigned to task '{task_name}'",
+	"notificationTitleValidationDeadline": "Validation '{validation_ref_id}' is due in {days} day(s)",
+	"notificationTitleValidationFlowCreated": "Validation '{validation_ref_id}' needs your approval",
+	"notificationTitleValidationFlowUpdated": "Validation '{validation_ref_id}' is now {new_status}",
+	"unreadNotifications": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} unread notification",
+				"countPlural=other": "{count} unread notifications"
+			}
+		}
+	],
+	"noUnreadNotifications": "No unread notifications",
+	"markAsRead": "Mark as read",
+	"markAsUnread": "Mark as unread",
+	"notification": "Notification",
+	"notifications": "Notifications",
+	"notificationsDescription": "Things that need your attention",
+	"read": "Read",
+	"unread": "Unread",
+	"approvals": "Approvals",
+	"deadlines": "Deadlines",
+	"updates": "Updates",
+	"account": "Account",
 	"docHtmlTemplates": "Document PDF layouts",
 	"docHtmlTemplatesDescription": "Customize the HTML/CSS layout used when documents are exported to PDF (cover page, headers, footers, branding). Upload your own template to override the built-in default.",
 	"docHtmlTemplateUploadHelp": "Upload an .html file (Django template syntax) using the same variables as the default. Download the default first to use as a starting point.",
@@ -6589,8 +6655,8 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "Page \u00b7 {count} question",
-				"countPlural=other": "Page \u00b7 {count} questions"
+				"countPlural=one": "Page · {count} question",
+				"countPlural=other": "Page · {count} questions"
 			}
 		}
 	],
@@ -6651,5 +6717,23 @@
 	"requirementAssessmentDoneNotAssessed": "Marked done but has no result",
 	"readInclude": "Extra data to include",
 	"readIncludeHelpText": "Computed on every row that is read, so only ask for what the workflow branches on.",
-	"quality_check": "Quality check"
+	"quality_check": "Quality check",
+	"sharedWithOthers": "Shared with others",
+	"onlyYou": "Only you",
+	"alsoNotified": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} other person was notified",
+				"countPlural=other": "{count} other people were notified"
+			}
+		}
+	],
+	"recipients": "Recipients",
+	"myTeams": "My teams",
+	"teamLeader": "Leader",
+	"teamDeputy": "Deputy",
+	"teamMember": "Member",
+	"noTeams": "You do not belong to any team."
 }
