@@ -21,7 +21,7 @@ We will point `CACHES["default"]` at `django.core.cache.backends.db.DatabaseCach
 - **`MAX_ENTRIES` must stay high (currently 100000).** Django defaults it to 300 and culls by lowest `cache_key` ordering, not by recency. See Security considerations.
 - **The cache backend is process-wide, and that cannot be scoped.** allauth imports the `default` alias directly, so every cache user moves to the database with it. In practice that is the feature-flags cache in `global_settings/utils.py`, which now costs a query per check instead of a memory hit, and in exchange gains cross-worker invalidation it did not have before.
 - **Tests pin `CACHES` to `LocMemCache`** in `backend/conftest.py`. This must stay. Under `DatabaseCache` a cache hit is itself a query, which breaks the `django_assert_num_queries(0)` assertions in `global_settings/tests/test_feature_flags.py`, and forces database access on tests that declare none.
-- **`CACHE_DB_PATH` is only meaningful on SQLite.** PostgreSQL has no single-writer lock to avoid, so setting it there buys nothing and adds a needless SQLite dependency. It is not guarded in code.
+- **`CACHE_DB_PATH` is only meaningful on SQLite.** PostgreSQL has no single-writer lock to avoid, so pointing the cache at a container-local SQLite file there buys nothing and would shard the throttle per pod. The Helm chart exposes it as `backend.config.cacheDbPath` and suppresses it unless `databaseType` is `sqlite`; the setting is not guarded in `settings.py` itself, so non-Helm deployments must respect that rule themselves.
 - When `CACHE_DB_PATH` is set, that file gets WAL and a 60s busy timeout so lock contention surfaces as a database error rather than a killed worker.
 
 ## Security considerations

@@ -16,6 +16,9 @@
                 "config": {
                     "type": "object",
                     "properties": {
+                        "cacheDbPath": {
+                            "type": "string"
+                        },
                         "chat": {
                             "type": "object",
                             "properties": {

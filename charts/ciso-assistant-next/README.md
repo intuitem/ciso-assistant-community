@@ -50,6 +50,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 |-----|------|---------|-------------|
 | backend.affinity | object | `{}` | Affinity rules for backend |
 | backend.annotations | object | `{}` | Backend deployment annotations |
+| backend.config.cacheDbPath | string | `""` | Path to a dedicated SQLite file for the login-throttle cache table, keeping a login flood's writes off the main database's single-writer lock. Empty keeps that table in the main database. # Note: Only applied when `databaseType` is `sqlite`. Must be a writable path; `/tmp` is an emptyDir and always mounted |
 | backend.config.chat.enabled | bool | `false` | Enable the AI assistant / chat feature (sets ENABLE_CHAT) |
 | backend.config.databaseType | string | `"sqlite"` | Set the database type (sqlite, pgsql or externalPgsql) # Note: PostgreSQL database configuration at `postgresql` or `externalPgsql` section |
 | backend.config.djangoDebug | bool | `false` | Enable Django debug mode |

@@ -228,3 +228,16 @@ Frontend pod volume: the raw CA secret.
         path: {{ .Values.global.extraCerts.fileName }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+CACHE_DB_PATH env entry, shared by the backend and huey containers so both
+resolve the login-throttle cache to the same file. Emitted only for sqlite:
+PostgreSQL has no single-writer lock to avoid, and pointing the cache at a
+container-local SQLite file there would shard the throttle per pod.
+*/}}
+{{- define "ciso-assistant.cacheDbPathEnv" -}}
+{{- if and .Values.backend.config.cacheDbPath (eq .Values.backend.config.databaseType "sqlite") -}}
+- name: CACHE_DB_PATH
+  value: {{ .Values.backend.config.cacheDbPath | quote }}
+{{- end -}}
+{{- end -}}
