@@ -25,6 +25,7 @@
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
 	const isAdmin = Boolean(page.data.user?.is_admin);
+	let isFederated = $derived(data.data.identity_source === 'federated');
 
 	let busy = $state(false);
 
@@ -175,13 +176,15 @@
 					<i class="fa-solid fa-check mr-2"></i>{m.activate()}
 				{/if}
 			</button>
-			<button
-				class="btn preset-filled-tertiary-500 h-fit"
-				data-testid="rotate-secret-button"
-				disabled={busy}
-				onclick={modalRotateSecret}
-				><i class="fa-solid fa-arrows-rotate mr-2"></i>{m.rotateSecret()}</button
-			>
+			{#if !isFederated}
+				<button
+					class="btn preset-filled-tertiary-500 h-fit"
+					data-testid="rotate-secret-button"
+					disabled={busy}
+					onclick={modalRotateSecret}
+					><i class="fa-solid fa-arrows-rotate mr-2"></i>{m.rotateSecret()}</button
+				>
+			{/if}
 			<button
 				class="btn preset-filled-error-500 h-fit"
 				data-testid="delete-button"
@@ -192,7 +195,7 @@
 	{/snippet}
 </DetailView>
 
-{#if data.data.previous_secret_expires_at && new Date(data.data.previous_secret_expires_at) > new Date()}
+{#if !isFederated && data.data.previous_secret_expires_at && new Date(data.data.previous_secret_expires_at) > new Date()}
 	<div class="card p-4 preset-tonal-warning flex flex-row items-center mt-4">
 		<i class="fa-solid fa-triangle-exclamation mr-2"></i>
 		{m.previousSecretValidUntil({

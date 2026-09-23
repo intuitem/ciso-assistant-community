@@ -95,6 +95,7 @@ type SidebarFrontendKeys = {
 	managePortals: boolean;
 	idpGroups: boolean;
 	serviceAccounts: boolean;
+	identityProviders: boolean;
 	postureAssessments: boolean;
 	commitments: boolean;
 };
@@ -151,6 +152,7 @@ export function getSidebarVisibleItems(
 		managePortals: featureFlags?.custom_portals ?? false,
 		idpGroups: (featureFlags?.idp_groups || featureFlags?.jit_provisioning) ?? false,
 		serviceAccounts: featureFlags?.service_accounts ?? false,
+		identityProviders: featureFlags?.service_accounts ?? false,
 		postureAssessments: featureFlags?.posture_assessments ?? false,
 		commitments: featureFlags?.commitment_management ?? false,
 		documents: featureFlags?.document_management ?? true,
