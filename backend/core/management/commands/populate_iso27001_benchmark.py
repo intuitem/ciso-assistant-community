@@ -5,16 +5,19 @@ look right for saying so, which is exactly what made the first live sweep
 uninformative. Here every requirement carries a known answer, so a run can be
 scored instead of admired:
 
-    supported    a control, and an unexpired evidence with a file or link
-                 behind it that plausibly shows what the requirement asks for
-    thin         something is there but it does not carry the claim: an
-                 evidence record with nothing attached, an expired one, one
-                 about a different subject, or one too old to show the current
-                 state — staleness that no expiry date records
-    unsupported  nothing at all — no control, no evidence
+    concern      the platform's own quality rules flag it — no control, no
+                 evidence, evidence expired or still in draft, a control not yet
+                 active. Deterministic: the rule either trips or it does not
+    needs_look   the rules pass it and a reader would still object: evidence
+                 about a different subject, or too old to describe the present.
+                 Three cases here are seeded RULE GAPS, where a human would
+                 object and no rule fires — the model is the only backstop
+    backed       the rules pass it and the evidence really does show what the
+                 requirement asks for
 
-The three are exclusive: complete, incomplete, empty. Anything vaguer cannot be
-scored, because two readers would label it differently.
+Only `needs_look` and `backed` are the model's to decide; `concern` is settled
+before any call is made. Which rule fires on which case was measured, not
+assumed — see the `why` on each.
 
     python manage.py populate_iso27001_benchmark --fresh --out /tmp/truth.json
 """
@@ -83,8 +86,8 @@ CASES = [
     Case(
         ref_id="A.5.1",
         result="compliant",
-        expected="supported",
-        why="approved policy set attached, and the observation matches it",
+        expected="backed",
+        why="approved policy attached and on subject",
         observation="Policy set reviewed with the CISO on 2026-02-10; approved by the board.",
         controls=[
             ("Information security policy set, approved and published", "active")
@@ -101,8 +104,8 @@ CASES = [
     Case(
         ref_id="A.6.3",
         result="compliant",
-        expected="supported",
-        why="the register is attached to the control, not the requirement — the indirect path counts",
+        expected="backed",
+        why="the register is attached to the control, not the requirement",
         observation="Awareness campaign ran in March and September.",
         controls=[("Annual security awareness programme", "active")],
         control_evidences=[
@@ -116,7 +119,7 @@ CASES = [
     Case(
         ref_id="A.8.8",
         result="partially_compliant",
-        expected="supported",
+        expected="backed",
         why="a partial claim backed by a real report is still backed",
         observation="Monthly scanning in place; remediation SLA not yet met for medium findings.",
         controls=[("Monthly authenticated vulnerability scanning", "active")],
@@ -132,7 +135,7 @@ CASES = [
     Case(
         ref_id="A.5.10",
         result="compliant",
-        expected="supported",
+        expected="backed",
         why="two evidences, one empty and one attached — one good one is enough",
         observation="Acceptable use policy acknowledged at onboarding and annually.",
         controls=[("Acceptable use policy with annual acknowledgement", "active")],
@@ -152,8 +155,8 @@ CASES = [
     Case(
         ref_id="A.8.13",
         result="compliant",
-        expected="supported",
-        why="restore test report attached, with a detailed observation naming dates",
+        expected="backed",
+        why="restore test report attached, with a detailed observation",
         observation=(
             "Backups run nightly to immutable storage. Restore test performed 2026-06-14 "
             "on the billing database; RTO 3h against a 4h objective, signed off by the "
@@ -174,8 +177,8 @@ CASES = [
     Case(
         ref_id="A.7.4",
         result="compliant",
-        expected="supported",
-        why="same shape as the others, with the observation written in French",
+        expected="backed",
+        why="attached and on subject, with everything written in French",
         observation=(
             "Vidéosurveillance en place sur les trois sites, avec conservation de 30 jours. "
             "Registre des accès badge revu chaque trimestre par la sécurité physique."
@@ -192,8 +195,8 @@ CASES = [
     Case(
         ref_id="A.5.15",
         result="compliant",
-        expected="thin",
-        why="the evidence record is a title with nothing behind it",
+        expected="concern",
+        why="the evidence never left draft: EvidenceAllDraft",
         observation="Access reviews are performed quarterly by system owners.",
         controls=[("Quarterly access review for production systems", "active")],
         evidences=[
@@ -208,8 +211,8 @@ CASES = [
     Case(
         ref_id="A.8.7",
         result="compliant",
-        expected="thin",
-        why="attached, but expired before the audit period closed",
+        expected="concern",
+        why="the only evidence expired: EvidenceExpired",
         observation="EDR deployed fleet-wide.",
         controls=[("Endpoint malware protection with central reporting", "active")],
         evidences=[
@@ -224,8 +227,8 @@ CASES = [
     Case(
         ref_id="A.8.24",
         result="compliant",
-        expected="thin",
-        why="evidence is attached but answers a different requirement",
+        expected="needs_look",
+        why="attached and current, but about a different requirement — no rule sees subject",
         observation="TLS everywhere; key management handled by the platform team.",
         controls=[("Encrypt data at rest and in transit (AES-256, TLS 1.3)", "active")],
         control_evidences=[
@@ -238,16 +241,16 @@ CASES = [
     Case(
         ref_id="A.5.7",
         result="partially_compliant",
-        expected="thin",
-        why="a control is named and nothing at all backs it",
+        expected="needs_look",
+        why="RULE GAP: partially compliant with a control and zero evidence — CompliantNoEvidence only fires on `compliant`",
         observation="Feeds are consumed informally by the SOC; no formal process yet.",
         controls=[("Subscribe to sector threat intelligence feeds", "active")],
     ),
     Case(
         ref_id="A.8.16",
         result="compliant",
-        expected="thin",
-        why="two controls, and the only evidence is an empty record",
+        expected="needs_look",
+        why="RULE GAP: the empty evidence is `in_review`, not `draft`, so EvidenceAllDraft misses it and evidenceNoFile is an evidence-level rule that does not surface here",
         observation="SIEM in place with 24/7 alerting.",
         controls=[
             ("Centralised log collection into the SIEM", "active"),
@@ -265,8 +268,8 @@ CASES = [
     Case(
         ref_id="A.8.2",
         result="compliant",
-        expected="thin",
-        why="the control that would carry it is still only planned",
+        expected="concern",
+        why="the control is still planned: CompliantNoActiveControl",
         observation="PAM rollout scheduled for Q4.",
         controls=[("Privileged access management for production", "to_do")],
         evidences=[
@@ -279,8 +282,8 @@ CASES = [
     Case(
         ref_id="A.5.34",
         result="compliant",
-        expected="thin",
-        why="attached, but the document says of itself that it is a draft",
+        expected="concern",
+        why="the document says of itself that it is a draft: EvidenceAllDraft",
         observation="PII handling procedure written with the DPO.",
         controls=[("PII handling procedure", "active")],
         evidences=[
@@ -294,8 +297,8 @@ CASES = [
     Case(
         ref_id="A.8.15",
         result="compliant",
-        expected="thin",
-        why="two evidence records, both empty",
+        expected="concern",
+        why="two evidence records, both draft: EvidenceAllDraft",
         observation="Logging enabled across the estate.",
         controls=[("Centralised logging with 12-month retention", "active")],
         evidences=[
@@ -316,8 +319,8 @@ CASES = [
     Case(
         ref_id="A.5.19",
         result="partially_compliant",
-        expected="thin",
-        why="one expired evidence and one empty one",
+        expected="needs_look",
+        why="RULE GAP: one evidence expired and one draft — EvidenceExpired needs all expired, EvidenceAllDraft needs all draft, so mixed states pass both",
         observation=(
             "Supplier register maintained. Annual reviews completed for all critical "
             "suppliers."
@@ -341,8 +344,8 @@ CASES = [
     Case(
         ref_id="A.8.9",
         result="compliant",
-        expected="thin",
-        why="attached and never expired, but three years old — only the date settles it",
+        expected="needs_look",
+        why="attached and never expired, but three years old — no rule sees age",
         observation="Configuration baselines defined for all server roles.",
         controls=[("Hardened configuration baselines", "active")],
         evidences=[
@@ -357,35 +360,35 @@ CASES = [
     Case(
         ref_id="A.5.23",
         result="compliant",
-        expected="unsupported",
-        why="claimed compliant with no control and no evidence",
+        expected="concern",
+        why="no control and no evidence: NoAppliedControl + CompliantNoEvidence",
         observation="Cloud usage is covered by the enterprise agreement.",
     ),
     Case(
         ref_id="A.8.12",
         result="partially_compliant",
-        expected="unsupported",
-        why="nothing recorded against it, and no observation either",
+        expected="concern",
+        why="nothing recorded at all: NoAppliedControl",
     ),
     Case(
         ref_id="A.5.30",
         result="compliant",
-        expected="unsupported",
-        why="the auditor's own note admits the gap, and nothing is attached",
+        expected="concern",
+        why="no control and no evidence, and the observation admits it",
         observation="ICT continuity plan drafted but not yet tested; evidence pending.",
     ),
     Case(
         ref_id="A.8.25",
         result="partially_compliant",
-        expected="unsupported",
-        why="nothing recorded against it",
+        expected="concern",
+        why="nothing recorded at all: NoAppliedControl",
         observation="Secure SDLC being rolled out team by team.",
     ),
     Case(
         ref_id="A.6.6",
         result="compliant",
-        expected="unsupported",
-        why="confident observation, nothing behind it",
+        expected="concern",
+        why="confident observation, nothing recorded: the rules say so",
         observation=(
             "All staff and contractors sign confidentiality agreements as part of "
             "onboarding; HR confirms 100% coverage."
@@ -394,8 +397,8 @@ CASES = [
     Case(
         ref_id="A.8.31",
         result="compliant",
-        expected="unsupported",
-        why="responsibility deflected to a provider, with nothing attached",
+        expected="concern",
+        why="responsibility deflected to a provider, nothing recorded",
         observation="Separation of environments is handled by the cloud provider.",
     ),
     # ============ outside the filter: the sweep must never see these ========
@@ -485,7 +488,7 @@ class Command(BaseCommand):
             )
         tally = {
             verdict: sum(1 for c in reviewable if c.expected == verdict)
-            for verdict in ("supported", "thin", "unsupported")
+            for verdict in ("concern", "needs_look", "backed")
         }
         self.stdout.write("")
         self.stdout.write(

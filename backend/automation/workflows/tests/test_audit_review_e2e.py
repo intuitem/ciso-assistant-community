@@ -43,7 +43,7 @@ LIBRARY = (
 JUDGEMENT = json.dumps(
     {
         "reasoning": "The control names an access review and the evidence has a link.",
-        "verdict": "supported",
+        "verdict": "backed",
         "note": "The signed access review is attached and dated this quarter.",
     }
 )
@@ -53,14 +53,14 @@ JUDGEMENT = json.dumps(
 SPILLED = json.dumps(
     {
         "reasoning": "",
-        "verdict": "thin",
+        "verdict": "needs_look",
         "note": "analysis<|message|>We need to answer verdict and note. " + "x" * 300,
     }
 )
-NOTHING_SECTION = "Nothing in this group."
-LOOK_SECTION = "- A.5.2 — ask for the access review record behind this control."
+CONCERNS_SECTION = "- A.5.2 — evidence has not left draft."
+LOOK_SECTION = "Nothing in this group."
 BACKED_SECTION = "- A.5.1 — the signed access review is attached."
-SECTIONS = [NOTHING_SECTION, LOOK_SECTION, BACKED_SECTION]
+SECTIONS = [CONCERNS_SECTION, LOOK_SECTION, BACKED_SECTION]
 
 
 class FakeLLM:
@@ -129,10 +129,18 @@ def make_audit(domain):
             result=RequirementAssessment.Result.COMPLIANT,
             observation="Checked with the platform team.",
         )
-        control = AppliedControl.objects.create(name=f"Control {ref_id}", folder=domain)
+        # `active` and `approved` are what the quality rules look for: the
+        # defaults (`--` and `draft`) trip CompliantNoActiveControl and
+        # EvidenceAllDraft, and a fixture that trips a rule never reaches the
+        # model at all.
+        control = AppliedControl.objects.create(
+            name=f"Control {ref_id}", folder=domain, status="active"
+        )
         assessment.applied_controls.add(control)
         if backed:
-            evidence = Evidence.objects.create(name=f"Review {ref_id}", folder=domain)
+            evidence = Evidence.objects.create(
+                name=f"Review {ref_id}", folder=domain, status="approved"
+            )
             EvidenceRevision.objects.create(
                 evidence=evidence, version=1, link="https://example.test/review"
             )
@@ -195,8 +203,8 @@ class TestAuditReviewSample:
         )
 
         assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
-        # One judgement — only the backed requirement needs one — plus the three
-        # section writers. The thin requirement never reaches the model.
+        # One judgement — only the requirement the rules pass needs one — plus
+        # the three section writers. The flagged one never reaches the model.
         assert len(fake.calls) == 4
 
         container = DocumentContainer.objects.get(folder=domain)
@@ -229,14 +237,17 @@ class TestAuditReviewSample:
         )
         records = instance.node_outputs["per_requirement"]["results"]
         assert [r["ref_id"] for r in records] == ["A.5.1", "A.5.2"]
-        assert [r["verdict"] for r in records] == ["supported", "thin"]
+        assert [r["bucket"] for r in records] == ["backed", "concern"]
         assert all(
-            set(r) == {"ref_id", "name", "claimed", "verdict", "note"} for r in records
+            set(r)
+            == {"ref_id", "name", "claimed", "bucket", "note", "errors", "warnings"}
+            for r in records
         )
         assert records[0]["claimed"] == "compliant"
-        # The thin one was settled by counting, so its note states the counts
-        # rather than quoting a model.
-        assert "none of them attached and current" in records[1]["note"]
+        # The flagged one carries the rule's own finding and no model prose.
+        assert records[1]["note"] == ""
+        # No evidence at all on this one, so this is the rule that speaks.
+        assert "requirementAssessmentCompliantNoEvidence" in records[1]["warnings"]
 
     def test_the_audit_itself_is_untouched(
         self, dispatch, django_capture_on_commit_callbacks, llm
@@ -281,8 +292,8 @@ class TestAuditReviewSample:
         assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
         loop_output = instance.node_outputs["per_requirement"]
         assert loop_output["count"] == 2
-        # The counted one still lands; only the judged one is lost.
-        assert [r["verdict"] for r in loop_output["results"]] == ["thin"]
+        # The rule-flagged one still lands; only the judged one is lost.
+        assert [r["bucket"] for r in loop_output["results"]] == ["concern"]
         assert len(loop_output["errors"]) == 1
 
         content = ManagedDocument.objects.get(
@@ -310,7 +321,7 @@ class TestAuditReviewSample:
         # The three sections are the document's shape, whatever the model wrote
         # inside them.
         for heading in (
-            "## Nothing recorded",
+            "## Concerns",
             "## Needs a look",
             "## Backed by evidence",
         ):
@@ -363,8 +374,8 @@ class TestAuditReviewSample:
         assert '"attached": true' in backed
         assert "The organisation restricts and reviews access." in backed
         assert "Checked with the platform team." in backed
-        # The unbacked requirement is never put to the model as a *judgement*:
-        # its verdict is a counting result, so asking would only invite it to be
+        # The flagged requirement is never put to the model as a *judgement*:
+        # a rule already answered it, so asking would only invite it to be
         # overruled. (The section writers do see every record — they are writing
         # prose about them, not deciding them, which is why the schema is what
         # tells the two kinds of call apart.)
