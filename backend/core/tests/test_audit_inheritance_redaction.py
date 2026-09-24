@@ -26,6 +26,7 @@ SHOW_SCORE = {
     "score": {"auditor": "edit", "respondent": "edit"},
     "is_scored": {"auditor": "edit", "respondent": "edit"},
 }
+HIDE_RESULT = {"result": {"auditor": "hidden", "respondent": "hidden"}}
 
 YAML = """
 urn: urn:intuitem:test:library:inh-redaction
@@ -309,3 +310,72 @@ def test_report_and_combined_tree_redact_overlay(admin_client, tree):
         "Eurostar": (1, 1, True),
         "Group": (None, None, None),
     }
+
+
+def _row(admin_client, fw, name):
+    r = admin_client.get(reverse("frameworks-report", kwargs={"pk": str(fw.pk)}))
+    assert r.status_code == 200, r.content
+    return next(
+        row for row in r.json()["rows"] if row["compliance_assessment_name"] == name
+    )
+
+
+def _set_result(ca, result):
+    RequirementAssessment.objects.filter(
+        compliance_assessment=ca, requirement__assessable=True
+    ).update(result=result)
+
+
+@pytest.mark.django_db
+def test_hidden_ancestor_verdict_never_steers_the_winner(admin_client, tree):
+    """Varying a hidden ancestor's verdict must leave the target row unchanged.
+
+    Under best_case the top audit (compliant) would otherwise win and show up
+    as ``source`` with ``inherited: true``, while a non_compliant one would lose
+    to the target's own verdict: the pair discloses the hidden verdict.
+    """
+    fw, cas = tree
+    group = cas["Group"]
+
+    # Positive control: while Group's verdict is visible, it steers the winner.
+    _set_result(group, "compliant")
+    visible_win = _row(admin_client, fw, "Teams+")["inheritance"]
+    _set_result(group, "non_compliant")
+    visible_loss = _row(admin_client, fw, "Teams+")["inheritance"]
+    assert visible_win["inherited"] is True
+    assert visible_win["source"]["ca_name"] == "Group"
+    assert visible_loss["inherited"] is False
+    assert visible_loss["source"]["ca_name"] == "Teams+"
+
+    # Hide Group's verdict from the viewer, then vary it again.
+    group.field_visibility = {**group.field_visibility, **HIDE_RESULT}
+    group.save(update_fields=["field_visibility"])
+    seen = []
+    for result in ("compliant", "non_compliant", "not_assessed"):
+        _set_result(group, result)
+        seen.append(_row(admin_client, fw, "Teams+"))
+    assert seen[0] == seen[1] == seen[2]
+
+    inh = seen[0]["inheritance"]
+    assert inh["inherited"] is False
+    assert inh["source"]["ca_name"] == "Teams+"
+    assert inh["effective_result"] == "partially_compliant"
+    assert inh["effective_score"] == 3
+    # Group is out of the chain altogether; Eurostar (visible) is still in it.
+    assert [e["ca_name"] for e in inh["path"]] == ["Eurostar"]
+
+    # A target whose own verdict is hidden contributes nothing to the choice
+    # either, and its row does not tell the viewer what it was.
+    teams = cas["Teams+"]
+    teams.field_visibility = {**teams.field_visibility, **HIDE_RESULT}
+    teams.save(update_fields=["field_visibility"])
+    seen = []
+    for result in ("compliant", "non_compliant"):
+        _set_result(teams, result)
+        seen.append(_row(admin_client, fw, "Teams+"))
+    assert seen[0] == seen[1]
+    assert seen[0]["result"] is None
+    inh = seen[0]["inheritance"]
+    assert inh["own"] is None
+    assert inh["effective_result"] is None
+    assert inh["source"]["ca_name"] == "Eurostar"

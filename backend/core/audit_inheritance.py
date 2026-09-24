@@ -309,6 +309,7 @@ def build_overlay_map(
     *,
     viewable_ca_ids: Optional[Iterable] = None,
     strategy: Optional[str] = None,
+    hidden_for_ca: Optional[Callable[[str], frozenset[str]]] = None,
 ) -> dict:
     """Build the full inheritance overlay for a target audit.
 
@@ -316,11 +317,21 @@ def build_overlay_map(
     maps ``str(requirement_id) -> overlay dict`` (only requirements an ancestor
     actually covers). When the feature is off or there are no ancestor audits,
     ``overlay`` is empty.
+
+    ``hidden_for_ca`` (see ``make_overlay_redactor``) maps a CA id to the field
+    names hidden from the viewer on that audit. An audit whose ``result`` is
+    hidden contributes no entry at all: a verdict the viewer may not read must
+    not pick the winner either, or ``inherited`` / ``source`` would disclose how
+    it compares to the visible ones. Redaction of the remaining values is a
+    separate step (``redact_overlay``).
     """
     from core.models import RequirementAssessment
 
     if strategy is None:
         strategy = get_strategy()
+
+    def result_hidden(ca_id: str) -> bool:
+        return hidden_for_ca is not None and "result" in hidden_for_ca(ca_id)
 
     own_scale = _ca_scale(target_ca)
     empty = {
@@ -350,6 +361,8 @@ def build_overlay_map(
     ).only("requirement_id", "compliance_assessment_id", "result", "score", "is_scored")
     for ra in ancestor_ras:
         ca_id = str(ra.compliance_assessment_id)
+        if result_hidden(ca_id):
+            continue
         meta = meta_by_ca[ca_id]
         chain_by_req[str(ra.requirement_id)].append(
             ChainEntry(
@@ -372,6 +385,8 @@ def build_overlay_map(
     own_ras = RequirementAssessment.objects.filter(
         compliance_assessment=target_ca
     ).only("requirement_id", "result", "score", "is_scored")
+    if result_hidden(str(target_ca.id)):
+        own_ras = own_ras.none()
     for ra in own_ras:
         own_by_req[str(ra.requirement_id)] = ChainEntry(
             ca_id=str(target_ca.id),
@@ -423,15 +438,20 @@ def hidden_overlay_fields(ca, viewer_role: str) -> frozenset[str]:
 
 
 def make_overlay_redactor(
-    cas: Iterable, respondent_folder_ids
+    cas: Iterable, respondent_folder_ids, *, lazy: bool = False
 ) -> Callable[[str], frozenset[str]]:
-    """Build the ``hidden_for_ca`` callable for ``redact_overlay``.
+    """Build the ``hidden_for_ca`` callable for ``build_overlay_map`` and
+    ``redact_overlay``.
 
-    ``cas`` are the audits an overlay may reference (target plus ancestors);
-    ``respondent_folder_ids`` are the folders where the viewer is a respondent
-    (see ``get_respondent_scoped_folder_ids``). An audit outside ``cas`` is
-    unknown to the viewer and every redactable field is hidden for it.
+    ``cas`` are the audits already loaded; ``respondent_folder_ids`` are the
+    folders where the viewer is a respondent (see
+    ``get_respondent_scoped_folder_ids``). With ``lazy`` an audit outside
+    ``cas`` is fetched on first use (ancestors are only known once the overlay
+    is built). An audit that cannot be resolved has every redactable field
+    hidden.
     """
+    from core.models import ComplianceAssessment
+
     ca_by_id = {str(ca.id): ca for ca in cas}
     respondent_folders = set(respondent_folder_ids or ())
     cache: dict[str, frozenset[str]] = {}
@@ -439,6 +459,8 @@ def make_overlay_redactor(
     def hidden_for_ca(ca_id: str) -> frozenset[str]:
         if ca_id not in cache:
             ca = ca_by_id.get(ca_id)
+            if ca is None and lazy:
+                ca = ComplianceAssessment.objects.filter(id=ca_id).first()
             if ca is None:
                 cache[ca_id] = frozenset(REDACTABLE_FIELDS)
             else:

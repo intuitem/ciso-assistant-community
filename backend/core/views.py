@@ -10331,29 +10331,26 @@ class FrameworkViewSet(BaseModelViewSet):
             redact_overlay,
         )
 
+        # The overlay carries values from other audits; they follow the same
+        # per-CA field visibility as the row's own fields. Hidden verdicts are
+        # kept out of the chain before the winner is picked, and the remaining
+        # hidden values are redacted from the result. Ancestors are viewable
+        # live audits on this framework, so they are in all_visible_cas unless
+        # a campaign filter narrowed it; the redactor fetches those lazily.
+        hidden_for_ca = make_overlay_redactor(
+            all_visible_cas, respondent_folders, lazy=True
+        )
+
         aggregation_strategy = get_strategy()
         overlays_by_ca: Dict[Any, Dict[str, Any]] = {}
-        overlay_ca_ids: set = set()
         if aggregation_strategy != "none":
             for ca in cas:
-                built = build_overlay_map(
+                overlays_by_ca[ca.id] = build_overlay_map(
                     ca,
                     viewable_ca_ids=viewable_ca_ids,
                     strategy=aggregation_strategy,
-                )
-                overlays_by_ca[ca.id] = built["overlay"]
-                overlay_ca_ids.update(a["ca_id"] for a in built["ancestors"])
-
-        # The overlay carries values from other audits; redact them with the
-        # same per-CA field visibility as the row's own fields, otherwise a
-        # hidden score would resurface through an ancestor's entry.
-        redactor_cas = list(all_visible_cas)
-        missing_ca_ids = overlay_ca_ids - {str(ca.id) for ca in redactor_cas}
-        if missing_ca_ids:
-            redactor_cas += list(
-                ComplianceAssessment.objects.filter(id__in=missing_ca_ids)
-            )
-        hidden_for_ca = make_overlay_redactor(redactor_cas, respondent_folders)
+                    hidden_for_ca=hidden_for_ca,
+                )["overlay"]
 
         ras = (
             RequirementAssessment.objects.filter(
@@ -13963,22 +13960,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
         )
+        # Same per-CA field visibility as the report: hidden verdicts never
+        # take part in the selection, hidden values are redacted from the
+        # result, each for the viewer's role on the audit it came from.
+        hidden_for_ca = make_overlay_redactor(
+            [compliance_assessment],
+            get_respondent_scoped_folder_ids(request.user),
+            lazy=True,
+        )
         result = build_overlay_map(
-            compliance_assessment, viewable_ca_ids=viewable_ca_ids
+            compliance_assessment,
+            viewable_ca_ids=viewable_ca_ids,
+            hidden_for_ca=hidden_for_ca,
         )
         overlay = result["overlay"]
-
-        # Same per-CA field visibility as the report: ancestor values are
-        # redacted for the viewer's role on each audit they came from.
-        ancestor_cas = list(
-            ComplianceAssessment.objects.filter(
-                id__in=[a["ca_id"] for a in result["ancestors"]]
-            )
-        )
-        hidden_for_ca = make_overlay_redactor(
-            [compliance_assessment] + ancestor_cas,
-            get_respondent_scoped_folder_ids(request.user),
-        )
         target_ca_id = str(compliance_assessment.id)
 
         def attach(nodes: dict):
