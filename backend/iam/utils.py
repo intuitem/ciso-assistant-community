@@ -43,3 +43,10 @@ class KnoxTokenStrategy(SessionTokenStrategy):
         if not access_token:
             return None
         return {"access_token": access_token}
+
+
+def redact_audited_secret(value: str) -> str:
+    """Full redaction for auditlog `mask_fields`. Auditlog's default `mask_str`
+    only masks the first half of the value, which would still publish most of a
+    password hash to anyone holding `view_central_auditlog`."""
+    return "**********" if value else value

@@ -3173,6 +3173,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     requirement_assessments = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
+    task_templates = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     owner = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
@@ -3215,6 +3216,10 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     contracts = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Contract.objects.all(), required=False
     )
+    # Reverse M2M (declared on TaskTemplate): DRF does not pick it up from Meta.
+    task_templates = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=TaskTemplate.objects.all(), required=False
+    )
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -3242,8 +3247,12 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         attachment = validated_data.pop("attachment", None)
         link = validated_data.pop("link", None)
         observation = validated_data.pop("observation", None)
+        task_templates = validated_data.pop("task_templates", [])
 
         evidence = super().create(validated_data)
+
+        if task_templates:
+            evidence.task_templates.set(task_templates)
 
         # A revision stands for a deposited artifact. Opening an empty one just to
         # have a row makes an evidence that holds nothing look like it holds
@@ -3264,10 +3273,14 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         # Track old folder before update
         old_folder_id = instance.folder_id
+        task_templates = validated_data.pop("task_templates", None)
 
         # Handle properly owner field cleaning
         with transaction.atomic():
             instance = super().update(instance, validated_data)
+
+            if task_templates is not None:
+                instance.task_templates.set(task_templates)
 
             # Update all EvidenceRevisions' folder if the Evidence's folder changed
             if old_folder_id != instance.folder_id:
@@ -3375,6 +3388,7 @@ class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
             "observation",
             "version",
             "attachment",
+            "original_filename",
             "link",
             "created_at",
             "updated_at",
@@ -3694,6 +3708,28 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     )
 
     def validate(self, attrs):
+        # Drop implementation groups that don't exist in the framework.
+        if "selected_implementation_groups" in attrs or (
+            "framework" in attrs and self.instance
+        ):
+            framework = attrs.get("framework") or getattr(
+                self.instance, "framework", None
+            )
+            defined = {
+                ig.get("ref_id")
+                for ig in (
+                    getattr(framework, "implementation_groups_definition", None) or []
+                )
+            }
+            selected = attrs.get(
+                "selected_implementation_groups",
+                getattr(self.instance, "selected_implementation_groups", None),
+            )
+            selected = selected if isinstance(selected, list) else []
+            attrs["selected_implementation_groups"] = [
+                g for g in selected if isinstance(g, str) and g in defined
+            ]
+
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
             # If we're unlocking (setting is_locked to False), allow the operation
             if "is_locked" in attrs and attrs["is_locked"] is False:
@@ -4011,6 +4047,8 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     is_locked = serializers.BooleanField()
     applied_controls = FieldsRelatedField(many=True)
+    # Reverse FK from Finding: DRF does not pick it up from Meta.
+    findings = FieldsRelatedField(many=True)
     answers = serializers.SerializerMethodField()
 
     # Effective scale after the Node -> CA cascade. Null when the CA has
@@ -4073,6 +4111,11 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     answers = serializers.JSONField(required=False, write_only=True)
     task_templates = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=TaskTemplate.objects.all()
+    )
+    # Reverse FK from Finding: binding an existing finding to this requirement
+    # assessment is done from the assessment's side, like the other pickers.
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
     )
 
     def to_internal_value(self, data):
@@ -4284,10 +4327,63 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "The specified Compliance Assessment does not exist."
             )
 
+    def _check_findings_rebind(self, instance, findings):
+        """Binding or unbinding a finding edits the finding, not just the assessment.
+
+        Runs inside update()'s transaction: the current, changed and binder rows
+        are read under row locks (on PostgreSQL; SQLite has a single writer), so
+        a binder locked between validation and the write is still refused and
+        a finding bound meanwhile is not silently dropped. `instance.findings`
+        is not used here because get_object() prefetched it before the
+        transaction.
+        """
+        current = set(
+            Finding.objects.select_for_update().filter(requirement_assessment=instance)
+        )
+        changed_ids = [f.id for f in current.symmetric_difference(findings)]
+        if not changed_ids:
+            return
+        changed = list(Finding.objects.select_for_update().filter(id__in=changed_ids))
+        binder_ids = {
+            f.findings_assessment_id for f in changed if f.findings_assessment_id
+        }
+        # Lock every binder involved, not only the locked ones: an unlocked
+        # binder must not get locked between this check and the write.
+        locked_binders = {
+            binder.id
+            for binder in FindingsAssessment.objects.select_for_update().filter(
+                id__in=binder_ids
+            )
+            if binder.is_locked
+        }
+        for finding in changed:
+            if finding.findings_assessment_id in locked_binders:
+                raise serializers.ValidationError(
+                    {
+                        "findings": "⚠️ Cannot bind or unbind a finding whose findings assessment is locked."
+                    }
+                )
+            # A finding belongs to one requirement assessment. Moving it is done
+            # from the finding, never as a side effect of editing another assessment.
+            if (
+                finding.requirement_assessment_id
+                and finding.requirement_assessment_id != instance.id
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "findings": "⚠️ This finding is already bound to another requirement assessment."
+                    }
+                )
+            self._check_object_perm(finding, "change", model=Finding)
+
     def update(self, instance, validated_data):
         with transaction.atomic():
             # Handle answers if provided in old JSON format
             answers_data = validated_data.pop("answers", None)
+
+            findings = validated_data.pop("findings", None)
+            if findings is not None:
+                self._check_findings_rebind(instance, findings)
 
             # Question-driven score is recompute-owned: drop manual writes
             # unless is_score_overridden pins a value.
@@ -4306,6 +4402,11 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             was_overridden = instance.is_score_overridden
             previous_alignment = instance.respondent_alignment
             instance = super().update(instance, validated_data)
+
+            if findings is not None:
+                # bulk=False goes through Finding.save(): updated_at moves and the
+                # binder's daily metrics are refreshed, as on any finding edit.
+                instance.findings.set(findings, bulk=False)
 
             # Override turned off: resync score from answers below.
             override_turned_off = (
@@ -5597,6 +5698,14 @@ class FindingWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 {
                     "findings_assessment": "⚠️ Cannot attach the finding to a locked findings assessment."
+                }
+            )
+        # Same rule as the findings-binder endpoint, for direct API writes.
+        target_requirement_assessment = attrs.get("requirement_assessment")
+        if target_requirement_assessment and target_requirement_assessment.is_locked:
+            raise serializers.ValidationError(
+                {
+                    "requirement_assessment": "⚠️ Cannot bind a finding to a requirement of a locked audit."
                 }
             )
         return super().validate(attrs)

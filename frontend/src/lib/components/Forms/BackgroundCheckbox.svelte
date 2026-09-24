@@ -1,66 +1,73 @@
+<script lang="ts" module>
+	export type CheckboxAccent = 'primary' | 'tertiary';
+
+	// Literal strings: Tailwind scans the source, so `from-${accent}-400` would
+	// never be emitted.
+	const ACCENT_CLASSES: Record<CheckboxAccent, { checked: string; helpText: string }> = {
+		primary: {
+			checked: 'bg-gradient-to-br from-primary-400 to-primary-500 border-primary text-white',
+			helpText: 'text-primary-100'
+		},
+		tertiary: {
+			checked: 'bg-gradient-to-br from-tertiary-400 to-tertiary-500 border-tertiary text-white',
+			helpText: 'text-tertiary-100'
+		}
+	};
+</script>
+
 <script lang="ts">
-	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { fade } from 'svelte/transition';
 
 	interface Props {
 		label?: string;
 		field: string;
-		valuePath?: any;
+		/** Controlled — the caller owns the value, wherever it lives. */
+		checked: boolean;
+		onToggle: (next: boolean) => void;
 		helpText?: string;
-		cachedValue?: boolean;
-		form: SuperForm<Record<string, boolean | undefined>>;
+		/** Hover hint, chiefly why a disabled tile cannot be toggled. Rendered as
+		 * `title`, which `aria-label` leaves free to be the description. */
+		tooltip?: string;
 		hidden?: boolean;
 		disabled?: boolean;
+		/** Supplied by the caller, which owns the form — the backend maps field
+		 * errors back onto it via `handleErrorResponse`. */
+		errors?: string[];
+		/** `primary` for an instance setting, `tertiary` for the viewer's own. */
+		accent?: CheckboxAccent;
 		classes?: string;
 		classesContainer?: string;
-		onChange?: (value: boolean) => void;
-		[key: string]: any;
 	}
 
 	let {
 		label,
 		field,
-		valuePath = field,
+		checked,
+		onToggle,
 		helpText,
-		cachedValue,
-		form,
+		tooltip,
 		hidden = false,
 		disabled = false,
+		errors = [],
+		accent = 'primary',
 		classes = '',
-		classesContainer = '',
-		onChange = () => {},
-		...rest
+		classesContainer = ''
 	}: Props = $props();
 
-	label = label ?? field;
-
-	const { value, errors } = formFieldProxy(form, valuePath);
-	$effect(() => {
-		cachedValue = $value;
-	});
+	const displayLabel = $derived(label ?? field);
 
 	function toggle() {
-		if (!disabled) {
-			$value = !$value;
-			onChange($value);
-		}
+		if (!disabled) onToggle(!checked);
 	}
-
-	let classesHidden = $derived((h: boolean) => (h ? 'hidden' : ''));
-	let classesDisabled = $derived((d: boolean) =>
-		d ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-	);
 </script>
 
-<div class="{classesContainer} {classesHidden(hidden)}">
+<div class="{classesContainer} {hidden ? 'hidden' : ''}">
 	<div
 		class="flex flex-col p-4 border rounded-lg transition-all duration-300 ease-in-out
 		       min-h-[150px]
 
-		       {classesDisabled(disabled)} {classes}
-		       {$value
-			? 'bg-gradient-to-br from-primary-400 to-primary-500 border-primary text-white'
-			: 'bg-surface-50-950 border-surface-300-700'}"
+		       {disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} {classes}
+		       {checked ? ACCENT_CLASSES[accent].checked : 'bg-surface-50-950 border-surface-300-700'}"
 		onclick={toggle}
 		onkeydown={(e) => {
 			if (e.key === 'Enter' || e.key === ' ') {
@@ -69,13 +76,16 @@
 			}
 		}}
 		role="checkbox"
-		aria-checked={$value}
+		aria-checked={checked}
+		aria-disabled={disabled}
+		aria-label={displayLabel}
+		title={tooltip}
 		tabindex="0"
 	>
 		<div class="flex justify-between items-center min-h-[2.5rem]">
-			<span class="font-semibold">{label}</span>
+			<span class="font-semibold">{displayLabel}</span>
 
-			{#if $value}
+			{#if checked}
 				<span
 					class="w-6 h-6 flex items-center justify-center"
 					in:fade={{ duration: 200 }}
@@ -100,16 +110,16 @@
 		{#if helpText}
 			<p
 				class="text-sm mt-1 transition-colors duration-300 ease-in-out
-				{$value ? 'text-primary-100' : 'text-surface-600-400'}"
+				{checked ? ACCENT_CLASSES[accent].helpText : 'text-surface-600-400'}"
 			>
 				{helpText}
 			</p>
 		{/if}
 	</div>
 
-	{#if $errors?.length}
+	{#if errors.length}
 		<div class="mt-1">
-			{#each $errors as error}
+			{#each errors as error (error)}
 				<p class="text-red-500 text-xs font-medium">{error}</p>
 			{/each}
 		</div>

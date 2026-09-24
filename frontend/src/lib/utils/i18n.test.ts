@@ -58,8 +58,8 @@ describe('translateChoiceLabel', () => {
 
 	it('translates privacy choices, whose keys follow the value and not the label', () => {
 		overwriteGetLocale(() => 'nl');
-		// SUP-1796: the English label from the choice endpoint has no message
-		// key, so a label-only lookup left these dropdowns untranslated.
+		// The English label from the choice endpoint has no message key, so a
+		// label-only lookup left these dropdowns untranslated.
 		expect(translateChoiceLabel('Unauthorized Disclosure', 'privacy_unauthorized_disclosure')).toBe(
 			'Ongeoorloofde openbaarmaking'
 		);

@@ -3,6 +3,7 @@ import re
 import uuid
 
 from django.db import IntegrityError
+from django.db.models import Prefetch
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
@@ -23,7 +24,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
 from iam.models import RoleAssignment, Folder, Permission
-from core.models import Asset
+from core.models import AppliedControl, Asset
 from .models import (
     BusinessImpactAnalysis,
     AssetAssessment,
@@ -409,6 +410,22 @@ class AssetAssessmentViewSet(BaseModelViewSet):
     filterset_fields = ["bia", "asset"]
     search_fields = ["bia__name", "asset__name"]
     ordering = ["asset"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("bia", "asset", "asset__folder")
+            .prefetch_related(
+                "dependencies",
+                "evidences",
+                # Serialized with its folder: join it in the prefetch query.
+                Prefetch(
+                    "associated_controls",
+                    queryset=AppliedControl.objects.select_related("folder"),
+                ),
+            )
+        )
 
     def _get_asset_verdict(self, asset):
         """

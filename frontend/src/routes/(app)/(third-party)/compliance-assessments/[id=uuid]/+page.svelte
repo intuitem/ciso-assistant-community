@@ -6,13 +6,12 @@
 
 	import { onMount } from 'svelte';
 
-	import type { ModalComponent, ModalSettings, TreeViewNode } from '@skeletonlabs/skeleton-svelte';
+	import type { TreeViewNode } from '$lib/components/TreeView/types';
 
 	import { Switch, Progress, Popover, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
 
-	import {} from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 
@@ -134,7 +133,12 @@
 	}
 
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 	import CompareAuditModal from '$lib/components/Modals/CompareAuditModal.svelte';
 	import MapFromAuditModal from '$lib/components/Modals/MapFromAuditModal.svelte';
 	import MappingDirectionModal from '$lib/components/Modals/MappingDirectionModal.svelte';
@@ -295,12 +299,12 @@
 			};
 		});
 	}
-	let treeViewNodes: TreeViewNode[] = $state();
+	let treeViewNodes: TreeViewNode[] | undefined = $state();
 
 	function assessableNodesCount(nodes: TreeViewNode[], onlyVisible = false): number {
 		let count = 0;
 		for (const node of nodes) {
-			if (node.contentProps.assessable && !(onlyVisible && node.contentProps.hidden)) {
+			if (node.contentProps?.assessable && !(onlyVisible && node.contentProps?.hidden)) {
 				count++;
 			}
 			if (node.children) {
@@ -310,7 +314,7 @@
 		return count;
 	}
 
-	let expandedNodes: TreeViewNode[] = $state([]);
+	let expandedNodes: string[] = $state([]);
 
 	expandedNodes = $expandedNodesState;
 
@@ -994,44 +998,42 @@
 					>
 
 					<!-- Modes -->
-					{#if !data.compliance_assessment.is_locked}
-						<div>
-							<span
-								class="text-[11px] font-medium text-surface-400-600 uppercase tracking-wider mb-1.5 block"
-								>{m.modes()}</span
-							>
-							<div class="grid grid-cols-2 gap-2">
-								{#if !page.data.user.is_third_party}
-									<Anchor
-										breadcrumbAction="push"
-										href={`${page.url.pathname}/flash-mode`}
-										class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 dark:bg-surface-800 dark:border-surface-700 dark:text-indigo-300 dark:hover:bg-surface-700 dark:hover:border-surface-600 transition-colors cursor-pointer"
-										data-testid="flash-mode-button"
-									>
-										<div
-											class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500 dark:bg-indigo-600 text-white shrink-0"
-										>
-											<i class="fa-solid fa-bolt text-sm"></i>
-										</div>
-										<span class="text-sm font-semibold">{m.flashMode()}</span>
-									</Anchor>
-								{/if}
+					<div>
+						<span
+							class="text-[11px] font-medium text-surface-400-600 uppercase tracking-wider mb-1.5 block"
+							>{m.modes()}</span
+						>
+						<div class="grid grid-cols-2 gap-2">
+							{#if !page.data.user.is_third_party}
 								<Anchor
 									breadcrumbAction="push"
-									href={`${page.url.pathname}/table-mode`}
-									class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-surface-50-950 border border-surface-100-900 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-200-800 transition-colors cursor-pointer"
-									data-testid="table-mode-button"
+									href={`${page.url.pathname}/flash-mode`}
+									class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 dark:bg-surface-800 dark:border-surface-700 dark:text-indigo-300 dark:hover:bg-surface-700 dark:hover:border-surface-600 transition-colors cursor-pointer"
+									data-testid="flash-mode-button"
 								>
 									<div
-										class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-500 text-white shrink-0"
+										class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500 dark:bg-indigo-600 text-white shrink-0"
 									>
-										<i class="fa-solid fa-table-list text-sm"></i>
+										<i class="fa-solid fa-bolt text-sm"></i>
 									</div>
-									<span class="text-sm font-semibold">{m.tableMode()}</span>
+									<span class="text-sm font-semibold">{m.flashMode()}</span>
 								</Anchor>
-							</div>
+							{/if}
+							<Anchor
+								breadcrumbAction="push"
+								href={`${page.url.pathname}/table-mode`}
+								class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-surface-50-950 border border-surface-100-900 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-200-800 transition-colors cursor-pointer"
+								data-testid="table-mode-button"
+							>
+								<div
+									class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-500 text-white shrink-0"
+								>
+									<i class="fa-solid fa-table-list text-sm"></i>
+								</div>
+								<span class="text-sm font-semibold">{m.tableMode()}</span>
+							</Anchor>
 						</div>
-					{/if}
+					</div>
 
 					<!-- Actions -->
 					{#if !page.data.user.is_third_party}
