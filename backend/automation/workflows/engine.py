@@ -1398,9 +1398,19 @@ def _refresh_status(instance):
             if parent_token.status != WorkflowToken.Status.WAITING:
                 return
             parent_token.instance = parent_instance
-            _persist_node_output(
-                parent_token.current_node, instance.variables, parent_instance
-            )
+            try:
+                _persist_node_output(
+                    parent_token.current_node, instance.variables, parent_instance
+                )
+            except FatalActionError as e:
+                # A child whose variables outgrow the output cap fails the
+                # parent's node; letting it escape would roll this block back
+                # and leave the parent token waiting for a child that is done.
+                parent_token.status = WorkflowToken.Status.ACTIVE
+                parent_token.save(update_fields=["status", "updated_at"])
+                _handle_failure(parent_token, str(e), retryable=False)
+                _run(parent_instance)
+                return
             # resume_token re-acquires the same row lock in this transaction
             # (a no-op) and re-checks WAITING before advancing.
             resume_token(parent_token)

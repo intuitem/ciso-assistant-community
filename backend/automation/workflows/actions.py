@@ -689,26 +689,71 @@ def _document_template_content(ref_id, locale, instance):
     return template.content
 
 
-def _rows_for(model, raw, label):
-    """Ids to rows, refusing any that is unknown: work handed to someone who
-    does not exist is worse than a failed step."""
+def _scoped_prefetches(entry, instance):
+    """`prefetch_scoped` as Prefetch objects, each narrowed to what the run may
+    read. Nested paths reuse the parent's scoped queryset so the narrowing is
+    not undone a level down."""
+    from django.db.models import Prefetch
+
+    from . import authz
+    from .engine import run_identity
+
+    identity = run_identity(instance)
+    folders = _read_scope_folder_ids(instance.folder)
+
+    def scoped(model):
+        queryset = model.objects.filter(id__in=authz.viewable_ids(identity, model))
+        if get_model_field(model, "folder"):
+            queryset = queryset.filter(folder_id__in=folders)
+        return queryset
+
+    built = {}
+    for path in sorted(entry.prefetch_scoped, key=lambda p: p.count("__")):
+        model = entry.prefetch_scoped[path]
+        queryset = scoped(model)
+        parent, _, leaf = path.rpartition("__")
+        for child, child_model in entry.prefetch_scoped.items():
+            if child.rpartition("__")[0] == path:
+                queryset = queryset.prefetch_related(built[child])
+        built[path] = Prefetch(path, queryset=queryset)
+    return [built[path] for path in entry.prefetch_scoped]
+
+
+def _rows_for(model, raw, instance, label):
+    """Ids to rows, refusing any the run may not reach: unknown, outside the
+    workflow's folder scope, or invisible to its identity. Same scope
+    _resolve_reference applies, and out-of-scope reads as unknown so the error
+    does not confirm that an id exists elsewhere."""
+    from . import authz
+    from .engine import run_identity
+
     ids = _as_id_list(raw)
     if not ids:
         return []
+    queryset = model.objects.filter(
+        id__in=authz.viewable_ids(run_identity(instance), model)
+    )
+    if get_model_field(model, "folder"):
+        queryset = queryset.filter(
+            folder_id__in=_accessible_folder_ids(instance.folder)
+        )
     try:
-        rows = list(model.objects.filter(id__in=ids))
+        rows = list(queryset.filter(id__in=ids))
     except ValueError, ValidationError:
         raise FatalActionError(f"create_object: '{label}' has invalid ids")
     if len(rows) != len(set(ids)):
         missing = ", ".join(sorted(set(ids) - {str(row.id) for row in rows}))
-        raise ActionError(f"create_object: {label} '{missing}' does not exist")
+        raise ActionError(
+            f"create_object: {label} '{missing}' does not exist or is outside "
+            "this workflow's scope"
+        )
     return rows
 
 
-def _link_targets(obj, params, relations):
+def _link_targets(obj, params, instance, relations):
     """Each name is both a relation on the object and a param holding ids."""
     for name, model in relations.items():
-        rows = _rows_for(model, params.get(name), name)
+        rows = _rows_for(model, params.get(name), instance, name)
         if rows:
             getattr(obj, name).set(rows)
 
@@ -717,7 +762,7 @@ def _construct_task_template(kwargs, params, instance):
     """A one-off task with the occurrence it owes: the board and the reminders
     read TaskNode, so a template alone shows nothing. Recurrent templates are not
     creatable here — their occurrences come from a schedule."""
-    assignees = _rows_for(Actor, params.get("assigned_to"), "assigned_to")
+    assignees = _rows_for(Actor, params.get("assigned_to"), instance, "assigned_to")
     task_date = (
         _as_date(params["task_date"], "task_date") if params.get("task_date") else None
     )
@@ -731,6 +776,7 @@ def _construct_task_template(kwargs, params, instance):
         _link_targets(
             template,
             params,
+            instance,
             {
                 "applied_controls": AppliedControl,
                 "compliance_assessments": ComplianceAssessment,
@@ -753,7 +799,7 @@ def _construct_validation_flow(kwargs, params, instance):
     FK, so a second id would be dropped without a word."""
     from .engine import run_identity
 
-    approvers = _rows_for(User, params.get("approver"), "approver")
+    approvers = _rows_for(User, params.get("approver"), instance, "approver")
     if len(approvers) > 1:
         raise FatalActionError("create_object: 'approver' names one user, not several")
 
@@ -776,7 +822,7 @@ def _construct_validation_flow(kwargs, params, instance):
             validation_deadline=deadline,
             **kwargs,
         )
-        _link_targets(flow, params, relations)
+        _link_targets(flow, params, instance, relations)
     return flow
 
 
@@ -1087,6 +1133,10 @@ class ReadEntry:
     #: Same, but resolved only when the node config names them in `include`.
     #: For values too expensive to pay for on every read of the model.
     optional_computed: dict[str, Callable] = dataclass_field(default_factory=dict)
+    #: {relation path: model}. Prefetched like `prefetch_related`, but each
+    #: queryset carries the same folder and visibility filters as the read
+    #: itself — a row the run may see must not arrive with children it may not.
+    prefetch_scoped: dict = dataclass_field(default_factory=dict)
     #: Restriction every read of this model must satisfy.
     base_filter: Q | None = None
     #: Integer columns where -1 means "not rated"; range filters skip it.
@@ -1459,10 +1509,13 @@ READABLE_MODELS: dict[str, ReadEntry] = {
         # the whole audit is in question.
         optional_computed={"quality_check": _quality_check_with_text},
         select_related=["requirement", "compliance_assessment"],
-        prefetch_related=[
-            "applied_controls__evidences__revisions",
-            "evidences__revisions",
-        ],
+        prefetch_scoped={
+            "applied_controls": AppliedControl,
+            "applied_controls__evidences": Evidence,
+            "applied_controls__evidences__revisions": EvidenceRevision,
+            "evidences": Evidence,
+            "evidences__revisions": EvidenceRevision,
+        },
     ),
     "risk_scenario": ReadEntry(
         model=RiskScenario,
@@ -1742,6 +1795,8 @@ class ReadObjectsAction(BaseAction):
             .order_by(order_by, "id")  # id tie-break keeps pagination stable
         )
         # Computed callables dereference these per row otherwise.
+        if entry.prefetch_scoped:
+            queryset = queryset.prefetch_related(*_scoped_prefetches(entry, instance))
         if entry.select_related:
             queryset = queryset.select_related(*entry.select_related)
         if entry.prefetch_related:
