@@ -17,6 +17,7 @@
 		line: 'Line',
 		area: 'Area',
 		bar: 'Bar',
+		small_multiples: 'Small Multiples',
 		table: 'Table',
 		donut: 'Donut',
 		pie: 'Pie',
@@ -31,6 +32,8 @@
 				widget.chart_type === 'donut' ||
 				widget.chart_type === 'pie' ||
 				widget.chart_type === 'bar' ||
+				widget.chart_type === 'area' ||
+				widget.chart_type === 'small_multiples' ||
 				widget.chart_type === 'table'
 			) {
 				return widget.chart_type_display;

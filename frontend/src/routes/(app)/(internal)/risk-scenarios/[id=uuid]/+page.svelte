@@ -67,23 +67,20 @@
 			object: data.scenario
 		})
 	);
-	let color_map = $state({});
-	color_map['--'] = '#A9A9A9';
+	const NO_VALUE_COLOR = '#A9A9A9';
+	const probaColors = Object.fromEntries(
+		data.riskMatrix.probability.map((prob) => [prob.name, prob.hexcolor])
+	);
+	const impactColors = Object.fromEntries(
+		data.riskMatrix.impact.map((impact) => [impact.name, impact.hexcolor])
+	);
 
-	// Map colors for risk levels
-	data.riskMatrix.risk.forEach((risk, i) => {
-		color_map[risk.name] = risk.hexcolor;
-	});
-
-	// Map colors for probability levels
-	data.riskMatrix.probability.forEach((prob, i) => {
-		color_map[prob.name] = prob.hexcolor;
-	});
-
-	// Map colors for impact levels
-	data.riskMatrix.impact.forEach((impact, i) => {
-		color_map[impact.name] = impact.hexcolor;
-	});
+	function levelBadge(colors: Record<string, string | undefined>, level?: { name?: string }) {
+		const bg = level?.name ? colors[level.name] : NO_VALUE_COLOR;
+		return bg
+			? { class: isDark(bg) ? 'text-white' : 'text-surface-950', style: `background-color: ${bg}` }
+			: { class: 'bg-surface-200-800 text-surface-950-50', style: '' };
+	}
 
 	let classesCellText = $derived((backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : 'text-surface-950';
@@ -442,14 +439,11 @@
 				<p class="flex flex-col">
 					<span class="text-sm font-semibold text-surface-400-600">{m.probability()}</span>
 					<span
-						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {classesCellText(
-							data.scenario.inherent_proba?.name
-								? color_map[data.scenario.inherent_proba.name]
-								: color_map['--']
-						)}"
-						style="background-color: {data.scenario.inherent_proba?.name
-							? color_map[data.scenario.inherent_proba.name]
-							: color_map['--']}"
+						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {levelBadge(
+							probaColors,
+							data.scenario.inherent_proba
+						).class}"
+						style={levelBadge(probaColors, data.scenario.inherent_proba).style}
 					>
 						{data.scenario.inherent_proba ? safeTranslate(data.scenario.inherent_proba.name) : '--'}
 					</span>
@@ -458,14 +452,11 @@
 				<p class="flex flex-col">
 					<span class="text-sm font-semibold text-surface-400-600">{m.impact()}</span>
 					<span
-						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {classesCellText(
-							data.scenario.inherent_impact?.name
-								? color_map[data.scenario.inherent_impact.name]
-								: color_map['--']
-						)}"
-						style="background-color: {data.scenario.inherent_impact?.name
-							? color_map[data.scenario.inherent_impact.name]
-							: color_map['--']}"
+						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {levelBadge(
+							impactColors,
+							data.scenario.inherent_impact
+						).class}"
+						style={levelBadge(impactColors, data.scenario.inherent_impact).style}
 					>
 						{data.scenario.inherent_impact
 							? safeTranslate(data.scenario.inherent_impact.name)
@@ -482,7 +473,7 @@
 							.inherent_level
 							? classesCellText(data.scenario.inherent_level.hexcolor)
 							: ''}"
-						style="background-color: {data.scenario.inherent_level?.hexcolor || color_map['--']}"
+						style="background-color: {data.scenario.inherent_level?.hexcolor || NO_VALUE_COLOR}"
 					>
 						{data.scenario.inherent_level ? safeTranslate(data.scenario.inherent_level.name) : '--'}
 					</span>
@@ -505,14 +496,11 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.probability()}</span>
 				<span
-					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {classesCellText(
-						data.scenario.current_proba?.name
-							? color_map[data.scenario.current_proba.name]
-							: color_map['--']
-					)}"
-					style="background-color: {data.scenario.current_proba?.name
-						? color_map[data.scenario.current_proba.name]
-						: color_map['--']}"
+					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {levelBadge(
+						probaColors,
+						data.scenario.current_proba
+					).class}"
+					style={levelBadge(probaColors, data.scenario.current_proba).style}
 				>
 					{data.scenario.current_proba ? safeTranslate(data.scenario.current_proba.name) : '--'}
 				</span>
@@ -521,14 +509,11 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.impact()}</span>
 				<span
-					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {classesCellText(
-						data.scenario.current_impact?.name
-							? color_map[data.scenario.current_impact.name]
-							: color_map['--']
-					)}"
-					style="background-color: {data.scenario.current_impact?.name
-						? color_map[data.scenario.current_impact.name]
-						: color_map['--']}"
+					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {levelBadge(
+						impactColors,
+						data.scenario.current_impact
+					).class}"
+					style={levelBadge(impactColors, data.scenario.current_impact).style}
 				>
 					{data.scenario.current_impact ? safeTranslate(data.scenario.current_impact.name) : '--'}
 				</span>
@@ -563,14 +548,11 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.probability()}</span>
 				<span
-					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {classesCellText(
-						data.scenario.residual_proba?.name
-							? color_map[data.scenario.residual_proba.name]
-							: color_map['--']
-					)}"
-					style="background-color: {data.scenario.residual_proba?.name
-						? color_map[data.scenario.residual_proba.name]
-						: color_map['--']}"
+					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {levelBadge(
+						probaColors,
+						data.scenario.residual_proba
+					).class}"
+					style={levelBadge(probaColors, data.scenario.residual_proba).style}
 				>
 					{data.scenario.residual_proba ? safeTranslate(data.scenario.residual_proba.name) : '--'}
 				</span>
@@ -579,14 +561,11 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.impact()}</span>
 				<span
-					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {classesCellText(
-						data.scenario.residual_impact?.name
-							? color_map[data.scenario.residual_impact.name]
-							: color_map['--']
-					)}"
-					style="background-color: {data.scenario.residual_impact?.name
-						? color_map[data.scenario.residual_impact.name]
-						: color_map['--']}"
+					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16 {levelBadge(
+						impactColors,
+						data.scenario.residual_impact
+					).class}"
+					style={levelBadge(impactColors, data.scenario.residual_impact).style}
 				>
 					{data.scenario.residual_impact ? safeTranslate(data.scenario.residual_impact.name) : '--'}
 				</span>

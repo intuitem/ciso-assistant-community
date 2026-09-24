@@ -34,6 +34,8 @@ The asset is a hub other surfaces point at: risk scenarios impact it, vulnerabil
 
 The distinction matters for risk work: scenarios typically express _what can happen to a primary asset_ via _which supporting assets are involved_.
 
+<figure><img src="../.gitbook/assets/assets-list.png" alt=""><figcaption><p>Primary and supporting assets in one list, separated by the Type column</p></figcaption></figure>
+
 ## Related
 
 - [Asset classes](asset-classes.md)

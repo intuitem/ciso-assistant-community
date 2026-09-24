@@ -421,6 +421,7 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     stakeholders = FieldsRelatedField(many=True)
     ro_to = FieldsRelatedField(["id", "risk_origin", "target_objective"])
     threats = FieldsRelatedField(many=True)
+    techniques = FieldsRelatedField(["id", "ref_id"], many=True)
     strategic_scenario = serializers.SerializerMethodField()
     likelihood = serializers.JSONField(source="get_likelihood_display")
     gravity = serializers.JSONField(source="get_gravity_display")
@@ -458,6 +459,7 @@ class OperationalScenarioImportExportSerializer(BaseModelSerializer):
     ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
     attack_path = HashSlugRelatedField(slug_field="pk", read_only=True)
     threats = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    techniques = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     operating_modes_description = serializers.SerializerMethodField()
 
@@ -488,6 +490,7 @@ class OperationalScenarioImportExportSerializer(BaseModelSerializer):
             "ebios_rm_study",
             "attack_path",
             "threats",
+            "techniques",
             "folder",
             "created_at",
             "updated_at",

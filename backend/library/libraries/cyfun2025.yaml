@@ -22,8 +22,8 @@ description: 'The CyberFundamentals Framework is a framework owned by the Centre
 
   Version 2025-10-01'
 copyright: "\u24B8 Centre for Cybersecurity Belgium (CCB)"
-version: 7
-publication_date: 2026-08-05
+version: 8
+publication_date: 2026-09-22
 provider: CCB
 packager: intuitem
 translations:
@@ -28386,9 +28386,14 @@ objects:
         \    - Organisations should act on vulnerabilities that are reported by trusted\
         \ sources (e.g., vendors, service providers, government advisories).\n   \
         \ - At the basic level, active scanning is not required, but known vulnerabilities\
-        \ should be addressed promptly.\n- Be Aware of Threats\n    Organisations\
+        \ should be addressed promptly.\n- Be Aware of Threats\n    - Organisations\
         \ should stay informed about common threats relevant to their sector (e.g.,\
-        \ phishing, ransomware"
+        \ phishing, ransomware, supply chain risks).\n    - Threat awareness can come\
+        \ from government advisories, industry news, or sector-specific guidance.\n\
+        - Maintain a Simple Risk Register\nA basic list of known threats and vulnerabilities\
+        \ should be kept, to support decision-making and planning.\n- Review Periodically\n\
+        This list should be reviewed when new systems are added or when there are\
+        \ major changes in the threat landscape."
       implementation_groups:
       - B
       - I
@@ -28418,9 +28423,16 @@ objects:
             \ die worden gemeld door betrouwbare bronnen (bijv. leveranciers, dienstverleners,\
             \ overheidsadviezen).\n    -  Op basisniveau is actief scannen niet vereist,\
             \ maar bekende kwetsbaarheden zouden onmiddellijk kunnen worden aangepakt.\n\
-            -  Zich bewust zijn van bedreigingen\n  Organisaties zouden op de hoogte\
-            \ kunnen blijven van veelvoorkomende bedreigingen die relevant zijn voor\
-            \ hun sector (bijv. phishing, ransomware)."
+            -  Zich bewust zijn van bedreigingen\n    -  Organisaties zouden op de\
+            \ hoogte kunnen blijven van veelvoorkomende bedreigingen die relevant\
+            \ zijn voor hun sector (bijv. phishing, ransomware, risico\u2019s in de\
+            \ toeleveringsketen).\n    - Inzicht in bedreigingen kan worden verkregen\
+            \ via adviezen van de overheid, nieuws uit de branche of sectorspecifieke\
+            \ richtlijnen.\n- Houd een eenvoudig risicoregister bij\nEr moet een basislijst\
+            \ van bekende bedreigingen en kwetsbaarheden worden bijgehouden ter ondersteuning\
+            \ van de besluitvorming en planning.\n- Evalueer de lijst regelmatig\n\
+            Deze lijst moet worden ge\xEBvalueerd wanneer er nieuwe systemen worden\
+            \ toegevoegd of wanneer er grote veranderingen plaatsvinden in het dreigingslandschap."
         fr:
           description: "Les menaces et les vuln\xE9rabilit\xE9s doivent \xEAtre identifi\xE9\
             es dans tous les actifs pertinents, y compris les logiciels, les architectures\
@@ -28446,9 +28458,17 @@ objects:
             \ prestataires de services, avis gouvernementaux).\n    -  Au niveau de\
             \ base, un scan actif n\u2019est pas requis, mais les vuln\xE9rabilit\xE9\
             s connues pourraient \xEAtre trait\xE9es rapidement.\n-  Rester conscient\
-            \ des menaces\n  Les organisations pourraient se tenir inform\xE9es des\
-            \ menaces courantes pertinentes pour leur secteur (par exemple, hame\xE7\
-            onnage, ransomware"
+            \ des menaces\n    -  Les organisations pourraient se tenir inform\xE9\
+            es des menaces courantes pertinentes pour leur secteur (par exemple, hame\xE7\
+            onnage, ran\xE7ongiciels, risques li\xE9s \xE0 la cha\xEEne d\u2019approvisionnement).\n\
+            \    -  La sensibilisation aux menaces peut provenir d\u2019avis gouvernementaux,\
+            \ d\u2019actualit\xE9s du secteur ou de recommandations sectoriales.\n\
+            -  Tenir \xE0 jour un registre des risques simple\nUne liste de base des\
+            \ menaces et vuln\xE9rabilit\xE9s connues pourrait \xEAtre tenue \xE0\
+            \ jour afin de faciliter la prise de d\xE9cision et la planification.\n\
+            -  Proc\xE9der \xE0 des r\xE9visions p\xE9riodiques\nCette liste pourrait\
+            \ \xEAtre r\xE9vis\xE9e lorsque de nouveaux syst\xE8mes sont mis en place\
+            \ ou lorsque des changements majeurs surviennent dans le paysage des menaces."
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.2
       assessable: true
       depth: 4
