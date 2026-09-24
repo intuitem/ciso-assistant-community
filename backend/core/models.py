@@ -27,7 +27,9 @@ from django.core.validators import (
     RegexValidator,
     MinValueValidator,
 )
+from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.core.files.uploadedfile import UploadedFile
 from django.db import models, transaction
 from django.db.models import F, Q, Exists, OuterRef, Subquery, Prefetch, Count, Value
 from django.db.models.functions import Coalesce
@@ -80,6 +82,7 @@ from .validators import (
 )
 from . import dora
 from collections import defaultdict, deque
+from dataclasses import dataclass
 
 logger = get_logger(__name__)
 
@@ -129,13 +132,361 @@ def match_urn(urn_string):
 def _serialize_for_quality_check(queryset) -> list[dict]:
     """Serialize a queryset to plain dicts, with the object id folded in.
 
-    serializers.serialize() fetches every m2m field one object at a time, so the
-    m2m fields are prefetched here to keep quality checks at a constant number of
-    queries whatever the size of the assessment.
+    m2m fields are prefetched: serializers.serialize() fetches them one object at
+    a time.
     """
     m2m_fields = [f.name for f in queryset.model._meta.many_to_many]
     payload = serializers.serialize("json", queryset.prefetch_related(*m2m_fields))
     return [{**item["fields"], "id": item["pk"]} for item in json.loads(payload)]
+
+
+def _issue_object(obj, *fields) -> dict:
+    """Identity plus the few fields the X-rays table shows as columns."""
+    get = obj.get if isinstance(obj, dict) else lambda name: getattr(obj, name)
+    return {"id": get("id"), "name": get("name"), **{f: get(f) for f in fields}}
+
+
+@dataclass(frozen=True)
+class RequirementAssessmentQualityContext:
+    """Everything the per-requirement quality rules read, resolved in bulk.
+
+    The rules issue no queries of their own: an audit resolves its controls and
+    its evidences once, whatever its size, and every requirement assessment is
+    then evaluated from these maps. Keep it that way — the checks run on audits
+    holding thousands of requirements.
+
+    A rule may only fire on a field the auditor can see. An audit that hides
+    `status` or `result` would otherwise be flooded with findings about fields
+    nobody is expected to fill in.
+    """
+
+    today: date
+    result_visible: bool
+    status_visible: bool
+    observation_visible: bool
+    controls_visible: bool
+    evidences_visible: bool
+    # ra_id -> {control_id: (status, eta, expiry_date)}
+    controls: dict
+    # ra_id -> {evidence_id: (status, expiry_date)}, both attachment paths merged
+    evidences: dict
+
+
+def _build_requirement_assessment_quality_context(
+    compliance_assessment, requirement_assessment_ids=None
+) -> RequirementAssessmentQualityContext:
+    """Resolve the quality-check inputs for a whole audit in three queries.
+
+    Filtering on the audit rather than on a list of ids keeps the SQL constant
+    when the caller wants every requirement: one audit-scoped join beats an IN
+    clause holding thousands of UUIDs. `requirement_assessment_ids` narrows it
+    for the single-requirement path.
+    """
+    from core.utils import resolve_visibility_from_overrides
+
+    RequirementAssessment = apps.get_model("core", "RequirementAssessment")
+
+    overrides = compliance_assessment.field_visibility or getattr(
+        compliance_assessment.framework, "field_visibility", None
+    )
+
+    def _visible(field):
+        return (
+            resolve_visibility_from_overrides(overrides, field).get("auditor", "edit")
+            != "hidden"
+        )
+
+    if requirement_assessment_ids is None:
+        scope = {"requirementassessment__compliance_assessment": compliance_assessment}
+    else:
+        scope = {"requirementassessment_id__in": list(requirement_assessment_ids)}
+
+    controls = defaultdict(dict)
+    control_through = RequirementAssessment.applied_controls.through.objects.filter(
+        **scope
+    )
+    for ra_id, control_id, status, eta, expiry in control_through.values_list(
+        "requirementassessment_id",
+        "appliedcontrol_id",
+        "appliedcontrol__status",
+        "appliedcontrol__eta",
+        "appliedcontrol__expiry_date",
+    ):
+        controls[ra_id][control_id] = (status, eta, expiry)
+
+    # The two paths RequirementAssessment.has_evidence() follows, merged on
+    # evidence id so an evidence reachable both directly and through a control
+    # counts once.
+    evidences = defaultdict(dict)
+    for (
+        ra_id,
+        evidence_id,
+        status,
+        expiry,
+    ) in RequirementAssessment.evidences.through.objects.filter(**scope).values_list(
+        "requirementassessment_id",
+        "evidence_id",
+        "evidence__status",
+        "evidence__expiry_date",
+    ):
+        evidences[ra_id][evidence_id] = (status, expiry)
+
+    for ra_id, evidence_id, status, expiry in control_through.filter(
+        appliedcontrol__evidences__isnull=False
+    ).values_list(
+        "requirementassessment_id",
+        "appliedcontrol__evidences__id",
+        "appliedcontrol__evidences__status",
+        "appliedcontrol__evidences__expiry_date",
+    ):
+        evidences[ra_id][evidence_id] = (status, expiry)
+
+    return RequirementAssessmentQualityContext(
+        today=date.today(),
+        result_visible=_visible("result"),
+        status_visible=_visible("status"),
+        observation_visible=_visible("observation"),
+        controls_visible=_visible("applied_controls"),
+        evidences_visible=_visible("evidences"),
+        controls=controls,
+        evidences=evidences,
+    )
+
+
+def _requirement_assessment_quality_findings(
+    requirement_assessment, payload, context
+) -> tuple[list, list, list]:
+    """Quality findings for one requirement assessment. Pure — issues no query.
+
+    Returns (errors, warnings, info). `payload` is the dict the X-rays page
+    renders; it reads only `name`, so nothing more is exposed. Every rule is
+    gated on the visibility of the fields it reads, and expiry is judged on the
+    date rather than the status: `mark_expired_evidences` runs daily under Huey,
+    so a status can lag its date by a day or trail it indefinitely when no worker
+    is running, and applied controls are never marked expired at all (CA-1869).
+    """
+    RequirementAssessment = apps.get_model("core", "RequirementAssessment")
+    AppliedControl = apps.get_model("core", "AppliedControl")
+    Evidence = apps.get_model("core", "Evidence")
+
+    Result = RequirementAssessment.Result
+    Progress = RequirementAssessment.Status
+    ControlStatus = AppliedControl.Status
+    EvidenceStatus = Evidence.Status
+
+    errors, warnings, info = [], [], []
+    # `result` and `status` are the columns ISSUE_COLUMNS.requirementassessment
+    # renders in the X-rays issue table; the rest of the payload stays internal.
+    issue_object = _issue_object(payload, "result", "status")
+
+    def report(bucket, message, msgid):
+        bucket.append(
+            {
+                "msg": message,
+                "msgid": msgid,
+                "link": f"requirement-assessments/{payload['id']}",
+                "obj_type": "requirementassessment",
+                "object": issue_object,
+            }
+        )
+
+    name = payload["name"]
+    result = requirement_assessment.result
+    claims_compliance = result in (Result.COMPLIANT, Result.PARTIALLY_COMPLIANT)
+    controls = context.controls.get(requirement_assessment.id, {})
+    evidences = context.evidences.get(requirement_assessment.id, {})
+
+    # --- is the verdict backed by controls, and do they run?
+    if context.result_visible and context.controls_visible:
+        control_statuses = {status for status, _eta, _expiry in controls.values()}
+
+        if claims_compliance and not controls:
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment result is compliant or partially compliant with no applied control applied"
+                ).format(name),
+                "requirementAssessmentNoAppliedControl",
+            )
+        if (
+            result == Result.COMPLIANT
+            and controls
+            and ControlStatus.ACTIVE not in control_statuses
+        ):
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment is compliant but none of its applied controls is active"
+                ).format(name),
+                "requirementAssessmentCompliantNoActiveControl",
+            )
+        if claims_compliance and control_statuses & {
+            ControlStatus.DEPRECATED,
+            ControlStatus.DEGRADED,
+        }:
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment relies on a deprecated or degraded applied control"
+                ).format(name),
+                "requirementAssessmentControlDeprecatedOrDegraded",
+            )
+        if (
+            result == Result.PARTIALLY_COMPLIANT
+            and controls
+            and control_statuses <= {ControlStatus.TO_DO, ControlStatus.UNDEFINED}
+        ):
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment is partially compliant but none of its applied controls has started"
+                ).format(name),
+                "requirementAssessmentPartialNoStartedControl",
+            )
+        if (
+            result == Result.NON_COMPLIANT
+            and controls
+            and control_statuses == {ControlStatus.ACTIVE}
+        ):
+            report(
+                info,
+                _(
+                    "{}: Requirement assessment is non-compliant while all its applied controls are active"
+                ).format(name),
+                "requirementAssessmentNonCompliantActiveControls",
+            )
+        if claims_compliance and any(
+            expiry and expiry < context.today for _s, _eta, expiry in controls.values()
+        ):
+            report(
+                errors,
+                _(
+                    "{}: Requirement assessment relies on an applied control past its expiry date"
+                ).format(name),
+                "requirementAssessmentControlExpired",
+            )
+
+    # A missed ETA is about the control's own plan, so it does not depend on the
+    # result being visible.
+    if context.controls_visible and any(
+        eta and eta < context.today and status != ControlStatus.ACTIVE
+        for status, eta, _expiry in controls.values()
+    ):
+        report(
+            warnings,
+            _(
+                "{}: Requirement assessment depends on an applied control whose ETA has passed"
+            ).format(name),
+            "requirementAssessmentControlEtaMissed",
+        )
+
+    # --- is the verdict backed by evidence that is still worth anything?
+    if context.result_visible and context.evidences_visible:
+        if result == Result.COMPLIANT and not evidences:
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment is compliant but has no evidence attached"
+                ).format(name),
+                "requirementAssessmentCompliantNoEvidence",
+            )
+        if (
+            claims_compliance
+            and evidences
+            and all(
+                status == EvidenceStatus.EXPIRED or (expiry and expiry < context.today)
+                for status, expiry in evidences.values()
+            )
+        ):
+            report(
+                warnings,
+                _(
+                    "{}: Every evidence supporting this requirement assessment has expired"
+                ).format(name),
+                "requirementAssessmentEvidenceExpired",
+            )
+        if claims_compliance and any(
+            status == EvidenceStatus.REJECTED for status, _expiry in evidences.values()
+        ):
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment relies on an evidence that was rejected"
+                ).format(name),
+                "requirementAssessmentEvidenceRejected",
+            )
+        if (
+            result == Result.COMPLIANT
+            and evidences
+            and all(
+                status == EvidenceStatus.DRAFT for status, _expiry in evidences.values()
+            )
+        ):
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment is compliant but none of its evidence has left draft"
+                ).format(name),
+                "requirementAssessmentEvidenceAllDraft",
+            )
+
+    # --- did the auditor say why?
+    if (
+        context.result_visible
+        and context.observation_visible
+        and not (requirement_assessment.observation or "").strip()
+    ):
+        if result == Result.NOT_APPLICABLE:
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment is not applicable with no justification"
+                ).format(name),
+                "requirementAssessmentNotApplicableNoJustification",
+            )
+        elif result == Result.NON_COMPLIANT:
+            report(
+                info,
+                _(
+                    "{}: Requirement assessment is non-compliant with no observation"
+                ).format(name),
+                "requirementAssessmentNonCompliantNoObservation",
+            )
+        elif result == Result.PARTIALLY_COMPLIANT:
+            report(
+                info,
+                _(
+                    "{}: Requirement assessment is partially compliant with no observation"
+                ).format(name),
+                "requirementAssessmentPartialNoObservation",
+            )
+
+    # --- does the progress status agree with the verdict?
+    if context.status_visible and context.result_visible:
+        if (
+            result != Result.NOT_ASSESSED
+            and requirement_assessment.status == Progress.TODO
+        ):
+            report(
+                info,
+                _(
+                    "{}: Requirement assessment has a result while still marked to do"
+                ).format(name),
+                "requirementAssessmentResultWithoutProgress",
+            )
+        if (
+            requirement_assessment.status == Progress.DONE
+            and result == Result.NOT_ASSESSED
+        ):
+            report(
+                warnings,
+                _("{}: Requirement assessment is marked done but has no result").format(
+                    name
+                ),
+                "requirementAssessmentDoneNotAssessed",
+            )
+
+    return errors, warnings, info
 
 
 def _translate_questions(owner) -> dict | None:
@@ -5648,7 +5999,10 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             # Check if this is a new attachment or if it has changed
             should_compute_hash = False
 
-            if self.pk:  # Existing record
+            # Uncommitted: a pending replacement, whatever it is named.
+            if not self.attachment._committed:
+                should_compute_hash = True
+            elif self.pk:  # Existing record
                 try:
                     old_instance = EvidenceRevision.objects.get(pk=self.pk)
                     # Check if attachment changed
@@ -5661,31 +6015,27 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
             if should_compute_hash:
                 try:
-                    # Compute SHA256 hash using chunked reading to avoid OOM
                     hash_obj = hashlib.sha256()
-                    if default_storage.exists(self.attachment.name):
+                    if not self.attachment._committed and hasattr(
+                        self.attachment, "chunks"
+                    ):
+                        for chunk in self.attachment.chunks(chunk_size=1024 * 1024):
+                            hash_obj.update(chunk)
+                        self.attachment_hash = hash_obj.hexdigest()
+                        if hasattr(self.attachment, "seek"):
+                            self.attachment.seek(0)
+
+                    elif default_storage.exists(self.attachment.name):
                         with default_storage.open(self.attachment.name, "rb") as f:
-                            for chunk in iter(
-                                lambda: f.read(1024 * 1024), b""
-                            ):  # 1MB chunks
+                            for chunk in iter(lambda: f.read(1024 * 1024), b""):
                                 hash_obj.update(chunk)
                         self.attachment_hash = hash_obj.hexdigest()
-                    else:
-                        # File not yet saved to storage, try reading from UploadedFile
-                        if hasattr(self.attachment, "chunks"):
-                            for chunk in self.attachment.chunks(chunk_size=1024 * 1024):
-                                hash_obj.update(chunk)
-                            self.attachment_hash = hash_obj.hexdigest()
-                            # Reset file position for subsequent operations
-                            if hasattr(self.attachment, "seek"):
-                                self.attachment.seek(0)
                 except Exception as e:
                     logger.warning(
                         "Failed to compute attachment hash",
                         revision_id=self.pk,
-                        error=str(e),
+                        error=e,
                     )
-                    # Don't fail the save if hash computation fails
                     self.attachment_hash = None
         else:
             # No attachment, clear the hash
@@ -5697,6 +6047,19 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         if not self.attachment:
             return None
         return self.original_filename or os.path.basename(self.attachment.name)
+
+    def set_new_attachment(
+        self, uploaded_file: UploadedFile | ContentFile
+    ) -> str | None:
+        """Set `self.attachment` to a new `uploaded_file` (and update `self.original_filename`
+        accordingly), returning the superseded file's name for the caller to delete once
+        saved: the old `FieldFile` is bound to this instance and nulls it on delete."""
+        superseded_name = self.attachment.name
+        self.attachment = uploaded_file
+        original_filename = uploaded_file.name
+        if original_filename:
+            self.original_filename = original_filename
+        return superseded_name
 
     def get_size(self):
         if not self.attachment or not self.attachment.storage.exists(
@@ -7149,9 +7512,7 @@ class RiskAssessment(Assessment):
         warnings_lst = list()
         info_lst = list()
         # --- check on the risk risk_assessment:
-        # Same dict shape as every other finding object, so the name renders.
-        _serialized = json.loads(serializers.serialize("json", [self]))[0]
-        _object = {**_serialized["fields"], "id": _serialized["pk"]}
+        _object = _issue_object(self, "status")
         if self.status == Assessment.Status.IN_PROGRESS:
             info_lst.append(
                 {
@@ -7193,6 +7554,7 @@ class RiskAssessment(Assessment):
             self.risk_scenarios.all().order_by("created_at")
         )
         for ri in scenarios:
+            ri_object = _issue_object(ri, "ref_id", "treatment")
             if ri["current_level"] < 0:
                 warnings_lst.append(
                     {
@@ -7202,7 +7564,7 @@ class RiskAssessment(Assessment):
                         "msgid": "riskScenarioNoCurrentLevel",
                         "link": f"risk-scenarios/{ri['id']}",
                         "obj_type": "riskscenario",
-                        "object": ri,
+                        "object": ri_object,
                     }
                 )
             if ri["residual_level"] < 0 and ri["current_level"] >= 0:
@@ -7213,7 +7575,7 @@ class RiskAssessment(Assessment):
                         ).format(ri["name"]),
                         "msgid": "riskScenarioNoResidualLevel",
                         "obj_type": "riskscenario",
-                        "object": ri,
+                        "object": ri_object,
                     }
                 )
             if ri["residual_level"] > ri["current_level"]:
@@ -7225,7 +7587,7 @@ class RiskAssessment(Assessment):
                         "msgid": "riskScenarioResidualHigherThanCurrent",
                         "link": f"risk-scenarios/{ri['id']}",
                         "obj_type": "riskscenario",
-                        "object": ri,
+                        "object": ri_object,
                     }
                 )
             if ri["residual_proba"] > ri["current_proba"]:
@@ -7237,7 +7599,7 @@ class RiskAssessment(Assessment):
                         "msgid": "riskScenarioResidualProbaHigherThanCurrent",
                         "link": f"risk-scenarios/{ri['id']}",
                         "obj_type": "riskscenario",
-                        "object": ri,
+                        "object": ri_object,
                     }
                 )
             if ri["residual_impact"] > ri["current_impact"]:
@@ -7249,7 +7611,7 @@ class RiskAssessment(Assessment):
                         "msgid": "riskScenarioResidualImpactHigherThanCurrent",
                         "link": f"risk-scenarios/{ri['id']}",
                         "obj_type": "riskscenario",
-                        "object": ri,
+                        "object": ri_object,
                     }
                 )
 
@@ -7270,7 +7632,7 @@ class RiskAssessment(Assessment):
                             "msgid": "riskScenarioResidualLoweredWithoutMeasures",
                             "link": f"risk-scenarios/{ri['id']}",
                             "obj_type": "riskscenario",
-                            "object": ri,
+                            "object": ri_object,
                         }
                     )
 
@@ -7284,7 +7646,7 @@ class RiskAssessment(Assessment):
                             "msgid": "riskScenarioAcceptedNoAcceptance",
                             "link": f"risk-scenarios/{ri['id']}",
                             "obj_type": "riskscenario",
-                            "object": ri,
+                            "object": ri_object,
                         }
                     )
 
@@ -7315,10 +7677,9 @@ class RiskAssessment(Assessment):
                         "msgid": "controlInBothLists",
                         "link": f"applied-controls/{duplicate_control.id}",
                         "obj_type": "appliedcontrol",
-                        "object": {
-                            "name": duplicate_control.name,
-                            "id": duplicate_control.id,
-                        },
+                        "object": _issue_object(
+                            duplicate_control, "status", "eta", "priority"
+                        ),
                     }
                 )
 
@@ -7333,21 +7694,46 @@ class RiskAssessment(Assessment):
                             "msgid": "existingControlNotActive",
                             "link": f"applied-controls/{existing_control.id}",
                             "obj_type": "appliedcontrol",
-                            "object": {
-                                "name": existing_control.name,
-                                "id": existing_control.id,
-                            },
+                            "object": _issue_object(
+                                existing_control, "status", "eta", "priority"
+                            ),
                         }
                     )
 
         # --- checks on the applied controls
         measures = _serialize_for_quality_check(
-            AppliedControl.objects.filter(risk_scenarios__risk_assessment=self)
+            AppliedControl.objects.filter(
+                models.Q(risk_scenarios__risk_assessment=self)
+                | models.Q(risk_scenarios_e__risk_assessment=self)
+            )
             .distinct()
             .order_by("created_at")
         )
+        planned_ids = {
+            str(pk)
+            for pk in AppliedControl.objects.filter(
+                risk_scenarios__risk_assessment=self
+            ).values_list("id", flat=True)
+        }
 
         for mtg in measures:
+            mtg_object = _issue_object(mtg, "status", "eta", "priority")
+            if mtg["status"] == "active" and not mtg["evidences"]:
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{}: Applied control is active but has no evidence attached"
+                        ).format(mtg["name"]),
+                        "msgid": "appliedControlActiveNoEvidence",
+                        "link": f"applied-controls/{mtg['id']}",
+                        "obj_type": "appliedcontrol",
+                        "object": mtg_object,
+                    }
+                )
+
+            if mtg["id"] not in planned_ids:
+                continue
+
             if not mtg["eta"] and not mtg["status"] == "active":
                 warnings_lst.append(
                     {
@@ -7355,7 +7741,7 @@ class RiskAssessment(Assessment):
                         "msgid": "appliedControlNoETA",
                         "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
-                        "object": {"name": mtg["name"], "id": mtg["id"]},
+                        "object": mtg_object,
                     }
                 )
             elif mtg["eta"] and not mtg["status"] == "active":
@@ -7368,7 +7754,7 @@ class RiskAssessment(Assessment):
                             "msgid": "appliedControlETAInPast",
                             "link": f"applied-controls/{mtg['id']}",
                             "obj_type": "appliedcontrol",
-                            "object": {"name": mtg["name"], "id": mtg["id"]},
+                            "object": mtg_object,
                         }
                     )
 
@@ -7381,7 +7767,7 @@ class RiskAssessment(Assessment):
                         "msgid": "appliedControlNoEffort",
                         "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
-                        "object": {"name": mtg["name"], "id": mtg["id"]},
+                        "object": mtg_object,
                     }
                 )
 
@@ -7394,7 +7780,7 @@ class RiskAssessment(Assessment):
                         "msgid": "appliedControlNoCost",
                         "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
-                        "object": {"name": mtg["name"], "id": mtg["id"]},
+                        "object": mtg_object,
                     }
                 )
 
@@ -7407,7 +7793,7 @@ class RiskAssessment(Assessment):
                         "msgid": "appliedControlNoLink",
                         "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
-                        "object": {"name": mtg["name"], "id": mtg["id"]},
+                        "object": mtg_object,
                     }
                 )
 
@@ -7418,6 +7804,7 @@ class RiskAssessment(Assessment):
             .order_by("created_at")
         )
         for ra in acceptances:
+            ra_object = _issue_object(ra, "state", "expiry_date")
             if not ra["expiry_date"]:
                 warnings_lst.append(
                     {
@@ -7426,8 +7813,8 @@ class RiskAssessment(Assessment):
                         ),
                         "msgid": "riskAcceptanceNoExpiryDate",
                         "link": f"risk-acceptances/{ra['id']}",
-                        "obj_type": "appliedcontrol",
-                        "object": ra,
+                        "obj_type": "riskacceptance",
+                        "object": ra_object,
                     }
                 )
                 continue
@@ -7440,7 +7827,7 @@ class RiskAssessment(Assessment):
                         "msgid": "riskAcceptanceExpired",
                         "link": f"risk-acceptances/{ra['id']}",
                         "obj_type": "riskacceptance",
-                        "object": ra,
+                        "object": ra_object,
                     }
                 )
 
@@ -9140,9 +9527,7 @@ class ComplianceAssessment(Assessment):
         warnings_lst = list()
         info_lst = list()
         # --- check on the assessment:
-        # Same dict shape as every other finding object, so the name renders.
-        _serialized = json.loads(serializers.serialize("json", [self]))[0]
-        _object = {**_serialized["fields"], "id": _serialized["pk"]}
+        _object = _issue_object(self, "status")
         if self.status == Assessment.Status.IN_PROGRESS:
             info_lst.append(
                 {
@@ -9169,72 +9554,40 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on requirement assessments:
-        _requirement_assessments = (
-            self.requirement_assessments.select_related("requirement")
-            .prefetch_related("applied_controls")
-            .order_by("created_at")
-        )
-        # Set-based equivalent of RequirementAssessment.has_evidence(), so the
-        # loop below does not issue one query per requirement assessment.
-        ac_through = RequirementAssessment.applied_controls.through.objects.filter(
-            requirementassessment__compliance_assessment=self
-        )
-        ra_ids_with_evidence = set(
-            RequirementAssessment.evidences.through.objects.filter(
-                requirementassessment__compliance_assessment=self
-            ).values_list("requirementassessment_id", flat=True)
-        ) | set(
-            ac_through.filter(appliedcontrol__evidences__isnull=False).values_list(
-                "requirementassessment_id", flat=True
-            )
-        )
-        requirement_assessments = []
-        for ra in _requirement_assessments:
-            # Only the fields the checks below and the X-rays page read: fully
+        # RequirementAssessment owns the rules; the audit only decides which of
+        # them are in scope and resolves their inputs once. Requirements outside
+        # the selected implementation groups, and non-assessable nodes, are not
+        # the auditor's to answer, so they are not judged.
+        quality_context = _build_requirement_assessment_quality_context(self)
+        for ra in self.requirement_assessments.select_related("requirement").order_by(
+            "created_at"
+        ):
+            # Same predicate as RequirementAssessment.quality_check(), called on
+            # `self` rather than through `ra.compliance_assessment` so the loop
+            # does not fetch the audit back once per requirement.
+            if (
+                not ra.requirement.assessable
+                or not self.requirement_matches_selected_groups(ra.requirement)
+            ):
+                continue
+
+            # Only the fields the rules and the X-rays page read: fully
             # serializing every requirement assessment dominated both the runtime
             # and the payload of this check on large audits.
             ra_dict = {
                 "id": ra.id,
                 "name": str(ra),
                 "result": ra.result,
-                "applied_controls": [ac.id for ac in ra.applied_controls.all()],
+                "status": ra.status,
+                "applied_controls": list(quality_context.controls.get(ra.id, {})),
             }
-            requirement_assessments.append(ra_dict)
 
-            # Check if assessable requirement assessment with compliant result has no evidence
-            if (
-                ra.requirement.assessable
-                and ra.result == RequirementAssessment.Result.COMPLIANT
-                and ra.id not in ra_ids_with_evidence
-            ):
-                warnings_lst.append(
-                    {
-                        "msg": _(
-                            "{}: Requirement assessment is compliant but has no evidence attached"
-                        ).format(str(ra)),
-                        "msgid": "requirementAssessmentCompliantNoEvidence",
-                        "link": f"requirement-assessments/{ra.id}",
-                        "obj_type": "requirementassessment",
-                        "object": ra_dict,
-                    }
-                )
-
-        for requirement_assessment in requirement_assessments:
-            if (
-                requirement_assessment["result"] in ("compliant", "partially_compliant")
-                and len(requirement_assessment["applied_controls"]) == 0
-            ):
-                warnings_lst.append(
-                    {
-                        "msg": _(
-                            "{}: Requirement assessment result is compliant or partially compliant with no applied control applied"
-                        ).format(requirement_assessment["name"]),
-                        "msgid": "requirementAssessmentNoAppliedControl",
-                        "link": f"requirement-assessments/{requirement_assessment['id']}",
-                        "obj_type": "requirementassessment",
-                        "object": requirement_assessment,
-                    }
-                )
+            ra_errors, ra_warnings, ra_info = _requirement_assessment_quality_findings(
+                ra, ra_dict, quality_context
+            )
+            errors_lst.extend(ra_errors)
+            warnings_lst.extend(ra_warnings)
+            info_lst.extend(ra_info)
         # ---
 
         # --- check on applied controls:
@@ -9246,6 +9599,22 @@ class ComplianceAssessment(Assessment):
             .order_by("created_at")
         )
         for applied_control in applied_controls:
+            ac_object = _issue_object(applied_control, "status", "eta", "priority")
+            if (
+                applied_control["status"] == "active"
+                and not applied_control["evidences"]
+            ):
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{}: Applied control is active but has no evidence attached"
+                        ).format(applied_control["name"]),
+                        "msgid": "appliedControlActiveNoEvidence",
+                        "link": f"applied-controls/{applied_control['id']}",
+                        "obj_type": "appliedcontrol",
+                        "object": ac_object,
+                    }
+                )
             if not applied_control["reference_control"]:
                 info_lst.append(
                     {
@@ -9255,7 +9624,7 @@ class ComplianceAssessment(Assessment):
                         "msgid": "appliedControlNoReferenceControl",
                         "link": f"applied-controls/{applied_control['id']}",
                         "obj_type": "appliedcontrol",
-                        "object": applied_control,
+                        "object": ac_object,
                     }
                 )
         # ---
@@ -9296,7 +9665,7 @@ class ComplianceAssessment(Assessment):
                     "msgid": "evidenceNoFile",
                     "link": f"evidences/{evidence['id']}",
                     "obj_type": "evidence",
-                    "object": evidence,
+                    "object": _issue_object(evidence),
                 }
             )
 
@@ -9821,6 +10190,45 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             Q(requirement_assessments=self)
             | Q(applied_controls__requirement_assessments=self)
         ).exists()
+
+    def quality_check(self) -> dict:
+        """Quality findings for this requirement assessment alone.
+
+        Same envelope as the assessment-level checks, so the API, the X-rays page
+        and the workflow engine all read one shape. The audit-level check resolves
+        the shared context once and calls the same rules, so a finding can never
+        differ between the two surfaces.
+        """
+        # Same predicate the audit applies when it decides what is in scope: a
+        # requirement the auditor was never asked to answer must not be judged
+        # here either, or this surface would report findings the X-rays page
+        # does not show.
+        if not self.requirement.assessable or not (
+            self.compliance_assessment.requirement_matches_selected_groups(
+                self.requirement
+            )
+        ):
+            return {"errors": [], "warnings": [], "info": [], "count": 0}
+
+        context = _build_requirement_assessment_quality_context(
+            self.compliance_assessment, requirement_assessment_ids=[self.id]
+        )
+        payload = {
+            "id": self.id,
+            "name": str(self),
+            "result": self.result,
+            "status": self.status,
+            "applied_controls": list(context.controls.get(self.id, {})),
+        }
+        errors, warnings, info = _requirement_assessment_quality_findings(
+            self, payload, context
+        )
+        return {
+            "errors": errors,
+            "warnings": warnings,
+            "info": info,
+            "count": len(errors) + len(warnings) + len(info),
+        }
 
     def trigger_compliance_assessment_update_hooks(self):
         ComplianceAssessment.objects.filter(pk=self.compliance_assessment_id).update(

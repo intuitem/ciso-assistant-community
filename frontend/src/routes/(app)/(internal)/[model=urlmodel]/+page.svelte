@@ -387,8 +387,13 @@
 				{tableFilters}
 				deleteForm={data.deleteForm}
 				{URLModel}
-				disableEdit={['user-groups', 'validation-flows', 'commitments'].includes(URLModel)}
+				disableEdit={['user-groups', 'validation-flows', 'commitments', 'notifications'].includes(
+					URLModel
+				)}
 				disableDelete={['user-groups', 'commitments'].includes(URLModel)}
+				disableView={['notifications'].includes(URLModel)}
+				disableBatchEdit={URLModel === 'notifications' ? false : undefined}
+				numberRowsPerPage={URLModel === 'notifications' ? 50 : undefined}
 				loading={isSyncing}
 				onFilterChange={handleFilterChange}
 			>
