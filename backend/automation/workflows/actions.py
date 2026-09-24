@@ -47,6 +47,7 @@ from core.models import (
     FindingsAssessment,
     Framework,
     Incident,
+    Policy,
     Perimeter,
     RiskAcceptance,
     QuickFormResponse,
@@ -371,6 +372,22 @@ CREATABLE_MODELS = {
         "constructor": "_construct_audit",
         "constructor_permissions": {"framework": ["add_complianceassessment"]},
     },
+    "validation_flow": {
+        "model": ValidationFlow,
+        # No name or description on the model; `ref_id` is generated on save.
+        "fields": ["request_notes"],
+        "fk_fields": {},
+        "params": {
+            "approver": None,
+            "validation_deadline": None,
+            "compliance_assessments": None,
+            "evidences": None,
+            "policies": None,
+            "findings_assessments": None,
+            "security_exceptions": None,
+        },
+        "constructor": "_construct_validation_flow",
+    },
     "risk_scenario": {
         "model": RiskScenario,
         # Never the ratings or the treatment: those are the analyst's.
@@ -515,8 +532,17 @@ CREATABLE_MODELS = {
         "model": TaskTemplate,
         # No `schedule`: objects.create() skips field validators and that
         # column's shape is enforced by one.
-        "fields": ["name", "description", "ref_id", "task_date"],
+        "fields": ["name", "description", "ref_id"],
         "fk_fields": {},
+        "params": {
+            "assigned_to": None,
+            "task_date": None,
+            "applied_controls": None,
+            "compliance_assessments": None,
+            "evidences": None,
+            "documents": None,
+        },
+        "constructor": "_construct_task_template",
     },
     "right_request": {
         "model": RightRequest,
@@ -661,6 +687,97 @@ def _document_template_content(ref_id, locale, instance):
             f"create_object: no document template '{ref_id}' in {locale} or en"
         )
     return template.content
+
+
+def _rows_for(model, raw, label):
+    """Ids to rows, refusing any that is unknown: work handed to someone who
+    does not exist is worse than a failed step."""
+    ids = _as_id_list(raw)
+    if not ids:
+        return []
+    try:
+        rows = list(model.objects.filter(id__in=ids))
+    except ValueError, ValidationError:
+        raise FatalActionError(f"create_object: '{label}' has invalid ids")
+    if len(rows) != len(set(ids)):
+        missing = ", ".join(sorted(set(ids) - {str(row.id) for row in rows}))
+        raise ActionError(f"create_object: {label} '{missing}' does not exist")
+    return rows
+
+
+def _link_targets(obj, params, relations):
+    """Each name is both a relation on the object and a param holding ids."""
+    for name, model in relations.items():
+        rows = _rows_for(model, params.get(name), name)
+        if rows:
+            getattr(obj, name).set(rows)
+
+
+def _construct_task_template(kwargs, params, instance):
+    """A one-off task with the occurrence it owes: the board and the reminders
+    read TaskNode, so a template alone shows nothing. Recurrent templates are not
+    creatable here — their occurrences come from a schedule."""
+    assignees = _rows_for(Actor, params.get("assigned_to"), "assigned_to")
+    task_date = (
+        _as_date(params["task_date"], "task_date") if params.get("task_date") else None
+    )
+
+    with transaction.atomic():
+        template = TaskTemplate.objects.create(
+            task_date=task_date, is_recurrent=False, **kwargs
+        )
+        if assignees:
+            template.assigned_to.set(assignees)
+        _link_targets(
+            template,
+            params,
+            {
+                "applied_controls": AppliedControl,
+                "compliance_assessments": ComplianceAssessment,
+                "evidences": Evidence,
+                # DocumentContainer.task_templates, from this side.
+                "documents": DocumentContainer,
+            },
+        )
+        TaskNode.objects.create(
+            task_template=template,
+            due_date=task_date,
+            scheduled_date=task_date,
+            folder=template.folder,
+        )
+    return template
+
+
+def _construct_validation_flow(kwargs, params, instance):
+    """A request for sign-off, from the run's identity. `approver` is a single
+    FK, so a second id would be dropped without a word."""
+    from .engine import run_identity
+
+    approvers = _rows_for(User, params.get("approver"), "approver")
+    if len(approvers) > 1:
+        raise FatalActionError("create_object: 'approver' names one user, not several")
+
+    relations = {
+        "compliance_assessments": ComplianceAssessment,
+        "evidences": Evidence,
+        "policies": Policy,
+        "findings_assessments": FindingsAssessment,
+        "security_exceptions": SecurityException,
+    }
+    deadline = (
+        _as_date(params["validation_deadline"], "validation_deadline")
+        if params.get("validation_deadline")
+        else None
+    )
+    with transaction.atomic():
+        flow = ValidationFlow.objects.create(
+            approver=approvers[0] if approvers else None,
+            requester=run_identity(instance),
+            validation_deadline=deadline,
+            **kwargs,
+        )
+        _link_targets(flow, params, relations)
+    return flow
 
 
 def _construct_managed_document(kwargs, params, instance):
@@ -1042,6 +1159,35 @@ def _requirement_backing(assessment):
     ]
 
 
+def _quality_check_with_text(obj):
+    """The quality-check envelope plus its findings as lines a document can use:
+    the template grammar cannot pluck `msg` out of a list of dicts or join them.
+
+    Each `msg` is prefixed with the object it names. Asked about one requirement
+    that prefix is on every line and says nothing; asked about the audit it is
+    the only thing telling the lines apart. Scope decides, not how many
+    requirements happen to have findings. `text` nests under a heading the
+    caller writes.
+    """
+    findings = obj.quality_check()
+    entries = findings["errors"] + findings["warnings"]
+    shared = str(obj) if isinstance(obj, RequirementAssessment) else None
+
+    messages = []
+    for entry in entries:
+        message = entry["msg"]
+        prefix = f"{shared}: "
+        if shared and message.startswith(prefix):
+            message = message[len(prefix) :]
+        messages.append(message)
+
+    return {
+        **findings,
+        "messages": messages,
+        "text": "\n".join(f"  - {message}" for message in messages),
+    }
+
+
 def _requirements_breakdown(assessment):
     """Total assessable requirement assessments and their count per result —
     stable shape: every result key present, zeroes included."""
@@ -1150,10 +1296,14 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "computed_outcome": lambda ca: ca.computed_outcome,
             "scores": lambda ca: ca.get_global_score(),
             "requirements": _requirements_breakdown,
+            # Actor ids, the shape task_template's assignees take.
+            "reviewers": lambda ca: [str(a.id) for a in ca.reviewers.all()],
+            "authors": lambda ca: [str(a.id) for a in ca.authors.all()],
         },
+        prefetch_related=["reviewers", "authors"],
         # Opt-in: one call walks every requirement of the audit with its
         # controls and evidences, so no unrelated read pays for it.
-        optional_computed={"quality_check": lambda ca: ca.quality_check()},
+        optional_computed={"quality_check": _quality_check_with_text},
     ),
     "risk_assessment": ReadEntry(
         model=RiskAssessment,
@@ -1305,7 +1455,7 @@ READABLE_MODELS: dict[str, ReadEntry] = {
         # Opt-in: each call resolves its own context, so a list read pays for
         # it per row. Reading the audit's quality check once is cheaper when
         # the whole audit is in question.
-        optional_computed={"quality_check": lambda ra: ra.quality_check()},
+        optional_computed={"quality_check": _quality_check_with_text},
         select_related=["requirement", "compliance_assessment"],
         prefetch_related=[
             "applied_controls__evidences__revisions",

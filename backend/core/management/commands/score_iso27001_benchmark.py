@@ -10,17 +10,21 @@ nothing.
 
 Three things are reported, and the first two are the ones that matter:
 
-    the counted half   requirements a quality rule flagged. These never reach a
-                       model, so a miss here means the workflow's routing broke,
-                       not that a model was wrong
-    the judged half    requirements the rules passed. Only these are a model's
-                       to get right
-    completeness       every collected record must reach the document. A right
-                       verdict that never appears on the page helps nobody, and
-                       a section writer has dropped records before.
+    the counted half   requirements a quality rule flagged, and requirements
+                       that claim nothing. Neither reaches a model, so a miss
+                       here means the workflow's routing broke, not that a
+                       model was wrong
+    the judged half    requirements the rules passed and that claim something.
+                       Only these are a model's to get right, and each of the
+                       three claims is asked its own question
+    completeness       every record the review took a view on must reach the
+                       document, and the ones it did not must stay out of it. A
+                       right verdict that never appears on the page helps
+                       nobody, and a section writer has dropped records before.
 """
 
 import json
+import re
 from collections import Counter
 
 from django.core.management.base import BaseCommand
@@ -28,7 +32,21 @@ from django.core.management.base import BaseCommand
 from doc_management.models import ManagedDocument
 from automation.workflows.models import WorkflowInstance
 
-BUCKETS = ("concern", "needs_look", "backed")
+
+def _mentions(content, ref_id):
+    """Is this requirement named in the document?
+
+    A substring test would say yes to A.5.1 because the page mentions A.5.10 —
+    which turns one printed requirement into a false "wrote up a requirement
+    nobody reviewed" for every shorter ref_id that prefixes it.
+    """
+    return re.search(rf"\b{re.escape(ref_id)}\b", content) is not None
+
+
+BUCKETS = ("concern", "needs_look", "known_gap", "backed")
+#: The buckets only a model can produce. `concern` comes from a rule, so it is
+#: not a model's to get right.
+MODEL_BUCKETS = ("needs_look", "known_gap", "backed")
 
 
 class Command(BaseCommand):
@@ -67,8 +85,8 @@ class Command(BaseCommand):
 
         # A rule either fires or it does not, so this half is the workflow's
         # wiring rather than a model's judgement.
-        counted = [ref for ref in expected if expected[ref] == "concern"]
-        judged = [ref for ref in expected if expected[ref] != "concern"]
+        judged = [ref for ref in expected if expected[ref] in MODEL_BUCKETS]
+        counted = [ref for ref in expected if expected[ref] not in MODEL_BUCKETS]
         for label, refs in (("counted (rules)", counted), ("judged (model)", judged)):
             right = sum(1 for ref in refs if got.get(ref) == expected[ref])
             self.stdout.write(f"  {label:<17} {right}/{len(refs)}")
@@ -78,14 +96,13 @@ class Command(BaseCommand):
             self.stderr.write(
                 self.style.WARNING(f"  never collected: {', '.join(sorted(absent))}")
             )
-        leaked = [ref for ref in truth.get("excluded", {}) if ref in got]
+        leaked = [ref for ref in truth.get("outside", {}) if ref in got]
         if leaked:
             self.stderr.write(
                 self.style.ERROR(
-                    f"  LEAKED (outside the filter): {', '.join(sorted(leaked))}"
+                    f"  LEAKED (outside the read): {', '.join(sorted(leaked))}"
                 )
             )
-
         self.stdout.write("\nconfusion (expected -> got):")
         matrix = Counter((expected[ref], got.get(ref, "absent")) for ref in expected)
         for bucket in BUCKETS:
@@ -93,7 +110,7 @@ class Command(BaseCommand):
             detail = "  ".join(f"{k}:{v}" for k, v in sorted(row.items()))
             self.stdout.write(f"  {bucket:<12} n={sum(row.values()):<3} {detail}")
 
-        self._report_document(instance, records)
+        self._report_document(instance, records, truth.get("outside", {}))
 
         misses = [ref for ref in expected if ref in got and got[ref] != expected[ref]]
         if misses:
@@ -118,7 +135,7 @@ class Command(BaseCommand):
             .first()
         )
 
-    def _report_document(self, instance, records):
+    def _report_document(self, instance, records, outside):
         # Only a document this run produced: a failed run leaves the previous
         # one in place, and reading that reports an old run's drops as this
         # one's.
@@ -133,14 +150,24 @@ class Command(BaseCommand):
             self.stdout.write("\ndocument : none produced by this run")
             return
         content = document.current_revision.content
-        dropped = [row["ref_id"] for row in records if row["ref_id"] not in content]
+        dropped = [r["ref_id"] for r in records if not _mentions(content, r["ref_id"])]
+        # A requirement the read never fetched cannot have been reviewed, so a
+        # section naming one is a verdict the model invented.
+        intruded = [ref for ref in outside if _mentions(content, ref)]
         if dropped:
             self.stderr.write(
                 self.style.ERROR(
                     f"\nDROPPED FROM THE DOCUMENT: {', '.join(sorted(dropped))}"
                 )
             )
-        else:
+        if intruded:
+            self.stderr.write(
+                self.style.ERROR(
+                    f"\nWROTE UP A REQUIREMENT NOBODY REVIEWED: {', '.join(sorted(intruded))}"
+                )
+            )
+        if not dropped and not intruded:
             self.stdout.write(
-                f"\ndocument : every collected record appears ({len(records)})"
+                f"\ndocument : every collected record appears ({len(records)}), "
+                f"and nothing outside the read was written up"
             )

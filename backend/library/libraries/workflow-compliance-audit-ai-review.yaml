@@ -2,21 +2,38 @@ urn: urn:intuitem:risk:library:workflow-compliance-audit-ai-review
 locale: en
 ref_id: workflow-compliance-audit-ai-review
 name: Audit — AI evidence challenge
-description: 'Walks the requirements an audit calls compliant or partially compliant, asks the configured
-  AI provider whether what is attached actually supports that claim, and files the answers as a managed
-  document of type Record. Run it with audit_id set to the audit you want reviewed. The model never
-  changes a result or a score — those are not writable by any workflow — so the review lands as a
-  document a person reads, next to the audit it questions. Reviews up to 25 requirements per run.
+description: 'Walks every requirement an audit says is compliant, partially compliant or not applicable —
+  the three answers that assert something a reviewer can check — reports what the platform''s own quality
+  rules find, and asks the configured AI provider only the questions a rule cannot answer. The answers are
+  filed as a managed document of type Record, next to the audit they question.
 
-  The platform''s own quality checks run first, and anything they flag costs no AI call: the finding is
-  already written, already translated, and carries a rule id. Only the requirements the rules pass are
-  put to the model, and only for what a rule cannot decide — whether the attached evidence is about what
-  the requirement asks for, and whether it is recent enough to describe the present. Three more calls
-  write the three sections, so a run stays well inside WORKFLOW_AI_MAX_CALLS_PER_RUN (50 by default). Needs an AI provider configured in Global settings — without
-  one the AI steps fail and the run stops rather than guessing.'
+  Two ways in: run it by hand with audit_id set, or enable the "An audit moved to in review" trigger and
+  let it run itself when someone moves an audit to that status. Internal-event triggers arrive disabled,
+  so the automatic path is one switch in the workflow''s triggers, deliberately.
+
+  The rules run first and cost nothing: anything they flag is already written, already translated, and
+  carries a rule id, so it goes straight to Concerns in their own words. Only requirements the rules pass
+  are put to the model, and each claim gets its own question, because "does the evidence show this" and
+  "does this exclusion hold" are not the same question. Non-compliant and unassessed requirements are
+  counted in the breakdown table and read no further: one is already an admission, the other has not been
+  answered, and neither has a claim to check.
+
+  The model is never asked to be confident: it chooses between "this holds" and "a reviewer should look",
+  and it cannot raise a concern. Everything under Concerns has a rule id behind it. The model never
+  changes a result or a score either — those are not writable by any workflow.
+
+  The document is assembled, not written: each requirement adds its own line to its section as the loop
+  runs, so the model is asked to judge and never to compose. One call per requirement and none for the
+  write-up, which is also why a section cannot quietly lose a record.
+
+  The loop pages its own read, so the number of requirements is bounded by WORKFLOW_LOOP_MAX_ITEMS (500)
+  rather than by what fits in one node''s output, and WORKFLOW_AI_MAX_CALLS_PER_RUN (50 by default) is
+  what limits how many reach the model. Past that the calls fail, the run continues, and the failures are
+  listed at the foot of the document — the rule findings still land. Needs an AI provider configured in
+  Global settings.'
 copyright: © intuitem
-version: 1
-publication_date: 2026-09-20
+version: 2
+publication_date: 2026-09-24
 provider: intuitem
 packager: intuitem
 objects:
@@ -25,10 +42,11 @@ objects:
     schema_version: 1
     ref_id: audit-ai-review
     name: Audit — AI evidence challenge
-    description: 'A second opinion on an audit''s own conclusions: for each requirement claimed compliant,
-      the model weighs the expectation against the controls and evidence attached to it and says whether
-      the claim is supported, thin or unsupported. The verdicts become a Record document linking back to
-      the audit. Results and scores stay untouched — a workflow cannot write them.'
+    description: 'A second opinion on an audit''s own conclusions. The platform''s quality rules judge
+      every requirement deterministically; the model is then asked, about the requirements they passed,
+      the one thing a rule cannot decide — whether what is written and attached actually answers what the
+      requirement asks for. The answers become a Record document linking back to the audit. Results and
+      scores stay untouched: a workflow cannot write them.'
     graph:
       variables:
       - key: audit_id
@@ -37,32 +55,48 @@ objects:
       - key: audit_name
         type: string
         default_value: ''
-      # The quality check's own findings, lifted into variables so a branch can
-      # ask the only question that matters: has a rule already spoken? Compared
-      # against '[]' because that is what an empty list renders as, and a
-      # condition reads a declared variable rather than a path.
+      - key: reviewers
+        type: json
+        default_value: []
+      - key: read_by
+        type: string
+        default_value: ''
+      - key: breakdown
+        type: json
+        default_value: {}
+      # '[]' is what an empty list renders as, and a condition reads a declared
+      # variable rather than a path.
       - key: qc_errors
         type: string
         default_value: '[]'
       - key: qc_warnings
         type: string
         default_value: '[]'
-      - key: ai_verdict
+      - key: claimed
         type: string
         default_value: ''
-      - key: ai_note
+      # `ai_missing` being non-empty decides the section on its own.
+      - key: ai_shows
+        type: string
+        default_value: ''
+      - key: ai_missing
         type: string
         default_value: ''
       - key: record
         type: json
         default_value: {}
-      - key: write_concerns
+      # Built a line at a time: set_variables renders against the live context,
+      # so '{{sec_x}}…' appends, and variables have no node-output cap.
+      - key: sec_concerns
         type: string
         default_value: ''
-      - key: write_look
+      - key: sec_look
         type: string
         default_value: ''
-      - key: write_backed
+      - key: sec_gaps
+        type: string
+        default_value: ''
+      - key: sec_backed
         type: string
         default_value: ''
       nodes:
@@ -71,6 +105,23 @@ objects:
         label: Run the review
         trigger_config:
           type: manual
+      # Arrives disabled; enabling it is deliberate. `changed` makes this a
+      # transition, so editing an audit already in review does not re-run it.
+      - ref: on_review
+        type: trigger
+        label: An audit moved to in review
+        trigger_config:
+          type: internal_event
+          event_key: complianceassessment.updated
+          filters:
+            operator: and
+            conditions:
+            - field: status
+              changed: true
+              op: eq
+              value: in_review
+        input_mapping:
+          audit_id: object_id
       - ref: check_id
         type: condition
         label: Was an audit given?
@@ -106,6 +157,8 @@ objects:
               value: '{{audit_id}}'
         output_mapping:
           audit_name: object.name
+          breakdown: object.requirements
+          reviewers: object.reviewers
       - ref: check_found
         type: condition
         label: Is it in this workflow's scope?
@@ -127,39 +180,33 @@ objects:
           message: 'No audit with that id is readable from this workflow''s domain. A workflow reads its
             own domain and the domains below it, never the ones above — publish the workflow where the
             audit lives, or higher.'
-      - ref: fetch
-        type: action
-        label: List what the audit claims is satisfied
-        action_config:
-          type: read_objects
-          model: requirement_assessment
-          mode: list
-          # Opt-in: the quality check walks the requirement with its controls and
-          # evidences, so only a read that intends to use it pays for it.
-          include:
-          - quality_check
-          order_by: created_at
-          # One call per requirement plus one for the write-up, so this stays
-          # inside WORKFLOW_AI_MAX_CALLS_PER_RUN (50 by default). Raising it
-          # costs calls and widens the read, which the node-output cap bounds.
-          limit: 25
-          filters:
-            operator: and
-            conditions:
-            - field: compliance_assessment
-              op: eq
-              value: '{{audit_id}}'
-            - field: result
-              op: in
-              value: compliant,partially_compliant
       - ref: per_requirement
         type: loop
         label: One requirement at a time
         loop_config:
-          collection: '{{nodes.fetch.results}}'
-          # A single {{path}} keeps the value's type, so the loop collects real
-          # records rather than sentences. Which section each one lands in is
-          # then a fact in the data, not something the write-up has to infer.
+          # Paging, not another node's output: these rows hit the node-output
+          # ceiling. `limit` is the page size, WORKFLOW_LOOP_MAX_ITEMS the total.
+          read:
+            model: requirement_assessment
+            # Opt-in: it walks the controls and evidences, so only a read that
+            # uses it pays for it.
+            include:
+            - quality_check
+            order_by: created_at
+            limit: 25
+            # The three results that assert something; the rest are counted in
+            # the breakdown table instead.
+            filters:
+              operator: and
+              conditions:
+              - field: compliance_assessment
+                op: eq
+                value: '{{audit_id}}'
+              - field: result
+                op: in
+                value: compliant,partially_compliant,not_applicable
+          # A single {{path}} keeps the value's type, so this collects records
+          # rather than sentences.
           collect: '{{record}}'
           on_item_error: continue
       - ref: facts
@@ -170,12 +217,11 @@ objects:
           variables:
             qc_errors: '{{item.quality_check.errors}}'
             qc_warnings: '{{item.quality_check.warnings}}'
+            claimed: '{{item.result}}'
       - ref: route
         type: condition
         label: Has a rule already spoken?
         branches:
-        # A tripped rule is a fact the product already checked, phrased as an
-        # action and carrying a rule id. There is nothing to ask a model about.
         - name: flagged
           condition_groups:
           - operator: or
@@ -186,8 +232,7 @@ objects:
             - variable: qc_warnings
               op: neq
               value: '[]'
-        # Clean by the rules. Only now is there a question worth a call.
-        - name: judge
+        - name: clean
           is_default: true
       - ref: pack_flagged
         type: action
@@ -195,6 +240,13 @@ objects:
         action_config:
           type: set_variables
           variables:
+            # One heading per requirement: several rules can trip on one, and
+            # the rules already wrote the sentences.
+            sec_concerns: '{{sec_concerns}}- **{{item.requirement.ref_id}} — {{item.requirement.name}}**
+
+{{item.quality_check.text}}
+
+'
             record:
               ref_id: '{{item.requirement.ref_id}}'
               name: '{{item.requirement.name}}'
@@ -203,165 +255,352 @@ objects:
               errors: '{{item.quality_check.errors}}'
               warnings: '{{item.quality_check.warnings}}'
               note: ''
-      - ref: challenge
+      # Each claim is wrong in its own way, so each gets its own question.
+      - ref: which_claim
+        type: condition
+        label: What is being claimed?
+        branches:
+        - name: compliant
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: claimed
+              op: eq
+              value: compliant
+        - name: partial
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: claimed
+              op: eq
+              value: partially_compliant
+        # The read returns these three results only, so not applicable is what
+        # is left. A condition node needs a default anyway.
+        - name: not_applicable
+          is_default: true
+      - ref: challenge_compliant
         type: action
         label: Does the evidence match the expectation?
         action_config:
           type: ai_extract
-          prompt: 'The product''s own quality checks found nothing wrong with this requirement: it has a
-            control, its evidence is attached, current, and out of draft. Those questions are settled and
-            are not yours to reopen.
+          prompt: |-
+            The product's own quality checks found nothing wrong with this requirement: it has a control,
+            its evidence is attached, current, out of draft, and recently touched. Those questions are
+            settled and are not yours to reopen.
 
             Yours is the one a rule cannot answer: does what is attached actually show what THIS
             requirement asks for, and is it recent enough to describe how things are now?
 
-            Read the requirement''s description first — that is the expectation. Then read the names and
+            Read the requirement's description first — that is the expectation. Then read the names and
             descriptions of the evidence and the controls it hangs off.
 
-            Answer "backed" when at least one attached evidence plausibly shows what the description asks
-            for, and nothing about it suggests it has been overtaken.
+            Leave "missing" empty when at least one attached evidence plausibly shows what the
+            description asks for, and nothing about it suggests it has been overtaken.
 
-            Answer "needs_look" when none of them do. The usual reasons: the document is about a
+            Fill "missing" when none of them do. The usual reasons: the document is about a
             different subject than the requirement; it describes a plan, a design or a draft rather than
-            something performed; or it is old enough that it no longer describes the present. Today''s
+            something performed; or it is old enough that it no longer describes the present. Today's
             date is given below — expiry dates were already checked, but most documents carry none, and a
             report whose own name or description places it a year or more before today does not show what
             is happening now.
 
             You are raising a question for a human, not overruling the auditor: never say the result is
-            wrong, say what a reviewer should ask for.
+            wrong, say what a reviewer should ask for. If you would ask for anything at all, it belongs in
+            "missing" — leaving that empty is a statement that you would not.
 
-            Work it out in the "reasoning" field — that is what it is for, and nobody reads it. Then put
-            in "note" only the finished sentence a reviewer will read: under 30 words, naming the specific
-            document you would ask for, or the one that was found. Never let working-out, self-talk or
-            formatting markers into "note". An ellipsis or a placeholder is not an answer.'
-          input: 'Today is {{today}}. Judge currency against that date, not against whatever period the
+            Work it out in "reasoning" first — that field is there for it and nobody reads it.
+
+            Then two fields, both read by a person:
+
+            "shows" — one finished sentence naming what the attached material actually shows, naming the document.
+
+            "missing" — what it fails to show that the requirement asks for, naming the document you would ask for, in one sentence. Leave it as an empty string when
+            nothing is: that empty string is how you say you are satisfied, and it is what files this
+            requirement under Backed by the record. Never write "nothing", "none" or "N/A" — write nothing at all.
+
+            Do not put a request into "shows" and do not put a finding into "missing". No working-out, no
+            self-talk, no formatting markers, no ellipsis, no placeholder.
+          input: |-
+            Today is {{today}}. Judge currency against that date, not against whatever period the
             documents mention.
 
             Requirement {{item.requirement.ref_id}} — {{item.requirement.name}}
 
-            The expectation, in the standard''s own words: {{item.requirement.description}}
+            The expectation, in the standard's own words: {{item.requirement.description}}
 
-            Auditor''s result: {{item.result}}
+            Auditor's result: {{item.result}}
 
-            Auditor''s note: {{item.observation}}
+            Auditor's note: {{item.observation}}
 
             Controls claimed, each with the evidence attached to it: {{item.applied_controls}}
 
-            Evidence attached to the requirement itself: {{item.evidences}}'
+            Evidence attached to the requirement itself: {{item.evidences}}
           schema:
             type: object
             properties:
+              # Never read. Unbounded: a cap here collapsed the sampler.
               reasoning:
                 type: string
-                maxLength: 800
-              verdict:
+              # Which of the two is filled says what a note would have to be
+              # read to know. Unbounded: a cap severs the sentence, a floor is
+              # met with padding.
+              shows:
                 type: string
-                enum:
-                - backed
-                - needs_look
-              note:
+              missing:
                 type: string
-                minLength: 40
-                maxLength: 200
             required:
             - reasoning
-            - verdict
-            - note
+            - shows
+            - missing
           max_attempts: 2
         output_mapping:
-          ai_verdict: verdict
-          ai_note: note
-      - ref: pack_judged
+          ai_shows: shows
+          ai_missing: missing
+      - ref: challenge_partial
         type: action
-        label: Keep the answer
+        label: Does the partial claim stand?
+        action_config:
+          type: ai_extract
+          prompt: |-
+            "Partially compliant" is a deliberate statement: part of this requirement is met and part is
+            not. The product's quality checks already confirmed there is a control, there is evidence,
+            there is an observation, and there is a date for closing the gap. Those are settled.
+
+            Yours is the question they cannot reach: reading the observation against the requirement's
+            description, is "partially compliant" actually the right answer?
+
+            Leave "missing" empty when the observation names what is missing, and what it names is a
+            genuine part of what the description asks for. That is an honest partial: the gap is
+            understood and recorded, and nothing here needs a reviewer's time.
+
+            Fill "missing" when the observation does not survive that reading. The usual reasons:
+            it describes the requirement as fully met, so "compliant" was meant; it describes nothing in
+            place at all, so "non-compliant" was meant; it is about something the description does not
+            ask for; or it is too vague to say what is missing — "in progress", "being rolled out",
+            "partially implemented" name no gap.
+
+            Do not weigh whether the gap is big or small, and do not judge whether the plan is good
+            enough. The only question is whether the stated gap is a truthful reading of what is there.
+
+            You are raising a question for a human, not overruling the auditor: never say the result is
+            wrong, say what a reviewer should ask.
+
+            Work it out in "reasoning" first — that field is there for it and nobody reads it.
+
+            Then two fields, both read by a person:
+
+            "shows" — one finished sentence naming what the attached material actually records, naming the gap as the observation states it.
+
+            "missing" — what it fails to settle about the partial claim, in one sentence, in one sentence. Leave it as an empty string when
+            nothing is: that empty string is how you say you are satisfied, and it is what files this
+            requirement under Known gaps. Never write "nothing", "none" or "N/A" — write nothing at all.
+
+            Do not put a request into "shows" and do not put a finding into "missing". No working-out, no
+            self-talk, no formatting markers, no ellipsis, no placeholder.
+          input: |-
+            Today is {{today}}. Judge currency against that date, not against whatever period the
+            documents mention.
+
+            Requirement {{item.requirement.ref_id}} — {{item.requirement.name}}
+
+            The expectation, in the standard's own words: {{item.requirement.description}}
+
+            Auditor's result: {{item.result}}
+
+            The observation, which is where the gap should be described: {{item.observation}}
+
+            Controls claimed, each with the evidence attached to it: {{item.applied_controls}}
+
+            Evidence attached to the requirement itself: {{item.evidences}}
+          schema:
+            type: object
+            properties:
+              # Never read. Unbounded: a cap here collapsed the sampler.
+              reasoning:
+                type: string
+              # Which of the two is filled says what a note would have to be
+              # read to know. Unbounded: a cap severs the sentence, a floor is
+              # met with padding.
+              shows:
+                type: string
+              missing:
+                type: string
+            required:
+            - reasoning
+            - shows
+            - missing
+          max_attempts: 2
+        output_mapping:
+          ai_shows: shows
+          ai_missing: missing
+      - ref: challenge_not_applicable
+        type: action
+        label: Does the exclusion hold?
+        action_config:
+          type: ai_extract
+          prompt: |-
+            This requirement has been declared not applicable, and the product's quality checks already
+            confirmed a justification was written. That it exists is settled.
+
+            Yours is whether it holds. An exclusion is the one answer an external auditor challenges
+            every time, and there is no evidence to fall back on: the justification is the whole case.
+
+            Read the requirement's description first, to see what is being excluded. Then read the
+            justification against it.
+
+            Leave "missing" empty when the justification names a fact about this organisation that puts
+            the requirement out of reach — an activity it does not carry out, a technology it does not
+            operate, a party it does not deal with — and that fact genuinely covers everything the
+            description asks for.
+
+            Fill "missing" otherwise. The usual reasons: the justification restates the exclusion
+            without giving a reason ("not applicable to us", "out of scope"); it gives a reason that is
+            about difficulty, cost, timing or priority, none of which make a requirement inapplicable;
+            it describes a control instead, which would mean the requirement applies and is met; or the
+            reason covers only part of what the description asks for, leaving the rest excluded without
+            a case.
+
+            You are raising a question for a human, not overruling the auditor: never say the result is
+            wrong, say what a reviewer should ask.
+
+            Work it out in "reasoning" first — that field is there for it and nobody reads it.
+
+            Then two fields, both read by a person:
+
+            "shows" — one finished sentence naming what the attached material actually establishes, naming the fact the exclusion rests on.
+
+            "missing" — what it fails to cover of what the requirement asks for, in one sentence. Leave it as an empty string when
+            nothing is: that empty string is how you say you are satisfied, and it is what files this
+            requirement under Backed by the record. Never write "nothing", "none" or "N/A" — write nothing at all.
+
+            Do not put a request into "shows" and do not put a finding into "missing". No working-out, no
+            self-talk, no formatting markers, no ellipsis, no placeholder.
+          input: |-
+            Today is {{today}}.
+
+            Requirement {{item.requirement.ref_id}} — {{item.requirement.name}}
+
+            What is being excluded, in the standard's own words: {{item.requirement.description}}
+
+            Auditor's result: {{item.result}}
+
+            The justification, which is the entire case for the exclusion: {{item.observation}}
+          schema:
+            type: object
+            properties:
+              # Never read. Unbounded: a cap here collapsed the sampler.
+              reasoning:
+                type: string
+              # Which of the two is filled says what a note would have to be
+              # read to know. Unbounded: a cap severs the sentence, a floor is
+              # met with padding.
+              shows:
+                type: string
+              missing:
+                type: string
+            required:
+            - reasoning
+            - shows
+            - missing
+          max_attempts: 2
+        output_mapping:
+          ai_shows: shows
+          ai_missing: missing
+      # One packer for all three: they differ in what is asked, not in what
+      # comes back.
+      # One signal: `missing` empty means the model would ask for nothing, and
+      # each branch knows which positive section that is. A verdict enum beside
+      # it could disagree with it, and did.
+      - ref: settle_compliant
+        type: condition
+        label: Does the evidence carry it?
+        branches:
+        - name: satisfied
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: ai_missing
+              op: eq
+              value: ''
+        - name: not_satisfied
+          is_default: true
+      - ref: settle_partial
+        type: condition
+        label: Does the partial claim stand?
+        branches:
+        - name: satisfied
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: ai_missing
+              op: eq
+              value: ''
+        - name: not_satisfied
+          is_default: true
+      - ref: settle_exclusion
+        type: condition
+        label: Does the exclusion hold?
+        branches:
+        - name: satisfied
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: ai_missing
+              op: eq
+              value: ''
+        - name: not_satisfied
+          is_default: true
+      - ref: append_backed
+        type: action
+        label: Add to "Backed by the record"
         action_config:
           type: set_variables
           variables:
+            sec_backed: '{{sec_backed}}- {{item.requirement.ref_id}} — {{item.requirement.name}} ({{item.result}}): {{ai_shows}}
+
+'
             record:
               ref_id: '{{item.requirement.ref_id}}'
               name: '{{item.requirement.name}}'
               claimed: '{{item.result}}'
-              bucket: '{{ai_verdict}}'
+              bucket: backed
               errors: '[]'
               warnings: '[]'
-              note: '{{ai_note}}'
-      - ref: write_concerns_section
+              note: '{{ai_shows}}'
+      - ref: append_gaps
         type: action
-        label: Write "Concerns"
+        label: Add to "Known gaps"
         action_config:
-          type: ai_generate
-          prompt: 'Below is one record per requirement an audit claims is satisfied. Write bullets for
-            ONLY the records whose bucket is exactly "concern". Ignore every other record completely —
-            they belong to sections you are not writing.
+          type: set_variables
+          variables:
+            sec_gaps: '{{sec_gaps}}- {{item.requirement.ref_id}} — {{item.requirement.name}}: {{ai_shows}}
 
-            Each of these tripped one or more of the product''s quality rules. The "errors" and
-            "warnings" lists hold those findings, already written out in the "msg" field.
-
-            Open with one sentence saying these were flagged by the platform''s own checks rather than by
-            a model. Then one bullet per record: the reference, the name, and the finding text. Quote the
-            "msg" as it stands — shorten it if it is long, but never reword what it claims, and never add
-            a reason of your own. Where a record has entries under "errors", put those first and say they
-            are errors.
-
-            Write one bullet for every record with that bucket, including records whose findings read the
-            same as each other. Never merge two records into a bullet, never summarise a group of them,
-            and never leave one out. If no record has that bucket, write one sentence saying there are
-            none, and no bullets.
-
-            Markdown bullets, no heading — the document supplies it. Do not count anything.'
-          input: '{{nodes.per_requirement.results}}'
-          max_words: 400
-        output_mapping:
-          write_concerns: text
-      - ref: write_look_section
+'
+            record:
+              ref_id: '{{item.requirement.ref_id}}'
+              name: '{{item.requirement.name}}'
+              claimed: '{{item.result}}'
+              bucket: known_gap
+              errors: '[]'
+              warnings: '[]'
+              note: '{{ai_shows}}'
+      - ref: append_look
         type: action
-        label: Write "Needs a look"
+        label: Add to "Needs a look"
         action_config:
-          type: ai_generate
-          prompt: 'Below is one record per requirement an audit claims is satisfied. Write bullets for
-            ONLY the records whose bucket is exactly "needs_look". Ignore every other record completely —
-            they belong to sections you are not writing.
+          type: set_variables
+          variables:
+            sec_look: '{{sec_look}}- {{item.requirement.ref_id}} — {{item.requirement.name}} ({{item.result}}): {{ai_missing}}
 
-            The quality rules found nothing wrong with these; a reviewer read them anyway and was not
-            convinced. Open with one sentence saying exactly that. Then one bullet per record: the
-            reference, the name, and the doubt, taken from its note.
-
-            Write one bullet for every record with that bucket, including records whose notes read the
-            same as each other. Never merge two records into a bullet, never summarise a group of them,
-            and never leave one out. If no record has that bucket, write one sentence saying there are
-            none, and no bullets.
-
-            Markdown bullets, no heading — the document supplies it. Do not count anything.'
-          input: '{{nodes.per_requirement.results}}'
-          max_words: 320
-        output_mapping:
-          write_look: text
-      - ref: write_backed_section
-        type: action
-        label: Write "Backed by evidence"
-        action_config:
-          type: ai_generate
-          prompt: 'Below is one record per requirement an audit claims is satisfied. Write bullets for
-            ONLY the records whose bucket is exactly "backed". Ignore every other record completely —
-            they belong to sections you are not writing.
-
-            These passed the quality rules and a reviewer then confirmed the evidence matches the
-            expectation. Open with one sentence saying both of those things happened. Then one bullet per
-            record: the reference, the name, and what was found, taken from its note. Name what was
-            found, never what is missing — a bullet here that asks for something is a bullet in the wrong
-            section.
-
-            Write one bullet for every record with that bucket, including records whose notes read the
-            same as each other. Never merge two records into a bullet, never summarise a group of them,
-            and never leave one out. If no record has that bucket, write one sentence saying there are
-            none, and no bullets.
-
-            Markdown bullets, no heading — the document supplies it. Do not count anything.'
-          input: '{{nodes.per_requirement.results}}'
-          max_words: 320
-        output_mapping:
-          write_backed: text
+'
+            record:
+              ref_id: '{{item.requirement.ref_id}}'
+              name: '{{item.requirement.name}}'
+              claimed: '{{item.result}}'
+              bucket: needs_look
+              errors: '[]'
+              warnings: '[]'
+              note: '{{ai_missing}}'
       - ref: open_record
         type: action
         label: Open the record
@@ -369,10 +608,8 @@ objects:
           type: create_object
           model: document_container
           fields:
-            # {{now}}, not {{today}}: a container's name is unique within its
-            # folder, so a second review of the same audit on the same day used
-            # to fail here — after every AI call had been paid for. A review is
-            # per run, and its own timestamp is what says which run.
+            # {{now}}, not {{today}}: a container name is unique per folder, so
+            # two reviews of one audit on one day would collide.
             name: 'Audit evidence review — {{audit_name}} — {{now}}'
             document_type: record
             description: 'Automated evidence review of the audit "{{audit_name}}", produced on {{today}}.'
@@ -385,58 +622,94 @@ objects:
           fields:
             name: 'Audit evidence review — {{audit_name}} — {{now}}'
             container: '{{nodes.open_record.created_object_id}}'
-            content: '# Audit evidence review — {{audit_name}}
+            content: |-
+              # Audit evidence review — {{audit_name}}
 
+              Produced automatically on {{today}} over every requirement this audit records as compliant,
+              partially compliant or not applicable — the three answers that assert something a reviewer
+              can check. The table below counts the whole audit, including the requirements no section
+              mentions.
 
-              Produced automatically on {{today}} over every requirement this audit records as compliant
-              or partially compliant.
+              Each reviewed requirement was put to the platform's own quality checks first — the same
+              rules the X-rays page runs. Anything they flagged is under Concerns, in their words, with
+              nothing added. The ones they passed were then read by the configured AI provider and asked
+              the one thing a rule cannot decide: whether what is written and attached actually answers
+              what the requirement asks for. What follows is what the records show — not a judgement on
+              whether the work is being done.
 
+              Every requirement writes its own line into its own section, so nothing here is a summary
+              and no section can be short of a requirement the run reviewed. A section with no lines
+              under it had none.
 
-              Each one was put to the platform''s own quality checks first — the same rules the X-rays
-              page runs. Anything they flagged is under Concerns, in their words, with nothing added. The
-              rest were read by the configured AI provider, which was asked the one question a rule
-              cannot answer: does the attached evidence actually show what the requirement asks for, and
-              is it recent enough to describe the present. What follows is what the records show — not a
-              judgement on whether the work is being done.
+              ## What the audit records
 
+              Counted from the audit itself, not written by a model.
+
+              | Result | Requirements |
+              |---|---|
+              | Compliant | {{breakdown.compliant}} |
+              | Partially compliant | {{breakdown.partially_compliant}} |
+              | Non-compliant | {{breakdown.non_compliant}} |
+              | Not applicable | {{breakdown.not_applicable}} |
+              | Not assessed | {{breakdown.not_assessed}} |
+              | **Total assessable** | **{{breakdown.total}}** |
 
               ## Concerns
 
-
-              {{write_concerns}}
-
+              {{sec_concerns}}
 
               ## Needs a look
 
+              {{sec_look}}
 
-              {{write_look}}
+              ## Known gaps
 
+              {{sec_gaps}}
 
-              ## Backed by evidence
+              ## Backed by the record
 
-
-              {{write_backed}}
-
+              {{sec_backed}}
 
               ---
 
-
               Source audit: [{{audit_name}}](/compliance-assessments/{{audit_id}})
 
-
               Run record, counted by the engine rather than written by the model:
-              {{nodes.per_requirement.count}} requirement(s) entered the review. If the summary above
-              states a different number, take this one — and read the list twice, because something was
-              dropped or miscounted. Steps that failed, and are therefore absent from the list above:
-              {{nodes.per_requirement.errors}}
-
+              {{nodes.per_requirement.count}} requirement(s) entered the review — the claims only, not the
+              audit's whole total, which the table above gives. If a section states a number that
+              disagrees with this one, take this one — and read the list twice, because something was
+              dropped or miscounted. Steps that failed, and are therefore
+              absent from the lists above: {{nodes.per_requirement.errors}}
 
               This document is a draft. Nothing in the audit was changed: a workflow cannot write a
-              requirement''s result or score.'
+              requirement's result or score.
+      - ref: due
+        type: action
+        label: When it should be read by
+        action_config:
+          type: date_offset
+          days: 14
+          output: read_by
+      - ref: hand_over
+        type: action
+        label: Ask the audit's reviewers to read it
+        action_config:
+          type: create_object
+          model: task_template
+          fields:
+            name: 'Read the evidence review — {{audit_name}}'
+            description: 'An automated review of this audit was filed on {{today}}. Read it and decide
+              what to do about anything under Concerns or Needs a look.'
+            assigned_to: '{{reviewers}}'
+            task_date: '{{read_by}}'
+            compliance_assessments: '{{audit_id}}'
+            documents: '{{nodes.open_record.created_object_id}}'
       - ref: done
         type: end
       edges:
       - source: start
+        target: check_id
+      - source: on_review
         target: check_id
       - source: check_id
         target: read_audit
@@ -449,15 +722,13 @@ objects:
       - source: read_audit
         target: check_found
       - source: check_found
-        target: fetch
+        target: per_requirement
         source_branch: found
       - source: check_found
         target: out_of_scope
         source_branch: not_found
       - source: out_of_scope
         target: done
-      - source: fetch
-        target: per_requirement
       - source: per_requirement
         target: facts
         source_port: each
@@ -467,24 +738,57 @@ objects:
         target: pack_flagged
         source_branch: flagged
       - source: route
-        target: challenge
-        source_branch: judge
-      - source: challenge
-        target: pack_judged
+        target: which_claim
+        source_branch: clean
+      - source: which_claim
+        target: challenge_compliant
+        source_branch: compliant
+      - source: which_claim
+        target: challenge_partial
+        source_branch: partial
+      - source: which_claim
+        target: challenge_not_applicable
+        source_branch: not_applicable
+      - source: challenge_compliant
+        target: settle_compliant
+      - source: challenge_partial
+        target: settle_partial
+      - source: challenge_not_applicable
+        target: settle_exclusion
       - source: pack_flagged
         target: per_requirement
-      - source: pack_judged
+      - source: settle_compliant
+        target: append_backed
+        source_branch: satisfied
+      - source: settle_compliant
+        target: append_look
+        source_branch: not_satisfied
+      - source: settle_partial
+        target: append_gaps
+        source_branch: satisfied
+      - source: settle_partial
+        target: append_look
+        source_branch: not_satisfied
+      - source: settle_exclusion
+        target: append_backed
+        source_branch: satisfied
+      - source: settle_exclusion
+        target: append_look
+        source_branch: not_satisfied
+      - source: append_backed
+        target: per_requirement
+      - source: append_gaps
+        target: per_requirement
+      - source: append_look
         target: per_requirement
       - source: per_requirement
-        target: write_concerns_section
-        source_port: done
-      - source: write_concerns_section
-        target: write_look_section
-      - source: write_look_section
-        target: write_backed_section
-      - source: write_backed_section
         target: open_record
+        source_port: done
       - source: open_record
         target: write_record
       - source: write_record
+        target: due
+      - source: due
+        target: hand_over
+      - source: hand_over
         target: done

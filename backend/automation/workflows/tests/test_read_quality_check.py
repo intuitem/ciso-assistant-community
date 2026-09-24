@@ -110,8 +110,21 @@ def test_serialized_row_is_json_safe(audit, model):
     )
 
     findings = row["quality_check"]
-    assert set(findings) == {"errors", "warnings", "info", "count"}
+    # The X-rays envelope, plus the same findings as text. A workflow writing a
+    # document needs the messages joined, and the template grammar cannot pluck
+    # `msg` out of a list of dicts or join them.
+    assert set(findings) == {
+        "errors",
+        "warnings",
+        "info",
+        "count",
+        "messages",
+        "text",
+    }
     assert findings["count"] > 0
+    assert findings["messages"]
+    assert findings["text"].startswith("  - ")
+    assert findings["text"].count("\n") == len(findings["messages"]) - 1
     assert json.dumps(row)
 
 
@@ -124,3 +137,37 @@ def test_read_objects_advertises_what_can_be_included():
     assert sorted(READABLE_MODELS["requirement_assessment"].optional_computed) == [
         "quality_check"
     ]
+
+
+@pytest.mark.django_db
+def test_a_requirements_own_name_is_dropped_from_its_findings(audit):
+    """Three rules tripping on one requirement repeated its name three times.
+    Read one object the prefix is noise; read a whole audit it is the only thing
+    telling the lines apart, so it survives there."""
+    compliance_assessment, ra = audit
+    entry = READABLE_MODELS["requirement_assessment"]
+
+    row = _serialize_read_row(
+        ra,
+        entry.readable_fields(),
+        _effective_computed(
+            entry, {"model": "requirement_assessment", "include": ["quality_check"]}
+        ),
+    )
+    findings = row["quality_check"]
+    assert findings["messages"]
+    assert not any(message.startswith(str(ra)) for message in findings["messages"])
+
+    audit_entry = READABLE_MODELS["compliance_assessment"]
+    audit_row = _serialize_read_row(
+        compliance_assessment,
+        audit_entry.readable_fields(),
+        _effective_computed(
+            audit_entry,
+            {"model": "compliance_assessment", "include": ["quality_check"]},
+        ),
+    )
+    audit_findings = audit_row["quality_check"]
+    # The audit's findings span its requirements and its own assessment-level
+    # rules, so nothing is shared and every line keeps saying what it is about.
+    assert any(str(ra) in message for message in audit_findings["messages"])

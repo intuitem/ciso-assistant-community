@@ -7,17 +7,27 @@ scored instead of admired:
 
     concern      the platform's own quality rules flag it — no control, no
                  evidence, evidence expired or still in draft, a control not yet
-                 active. Deterministic: the rule either trips or it does not
+                 active, a declared gap with no date. Deterministic: the rule
+                 either trips or it does not. Five cases here were seeded as
+                 rule gaps and are now caught by rules this benchmark prompted
     needs_look   the rules pass it and a reader would still object: evidence
-                 about a different subject, or too old to describe the present.
-                 Three cases here are seeded RULE GAPS, where a human would
-                 object and no rule fires — the model is the only backstop
+                 about a different subject, too old to describe the present, a
+                 "partial" whose observation describes something else, or an
+                 exclusion that gives no reason
+    known_gap    a partial claim the rules pass and whose observation names a
+                 real gap. Correct, and deliberately not filed with the good
+                 news — it is work outstanding
     backed       the rules pass it and the evidence really does show what the
-                 requirement asks for
+                 requirement asks for, or the exclusion rests on a real fact
 
-Only `needs_look` and `backed` are the model's to decide; `concern` is settled
-before any call is made. Which rule fires on which case was measured, not
-assumed — see the `why` on each.
+A case with no expected bucket is outside the read: non-compliant and unassessed
+requirements assert nothing, so the review never fetches them. They are counted
+in the audit's own breakdown and a run that writes one up has read past its
+filter.
+
+`concern` is settled before any call is made; the other three are the model's.
+Which rule fires on which case was measured, not assumed — see the `why` on
+each.
 
     python manage.py populate_iso27001_benchmark --fresh --out /tmp/truth.json
 """
@@ -39,6 +49,11 @@ from core.models import (
     RequirementAssessment,
 )
 from iam.models import Folder
+
+# Worst first.
+BUCKETS = ("concern", "needs_look", "known_gap", "backed")
+#: The buckets only a model can produce. The other two are decided by counting.
+MODEL_BUCKETS = ("needs_look", "known_gap", "backed")
 
 PREFIX = "BENCH-"
 FRAMEWORK_URN = "urn:intuitem:risk:framework:iso27001-2022"
@@ -72,6 +87,9 @@ class Case:
     observation: str = ""
     #: (name, status) — a control that is only planned supports nothing yet.
     controls: list[tuple] = field(default_factory=list)
+    #: A target date on the first control. Without one anywhere, a partial
+    #: claim trips requirementAssessmentPartialNoPlan and is settled by rule.
+    gap_dated: bool = False
     #: Evidence hanging off the requirement itself.
     evidences: list[Doc] = field(default_factory=list)
     #: Evidence hanging off the first control — the indirect path, which counts
@@ -119,8 +137,9 @@ CASES = [
     Case(
         ref_id="A.8.8",
         result="partially_compliant",
-        expected="backed",
-        why="a partial claim backed by a real report is still backed",
+        expected="known_gap",
+        gap_dated=True,
+        why="an honest partial: a real report behind it, and an observation that names what is still missing",
         observation="Monthly scanning in place; remediation SLA not yet met for medium findings.",
         controls=[("Monthly authenticated vulnerability scanning", "active")],
         evidences=[
@@ -136,9 +155,11 @@ CASES = [
         ref_id="A.5.10",
         result="compliant",
         expected="backed",
-        why="two evidences, one empty and one attached — one good one is enough",
+        why="an empty record among usable ones does not sink the claim",
         observation="Acceptable use policy acknowledged at onboarding and annually.",
         controls=[("Acceptable use policy with annual acknowledgement", "active")],
+        # A.5.10 asks for rules documented AND implemented, so both halves are
+        # attached and the empty record is the supplementary one.
         evidences=[
             Doc(
                 "Acceptable use policy v2.1",
@@ -146,7 +167,12 @@ CASES = [
             ),
             Doc(
                 "Acknowledgement export — 2026",
-                "Placeholder for the annual acknowledgement extract; never uploaded.",
+                "Per-employee acknowledgement extract from the HR system, 100% of "
+                "staff for the current year.",
+            ),
+            Doc(
+                "Acceptable use briefing deck",
+                "Placeholder for the induction slides; never uploaded.",
                 state="empty",
                 status="draft",
             ),
@@ -178,17 +204,25 @@ CASES = [
         ref_id="A.7.4",
         result="compliant",
         expected="backed",
-        why="attached and on subject, with everything written in French",
+        why="on subject and carried by what is attached, with everything written in French",
         observation=(
             "Vidéosurveillance en place sur les trois sites, avec conservation de 30 jours. "
             "Registre des accès badge revu chaque trimestre par la sécurité physique."
         ),
         controls=[("Vidéosurveillance et contrôle d'accès par badge", "active")],
+        # The surveillance record carries the requirement; a badge export alone
+        # does not. This case is about reading French — A.8.24 is the one about
+        # evidence on the wrong subject.
         control_evidences=[
+            Doc(
+                "Relevé de vidéosurveillance — T3 2026",
+                "Relevé trimestriel des caméras des trois sites : couverture, disponibilité "
+                "et conservation des enregistrements sur 30 jours.",
+            ),
             Doc(
                 "Registre des accès badge — T3 2026",
                 "Export trimestriel des accès badge pour les trois sites.",
-            )
+            ),
         ],
     ),
     # ================= thin: something there, it does not carry =============
@@ -241,16 +275,16 @@ CASES = [
     Case(
         ref_id="A.5.7",
         result="partially_compliant",
-        expected="needs_look",
-        why="RULE GAP: partially compliant with a control and zero evidence — CompliantNoEvidence only fires on `compliant`",
+        expected="concern",
+        why="partially compliant with a control and zero evidence — a rule gap this benchmark found, now requirementAssessmentPartialNoEvidence",
         observation="Feeds are consumed informally by the SOC; no formal process yet.",
         controls=[("Subscribe to sector threat intelligence feeds", "active")],
     ),
     Case(
         ref_id="A.8.16",
         result="compliant",
-        expected="needs_look",
-        why="RULE GAP: the empty evidence is `in_review`, not `draft`, so EvidenceAllDraft misses it and evidenceNoFile is an evidence-level rule that does not surface here",
+        expected="concern",
+        why="an evidence record with nothing uploaded and not in draft — a rule gap this benchmark found, now requirementAssessmentNoUsableEvidence",
         observation="SIEM in place with 24/7 alerting.",
         controls=[
             ("Centralised log collection into the SIEM", "active"),
@@ -319,8 +353,8 @@ CASES = [
     Case(
         ref_id="A.5.19",
         result="partially_compliant",
-        expected="needs_look",
-        why="RULE GAP: one evidence expired and one draft — EvidenceExpired needs all expired, EvidenceAllDraft needs all draft, so mixed states pass both",
+        expected="concern",
+        why="one evidence expired and one empty — a rule gap this benchmark found, now requirementAssessmentNoUsableEvidence",
         observation=(
             "Supplier register maintained. Annual reviews completed for all critical "
             "suppliers."
@@ -401,12 +435,12 @@ CASES = [
         why="responsibility deflected to a provider, nothing recorded",
         observation="Separation of environments is handled by the cloud provider.",
     ),
-    # ============ outside the filter: the sweep must never see these ========
+    # ============ outside the read: no claim, so never fetched ==============
     Case(
         ref_id="A.5.2",
         result="non_compliant",
         expected="",
-        why="non-compliant: honest about itself, so the sweep skips it",
+        why="non-compliant is already an admission, so there is nothing to challenge",
         observation="Roles not formally assigned; gap accepted and scheduled.",
         controls=[("Assign and document ISMS roles", "to_do")],
         evidences=[
@@ -420,14 +454,45 @@ CASES = [
         ref_id="A.5.3",
         result="not_assessed",
         expected="",
-        why="not assessed yet, so there is no claim to challenge",
+        why="not answered yet, so there is no claim to challenge",
+    ),
+    # ============ exclusions: the one answer with no evidence behind it =====
+    Case(
+        ref_id="A.6.7",
+        result="not_applicable",
+        expected="backed",
+        why="the justification names a fact about the organisation that puts the requirement out of reach",
+        observation=(
+            "Not applicable: all staff work on site and no role is provisioned for remote "
+            "access to production systems."
+        ),
     ),
     Case(
-        ref_id="A.5.4",
+        ref_id="A.8.30",
         result="not_applicable",
-        expected="",
-        why="scoped out, so there is no claim to challenge",
-        observation="Not applicable: no in-house development in this scope.",
+        expected="needs_look",
+        why="the justification restates the exclusion instead of giving a reason for it",
+        observation="Out of scope for this audit cycle.",
+    ),
+    # ============ a partial whose observation does not match the label ======
+    Case(
+        ref_id="A.8.32",
+        result="partially_compliant",
+        expected="needs_look",
+        gap_dated=True,
+        why="the observation describes a complete implementation, so partially compliant is not what it says",
+        observation=(
+            "All production changes go through the change advisory board and are recorded in "
+            "the change register; emergency changes are reviewed retrospectively within 48 hours."
+        ),
+        controls=[("Change advisory board and change register", "active")],
+        evidences=[
+            Doc(
+                "Change register export — Q3 2026",
+                "Every production change for the quarter, with approver, date and rollback plan.",
+            )
+        ],
+        score=3,
     ),
 ]
 
@@ -473,8 +538,8 @@ class Command(BaseCommand):
 
         audit, domain = self._create_audit(framework, domain_name)
         seeded, missing = self._seed_cases(audit, domain)
-        reviewable = [c for c in seeded if c.expected]
-        excluded = [c for c in seeded if not c.expected]
+        reviewed = [c for c in seeded if c.expected]
+        outside = [c for c in seeded if not c.expected]
 
         self.stdout.write("")
         self.stdout.write(f"Audit: {audit.name}")
@@ -482,22 +547,26 @@ class Command(BaseCommand):
         self.stdout.write(f"  domain {domain.name}")
         self.stdout.write("")
         self.stdout.write("Expected answers:")
-        for case in reviewable:
+        for case in reviewed:
             self.stdout.write(
                 f"  {case.ref_id:<8} {case.result:<22} {case.expected:<12} {case.why}"
             )
         tally = {
-            verdict: sum(1 for c in reviewable if c.expected == verdict)
-            for verdict in ("concern", "needs_look", "backed")
+            verdict: sum(1 for c in reviewed if c.expected == verdict)
+            for verdict in BUCKETS
         }
         self.stdout.write("")
         self.stdout.write(
-            f"  {len(reviewable)} reviewable — "
+            f"  {len(reviewed)} reviewed — "
             + ", ".join(f"{n} {verdict}" for verdict, n in tally.items())
         )
+        judged = sum(1 for c in reviewed if c.expected in MODEL_BUCKETS)
+        self.stdout.write(
+            f"  {judged} of them reach the model; the rest are settled by rule"
+        )
         self.stdout.write("")
-        self.stdout.write("Outside the filter — a review that mentions these is wrong:")
-        for case in excluded:
+        self.stdout.write("Outside the read — a review that writes these up is wrong:")
+        for case in outside:
             self.stdout.write(f"  {case.ref_id:<8} {case.result:<22} {case.why}")
         if missing:
             self.stderr.write(
@@ -510,10 +579,10 @@ class Command(BaseCommand):
             truth = {
                 "audit_id": str(audit.id),
                 "framework": FRAMEWORK_URN,
-                "expected": {c.ref_id: c.expected for c in reviewable},
-                "why": {c.ref_id: c.why for c in reviewable},
+                "expected": {c.ref_id: c.expected for c in reviewed},
+                "why": {c.ref_id: c.why for c in reviewed},
                 # A run that reports on any of these read past its own filter.
-                "excluded": {c.ref_id: c.result for c in excluded},
+                "outside": {c.ref_id: c.result for c in outside},
             }
             with open(options["out"], "w") as handle:
                 json.dump(truth, handle, indent=2)
@@ -599,6 +668,11 @@ class Command(BaseCommand):
                     description=f"Seeded control for {case.ref_id}.",
                     folder=domain,
                     status=status,
+                    eta=(
+                        timezone.now().date() + timedelta(days=90)
+                        if case.gap_dated and control is None
+                        else None
+                    ),
                 )
                 assessment.applied_controls.add(control)
 

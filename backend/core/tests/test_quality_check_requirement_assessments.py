@@ -19,6 +19,7 @@ from core.models import (
     AppliedControl,
     ComplianceAssessment,
     Evidence,
+    EvidenceRevision,
     Framework,
     Perimeter,
     RequirementAssessment,
@@ -408,4 +409,243 @@ def test_rules_do_not_query_per_requirement(requirement_assessment):
             ]
         )
         == 20
+    )
+
+
+def _evidence(folder, name, *, status=None, expiry=None, attached=True, updated=None):
+    """An evidence in a named state. `attached` is the distinction a status
+    cannot express: a record with nothing uploaded is a title."""
+    evidence = Evidence.objects.create(
+        name=name,
+        folder=folder,
+        status=status or Evidence.Status.APPROVED,
+        expiry_date=expiry,
+    )
+    if attached:
+        revision = EvidenceRevision.objects.create(
+            evidence=evidence, version=1, link="https://example.test/file"
+        )
+        if updated is not None:
+            # queryset.update() writes the column as given; save() would stamp
+            # auto_now over it.
+            EvidenceRevision.objects.filter(pk=revision.pk).update(updated_at=updated)
+    return evidence
+
+
+@pytest.mark.django_db
+def test_partially_compliant_with_no_evidence(requirement_assessment):
+    """The compliant case had a rule; the partial one claimed just as much and
+    had none."""
+    compliance_assessment, ra = requirement_assessment
+    ra.applied_controls.add(
+        AppliedControl.objects.create(
+            name="A control", folder=compliance_assessment.folder, status="active"
+        )
+    )
+    ra.result = RequirementAssessment.Result.PARTIALLY_COMPLIANT
+    ra.save()
+
+    msgids = _msgids(compliance_assessment.quality_check(), "warnings")
+    assert "requirementAssessmentPartialNoEvidence" in msgids
+    # The compliant rule stays about compliant.
+    assert "requirementAssessmentCompliantNoEvidence" not in msgids
+
+
+@pytest.mark.django_db
+def test_one_expired_and_one_empty_evidence_is_caught(requirement_assessment):
+    """Neither narrower rule fires here — not every evidence has expired, and
+    not every one is draft — so before this rule the requirement passed in
+    silence with nothing usable behind it."""
+    compliance_assessment, ra = requirement_assessment
+    folder = compliance_assessment.folder
+    ra.evidences.add(
+        _evidence(folder, "Lapsed report", expiry=date.today() - timedelta(days=30)),
+        _evidence(folder, "Empty record", status=Evidence.Status.DRAFT, attached=False),
+    )
+    ra.result = RequirementAssessment.Result.COMPLIANT
+    ra.save()
+
+    msgids = _msgids(compliance_assessment.quality_check(), "warnings")
+    assert "requirementAssessmentNoUsableEvidence" in msgids
+    assert "requirementAssessmentEvidenceExpired" not in msgids
+    assert "requirementAssessmentEvidenceAllDraft" not in msgids
+
+
+@pytest.mark.django_db
+def test_an_approved_evidence_with_nothing_uploaded_is_caught(requirement_assessment):
+    """`evidenceNoFile` sees this, but it is reported against the evidence and
+    never reaches the requirement that rests on it."""
+    compliance_assessment, ra = requirement_assessment
+    ra.evidences.add(
+        _evidence(
+            compliance_assessment.folder,
+            "Access review — Q3",
+            status=Evidence.Status.IN_REVIEW,
+            attached=False,
+        )
+    )
+    ra.result = RequirementAssessment.Result.COMPLIANT
+    ra.save()
+
+    assert "requirementAssessmentNoUsableEvidence" in _msgids(
+        compliance_assessment.quality_check(), "warnings"
+    )
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "all_expired,expected",
+    [(True, "requirementAssessmentEvidenceExpired"), (False, None)],
+)
+def test_the_narrower_rule_wins_when_it_applies(
+    requirement_assessment, all_expired, expected
+):
+    """One problem is reported once: when every evidence has expired, that is
+    the finding, not the general one as well."""
+    compliance_assessment, ra = requirement_assessment
+    folder = compliance_assessment.folder
+    lapsed = date.today() - timedelta(days=30)
+    ra.evidences.add(_evidence(folder, "Old one", expiry=lapsed))
+    if not all_expired:
+        ra.evidences.add(_evidence(folder, "Empty one", attached=False))
+    ra.result = RequirementAssessment.Result.COMPLIANT
+    ra.save()
+
+    msgids = _msgids(compliance_assessment.quality_check(), "warnings")
+    if expected:
+        assert expected in msgids
+        assert "requirementAssessmentNoUsableEvidence" not in msgids
+    else:
+        assert "requirementAssessmentNoUsableEvidence" in msgids
+
+
+@pytest.mark.django_db
+def test_evidence_nobody_has_touched_in_a_year(requirement_assessment):
+    """Attached, unexpired, and last moved three years ago. Nothing about its
+    status says so — only the revision's own date does."""
+    from django.utils import timezone
+
+    compliance_assessment, ra = requirement_assessment
+    ra.evidences.add(
+        _evidence(
+            compliance_assessment.folder,
+            "Configuration baseline",
+            updated=timezone.now() - timedelta(days=1100),
+        )
+    )
+    ra.result = RequirementAssessment.Result.COMPLIANT
+    ra.save()
+
+    msgids = _msgids(compliance_assessment.quality_check(), "warnings")
+    assert "requirementAssessmentEvidenceStale" in msgids
+    # It is current in every other sense, so nothing else should fire.
+    assert "requirementAssessmentNoUsableEvidence" not in msgids
+    assert "requirementAssessmentEvidenceExpired" not in msgids
+
+
+@pytest.mark.django_db
+def test_recent_evidence_is_not_stale(requirement_assessment):
+    from django.utils import timezone
+
+    compliance_assessment, ra = requirement_assessment
+    ra.evidences.add(
+        _evidence(
+            compliance_assessment.folder,
+            "Fresh export",
+            updated=timezone.now() - timedelta(days=30),
+        )
+    )
+    ra.result = RequirementAssessment.Result.COMPLIANT
+    ra.save()
+
+    assert "requirementAssessmentEvidenceStale" not in _msgids(
+        compliance_assessment.quality_check(), "warnings"
+    )
+
+
+def _partial_with_a_control(compliance_assessment, ra, **control_fields):
+    ra.applied_controls.add(
+        AppliedControl.objects.create(
+            name="A control",
+            folder=compliance_assessment.folder,
+            status=AppliedControl.Status.ACTIVE,
+            **control_fields,
+        )
+    )
+    ra.result = RequirementAssessment.Result.PARTIALLY_COMPLIANT
+    ra.save()
+
+
+@pytest.mark.django_db
+def test_a_declared_gap_with_no_date_on_it(requirement_assessment):
+    """ControlEtaMissed catches a date that passed. Nothing caught the absence
+    of one, which is the more common way a gap goes unmanaged."""
+    compliance_assessment, ra = requirement_assessment
+    _partial_with_a_control(compliance_assessment, ra)
+
+    assert "requirementAssessmentPartialNoPlan" in _msgids(
+        compliance_assessment.quality_check(), "warnings"
+    )
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("field", ["eta", "due_date"])
+def test_a_date_on_the_assessment_itself_is_a_plan(requirement_assessment, field):
+    """The gap may be tracked on the assessment rather than on any one control."""
+    compliance_assessment, ra = requirement_assessment
+    setattr(ra, field, date.today() + timedelta(days=60))
+    _partial_with_a_control(compliance_assessment, ra)
+
+    assert "requirementAssessmentPartialNoPlan" not in _msgids(
+        compliance_assessment.quality_check()
+    )
+
+
+@pytest.mark.django_db
+def test_a_date_on_one_control_is_a_plan(requirement_assessment):
+    compliance_assessment, ra = requirement_assessment
+    _partial_with_a_control(
+        compliance_assessment, ra, eta=date.today() + timedelta(days=60)
+    )
+
+    assert "requirementAssessmentPartialNoPlan" not in _msgids(
+        compliance_assessment.quality_check()
+    )
+
+
+@pytest.mark.django_db
+def test_a_partial_assessment_with_nothing_attached_is_reported_once(
+    requirement_assessment,
+):
+    """No control and no date is one problem, and NoAppliedControl is the rule
+    that names it."""
+    compliance_assessment, ra = requirement_assessment
+    ra.result = RequirementAssessment.Result.PARTIALLY_COMPLIANT
+    ra.save()
+
+    msgids = _msgids(compliance_assessment.quality_check())
+    assert "requirementAssessmentNoAppliedControl" in msgids
+    assert "requirementAssessmentPartialNoPlan" not in msgids
+
+
+@pytest.mark.django_db
+def test_a_partial_claim_with_no_observation_is_a_warning(requirement_assessment):
+    """The observation is where a declared deviation is described, so this
+    belongs with NotApplicableNoJustification rather than below it."""
+    compliance_assessment, ra = requirement_assessment
+    _partial_with_a_control(compliance_assessment, ra)
+
+    findings = compliance_assessment.quality_check()
+    assert "requirementAssessmentPartialNoObservation" in _msgids(findings, "warnings")
+    assert "requirementAssessmentPartialNoObservation" not in _msgids(findings, "info")
+
+
+@pytest.mark.django_db
+def test_an_observation_answers_it(requirement_assessment):
+    compliance_assessment, ra = requirement_assessment
+    ra.observation = "Rolled out to production; the two lab segments are pending."
+    _partial_with_a_control(compliance_assessment, ra)
+
+    assert "requirementAssessmentPartialNoObservation" not in _msgids(
+        compliance_assessment.quality_check()
     )

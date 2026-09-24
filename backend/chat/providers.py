@@ -603,7 +603,7 @@ class OpenAICompatibleLLM:
             body["response_format"] = {"type": "json_object"}
             resp = self.client.post(self._chat_url(), json=body)
         resp.raise_for_status()
-        return strip_reasoning(resp.json()["choices"][0]["message"]["content"])
+        return strip_reasoning(_message_text(resp.json()["choices"][0]["message"]))
 
     def _raw_stream(
         self,
@@ -980,6 +980,16 @@ def get_llm() -> LLM:
     logger.info("no_llm_available", mode="retrieval-only")
     # Don't cache StubLLM — retry on next request in case LLM comes back
     return StubLLM()
+
+
+def _message_text(message: dict) -> str:
+    """The answer, wherever the server put it: some models return the whole
+    completion in `reasoning_content` and leave `content` empty. Beside an
+    answer the reasoning is thinking, so it is read only when `content` is."""
+    content = (message.get("content") or "").strip()
+    if content:
+        return message["content"]
+    return message.get("reasoning_content") or message.get("reasoning") or ""
 
 
 class NoLLMAvailable(Exception):

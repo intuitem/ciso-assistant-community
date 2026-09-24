@@ -3,7 +3,17 @@ import uuid
 import pytest
 
 from iam.models import Folder
-from automation.workflows.engine import start_instance
+import uuid
+from types import SimpleNamespace
+
+from automation.workflows.actions import FatalActionError
+from automation.workflows.engine import (
+    MAX_COLLECTION_ITEMS,
+    _cap_structure,
+    _store_node_output,
+    start_instance,
+)
+from automation.workflows.models import WorkflowNode
 from automation.workflows.graph import GraphValidationError, save_graph
 from automation.workflows.models import Workflow, WorkflowInstance, WorkflowVersion
 from automation.workflows.tests.helpers import publisher_user
@@ -181,7 +191,7 @@ class TestNodeOutputReferences:
                 return {
                     "blob": "x" * 50000,
                     "nested": {"deep": {"email": "ada@acme.com"}},
-                    "items": list(range(500)),
+                    "items": list(range(20)),
                 }
 
         monkeypatch.setattr(
@@ -215,8 +225,52 @@ class TestNodeOutputReferences:
         # Structure survives: nested paths remain referenceable.
         assert isinstance(stored, dict)
         assert stored["nested"]["deep"]["email"] == "ada@acme.com"
-        # Oversized leaves truncate, huge lists tail-omit.
+        # An oversized leaf shortens and says so; the run carries on, because
+        # the value is still there.
         assert "truncated" in stored["blob"]
         assert len(stored["blob"]) < 1200
-        assert "more items" in stored["items"][-1]
-        assert len(stored["items"]) <= 101
+        assert stored["items"] == list(range(20))
+
+
+class TestTruncationIsLoud:
+    """The caps exist to stop a runaway payload, not to quietly reshape data. A
+    node output is also the next node's input, so losing records from it has to
+    fail the node — that is how a sweep over 123 requirements came to persist
+    100 and report success."""
+
+    def _lost(self, payload):
+        lost = []
+        _cap_structure(payload, lost=lost)
+        return lost
+
+    def test_dropping_items_from_a_list_is_reported(self):
+        lost = self._lost({"items": list(range(MAX_COLLECTION_ITEMS + 50))})
+        assert lost == [f"50 of {MAX_COLLECTION_ITEMS + 50} items were dropped"]
+
+    def test_running_out_of_budget_is_reported(self, settings):
+        settings.WORKFLOW_NODE_OUTPUT_BUDGET = 2000
+        lost = self._lost({"rows": [{"note": "x" * 650} for _ in range(50)]})
+        assert lost and "were dropped" in lost[0]
+
+    def test_shortening_one_long_string_is_not(self):
+        assert self._lost({"blob": "x" * 50000}) == []
+
+    def test_an_output_that_fits_reports_nothing(self):
+        payload = {"rows": [{"ref_id": "A.5.1", "bucket": "backed"}], "count": 1}
+        lost = []
+        assert _cap_structure(payload, lost=lost) == payload
+        assert lost == []
+
+    @pytest.mark.django_db
+    def test_a_node_that_loses_records_fails(self, settings):
+        """The symptom this replaces: status completed, records missing, nothing
+        said."""
+        settings.WORKFLOW_NODE_OUTPUT_BUDGET = 500
+        _, version = make_workflow()
+        node_ = WorkflowNode(ref="big", id=uuid.uuid4())
+        instance = SimpleNamespace(node_outputs={})
+        with pytest.raises(FatalActionError) as caught:
+            _store_node_output(
+                node_, {"rows": [{"note": "x" * 200} for _ in range(20)]}, instance
+            )
+        assert "were dropped" in str(caught.value)

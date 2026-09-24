@@ -1025,31 +1025,55 @@ def _start_subprocess(token):
 
 def _store_node_output(node, output, instance):
     """Record the node's output (in memory) for {{nodes.<ref>.<path>}} references
-    and the builder's reference-run data browser. Structure-preserving: nested
-    JSON stays navigable and referenceable; only oversized leaves and collections
-    shrink. The display log truncates flat and harder. Persisting is the caller's
-    job — see _persist_node_output."""
+    and the builder's data browser. Persisting is the caller's job — see
+    _persist_node_output.
+
+    Dropping records fails the node: a loop's records are the next node's input,
+    so a silent cut means a write-up short of what the run processed. Shortening
+    one string keeps the value, so that stays quiet.
+    """
     key = node.ref or str(node.id)
-    instance.node_outputs[key] = _cap_structure(output)
+    lost = []
+    instance.node_outputs[key] = _cap_structure(output, lost=lost)
+    if lost:
+        raise FatalActionError(
+            f"This step produced more than one node output can hold, so "
+            f"{'; '.join(lost)}. Narrow what the step reads, or raise "
+            f"WORKFLOW_NODE_OUTPUT_BUDGET."
+        )
 
 
 MAX_LEAF_CHARS = 1000
-MAX_COLLECTION_ITEMS = 100
+MAX_COLLECTION_ITEMS = 2000
 MAX_STRUCTURE_DEPTH = 10
 
 
-def _cap_structure(value, budget=None, depth=0):
-    """Bound node_outputs without flattening: dicts and lists keep their shape
-    (so paths into them keep working), long strings truncate, huge collections
-    tail-omit, and a global character budget backstops pathological payloads."""
+def node_output_budget():
+    """Characters one node output may hold. `node_outputs` keeps every node's
+    output in one JSONField, rewritten on each node completion."""
+    return int(getattr(settings, "WORKFLOW_NODE_OUTPUT_BUDGET", 500_000))
+
+
+def _cap_structure(value, budget=None, depth=0, lost=None):
+    """Bound node_outputs without flattening: dicts and lists keep their shape so
+    paths into them keep working. `lost` collects what the caller no longer
+    has."""
     if budget is None:
-        budget = [32000]
+        budget = [node_output_budget()]
+
+    def drop(what):
+        if lost is not None:
+            lost.append(what)
+
     if budget[0] <= 0:
+        drop("the output budget ran out")
         return "<truncated: output budget exceeded>"
     if depth > MAX_STRUCTURE_DEPTH:
+        drop(f"nesting past {MAX_STRUCTURE_DEPTH} levels was dropped")
         return "<truncated: max depth>"
 
     if isinstance(value, str):
+        # Quiet: the value is still there and says how much was cut.
         if len(value) > MAX_LEAF_CHARS:
             budget[0] -= MAX_LEAF_CHARS
             return f"{value[:MAX_LEAF_CHARS]}… <{len(value)} chars truncated>"
@@ -1060,19 +1084,21 @@ def _cap_structure(value, budget=None, depth=0):
         capped = {}
         for index, (key, item) in enumerate(value.items()):
             if index >= MAX_COLLECTION_ITEMS or budget[0] <= 0:
+                drop(f"{len(value) - index} of {len(value)} keys were dropped")
                 capped["<omitted>"] = f"{len(value) - index} more keys"
                 break
             budget[0] -= len(str(key))
-            capped[key] = _cap_structure(item, budget, depth + 1)
+            capped[key] = _cap_structure(item, budget, depth + 1, lost)
         return capped
 
     if isinstance(value, list):
         capped_items = []
         for index, item in enumerate(value):
             if index >= MAX_COLLECTION_ITEMS or budget[0] <= 0:
+                drop(f"{len(value) - index} of {len(value)} items were dropped")
                 capped_items.append(f"<{len(value) - index} more items>")
                 break
-            capped_items.append(_cap_structure(item, budget, depth + 1))
+            capped_items.append(_cap_structure(item, budget, depth + 1, lost))
         return capped_items
 
     budget[0] -= 8

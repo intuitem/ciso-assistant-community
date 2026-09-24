@@ -529,3 +529,68 @@ class TestStripReasoning:
 
         payload = '{"verdict": "thin", "note": "clean"}'
         assert strip_reasoning(payload) == payload
+
+
+class _MessageClient:
+    """Replays one canned assistant message."""
+
+    def __init__(self, message):
+        self.message = message
+
+    def post(self, url, json=None):  # noqa: ARG002
+        client = self
+
+        class Response:
+            status_code = 200
+
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {"choices": [{"message": client.message}]}
+
+        return Response()
+
+
+class TestTheAnswerWhereverTheServerPutIt:
+    """Measured on zai-org/glm-4.7-flash served by LM Studio: a reasoning model
+    can return the whole completion in `reasoning_content` and leave `content`
+    empty, including for a json_schema-constrained call, with finish_reason
+    "stop". Reading `content` alone turns that into an empty answer the caller
+    cannot tell apart from a refusal."""
+
+    def _llm(self, message):
+        from chat.providers import OpenAICompatibleLLM
+
+        llm = OpenAICompatibleLLM(model="m", base_url="http://x/v1")
+        llm.client = _MessageClient(message)
+        return llm
+
+    def test_an_empty_content_falls_back_to_the_reasoning_field(self):
+        llm = self._llm({"content": "", "reasoning_content": '{"verdict": "backed"}'})
+        assert llm.generate(prompt="p", context="") == '{"verdict": "backed"}'
+
+    def test_the_deepseek_spelling_works_too(self):
+        llm = self._llm({"content": None, "reasoning": '{"verdict": "backed"}'})
+        assert llm.generate(prompt="p", context="") == '{"verdict": "backed"}'
+
+    def test_reasoning_beside_an_answer_is_thinking_and_stays_out(self):
+        """The fallback is for an answer in the wrong field, not a licence to
+        hand a caller the working-out when it already has what it asked for."""
+        llm = self._llm(
+            {
+                "content": '{"verdict": "backed"}',
+                "reasoning_content": "Let me think about whether this holds...",
+            }
+        )
+        assert llm.generate(prompt="p", context="") == '{"verdict": "backed"}'
+
+    def test_whitespace_is_not_an_answer(self):
+        llm = self._llm(
+            {"content": "   \n  ", "reasoning_content": '{"verdict": "needs_look"}'}
+        )
+        assert llm.generate(prompt="p", context="") == '{"verdict": "needs_look"}'
+
+    def test_nothing_anywhere_is_an_empty_string(self):
+        llm = self._llm({"content": None})
+        assert llm.generate(prompt="p", context="") == ""
