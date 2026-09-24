@@ -1183,6 +1183,8 @@ def _quality_check_with_text(obj):
 
     return {
         **findings,
+        # The one question a workflow branches on: did any rule speak?
+        "flagged": bool(entries),
         "messages": messages,
         "text": "\n".join(f"  - {message}" for message in messages),
     }

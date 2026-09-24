@@ -2973,6 +2973,8 @@
 	"changeOwner": "Changer le propriétaire",
 	"changeDomain": "Changer le domaine",
 	"batchChangePriority": "Changer la priorité",
+	"changeDocumentType": "Changer le type de document",
+	"changeClassification": "Changer la classification",
 	"changeAttributes": "Modifier les attributs",
 	"mergeControls": "Fusionner",
 	"mergeIrreversibleWarning": "Action permanente. {n} mesure(s) appliquée(s) seront supprimée(s) définitivement et toutes leurs références repointées vers la cible. Les mesures supprimées ne peuvent pas être restaurées.",

@@ -2993,6 +2993,8 @@
 	"changeOwner": "Change owner",
 	"changeDomain": "Change domain",
 	"batchChangePriority": "Change priority",
+	"changeDocumentType": "Change document type",
+	"changeClassification": "Change classification",
 	"changeAttributes": "Change attributes",
 	"mergeControls": "Merge",
 	"mergeIrreversibleWarning": "This action is permanent. {n} applied control(s) will be hard-deleted and all references to them repointed to the target. Deleted controls cannot be restored.",

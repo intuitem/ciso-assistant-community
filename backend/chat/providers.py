@@ -425,7 +425,7 @@ class OllamaLLM:
         self.system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
         self.temperature_enabled = temperature_enabled
         self.temperature = temperature
-        self.client = httpx.Client(timeout=120)
+        self.client = httpx.Client(timeout=llm_timeout())
 
     def _options(self) -> dict:
         return {"temperature": self.temperature} if self.temperature_enabled else {}
@@ -443,14 +443,22 @@ class OllamaLLM:
             system_prompt or self.system_prompt, prompt, context, history, directives
         )
         body: dict = {"model": self.model, "messages": messages, "stream": False}
-        if options := self._options():
-            body["options"] = options
+        body["options"] = {
+            **self._options(),
+            "num_predict": llm_max_output_tokens(),
+        }
         if schema is not None:
             # Constrained decoding: valid JSON by construction.
             body["format"] = schema
         resp = self.client.post(f"{self.base_url}/api/chat", json=body)
         resp.raise_for_status()
-        return strip_reasoning(resp.json()["message"]["content"])
+        payload = resp.json()
+        if schema is not None and payload.get("done_reason") == "length":
+            raise TruncatedCompletion(
+                f"the model reached the {llm_max_output_tokens()}-token ceiling "
+                "before finishing its answer"
+            )
+        return strip_reasoning(payload["message"]["content"])
 
     def _raw_stream(
         self,
@@ -471,7 +479,7 @@ class OllamaLLM:
             "POST",
             f"{self.base_url}/api/chat",
             json=body,
-            timeout=120,
+            timeout=llm_timeout(),
         ) as resp:
             for line in resp.iter_lines():
                 if line:
@@ -564,7 +572,7 @@ class OpenAICompatibleLLM:
         headers = {}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
-        self.client = httpx.Client(timeout=120, headers=headers)
+        self.client = httpx.Client(timeout=llm_timeout(), headers=headers)
         self._api_key = api_key
 
     def _chat_url(self) -> str:
@@ -582,7 +590,11 @@ class OpenAICompatibleLLM:
         messages = _build_messages(
             system_prompt or self.system_prompt, prompt, context, history, directives
         )
-        body: dict = {"messages": messages, "stream": False}
+        body: dict = {
+            "messages": messages,
+            "stream": False,
+            "max_tokens": llm_max_output_tokens(),
+        }
         if self.model:
             body["model"] = self.model
         if self.temperature_enabled:
@@ -603,7 +615,13 @@ class OpenAICompatibleLLM:
             body["response_format"] = {"type": "json_object"}
             resp = self.client.post(self._chat_url(), json=body)
         resp.raise_for_status()
-        return strip_reasoning(_message_text(resp.json()["choices"][0]["message"]))
+        choice = resp.json()["choices"][0]
+        if schema is not None and choice.get("finish_reason") == "length":
+            raise TruncatedCompletion(
+                f"the model reached the {llm_max_output_tokens()}-token ceiling "
+                "before finishing its answer"
+            )
+        return strip_reasoning(_message_text(choice["message"]))
 
     def _raw_stream(
         self,
@@ -631,7 +649,7 @@ class OpenAICompatibleLLM:
             self._chat_url(),
             json=body,
             headers=headers,
-            timeout=120,
+            timeout=llm_timeout(),
         ) as resp:
             for line in resp.iter_lines():
                 if not line or not line.startswith("data: "):
@@ -990,6 +1008,34 @@ def _message_text(message: dict) -> str:
     if content:
         return message["content"]
     return message.get("reasoning_content") or message.get("reasoning") or ""
+
+
+def llm_timeout() -> float:
+    """Seconds to wait on one generation. Read at call time, so a deployment
+    running a local reasoning model can raise it: with `stream: false` the
+    server sends nothing until the completion is finished, so this is the whole
+    generation, and an unbounded reasoning field can spend minutes on one
+    answer."""
+    from django.conf import settings
+
+    return float(getattr(settings, "LLM_REQUEST_TIMEOUT", 120))
+
+
+def llm_max_output_tokens() -> int:
+    """Tokens one generation may produce. A reasoning model given an unbounded
+    field and an ambiguous question has no stopping condition of its own — one
+    requirement here ran past 10,000 tokens — and a timeout only converts that
+    into a long wait. Applied to whole answers, not to streamed chat, where a
+    person is watching."""
+    from django.conf import settings
+
+    return int(getattr(settings, "LLM_MAX_OUTPUT_TOKENS", 2048))
+
+
+class TruncatedCompletion(Exception):
+    """The model stopped because it ran out of tokens, not because it finished.
+    Raised only for schema-constrained calls, where a cut answer cannot parse
+    and would otherwise be reported as invalid JSON."""
 
 
 class NoLLMAvailable(Exception):

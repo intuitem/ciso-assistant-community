@@ -118,10 +118,14 @@ def test_serialized_row_is_json_safe(audit, model):
         "warnings",
         "info",
         "count",
+        "flagged",
         "messages",
         "text",
     }
     assert findings["count"] > 0
+    # `count` includes info, which no workflow branches on; `flagged` is the
+    # errors-or-warnings question a condition can read as a boolean.
+    assert findings["flagged"] is True
     assert findings["messages"]
     assert findings["text"].startswith("  - ")
     assert findings["text"].count("\n") == len(findings["messages"]) - 1
@@ -171,3 +175,26 @@ def test_a_requirements_own_name_is_dropped_from_its_findings(audit):
     # The audit's findings span its requirements and its own assessment-level
     # rules, so nothing is shared and every line keeps saying what it is about.
     assert any(str(ra) in message for message in audit_findings["messages"])
+
+
+@pytest.mark.django_db
+def test_info_alone_does_not_flag(audit):
+    """A requirement carrying only info findings has nothing to act on, so a
+    workflow routing on `flagged` must not treat it as a concern."""
+    compliance_assessment, ra = audit
+    ra.applied_controls.clear()
+    ra.result = RequirementAssessment.Result.NOT_ASSESSED
+    ra.status = RequirementAssessment.Status.IN_PROGRESS
+    ra.save()
+
+    entry = READABLE_MODELS["requirement_assessment"]
+    row = _serialize_read_row(
+        ra,
+        entry.readable_fields(),
+        _effective_computed(
+            entry, {"model": "requirement_assessment", "include": ["quality_check"]}
+        ),
+    )
+    findings = row["quality_check"]
+    assert findings["errors"] == [] and findings["warnings"] == []
+    assert findings["flagged"] is False

@@ -180,7 +180,7 @@ def ai_call_task(
     """Run one AI step's inference and hand the token back to the engine, in a
     task so a call that takes minutes never holds the instance-tree locks.
     get_llm_strict, not get_llm: a run must not proceed on StubLLM output."""
-    from chat.providers import NoLLMAvailable, get_llm_strict
+    from chat.providers import NoLLMAvailable, TruncatedCompletion, get_llm_strict
 
     from .actions import AI_SYSTEM_PROMPT, AI_TEXT_MAX_CHARS
     from .engine import (
@@ -240,6 +240,16 @@ def ai_call_task(
             error=e,
         )
         failure = f"{label}: no AI provider is reachable"
+    except TruncatedCompletion as e:
+        # Our own ceiling and our own wording, so it is safe to show and says
+        # the one thing that matters: the model did not stop on its own.
+        logger.warning(
+            "AI action output hit the token ceiling",
+            instance_id=str(token.instance_id),
+            action=label,
+            error=e,
+        )
+        failure = f"{label}: {e}"
     except Exception as e:
         # Provider errors stringify with the endpoint URL, and a key can ride
         # in a header: controlled message to the run log, detail to the server.

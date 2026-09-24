@@ -641,3 +641,46 @@ class TestAuditReviewSample:
 
         occurrence = TaskNode.objects.get(task_template=task)
         assert occurrence.due_date == date.today() + timedelta(days=14)
+
+    def test_no_audit_id_fails_the_run_rather_than_guarding_it(
+        self, dispatch, django_capture_on_commit_callbacks, llm
+    ):
+        """The read rejects an empty id itself, naming the step that failed, so
+        a branch to say the same thing earns nothing."""
+        domain = Folder.objects.create(
+            name="Audit review no id",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        version = install(domain)
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = create_instance(version, initiated_by=publisher_user())
+            run_instance(instance)
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not ManagedDocument.objects.filter(container__folder=domain).exists()
+
+    def test_an_audit_it_cannot_see_stops_the_run(
+        self, dispatch, django_capture_on_commit_callbacks, llm
+    ):
+        """A read that matches nothing returns found=false and carries on, so
+        without the branch this files a document with empty sections and calls
+        it done."""
+        import uuid as _uuid
+
+        domain = Folder.objects.create(
+            name="Audit review unseen",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        version = install(domain)
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = create_instance(
+                version,
+                initiated_by=publisher_user(),
+                initial_variables={"audit_id": str(_uuid.uuid4())},
+            )
+            run_instance(instance)
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        assert not ManagedDocument.objects.filter(container__folder=domain).exists()

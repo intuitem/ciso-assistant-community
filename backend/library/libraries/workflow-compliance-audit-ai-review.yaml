@@ -7,9 +7,10 @@ description: 'Walks every requirement an audit says is compliant, partially comp
   rules find, and asks the configured AI provider only the questions a rule cannot answer. The answers are
   filed as a managed document of type Record, next to the audit they question.
 
-  Two ways in: run it by hand with audit_id set, or enable the "An audit moved to in review" trigger and
-  let it run itself when someone moves an audit to that status. Internal-event triggers arrive disabled,
-  so the automatic path is one switch in the workflow''s triggers, deliberately.
+  Two ways in: run it by hand with "Run with variables" and audit_id set to the audit you want reviewed,
+  or enable the "An audit moved to in review" trigger and let it run itself when someone moves an audit to
+  that status. Internal-event triggers arrive disabled, so the automatic path is one switch in the
+  workflow''s triggers, deliberately.
 
   The rules run first and cost nothing: anything they flag is already written, already translated, and
   carries a rule id, so it goes straight to Concerns in their own words. Only requirements the rules pass
@@ -52,6 +53,9 @@ objects:
       - key: audit_id
         type: string
         default_value: ''
+      - key: found
+        type: boolean
+        default_value: false
       - key: audit_name
         type: string
         default_value: ''
@@ -64,14 +68,10 @@ objects:
       - key: breakdown
         type: json
         default_value: {}
-      # '[]' is what an empty list renders as, and a condition reads a declared
-      # variable rather than a path.
-      - key: qc_errors
-        type: string
-        default_value: '[]'
-      - key: qc_warnings
-        type: string
-        default_value: '[]'
+      # A condition reads a declared variable, never a path.
+      - key: flagged
+        type: boolean
+        default_value: false
       - key: claimed
         type: string
         default_value: ''
@@ -122,26 +122,6 @@ objects:
               value: in_review
         input_mapping:
           audit_id: object_id
-      - ref: check_id
-        type: condition
-        label: Was an audit given?
-        branches:
-        - name: given
-          condition_groups:
-          - operator: and
-            conditions:
-            - variable: audit_id
-              op: neq
-              value: ''
-        - name: missing
-          is_default: true
-      - ref: no_audit
-        type: action
-        label: Nothing to review
-        action_config:
-          type: log
-          message: 'No audit_id was given. Run this workflow with "Run with variables" and set audit_id
-            to the audit you want reviewed.'
       - ref: read_audit
         type: action
         label: Find the audit
@@ -156,9 +136,13 @@ objects:
               op: eq
               value: '{{audit_id}}'
         output_mapping:
+          found: found
           audit_name: object.name
           breakdown: object.requirements
           reviewers: object.reviewers
+      # A read that matches nothing is not a failure: it returns found=false and
+      # the run carries on, which without this would file a document with empty
+      # sections and call it done.
       - ref: check_found
         type: condition
         label: Is it in this workflow's scope?
@@ -167,9 +151,9 @@ objects:
           condition_groups:
           - operator: and
             conditions:
-            - variable: audit_name
-              op: neq
-              value: ''
+            - variable: found
+              op: eq
+              value: true
         - name: not_found
           is_default: true
       - ref: out_of_scope
@@ -215,8 +199,7 @@ objects:
         action_config:
           type: set_variables
           variables:
-            qc_errors: '{{item.quality_check.errors}}'
-            qc_warnings: '{{item.quality_check.warnings}}'
+            flagged: '{{item.quality_check.flagged}}'
             claimed: '{{item.result}}'
       - ref: route
         type: condition
@@ -224,14 +207,11 @@ objects:
         branches:
         - name: flagged
           condition_groups:
-          - operator: or
+          - operator: and
             conditions:
-            - variable: qc_errors
-              op: neq
-              value: '[]'
-            - variable: qc_warnings
-              op: neq
-              value: '[]'
+            - variable: flagged
+              op: eq
+              value: true
         - name: clean
           is_default: true
       - ref: pack_flagged
@@ -511,9 +491,9 @@ objects:
       # One signal: `missing` empty means the model would ask for nothing, and
       # each branch knows which positive section that is. A verdict enum beside
       # it could disagree with it, and did.
-      - ref: settle_compliant
+      - ref: settle_claim
         type: condition
-        label: Does the evidence carry it?
+        label: Backed, or needs a look?
         branches:
         - name: satisfied
           condition_groups:
@@ -526,20 +506,7 @@ objects:
           is_default: true
       - ref: settle_partial
         type: condition
-        label: Does the partial claim stand?
-        branches:
-        - name: satisfied
-          condition_groups:
-          - operator: and
-            conditions:
-            - variable: ai_missing
-              op: eq
-              value: ''
-        - name: not_satisfied
-          is_default: true
-      - ref: settle_exclusion
-        type: condition
-        label: Does the exclusion hold?
+        label: A known gap, or needs a look?
         branches:
         - name: satisfied
           condition_groups:
@@ -708,17 +675,9 @@ objects:
         type: end
       edges:
       - source: start
-        target: check_id
-      - source: on_review
-        target: check_id
-      - source: check_id
         target: read_audit
-        source_branch: given
-      - source: check_id
-        target: no_audit
-        source_branch: missing
-      - source: no_audit
-        target: done
+      - source: on_review
+        target: read_audit
       - source: read_audit
         target: check_found
       - source: check_found
@@ -750,29 +709,23 @@ objects:
         target: challenge_not_applicable
         source_branch: not_applicable
       - source: challenge_compliant
-        target: settle_compliant
+        target: settle_claim
+      - source: challenge_not_applicable
+        target: settle_claim
       - source: challenge_partial
         target: settle_partial
-      - source: challenge_not_applicable
-        target: settle_exclusion
       - source: pack_flagged
         target: per_requirement
-      - source: settle_compliant
+      - source: settle_claim
         target: append_backed
         source_branch: satisfied
-      - source: settle_compliant
+      - source: settle_claim
         target: append_look
         source_branch: not_satisfied
       - source: settle_partial
         target: append_gaps
         source_branch: satisfied
       - source: settle_partial
-        target: append_look
-        source_branch: not_satisfied
-      - source: settle_exclusion
-        target: append_backed
-        source_branch: satisfied
-      - source: settle_exclusion
         target: append_look
         source_branch: not_satisfied
       - source: append_backed

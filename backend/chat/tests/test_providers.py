@@ -594,3 +594,107 @@ class TestTheAnswerWhereverTheServerPutIt:
     def test_nothing_anywhere_is_an_empty_string(self):
         llm = self._llm({"content": None})
         assert llm.generate(prompt="p", context="") == ""
+
+
+class TestGenerationTimeoutIsADeploymentSetting:
+    """With `stream: false` the server sends nothing until the completion is
+    finished, so this bounds the whole generation. Measured on qwen3.8-27b: one
+    hard requirement emitted 11,829 characters of reasoning and took 97-122s,
+    straddling the old hardcoded 120."""
+
+    def test_the_default_leaves_room_for_the_token_ceiling(self, settings):
+        from chat.providers import llm_timeout
+
+        assert llm_timeout() == 120
+
+    def test_a_deployment_can_raise_it(self, settings):
+        from chat.providers import llm_timeout
+
+        settings.LLM_REQUEST_TIMEOUT = 600
+        assert llm_timeout() == 600
+
+    def test_the_client_takes_it(self, settings):
+        from chat.providers import OpenAICompatibleLLM
+
+        settings.LLM_REQUEST_TIMEOUT = 450
+        llm = OpenAICompatibleLLM(model="m", base_url="http://x/v1")
+        assert llm.client.timeout.read == 450
+
+
+class _FinishClient:
+    def __init__(self, finish_reason, content='{"verdict": "backed"}'):
+        self.finish_reason = finish_reason
+        self.content = content
+        self.bodies = []
+
+    def post(self, url, json=None):  # noqa: ARG002
+        self.bodies.append(json)
+        client = self
+
+        class Response:
+            status_code = 200
+
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {
+                    "choices": [
+                        {
+                            "finish_reason": client.finish_reason,
+                            "message": {"content": client.content},
+                        }
+                    ]
+                }
+
+        return Response()
+
+
+class TestGenerationIsBounded:
+    """A reasoning model with an unbounded field and an ambiguous question has
+    no stopping condition; a timeout turns that into a long wait rather than a
+    bound."""
+
+    SCHEMA = {"type": "object", "properties": {"verdict": {"type": "string"}}}
+
+    def _llm(self, client, settings=None):
+        from chat.providers import OpenAICompatibleLLM
+
+        llm = OpenAICompatibleLLM(model="m", base_url="http://x/v1")
+        llm.client = client
+        return llm
+
+    def test_every_request_carries_the_ceiling(self, settings):
+        settings.LLM_MAX_OUTPUT_TOKENS = 2048
+        client = _FinishClient("stop")
+        self._llm(client).generate(prompt="p", context="")
+        assert client.bodies[0]["max_tokens"] == 2048
+
+    def test_hitting_the_ceiling_is_not_reported_as_bad_json(self, settings):
+        """`finish_reason: length` on a schema call means the answer was cut,
+        which the JSON parser would otherwise blame on the model."""
+        from chat.providers import TruncatedCompletion
+
+        client = _FinishClient("length", content='{"verdict": "bac')
+        with pytest.raises(TruncatedCompletion):
+            self._llm(client).generate(prompt="p", context="", schema=self.SCHEMA)
+
+    def test_an_unconstrained_call_may_run_to_the_ceiling(self, settings):
+        """Chat has no schema to satisfy, so a long answer that stops at the
+        ceiling is still an answer."""
+        client = _FinishClient("length", content="a long answer that got cut")
+        assert self._llm(client).generate(prompt="p", context="") == (
+            "a long answer that got cut"
+        )
+
+
+def test_the_two_bounds_agree(settings):
+    """The token ceiling is meant to bind first. At a local model's ~30 tokens
+    per second a timeout below that makes the ceiling unreachable, and a long
+    answer gets reported as a dead provider."""
+    from chat.providers import llm_max_output_tokens, llm_timeout
+
+    slowest_plausible_tokens_per_second = 30
+    assert (
+        llm_max_output_tokens() / slowest_plausible_tokens_per_second
+    ) < llm_timeout()

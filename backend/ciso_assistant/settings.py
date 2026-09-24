@@ -264,6 +264,13 @@ WORKFLOW_READ_MAX_LIMIT = int(os.environ.get("WORKFLOW_READ_MAX_LIMIT", 500))
 WORKFLOW_LOOP_MAX_ITEMS = int(os.environ.get("WORKFLOW_LOOP_MAX_ITEMS", 500))
 WORKFLOW_LOOP_MAX_PAGES = int(os.environ.get("WORKFLOW_LOOP_MAX_PAGES", 20))
 
+# The token ceiling bounds one generation; the timeout is the safety net for a
+# provider that stopped answering. They have to agree, or the timeout fires
+# first and reports a dead provider instead of a long answer: a local model runs
+# around 30 tokens/second, so 2048 tokens needs about a minute.
+LLM_REQUEST_TIMEOUT = float(os.environ.get("LLM_REQUEST_TIMEOUT", 120))
+LLM_MAX_OUTPUT_TOKENS = int(os.environ.get("LLM_MAX_OUTPUT_TOKENS", 2048))
+
 USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
 USE_AZURE = os.getenv("USE_AZURE", "False").lower() in ("true", "1", "yes")
 
