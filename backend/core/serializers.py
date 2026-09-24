@@ -3173,6 +3173,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     requirement_assessments = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
+    task_templates = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     owner = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
@@ -3215,6 +3216,10 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     contracts = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Contract.objects.all(), required=False
     )
+    # Reverse M2M (declared on TaskTemplate): DRF does not pick it up from Meta.
+    task_templates = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=TaskTemplate.objects.all(), required=False
+    )
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -3242,8 +3247,12 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         attachment = validated_data.pop("attachment", None)
         link = validated_data.pop("link", None)
         observation = validated_data.pop("observation", None)
+        task_templates = validated_data.pop("task_templates", [])
 
         evidence = super().create(validated_data)
+
+        if task_templates:
+            evidence.task_templates.set(task_templates)
 
         # A revision stands for a deposited artifact. Opening an empty one just to
         # have a row makes an evidence that holds nothing look like it holds
@@ -3264,10 +3273,14 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         # Track old folder before update
         old_folder_id = instance.folder_id
+        task_templates = validated_data.pop("task_templates", None)
 
         # Handle properly owner field cleaning
         with transaction.atomic():
             instance = super().update(instance, validated_data)
+
+            if task_templates is not None:
+                instance.task_templates.set(task_templates)
 
             # Update all EvidenceRevisions' folder if the Evidence's folder changed
             if old_folder_id != instance.folder_id:
@@ -3695,6 +3708,28 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     )
 
     def validate(self, attrs):
+        # Drop implementation groups that don't exist in the framework.
+        if "selected_implementation_groups" in attrs or (
+            "framework" in attrs and self.instance
+        ):
+            framework = attrs.get("framework") or getattr(
+                self.instance, "framework", None
+            )
+            defined = {
+                ig.get("ref_id")
+                for ig in (
+                    getattr(framework, "implementation_groups_definition", None) or []
+                )
+            }
+            selected = attrs.get(
+                "selected_implementation_groups",
+                getattr(self.instance, "selected_implementation_groups", None),
+            )
+            selected = selected if isinstance(selected, list) else []
+            attrs["selected_implementation_groups"] = [
+                g for g in selected if isinstance(g, str) and g in defined
+            ]
+
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
             # If we're unlocking (setting is_locked to False), allow the operation
             if "is_locked" in attrs and attrs["is_locked"] is False:

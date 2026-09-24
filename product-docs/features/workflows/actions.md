@@ -55,6 +55,7 @@ Queries objects of one kind inside the workflow's scope.
 | Order by | A field. Tick **Newest / highest first** for descending. Default: newest first |
 | Max results | Page size, default 25, capped by the instance (500 by default) |
 | Start at *expr* | Offset of the page, for manual paging |
+| Extra data to include | Values costly enough that they are only computed when asked for. Offered for the objects that have any |
 
 Output in list mode: `count` (total matches, not just this page), `results` (list of rows), `offset`, `next_offset` (0 when there is no further page). Output in first mode: `found` (boolean), `object` (a row or null). A miss is not an error.
 
@@ -94,6 +95,21 @@ Filter operators depend on the field type:
 | Reference (another object) | equals, not equals, in, not in, is null |
 
 `in` and `not in` take a comma-separated list.
+
+#### Including the quality check
+
+**Audit** and **Requirement** offer `quality_check` under **Extra data to include** — the same findings the [X-rays](../x-rays.md) page shows, as `{errors, warnings, info, count}`. It is off by default because resolving it walks the whole audit with its controls and evidences, and it is computed for every row a step reads: ask for it on a **First match only** read, or on a short page.
+
+A run can then branch on it. `{{nodes.<step>.object.quality_check.count}}` is the number of findings, and a condition on it routes the two outcomes:
+
+| | |
+|---|---|
+| Trigger | Audit updated, condition on `status`, **Only when changed**, equals `done` |
+| Read objects | Audit, First match only, filter `id` equals `{{payload.object_id}}`, include `quality_check` |
+| Condition | `{{nodes.check.object.quality_check.count}}` greater than `0` |
+| Send email | "This audit was closed with open quality findings" |
+
+Reading the audit's own quality check covers every requirement in one call, which is cheaper than reading the requirements and asking each for its own.
 
 ## Write steps
 

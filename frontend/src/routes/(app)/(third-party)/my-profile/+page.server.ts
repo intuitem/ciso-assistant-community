@@ -15,8 +15,20 @@ export const load = async ({ fetch, locals, url }) => {
 			return null;
 		});
 
+	// Teams are their own endpoint rather than a field on the user: membership is three
+	// relations, and putting them on UserReadSerializer would N+1 the users list.
+	const teams = await fetch(`${BASE_API_URL}/users/${user.id}/teams/`, {
+		credentials: 'include'
+	})
+		.then((r) => (r.ok ? r.json() : []))
+		.catch((e) => {
+			console.error('Error fetching user teams:', e);
+			return [];
+		});
+
 	return {
 		currentUser: res,
+		teams,
 		title: m.myProfile()
 	};
 };
