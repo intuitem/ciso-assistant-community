@@ -4892,6 +4892,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     name=scenario.name,
                     description=scenario.description,
                     treatment=scenario.treatment,
+                    inherent_proba=scenario.inherent_proba,
+                    inherent_impact=scenario.inherent_impact,
                     current_proba=scenario.current_proba,
                     current_impact=scenario.current_impact,
                     residual_proba=scenario.residual_proba,
