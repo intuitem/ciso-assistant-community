@@ -203,6 +203,7 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: |
+          uv run python manage.py setup_cache_table
           uv run python manage.py migrate
           pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg-community.sql
 
@@ -264,6 +265,7 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: |
+          uv run --project ../enterprise/backend python manage.py setup_cache_table
           uv run --project ../enterprise/backend python manage.py migrate
           pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg-enterprise.sql
 
@@ -435,6 +437,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           uv run python manage.py makemigrations
+          uv run python manage.py setup_cache_table
           uv run python manage.py migrate
 
       - name: Start test server
@@ -641,7 +644,9 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
-        run: uv run --project ../enterprise/backend python manage.py migrate --settings="$SETTINGS_MODULE"
+        run: |
+          uv run --project ../enterprise/backend python manage.py setup_cache_table --settings="$SETTINGS_MODULE"
+          uv run --project ../enterprise/backend python manage.py migrate --settings="$SETTINGS_MODULE"
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         env:

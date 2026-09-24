@@ -11,7 +11,7 @@ from core.models import Perimeter
 from iam.models import Folder
 from webhooks import tasks
 from webhooks.models import WebhookEndpoint
-from webhooks.ocsf import log_entry_to_ocsf
+from webhooks.ocsf import LOGIN_FAILED_ACTION, log_entry_to_ocsf, log_entry_to_raw
 
 
 @pytest.fixture
@@ -390,3 +390,41 @@ def test_update_preserves_headers_when_omitted(root_folder):
     ep.refresh_from_db()
     assert ep.url == "https://siem.example/v2"
     assert ep.headers == {"Authorization": "Splunk token"}
+
+
+def _failed_login_entry(remote_addr=None):
+    from django.contrib.auth import get_user_model
+    from django.contrib.contenttypes.models import ContentType
+
+    username = "attacker@example.invalid"
+    return LogEntry.objects.create(
+        action=LOGIN_FAILED_ACTION,
+        content_type=ContentType.objects.get_for_model(get_user_model()),
+        object_repr=username,
+        remote_addr=remote_addr,
+        additional_data={"username": username},
+    )
+
+
+@pytest.mark.django_db
+def test_ocsf_mapping_for_failed_login(root_folder):
+    le = _failed_login_entry(remote_addr="203.0.113.7")
+    body = log_entry_to_ocsf(le)
+
+    assert body["status_id"] == 2
+    assert body["api"]["operation"] == "login_failed"
+    assert body["activity_id"] == 99
+    assert body["type_uid"] == 600399
+    assert body["src_endpoint"]["ip"] == "203.0.113.7"
+
+
+@pytest.mark.django_db
+def test_successful_actions_keep_status_success(root_folder):
+    p, le = _create_entry("P-status", root_folder)
+    assert log_entry_to_ocsf(le)["status_id"] == 1
+
+
+@pytest.mark.django_db
+def test_raw_body_names_the_failed_login(root_folder):
+    le = _failed_login_entry()
+    assert log_entry_to_raw(le)["action"] == "login_failed"

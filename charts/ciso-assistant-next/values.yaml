@@ -131,6 +131,10 @@ backend:
     ## Note: PostgreSQL database configuration at `postgresql` or `externalPgsql` section
     databaseType: sqlite
 
+    # -- Path to a dedicated SQLite file for the login-throttle cache table, keeping a login flood's writes off the main database's single-writer lock. Empty keeps that table in the main database.
+    ## Note: Only applied when `databaseType` is `sqlite`. Must be a writable path; `/tmp` is an emptyDir and always mounted. The file is pod-local, so this is rejected when `backend.replicas` is greater than 1
+    cacheDbPath: ""
+
     # -- Set Django secret key
     djangoSecretKey: "changeme"
     # -- Name of an existing secret resource containing the django secret in a 'django-secret-key' key
@@ -292,6 +296,10 @@ frontend:
   config:
     # -- Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used)
     bodySizeLimit: "50M"
+
+    # -- How many proxies sit in front of the frontend, counted from the right of `X-Forwarded-For`, used to pick the real client address for login throttling.
+    ## Note: 1 suits a single ingress controller. Add one per extra hop, for example 2 behind a cloud load balancer in front of the ingress. Too high trusts a client-supplied address, too low throttles everyone as one shared address
+    xffDepth: 1
 
   # -- Set extra volumes for frontend
   extraVolumes: []

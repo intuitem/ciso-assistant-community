@@ -16,6 +16,9 @@
                 "config": {
                     "type": "object",
                     "properties": {
+                        "cacheDbPath": {
+                            "type": "string"
+                        },
                         "chat": {
                             "type": "object",
                             "properties": {
@@ -258,6 +261,9 @@
                     "properties": {
                         "bodySizeLimit": {
                             "type": "string"
+                        },
+                        "xffDepth": {
+                            "type": "integer"
                         }
                     },
                     "additionalProperties": false

@@ -74,6 +74,8 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:8443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
     image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
     pull_policy: always
     read_only: true
@@ -147,7 +149,9 @@ services:
       - ./db/caddy:/data/caddy
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
-      reverse_proxy /api/* backend:8000
+      reverse_proxy /api/* backend:8000 {
+      header_up X-Real-IP {remote_host}
+      }
       reverse_proxy /mcp* mcp:8001
       reverse_proxy /* frontend:3000
       tls internal

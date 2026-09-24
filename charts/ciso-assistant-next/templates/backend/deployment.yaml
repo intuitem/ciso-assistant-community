@@ -93,6 +93,7 @@ spec:
           {{- end }}
           - name: HUEY_FILE_PATH
             value: /tmp/huey.db
+          {{- include "ciso-assistant.cacheDbPathEnv" . | nindent 10 }}
           {{- if .Values.backend.persistence.localStorage.enabled }}
           - name: LOCAL_STORAGE_DIRECTORY
             value: /ciso/localStorage
@@ -192,6 +193,7 @@ spec:
           {{- with .Values.backend.huey.env }}
             {{- toYaml . | nindent 10 }}
           {{- end }}
+          {{- include "ciso-assistant.cacheDbPathEnv" . | nindent 10 }}
           {{- if .Values.backend.persistence.sqlite.enabled }}
           - name: HUEY_FILE_PATH
             value: /ciso/db/huey.db

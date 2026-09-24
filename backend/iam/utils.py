@@ -13,6 +13,14 @@ def generate_token(user):
     return _auth_token[1]
 
 
+def revoke_all_user_tokens(user, exclude_token=None) -> int:
+    tokens = AuthToken.objects.filter(user=user)
+    if exclude_token is not None:
+        tokens = tokens.exclude(pk=exclude_token.pk)
+    deleted, _ = tokens.delete()
+    return deleted
+
+
 def sync_user_idp_groups(user, group_names) -> None:
     from iam.models import IdPGroup
 

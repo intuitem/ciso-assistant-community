@@ -803,6 +803,43 @@ else:
 
 logger.info("DATABASE ENGINE: %s", DATABASES["default"]["ENGINE"])
 
+# Login rate limiting (ACCOUNT_RATE_LIMITS below) is backed by DatabaseCache so
+# its counters are shared across gunicorn workers, unlike the default per-process
+# LocMemCache. CACHE_DB_PATH optionally isolates that cache table to its own
+# SQLite file, so a login flood's writes don't contend with the main database's
+# single-writer lock. Left unset, everything falls back to "default" via
+# Django's normal router-chain fallback (empty DATABASE_ROUTERS => None => "default").
+CACHE_DB_PATH = os.environ.get("CACHE_DB_PATH")
+
+if CACHE_DB_PATH:
+    DATABASES["cache_db"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": CACHE_DB_PATH,
+        # Mirrors "default": this file absorbs the login flood, so without WAL
+        # its writers would block the throttle's own reads, and the 5s default
+        # busy timeout would surface as "database is locked" during one.
+        "OPTIONS": {
+            "timeout": 120,
+            "transaction_mode": "IMMEDIATE",
+            "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;",
+        },
+    }
+    DATABASE_ROUTERS = ["ciso_assistant.routers.CacheDBRouter"]
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "auth_throttle_cache",
+        # Django's MAX_ENTRIES default is 300, and culling evicts the
+        # lowest-sorting third by cache_key, not the least recently used. An
+        # attacker spraying from enough IPs would push past 300 and evict their
+        # own throttle counter, bypassing the limit. Entries are short-lived
+        # (60s/300s) and expired rows are purged before any cull, so a high cap
+        # costs only the per-write COUNT(*): 0.17ms at 100k rows.
+        "OPTIONS": {"MAX_ENTRIES": 100_000, "CULL_FREQUENCY": 4},
+    }
+}
+
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
@@ -824,6 +861,8 @@ SPECTACULAR_SETTINGS = {
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+
+ACCOUNT_RATE_LIMITS = {"login_failed": "10/m/ip,5/300s/key"}
 
 # NOTE: The reauthentication flow has not been implemented in the frontend yet, hence the long timeout.
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
@@ -904,6 +943,17 @@ HUEY = {
 
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
+# Security events (e.g. failed logins) are pruned under their own count quota so
+# a login flood cannot push business audit history past AUDITLOG_MAX_RECORDS and
+# evict it. Values are LogEntry.action ints; 4 = LOGIN_FAILED (enterprise).
+AUDITLOG_SECURITY_MAX_RECORDS = int(
+    os.environ.get("AUDITLOG_SECURITY_MAX_RECORDS", 5000)
+)
+AUDITLOG_SECURITY_ACTIONS = [
+    int(a)
+    for a in os.environ.get("AUDITLOG_SECURITY_ACTIONS", "4").split(",")
+    if a.strip()
+]
 
 # Run workflow instances in a Huey worker instead of the triggering request.
 # False only moves the engine into the request: a Huey consumer is required
@@ -928,6 +978,11 @@ WORKFLOWS_INBOUND_HOOKS = (
 
 # Per-sender-IP rate limit on the unauthenticated inbound hook endpoint (DRF
 # rate string, e.g. "120/min"). Keyed on the trailing X-Forwarded-For entry.
+# Password reset is unauthenticated and queues a Huey task per call, so this
+# bounds how much work one source address can enqueue. Generous enough for an
+# office behind one NAT address.
+PASSWORD_RESET_THROTTLE_RATE = os.environ.get("PASSWORD_RESET_THROTTLE_RATE", "10/h")
+
 WORKFLOWS_WEBHOOK_THROTTLE_RATE = os.environ.get(
     "WORKFLOWS_WEBHOOK_THROTTLE_RATE", "120/min"
 )

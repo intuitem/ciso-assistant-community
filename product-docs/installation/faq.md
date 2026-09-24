@@ -65,6 +65,7 @@ Make sure you share these information if you're reporting an issue on Discord or
 If you want to trigger the migration to make sure that all increments have been properly applied:
 
 ```
+docker compose exec backend uv run python manage.py setup_cache_table
 docker compose exec backend uv run python manage.py migrate
 ```
 

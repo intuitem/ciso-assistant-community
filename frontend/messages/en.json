@@ -1866,7 +1866,7 @@
 	"loginUsingTOTP": "Use authenticator app",
 	"copy": "Copy",
 	"incorrectCode": "Incorrect code",
-	"tooManyLoginAttempts": "Too many login attempts. Please try again later.",
+	"tooManyLoginAttempts": "Too many failed login attempts. Please try again later.",
 	"step": "Step {number}",
 	"critical": "Critical",
 	"isCritical": "Is critical",

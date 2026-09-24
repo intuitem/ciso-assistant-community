@@ -58,7 +58,9 @@ jobs:
         run: uv sync --locked
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        run: uv run python manage.py migrate
+        run: |
+          uv run python manage.py setup_cache_table
+          uv run python manage.py migrate
       - name: Run coverage
         working-directory: ${{ env.backend-directory }}
         env:

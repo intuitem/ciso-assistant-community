@@ -15,6 +15,8 @@ while ! python manage.py showmigrations iam >/dev/null; do
   echo "database not ready; waiting"
   sleep 15
 done
+# Before migrate, not after: migrate ends with core.startup, which reads the cache.
+python manage.py setup_cache_table --settings="${DJANGO_SETTINGS_MODULE}"
 python manage.py migrate --settings="${DJANGO_SETTINGS_MODULE}"
 python manage.py storelibraries --settings="${DJANGO_SETTINGS_MODULE}"
 if [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then

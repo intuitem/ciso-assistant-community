@@ -10,12 +10,13 @@ from allauth.socialaccount.adapter import (
 from allauth.socialaccount.models import app_settings
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
-from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
 
+import ipaddress
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -23,6 +24,24 @@ logger = structlog.get_logger(__name__)
 User = get_user_model()
 
 DEFAULT_ATTRIBUTE_MAPPING_GROUPS = ["groups"]
+
+
+def resolve_client_ip(request):
+    if request is None:
+        return None
+
+    request_ip = request.META.get("REMOTE_ADDR")
+    header_ip = request.headers.get("X-Real-IP")
+
+    if not request_ip:
+        return header_ip
+    if not header_ip:
+        return request_ip
+
+    request_ip_info = ipaddress.ip_address(request_ip)
+    if request_ip_info.is_private or request_ip_info.is_loopback:
+        return header_ip
+    return request_ip
 
 
 class AccountAdapter(DefaultAccountAdapter):
@@ -41,22 +60,28 @@ class AccountAdapter(DefaultAccountAdapter):
 
     def authenticate(self, request, **credentials):
         try:
-            serializer = AuthTokenSerializer(
-                data={
-                    "username": credentials.get("email"),
-                    "password": credentials.get("password"),
-                }
-            )
-            serializer.is_valid(raise_exception=True)
-            user = serializer.validated_data["user"]
-            if not user.is_local:
-                raise NotImplementedError(
-                    "This user is not allowed to use local login."
-                )
-
-            return user
-        except Exception:
+            user = super().authenticate(request, **credentials)
+        except ValidationError as error:
+            # must propagate, not be swallowed by the broad except
+            if getattr(error, "code", None) == "too_many_login_attempts":
+                email = credentials.get("username") or credentials.get("email")
+                client_ip = resolve_client_ip(request)
+                logger.warning("login_throttled", username=email, client_ip=client_ip)
+            raise
+        if user is not None and not user.is_local:
             return None
+        return user
+
+    def get_client_ip(self, request):
+        return resolve_client_ip(request) or super().get_client_ip(request)
+
+    def _get_login_attempts_cache_key(self, request, **credentials):
+        base = super()._get_login_attempts_cache_key(request, **credentials)
+        if request is None:
+            return base
+        from allauth.core.internal.ratelimit import get_ip
+
+        return f"{base}:{get_ip(request)}"
 
 
 class MFAAdapter(DefaultMFAAdapter):

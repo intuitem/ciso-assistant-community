@@ -12,6 +12,8 @@ class IamConfig(AppConfig):
 
         self._patch_client_check_secret(ServiceAccount)
 
+        import iam.signals  # noqa: F401
+
     def _patch_client_check_secret(self, ServiceAccount):
         """adapter hook for multi-secret/grace-period support."""
         from allauth.idp.oidc.models import Client

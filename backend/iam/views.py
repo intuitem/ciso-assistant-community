@@ -17,7 +17,7 @@ from knox.auth import TokenAuthentication, get_token_model, knox_settings
 from knox.models import AuthToken
 from knox.views import DateTimeField
 from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_framework import permissions, serializers, status, views, viewsets
+from rest_framework import permissions, serializers, status, throttling, views, viewsets
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_200_OK,
@@ -41,6 +41,8 @@ from .models import (
 )
 from core.permissions import IsGlobalAdmin, FeatureFlagRequired
 from iam.sso.slo import copy_slo_state_from_session_key
+from iam.tasks import send_password_reset_email
+from iam.utils import revoke_all_user_tokens
 from .service_accounts import (
     UNSET as UNSET_FIELD,
     get_selectable_permissions,
@@ -301,67 +303,33 @@ class SessionTokenView(views.APIView):
         return Response({"token": session_token})
 
 
+class PasswordResetRateThrottle(throttling.SimpleRateThrottle):
+    """Per-IP cap on password-reset requests."does this user exist" check deliberately lives inside the task so that
+    known and unknown addresses take the same time.
+    """
+
+    scope = "password_reset"
+
+    def get_rate(self):
+        return getattr(settings, "PASSWORD_RESET_THROTTLE_RATE", "10/h")
+
+    def get_cache_key(self, request, view):
+        from iam.adapter import resolve_client_ip
+
+        ident = resolve_client_ip(request) or "anon"
+        return self.cache_format % {"scope": self.scope, "ident": ident}
+
+
 class PasswordResetView(views.APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [PasswordResetRateThrottle]
 
     @method_decorator(ensure_csrf_cookie)
     def post(self, request):
         email = request.data["email"]  # type: ignore
-        associated_user = User.objects.filter(email__iexact=email).first()
         if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
-            if associated_user is not None and associated_user.is_local:
-                try:
-                    logger.info(
-                        "Attempting to send password reset email", recipient=email
-                    )
-                    associated_user.mailing(
-                        email_template_name="registration/password_reset_email.html",
-                        subject=_("CISO Assistant: Password Reset"),
-                    )
-                    logger.info(
-                        "Password reset email request processed", recipient=email
-                    )
-                except Exception as e:
-                    logger.error(
-                        "Failed to send password reset email",
-                        recipient=email,
-                        error=str(e),
-                    )
-            else:
-                # Provide detailed logging about why password reset was not sent
-                if associated_user is None:
-                    logger.info(
-                        "Password reset requested for non-existent user",
-                        email=email,
-                    )
-                elif not associated_user.is_active:
-                    logger.info(
-                        "Password reset requested for inactive user",
-                        email=email,
-                        user_id=associated_user.id,
-                    )
-                else:
-                    # User exists and is active but is_local is False
-                    # Check why is_local is False
-
-                    try:
-                        sso_settings = GlobalSettings.objects.get(
-                            name=GlobalSettings.Names.SSO
-                        ).value
-                    except GlobalSettings.DoesNotExist:
-                        sso_settings = {}
-
-                    sso_enabled = sso_settings.get("is_enabled", False)
-                    sso_forced = sso_settings.get("force_sso", False)
-
-                    logger.info(
-                        "Password reset requested for non-local user",
-                        email=email,
-                        user_id=associated_user.id,
-                        keep_local_login=associated_user.keep_local_login,
-                        sso_enabled=sso_enabled,
-                        sso_forced=sso_forced,
-                    )
+            logger.info("Enqueuing password reset email", recipient=email)
+            send_password_reset_email(email, str(_("CISO Assistant: Password Reset")))
             return Response(status=HTTP_202_ACCEPTED)
         logger.warning("Password reset requested but email server not configured")
         return Response(
@@ -408,8 +376,10 @@ class ResetPasswordConfirmView(views.APIView):
             user is not None and user.is_local
         ):  # Only local user can reset their password.
             if self.token_generator.check_token(user, token):
-                user.set_password(new_password)
-                user.save()
+                with transaction.atomic():
+                    user.set_password(new_password)
+                    user.save()
+                    revoke_all_user_tokens(user)
                 return Response(status=status.HTTP_200_OK)
         return Response(
             data={"error": "The link is invalid or has expired."},
@@ -436,8 +406,11 @@ class ChangePasswordView(views.APIView):
             raise serializers.ValidationError(
                 "Your old password was entered incorrectly. Please enter it again."
             )
-        user.set_password(new_password)
-        user.save()
+        current_token = request.auth if isinstance(request.auth, AuthToken) else None
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save()
+            revoke_all_user_tokens(user, exclude_token=current_token)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -455,8 +428,10 @@ class SetPasswordView(views.APIView):
         serializer.is_valid(raise_exception=True)
         new_password = serializer.validated_data.get("new_password")
         user = serializer.validated_data.get("user")
-        user.set_password(new_password)
-        user.save()
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save()
+            revoke_all_user_tokens(user)
         try:
             email_address = EmailAddress.objects.get(user=user, primary=True)
             email_address.verified = True

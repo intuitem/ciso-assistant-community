@@ -45,6 +45,10 @@ spec:
             value: x-forwarded-proto
           - name: HOST_HEADER
             value: x-forwarded-host
+          - name: ADDRESS_HEADER
+            value: x-forwarded-for
+          - name: XFF_DEPTH
+            value: {{ .Values.frontend.config.xffDepth | quote }}
           - name: PUBLIC_BACKEND_API_URL
             value: {{ include "ciso-assistant.backendApiUrl" . }}
           - name: PUBLIC_BACKEND_API_EXPOSED_URL
