@@ -10324,17 +10324,36 @@ class FrameworkViewSet(BaseModelViewSet):
         # Domain-tree inheritance overlay. Computed per live CA (column) against
         # its ancestor audits when the org-wide strategy is enabled; gated so the
         # default (none) adds no query cost.
-        from core.audit_inheritance import build_overlay_map, get_strategy
+        from core.audit_inheritance import (
+            build_overlay_map,
+            get_strategy,
+            make_overlay_redactor,
+            redact_overlay,
+        )
 
         aggregation_strategy = get_strategy()
         overlays_by_ca: Dict[Any, Dict[str, Any]] = {}
+        overlay_ca_ids: set = set()
         if aggregation_strategy != "none":
             for ca in cas:
-                overlays_by_ca[ca.id] = build_overlay_map(
+                built = build_overlay_map(
                     ca,
                     viewable_ca_ids=viewable_ca_ids,
                     strategy=aggregation_strategy,
-                )["overlay"]
+                )
+                overlays_by_ca[ca.id] = built["overlay"]
+                overlay_ca_ids.update(a["ca_id"] for a in built["ancestors"])
+
+        # The overlay carries values from other audits; redact them with the
+        # same per-CA field visibility as the row's own fields, otherwise a
+        # hidden score would resurface through an ancestor's entry.
+        redactor_cas = list(all_visible_cas)
+        missing_ca_ids = overlay_ca_ids - {str(ca.id) for ca in redactor_cas}
+        if missing_ca_ids:
+            redactor_cas += list(
+                ComplianceAssessment.objects.filter(id__in=missing_ca_ids)
+            )
+        hidden_for_ca = make_overlay_redactor(redactor_cas, respondent_folders)
 
         ras = (
             RequirementAssessment.objects.filter(
@@ -10427,7 +10446,11 @@ class FrameworkViewSet(BaseModelViewSet):
                     ),
                     # Inheritance overlay for this (audit, requirement); None when
                     # no ancestor audit covers it or the feature is off.
-                    "inheritance": overlays_by_ca.get(ca.id, {}).get(str(req.id)),
+                    "inheritance": redact_overlay(
+                        overlays_by_ca.get(ca.id, {}).get(str(req.id)),
+                        str(ca.id),
+                        hidden_for_ca,
+                    ),
                 }
             )
 
@@ -13882,7 +13905,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         when it is ``none`` the overlay map is empty and this behaves like
         ``tree``.
         """
-        from core.audit_inheritance import build_overlay_map
+        from core.audit_inheritance import (
+            build_overlay_map,
+            make_overlay_redactor,
+            redact_overlay,
+        )
 
         compliance_assessment = self.get_object()
         _framework = compliance_assessment.framework
@@ -13941,11 +13968,26 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         overlay = result["overlay"]
 
+        # Same per-CA field visibility as the report: ancestor values are
+        # redacted for the viewer's role on each audit they came from.
+        ancestor_cas = list(
+            ComplianceAssessment.objects.filter(
+                id__in=[a["ca_id"] for a in result["ancestors"]]
+            )
+        )
+        hidden_for_ca = make_overlay_redactor(
+            [compliance_assessment] + ancestor_cas,
+            get_respondent_scoped_folder_ids(request.user),
+        )
+        target_ca_id = str(compliance_assessment.id)
+
         def attach(nodes: dict):
             for req_id, node in nodes.items():
                 ov = overlay.get(str(req_id))
                 if ov is not None:
-                    node["inheritance"] = ov
+                    node["inheritance"] = redact_overlay(
+                        ov, target_ca_id, hidden_for_ca
+                    )
                 children = node.get("children")
                 if children:
                     attach(children)

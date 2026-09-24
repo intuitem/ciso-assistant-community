@@ -33,7 +33,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Iterable, Optional
+from typing import Callable, Iterable, Optional
 
 from django.db.models import TextChoices
 from django.utils.translation import gettext_lazy as _
@@ -399,3 +399,111 @@ def build_overlay_map(
         "ancestors": [a.as_meta() for a in ancestors],
         "canonical_scale": {"min": canonical_scale[0], "max": canonical_scale[1]},
     }
+
+
+# Overlay fields that mirror a RequirementAssessment column subject to per-role
+# field visibility. Everything else in the overlay (audit names, folders,
+# distances, scales) is structural and never redacted.
+REDACTABLE_FIELDS = ("result", "score", "is_scored")
+
+_ENTRY_FIELDS_BY_NAME = {
+    "result": ("result",),
+    "score": ("score", "raw_score"),
+    "is_scored": ("is_scored",),
+}
+
+
+def hidden_overlay_fields(ca, viewer_role: str) -> frozenset[str]:
+    """Names in ``REDACTABLE_FIELDS`` the viewer may not read on ``ca``."""
+    from core.utils import is_field_visible_to
+
+    return frozenset(
+        f for f in REDACTABLE_FIELDS if not is_field_visible_to(ca, f, viewer_role)
+    )
+
+
+def make_overlay_redactor(
+    cas: Iterable, respondent_folder_ids
+) -> Callable[[str], frozenset[str]]:
+    """Build the ``hidden_for_ca`` callable for ``redact_overlay``.
+
+    ``cas`` are the audits an overlay may reference (target plus ancestors);
+    ``respondent_folder_ids`` are the folders where the viewer is a respondent
+    (see ``get_respondent_scoped_folder_ids``). An audit outside ``cas`` is
+    unknown to the viewer and every redactable field is hidden for it.
+    """
+    ca_by_id = {str(ca.id): ca for ca in cas}
+    respondent_folders = set(respondent_folder_ids or ())
+    cache: dict[str, frozenset[str]] = {}
+
+    def hidden_for_ca(ca_id: str) -> frozenset[str]:
+        if ca_id not in cache:
+            ca = ca_by_id.get(ca_id)
+            if ca is None:
+                cache[ca_id] = frozenset(REDACTABLE_FIELDS)
+            else:
+                role = "respondent" if ca.folder_id in respondent_folders else "auditor"
+                cache[ca_id] = hidden_overlay_fields(ca, role)
+        return cache[ca_id]
+
+    return hidden_for_ca
+
+
+def redact_overlay(
+    overlay: Optional[dict],
+    target_ca_id: str,
+    hidden_for_ca: Callable[[str], frozenset[str]],
+) -> Optional[dict]:
+    """Null out overlay values the viewer is not allowed to read.
+
+    The overlay is a cross-audit structure, so every value is checked against
+    the field visibility of the audit it came from *and* of the target audit
+    the overlay is attached to: the effective value is displayed in the target
+    audit's row, and a value hidden on the target must not resurface through an
+    ancestor.
+
+    ``target_ca_id`` is the audit the overlay is attached to and
+    ``hidden_for_ca`` maps a CA id to the set of redactable field names hidden
+    for the viewer on that CA. Returns a new dict; the input is left untouched.
+    """
+    if overlay is None:
+        return None
+
+    own = overlay.get("own")
+    source = overlay.get("source")
+    target_hidden = hidden_for_ca(target_ca_id)
+
+    def redact_entry(entry: Optional[dict]) -> Optional[dict]:
+        if entry is None:
+            return None
+        hidden = target_hidden | hidden_for_ca(entry["ca_id"])
+        out = dict(entry)
+        for name in hidden:
+            for key in _ENTRY_FIELDS_BY_NAME[name]:
+                if key in out:
+                    out[key] = None
+        return out
+
+    redacted = dict(overlay)
+    redacted["path"] = [redact_entry(e) for e in overlay.get("path", [])]
+    redacted["source"] = redact_entry(source)
+
+    if own is not None:
+        # ``own`` has no ca_id: it always belongs to the target audit.
+        own_out = dict(own)
+        for name in target_hidden:
+            for key in _ENTRY_FIELDS_BY_NAME[name]:
+                if key in own_out:
+                    own_out[key] = None
+        redacted["own"] = own_out
+
+    source_hidden = (
+        target_hidden | hidden_for_ca(source["ca_id"])
+        if source is not None
+        else target_hidden
+    )
+    if "result" in source_hidden:
+        redacted["effective_result"] = None
+    if "score" in source_hidden:
+        redacted["effective_score"] = None
+    return redacted
