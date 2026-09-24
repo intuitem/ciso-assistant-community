@@ -727,14 +727,14 @@ For more information, see the documentation in [`tools/.windows/README.md`](tool
 - Export in the backend directory all the env variables asked about S3
   - You can see the list above in the recommanded variables
 
-8. Apply migrations and create the cache table.
+8. Create the cache table, then apply migrations.
 
 ```sh
+uv run python manage.py setup_cache_table
 uv run python manage.py migrate
-uv run python manage.py createcachetable
 ```
 
-> `createcachetable` is required. Login throttling and feature flags are backed by a database cache, so without this table both fail with `no such table: auth_throttle_cache`. Docker and Helm deployments run it automatically through `startup.sh`.
+> `setup_cache_table` is required, and has to run **before** `migrate`. Login throttling and feature flags are backed by a database cache, and the end of `migrate` already reads it, so without this table you get `no such table: auth_throttle_cache`. The command is idempotent and puts the table in the right database on its own, including when `CACHE_DB_PATH` is set. Docker and Helm deployments run it automatically through `startup.sh`.
 <details>
 <summary>[EXPERIMENTAL] Apply migration on Windows without WSL2</summary>
 
@@ -831,6 +831,7 @@ After a change (or a clean), it is necessary to re-generate migration files:
 
 ```sh
 uv run python manage.py makemigrations
+uv run python manage.py setup_cache_table
 uv run python manage.py migrate
 ```
 

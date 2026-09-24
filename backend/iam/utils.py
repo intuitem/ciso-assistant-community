@@ -13,8 +13,11 @@ def generate_token(user):
     return _auth_token[1]
 
 
-def revoke_all_user_tokens(user) -> int:
-    deleted, _ = AuthToken.objects.filter(user=user).delete()
+def revoke_all_user_tokens(user, exclude_token=None) -> int:
+    tokens = AuthToken.objects.filter(user=user)
+    if exclude_token is not None:
+        tokens = tokens.exclude(pk=exclude_token.pk)
+    deleted, _ = tokens.delete()
     return deleted
 
 

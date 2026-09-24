@@ -237,6 +237,9 @@ container-local SQLite file there would shard the throttle per pod.
 */}}
 {{- define "ciso-assistant.cacheDbPathEnv" -}}
 {{- if and .Values.backend.config.cacheDbPath (eq .Values.backend.config.databaseType "sqlite") -}}
+{{- if gt (int .Values.backend.replicas) 1 -}}
+{{- fail "backend.config.cacheDbPath is a pod-local file, so with backend.replicas > 1 each replica would keep its own login-throttle counters and the effective limit would multiply by the replica count. Either set backend.replicas to 1 or leave cacheDbPath empty, which keeps the cache table in the main database." -}}
+{{- end -}}
 - name: CACHE_DB_PATH
   value: {{ .Values.backend.config.cacheDbPath | quote }}
 {{- end -}}

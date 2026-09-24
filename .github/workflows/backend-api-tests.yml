@@ -70,7 +70,9 @@ jobs:
 
       - name: Run migrations (sqlite)
         working-directory: ${{ env.BACKEND_DIR }}
-        run: uv run python manage.py migrate
+        run: |
+          uv run python manage.py setup_cache_table
+          uv run python manage.py migrate
 
       - name: Upload Database
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -95,6 +97,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
           PGPASSWORD: postgres
         run: |
+          uv run python manage.py setup_cache_table
           uv run python manage.py migrate
           pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg.sql
 

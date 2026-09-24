@@ -13,20 +13,31 @@ _PRODUCT = {"name": "CISO Assistant", "vendor_name": "intuitem"}
 _API_ACTIVITY_CLASS_UID = 6003
 _APPLICATION_ACTIVITY_CATEGORY_UID = 6
 
-# auditlog.Action → OCSF API Activity activity_id (1=Create, 2=Read, 3=Update, 4=Delete).
-# Note the remap: auditlog uses 0=CREATE, 1=UPDATE, 2=DELETE, 3=ACCESS.
+# enterprise_core.LogEntryAction.LOGIN_FAILED, which this package cannot import.
+LOGIN_FAILED_ACTION = 4
+
+_OCSF_ACTIVITY_OTHER = 99
+_OCSF_STATUS_SUCCESS = 1
+_OCSF_STATUS_FAILURE = 2
+
+# auditlog.Action → OCSF API Activity activity_id (1=Create, 2=Read, 3=Update,
+# 4=Delete, 99=Other). Note the remap: auditlog uses 0=CREATE, 1=UPDATE,
+# 2=DELETE, 3=ACCESS, and enterprise adds 4=LOGIN_FAILED.
 _OCSF_ACTIVITY_BY_ACTION = {
     LogEntry.Action.CREATE: 1,
     LogEntry.Action.UPDATE: 3,
     LogEntry.Action.DELETE: 4,
     LogEntry.Action.ACCESS: 2,
+    LOGIN_FAILED_ACTION: _OCSF_ACTIVITY_OTHER,
 }
 _ACTION_VERB = {
     LogEntry.Action.CREATE: "create",
     LogEntry.Action.UPDATE: "update",
     LogEntry.Action.DELETE: "delete",
     LogEntry.Action.ACCESS: "read",
+    LOGIN_FAILED_ACTION: "login_failed",
 }
+_OCSF_STATUS_BY_ACTION = {LOGIN_FAILED_ACTION: _OCSF_STATUS_FAILURE}
 
 
 def _model_name(log_entry) -> str:
@@ -61,7 +72,7 @@ def log_entry_to_ocsf(log_entry) -> dict:
         "class_uid": _API_ACTIVITY_CLASS_UID,
         "type_uid": _API_ACTIVITY_CLASS_UID * 100 + activity_id,
         "severity_id": 1,  # Informational
-        "status_id": 1,  # Success
+        "status_id": _OCSF_STATUS_BY_ACTION.get(log_entry.action, _OCSF_STATUS_SUCCESS),
         "time": int(log_entry.timestamp.timestamp() * 1000),
         "metadata": metadata,
         "actor": _actor(log_entry),

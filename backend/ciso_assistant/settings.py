@@ -978,6 +978,11 @@ WORKFLOWS_INBOUND_HOOKS = (
 
 # Per-sender-IP rate limit on the unauthenticated inbound hook endpoint (DRF
 # rate string, e.g. "120/min"). Keyed on the trailing X-Forwarded-For entry.
+# Password reset is unauthenticated and queues a Huey task per call, so this
+# bounds how much work one source address can enqueue. Generous enough for an
+# office behind one NAT address.
+PASSWORD_RESET_THROTTLE_RATE = os.environ.get("PASSWORD_RESET_THROTTLE_RATE", "10/h")
+
 WORKFLOWS_WEBHOOK_THROTTLE_RATE = os.environ.get(
     "WORKFLOWS_WEBHOOK_THROTTLE_RATE", "120/min"
 )

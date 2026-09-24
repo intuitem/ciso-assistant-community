@@ -297,9 +297,11 @@ export LICENSE_SEATS=999
 cd "$APP_DIR"/backend/ || exit 1
 if [[ $KEEP_DATABASE_SNAPSHOT -ne 1 ]]; then
   uv run python3 manage.py makemigrations $(django_args)
+  uv run python3 manage.py setup_cache_table $(django_args)
   uv run python3 manage.py migrate $(django_args)
 elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]]; then
   uv run python3 manage.py makemigrations $(django_args)
+  uv run python3 manage.py setup_cache_table $(django_args)
   uv run python3 manage.py migrate $(django_args)
   cp "$DB_DIR/$DB_NAME" "$DB_DIR/$DB_INIT_NAME"
 else

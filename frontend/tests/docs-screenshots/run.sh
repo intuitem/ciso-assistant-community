@@ -143,6 +143,7 @@ fi
 cd "$APP_DIR/backend"
 if [[ $RESEED -eq 1 || ! -f "db/$DB_NAME" ]]; then
   rm -f "db/$DB_NAME"
+  $PYTHON manage.py setup_cache_table
   $PYTHON manage.py migrate
   $PYTHON manage.py createsuperuser --noinput
 fi

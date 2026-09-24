@@ -183,7 +183,8 @@ Before starting the services, run migrations and create a superuser account:
 cd /path/to/ciso-assistant-community/backend
 source .venv/bin/activate
 
-# Run database migrations
+# Create the cache table, then run database migrations
+python manage.py setup_cache_table
 python manage.py migrate
 
 # Create superuser account

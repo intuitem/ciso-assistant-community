@@ -223,6 +223,7 @@ Push-Location -LiteralPath $ManageWorkingDir
 try {
     $CreateSuperuserArguments = @($ManagePy, "createsuperuser") + $ManageSettingsArguments
     $MigrateArguments = @($ManagePy, "migrate") + $ManageSettingsArguments
+    $SetupCacheArguments = @($ManagePy, "setup_cache_table") + $ManageSettingsArguments
     $RunserverArguments = @($RunserverScript) + $ManageSettingsArguments
 
     if ($CreateSuperuserOnly) {
@@ -231,6 +232,7 @@ try {
     }
 
     if ($MigrateOnly) {
+        Invoke-WithEnvironment -Environment $MigrateEnvironment -FilePath $SelectedPythonExecutablePath -ArgumentList $SetupCacheArguments -CommandName "manage.py setup_cache_table"
         Invoke-WithEnvironment -Environment $MigrateEnvironment -FilePath $SelectedPythonExecutablePath -ArgumentList $MigrateArguments -CommandName "manage.py migrate"
         return
     }
@@ -241,6 +243,7 @@ try {
     }
 
     # Run from the selected Django working directory so relative paths resolve like Django expects.
+    Invoke-WithEnvironment -Environment $MigrateEnvironment -FilePath $SelectedPythonExecutablePath -ArgumentList $SetupCacheArguments -CommandName "manage.py setup_cache_table"
     Invoke-WithEnvironment -Environment $MigrateEnvironment -FilePath $SelectedPythonExecutablePath -ArgumentList $MigrateArguments -CommandName "manage.py migrate"
     Invoke-WithEnvironment -Environment $RunserverEnvironment -FilePath $SelectedPythonExecutablePath -ArgumentList $RunserverArguments -CommandName "manage.py runserver"
 }

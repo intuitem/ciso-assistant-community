@@ -41,6 +41,7 @@ echo "Step 2: Database Initialization"
 echo "----------------------------"
 echo "Running Django migrations..."
 cd /opt/ciso-assistant/backend
+sudo -u ciso-assistant /opt/ciso-assistant/venv/bin/python manage.py setup_cache_table
 sudo -u ciso-assistant /opt/ciso-assistant/venv/bin/python manage.py migrate
 
 echo ""

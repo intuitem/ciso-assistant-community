@@ -50,7 +50,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 |-----|------|---------|-------------|
 | backend.affinity | object | `{}` | Affinity rules for backend |
 | backend.annotations | object | `{}` | Backend deployment annotations |
-| backend.config.cacheDbPath | string | `""` | Path to a dedicated SQLite file for the login-throttle cache table, keeping a login flood's writes off the main database's single-writer lock. Empty keeps that table in the main database. # Note: Only applied when `databaseType` is `sqlite`. Must be a writable path; `/tmp` is an emptyDir and always mounted |
+| backend.config.cacheDbPath | string | `""` | Path to a dedicated SQLite file for the login-throttle cache table, keeping a login flood's writes off the main database's single-writer lock. Empty keeps that table in the main database. # Note: Only applied when `databaseType` is `sqlite`. Must be a writable path; `/tmp` is an emptyDir and always mounted. The file is pod-local, so this is rejected when `backend.replicas` is greater than 1 |
 | backend.config.chat.enabled | bool | `false` | Enable the AI assistant / chat feature (sets ENABLE_CHAT) |
 | backend.config.databaseType | string | `"sqlite"` | Set the database type (sqlite, pgsql or externalPgsql) # Note: PostgreSQL database configuration at `postgresql` or `externalPgsql` section |
 | backend.config.djangoDebug | bool | `false` | Enable Django debug mode |
@@ -107,6 +107,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | frontend.affinity | object | `{}` | Affinity rules for frontend |
 | frontend.annotations | object | `{}` | Frontend deployment annotations |
 | frontend.config.bodySizeLimit | string | `"50M"` | Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used) |
+| frontend.config.xffDepth | int | `1` | How many proxies sit in front of the frontend, counted from the right of `X-Forwarded-For`, used to pick the real client address for login throttling. # Note: 1 suits a single ingress controller. Add one per extra hop, for example 2 behind a cloud load balancer in front of the ingress. Too high trusts a client-supplied address, too low throttles everyone as one shared address |
 | frontend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | frontend.env | list | `[]` | Environment variables to pass to frontend |
 | frontend.extraVolumeMounts | list | `[]` | Set extra volume mounts for frontend container |

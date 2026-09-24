@@ -45,6 +45,7 @@ docker compose -f "${DOCKER_COMPOSE_FILE}" build
 docker compose -f "${DOCKER_COMPOSE_FILE}" up -d
 
 # Perform database migrations
+docker compose exec backend python manage.py setup_cache_table
 docker compose exec backend python manage.py migrate
 
 echo "Connect to CISO Assistant on https://localhost:8443"

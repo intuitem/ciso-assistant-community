@@ -116,7 +116,9 @@ jobs:
           exit 1
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        run: uv run python manage.py migrate
+        run: |
+          uv run python manage.py setup_cache_table
+          uv run python manage.py migrate
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -325,7 +327,9 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
-        run: uv run --project ../enterprise/backend python manage.py migrate --settings="$SETTINGS_MODULE"
+        run: |
+          uv run --project ../enterprise/backend python manage.py setup_cache_table --settings="$SETTINGS_MODULE"
+          uv run --project ../enterprise/backend python manage.py migrate --settings="$SETTINGS_MODULE"
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         env:

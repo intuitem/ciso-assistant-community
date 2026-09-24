@@ -17,7 +17,7 @@ from knox.auth import TokenAuthentication, get_token_model, knox_settings
 from knox.models import AuthToken
 from knox.views import DateTimeField
 from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_framework import permissions, serializers, status, views, viewsets
+from rest_framework import permissions, serializers, status, throttling, views, viewsets
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_200_OK,
@@ -303,8 +303,26 @@ class SessionTokenView(views.APIView):
         return Response({"token": session_token})
 
 
+class PasswordResetRateThrottle(throttling.SimpleRateThrottle):
+    """Per-IP cap on password-reset requests."does this user exist" check deliberately lives inside the task so that
+    known and unknown addresses take the same time.
+    """
+
+    scope = "password_reset"
+
+    def get_rate(self):
+        return getattr(settings, "PASSWORD_RESET_THROTTLE_RATE", "10/h")
+
+    def get_cache_key(self, request, view):
+        from iam.adapter import resolve_client_ip
+
+        ident = resolve_client_ip(request) or "anon"
+        return self.cache_format % {"scope": self.scope, "ident": ident}
+
+
 class PasswordResetView(views.APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [PasswordResetRateThrottle]
 
     @method_decorator(ensure_csrf_cookie)
     def post(self, request):
@@ -388,8 +406,11 @@ class ChangePasswordView(views.APIView):
             raise serializers.ValidationError(
                 "Your old password was entered incorrectly. Please enter it again."
             )
-        user.set_password(new_password)
-        user.save()
+        current_token = request.auth if isinstance(request.auth, AuthToken) else None
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save()
+            revoke_all_user_tokens(user, exclude_token=current_token)
         return Response(status=status.HTTP_200_OK)
 
 
