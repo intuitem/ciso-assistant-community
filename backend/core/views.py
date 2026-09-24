@@ -1698,6 +1698,12 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         would succeed."""
         return []
 
+    def cascade_extra_deletions(self, instance):
+        """Objects a `destroy` override removes on top of the ORM cascade, for
+        links Django would only SET_NULL. Listed here so the cascade_info
+        preview reports them as deleted instead of "kept, loses a link"."""
+        return []
+
     def perform_destroy(self, instance):
         # resolve for "destroy" explicitly so batch_action can call this too
         serializer_class = self.get_serializer_class(action="destroy")
@@ -2096,6 +2102,17 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             return model is type(instance) and str(getattr(obj, "pk", "")) == str(
                 instance.pk
             )
+
+        # Roots a destroy override deletes explicitly cascade like the subject.
+        extra_roots = list(self.cascade_extra_deletions(instance))
+        if extra_roots:
+            extra_collector = NestedObjects(using=router.db_for_write(instance))
+            extra_collector.collect(extra_roots)
+            for model, objs in extra_collector.model_objs.items():
+                collector.model_objs.setdefault(model, set()).update(objs)
+            # PROTECT/RESTRICT blockers on the extra roots stop the real
+            # delete too, so they belong in the blocked bucket with the rest.
+            collector.protected.update(extra_collector.protected)
 
         deleted_index = set()
         for model, objs in collector.model_objs.items():
