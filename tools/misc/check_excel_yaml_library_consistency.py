@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""Compare les bibliothèques Excel des outils avec les bibliothèques YAML.
+"""Compare Excel libraries in tools with YAML libraries.
 
-Le script cherche récursivement les fichiers Excel OpenXML dans ``tools`` et les
-fichiers YAML dans ``backend/library/libraries``. Une paire directe est valide
-lorsque les deux fichiers ont le même nom (sans extension), une seule fois de
-chaque côté. Les fichiers sans paire de nom reçoivent ensuite une suggestion
-fondée exclusivement sur l'URN de leur bibliothèque.
+The script recursively finds OpenXML Excel files in ``tools`` and YAML files in
+``backend/library/libraries``. A direct pair is valid when both files have the
+same name (without the extension) and there is exactly one file on each side.
+Files without a name-based pair then receive a suggestion based exclusively on
+their library URN.
 
-Usage courant depuis la racine de ciso-assistant-community :
+Typical usage from the ciso-assistant-community root:
 
     python tools/check_excel_yaml_library_consistency.py
 
-Le rapport est affiché dans le terminal et écrit, par défaut, dans
+The report is printed to the terminal and written by default to
 ``tools/excel_yaml_library_consistency_report.md``.
 """
 
@@ -38,15 +38,15 @@ ROOT_METADATA_PATTERN = re.compile(r"^(?P<key>urn|version)\s*:\s*(?P<value>.*)$"
 ROOT_OBJECTS_PATTERN = re.compile(r"^objects\s*:")
 MARKDOWN_LINK_PATTERN = re.compile(r"\[`(?P<label>[^`]+)`\]\([^)]*\)")
 SCRIPT_PATH = Path(__file__).resolve()
-PROJECT_ROOT = SCRIPT_PATH.parent.parent
-DEFAULT_TOOLS_DIR = SCRIPT_PATH.parent
+PROJECT_ROOT = SCRIPT_PATH.parents[2]
+DEFAULT_TOOLS_DIR = PROJECT_ROOT / "tools"
 DEFAULT_LIBRARIES_DIR = PROJECT_ROOT / "backend" / "library" / "libraries"
 DEFAULT_REPORT_PATH = SCRIPT_PATH.parent / "excel_yaml_library_consistency_report.md"
 
 
 @dataclass(frozen=True)
 class LibraryFile:
-    """Informations minimales nécessaires pour comparer une bibliothèque."""
+    """Minimum information required to compare a library."""
 
     path: Path
     relative_path: str
@@ -58,7 +58,7 @@ class LibraryFile:
 
 @dataclass(frozen=True)
 class DirectPairUrnIssue:
-    """Une paire de fichiers de même nom dont les URN ne confirment pas le lien."""
+    """A same-name file pair whose URNs do not confirm the relationship."""
 
     excel: LibraryFile
     yaml_file: LibraryFile
@@ -67,7 +67,7 @@ class DirectPairUrnIssue:
 
 @dataclass(frozen=True)
 class DirectPairVersionIssue:
-    """Une paire de fichiers de même nom dont les versions divergent."""
+    """A same-name file pair whose versions differ."""
 
     excel: LibraryFile
     yaml_file: LibraryFile
@@ -76,44 +76,43 @@ class DirectPairVersionIssue:
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Compare les noms de fichiers Excel et YAML de bibliothèques, puis "
-            "suggère les associations par URN."
+            "Compare Excel and YAML library filenames, then suggest matches by URN."
         )
     )
     parser.add_argument(
         "--tools-dir",
         type=Path,
         default=DEFAULT_TOOLS_DIR,
-        help=f"Dossier à parcourir pour les Excel (défaut : {DEFAULT_TOOLS_DIR})",
+        help=f"Directory to scan for Excel files (default: {DEFAULT_TOOLS_DIR})",
     )
     parser.add_argument(
         "--libraries-dir",
         type=Path,
         default=DEFAULT_LIBRARIES_DIR,
         help=(
-            "Dossier à parcourir pour les YAML "
-            f"(défaut : {DEFAULT_LIBRARIES_DIR})"
+            "Directory to scan for YAML files "
+            f"(default: {DEFAULT_LIBRARIES_DIR})"
         ),
     )
     parser.add_argument(
         "--output",
         type=Path,
         default=DEFAULT_REPORT_PATH,
-        help=f"Fichier Markdown à générer (défaut : {DEFAULT_REPORT_PATH})",
+        help=f"Markdown report to generate (default: {DEFAULT_REPORT_PATH})",
     )
     parser.add_argument(
         "--fail-on-inconsistency",
         action="store_true",
         help=(
-            "Retourne le code 1 si le rapport contient une absence, un conflit "
-            "de nom ou une incohérence d'URN. Utile en CI."
+            "Return exit code 1 when the report contains a missing match, filename "
+            "collision, URN inconsistency, or version mismatch. Useful in CI."
         ),
     )
     return parser.parse_args()
 
 
 def display_path(path: Path, project_root: Path) -> str:
-    """Retourne un chemin portable, relatif au projet quand cela est possible."""
+    """Return a portable path relative to the project whenever possible."""
 
     try:
         return path.resolve().relative_to(project_root.resolve()).as_posix()
@@ -121,8 +120,8 @@ def display_path(path: Path, project_root: Path) -> str:
         return path.resolve().as_posix()
 
 
-def normalise_name(path: Path) -> str:
-    """Normalise seulement la casse : les noms doivent rester explicitement égaux."""
+def normalize_name(path: Path) -> str:
+    """Normalize case only: filenames must otherwise remain explicitly identical."""
 
     return path.stem.casefold()
 
@@ -135,7 +134,7 @@ def clean_cell_value(value: object) -> str | None:
 
 
 def extract_excel_library_metadata(path: Path) -> tuple[str | None, str | None, str | None]:
-    """Lit l'URN et la version dans la feuille ``library_meta`` d'un Excel."""
+    """Read the URN and version from an Excel ``library_meta`` sheet."""
 
     try:
         workbook = load_workbook(
@@ -144,12 +143,12 @@ def extract_excel_library_metadata(path: Path) -> tuple[str | None, str | None, 
             data_only=True,
             keep_links=False,
         )
-    except Exception as error:  # openpyxl expose plusieurs exceptions possibles.
-        return None, None, f"Impossible de lire le classeur : {error}"
+    except Exception as error:  # openpyxl can raise several exception types.
+        return None, None, f"Unable to read workbook: {error}"
 
     try:
         if "library_meta" not in workbook.sheetnames:
-            return None, None, "Feuille 'library_meta' absente"
+            return None, None, "Missing 'library_meta' sheet"
 
         worksheet = workbook["library_meta"]
         metadata: dict[str, str] = {}
@@ -163,21 +162,20 @@ def extract_excel_library_metadata(path: Path) -> tuple[str | None, str | None, 
 
         urn = metadata.get("urn")
         if urn is None:
-            return None, metadata.get("version"), "Clé 'urn' absente de la feuille 'library_meta'"
+            return None, metadata.get("version"), "Missing 'urn' key in the 'library_meta' sheet"
         return urn, metadata.get("version"), None
     except Exception as error:
-        return None, None, f"Impossible de lire la feuille 'library_meta' : {error}"
+        return None, None, f"Unable to read 'library_meta' sheet: {error}"
     finally:
         workbook.close()
 
 
 def extract_yaml_library_metadata(path: Path) -> tuple[str | None, str | None, str | None]:
-    """Lit l'URN et la version sans désérialiser les objets volumineux du YAML."""
+    """Read the URN and version without deserializing large YAML objects."""
 
     try:
-        # Toutes les bibliothèques du dépôt placent cette métadonnée de premier
-        # niveau avant ``objects:``. Lire seulement cette partie rend le contrôle
-        # très nettement plus rapide pour les YAML de plusieurs mégaoctets.
+        # All repository libraries keep this top-level metadata before
+        # ``objects:``. Reading only this section is much faster for multi-MB YAML.
         with path.open("r", encoding="utf-8-sig") as yaml_file:
             metadata: dict[str, str] = {}
             for line in yaml_file:
@@ -189,11 +187,11 @@ def extract_yaml_library_metadata(path: Path) -> tuple[str | None, str | None, s
                     continue
 
                 try:
-                    # PyYAML décode correctement les valeurs simples, les
-                    # guillemets et les commentaires sans charger le document.
+                    # PyYAML correctly decodes simple values, quotes, and comments
+                    # without loading the complete document.
                     value = clean_cell_value(yaml.safe_load(metadata_match.group("value")))
                 except yaml.YAMLError as error:
-                    return None, None, f"Valeur YAML invalide : {error}"
+                    return None, None, f"Invalid YAML value: {error}"
 
                 if value is not None:
                     metadata[metadata_match.group("key")] = value
@@ -201,16 +199,16 @@ def extract_yaml_library_metadata(path: Path) -> tuple[str | None, str | None, s
                 if "urn" in metadata and "version" in metadata:
                     return metadata["urn"], metadata["version"], None
     except OSError as error:
-        return None, None, f"Impossible de lire le YAML : {error}"
+        return None, None, f"Unable to read YAML: {error}"
 
     urn = metadata.get("urn")
     if urn is None:
-        return None, metadata.get("version"), "Clé 'urn' absente à la racine du YAML"
+        return None, metadata.get("version"), "Missing 'urn' key at the YAML root"
     return urn, metadata.get("version"), None
 
 
 def iter_library_paths(directory: Path, extensions: set[str]) -> Iterable[Path]:
-    """Parcourt les fichiers utiles sans inclure les fichiers temporaires d'Excel."""
+    """Iterate over relevant files while excluding temporary Excel files."""
 
     for path in sorted(directory.rglob("*"), key=lambda item: item.as_posix().casefold()):
         if (
@@ -226,7 +224,7 @@ def collect_excel_files(directory: Path, project_root: Path) -> list[LibraryFile
         LibraryFile(
             path=path,
             relative_path=display_path(path, project_root),
-            name_key=normalise_name(path),
+            name_key=normalize_name(path),
             urn=urn,
             version=version,
             urn_error=error,
@@ -241,7 +239,7 @@ def collect_yaml_files(directory: Path, project_root: Path) -> list[LibraryFile]
         LibraryFile(
             path=path,
             relative_path=display_path(path, project_root),
-            name_key=normalise_name(path),
+            name_key=normalize_name(path),
             urn=urn,
             version=version,
             urn_error=error,
@@ -273,14 +271,14 @@ def is_direct_pair(
 
 
 def markdown_file_link(library_file: LibraryFile, report_path: Path) -> str:
-    """Crée un lien Markdown relatif au rapport tout en gardant son libellé projet."""
+    """Create a report-relative Markdown link while retaining its project label."""
 
     try:
         target = os.path.relpath(library_file.path, start=report_path.parent)
         target_url = quote(Path(target).as_posix(), safe="/.-_~")
     except ValueError:
-        # Un chemin personnalisé sur un autre volume Windows ne peut pas être
-        # relatif au rapport. L'URI file reste alors directement utilisable.
+        # A custom path on another Windows volume cannot be report-relative.
+        # Its file URI remains directly usable instead.
         target_url = library_file.path.as_uri()
     return f"[`{library_file.relative_path}`]({target_url})"
 
@@ -292,7 +290,7 @@ def markdown_path_list(files: Iterable[LibraryFile], report_path: Path) -> list[
 def association_prefix(
     candidates: list[LibraryFile], valid_target_paths: set[Path]
 ) -> str:
-    """Construit le préfixe demandé pour une association estimée par URN."""
+    """Build the requested prefix for a URN-based estimated association."""
 
     icons: list[str] = []
     if len(candidates) > 1:
@@ -304,16 +302,16 @@ def association_prefix(
 
 def format_urn(urn: str | None, urn_error: str | None) -> str:
     if urn is not None:
-        return f"URN : `{urn}`"
-    return f"URN indisponible : {urn_error or 'raison inconnue'}"
+        return f"URN: `{urn}`"
+    return f"URN unavailable: {urn_error or 'unknown reason'}"
 
 
 def format_version(version: str | None) -> str:
-    return f"`{version}`" if version is not None else "absente"
+    return f"`{version}`" if version is not None else "missing"
 
 
 def is_expected_unpaired_file(library_file: LibraryFile) -> bool:
-    """Indique les YAML/Excel sans équivalent attendus par convention de nom."""
+    """Identify expected unmatched YAML/Excel files by filename convention."""
 
     return library_file.name_key.startswith(EXPECTED_UNPAIRED_PREFIXES)
 
@@ -326,7 +324,7 @@ def append_estimated_associations(
     arrow: str,
     report_path: Path,
 ) -> list[LibraryFile]:
-    """Ajoute les associations par URN et retourne les sources sans candidat."""
+    """Add URN-based associations and return source files without candidates."""
 
     no_association: list[LibraryFile] = []
     for source in source_files:
@@ -382,12 +380,12 @@ def build_report(
     for excel, yaml_file in direct_pairs:
         if excel.urn is None or yaml_file.urn is None:
             reason = (
-                f"Excel : {format_urn(excel.urn, excel.urn_error)}. "
-                f"YAML : {format_urn(yaml_file.urn, yaml_file.urn_error)}."
+                f"Excel: {format_urn(excel.urn, excel.urn_error)}. "
+                f"YAML: {format_urn(yaml_file.urn, yaml_file.urn_error)}."
             )
             direct_pair_urn_issues.append(DirectPairUrnIssue(excel, yaml_file, reason))
         elif excel.urn != yaml_file.urn:
-            reason = f"URN Excel : `{excel.urn}` ; URN YAML : `{yaml_file.urn}`."
+            reason = f"Excel URN: `{excel.urn}`; YAML URN: `{yaml_file.urn}`."
             direct_pair_urn_issues.append(DirectPairUrnIssue(excel, yaml_file, reason))
         else:
             confirmed_urn_pairs += 1
@@ -425,51 +423,51 @@ def build_report(
     ]
 
     lines = [
-        "# Rapport de cohérence Excel / YAML des bibliothèques",
+        "# Excel / YAML Library Consistency Report",
         "",
-        "Les chemins ci-dessous sont relatifs à la racine du projet. Une paire "
-        "directe est valide si le nom de fichier sans extension est identique et "
-        "unique de chaque côté (comparaison insensible à la casse).",
+        "The paths below are relative to the project root. A direct pair is valid "
+        "when its extensionless filename is identical and unique on each side "
+        "(case-insensitive comparison).",
         "",
-        "## Périmètre",
+        "## Scope",
         "",
-        f"- Excel : `{display_path(tools_dir, project_root)}` (récursif)",
-        f"- YAML : `{display_path(libraries_dir, project_root)}` (récursif)",
+        f"- Excel: `{display_path(tools_dir, project_root)}` (recursive)",
+        f"- YAML: `{display_path(libraries_dir, project_root)}` (recursive)",
         "",
-        "## Résumé",
+        "## Summary",
         "",
-        f"- Fichiers Excel analysés : **{len(excel_files)}**",
-        f"- Fichiers YAML analysés : **{len(yaml_files)}**",
-        f"- Paires Excel-YAML valides par nom : **{len(direct_pairs)}**",
-        f"- Paires valides également confirmées par URN : **{confirmed_urn_pairs}**",
-        f"- Paires directes dont la version diverge : **{len(direct_pair_version_issues)}**",
+        f"- Excel files analyzed: **{len(excel_files)}**",
+        f"- YAML files analyzed: **{len(yaml_files)}**",
+        f"- Valid Excel-YAML pairs by name: **{len(direct_pairs)}**",
+        f"- Valid pairs also confirmed by URN: **{confirmed_urn_pairs}**",
+        f"- Direct pairs with version mismatches: **{len(direct_pair_version_issues)}**",
         (
-            "- Excel sans YAML du même nom, hors exceptions workflow-/preset- : "
+            "- Excel files without same-name YAML, excluding workflow-/preset- exceptions: "
             f"**{len(unexpected_excel_without_name_pair)}**"
         ),
         (
-            "- YAML sans Excel du même nom, hors exceptions workflow-/preset- : "
+            "- YAML files without same-name Excel, excluding workflow-/preset- exceptions: "
             f"**{len(unexpected_yaml_without_name_pair)}**"
         ),
         (
-            "- Fichiers workflow-/preset- sans association attendus : "
+            "- Expected unmatched workflow-/preset- files: "
             f"**{len(expected_no_association_excel) + len(expected_no_association_yaml)}**"
         ),
-        f"- Conflits de noms non 1:1 : **{len(name_collisions)}**",
+        f"- Non-1:1 filename collisions: **{len(name_collisions)}**",
         "",
-        "## Excel sans YAML du même nom (hors exceptions workflow-/preset-)",
+        "## Excel without same-name YAML (excluding workflow-/preset- exceptions)",
         "",
     ]
     lines.extend(
-        markdown_path_list(unexpected_excel_without_name_pair, report_path) or ["Aucun."]
+        markdown_path_list(unexpected_excel_without_name_pair, report_path) or ["None."]
     )
 
-    lines.extend(["", "## YAML sans Excel du même nom (hors exceptions workflow-/preset-)", ""])
+    lines.extend(["", "## YAML without same-name Excel (excluding workflow-/preset- exceptions)", ""])
     lines.extend(
-        markdown_path_list(unexpected_yaml_without_name_pair, report_path) or ["Aucun."]
+        markdown_path_list(unexpected_yaml_without_name_pair, report_path) or ["None."]
     )
 
-    lines.extend(["", "## Associations estimées par URN — Excel sans paire de nom", ""])
+    lines.extend(["", "## URN-based estimated associations — Excel without name pair", ""])
     no_association_excel = append_estimated_associations(
         lines,
         unexpected_excel_without_name_pair,
@@ -479,9 +477,9 @@ def build_report(
         report_path,
     )
     if len(no_association_excel) == len(unexpected_excel_without_name_pair):
-        lines.append("Aucune association estimée.")
+        lines.append("No estimated associations.")
 
-    lines.extend(["", "## Associations estimées par URN — YAML sans paire de nom", ""])
+    lines.extend(["", "## URN-based estimated associations — YAML without name pair", ""])
     no_association_yaml = append_estimated_associations(
         lines,
         unexpected_yaml_without_name_pair,
@@ -491,9 +489,9 @@ def build_report(
         report_path,
     )
     if len(no_association_yaml) == len(unexpected_yaml_without_name_pair):
-        lines.append("Aucune association estimée.")
+        lines.append("No estimated associations.")
 
-    lines.extend(["", "## Excel sans aucune association estimée", ""])
+    lines.extend(["", "## Excel without any estimated association", ""])
     if no_association_excel:
         for excel in no_association_excel:
             lines.append(
@@ -501,31 +499,31 @@ def build_report(
                 f"({format_urn(excel.urn, excel.urn_error)})"
             )
     else:
-        lines.append("Aucun.")
+        lines.append("None.")
 
     lines.extend(
         [
             "",
-            "## Excel workflow-/preset- sans association (attendus)",
+            "## Expected unmatched workflow-/preset- Excel files",
             "",
         ]
     )
     lines.extend(
-        markdown_path_list(expected_no_association_excel, report_path) or ["Aucun."]
+        markdown_path_list(expected_no_association_excel, report_path) or ["None."]
     )
 
     lines.extend(
         [
             "",
-            "## YAML workflow-/preset- sans association (attendus)",
+            "## Expected unmatched workflow-/preset- YAML files",
             "",
         ]
     )
     lines.extend(
-        markdown_path_list(expected_no_association_yaml, report_path) or ["Aucun."]
+        markdown_path_list(expected_no_association_yaml, report_path) or ["None."]
     )
 
-    lines.extend(["", "## YAML sans aucune association estimée", ""])
+    lines.extend(["", "## YAML without any estimated association", ""])
     if no_association_yaml:
         for yaml_file in no_association_yaml:
             lines.append(
@@ -533,22 +531,22 @@ def build_report(
                 f"({format_urn(yaml_file.urn, yaml_file.urn_error)})"
             )
     else:
-        lines.append("Aucun.")
+        lines.append("None.")
 
-    lines.extend(["", "## Conflits de noms (non considérés comme des paires valides)", ""])
+    lines.extend(["", "## Filename collisions (not considered valid pairs)", ""])
     if name_collisions:
         for name_key, matching_excels, matching_yamls in name_collisions:
-            lines.append(f"### Nom normalisé : `{name_key}`")
+            lines.append(f"### Normalized name: `{name_key}`")
             lines.append("")
-            lines.append("Excel :")
+            lines.append("Excel:")
             lines.extend(markdown_path_list(matching_excels, report_path))
-            lines.append("YAML :")
+            lines.append("YAML:")
             lines.extend(markdown_path_list(matching_yamls, report_path))
             lines.append("")
     else:
-        lines.append("Aucun.")
+        lines.append("None.")
 
-    lines.extend(["", "## Paires directes dont l'URN ne confirme pas le lien", ""])
+    lines.extend(["", "## Direct pairs whose URN does not confirm the relationship", ""])
     if direct_pair_urn_issues:
         for issue in direct_pair_urn_issues:
             lines.append(
@@ -556,29 +554,29 @@ def build_report(
                 f"{markdown_file_link(issue.yaml_file, report_path)} — {issue.reason}"
             )
     else:
-        lines.append("Aucune.")
+        lines.append("None.")
 
-    lines.extend(["", "## Paires directes dont la version diverge", ""])
+    lines.extend(["", "## Direct pairs with version mismatches", ""])
     if direct_pair_version_issues:
         for issue in direct_pair_version_issues:
             lines.append(
                 f"- ⚠️ {markdown_file_link(issue.excel, report_path)} ↔ "
                 f"{markdown_file_link(issue.yaml_file, report_path)} — "
-                f"version Excel : {format_version(issue.excel.version)} ; "
-                f"version YAML : {format_version(issue.yaml_file.version)}."
+                f"Excel version: {format_version(issue.excel.version)}; "
+                f"YAML version: {format_version(issue.yaml_file.version)}."
             )
     else:
-        lines.append("Aucune.")
+        lines.append("None.")
 
     urn_errors = [item for item in [*excel_files, *yaml_files] if item.urn_error]
-    lines.extend(["", "## Fichiers dont l'URN est illisible ou absente", ""])
+    lines.extend(["", "## Files with unreadable or missing URN", ""])
     if urn_errors:
         for item in urn_errors:
             lines.append(
                 f"- ⚠️ {markdown_file_link(item, report_path)} — {item.urn_error}"
             )
     else:
-        lines.append("Aucun.")
+        lines.append("None.")
 
     has_inconsistency = bool(
         unexpected_excel_without_name_pair
@@ -592,7 +590,7 @@ def build_report(
 
 
 def report_for_console(markdown_report: str) -> str:
-    """Retire les cibles des liens pour conserver des chemins lisibles au terminal."""
+    """Remove link targets to keep paths readable in the terminal."""
 
     return MARKDOWN_LINK_PATTERN.sub(lambda match: f"`{match.group('label')}`", markdown_report)
 
@@ -610,7 +608,7 @@ def main() -> int:
     ]
     if missing_directories:
         for directory in missing_directories:
-            print(f"Erreur : le dossier n'existe pas : {directory}", file=sys.stderr)
+            print(f"Error: directory does not exist: {directory}", file=sys.stderr)
         return 2
 
     project_root = PROJECT_ROOT
@@ -628,7 +626,7 @@ def main() -> int:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(report, encoding="utf-8")
     print(report_for_console(report), end="")
-    print(f"Rapport Markdown écrit dans : {display_path(output_path, project_root)}")
+    print(f"Markdown report written to: {display_path(output_path, project_root)}")
 
     if arguments.fail_on_inconsistency and has_inconsistency:
         return 1

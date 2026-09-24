@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""Compare le contenu normalisé de deux bibliothèques YAML ou Excel v2.
+"""Compare normalized content from two YAML libraries or v2 Excel workbooks.
 
-Un fichier ``.xlsx`` est converti temporairement avec le convertisseur v2 du
-projet avant la comparaison. Le comparateur accepte donc aussi bien deux YAML
-qu'un YAML et son classeur source.
+A ``.xlsx`` file is temporarily converted with the project's v2 converter
+before comparison. The comparator therefore accepts two YAML files or a YAML
+file and its source workbook.
 
-Exemple :
+Example:
 
     python tools/compare_library_content.py \
         backend/library/libraries/adobe-ccf-v5.yaml \
         tools/excel/adobe/adobe-ccf-v5.xlsx
 
-La normalisation charge le YAML, ce qui convertit notamment ``\\xE9`` et
-``\\u00e9`` en ``é``. Elle normalise aussi Unicode (NFC) et les fins de ligne,
-mais ne masque aucune différence de valeur, de type, de liste ou de structure.
+Normalization loads YAML, which converts ``\\xE9`` and ``\\u00e9`` to ``é``.
+It also normalizes Unicode (NFC) and line endings without hiding differences
+in values, types, lists, or structure.
 """
 
 from __future__ import annotations
@@ -37,7 +37,7 @@ import yaml
 YAML_EXTENSIONS = {".yaml", ".yml"}
 EXCEL_EXTENSIONS = {".xlsx", ".xlsm", ".xltx", ".xltm"}
 SCRIPT_PATH = Path(__file__).resolve()
-PROJECT_ROOT = SCRIPT_PATH.parent.parent
+PROJECT_ROOT = SCRIPT_PATH.parents[2]
 CONVERTER_PATH = PROJECT_ROOT / "backend" / "scripts" / "convert_library_v2.py"
 IGNORED_CONVERTER_KEYS = {"convert_library_version"}
 BULLET_OR_NUMBERED_LINE = re.compile(r"^(?:[-*•◦▪—]|\d+[.)])\s*")
@@ -53,31 +53,31 @@ class Difference:
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Compare deux bibliothèques YAML ou Excel après normalisation."
+        description="Compare two YAML libraries or Excel workbooks after normalization."
     )
-    parser.add_argument("left", type=Path, help="Premier fichier YAML ou Excel v2")
-    parser.add_argument("right", type=Path, help="Second fichier YAML ou Excel v2")
+    parser.add_argument("left", type=Path, help="First YAML file or v2 Excel workbook")
+    parser.add_argument("right", type=Path, help="Second YAML file or v2 Excel workbook")
     parser.add_argument(
         "--compat",
         type=int,
         default=0,
-        help="Mode de compatibilité du convertisseur pour un Excel (défaut : 0)",
+        help="Converter compatibility mode for Excel input (default: 0)",
     )
     parser.add_argument(
         "--max-differences",
         type=int,
         default=100,
-        help="Nombre maximal de divergences détaillées (défaut : 100)",
+        help="Maximum number of detailed differences (default: 100)",
     )
     parser.add_argument(
         "--include-converter-metadata",
         action="store_true",
-        help="Compare aussi la métadonnée technique convert_library_version.",
+        help="Also compare the technical convert_library_version metadata.",
     )
     parser.add_argument(
         "--fail-on-difference",
         action="store_true",
-        help="Retourne le code 1 si au moins une divergence est trouvée.",
+        help="Return exit code 1 when at least one difference is found.",
     )
     return parser.parse_args()
 
@@ -94,18 +94,18 @@ def load_yaml(path: Path) -> Any:
         with path.open("r", encoding="utf-8-sig") as yaml_file:
             return yaml.safe_load(yaml_file)
     except (OSError, yaml.YAMLError) as error:
-        raise ValueError(f"Impossible de lire le YAML '{path}': {error}") from error
+        raise ValueError(f"Unable to read YAML '{path}': {error}") from error
 
 
 def load_converter_module() -> Any:
     if not CONVERTER_PATH.is_file():
-        raise ValueError(f"Convertisseur v2 introuvable : {CONVERTER_PATH}")
+        raise ValueError(f"v2 converter not found: {CONVERTER_PATH}")
 
     module_spec = importlib.util.spec_from_file_location(
         "ciso_library_v2_converter", CONVERTER_PATH
     )
     if module_spec is None or module_spec.loader is None:
-        raise ValueError(f"Impossible de charger le convertisseur : {CONVERTER_PATH}")
+        raise ValueError(f"Unable to load converter: {CONVERTER_PATH}")
 
     module = importlib.util.module_from_spec(module_spec)
     module_spec.loader.exec_module(module)
@@ -113,13 +113,13 @@ def load_converter_module() -> Any:
 
 
 def convert_excel_to_data(path: Path, compat_mode: int) -> Any:
-    """Convertit un Excel v2 dans un fichier temporaire, puis charge son YAML."""
+    """Convert a v2 Excel workbook to a temporary file, then load its YAML."""
 
     converter = load_converter_module()
     with tempfile.TemporaryDirectory(prefix="compare_library_content_") as temp_dir:
         converted_yaml = Path(temp_dir) / f"{path.stem}.yaml"
-        # Le convertisseur affiche sa progression ; le comparateur n'affiche que
-        # son propre rapport afin de garder un résultat directement exploitable.
+        # The converter prints progress. Keep the comparator output focused on
+        # its own report.
         with contextlib.redirect_stdout(io.StringIO()):
             converter.create_library(
                 str(path),
@@ -132,25 +132,25 @@ def convert_excel_to_data(path: Path, compat_mode: int) -> Any:
 
 def load_source(path: Path, compat_mode: int) -> tuple[Any, str]:
     if not path.is_file():
-        raise ValueError(f"Fichier introuvable : {path}")
+        raise ValueError(f"File not found: {path}")
 
     suffix = path.suffix.casefold()
     if suffix in YAML_EXTENSIONS:
         return load_yaml(path), "YAML"
     if suffix in EXCEL_EXTENSIONS:
-        return convert_excel_to_data(path, compat_mode), "Excel v2 converti temporairement en YAML"
+        return convert_excel_to_data(path, compat_mode), "v2 Excel temporarily converted to YAML"
     raise ValueError(
-        f"Format non pris en charge pour '{path}'. Formats acceptés : "
+        f"Unsupported format for '{path}'. Accepted formats: "
         f"{', '.join(sorted(YAML_EXTENSIONS | EXCEL_EXTENSIONS))}"
     )
 
 
-def normalise_text(value: str) -> str:
-    """Supprime les différences d'encodage sans modifier le sens du texte."""
+def normalize_text(value: str) -> str:
+    """Remove encoding differences without changing the meaning of text."""
 
-    line_endings_normalised = value.replace("\r\n", "\n").replace("\r", "\n")
-    unicode_normalised = unicodedata.normalize("NFC", line_endings_normalised)
-    readable_spaces = unicode_normalised.replace("\u00a0", " ").replace("\u202f", " ")
+    normalized_line_endings = value.replace("\r\n", "\n").replace("\r", "\n")
+    normalized_unicode = unicodedata.normalize("NFC", normalized_line_endings)
+    readable_spaces = normalized_unicode.replace("\u00a0", " ").replace("\u202f", " ")
     lines = [line.strip() for line in readable_spaces.split("\n")]
 
     paragraphs: list[list[str]] = []
@@ -164,12 +164,12 @@ def normalise_text(value: str) -> str:
     if current_paragraph:
         paragraphs.append(current_paragraph)
 
-    normalised_paragraphs: list[str] = []
+    normalized_paragraphs: list[str] = []
     for paragraph in paragraphs:
         result = paragraph[0]
         for line in paragraph[1:]:
-            # Les listes restent lisibles, mais les lignes ordinaires séparées
-            # uniquement par le sérialiseur YAML sont jointes comme un texte.
+            # Keep lists readable, but join ordinary lines separated only by the
+            # YAML serializer as continuous text.
             separator = (
                 "\n"
                 if BULLET_OR_NUMBERED_LINE.match(result.split("\n")[-1])
@@ -177,39 +177,39 @@ def normalise_text(value: str) -> str:
                 else " "
             )
             result = f"{result}{separator}{line}"
-        normalised_paragraphs.append(result)
+        normalized_paragraphs.append(result)
 
-    return "\n\n".join(normalised_paragraphs)
+    return "\n\n".join(normalized_paragraphs)
 
 
-def normalise_data(value: Any, include_converter_metadata: bool) -> Any:
-    """Normalise récursivement les valeurs YAML pour une comparaison fiable."""
+def normalize_data(value: Any, include_converter_metadata: bool) -> Any:
+    """Recursively normalize YAML values for reliable comparison."""
 
     if isinstance(value, str):
-        return normalise_text(value)
+        return normalize_text(value)
     if isinstance(value, (datetime_module.datetime, datetime_module.date)):
         return value.isoformat()
     if isinstance(value, dict):
-        normalised: dict[Any, Any] = {}
+        normalized: dict[Any, Any] = {}
         for key, item in value.items():
-            normalised_key = normalise_text(key) if isinstance(key, str) else key
+            normalized_key = normalize_text(key) if isinstance(key, str) else key
             if (
                 not include_converter_metadata
-                and normalised_key in IGNORED_CONVERTER_KEYS
+                and normalized_key in IGNORED_CONVERTER_KEYS
             ):
                 continue
-            if normalised_key in normalised:
+            if normalized_key in normalized:
                 raise ValueError(
-                    f"Deux clés deviennent identiques après normalisation : {normalised_key!r}"
+                    f"Two keys become identical after normalization: {normalized_key!r}"
                 )
-            normalised[normalised_key] = normalise_data(
+            normalized[normalized_key] = normalize_data(
                 item, include_converter_metadata
             )
-        return normalised
+        return normalized
     if isinstance(value, list):
-        return [normalise_data(item, include_converter_metadata) for item in value]
+        return [normalize_data(item, include_converter_metadata) for item in value]
     if isinstance(value, tuple):
-        return tuple(normalise_data(item, include_converter_metadata) for item in value)
+        return tuple(normalize_data(item, include_converter_metadata) for item in value)
     return value
 
 
@@ -245,7 +245,7 @@ def compare_values(
             differences,
             maximum,
             path,
-            f"Type différent ({type(left).__name__} / {type(right).__name__})",
+            f"Different type ({type(left).__name__} / {type(right).__name__})",
             left,
             right,
         )
@@ -256,12 +256,12 @@ def compare_values(
         right_keys = set(right)
         for key in sorted(left_keys - right_keys, key=sort_key):
             if append_difference(
-                differences, maximum, f"{path}.{key}", "Clé absente à droite", left[key], None
+                differences, maximum, f"{path}.{key}", "Missing key on the right", left[key], None
             ):
                 return
         for key in sorted(right_keys - left_keys, key=sort_key):
             if append_difference(
-                differences, maximum, f"{path}.{key}", "Clé absente à gauche", None, right[key]
+                differences, maximum, f"{path}.{key}", "Missing key on the left", None, right[key]
             ):
                 return
         for key in sorted(left_keys & right_keys, key=sort_key):
@@ -276,7 +276,7 @@ def compare_values(
                 differences,
                 maximum,
                 path,
-                f"Longueur différente ({len(left)} / {len(right)})",
+                f"Different length ({len(left)} / {len(right)})",
                 len(left),
                 len(right),
             ):
@@ -288,7 +288,7 @@ def compare_values(
         return
 
     if left != right:
-        append_difference(differences, maximum, path, "Valeur différente", left, right)
+        append_difference(differences, maximum, path, "Different value", left, right)
 
 
 def preview(value: Any, maximum_length: int = 180) -> str:
@@ -306,48 +306,48 @@ def write_report(
     differences: list[Difference],
     maximum: int,
 ) -> None:
-    print("Comparaison de bibliothèques normalisées")
-    print(f"- Gauche : {display_path(left_path)} ({left_kind})")
-    print(f"- Droite : {display_path(right_path)} ({right_kind})")
+    print("Normalized library comparison")
+    print(f"- Left: {display_path(left_path)} ({left_kind})")
+    print(f"- Right: {display_path(right_path)} ({right_kind})")
     print(
-        "- Normalisation : décodage YAML, Unicode NFC, espaces de fin, "
-        "fins de ligne et lignes de continuation, ordre des clés"
+        "- Normalization: YAML decoding, Unicode NFC, trailing whitespace, "
+        "line endings and continuation lines, key order"
     )
 
     if not differences:
-        print("\n✅ Contenu et structure identiques après normalisation.")
+        print("\n✅ Content and structure are identical after normalization.")
         return
 
-    print(f"\n❌ {len(differences)} divergence(s) affichée(s).")
+    print(f"\n❌ {len(differences)} difference(s) shown.")
     if len(differences) >= maximum:
-        print(f"La limite de {maximum} divergences est atteinte.")
+        print(f"The limit of {maximum} differences has been reached.")
     for difference in differences:
         print(f"\n- {difference.path} — {difference.reason}")
-        print(f"  gauche : {preview(difference.left)}")
-        print(f"  droite : {preview(difference.right)}")
+        print(f"  left: {preview(difference.left)}")
+        print(f"  right: {preview(difference.right)}")
 
 
 def main() -> int:
     arguments = parse_arguments()
     if arguments.max_differences < 1:
-        print("Erreur : --max-differences doit être supérieur à 0.", file=sys.stderr)
+        print("Error: --max-differences must be greater than 0.", file=sys.stderr)
         return 2
 
     try:
         left_data, left_kind = load_source(arguments.left.resolve(), arguments.compat)
         right_data, right_kind = load_source(arguments.right.resolve(), arguments.compat)
-        normalised_left = normalise_data(
+        normalized_left = normalize_data(
             left_data, arguments.include_converter_metadata
         )
-        normalised_right = normalise_data(
+        normalized_right = normalize_data(
             right_data, arguments.include_converter_metadata
         )
     except ValueError as error:
-        print(f"Erreur : {error}", file=sys.stderr)
+        print(f"Error: {error}", file=sys.stderr)
         return 2
 
     differences: list[Difference] = []
-    compare_values(normalised_left, normalised_right, "$", differences, arguments.max_differences)
+    compare_values(normalized_left, normalized_right, "$", differences, arguments.max_differences)
     write_report(
         arguments.left,
         left_kind,
