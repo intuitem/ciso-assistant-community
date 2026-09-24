@@ -257,12 +257,17 @@ const handleRequest: Handle = async ({ event, resolve }) => {
 			const headers = authorized();
 			if (!headers) return undefined;
 			try {
-				const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`, {
-					credentials: 'include',
-					headers
-				});
+				// `effective`, not the raw row: the raw row stays the admin form's
+				// source, and it PUTs the whole body back.
+				const featureFlagSettings = await fetch(
+					`${BASE_API_URL}/settings/feature-flags/effective/`,
+					{
+						credentials: 'include',
+						headers
+					}
+				);
 				if (!featureFlagSettings.ok) throw new Error(`status ${featureFlagSettings.status}`);
-				event.locals.featureflags = await featureFlagSettings.json();
+				event.locals.featureflags = (await featureFlagSettings.json()).flags;
 			} catch (e) {
 				logger.error('Error fetching feature flags', { error: e });
 				event.locals.featureflags = {};

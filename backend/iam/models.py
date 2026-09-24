@@ -2414,10 +2414,17 @@ class ServiceAccount(AbstractBaseModel):
 
 
 common_exclude = ["created_at", "updated_at"]
+# `preferences` is personal UI state (language, theme, date format, hidden
+# modules) with no security meaning, and every toggle would otherwise log the
+# whole blob, burying the User events that matter. `password` stays tracked so
+# the *change* is still auditable, but the hash itself is redacted rather than
+# half-masked as auditlog would do by default.
 auditlog.register(
     User,
     m2m_fields={"user_groups", "idp_groups"},
-    exclude_fields=common_exclude,
+    exclude_fields=common_exclude + ["preferences"],
+    mask_fields=["password"],
+    mask_callable="iam.utils.redact_audited_secret",
 )
 auditlog.register(
     Folder,

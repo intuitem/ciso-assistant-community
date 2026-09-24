@@ -75,9 +75,21 @@ export const load: PageServerLoad = async (event) => {
 		personalAccessTokens = await personalAccessTokensResponse.json();
 	}
 
+	// Third parties get the same narrow nav whatever the flags say, so there is
+	// nothing for them to personalise — same reasoning as `patAllowed`.
+	// Null on failure rather than throwing: the modules section just doesn't
+	// render, instead of taking the whole settings page down.
+	const moduleVisibility = patAllowed
+		? await event
+				.fetch(`${BASE_API_URL}/settings/feature-flags/effective/`)
+				.then((res) => (res.ok ? res.json() : null))
+				.catch(() => null)
+		: null;
+
 	return {
 		authenticators,
 		totp,
+		moduleVisibility,
 		activateTOTPForm,
 		recoveryCodes,
 		webauthnCredentials,
