@@ -815,22 +815,42 @@ def _process_loop(token):
     _loop_next_iteration(token)
 
 
+def _loop_stop_reason(state):
+    """Why a loop stops before its items do, checked between iterations so it
+    stops BEFORE the next item's side effects rather than after all of them.
+
+    Pages must not become a way around the item ceiling: a run is capped at
+    MAX_STEPS, so an unbounded sweep would fail late instead of stopping
+    cleanly. The same applies to what it collects — results that outgrow one
+    node output would fail the loop having already done every write it was
+    going to do.
+    """
+    collected = len(state.get("results") or [])
+    if state.get("processed", 0) >= loop_max_items():
+        return f"stopped after {loop_max_items()} items"
+    if collected >= MAX_COLLECTION_ITEMS:
+        return f"stopped after collecting {MAX_COLLECTION_ITEMS} items"
+    # Predictive, and against the widest item seen rather than the average: a
+    # loop that notices only once it is over has already collected what it
+    # cannot keep, and dropping that record would lose work the run did.
+    room = node_output_budget() - state.get("collected_chars", 0)
+    if collected and room <= state.get("widest_item", 0):
+        return (
+            f"stopped after collecting {collected} items: another would not fit "
+            f"in one node output (WORKFLOW_NODE_OUTPUT_BUDGET)"
+        )
+    return None
+
+
 def _loop_next_iteration(controller):
     node = controller.current_node
     instance = controller.instance
     state = controller.loop_state
     state["index"] += 1
 
-    if state.get("processed", 0) >= loop_max_items():
-        # Pages must not become a way around the item ceiling: a run is capped
-        # at MAX_STEPS, so an unbounded sweep would fail late instead of
-        # stopping cleanly.
-        state["errors"].append(
-            {
-                "index": state["index"],
-                "message": f"stopped after {loop_max_items()} items",
-            }
-        )
+    stop = _loop_stop_reason(state)
+    if stop:
+        state["errors"].append({"index": state["index"], "message": stop})
         _loop_finish(controller)
         return
 
@@ -889,6 +909,12 @@ def _loop_body_returned(controller, failed):
         value = dig(ctx, match.group(1)) if match else render(collect, ctx)
         controller.instance._iteration_context = None
         state["results"].append(value)
+        # Rough, and deliberately so: it only has to notice the loop nearing
+        # what one node output holds, in time to stop before the next item's
+        # side effects run.
+        size = len(str(value))
+        state["collected_chars"] = state.get("collected_chars", 0) + size
+        state["widest_item"] = max(state.get("widest_item", 0), size)
         controller.loop_state = state
         controller.save(update_fields=["loop_state", "updated_at"])
     _loop_next_iteration(controller)

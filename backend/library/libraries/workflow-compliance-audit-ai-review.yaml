@@ -172,10 +172,13 @@ objects:
           # ceiling. `limit` is the page size, WORKFLOW_LOOP_MAX_ITEMS the total.
           read:
             model: requirement_assessment
-            # Opt-in: it walks the controls and evidences, so only a read that
-            # uses it pays for it.
+            # Opt-in, each costing per row: the x-rays resolve their own
+            # context, and the backing walks the controls, their evidence and
+            # its revisions. A read that does not use them does not pay.
             include:
             - quality_check
+            - applied_controls
+            - evidences
             order_by: created_at
             limit: 25
             # The three results that assert something; the rest are counted in

@@ -103,6 +103,8 @@ Filter operators depend on the field type:
 
 **Audit** and **Requirement** offer `quality_check` under **Extra data to include** — the same findings the [X-rays](../x-rays.md) page shows, as `{errors, warnings, info, count}`, plus three values for building on them: `flagged` (true when there is an error or a warning), `messages` (the finding sentences) and `text` (those sentences as an indented markdown list, ready to nest under a heading a document writes). It is off by default because resolving it walks the whole audit with its controls and evidences, and it is computed for every row a step reads: ask for it on a **First match only** read, or on a short page.
 
+**Requirement** also offers `applied_controls` and `evidences`: what is claimed to satisfy the requirement, each control with the evidence attached to it, and each evidence saying whether anything is actually attached. Off by default for the same reason — they are the heaviest thing a row can carry, and a page of 500 rows holding all three is how a read outgrows what one step's output can hold.
+
 A run can then branch on it. Branch on `flagged` rather than on `count`: `count` includes the informational findings, which are observations rather than something to act on.
 
 | | |

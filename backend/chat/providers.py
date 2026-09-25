@@ -449,7 +449,9 @@ class OllamaLLM:
         )
         ceiling = max_output_tokens or llm_max_output_tokens()
         body: dict = {"model": self.model, "messages": messages, "stream": False}
-        body["options"] = {**self._options(), "num_predict": ceiling}
+        body["options"] = {**self._options()}
+        if ceiling:
+            body["options"]["num_predict"] = ceiling
         if schema is not None:
             # Constrained decoding: valid JSON by construction.
             body["format"] = schema
@@ -598,9 +600,10 @@ class OpenAICompatibleLLM:
         )
         ceiling = max_output_tokens or llm_max_output_tokens()
         body: dict = {"messages": messages, "stream": False}
-        # OpenAI's reasoning models reject `max_tokens` outright and take
-        # `max_completion_tokens`; everything else still wants the old name.
-        body[_token_limit_param(self.model)] = ceiling
+        if ceiling:
+            # OpenAI's reasoning models reject `max_tokens` outright and take
+            # `max_completion_tokens`; everything else still wants the old name.
+            body[_token_limit_param(self.model)] = ceiling
         if self.model:
             body["model"] = self.model
         if self.temperature_enabled:
@@ -1045,26 +1048,39 @@ def _token_limit_param(model: str) -> str:
     return "max_completion_tokens" if reasoning else "max_tokens"
 
 
-def llm_max_output_tokens() -> int:
-    """Tokens one generation may produce. A reasoning model given an unbounded
-    field and an ambiguous question has no stopping condition of its own — one
-    requirement here ran past 10,000 tokens — and a timeout only converts that
-    into a long wait. Applied to whole answers, not to streamed chat, where a
-    person is watching."""
+#: What an unattended whole-answer call asks for when nothing else says. A
+#: reasoning model given an unbounded field and an ambiguous question has no
+#: stopping condition of its own — one requirement here ran past 10,000 tokens —
+#: and a timeout only converts that into a long wait.
+DEFAULT_MAX_OUTPUT_TOKENS = 2048
+
+
+def llm_max_output_tokens() -> int | None:
+    """The deployment's ceiling, if it set one. None means what it has always
+    meant: the provider decides. Chat, memory summaries and the questionnaire
+    stream to someone waiting and are bounded by the conversation, not by us —
+    a ceiling they never asked for cuts a long answer, and on a reasoning model
+    the thinking alone can spend it."""
     from django.conf import settings
 
-    return int(getattr(settings, "LLM_MAX_OUTPUT_TOKENS", 2048))
+    configured = getattr(settings, "LLM_MAX_OUTPUT_TOKENS", None)
+    return int(configured) if configured else None
 
 
 def words_to_output_tokens(words: int) -> int:
     """A ceiling that fits a word budget the caller already accepted. A word
     costs under two tokens in the languages we serve, and the slack covers a
-    preamble; never below the global ceiling, which stays the floor.
+    preamble; never below the ceiling an unattended call would use anyway.
 
     A budget large enough to outrun LLM_REQUEST_TIMEOUT fails on the timeout
     instead — the honest order, and the reason that bound is configurable.
     """
-    return max(llm_max_output_tokens(), words * 2 + 256)
+    return max(unattended_max_output_tokens(), words * 2 + 256)
+
+
+def unattended_max_output_tokens() -> int:
+    """For a call nobody is watching: the deployment's ceiling, else our own."""
+    return llm_max_output_tokens() or DEFAULT_MAX_OUTPUT_TOKENS
 
 
 def _wants_whole_answer(schema: dict | None, max_output_tokens: int | None) -> bool:

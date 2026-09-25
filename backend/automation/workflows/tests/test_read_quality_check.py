@@ -3,6 +3,7 @@ single requirement — but only when the node asks for it, since resolving one
 walks the whole audit."""
 
 import json
+from types import SimpleNamespace
 
 import pytest
 
@@ -139,7 +140,9 @@ def test_read_objects_advertises_what_can_be_included():
     action = ACTION_REGISTRY["read_objects"]
     assert action.action_type == "read_objects"
     assert sorted(READABLE_MODELS["requirement_assessment"].optional_computed) == [
-        "quality_check"
+        "applied_controls",
+        "evidences",
+        "quality_check",
     ]
 
 
@@ -198,3 +201,45 @@ def test_info_alone_does_not_flag(audit):
     findings = row["quality_check"]
     assert findings["errors"] == [] and findings["warnings"] == []
     assert findings["flagged"] is False
+
+
+@pytest.mark.django_db
+def test_the_backing_is_opt_in_too(audit):
+    """A page of 500 rows carrying every control, its evidence and their
+    revisions is how a read outgrows one node output. Most reads want none of
+    it, so none of it is on by default."""
+    compliance_assessment, ra = audit
+    entry = READABLE_MODELS["requirement_assessment"]
+
+    plain = _serialize_read_row(
+        ra,
+        entry.readable_fields(),
+        _effective_computed(entry, {"model": "requirement_assessment"}),
+    )
+    assert "applied_controls" not in plain
+    assert "evidences" not in plain
+
+    asked = _serialize_read_row(
+        ra,
+        entry.readable_fields(),
+        _effective_computed(
+            entry,
+            {
+                "model": "requirement_assessment",
+                "include": ["applied_controls", "evidences"],
+            },
+        ),
+    )
+    assert asked["applied_controls"]
+
+
+def test_the_prefetches_are_keyed_by_what_needs_them():
+    """Each group hangs off the computed value it serves, so a read that did not
+    ask for one does not pay for its queries either."""
+    entry = READABLE_MODELS["requirement_assessment"]
+    assert set(entry.prefetch_scoped) <= set(entry.optional_computed)
+    assert set(entry.prefetch_scoped) == {"applied_controls", "evidences"}
+    assert (
+        "applied_controls__evidences__revisions"
+        in (entry.prefetch_scoped["applied_controls"])
+    )

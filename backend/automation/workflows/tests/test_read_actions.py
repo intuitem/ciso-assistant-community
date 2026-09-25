@@ -832,9 +832,10 @@ class TestAssessmentScoping:
 
 @pytest.mark.django_db
 class TestRequirementBacking:
-    """A requirement assessment read carries the expectation, the assessor's
-    note, and what is claimed to satisfy it — enough to weigh a result against
-    its support without a second read per row."""
+    """Asked for it, a requirement assessment read carries what is claimed to
+    satisfy the requirement — enough to weigh a result against its support
+    without a second read per row. Opt-in, because it is also the heaviest
+    thing the read can carry: see test_read_quality_check."""
 
     def make_audit(self, domain, rows=1, with_backing=True):
         from core.models import (
@@ -896,7 +897,13 @@ class TestRequirementBacking:
 
     def read(self, domain, mode="first"):
         version = read_flow(
-            domain, {"model": "requirement_assessment", "mode": mode, "limit": 50}
+            domain,
+            {
+                "model": "requirement_assessment",
+                "mode": mode,
+                "limit": 50,
+                "include": ["applied_controls", "evidences"],
+            },
         )
         instance = start_instance(version)
         assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables

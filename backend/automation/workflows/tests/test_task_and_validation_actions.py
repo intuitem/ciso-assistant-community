@@ -309,6 +309,70 @@ class TestTheSideEffectsTheEditorHas:
         assert occurrence.due_date == later
         assert list(template.assigned_to.all()) == [assignee]
 
+    def test_a_recurring_task_of_the_same_name_is_left_alone(self, domain):
+        """A recurring template's occurrences come from its schedule. Matching
+        one here would re-date every occurrence it has ever had, completed
+        history included."""
+        recurring = TaskTemplate.objects.create(
+            name="Quarterly access review",
+            folder=domain,
+            is_recurrent=True,
+            schedule={"interval": 1, "frequency": "MONTHLY"},
+        )
+        occurrence = TaskNode.objects.create(
+            task_template=recurring,
+            due_date=date.today() - timedelta(days=30),
+            scheduled_date=date.today() - timedelta(days=30),
+            folder=domain,
+            status="completed",
+        )
+        instance = start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "task_template",
+                    "upsert": True,
+                    "fields": {
+                        "name": "Quarterly access review",
+                        "task_date": (date.today() + timedelta(days=7)).isoformat(),
+                    },
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        occurrence.refresh_from_db()
+        assert occurrence.due_date == date.today() - timedelta(days=30)
+        assert occurrence.status == "completed"
+        # The one-off task is created beside it, not merged into it.
+        assert TaskTemplate.objects.filter(name="Quarterly access review").count() == 2
+
+    def test_an_update_that_names_no_date_keeps_the_one_there(self, domain):
+        """Not setting `task_date` is not saying "no date"."""
+        due = date.today() + timedelta(days=21)
+
+        def run(fields):
+            return start_instance(
+                action_flow(
+                    domain,
+                    {
+                        "type": "create_object",
+                        "model": "task_template",
+                        "upsert": True,
+                        "fields": {"name": "Keep my date", **fields},
+                    },
+                )
+            )
+
+        run({"task_date": due.isoformat()})
+        instance = run({"description": "Just a note"})
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+
+        template = TaskTemplate.objects.get(name="Keep my date")
+        assert template.task_date == due
+        assert template.description == "Just a note"
+        assert TaskNode.objects.get(task_template=template).due_date == due
+
     def test_the_second_run_says_it_did_not_create(self, domain):
         def run():
             return start_instance(

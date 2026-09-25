@@ -670,6 +670,16 @@ class TestGenerationIsBounded:
         self._llm(client).generate(prompt="p", context="")
         assert client.bodies[0]["max_tokens"] == 2048
 
+    def test_no_ceiling_is_sent_when_none_is_configured(self, settings):
+        """Chat, memory summaries and the questionnaire are bounded by the
+        conversation. A ceiling they never asked for cuts a long answer, and on
+        a reasoning model the thinking alone can spend it."""
+        settings.LLM_MAX_OUTPUT_TOKENS = None
+        client = _FinishClient("stop")
+        self._llm(client).generate(prompt="p", context="")
+        assert "max_tokens" not in client.bodies[0]
+        assert "max_completion_tokens" not in client.bodies[0]
+
     def test_hitting_the_ceiling_is_not_reported_as_bad_json(self, settings):
         """`finish_reason: length` on a schema call means the answer was cut,
         which the JSON parser would otherwise blame on the model."""
@@ -706,22 +716,22 @@ class TestGenerationIsBounded:
 def test_a_word_budget_gets_a_ceiling_above_it():
     """ai_generate's `max_words` is what an author sets; a ceiling below it
     would cut the draft they asked for."""
-    from chat.providers import llm_max_output_tokens, words_to_output_tokens
+    from chat.providers import unattended_max_output_tokens, words_to_output_tokens
 
     assert words_to_output_tokens(2000) > 2000 * 1.3
-    # Never tighter than the global ceiling, which stays the floor.
-    assert words_to_output_tokens(1) == llm_max_output_tokens()
+    # Never tighter than what an unattended call would ask for anyway.
+    assert words_to_output_tokens(1) == unattended_max_output_tokens()
 
 
 def test_the_two_bounds_agree(settings):
     """The token ceiling is meant to bind first. At a local model's ~30 tokens
     per second a timeout below that makes the ceiling unreachable, and a long
     answer gets reported as a dead provider."""
-    from chat.providers import llm_max_output_tokens, llm_timeout
+    from chat.providers import llm_timeout, unattended_max_output_tokens
 
     slowest_plausible_tokens_per_second = 30
     assert (
-        llm_max_output_tokens() / slowest_plausible_tokens_per_second
+        unattended_max_output_tokens() / slowest_plausible_tokens_per_second
     ) < llm_timeout()
 
 

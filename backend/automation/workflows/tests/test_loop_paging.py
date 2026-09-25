@@ -336,17 +336,32 @@ class TestALoopThatCannotStoreWhatItCollected:
         with override_settings(WORKFLOW_NODE_OUTPUT_BUDGET=budget):
             return start_instance(version)
 
-    def test_the_run_fails_instead_of_hanging(self):
-        instance = self._run(budget=300)
-        assert instance.status == WorkflowInstance.Status.FAILED
-        assert not instance.tokens.filter(status="waiting").exists()
-
-    def test_and_the_run_log_says_what_was_lost(self):
-        instance = self._run(budget=300)
-        said = " ".join(log.message or "" for log in instance.logs.all())
-        assert "were dropped" in said
+    def test_it_stops_where_it_can_no_longer_keep_records(self):
+        """Checked between iterations, so the loop stops before the next item's
+        side effects rather than after every one of them."""
+        instance = self._run(budget=3000)
+        assert instance.status == WorkflowInstance.Status.COMPLETED, list(
+            instance.logs.values_list("message", flat=True)
+        )
+        output = instance.node_outputs["each_row"]
+        assert output["count"] < 6
+        assert any("would not fit" in e["message"] for e in output["errors"])
+        # What it did collect is still there, in full — no record of work done
+        # is dropped to make room.
+        assert output["results"]
+        assert "omitted" not in str(output["results"])
 
     def test_a_loop_that_fits_is_untouched(self):
         instance = self._run(budget=500_000)
         assert instance.status == WorkflowInstance.Status.COMPLETED
         assert instance.node_outputs["each_row"]["count"] == 6
+        assert instance.node_outputs["each_row"]["errors"] == []
+
+    def test_an_output_that_still_cannot_be_stored_fails_the_loop(self):
+        """The estimate only watches what the loop collects; a first item over
+        the whole budget still has to fail rather than quietly shrink."""
+        instance = self._run(budget=200)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not instance.tokens.filter(status="waiting").exists()
+        said = " ".join(log.message or "" for log in instance.logs.all())
+        assert "were dropped" in said

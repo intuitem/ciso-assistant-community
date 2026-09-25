@@ -184,6 +184,7 @@ def ai_call_task(
         NoLLMAvailable,
         TruncatedCompletion,
         get_llm_strict,
+        unattended_max_output_tokens,
         words_to_output_tokens,
     )
 
@@ -212,6 +213,9 @@ def ai_call_task(
                     context=text,
                     schema=schema,
                     system_prompt=AI_SYSTEM_PROMPT,
+                    # Nobody is watching this one, and a reasoning model with an
+                    # unbounded field has no stopping condition of its own.
+                    max_output_tokens=unattended_max_output_tokens(),
                 )
                 try:
                     output = _parse_ai_object(completion, schema or {})

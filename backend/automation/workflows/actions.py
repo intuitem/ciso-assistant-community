@@ -548,8 +548,12 @@ CREATABLE_MODELS = {
         },
         "constructor": "_construct_task_template",
         # Which is what makes upsert possible here: matched on name, the row is
-        # updated instead of a second task piling up every cycle.
+        # updated instead of a second task piling up every cycle. Only against
+        # the one-off kind this action creates: a recurring template's
+        # occurrences come from its schedule, and re-dating them would rewrite
+        # history that has already happened.
         "updater": "_update_task_template",
+        "match_filter": Q(is_recurrent=False),
     },
     "right_request": {
         "model": RightRequest,
@@ -696,10 +700,11 @@ def _document_template_content(ref_id, locale, instance):
     return template.content
 
 
-def _scoped_prefetches(entry, instance):
+def _scoped_prefetches(entry, instance, computed):
     """`prefetch_scoped` as Prefetch objects, each narrowed to what the run may
     read. Nested paths reuse the parent's scoped queryset so the narrowing is
-    not undone a level down."""
+    not undone a level down. Only the groups whose computed value this read
+    asked for."""
     from django.db.models import Prefetch
 
     from . import authz
@@ -722,14 +727,20 @@ def _scoped_prefetches(entry, instance):
     # named relative to that parent. Only the roots are returned: a nested path
     # belongs inside its parent's queryset, and Django rejects the same lookup
     # arriving twice.
+    wanted = {
+        path: model
+        for name, group in entry.prefetch_scoped.items()
+        if name in computed
+        for path, model in group.items()
+    }
     built = {}
-    for path in sorted(entry.prefetch_scoped, key=lambda p: -p.count("__")):
-        queryset = scoped(entry.prefetch_scoped[path])
-        for child in entry.prefetch_scoped:
+    for path in sorted(wanted, key=lambda p: -p.count("__")):
+        queryset = scoped(wanted[path])
+        for child in wanted:
             if child.rpartition("__")[0] == path:
                 queryset = queryset.prefetch_related(built[child])
         built[path] = Prefetch(path.rpartition("__")[2] or path, queryset=queryset)
-    return [built[path] for path in entry.prefetch_scoped if "__" not in path]
+    return [built[path] for path in wanted if "__" not in path]
 
 
 def _identifier_q(model, value):
@@ -865,21 +876,28 @@ def _construct_task_template(kwargs, params, instance):
 def _update_task_template(template, kwargs, params, instance):
     """The upsert match: the same writes onto the task already there, and its
     occurrence re-dated rather than a second one added. No notice — the run that
-    created it sent one, and a periodic refresh is not news."""
+    created it sent one, and a periodic refresh is not news.
+
+    A step that does not set `task_date` is not saying "no date": only what the
+    author supplied is written, or a flow updating a note would clear the
+    deadline.
+    """
     assignees = _rows_for(Actor, params.get("assigned_to"), instance, "assigned_to")
     task_date = _task_date(params)
 
     with transaction.atomic():
         for key, value in kwargs.items():
             setattr(template, key, value)
-        template.task_date = task_date
+        if task_date is not None:
+            template.task_date = task_date
         template.save()
         if assignees:
             template.assigned_to.set(assignees)
         _link_targets(template, params, instance, _TASK_TARGETS)
-        TaskNode.objects.filter(task_template=template).update(
-            due_date=task_date, scheduled_date=task_date
-        )
+        if task_date is not None:
+            TaskNode.objects.filter(task_template=template).update(
+                due_date=task_date, scheduled_date=task_date
+            )
     return template
 
 
@@ -1205,7 +1223,10 @@ def _upsert_match(entry, kwargs, folder):
         raise ActionError(
             f"create_object: upsert requires {', '.join(repr(m) for m in missing)}"
         )
-    return entry["model"].objects.filter(folder=folder, **match).first()
+    rows = entry["model"].objects.filter(folder=folder, **match)
+    if entry.get("match_filter") is not None:
+        rows = rows.filter(entry["match_filter"])
+    return rows.first()
 
 
 def _creation_folder(instance):
@@ -1646,11 +1667,6 @@ READABLE_MODELS: dict[str, ReadEntry] = {
                 # a title.
                 "description": ra.requirement.description,
             },
-            # What is claimed to satisfy the requirement, and what backs it.
-            "applied_controls": _requirement_backing,
-            "evidences": lambda ra: [
-                _evidence_summary(evidence) for evidence in ra.evidences.all()
-            ],
             # Subset of the API's FieldsRelatedField dict.
             "compliance_assessment": lambda ra: {
                 "str": str(ra.compliance_assessment),
@@ -1658,17 +1674,31 @@ READABLE_MODELS: dict[str, ReadEntry] = {
                 "name": ra.compliance_assessment.name,
             },
         },
-        # Opt-in: each call resolves its own context, so a list read pays for
-        # it per row. Reading the audit's quality check once is cheaper when
-        # the whole audit is in question.
-        optional_computed={"quality_check": _quality_check_with_text},
+        # Opt-in, because each costs per row and most reads want none of them:
+        # a quality check resolves its own context, and the backing walks the
+        # controls, their evidence and its revisions. A page of 500 rows
+        # carrying all three is also how a read outgrows one node output.
+        optional_computed={
+            "quality_check": _quality_check_with_text,
+            # What is claimed to satisfy the requirement, and what backs it.
+            "applied_controls": _requirement_backing,
+            "evidences": lambda ra: [
+                _evidence_summary(evidence) for evidence in ra.evidences.all()
+            ],
+        },
         select_related=["requirement", "compliance_assessment"],
+        # Each keyed by the computed value that needs it, so a read that did
+        # not ask for one does not pay for its queries either.
         prefetch_scoped={
-            "applied_controls": AppliedControl,
-            "applied_controls__evidences": Evidence,
-            "applied_controls__evidences__revisions": EvidenceRevision,
-            "evidences": Evidence,
-            "evidences__revisions": EvidenceRevision,
+            "applied_controls": {
+                "applied_controls": AppliedControl,
+                "applied_controls__evidences": Evidence,
+                "applied_controls__evidences__revisions": EvidenceRevision,
+            },
+            "evidences": {
+                "evidences": Evidence,
+                "evidences__revisions": EvidenceRevision,
+            },
         },
     ),
     "risk_scenario": ReadEntry(
@@ -1927,6 +1957,7 @@ class ReadObjectsAction(BaseAction):
         if entry is None:
             raise ActionError(f"read_objects: unknown model '{config.get('model')}'")
         fields = entry.readable_fields()
+        computed = _effective_computed(entry, config)
         context = _render_context(instance)
         query = _read_filters_to_q(config.get("filters"), entry, set(fields), context)
 
@@ -1950,7 +1981,9 @@ class ReadObjectsAction(BaseAction):
         )
         # Computed callables dereference these per row otherwise.
         if entry.prefetch_scoped:
-            queryset = queryset.prefetch_related(*_scoped_prefetches(entry, instance))
+            queryset = queryset.prefetch_related(
+                *_scoped_prefetches(entry, instance, computed)
+            )
         if entry.select_related:
             queryset = queryset.select_related(*entry.select_related)
         if entry.prefetch_related:
