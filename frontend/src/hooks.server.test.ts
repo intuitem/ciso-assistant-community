@@ -23,7 +23,7 @@ const REAUTHENTICATION_REQUIRED = {
 };
 const SESSION_GONE = { status: 401, meta: { is_authenticated: false } };
 
-function callWith(user: Record<string, unknown>, body: unknown) {
+function callWith(getUser: () => Promise<Record<string, unknown> | null>, body: unknown) {
 	const jar = new Map(SESSION_COOKIES.map((name) => [name, `${name}-value`]));
 	const response = handleFetch({
 		request: new Request(`${ALLAUTH_API_URL}/account/authenticators`),
@@ -43,7 +43,7 @@ function callWith(user: Record<string, unknown>, body: unknown) {
 			},
 			// Only getUser, never locals.user: a form action runs before any load,
 			// so nothing has resolved it by the time handleFetch decides.
-			locals: { getUser: async () => user }
+			locals: { getUser }
 		}
 	} as never);
 	return { response, jar };
@@ -51,13 +51,13 @@ function callWith(user: Record<string, unknown>, body: unknown) {
 
 describe('handleFetch, 401 from an allauth account endpoint', () => {
 	it('signs out a local user so they can re-enter their password', async () => {
-		await expect(callWith(LOCAL_USER, REAUTHENTICATION_REQUIRED).response).rejects.toSatisfy(
-			isRedirect
-		);
+		await expect(
+			callWith(async () => LOCAL_USER, REAUTHENTICATION_REQUIRED).response
+		).rejects.toSatisfy(isRedirect);
 	});
 
 	it('keeps an SSO user, who has no password to re-enter', async () => {
-		const { response, jar } = callWith(SSO_USER, REAUTHENTICATION_REQUIRED);
+		const { response, jar } = callWith(async () => SSO_USER, REAUTHENTICATION_REQUIRED);
 
 		expect((await response).status).toBe(401);
 		// Exact set: the session cookies survive, and no flash cookie is added.
@@ -66,6 +66,17 @@ describe('handleFetch, 401 from an allauth account endpoint', () => {
 	});
 
 	it('signs out an SSO user whose allauth session is gone', async () => {
-		await expect(callWith(SSO_USER, SESSION_GONE).response).rejects.toSatisfy(isRedirect);
+		await expect(callWith(async () => SSO_USER, SESSION_GONE).response).rejects.toSatisfy(
+			isRedirect
+		);
+	});
+
+	it('keeps the session when the current-user lookup fails', async () => {
+		const { response, jar } = callWith(async () => {
+			throw new TypeError('fetch failed');
+		}, REAUTHENTICATION_REQUIRED);
+
+		expect((await response).status).toBe(401);
+		expect([...jar.keys()]).toEqual(SESSION_COOKIES);
 	});
 });
