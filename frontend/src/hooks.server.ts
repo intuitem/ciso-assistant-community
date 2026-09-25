@@ -3,6 +3,7 @@ import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
 import type { User } from '$lib/utils/types';
 import {
 	error,
+	isRedirect,
 	redirect,
 	type Handle,
 	type HandleFetch,
@@ -374,12 +375,20 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 						reauthenticationFlows.includes(flow.id)
 					)
 				) {
-					if (event.locals.user?.is_sso) {
-						// SSO users: don't log out — let the page handle the 401
-						// gracefully. Logging out forces a full IdP round-trip.
-					} else {
-						// Local users: log out so they can re-enter their password
-						// to refresh the session (temporary until proper reauth flow).
+					// locals.user is unset here: a form action runs before any load.
+					// Only a positively identified local account is signed out, so
+					// that they can re-enter their password; a lookup that fails
+					// says nothing, and an SSO logout costs a full IdP round-trip.
+					let user: User | null = null;
+					try {
+						user = await event.locals.getUser();
+					} catch (lookupError) {
+						if (isRedirect(lookupError)) throw lookupError;
+						logger.error('Could not resolve the current user on a 401', {
+							error: lookupError
+						});
+					}
+					if (user && !user.is_sso) {
 						setFlash(
 							{ type: 'warning', message: safeTranslate('reauthenticateForSensitiveAction') },
 							event
