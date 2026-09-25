@@ -14,7 +14,6 @@ import { error, redirect } from '@sveltejs/kit';
 export const load = (async ({ fetch, params, cookies, locals }) => {
 	const URLModel = 'risk-scenarios';
 	const baseEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
-	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
 
 	// Depends only on params.id, so start it now and let it overlap the fetches below.
 	const riskAcceptancesPromise = fetchAllPages(
@@ -39,11 +38,10 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		throw error(res.status, res.statusText || 'Failed to load risk scenario');
 	}
 	const scenario = await res.json();
-	const object = await fetch(objectEndpoint).then((res) => res.json());
 
 	const tables: Record<string, any> = {};
 
-	for (const key of ['assets', 'threats', 'vulnerabilities', 'security-exceptions']) {
+	for (const key of ['assets', 'threats', 'vulnerabilities', 'security-exceptions'] as const) {
 		const table: TableSource = {
 			head: headData(key),
 			body: [],
@@ -63,7 +61,7 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		})
 	);
 
-	const riskMatrix = await fetch(`${BASE_API_URL}/risk-matrices/${object.risk_matrix}/`)
+	const riskMatrix = await fetch(`${BASE_API_URL}/risk-matrices/${scenario.risk_matrix.id}/`)
 		.then((res) => res.json())
 		.then((res) => JSON.parse(res.json_definition));
 
