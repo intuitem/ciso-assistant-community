@@ -127,8 +127,11 @@ def strip_thinking(text: str) -> str:
 # mangled as often as not (a stray `analysis<|message|>` with no opening
 # `<|channel|>`), so the markers are stripped wherever they appear rather than
 # only in well-formed pairs.
+# A final channel may carry headers of its own before the message, e.g.
+# `<|channel|>final <|constrain|>JSON<|message|>{...}`.
 _HARMONY_FINAL_RE = re.compile(
-    r"<\|channel\|>final<\|message\|>([\s\S]*?)(?:<\|(?:end|return)\|>|\Z)"
+    r"<\|channel\|>final[^<]*(?:<\|(?!message\|>)[^|]*\|>[^<]*)*"
+    r"<\|message\|>([\s\S]*?)(?:<\|(?:end|return)\|>|\Z)"
 )
 _HARMONY_ANALYSIS_RE = re.compile(
     r"(?:<\|channel\|>)?(?:analysis|commentary)<\|message\|>[\s\S]*?"
@@ -590,11 +593,10 @@ class OpenAICompatibleLLM:
         messages = _build_messages(
             system_prompt or self.system_prompt, prompt, context, history, directives
         )
-        body: dict = {
-            "messages": messages,
-            "stream": False,
-            "max_tokens": llm_max_output_tokens(),
-        }
+        body: dict = {"messages": messages, "stream": False}
+        # OpenAI's reasoning models reject `max_tokens` outright and take
+        # `max_completion_tokens`; everything else still wants the old name.
+        body[_token_limit_param(self.model)] = llm_max_output_tokens()
         if self.model:
             body["model"] = self.model
         if self.temperature_enabled:
@@ -621,7 +623,9 @@ class OpenAICompatibleLLM:
                 f"the model reached the {llm_max_output_tokens()}-token ceiling "
                 "before finishing its answer"
             )
-        return strip_reasoning(_message_text(choice["message"]))
+        return strip_reasoning(
+            _message_text(choice["message"], choice.get("finish_reason"))
+        )
 
     def _raw_stream(
         self,
@@ -1000,13 +1004,17 @@ def get_llm() -> LLM:
     return StubLLM()
 
 
-def _message_text(message: dict) -> str:
+def _message_text(message: dict, finish_reason: str | None = None) -> str:
     """The answer, wherever the server put it: some models return the whole
     completion in `reasoning_content` and leave `content` empty. Beside an
-    answer the reasoning is thinking, so it is read only when `content` is."""
+    answer the reasoning is thinking, so it is read only when `content` is —
+    and only when the model finished, since an interrupted run leaves
+    working-out there that no marker identifies as unfinished."""
     content = (message.get("content") or "").strip()
     if content:
         return message["content"]
+    if finish_reason not in (None, "stop"):
+        return ""
     return message.get("reasoning_content") or message.get("reasoning") or ""
 
 
@@ -1019,6 +1027,15 @@ def llm_timeout() -> float:
     from django.conf import settings
 
     return float(getattr(settings, "LLM_REQUEST_TIMEOUT", 120))
+
+
+def _token_limit_param(model: str) -> str:
+    """OpenAI's o-series and GPT-5 reasoning models take `max_completion_tokens`
+    and reject `max_tokens`. Keyed on the model name because the endpoint is
+    "OpenAI-compatible": the same base URL serves both conventions."""
+    name = (model or "").rsplit("/", 1)[-1].lower()
+    reasoning = name.startswith(("o1", "o3", "o4", "gpt-5"))
+    return "max_completion_tokens" if reasoning else "max_tokens"
 
 
 def llm_max_output_tokens() -> int:

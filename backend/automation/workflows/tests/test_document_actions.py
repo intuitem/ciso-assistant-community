@@ -549,3 +549,15 @@ class TestAiMayWriteTheDraft:
     def test_it_may_fill_the_change_summary_too(self):
         version = self.published({"change_summary": "{{nodes.draft.text}}"})
         assert "action_update_ai_value_on_fenced_field" not in self.codes(version)
+
+
+def test_renewing_the_editing_lock_raises_no_internal_event():
+    """The editor renews its lock every few minutes. Tracking that would make
+    each renewal a `documentrevision.updated` event, evaluated against every
+    enabled trigger, for a field no workflow can act on."""
+    from auditlog.registry import auditlog
+
+    excluded = auditlog.get_model_fields(DocumentRevision)["exclude_fields"]
+    assert {"editing_since", "editing_user"} <= set(excluded)
+    # The lifecycle a trigger is actually after stays tracked.
+    assert "status" not in excluded

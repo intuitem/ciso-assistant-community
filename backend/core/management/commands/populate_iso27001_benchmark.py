@@ -36,7 +36,7 @@ import json
 from dataclasses import dataclass, field
 from datetime import timedelta
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from core.models import (
@@ -593,6 +593,14 @@ class Command(BaseCommand):
         )
 
     def _clean(self, domain_name):
+        # Only ever a domain this command made. Matching on the name alone would
+        # let `--domain` name a real one and take it, and everything in it, down
+        # with the seed.
+        if not domain_name.startswith(PREFIX):
+            raise CommandError(
+                f"refusing to clean '{domain_name}': this command only deletes "
+                f"domains it seeded, whose names start with {PREFIX}"
+            )
         folders = Folder.objects.filter(name=domain_name)
         if not folders.exists():
             self.stdout.write(f"Nothing to clean: no domain named {domain_name}")

@@ -502,8 +502,12 @@ auditlog.register(
     DocumentRevision,
     # `content` is excluded, so a content-only save writes no log row: DocumentEdit
     # already snapshots every save of a draft, and mirroring whole markdown diffs
-    # here would make these the largest rows in the log by far. What remains —
-    # the revision appearing, and its status moving through review to published —
-    # is the lifecycle a reader (or a trigger) is after.
-    exclude_fields=common_exclude + ["content", "file", "pdf_snapshot"],
+    # here would make these the largest rows in the log by far. The editing lock
+    # goes too: the editor renews it every few minutes, and each renewal would
+    # otherwise be a log row and a `documentrevision.updated` event evaluated
+    # against every enabled trigger. What remains — the revision appearing, and
+    # its status moving through review to published — is the lifecycle a reader
+    # (or a trigger) is after.
+    exclude_fields=common_exclude
+    + ["content", "file", "pdf_snapshot", "editing_user", "editing_since"],
 )

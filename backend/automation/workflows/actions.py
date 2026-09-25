@@ -707,16 +707,18 @@ def _scoped_prefetches(entry, instance):
             queryset = queryset.filter(folder_id__in=folders)
         return queryset
 
+    # Deepest first, so a child is built before the parent that nests it, and
+    # named relative to that parent. Only the roots are returned: a nested path
+    # belongs inside its parent's queryset, and Django rejects the same lookup
+    # arriving twice.
     built = {}
-    for path in sorted(entry.prefetch_scoped, key=lambda p: p.count("__")):
-        model = entry.prefetch_scoped[path]
-        queryset = scoped(model)
-        parent, _, leaf = path.rpartition("__")
-        for child, child_model in entry.prefetch_scoped.items():
+    for path in sorted(entry.prefetch_scoped, key=lambda p: -p.count("__")):
+        queryset = scoped(entry.prefetch_scoped[path])
+        for child in entry.prefetch_scoped:
             if child.rpartition("__")[0] == path:
                 queryset = queryset.prefetch_related(built[child])
-        built[path] = Prefetch(path, queryset=queryset)
-    return [built[path] for path in entry.prefetch_scoped]
+        built[path] = Prefetch(path.rpartition("__")[2] or path, queryset=queryset)
+    return [built[path] for path in entry.prefetch_scoped if "__" not in path]
 
 
 def _rows_for(model, raw, instance, label):

@@ -698,3 +698,58 @@ def test_the_two_bounds_agree(settings):
     assert (
         llm_max_output_tokens() / slowest_plausible_tokens_per_second
     ) < llm_timeout()
+
+
+class TestTheTokenLimitParameterMatchesTheModel:
+    """The endpoint is "OpenAI-compatible", so the same base URL serves servers
+    that want `max_tokens` and OpenAI's reasoning models that reject it."""
+
+    def test_a_reasoning_model_gets_the_completion_parameter(self, settings):
+        from chat.providers import OpenAICompatibleLLM
+
+        settings.LLM_MAX_OUTPUT_TOKENS = 1234
+        for name in ("o3-mini", "gpt-5", "openai/o1-preview"):
+            llm = OpenAICompatibleLLM(model=name, base_url="http://x/v1")
+            llm.client = _FinishClient("stop")
+            llm.generate(prompt="p", context="")
+            assert llm.client.bodies[0]["max_completion_tokens"] == 1234
+            assert "max_tokens" not in llm.client.bodies[0]
+
+    def test_everything_else_keeps_max_tokens(self, settings):
+        from chat.providers import OpenAICompatibleLLM
+
+        settings.LLM_MAX_OUTPUT_TOKENS = 1234
+        for name in ("", "qwen/qwen3.8-27b", "google/gemma-4-e4b"):
+            llm = OpenAICompatibleLLM(model=name, base_url="http://x/v1")
+            llm.client = _FinishClient("stop")
+            llm.generate(prompt="p", context="")
+            assert llm.client.bodies[0]["max_tokens"] == 1234
+            assert "max_completion_tokens" not in llm.client.bodies[0]
+
+
+def test_a_final_channel_may_carry_its_own_headers():
+    """`<|channel|>final <|constrain|>JSON<|message|>` is what a schema request
+    can come back as; without the headers in between it is the same shape."""
+    from chat.providers import strip_reasoning
+
+    assert (
+        strip_reasoning(
+            '<|channel|>final <|constrain|>JSON<|message|>{"verdict":"thin"}<|return|>'
+        )
+        == '{"verdict":"thin"}'
+    )
+    assert strip_reasoning("<|channel|>final<|message|>plain<|return|>") == "plain"
+
+
+def test_unfinished_reasoning_is_not_an_answer():
+    """A model stopped mid-thought leaves working-out in `reasoning_content`
+    with nothing marking it unfinished, so the fallback only applies to a
+    completion that ended on its own."""
+    from chat.providers import _message_text
+
+    cut = {"content": "", "reasoning_content": "Let me weigh the evidence and"}
+    assert _message_text(cut, "length") == ""
+    assert _message_text(cut, "content_filter") == ""
+    # Finished, and the answer genuinely landed in the reasoning field.
+    assert _message_text(cut, "stop") == "Let me weigh the evidence and"
+    assert _message_text(cut) == "Let me weigh the evidence and"
