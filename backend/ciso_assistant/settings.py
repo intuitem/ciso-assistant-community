@@ -910,6 +910,9 @@ HUEY = {
 
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
+AUDITLOG_EXPORT_XLSX_MAX_ROWS = int(
+    os.environ.get("AUDITLOG_EXPORT_XLSX_MAX_ROWS", 100000)
+)
 
 # Run workflow instances in a Huey worker instead of the triggering request.
 # False only moves the engine into the request: a Huey consumer is required
