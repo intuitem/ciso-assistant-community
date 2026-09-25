@@ -89,6 +89,7 @@
 		"echarts": "^6.1.0",
 		"exceljs": "^4.4.0",
 		"marked": "^16.4.2",
+		"mermaid": "^12.0.0",
 		"sanitize-html": "^2.17.7",
 		"ssf": "^0.11.2",
 		"svelte-multiselect": "^11.8.0",
