@@ -11,10 +11,21 @@ import json
 import tempfile
 from pathlib import Path
 
+import structlog
 import typst
 
+logger = structlog.get_logger(__name__)
+
 TEMPLATE_DIR = Path(__file__).resolve().parent / "typst"
+VENDORED_PACKAGES = TEMPLATE_DIR / "packages"
 DEFAULT_LOCALE = "en"
+
+# Render time grows faster than linearly with label length (1 MB took minutes).
+MERMAID_MAX_SOURCE_CHARS = 20_000
+MERMAID_TEMPLATE = """#import "@preview/merman:0.3.0": mermaid
+#set page(width: auto, height: auto, margin: 0pt, fill: none)
+#mermaid(sys.inputs.source, error-mode: "panic")
+"""
 
 
 def localized_template(stem: str, lang: str) -> str:
@@ -65,3 +76,25 @@ def render_pdf(
             package_path=str(packages),
             package_cache_path=str(packages),
         )
+
+
+def render_mermaid_svg(source: str) -> bytes | None:
+    """Render Mermaid source to SVG with the vendored merman package, or None if it fails."""
+    if len(source) > MERMAID_MAX_SOURCE_CHARS:
+        logger.warning("Mermaid diagram too large to render", chars=len(source))
+        return None
+    with tempfile.TemporaryDirectory() as root:
+        entrypoint = Path(root) / "main.typ"
+        entrypoint.write_text(MERMAID_TEMPLATE)
+        try:
+            return typst.compile(
+                entrypoint,
+                root=root,
+                format="svg",
+                sys_inputs={"source": source},
+                package_path=str(VENDORED_PACKAGES),
+                package_cache_path=root,
+            )
+        except Exception as e:
+            logger.warning("Mermaid diagram could not be rendered", error=e)
+            return None

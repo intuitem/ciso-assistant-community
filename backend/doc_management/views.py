@@ -1,5 +1,7 @@
 import difflib
+import html
 import mimetypes
+import re
 from uuid import UUID
 
 import requests
@@ -27,6 +29,7 @@ from weasyprint.urls import URLFetcher, URLFetcherResponse
 import django_filters as df
 
 from core.net_safety import BlockedRequestError, assert_public_url
+from core.typst_render import render_mermaid_svg
 from core.validators import validate_file_name, validate_file_size
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder
@@ -142,6 +145,22 @@ class _SafeURLFetcher(URLFetcher):
 
 
 _safe_url_fetcher = _SafeURLFetcher()
+
+_MERMAID_BLOCK_RE = re.compile(
+    r'<pre><code class="language-mermaid">(.*?)</code></pre>', re.DOTALL
+)
+
+
+def _render_mermaid_blocks(content_html: str) -> str:
+    """Swap mermaid code blocks for rendered SVG; blocks that fail to render stay as code."""
+
+    def replace(match):
+        svg = render_mermaid_svg(html.unescape(match.group(1)))
+        if svg is None:
+            return match.group(0)
+        return f'<div class="mermaid-diagram">{svg.decode()}</div>'
+
+    return _MERMAID_BLOCK_RE.sub(replace, content_html)
 
 
 class DocumentContainerFilter(GenericFilterSet):
@@ -1324,6 +1343,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             revision.content,
             extensions=["tables", "fenced_code", "toc", "nl2br"],
         )
+        content_html = _render_mermaid_blocks(content_html)
         accessible_ids = RoleAssignment.get_viewable_object_ids(
             user, DocumentAttachment
         )
