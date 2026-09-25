@@ -176,6 +176,9 @@
 
 	const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
+	// Written as prose or markdown, so a one-line input is the wrong box.
+	const LONG_TEXT_FIELDS = ['description', 'content', 'observation'];
+
 	// 'choice' emits an enum, which is what a branch step can route on.
 	const AI_FIELD_TYPES = ['choice', 'string', 'number', 'boolean'];
 
@@ -1515,10 +1518,10 @@
 								safeTranslate(field) +
 									(creatableEntry?.required_fields?.includes(field) ? ' *' : '')
 							)}
-							{#if field === 'description'}
+							{#if LONG_TEXT_FIELDS.includes(field)}
 								<textarea
 									class="input w-full text-sm"
-									rows="2"
+									rows={field === 'content' ? 6 : 2}
 									bind:value={actionConfig.fields[field]}
 									oninput={onChange}
 								></textarea>
@@ -1573,7 +1576,16 @@
 										</optgroup>
 									{/if}
 								</select>
-								<span class="text-[10px] text-surface-500">{m.frameworkUrnOrId()}</span>
+								{#if paramName === 'framework'}
+									<span class="text-[10px] text-surface-500">{m.frameworkUrnOrId()}</span>
+								{/if}
+							{:else if LONG_TEXT_FIELDS.includes(paramName)}
+								<textarea
+									class="input w-full text-sm"
+									rows="6"
+									bind:value={actionConfig.fields[paramName]}
+									oninput={onChange}
+								></textarea>
 							{:else}
 								<input
 									type="text"
@@ -1581,7 +1593,9 @@
 									bind:value={actionConfig.fields[paramName]}
 									oninput={onChange}
 								/>
-								<span class="text-[10px] text-surface-500">{m.implementationGroupsHint()}</span>
+								{#if paramName === 'implementation_groups'}
+									<span class="text-[10px] text-surface-500">{m.implementationGroupsHint()}</span>
+								{/if}
 							{/if}
 						</label>
 					{/each}
@@ -1652,10 +1666,10 @@
 									{/each}
 								</select>
 								<span class="text-[10px] text-surface-500">{m.guardedFieldHint()}</span>
-							{:else if field === 'description' || field === 'observation'}
+							{:else if LONG_TEXT_FIELDS.includes(field)}
 								<textarea
 									class="input w-full text-sm"
-									rows="2"
+									rows={field === 'content' ? 6 : 2}
 									bind:value={actionConfig.fields[field]}
 									oninput={onChange}
 								></textarea>
