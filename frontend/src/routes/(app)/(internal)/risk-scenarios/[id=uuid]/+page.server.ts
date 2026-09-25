@@ -43,22 +43,14 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 
 	const tables: Record<string, any> = {};
 
-	await Promise.all(
-		['assets', 'threats', 'vulnerabilities', 'security-exceptions'].map(async (key) => {
-			const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}`;
-			const response = await fetch(keyEndpoint);
-			if (response.ok) {
-				const table: TableSource = {
-					head: headData(key),
-					body: [],
-					meta: []
-				};
-				tables[key] = table;
-			} else {
-				console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
-			}
-		})
-	);
+	for (const key of ['assets', 'threats', 'vulnerabilities', 'security-exceptions']) {
+		const table: TableSource = {
+			head: headData(key),
+			body: [],
+			meta: []
+		};
+		tables[key] = table;
+	}
 	//todo the naming here is not great because of inverted logic inhereted from the filters
 	await Promise.all(
 		['risk_scenarios', 'risk_scenarios_e'].map(async (key) => {
