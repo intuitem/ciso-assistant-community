@@ -11,7 +11,6 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
-	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
 
 	const ACTION_FILTER = {
@@ -40,20 +39,10 @@
 	};
 
 	const modalStore: ModalStore = getModalStore();
-	let currentFilterSearch = $state(page.url.search);
-
-	function handleFilterChange(filters: Record<string, any>) {
-		const params = new URLSearchParams();
-		for (const [field, values] of Object.entries(filters)) {
-			if (Array.isArray(values)) {
-				for (const v of values) {
-					if (v?.value) params.append(v.param ?? field, v.value);
-				}
-			}
-		}
-		const search = params.toString();
-		currentFilterSearch = search ? `?${search}` : '';
-	}
+	let currentQuery = $state('');
+	const isFiltered = $derived(
+		[...new URLSearchParams(currentQuery).keys()].some((key) => key !== 'ordering')
+	);
 
 	function buildExportOptions(filterSearch: string): ExportOption[] {
 		return [
@@ -75,9 +64,9 @@
 	}
 
 	function modalExport(): void {
-		const groups: ExportGroup[] = currentFilterSearch
+		const groups: ExportGroup[] = isFiltered
 			? [
-					{ titleKey: 'exportGroupCurrentView', options: buildExportOptions(currentFilterSearch) },
+					{ titleKey: 'exportGroupCurrentView', options: buildExportOptions(`?${currentQuery}`) },
 					{ titleKey: 'exportGroupEntireTable', options: buildExportOptions('') }
 				]
 			: [{ titleKey: '', options: buildExportOptions('') }];
@@ -112,7 +101,7 @@
 		fields={['actor', 'action', 'content_type', 'timestamp', 'folder']}
 		thFilter={true}
 		thFilterFields={['actor', 'folder']}
-		onFilterChange={handleFilterChange}
+		onQueryChange={(query) => (currentQuery = query)}
 	>
 		{#snippet optButton()}
 			<button

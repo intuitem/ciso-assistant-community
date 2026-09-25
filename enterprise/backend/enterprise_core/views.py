@@ -563,10 +563,6 @@ class LogEntryFilterSet(GenericFilterSet):
         return queryset.filter(q)
 
 
-XLSX_MAX_ROWS = 1_048_575
-XLSX_MAX_CELL_CHARS = 32_000
-
-
 def _format_log_action(action):
     try:
         return LogEntryAction(action).to_string()
@@ -581,10 +577,10 @@ def _format_log_changes(changes):
         try:
             changes = json.loads(changes)
         except ValueError:
-            return changes[:XLSX_MAX_CELL_CHARS]
+            return changes
     if isinstance(changes, dict) and "password" in changes:
         changes = {**changes, "password": ["[old password]", "[new password]"]}
-    return json.dumps(changes, ensure_ascii=False, default=str)[:XLSX_MAX_CELL_CHARS]
+    return json.dumps(changes, ensure_ascii=False, default=str)
 
 
 class LogEntryViewSet(
@@ -669,9 +665,11 @@ class LogEntryViewSet(
 
     @action(detail=False, name="Export as XLSX")
     def export_xlsx(self, request):
-        if self.filter_queryset(self.get_queryset()).count() > XLSX_MAX_ROWS:
+        max_rows = settings.AUDITLOG_EXPORT_XLSX_MAX_ROWS
+        if self.filter_queryset(self.get_queryset()).count() > max_rows:
             return Response(
-                {"error": "tooManyRowsForXlsx"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "tooManyRowsForXlsx", "max_rows": max_rows},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         return super().export_xlsx(request)
 

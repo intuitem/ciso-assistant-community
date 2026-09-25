@@ -9,6 +9,13 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
+		const body = await res.json().catch(() => ({}));
+		if (body?.error === 'tooManyRowsForXlsx') {
+			error(
+				400,
+				`Too many rows for an Excel file (limit: ${body.max_rows}). Use the CSV export or narrow the filters.`
+			);
+		}
 		error(400, 'Error fetching the XLSX file');
 	}
 
@@ -17,7 +24,8 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 	return new Response(await res.blob(), {
 		headers: {
 			'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-			'Content-Disposition': `attachment; filename="${fileName}"`
+			'Content-Disposition': `attachment; filename="${fileName}"`,
+			'Cache-Control': 'no-store'
 		}
 	});
 };

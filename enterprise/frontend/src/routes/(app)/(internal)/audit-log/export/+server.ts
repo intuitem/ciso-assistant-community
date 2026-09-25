@@ -17,7 +17,8 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 	return new Response(await res.blob(), {
 		headers: {
 			'Content-Type': 'text/csv',
-			'Content-Disposition': `attachment; filename="${fileName}"`
+			'Content-Disposition': `attachment; filename="${fileName}"`,
+			'Cache-Control': 'no-store'
 		}
 	});
 };
