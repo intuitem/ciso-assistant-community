@@ -80,7 +80,7 @@ Each row carries `id`, `name`, `created_at`, `updated_at` plus the fields below.
 | `document_container` | description, ref_id, document_type |
 | `managed_document` | description, locale, default_locale, container, plus `document_type` and `current_revision` (id, version number, status). A locale variant with no title of its own reads under the document's name |
 | `document_revision` | version_number, status, source, change_summary, content, published_at, document. `content` is the markdown itself, so a long one is truncated in `{{nodes.…}}`; map it to a variable to pass a whole document to an AI step |
-| `requirement_assessment` | status, result, extended_result, score, is_scored, documentation_score, eta, due_date, observation, compliance_assessment, plus `requirement` (id, ref_id, name, description), `applied_controls` (each with its own `evidences`) and `evidences` attached to the requirement itself. Every evidence says whether anything is `attached`. Only assessable requirements |
+| `requirement_assessment` | status, result, extended_result, score, is_scored, documentation_score, eta, due_date, observation, compliance_assessment, plus `requirement` (id, ref_id, name, description), `applied_controls` (each with its own `evidences`) and `evidences` attached to the requirement itself, all narrowed to what the run may see. Every evidence says whether anything is `attached`. Only assessable requirements |
 | `risk_scenario` | description, ref_id, treatment, inherent_level, current_level, residual_level, risk_assessment. Level filters ignore unrated scenarios |
 | `risk_acceptance` | description, state, expiry_date, justification |
 | `validation_flow` | ref_id, status, validation_deadline |
@@ -101,15 +101,16 @@ Filter operators depend on the field type:
 
 #### Including the quality check
 
-**Audit** and **Requirement** offer `quality_check` under **Extra data to include** — the same findings the [X-rays](../x-rays.md) page shows, as `{errors, warnings, info, count}`. It is off by default because resolving it walks the whole audit with its controls and evidences, and it is computed for every row a step reads: ask for it on a **First match only** read, or on a short page.
+**Audit** and **Requirement** offer `quality_check` under **Extra data to include** — the same findings the [X-rays](../x-rays.md) page shows, as `{errors, warnings, info, count}`, plus three values for building on them: `flagged` (true when there is an error or a warning), `messages` (the finding sentences) and `text` (those sentences as an indented markdown list, ready to nest under a heading a document writes). It is off by default because resolving it walks the whole audit with its controls and evidences, and it is computed for every row a step reads: ask for it on a **First match only** read, or on a short page.
 
-A run can then branch on it. `{{nodes.<step>.object.quality_check.count}}` is the number of findings, and a condition on it routes the two outcomes:
+A run can then branch on it. Branch on `flagged` rather than on `count`: `count` includes the informational findings, which are observations rather than something to act on.
 
 | | |
 |---|---|
 | Trigger | Audit updated, condition on `status`, **Only when changed**, equals `done` |
 | Read objects | Audit, First match only, filter `id` equals `{{payload.object_id}}`, include `quality_check` |
-| Condition | `{{nodes.check.object.quality_check.count}}` greater than `0` |
+| Set variables | `flagged` = `{{nodes.check.object.quality_check.flagged}}` — a condition reads a declared variable, never a path |
+| Condition | `flagged` is `true` |
 | Send email | "This audit was closed with open quality findings" |
 
 Reading the audit's own quality check covers every requirement in one call, which is cheaper than reading the requirements and asking each for its own.
@@ -163,7 +164,7 @@ Some objects live in their parent's domain rather than the workflow's: a purpose
 | `entity_assessment` | name, description | entity, perimeter, framework, implementation_groups. With a framework, the questionnaire and its enclave are built too. Upsert not available |
 | `entity_score` | **score**, **as_of**, scale_max, grade, url, observation | entity, provider |
 | `timeline_entry` | **entry**, entry_type, timestamp, observation | incident |
-| `task_template` | name, description, ref_id, task_date | |
+| `task_template` | name, description, ref_id | `assigned_to` (actors), `task_date`, and links to `applied_controls`, `compliance_assessments`, `evidences`, `documents`. Creates the occurrence with it, so the task shows on the board |
 | `right_request` | name, **requested_on**, description, ref_id, due_date, request_type, observation | |
 
 **Bold** marks a field the object cannot be stored without: publishing refuses a step that leaves one empty, rather than letting the run write a blank. Every object that has a name needs one too, unless **Update when it already exists** is on.
@@ -174,7 +175,8 @@ Four of these are where a run files what an external system reported, and each i
 
 * **External rating** (`entity_score`) is one reading per provider per day, dated. Turn on **Update when it already exists** and a re-run on the same day corrects that day's reading instead of failing on the duplicate.
 * **Timeline Entry** (`timeline_entry`) adds an observation to an incident without touching its status or severity.
-* **Task** (`task_template`) attaches work. A run creates a dated task; recurrence stays something you set up by hand.
+* **Task** (`task_template`) attaches work. A run creates a dated, assigned task and the occurrence that puts it on the board; recurrence stays something you set up by hand.
+* **Validation flow** (`validation_flow`) asks for sign-off. Name an `approver` and what is being validated — audits, evidences, policies, findings assessments or security exceptions. The requester is the run's own identity.
 * **Right Request** (`right_request`) opens a request in **New**. Closing it stays with whoever handles it.
 
 ### Update object
