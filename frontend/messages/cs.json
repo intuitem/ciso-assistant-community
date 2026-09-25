@@ -5616,9 +5616,7 @@
 	"attributeMappingGroups": "Mapování atributu skupin",
 	"attributeMappingGroupsHelpText": "Název(y) nároku (claim) obsahujícího členství uživatele ve skupinách IdP. Skupiny nalezené zde jsou při každém přihlášení synchronizovány se skupinami IdP a udělují uživatelské skupiny CISO Assistant, na které je administrátor namapoval.",
 	"jitProvisioning": "Automatické zřizování přes SSO (JIT)",
-	"jitProvisioningDescription": "Povolit automatické vytváření účtů při prvním přihlášení přes SSO a synchronizaci jejich členství ve skupinách IdP, bez nutnosti SCIM."
-}
-{
+	"jitProvisioningDescription": "Povolit automatické vytváření účtů při prvním přihlášení přes SSO a synchronizaci jejich členství ve skupinách IdP, bez nutnosti SCIM.",
     "defaultRoleMustContainOnlyViewPermissions": "Výchozí role může obsahovat pouze oprávnění ke čtení.",
     "roleUsedAsDefaultRoleMustStayViewOnly": "Tato role je použita jako výchozí a může obsahovat pouze oprávnění ke čtení.",
     "reviewChangesRequested": "Požadovány změny",
@@ -6600,7 +6598,7 @@
     "newCampaign": "Nová kampaň",
     "sureToStartCampaign": "Zahájit “{campaign}”? Všichni přiřazení budou upozorněni.",
     "campaignStarted": "Kampaň zahájena: upozorněno {count} přiřazení.",
-    "campaignStartedWithUnassigned": "Kampaň zahájena: upozorněno {count} osob, ale u {missing} cílů nikdo chybí přiřazený řešitel.",
+    "campaignStartedWithUnassigned": "Kampaň zahájena: upozorněno {count} osob, ale u {missing} cílů chybí přiřazený řešitel.",
     "campaignHasNoAudits": "Tato kampaň nemá k zahájení žádná hodnocení.",
     "noAssigneeToNotify": "V dotazníku není nikdo přiřazen — přidejte zástupce dodavatele a pošlete znovu.",
     "lastAssessment": "Poslední hodnocení rizik",
