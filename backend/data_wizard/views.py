@@ -2765,6 +2765,7 @@ class FolderRecordConsumer(RecordConsumer):
     SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
         {
             "parent_folder": ["domain"],
+            "create_iam_groups": ["iam_group"],
         }
     )
 
@@ -2806,11 +2807,17 @@ class FolderRecordConsumer(RecordConsumer):
         else:
             parent_folder_id = Folder.get_root_folder().id
 
-        return {
+        data = {
             "name": name,
             "description": record.get("description", ""),
             "parent_folder": parent_folder_id,
-        }, None
+        }
+
+        iam_group = _parse_bool_cell(record.get("iam_group"))
+        if iam_group is not None:
+            data["create_iam_groups"] = iam_group
+
+        return data, None
 
 
 class VulnerabilityRecordConsumer(RecordConsumer[None]):

@@ -46,7 +46,6 @@ def audit_with_assignment(app_config):
         parent_folder=Folder.get_root_folder(),
         create_iam_groups=True,
     )
-    Folder.create_default_ug_and_ra(domain)
     perimeter = Perimeter.objects.create(name="P1", folder=domain)
     ca = ComplianceAssessment.objects.create(
         name="Audit", framework=framework, perimeter=perimeter, folder=domain

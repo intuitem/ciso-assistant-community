@@ -481,7 +481,6 @@ class TestDeputization:
             content_type=Folder.ContentType.DOMAIN,
             create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(domain)
         manager = User.objects.create_user(email="dma@example.com")
         manager.user_groups.add(UserGroup.objects.get(folder=domain, name="BI-UG-DMA"))
 
@@ -642,7 +641,6 @@ class TestSecretApi:
             content_type=Folder.ContentType.DOMAIN,
             create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(domain)
         manager = User.objects.create_user(email=email)
         manager.user_groups.add(UserGroup.objects.get(folder=domain, name="BI-UG-DMA"))
         return domain, manager

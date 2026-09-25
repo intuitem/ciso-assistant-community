@@ -45,7 +45,6 @@ def _make_domain(name):
         parent_folder=Folder.get_root_folder(),
         create_iam_groups=True,
     )
-    Folder.create_default_ug_and_ra(folder)
     return folder
 
 
