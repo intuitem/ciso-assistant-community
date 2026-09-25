@@ -42,9 +42,17 @@ describe('bufferJsonResponse', () => {
 		expect(await buffered.json()).toEqual({ a: 1 });
 	});
 
+	it('matches the JSON media type case-insensitively, ignoring parameters', async () => {
+		const original = new Response('{}', {
+			headers: { 'content-type': 'Application/JSON; charset=utf-8' }
+		});
+		expect(await bufferJsonResponse(original)).not.toBe(original);
+	});
+
 	it('passes streams, files and bodiless responses through untouched', async () => {
 		for (const res of [
 			new Response('data: x\n\n', { headers: { 'content-type': 'text/event-stream' } }),
+			new Response('{}\n', { headers: { 'content-type': 'application/json-seq' } }),
 			new Response('PK', { headers: { 'content-type': 'application/zip' } }),
 			new Response(null, { status: 204, headers: { 'content-type': 'application/json' } })
 		]) {

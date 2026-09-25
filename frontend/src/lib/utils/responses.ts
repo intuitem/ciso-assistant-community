@@ -17,7 +17,8 @@ const NULL_BODY_STATUSES = new Set([101, 204, 205, 304]);
  */
 export async function bufferJsonResponse(res: Response): Promise<Response> {
 	if (!res.body || NULL_BODY_STATUSES.has(res.status)) return res;
-	if (!res.headers.get('content-type')?.includes('application/json')) return res;
+	const mediaType = res.headers.get('content-type')?.split(';')[0].trim().toLowerCase();
+	if (mediaType !== 'application/json') return res;
 	const body = await res.arrayBuffer();
 	return new Response(body, {
 		status: res.status,
