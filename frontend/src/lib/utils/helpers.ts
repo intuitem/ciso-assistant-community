@@ -311,6 +311,7 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	let totalWeight = 0;
 	let isScoreComputed = false;
 	const results: string[] = [];
+	const questionResults: { tier: string | null; selected: string[] }[] = [];
 	let visibleCount = 0;
 	let answeredVisibleCount = 0;
 
@@ -342,6 +343,7 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 		if (!question.choices || !Array.isArray(question.choices)) continue;
 
 		const weight = typeof question.weight === 'number' ? question.weight : 1;
+		const selected: string[] = [];
 
 		for (const urn of choiceURNs) {
 			const selectedChoice = question.choices.find((choice: any) => choice.urn === urn);
@@ -355,9 +357,17 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 			if (selectedChoice.compute_result !== undefined && selectedChoice.compute_result !== null) {
 				const resolved = resolveComputeResult(selectedChoice.compute_result);
-				if (resolved !== null) results.push(resolved);
+				if (resolved !== null) {
+					results.push(resolved);
+					selected.push(resolved);
+				}
 			}
 		}
+
+		questionResults.push({
+			tier: resolveResultTier(question.choices.map((choice: any) => choice.compute_result)),
+			selected
+		});
 	}
 
 	let score: number | null;
@@ -381,7 +391,10 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	} else if (answeredVisibleCount < visibleCount || results.length === 0) {
 		result = 'not_assessed';
 	} else {
-		const aggregated = aggregateComputeResults(results);
+		const aggregated =
+			ca.framework?.result_aggregation === 'tiered_all'
+				? aggregateTieredResults(questionResults)
+				: aggregateComputeResults(results);
 		result = aggregated ?? 'not_assessed';
 	}
 
@@ -403,7 +416,64 @@ export function resolveComputeResult(value: unknown): string | null {
 	return null;
 }
 
-/** Aggregate resolved compute_result values: not_applicable is neutral, else worst-wins. */
+/**
+ * The tier a question states, read from the results its choices can set.
+ * Mirrors `resolve_result_tier` in backend/core/utils.py.
+ */
+export function resolveResultTier(computeResults: unknown[]): string | null {
+	const resolved = new Set(computeResults.map((value) => resolveComputeResult(value)));
+	if (resolved.has('compliant')) return 'compliant';
+	if (resolved.has('partially_compliant')) return 'partially_compliant';
+	if (resolved.has('non_compliant')) return 'blocking';
+	return null;
+}
+
+/**
+ * Aggregate answers where a tier is earned only if all of it holds.
+ * Mirrors `aggregate_tiered_results` in backend/core/utils.py - keep the two in step.
+ */
+export function aggregateTieredResults(
+	questionResults: { tier: string | null; selected: string[] }[]
+): string | null {
+	const answered = questionResults.filter((entry) => entry.tier);
+	if (answered.length === 0) return null;
+
+	// not_applicable is neutral, as in aggregateComputeResults: on a multiple
+	// choice answer it drops out of the selection rather than failing the tier,
+	// and a question answered entirely not_applicable stops contributing.
+	const contributing: { tier: string | null; selected: string[] }[] = [];
+	for (const { tier, selected } of answered) {
+		const effective = selected.filter((r) => r !== 'not_applicable');
+		if (selected.length > 0 && effective.length === 0) continue;
+		contributing.push({ tier, selected: effective });
+	}
+	if (contributing.length === 0) return 'not_applicable';
+
+	const holdsByTier: Record<string, boolean[]> = { compliant: [], partially_compliant: [] };
+	for (const { tier, selected } of contributing) {
+		if (tier === 'blocking') {
+			if (selected.some((r) => r === 'non_compliant')) return 'non_compliant';
+			continue;
+		}
+		holdsByTier[tier as string].push(selected.length > 0 && selected.every((r) => r === tier));
+	}
+
+	for (const tier of ['compliant', 'partially_compliant']) {
+		if (holdsByTier[tier].length > 0 && holdsByTier[tier].every(Boolean)) return tier;
+	}
+
+	// Nothing states a tier - only blocking statements, none of them triggered.
+	if (holdsByTier.compliant.length === 0 && holdsByTier.partially_compliant.length === 0) {
+		return 'compliant';
+	}
+	return 'non_compliant';
+}
+
+/**
+ * Aggregate resolved compute_result values, each answer standing on its own:
+ * not_applicable is neutral, unanimous answers carry, and answers that disagree
+ * land on partially_compliant.
+ */
 function aggregateComputeResults(resolved: string[]): string | null {
 	const contributing = resolved.filter((r) => r !== null && r !== undefined);
 	if (contributing.length === 0) return null;

@@ -432,6 +432,9 @@ class FrameworkImporter:
                 annotation=self.framework_data.get("annotation"),
                 min_score=min_score,
                 max_score=max_score,
+                result_aggregation=self.framework_data.get(
+                    "result_aggregation", Framework.ResultAggregation.PER_ANSWER
+                ),
                 scores_definition=scores_definition,
                 implementation_groups_definition=self.framework_data.get(
                     "implementation_groups_definition"
