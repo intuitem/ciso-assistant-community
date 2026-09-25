@@ -874,9 +874,15 @@ if not IDP_OIDC_PRIVATE_KEY:
             format=serialization.PrivateFormat.PKCS8,
             encryption_algorithm=serialization.NoEncryption(),
         ).decode()
-        _idp_oidc_key_path.parent.mkdir(parents=True, exist_ok=True)
-        _idp_oidc_key_path.touch(mode=0o600)
-        _idp_oidc_key_path.write_text(IDP_OIDC_PRIVATE_KEY)
+        try:
+            _idp_oidc_key_path.parent.mkdir(parents=True, exist_ok=True)
+            _idp_oidc_key_path.touch(mode=0o600)
+            _idp_oidc_key_path.write_text(IDP_OIDC_PRIVATE_KEY)
+        except OSError as exc:
+            # in-memory key: rotates on restart, differs between processes
+            logger.warning(
+                "could not persist the OIDC signing key, keeping it in memory: %s", exc
+            )
 
 # MFA / WebAuthn settings
 MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
