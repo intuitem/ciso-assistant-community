@@ -4,7 +4,8 @@ import sanitizeHtml from 'sanitize-html';
 import { sanitizeConfig } from './markdown';
 import { MERMAID_BLOCK_CLASS, wrapMermaidBlocks } from './mermaid';
 
-const render = (md: string) => wrapMermaidBlocks(sanitizeHtml(marked(md) as string, sanitizeConfig));
+const render = (md: string) =>
+	wrapMermaidBlocks(sanitizeHtml(marked(md) as string, sanitizeConfig));
 
 describe('wrapMermaidBlocks', () => {
 	it('wraps mermaid fenced blocks', () => {
