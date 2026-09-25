@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { type TableSource } from '$lib/components/ModelTable/types';
 import { headData } from '$lib/utils/table';
+import { discardBody } from '$lib/utils/responses';
 import type { urlModel } from '$lib/utils/types';
 
 export const load = (async ({ fetch, params }) => {
@@ -18,7 +19,7 @@ export const load = (async ({ fetch, params }) => {
 	const requirementsListData = await fetch(
 		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/requirements_list/?assessable=true`
 	)
-		.then((res) => (res.ok ? res.json() : null))
+		.then((res) => (res.ok ? res.json() : discardBody(res).then(() => null)))
 		.catch((error) => {
 			console.error('Failed to fetch requirement viewer role:', error);
 			return null;
@@ -27,28 +28,14 @@ export const load = (async ({ fetch, params }) => {
 
 	const tables: Record<string, any> = {};
 
-	// Only reachability is read — the rows come from the table's own request — so the
-	// probes ask for one row each and run together instead of four blocking round trips.
-	await Promise.all(
-		(['applied-controls', 'task-templates', 'evidences', 'findings'] as urlModel[]).map(
-			async (key) => {
-				// findings hang off the assessment itself; the others off its `requirement_assessments` m2m
-				const filter = key === 'findings' ? 'requirement_assessment' : 'requirement_assessments';
-				const keyEndpoint = `${BASE_API_URL}/${key}/?${filter}=${params.id}&limit=1`;
-				const response = await fetch(keyEndpoint);
-				if (response.ok) {
-					const table: TableSource = {
-						head: headData(key),
-						body: [],
-						meta: []
-					};
-					tables[key] = table;
-				} else {
-					console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
-				}
-			}
-		)
-	);
+	for (const key of ['applied-controls', 'task-templates', 'evidences', 'findings'] as urlModel[]) {
+		const table: TableSource = {
+			head: headData(key),
+			body: [],
+			meta: []
+		};
+		tables[key] = table;
+	}
 
 	return {
 		requirementAssessment,
