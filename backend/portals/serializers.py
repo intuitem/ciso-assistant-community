@@ -1,4 +1,5 @@
 import re
+import uuid
 
 from django.contrib.auth.models import Permission
 from rest_framework import serializers
@@ -12,6 +13,9 @@ from .models import FrameworkSnapshot, Portal, PortalPreset, PublicDocument
 
 # accent_color goes verbatim into an inline style on the public trust page; constrain it.
 _COLOR_RE = re.compile(r"^#[0-9a-fA-F]{3,8}$|^rgba?\([\d.,\s/%]+\)$", re.IGNORECASE)
+
+# Tiles the launch endpoints look up by id (PortalViewSet._find_item).
+LAUNCHABLE_KINDS = ("assessment", "quickForm")
 
 
 class PortalPresetReadSerializer(BaseModelSerializer):
@@ -107,6 +111,12 @@ class PortalWriteSerializer(BaseModelSerializer):
                 not isinstance(i, dict) for i in items
             ):
                 raise serializers.ValidationError("section items must be objects")
+            for item in items:
+                # A click finds its tile by id. The editor mints one, but a design
+                # can arrive without it (a library preset, the API), and a portal
+                # published before its first save would 404 on every click.
+                if item.get("kind") in LAUNCHABLE_KINDS and not item.get("id"):
+                    item["id"] = str(uuid.uuid4())
         return value
 
     def _incomplete_tiles(self, content):

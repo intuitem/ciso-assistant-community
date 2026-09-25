@@ -574,17 +574,29 @@ class QuickFormImporter:
 
 class PortalPresetImporter:
     """Loads a portal design as a catalog entry, keyed on its URN so a later version
-    refreshes it in place. Tile references arrive as URNs; one that cannot be resolved
-    leaves its tile unwired rather than failing the load, and the editor flags it."""
+    refreshes it in place. Used by a first load and by a library update alike, so
+    both get the same checks. Tile references travel as URNs and are only resolved
+    when a portal is cloned from the preset: one that cannot be resolved leaves its
+    tile unwired rather than failing the load, and the editor flags it."""
 
     REQUIRED_FIELDS = {"ref_id", "urn", "name"}
     # Checked here so a bad document fails the load with a message on every
     # database; PostgreSQL rejects an oversized column, SQLite stores it.
     MAX_LENGTHS = {"name": 200, "ref_id": 255, "urn": 255}
 
-    def __init__(self, preset_data: dict, library_urn: Optional[str] = None):
+    def __init__(
+        self,
+        preset_data: dict,
+        library_urn: Optional[str] = None,
+        locale: str = "en",
+    ):
         self.preset_data = preset_data
         self.library_urn = library_urn
+        self.locale = locale
+
+    @property
+    def urn(self) -> str:
+        return str(self.preset_data["urn"]).lower()
 
     def init(self) -> Union[str, None]:
         from portals.models import PortalPreset
@@ -599,17 +611,21 @@ class PortalPresetImporter:
                 return f"{field} must be a non-empty string"
             if len(value) > max_length:
                 return f"{field} must be at most {max_length} characters"
-        urn = str(self.preset_data["urn"]).lower()
-        # update_or_create keys on the URN alone; without this, a second library
-        # shipping the same preset URN would silently take the row over.
+        urn = self.urn
+        # update_or_create keys on the URN alone; without this, a second library,
+        # or another locale of this one, shipping the same preset URN would silently
+        # take the row over (and unloading it would then cascade the preset away).
         owner = (
             PortalPreset.objects.filter(urn=urn, library__isnull=False)
-            .exclude(library__urn=self.library_urn)
-            .values_list("library__urn", flat=True)
+            .exclude(library__urn=self.library_urn, library__locale=self.locale)
+            .values_list("library__urn", "library__locale")
             .first()
         )
         if owner:
-            return f"portal preset {urn} is already provided by library {owner}"
+            return (
+                f"portal preset {urn} is already provided by library "
+                f"{owner[0]} ({owner[1]})"
+            )
         content = self.preset_data.get("content")
         if not isinstance(content, dict):
             return "content must be an object"
@@ -630,16 +646,19 @@ class PortalPresetImporter:
         from portals.models import PortalPreset
         from portals.references import resolve
 
-        urn = self.preset_data["urn"].lower()
-        content, unresolved = resolve(self.preset_data.get("content") or {})
-        for warning in unresolved:
+        # Stored as shipped, URNs and all: tiles are wired when a portal is cloned
+        # from the preset, so a library loaded (or reloaded) after this one still
+        # resolves. Resolving here only reports what would stay unwired today.
+        content = self.preset_data.get("content") or {}
+        for warning in resolve(content)[1]:
             logger.warning(
                 "Portal preset load warning",
                 library=library_object.urn,
+                preset=self.urn,
                 warning=warning,
             )
         PortalPreset.objects.update_or_create(
-            urn=urn,
+            urn=self.urn,
             defaults=dict(
                 folder=Folder.get_root_folder(),
                 library=library_object,
@@ -654,6 +673,38 @@ class PortalPresetImporter:
                 content=content,
             ),
         )
+
+
+def init_portal_preset_importers(
+    presets_data, library_urn: str, locale: str
+) -> tuple[list[PortalPresetImporter], Union[str, None]]:
+    """Checks a library's `portal_presets` block and returns an importer per entry,
+    or the first error. Shared by a load and a library update."""
+    if isinstance(presets_data, dict):
+        presets_data = [presets_data]
+    if not isinstance(presets_data, list):
+        return [], "[PORTAL_PRESET_ERROR] The 'portal_presets' field must be a list."
+    importers = []
+    import_errors = []
+    for index, preset_data in enumerate(presets_data):
+        if not isinstance(preset_data, dict):
+            import_errors.append((index, "must be an object"))
+            continue
+        importer = PortalPresetImporter(
+            preset_data, library_urn=library_urn, locale=locale
+        )
+        importers.append(importer)
+        if (error := importer.init()) is not None:
+            import_errors.append((index, error))
+    if not import_errors:
+        return importers, None
+    index, error = import_errors[0]
+    ordinal = {1: "st", 2: "nd", 3: "rd"}.get(index + 1, "th")
+    return importers, (
+        f"[PORTAL_PRESET_ERROR] {len(import_errors)} invalid portal preset"
+        f"{'s' if len(import_errors) > 1 else ''} detected, the "
+        f"{index + 1}{ordinal} portal preset has the following error : {error}"
+    )
 
 
 class ReferentialImporterMixin:
@@ -1216,27 +1267,11 @@ class LibraryImporter:
             )
         return None
 
-    def init_portal_presets(self, portal_presets: List[dict]) -> Union[str, None]:
-        importers = []
-        import_errors = []
-        for index, preset_data in enumerate(portal_presets):
-            if not isinstance(preset_data, dict):
-                import_errors.append((index, "must be an object"))
-                continue
-            importer = PortalPresetImporter(preset_data, library_urn=self._library.urn)
-            importers.append(importer)
-            if (error := importer.init()) is not None:
-                import_errors.append((index, error))
-        self._portal_presets = importers
-        if import_errors:
-            index, error = import_errors[0]
-            ordinal = {1: "st", 2: "nd", 3: "rd"}.get(index + 1, "th")
-            return (
-                f"[PORTAL_PRESET_ERROR] {len(import_errors)} invalid portal preset"
-                f"{'s' if len(import_errors) > 1 else ''} detected, the "
-                f"{index + 1}{ordinal} portal preset has the following error : {error}"
-            )
-        return None
+    def init_portal_presets(self, portal_presets) -> Union[str, None]:
+        self._portal_presets, error = init_portal_preset_importers(
+            portal_presets, self._library.urn, self._library.locale
+        )
+        return error
 
     def init(self) -> Union[str, None]:
         """missing_fields = self.REQUIRED_FIELDS - set(self._library_data.keys())
@@ -1295,12 +1330,6 @@ class LibraryImporter:
 
         if "portal_presets" in library_objects:
             presets_data = library_objects["portal_presets"]
-            if isinstance(presets_data, dict):
-                presets_data = [presets_data]
-            if not isinstance(presets_data, list):
-                return (
-                    "[PORTAL_PRESET_ERROR] The 'portal_presets' field must be a list."
-                )
             if (error := self.init_portal_presets(presets_data)) is not None:
                 logger.error("Portal preset import error", error=error)
                 return error

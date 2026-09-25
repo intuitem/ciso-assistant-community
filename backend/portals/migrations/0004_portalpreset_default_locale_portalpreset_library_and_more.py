@@ -33,4 +33,16 @@ class Migration(migrations.Migration):
             name="locale",
             field=models.CharField(default="en", max_length=100, verbose_name="Locale"),
         ),
+        migrations.AddField(
+            model_name="portal",
+            name="export_fingerprint",
+            field=models.CharField(
+                blank=True, default="", editable=False, max_length=64
+            ),
+        ),
+        migrations.AddField(
+            model_name="portal",
+            name="export_version",
+            field=models.IntegerField(default=0, editable=False),
+        ),
     ]

@@ -497,8 +497,8 @@ class PortalViewSet(CustomPortalsViewSet):
 
     @action(detail=True, methods=["get"])
     def export(self, request, pk=None):
-        """Emit the design as a loadable library YAML, with dependencies derived
-        from the libraries behind its tiles."""
+        """Emit the design as a loadable library YAML. Exporting an edited portal
+        again ships the next version, which loads as an update of the last one."""
         portal = self.get_object()
         document, _unwired = build_preset_library(portal)
         payload = yaml.safe_dump(

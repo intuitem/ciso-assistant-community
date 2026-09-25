@@ -1,6 +1,11 @@
 """Portal tile targets point at local rows by pk; a packaged design names them by
 URN instead. Neither direction fails: an unresolvable reference leaves its tile
-unwired, which the editor already flags."""
+unwired, which the editor already flags.
+
+A target holds one reference per field, never both: live portal content holds the
+local id (`framework`), preset content holds the URN (`framework_urn`) wherever the
+row has one. A URN kept next to an id would go stale as soon as the author picks
+another target in the editor, and then win over the author's pick."""
 
 import copy
 
@@ -13,8 +18,9 @@ URN_TARGET_FIELDS = {
     "quickForm": [("quick_form", QuickForm)],
 }
 
-# Dropping these costs a default, not a capability: an absent domain means the
-# clicker picks one, an absent reviewer means the requester reviews their own.
+# Dropped on export only: they name rows of this instance. Dropping them costs a
+# default, not a capability: an absent domain means the clicker picks one, an
+# absent reviewer means the requester reviews their own.
 LOCAL_ONLY_FIELDS = ("folder", "reviewers")
 
 
@@ -51,22 +57,25 @@ def _urn_of(model, pk):
 def _carry_publication_form(target, title, unwired, keep_local_ids):
     """A quick form tile may be wired through a publication alone. The publication
     is local (audience, submission folder), but the form behind it can travel, so
-    the tile leaves as `quick_form` and is rewired to the form on arrival."""
+    the tile leaves as `quick_form` and is rewired to the form on arrival.
+
+    The publication decides the form, as it does when the tile is clicked: a
+    `quick_form` next to it is a leftover the editor hides, not the author's pick."""
     publication = target.get("publication")
     if not publication:
         target.pop("publication", None)
         return
-    if not target.get("quick_form"):
-        form_id = _first(QuickFormPublication.objects, "quick_form_id", publication)
-        if form_id is None:
-            if not keep_local_ids:
-                target.pop("publication", None)
-                unwired.append(
-                    f"'{title}' travels unwired: its publication is not on this "
-                    "instance, so there is no quick form to travel under."
-                )
-            return
+    form_id = _first(QuickFormPublication.objects, "quick_form_id", publication)
+    if form_id is not None:
         target["quick_form"] = str(form_id)
+    elif not target.get("quick_form"):
+        if not keep_local_ids:
+            target.pop("publication", None)
+            unwired.append(
+                f"'{title}' travels unwired: its publication is not on this "
+                "instance, so there is no quick form to travel under."
+            )
+        return
     if not keep_local_ids:
         target.pop("publication", None)
 
@@ -92,8 +101,12 @@ def dereference(content, keep_local_ids=False):
         for field, model in URN_TARGET_FIELDS.get(item.get("kind"), []):
             value = target.get(field)
             if not value:
+                # Nothing picked here: a URN that never resolved on this instance
+                # is the only record of the intended target, so it travels on.
                 target.pop(field, None)
                 continue
+            # The id is what the tile runs on, so it alone decides what travels.
+            target.pop(f"{field}_urn", None)
             urn = _urn_of(model, value)
             if not urn:
                 if not keep_local_ids:
@@ -105,14 +118,16 @@ def dereference(content, keep_local_ids=False):
                 continue
             target.pop(field, None)
             target[f"{field}_urn"] = urn
-        for field in LOCAL_ONLY_FIELDS:
-            target.pop(field, None)
+        if not keep_local_ids:
+            for field in LOCAL_ONLY_FIELDS:
+                target.pop(field, None)
     return out, unwired
 
 
 def resolve(content):
-    """Preset content -> portal content. Returns (content, unwired). The URN is
-    kept alongside the resolved id, so the design stays re-exportable."""
+    """Preset content -> portal content. Returns (content, unwired). A resolved URN
+    is replaced by the local id (dereference derives it back on export); one that
+    does not resolve stays, so the tile can still be wired once its library is."""
     out = copy.deepcopy(content or {})
     unwired = []
     for item in _iter_items(out):
@@ -135,4 +150,5 @@ def resolve(content):
                 )
                 continue
             target[field] = str(obj.id)
+            target.pop(f"{field}_urn", None)
     return out, unwired

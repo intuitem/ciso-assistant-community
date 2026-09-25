@@ -262,10 +262,115 @@ class TestDereference:
         assert len(unwired) == 1
         assert "framework" not in content["sections"][0]["items"][0]["target"]
 
+    def test_the_id_decides_what_travels_not_a_urn_left_next_to_it(self, catalog):
+        """The editor rebinds only the id. A tile once wired to the library
+        framework and re-pointed at a homegrown one must stay homegrown."""
+        homegrown = Framework.objects.create(
+            name="Homegrown", folder=catalog["folder"], locale="en", default_locale=True
+        )
+        portal = _portal(
+            catalog,
+            [
+                {
+                    "kind": "assessment",
+                    "title": "Audit",
+                    "target": {
+                        "framework": str(homegrown.id),
+                        "framework_urn": catalog["fw"].urn,
+                    },
+                }
+            ],
+        )
+
+        template, _ = dereference(portal.content, keep_local_ids=True)
+        cloned, unwired = resolve(template)
+        assert unwired == []
+        assert cloned["sections"][0]["items"][0]["target"] == {
+            "framework": str(homegrown.id)
+        }
+
+        exported, unwired = dereference(portal.content)
+        assert len(unwired) == 1
+        assert exported["sections"][0]["items"][0]["target"] == {}
+
+    def test_an_unresolved_urn_travels_on_until_something_is_picked(self, catalog):
+        portal = _portal(
+            catalog,
+            [
+                {
+                    "kind": "assessment",
+                    "target": {"framework_urn": "urn:test:absent:fw"},
+                }
+            ],
+        )
+
+        exported, _ = dereference(portal.content)
+
+        assert exported["sections"][0]["items"][0]["target"] == {
+            "framework_urn": "urn:test:absent:fw"
+        }
+
+    def test_the_publication_decides_the_form_as_it_does_on_click(self, catalog):
+        """Picking a publication hides the inline form select without clearing it;
+        the tile runs the publication's form, so that is the one that travels."""
+        from core.models import QuickFormPublication
+
+        other = QuickForm.objects.create(
+            name="Laptop request",
+            urn="urn:test:portals:qf2",
+            ref_id="QF2",
+            folder=catalog["folder"],
+            library=catalog["library"],
+            locale="en",
+            default_locale=True,
+        )
+        publication = QuickFormPublication.objects.create(
+            name="Laptops", folder=catalog["folder"], quick_form=other
+        )
+        portal = _portal(
+            catalog,
+            [
+                {
+                    "kind": "quickForm",
+                    "title": "Ask",
+                    "target": {
+                        "publication": str(publication.id),
+                        "quick_form": str(catalog["qf"].id),
+                    },
+                }
+            ],
+        )
+
+        exported, unwired = dereference(portal.content)
+
+        assert unwired == []
+        assert exported["sections"][0]["items"][0]["target"] == {
+            "quick_form_urn": other.urn
+        }
+
+    def test_a_local_template_keeps_the_tiles_domain_and_reviewers(self, catalog):
+        target = {
+            "quick_form": str(catalog["qf"].id),
+            "folder": str(catalog["folder"].id),
+            "reviewers": ["an-actor-id"],
+        }
+        portal = _portal(catalog, [{"kind": "quickForm", "target": target}])
+
+        template, unwired = dereference(portal.content, keep_local_ids=True)
+
+        assert unwired == []
+        assert template["sections"][0]["items"][0]["target"] == {
+            "quick_form_urn": catalog["qf"].urn,
+            "folder": target["folder"],
+            "reviewers": target["reviewers"],
+        }
+
 
 @pytest.mark.django_db
 class TestResolve:
-    def test_urns_become_local_ids_and_are_kept(self, catalog):
+    def test_urns_become_local_ids(self, catalog):
+        """The URN goes once resolved: the editor only ever rewrites the id, so a
+        URN left next to it would go stale and override the author's next pick."""
         content, unwired = resolve(
             {
                 "sections": [
@@ -283,8 +388,7 @@ class TestResolve:
         target = content["sections"][0]["items"][0]["target"]
 
         assert unwired == []
-        assert target["framework"] == str(catalog["fw"].id)
-        assert target["framework_urn"] == "urn:test:portals:fw"
+        assert target == {"framework": str(catalog["fw"].id)}
 
     def test_missing_reference_is_reported_not_silently_dropped(self, catalog):
         _content, unwired = resolve(
@@ -307,8 +411,8 @@ class TestResolve:
         assert "not loaded" in unwired[0]
 
     def test_an_id_that_travelled_with_an_unloaded_urn_is_dropped(self, catalog):
-        """A preset keeps the id next to the URN; on another instance that id is
-        dangling, and a dangling id would only make the tile look wired."""
+        """A hand-written preset may carry an id next to the URN; on another
+        instance that id is dangling, and would only make the tile look wired."""
         content, _unwired = resolve(
             {
                 "sections": [
@@ -356,7 +460,7 @@ class TestRoundTrip:
         assert unwired == []
         # Must survive the YAML trip the library store puts it through.
         document = yaml.safe_load(yaml.safe_dump(document, allow_unicode=True))
-        assert document["dependencies"] == ["urn:test:portals:lib"]
+        assert "dependencies" not in document
 
         preset_data = document["objects"]["portal_presets"][0]
         importer = PortalPresetImporter(preset_data)
@@ -364,7 +468,9 @@ class TestRoundTrip:
         importer.import_portal_preset(catalog["library"])
 
         preset = PortalPreset.objects.get(urn=preset_data["urn"])
-        items = preset.content["sections"][0]["items"]
+        # Stored as shipped; the tiles are wired when a portal is cloned from it.
+        assert preset.content == preset_data["content"]
+        items = resolve(preset.content)[0]["sections"][0]["items"]
 
         assert preset.library_id == catalog["library"].id
         assert items[0]["target"]["framework"] == str(catalog["fw"].id)
@@ -404,12 +510,12 @@ class TestRoundTrip:
         )
         assert preset.library_id == library.id
         assert preset.provider == "personal"
-        assert list(library.dependencies.values_list("urn", flat=True)) == [
-            catalog["library"].urn
-        ]
+        assert not library.dependencies.exists()
         target = preset.content["sections"][0]["items"][0]["target"]
-        assert target["framework"] == str(catalog["fw"].id)
-        assert target["framework_urn"] == "urn:test:portals:fw"
+        assert target == {"framework_urn": "urn:test:portals:fw"}
+        assert resolve(preset.content)[0]["sections"][0]["items"][0]["target"] == {
+            "framework": str(catalog["fw"].id)
+        }
 
     def test_a_stored_newer_version_updates_the_loaded_preset(self, catalog):
         from core.models import StoredLibrary
@@ -426,11 +532,12 @@ class TestRoundTrip:
         assert error is None, error
         assert stored.load() is None
 
-        document["version"] = 2
-        document["objects"]["portal_presets"][0]["name"] = "Updated design v2"
-        document["objects"]["portal_presets"][0]["content"]["sections"][0]["title"] = (
-            "Start over"
-        )
+        # Edit and export again: the next version, loadable as an update.
+        portal.name = "Updated design v2"
+        portal.content["sections"][0]["title"] = "Start over"
+        portal.save()
+        document, _unwired = build_preset_library(portal)
+        assert document["version"] == 2
         stored_v2, error = StoredLibrary.store_library_content(
             yaml.safe_dump(document, allow_unicode=True).encode("utf-8")
         )
@@ -471,7 +578,9 @@ class TestRoundTrip:
         importer.import_portal_preset(catalog["library"])
 
         preset = PortalPreset.objects.get(urn=preset_data["urn"])
-        assert "framework" not in preset.content["sections"][0]["items"][0]["target"]
+        content, unwired = resolve(preset.content)
+        assert "framework" not in content["sections"][0]["items"][0]["target"]
+        assert len(unwired) == 1
 
     def test_unloading_drops_the_catalog_entry_but_never_a_live_portal(self, catalog):
         portal = _portal(
@@ -508,6 +617,89 @@ class TestRoundTrip:
 
         presets = PortalPreset.objects.filter(urn=preset_data["urn"])
         assert [p.name for p in presets] == ["Onboarding v2"]
+
+
+@pytest.mark.django_db
+class TestExportIdentity:
+    def _store(self, document):
+        from core.models import StoredLibrary
+
+        return StoredLibrary.store_library_content(
+            yaml.safe_dump(document, allow_unicode=True).encode("utf-8")
+        )
+
+    def test_identity_follows_the_portal_not_its_name(self, catalog):
+        first = _portal(catalog, [])
+        before, _ = build_preset_library(first)
+        first.name = "Renamed"
+        first.save()
+        after, _ = build_preset_library(first)
+        assert after["urn"] == before["urn"]
+
+        # Names a slug cannot tell apart must not collide.
+        a = Portal.objects.create(name="Портал поставщиков", folder=catalog["folder"])
+        b = Portal.objects.create(name="供应商门户", folder=catalog["folder"])
+        assert build_preset_library(a)[0]["urn"] != build_preset_library(b)[0]["urn"]
+
+    def test_a_long_name_still_exports_a_loadable_library(self, catalog):
+        portal = _portal(
+            catalog, [{"kind": "create", "target": {"model": "incidents"}}]
+        )
+        portal.name = "Security operations onboarding portal " + "x" * 150
+        portal.save()
+
+        stored, error = self._store(build_preset_library(portal)[0])
+
+        assert error is None, error
+        assert stored.load() is None
+
+    def test_the_version_moves_only_when_what_ships_changes(self, catalog):
+        portal = _portal(
+            catalog, [{"kind": "create", "target": {"model": "incidents"}}]
+        )
+
+        assert build_preset_library(portal)[0]["version"] == 1
+        assert build_preset_library(portal)[0]["version"] == 1
+
+        portal.content["sections"][0]["title"] = "Edited"
+        portal.save()
+        assert build_preset_library(portal)[0]["version"] == 2
+
+        # A settings change ships nothing new.
+        portal.enabled = False
+        portal.save()
+        assert build_preset_library(portal)[0]["version"] == 2
+
+    def test_a_design_loads_without_the_libraries_behind_its_tiles(self, catalog):
+        """References are soft: a missing library leaves the tile unwired at Use
+        time instead of failing the load."""
+        portal = _portal(
+            catalog,
+            [
+                {
+                    "id": "t1",
+                    "kind": "assessment",
+                    "title": "Run the audit",
+                    "target": {"framework": str(catalog["fw"].id)},
+                }
+            ],
+        )
+        document, _ = build_preset_library(portal)
+        assert "dependencies" not in document
+        # The receiving instance does not have the framework's library.
+        portal.delete()
+        catalog["library"].delete()
+
+        stored, error = self._store(document)
+        assert error is None, error
+        assert stored.load() is None
+
+        preset = PortalPreset.objects.get(
+            urn=document["objects"]["portal_presets"][0]["urn"]
+        )
+        content, unwired = resolve(preset.content)
+        assert "framework" not in content["sections"][0]["items"][0]["target"]
+        assert len(unwired) == 1
 
 
 @pytest.mark.django_db
@@ -582,6 +774,25 @@ class TestPresetValidation:
         assert again.init() is None
         assert catalog["library"].urn in other.init()
 
+    def test_another_locale_of_the_same_library_is_refused(self, catalog):
+        """Taking the row over would re-home it to the other locale's library, and
+        unloading that one would cascade the preset away from this one."""
+        preset_data = {
+            "urn": "urn:test:portals:portal_preset:localized",
+            "ref_id": "localized",
+            "name": "Localized",
+            "content": {"sections": [{"items": []}]},
+        }
+        PortalPresetImporter(
+            preset_data, library_urn=catalog["library"].urn, locale="en"
+        ).import_portal_preset(catalog["library"])
+
+        french = PortalPresetImporter(
+            preset_data, library_urn=catalog["library"].urn, locale="fr"
+        )
+
+        assert "(en)" in french.init()
+
 
 @pytest.mark.django_db
 class TestPublishGate:
@@ -641,6 +852,31 @@ class TestPublishGate:
         assert not serializer.is_valid()
         assert "Audit" in str(serializer.errors["status"])
 
+    def test_launchable_tiles_get_an_id_on_save(self, catalog):
+        """A click finds its tile by id; content that arrives without one (a
+        library preset, the API) must not produce tiles that 404."""
+        serializer = self._serializer(
+            catalog,
+            content={
+                "sections": [
+                    {
+                        "items": [
+                            {"kind": "assessment", "target": {}},
+                            {"kind": "quickForm", "target": {}},
+                            {"id": "kept", "kind": "assessment", "target": {}},
+                            {"kind": "create", "target": {"model": "incidents"}},
+                        ]
+                    }
+                ]
+            },
+        )
+
+        assert serializer.is_valid(), serializer.errors
+        items = serializer.validated_data["content"]["sections"][0]["items"]
+        assert items[0]["id"] and items[1]["id"] and items[0]["id"] != items[1]["id"]
+        assert items[2]["id"] == "kept"
+        assert "id" not in items[3]
+
     def test_a_wired_design_publishes(self, catalog):
         serializer = self._serializer(
             catalog,
@@ -664,19 +900,20 @@ class TestPublishGate:
 
 @pytest.mark.django_db
 class TestLibraryUpdateRefresh:
-    def _stored(self, catalog, version, preset_name):
+    def _stored(self, catalog, version, preset_name, presets=None, urn=None):
         from core.models import StoredLibrary
 
         return StoredLibrary.objects.create(
             name="Catalog",
-            urn=catalog["library"].urn,
+            urn=urn or catalog["library"].urn,
             ref_id="CAT",
             version=version,
             locale="en",
             default_locale=True,
             folder=catalog["folder"],
             content={
-                "portal_presets": [
+                "portal_presets": presets
+                or [
                     {
                         "urn": "urn:test:portals:portal_preset:refreshed",
                         "ref_id": "refreshed",
@@ -687,9 +924,12 @@ class TestLibraryUpdateRefresh:
             },
         )
 
-    def test_a_newer_version_refreshes_the_entry_in_place(self, catalog):
+    def _update(self, library, stored):
         from core.models import LibraryUpdater
 
+        return LibraryUpdater(library, stored).update_library()
+
+    def test_a_newer_version_refreshes_the_entry_in_place(self, catalog):
         PortalPresetImporter(
             {
                 "urn": "urn:test:portals:portal_preset:refreshed",
@@ -699,9 +939,7 @@ class TestLibraryUpdateRefresh:
             }
         ).import_portal_preset(catalog["library"])
 
-        LibraryUpdater(
-            catalog["library"], self._stored(catalog, 2, "v2")
-        ).update_portal_presets()
+        assert self._update(catalog["library"], self._stored(catalog, 2, "v2")) is None
 
         presets = PortalPreset.objects.filter(
             urn="urn:test:portals:portal_preset:refreshed"
@@ -709,8 +947,6 @@ class TestLibraryUpdateRefresh:
         assert [(p.name, p.version) for p in presets] == [("v2", 2)]
 
     def test_a_preset_the_new_version_dropped_goes_with_it(self, catalog):
-        from core.models import LibraryUpdater
-
         PortalPresetImporter(
             {
                 "urn": "urn:test:portals:portal_preset:dropped",
@@ -723,9 +959,7 @@ class TestLibraryUpdateRefresh:
             name="Mine", folder=catalog["folder"], content={"sections": []}
         )
 
-        LibraryUpdater(
-            catalog["library"], self._stored(catalog, 2, "v2")
-        ).update_portal_presets()
+        assert self._update(catalog["library"], self._stored(catalog, 2, "v2")) is None
 
         urns = set(
             PortalPreset.objects.filter(library=catalog["library"]).values_list(
@@ -736,8 +970,6 @@ class TestLibraryUpdateRefresh:
         assert PortalPreset.objects.filter(pk=mine.pk).exists()
 
     def test_a_refresh_does_not_touch_portals_cloned_from_it(self, catalog):
-        from core.models import LibraryUpdater
-
         PortalPresetImporter(
             {
                 "urn": "urn:test:portals:portal_preset:refreshed",
@@ -753,12 +985,77 @@ class TestLibraryUpdateRefresh:
             name="Live", folder=catalog["folder"], content=preset.content
         )
 
-        LibraryUpdater(
-            catalog["library"], self._stored(catalog, 2, "v2")
-        ).update_portal_presets()
+        assert self._update(catalog["library"], self._stored(catalog, 2, "v2")) is None
         clone.refresh_from_db()
 
         assert clone.content["sections"][0]["title"] == "Original"
+
+    def test_an_update_cannot_take_over_a_preset_another_library_ships(self, catalog):
+        """The load refuses a URN another library owns; an update must too, or a
+        new version of one library silently rewrites the other's catalog entry."""
+        owned = {
+            "urn": "urn:test:portals:portal_preset:owned",
+            "ref_id": "owned",
+            "name": "Owned by the catalog",
+            "content": {"sections": [{"items": []}]},
+        }
+        PortalPresetImporter(
+            owned, library_urn=catalog["library"].urn
+        ).import_portal_preset(catalog["library"])
+        other = LoadedLibrary.objects.create(
+            name="Other",
+            urn="urn:test:other:lib",
+            ref_id="OTHER",
+            version=1,
+            locale="en",
+            default_locale=True,
+            folder=catalog["folder"],
+        )
+
+        error = self._update(
+            other,
+            self._stored(
+                catalog,
+                2,
+                None,
+                presets=[{**owned, "name": "Taken over"}],
+                urn=other.urn,
+            ),
+        )
+
+        assert catalog["library"].urn in error
+        preset = PortalPreset.objects.get(urn=owned["urn"])
+        assert (preset.name, preset.library_id) == (
+            "Owned by the catalog",
+            catalog["library"].id,
+        )
+        other.refresh_from_db()
+        assert other.version == 1
+
+    def test_an_update_gets_the_loads_content_checks_before_writing(self, catalog):
+        error = self._update(
+            catalog["library"],
+            self._stored(
+                catalog,
+                2,
+                None,
+                presets=[
+                    {
+                        "urn": "urn:test:portals:portal_preset:bad",
+                        "ref_id": "bad",
+                        "name": "Bad",
+                        "content": {"sections": [{"items": "nope"}]},
+                    }
+                ],
+            ),
+        )
+
+        assert "list of objects" in error
+        assert not PortalPreset.objects.filter(
+            urn="urn:test:portals:portal_preset:bad"
+        ).exists()
+        catalog["library"].refresh_from_db()
+        assert catalog["library"].version == 1
 
 
 @pytest.mark.django_db
@@ -854,3 +1151,48 @@ class TestTemplateEndpoints:
 
         assert res.status_code == 400
         assert "name" in res.json()
+
+    def test_a_library_preset_without_tile_ids_clones_into_clickable_tiles(
+        self, catalog, client
+    ):
+        """Use, then Publish before any Save: the clone's tiles must still launch."""
+        PortalPresetImporter(
+            {
+                "urn": "urn:test:portals:portal_preset:noid",
+                "ref_id": "noid",
+                "name": "No ids",
+                "content": {
+                    "sections": [
+                        {
+                            "items": [
+                                {
+                                    "kind": "assessment",
+                                    "title": "Run the audit",
+                                    "target": {"framework_urn": catalog["fw"].urn},
+                                }
+                            ]
+                        }
+                    ]
+                },
+            },
+            library_urn=catalog["library"].urn,
+        ).import_portal_preset(catalog["library"])
+        preset = PortalPreset.objects.get(urn="urn:test:portals:portal_preset:noid")
+
+        used = client.post(
+            "/api/portals/from-preset/", {"preset": str(preset.id)}, format="json"
+        )
+        assert used.status_code == 201, used.json()
+        portal_id = used.json()["id"]
+        published = client.patch(
+            f"/api/portals/{portal_id}/", {"status": "published"}, format="json"
+        )
+        assert published.status_code == 200, published.json()
+
+        item = Portal.objects.get(pk=portal_id).content["sections"][0]["items"][0]
+        launched = client.post(
+            f"/api/portals/{portal_id}/launch-assessment/",
+            {"item": item["id"], "folder": str(catalog["folder"].id)},
+            format="json",
+        )
+        assert launched.status_code == 200, launched.json()

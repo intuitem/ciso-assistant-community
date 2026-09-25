@@ -60,6 +60,12 @@ class Portal(NameDescriptionMixin, FolderMixin):
     branding = models.JSONField(default=dict, blank=True)
     content = models.JSONField(default=dict, blank=True)
     source_ref = models.CharField(max_length=255, null=True, blank=True)
+    # What the last "Export as library" shipped (see portals.presets), so the next
+    # export can tell an edit (next version, loads as an update) from a re-download.
+    export_version = models.IntegerField(default=0, editable=False)
+    export_fingerprint = models.CharField(
+        max_length=64, blank=True, default="", editable=False
+    )
     # Public (trust center): non-enumerable token minted when first made public.
     public_token = models.CharField(
         max_length=64, null=True, blank=True, unique=True, editable=False
