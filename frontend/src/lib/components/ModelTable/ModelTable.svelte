@@ -6,7 +6,11 @@
 	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '$lib/utils/constants';
+	import {
+		breakdownSemanticColorMap,
+		DATE_FIELDS_TO_FORMAT,
+		ISO_8601_REGEX
+	} from '$lib/utils/constants';
 	import {
 		CUSTOM_ACTIONS_COMPONENT,
 		getFieldComponentMap,
@@ -1178,6 +1182,15 @@
 																			{@const itemHref = getRelatedFieldHref(key, val.id, {
 																				fallbackToDashedField: true
 																			})}
+																			{#if key === 'applied_controls' && val.status}
+																				<span
+																					class="inline-block size-2 rounded-full align-middle"
+																					style="background-color: {breakdownSemanticColorMap[
+																						val.status
+																					] ?? breakdownSemanticColorMap['--']}"
+																					title={safeTranslate(val.status)}
+																				></span>
+																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
 																					>{safeTranslate(val.str)}</Anchor
