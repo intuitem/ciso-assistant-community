@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from django.utils.formats import date_format
 
@@ -5,7 +6,7 @@ import magic
 import structlog
 from django.db import models, transaction
 from django.db.models import CharField, Value, Case, When
-from django.db.models.functions import Lower, Cast
+from django.db.models.functions import Coalesce, Lower, Cast, NullIf
 import django_filters as df
 from django.contrib.auth.models import Permission
 from rest_framework import serializers, status
@@ -29,6 +30,7 @@ from django.core.exceptions import ValidationError
 from core.views import (
     BaseModelViewSet,
     ComplianceAssessmentViewSet,
+    ExportMixin,
     GenericFilterSet,
     RoleFilter,
     SmartOrderingFilter,
@@ -57,7 +59,7 @@ from core.models import (
 )
 from global_settings.models import GlobalSettings
 from resilience.models import BusinessImpactAnalysis
-from .models import ClientSettings
+from .models import ClientSettings, LogEntryAction
 from .serializers import (
     ClientSettingsReadSerializer,
     CustomEmailTemplateReadSerializer,
@@ -561,9 +563,37 @@ class LogEntryFilterSet(GenericFilterSet):
         return queryset.filter(q)
 
 
+XLSX_MAX_ROWS = 1_048_575
+XLSX_MAX_CELL_CHARS = 32_000
+
+
+def _format_log_action(action):
+    try:
+        return LogEntryAction(action).to_string()
+    except ValueError:
+        return str(action)
+
+
+def _format_log_changes(changes):
+    if not changes:
+        return ""
+    if isinstance(changes, str):
+        try:
+            changes = json.loads(changes)
+        except ValueError:
+            return changes[:XLSX_MAX_CELL_CHARS]
+    if isinstance(changes, dict) and "password" in changes:
+        changes = {**changes, "password": ["[old password]", "[new password]"]}
+    return json.dumps(changes, ensure_ascii=False, default=str)[:XLSX_MAX_CELL_CHARS]
+
+
 class LogEntryViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    ExportMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
 ):
+    model = LogEntry
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -583,6 +613,67 @@ class LogEntryViewSet(
 
     permission_classes = (IsAuthenticated,)
     serializer_class = LogEntrySerializer
+
+    export_config = {
+        "filename": "audit_log",
+        "select_related": ["content_type", "actor"],
+        "wrap_columns": ["changes"],
+        "fields": {
+            "timestamp": {
+                "source": "timestamp",
+                "label": "timestamp",
+                "format": lambda d: d.isoformat() if d else "",
+            },
+            "actor": {"source": "actor_label", "label": "actor"},
+            "action": {
+                "source": "action",
+                "label": "action",
+                "format": _format_log_action,
+            },
+            "content_type": {"source": "content_type.model", "label": "model"},
+            "object_id": {"source": "object_pk", "label": "object_id"},
+            "object": {"source": "object_repr", "label": "object"},
+            "folder": {"source": "folder", "label": "folder"},
+            "changes": {
+                "source": "changes",
+                "label": "changes",
+                "format": _format_log_changes,
+            },
+            "remote_addr": {"source": "remote_addr", "label": "remote_addr"},
+        },
+    }
+
+    def _get_export_queryset(self):
+        self._folder_paths = {
+            str(folder.id): folder.get_folder_full_path_string()
+            for folder in Folder.objects.all()
+        }
+        return (
+            super()
+            ._get_export_queryset()
+            .annotate(
+                actor_label=Coalesce(
+                    NullIf("actor_email", Value("")),
+                    "actor__email",
+                    Value(""),
+                    output_field=CharField(),
+                )
+            )
+        )
+
+    def _resolve_field_value(self, obj, field_config):
+        if field_config.get("source") == "folder":
+            folder_id = (obj.additional_data or {}).get("folder_id")
+            return self._folder_paths.get(str(folder_id), "") if folder_id else ""
+        return super()._resolve_field_value(obj, field_config)
+
+    @action(detail=False, name="Export as XLSX")
+    def export_xlsx(self, request):
+        if self.filter_queryset(self.get_queryset()).count() > XLSX_MAX_ROWS:
+            return Response(
+                {"error": "tooManyRowsForXlsx"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        return super().export_xlsx(request)
 
     def get_queryset(self):
         if not RoleAssignment.is_access_allowed(
