@@ -45,6 +45,7 @@ from core.models import (
     FilteringLabel,
     Finding,
     FindingsAssessment,
+    FlowEvent,
     Framework,
     Incident,
     Policy,
@@ -378,6 +379,7 @@ CREATABLE_MODELS = {
         "fields": ["request_notes"],
         "fk_fields": {},
         "params": {
+            "folder": None,
             "approver": None,
             "validation_deadline": None,
             "compliance_assessments": None,
@@ -535,6 +537,7 @@ CREATABLE_MODELS = {
         "fields": ["name", "description", "ref_id"],
         "fk_fields": {},
         "params": {
+            "folder": None,
             "assigned_to": None,
             "task_date": None,
             "applied_controls": None,
@@ -721,11 +724,28 @@ def _scoped_prefetches(entry, instance):
     return [built[path] for path in entry.prefetch_scoped if "__" not in path]
 
 
+def _identifier_q(model, value):
+    """How a person names one of these when not pasting a UUID. An Actor has no
+    name of its own — it wraps a user, a team or an entity — so it answers to
+    whichever it holds."""
+    if model is Actor:
+        return (
+            Q(user__email__iexact=value)
+            | Q(team__name__iexact=value)
+            | Q(entity__name__iexact=value)
+        )
+    if model is User:
+        return Q(email__iexact=value)
+    if get_model_field(model, "name"):
+        return Q(name__iexact=value)
+    return None
+
+
 def _rows_for(model, raw, instance, label):
-    """Ids to rows, refusing any the run may not reach: unknown, outside the
-    workflow's folder scope, or invisible to its identity. Same scope
-    _resolve_reference applies, and out-of-scope reads as unknown so the error
-    does not confirm that an id exists elsewhere."""
+    """Values to rows. Each is a UUID or the name a person knows the row by, as
+    everywhere else a workflow names something. Anything the run may not reach —
+    unknown, outside its folders, invisible to its identity — reads the same, so
+    the error never confirms a row exists elsewhere."""
     from . import authz
     from .engine import run_identity
 
@@ -739,15 +759,25 @@ def _rows_for(model, raw, instance, label):
         queryset = queryset.filter(
             folder_id__in=_accessible_folder_ids(instance.folder)
         )
-    try:
-        rows = list(queryset.filter(id__in=ids))
-    except ValueError, ValidationError:
-        raise FatalActionError(f"create_object: '{label}' has invalid ids")
-    if len(rows) != len(set(ids)):
-        missing = ", ".join(sorted(set(ids) - {str(row.id) for row in rows}))
+    rows, unresolved = [], []
+    for value in dict.fromkeys(ids):
+        if UUID_RE.match(value):
+            match = list(queryset.filter(id=value)[:2])
+        else:
+            lookup = _identifier_q(model, value)
+            match = list(queryset.filter(lookup)[:2]) if lookup is not None else []
+        if len(match) > 1:
+            raise ActionError(
+                f"create_object: {label} '{value}' matches more than one object"
+            )
+        if match:
+            rows.append(match[0])
+        else:
+            unresolved.append(value)
+    if unresolved:
         raise ActionError(
-            f"create_object: {label} '{missing}' does not exist or is outside "
-            "this workflow's scope"
+            f"create_object: {label} '{', '.join(unresolved)}' does not exist or "
+            "is outside this workflow's scope"
         )
     return rows
 
@@ -760,11 +790,42 @@ def _link_targets(obj, params, instance, relations):
             getattr(obj, name).set(rows)
 
 
+def _authorize_creation_folder(model, folder, instance):
+    """The create permission, checked where the row will actually land."""
+    from . import authz
+    from .engine import run_identity
+
+    codename = f"add_{model._meta.model_name}"
+    if not authz.can(run_identity(instance), codename, folder):
+        raise ActionError(
+            f"create_object: this workflow may not create a "
+            f"{model._meta.model_name} in '{folder}'"
+        )
+
+
+def _target_folder(kwargs, params, instance, model, label="folder"):
+    """The domain an author named, else where the run would have put it.
+
+    authorize_action checks the create permission against the workflow's own
+    folder, so naming another one has to be checked here or a run could write
+    into a domain it may see but not write to.
+    """
+    from iam.models import Folder
+
+    named = params.get(label)
+    if not named:
+        return kwargs["folder"]
+    folder = _rows_for(Folder, named, instance, label)[0]
+    _authorize_creation_folder(model, folder, instance)
+    return folder
+
+
 def _construct_task_template(kwargs, params, instance):
     """A one-off task with the occurrence it owes: the board and the reminders
     read TaskNode, so a template alone shows nothing. Recurrent templates are not
     creatable here — their occurrences come from a schedule."""
     assignees = _rows_for(Actor, params.get("assigned_to"), instance, "assigned_to")
+    kwargs["folder"] = _target_folder(kwargs, params, instance, TaskTemplate)
     task_date = (
         _as_date(params["task_date"], "task_date") if params.get("task_date") else None
     )
@@ -793,7 +854,30 @@ def _construct_task_template(kwargs, params, instance):
             scheduled_date=task_date,
             folder=template.folder,
         )
+    # Same notice the editor sends: work assigned to someone who is never told
+    # is not assigned.
+    _notify_assignees(template, assignees)
     return template
+
+
+def _notify_assignees(template, assignees):
+    """Best effort, and after the transaction: a mail server being down must not
+    undo a task that was created."""
+    import structlog
+
+    from core.tasks import send_task_template_assignment_notification
+
+    emails = [email for actor in assignees for email in actor.get_emails()]
+    if not emails:
+        return
+    try:
+        send_task_template_assignment_notification(template.id, emails)
+    except Exception as e:
+        structlog.get_logger(__name__).error(
+            "task assignment notification failed",
+            task_template=str(template.id),
+            error=e,
+        )
 
 
 def _construct_validation_flow(kwargs, params, instance):
@@ -802,6 +886,7 @@ def _construct_validation_flow(kwargs, params, instance):
     from .engine import run_identity
 
     approvers = _rows_for(User, params.get("approver"), instance, "approver")
+    kwargs["folder"] = _target_folder(kwargs, params, instance, ValidationFlow)
     if len(approvers) > 1:
         raise FatalActionError("create_object: 'approver' names one user, not several")
 
@@ -817,15 +902,41 @@ def _construct_validation_flow(kwargs, params, instance):
         if params.get("validation_deadline")
         else None
     )
+    requester = run_identity(instance)
     with transaction.atomic():
         flow = ValidationFlow.objects.create(
             approver=approvers[0] if approvers else None,
-            requester=run_identity(instance),
+            requester=requester,
             validation_deadline=deadline,
             **kwargs,
         )
         _link_targets(flow, params, instance, relations)
+        # The flow's history starts here, as it does for a request raised by
+        # hand: without it the timeline opens on nothing.
+        FlowEvent.objects.create(
+            validation_flow=flow,
+            event_type=flow.status,
+            event_actor=requester,
+            event_notes=kwargs.get("request_notes") or None,
+            folder=flow.folder,
+        )
+    _notify_approver(flow)
     return flow
+
+
+def _notify_approver(flow):
+    """Best effort, and after the transaction: a mail server being down must not
+    undo a request that was made."""
+    import structlog
+
+    from core.tasks import send_validation_flow_created_notification
+
+    try:
+        send_validation_flow_created_notification(flow)
+    except Exception as e:
+        structlog.get_logger(__name__).error(
+            "validation flow notification failed", validation_flow=str(flow.id), error=e
+        )
 
 
 def _construct_managed_document(kwargs, params, instance):
@@ -1024,6 +1135,10 @@ class CreateObjectAction(BaseAction):
         folder_from = entry.get("folder_from")
         if folder_from and kwargs.get(folder_from) is not None:
             folder = kwargs[folder_from].folder
+        # authorize_action cleared this action against the workflow's folder,
+        # but the row lands wherever the trigger or the parent puts it, and a
+        # non-recursive grant does not reach a subfolder.
+        _authorize_creation_folder(entry["model"], folder, instance)
         if config.get("upsert"):
             match_fields = _match_fields(entry)
             match = {key: kwargs.get(key) for key in match_fields}

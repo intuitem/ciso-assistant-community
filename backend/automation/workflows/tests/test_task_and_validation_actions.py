@@ -225,3 +225,170 @@ class TestCreatingAValidationFlow:
         )
         assert instance.status == WorkflowInstance.Status.FAILED
         assert not ValidationFlow.objects.filter(folder=domain).exists()
+
+
+@pytest.mark.django_db
+class TestTheSideEffectsTheEditorHas:
+    """The registry writes through the ORM rather than the write serializers, so
+    everything a serializer does besides the row has to be done here too. These
+    pin the ones that were missed once already."""
+
+    def test_assigning_a_task_tells_the_assignee(self, domain, assignee, monkeypatch):
+        sent = []
+        monkeypatch.setattr(
+            "core.tasks.send_task_template_assignment_notification",
+            lambda task_id, emails: sent.append((str(task_id), emails)),
+        )
+        instance = start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "task_template",
+                    "fields": {"name": "Tell them", "assigned_to": str(assignee.id)},
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        task = TaskTemplate.objects.get(folder=domain)
+        assert sent and sent[0][0] == str(task.id)
+        assert sent[0][1] == assignee.get_emails()
+
+    def test_an_unassigned_task_tells_nobody(self, domain, monkeypatch):
+        sent = []
+        monkeypatch.setattr(
+            "core.tasks.send_task_template_assignment_notification",
+            lambda task_id, emails: sent.append(emails),
+        )
+        start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "task_template",
+                    "fields": {"name": "Nobody"},
+                },
+            )
+        )
+        assert sent == []
+
+    def test_a_task_can_name_its_domain(self, domain, assignee):
+        elsewhere = Folder.objects.create(
+            name=f"elsewhere {uuid.uuid4()}",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        instance = start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "task_template",
+                    "fields": {
+                        "name": "Over there",
+                        "assigned_to": str(assignee.id),
+                        "folder": elsewhere.name,
+                    },
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        task = TaskTemplate.objects.get(name="Over there")
+        assert task.folder == elsewhere
+        # The occurrence follows the template, or the board shows it in the
+        # wrong domain.
+        assert TaskNode.objects.get(task_template=task).folder == elsewhere
+
+    def test_an_assignee_is_named_the_way_a_person_names_them(self, domain, assignee):
+        """An Actor has no name of its own, so it answers to the email of the
+        user it wraps — what someone types in the builder."""
+        instance = start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "task_template",
+                    "fields": {
+                        "name": "By email",
+                        "assigned_to": assignee.user.email,
+                    },
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        assert list(TaskTemplate.objects.get(name="By email").assigned_to.all()) == [
+            assignee
+        ]
+
+    def test_a_validation_flow_opens_with_its_submission_event(self, domain):
+        from core.models import FlowEvent
+
+        approver = User.objects.create(email=f"boss-{uuid.uuid4()}@test.example")
+        framework = Framework.objects.create(
+            name="FW",
+            urn=f"urn:test:vf2:{uuid.uuid4()}",
+            folder=Folder.get_root_folder(),
+        )
+        perimeter = Perimeter.objects.create(name="P2", folder=domain)
+        audit = ComplianceAssessment.objects.create(
+            name="ISO", framework=framework, perimeter=perimeter, folder=domain
+        )
+        instance = start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "validation_flow",
+                    "fields": {
+                        "approver": approver.email,
+                        "compliance_assessments": str(audit.id),
+                        "request_notes": "Please sign off.",
+                    },
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        flow = ValidationFlow.objects.get(folder=domain)
+        event = FlowEvent.objects.get(validation_flow=flow)
+        assert event.event_type == ValidationFlow.Status.SUBMITTED
+        assert event.event_notes == "Please sign off."
+        assert event.folder == flow.folder
+
+
+@pytest.mark.django_db
+def test_a_named_domain_needs_the_create_permission_there(domain, assignee):
+    """authorize_action checks the permission against the workflow's own folder,
+    so a named one is only as safe as the check made here. Seeing a domain is
+    not permission to write in it."""
+    from automation.workflows import authz
+
+    elsewhere = Folder.objects.create(
+        name=f"no rights {uuid.uuid4()}",
+        parent_folder=Folder.get_root_folder(),
+        content_type=Folder.ContentType.DOMAIN,
+    )
+    version = action_flow(
+        domain,
+        {
+            "type": "create_object",
+            "model": "task_template",
+            "fields": {
+                "name": "Somewhere I may not write",
+                "assigned_to": str(assignee.id),
+                "folder": elsewhere.name,
+            },
+        },
+    )
+    # Visible — resolution must succeed — but not writable.
+    real_can = authz.can
+    authz.can = lambda user, codename, folder: (
+        False if folder == elsewhere else real_can(user, codename, folder)
+    )
+    try:
+        instance = start_instance(version)
+    finally:
+        authz.can = real_can
+
+    assert instance.status == WorkflowInstance.Status.FAILED
+    assert not TaskTemplate.objects.filter(folder=elsewhere).exists()
+    assert not TaskTemplate.objects.filter(name="Somewhere I may not write").exists()
