@@ -311,3 +311,42 @@ class TestItemCeiling:
         output = instance.node_outputs["each_row"]
         assert output["count"] == 4
         assert any("stopped after 4 items" in e["message"] for e in output["errors"])
+
+
+@pytest.mark.django_db
+class TestALoopThatCannotStoreWhatItCollected:
+    """The failure runs under the body token that closed the last iteration, so
+    it must not travel the ordinary node-failure path: that collects the
+    iteration a second time and comes straight back here, the second raise
+    escaping the run's transaction and leaving the loop parked in silence."""
+
+    def _run(self, budget):
+        domain = make_domain(f"Sweep oversized {uuid.uuid4()}")
+        for index in range(6):
+            AppliedControl.objects.create(
+                name=f"AC {index:02d}", description="d" * 400, folder=domain
+            )
+        version = paging_flow(
+            domain,
+            {
+                "read": {"model": "applied_control", "order_by": "name", "limit": 2},
+                "collect": "{{item}}",
+            },
+        )
+        with override_settings(WORKFLOW_NODE_OUTPUT_BUDGET=budget):
+            return start_instance(version)
+
+    def test_the_run_fails_instead_of_hanging(self):
+        instance = self._run(budget=300)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not instance.tokens.filter(status="waiting").exists()
+
+    def test_and_the_run_log_says_what_was_lost(self):
+        instance = self._run(budget=300)
+        said = " ".join(log.message or "" for log in instance.logs.all())
+        assert "were dropped" in said
+
+    def test_a_loop_that_fits_is_untouched(self):
+        instance = self._run(budget=500_000)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert instance.node_outputs["each_row"]["count"] == 6

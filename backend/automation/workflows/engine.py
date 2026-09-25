@@ -958,7 +958,18 @@ def _loop_finish(controller):
         "errors": state["errors"],
         "pages": state.get("pages", 0),
     }
-    _persist_node_output(node, output, instance)
+    try:
+        _persist_node_output(node, output, instance)
+    except FatalActionError as e:
+        # This runs under the body token that closed the last iteration. Letting
+        # it escape would route the loop's failure through _handle_failure, which
+        # collects that iteration a second time (outstanding below zero) and
+        # arrives back here — the second raise escaping the run transaction and
+        # leaving the loop parked with nothing said. Fail the loop itself.
+        controller.loop_state = {}
+        controller.save(update_fields=["loop_state", "updated_at"])
+        _fail_token(controller, str(e))
+        return
     failed = len(state["errors"])
     message = f"processed {output['count']} items"
     if failed:
@@ -1033,6 +1044,15 @@ def _start_subprocess(token):
         raise EngineError(f"Subprocess failed ({child})")
 
 
+def _foreign_output(node):
+    """Whether this node's output is a remote's payload rather than the step's
+    own product. Declared by the action, not guessed from its name."""
+    from .actions import ACTION_REGISTRY
+
+    action = ACTION_REGISTRY.get((node.action_config or {}).get("type"))
+    return bool(getattr(action, "foreign_output", False))
+
+
 def _store_node_output(node, output, instance):
     """Record the node's output (in memory) for {{nodes.<ref>.<path>}} references
     and the builder's data browser. Persisting is the caller's job — see
@@ -1040,12 +1060,13 @@ def _store_node_output(node, output, instance):
 
     Dropping records fails the node: a loop's records are the next node's input,
     so a silent cut means a write-up short of what the run processed. Shortening
-    one string keeps the value, so that stays quiet.
+    one string keeps the value, so that stays quiet, and so does a payload the
+    action declared foreign — the trim markers in the value say what was cut.
     """
     key = node.ref or str(node.id)
     lost = []
     instance.node_outputs[key] = _cap_structure(output, lost=lost)
-    if lost:
+    if lost and not _foreign_output(node):
         # Only the character budget is a setting; the item and depth caps are
         # engine constants, so pointing at the setting there would misdirect.
         raisable = {remedy for _what, remedy in lost if remedy}

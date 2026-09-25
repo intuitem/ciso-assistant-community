@@ -133,8 +133,6 @@ Permission: `add_<model>`, plus `change_<model>` when **Update when it already e
 
 Reference fields accept an id, a urn, or a name. Names resolve in the workflow's subtree and the root only.
 
-A task or a validation flow can name a `folder` to land in another domain. It must be inside the workflow's subtree, and the run identity needs the create permission there — seeing a domain is not permission to write in it.
-
 Some objects live in their parent's domain rather than the workflow's: a purpose belongs to its processing, a risk scenario to its risk assessment, an external rating to its entity. **Update when it already exists** matches in the domain the object will land in, so a workflow in a parent domain still finds the object it created last time.
 
 | Model | Fields | References |
@@ -166,11 +164,11 @@ Some objects live in their parent's domain rather than the workflow's: a purpose
 | `entity_assessment` | name, description | entity, perimeter, framework, implementation_groups. With a framework, the questionnaire and its enclave are built too. Upsert not available |
 | `entity_score` | **score**, **as_of**, scale_max, grade, url, observation | entity, provider |
 | `timeline_entry` | **entry**, entry_type, timestamp, observation | incident |
-| `task_template` | name, description, ref_id | `assigned_to` (actors), `task_date`, `folder`, and links to `applied_controls`, `compliance_assessments`, `evidences`, `documents`. Creates the occurrence with it, so the task shows on the board |
-| `validation_flow` | request_notes | `approver` (actor), `validation_deadline`, `folder`, and what is being validated — links to `compliance_assessments`, `evidences`, `policies`, `findings_assessments`, `security_exceptions`. Opens with its submission event. Upsert not available |
+| `task_template` | name, description, ref_id | `assigned_to` (actors), `task_date`, and links to `applied_controls`, `compliance_assessments`, `evidences`, `documents`. Creates the occurrence with it, so the task shows on the board. **Update when it already exists** re-dates that occurrence rather than adding a second one |
+| `validation_flow` | request_notes | `approver` (actor), `validation_deadline`, and what is being validated — links to `compliance_assessments`, `evidences`, `policies`, `findings_assessments`, `security_exceptions`. Opens with its submission event. Upsert not available |
 | `right_request` | name, **requested_on**, description, ref_id, due_date, request_type, observation | |
 
-**Bold** marks a field the object cannot be stored without: publishing refuses a step that leaves one empty, rather than letting the run write a blank. Every object that has a name needs one too, unless **Update when it already exists** is on.
+**Bold** marks a field the object cannot be stored without: publishing refuses a step that leaves one empty, rather than letting the run write a blank. An object whose name the model requires needs one too, unless **Update when it already exists** is on — where the name is optional on the object itself (a managed document, a privacy record), the step may leave it empty.
 
 Choice fields (status, severity, type, legal_basis) must receive one of the object's accepted values. Anything else fails the step permanently. `timeline_entry` accepts only `detection`, `mitigation` and `observation` as its type: `severity_changed` and `status_changed` record a change someone made to the incident, so a run may not write them.
 

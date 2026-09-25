@@ -118,6 +118,19 @@ class TestCreatingADocument:
         assert revision.content == "# Backup"
         assert revision.folder == domain
 
+    def test_a_document_need_not_be_named(self):
+        """The container carries the name that matters; `ManagedDocument.name`
+        is blank=True, and this registry does not get to be stricter."""
+        domain = make_domain("Nameless")
+        container = DocumentContainer.objects.create(
+            name="Access control", folder=domain
+        )
+        instance = start_instance(self._flow(domain, container))
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        document = ManagedDocument.objects.get(container=container)
+        assert document.name == ""
+        assert document.current_revision is not None
+
     def test_a_template_seeds_the_draft(self):
         domain = make_domain("Templated")
         DocumentTemplate.objects.create(

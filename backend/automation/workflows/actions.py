@@ -210,6 +210,10 @@ def register(cls):
 
 class BaseAction:
     action_type = ""
+    #: Output whose shape the workflow does not control. Over the node-output
+    #: ceiling it is trimmed rather than failed: the step's side effect has
+    #: already happened, and no retry makes a remote's reply smaller.
+    foreign_output = False
 
     def execute(self, config: dict, instance) -> dict:
         raise NotImplementedError
@@ -378,7 +382,6 @@ CREATABLE_MODELS = {
         "fields": ["request_notes"],
         "fk_fields": {},
         "params": {
-            "folder": None,
             "approver": None,
             "validation_deadline": None,
             "compliance_assessments": None,
@@ -536,7 +539,6 @@ CREATABLE_MODELS = {
         "fields": ["name", "description", "ref_id"],
         "fk_fields": {},
         "params": {
-            "folder": None,
             "assigned_to": None,
             "task_date": None,
             "applied_controls": None,
@@ -545,6 +547,9 @@ CREATABLE_MODELS = {
             "documents": None,
         },
         "constructor": "_construct_task_template",
+        # Which is what makes upsert possible here: matched on name, the row is
+        # updated instead of a second task piling up every cycle.
+        "updater": "_update_task_template",
     },
     "right_request": {
         "model": RightRequest,
@@ -753,8 +758,6 @@ def _rows_for(model, raw, instance, label):
     Same two scopes as _resolve_reference: an id reaches the ancestors, a name
     only the subtree and the root.
     """
-    from iam.models import Folder
-
     from . import authz
     from .engine import run_identity
 
@@ -766,10 +769,8 @@ def _rows_for(model, raw, instance, label):
     )
 
     def within(folder_ids):
-        # A folder is its own scope. An Actor has none of either — it is an IAM
-        # special case, and viewable_ids is the whole answer for it.
-        if model is Folder:
-            return queryset.filter(id__in=folder_ids)
+        # An Actor has no folder — it is an IAM special case, and viewable_ids
+        # is the whole answer for it.
         if get_model_field(model, "folder"):
             return queryset.filter(folder_id__in=folder_ids)
         return queryset
@@ -820,19 +821,19 @@ def _authorize_creation_folder(model, folder, instance):
         )
 
 
-def _target_folder(kwargs, params, instance, model, label="folder"):
-    """The domain an author named, else where the run would have put it.
+_TASK_TARGETS = {
+    "applied_controls": AppliedControl,
+    "compliance_assessments": ComplianceAssessment,
+    "evidences": Evidence,
+    # DocumentContainer.task_templates, from this side.
+    "documents": DocumentContainer,
+}
 
-    authorize_action checks the create permission against the workflow's own
-    folder, so whichever domain this settles on has to be checked here or a run
-    could write into one it may see but not write to.
-    """
-    from iam.models import Folder
 
-    named = params.get(label)
-    folder = _rows_for(Folder, named, instance, label)[0] if named else kwargs["folder"]
-    _authorize_creation_folder(model, folder, instance)
-    return folder
+def _task_date(params):
+    return (
+        _as_date(params["task_date"], "task_date") if params.get("task_date") else None
+    )
 
 
 def _construct_task_template(kwargs, params, instance):
@@ -840,10 +841,7 @@ def _construct_task_template(kwargs, params, instance):
     read TaskNode, so a template alone shows nothing. Recurrent templates are not
     creatable here — their occurrences come from a schedule."""
     assignees = _rows_for(Actor, params.get("assigned_to"), instance, "assigned_to")
-    kwargs["folder"] = _target_folder(kwargs, params, instance, TaskTemplate)
-    task_date = (
-        _as_date(params["task_date"], "task_date") if params.get("task_date") else None
-    )
+    task_date = _task_date(params)
 
     with transaction.atomic():
         template = TaskTemplate.objects.create(
@@ -851,18 +849,7 @@ def _construct_task_template(kwargs, params, instance):
         )
         if assignees:
             template.assigned_to.set(assignees)
-        _link_targets(
-            template,
-            params,
-            instance,
-            {
-                "applied_controls": AppliedControl,
-                "compliance_assessments": ComplianceAssessment,
-                "evidences": Evidence,
-                # DocumentContainer.task_templates, from this side.
-                "documents": DocumentContainer,
-            },
-        )
+        _link_targets(template, params, instance, _TASK_TARGETS)
         TaskNode.objects.create(
             task_template=template,
             due_date=task_date,
@@ -872,6 +859,27 @@ def _construct_task_template(kwargs, params, instance):
     # Same notice the editor sends: work assigned to someone who is never told
     # is not assigned.
     _notify_assignees(template, assignees)
+    return template
+
+
+def _update_task_template(template, kwargs, params, instance):
+    """The upsert match: the same writes onto the task already there, and its
+    occurrence re-dated rather than a second one added. No notice — the run that
+    created it sent one, and a periodic refresh is not news."""
+    assignees = _rows_for(Actor, params.get("assigned_to"), instance, "assigned_to")
+    task_date = _task_date(params)
+
+    with transaction.atomic():
+        for key, value in kwargs.items():
+            setattr(template, key, value)
+        template.task_date = task_date
+        template.save()
+        if assignees:
+            template.assigned_to.set(assignees)
+        _link_targets(template, params, instance, _TASK_TARGETS)
+        TaskNode.objects.filter(task_template=template).update(
+            due_date=task_date, scheduled_date=task_date
+        )
     return template
 
 
@@ -901,7 +909,6 @@ def _construct_validation_flow(kwargs, params, instance):
     from .engine import run_identity
 
     approvers = _rows_for(User, params.get("approver"), instance, "approver")
-    kwargs["folder"] = _target_folder(kwargs, params, instance, ValidationFlow)
     if len(approvers) > 1:
         raise FatalActionError("create_object: 'approver' names one user, not several")
 
@@ -1098,7 +1105,10 @@ class CreateObjectAction(BaseAction):
                     f"create_object: '{value}' is not an accepted "
                     f"{config.get('model')}.{key}"
                 )
-        named = get_model_field(entry["model"], "name") is not None
+        name_field = get_model_field(entry["model"], "name")
+        # The model decides: a managed document's name is optional because its
+        # container carries the one that matters, a control's is not.
+        named = name_field is not None and not name_field.blank
         if named and not kwargs.get("name") and not config.get("upsert"):
             raise ActionError("create_object: 'name' is required")
         for key in entry.get("required_fields") or []:
@@ -1128,46 +1138,42 @@ class CreateObjectAction(BaseAction):
         # authorize_action cleared this action against the workflow's folder,
         # but the row lands wherever the trigger or the parent puts it, and a
         # non-recursive grant does not reach a subfolder. Built models land the
-        # same way, so the check precedes the constructor too — except where an
-        # author may name the domain, which _target_folder checks instead:
-        # clearing the default would be clearing a folder nothing is written to.
-        if "folder" not in (entry.get("params") or {}):
-            _authorize_creation_folder(entry["model"], folder, instance)
+        # same way, so the check precedes the constructor too.
+        _authorize_creation_folder(entry["model"], folder, instance)
 
         constructor = entry.get("constructor")
+        if constructor and config.get("upsert") and not entry.get("updater"):
+            raise FatalActionError(
+                f"create_object: '{config.get('model')}' is built, not "
+                "matched — upsert does not apply"
+            )
+
+        obj = None
+        created = True
+        if config.get("upsert"):
+            obj = _upsert_match(entry, kwargs, folder)
+
         if constructor:
-            if config.get("upsert"):
-                raise FatalActionError(
-                    f"create_object: '{config.get('model')}' is built, not "
-                    "matched — upsert does not apply"
-                )
             params = _construction_params(entry, fields, instance)
             try:
-                obj = globals()[constructor](
-                    {"folder": folder, **kwargs}, params, instance
-                )
+                if obj is None:
+                    obj = globals()[constructor](
+                        {"folder": folder, **kwargs}, params, instance
+                    )
+                else:
+                    created = False
+                    globals()[entry["updater"]](obj, kwargs, params, instance)
             except ValidationError as e:
                 raise ActionError(f"create_object: {'; '.join(e.messages)}")
-            _record_provenance(instance, obj)
+            if created:
+                _record_provenance(instance, obj)
             return {
                 "created_object_id": str(obj.id),
                 # A built model need not be named: a document revision is "v3".
                 "created_object_name": getattr(obj, "name", None) or str(obj),
                 "created_object_model": config.get("model"),
-                "created": True,
+                "created": created,
             }
-
-        obj = None
-        created = True
-        if config.get("upsert"):
-            match_fields = _match_fields(entry)
-            match = {key: kwargs.get(key) for key in match_fields}
-            missing = [key for key, value in match.items() if value in ("", None)]
-            if missing:
-                raise ActionError(
-                    f"create_object: upsert requires {', '.join(repr(m) for m in missing)}"
-                )
-            obj = entry["model"].objects.filter(folder=folder, **match).first()
 
         try:
             if obj is not None:
@@ -1189,6 +1195,17 @@ class CreateObjectAction(BaseAction):
             "created_object_model": config.get("model"),
             "created": created,
         }
+
+
+def _upsert_match(entry, kwargs, folder):
+    """The row an upsert would update, if it is already there."""
+    match = {key: kwargs.get(key) for key in _match_fields(entry)}
+    missing = [key for key, value in match.items() if value in ("", None)]
+    if missing:
+        raise ActionError(
+            f"create_object: upsert requires {', '.join(repr(m) for m in missing)}"
+        )
+    return entry["model"].objects.filter(folder=folder, **match).first()
 
 
 def _creation_folder(instance):
@@ -3072,6 +3089,7 @@ HTTP_DEFAULT_TIMEOUT = 15
 @register
 class HttpRequestAction(BaseAction):
     action_type = "http_request"
+    foreign_output = True
 
     def execute(self, config, instance):
         import requests
@@ -3713,7 +3731,7 @@ def validate_create_config(node):
         ]
     fields = config.get("fields") or {}
     errors = []
-    if entry.get("constructor") and config.get("upsert"):
+    if entry.get("constructor") and config.get("upsert") and not entry.get("updater"):
         errors.append(
             (
                 "action_create_upsert_unsupported",

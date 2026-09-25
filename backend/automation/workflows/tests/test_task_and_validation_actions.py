@@ -272,32 +272,61 @@ class TestTheSideEffectsTheEditorHas:
         )
         assert sent == []
 
-    def test_a_task_can_name_its_domain(self, domain, assignee):
-        elsewhere = Folder.objects.create(
-            name=f"elsewhere {uuid.uuid4()}",
-            parent_folder=domain,
-            content_type=Folder.ContentType.DOMAIN,
-        )
-        instance = start_instance(
-            action_flow(
-                domain,
-                {
-                    "type": "create_object",
-                    "model": "task_template",
-                    "fields": {
-                        "name": "Over there",
-                        "assigned_to": str(assignee.id),
-                        "folder": elsewhere.name,
+    def test_a_periodic_run_updates_its_task_instead_of_piling_them_up(
+        self, domain, assignee
+    ):
+        """`upsert` worked here before the task grew its occurrence, and a
+        quarterly flow that duplicated its task every run would be useless."""
+        first = date.today() + timedelta(days=7)
+        later = date.today() + timedelta(days=97)
+
+        def run(task_date):
+            return start_instance(
+                action_flow(
+                    domain,
+                    {
+                        "type": "create_object",
+                        "model": "task_template",
+                        "upsert": True,
+                        "fields": {
+                            "name": "Quarterly access review",
+                            "assigned_to": str(assignee.id),
+                            "task_date": task_date.isoformat(),
+                        },
                     },
-                },
+                )
             )
-        )
-        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
-        task = TaskTemplate.objects.get(name="Over there")
-        assert task.folder == elsewhere
-        # The occurrence follows the template, or the board shows it in the
-        # wrong domain.
-        assert TaskNode.objects.get(task_template=task).folder == elsewhere
+
+        assert run(first).status == WorkflowInstance.Status.COMPLETED
+        second = run(later)
+        assert second.status == WorkflowInstance.Status.COMPLETED, second.variables
+
+        template = TaskTemplate.objects.get(name="Quarterly access review")
+        assert TaskTemplate.objects.filter(folder=domain).count() == 1
+        assert template.task_date == later
+        # The occurrence is re-dated, not doubled: the board shows one task.
+        occurrence = TaskNode.objects.get(task_template=template)
+        assert occurrence.due_date == later
+        assert list(template.assigned_to.all()) == [assignee]
+
+    def test_the_second_run_says_it_did_not_create(self, domain):
+        def run():
+            return start_instance(
+                action_flow(
+                    domain,
+                    {
+                        "type": "create_object",
+                        "model": "task_template",
+                        "upsert": True,
+                        "fields": {"name": "Same task"},
+                    },
+                )
+            )
+
+        run()
+        instance = run()
+        log = instance.logs.get(event_type="action_executed")
+        assert log.data["created"] is False
 
     def test_an_assignee_is_named_the_way_a_person_names_them(self, domain, assignee):
         """An Actor has no name of its own, so it answers to the email of the
@@ -353,70 +382,3 @@ class TestTheSideEffectsTheEditorHas:
         assert event.event_type == ValidationFlow.Status.SUBMITTED
         assert event.event_notes == "Please sign off."
         assert event.folder == flow.folder
-
-
-@pytest.mark.django_db
-def test_a_named_domain_needs_the_create_permission_there(domain, assignee):
-    """authorize_action checks the permission against the workflow's own folder,
-    so a named one is only as safe as the check made here. Seeing a domain is
-    not permission to write in it."""
-    from automation.workflows import authz
-
-    elsewhere = Folder.objects.create(
-        name=f"no rights {uuid.uuid4()}",
-        parent_folder=domain,
-        content_type=Folder.ContentType.DOMAIN,
-    )
-    version = action_flow(
-        domain,
-        {
-            "type": "create_object",
-            "model": "task_template",
-            "fields": {
-                "name": "Somewhere I may not write",
-                "assigned_to": str(assignee.id),
-                "folder": elsewhere.name,
-            },
-        },
-    )
-    # Visible — resolution must succeed — but not writable.
-    real_can = authz.can
-    authz.can = lambda user, codename, folder: (
-        False if folder == elsewhere else real_can(user, codename, folder)
-    )
-    try:
-        instance = start_instance(version)
-    finally:
-        authz.can = real_can
-
-    assert instance.status == WorkflowInstance.Status.FAILED
-    assert not TaskTemplate.objects.filter(folder=elsewhere).exists()
-    assert not TaskTemplate.objects.filter(name="Somewhere I may not write").exists()
-
-
-@pytest.mark.django_db
-def test_a_named_domain_outside_the_workflows_tree_is_refused(domain, assignee):
-    """A name resolves in the workflow's own subtree and the root, nowhere else
-    — the same rule every other reference follows. A sibling domain the run may
-    happen to see is not a place this workflow writes."""
-    sibling = Folder.objects.create(
-        name=f"sibling {uuid.uuid4()}",
-        parent_folder=Folder.get_root_folder(),
-        content_type=Folder.ContentType.DOMAIN,
-    )
-    instance = start_instance(
-        action_flow(
-            domain,
-            {
-                "type": "create_object",
-                "model": "task_template",
-                "fields": {
-                    "name": "Not my domain",
-                    "assigned_to": str(assignee.id),
-                    "folder": sibling.name,
-                },
-            },
-        )
-    )
-    assert instance.status == WorkflowInstance.Status.FAILED
-    assert not TaskTemplate.objects.filter(name="Not my domain").exists()

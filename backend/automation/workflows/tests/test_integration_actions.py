@@ -142,6 +142,41 @@ class TestHttpRequest:
         for log in instance.logs.all():
             assert "s3cr3t-value" not in str(log.data) + log.message
 
+    def test_an_oversized_reply_is_trimmed_not_failed(self, monkeypatch, settings):
+        """The request has already been sent and no retry makes the answer
+        smaller, so a reply past the node-output ceiling is cut, not fatal."""
+        settings.WORKFLOW_NODE_OUTPUT_BUDGET = 200
+        _workflow, version = make_workflow()
+
+        class FakeResponse:
+            status_code = 200
+
+            def json(self):
+                return {"rows": [{"note": "x" * 300} for _ in range(20)], "ok": True}
+
+        monkeypatch.setattr(
+            "requests.request", lambda method, url, **kw: FakeResponse()
+        )
+        monkeypatch.setattr(
+            "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
+        )
+        actions = linear_graph(
+            version,
+            {
+                "type": "http_request",
+                "method": "GET",
+                "url": "https://hris.example.com/big",
+            },
+        )
+        version.nodes.filter(id=actions[0]["id"]).update(ref="call")
+        instance = start_instance(version)
+
+        assert instance.status == WorkflowInstance.Status.COMPLETED, list(
+            instance.logs.values_list("message", flat=True)
+        )
+        # What survived says it was cut, rather than the step claiming it all.
+        assert "more items" in str(instance.node_outputs["call"])
+
     def test_secrets_are_workflow_scoped(self, monkeypatch):
         """A same-named secret on another workflow must never bleed in: the
         instance resolves only its own workflow's secret."""
