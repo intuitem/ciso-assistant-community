@@ -16,15 +16,16 @@ Event Trigger (serializer / periodic cron)
         v
   check_email_configuration()
   - notifications_enable_mailing enabled?
-  - EMAIL_HOST / EMAIL_PORT / DEFAULT_FROM_EMAIL set?
+  - core.mailer.mailing_enabled()? (a mailer and DEFAULT_FROM_EMAIL set)
   - Recipient email present?
         |
         v
   Email Template Rendering (YAML + string.Template)
         |
         v
-  django.core.mail.send_mail()
-  - Primary server -> Rescue server (fallback)
+  core.mailer.send()
+  - Tries the mailers in settings.MAILERS in order
+  - Fails over only when a server cannot be reached
 ```
 
 There is **no notification model** in the database. Notifications are fire-and-forget emails. Frontend toast notifications are independent and handled client-side only.
@@ -38,18 +39,18 @@ There is **no notification model** in the database. Notifications are fire-and-f
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `EMAIL_HOST` | Yes | SMTP server hostname |
-| `EMAIL_PORT` | Yes | SMTP server port |
+| `EMAIL_PORT` | No | SMTP server port (default: 465 with SSL, 587 with TLS, 25 otherwise) |
 | `EMAIL_HOST_USER` | No | SMTP username |
 | `EMAIL_HOST_PASSWORD` | No | SMTP password |
 | `EMAIL_USE_TLS` | No | Enable TLS (`true`/`false`, default `false`) |
 | `DEFAULT_FROM_EMAIL` | Yes | Sender address (fallback: `noreply@ciso.assistant`) |
-| `EMAIL_HOST_RESCUE` | No | Fallback SMTP server |
+| `EMAIL_HOST_RESCUE` | No | Second SMTP server, used when the first cannot be reached (all mail, not only password resets) |
 | `EMAIL_PORT_RESCUE` | No | Fallback SMTP port |
 | `EMAIL_HOST_USER_RESCUE` | No | Fallback SMTP username |
 | `EMAIL_HOST_PASSWORD_RESCUE` | No | Fallback SMTP password |
 | `EMAIL_USE_TLS_RESCUE` | No | Fallback TLS setting |
 
-Source: `backend/ciso_assistant/settings.py` (lines 258-275)
+The variables are turned into Django's `MAILERS` setting by `backend/ciso_assistant/mailers.py`. Every send goes through `backend/core/mailer.py`.
 
 ### Global Setting (UI toggle)
 
@@ -236,7 +237,7 @@ These use a separate mechanism (`User.mailing()` in `backend/iam/models.py`) wit
 | User creation (welcome) | `registration/first_connexion_email.html` | `User.save()` / management command `welcome_mail` |
 | User creation (SSO) | `registration/first_connexion_email_sso.html` | SSO user provisioning |
 
-These emails support the **rescue (fallback) email server**. Notification emails (from `tasks.py`) currently use only the primary server.
+All of these, like the notification emails, go through `core.mailer` and therefore the rescue server.
 
 ### 5. Non-Notification Periodic Tasks
 

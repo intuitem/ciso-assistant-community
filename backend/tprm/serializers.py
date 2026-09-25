@@ -2,6 +2,7 @@ import uuid
 
 import structlog
 from django.conf import settings
+from core import mailer
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
@@ -763,7 +764,7 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
             email=instance.email,
         ).first()
         if not user:
-            send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
+            send_mail = mailer.mailing_enabled()
             try:
                 user = User.objects.create_user(
                     email=instance.email,
