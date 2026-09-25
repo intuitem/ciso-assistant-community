@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from django.conf import settings
 from core.models import *
+from doc_management.models import DocumentContainer
 from core.serializer_fields import (
     FieldsRelatedField,
     HashSlugRelatedField,
@@ -1487,6 +1488,9 @@ class AppliedControlWriteSerializer(
     )
     incidents = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Incident.objects.all()
+    )
+    control_documents = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=DocumentContainer.objects.all()
     )
     cost = serializers.JSONField(required=False, allow_null=True)
     integration_config = serializers.PrimaryKeyRelatedField(
