@@ -11,6 +11,7 @@ from core.models import (
     Perimeter,
     RiskAssessment,
     RiskMatrix,
+    RiskScenario,
 )
 from iam.models import Folder, User, UserGroup
 
@@ -291,3 +292,42 @@ def test_organisation_objective_duplicate_same_domain(domains):
     assert OrganisationObjective.objects.filter(
         name="obj copy", folder=domain_a
     ).exists()
+
+
+@pytest.mark.django_db
+def test_risk_assessment_duplicate_keeps_inherent_risk(domains):
+    """#4847: the duplicate carried over current and residual only."""
+    domain_a, _ = domains
+    client = _client_for("dup-inherent@tests.com", [("BI-UG-ANA", domain_a)])
+    risk_assessment = _make_risk_assessment(domain_a)
+    RiskScenario.objects.create(
+        name="scn",
+        folder=domain_a,
+        risk_assessment=risk_assessment,
+        inherent_proba=2,
+        inherent_impact=1,
+        current_proba=1,
+        current_impact=1,
+    )
+    original = risk_assessment.risk_scenarios.get()
+
+    response = client.post(
+        f"/api/risk-assessments/{risk_assessment.id}/duplicate/",
+        {
+            "name": "ra copy",
+            "description": "",
+            "version": "1.0",
+            "perimeter": str(risk_assessment.perimeter.id),
+            "folder": str(domain_a.id),
+        },
+        format="json",
+    )
+
+    assert response.status_code == 200, response.content
+    duplicate = RiskAssessment.objects.get(name="ra copy").risk_scenarios.get()
+    assert (duplicate.inherent_proba, duplicate.inherent_impact) == (2, 1)
+    # Levels are recomputed on save, and an unset pair scores back to -1,
+    # which is what the UI renders as "--".
+    assert duplicate.inherent_level == original.inherent_level
+    # Control: the pairs that were already carried over must stay untouched.
+    assert (duplicate.current_proba, duplicate.current_impact) == (1, 1)

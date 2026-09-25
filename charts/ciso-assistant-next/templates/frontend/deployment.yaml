@@ -35,6 +35,14 @@ spec:
       - name: {{ .Values.frontend.name }}
         image: {{ default .Values.global.image.registry .Values.frontend.image.registry }}/{{ .Values.frontend.image.repository }}:{{ default (include "ciso-assistant.defaultTag" .) .Values.frontend.image.tag }}
         imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.frontend.image.imagePullPolicy }}
+        {{- with .Values.frontend.command }}
+        command:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.frontend.args }}
+        args:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         env:
           {{- with .Values.frontend.env }}
             {{- toYaml . | nindent 10 }}
