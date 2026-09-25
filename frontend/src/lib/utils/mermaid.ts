@@ -21,12 +21,16 @@ function cacheSvg(key: string, svg: string) {
 	svgCache.set(key, svg);
 }
 
+function currentTheme(): 'dark' | 'default' {
+	return isDarkTheme() ? 'dark' : 'default';
+}
+
 /** Renders every wrapped mermaid block under `root`; blocks that fail to parse keep their source. */
 export async function renderMermaidBlocks(root: HTMLElement): Promise<void> {
 	const blocks = [...root.querySelectorAll<HTMLElement>(`.${MERMAID_BLOCK_CLASS}`)];
 	if (!blocks.length) return;
 
-	const theme = isDarkTheme() ? 'dark' : 'default';
+	const theme = currentTheme();
 	const pending: HTMLElement[] = [];
 	for (const block of blocks) {
 		block.dataset.source ??= block.textContent ?? '';
@@ -47,7 +51,10 @@ export async function renderMermaidBlocks(root: HTMLElement): Promise<void> {
 	for (const block of pending) {
 		const source = block.dataset.source!;
 		try {
+			if (currentTheme() !== theme) return;
 			const { svg } = await mermaid.render(`mermaid-${++counter}`, source);
+			// A theme flip mid-render re-initialises mermaid for the newer pass; drop this one.
+			if (currentTheme() !== theme) return;
 			cacheSvg(`${theme}:${source}`, svg);
 			if (block.isConnected) block.innerHTML = svg;
 		} catch {
