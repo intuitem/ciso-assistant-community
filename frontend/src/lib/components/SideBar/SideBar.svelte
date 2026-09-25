@@ -242,9 +242,18 @@
 			type: 'component',
 			component: modalComponent,
 			title: m.firstTimeLoginModalTitle(),
-			body: m.firstTimeLoginModalDescription()
+			body: m.firstTimeLoginModalDescription(),
+			response: dismissOnboarding
 		};
 		modalStore.trigger(modal);
+	}
+
+	function dismissOnboarding(): void {
+		if (user?.preferences?.ui?.onboarding_dismissed) return;
+		fetch('/fe-api/user-preferences', {
+			method: 'PATCH',
+			body: JSON.stringify({ ui: { onboarding_dismissed: true } })
+		});
 	}
 
 	const loading = writable(false);
@@ -292,7 +301,9 @@
 
 	onMount(() => {
 		const showFirstLoginModal =
-			getCookie('show_first_login_modal') === 'true' && user.accessible_domains.length === 0;
+			getCookie('show_first_login_modal') === 'true' &&
+			!user.preferences?.ui?.onboarding_dismissed &&
+			user.accessible_domains.length === 0;
 		// NOTE: For now, there is only a single guided tour, which is targeted at an administrator.
 		// Later, we will have tours for domain managers, analysts etc.
 		if (showFirstLoginModal && user.is_admin) {
