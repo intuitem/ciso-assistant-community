@@ -149,13 +149,25 @@ _safe_url_fetcher = _SafeURLFetcher()
 _MERMAID_BLOCK_RE = re.compile(
     r'<pre><code class="language-mermaid">(.*?)</code></pre>', re.DOTALL
 )
+MERMAID_MAX_BLOCKS_PER_DOCUMENT = 20
+MERMAID_MAX_CHARS_PER_DOCUMENT = 100_000
 
 
 def _render_mermaid_blocks(content_html: str) -> str:
-    """Swap mermaid code blocks for rendered SVG; blocks that fail to render stay as code."""
+    """Swap mermaid code blocks for rendered SVG; blocks that fail to render or exceed
+    the per-document budget stay as code."""
+    budget = {
+        "blocks": MERMAID_MAX_BLOCKS_PER_DOCUMENT,
+        "chars": MERMAID_MAX_CHARS_PER_DOCUMENT,
+    }
 
     def replace(match):
-        svg = render_mermaid_svg(html.unescape(match.group(1)))
+        source = html.unescape(match.group(1))
+        if budget["blocks"] <= 0 or len(source) > budget["chars"]:
+            return match.group(0)
+        budget["blocks"] -= 1
+        budget["chars"] -= len(source)
+        svg = render_mermaid_svg(source)
         if svg is None:
             return match.group(0)
         return f'<div class="mermaid-diagram">{svg.decode()}</div>'

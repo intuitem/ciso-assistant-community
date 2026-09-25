@@ -6,7 +6,13 @@ from weasyprint import HTML
 import pymupdf
 
 from core.typst_render import MERMAID_MAX_SOURCE_CHARS, render_mermaid_svg
-from doc_management.views import _render_mermaid_blocks, _safe_url_fetcher
+from doc_management import views as doc_views
+from doc_management.views import (
+    MERMAID_MAX_BLOCKS_PER_DOCUMENT,
+    MERMAID_MAX_CHARS_PER_DOCUMENT,
+    _render_mermaid_blocks,
+    _safe_url_fetcher,
+)
 
 FLOWCHART = "flowchart TD\n  A[Policy] --> B{Approved?}\n  B -->|yes| C[Published]\n"
 
@@ -74,3 +80,36 @@ class TestRenderMermaidBlocks:
         text = _pdf_text(f"<html><body>{content}</body></html>")
         for label in ("Policy", "Approved?", "Published"):
             assert label in text
+
+    def test_stops_rendering_after_block_budget(self, monkeypatch):
+        rendered = []
+        monkeypatch.setattr(
+            doc_views,
+            "render_mermaid_svg",
+            lambda src: rendered.append(src) or b"<svg/>",
+        )
+        fences = "\n\n".join(
+            f"```mermaid\ngraph TD\n  A{i} --> B\n```"
+            for i in range(MERMAID_MAX_BLOCKS_PER_DOCUMENT + 5)
+        )
+        content = _render_mermaid_blocks(_markdown(fences))
+        assert len(rendered) == MERMAID_MAX_BLOCKS_PER_DOCUMENT
+        assert (
+            content.count('class="mermaid-diagram"') == MERMAID_MAX_BLOCKS_PER_DOCUMENT
+        )
+        assert content.count("language-mermaid") == 5
+
+    def test_stops_rendering_after_character_budget(self, monkeypatch):
+        rendered = []
+        monkeypatch.setattr(
+            doc_views,
+            "render_mermaid_svg",
+            lambda src: rendered.append(src) or b"<svg/>",
+        )
+        label = "x" * (MERMAID_MAX_CHARS_PER_DOCUMENT // 3)
+        fences = "\n\n".join(
+            f"```mermaid\ngraph TD\n  A[{label}] --> B{i}\n```" for i in range(4)
+        )
+        content = _render_mermaid_blocks(_markdown(fences))
+        assert len(rendered) == 2
+        assert content.count("language-mermaid") == 2
