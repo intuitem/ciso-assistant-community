@@ -231,7 +231,7 @@ def expand_urns_from_prefixed_list(
 ):
     """
     Convert a prefixed list like 'abc:xyz, def:uvw' into a list of full URNs,
-    using a prefix mapping. Fully qualified URNs (starting with 'urn:') are left untouched.
+    using a prefix mapping. Fully qualified URNs (starting with 'urn:') are only lowercased.
 
     Args:
         field_value (str): Raw string field value from the sheet (e.g., 'abc:id1, urn:...').
@@ -249,7 +249,7 @@ def expand_urns_from_prefixed_list(
             continue
 
         if element.startswith("urn:"):
-            result.append(element)
+            result.append(element.lower())
             continue
 
         parts = element.split(":")
