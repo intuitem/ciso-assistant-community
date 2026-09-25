@@ -240,6 +240,7 @@ def live_framework_to_object(framework) -> dict:
                         "annotation": question.annotation,
                         "config": question.config,
                         "depends_on": question.depends_on,
+                        "question_group": question.question_group,
                         "weight": question.weight
                         if question.weight not in (None, 1)
                         else None,
@@ -322,6 +323,7 @@ def live_framework_to_object(framework) -> dict:
             "max_score": framework.max_score,
             "scores_definition": framework.scores_definition,
             "implementation_groups_definition": framework.implementation_groups_definition,
+            "question_groups_definition": framework.question_groups_definition,
             "outcomes_definition": framework.outcomes_definition,
             "field_visibility": framework.field_visibility or None,
             "translations": framework.translations or None,

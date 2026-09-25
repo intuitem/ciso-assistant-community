@@ -1248,7 +1248,8 @@
 								<div class="flex flex-col w-full space-y-2">
 									<Question
 										questions={requirement.questions}
-										groups={requirement.questions_properties?.groups}
+										groupsOrder={requirement.questions_properties?.groups_order}
+										questionGroupsDefinition={fw?.question_groups_definition}
 										initialValue={requirementAssessment.answers}
 										field="answers"
 										disabled={!canEditAnswers}

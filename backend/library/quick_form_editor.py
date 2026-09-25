@@ -40,6 +40,7 @@ FRAMEWORK_ONLY_META_KEYS = {
     "min_score",
     "max_score",
     "implementation_groups_definition",
+    "question_groups_definition",
     "field_visibility",
 }
 

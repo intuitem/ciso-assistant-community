@@ -14,7 +14,8 @@
 		form?: SuperForm<Record<string, any>>;
 		initialValue?: any;
 		questions?: Record<string, any>;
-		groups?: unknown;
+		groupsOrder?: unknown;
+		questionGroupsDefinition?: unknown;
 		field: string;
 		helpText?: string;
 		onChange?: (urn: string, newAnswer: any) => void;
@@ -37,7 +38,8 @@
 		shallow = false,
 		form,
 		questions = {},
-		groups,
+		groupsOrder,
+		questionGroupsDefinition,
 		initialValue = {},
 		field,
 		helpText,
@@ -117,11 +119,24 @@
 	let questionBuffers = $state<Record<string, string>>({});
 	let activeGroupIndex = $state(0);
 	let questionView = $state<'grouped' | 'flat'>('grouped');
-	let normalizedGroups = $derived(normalizeQuestionGroups(groups, questions));
+	let normalizedGroups = $derived(
+		normalizeQuestionGroups(groupsOrder, questionGroupsDefinition, questions)
+	);
 	let hasQuestionGroups = $derived(normalizedGroups.length > 0);
 	let activeGroup = $derived(normalizedGroups[activeGroupIndex] ?? null);
 	let questionGroupsToRender = $derived.by(() => {
-		if (!hasQuestionGroups) return [{ description: '', order: Object.keys(questions) }];
+		if (!hasQuestionGroups) {
+			return [
+				{
+					refId: '',
+					name: '',
+					description: '',
+					annotation: '',
+					typicalEvidence: '',
+					order: Object.keys(questions)
+				}
+			];
+		}
 		return questionView === 'grouped' && activeGroup ? [activeGroup] : normalizedGroups;
 	});
 	let visibleQuestions = $derived(
@@ -206,8 +221,11 @@
 		{#if hasQuestionGroups}
 			<div class="mb-4 flex items-center justify-between gap-3">
 				<div class="min-w-0">
-					{#if questionView === 'grouped' && activeGroup?.description}
-						<h3 class="font-semibold">{activeGroup.description}</h3>
+					{#if questionView === 'grouped' && activeGroup}
+						<h3 class="font-semibold">{activeGroup.name}</h3>
+						{#if activeGroup.description}
+							<p class="mt-1 text-sm text-surface-600-400">{activeGroup.description}</p>
+						{/if}
 					{:else if questionView === 'flat'}
 						<h3 class="font-semibold">{m.questionFlatView()}</h3>
 					{/if}
@@ -272,13 +290,36 @@
 					? 'mb-4 rounded-lg border border-surface-200-800 bg-surface-50-950 p-3 sm:p-4'
 					: ''}
 			>
-				{#if hasQuestionGroups && questionView === 'flat' && group.description}
-					<div class="mb-4">
+				{#if hasQuestionGroups && questionView === 'flat'}
+					<div class="mb-4 space-y-2">
 						<h3
 							class="inline-flex items-center rounded-full border border-primary-200-800 bg-primary-100-900 px-3 py-1 text-sm font-semibold text-primary-700-300"
 						>
-							{group.description}
+							{group.name}
 						</h3>
+						{#if group.description}
+							<p class="text-sm text-surface-600-400">{group.description}</p>
+						{/if}
+					</div>
+				{/if}
+				{#if hasQuestionGroups && (group.annotation || group.typicalEvidence)}
+					<div class="mb-4 grid gap-2 text-sm sm:grid-cols-2">
+						{#if group.annotation}
+							<div class="rounded-lg border border-primary-200-800 bg-primary-50-950/40 px-3 py-2">
+								<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-primary-700-300">
+									<i class="fa-solid fa-circle-info mr-1"></i>{m.annotation()}
+								</p>
+								<p class="whitespace-pre-line text-surface-700-300">{group.annotation}</p>
+							</div>
+						{/if}
+						{#if group.typicalEvidence}
+							<div class="rounded-lg border border-surface-200-800 bg-surface-100-900 px-3 py-2">
+								<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-surface-600-400">
+									<i class="fa-solid fa-clipboard-check mr-1"></i>{m.typicalEvidence()}
+								</p>
+								<p class="whitespace-pre-line text-surface-700-300">{group.typicalEvidence}</p>
+							</div>
+						{/if}
 					</div>
 				{/if}
 				<ul class="control flex flex-col gap-4 whitespace-pre-line">

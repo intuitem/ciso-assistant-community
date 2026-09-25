@@ -113,6 +113,20 @@ class TestSyncQuestionsCreation:
 
         assert requirement_node.questions.get().ref_id == "q1"
 
+    def test_question_group_is_persisted(self, requirement_node):
+        _sync_questions_from_data(
+            requirement_node,
+            {
+                "urn:test:sync:q1": {
+                    "type": "text",
+                    "text": "Grouped question",
+                    "question_group": "achieved",
+                }
+            },
+        )
+
+        assert requirement_node.questions.get().question_group == "achieved"
+
 
 @pytest.mark.django_db
 class TestSyncQuestionsUpdate:
@@ -170,6 +184,27 @@ class TestSyncQuestionsUpdate:
         assert q1.annotation == "Updated Q1"
         assert q1.weight == 5
         assert q1.translations == {"fr": {"text": "Q1 mis à jour"}}
+
+    def test_update_question_group(self, requirement_node):
+        self._seed(requirement_node)
+
+        _sync_questions_from_data(
+            requirement_node,
+            {
+                "urn:test:sync:q1": {
+                    "type": "unique_choice",
+                    "text": "Original Q1",
+                    "question_group": "partially_achieved",
+                    "choices": [_make_choice("c1"), _make_choice("c2")],
+                },
+                "urn:test:sync:q2": {"type": "text", "text": "Original Q2"},
+            },
+        )
+
+        assert (
+            requirement_node.questions.get(urn="urn:test:sync:q1").question_group
+            == "partially_achieved"
+        )
 
     def test_add_new_question(self, requirement_node):
         self._seed(requirement_node)

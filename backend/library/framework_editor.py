@@ -60,6 +60,7 @@ EDITOR_FRAMEWORK_KEYS = {
     "max_score",
     "scores_definition",
     "implementation_groups_definition",
+    "question_groups_definition",
     "outcomes_definition",
     "field_visibility",
 }
@@ -70,6 +71,7 @@ QUESTION_KEYS = {
     "annotation",
     "config",
     "depends_on",
+    "question_group",
     "weight",
     "required",
     "translations",
@@ -106,6 +108,8 @@ def framework_to_editor_doc(framework: dict, *, locale: str = "en") -> dict:
         "implementation_groups_definition": framework.get(
             "implementation_groups_definition"
         ),
+        "question_groups_definition": framework.get("question_groups_definition")
+        or [],
         "outcomes_definition": framework.get("outcomes_definition"),
         "field_visibility": framework.get("field_visibility") or {},
         "urn_namespace": urn.split(":")[1] if urn.startswith("urn:") else "custom",
@@ -164,6 +168,7 @@ def framework_to_editor_doc(framework: dict, *, locale: str = "en") -> dict:
                     "type": _normalize_question_type(q_data.get("type")),
                     "config": q_data.get("config"),
                     "depends_on": q_data.get("depends_on"),
+                    "question_group": q_data.get("question_group"),
                     "order": q_order,
                     "weight": q_data.get("weight", 1),
                     "required": q_data.get("required", True) is not False,
@@ -390,6 +395,7 @@ def editor_doc_to_framework_object(
                 "annotation": question.get("annotation"),
                 "config": question.get("config"),
                 "depends_on": question.get("depends_on"),
+                "question_group": question.get("question_group"),
                 "weight": question.get("weight"),
                 # Only the non-default value is emitted, so compliance
                 # documents stay byte-identical.
@@ -510,6 +516,8 @@ def editor_doc_to_framework_object(
                 "implementation_groups_definition": meta.get(
                     "implementation_groups_definition"
                 ),
+                "question_groups_definition": meta.get("question_groups_definition")
+                or [],
                 "outcomes_definition": meta.get("outcomes_definition"),
                 "field_visibility": meta.get("field_visibility") or None,
             }

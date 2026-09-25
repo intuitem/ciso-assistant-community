@@ -1,45 +1,71 @@
 import { describe, expect, it } from 'vitest';
 import { hasQuestionAnswer, normalizeQuestionGroups } from './question-groups';
 
-const questions = {
-	'q:1': {},
-	'q:2': {},
-	'q:3': {}
-};
-
 describe('normalizeQuestionGroups', () => {
-	it('sorts numeric group keys and preserves the declared question order', () => {
+	it('uses the requirement order and groups questions by their group reference', () => {
 		expect(
 			normalizeQuestionGroups(
+				['not_achieved', 'achieved'],
+				[
+					{
+						ref_id: 'not_achieved',
+						name: 'Not Achieved',
+						description: 'One statement is true.',
+						annotation: 'A failed state.',
+						typical_evidence: 'A risk record.'
+					},
+					{ ref_id: 'achieved', name: 'Achieved' }
+				],
 				{
-					2: { description: 'Achieved', order: ['q:3'] },
-					1: { description: 'Not Achieved', order: ['q:2', 'q:1'] }
-				},
-				questions
+					'q:1': { question_group: 'not_achieved' },
+					'q:2': { question_group: 'not_achieved' },
+					'q:3': { question_group: 'achieved' }
+				}
 			)
 		).toEqual([
-			{ description: 'Not Achieved', order: ['q:2', 'q:1'] },
-			{ description: 'Achieved', order: ['q:3'] }
+			{
+				refId: 'not_achieved',
+				name: 'Not Achieved',
+				description: 'One statement is true.',
+				annotation: 'A failed state.',
+				typicalEvidence: 'A risk record.',
+				order: ['q:1', 'q:2']
+			},
+			{
+				refId: 'achieved',
+				name: 'Achieved',
+				description: '',
+				annotation: '',
+				typicalEvidence: '',
+				order: ['q:3']
+			}
 		]);
 	});
 
-	it('falls back when a question is omitted', () => {
+	it('falls back when a question references a group outside the local order', () => {
 		expect(
 			normalizeQuestionGroups(
-				{ 1: { description: 'Not Achieved', order: ['q:1', 'q:2'] } },
-				questions
+				['not_achieved'],
+				[{ ref_id: 'not_achieved', name: 'Not Achieved' }],
+				{
+					'q:1': { question_group: 'not_achieved' },
+					'q:2': { question_group: 'not_achieved' },
+					'q:3': { question_group: 'achieved' }
+				}
 			)
 		).toEqual([]);
 	});
 
-	it('falls back when a question is repeated or unknown', () => {
+	it('falls back for an unknown definition or a group without questions', () => {
 		expect(
 			normalizeQuestionGroups(
+				['not_achieved', 'achieved'],
+				[{ ref_id: 'not_achieved', name: 'Not Achieved' }],
 				{
-					1: { description: 'First', order: ['q:1', 'q:2'] },
-					2: { description: 'Second', order: ['q:2', 'q:4'] }
-				},
-				questions
+					'q:1': { question_group: 'not_achieved' },
+					'q:2': { question_group: 'not_achieved' },
+					'q:3': { question_group: 'not_achieved' }
+				}
 			)
 		).toEqual([]);
 	});

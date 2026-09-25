@@ -207,6 +207,8 @@ def _translate_questions(owner) -> dict | None:
             q_data["choices"] = choices
         if question.depends_on:
             q_data["depends_on"] = question.depends_on
+        if question.question_group:
+            q_data["question_group"] = question.question_group
         result[question.urn] = q_data
 
     return result if result else None
@@ -253,6 +255,7 @@ def _sync_questions_from_data(
             "type": q_type,
             "config": q_data.get("config"),
             "depends_on": q_data.get("depends_on"),
+            "question_group": q_data.get("question_group") or None,
             "order": order,
             "weight": q_data.get("weight", 1),
             "required": q_data.get("required", True) is not False,
@@ -1275,6 +1278,9 @@ class LibraryUpdater:
                     framework_dict["outcomes_definition"] = []
                 # An omitted IG definition means that the framework no longer defines implementation groups.
                 framework_dict.setdefault("implementation_groups_definition", None)
+                # Likewise, a library update that omits question groups removes
+                # their presentation metadata instead of leaving stale groups.
+                framework_dict.setdefault("question_groups_definition", [])
                 # Same for the result rule: dropping the key reverts to the default.
                 framework_dict.setdefault(
                     "result_aggregation", Framework.ResultAggregation.PER_ANSWER
@@ -3160,6 +3166,15 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
     implementation_groups_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Implementation groups definition")
     )
+    question_groups_definition = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("Question groups definition"),
+        help_text=_(
+            "Reusable question-group metadata. Requirements choose their order "
+            "and questions reference one group by ref_id."
+        ),
+    )
     outcomes_definition = models.JSONField(
         default=list, blank=True, verbose_name=_("Outcomes definition")
     )
@@ -3195,6 +3210,13 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
 
         return update_translations_in_object(
             copy.deepcopy(self.implementation_groups_definition or [])
+        )
+
+    def get_question_groups_definition_translated(self):
+        import copy
+
+        return update_translations_in_object(
+            copy.deepcopy(self.question_groups_definition or [])
         )
 
     def is_deletable(self) -> bool:
@@ -3777,6 +3799,13 @@ class Question(AbstractBaseModel, FolderMixin):
     )
     config = models.JSONField(blank=True, null=True, verbose_name=_("Config"))
     depends_on = models.JSONField(blank=True, null=True, verbose_name=_("Depends on"))
+    question_group = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name=_("Question group"),
+        help_text=_("Reference ID of this question's framework-level group."),
+    )
     order = models.IntegerField(default=0, verbose_name=_("Order"))
     weight = models.IntegerField(default=1, verbose_name=_("Weight"))
     translations = models.JSONField(

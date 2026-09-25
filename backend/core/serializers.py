@@ -3033,9 +3033,13 @@ class FrameworkReadSerializer(ReferentialSerializer):
     third_party_field_visibility = serializers.SerializerMethodField()
 
     implementation_groups_definition = serializers.SerializerMethodField()
+    question_groups_definition = serializers.SerializerMethodField()
 
     def get_implementation_groups_definition(self, obj):
         return obj.get_implementation_groups_definition_translated()
+
+    def get_question_groups_definition(self, obj):
+        return obj.get_question_groups_definition_translated()
 
     def get_has_compliance_assessments(self, obj):
         flag = getattr(obj, "has_compliance_assessments_flag", None)
@@ -3079,6 +3083,7 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
     implementation_groups_definition = serializers.JSONField(
         required=False, allow_null=True
     )
+    question_groups_definition = serializers.JSONField(required=False)
 
     def create(self, validated_data):
         # Strip any non-model fields that leak through from the read serializer
@@ -3099,6 +3104,7 @@ class FrameworkImportExportSerializer(BaseModelSerializer):
             "min_score",
             "max_score",
             "implementation_groups_definition",
+            "question_groups_definition",
             "outcomes_definition",
             "provider",
             "annotation",
@@ -4006,6 +4012,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             {
                 "framework": [
                     "implementation_groups_definition",
+                    "question_groups_definition",
                     "field_visibility",
                     # The edit page recomputes the result client-side, so it
                     # needs the rule the backend will apply on save.

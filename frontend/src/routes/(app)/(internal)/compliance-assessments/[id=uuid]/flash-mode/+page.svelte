@@ -457,7 +457,9 @@
 								<div class="mt-4">
 									<Question
 										questions={currentQuestions}
-										groups={requirement?.questions_properties?.groups}
+										groupsOrder={requirement?.questions_properties?.groups_order}
+										questionGroupsDefinition={complianceAssessment.framework
+											?.question_groups_definition}
 										initialValue={currentRequirementAssessment.answers ?? {}}
 										field="answers"
 										disabled={isReadOnly}

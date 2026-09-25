@@ -12,60 +12,64 @@ SPEC.loader.exec_module(convert_library_v2)
 
 
 ANSWERS = {
-    "TF-NA": {
+    "TF": {
         "type": "unique_choice",
-        "group_description": "Not Achieved",
-        "choices": [{"urn": "", "value": "True"}],
-    },
-    "TF-A": {
-        "type": "unique_choice",
-        "group_description": "Achieved",
         "choices": [{"urn": "", "value": "True"}],
     },
 }
 
 
-def test_inject_questions_builds_presentation_groups_without_changing_questions():
+def test_inject_questions_references_global_groups_and_keeps_local_order():
     node = {"urn": "urn:intuitem:risk:req_node:test:a1.a"}
     convert_library_v2.inject_questions_into_node(
         {
-            "questions": "NA one\nNA two\nA one",
-            "answer": "TF-NA\nTF-NA\nTF-A",
-            "answer_group_order": "TF-NA\nTF-A",
+            "questions": "Not achieved one\nNot achieved two\nAchieved one",
+            "answer": "TF\nTF\nTF",
+            "question_groups": "not_achieved\nnot_achieved\nachieved",
+            "question_groups_order": "not_achieved\nachieved",
         },
         node,
         ANSWERS,
+        question_group_ids={"not_achieved", "achieved"},
     )
 
     question_urns = list(node["questions"])
+    assert [node["questions"][urn]["question_group"] for urn in question_urns] == [
+        "not_achieved",
+        "not_achieved",
+        "achieved",
+    ]
     assert node["questions_properties"] == {
-        "groups": {
-            1: {
-                "description": "Not Achieved",
-                "order": question_urns[:2],
-            },
-            2: {"description": "Achieved", "order": question_urns[2:]},
-        }
+        "groups_order": ["not_achieved", "achieved"]
     }
 
 
 @pytest.mark.parametrize(
-    "group_order, message",
+    ("groups", "group_order", "known_ids", "message"),
     [
-        ("TF-NA", "missing answer IDs"),
-        ("TF-NA\nTF-A\nTF-A", "Duplicate answer ID"),
-        ("TF-NA\nTF-PA\nTF-A", "unused answer IDs"),
+        ("not_achieved\nachieved", "not_achieved", {"not_achieved", "achieved"}, "missing group IDs"),
+        (
+            "not_achieved\nachieved",
+            "not_achieved\nachieved\nachieved",
+            {"not_achieved", "achieved"},
+            "Duplicate group ID",
+        ),
+        ("not_achieved\nunknown", "not_achieved\nunknown", {"not_achieved"}, "Unknown question group IDs"),
     ],
 )
-def test_inject_questions_rejects_inconsistent_group_metadata(group_order, message):
+def test_inject_questions_rejects_inconsistent_group_metadata(
+    groups, group_order, known_ids, message
+):
     node = {"urn": "urn:intuitem:risk:req_node:test:a1.a"}
     with pytest.raises(ValueError, match=message):
         convert_library_v2.inject_questions_into_node(
             {
-                "questions": "NA one\nA one",
-                "answer": "TF-NA\nTF-A",
-                "answer_group_order": group_order,
+                "questions": "One\nTwo",
+                "answer": "TF\nTF",
+                "question_groups": groups,
+                "question_groups_order": group_order,
             },
             node,
             ANSWERS,
+            question_group_ids=known_ids,
         )

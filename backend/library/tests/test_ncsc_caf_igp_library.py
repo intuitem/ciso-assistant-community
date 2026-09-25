@@ -35,7 +35,7 @@ LIBRARIES_DIR = Path(__file__).resolve().parents[2] / "library" / "libraries"
 REF_ID = "ncsc-caf-4.0-igp"
 LIBRARY_URN = f"urn:intuitem:risk:library:{REF_ID}"
 FRAMEWORK_URN = f"urn:intuitem:risk:framework:{REF_ID}"
-GROUPED_REF_ID = "ncsc-caf-4.0-igp-grouped"
+GROUPED_REF_ID = "ncsc-caf-4.0-igp-grouped_better"
 GROUPED_LIBRARY_URN = f"urn:intuitem:risk:library:{GROUPED_REF_ID}"
 GROUPED_FRAMEWORK_URN = f"urn:intuitem:risk:framework:{GROUPED_REF_ID}"
 
@@ -242,45 +242,45 @@ class TestLibraryShape:
 
 @pytest.mark.django_db
 class TestGroupedLibraryShape:
-    def test_groups_cover_every_question_once_in_caf_column_order(
+    def test_global_groups_and_local_order_cover_every_question_once(
         self, grouped_framework
     ):
+        definitions = {
+            group["ref_id"]: group
+            for group in grouped_framework.question_groups_definition
+        }
+        assert set(definitions) == {
+            "not_achieved",
+            "partially_achieved",
+            "achieved",
+        }
+        assert definitions["not_achieved"]["name"] == "Not Achieved"
+
         nodes = RequirementNode.objects.filter(
             framework=grouped_framework, assessable=True
         ).prefetch_related("questions")
         assert nodes.count() == EXPECTED_OUTCOMES
 
         for node in nodes:
-            groups = node.questions_properties.get("groups")
-            assert isinstance(groups, dict), node.ref_id
-            ordered_groups = [groups[key] for key in sorted(groups, key=int)]
-            expected_descriptions = (
-                ["Not Achieved", "Achieved"]
+            group_order = node.questions_properties.get("groups_order")
+            expected_group_order = (
+                ["not_achieved", "achieved"]
                 if node.ref_id in TWO_STATE_OUTCOMES
-                else ["Not Achieved", "Partially Achieved", "Achieved"]
+                else ["not_achieved", "partially_achieved", "achieved"]
             )
-            assert [group["description"] for group in ordered_groups] == (
-                expected_descriptions
-            )
+            assert group_order == expected_group_order
 
             questions = list(node.questions.order_by("order"))
-            questions_by_urn = {question.urn: question for question in questions}
-            grouped_urns = [
-                question_urn
-                for group in ordered_groups
-                for question_urn in group["order"]
-            ]
-            assert grouped_urns == [question.urn for question in questions]
-            assert len(grouped_urns) == len(set(grouped_urns))
-
             expected_columns = ["NA", "A"]
             if node.ref_id not in TWO_STATE_OUTCOMES:
                 expected_columns.insert(1, "PA")
-            for group, expected_column in zip(ordered_groups, expected_columns):
+            for group_id, expected_column in zip(group_order, expected_columns):
                 assert {
-                    column_of(questions_by_urn[question_urn])
-                    for question_urn in group["order"]
+                    column_of(question)
+                    for question in questions
+                    if question.question_group == group_id
                 } == {expected_column}
+            assert {question.question_group for question in questions} == set(group_order)
 
     def test_grouping_does_not_change_the_calculation_rule(self, grouped_framework):
         assert (

@@ -442,6 +442,9 @@ class FrameworkImporter:
                 implementation_groups_definition=self.framework_data.get(
                     "implementation_groups_definition"
                 ),
+                question_groups_definition=self.framework_data.get(
+                    "question_groups_definition", []
+                ),
                 outcomes_definition=self.framework_data.get("outcomes_definition", []),
                 field_visibility=self.framework_data.get("field_visibility") or {},
                 provider=library_object.provider,

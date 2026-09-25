@@ -942,7 +942,9 @@
 								{form}
 								field="answers"
 								questions={page.data.requirementAssessment.requirement.questions}
-								groups={page.data.requirementAssessment.requirement.questions_properties?.groups}
+								groupsOrder={page.data.requirementAssessment.requirement.questions_properties
+									?.groups_order}
+								questionGroupsDefinition={fw?.question_groups_definition}
 								label={m.questionSingular()}
 							/>
 						</div>
