@@ -2243,8 +2243,6 @@ def startup(sender=None, **kwargs):
     from global_settings.models import GlobalSettings
     from integrations.models import IntegrationProvider
 
-    from core.mappings.engine import engine
-
     print("startup handler: initialize database")
 
     # if root folder does not exist, then create it
