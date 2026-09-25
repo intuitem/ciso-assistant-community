@@ -38,6 +38,7 @@ from .models import (
     DocumentRevision,
     DocumentTemplate,
     ManagedDocument,
+    record_document_edit,
 )
 
 
@@ -972,23 +973,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 )
         old_content = instance.content
         instance = serializer.save()
-        # Record edit history for draft revisions, only if content actually changed
-        if (
-            instance.status == DocumentRevision.Status.DRAFT
-            and instance.content != old_content
-        ):
-            DocumentEdit.objects.create(
-                revision=instance,
-                editor=self.request.user,
-                summary=instance.change_summary or "",
-                content_snapshot=instance.content,
-            )
-            # Cap edit history to the 20 most recent entries per revision
-            MAX_EDITS_PER_REVISION = 20
-            edit_ids_to_keep = instance.edits.order_by("-created_at").values_list(
-                "pk", flat=True
-            )[:MAX_EDITS_PER_REVISION]
-            instance.edits.exclude(pk__in=list(edit_ids_to_keep)).delete()
+        record_document_edit(instance, self.request.user, old_content)
 
     @action(detail=True, methods=["post"], url_path="start-editing")
     def start_editing(self, request, pk=None):

@@ -66,7 +66,6 @@ from core.models import (
 from core.tasks import get_missing_email_settings
 from doc_management.models import (
     DocumentContainer,
-    DocumentEdit,
     DocumentRevision,
     DocumentTemplate,
     ManagedDocument,
@@ -702,7 +701,11 @@ def _scoped_prefetches(entry, instance):
     from .engine import run_identity
 
     identity = run_identity(instance)
-    folders = _read_scope_folder_ids(instance.folder)
+    # Wider than a top-level read: these hang off a row already in scope, and a
+    # control or an evidence in a parent domain is the normal shape. Narrowing
+    # them to the subtree would also contradict quality_check, which counts
+    # through the join table and sees them all.
+    folders = _accessible_folder_ids(instance.folder)
 
     def scoped(model):
         queryset = model.objects.filter(id__in=authz.viewable_ids(identity, model))
@@ -745,7 +748,13 @@ def _rows_for(model, raw, instance, label):
     """Values to rows. Each is a UUID or the name a person knows the row by, as
     everywhere else a workflow names something. Anything the run may not reach —
     unknown, outside its folders, invisible to its identity — reads the same, so
-    the error never confirms a row exists elsewhere."""
+    the error never confirms a row exists elsewhere.
+
+    Same two scopes as _resolve_reference: an id reaches the ancestors, a name
+    only the subtree and the root.
+    """
+    from iam.models import Folder
+
     from . import authz
     from .engine import run_identity
 
@@ -755,17 +764,25 @@ def _rows_for(model, raw, instance, label):
     queryset = model.objects.filter(
         id__in=authz.viewable_ids(run_identity(instance), model)
     )
-    if get_model_field(model, "folder"):
-        queryset = queryset.filter(
-            folder_id__in=_accessible_folder_ids(instance.folder)
-        )
+
+    def within(folder_ids):
+        # A folder is its own scope. An Actor has none of either — it is an IAM
+        # special case, and viewable_ids is the whole answer for it.
+        if model is Folder:
+            return queryset.filter(id__in=folder_ids)
+        if get_model_field(model, "folder"):
+            return queryset.filter(folder_id__in=folder_ids)
+        return queryset
+
+    by_id = within(_accessible_folder_ids(instance.folder))
+    by_name = within(_name_scope_folder_ids(instance.folder))
     rows, unresolved = [], []
     for value in dict.fromkeys(ids):
         if UUID_RE.match(value):
-            match = list(queryset.filter(id=value)[:2])
+            match = list(by_id.filter(id=value)[:2])
         else:
             lookup = _identifier_q(model, value)
-            match = list(queryset.filter(lookup)[:2]) if lookup is not None else []
+            match = list(by_name.filter(lookup)[:2]) if lookup is not None else []
         if len(match) > 1:
             raise ActionError(
                 f"create_object: {label} '{value}' matches more than one object"
@@ -807,15 +824,13 @@ def _target_folder(kwargs, params, instance, model, label="folder"):
     """The domain an author named, else where the run would have put it.
 
     authorize_action checks the create permission against the workflow's own
-    folder, so naming another one has to be checked here or a run could write
-    into a domain it may see but not write to.
+    folder, so whichever domain this settles on has to be checked here or a run
+    could write into one it may see but not write to.
     """
     from iam.models import Folder
 
     named = params.get(label)
-    if not named:
-        return kwargs["folder"]
-    folder = _rows_for(Folder, named, instance, label)[0]
+    folder = _rows_for(Folder, named, instance, label)[0] if named else kwargs["folder"]
     _authorize_creation_folder(model, folder, instance)
     return folder
 
@@ -1104,6 +1119,21 @@ class CreateObjectAction(BaseAction):
                 .get_limit_choices_to(),
             )
 
+        # save() may take the folder from a parent. Matching on the instance
+        # folder would then miss and the create would hit a unique constraint.
+        folder = _creation_folder(instance)
+        folder_from = entry.get("folder_from")
+        if folder_from and kwargs.get(folder_from) is not None:
+            folder = kwargs[folder_from].folder
+        # authorize_action cleared this action against the workflow's folder,
+        # but the row lands wherever the trigger or the parent puts it, and a
+        # non-recursive grant does not reach a subfolder. Built models land the
+        # same way, so the check precedes the constructor too — except where an
+        # author may name the domain, which _target_folder checks instead:
+        # clearing the default would be clearing a folder nothing is written to.
+        if "folder" not in (entry.get("params") or {}):
+            _authorize_creation_folder(entry["model"], folder, instance)
+
         constructor = entry.get("constructor")
         if constructor:
             if config.get("upsert"):
@@ -1114,7 +1144,7 @@ class CreateObjectAction(BaseAction):
             params = _construction_params(entry, fields, instance)
             try:
                 obj = globals()[constructor](
-                    {"folder": _creation_folder(instance), **kwargs}, params, instance
+                    {"folder": folder, **kwargs}, params, instance
                 )
             except ValidationError as e:
                 raise ActionError(f"create_object: {'; '.join(e.messages)}")
@@ -1129,16 +1159,6 @@ class CreateObjectAction(BaseAction):
 
         obj = None
         created = True
-        folder = _creation_folder(instance)
-        # save() may take the folder from a parent. Matching on the instance
-        # folder would then miss and the create would hit a unique constraint.
-        folder_from = entry.get("folder_from")
-        if folder_from and kwargs.get(folder_from) is not None:
-            folder = kwargs[folder_from].folder
-        # authorize_action cleared this action against the workflow's folder,
-        # but the row lands wherever the trigger or the parent puts it, and a
-        # non-recursive grant does not reach a subfolder.
-        _authorize_creation_folder(entry["model"], folder, instance)
         if config.get("upsert"):
             match_fields = _match_fields(entry)
             match = {key: kwargs.get(key) for key in match_fields}
@@ -1985,7 +2005,8 @@ class UpdateEntry:
     #: why the row was refused rather than blaming scope.
     scope_note: str = ""
     #: Bookkeeping the API does around its own write — called (obj, updated
-    #: field names, instance) after save() so a run leaves the same trail.
+    #: field names, their pre-save values, instance) after save() so a run
+    #: leaves the same trail.
     after_save: Callable | None = None
 
 
@@ -2002,11 +2023,11 @@ _ASSESSMENT_STATUSES = frozenset(
 )
 
 
-def _record_document_edit(revision, updated, instance):
-    """The editor snapshots every content change of a draft (doc_management
-    perform_update). A run's rewrite belongs in that same history, under the
-    identity the run holds — otherwise the only trace of what a machine wrote
-    is the revision itself.
+def _record_document_edit(revision, updated, before, instance):
+    """A run's rewrite belongs in the same history the editor keeps, under the
+    identity the run holds — otherwise the only trace of what a machine wrote is
+    the revision itself. doc_management owns the policy (which statuses are
+    snapshotted, how many entries survive); this only supplies the editor.
 
     Deliberately NOT declared as an extra permission: no role grants
     `add_documentedit` (core/startup.py grants `view_documentedit` only) because
@@ -2014,16 +2035,13 @@ def _record_document_edit(revision, updated, instance):
     Declaring it would refuse to publish a workflow whose author can do the same
     thing through the API, which is the one direction the engine must not take.
     """
+    from doc_management.models import record_document_edit
+
     from .engine import run_identity
 
     if "content" not in updated:
         return
-    DocumentEdit.objects.create(
-        revision=revision,
-        editor=run_identity(instance),
-        summary=revision.change_summary or "",
-        content_snapshot=revision.content,
-    )
+    record_document_edit(revision, run_identity(instance), before.get("content"))
 
 
 UPDATABLE_MODELS: dict[str, UpdateEntry] = {
@@ -2321,7 +2339,7 @@ class UpdateObjectAction(BaseAction):
             )
 
         fields = render(config.get("fields") or {}, context)
-        updated = {}
+        updated, before = {}, {}
         for key, value in fields.items():
             if key not in entry.fields or value in ("", None):
                 continue
@@ -2331,6 +2349,7 @@ class UpdateObjectAction(BaseAction):
                     f"update_object: a workflow may not set {config.get('model')}"
                     f".{key} to '{value}'"
                 )
+            before[key] = getattr(obj, key)
             setattr(obj, key, value)
             updated[key] = value
         if updated:
@@ -2339,7 +2358,7 @@ class UpdateObjectAction(BaseAction):
             except ValidationError as e:
                 raise ActionError(f"update_object: {'; '.join(e.messages)}")
             if entry.after_save is not None:
-                entry.after_save(obj, updated, instance)
+                entry.after_save(obj, updated, before, instance)
 
         relations = {}
         for field_name, spec in (config.get("m2m") or {}).items():

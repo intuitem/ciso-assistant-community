@@ -187,6 +187,32 @@ class TestCreatingADocument:
         }
         assert "action_create_missing_fk" in codes
 
+    def test_the_folder_it_lands_in_needs_the_create_permission(self):
+        """A built model lands where its parent is — here the container's
+        domain — which authorize_action never saw: it cleared the action
+        against the workflow's own folder."""
+        from automation.workflows import authz
+
+        domain = make_domain("Publishes here")
+        child = make_domain("Read-only corner", parent=domain)
+        container = DocumentContainer.objects.create(name="Locked", folder=child)
+        version = self._flow(domain, container, name="Locked")
+        real_can = authz.can
+        authz.can = lambda user, codename, folder: (
+            False if folder == child else real_can(user, codename, folder)
+        )
+        try:
+            instance = start_instance(version)
+        finally:
+            authz.can = real_can
+
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not ManagedDocument.objects.filter(container=container).exists()
+        # The constructor writes the first revision in the same breath.
+        assert not DocumentRevision.objects.filter(
+            document__container=container
+        ).exists()
+
     def test_it_declares_the_revision_permission_it_needs(self):
         """The constructor writes a revision on every run, not only when a
         field asks for one."""
@@ -319,6 +345,44 @@ class TestRewritingADraft:
         edit = DocumentEdit.objects.get(revision=draft)
         assert edit.content_snapshot == "# Newer"
         assert edit.editor == publisher_user()
+
+    def test_a_returned_revision_is_rewritten_without_a_snapshot(self):
+        """doc_management snapshots drafts only. A run following the same rule
+        is the point of sharing record_document_edit with the editor."""
+        domain = make_domain("Returned history")
+        _container, document, _published = make_document(domain)
+        returned = DocumentRevision.objects.create(
+            document=document,
+            version_number=2,
+            content="old",
+            status=DocumentRevision.Status.CHANGE_REQUESTED,
+        )
+        start_instance(self._flow(domain, returned, content="# Reworked"))
+        assert not DocumentEdit.objects.filter(revision=returned).exists()
+
+    def test_the_history_keeps_the_same_number_of_entries_as_the_editor(self):
+        from doc_management.models import MAX_EDITS_PER_REVISION
+
+        domain = make_domain("Capped history")
+        _container, document, _published = make_document(domain)
+        draft = DocumentRevision.objects.create(
+            document=document, version_number=2, content="old"
+        )
+        for pass_ in range(MAX_EDITS_PER_REVISION + 3):
+            start_instance(self._flow(domain, draft, content=f"# Pass {pass_}"))
+        assert (
+            DocumentEdit.objects.filter(revision=draft).count()
+            == MAX_EDITS_PER_REVISION
+        )
+
+    def test_rewriting_with_the_same_markdown_adds_nothing(self):
+        domain = make_domain("Same markdown")
+        _container, document, _published = make_document(domain)
+        draft = DocumentRevision.objects.create(
+            document=document, version_number=2, content="# Same"
+        )
+        start_instance(self._flow(domain, draft, content="# Same"))
+        assert not DocumentEdit.objects.filter(revision=draft).exists()
 
     def test_a_metadata_only_write_leaves_no_snapshot(self):
         domain = make_domain("No snapshot")

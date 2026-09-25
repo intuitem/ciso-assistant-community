@@ -367,7 +367,17 @@ def complete_deferred_action(token: WorkflowToken, output: dict) -> None:
 
     def on_resume(instance):
         node = token.current_node
-        _persist_node_output(node, output, instance)
+        try:
+            _persist_node_output(node, output, instance)
+        except FatalActionError as e:
+            # The dispatch claim is already committed, so letting this escape
+            # would roll the resume back and leave the token WAITING for a task
+            # that will never be delivered again (mirrors the async-subprocess
+            # completion path in _refresh_status).
+            token.status = WorkflowToken.Status.ACTIVE
+            token.save(update_fields=["status", "updated_at"])
+            _handle_failure(token, str(e), retryable=False)
+            return
         _log(
             instance,
             WorkflowInstanceLog.EventType.ACTION_EXECUTED,
@@ -1036,10 +1046,14 @@ def _store_node_output(node, output, instance):
     lost = []
     instance.node_outputs[key] = _cap_structure(output, lost=lost)
     if lost:
+        # Only the character budget is a setting; the item and depth caps are
+        # engine constants, so pointing at the setting there would misdirect.
+        raisable = {remedy for _what, remedy in lost if remedy}
+        hint = f" Or raise {', '.join(sorted(raisable))}." if raisable else ""
         raise FatalActionError(
             f"This step produced more than one node output can hold, so "
-            f"{'; '.join(lost)}. Narrow what the step reads, or raise "
-            f"WORKFLOW_NODE_OUTPUT_BUDGET."
+            f"{'; '.join(what for what, _remedy in lost)}. Narrow what the step "
+            f"reads.{hint}"
         )
 
 
@@ -1061,12 +1075,12 @@ def _cap_structure(value, budget=None, depth=0, lost=None):
     if budget is None:
         budget = [node_output_budget()]
 
-    def drop(what):
+    def drop(what, remedy=None):
         if lost is not None:
-            lost.append(what)
+            lost.append((what, remedy))
 
     if budget[0] <= 0:
-        drop("the output budget ran out")
+        drop("the output budget ran out", "WORKFLOW_NODE_OUTPUT_BUDGET")
         return "<truncated: output budget exceeded>"
     if depth > MAX_STRUCTURE_DEPTH:
         drop(f"nesting past {MAX_STRUCTURE_DEPTH} levels was dropped")
@@ -1084,7 +1098,12 @@ def _cap_structure(value, budget=None, depth=0, lost=None):
         capped = {}
         for index, (key, item) in enumerate(value.items()):
             if index >= MAX_COLLECTION_ITEMS or budget[0] <= 0:
-                drop(f"{len(value) - index} of {len(value)} keys were dropped")
+                drop(
+                    f"{len(value) - index} of {len(value)} keys were dropped",
+                    None
+                    if index >= MAX_COLLECTION_ITEMS
+                    else "WORKFLOW_NODE_OUTPUT_BUDGET",
+                )
                 capped["<omitted>"] = f"{len(value) - index} more keys"
                 break
             budget[0] -= len(str(key))
@@ -1095,7 +1114,12 @@ def _cap_structure(value, budget=None, depth=0, lost=None):
         capped_items = []
         for index, item in enumerate(value):
             if index >= MAX_COLLECTION_ITEMS or budget[0] <= 0:
-                drop(f"{len(value) - index} of {len(value)} items were dropped")
+                drop(
+                    f"{len(value) - index} of {len(value)} items were dropped",
+                    None
+                    if index >= MAX_COLLECTION_ITEMS
+                    else "WORKFLOW_NODE_OUTPUT_BUDGET",
+                )
                 capped_items.append(f"<{len(value) - index} more items>")
                 break
             capped_items.append(_cap_structure(item, budget, depth + 1, lost))

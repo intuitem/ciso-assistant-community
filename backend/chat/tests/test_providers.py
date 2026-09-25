@@ -687,6 +687,31 @@ class TestGenerationIsBounded:
             "a long answer that got cut"
         )
 
+    def test_a_caller_that_sizes_the_ceiling_gets_it(self, settings):
+        settings.LLM_MAX_OUTPUT_TOKENS = 2048
+        client = _FinishClient("stop")
+        self._llm(client).generate(prompt="p", context="", max_output_tokens=5000)
+        assert client.bodies[0]["max_tokens"] == 5000
+
+    def test_and_hears_when_the_answer_did_not_fit(self, settings):
+        """It asked for a whole answer of a known size; a cut one is a defect,
+        not a long reply."""
+        from chat.providers import TruncatedCompletion
+
+        client = _FinishClient("length", content="cut")
+        with pytest.raises(TruncatedCompletion):
+            self._llm(client).generate(prompt="p", context="", max_output_tokens=5000)
+
+
+def test_a_word_budget_gets_a_ceiling_above_it():
+    """ai_generate's `max_words` is what an author sets; a ceiling below it
+    would cut the draft they asked for."""
+    from chat.providers import llm_max_output_tokens, words_to_output_tokens
+
+    assert words_to_output_tokens(2000) > 2000 * 1.3
+    # Never tighter than the global ceiling, which stays the floor.
+    assert words_to_output_tokens(1) == llm_max_output_tokens()
+
 
 def test_the_two_bounds_agree(settings):
     """The token ceiling is meant to bind first. At a local model's ~30 tokens

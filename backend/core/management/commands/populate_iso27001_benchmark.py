@@ -40,6 +40,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from core.models import (
+    Actor,
     AppliedControl,
     ComplianceAssessment,
     Evidence,
@@ -48,7 +49,7 @@ from core.models import (
     Perimeter,
     RequirementAssessment,
 )
-from iam.models import Folder
+from iam.models import Folder, User
 
 # Worst first.
 BUCKETS = ("concern", "needs_look", "known_gap", "backed")
@@ -56,6 +57,8 @@ BUCKETS = ("concern", "needs_look", "known_gap", "backed")
 MODEL_BUCKETS = ("needs_look", "known_gap", "backed")
 
 PREFIX = "BENCH-"
+#: The audit needs one, or the review has nobody to hand its write-up to.
+REVIEWER_EMAIL = "bench-reviewer@test.example"
 FRAMEWORK_URN = "urn:intuitem:risk:framework:iso27001-2022"
 LINK = "https://evidence.example.test/"
 
@@ -648,6 +651,8 @@ class Command(BaseCommand):
             field_visibility=build_initial_field_visibility(framework),
         )
         audit.create_requirement_assessments()
+        user, _created = User.objects.get_or_create(email=REVIEWER_EMAIL)
+        audit.reviewers.add(Actor.objects.get(user=user))
         return audit, domain
 
     def _seed_cases(self, audit, domain):

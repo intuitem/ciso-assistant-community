@@ -275,7 +275,7 @@ class TestTheSideEffectsTheEditorHas:
     def test_a_task_can_name_its_domain(self, domain, assignee):
         elsewhere = Folder.objects.create(
             name=f"elsewhere {uuid.uuid4()}",
-            parent_folder=Folder.get_root_folder(),
+            parent_folder=domain,
             content_type=Folder.ContentType.DOMAIN,
         )
         instance = start_instance(
@@ -364,7 +364,7 @@ def test_a_named_domain_needs_the_create_permission_there(domain, assignee):
 
     elsewhere = Folder.objects.create(
         name=f"no rights {uuid.uuid4()}",
-        parent_folder=Folder.get_root_folder(),
+        parent_folder=domain,
         content_type=Folder.ContentType.DOMAIN,
     )
     version = action_flow(
@@ -392,3 +392,31 @@ def test_a_named_domain_needs_the_create_permission_there(domain, assignee):
     assert instance.status == WorkflowInstance.Status.FAILED
     assert not TaskTemplate.objects.filter(folder=elsewhere).exists()
     assert not TaskTemplate.objects.filter(name="Somewhere I may not write").exists()
+
+
+@pytest.mark.django_db
+def test_a_named_domain_outside_the_workflows_tree_is_refused(domain, assignee):
+    """A name resolves in the workflow's own subtree and the root, nowhere else
+    — the same rule every other reference follows. A sibling domain the run may
+    happen to see is not a place this workflow writes."""
+    sibling = Folder.objects.create(
+        name=f"sibling {uuid.uuid4()}",
+        parent_folder=Folder.get_root_folder(),
+        content_type=Folder.ContentType.DOMAIN,
+    )
+    instance = start_instance(
+        action_flow(
+            domain,
+            {
+                "type": "create_object",
+                "model": "task_template",
+                "fields": {
+                    "name": "Not my domain",
+                    "assigned_to": str(assignee.id),
+                    "folder": sibling.name,
+                },
+            },
+        )
+    )
+    assert instance.status == WorkflowInstance.Status.FAILED
+    assert not TaskTemplate.objects.filter(name="Not my domain").exists()

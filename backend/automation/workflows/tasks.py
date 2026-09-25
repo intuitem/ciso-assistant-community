@@ -180,7 +180,12 @@ def ai_call_task(
     """Run one AI step's inference and hand the token back to the engine, in a
     task so a call that takes minutes never holds the instance-tree locks.
     get_llm_strict, not get_llm: a run must not proceed on StubLLM output."""
-    from chat.providers import NoLLMAvailable, TruncatedCompletion, get_llm_strict
+    from chat.providers import (
+        NoLLMAvailable,
+        TruncatedCompletion,
+        get_llm_strict,
+        words_to_output_tokens,
+    )
 
     from .actions import AI_SYSTEM_PROMPT, AI_TEXT_MAX_CHARS
     from .engine import (
@@ -227,6 +232,9 @@ def ai_call_task(
                 prompt=f"{prompt}\n\nAnswer in at most {max_words} words.",
                 context=text,
                 system_prompt=AI_SYSTEM_PROMPT,
+                # The word budget is the author's control; the token ceiling
+                # must sit above it or a long draft is cut with nothing said.
+                max_output_tokens=words_to_output_tokens(max_words),
             )
             output = {"text": (completion or "").strip()[:AI_TEXT_MAX_CHARS]}
         if output is not None and truncated:

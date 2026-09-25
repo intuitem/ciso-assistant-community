@@ -245,12 +245,15 @@ class TestTruncationIsLoud:
 
     def test_dropping_items_from_a_list_is_reported(self):
         lost = self._lost({"items": list(range(MAX_COLLECTION_ITEMS + 50))})
-        assert lost == [f"50 of {MAX_COLLECTION_ITEMS + 50} items were dropped"]
+        # No remedy: the item cap is an engine constant, so telling the author
+        # to raise the budget setting would send them somewhere that cannot help.
+        assert lost == [(f"50 of {MAX_COLLECTION_ITEMS + 50} items were dropped", None)]
 
     def test_running_out_of_budget_is_reported(self, settings):
         settings.WORKFLOW_NODE_OUTPUT_BUDGET = 2000
         lost = self._lost({"rows": [{"note": "x" * 650} for _ in range(50)]})
-        assert lost and "were dropped" in lost[0]
+        assert lost and "were dropped" in lost[0][0]
+        assert lost[0][1] == "WORKFLOW_NODE_OUTPUT_BUDGET"
 
     def test_shortening_one_long_string_is_not(self):
         assert self._lost({"blob": "x" * 50000}) == []
@@ -274,3 +277,4 @@ class TestTruncationIsLoud:
                 node_, {"rows": [{"note": "x" * 200} for _ in range(20)]}, instance
             )
         assert "were dropped" in str(caught.value)
+        assert "WORKFLOW_NODE_OUTPUT_BUDGET" in str(caught.value)

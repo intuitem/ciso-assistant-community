@@ -370,6 +370,32 @@ class DocumentEdit(AbstractBaseModel, FolderMixin):
         return f"Edit by {editor_str} on {self.created_at}"
 
 
+MAX_EDITS_PER_REVISION = 20
+
+
+def record_document_edit(revision, editor, previous_content):
+    """Snapshot a draft's content change, keeping the most recent entries.
+
+    The one place this policy lives: the editor's PATCH and a workflow rewriting
+    the same draft have to leave the same history.
+    """
+    if (
+        revision.status != DocumentRevision.Status.DRAFT
+        or revision.content == previous_content
+    ):
+        return
+    DocumentEdit.objects.create(
+        revision=revision,
+        editor=editor,
+        summary=revision.change_summary or "",
+        content_snapshot=revision.content,
+    )
+    keep = revision.edits.order_by("-created_at").values_list("pk", flat=True)[
+        :MAX_EDITS_PER_REVISION
+    ]
+    revision.edits.exclude(pk__in=list(keep)).delete()
+
+
 class DocumentTemplate(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     """A reusable content skeleton for seeding a document's markdown.
 

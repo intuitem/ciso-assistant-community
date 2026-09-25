@@ -854,3 +854,29 @@ def test_the_token_ceiling_is_named_in_the_run(
     said = " ".join(log.message or "" for log in instance.logs.all())
     assert "4096-token ceiling" in said
     assert "the AI provider call failed" not in said
+
+
+@pytest.mark.django_db
+def test_an_oversized_deferred_output_fails_the_node_instead_of_stranding_it(
+    dispatch, llm, django_capture_on_commit_callbacks, settings
+):
+    """The task's claim on the token is already committed when the output is
+    persisted, so a cap breach there must not roll the resume back: the token
+    would stay WAITING for a delivery that never comes again."""
+    settings.WORKFLOW_NODE_OUTPUT_BUDGET = 100
+    schema = {
+        "type": "object",
+        "properties": {"first": {"type": "string"}, "second": {"type": "string"}},
+        "required": ["first", "second"],
+    }
+    llm(json.dumps({"first": "x" * 400, "second": "y"}))
+    version = ai_flow({"type": "ai_extract", "prompt": "Classify", "schema": schema})
+    with django_capture_on_commit_callbacks(execute=True):
+        instance = start_instance(version)
+    with django_capture_on_commit_callbacks(execute=True):
+        dispatch.run()
+    instance.refresh_from_db()
+
+    assert instance.status == WorkflowInstance.Status.FAILED
+    assert not instance.tokens.filter(status=WorkflowToken.Status.WAITING).exists()
+    assert any("were dropped" in (log.message or "") for log in instance.logs.all())

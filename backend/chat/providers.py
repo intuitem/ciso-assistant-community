@@ -255,6 +255,7 @@ class LLM(Protocol):
         directives: str = "",
         schema: dict | None = None,
         system_prompt: str | None = None,
+        max_output_tokens: int | None = None,
     ) -> str: ...
 
     def stream(
@@ -441,24 +442,25 @@ class OllamaLLM:
         directives: str = "",
         schema: dict | None = None,
         system_prompt: str | None = None,
+        max_output_tokens: int | None = None,
     ) -> str:
         messages = _build_messages(
             system_prompt or self.system_prompt, prompt, context, history, directives
         )
+        ceiling = max_output_tokens or llm_max_output_tokens()
         body: dict = {"model": self.model, "messages": messages, "stream": False}
-        body["options"] = {
-            **self._options(),
-            "num_predict": llm_max_output_tokens(),
-        }
+        body["options"] = {**self._options(), "num_predict": ceiling}
         if schema is not None:
             # Constrained decoding: valid JSON by construction.
             body["format"] = schema
         resp = self.client.post(f"{self.base_url}/api/chat", json=body)
         resp.raise_for_status()
         payload = resp.json()
-        if schema is not None and payload.get("done_reason") == "length":
+        if _wants_whole_answer(schema, max_output_tokens) and (
+            payload.get("done_reason") == "length"
+        ):
             raise TruncatedCompletion(
-                f"the model reached the {llm_max_output_tokens()}-token ceiling "
+                f"the model reached the {ceiling}-token ceiling "
                 "before finishing its answer"
             )
         return strip_reasoning(payload["message"]["content"])
@@ -589,14 +591,16 @@ class OpenAICompatibleLLM:
         directives: str = "",
         schema: dict | None = None,
         system_prompt: str | None = None,
+        max_output_tokens: int | None = None,
     ) -> str:
         messages = _build_messages(
             system_prompt or self.system_prompt, prompt, context, history, directives
         )
+        ceiling = max_output_tokens or llm_max_output_tokens()
         body: dict = {"messages": messages, "stream": False}
         # OpenAI's reasoning models reject `max_tokens` outright and take
         # `max_completion_tokens`; everything else still wants the old name.
-        body[_token_limit_param(self.model)] = llm_max_output_tokens()
+        body[_token_limit_param(self.model)] = ceiling
         if self.model:
             body["model"] = self.model
         if self.temperature_enabled:
@@ -618,9 +622,11 @@ class OpenAICompatibleLLM:
             resp = self.client.post(self._chat_url(), json=body)
         resp.raise_for_status()
         choice = resp.json()["choices"][0]
-        if schema is not None and choice.get("finish_reason") == "length":
+        if _wants_whole_answer(schema, max_output_tokens) and (
+            choice.get("finish_reason") == "length"
+        ):
             raise TruncatedCompletion(
-                f"the model reached the {llm_max_output_tokens()}-token ceiling "
+                f"the model reached the {ceiling}-token ceiling "
                 "before finishing its answer"
             )
         return strip_reasoning(
@@ -813,6 +819,7 @@ class StubLLM:
         directives: str = "",
         schema: dict | None = None,
         system_prompt: str | None = None,
+        max_output_tokens: int | None = None,
     ) -> str:
         return f"[No LLM configured — showing retrieved context]\n\n{context}"
 
@@ -1047,6 +1054,24 @@ def llm_max_output_tokens() -> int:
     from django.conf import settings
 
     return int(getattr(settings, "LLM_MAX_OUTPUT_TOKENS", 2048))
+
+
+def words_to_output_tokens(words: int) -> int:
+    """A ceiling that fits a word budget the caller already accepted. A word
+    costs under two tokens in the languages we serve, and the slack covers a
+    preamble; never below the global ceiling, which stays the floor.
+
+    A budget large enough to outrun LLM_REQUEST_TIMEOUT fails on the timeout
+    instead — the honest order, and the reason that bound is configurable.
+    """
+    return max(llm_max_output_tokens(), words * 2 + 256)
+
+
+def _wants_whole_answer(schema: dict | None, max_output_tokens: int | None) -> bool:
+    """Who hears about hitting the ceiling: a schema call, whose cut answer
+    cannot parse, and a caller that sized the ceiling itself and so expects the
+    whole answer to fit. Streamed chat, where a person is watching, does not."""
+    return schema is not None or max_output_tokens is not None
 
 
 class TruncatedCompletion(Exception):
