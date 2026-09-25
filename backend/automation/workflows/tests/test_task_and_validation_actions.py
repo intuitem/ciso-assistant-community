@@ -233,26 +233,55 @@ class TestTheSideEffectsTheEditorHas:
     everything a serializer does besides the row has to be done here too. These
     pin the ones that were missed once already."""
 
-    def test_assigning_a_task_tells_the_assignee(self, domain, assignee, monkeypatch):
+    def test_assigning_a_task_tells_the_assignee(
+        self, domain, assignee, monkeypatch, django_capture_on_commit_callbacks
+    ):
         sent = []
         monkeypatch.setattr(
             "core.tasks.send_task_template_assignment_notification",
             lambda task_id, emails: sent.append((str(task_id), emails)),
         )
-        instance = start_instance(
-            action_flow(
-                domain,
-                {
-                    "type": "create_object",
-                    "model": "task_template",
-                    "fields": {"name": "Tell them", "assigned_to": str(assignee.id)},
-                },
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(
+                action_flow(
+                    domain,
+                    {
+                        "type": "create_object",
+                        "model": "task_template",
+                        "fields": {
+                            "name": "Tell them",
+                            "assigned_to": str(assignee.id),
+                        },
+                    },
+                )
             )
-        )
         assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
         task = TaskTemplate.objects.get(folder=domain)
         assert sent and sent[0][0] == str(task.id)
         assert sent[0][1] == assignee.get_emails()
+
+    def test_nobody_is_told_until_the_run_commits(
+        self, domain, assignee, monkeypatch, django_capture_on_commit_callbacks
+    ):
+        """A later step can still fail the run and roll the task back."""
+        sent = []
+        monkeypatch.setattr(
+            "core.tasks.send_task_template_assignment_notification",
+            lambda task_id, emails: sent.append(emails),
+        )
+        with django_capture_on_commit_callbacks(execute=False) as callbacks:
+            start_instance(
+                action_flow(
+                    domain,
+                    {
+                        "type": "create_object",
+                        "model": "task_template",
+                        "fields": {"name": "Not yet", "assigned_to": str(assignee.id)},
+                    },
+                )
+            )
+        assert sent == []
+        assert callbacks
 
     def test_an_unassigned_task_tells_nobody(self, domain, monkeypatch):
         sent = []
@@ -275,8 +304,7 @@ class TestTheSideEffectsTheEditorHas:
     def test_a_periodic_run_updates_its_task_instead_of_piling_them_up(
         self, domain, assignee
     ):
-        """`upsert` worked here before the task grew its occurrence, and a
-        quarterly flow that duplicated its task every run would be useless."""
+        """`upsert` worked here before the task grew its occurrence."""
         first = date.today() + timedelta(days=7)
         later = date.today() + timedelta(days=97)
 
@@ -310,9 +338,7 @@ class TestTheSideEffectsTheEditorHas:
         assert list(template.assigned_to.all()) == [assignee]
 
     def test_a_recurring_task_of_the_same_name_is_left_alone(self, domain):
-        """A recurring template's occurrences come from its schedule. Matching
-        one here would re-date every occurrence it has ever had, completed
-        history included."""
+        """Matching one would re-date every occurrence it has ever had."""
         recurring = TaskTemplate.objects.create(
             name="Quarterly access review",
             folder=domain,

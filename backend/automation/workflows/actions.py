@@ -210,9 +210,8 @@ def register(cls):
 
 class BaseAction:
     action_type = ""
-    #: Output whose shape the workflow does not control. Over the node-output
-    #: ceiling it is trimmed rather than failed: the step's side effect has
-    #: already happened, and no retry makes a remote's reply smaller.
+    #: A remote's payload, not the step's own product: over the node-output
+    #: ceiling it is trimmed rather than failed. No retry shrinks a reply.
     foreign_output = False
 
     def execute(self, config: dict, instance) -> dict:
@@ -547,11 +546,8 @@ CREATABLE_MODELS = {
             "documents": None,
         },
         "constructor": "_construct_task_template",
-        # Which is what makes upsert possible here: matched on name, the row is
-        # updated instead of a second task piling up every cycle. Only against
-        # the one-off kind this action creates: a recurring template's
-        # occurrences come from its schedule, and re-dating them would rewrite
-        # history that has already happened.
+        # An updater is what makes upsert possible on a built model. Never a
+        # recurring one: re-dating its occurrences rewrites past ones.
         "updater": "_update_task_template",
         "match_filter": Q(is_recurrent=False),
     },
@@ -767,8 +763,7 @@ def _rows_for(model, raw, instance, label):
     the error never confirms a row exists elsewhere.
 
     Same two scopes as _resolve_reference: an id reaches the ancestors, a name
-    only the subtree and the root.
-    """
+    only the subtree and the root."""
     from . import authz
     from .engine import run_identity
 
@@ -780,8 +775,8 @@ def _rows_for(model, raw, instance, label):
     )
 
     def within(folder_ids):
-        # An Actor has no folder — it is an IAM special case, and viewable_ids
-        # is the whole answer for it.
+        # An Actor has no folder: an IAM special case, and viewable_ids is the
+        # whole answer for it.
         if get_model_field(model, "folder"):
             return queryset.filter(folder_id__in=folder_ids)
         return queryset
@@ -874,14 +869,9 @@ def _construct_task_template(kwargs, params, instance):
 
 
 def _update_task_template(template, kwargs, params, instance):
-    """The upsert match: the same writes onto the task already there, and its
-    occurrence re-dated rather than a second one added. No notice — the run that
-    created it sent one, and a periodic refresh is not news.
-
-    A step that does not set `task_date` is not saying "no date": only what the
-    author supplied is written, or a flow updating a note would clear the
-    deadline.
-    """
+    """The upsert match: the same writes, the occurrence re-dated rather than a
+    second one added, no notice (a refresh is not news). Only what the author
+    supplied is written — an unset `task_date` is not a request to clear it."""
     assignees = _rows_for(Actor, params.get("assigned_to"), instance, "assigned_to")
     task_date = _task_date(params)
 
@@ -902,22 +892,30 @@ def _update_task_template(template, kwargs, params, instance):
 
 
 def _notify_assignees(template, assignees):
-    """Best effort, and after the transaction: a mail server being down must not
-    undo a task that was created."""
-    import structlog
-
+    """On commit, so nobody hears about a task a later step rolled back."""
     from core.tasks import send_task_template_assignment_notification
 
     emails = [email for actor in assignees for email in actor.get_emails()]
     if not emails:
         return
+    transaction.on_commit(
+        lambda: _send_quietly(
+            "task assignment",
+            lambda: send_task_template_assignment_notification(template.id, emails),
+            task_template=str(template.id),
+        )
+    )
+
+
+def _send_quietly(what, send, **context):
+    """A mail server being down must not undo the row it was about."""
+    import structlog
+
     try:
-        send_task_template_assignment_notification(template.id, emails)
+        send()
     except Exception as e:
         structlog.get_logger(__name__).error(
-            "task assignment notification failed",
-            task_template=str(template.id),
-            error=e,
+            f"{what} notification failed", error=e, **context
         )
 
 
@@ -965,18 +963,16 @@ def _construct_validation_flow(kwargs, params, instance):
 
 
 def _notify_approver(flow):
-    """Best effort, and after the transaction: a mail server being down must not
-    undo a request that was made."""
-    import structlog
-
+    """On commit, so nobody is asked to sign off on a rolled-back request."""
     from core.tasks import send_validation_flow_created_notification
 
-    try:
-        send_validation_flow_created_notification(flow)
-    except Exception as e:
-        structlog.get_logger(__name__).error(
-            "validation flow notification failed", validation_flow=str(flow.id), error=e
+    transaction.on_commit(
+        lambda: _send_quietly(
+            "validation flow",
+            lambda: send_validation_flow_created_notification(flow),
+            validation_flow=str(flow.id),
         )
+    )
 
 
 def _construct_managed_document(kwargs, params, instance):
@@ -1147,16 +1143,15 @@ class CreateObjectAction(BaseAction):
                 .get_limit_choices_to(),
             )
 
-        # save() may take the folder from a parent. Matching on the instance
-        # folder would then miss and the create would hit a unique constraint.
+        # save() may take the folder from a parent; an upsert matching on the
+        # instance folder would then miss and hit a unique constraint.
         folder = _creation_folder(instance)
         folder_from = entry.get("folder_from")
         if folder_from and kwargs.get(folder_from) is not None:
             folder = kwargs[folder_from].folder
-        # authorize_action cleared this action against the workflow's folder,
-        # but the row lands wherever the trigger or the parent puts it, and a
-        # non-recursive grant does not reach a subfolder. Built models land the
-        # same way, so the check precedes the constructor too.
+        # authorize_action cleared the workflow's own folder; the row lands
+        # where the trigger or the parent puts it, which a non-recursive grant
+        # need not reach. Built models land the same way.
         _authorize_creation_folder(entry["model"], folder, instance)
 
         constructor = entry.get("constructor")
@@ -1674,10 +1669,8 @@ READABLE_MODELS: dict[str, ReadEntry] = {
                 "name": ra.compliance_assessment.name,
             },
         },
-        # Opt-in, because each costs per row and most reads want none of them:
-        # a quality check resolves its own context, and the backing walks the
-        # controls, their evidence and its revisions. A page of 500 rows
-        # carrying all three is also how a read outgrows one node output.
+        # Opt-in: each costs per row, and a page carrying all three is how a
+        # read outgrows one node output.
         optional_computed={
             "quality_check": _quality_check_with_text,
             # What is claimed to satisfy the requirement, and what backs it.
@@ -1687,8 +1680,7 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             ],
         },
         select_related=["requirement", "compliance_assessment"],
-        # Each keyed by the computed value that needs it, so a read that did
-        # not ask for one does not pay for its queries either.
+        # Keyed by the computed value that needs it: unasked, unqueried.
         prefetch_scoped={
             "applied_controls": {
                 "applied_controls": AppliedControl,
@@ -2074,16 +2066,14 @@ _ASSESSMENT_STATUSES = frozenset(
 
 
 def _record_document_edit(revision, updated, before, instance):
-    """A run's rewrite belongs in the same history the editor keeps, under the
-    identity the run holds — otherwise the only trace of what a machine wrote is
-    the revision itself. doc_management owns the policy (which statuses are
-    snapshotted, how many entries survive); this only supplies the editor.
+    """The same history the editor keeps, under the run's identity.
+    doc_management owns the policy; this only supplies the editor.
 
     Deliberately NOT declared as an extra permission: no role grants
     `add_documentedit` (core/startup.py grants `view_documentedit` only) because
     the platform writes these rows itself, under `change_documentrevision`.
     Declaring it would refuse to publish a workflow whose author can do the same
-    thing through the API, which is the one direction the engine must not take.
+    thing through the API.
     """
     from doc_management.models import record_document_edit
 

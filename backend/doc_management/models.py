@@ -374,11 +374,8 @@ MAX_EDITS_PER_REVISION = 20
 
 
 def record_document_edit(revision, editor, previous_content):
-    """Snapshot a draft's content change, keeping the most recent entries.
-
-    The one place this policy lives: the editor's PATCH and a workflow rewriting
-    the same draft have to leave the same history.
-    """
+    """Snapshot a draft's content change, keeping the most recent entries. One
+    place, so the editor's PATCH and a workflow leave the same history."""
     if (
         revision.status != DocumentRevision.Status.DRAFT
         or revision.content == previous_content

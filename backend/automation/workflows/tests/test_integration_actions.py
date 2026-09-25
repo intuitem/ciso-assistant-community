@@ -143,8 +143,7 @@ class TestHttpRequest:
             assert "s3cr3t-value" not in str(log.data) + log.message
 
     def test_an_oversized_reply_is_trimmed_not_failed(self, monkeypatch, settings):
-        """The request has already been sent and no retry makes the answer
-        smaller, so a reply past the node-output ceiling is cut, not fatal."""
+        """No retry makes the answer smaller, so it is cut, not fatal."""
         settings.WORKFLOW_NODE_OUTPUT_BUDGET = 200
         _workflow, version = make_workflow()
 

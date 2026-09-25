@@ -370,10 +370,9 @@ def complete_deferred_action(token: WorkflowToken, output: dict) -> None:
         try:
             _persist_node_output(node, output, instance)
         except FatalActionError as e:
-            # The dispatch claim is already committed, so letting this escape
-            # would roll the resume back and leave the token WAITING for a task
-            # that will never be delivered again (mirrors the async-subprocess
-            # completion path in _refresh_status).
+            # The dispatch claim is already committed: escaping would roll the
+            # resume back and leave the token WAITING for a task that is never
+            # delivered again (as _refresh_status does for a subprocess).
             token.status = WorkflowToken.Status.ACTIVE
             token.save(update_fields=["status", "updated_at"])
             _handle_failure(token, str(e), retryable=False)
@@ -816,23 +815,15 @@ def _process_loop(token):
 
 
 def _loop_stop_reason(state):
-    """Why a loop stops before its items do, checked between iterations so it
-    stops BEFORE the next item's side effects rather than after all of them.
-
-    Pages must not become a way around the item ceiling: a run is capped at
-    MAX_STEPS, so an unbounded sweep would fail late instead of stopping
-    cleanly. The same applies to what it collects — results that outgrow one
-    node output would fail the loop having already done every write it was
-    going to do.
-    """
+    """Why a loop stops before its items do. Checked between iterations, so it
+    stops before the next item's side effects rather than after all of them."""
     collected = len(state.get("results") or [])
     if state.get("processed", 0) >= loop_max_items():
         return f"stopped after {loop_max_items()} items"
     if collected >= MAX_COLLECTION_ITEMS:
         return f"stopped after collecting {MAX_COLLECTION_ITEMS} items"
-    # Predictive, and against the widest item seen rather than the average: a
-    # loop that notices only once it is over has already collected what it
-    # cannot keep, and dropping that record would lose work the run did.
+    # Predictive, against the widest item seen: noticing once over means having
+    # collected what cannot be kept, and dropping it loses work the run did.
     room = node_output_budget() - state.get("collected_chars", 0)
     if collected and room <= state.get("widest_item", 0):
         return (
@@ -850,7 +841,7 @@ def _loop_next_iteration(controller):
 
     stop = _loop_stop_reason(state)
     if stop:
-        state["errors"].append({"index": state["index"], "message": stop})
+        state["stopped"] = stop
         _loop_finish(controller)
         return
 
@@ -909,9 +900,7 @@ def _loop_body_returned(controller, failed):
         value = dig(ctx, match.group(1)) if match else render(collect, ctx)
         controller.instance._iteration_context = None
         state["results"].append(value)
-        # Rough, and deliberately so: it only has to notice the loop nearing
-        # what one node output holds, in time to stop before the next item's
-        # side effects run.
+        # Rough on purpose: it only has to notice the ceiling coming.
         size = len(str(value))
         state["collected_chars"] = state.get("collected_chars", 0) + size
         state["widest_item"] = max(state.get("widest_item", 0), size)
@@ -940,12 +929,8 @@ def _loop_load_next_page(controller, state):
     if not state.get("read") or not state.get("next_offset"):
         return False
     if state.get("pages", 0) >= loop_max_pages():
-        state["errors"].append(
-            {
-                "index": state["index"],
-                "message": f"stopped after {loop_max_pages()} pages",
-            }
-        )
+        # A ceiling, not an item that failed — same as the others.
+        state["stopped"] = f"stopped after {loop_max_pages()} pages"
         return False
     try:
         items, next_offset = _read_snapshot_page(
@@ -983,15 +968,17 @@ def _loop_finish(controller):
         "results": state["results"],
         "errors": state["errors"],
         "pages": state.get("pages", 0),
+        # Why it ended early. Not in `errors`: no item went wrong, and a step
+        # branching on failures must not see one here.
+        "stopped": state.get("stopped"),
     }
     try:
         _persist_node_output(node, output, instance)
     except FatalActionError as e:
-        # This runs under the body token that closed the last iteration. Letting
-        # it escape would route the loop's failure through _handle_failure, which
-        # collects that iteration a second time (outstanding below zero) and
-        # arrives back here — the second raise escaping the run transaction and
-        # leaving the loop parked with nothing said. Fail the loop itself.
+        # Runs under the body token that closed the last iteration: escaping
+        # here would route the loop's failure through _handle_failure, which
+        # collects that iteration again and arrives back with a second raise,
+        # this one outside the run transaction. Fail the loop itself.
         controller.loop_state = {}
         controller.save(update_fields=["loop_state", "updated_at"])
         _fail_token(controller, str(e))
@@ -1000,6 +987,8 @@ def _loop_finish(controller):
     message = f"processed {output['count']} items"
     if failed:
         message += f" · {failed} failed"
+    if output["stopped"]:
+        message += f" · {output['stopped']}"
     _log(
         instance,
         WorkflowInstanceLog.EventType.LOOP_COMPLETED,
@@ -1084,17 +1073,17 @@ def _store_node_output(node, output, instance):
     and the builder's data browser. Persisting is the caller's job — see
     _persist_node_output.
 
-    Dropping records fails the node: a loop's records are the next node's input,
-    so a silent cut means a write-up short of what the run processed. Shortening
-    one string keeps the value, so that stays quiet, and so does a payload the
-    action declared foreign — the trim markers in the value say what was cut.
+    Dropping records fails the node: they are the next node's input, so a silent
+    cut means a write-up short of what the run processed. Shortening one string
+    keeps the value, so that stays quiet — as does a payload the action declared
+    foreign, where the trim markers say what was cut.
     """
     key = node.ref or str(node.id)
     lost = []
     instance.node_outputs[key] = _cap_structure(output, lost=lost)
     if lost and not _foreign_output(node):
-        # Only the character budget is a setting; the item and depth caps are
-        # engine constants, so pointing at the setting there would misdirect.
+        # Only the character budget is a setting; naming it for the item and
+        # depth caps, which are constants, would misdirect.
         raisable = {remedy for _what, remedy in lost if remedy}
         hint = f" Or raise {', '.join(sorted(raisable))}." if raisable else ""
         raise FatalActionError(

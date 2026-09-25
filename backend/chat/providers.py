@@ -1048,19 +1048,17 @@ def _token_limit_param(model: str) -> str:
     return "max_completion_tokens" if reasoning else "max_tokens"
 
 
-#: What an unattended whole-answer call asks for when nothing else says. A
-#: reasoning model given an unbounded field and an ambiguous question has no
-#: stopping condition of its own — one requirement here ran past 10,000 tokens —
-#: and a timeout only converts that into a long wait.
+#: What an unattended call asks for when nothing else says. A reasoning model
+#: on an unbounded field has no stopping condition of its own — one requirement
+#: here ran past 10,000 tokens — and a timeout only makes that a long wait.
 DEFAULT_MAX_OUTPUT_TOKENS = 2048
 
 
 def llm_max_output_tokens() -> int | None:
-    """The deployment's ceiling, if it set one. None means what it has always
-    meant: the provider decides. Chat, memory summaries and the questionnaire
-    stream to someone waiting and are bounded by the conversation, not by us —
-    a ceiling they never asked for cuts a long answer, and on a reasoning model
-    the thinking alone can spend it."""
+    """The deployment's ceiling, if it set one; None leaves it to the provider.
+    Chat and the questionnaire are bounded by the conversation — a ceiling they
+    never asked for cuts a long answer, and on a reasoning model the thinking
+    alone can spend it."""
     from django.conf import settings
 
     configured = getattr(settings, "LLM_MAX_OUTPUT_TOKENS", None)
@@ -1068,13 +1066,10 @@ def llm_max_output_tokens() -> int | None:
 
 
 def words_to_output_tokens(words: int) -> int:
-    """A ceiling that fits a word budget the caller already accepted. A word
-    costs under two tokens in the languages we serve, and the slack covers a
-    preamble; never below the ceiling an unattended call would use anyway.
-
-    A budget large enough to outrun LLM_REQUEST_TIMEOUT fails on the timeout
-    instead — the honest order, and the reason that bound is configurable.
-    """
+    """A ceiling that fits a word budget the caller already accepted: under two
+    tokens a word, plus slack for a preamble. A budget large enough to outrun
+    LLM_REQUEST_TIMEOUT fails on the timeout instead, which is why that bound is
+    configurable."""
     return max(unattended_max_output_tokens(), words * 2 + 256)
 
 
@@ -1085,8 +1080,7 @@ def unattended_max_output_tokens() -> int:
 
 def _wants_whole_answer(schema: dict | None, max_output_tokens: int | None) -> bool:
     """Who hears about hitting the ceiling: a schema call, whose cut answer
-    cannot parse, and a caller that sized the ceiling itself and so expects the
-    whole answer to fit. Streamed chat, where a person is watching, does not."""
+    cannot parse, and a caller that sized the ceiling itself."""
     return schema is not None or max_output_tokens is not None
 
 

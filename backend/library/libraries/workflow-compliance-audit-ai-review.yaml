@@ -650,6 +650,7 @@ objects:
               disagrees with this one, take this one — and read the list twice, because something was
               dropped or miscounted. Steps that failed, and are therefore
               absent from the lists above: {{nodes.per_requirement.errors}}
+              {{nodes.per_requirement.stopped}}
 
               This document is a draft. Nothing in the audit was changed: a workflow cannot write a
               requirement's result or score.

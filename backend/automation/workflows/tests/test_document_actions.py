@@ -201,9 +201,8 @@ class TestCreatingADocument:
         assert "action_create_missing_fk" in codes
 
     def test_the_folder_it_lands_in_needs_the_create_permission(self):
-        """A built model lands where its parent is — here the container's
-        domain — which authorize_action never saw: it cleared the action
-        against the workflow's own folder."""
+        """It lands in the container's domain, which authorize_action never
+        saw: it cleared the action against the workflow's own folder."""
         from automation.workflows import authz
 
         domain = make_domain("Publishes here")
@@ -360,8 +359,7 @@ class TestRewritingADraft:
         assert edit.editor == publisher_user()
 
     def test_a_returned_revision_is_rewritten_without_a_snapshot(self):
-        """doc_management snapshots drafts only. A run following the same rule
-        is the point of sharing record_document_edit with the editor."""
+        """doc_management snapshots drafts only, and the run shares its rule."""
         domain = make_domain("Returned history")
         _container, document, _published = make_document(domain)
         returned = DocumentRevision.objects.create(

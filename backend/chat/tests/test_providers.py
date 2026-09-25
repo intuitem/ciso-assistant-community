@@ -671,9 +671,8 @@ class TestGenerationIsBounded:
         assert client.bodies[0]["max_tokens"] == 2048
 
     def test_no_ceiling_is_sent_when_none_is_configured(self, settings):
-        """Chat, memory summaries and the questionnaire are bounded by the
-        conversation. A ceiling they never asked for cuts a long answer, and on
-        a reasoning model the thinking alone can spend it."""
+        """Chat is bounded by the conversation; a ceiling it never asked for
+        cuts a long answer, and reasoning models spend it on thinking."""
         settings.LLM_MAX_OUTPUT_TOKENS = None
         client = _FinishClient("stop")
         self._llm(client).generate(prompt="p", context="")
@@ -704,8 +703,7 @@ class TestGenerationIsBounded:
         assert client.bodies[0]["max_tokens"] == 5000
 
     def test_and_hears_when_the_answer_did_not_fit(self, settings):
-        """It asked for a whole answer of a known size; a cut one is a defect,
-        not a long reply."""
+        """It asked for a known size, so a cut answer is a defect."""
         from chat.providers import TruncatedCompletion
 
         client = _FinishClient("length", content="cut")

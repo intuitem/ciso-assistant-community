@@ -205,9 +205,8 @@ def test_info_alone_does_not_flag(audit):
 
 @pytest.mark.django_db
 def test_the_backing_is_opt_in_too(audit):
-    """A page of 500 rows carrying every control, its evidence and their
-    revisions is how a read outgrows one node output. Most reads want none of
-    it, so none of it is on by default."""
+    """A page carrying every control, its evidence and their revisions is how a
+    read outgrows one node output. Most reads want none of it."""
     compliance_assessment, ra = audit
     entry = READABLE_MODELS["requirement_assessment"]
 

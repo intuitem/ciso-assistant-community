@@ -860,9 +860,8 @@ def test_the_token_ceiling_is_named_in_the_run(
 def test_an_oversized_deferred_output_fails_the_node_instead_of_stranding_it(
     dispatch, llm, django_capture_on_commit_callbacks, settings
 ):
-    """The task's claim on the token is already committed when the output is
-    persisted, so a cap breach there must not roll the resume back: the token
-    would stay WAITING for a delivery that never comes again."""
+    """The claim on the token is already committed, so a cap breach must not
+    roll the resume back: the token would stay WAITING forever."""
     settings.WORKFLOW_NODE_OUTPUT_BUDGET = 100
     schema = {
         "type": "object",
