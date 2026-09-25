@@ -389,6 +389,7 @@ def inject_questions_into_node(
     node: Dict[str, Any],
     answers_dict: dict,
     row_translations: dict | None = None,
+    question_group_ids: set[str] | None = None,
 ) -> None:
     """
     Injects parsed questions and their metadata into a requirement node.
@@ -403,7 +404,8 @@ def inject_questions_into_node(
     raw_answer_str = qa_data.get("answer")
     raw_depends_on_str = qa_data.get("depends_on")
     raw_condition_str = qa_data.get("condition")
-    raw_group_order = qa_data.get("answer_group_order")
+    raw_question_groups = qa_data.get("question_groups")
+    raw_groups_order = qa_data.get("question_groups_order")
 
     if not raw_question_str:
         return
@@ -411,6 +413,55 @@ def inject_questions_into_node(
     allowed_types = {"unique_choice", "multiple_choice", "text", "date"}
 
     question_lines = _parse_multiline_with_pipe(raw_question_str)
+
+    question_groups = None
+    groups_order = None
+    if raw_question_groups or raw_groups_order:
+        if not raw_question_groups:
+            raise ValueError(
+                f"Missing 'question_groups' for grouped node {node.get('urn')}"
+            )
+        if not raw_groups_order:
+            raise ValueError(
+                f"Missing 'question_groups_order' for grouped node {node.get('urn')}"
+            )
+        if question_group_ids is None:
+            raise ValueError(
+                f"Missing question_groups_definition for grouped node {node.get('urn')}"
+            )
+
+        question_groups = _parse_multiline_with_pipe(raw_question_groups)
+        groups_order = _parse_multiline_with_pipe(raw_groups_order)
+
+        if len(question_groups) != len(question_lines):
+            raise ValueError(
+                f"Mismatch between questions and 'question_groups' for node {node.get('urn')}"
+            )
+        if len(groups_order) != len(set(groups_order)):
+            raise ValueError(
+                f"Duplicate group ID in 'question_groups_order' for node {node.get('urn')}"
+            )
+
+        unknown_group_ids = sorted(set(question_groups) - question_group_ids)
+        if unknown_group_ids:
+            raise ValueError(
+                f"Unknown question group IDs for node {node.get('urn')}: {unknown_group_ids}"
+            )
+
+        used_group_ids = set(question_groups)
+        ordered_group_ids = set(groups_order)
+        if used_group_ids != ordered_group_ids:
+            missing = sorted(used_group_ids - ordered_group_ids)
+            unused = sorted(ordered_group_ids - used_group_ids)
+            details = []
+            if missing:
+                details.append(f"missing group IDs: {missing}")
+            if unused:
+                details.append(f"unused group IDs: {unused}")
+            raise ValueError(
+                f"Invalid 'question_groups_order' for node {node.get('urn')}: "
+                + "; ".join(details)
+            )
 
     depends_on_lines = None
     if raw_depends_on_str:
@@ -470,11 +521,9 @@ def inject_questions_into_node(
         )
 
     question_block = {}
-    question_answer_ids = []
 
     for idx, question_text in enumerate(question_lines):
         answer_id = answer_ids[0] if len(answer_ids) == 1 else answer_ids[idx]
-        question_answer_ids.append(answer_id)
         answer_meta = answers_dict.get(answer_id)
 
         if not answer_meta:
@@ -492,6 +541,8 @@ def inject_questions_into_node(
         }
 
         question_entry["text"] = question_text
+        if question_groups:
+            question_entry["question_group"] = question_groups[idx]
         _attach_question_translations(
             question_entry,
             row_translations,
@@ -576,54 +627,8 @@ def inject_questions_into_node(
     if question_block:
         node["questions"] = question_block
 
-    if raw_group_order:
-        group_answer_ids = _parse_multiline_with_pipe(raw_group_order)
-        if len(group_answer_ids) != len(set(group_answer_ids)):
-            raise ValueError(
-                f"Duplicate answer ID in 'answer_group_order' for node {node.get('urn')}"
-            )
-
-        used_answer_ids = set(question_answer_ids)
-        ordered_answer_ids = set(group_answer_ids)
-        if used_answer_ids != ordered_answer_ids:
-            missing = sorted(used_answer_ids - ordered_answer_ids)
-            unused = sorted(ordered_answer_ids - used_answer_ids)
-            details = []
-            if missing:
-                details.append(f"missing answer IDs: {missing}")
-            if unused:
-                details.append(f"unused answer IDs: {unused}")
-            raise ValueError(
-                f"Invalid 'answer_group_order' for node {node.get('urn')}: "
-                + "; ".join(details)
-            )
-
-        question_urns = list(question_block)
-        groups = {}
-        for group_index, answer_id in enumerate(group_answer_ids, start=1):
-            answer_meta = answers_dict.get(answer_id)
-            if not answer_meta:
-                raise ValueError(
-                    f"Unknown answer ID in 'answer_group_order': {answer_id} "
-                    f"for node {node.get('urn')}"
-                )
-            description = answer_meta.get("group_description")
-            if not description:
-                raise ValueError(
-                    f"Missing 'group_description' for grouped answer ID: {answer_id}"
-                )
-            groups[group_index] = {
-                "description": description,
-                "order": [
-                    question_urn
-                    for question_urn, question_answer_id in zip(
-                        question_urns, question_answer_ids
-                    )
-                    if question_answer_id == answer_id
-                ],
-            }
-
-        node["questions_properties"] = {"groups": groups}
+    if groups_order:
+        node["questions_properties"] = {"groups_order": groups_order}
 
 
 # --- risk matrix management ------------------------------------------------------------
@@ -882,6 +887,7 @@ def _per_choice_lines(data: dict, col: str, n_choices: int, answer_id: str):
 _SKIPPED_TYPES = {
     "answers",
     "implementation_groups",
+    "question_groups",
     "scores",
     "urn_prefix",
     "ttp_groups",  # consumed via ttp_catalog meta.grouping_definition
@@ -1236,11 +1242,6 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 answers_dict[answer_id] = {
                     "type": answer_type,
                     "choices": choices,
-                    "group_description": (
-                        str(data.get("group_description")).strip()
-                        if data.get("group_description") is not None
-                        else None
-                    ),
                 }
     else:
         if verbose:
@@ -1276,6 +1277,45 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 "expected per_answer or tiered_all."
             )
         framework["result_aggregation"] = result_aggregation
+
+    # [CONTENT] Question Groups
+    question_group_ids = None
+    question_groups_name = meta.get("question_groups_definition")
+    if question_groups_name:
+        if question_groups_name not in object_blocks:
+            raise ValueError(
+                f"Missing question groups sheet: '{question_groups_name}'"
+            )
+
+        question_groups_header, question_groups_rows = parse_content_rows(
+            object_blocks[question_groups_name]["content_sheet"]
+        )
+        question_groups_definition = []
+        question_group_ids = set()
+        for row, data in question_groups_rows:
+            ref_id = str(data.get("ref_id", "")).strip()
+            if not ref_id:
+                raise ValueError(
+                    f"Missing question group ref_id in '{question_groups_name}'"
+                )
+            if ref_id in question_group_ids:
+                raise ValueError(
+                    f"Duplicate question group ref_id '{ref_id}' in '{question_groups_name}'"
+                )
+
+            question_group_ids.add(ref_id)
+            question_group = {"ref_id": ref_id}
+            set_optional_fields(
+                question_group,
+                data,
+                ["name", "description", "annotation", "typical_evidence"],
+            )
+            attach_translations_from_row(
+                question_group, question_groups_header, row
+            )
+            question_groups_definition.append(question_group)
+
+        framework["question_groups_definition"] = question_groups_definition
 
     if meta.get("field_visibility"):
         try:
@@ -1595,6 +1635,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                     node,
                     answers_dict,
                     translations,
+                    question_group_ids,
                 )
             if translations:
                 node_translations = _node_translations_without_questions(translations)

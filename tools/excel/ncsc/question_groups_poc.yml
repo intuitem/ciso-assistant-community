@@ -1,0 +1,168 @@
+objects:
+  framework:
+    ### GLOBAL QUESTION GROUPS DEFINITION (THEY'RE REUSABLE)
+    question_groups_definition:
+    - ref_id: not_achieved
+      name: Not Achieved
+      description: At least one of the following statements is true.
+      annotation: If 1 question is set to "True", requirement is "Not Compliant".
+      typical_evidence: Stuff 1
+    - ref_id: partially_achieved
+      name: Partially Achieved
+      description: All the following statements are true
+      annotation: If all questions are set to "True" and all "Not Achieved" questions are set to "False", requirement is "Partially Compliant".
+      typical_evidence: Stuff 2
+    - ref_id: achieved
+      name: Achieved
+      description: All the following statements are true
+      annotation: If all questions are set to "True" and all "Not Achieved" questions are set to "False", requirement is "Partially Compliant".
+      typical_evidence: Stuff 3
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1
+      ref_id: A1.a
+      name: Board Direction
+      description: You have effective organisational security management led at board
+        level and articulated clearly in corresponding policies.
+      annotation: 'CAF rule for this contributing outcome: Achieved when all of the
+        A statements are true, otherwise Not achieved. This outcome has no Partially
+        achieved level.'
+      questions:
+        urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:1:
+          type: unique_choice
+          text: '[A1.a.NA.1] The security of network and information systems related
+            to the operation of essential function(s) is not discussed or reported
+            on regularly at board-level.'
+          # QUESTION GROUP DEFINITION IS DEFINED HERE. IT'LL AVOID REWRITING QUESTION NODE ID ELSEWHERE
+          question_group: not_achieved
+          choices:
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:1:choice:1
+            value: 'True'
+            compute_result: non_compliant
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:1:choice:2
+            value: 'False'
+        urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:2:
+          type: unique_choice
+          text: '[A1.a.NA.2] Board-level discussions on the security of network and
+            information systems are based on partial or out-of-date information, without
+            the benefit of expert guidance.'
+          question_group: not_achieved
+          choices:
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:2:choice:1
+            value: 'True'
+            compute_result: non_compliant
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:2:choice:2
+            value: 'False'
+        urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:3:
+          type: unique_choice
+          text: '[A1.a.NA.3] The security of network and information systems supporting
+            your essential function(s) are not driven effectively by the direction
+            set at board-level.'
+          question_group: not_achieved
+          choices:
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:3:choice:1
+            value: 'True'
+            compute_result: non_compliant
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:3:choice:2
+            value: 'False'
+        urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:4:
+          type: unique_choice
+          text: '[A1.a.NA.4] Senior management or other pockets of the organisation
+            consider themselves exempt from some policies or expect special accommodations
+            to be made.'
+          question_group: not_achieved
+          choices:
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:4:choice:1
+            value: 'True'
+            compute_result: non_compliant
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:4:choice:2
+            value: 'False'
+        urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:5:
+          type: unique_choice
+          text: '[A1.a.A.1] Your organisation''s approach and policy relating to the
+            security of network and information systems supporting the operation of
+            your essential function(s) are owned and managed at board-level. These
+            are communicated, in a meaningful way, to risk management decision-makers
+            across the organisation.'
+          question_group: achieved
+          choices:
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:5:choice:1
+            value: 'True'
+            compute_result: compliant
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:5:choice:2
+            value: 'False'
+            compute_result: non_compliant
+        urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:6:
+          type: unique_choice
+          text: '[A1.a.A.2] Regular board-level discussions on the security of network
+            and information systems supporting the operation of your essential function(s)
+            take place, based on timely and accurate information and informed by expert
+            guidance.'
+          question_group: achieved
+          choices:
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:6:choice:1
+            value: 'True'
+            compute_result: compliant
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:6:choice:2
+            value: 'False'
+            compute_result: non_compliant
+        urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:7:
+          type: unique_choice
+          text: '[A1.a.A.3] There is a board-level individual who has overall accountability
+            for the security of network and information systems and drives regular
+            discussion at board-level.'
+          question_group: achieved
+          choices:
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:7:choice:1
+            value: 'True'
+            compute_result: compliant
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:7:choice:2
+            value: 'False'
+            compute_result: non_compliant
+        urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:8:
+          type: unique_choice
+          text: '[A1.a.A.4] Direction set at board-level is translated into effective
+            organisational practices that direct and control the security of network
+            and information systems supporting your essential function(s).'
+          question_group: achieved
+          choices:
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:8:choice:1
+            value: 'True'
+            compute_result: compliant
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:8:choice:2
+            value: 'False'
+            compute_result: non_compliant
+        urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:9:
+          type: unique_choice
+          text: '[A1.a.A.5] The board has the information and understanding needed
+            in order to effectively discuss how the security and resilience of network
+            and information systems contributes to the delivery of essential function(s)
+            and what the potential impact from compromise of those systems would be.'
+          question_group: achieved
+          choices:
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:9:choice:1
+            value: 'True'
+            compute_result: compliant
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:9:choice:2
+            value: 'False'
+            compute_result: non_compliant
+        urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:10:
+          type: unique_choice
+          text: '[A1.a.A.6] Security is recognised as an important enabler for the
+            resilience of your essential function(s) and considered in all relevant
+            discussions.'
+          question_group: achieved
+          choices:
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:10:choice:1
+            value: 'True'
+            compute_result: compliant
+          - urn: urn:intuitem:risk:req_node:ncsc-caf-4.0-igp-grouped:a1.a:question:10:choice:2
+            value: 'False'
+            compute_result: non_compliant
+      # QUESTION PROPERTIES HERE. WE CAN DEFINE QUESTION GROUPS ORDER HERE
+      questions_properties:
+        groups_order:
+        - not_achieved
+        - achieved
