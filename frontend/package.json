@@ -96,5 +96,5 @@
 		"svelte-persisted-store": "^0.12.0",
 		"wx-svelte-grid": "^2.7.0"
 	},
-	"packageManager": "pnpm@12.6.0"
+	"packageManager": "pnpm@11.24.0"
 }
