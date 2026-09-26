@@ -6,11 +6,7 @@
 	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import {
-		breakdownSemanticColorMap,
-		DATE_FIELDS_TO_FORMAT,
-		ISO_8601_REGEX
-	} from '$lib/utils/constants';
+	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '$lib/utils/constants';
 	import {
 		CUSTOM_ACTIONS_COMPONENT,
 		getFieldComponentMap,
@@ -800,6 +796,15 @@
 		$tableFilterStates = next;
 	}
 
+	const APPLIED_CONTROL_STATUS_PRESETS: Record<string, string> = {
+		to_do: 'preset-tonal-primary',
+		in_progress: 'preset-tonal-warning',
+		on_hold: 'preset-tonal-secondary',
+		active: 'preset-tonal-success',
+		degraded: 'preset-tonal-error',
+		deprecated: 'preset-tonal-surface'
+	};
+
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
 		// The badge background is a fixed hex color, so the text must be a fixed color too
 		// (not theme-dependent), otherwise it turns light in dark mode and vanishes on a
@@ -1188,14 +1193,13 @@
 																			{@const itemHref = getRelatedFieldHref(key, val.id, {
 																				fallbackToDashedField: true
 																			})}
-																			{#if key === 'applied_controls' && val.status}
+																			{#if key === 'applied_controls' && val.status && val.status !== '--'}
 																				<span
-																					class="inline-block size-2 rounded-full align-middle"
-																					style="background-color: {breakdownSemanticColorMap[
+																					class="badge text-xs {APPLIED_CONTROL_STATUS_PRESETS[
 																						val.status
-																					] ?? breakdownSemanticColorMap['--']}"
-																					title={safeTranslate(val.status)}
-																				></span>
+																					] ?? 'preset-tonal-surface'}"
+																					>{safeTranslate(val.status)}</span
+																				>
 																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
