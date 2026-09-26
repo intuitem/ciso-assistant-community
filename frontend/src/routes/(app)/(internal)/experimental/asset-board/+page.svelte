@@ -53,6 +53,8 @@
 			{#key data.selectedFolderId}
 				<AssetBoard
 					assets={data.assets}
+					externalAssets={data.externalAssets}
+					hiddenAssetIds={data.hiddenAssetIds}
 					folderId={data.selectedFolderId}
 					assetModel={data.assetModel}
 					deleteForm={data.assetDeleteForm}
