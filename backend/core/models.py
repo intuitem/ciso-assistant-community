@@ -1458,6 +1458,8 @@ class LibraryUpdater:
         self.new_quick_forms = new_library_content.get("quick_forms")
         if isinstance(self.new_quick_forms, dict):
             self.new_quick_forms = [self.new_quick_forms]
+        self.new_portal_presets = new_library_content.get("portal_presets")
+        self.portal_preset_importers = []
 
     def update_dependencies(self) -> Union[str, None]:
         for dependency_urn in self.dependencies:
@@ -2246,6 +2248,34 @@ class LibraryUpdater:
                     if answers_to_create:
                         Answer.objects.bulk_create(answers_to_create, batch_size=500)
 
+    def init_portal_presets(self) -> Union[str, None]:
+        """Run the load's checks on the new version's presets (ownership, identity,
+        content shape). Called before update_library writes anything: update() only
+        rolls back on an exception, so an error found halfway would leave a half
+        updated library behind."""
+        if self.new_portal_presets is None:
+            return None
+        from library.utils import init_portal_preset_importers
+
+        self.portal_preset_importers, error = init_portal_preset_importers(
+            self.new_portal_presets, self.old_library.urn, self.old_library.locale
+        )
+        return error
+
+    def update_portal_presets(self):
+        """Refresh catalog entries through the importer a load uses. Live Portals
+        cloned from them are copies, so nothing here reaches a design a user is
+        already running."""
+        from portals.models import PortalPreset
+
+        for importer in self.portal_preset_importers:
+            importer.import_portal_preset(self.old_library)
+        # A preset the new version dropped has no owner left: it cannot be edited or
+        # deleted through the API (library-backed), so it goes with the version.
+        PortalPreset.objects.filter(library=self.old_library).exclude(
+            urn__in=[importer.urn for importer in self.portal_preset_importers]
+        ).delete()
+
     def update_quick_forms(self):
         """Upsert quick forms, pages and questions by URN, prune what the new
         version dropped, then reconcile every live response: seed answers for
@@ -2496,6 +2526,9 @@ class LibraryUpdater:
 
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
     def update_library(self) -> Union[str, None]:
+        if (error_msg := self.init_portal_presets()) is not None:
+            return error_msg
+
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
 
@@ -2555,6 +2588,9 @@ class LibraryUpdater:
 
         if self.new_quick_forms is not None:
             self.update_quick_forms()
+
+        if self.new_portal_presets is not None:
+            self.update_portal_presets()
 
         if self.new_requirement_mapping_sets is not None:
             self.update_requirement_mapping_sets()

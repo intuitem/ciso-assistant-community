@@ -1,5 +1,6 @@
 import re
 
+import yaml
 from django.contrib.auth.models import Permission
 from django.db import transaction
 from django.db.models import Q
@@ -13,6 +14,7 @@ from rest_framework.views import APIView
 
 from core.models import Actor, QuickFormResponse, RequirementAssignment
 from core.permissions import FeatureFlagRequired
+from core.utils import free_name
 from core.serializers import (
     ComplianceAssessmentWriteSerializer,
     QuickFormResponseWriteSerializer,
@@ -55,9 +57,13 @@ class PublicPortalAPIView(APIView):
 from .models import FrameworkSnapshot, Portal, PortalPreset, PublicDocument
 from .serializers import (
     FrameworkSnapshotReadSerializer,
+    PortalPresetReadSerializer,
+    PortalPresetWriteSerializer,
     PortalReadSerializer,
     PortalWriteSerializer,
 )
+from .presets import build_preset_library, _urn_leaf
+from .references import dereference, resolve
 from .snapshots import compute_snapshot
 
 
@@ -200,17 +206,22 @@ class PortalViewSet(CustomPortalsViewSet):
             folder=preset.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
+        # Wired at clone time, not load time: a preset names its targets by URN, and
+        # the row behind a URN can change (library unloaded and reloaded) or only
+        # exist by now (dependency loaded after the preset).
+        content, unwired = resolve(preset.content or {})
         data = {
             "name": request.data.get("name") or preset.name,
             "folder": str(preset.folder_id),
-            "content": preset.content,
+            "content": content,
             "source_ref": preset.urn or preset.ref_id or str(preset.id),
         }
         serializer = PortalWriteSerializer(data=data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         portal = serializer.save()
         return Response(
-            PortalReadSerializer(portal).data, status=status.HTTP_201_CREATED
+            {**PortalReadSerializer(portal).data, "unwired": unwired},
+            status=status.HTTP_201_CREATED,
         )
 
     @action(detail=True, methods=["post"], url_path="regenerate-public-token")
@@ -449,6 +460,54 @@ class PortalViewSet(CustomPortalsViewSet):
                 "ref_id": response_object.ref_id,
             }
         )
+
+    @action(detail=True, methods=["post"], url_path="save-as-preset")
+    def save_as_preset(self, request, pk=None):
+        """Capture the design as a reusable starting point. A snapshot: later edits
+        to either side never reach the other."""
+        portal = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_portalpreset"),
+            folder=portal.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        # The template stays on this instance, so a target with no URN keeps its
+        # local id; only an export has to drop it.
+        content, unwired = dereference(portal.content or {}, keep_local_ids=True)
+        serializer = PortalPresetWriteSerializer(
+            data={
+                "name": free_name(
+                    PortalPreset,
+                    str(request.data.get("name") or portal.name).strip(),
+                    portal.folder,
+                ),
+                "description": request.data.get("description") or portal.description,
+                "folder": str(portal.folder_id),
+                "content": content,
+            },
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        preset = serializer.save()
+        return Response(
+            {**PortalPresetReadSerializer(preset).data, "unwired": unwired},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["get"])
+    def export(self, request, pk=None):
+        """Emit the design as a loadable library YAML. Exporting an edited portal
+        again ships the next version, which loads as an update of the last one."""
+        portal = self.get_object()
+        document, _unwired = build_preset_library(portal)
+        payload = yaml.safe_dump(
+            document, allow_unicode=True, sort_keys=False, width=1000
+        )
+        slug = _urn_leaf(portal.name)
+        response = HttpResponse(payload, content_type="application/yaml")
+        response["Content-Disposition"] = f'attachment; filename="portal-{slug}.yaml"'
+        return response
 
     @action(detail=True, methods=["post"])
     def duplicate(self, request, pk=None):
