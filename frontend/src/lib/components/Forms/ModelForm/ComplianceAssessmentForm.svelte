@@ -11,6 +11,9 @@
 	import { page } from '$app/state';
 	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import ScoreScaleEditor from '$lib/components/ComplianceAssessment/ScoreScaleEditor.svelte';
+	import type { ScoreScaleValue } from '$lib/utils/score-scales';
+	import { untrack } from 'svelte';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -46,6 +49,57 @@
 
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
 
+	let frameworkScoring = $state<Record<string, any> | null>(null);
+
+	const SCALE_FIELDS = ['score_scale_preset', 'min_score', 'max_score', 'scores_definition'];
+	let scaleDirty = $state(false);
+
+	function initialScale(): ScoreScaleValue | null {
+		if (!object?.id) return null;
+		const current: ScoreScaleValue = {
+			score_scale_preset: object.score_scale_preset ?? null,
+			min_score: object.min_score,
+			max_score: object.max_score,
+			scores_definition: object.scores_definition ?? []
+		};
+		const fallback = frameworkScoring?.audit_default_scale;
+		const sameAsDefault =
+			fallback &&
+			current.min_score === fallback.min_score &&
+			current.max_score === fallback.max_score &&
+			current.score_scale_preset === fallback.score_scale_preset &&
+			JSON.stringify(current.scores_definition) ===
+				JSON.stringify(fallback.scores_definition ?? []);
+		return sameAsDefault ? null : current;
+	}
+
+	function onScaleChange(value: ScoreScaleValue | null) {
+		scaleDirty = true;
+		form.form.update((d) => ({
+			...d,
+			score_scale_preset: value?.score_scale_preset ?? null,
+			min_score: value?.min_score ?? null,
+			max_score: value?.max_score ?? null,
+			scores_definition: value?.scores_definition ?? null
+		}));
+	}
+
+	$effect(() => {
+		if (!object?.id || scaleDirty) return;
+		untrack(() => {
+			if (SCALE_FIELDS.every((f) => $formData[f] === undefined)) return;
+			form.form.update((d) => {
+				const next = { ...d };
+				for (const f of SCALE_FIELDS) delete next[f];
+				return next;
+			});
+		});
+	});
+
+	let scoringEnabled = $derived(
+		($formData.field_visibility?.score ?? frameworkDefaults?.score)?.auditor !== 'hidden'
+	);
+
 	async function handleFrameworkChange(id: string) {
 		if (id) {
 			await fetch(`/frameworks/${id}`)
@@ -60,6 +114,15 @@
 					suggestions = r['reference_controls'].length > 0;
 
 					frameworkDefaults = r['effective_field_visibility'] ?? null;
+
+					frameworkScoring = {
+						min_score: r['min_score'],
+						max_score: r['max_score'],
+						scores_definition: r['scores_definition'],
+						is_scale_bound: r['is_scale_bound'],
+						audit_default_scale: r['audit_default_scale']
+					};
+					if (!object.id) onScaleChange(null);
 
 					defaultImplementationGroups = implementation_groups
 						.filter((group) => group.default_selected)
@@ -196,6 +259,24 @@
 			disabled={object?.is_locked}
 			{frameworkDefaults}
 		/>
+
+		{#if frameworkScoring}
+			{#key frameworkScoring}
+				<ScoreScaleEditor
+					value={initialScale()}
+					onChange={onScaleChange}
+					defaultScale={frameworkScoring.audit_default_scale}
+					declaredRange={frameworkScoring.min_score !== 0 ||
+					frameworkScoring.max_score !== 100 ||
+					frameworkScoring.scores_definition?.length
+						? { min: frameworkScoring.min_score, max: frameworkScoring.max_score }
+						: null}
+					isScaleBound={frameworkScoring.is_scale_bound}
+					rangeLocked={Boolean(object?.id && object?.has_scores)}
+					{scoringEnabled}
+				/>
+			{/key}
+		{/if}
 
 		<Select
 			{form}

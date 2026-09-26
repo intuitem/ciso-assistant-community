@@ -10246,6 +10246,16 @@ class FrameworkViewSet(BaseModelViewSet):
             has_compliance_assessments_flag=Exists(
                 ComplianceAssessment.objects.filter(framework=OuterRef("pk"))
             ),
+            scale_bound_flag=ExpressionWrapper(
+                Q(
+                    *(
+                        Exists(qs)
+                        for qs in Framework.scale_bound_querysets(OuterRef("pk"))
+                    ),
+                    _connector=Q.OR,
+                ),
+                output_field=models.BooleanField(),
+            ),
         )
 
         return qs
@@ -13813,7 +13823,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # Source of truth is the CA copy (set at save() and customisable
         # independently of the framework). Fall back to the framework's
         # translated definition for the labels.
-        scores_definition = compliance_assessment.scores_definition
+        scores_definition = compliance_assessment.get_scale_levels()
         if not scores_definition:
             scores_definition = get_referential_translation(
                 compliance_assessment.framework, "scores_definition", get_language()

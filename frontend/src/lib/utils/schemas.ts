@@ -585,6 +585,25 @@ export const ComplianceAssessmentSchema = z.object({
 		.optional()
 		.default({}),
 	score_calculation_method: z.string().optional().default('average'),
+	score_scale_preset: z.string().optional().nullable(),
+	min_score: z.number().int().optional().nullable(),
+	max_score: z.number().int().optional().nullable(),
+	scores_definition: z
+		.array(
+			z.object({
+				score: z.number().int(),
+				name: z.string().optional().nullable(),
+				description: z.string().optional().nullable(),
+				translations: z
+					.record(
+						z.string(),
+						z.object({ name: z.string().optional(), description: z.string().optional() })
+					)
+					.optional()
+			})
+		)
+		.optional()
+		.nullable(),
 	target_score: z.number().optional().nullable(),
 	anchor_na_to_target: z.boolean().optional().default(false),
 	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
@@ -659,6 +678,15 @@ export const EvidenceRevisionSchema = z.object({
 
 export const GeneralSettingsSchema = z.object({
 	security_objective_scale: z.string(),
+	default_score_scale: z
+		.object({
+			score_scale_preset: z.string().nullable(),
+			min_score: z.number().int(),
+			max_score: z.number().int(),
+			scores_definition: z.array(z.any())
+		})
+		.nullable()
+		.optional(),
 	ebios_radar_green_zone_radius: z.number(),
 	ebios_radar_yellow_zone_radius: z.number(),
 	ebios_radar_red_zone_radius: z.number(),

@@ -18,6 +18,7 @@
 	import type { DateFormatPreference } from '$lib/utils/datetime';
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import ScoreScaleEditor from '$lib/components/ComplianceAssessment/ScoreScaleEditor.svelte';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -435,6 +436,11 @@
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
+				<ScoreScaleEditor
+					value={$formStore.default_score_scale ?? null}
+					onChange={(value) => form.form.update((d) => ({ ...d, default_score_scale: value }))}
+					helpText={m.defaultScoreScaleHelpText()}
+				/>
 				<Checkbox
 					{form}
 					field="disable_partially_compliant_result"

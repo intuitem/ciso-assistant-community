@@ -67,6 +67,7 @@ def validate_default_dashboard_value(value):
 
 GENERAL_SETTINGS_KEYS = [
     "security_objective_scale",
+    "default_score_scale",
     "ebios_radar_max",
     "ebios_radar_green_zone_radius",
     "ebios_radar_yellow_zone_radius",
@@ -113,6 +114,39 @@ LLM_URL_DEFAULTS = {
     "ollama_base_url": "http://localhost:11434",
     "openai_api_base": "http://localhost:1234/v1",
 }
+
+
+def _normalize_default_score_scale(value):
+    from core.models import normalize_score_scale
+
+    if not isinstance(value, dict):
+        raise serializers.ValidationError(
+            {"default_score_scale": "Must be an object or null."}
+        )
+    levels = value.get("scores_definition")
+    if levels is not None and not isinstance(levels, list):
+        raise serializers.ValidationError(
+            {"default_score_scale": "scores_definition must be a list."}
+        )
+    try:
+        preset, min_score, max_score = normalize_score_scale(
+            value.get("score_scale_preset"),
+            value.get("min_score"),
+            value.get("max_score"),
+            levels,
+        )
+    except DjangoValidationError as e:
+        raise serializers.ValidationError({"default_score_scale": e.messages})
+    if min_score is None:
+        raise serializers.ValidationError(
+            {"default_score_scale": "A preset or a min/max range is required."}
+        )
+    return {
+        "score_scale_preset": preset,
+        "min_score": min_score,
+        "max_score": max_score,
+        "scores_definition": levels or [],
+    }
 
 
 class GeneralSettingsSerializer(serializers.ModelSerializer):
@@ -172,6 +206,8 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                             {key: "URL hostname could not be resolved."}
                         )
             # Validate builtin_metrics_retention_days minimum value
+            if key == "default_score_scale" and value is not None:
+                validated_data["value"][key] = _normalize_default_score_scale(value)
             if key == "builtin_metrics_retention_days":
                 if not isinstance(value, int) or value < 1:
                     raise serializers.ValidationError(

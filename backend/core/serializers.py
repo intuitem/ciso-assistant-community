@@ -3022,6 +3022,8 @@ class FrameworkReadSerializer(ReferentialSerializer):
     is_dynamic = serializers.BooleanField(read_only=True)
     has_update = serializers.BooleanField(read_only=True)
     has_compliance_assessments = serializers.SerializerMethodField()
+    is_scale_bound = serializers.SerializerMethodField()
+    audit_default_scale = serializers.SerializerMethodField()
     scores_definition = serializers.SerializerMethodField()
     # The complete per-role visibility map a new CA created from this framework
     # would inherit: DEFAULT_VISIBILITY ⊕ framework.field_visibility. The
@@ -3042,6 +3044,24 @@ class FrameworkReadSerializer(ReferentialSerializer):
         if flag is not None:
             return flag
         return obj.complianceassessment_set.exists()
+
+    def get_is_scale_bound(self, obj):
+        flag = getattr(obj, "scale_bound_flag", None)
+        if flag is not None:
+            return flag
+        return obj.is_scale_bound
+
+    def get_audit_default_scale(self, obj):
+        if "_default_score_scale" not in self.context:
+            self.context["_default_score_scale"] = get_default_score_scale()
+        scale = obj.default_audit_scale(
+            instance_default=self.context["_default_score_scale"],
+            scale_bound=self.get_is_scale_bound(obj),
+        )
+        sd = scale["scores_definition"]
+        if isinstance(sd, dict):
+            scale["scores_definition"] = sd.get("scale")
+        return scale
 
     def get_scores_definition(self, obj):
         sd = obj.scores_definition
@@ -3623,6 +3643,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     # storage is `field_visibility`; clients that want to change these should
     # PATCH `field_visibility` directly.
     scoring_enabled = serializers.BooleanField(read_only=True)
+    has_scores = serializers.BooleanField(read_only=True)
     show_documentation_score = serializers.BooleanField(read_only=True)
     extended_result_enabled = serializers.BooleanField(read_only=True)
     progress_status_enabled = serializers.BooleanField(read_only=True)
@@ -3742,6 +3763,8 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     f"⚠️ Cannot modify the audit attributes when it is locked. Only the 'Locked' field can be modified."
                 )
 
+        self._validate_score_scale(attrs)
+
         target = attrs.get(
             "target_score",
             getattr(self.instance, "target_score", None) if self.instance else None,
@@ -3776,6 +3799,67 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     )
 
         return super().validate(attrs)
+
+    def _validate_score_scale(self, attrs):
+        scale_fields = {
+            "score_scale_preset",
+            "min_score",
+            "max_score",
+            "scores_definition",
+        }
+        if not scale_fields & attrs.keys():
+            return
+        instance = self.instance
+        framework = attrs.get("framework") or getattr(instance, "framework", None)
+        default = framework.default_audit_scale() if framework else None
+        default_range = (
+            (default["min_score"], default["max_score"]) if default else None
+        )
+
+        preset = attrs.get("score_scale_preset")
+        min_s = attrs.get(
+            "min_score", None if preset else getattr(instance, "min_score", None)
+        )
+        max_s = attrs.get(
+            "max_score", None if preset else getattr(instance, "max_score", None)
+        )
+        try:
+            preset, min_s, max_s = normalize_score_scale(
+                preset, min_s, max_s, attrs.get("scores_definition"), default_range
+            )
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(e.message_dict)
+        if preset:
+            attrs["min_score"], attrs["max_score"] = min_s, max_s
+
+        resolved = (min_s, max_s) if min_s is not None else default_range
+        if min_s is None:
+            attrs["score_scale_preset"] = None
+        elif (
+            "score_scale_preset" not in attrs
+            and instance
+            and instance.score_scale_preset
+        ):
+            if SCORE_SCALE_PRESETS.get(instance.score_scale_preset) != resolved:
+                attrs["score_scale_preset"] = None
+
+        current = (
+            (instance.min_score, instance.max_score) if instance else default_range
+        )
+        if resolved == current:
+            return
+        if framework and framework.is_scale_bound:
+            raise serializers.ValidationError(
+                {
+                    "score_scale_preset": "This framework computes scores from its questions, so its scale cannot be changed."
+                }
+            )
+        if instance and instance.has_scores:
+            raise serializers.ValidationError(
+                {
+                    "score_scale_preset": "The score range cannot be changed once requirements have been scored."
+                }
+            )
 
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)

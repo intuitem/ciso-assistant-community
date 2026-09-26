@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import re
@@ -3699,6 +3700,55 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
                 .exists()
             )
         return self._is_dynamic_cache
+
+    @staticmethod
+    def scale_bound_querysets(framework):
+        return (
+            QuestionChoice.objects.filter(
+                question__requirement_node__framework=framework,
+                add_score__isnull=False,
+            ),
+            RequirementNode.objects.filter(framework=framework).filter(
+                Q(min_score__isnull=False)
+                | Q(max_score__isnull=False)
+                | Q(scores_definition_ref__gt="")
+            ),
+        )
+
+    @property
+    def is_scale_bound(self) -> bool:
+        return any(qs.exists() for qs in self.scale_bound_querysets(self))
+
+    def declares_scale(self) -> bool:
+        return bool(self.scores_definition) or (self.min_score, self.max_score) != (
+            0,
+            100,
+        )
+
+    def default_audit_scale(self, instance_default=..., scale_bound=None) -> dict:
+        """Scale a new audit on this framework gets when none is chosen: the
+        instance default for frameworks that declare no scale, else the framework's."""
+        if instance_default is ...:
+            instance_default = get_default_score_scale()
+        if instance_default and not self.declares_scale():
+            bound = self.is_scale_bound if scale_bound is None else scale_bound
+            if not bound:
+                return {
+                    "source": "instance",
+                    "score_scale_preset": instance_default.get("score_scale_preset"),
+                    "min_score": instance_default["min_score"],
+                    "max_score": instance_default["max_score"],
+                    "scores_definition": copy.deepcopy(
+                        instance_default.get("scores_definition")
+                    ),
+                }
+        return {
+            "source": "framework",
+            "score_scale_preset": None,
+            "min_score": self.min_score,
+            "max_score": self.max_score,
+            "scores_definition": self.scores_definition,
+        }
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.get_name_translated}"
@@ -8440,6 +8490,73 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         return data
 
 
+# Range is frozen per id: rewording lives in the frontend catalog, a new range needs a new id.
+SCORE_SCALE_PRESETS = {
+    "0-100": (0, 100),
+    "0-5": (0, 5),
+    "1-5": (1, 5),
+    "1-4": (1, 4),
+    "0-4": (0, 4),
+}
+MAX_LABELLED_LEVELS = 11
+
+
+def normalize_score_scale(preset, min_score, max_score, levels, default_range=None):
+    """Validate a score scale and return (preset, min_score, max_score).
+
+    A preset forces its range; min/max of None means "use the default".
+    """
+    if preset:
+        if preset not in SCORE_SCALE_PRESETS:
+            raise ValidationError({"score_scale_preset": f"Unknown scale {preset}."})
+        for field, given, value in zip(
+            ("min_score", "max_score"),
+            (min_score, max_score),
+            SCORE_SCALE_PRESETS[preset],
+        ):
+            if given is not None and given != value:
+                raise ValidationError(
+                    {field: f"Must be {value} for the {preset} scale."}
+                )
+        min_score, max_score = SCORE_SCALE_PRESETS[preset]
+    if (min_score is None) != (max_score is None):
+        raise ValidationError(
+            {"max_score": "Minimum and maximum scores must be set together."}
+        )
+    if min_score is not None:
+        if not all(
+            isinstance(v, int) and not isinstance(v, bool)
+            for v in (min_score, max_score)
+        ):
+            raise ValidationError({"max_score": "Scores must be integers."})
+        if min_score >= max_score:
+            raise ValidationError(
+                {
+                    "max_score": "The maximum score must be greater than the minimum score."
+                }
+            )
+    score_range = (min_score, max_score) if min_score is not None else default_range
+    if isinstance(levels, list) and score_range:
+        for level in levels:
+            score = level.get("score") if isinstance(level, dict) else None
+            if (
+                not isinstance(score, int)
+                or isinstance(score, bool)
+                or not score_range[0] <= score <= score_range[1]
+            ):
+                raise ValidationError(
+                    {
+                        "scores_definition": f"Each level needs an integer score between {score_range[0]} and {score_range[1]}."
+                    }
+                )
+    return preset or None, min_score, max_score
+
+
+def get_default_score_scale() -> dict | None:
+    general = GlobalSettings.objects.filter(name="general").first()
+    return (general.value or {}).get("default_score_scale") if general else None
+
+
 class ComplianceAssessment(Assessment):
     class CalculationMethod(models.TextChoices):
         AVG = "average", "Average"
@@ -8460,6 +8577,13 @@ class ComplianceAssessment(Assessment):
     max_score = models.IntegerField(null=True, verbose_name=_("Maximum score"))
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
+    )
+    score_scale_preset = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        choices=[(key, key) for key in SCORE_SCALE_PRESETS],
+        verbose_name=_("Score scale preset"),
     )
     computed_outcome = models.JSONField(null=True, blank=True)
 
@@ -8650,11 +8774,37 @@ class ComplianceAssessment(Assessment):
             },
         )
 
+    def get_scale_levels(self) -> list | None:
+        """Bare list of level labels; a preset is expanded to every score in its
+        range, tagged with the preset id so clients can resolve the wording."""
+        sd = self.scores_definition
+        scale = sd.get("scale") if isinstance(sd, dict) else sd
+        preset = self.score_scale_preset
+        if not preset or self.max_score - self.min_score + 1 > MAX_LABELLED_LEVELS:
+            return scale
+        own = {
+            level["score"]: level
+            for level in scale or []
+            if isinstance(level, dict) and "score" in level
+        }
+        return [
+            {**own.get(score, {}), "score": score, "preset": preset}
+            for score in range(self.min_score, self.max_score + 1)
+        ]
+
+    @property
+    def has_scores(self) -> bool:
+        return self.requirement_assessments.filter(
+            Q(score__isnull=False) | Q(documentation_score__isnull=False)
+        ).exists()
+
     def save(self, *args, **kwargs) -> None:
         if self.min_score is None:
-            self.min_score = self.framework.min_score
-            self.max_score = self.framework.max_score
-            self.scores_definition = self.framework.scores_definition
+            scale = self.framework.default_audit_scale()
+            self.min_score = scale["min_score"]
+            self.max_score = scale["max_score"]
+            self.scores_definition = scale["scores_definition"]
+            self.score_scale_preset = scale["score_scale_preset"]
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
 
@@ -10080,7 +10230,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 req.scores_definition_ref
             )
         else:
-            scores_definition = ca_sd.get("scale")
+            scores_definition = ca.get_scale_levels()
             # Inherited default may extend beyond the Node's overridden bounds.
             # Keep only entries that fall inside the resolved range (preserves
             # sparse scales like 0/25/50/75/100); drop the labels entirely if
