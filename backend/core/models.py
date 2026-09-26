@@ -8808,8 +8808,11 @@ class ComplianceAssessment(Assessment):
 
     def rescale_impact(self) -> dict:
         own_range = self._rescalable_requirements()
+        scores = own_range.filter(score__isnull=False)
         return {
-            "scores": own_range.filter(score__isnull=False).count(),
+            # Same rule as the scoring engine for what counts as scored.
+            "scored": scores.filter(is_scored=True).count(),
+            "scores": scores.filter(is_scored=False).count(),
             "documentation_scores": own_range.filter(
                 documentation_score__isnull=False
             ).count(),
@@ -8825,14 +8828,6 @@ class ComplianceAssessment(Assessment):
                     ra, field, rescale_score(getattr(ra, field), old_range, new_range)
                 )
             RequirementAssessment.objects.bulk_update(rows, [field])
-
-    @property
-    def has_scores(self) -> bool:
-        # Same rule as the scoring engine: a stale score with is_scored=False
-        # (projections, baseline copies) doesn't count.
-        return self.requirement_assessments.filter(
-            is_scored=True, score__isnull=False
-        ).exists()
 
     def save(self, *args, **kwargs) -> None:
         if self.min_score is None:

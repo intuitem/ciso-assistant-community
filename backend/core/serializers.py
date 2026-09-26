@@ -3644,7 +3644,6 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     # storage is `field_visibility`; clients that want to change these should
     # PATCH `field_visibility` directly.
     scoring_enabled = serializers.BooleanField(read_only=True)
-    has_scores = serializers.BooleanField(read_only=True)
     show_documentation_score = serializers.BooleanField(read_only=True)
     extended_result_enabled = serializers.BooleanField(read_only=True)
     progress_status_enabled = serializers.BooleanField(read_only=True)
@@ -3714,8 +3713,6 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     confirm_rescale = serializers.BooleanField(
         write_only=True, required=False, default=False
     )
-    # Read back by the edit form (object/ action) to lock the range.
-    has_scores = serializers.BooleanField(read_only=True)
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -3877,12 +3874,6 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     "score_scale_preset": "This framework computes scores from its questions, so its scale cannot be changed."
                 }
             )
-        if instance and instance.has_scores:
-            raise serializers.ValidationError(
-                {
-                    "score_scale_preset": "The score range cannot be changed once requirements have been scored."
-                }
-            )
         if instance and None not in (*current, *resolved):
             self._score_rescale = (current, resolved)
             impact = instance.rescale_impact()
@@ -3973,6 +3964,8 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
             if rescale := getattr(self, "_score_rescale", None):
                 updated_instance.rescale_requirement_scores(*rescale)
+                # save() snapshotted today's metrics before the scores moved.
+                updated_instance.upsert_daily_metrics()
 
             # For dynamic frameworks, recompute IGs from current answers so the
             # answer-driven calc always wins over any manual override submitted

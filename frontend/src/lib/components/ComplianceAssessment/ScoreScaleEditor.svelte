@@ -22,7 +22,6 @@
 		defaultScale?: DefaultScoreScale | null;
 		declaredRange?: { min: number; max: number } | null;
 		isScaleBound?: boolean;
-		rangeLocked?: boolean;
 		scoringEnabled?: boolean;
 		helpText?: string;
 		currentRange?: { min: number; max: number } | null;
@@ -34,7 +33,6 @@
 		defaultScale = null,
 		declaredRange = null,
 		isScaleBound = false,
-		rangeLocked = false,
 		scoringEnabled = true,
 		helpText = m.scoreScaleHelpText(),
 		currentRange = null
@@ -290,14 +288,6 @@
 				<i class="fa-solid fa-lock mt-0.5"></i>
 				<span>{m.scoreScaleBoundToFramework()}</span>
 			</div>
-		{:else if rangeLocked}
-			<div
-				class="flex gap-2 rounded-md border border-surface-200-800 bg-surface-50-950 px-3 py-2 text-xs text-surface-700-300"
-				role="note"
-			>
-				<i class="fa-solid fa-lock mt-0.5"></i>
-				<span>{m.scoreScaleRangeLockedOnceScored()}</span>
-			</div>
 		{/if}
 
 		<div class="flex flex-wrap gap-2" role="radiogroup" aria-label={m.scoreScale()}>
@@ -305,7 +295,6 @@
 				type="button"
 				role="radio"
 				aria-checked={selection === 'default'}
-				disabled={rangeLocked && selection !== 'default'}
 				class={chipClass(selection === 'default')}
 				data-testid="score-scale-default"
 				onclick={() => select('default')}
@@ -329,7 +318,7 @@
 					type="button"
 					role="radio"
 					aria-checked={selection === p.id}
-					disabled={isScaleBound || (rangeLocked && selection !== p.id)}
+					disabled={isScaleBound}
 					class={chipClass(selection === p.id)}
 					data-testid={`score-scale-${p.id}`}
 					onclick={() => select(p.id)}
@@ -342,7 +331,7 @@
 				type="button"
 				role="radio"
 				aria-checked={selection === 'custom'}
-				disabled={isScaleBound || (rangeLocked && selection !== 'custom')}
+				disabled={isScaleBound}
 				class={chipClass(selection === 'custom')}
 				data-testid="score-scale-custom"
 				onclick={() => select('custom')}
@@ -352,7 +341,7 @@
 			</button>
 		</div>
 
-		{#if selection !== 'default' && declaredRange && !rangeLocked}
+		{#if selection !== 'default' && declaredRange}
 			<div
 				class="flex gap-2 rounded-md border border-surface-200-800 bg-surface-50-950 px-3 py-2 text-xs text-surface-700-300"
 				role="note"
@@ -424,7 +413,6 @@
 						step="1"
 						class="input w-24 text-sm"
 						value={min}
-						disabled={rangeLocked}
 						onchange={(e) => setRange(parseInt(e.currentTarget.value) || 0, max)}
 						data-testid="score-scale-custom-min"
 					/>
@@ -436,7 +424,6 @@
 						step="1"
 						class="input w-24 text-sm"
 						value={max}
-						disabled={rangeLocked}
 						onchange={(e) => setRange(min, parseInt(e.currentTarget.value) || 0)}
 						data-testid="score-scale-custom-max"
 					/>

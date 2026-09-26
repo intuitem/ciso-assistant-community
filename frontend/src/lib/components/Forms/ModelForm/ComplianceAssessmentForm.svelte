@@ -307,6 +307,9 @@
 			})}
 		</p>
 		<ul class="list-disc pl-8 text-xs">
+			{#if rescaleImpact.scored}
+				<li>{m.scoreScaleConfirmScored({ count: rescaleImpact.scored })}</li>
+			{/if}
 			{#if rescaleImpact.scores}
 				<li>{m.scoreScaleConfirmScores({ count: rescaleImpact.scores })}</li>
 			{/if}
@@ -325,6 +328,9 @@
 			{/if}
 		</ul>
 		<p class="text-xs text-surface-600-400">{m.scoreScaleConfirmIrreversible()}</p>
+		{#if rescaleImpact.scored}
+			<p class="text-xs text-surface-600-400">{m.scoreScaleConfirmHistory()}</p>
+		{/if}
 		<div class="flex gap-2">
 			<button
 				type="button"
@@ -373,7 +379,6 @@
 						? { min: frameworkScoring.min_score, max: frameworkScoring.max_score }
 						: null}
 					isScaleBound={frameworkScoring.is_scale_bound}
-					rangeLocked={Boolean(object?.id && object?.has_scores)}
 					currentRange={object?.id ? { min: object.min_score, max: object.max_score } : null}
 					{scoringEnabled}
 				/>

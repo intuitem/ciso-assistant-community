@@ -127,42 +127,47 @@ class TestScoreScalePreset:
 
 
 @pytest.mark.django_db
-class TestRangeLock:
-    def test_has_scores(self, setup):
-        assert setup["ca"].has_scores is False
+class TestScoredRequirements:
+    def _score(self, setup, value):
         setup["ra"].is_scored = True
-        setup["ra"].score = 40
+        setup["ra"].score = value
         setup["ra"].save()
-        assert setup["ca"].has_scores is True
 
-    def test_range_locked_once_scored(self, setup):
-        setup["ra"].is_scored = True
-        setup["ra"].score = 40
-        setup["ra"].save()
+    def test_scored_requirements_are_converted(self, setup):
+        self._score(setup, 40)
         serializer, valid = _update(setup["ca"], {"score_scale_preset": "0-5"})
-        assert not valid
-        assert "score_scale_preset" in serializer.errors
+        assert valid, serializer.errors
+        serializer.save()
+        setup["ra"].refresh_from_db()
+        assert (setup["ra"].score, setup["ra"].is_scored) == (2, True)
+
+    def test_scored_requirements_are_counted_separately(self, setup):
+        from core.serializers import ScoreRescaleConfirmationRequired
+
+        self._score(setup, 40)
+        with pytest.raises(ScoreRescaleConfirmationRequired) as exc:
+            _update(setup["ca"], {"score_scale_preset": "0-5"}, confirm=False)
+        impact = json.loads(exc.value.detail["confirm_rescale"][0])
+        assert (impact["scored"], impact["scores"]) == (1, 0)
+
+    def test_todays_metric_uses_converted_scores(self, setup):
+        from core.models import HistoricalMetric
+
+        self._score(setup, 80)
+        _update(setup["ca"], {"score_scale_preset": "1-5"})[0].save()
+        metric = HistoricalMetric.objects.filter(object_id=setup["ca"].id).latest(
+            "date"
+        )
+        assert metric.data["reqs"]["score"] == pytest.approx(4)
 
     def test_wording_editable_once_scored(self, setup):
         ca = setup["ca"]
         _update(ca, {"score_scale_preset": "0-5"})[0].save()
-        setup["ra"].is_scored = True
-        setup["ra"].score = 4
-        setup["ra"].save()
+        self._score(setup, 4)
         serializer, valid = _update(
             ca, {"score_scale_preset": "0-5", "scores_definition": _levels(4)}
         )
         assert valid, serializer.errors
-
-    def test_stale_score_does_not_lock(self, setup):
-        setup["ra"].score = 40
-        setup["ra"].save()
-        assert setup["ca"].has_scores is False
-
-    def test_documentation_score_alone_does_not_lock(self, setup):
-        setup["ra"].documentation_score = 10
-        setup["ra"].save()
-        assert setup["ca"].has_scores is False
 
 
 @pytest.mark.django_db
@@ -617,6 +622,7 @@ class TestRescaleConfirmation:
         assert self._impact(exc.value) == {
             "from": [0, 100],
             "to": [1, 5],
+            "scored": 0,
             "scores": 1,
             "documentation_scores": 1,
             "target": [80.0, 4.2],
