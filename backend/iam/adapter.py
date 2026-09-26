@@ -196,8 +196,9 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             sso_settings = None
 
         # SAML assertions are resolved by the SAML ACS view; the verification
-        # claim rule is OIDC's.
-        if sso_settings is None or sso_settings.provider != "saml":
+        # claim rule is OIDC's. Keyed on this login's provider class, not on the
+        # stored configuration or the configurable provider_id.
+        if sociallogin.provider.id != "saml":
             self._require_verified_email(extra, sso_settings)
 
         # Primary lookup (legacy format)

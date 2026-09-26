@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
@@ -27,6 +28,7 @@ class FakeSocialLogin:
         self, extra_data, first_name="", last_name="", provider="openid_connect"
     ):
         self.account = FakeAccount(extra_data, provider)
+        self.provider = SimpleNamespace(id=provider)
         self.user = FakeUser(first_name, last_name)
         self.connect = MagicMock()
 
@@ -257,6 +259,18 @@ class TestOIDCEmailVerification:
         assert User.objects.filter(
             email="new.user@example.com", is_jit_provisioned=True
         ).exists()
+
+    def test_rule_follows_the_login_provider_not_the_stored_config(self):
+        # Stored configuration says OIDC, the login is SAML with a custom
+        # provider_id: the protocol of the login decides, so no refusal.
+        _make_sso_settings(provider="openid_connect")
+        sociallogin = FakeSocialLogin(
+            extra_data={"urn:oid:0.9.2342.19200300.100.1.3": ["alice@example.com"]},
+            provider="corp-saml",
+        )
+        sociallogin.provider = SimpleNamespace(id="saml")
+
+        SocialAccountAdapter().pre_social_login(RequestFactory().get("/"), sociallogin)
 
     def test_saml_is_not_subject_to_the_oidc_rule(self):
         _make_sso_settings(provider="saml")
