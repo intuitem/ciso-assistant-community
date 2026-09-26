@@ -102,6 +102,7 @@
 	"trajectoryReachedCount": "{count}/{total} scenarios at residual risk",
 	"trajectoryNoEta": "No ETA",
 	"trajectoryBurndownTitle": "Projected risk levels",
+	"trajectoryControlsLoadError": "Extra controls could not be loaded, projection unavailable",
 	"calendar": "Calendar",
 	"threats": "Threats",
 	"threatsColon": "Threats:",

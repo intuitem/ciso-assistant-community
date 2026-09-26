@@ -131,6 +131,7 @@
 	"trajectoryReachedCount": "{count}/{total} scénarios au niveau résiduel",
 	"trajectoryNoEta": "Sans échéance",
 	"trajectoryBurndownTitle": "Niveaux de risque projetés",
+	"trajectoryControlsLoadError": "Impossible de charger les mesures complémentaires, projection indisponible",
 	"calendar": "Calendrier",
 	"threats": "Menaces",
 	"threatsColon": "Menaces :",

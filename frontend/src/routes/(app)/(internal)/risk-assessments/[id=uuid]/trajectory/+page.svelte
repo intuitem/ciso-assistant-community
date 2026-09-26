@@ -36,6 +36,7 @@
 			riskMatrix={data.risk_assessment.risk_matrix}
 			scenarios={data.risk_assessment.risk_scenarios}
 			controls={data.controls}
+			controlsError={data.controlsError}
 			{stages}
 		/>
 	</section>

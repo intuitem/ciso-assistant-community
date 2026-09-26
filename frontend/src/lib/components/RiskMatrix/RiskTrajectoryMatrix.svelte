@@ -29,6 +29,7 @@
 		scenarios: any[];
 		stages: Stage[];
 		controls?: ControlInfo[];
+		controlsError?: boolean;
 		swapAxes?: boolean;
 		flipVertical?: boolean;
 		labelStandard?: string;
@@ -39,6 +40,7 @@
 		scenarios,
 		stages,
 		controls = [],
+		controlsError = false,
 		swapAxes = page.data.settings?.risk_matrix_swap_axes ?? false,
 		flipVertical = page.data.settings?.risk_matrix_flip_vertical ?? false,
 		labelStandard = page.data.settings?.risk_matrix_labels ?? 'ISO'
@@ -246,7 +248,7 @@
 {:else}
 	<div class="flex flex-col gap-4">
 		<div class="flex flex-wrap items-center gap-2">
-			{#if canProject}
+			{#if canProject || controlsError}
 				<div class="flex rounded-base border border-surface-200-800 p-0.5 mr-2">
 					<button
 						class="btn btn-sm {mode === 'stages' ? 'preset-filled-surface-900-100' : ''}"
@@ -258,11 +260,18 @@
 					<button
 						class="btn btn-sm {mode === 'projection' ? 'preset-filled-surface-900-100' : ''}"
 						onclick={() => setMode('projection')}
+						disabled={controlsError}
+						title={controlsError ? m.trajectoryControlsLoadError() : undefined}
 						data-testid="trajectory-mode-projection"
 					>
 						<i class="fa-solid fa-calendar-days mr-1"></i>{m.trajectoryProjection()}
 					</button>
 				</div>
+				{#if controlsError}
+					<span class="text-xs text-warning-600-400" data-testid="trajectory-controls-error">
+						<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.trajectoryControlsLoadError()}
+					</span>
+				{/if}
 			{/if}
 			<button
 				class="btn btn-sm preset-filled-primary-500"

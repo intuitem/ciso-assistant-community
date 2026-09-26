@@ -97,11 +97,15 @@
 <a
 	href="/risk-scenarios/{dot.id}"
 	title="{dot.label} - {dot.name}"
+	tabindex={visible ? undefined : -1}
+	aria-hidden={visible ? undefined : 'true'}
 	onmouseenter={() => (hovered = true)}
 	onmouseleave={() => (hovered = false)}
 	onfocus={() => (hovered = true)}
 	onblur={() => (hovered = false)}
-	class="absolute pointer-events-auto flex items-center justify-center min-w-7 h-7 px-1 rounded-full bg-surface-900 text-white text-[10px] font-semibold shadow-md ring-2 transition-[opacity,box-shadow,scale] duration-300 hover:scale-110 {hovered ||
+	class="absolute {visible
+		? 'pointer-events-auto'
+		: 'pointer-events-none'} flex items-center justify-center min-w-7 h-7 px-1 rounded-full bg-surface-900 text-white text-[10px] font-semibold shadow-md ring-2 transition-[opacity,box-shadow,scale] duration-300 hover:scale-110 {hovered ||
 	highlighted
 		? 'z-20'
 		: 'z-10'} {highlighted ? 'scale-125' : ''} {flag === 'unscheduled'
