@@ -133,7 +133,7 @@ test.describe('General settings', () => {
 				await assetsPage.goto();
 				await assetsPage.hasTitle();
 				await page.getByTestId('add-button').click();
-				await page.getByRole('button', { name: ' Security targets' }).click();
+				await page.getByRole('button', { name: 'Security targets' }).click();
 				await expect(page.locator('.text-base').first()).toHaveText('1');
 				await expect(page.locator('label:nth-child(4) > .text-base').first()).toHaveText('4');
 				await page.getByTestId('cancel-button').click();
@@ -149,7 +149,7 @@ test.describe('General settings', () => {
 				await assetsPage.goto();
 				await assetsPage.hasTitle();
 				await page.getByTestId('add-button').click();
-				await page.getByRole('button', { name: ' Security targets' }).click();
+				await page.getByRole('button', { name: 'Security targets' }).click();
 				await expect(page.locator('.text-base').first()).toHaveText('0');
 				await expect(page.locator('label:nth-child(5) > .text-base').first()).toHaveText('4');
 				await page.getByTestId('cancel-button').click();
@@ -165,7 +165,7 @@ test.describe('General settings', () => {
 				await assetsPage.goto();
 				await assetsPage.hasTitle();
 				await page.getByTestId('add-button').click();
-				await page.getByRole('button', { name: ' Security targets' }).click();
+				await page.getByRole('button', { name: 'Security targets' }).click();
 				await expect(page.locator('.text-base').first()).toHaveText('1');
 				await expect(page.locator('label:nth-child(5) > .text-base').first()).toHaveText('5');
 				await page.getByTestId('cancel-button').click();
@@ -181,7 +181,7 @@ test.describe('General settings', () => {
 				await assetsPage.goto();
 				await assetsPage.hasTitle();
 				await page.getByTestId('add-button').click();
-				await page.getByRole('button', { name: ' Security targets' }).click();
+				await page.getByRole('button', { name: 'Security targets' }).click();
 				await expect(page.locator('.text-base').first()).toHaveText('0');
 				await expect(page.locator('label:nth-child(4) > .text-base').first()).toHaveText('3');
 				await page.getByTestId('cancel-button').click();
@@ -197,7 +197,7 @@ test.describe('General settings', () => {
 				await assetsPage.goto();
 				await assetsPage.hasTitle();
 				await page.getByTestId('add-button').click();
-				await page.getByRole('button', { name: ' Security targets' }).click();
+				await page.getByRole('button', { name: 'Security targets' }).click();
 				await expect(page.locator('.text-base').first()).toHaveText('low');
 				await expect(page.locator('label:nth-child(2) > .text-base').first()).toHaveText(
 					'moderate'
