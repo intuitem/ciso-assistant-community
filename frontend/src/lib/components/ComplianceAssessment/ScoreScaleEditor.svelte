@@ -205,6 +205,13 @@
 		commit();
 	}
 
+	// No labels at all: names, descriptions and translations. The framework's
+	// labels are only copied at creation, so an empty list stays empty.
+	function clearLabels() {
+		levels = [];
+		commit();
+	}
+
 	function addLanguage() {
 		const next = unusedLocales[0];
 		if (next) languages = [...languages, next];
@@ -428,15 +435,27 @@
 				<div class="max-w-4xl space-y-1.5">
 					<div class="flex items-center justify-between">
 						<span class="text-xs font-medium text-surface-600-400">{m.scoreScaleLevels()}</span>
-						<button
-							type="button"
-							class="btn btn-sm preset-tonal-primary"
-							onclick={addLanguage}
-							disabled={unusedLocales.length === 0}
-							data-testid="score-scale-add-language"
-						>
-							<i class="fa-solid fa-plus mr-1"></i>{m.addTranslation()}
-						</button>
+						<div class="flex gap-2">
+							{#if selection === 'custom' && levels.length > 0}
+								<button
+									type="button"
+									class="btn btn-sm preset-tonal-surface"
+									onclick={clearLabels}
+									data-testid="score-scale-clear-labels"
+								>
+									<i class="fa-solid fa-eraser mr-1"></i>{m.scoreScaleClearLabels()}
+								</button>
+							{/if}
+							<button
+								type="button"
+								class="btn btn-sm preset-tonal-primary"
+								onclick={addLanguage}
+								disabled={unusedLocales.length === 0}
+								data-testid="score-scale-add-language"
+							>
+								<i class="fa-solid fa-plus mr-1"></i>{m.addTranslation()}
+							</button>
+						</div>
 					</div>
 					<div class="overflow-x-auto rounded-md border border-surface-200-800">
 						<table class="w-full text-sm">

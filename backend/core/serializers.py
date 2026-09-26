@@ -1,6 +1,5 @@
 import copy
 import importlib
-import json
 from typing import Any
 
 import structlog
@@ -3709,6 +3708,12 @@ class ScoreRescaleConfirmationRequired(APIException):
     status_code = 409
     default_code = "score_rescale_confirmation_required"
 
+    def __init__(self, impact: dict):
+        self.impact = impact
+        super().__init__(
+            {"confirm_rescale": ["scoreScaleConfirmRequired"], "rescale_impact": impact}
+        )
+
 
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     confirm_rescale = serializers.BooleanField(
@@ -3806,9 +3811,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             if min_s is not None and max_s is not None:
                 if not (min_s <= target <= max_s):
                     raise serializers.ValidationError(
-                        {
-                            "target_score": f"Target score must be between {min_s} and {max_s}."
-                        }
+                        {"target_score": "targetScoreOutOfRange"}
                     )
 
         return super().validate(attrs)
@@ -3886,9 +3889,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             return
         if framework and framework.is_scale_bound:
             raise serializers.ValidationError(
-                {
-                    "score_scale_preset": "This framework computes scores from its questions, so its scale cannot be changed."
-                }
+                {"score_scale_preset": "scoreScaleBoundToFramework"}
             )
         if instance and None not in (*current, *resolved):
             self._score_rescale = (current, resolved)
@@ -3903,14 +3904,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 impact["target"] = [instance.target_score, attrs["target_score"]]
             if not confirm and any(impact.values()):
                 raise ScoreRescaleConfirmationRequired(
-                    {
-                        "confirm_rescale": [
-                            json.dumps(
-                                {"from": current, "to": resolved, **impact},
-                                separators=(",", ":"),
-                            )
-                        ]
-                    }
+                    {"from": list(current), "to": list(resolved), **impact}
                 )
 
     def create(self, validated_data: Any):
@@ -4565,7 +4559,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
             if answers_data and isinstance(answers_data, dict):
                 # Convert incoming answers dict to Answer model updates
-                from core.models import Answer, Question
+                from core.models import Question
 
                 questions_by_urn = {
                     q.urn: q

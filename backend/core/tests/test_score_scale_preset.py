@@ -1,6 +1,5 @@
-import json
 import pytest
-from django.db.models import BooleanField, Exists, ExpressionWrapper, OuterRef, Q
+from django.db.models import BooleanField, ExpressionWrapper, OuterRef
 
 from core.models import (
     ComplianceAssessment,
@@ -147,7 +146,7 @@ class TestScoredRequirements:
         self._score(setup, 40)
         with pytest.raises(ScoreRescaleConfirmationRequired) as exc:
             _update(setup["ca"], {"score_scale_preset": "0-5"}, confirm=False)
-        impact = json.loads(exc.value.detail["confirm_rescale"][0])
+        impact = exc.value.impact
         assert (impact["scored"], impact["scores"]) == (1, 0)
 
     def test_todays_metric_uses_converted_scores(self, setup):
@@ -197,13 +196,7 @@ class TestScaleBoundFramework:
             Framework.objects.filter(pk=fw.pk)
             .annotate(
                 scale_bound_flag=ExpressionWrapper(
-                    Q(
-                        *(
-                            Exists(qs)
-                            for qs in Framework.scale_bound_querysets(OuterRef("pk"))
-                        ),
-                        _connector=Q.OR,
-                    ),
+                    Framework.scale_bound_q(OuterRef("pk")),
                     output_field=BooleanField(),
                 )
             )
@@ -604,7 +597,7 @@ class TestTargetWithFullFormPayload:
 @pytest.mark.django_db
 class TestRescaleConfirmation:
     def _impact(self, exc):
-        return json.loads(exc.detail["confirm_rescale"][0])
+        return exc.impact
 
     def test_conversion_needs_confirmation(self, setup):
         from core.serializers import ScoreRescaleConfirmationRequired
@@ -671,7 +664,10 @@ class TestRescaleConfirmation:
         url = f"/api/compliance-assessments/{setup['ca'].id}/"
         response = api.patch(url, {"score_scale_preset": "0-5"}, format="json")
         assert response.status_code == 409
-        assert "confirm_rescale" in response.json()
+        body = response.json()
+        assert body["confirm_rescale"] == ["scoreScaleConfirmRequired"]
+        assert body["rescale_impact"]["scored"] == "0"
+        assert body["rescale_impact"]["scores"] == "1"
         response = api.patch(
             url, {"score_scale_preset": "0-5", "confirm_rescale": True}, format="json"
         )
@@ -1088,3 +1084,200 @@ class TestTargetOnCreation:
         response = self._post(setup, target_score=150)
         assert response.status_code == 400
         assert "target_score" in response.json()
+
+
+def _labelled_framework(setup, urn="urn:test:fw-labelled"):
+    return Framework.objects.create(
+        name="FW labelled",
+        urn=urn,
+        min_score=1,
+        max_score=5,
+        scores_definition=[
+            {"score": s, "name": n}
+            for s, n in zip(
+                range(1, 6), ["Initial", "Managed", "Defined", "Measured", "Optimizing"]
+            )
+        ],
+        folder=setup["folder"],
+    )
+
+
+@pytest.mark.django_db
+class TestAuditCopyIsTheOnlyLabelSource:
+    def _global_score_levels(self, ca):
+        from iam.models import User
+        from rest_framework.test import APIClient
+
+        admin = User.objects.create_superuser(email="gs-admin@test.local", password="x")
+        api = APIClient()
+        api.force_authenticate(admin)
+        response = api.get(f"/api/compliance-assessments/{ca.id}/global_score/")
+        assert response.status_code == 200, response.json()
+        return response.json()["scores_definition"]
+
+    def test_wide_preset_shows_no_framework_labels(self, setup):
+        fw = _labelled_framework(setup)
+        ca = ComplianceAssessment.objects.create(
+            name="Percent",
+            framework=fw,
+            folder=setup["folder"],
+            score_scale_preset="0-100",
+            min_score=0,
+            max_score=100,
+            scores_definition=[],
+        )
+        assert self._global_score_levels(ca) == []
+
+    def test_custom_scale_without_labels_stays_empty(self, setup):
+        fw = _labelled_framework(setup)
+        ca = ComplianceAssessment.objects.create(
+            name="Bare",
+            framework=fw,
+            folder=setup["folder"],
+            min_score=1,
+            max_score=5,
+            scores_definition=[],
+        )
+        assert self._global_score_levels(ca) == []
+
+    def test_framework_labels_copied_at_creation(self, setup):
+        fw = _labelled_framework(setup)
+        ca = ComplianceAssessment.objects.create(
+            name="Default", framework=fw, folder=setup["folder"]
+        )
+        assert [lvl["name"] for lvl in self._global_score_levels(ca)][:2] == [
+            "Initial",
+            "Managed",
+        ]
+
+
+@pytest.mark.django_db
+class TestLibraryUpdateLabelsFollowRange:
+    def test_own_range_audit_does_not_pick_up_new_labels(self):
+        from core.models import LoadedLibrary, StoredLibrary
+
+        folder = Folder.get_root_folder()
+        stored, _ = StoredLibrary.store_library_content(
+            _LIB.format(version=1, scale="").encode("utf-8")
+        )
+        stored.load()
+        fw = Framework.objects.get(urn="urn:intuitem:test:framework:scale-update")
+        own_range = ComplianceAssessment.objects.create(
+            name="Own range",
+            framework=fw,
+            folder=folder,
+            min_score=0,
+            max_score=4,
+            scores_definition=[],
+        )
+        following = ComplianceAssessment.objects.create(
+            name="Following", framework=fw, folder=folder
+        )
+
+        StoredLibrary.store_library_content(
+            _LIB.format(version=2, scale=_SCALE_V2).encode("utf-8")
+        )
+        assert (
+            LoadedLibrary.objects.get(urn=stored.urn).update(strategy="clamp") is None
+        )
+
+        own_range.refresh_from_db()
+        assert (own_range.min_score, own_range.max_score) == (0, 4)
+        assert own_range.scores_definition == []
+        following.refresh_from_db()
+        assert (following.min_score, following.max_score) == (1, 4)
+        assert [lvl["name"] for lvl in following.get_scale_levels()][0] == "Low"
+
+
+@pytest.mark.django_db
+class TestLabelMigration:
+    def _run(self):
+        import importlib
+
+        from django.apps import apps
+
+        module = importlib.import_module(
+            "core.migrations.0191_copy_framework_scale_labels_to_audits"
+        )
+        module.copy_framework_labels(apps, None)
+
+    def test_fills_only_audits_on_framework_range(self, setup):
+        fw = _labelled_framework(setup)
+        folder = setup["folder"]
+        on_range = ComplianceAssessment.objects.create(
+            name="On range", framework=fw, folder=folder, min_score=1, max_score=5
+        )
+        ComplianceAssessment.objects.filter(pk=on_range.pk).update(
+            scores_definition=None
+        )
+        other_range = ComplianceAssessment.objects.create(
+            name="Other",
+            framework=fw,
+            folder=folder,
+            min_score=0,
+            max_score=3,
+            scores_definition=[],
+        )
+        preset = ComplianceAssessment.objects.create(
+            name="Preset",
+            framework=fw,
+            folder=folder,
+            score_scale_preset="1-5",
+            min_score=1,
+            max_score=5,
+            scores_definition=[],
+        )
+        own = [{"score": 1, "name": "Mine"}]
+        labelled = ComplianceAssessment.objects.create(
+            name="Labelled",
+            framework=fw,
+            folder=folder,
+            min_score=1,
+            max_score=5,
+            scores_definition=own,
+        )
+
+        self._run()
+
+        for ca in (on_range, other_range, preset, labelled):
+            ca.refresh_from_db()
+        assert on_range.scores_definition == fw.scores_definition
+        assert other_range.scores_definition == []
+        assert preset.scores_definition == []
+        assert labelled.scores_definition == own
+
+
+class TestHalfUpRounding:
+    @pytest.mark.parametrize(
+        "value, expected",
+        [(10, 1), (30, 2), (50, 3), (70, 4), (90, 5), (0, 0), (100, 5)],
+    )
+    def test_percentages_to_zero_five_round_halves_up(self, value, expected):
+        from core.models import rescale_score
+
+        assert rescale_score(value, (0, 100), (0, 5)) == expected
+
+    def test_float_target_rounds_half_up(self):
+        from core.models import rescale_score
+
+        assert rescale_score(1, (0, 8), (0, 1), integer=False) == 0.13
+
+
+@pytest.mark.django_db
+class TestGlobalScoreScaleSummary:
+    def test_includes_framework_and_preset(self, setup):
+        from iam.models import User
+        from rest_framework.test import APIClient
+
+        _update(setup["ca"], {"score_scale_preset": "1-4"})[0].save()
+        admin = User.objects.create_superuser(
+            email="gs2-admin@test.local", password="x"
+        )
+        api = APIClient()
+        api.force_authenticate(admin)
+        body = api.get(
+            f"/api/compliance-assessments/{setup['ca'].id}/global_score/"
+        ).json()
+        assert body["framework"] == str(setup["fw"].id)
+        assert body["score_scale_preset"] == "1-4"
+        assert (body["min_score"], body["max_score"]) == (1, 4)

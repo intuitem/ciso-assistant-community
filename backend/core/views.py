@@ -10247,13 +10247,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 ComplianceAssessment.objects.filter(framework=OuterRef("pk"))
             ),
             scale_bound_flag=ExpressionWrapper(
-                Q(
-                    *(
-                        Exists(qs)
-                        for qs in Framework.scale_bound_querysets(OuterRef("pk"))
-                    ),
-                    _connector=Q.OR,
-                ),
+                Framework.scale_bound_q(OuterRef("pk")),
                 output_field=models.BooleanField(),
             ),
         )
@@ -13824,16 +13818,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         """Returns the global score of the compliance assessment"""
         compliance_assessment = self.get_object()
         scores = compliance_assessment.get_global_score()
-        # Source of truth is the CA copy (set at save() and customisable
-        # independently of the framework). Fall back to the framework's
-        # translated definition for the labels.
-        scores_definition = compliance_assessment.get_scale_levels()
-        if not scores_definition:
-            scores_definition = get_referential_translation(
-                compliance_assessment.framework, "scores_definition", get_language()
-            )
-        if isinstance(scores_definition, dict) and "scale" in scores_definition:
-            scores_definition = scores_definition["scale"]
+        # The audit's own copy is the only source of labels (the framework's are
+        # copied once, at creation); an empty list means no labels.
+        scores_definition = compliance_assessment.get_scale_levels() or []
         return Response(
             {
                 **scores,
@@ -13841,6 +13828,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 "min_score": compliance_assessment.min_score,
                 "total_max_score": compliance_assessment.get_total_max_score(),
                 "scores_definition": scores_definition,
+                "score_scale_preset": compliance_assessment.score_scale_preset,
+                "framework": str(compliance_assessment.framework_id),
                 "scoring_enabled": compliance_assessment.scoring_enabled,
                 "show_documentation_score": compliance_assessment.show_documentation_score,
                 "score_calculation_method": compliance_assessment.score_calculation_method,

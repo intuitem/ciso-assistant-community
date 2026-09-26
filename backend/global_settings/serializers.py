@@ -121,12 +121,12 @@ def _normalize_default_score_scale(value):
 
     if not isinstance(value, dict):
         raise serializers.ValidationError(
-            {"default_score_scale": "Must be an object or null."}
+            {"default_score_scale": "scoreScaleErrorInvalid"}
         )
     levels = value.get("scores_definition")
     if levels is not None and not isinstance(levels, list):
         raise serializers.ValidationError(
-            {"default_score_scale": "scores_definition must be a list."}
+            {"default_score_scale": "scoreScaleErrorInvalid"}
         )
     try:
         preset, min_score, max_score = normalize_score_scale(
@@ -139,7 +139,7 @@ def _normalize_default_score_scale(value):
         raise serializers.ValidationError({"default_score_scale": e.messages})
     if min_score is None:
         raise serializers.ValidationError(
-            {"default_score_scale": "A preset or a min/max range is required."}
+            {"default_score_scale": "scoreScaleErrorRangeRequired"}
         )
     return {
         "score_scale_preset": preset,

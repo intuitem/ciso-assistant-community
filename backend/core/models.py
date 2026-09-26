@@ -1,4 +1,7 @@
 import copy
+import math
+from decimal import ROUND_HALF_UP, Decimal
+from fractions import Fraction
 import json
 import os
 import re
@@ -1880,9 +1883,17 @@ class LibraryUpdater:
                         if ca.score_scale_preset:
                             ca.score_scale_preset = None
                             preset_dropped = True
-                    if (definition_on_prev_defaults or preset_dropped) and (
-                        scores_definition_changed or preset_dropped
-                    ):
+                    # Labels only follow the framework together with its range:
+                    # an audit on its own range keeps its own (possibly empty)
+                    # labels.
+                    range_follows = scale_on_prev_defaults or (
+                        ca.min_score,
+                        ca.max_score,
+                    ) == (new_framework.min_score, new_framework.max_score)
+                    if (
+                        (definition_on_prev_defaults and range_follows)
+                        or preset_dropped
+                    ) and (scores_definition_changed or preset_dropped):
                         ca.scores_definition = new_framework.scores_definition
                         needs_update = True
                     if needs_update:
@@ -2051,17 +2062,10 @@ class LibraryUpdater:
                                         and prev_max is not None
                                         and prev_min != prev_max
                                     ):
-                                        # Normalize to 0-1 range
-                                        normalized = (value - prev_min) / (
-                                            prev_max - prev_min
-                                        )
-                                        # Scale to new range
-                                        scaled = ca_min + (
-                                            normalized * (ca_max - ca_min)
-                                        )
-                                        # Round + clamp
-                                        return max(
-                                            min(int(round(scaled)), ca_max), ca_min
+                                        return rescale_score(
+                                            value,
+                                            (prev_min, prev_max),
+                                            (ca_min, ca_max),
                                         )
                                     else:
                                         # Old range invalid → clamp
@@ -3743,6 +3747,12 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
                 | Q(scores_definition_ref__gt="")
             ),
         )
+
+    @classmethod
+    def scale_bound_q(cls, framework):
+        """Boolean expression for annotating querysets (framework may be an OuterRef)."""
+        choices, nodes = cls.scale_bound_querysets(framework)
+        return Exists(choices) | Exists(nodes)
 
     @property
     def is_scale_bound(self) -> bool:
@@ -8537,33 +8547,27 @@ def normalize_score_scale(preset, min_score, max_score, levels, default_range=No
     """
     if preset:
         if preset not in SCORE_SCALE_PRESETS:
-            raise ValidationError({"score_scale_preset": f"Unknown scale {preset}."})
+            raise ValidationError(
+                {"score_scale_preset": "scoreScaleErrorUnknownPreset"}
+            )
         for field, given, value in zip(
             ("min_score", "max_score"),
             (min_score, max_score),
             SCORE_SCALE_PRESETS[preset],
         ):
             if given is not None and given != value:
-                raise ValidationError(
-                    {field: f"Must be {value} for the {preset} scale."}
-                )
+                raise ValidationError({field: "scoreScaleErrorPresetRange"})
         min_score, max_score = SCORE_SCALE_PRESETS[preset]
     if (min_score is None) != (max_score is None):
-        raise ValidationError(
-            {"max_score": "Minimum and maximum scores must be set together."}
-        )
+        raise ValidationError({"max_score": "scoreScaleErrorMinMaxTogether"})
     if min_score is not None:
         if not all(
             isinstance(v, int) and not isinstance(v, bool)
             for v in (min_score, max_score)
         ):
-            raise ValidationError({"max_score": "Scores must be integers."})
+            raise ValidationError({"max_score": "scoreScaleErrorIntegers"})
         if min_score >= max_score:
-            raise ValidationError(
-                {
-                    "max_score": "The maximum score must be greater than the minimum score."
-                }
-            )
+            raise ValidationError({"max_score": "scoreScaleRangeError"})
     score_range = (min_score, max_score) if min_score is not None else default_range
     if isinstance(levels, dict):
         levels = levels.get("scale")
@@ -8576,19 +8580,25 @@ def normalize_score_scale(preset, min_score, max_score, levels, default_range=No
                 or not score_range[0] <= score <= score_range[1]
             ):
                 raise ValidationError(
-                    {
-                        "scores_definition": f"Each level needs an integer score between {score_range[0]} and {score_range[1]}."
-                    }
+                    {"scores_definition": "scoreScaleErrorLevelOutOfRange"}
                 )
     return preset or None, min_score, max_score
 
 
 def rescale_score(value, old_range, new_range, integer=True):
-    """Map a score proportionally from one range to another, clamped to the new one."""
+    """Map a score proportionally from one range to another, clamped to the new one.
+
+    Exact arithmetic, halves rounded up: round() is half-to-even, which would
+    send 10/30/50/70/90 on 0-100 to 0/2/2/4/4 on 0-5 instead of 1/2/3/4/5.
+    """
     (old_min, old_max), (new_min, new_max) = old_range, new_range
-    ratio = min(max((value - old_min) / (old_max - old_min), 0), 1)
+    ratio = (Fraction(value) - old_min) / (old_max - old_min)
+    ratio = min(max(ratio, Fraction(0)), Fraction(1))
     result = new_min + ratio * (new_max - new_min)
-    return round(result) if integer else round(result, 2)
+    if integer:
+        return math.floor(result + Fraction(1, 2))
+    exact = Decimal(result.numerator) / Decimal(result.denominator)
+    return float(exact.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
 def get_default_score_scale() -> dict | None:

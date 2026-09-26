@@ -76,14 +76,21 @@
 	const formErrors = form.errors;
 	let rescalePanel = $state<HTMLElement | null>(null);
 	let rescaleConfirmButton = $state<HTMLButtonElement | null>(null);
+	const formMessage = form.message;
 	let rescaleImpact = $derived.by(() => {
-		const raw = ($formErrors as Record<string, string[] | undefined>)?.confirm_rescale?.[0];
-		if (!raw) return null;
-		try {
-			return JSON.parse(raw);
-		} catch {
-			return null;
-		}
+		const pending = ($formErrors as Record<string, string[] | undefined>)?.confirm_rescale?.length;
+		if (!pending) return null;
+		const impact: Record<string, any> =
+			($formMessage as { data?: Record<string, any> } | undefined)?.data?.rescale_impact ?? {};
+		// DRF sends counts as strings: "0" must not read as a count.
+		return Object.fromEntries(
+			Object.entries(impact).map(([key, value]) => [
+				key,
+				typeof value === 'string' && value.trim() !== '' && !isNaN(Number(value))
+					? Number(value)
+					: value
+			])
+		);
 	});
 
 	$effect(() => {
@@ -163,10 +170,11 @@
 	// default (the backend applies the same rule), so show that as "Default".
 	async function applyBaselineDefault(frameworkId: string, request: number) {
 		if (!initialData.baseline) return;
-		const baseline = await fetch(`/compliance-assessments/${initialData.baseline}`)
+		// The audit detail URL is a page (HTML); global-score is its JSON scale summary.
+		const baseline = await fetch(`/compliance-assessments/${initialData.baseline}/global-score`)
 			.then((r) => (r.ok ? r.json() : null))
 			.catch(() => null);
-		if (request !== frameworkRequest || baseline?.framework?.id !== frameworkId) return;
+		if (request !== frameworkRequest || baseline?.framework !== frameworkId) return;
 		frameworkScoring = {
 			...frameworkScoring,
 			audit_default_scale: {
@@ -346,10 +354,12 @@
 	>
 		<p id="score-rescale-title" class="flex gap-2 font-medium">
 			<i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
-			{m.scoreScaleConfirmTitle({
-				from: rescaleImpact.from.join('–'),
-				to: rescaleImpact.to.join('–')
-			})}
+			{rescaleImpact.from && rescaleImpact.to
+				? m.scoreScaleConfirmTitle({
+						from: rescaleImpact.from.join('–'),
+						to: rescaleImpact.to.join('–')
+					})
+				: m.scoreScaleConfirmTitleGeneric()}
 		</p>
 		<ul class="list-disc pl-8 text-xs">
 			{#if rescaleImpact.scored}
