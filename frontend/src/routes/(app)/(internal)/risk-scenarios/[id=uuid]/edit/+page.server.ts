@@ -32,22 +32,14 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const tables: Record<string, any> = {};
 
-	await Promise.all(
-		['assets', 'applied-controls', 'vulnerabilities'].map(async (key) => {
-			const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}`;
-			const response = await fetch(keyEndpoint);
-			if (response.ok) {
-				const table: TableSource = {
-					head: headData(key),
-					body: [],
-					meta: []
-				};
-				tables[key] = table;
-			} else {
-				console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
-			}
-		})
-	);
+	for (const key of ['assets', 'applied-controls', 'vulnerabilities']) {
+		const table: TableSource = {
+			head: headData(key),
+			body: [],
+			meta: []
+		};
+		tables[key] = table;
+	}
 
 	const selectOptions: Record<string, any> = {};
 
