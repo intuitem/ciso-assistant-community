@@ -88,11 +88,14 @@
 		if (!object?.id || scaleDirty) return;
 		untrack(() => {
 			if (SCALE_FIELDS.every((f) => $formData[f] === undefined)) return;
-			form.form.update((d) => {
-				const next = { ...d };
-				for (const f of SCALE_FIELDS) delete next[f];
-				return next;
-			});
+			form.form.update(
+				(d) => {
+					const next = { ...d };
+					for (const f of SCALE_FIELDS) delete next[f];
+					return next;
+				},
+				{ taint: false }
+			);
 		});
 	});
 
