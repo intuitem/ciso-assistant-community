@@ -796,6 +796,15 @@
 		$tableFilterStates = next;
 	}
 
+	const APPLIED_CONTROL_STATUS_PRESETS: Record<string, string> = {
+		to_do: 'preset-tonal-primary',
+		in_progress: 'preset-tonal-warning',
+		on_hold: 'preset-tonal-secondary',
+		active: 'preset-tonal-success',
+		degraded: 'preset-tonal-error',
+		deprecated: 'preset-tonal-surface'
+	};
+
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
 		// The badge background is a fixed hex color, so the text must be a fixed color too
 		// (not theme-dependent), otherwise it turns light in dark mode and vanishes on a
@@ -1184,6 +1193,14 @@
 																			{@const itemHref = getRelatedFieldHref(key, val.id, {
 																				fallbackToDashedField: true
 																			})}
+																			{#if key === 'applied_controls' && val.status && val.status !== '--'}
+																				<span
+																					class="badge text-xs {APPLIED_CONTROL_STATUS_PRESETS[
+																						val.status
+																					] ?? 'preset-tonal-surface'}"
+																					>{safeTranslate(val.status)}</span
+																				>
+																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
 																					>{safeTranslate(val.str)}</Anchor
