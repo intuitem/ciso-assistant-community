@@ -1485,3 +1485,128 @@ class TestVisibilityEdgeCases:
 
         # Only Q1 visible and answered with a 'compliant' choice -> compliant
         assert ra.result == "compliant"
+
+
+@pytest.fixture
+def weighted_sum_setup(db):
+    """A 0-100 SUM audit with two 0/50 questions, q1 weighing 3 and q2 weighing 1."""
+    folder = Folder.get_root_folder()
+    fw = Framework.objects.create(
+        name="Weighted SUM FW", folder=folder, min_score=0, max_score=100
+    )
+    rn = RequirementNode.objects.create(
+        framework=fw,
+        urn="urn:test:wsum:req:001",
+        ref_id="WSUM-REQ",
+        assessable=True,
+        folder=folder,
+    )
+    d = {"folder": folder}
+    for key, weight in (("q1", 3), ("q2", 1)):
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn=f"urn:test:wsum:{key}",
+            ref_id=key.upper(),
+            text=key,
+            type=Question.Type.UNIQUE_CHOICE,
+            order=0 if key == "q1" else 1,
+            weight=weight,
+            folder=folder,
+        )
+        d[key] = q
+        for suffix, score in (("good", 50), ("bad", 0)):
+            d[f"{key}_{suffix}"] = QuestionChoice.objects.create(
+                question=q,
+                urn=f"urn:test:wsum:choice:{key}:{suffix}",
+                ref_id=f"{key}-{suffix}".upper(),
+                value=suffix,
+                add_score=score,
+                order=0 if suffix == "good" else 1,
+                folder=folder,
+            )
+    perimeter = Perimeter.objects.create(name="WSUM Perim", folder=folder)
+    ca = ComplianceAssessment.objects.create(
+        name="WSUM CA",
+        framework=fw,
+        folder=folder,
+        perimeter=perimeter,
+        min_score=0,
+        max_score=100,
+        score_calculation_method=ComplianceAssessment.CalculationMethod.SUM,
+    )
+    d["ra"] = RequirementAssessment.objects.create(
+        compliance_assessment=ca, requirement=rn, folder=folder
+    )
+    return d
+
+
+def _answer(d, q1_choice, q2_choice):
+    for q, choice in (("q1", q1_choice), ("q2", q2_choice)):
+        answer, _ = Answer.objects.get_or_create(
+            requirement_assessment=d["ra"], question=d[q], folder=d["folder"]
+        )
+        answer.selected_choices.set([d[f"{q}_{choice}"]])
+    d["ra"].compute_score_and_result()
+    d["ra"].refresh_from_db()
+    return d["ra"].score
+
+
+@pytest.mark.django_db
+class TestWeightedSum:
+    def test_heavy_question_counts_more_and_top_stays_reachable(
+        self, weighted_sum_setup
+    ):
+        """Weights 3 and 1: heavy alone 75, light alone 25, both 100, none 0."""
+        d = weighted_sum_setup
+        assert _answer(d, "good", "bad") == 75
+        assert _answer(d, "bad", "good") == 25
+        assert _answer(d, "good", "good") == 100
+        assert _answer(d, "bad", "bad") == 0
+
+    def test_uneven_maxima_do_not_saturate(self, weighted_sum_setup):
+        """q1 tops at 70 (weight 3), q2 at 30 (weight 1): the weighted total is
+        projected onto the 0-100 the author designed, so the heavy question alone
+        is not already at the ceiling."""
+        d = weighted_sum_setup
+        d["q1_good"].add_score = 70
+        d["q1_good"].save(update_fields=["add_score"])
+        d["q2_good"].add_score = 30
+        d["q2_good"].save(update_fields=["add_score"])
+        # (210 - 0) * 100 / 240 = 87.5 -> 87
+        assert _answer(d, "good", "bad") == 87
+        # 30 * 100 / 240 = 12.5 -> 12
+        assert _answer(d, "bad", "good") == 12
+        assert _answer(d, "good", "good") == 100
+
+    def test_unit_weights_keep_the_raw_sum(self, weighted_sum_setup):
+        d = weighted_sum_setup
+        d["q1"].weight = 1
+        d["q1"].save(update_fields=["weight"])
+        assert _answer(d, "good", "bad") == 50
+        assert _answer(d, "good", "good") == 100
+
+    def test_negative_weight_counts_as_zero(self, weighted_sum_setup):
+        """A negative weight is clamped to 0: the question drops out of the weighted
+        range and its share goes to the others."""
+        d = weighted_sum_setup
+        d["q1"].weight = -2
+        d["q1"].save(update_fields=["weight"])
+        assert _answer(d, "good", "bad") == 0
+        assert _answer(d, "bad", "good") == 100
+
+    def test_unscored_choice_counts_as_zero(self, weighted_sum_setup):
+        """An unscored choice is a valid answer worth 0, so it belongs to the
+        reachable range: leaving it out pushed the floor up to the scored choice."""
+        d = weighted_sum_setup
+        d["q2_bad"].add_score = None
+        d["q2_bad"].save(update_fields=["add_score"])
+        assert _answer(d, "good", "bad") == 75
+        assert _answer(d, "bad", "bad") == 0
+
+    def test_mean_is_untouched_by_the_projection(self, weighted_sum_setup):
+        d = weighted_sum_setup
+        ca = d["ra"].compliance_assessment
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.save(update_fields=["score_calculation_method"])
+        # (50*3 + 0*1) / 4 = 37.5 -> 37
+        assert _answer(d, "good", "bad") == 37

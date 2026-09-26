@@ -333,7 +333,11 @@ def _quick_form_snapshot(response) -> dict:
     computation need, keyed to avoid a second round of queries.
     """
     from core.models import Answer, Question, QuickFormPage
-    from core.utils import _build_answer_context, _is_question_visible
+    from core.utils import (
+        _build_answer_context,
+        _is_question_visible,
+        question_score_bounds,
+    )
 
     pages = list(
         QuickFormPage.objects.filter(quick_form_id=response.quick_form_id)
@@ -364,10 +368,15 @@ def _quick_form_snapshot(response) -> dict:
         visible = _is_question_visible(question, answers_by_urn, questions_by_urn)
         answer = answers_by_qid.get(question.id)
         selected = list(answer.selected_choices.all()) if answer else []
+        # A negative weight has no defined meaning; treat it as 0.
+        weight = max(question.weight, 0)
         score = sum(
-            (c.add_score or 0) * question.weight
-            for c in selected
-            if c.add_score is not None
+            (c.add_score or 0) * weight for c in selected if c.add_score is not None
+        )
+        choices = list(question.choices.all())
+        scores = [c.add_score for c in choices if c.add_score is not None]
+        lo, hi = question_score_bounds(
+            [c.add_score or 0 for c in choices], question.type == "multiple_choice"
         )
         per_question[question.id] = {
             "question": question,
@@ -377,9 +386,13 @@ def _quick_form_snapshot(response) -> dict:
             "answer": answer,
             "selected": selected,
             "score": score,
+            "weight": weight,
+            # Unweighted reachable range: the scale a weighted SUM is projected onto.
+            "lo": lo,
+            "hi": hi,
             "max_score": _question_max_score(question),
             "scorable": question.type in ("unique_choice", "multiple_choice")
-            and any(c.add_score is not None for c in question.choices.all()),
+            and bool(scores),
         }
     return {"pages": pages, "per_question": per_question}
 
@@ -429,7 +442,7 @@ def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
                     for c in entry["selected"]
                     if extract_node_id(c.urn)
                 ],
-                "weight": question.weight,
+                "weight": entry["weight"],
                 "type": question.type,
                 "answered": entry["answered"],
             }
@@ -477,8 +490,20 @@ def _quick_form_score(response, context, snapshot, hidden_page_ids) -> int | Non
         return None
     total = sum(e["score"] for e in scorable)
     if form.score_aggregation == "mean":
-        total_weight = sum(e["question"].weight for e in scorable) or 1
+        total_weight = sum(e["weight"] for e in scorable) or 1
         total = total / total_weight
+    else:
+        # Same projection as RequirementAssessment.recompute_assessment, so a
+        # question weight means the same thing in a quick form and in an audit.
+        from core.utils import project_weighted_sum
+
+        total = project_weighted_sum(
+            total,
+            sum(e["lo"] * e["weight"] for e in scorable),
+            sum(e["hi"] * e["weight"] for e in scorable),
+            sum(e["lo"] for e in scorable),
+            sum(e["hi"] for e in scorable),
+        )
     lo, hi = form.score_bounds
     return int(max(lo, min(hi, round(total))))
 
@@ -628,11 +653,19 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
     visibility and outcomes go through the same CEL programs as a filled response —
     so a preview cannot quietly disagree with what respondents will get.
     """
-    from core.utils import _is_question_visible, extract_node_id
+    from core.utils import (
+        _is_question_visible,
+        extract_node_id,
+        project_weighted_sum,
+        question_score_bounds,
+    )
 
     answers = answers or {}
     pages = []
     questions_by_urn = {}
+    # Reachable range of the visible scorable questions, weighted and not, filled
+    # by build_context and kept out of the CEL context: rules never see it.
+    reach = {"lo": 0, "hi": 0, "weighted_lo": 0, "weighted_hi": 0}
     for page in quick_form.get("pages") or []:
         entries = []
         for urn, question in (page.get("questions") or {}).items():
@@ -660,8 +693,24 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         value = answers.get(entry["urn"])
         return value is not None and value != ""
 
+    def weight_of(entry):
+        # A negative weight has no defined meaning; treat it as 0.
+        raw = entry.get("weight")
+        return max(int(1 if raw is None else raw), 0)
+
+    def has_score(entry):
+        return any(
+            choice.get("add_score") is not None for choice in entry.get("choices") or []
+        )
+
+    def bounds_of(entry):
+        scores = [
+            int(choice.get("add_score") or 0) for choice in entry.get("choices") or []
+        ]
+        return question_score_bounds(scores, entry.get("type") == "multiple_choice")
+
     def score_of(entry):
-        weight = int(entry.get("weight") or 1)
+        weight = weight_of(entry)
         chosen = set(selected_of(entry))
         return sum(
             int(choice.get("add_score") or 0) * weight
@@ -670,7 +719,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         )
 
     def max_score_of(entry):
-        weight = int(entry.get("weight") or 1)
+        weight = weight_of(entry)
         scores = [
             int(choice.get("add_score") or 0) * weight
             for choice in entry.get("choices") or []
@@ -696,6 +745,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
             "missing": 0,
             "weight": 0,
         }
+        reach.update(lo=0, hi=0, weighted_lo=0, weighted_hi=0)
         for page in pages:
             node_id = extract_node_id(str(page.get("urn") or "")) or page.get("ref_id")
             stats = {"answered_count": 0, "total_count": 0}
@@ -714,9 +764,15 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                     totals["missing"] += 1
                 if entry.get("type") in ("unique_choice", "multiple_choice"):
                     totals["max"] += max_score_of(entry)
-                    if answered:
+                    if answered and has_score(entry):
+                        weight = weight_of(entry)
+                        lo, hi = bounds_of(entry)
+                        reach["lo"] += lo
+                        reach["hi"] += hi
+                        reach["weighted_lo"] += lo * weight
+                        reach["weighted_hi"] += hi * weight
                         totals["sum"] += score_of(entry)
-                        totals["weight"] += int(entry.get("weight") or 1)
+                        totals["weight"] += weight
                 q_node_id = extract_node_id(entry["urn"])
                 if q_node_id:
                     answer_ctx[q_node_id] = {
@@ -727,7 +783,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                             for u in selected_of(entry)
                             if extract_node_id(u)
                         ],
-                        "weight": int(entry.get("weight") or 1),
+                        "weight": weight_of(entry),
                         "type": entry.get("type") or "text",
                         "answered": answered,
                     }
@@ -803,6 +859,14 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         # made the preview disagree with the live response on any form that mixes
         # scorable and non-scorable questions, or uses a weight other than 1.
         raw = raw / (context["response"]["score_weight"] or 1)
+    else:
+        raw = project_weighted_sum(
+            raw,
+            reach["weighted_lo"],
+            reach["weighted_hi"],
+            reach["lo"],
+            reach["hi"],
+        )
     score = (
         int(max(lo, min(hi, round(raw))))
         if context["response"]["complete"] and context["response"]["score_max"]
