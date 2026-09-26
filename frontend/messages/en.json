@@ -2993,6 +2993,7 @@
 	"changeOwner": "Change owner",
 	"changeDomain": "Change domain",
 	"batchChangePriority": "Change priority",
+	"changeEta": "Change ETA",
 	"changeDocumentType": "Change document type",
 	"changeClassification": "Change classification",
 	"changeAttributes": "Change attributes",
