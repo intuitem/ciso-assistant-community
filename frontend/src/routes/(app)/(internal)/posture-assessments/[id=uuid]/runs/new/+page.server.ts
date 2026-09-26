@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { discardBody } from '$lib/utils/responses';
 import type { PageServerLoad } from './$types';
 import { error, fail, redirect, type Actions, type NumericRange } from '@sveltejs/kit';
 
@@ -16,8 +17,10 @@ export const load: PageServerLoad = async (event) => {
 		event.fetch(`${endpoint}/`),
 		event.fetch(`${endpoint}/tree/`)
 	]);
-	if (!assessmentRes.ok)
+	if (!assessmentRes.ok) {
+		await discardBody(treeRes);
 		error(assessmentRes.status as NumericRange<400, 599>, await assessmentRes.json());
+	}
 	if (!treeRes.ok) error(treeRes.status as NumericRange<400, 599>, await treeRes.json());
 	const [assessment, tree] = await Promise.all([assessmentRes.json(), treeRes.json()]);
 	const asset =
@@ -34,7 +37,7 @@ export const load: PageServerLoad = async (event) => {
 
 	const checks = flattenChecks(tree.tree);
 	const from = event.url.searchParams.get('from');
-	let prefill: Record<string, string> = {};
+	const prefill: Record<string, string> = {};
 	let prefillDropped = 0;
 	if (from && asset) {
 		const sourceRun = await event.fetch(`${endpoint}/runs/${from}/`);
