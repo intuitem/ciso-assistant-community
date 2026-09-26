@@ -1029,3 +1029,62 @@ class TestLibraryUpdateConvertsAllStoredValues:
         )
         assert (stale.score, stale.is_scored) == (3, False)
         assert ca.pk in calls
+
+
+@pytest.mark.django_db
+class TestTargetOnCreation:
+    def _post(self, setup, **extra):
+        from iam.models import User
+        from rest_framework.test import APIClient
+
+        admin = User.objects.create_superuser(
+            email="target-admin@test.local", password="x"
+        )
+        api = APIClient()
+        api.force_authenticate(admin)
+        return api.post(
+            "/api/compliance-assessments/",
+            {
+                "name": "Created",
+                "folder": str(setup["folder"].id),
+                "framework": str(setup["fw"].id),
+                **extra,
+            },
+            format="json",
+        )
+
+    def test_target_checked_against_baseline_scale(self, setup):
+        _update(setup["ca"], {"score_scale_preset": "1-5"})[0].save()
+        response = self._post(setup, baseline=str(setup["ca"].id), target_score=80)
+        assert response.status_code == 400
+        assert "target_score" in response.json()
+
+    def test_valid_target_on_baseline_scale_despite_instance_default(self, setup):
+        _set_instance_default(
+            {"score_scale_preset": "1-5", "min_score": 1, "max_score": 5}
+        )
+        response = self._post(setup, baseline=str(setup["ca"].id), target_score=80)
+        assert response.status_code == 201, response.json()
+        created = ComplianceAssessment.objects.get(id=response.json()["id"])
+        assert (created.min_score, created.max_score, created.target_score) == (
+            0,
+            100,
+            80,
+        )
+
+    def test_baseline_scale_and_labels_are_copied(self, setup):
+        _update(
+            setup["ca"],
+            {"score_scale_preset": "0-5", "scores_definition": _levels(3)},
+        )[0].save()
+        response = self._post(setup, baseline=str(setup["ca"].id))
+        assert response.status_code == 201, response.json()
+        created = ComplianceAssessment.objects.get(id=response.json()["id"])
+        assert (created.min_score, created.max_score) == (0, 5)
+        assert created.score_scale_preset == "0-5"
+        assert created.scores_definition == _levels(3)
+
+    def test_target_checked_without_any_scale_field(self, setup):
+        response = self._post(setup, target_score=150)
+        assert response.status_code == 400
+        assert "target_score" in response.json()

@@ -1,3 +1,4 @@
+import copy
 import importlib
 import json
 from typing import Any
@@ -3819,11 +3820,24 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             "max_score",
             "scores_definition",
         }
-        if not scale_fields & attrs.keys():
-            return
         instance = self.instance
+        # Creation always resolves the scale, so the target is checked against
+        # the range the audit will actually get.
+        if instance and not scale_fields & attrs.keys():
+            return
         framework = attrs.get("framework") or getattr(instance, "framework", None)
-        default = framework.default_audit_scale() if framework else None
+        baseline = None if instance else attrs.get("baseline")
+        if baseline and framework and baseline.framework_id == framework.id:
+            # A copy of an audit keeps its scale by default.
+            default = {
+                "source": "baseline",
+                "score_scale_preset": baseline.score_scale_preset,
+                "min_score": baseline.min_score,
+                "max_score": baseline.max_score,
+                "scores_definition": copy.deepcopy(baseline.scores_definition),
+            }
+        else:
+            default = framework.default_audit_scale() if framework else None
         default_range = (
             (default["min_score"], default["max_score"]) if default else None
         )
@@ -3846,9 +3860,13 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
         resolved = (min_s, max_s) if min_s is not None else default_range
         if min_s is None:
-            if attrs.get("scores_definition") and default:
+            if default and (
+                attrs.get("scores_definition") or default["source"] == "baseline"
+            ):
                 attrs["min_score"], attrs["max_score"] = default_range
                 attrs["score_scale_preset"] = default["score_scale_preset"]
+                if not attrs.get("scores_definition"):
+                    attrs["scores_definition"] = default["scores_definition"]
             else:
                 attrs["score_scale_preset"] = None
                 attrs["scores_definition"] = None
@@ -4105,6 +4123,7 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "min_score",
             "max_score",
             "scores_definition",
+            "score_scale_preset",
             "score_calculation_method",
             "target_score",
             "anchor_na_to_target",
