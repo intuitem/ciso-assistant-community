@@ -3834,7 +3834,12 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
         resolved = (min_s, max_s) if min_s is not None else default_range
         if min_s is None:
-            attrs["score_scale_preset"] = None
+            if attrs.get("scores_definition") and default:
+                attrs["min_score"], attrs["max_score"] = default_range
+                attrs["score_scale_preset"] = default["score_scale_preset"]
+            else:
+                attrs["score_scale_preset"] = None
+                attrs["scores_definition"] = None
         elif (
             "score_scale_preset" not in attrs
             and instance

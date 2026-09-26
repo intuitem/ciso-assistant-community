@@ -127,11 +127,13 @@ class TestScoreScalePreset:
 class TestRangeLock:
     def test_has_scores(self, setup):
         assert setup["ca"].has_scores is False
+        setup["ra"].is_scored = True
         setup["ra"].score = 40
         setup["ra"].save()
         assert setup["ca"].has_scores is True
 
     def test_range_locked_once_scored(self, setup):
+        setup["ra"].is_scored = True
         setup["ra"].score = 40
         setup["ra"].save()
         serializer, valid = _update(setup["ca"], {"score_scale_preset": "0-5"})
@@ -141,6 +143,7 @@ class TestRangeLock:
     def test_wording_editable_once_scored(self, setup):
         ca = setup["ca"]
         _update(ca, {"score_scale_preset": "0-5"})[0].save()
+        setup["ra"].is_scored = True
         setup["ra"].score = 4
         setup["ra"].save()
         serializer, valid = _update(
@@ -148,10 +151,15 @@ class TestRangeLock:
         )
         assert valid, serializer.errors
 
-    def test_documentation_score_counts_as_scored(self, setup):
+    def test_stale_score_does_not_lock(self, setup):
+        setup["ra"].score = 40
+        setup["ra"].save()
+        assert setup["ca"].has_scores is False
+
+    def test_documentation_score_alone_does_not_lock(self, setup):
         setup["ra"].documentation_score = 10
         setup["ra"].save()
-        assert setup["ca"].has_scores is True
+        assert setup["ca"].has_scores is False
 
 
 @pytest.mark.django_db
@@ -398,3 +406,62 @@ class TestDefaultScoreScaleSetting:
 
         with pytest.raises(ValidationError):
             self._update(value)
+
+
+@pytest.mark.django_db
+class TestLabelsWithoutRange:
+    def test_create_keeps_labels_on_default_range(self, setup):
+        levels = [{"score": 50, "translations": {"fr": {"name": "Moyen"}}}]
+        serializer = ComplianceAssessmentWriteSerializer(
+            data={
+                "name": "CA labels only",
+                "folder": str(setup["folder"].id),
+                "framework": str(setup["fw"].id),
+                "scores_definition": levels,
+            }
+        )
+        assert serializer.is_valid(), serializer.errors
+        ca = serializer.save()
+        assert (ca.min_score, ca.max_score) == (0, 100)
+        assert ca.scores_definition == levels
+
+    def test_reset_without_labels_drops_old_labels(self, setup):
+        ca = setup["ca"]
+        _update(
+            ca, {"min_score": 1, "max_score": 3, "scores_definition": _levels(1, 3)}
+        )[0].save()
+        serializer, valid = _update(ca, {"min_score": None, "max_score": None})
+        assert valid, serializer.errors
+        ca = serializer.save()
+        assert (ca.min_score, ca.max_score) == (0, 100)
+        assert ca.scores_definition is None
+
+
+@pytest.mark.django_db
+class TestWrappedFrameworkScale:
+    """Loaded frameworks store {"scale": [...]}, not a bare list."""
+
+    def test_wrapped_scale_flows_to_audit_and_api(self, setup):
+        from core.serializers import FrameworkReadSerializer
+
+        wrapped = {
+            "scale": [
+                {"score": s, "name": f"L{s}", "translations": {"fr": {"name": f"N{s}"}}}
+                for s in range(1, 5)
+            ]
+        }
+        fw = Framework.objects.create(
+            name="FW wrapped",
+            urn="urn:test:fw-wrapped",
+            min_score=1,
+            max_score=4,
+            scores_definition=wrapped,
+            folder=setup["folder"],
+        )
+        assert fw.declares_scale()
+        ca = _new_audit(setup, framework=fw)
+        assert ca.scores_definition == wrapped
+        assert [lvl["score"] for lvl in ca.get_scale_levels()] == [1, 2, 3, 4]
+        default = FrameworkReadSerializer(fw).data["audit_default_scale"]
+        assert default["source"] == "framework"
+        assert [lvl["score"] for lvl in default["scores_definition"]] == [1, 2, 3, 4]

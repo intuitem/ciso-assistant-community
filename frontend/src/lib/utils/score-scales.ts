@@ -85,6 +85,13 @@ export const SCORE_SCALE_PRESETS: ScoreScalePreset[] = [
 
 export const MAX_LABELLED_LEVELS = 11;
 
+// Stored scales are either a bare list or wrapped as {scale, alternatives}.
+export function scaleLevels(definition: unknown): ScoreLevel[] {
+	if (Array.isArray(definition)) return definition;
+	const scale = (definition as { scale?: unknown } | null)?.scale;
+	return Array.isArray(scale) ? scale : [];
+}
+
 export function getPreset(id?: string | null) {
 	return SCORE_SCALE_PRESETS.find((p) => p.id === id);
 }

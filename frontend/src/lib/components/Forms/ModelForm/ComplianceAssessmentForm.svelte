@@ -12,7 +12,7 @@
 	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 	import ScoreScaleEditor from '$lib/components/ComplianceAssessment/ScoreScaleEditor.svelte';
-	import type { ScoreScaleValue } from '$lib/utils/score-scales';
+	import { scaleLevels, type ScoreScaleValue } from '$lib/utils/score-scales';
 	import { untrack } from 'svelte';
 
 	interface Props {
@@ -60,7 +60,7 @@
 			score_scale_preset: object.score_scale_preset ?? null,
 			min_score: object.min_score,
 			max_score: object.max_score,
-			scores_definition: object.scores_definition ?? []
+			scores_definition: scaleLevels(object.scores_definition)
 		};
 		const fallback = frameworkScoring?.audit_default_scale;
 		const sameAsDefault =
@@ -69,7 +69,7 @@
 			current.max_score === fallback.max_score &&
 			current.score_scale_preset === fallback.score_scale_preset &&
 			JSON.stringify(current.scores_definition) ===
-				JSON.stringify(fallback.scores_definition ?? []);
+				JSON.stringify(scaleLevels(fallback.scores_definition));
 		return sameAsDefault ? null : current;
 	}
 
@@ -100,11 +100,15 @@
 		($formData.field_visibility?.score ?? frameworkDefaults?.score)?.auditor !== 'hidden'
 	);
 
+	let frameworkRequest = 0;
+
 	async function handleFrameworkChange(id: string) {
 		if (id) {
+			const request = ++frameworkRequest;
 			await fetch(`/frameworks/${id}`)
 				.then((r) => r.json())
 				.then((r) => {
+					if (request !== frameworkRequest) return;
 					is_dynamic = r['is_dynamic'] || false;
 					const implementation_groups = r['implementation_groups_definition'] || [];
 					implementationGroupsChoices = implementation_groups.map((group) => ({
@@ -268,7 +272,7 @@
 					defaultScale={frameworkScoring.audit_default_scale}
 					declaredRange={frameworkScoring.min_score !== 0 ||
 					frameworkScoring.max_score !== 100 ||
-					frameworkScoring.scores_definition?.length
+					scaleLevels(frameworkScoring.scores_definition).length
 						? { min: frameworkScoring.min_score, max: frameworkScoring.max_score }
 						: null}
 					isScaleBound={frameworkScoring.is_scale_bound}
@@ -278,34 +282,36 @@
 			{/key}
 		{/if}
 
-		<Select
-			{form}
-			options={model.selectOptions['score_calculation_method']}
-			field="score_calculation_method"
-			label={m.scoreCalculationMethod()}
-			helpText={m.scoreCalculationMethodHelpText()}
-			cacheLock={cacheLocks['score_calculation_method']}
-			bind:cachedValue={formDataCache['score_calculation_method']}
-			disableDoubleDash
-		/>
-		<TextField
-			{form}
-			type="number"
-			step="any"
-			field="target_score"
-			label={m.targetScore()}
-			helpText={m.targetScoreHelpText()}
-			cacheLock={cacheLocks['target_score']}
-			bind:cachedValue={formDataCache['target_score']}
-		/>
-		<Checkbox
-			{form}
-			field="anchor_na_to_target"
-			label={m.anchorNaToTarget()}
-			helpText={m.anchorNaToTargetHelpText()}
-			cacheLock={cacheLocks['anchor_na_to_target']}
-			bind:cachedValue={formDataCache['anchor_na_to_target']}
-		/>
+		{#if scoringEnabled}
+			<Select
+				{form}
+				options={model.selectOptions['score_calculation_method']}
+				field="score_calculation_method"
+				label={m.scoreCalculationMethod()}
+				helpText={m.scoreCalculationMethodHelpText()}
+				cacheLock={cacheLocks['score_calculation_method']}
+				bind:cachedValue={formDataCache['score_calculation_method']}
+				disableDoubleDash
+			/>
+			<TextField
+				{form}
+				type="number"
+				step="any"
+				field="target_score"
+				label={m.targetScore()}
+				helpText={m.targetScoreHelpText()}
+				cacheLock={cacheLocks['target_score']}
+				bind:cachedValue={formDataCache['target_score']}
+			/>
+			<Checkbox
+				{form}
+				field="anchor_na_to_target"
+				label={m.anchorNaToTarget()}
+				helpText={m.anchorNaToTargetHelpText()}
+				cacheLock={cacheLocks['anchor_na_to_target']}
+				bind:cachedValue={formDataCache['anchor_na_to_target']}
+			/>
+		{/if}
 	</div>
 	<AutocompleteSelect
 		multiple

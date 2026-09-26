@@ -8794,8 +8794,10 @@ class ComplianceAssessment(Assessment):
 
     @property
     def has_scores(self) -> bool:
+        # Same rule as the scoring engine: a stale score with is_scored=False
+        # (projections, baseline copies) doesn't count.
         return self.requirement_assessments.filter(
-            Q(score__isnull=False) | Q(documentation_score__isnull=False)
+            is_scored=True, score__isnull=False
         ).exists()
 
     def save(self, *args, **kwargs) -> None:

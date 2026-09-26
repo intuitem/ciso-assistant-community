@@ -10,6 +10,7 @@
 		presetLevelName,
 		resolveLevelName,
 		localizedLevelField,
+		scaleLevels,
 		type ScoreLevel,
 		type ScoreScaleValue,
 		type DefaultScoreScale
@@ -38,7 +39,7 @@
 	}: Props = $props();
 
 	const initial = $state.snapshot(value);
-	const initialLevels = structuredClone(initial?.scores_definition ?? []);
+	const initialLevels = structuredClone(scaleLevels(initial?.scores_definition));
 	const storedLocales = new Set(initialLevels.flatMap((l) => Object.keys(l.translations ?? {})));
 
 	let selection = $state<string>(
@@ -112,7 +113,7 @@
 	let defaultPreview = $derived.by(() => {
 		if (!defaultScale) return [];
 		const lang = getLocale();
-		const own = defaultScale.scores_definition ?? [];
+		const own = scaleLevels(defaultScale.scores_definition);
 		const { min_score: lo, max_score: hi } = defaultScale;
 		if (defaultPreset && hasLabelledLevels(lo, hi)) {
 			return Array.from({ length: hi - lo + 1 }, (_, i) => lo + i).map((score) => ({
@@ -149,7 +150,7 @@
 			if (selection === 'default') {
 				min = defaultScale?.min_score ?? 0;
 				max = defaultScale?.max_score ?? 5;
-				levels = seedLevels(defaultScale?.scores_definition ?? [], defaultPreset, min, max);
+				levels = seedLevels(scaleLevels(defaultScale?.scores_definition), defaultPreset, min, max);
 			} else {
 				levels = seedLevels(levels, preset, min, max);
 			}
@@ -171,8 +172,7 @@
 	function setRange(nextMin: number, nextMax: number) {
 		min = nextMin;
 		max = nextMax;
-		if (!(max > min)) return;
-		levels = levels.filter((l) => l.score >= min && l.score <= max);
+		if (max > min) levels = levels.filter((l) => l.score >= min && l.score <= max);
 		commit();
 	}
 
