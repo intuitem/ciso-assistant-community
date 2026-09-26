@@ -41,6 +41,13 @@ describe('seedLevels', () => {
 		expect(level.name).toBeTruthy();
 	});
 
+	it('accepts proxied levels, as handed over by Svelte state', () => {
+		const proxied = frameworkLevels.map((l) => new Proxy(structuredClone(l), {}));
+		const seeded = seedLevels(new Proxy(proxied, {}), undefined, 1, 2, ['en']);
+		expect(seeded[0].description).toBe('Standard process does not exist.');
+		expect(() => structuredClone(seeded)).not.toThrow();
+	});
+
 	it('fills every score of the range', () => {
 		expect(seedLevels([], undefined, 1, 4, ['en']).map((l) => l.score)).toEqual([1, 2, 3, 4]);
 	});

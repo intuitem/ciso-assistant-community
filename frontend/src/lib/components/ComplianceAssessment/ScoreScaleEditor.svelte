@@ -144,14 +144,14 @@
 				min = defaultScale?.min_score ?? 0;
 				max = defaultScale?.max_score ?? 5;
 				levels = seedLevels(
-					scaleLevels(defaultScale?.scores_definition),
+					$state.snapshot(scaleLevels(defaultScale?.scores_definition)),
 					defaultPreset,
 					min,
 					max,
 					languages
 				);
 			} else {
-				levels = seedLevels(levels, preset, min, max, languages);
+				levels = seedLevels($state.snapshot(levels), preset, min, max, languages);
 			}
 			selection = 'custom';
 		} else if (id === 'default') {

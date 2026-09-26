@@ -919,3 +919,113 @@ class TestSameFrameworkMergeConversion:
 
         results = {"min_score": 0, "max_score": 100, "requirement_assessments": {}}
         assert rescaled_to_target(results, setup["ca"]) is results
+
+
+@pytest.mark.django_db
+class TestWrappedDefinitionValidation:
+    def test_wrapped_levels_are_range_checked(self, setup):
+        serializer, valid = _update(
+            setup["ca"],
+            {
+                "score_scale_preset": "1-5",
+                "scores_definition": {"scale": [{"score": 80}]},
+            },
+        )
+        assert not valid
+        assert "scores_definition" in serializer.errors
+
+    def test_wrapped_levels_in_range_pass(self, setup):
+        serializer, valid = _update(
+            setup["ca"],
+            {
+                "score_scale_preset": "1-5",
+                "scores_definition": {"scale": [{"score": 3}]},
+            },
+        )
+        assert valid, serializer.errors
+
+
+_LIB_TWO_NODES = """
+urn: urn:intuitem:test:library:scale-update-2
+locale: en
+ref_id: SCALE-UPDATE-2
+name: Scale update 2
+description: Scale update 2
+copyright: Test
+version: {version}
+publication_date: 2026-09-26
+provider: test
+packager: test
+objects:
+  framework:
+    urn: urn:intuitem:test:framework:scale-update-2
+    ref_id: SCALE-UPDATE-2
+    name: Scale update 2
+    description: Scale update 2
+{scale}    requirement_nodes:
+    - urn: urn:intuitem:test:req_node:scale-update-2:req-1
+      assessable: true
+      depth: 1
+      ref_id: REQ-1
+      name: Requirement 1
+    - urn: urn:intuitem:test:req_node:scale-update-2:req-2
+      assessable: true
+      depth: 1
+      ref_id: REQ-2
+      name: Requirement 2
+""".lstrip()
+
+
+@pytest.mark.django_db
+class TestLibraryUpdateConvertsAllStoredValues:
+    def test_stale_and_documentation_scores_follow(
+        self, django_capture_on_commit_callbacks, monkeypatch
+    ):
+        from core.models import LoadedLibrary, StoredLibrary
+
+        folder = Folder.get_root_folder()
+        stored, _ = StoredLibrary.store_library_content(
+            _LIB_TWO_NODES.format(version=1, scale="").encode("utf-8")
+        )
+        stored.load()
+        fw = Framework.objects.get(urn="urn:intuitem:test:framework:scale-update-2")
+        ca = ComplianceAssessment.objects.create(
+            name="Lib", framework=fw, folder=folder
+        )
+        ca.create_requirement_assessments()
+        scored, stale = sorted(
+            ca.requirement_assessments.all(), key=lambda r: r.requirement.ref_id
+        )
+        # Queryset updates: RequirementAssessment.save() would queue an outcome
+        # evaluation for this audit and mask the one under test.
+        RequirementAssessment.objects.filter(pk=scored.pk).update(
+            is_scored=True, score=80, documentation_score=40
+        )
+        RequirementAssessment.objects.filter(pk=stale.pk).update(
+            is_scored=False, score=60
+        )
+
+        calls = []
+        monkeypatch.setattr(
+            "core.cel_service.evaluate_outcomes", lambda audit: calls.append(audit.pk)
+        )
+        StoredLibrary.store_library_content(
+            _LIB_TWO_NODES.format(
+                version=2, scale="    min_score: 1\n    max_score: 4\n"
+            ).encode("utf-8")
+        )
+        with django_capture_on_commit_callbacks(execute=True):
+            error = LoadedLibrary.objects.get(urn=stored.urn).update(
+                strategy="rule_of_three"
+            )
+        assert error is None
+
+        scored.refresh_from_db()
+        stale.refresh_from_db()
+        assert (scored.score, scored.documentation_score, scored.is_scored) == (
+            3,
+            2,
+            True,
+        )
+        assert (stale.score, stale.is_scored) == (3, False)
+        assert ca.pk in calls

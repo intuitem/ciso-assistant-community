@@ -2014,10 +2014,10 @@ class LibraryUpdater:
                                 ra_pks_to_update.add(ra.pk)
                                 requirement_assessment_objects_to_update.append(ra)
 
-                        if (
-                            ra.is_scored
-                            and ra.score is not None
-                            and ra.compliance_assessment in ca_with_scale_change
+                        # Every stored value moves to the new range, ticked or not,
+                        # so none is left outside it.
+                        if ra.compliance_assessment in ca_with_scale_change and (
+                            ra.score is not None or ra.documentation_score is not None
                         ):
                             default_min = (
                                 0
@@ -2076,9 +2076,12 @@ class LibraryUpdater:
 
                             if new_score != old_score:
                                 ra.score = new_score
-                                ra.is_scored = (
-                                    new_score is not None and self.strategy != "reset"
-                                )
+                                # An unticked (stale) score must not become scored.
+                                if ra.is_scored:
+                                    ra.is_scored = (
+                                        new_score is not None
+                                        and self.strategy != "reset"
+                                    )
                                 if ra.pk not in ra_pks_to_update:
                                     ra_pks_to_update.add(ra.pk)
                                     requirement_assessment_objects_to_update.append(ra)
@@ -2221,6 +2224,16 @@ class LibraryUpdater:
                         ],
                         batch_size=100,
                     )
+                    # bulk_update skips RequirementAssessment.save(), which
+                    # re-evaluates outcomes when a score changes.
+                    for ca in ca_with_scale_change:
+
+                        def _evaluate(ca=ca):
+                            from core.cel_service import evaluate_outcomes
+
+                            evaluate_outcomes(ca)
+
+                        _defer_once("_pending_cel_evaluations", ca.pk, _evaluate)
 
                 # Keep selected_implementation_groups consistent for dynamic frameworks
                 # This must run even if no RA scalar fields changed, because answer
@@ -8552,6 +8565,8 @@ def normalize_score_scale(preset, min_score, max_score, levels, default_range=No
                 }
             )
     score_range = (min_score, max_score) if min_score is not None else default_range
+    if isinstance(levels, dict):
+        levels = levels.get("scale")
     if isinstance(levels, list) and score_range:
         for level in levels:
             score = level.get("score") if isinstance(level, dict) else None

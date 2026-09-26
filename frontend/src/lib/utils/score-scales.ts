@@ -127,7 +127,8 @@ export function seedLevels(
 	if (!hasLabelledLevels(lo, hi)) return [];
 	return Array.from({ length: hi - lo + 1 }, (_, i) => lo + i).map((score) => {
 		const level = source.find((l) => l.score === score);
-		const { preset: _preset, ...rest } = structuredClone(level ?? { score });
+		// JSON copy: callers may hand over Svelte proxies, which structuredClone rejects.
+		const { preset: _preset, ...rest }: ScoreLevel = JSON.parse(JSON.stringify(level ?? { score }));
 		const translations = rest.translations ?? {};
 		for (const loc of languages) {
 			const name = resolveLevelName(level, sourcePreset, score, loc);
