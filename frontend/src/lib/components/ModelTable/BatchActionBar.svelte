@@ -133,6 +133,7 @@
 				optionsEndpoint: action.optionsEndpoint,
 				enableDoubleDash: action.enableDoubleDash ?? false,
 				multiSelect: action.multiSelect ?? false,
+				inputType: action.inputType,
 				confirmMessage: action.confirmMessage,
 				fixedValue: action.value,
 				onConfirm: async (value?: string | string[]) => {

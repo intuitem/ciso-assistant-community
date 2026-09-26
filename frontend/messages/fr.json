@@ -2973,6 +2973,7 @@
 	"changeOwner": "Changer le propriétaire",
 	"changeDomain": "Changer le domaine",
 	"batchChangePriority": "Changer la priorité",
+	"changeEta": "Changer l'ETA",
 	"changeDocumentType": "Changer le type de document",
 	"changeClassification": "Changer la classification",
 	"changeAttributes": "Modifier les attributs",
