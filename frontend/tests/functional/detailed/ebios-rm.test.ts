@@ -117,7 +117,7 @@ test('ebios rm study', async ({
 		await test.step('step 1', async () => {
 			await page.getByTestId('workshop-1-step-1-link').click();
 			await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[11]], false);
-			await page.getByRole('link', { name: 'Edit', exact: true }).click();
+			await page.getByText('Edit', { exact: true }).click();
 			await expect(page).toHaveURL(/.*edit.*/);
 			await ebiosRmStudyPage.form.fill({
 				authors: [LoginPage.defaultEmail],
