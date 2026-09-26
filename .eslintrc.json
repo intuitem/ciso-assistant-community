@@ -1,4 +1,18 @@
 {
+    "overrides": [
+      {
+        "files": ["*.svelte", "*.svelte.js", "*.svelte.ts"],
+        "globals": {
+          "$state": "readonly",
+          "$derived": "readonly",
+          "$effect": "readonly",
+          "$props": "readonly",
+          "$bindable": "readonly",
+          "$inspect": "readonly",
+          "$host": "readonly"
+        }
+      }
+    ],
     "rules": {
       "@typescript-eslint/no-unused-vars": [
         "error",
