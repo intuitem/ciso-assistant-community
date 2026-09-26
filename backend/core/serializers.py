@@ -1,4 +1,5 @@
 import importlib
+import json
 from typing import Any
 
 import structlog
@@ -29,7 +30,7 @@ from iam.models import *
 from django.contrib.auth.models import Permission
 
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import APIException, PermissionDenied
 from django.core.exceptions import FieldDoesNotExist
 from django.core.exceptions import ValidationError as DjangoValidationError
 
@@ -3704,7 +3705,17 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
         ]
 
 
+class ScoreRescaleConfirmationRequired(APIException):
+    status_code = 409
+    default_code = "score_rescale_confirmation_required"
+
+
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
+    confirm_rescale = serializers.BooleanField(
+        write_only=True, required=False, default=False
+    )
+    # Read back by the edit form (object/ action) to lock the range.
+    has_scores = serializers.BooleanField(read_only=True)
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -3763,7 +3774,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     f"⚠️ Cannot modify the audit attributes when it is locked. Only the 'Locked' field can be modified."
                 )
 
-        self._validate_score_scale(attrs)
+        self._validate_score_scale(attrs, confirm=attrs.pop("confirm_rescale", False))
 
         target = attrs.get(
             "target_score",
@@ -3782,13 +3793,19 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 }
             )
         if target is not None:
-            min_s = attrs.get(
-                "min_score",
-                getattr(self.instance, "min_score", None) if self.instance else None,
-            )
-            max_s = attrs.get(
-                "max_score",
-                getattr(self.instance, "max_score", None) if self.instance else None,
+            min_s, max_s = getattr(self, "_effective_score_range", None) or (
+                attrs.get(
+                    "min_score",
+                    getattr(self.instance, "min_score", None)
+                    if self.instance
+                    else None,
+                ),
+                attrs.get(
+                    "max_score",
+                    getattr(self.instance, "max_score", None)
+                    if self.instance
+                    else None,
+                ),
             )
             if min_s is not None and max_s is not None:
                 if not (min_s <= target <= max_s):
@@ -3800,7 +3817,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
         return super().validate(attrs)
 
-    def _validate_score_scale(self, attrs):
+    def _validate_score_scale(self, attrs, confirm=False):
         scale_fields = {
             "score_scale_preset",
             "min_score",
@@ -3851,6 +3868,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         current = (
             (instance.min_score, instance.max_score) if instance else default_range
         )
+        self._effective_score_range = resolved
         if resolved == current:
             return
         if framework and framework.is_scale_bound:
@@ -3865,6 +3883,28 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     "score_scale_preset": "The score range cannot be changed once requirements have been scored."
                 }
             )
+        if instance and None not in (*current, *resolved):
+            self._score_rescale = (current, resolved)
+            impact = instance.rescale_impact()
+            unchanged = attrs.get("target_score", instance.target_score) == (
+                instance.target_score
+            )
+            if unchanged and instance.target_score is not None:
+                attrs["target_score"] = rescale_score(
+                    instance.target_score, current, resolved, integer=False
+                )
+                impact["target"] = [instance.target_score, attrs["target_score"]]
+            if not confirm and any(impact.values()):
+                raise ScoreRescaleConfirmationRequired(
+                    {
+                        "confirm_rescale": [
+                            json.dumps(
+                                {"from": current, "to": resolved, **impact},
+                                separators=(",", ":"),
+                            )
+                        ]
+                    }
+                )
 
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
@@ -3930,6 +3970,9 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         with transaction.atomic():
             # Perform the main update (fields + M2M)
             updated_instance = super().update(instance, validated_data)
+
+            if rescale := getattr(self, "_score_rescale", None):
+                updated_instance.rescale_requirement_scores(*rescale)
 
             # For dynamic frameworks, recompute IGs from current answers so the
             # answer-driven calc always wins over any manual override submitted

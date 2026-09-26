@@ -8552,6 +8552,14 @@ def normalize_score_scale(preset, min_score, max_score, levels, default_range=No
     return preset or None, min_score, max_score
 
 
+def rescale_score(value, old_range, new_range, integer=True):
+    """Map a score proportionally from one range to another, clamped to the new one."""
+    (old_min, old_max), (new_min, new_max) = old_range, new_range
+    ratio = min(max((value - old_min) / (old_max - old_min), 0), 1)
+    result = new_min + ratio * (new_max - new_min)
+    return round(result) if integer else round(result, 2)
+
+
 def get_default_score_scale() -> dict | None:
     general = GlobalSettings.objects.filter(name="general").first()
     return (general.value or {}).get("default_score_scale") if general else None
@@ -8791,6 +8799,32 @@ class ComplianceAssessment(Assessment):
             {**own.get(score, {}), "score": score, "preset": preset}
             for score in range(self.min_score, self.max_score + 1)
         ]
+
+    def _rescalable_requirements(self):
+        # Requirements with their own scale keep it.
+        return self.requirement_assessments.filter(
+            requirement__min_score__isnull=True, requirement__max_score__isnull=True
+        )
+
+    def rescale_impact(self) -> dict:
+        own_range = self._rescalable_requirements()
+        return {
+            "scores": own_range.filter(score__isnull=False).count(),
+            "documentation_scores": own_range.filter(
+                documentation_score__isnull=False
+            ).count(),
+        }
+
+    def rescale_requirement_scores(self, old_range, new_range) -> None:
+        """Carry stored scores over to a new range."""
+        own_range = self._rescalable_requirements()
+        for field in ("score", "documentation_score"):
+            rows = list(own_range.filter(**{f"{field}__isnull": False}))
+            for ra in rows:
+                setattr(
+                    ra, field, rescale_score(getattr(ra, field), old_range, new_range)
+                )
+            RequirementAssessment.objects.bulk_update(rows, [field])
 
     @property
     def has_scores(self) -> bool:

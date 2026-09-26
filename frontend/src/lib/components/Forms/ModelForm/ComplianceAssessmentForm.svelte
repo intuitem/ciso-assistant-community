@@ -73,10 +73,43 @@
 		return sameAsDefault ? null : current;
 	}
 
+	const formErrors = form.errors;
+	let rescalePanel = $state<HTMLElement | null>(null);
+	let rescaleImpact = $derived.by(() => {
+		const raw = ($formErrors as Record<string, string[] | undefined>)?.confirm_rescale?.[0];
+		if (!raw) return null;
+		try {
+			return JSON.parse(raw);
+		} catch {
+			return null;
+		}
+	});
+
+	$effect(() => {
+		if (rescaleImpact && rescalePanel) rescalePanel.scrollIntoView({ block: 'center' });
+	});
+
+	const SCALE_ERROR_FIELDS = [...SCALE_FIELDS, 'target_score'];
+	let scaleErrors = $derived(
+		SCALE_ERROR_FIELDS.flatMap(
+			(f) => ($formErrors as Record<string, string[] | undefined>)?.[f] ?? []
+		)
+	);
+
+	function confirmRescale() {
+		form.form.update((d) => ({ ...d, confirm_rescale: true }), { taint: false });
+		form.submit();
+	}
+
+	function dismissRescale() {
+		form.errors.update((e) => ({ ...e, confirm_rescale: undefined }));
+	}
+
 	function onScaleChange(value: ScoreScaleValue | null) {
 		scaleDirty = true;
 		form.form.update((d) => ({
 			...d,
+			confirm_rescale: false,
 			score_scale_preset: value?.score_scale_preset ?? null,
 			min_score: value?.min_score ?? null,
 			max_score: value?.max_score ?? null,
@@ -244,6 +277,67 @@
 	cacheLock={cacheLocks['eta']}
 	bind:cachedValue={formDataCache['eta']}
 />
+{#if scaleErrors.length && !rescaleImpact}
+	<div
+		class="flex gap-2 rounded-md border border-error-500 bg-error-50-950 px-3 py-2 text-sm"
+		role="alert"
+		data-testid="score-scale-errors"
+	>
+		<i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+		<ul>
+			{#each scaleErrors as error}
+				<li>{error}</li>
+			{/each}
+		</ul>
+	</div>
+{/if}
+{#if rescaleImpact}
+	<div
+		bind:this={rescalePanel}
+		class="space-y-2 rounded-md border border-warning-500 bg-warning-50-950 px-3 py-2 text-sm"
+		role="alertdialog"
+		aria-labelledby="score-rescale-title"
+		data-testid="score-rescale-confirmation"
+	>
+		<p id="score-rescale-title" class="flex gap-2 font-medium">
+			<i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+			{m.scoreScaleConfirmTitle({
+				from: rescaleImpact.from.join('–'),
+				to: rescaleImpact.to.join('–')
+			})}
+		</p>
+		<ul class="list-disc pl-8 text-xs">
+			{#if rescaleImpact.scores}
+				<li>{m.scoreScaleConfirmScores({ count: rescaleImpact.scores })}</li>
+			{/if}
+			{#if rescaleImpact.documentation_scores}
+				<li>
+					{m.scoreScaleConfirmDocScores({ count: rescaleImpact.documentation_scores })}
+				</li>
+			{/if}
+			{#if rescaleImpact.target}
+				<li>
+					{m.scoreScaleConfirmTarget({
+						from: rescaleImpact.target[0],
+						to: rescaleImpact.target[1]
+					})}
+				</li>
+			{/if}
+		</ul>
+		<p class="text-xs text-surface-600-400">{m.scoreScaleConfirmIrreversible()}</p>
+		<div class="flex gap-2">
+			<button
+				type="button"
+				class="btn btn-sm preset-filled-warning-500"
+				onclick={confirmRescale}
+				data-testid="score-rescale-confirm">{m.scoreScaleConfirmSave()}</button
+			>
+			<button type="button" class="btn btn-sm preset-tonal-surface" onclick={dismissRescale}
+				>{m.cancel()}</button
+			>
+		</div>
+	</div>
+{/if}
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<div class="space-y-4">
 		{#if context === 'create' && suggestions}
@@ -280,6 +374,7 @@
 						: null}
 					isScaleBound={frameworkScoring.is_scale_bound}
 					rangeLocked={Boolean(object?.id && object?.has_scores)}
+					currentRange={object?.id ? { min: object.min_score, max: object.max_score } : null}
 					{scoringEnabled}
 				/>
 			{/key}

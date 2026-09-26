@@ -586,6 +586,7 @@ export const ComplianceAssessmentSchema = z.object({
 		.default({}),
 	score_calculation_method: z.string().optional().default('average'),
 	score_scale_preset: z.string().optional().nullable(),
+	confirm_rescale: z.boolean().optional().default(false),
 	min_score: z.number().int().optional().nullable(),
 	max_score: z.number().int().optional().nullable(),
 	scores_definition: z

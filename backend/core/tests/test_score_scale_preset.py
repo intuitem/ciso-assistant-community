@@ -1,3 +1,4 @@
+import json
 import pytest
 from django.db.models import BooleanField, Exists, ExpressionWrapper, OuterRef, Q
 
@@ -37,7 +38,9 @@ def setup():
     return {"fw": fw, "rn": rn, "ca": ca, "ra": ra, "folder": folder}
 
 
-def _update(ca, data):
+def _update(ca, data, confirm=True):
+    if confirm:
+        data = {"confirm_rescale": True, **data}
     serializer = ComplianceAssessmentWriteSerializer(
         instance=ca, data=data, partial=True
     )
@@ -465,3 +468,207 @@ class TestWrappedFrameworkScale:
         default = FrameworkReadSerializer(fw).data["audit_default_scale"]
         assert default["source"] == "framework"
         assert [lvl["score"] for lvl in default["scores_definition"]] == [1, 2, 3, 4]
+
+
+class TestRescaleScore:
+    @pytest.mark.parametrize(
+        "value, expected",
+        [(0, 1), (50, 3), (100, 5), (75, 4), (-10, 1), (150, 5)],
+    )
+    def test_percentage_to_one_five(self, value, expected):
+        from core.models import rescale_score
+
+        assert rescale_score(value, (0, 100), (1, 5)) == expected
+
+    def test_float_target(self):
+        from core.models import rescale_score
+
+        assert rescale_score(80, (0, 100), (0, 5), integer=False) == 4.0
+
+
+@pytest.mark.django_db
+class TestStaleScoresFollowRangeChange:
+    def test_unscored_values_are_converted(self, setup):
+        ra = setup["ra"]
+        ra.score, ra.documentation_score, ra.is_scored = 75, 40, False
+        ra.save()
+        serializer, valid = _update(setup["ca"], {"score_scale_preset": "0-5"})
+        assert valid, serializer.errors
+        serializer.save()
+        ra.refresh_from_db()
+        assert (ra.score, ra.documentation_score, ra.is_scored) == (4, 2, False)
+
+    def test_target_follows_unless_given(self, setup):
+        ca = setup["ca"]
+        ca.target_score = 80
+        ca.save()
+        serializer, valid = _update(ca, {"score_scale_preset": "0-5"})
+        assert valid, serializer.errors
+        assert serializer.save().target_score == 4.0
+
+        serializer, valid = _update(
+            ca, {"score_scale_preset": "1-4", "target_score": 2}
+        )
+        assert valid, serializer.errors
+        assert serializer.save().target_score == 2
+
+    def test_reset_to_default_converts_back(self, setup):
+        ca, ra = setup["ca"], setup["ra"]
+        _update(ca, {"score_scale_preset": "1-5"})[0].save()
+        ra.score = 5
+        ra.save()
+        serializer, valid = _update(
+            ca, {"score_scale_preset": None, "min_score": None, "max_score": None}
+        )
+        assert valid, serializer.errors
+        serializer.save()
+        ra.refresh_from_db()
+        assert ra.score == 100
+
+    def test_wording_change_leaves_scores_alone(self, setup):
+        ca, ra = setup["ca"], setup["ra"]
+        _update(ca, {"score_scale_preset": "0-5"})[0].save()
+        ra.score = 3
+        ra.save()
+        serializer, valid = _update(
+            ca, {"score_scale_preset": "0-5", "scores_definition": _levels(3)}
+        )
+        assert valid, serializer.errors
+        serializer.save()
+        ra.refresh_from_db()
+        assert ra.score == 3
+
+
+@pytest.mark.django_db
+class TestTargetWithFullFormPayload:
+    """The edit form PUTs every field, target_score included."""
+
+    def test_unchanged_target_is_converted_down(self, setup):
+        ca = setup["ca"]
+        ca.target_score = 80
+        ca.save()
+        serializer, valid = _update(
+            ca, {"score_scale_preset": "1-5", "target_score": 80}
+        )
+        assert valid, serializer.errors
+        assert serializer.save().target_score == 4.2
+
+    def test_unchanged_target_is_converted_up(self, setup):
+        ca = setup["ca"]
+        _update(ca, {"score_scale_preset": "1-5"})[0].save()
+        ca.target_score = 4
+        ca.save()
+        serializer, valid = _update(
+            ca,
+            {
+                "score_scale_preset": None,
+                "min_score": 0,
+                "max_score": 100,
+                "target_score": 4,
+            },
+        )
+        assert valid, serializer.errors
+        assert serializer.save().target_score == 75.0
+
+    def test_edited_target_is_checked_against_new_range(self, setup):
+        ca = setup["ca"]
+        ca.target_score = 80
+        ca.save()
+        serializer, valid = _update(
+            ca, {"score_scale_preset": "1-5", "target_score": 9}
+        )
+        assert not valid
+        assert "target_score" in serializer.errors
+
+    def test_target_checked_against_default_range(self, setup):
+        ca = setup["ca"]
+        _update(ca, {"score_scale_preset": "0-5"})[0].save()
+        serializer, valid = _update(
+            ca,
+            {
+                "score_scale_preset": None,
+                "min_score": None,
+                "max_score": None,
+                "target_score": 150,
+            },
+        )
+        assert not valid
+        assert "target_score" in serializer.errors
+
+
+@pytest.mark.django_db
+class TestRescaleConfirmation:
+    def _impact(self, exc):
+        return json.loads(exc.detail["confirm_rescale"][0])
+
+    def test_conversion_needs_confirmation(self, setup):
+        from core.serializers import ScoreRescaleConfirmationRequired
+
+        ca, ra = setup["ca"], setup["ra"]
+        ra.score, ra.documentation_score = 75, 40
+        ra.save()
+        ca.target_score = 80
+        ca.save()
+        with pytest.raises(ScoreRescaleConfirmationRequired) as exc:
+            _update(
+                ca, {"score_scale_preset": "1-5", "target_score": 80}, confirm=False
+            )
+        assert exc.value.status_code == 409
+        assert self._impact(exc.value) == {
+            "from": [0, 100],
+            "to": [1, 5],
+            "scores": 1,
+            "documentation_scores": 1,
+            "target": [80.0, 4.2],
+        }
+        ca.refresh_from_db()
+        ra.refresh_from_db()
+        assert (ca.min_score, ca.max_score, ra.score) == (0, 100, 75)
+
+    def test_nothing_to_convert_needs_no_confirmation(self, setup):
+        serializer, valid = _update(
+            setup["ca"], {"score_scale_preset": "1-5"}, confirm=False
+        )
+        assert valid, serializer.errors
+        assert serializer.save().max_score == 5
+
+    def test_wording_change_needs_no_confirmation(self, setup):
+        ca, ra = setup["ca"], setup["ra"]
+        ra.score = 50
+        ra.save()
+        serializer, valid = _update(
+            ca, {"scores_definition": [{"score": 50, "name": "Half"}]}, confirm=False
+        )
+        assert valid, serializer.errors
+
+    def test_edited_target_alone_needs_no_confirmation(self, setup):
+        ca = setup["ca"]
+        ca.target_score = 80
+        ca.save()
+        serializer, valid = _update(
+            ca, {"score_scale_preset": "1-5", "target_score": 3}, confirm=False
+        )
+        assert valid, serializer.errors
+        assert serializer.save().target_score == 3
+
+    def test_api_returns_409(self, setup, client):
+        from rest_framework.test import APIClient
+        from iam.models import User
+
+        admin = User.objects.create_superuser(
+            email="scale-admin@test.local", password="x"
+        )
+        api = APIClient()
+        api.force_authenticate(admin)
+        setup["ra"].score = 60
+        setup["ra"].save()
+        url = f"/api/compliance-assessments/{setup['ca'].id}/"
+        response = api.patch(url, {"score_scale_preset": "0-5"}, format="json")
+        assert response.status_code == 409
+        assert "confirm_rescale" in response.json()
+        response = api.patch(
+            url, {"score_scale_preset": "0-5", "confirm_rescale": True}, format="json"
+        )
+        assert response.status_code == 200, response.json()
+        setup["ra"].refresh_from_db()
+        assert setup["ra"].score == 3

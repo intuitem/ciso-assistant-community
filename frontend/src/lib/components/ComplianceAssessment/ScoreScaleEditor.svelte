@@ -25,6 +25,7 @@
 		rangeLocked?: boolean;
 		scoringEnabled?: boolean;
 		helpText?: string;
+		currentRange?: { min: number; max: number } | null;
 	}
 
 	let {
@@ -35,7 +36,8 @@
 		isScaleBound = false,
 		rangeLocked = false,
 		scoringEnabled = true,
-		helpText = m.scoreScaleHelpText()
+		helpText = m.scoreScaleHelpText(),
+		currentRange = null
 	}: Props = $props();
 
 	const initial = $state.snapshot(value);
@@ -60,6 +62,18 @@
 	let preset = $derived(getPreset(selection));
 	let defaultPreset = $derived(getPreset(defaultScale?.score_scale_preset));
 	let rangeError = $derived(selection === 'custom' && !(max > min));
+	let effectiveRange = $derived(
+		selection === 'default'
+			? { min: defaultScale?.min_score, max: defaultScale?.max_score }
+			: { min, max }
+	);
+	let rangeChanges = $derived(
+		Boolean(
+			currentRange &&
+			!rangeError &&
+			(effectiveRange.min !== currentRange.min || effectiveRange.max !== currentRange.max)
+		)
+	);
 	let scores = $derived(
 		selection !== 'default' && hasLabelledLevels(min, max)
 			? Array.from({ length: max - min + 1 }, (_, i) => min + i)
@@ -386,6 +400,18 @@
 				{:else}
 					<span class="italic">{m.scoreScaleNoLabels()}</span>
 				{/if}
+			</p>
+		{/if}
+
+		{#if rangeChanges && currentRange}
+			<p class="flex gap-2 text-xs text-surface-600-400" data-testid="score-scale-conversion-note">
+				<i class="fa-solid fa-arrow-right-arrow-left mt-0.5"></i>
+				<span
+					>{m.scoreScaleConversionNote({
+						from: `${currentRange.min}–${currentRange.max}`,
+						to: `${effectiveRange.min}–${effectiveRange.max}`
+					})}</span
+				>
 			</p>
 		{/if}
 
