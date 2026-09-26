@@ -881,7 +881,7 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         "database": {"hex": "f1c0", "fa": "fas fa-database"},
         "key": {"hex": "f084", "fa": "fas fa-key"},
         "search": {"hex": "f002", "fa": "fa-solid fa-magnifying-glass"},
-        "carrot": {"hex": "f084", "fa": "fa-solid fa-carrot"},
+        "carrot": {"hex": "f787", "fa": "fa-solid fa-carrot"},
         "money": {"hex": "f81d", "fa": "fa-solid fa-sack-dollar"},
         "skull": {"hex": "f714", "fa": "fa-solid fa-skull-crossbones"},
         "globe": {"hex": "f0ac", "fa": "fa-solid fa-globe"},
