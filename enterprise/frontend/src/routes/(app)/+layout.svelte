@@ -3,6 +3,7 @@
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle/ThemeToggle.svelte';
+	import NotificationBell from '$lib/components/NotificationBell/NotificationBell.svelte';
 	import ChatWidget from '$lib/components/ChatWidget/ChatWidget.svelte';
 	import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
 	import { AppBar } from '@skeletonlabs/skeleton-svelte';
@@ -223,6 +224,9 @@
 					{/if}
 				</div>
 				<div class="flex items-center gap-3 shrink-0">
+					{#if sideBarVisibleItems.notifications && !data?.user?.is_third_party}
+						<NotificationBell />
+					{/if}
 					<ThemeToggle />
 					{#if data?.featureflags?.custom_portals && !data?.user?.is_third_party}
 						<a

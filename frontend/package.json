@@ -77,7 +77,7 @@
 	"dependencies": {
 		"@dagrejs/dagre": "^3.1.1",
 		"@floating-ui/dom": "^1.8.0",
-		"@fortawesome/fontawesome-free": "^6.7.2",
+		"@fortawesome/fontawesome-free": "^7.3.1",
 		"@simplewebauthn/browser": "^13.3.0",
 		"@unovis/svelte": "1.6.7",
 		"@unovis/ts": "1.6.7",
@@ -89,6 +89,7 @@
 		"echarts": "^6.1.0",
 		"exceljs": "^4.4.0",
 		"marked": "^16.4.2",
+		"mermaid": "^12.0.0",
 		"sanitize-html": "^2.17.7",
 		"ssf": "^0.11.2",
 		"svelte-multiselect": "^11.8.0",

@@ -171,6 +171,10 @@ READER_PERMISSIONS_LIST = [
     "view_questionnairequestion",
     "view_agentrun",
     "view_agentaction",
+    # notifications
+    "view_notification",
+    "change_notification",
+    "delete_notification",
 ]
 
 BASELINE_READER_PERMISSIONS_LIST = [
@@ -218,6 +222,10 @@ BASELINE_READER_PERMISSIONS_LIST = [
     "view_customfielddefinition",
     "view_requirementmapping",
     "view_requirementmappingset",
+    # notifications
+    "view_notification",
+    "change_notification",
+    "delete_notification",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -367,6 +375,10 @@ APPROVER_PERMISSIONS_LIST = [
     "view_questionnairequestion",
     "view_agentrun",
     "view_agentaction",
+    # notifications
+    "view_notification",
+    "change_notification",
+    "delete_notification",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -813,6 +825,10 @@ ANALYST_PERMISSIONS_LIST = [
     "view_agentaction",
     "change_agentaction",
     "delete_agentaction",
+    # notifications
+    "view_notification",
+    "change_notification",
+    "delete_notification",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -1352,6 +1368,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_agentaction",
     "change_agentaction",
     "delete_agentaction",
+    # notifications
+    "view_notification",
+    "change_notification",
+    "delete_notification",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -1970,6 +1990,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_agentaction",
     "change_agentaction",
     "delete_agentaction",
+    # notifications
+    "view_notification",
+    "change_notification",
+    "delete_notification",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -2004,6 +2028,10 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_comment",
     "change_comment",
     "delete_comment",
+    # notifications
+    "view_notification",
+    "change_notification",
+    "delete_notification",
 ]
 
 AUDITEE_PERMISSIONS_LIST = [
@@ -2042,6 +2070,10 @@ AUDITEE_PERMISSIONS_LIST = [
     "view_comment",
     "change_comment",
     "delete_comment",
+    # notifications
+    "view_notification",
+    "change_notification",
+    "delete_notification",
 ]
 
 
@@ -2071,6 +2103,10 @@ TECHNICAL_TESTER_PERMISSIONS_LIST = [
     "view_finding",
     "change_finding",
     "delete_finding",
+    # notifications
+    "view_notification",
+    "change_notification",
+    "delete_notification",
 ]
 
 
@@ -2206,8 +2242,6 @@ def startup(sender=None, **kwargs):
     from privacy.models import create_default_privacy_terminologies
     from global_settings.models import GlobalSettings
     from integrations.models import IntegrationProvider
-
-    from core.mappings.engine import engine
 
     print("startup handler: initialize database")
 

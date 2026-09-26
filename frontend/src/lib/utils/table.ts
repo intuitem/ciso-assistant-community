@@ -20,6 +20,7 @@ import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/Ch
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
 import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
+import ToggleBooleanField from '$lib/components/ContextMenu/ToggleBooleanField.svelte';
 import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
 import MetricInstanceEditValue from '$lib/components/ContextMenu/metric-instances/EditValue.svelte';
 
@@ -54,6 +55,16 @@ interface ListViewFieldsConfig {
 		optionalFields?: { head: string[]; body: string[] };
 		meta?: string[];
 		breadcrumb_link_disabled?: boolean;
+		// Offered on every model since most have a description; set false for one that
+		// does not, or the column picker offers a column that can only be blank.
+		hasDescription?: boolean;
+		// Give rows matching a condition more visual weight. Purely presentational.
+		// `equals` defaults to true, `class` to a semibold weight.
+		rowEmphasis?: { field: string; equals?: unknown; class?: string };
+		// Send a row click somewhere other than this model's own detail page.
+		// `modelField` holds the target's Django model name, `idField` its id, and the
+		// optional `markField` is a boolean PATCHed to true on open.
+		rowNavigation?: { modelField: string; idField: string; markField?: string };
 		filters?: {
 			[key: string]: ListViewFilterConfig | undefined;
 		};
@@ -961,6 +972,45 @@ export const RISK_PROBABILITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const NOTIFICATION_READ_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'read',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+// Not the raw count: "is anyone else on this" is the question, and the backend turns
+// it into recipient_count > 1.
+export const NOTIFICATION_SHARED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'recipients',
+		options: [
+			{ label: 'sharedWithOthers', value: 'true' },
+			{ label: 'onlyYou', value: 'false' }
+		],
+		multiple: false
+	}
+};
+
+// `category` is a property of the notification type, not a column: the backend
+// expands it to type__in from the registry, so the options are a fixed vocabulary
+// rather than an endpoint.
+export const NOTIFICATION_CATEGORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'category',
+		optionsEndpoint: 'notifications/category',
+		// The proxy hands back {label, value}; AutocompleteSelect defaults to `name`.
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: false
+	}
+};
+
 export const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1025,6 +1075,15 @@ export const USER_IS_THIRD_PARTY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'is_third_party',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+export const IS_TPRM_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'thirdPartyAudit',
 		options: YES_NO_OPTIONS,
 		multiple: false
 	}
@@ -2233,6 +2292,7 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			framework: FRAMEWORK_FILTER,
 			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
+			is_tprm: IS_TPRM_FILTER,
 			authors: AUTHOR_FILTER,
 			due_date: dateFilter('due_date'),
 			eta: dateFilter('eta'),
@@ -2983,6 +3043,30 @@ export const listViewFields = {
 		head: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator'],
 		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
 	},
+	notifications: {
+		head: ['read', 'category', 'title', 'created_at'],
+		// Computed column: the API returns no `title`, NotificationTitle builds it from
+		// `type` + `context`. tableSourceMapper keeps keys with no value, which is what
+		// makes a computed column possible.
+		body: ['is_read', 'category', 'title', 'created_at'],
+		hasDescription: false,
+		rowEmphasis: { field: 'is_read', equals: false },
+		rowNavigation: { modelField: 'target_model', idField: 'object_id', markField: 'is_read' },
+		// `target_folder` is the target's domain, not this row's IAM scope: derived, so
+		// it filters but never sorts -- a GenericForeignKey cannot be joined.
+		optionalFields: {
+			head: ['domain', 'readAt'],
+			body: ['target_folder', 'read_at']
+		},
+		filters: {
+			is_read: NOTIFICATION_READ_FILTER,
+			category: NOTIFICATION_CATEGORY_FILTER,
+			shared: NOTIFICATION_SHARED_FILTER,
+			target_folder: DOMAIN_FILTER,
+			created_at: CREATED_AT_FILTER,
+			read_at: dateFilter('read_at', { isDateTime: true })
+		}
+	},
 	'security-exceptions': {
 		head: [
 			'ref_id',
@@ -3711,6 +3795,19 @@ export type FilterKeys = {
 }[keyof typeof listViewFields];
 
 export const contextMenuActions = {
+	// One click to flip read/unread: a submenu is an extra step for two values.
+	notifications: [
+		{
+			component: ToggleBooleanField,
+			props: {
+				field: 'is_read',
+				labelWhenTrue: 'markAsUnread',
+				labelWhenFalse: 'markAsRead',
+				iconWhenTrue: 'fa-solid fa-envelope',
+				iconWhenFalse: 'fa-solid fa-envelope-open'
+			}
+		}
+	],
 	findings: [
 		{ component: ChangeChoiceField, props: { field: 'status', labelKey: 'changeStatus' } },
 		{ component: ChangeChoiceField, props: { field: 'severity', labelKey: 'changeSeverity' } },
@@ -3767,8 +3864,12 @@ export interface BatchActionConfig {
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
+	// A change_field value fixed by config ("mark as read") rather than picked by the
+	// user. Mutually exclusive with optionsEndpoint: skips the picker.
+	value?: string;
 	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
+	inputType?: 'date';
 	children?: BatchActionConfig[];
 	minSelection?: number;
 	maxSelection?: number;
@@ -3791,7 +3892,79 @@ export interface ParentActionConfig {
 export type TableBatchAction = BatchActionConfig | ParentActionConfig;
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
+	// The whole vocabulary: read stops the reminder, delete removes the message (§4).
+	notifications: [
+		{
+			type: 'change_field',
+			label: 'markAsRead',
+			icon: 'fa-solid fa-envelope-open',
+			field: 'is_read',
+			value: 'true'
+		},
+		{
+			type: 'change_field',
+			label: 'markAsUnread',
+			icon: 'fa-solid fa-envelope',
+			field: 'is_read',
+			value: 'false'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	'document-templates': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'document-containers': [
+		{
+			type: 'group',
+			label: 'changeAttributes',
+			icon: 'fa-solid fa-sliders',
+			children: [
+				{
+					type: 'change_field',
+					label: 'changeDocumentType',
+					icon: 'fa-solid fa-file-lines',
+					field: 'document_type',
+					optionsEndpoint: 'document-containers/document_type'
+				},
+				{
+					type: 'change_field',
+					label: 'changeClassification',
+					icon: 'fa-solid fa-lock',
+					field: 'classification',
+					optionsEndpoint: 'classification-levels',
+					enableDoubleDash: true
+				}
+			]
+		},
+		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	'asset-assessments': [
 		{
 			type: 'delete',
@@ -3829,6 +4002,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 					field: 'priority',
 					optionsEndpoint: 'applied-controls/priority',
 					enableDoubleDash: true
+				},
+				{
+					type: 'change_field',
+					label: 'changeEta',
+					icon: 'fa-solid fa-calendar-day',
+					field: 'eta',
+					inputType: 'date'
 				},
 				{
 					type: 'change_field',

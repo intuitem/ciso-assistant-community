@@ -1,5 +1,6 @@
 import csv
 import enum
+import importlib
 import io
 import logging
 import math
@@ -16,6 +17,7 @@ from uuid import UUID
 
 import pandas as pd
 import structlog
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.db import IntegrityError, models
@@ -917,6 +919,19 @@ class RecordConsumer[Context = None](ABC):
 
         assert is_serializer, f"Invalid serializer for class {cls.__name__}"
 
+    @classmethod
+    def get_serializer_class(cls) -> type[BaseModelSerializer]:
+        """Resolve the edition's serializer, mirroring what `SerializerFactory`
+        does for viewsets. `SERIALIZER_CLASS` is bound at import time, so without
+        this the enterprise override never reaches the importer and nested domains
+        are rejected with `subDomainsRequirePro` even on PRO.
+        """
+        override_module = settings.MODULE_PATHS.get("serializers")
+        if not override_module:
+            return cls.SERIALIZER_CLASS
+        module = importlib.import_module(override_module)
+        return getattr(module, cls.SERIALIZER_CLASS.__name__, cls.SERIALIZER_CLASS)
+
     @abstractmethod
     def create_context(self) -> tuple[Context, Optional[Error]]:
         pass
@@ -1056,7 +1071,7 @@ class RecordConsumer[Context = None](ABC):
                         break
                     case ConflictMode.UPDATE:
                         update_data = self._build_update_data(record, record_data)
-                        serializer = self.SERIALIZER_CLASS(
+                        serializer = self.get_serializer_class()(
                             instance=existing,
                             data=update_data,
                             partial=True,
@@ -1077,7 +1092,7 @@ class RecordConsumer[Context = None](ABC):
                             )
                         continue
 
-            serializer = self.SERIALIZER_CLASS(
+            serializer = self.get_serializer_class()(
                 data=record_data, context={"request": self.request}
             )
             if serializer.is_valid():
@@ -4907,6 +4922,7 @@ class LoadFileView(APIView):
         # rather than being dropped silently. Set here so every caller's results
         # dict carries the key.
         results.setdefault("warnings", [])
+        controls_created: list[str] = []
         for record in records:
             ref_id = record.get("ref_id")
             urn = record.get("urn")
@@ -4955,6 +4971,22 @@ class LoadFileView(APIView):
                         requirement_data["status"] = requirement_progress
                     if observations not in (None, ""):
                         requirement_data["observation"] = observations
+                    controls_cell = record.get("applied_controls") or record.get(
+                        "controls"
+                    )
+                    if controls_cell not in (None, ""):
+                        controls = _resolve_applied_controls(
+                            controls_cell, compliance_assessment.folder, request
+                        )
+                        controls_created.extend(controls.created)
+                        requirement_data["applied_controls"] = controls.ids
+                        if controls.failed:
+                            results["warnings"].append(
+                                {
+                                    "requirement": ReqNode.ref_id or ReqNode.urn,
+                                    "warning": f"Could not resolve controls: {', '.join(controls.failed)}",
+                                }
+                            )
                     impl_score = record.get("implementation_score")
                     doc_score = record.get("documentation_score")
                     score = record.get("score")
@@ -5051,6 +5083,10 @@ class LoadFileView(APIView):
                 results["failed"] += 1
                 results["errors"].append({"record": record, "error": str(e)})
 
+        if controls_created:
+            results.setdefault("details", {})["applied_controls_created"] = len(
+                controls_created
+            )
         logger.info(
             f"Compliance Assessment import complete. Success: {results['successful']}, Failed: {results['failed']}"
         )

@@ -368,6 +368,47 @@ EMAIL_TEMPLATE_REGISTRY = {
             "ciso_assistant_url",
         ],
     },
+    "assignment_reopened": {
+        "description": "Sent to a respondent when their audit assignment is reopened for editing",
+        "category": "notification",
+        "variables": [
+            "assessment_name",
+            "reviewer_observation",
+            "ciso_assistant_url",
+        ],
+    },
+    "quick_form_started": {
+        "description": "Sent to a respondent when a quick form is ready for their input",
+        "category": "notification",
+        "variables": [
+            "ciso_assistant_url",
+            "due_date",
+            "quick_form_name",
+            "response_id",
+            "response_name",
+        ],
+    },
+    "quick_form_reopened": {
+        "description": "Sent to a respondent when their quick form response is sent back for changes",
+        "category": "notification",
+        "variables": [
+            "ciso_assistant_url",
+            "observation",
+            "quick_form_name",
+            "response_id",
+            "response_name",
+        ],
+    },
+    "quick_form_submitted": {
+        "description": "Sent to a reviewer when a quick form response is submitted",
+        "category": "notification",
+        "variables": [
+            "ciso_assistant_url",
+            "quick_form_name",
+            "response_id",
+            "response_name",
+        ],
+    },
 }
 
 

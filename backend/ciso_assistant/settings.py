@@ -264,6 +264,18 @@ WORKFLOW_READ_MAX_LIMIT = int(os.environ.get("WORKFLOW_READ_MAX_LIMIT", 500))
 WORKFLOW_LOOP_MAX_ITEMS = int(os.environ.get("WORKFLOW_LOOP_MAX_ITEMS", 500))
 WORKFLOW_LOOP_MAX_PAGES = int(os.environ.get("WORKFLOW_LOOP_MAX_PAGES", 20))
 
+# The timeout is the safety net for a provider that stopped answering; it has to
+# outlast the token ceiling, or it fires first and reports a dead provider
+# instead of a long answer (a local model runs around 30 tokens/second).
+#
+# The ceiling is unset on purpose: it would otherwise reach chat and the
+# questionnaire, which are bounded by the conversation. Unattended callers ask
+# for their own. Set it to bound every call in a deployment.
+LLM_REQUEST_TIMEOUT = float(os.environ.get("LLM_REQUEST_TIMEOUT", 120))
+LLM_MAX_OUTPUT_TOKENS = (
+    int(value) if (value := os.environ.get("LLM_MAX_OUTPUT_TOKENS")) else None
+)
+
 USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
 USE_AZURE = os.getenv("USE_AZURE", "False").lower() in ("true", "1", "yes")
 
@@ -486,6 +498,7 @@ INSTALLED_APPS = [
     "doc_management",
     "portals",
     "core",
+    "notifications",
     "cal",
     "django_filters",
     "library",
@@ -873,9 +886,15 @@ if not IDP_OIDC_PRIVATE_KEY:
             format=serialization.PrivateFormat.PKCS8,
             encryption_algorithm=serialization.NoEncryption(),
         ).decode()
-        _idp_oidc_key_path.parent.mkdir(parents=True, exist_ok=True)
-        _idp_oidc_key_path.touch(mode=0o600)
-        _idp_oidc_key_path.write_text(IDP_OIDC_PRIVATE_KEY)
+        try:
+            _idp_oidc_key_path.parent.mkdir(parents=True, exist_ok=True)
+            _idp_oidc_key_path.touch(mode=0o600)
+            _idp_oidc_key_path.write_text(IDP_OIDC_PRIVATE_KEY)
+        except OSError as exc:
+            # in-memory key: rotates on restart, differs between processes
+            logger.warning(
+                "could not persist the OIDC signing key, keeping it in memory: %s", exc
+            )
 
 # MFA / WebAuthn settings
 MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
@@ -903,6 +922,9 @@ HUEY = {
 
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
+AUDITLOG_EXPORT_XLSX_MAX_ROWS = int(
+    os.environ.get("AUDITLOG_EXPORT_XLSX_MAX_ROWS", 100000)
+)
 
 # Run workflow instances in a Huey worker instead of the triggering request.
 # False only moves the engine into the request: a Huey consumer is required

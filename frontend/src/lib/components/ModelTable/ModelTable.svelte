@@ -6,13 +6,22 @@
 	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '$lib/utils/constants';
 	import {
 		CUSTOM_ACTIONS_COMPONENT,
 		getFieldComponentMap,
 		isFieldFlagEnabled,
-		URL_MODEL_MAP
+		URL_MODEL_MAP,
+		urlModelForDjangoName
 	} from '$lib/utils/crud';
+
+	// Presentational row weighting, declared per model in listViewFields.rowEmphasis.
+	function rowEmphasisClass(row: TableSource): string {
+		const config = listViewFields[URLModel]?.rowEmphasis;
+		if (!config) return '';
+		const expected = 'equals' in config ? config.equals : true;
+		return row.meta?.[config.field] === expected ? (config.class ?? 'font-semibold') : '';
+	}
 
 	// A filter on a flag-gated field must go away with its flag, like its column does.
 	function filtersForActiveFlags(urlModel: string) {
@@ -30,6 +39,7 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount, tick, untrack } from 'svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import { applyUnreadCount } from '$lib/utils/stores';
 
 	// Types
 	import { browser } from '$app/environment';
@@ -55,7 +65,7 @@
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
 	import type { FormDataShape } from '$lib/utils/schemas';
-	import { loadTableData } from './handler';
+	import { getParams, loadTableData } from './handler';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
 	import RowsPerPage from './RowsPerPage.svelte';
@@ -109,6 +119,10 @@
 		displayActions?: boolean;
 		disableCreate?: boolean;
 		disableEdit?: boolean;
+		// A model with no edit form can still have a field worth changing in bulk (an
+		// inbox's read flag), so this is separable from `disableEdit` -- which it
+		// defaults to, leaving existing callers unaffected.
+		disableBatchEdit?: boolean;
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
@@ -130,6 +144,7 @@
 		expectedCount?: number;
 		loading?: boolean;
 		onFilterChange?: (filters: Record<string, any>) => void;
+		onQueryChange?: (query: string) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
@@ -172,6 +187,7 @@
 		displayActions = true,
 		disableCreate = false,
 		disableEdit = false,
+		disableBatchEdit = undefined,
 		disableDelete = false,
 		disableView = false,
 		identifierField = 'id',
@@ -197,6 +213,7 @@
 		expectedCount = undefined,
 		loading = false,
 		onFilterChange = () => {},
+		onQueryChange = () => {},
 		quickFilters,
 		optButton,
 		selectButton,
@@ -309,12 +326,48 @@
 		$tableColumnStates = next;
 	}
 
+	/**
+	 * Open the object a row points at, rather than the row itself. Returns true when it
+	 * handled the click. The PATCH is fire-and-forget so navigation never waits on it.
+	 */
+	function followRowNavigation(rowMetaData: Record<string, any>): boolean {
+		const nav = listViewFields[URLModel]?.rowNavigation;
+		if (!nav) return false;
+
+		const marked =
+			nav.markField && rowMetaData[nav.markField] === false
+				? fetch(`/${URLModel}/${rowMetaData[identifierField]}/${nav.markField}`, {
+						method: 'PATCH',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ [nav.markField]: true })
+					})
+						.then((res) => (res.ok ? res.json() : null))
+						.then(applyUnreadCount)
+						.catch((error) => console.error(`Could not mark ${nav.markField}:`, error))
+				: Promise.resolve();
+
+		const targetModel = urlModelForDjangoName(rowMetaData[nav.modelField]);
+		const targetId = rowMetaData[nav.idField];
+		if (!targetModel || !targetId) {
+			// Unmapped model, or a target deleted under the row: still counts as read, so
+			// only the navigation is skipped. Refetching before the PATCH lands would
+			// bring the row back unread.
+			marked.finally(() => handler.invalidate());
+			return true;
+		}
+
+		goto(`/${targetModel}/${targetId}`, { breadcrumbAction: 'push' });
+		return true;
+	}
+
 	function onRowClick(event: SvelteEvent<MouseEvent, HTMLTableRowElement>, rowIndex: number): void {
 		if (!interactive) return;
 		event.preventDefault();
 		event.stopPropagation();
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
+
+		if (followRowNavigation(rowMetaData)) return;
 
 		const preferredLabel =
 			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
@@ -412,6 +465,10 @@
 			return currentLoad;
 		};
 		handler.onChange((state: State) => {
+			const query = getParams(state);
+			query.delete('offset');
+			query.delete('limit');
+			onQueryChange(query.toString());
 			inFlight += 1;
 			// Per request, so a failure cannot mask a success that overlapped it.
 			let failed = false;
@@ -626,8 +683,14 @@
 	let contextMenuDisplayEdit = $derived(
 		contextMenuCanEditObject &&
 			URLModel &&
+			!disableEdit &&
 			!['frameworks', 'risk-matrices', 'ebios-rm', ...LIBRARY_MANAGED_URL_MODELS].includes(URLModel)
 	);
+
+	// The context menu ignored disableEdit/disableView entirely, so a model that
+	// suppressed them in the row actions still offered them on right-click. View
+	// matches TableRowActions: builtin/urn restricts editing, never reading.
+	let contextMenuDisplayView = $derived(!disableView);
 
 	let contextMenuCanDeleteObject = $derived(
 		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&
@@ -817,12 +880,14 @@
 	// Batch selection state
 	let selectedIds: Set<string> = $state(new Set());
 
+	const noBatchFieldEdit = $derived(disableBatchEdit ?? disableEdit);
+
 	const currentBatchActions: BatchActionConfig[] = $derived(
 		URLModel && model
 			? getBatchActions(URLModel, page.data?.featureflags ?? {}).filter((a) =>
 					a.type === 'delete'
 						? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
-						: !disableEdit && hasPermissionAnywhere(user, `change_${model.name}`)
+						: !noBatchFieldEdit && hasPermissionAnywhere(user, `change_${model.name}`)
 				)
 			: []
 	);
@@ -830,7 +895,7 @@
 	// only the lock/disable filters apply here — the child-model permission
 	// filter above would ask the wrong question for parent_action entries.
 	const extraActions = $derived(
-		extraBatchActions.filter((a) => (a.type === 'delete' ? !disableDelete : !disableEdit))
+		extraBatchActions.filter((a) => (a.type === 'delete' ? !disableDelete : !noBatchFieldEdit))
 	);
 	const allBatchActions = $derived([...currentBatchActions, ...extraActions]);
 	const hasBatchActions = $derived(
@@ -1053,7 +1118,9 @@
 							<tr
 								onclick={(e) => onRowClick(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
-								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
+								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer {rowEmphasisClass(
+									row
+								)}"
 							>
 								{#if hasBatchActions}
 									<td
@@ -1194,7 +1261,7 @@
 														>
 															{safeTranslate(value.name ?? value.str) ?? '-'}
 														</p>
-													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'end_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on' || key === 'last_assessment_date')}
+													{:else if ISO_8601_REGEX.test(value) && DATE_FIELDS_TO_FORMAT.includes(key)}
 														{formatDateOrDateTime(value, getLocale())}
 													{:else if [true, false].includes(value)}
 														{@const bd = booleanDisplay(value, key, URLModel)}
@@ -1351,7 +1418,7 @@
 					</tbody>
 				{/snippet}
 			</ContextMenu.Trigger>
-			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
+			{#if contextMenuDisplayEdit || contextMenuDisplayView || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
 					class="z-50 min-w-[180px] outline-hidden bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200-800 rounded-md"
 				>
@@ -1361,7 +1428,7 @@
 						{/each}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 					{/if}
-					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) || URLModel === 'terminologies' || URLModel === 'entities'}
+					{#if contextMenuDisplayEdit}
 						<ContextMenu.Item
 							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
@@ -1375,6 +1442,8 @@
 						>
 							{m.edit()}
 						</ContextMenu.Item>
+					{/if}
+					{#if contextMenuDisplayView}
 						<ContextMenu.Item
 							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {

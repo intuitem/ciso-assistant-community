@@ -1,4 +1,5 @@
 type SidebarBackendKeys = {
+	notification_center: boolean;
 	xrays: boolean;
 	incidents: boolean;
 	tasks: boolean;
@@ -24,6 +25,11 @@ type SidebarBackendKeys = {
 	custom_fields: boolean;
 	bia: boolean;
 	project_management: boolean;
+	generic_collections: boolean;
+	accreditations: boolean;
+	projects: boolean;
+	responsibility_matrices: boolean;
+	risk_management: boolean;
 	contracts: boolean;
 	reports: boolean;
 	validation_flows: boolean;
@@ -49,6 +55,7 @@ type SidebarBackendKeys = {
 };
 
 type SidebarFrontendKeys = {
+	notifications: boolean;
 	xRays: boolean;
 	incidents: boolean;
 	tasks: boolean;
@@ -74,6 +81,11 @@ type SidebarFrontendKeys = {
 	customFields: boolean;
 	businessImpactAnalysis: boolean;
 	projectManagement: boolean;
+	genericCollections: boolean;
+	accreditations: boolean;
+	projects: boolean;
+	responsibilityMatrices: boolean;
+	risk: boolean;
 	contracts: boolean;
 	reports: boolean;
 	validationFlows: boolean;
@@ -101,6 +113,10 @@ export function getSidebarVisibleItems(
 	featureFlags: Partial<SidebarBackendKeys> | undefined
 ): SidebarFrontendKeys {
 	return {
+		// Default true: unlike the others this is not a module you opt into, it is the
+		// notification channel that works out of the box (notifications_enable_mailing
+		// defaults off, so email alone leaves most installs silent).
+		notifications: featureFlags?.notification_center ?? true,
 		xRays: featureFlags?.xrays ?? false,
 		incidents: featureFlags?.incidents ?? false,
 		tasks: featureFlags?.tasks ?? false,
@@ -126,6 +142,11 @@ export function getSidebarVisibleItems(
 		customFields: featureFlags?.custom_fields ?? false,
 		businessImpactAnalysis: featureFlags?.bia ?? true,
 		projectManagement: featureFlags?.project_management ?? false,
+		genericCollections: featureFlags?.generic_collections ?? true,
+		accreditations: featureFlags?.accreditations ?? true,
+		projects: featureFlags?.projects ?? true,
+		responsibilityMatrices: featureFlags?.responsibility_matrices ?? true,
+		risk: featureFlags?.risk_management ?? true,
 		contracts: featureFlags?.contracts ?? false,
 		reports: featureFlags?.reports ?? false,
 		validationFlows: featureFlags?.validation_flows ?? false,

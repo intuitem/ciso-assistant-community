@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { discardBody } from '$lib/utils/responses';
 import { getModelInfo } from '$lib/utils/crud';
 import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
@@ -7,11 +8,12 @@ import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/acti
 
 export const load: PageServerLoad = async (event) => {
 	// read-only preview: the graph endpoint is enough, the palette needs no catalog here
-	const [detail, res] = await Promise.all([
+	const [detail, graph] = await Promise.all([
 		loadDetail({ event, model: getModelInfo('threat-models'), id: event.params.id }),
-		event.fetch(`${BASE_API_URL}/threat-models/${event.params.id}/graph/`)
+		event
+			.fetch(`${BASE_API_URL}/threat-models/${event.params.id}/graph/`)
+			.then((res) => (res.ok ? res.json() : discardBody(res).then(() => null)))
 	]);
-	const graph = res.ok ? await res.json() : null;
 
 	return { ...detail, graph };
 };
