@@ -26,6 +26,7 @@ Every template follows the same rules:
 | Non-compliant requirement, open and link a remediation control | Requirement assessment updated | Creates an applied control, links it to the requirement, notifies the owner. Never touches the result. |
 | Validation decided, route the outcome | Validation flow updated | Branches on the decision and sends a different email per outcome. The reference example for branches. |
 | Validation requested, notify the approver | Validation flow created | Emails the approver with the deadline. |
+| Audit, AI evidence challenge | Manual, or an audit moving to **in review** | Walks every requirement the audit calls compliant, partially compliant or not applicable — the three answers that assert something. The platform's own quality rules judge each one first, and only the ones they pass reach the configured AI provider, which is asked the single thing a rule cannot decide: whether what is written and attached answers what the requirement asks for. The findings and the answers are assembled into a Record document, and the audit's reviewers get a dated task to read it. Results and scores are never touched — no workflow can write them. `WORKFLOW_AI_MAX_CALLS_PER_RUN` (50 by default) is what bounds a run. Needs the `chat_mode` flag and a provider. Set `audit_id`, or enable the trigger. |
 
 ## Risk
 

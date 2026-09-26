@@ -13,10 +13,19 @@ import zlib
 
 class MappingEngine:
     def __init__(self):
-        self._all_rms = None
-        self._framework_mappings = None
-        self._frameworks = None
-        self._direct_mappings = None
+        """Reads the mapping graph from the database.
+
+        Nothing is kept between instances on purpose. A module-level one is a
+        cache per gunicorn worker, refreshed only in the worker that handled
+        the write, so the others answer from a graph that predates a library
+        loaded elsewhere (#4791). Callers build one per request instead.
+        """
+        self._frameworks = self.load_frameworks()
+        (
+            self._all_rms,
+            self._framework_mappings,
+            self._direct_mappings,
+        ) = self.load_rms_data()
 
         self.fields_to_map: list[str] = [
             "result",
@@ -33,13 +42,8 @@ class MappingEngine:
             "evidences",
         ]
 
-    def _ensure_loaded(self):
-        if self._frameworks is None:
-            self.reload_cache()
-
     @property
     def all_rms(self):
-        self._ensure_loaded()
         return self._all_rms
 
     @all_rms.setter
@@ -48,7 +52,6 @@ class MappingEngine:
 
     @property
     def framework_mappings(self):
-        self._ensure_loaded()
         return self._framework_mappings
 
     @framework_mappings.setter
@@ -57,7 +60,6 @@ class MappingEngine:
 
     @property
     def frameworks(self):
-        self._ensure_loaded()
         return self._frameworks
 
     @frameworks.setter
@@ -66,7 +68,6 @@ class MappingEngine:
 
     @property
     def direct_mappings(self):
-        self._ensure_loaded()
         return self._direct_mappings
 
     @direct_mappings.setter
@@ -85,33 +86,6 @@ class MappingEngine:
         if data is None:
             return None
         return self._decompress_rms(data)
-
-    def reload_cache(self) -> None:
-        """Reloads all engine cache data: frameworks and RMS data.
-
-        Builds new local containers from the database first, and only swaps
-        them into the instance attributes after both reads succeed. If the
-        tables are not yet available (e.g. during migrations), the existing
-        instance cache is preserved so ``_ensure_loaded`` can retry later.
-        """
-        from django.db.utils import ProgrammingError, OperationalError
-
-        try:
-            local_frameworks = self.load_frameworks()
-            (
-                local_all_rms,
-                local_framework_mappings,
-                local_direct_mappings,
-            ) = self.load_rms_data()
-        except ProgrammingError, OperationalError:
-            # Tables might not exist during migrations. Preserve whatever
-            # cache state already exists and let the next access retry.
-            return
-
-        self._frameworks = local_frameworks
-        self._all_rms = local_all_rms
-        self._framework_mappings = local_framework_mappings
-        self._direct_mappings = local_direct_mappings
 
     def load_rms_data(
         self,
@@ -788,6 +762,3 @@ class MappingEngine:
             res[result] += 1
 
         return dict(res)
-
-
-engine = MappingEngine()
