@@ -32,9 +32,9 @@
 	});
 
 	const GROUPS = [
-		{ value: 'compliance_assessments', label: () => m.complianceAssessments() },
-		{ value: 'risk_assessments', label: () => m.riskAssessments() },
 		{ value: 'governance', label: () => m.governance() },
+		{ value: 'risk_assessments', label: () => m.risk() },
+		{ value: 'compliance_assessments', label: () => m.compliance() },
 		{ value: 'operations', label: () => m.operations() }
 	];
 
