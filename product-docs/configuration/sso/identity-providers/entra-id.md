@@ -124,7 +124,11 @@ for instance, for localhost: `http://localhost:8000/api/accounts/oidc/openid_con
 
 ![Paste it into the Server URL field](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fk4VkipPBEeDSWX95eva89a_doc.png?alt=media\&token=959cd638-397a-465f-8502-1d8a0a8369d9)
 
-#### 18. Save your configuration
+#### 18. Enable "This identity provider does not report whether email addresses are verified"
+
+Entra ID does not send the standard `email_verified` claim. Open **Advanced settings** and enable **This identity provider does not report whether email addresses are verified**, otherwise every login is rejected with "Your identity provider did not confirm your email address". You can skip this step if you configured the app registration to provide the `xms_edov` optional claim. Do this only for an app registration limited to **Accounts in this organizational directory only**, so that the email addresses CISO Assistant trusts are the ones your own tenant administrators control.
+
+#### 19. Save your configuration
 
 ![Save your configuration](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FdecHPQUuEQRJt82tDzpzkA_doc.png?alt=media\&token=38769a0b-9b81-4013-9a86-6319b84b6de7)
 

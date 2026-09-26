@@ -880,6 +880,7 @@ export const SSOSettingsSchema = z.object({
 		.optional()
 		.nullable(),
 	oauth_pkce_enabled: z.boolean().optional().default(false),
+	trust_email_without_verified_claim: z.boolean().optional().default(false),
 	additional_scopes: z
 		.string()
 		.trim()

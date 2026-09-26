@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.test import RequestFactory
 
 from global_settings.models import GlobalSettings
@@ -41,20 +42,27 @@ def _set_feature_flag(name, value):
 
 
 def _make_sso_settings(
-    jit_provisioning_enabled=False, default_user_groups=None, attribute_mapping=None
+    jit_provisioning_enabled=False,
+    default_user_groups=None,
+    attribute_mapping=None,
+    provider="openid_connect",
+    trust_unverified_email=False,
 ):
     GlobalSettings.objects.update_or_create(
         name=GlobalSettings.Names.SSO,
         defaults={
             "value": {
                 "is_enabled": True,
-                "provider": "openid_connect",
+                "provider": provider,
                 "provider_id": "test-oidc",
                 "name": "Test OIDC",
                 "client_id": "client-id",
                 "jit_provisioning_enabled": jit_provisioning_enabled,
                 "default_user_groups": default_user_groups or [],
-                "settings": {"attribute_mapping": attribute_mapping or {}},
+                "settings": {
+                    "attribute_mapping": attribute_mapping or {},
+                    "trust_email_without_verified_claim": trust_unverified_email,
+                },
             }
         },
     )
@@ -64,7 +72,9 @@ def _make_sso_settings(
 class TestOIDCPreSSOMainBehavior:
     def test_existing_user_is_matched_and_connected(self):
         user = User.objects.create_user(email="alice@example.com", password="pw")
-        sociallogin = FakeSocialLogin(extra_data={"email": "alice@example.com"})
+        sociallogin = FakeSocialLogin(
+            extra_data={"email": "alice@example.com", "email_verified": True}
+        )
         request = RequestFactory().get("/")
 
         response = SocialAccountAdapter().pre_social_login(request, sociallogin)
@@ -74,7 +84,9 @@ class TestOIDCPreSSOMainBehavior:
         sociallogin.connect.assert_called_once_with(request, user)
 
     def test_unknown_email_without_sso_settings_returns_401(self):
-        sociallogin = FakeSocialLogin(extra_data={"email": "ghost@example.com"})
+        sociallogin = FakeSocialLogin(
+            extra_data={"email": "ghost@example.com", "email_verified": True}
+        )
         request = RequestFactory().get("/")
 
         response = SocialAccountAdapter().pre_social_login(request, sociallogin)
@@ -87,7 +99,9 @@ class TestOIDCPreSSOMainBehavior:
         _make_sso_settings(jit_provisioning_enabled=True)
         _set_feature_flag("jit_provisioning", False)
 
-        sociallogin = FakeSocialLogin(extra_data={"email": "ghost@example.com"})
+        sociallogin = FakeSocialLogin(
+            extra_data={"email": "ghost@example.com", "email_verified": True}
+        )
         request = RequestFactory().get("/")
 
         response = SocialAccountAdapter().pre_social_login(request, sociallogin)
@@ -100,7 +114,9 @@ class TestOIDCPreSSOMainBehavior:
         _make_sso_settings(jit_provisioning_enabled=False)
         _set_feature_flag("jit_provisioning", True)
 
-        sociallogin = FakeSocialLogin(extra_data={"email": "ghost@example.com"})
+        sociallogin = FakeSocialLogin(
+            extra_data={"email": "ghost@example.com", "email_verified": True}
+        )
         request = RequestFactory().get("/")
 
         response = SocialAccountAdapter().pre_social_login(request, sociallogin)
@@ -110,7 +126,9 @@ class TestOIDCPreSSOMainBehavior:
         assert not User.objects.filter(email="ghost@example.com").exists()
 
     def test_no_email_in_extra_data_returns_401(self):
-        sociallogin = FakeSocialLogin(extra_data={"sub": "1234"})
+        sociallogin = FakeSocialLogin(
+            extra_data={"sub": "1234", "email_verified": True}
+        )
         request = RequestFactory().get("/")
 
         response = SocialAccountAdapter().pre_social_login(request, sociallogin)
@@ -121,7 +139,11 @@ class TestOIDCPreSSOMainBehavior:
     def test_existing_user_not_group_synced_when_jit_flag_off(self):
         user = User.objects.create_user(email="bob@example.com", password="pw")
         sociallogin = FakeSocialLogin(
-            extra_data={"email": "bob@example.com", "groups": ["Engineering"]}
+            extra_data={
+                "email": "bob@example.com",
+                "email_verified": True,
+                "groups": ["Engineering"],
+            }
         )
         request = RequestFactory().get("/")
 
@@ -130,6 +152,122 @@ class TestOIDCPreSSOMainBehavior:
         user.refresh_from_db()
         assert list(user.idp_groups.all()) == []
         assert not IdPGroup.objects.filter(name="Engineering").exists()
+
+
+@pytest.mark.django_db
+class TestOIDCEmailVerification:
+    """An OIDC email is accepted on the IdP's own word only: an explicit false
+    rejects, an explicit true accepts, silence needs the operator's trust
+    switch."""
+
+    @pytest.mark.parametrize(
+        "extra_data",
+        [
+            {"email": "alice@example.com", "email_verified": False},
+            {"email": "alice@example.com", "email_verified": "false"},
+            {"userinfo": {"email": "alice@example.com", "email_verified": False}},
+            {"email": "alice@example.com", "id_token": {"email_verified": False}},
+            {"email": "alice@example.com", "xms_edov": False},
+            # userinfo vouches, the id_token does not: the refusal wins
+            {
+                "userinfo": {"email": "alice@example.com", "email_verified": True},
+                "id_token": {"email_verified": False},
+            },
+        ],
+    )
+    def test_explicitly_unverified_email_is_refused(self, extra_data):
+        User.objects.create_user(email="alice@example.com", password="pw")
+        # the trust switch never overrides an explicit refusal
+        _make_sso_settings(trust_unverified_email=True)
+        sociallogin = FakeSocialLogin(extra_data=extra_data)
+
+        with pytest.raises(ValidationError) as exc:
+            SocialAccountAdapter().pre_social_login(
+                RequestFactory().get("/"), sociallogin
+            )
+
+        assert exc.value.code == "ssoEmailNotVerified"
+        sociallogin.connect.assert_not_called()
+
+    def test_unusable_claim_value_is_refused_not_guessed(self):
+        User.objects.create_user(email="alice@example.com", password="pw")
+        sociallogin = FakeSocialLogin(
+            extra_data={"email": "alice@example.com", "email_verified": "maybe"}
+        )
+
+        with pytest.raises(ValidationError) as exc:
+            SocialAccountAdapter().pre_social_login(
+                RequestFactory().get("/"), sociallogin
+            )
+
+        assert exc.value.code == "ssoEmailNotVerified"
+
+    def test_entra_xms_edov_true_counts_as_verified(self):
+        user = User.objects.create_user(email="alice@example.com", password="pw")
+        sociallogin = FakeSocialLogin(
+            extra_data={"id_token": {"email": "alice@example.com", "xms_edov": True}}
+        )
+        request = RequestFactory().get("/")
+
+        SocialAccountAdapter().pre_social_login(request, sociallogin)
+
+        sociallogin.connect.assert_called_once_with(request, user)
+
+    def test_missing_claim_is_refused_by_default(self):
+        User.objects.create_user(email="alice@example.com", password="pw")
+        sociallogin = FakeSocialLogin(extra_data={"email": "alice@example.com"})
+
+        with pytest.raises(ValidationError) as exc:
+            SocialAccountAdapter().pre_social_login(
+                RequestFactory().get("/"), sociallogin
+            )
+
+        assert exc.value.code == "ssoEmailVerificationClaimMissing"
+        sociallogin.connect.assert_not_called()
+
+    def test_missing_claim_is_accepted_with_trust_switch(self):
+        user = User.objects.create_user(email="alice@example.com", password="pw")
+        _make_sso_settings(trust_unverified_email=True)
+        sociallogin = FakeSocialLogin(extra_data={"email": "alice@example.com"})
+        request = RequestFactory().get("/")
+
+        SocialAccountAdapter().pre_social_login(request, sociallogin)
+
+        sociallogin.connect.assert_called_once_with(request, user)
+
+    def test_jit_refuses_missing_claim_by_default(self):
+        _make_sso_settings(jit_provisioning_enabled=True)
+        _set_feature_flag("jit_provisioning", True)
+        sociallogin = FakeSocialLogin(extra_data={"email": "new.user@example.com"})
+
+        with pytest.raises(ValidationError):
+            SocialAccountAdapter().pre_social_login(
+                RequestFactory().get("/"), sociallogin
+            )
+
+        assert not User.objects.filter(email="new.user@example.com").exists()
+
+    def test_jit_provisions_missing_claim_with_trust_switch(self):
+        _make_sso_settings(jit_provisioning_enabled=True, trust_unverified_email=True)
+        _set_feature_flag("jit_provisioning", True)
+        sociallogin = FakeSocialLogin(extra_data={"email": "new.user@example.com"})
+
+        SocialAccountAdapter().pre_social_login(RequestFactory().get("/"), sociallogin)
+
+        assert User.objects.filter(
+            email="new.user@example.com", is_jit_provisioned=True
+        ).exists()
+
+    def test_saml_is_not_subject_to_the_oidc_rule(self):
+        _make_sso_settings(provider="saml")
+        sociallogin = FakeSocialLogin(
+            extra_data={"urn:oid:0.9.2342.19200300.100.1.3": ["alice@example.com"]},
+            provider="saml",
+        )
+
+        # No verification claim and no trust switch would refuse an OIDC login
+        # here; SAML identity is resolved by the SAML ACS view instead.
+        SocialAccountAdapter().pre_social_login(RequestFactory().get("/"), sociallogin)
 
 
 @pytest.mark.django_db
@@ -142,7 +280,7 @@ class TestOIDCPreSSOJitProvisioning:
         _set_feature_flag("jit_provisioning", True)
 
         sociallogin = FakeSocialLogin(
-            extra_data={"email": "new.user@example.com"},
+            extra_data={"email": "new.user@example.com", "email_verified": True},
             first_name="New",
             last_name="User",
         )
@@ -164,7 +302,11 @@ class TestOIDCPreSSOJitProvisioning:
         _set_feature_flag("jit_provisioning", True)
 
         sociallogin = FakeSocialLogin(
-            extra_data={"email": "new.user@example.com", "groups": ["Engineering"]},
+            extra_data={
+                "email": "new.user@example.com",
+                "email_verified": True,
+                "groups": ["Engineering"],
+            },
         )
         request = RequestFactory().get("/")
 
@@ -181,7 +323,11 @@ class TestOIDCPreSSOJitProvisioning:
         _set_feature_flag("jit_provisioning", True)
 
         sociallogin = FakeSocialLogin(
-            extra_data={"email": "carol@example.com", "groups": ["Sales"]}
+            extra_data={
+                "email": "carol@example.com",
+                "email_verified": True,
+                "groups": ["Sales"],
+            }
         )
         request = RequestFactory().get("/")
 
@@ -201,7 +347,11 @@ class TestOIDCPreSSOJitProvisioning:
         _set_feature_flag("jit_provisioning", True)
 
         sociallogin = FakeSocialLogin(
-            extra_data={"email": "dora@example.com", "groups": []}
+            extra_data={
+                "email": "dora@example.com",
+                "email_verified": True,
+                "groups": [],
+            }
         )
         request = RequestFactory().get("/")
 
@@ -222,7 +372,11 @@ class TestOIDCPreSSOJitProvisioning:
         _set_feature_flag("jit_provisioning", True)
 
         sociallogin = FakeSocialLogin(
-            extra_data={"email": "eve@example.com", "groups": ["Something Else"]}
+            extra_data={
+                "email": "eve@example.com",
+                "email_verified": True,
+                "groups": ["Something Else"],
+            }
         )
         request = RequestFactory().get("/")
 

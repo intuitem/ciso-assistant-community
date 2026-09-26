@@ -11,3 +11,5 @@ class AuthError(AllauthAuthError):
     FAILED_TO_CONTACT_PROVIDER = "failedToContactProvider"
     USER_DOES_NOT_EXIST = "UserDoesNotExist"
     USER_IS_NOT_SSO = "userIsNotSSO"
+    EMAIL_NOT_VERIFIED = "ssoEmailNotVerified"
+    EMAIL_VERIFICATION_CLAIM_MISSING = "ssoEmailVerificationClaimMissing"

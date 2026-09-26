@@ -109,6 +109,7 @@
 		{
 			"username": "admin@tests.com",
 			"enabled": true,
+			"emailVerified": true,
 			"firstName": "John",
 			"lastName": "Doe",
 			"email": "admin@tests.com",
