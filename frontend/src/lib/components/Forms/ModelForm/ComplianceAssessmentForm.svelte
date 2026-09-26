@@ -75,6 +75,7 @@
 
 	const formErrors = form.errors;
 	let rescalePanel = $state<HTMLElement | null>(null);
+	let rescaleConfirmButton = $state<HTMLButtonElement | null>(null);
 	let rescaleImpact = $derived.by(() => {
 		const raw = ($formErrors as Record<string, string[] | undefined>)?.confirm_rescale?.[0];
 		if (!raw) return null;
@@ -86,7 +87,23 @@
 	});
 
 	$effect(() => {
-		if (rescaleImpact && rescalePanel) rescalePanel.scrollIntoView({ block: 'center' });
+		if (!rescaleImpact || !rescalePanel) return;
+		rescalePanel.scrollIntoView({ block: 'center' });
+		rescaleConfirmButton?.focus();
+	});
+
+	// The confirmation is single-use: whatever the outcome of the submission it
+	// was sent with, the next one has to be confirmed again.
+	const submitting = form.submitting;
+	let wasSubmitting = false;
+	$effect(() => {
+		const busy = $submitting;
+		untrack(() => {
+			if (wasSubmitting && !busy && $formData.confirm_rescale) {
+				form.form.update((d) => ({ ...d, confirm_rescale: false }), { taint: false });
+			}
+			wasSubmitting = busy;
+		});
 	});
 
 	const SCALE_ERROR_FIELDS = [...SCALE_FIELDS, 'target_score'];
@@ -102,7 +119,11 @@
 	}
 
 	function dismissRescale() {
+		const saveButton = rescalePanel
+			?.closest('form')
+			?.querySelector<HTMLButtonElement>('[data-testid="save-button"]');
 		form.errors.update((e) => ({ ...e, confirm_rescale: undefined }));
+		saveButton?.focus();
 	}
 
 	function onScaleChange(value: ScoreScaleValue | null) {
@@ -139,8 +160,9 @@
 	let frameworkRequest = 0;
 
 	async function handleFrameworkChange(id: string) {
+		const request = ++frameworkRequest;
+		if (!id) frameworkScoring = null;
 		if (id) {
-			const request = ++frameworkRequest;
 			await fetch(`/frameworks/${id}`)
 				.then((r) => r.json())
 				.then((r) => {
@@ -336,6 +358,7 @@
 				type="button"
 				class="btn btn-sm preset-filled-warning-500"
 				onclick={confirmRescale}
+				bind:this={rescaleConfirmButton}
 				data-testid="score-rescale-confirm">{m.scoreScaleConfirmSave()}</button
 			>
 			<button type="button" class="btn btn-sm preset-tonal-surface" onclick={dismissRescale}

@@ -591,14 +591,19 @@ export const ComplianceAssessmentSchema = z.object({
 	max_score: z.number().int().optional().nullable(),
 	scores_definition: z
 		.array(
-			z.object({
+			z.looseObject({
 				score: z.number().int(),
 				name: z.string().optional().nullable(),
 				description: z.string().optional().nullable(),
+				description_doc: z.string().optional().nullable(),
 				translations: z
 					.record(
 						z.string(),
-						z.object({ name: z.string().optional(), description: z.string().optional() })
+						z.looseObject({
+							name: z.string().optional(),
+							description: z.string().optional(),
+							description_doc: z.string().optional()
+						})
 					)
 					.optional()
 			})

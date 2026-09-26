@@ -11,6 +11,7 @@
 		resolveLevelName,
 		localizedLevelField,
 		scaleLevels,
+		seedLevels,
 		type ScoreLevel,
 		type ScoreScaleValue,
 		type DefaultScoreScale
@@ -69,6 +70,8 @@
 		Boolean(
 			currentRange &&
 			!rangeError &&
+			effectiveRange.min != null &&
+			effectiveRange.max != null &&
 			(effectiveRange.min !== currentRange.min || effectiveRange.max !== currentRange.max)
 		)
 	);
@@ -92,28 +95,6 @@
 						scores_definition: $state.snapshot(levels)
 					}
 		);
-	}
-
-	function seedLevels(
-		source: ScoreLevel[],
-		sourcePreset: ReturnType<typeof getPreset>,
-		lo: number,
-		hi: number
-	): ScoreLevel[] {
-		if (!hasLabelledLevels(lo, hi)) return [];
-		return Array.from({ length: hi - lo + 1 }, (_, i) => lo + i).map((score) => {
-			const level = source.find((l) => l.score === score);
-			const translations = structuredClone(level?.translations ?? {});
-			for (const loc of languages) {
-				const name = resolveLevelName(level, sourcePreset, score, loc);
-				if (name) translations[loc] = { ...translations[loc], name };
-			}
-			return {
-				score,
-				name: level?.name ?? translations[languages[0]]?.name ?? '',
-				translations
-			};
-		});
 	}
 
 	let pendingSelection = $state<string | null>(null);
@@ -162,9 +143,15 @@
 			if (selection === 'default') {
 				min = defaultScale?.min_score ?? 0;
 				max = defaultScale?.max_score ?? 5;
-				levels = seedLevels(scaleLevels(defaultScale?.scores_definition), defaultPreset, min, max);
+				levels = seedLevels(
+					scaleLevels(defaultScale?.scores_definition),
+					defaultPreset,
+					min,
+					max,
+					languages
+				);
 			} else {
-				levels = seedLevels(levels, preset, min, max);
+				levels = seedLevels(levels, preset, min, max, languages);
 			}
 			selection = 'custom';
 		} else if (id === 'default') {
@@ -208,11 +195,11 @@
 		else translations[loc] = { ...translations[loc], name: text };
 
 		if (preset) {
-			if (Object.keys(translations).length) next.push({ score, translations });
+			if (Object.keys(translations).length) next.push({ ...level, score, translations });
 		} else {
 			const fallback =
 				translations[languages[0]]?.name ?? Object.values(translations).find((t) => t.name)?.name;
-			next.push({ score, name: fallback ?? '', translations });
+			next.push({ ...level, score, name: fallback ?? '', translations });
 		}
 		levels = next.sort((a, b) => a.score - b.score);
 		commit();

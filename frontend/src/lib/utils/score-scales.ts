@@ -115,6 +115,33 @@ export function localizedLevelField(
 	return (preset && presetLevelName(preset, level.score, locale)) || level[field] || undefined;
 }
 
+// Rebuild a full level list for editing, keeping every other level field
+// (description, description_doc, …) and resolving names in each language.
+export function seedLevels(
+	source: ScoreLevel[],
+	sourcePreset: ScoreScalePreset | undefined,
+	lo: number,
+	hi: number,
+	languages: string[]
+): ScoreLevel[] {
+	if (!hasLabelledLevels(lo, hi)) return [];
+	return Array.from({ length: hi - lo + 1 }, (_, i) => lo + i).map((score) => {
+		const level = source.find((l) => l.score === score);
+		const { preset: _preset, ...rest } = structuredClone(level ?? { score });
+		const translations = rest.translations ?? {};
+		for (const loc of languages) {
+			const name = resolveLevelName(level, sourcePreset, score, loc);
+			if (name) translations[loc] = { ...translations[loc], name };
+		}
+		return {
+			...rest,
+			score,
+			name: level?.name ?? translations[languages[0]]?.name ?? '',
+			translations
+		};
+	});
+}
+
 export function resolveLevelName(
 	level: ScoreLevel | undefined,
 	preset: ScoreScalePreset | undefined,

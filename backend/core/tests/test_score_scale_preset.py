@@ -678,3 +678,109 @@ class TestRescaleConfirmation:
         assert response.status_code == 200, response.json()
         setup["ra"].refresh_from_db()
         assert setup["ra"].score == 3
+
+
+_LIB = """
+urn: urn:intuitem:test:library:scale-update
+locale: en
+ref_id: SCALE-UPDATE
+name: Scale update
+description: Scale update
+copyright: Test
+version: {version}
+publication_date: 2026-09-26
+provider: test
+packager: test
+objects:
+  framework:
+    urn: urn:intuitem:test:framework:scale-update
+    ref_id: SCALE-UPDATE
+    name: Scale update
+    description: Scale update
+{scale}    requirement_nodes:
+    - urn: urn:intuitem:test:req_node:scale-update:req-1
+      assessable: true
+      depth: 1
+      ref_id: REQ-1
+      name: Requirement 1
+""".lstrip()
+
+_SCALE_V2 = """    min_score: 1
+    max_score: 4
+    scores_definition:
+    - score: 1
+      name: Low
+      description: Low level
+    - score: 2
+      name: Medium
+    - score: 3
+      name: High
+    - score: 4
+      name: Very high
+"""
+
+
+@pytest.mark.django_db
+class TestLibraryUpdateWithPreset:
+    def test_preset_follows_framework_scale_change(self):
+        from core.models import LoadedLibrary, StoredLibrary
+
+        folder = Folder.get_root_folder()
+        stored, _ = StoredLibrary.store_library_content(
+            _LIB.format(version=1, scale="").encode("utf-8")
+        )
+        stored.load()
+        fw = Framework.objects.get(urn="urn:intuitem:test:framework:scale-update")
+        preset_ca = ComplianceAssessment.objects.create(
+            name="On preset",
+            framework=fw,
+            folder=folder,
+            score_scale_preset="0-100",
+            min_score=0,
+            max_score=100,
+            scores_definition=[],
+        )
+        custom_ca = ComplianceAssessment.objects.create(
+            name="Custom",
+            framework=fw,
+            folder=folder,
+            min_score=1,
+            max_score=3,
+            scores_definition=[{"score": 1, "name": "Mine"}],
+        )
+
+        StoredLibrary.store_library_content(
+            _LIB.format(version=2, scale=_SCALE_V2).encode("utf-8")
+        )
+        error = LoadedLibrary.objects.get(urn=stored.urn).update(strategy="clamp")
+        assert error is None
+
+        preset_ca.refresh_from_db()
+        assert (preset_ca.min_score, preset_ca.max_score) == (1, 4)
+        assert preset_ca.score_scale_preset is None
+        levels = preset_ca.get_scale_levels()
+        assert [lvl["name"] for lvl in levels] == ["Low", "Medium", "High", "Very high"]
+        assert levels[0]["description"] == "Low level"
+
+        custom_ca.refresh_from_db()
+        assert (custom_ca.min_score, custom_ca.max_score) == (1, 3)
+        assert custom_ca.scores_definition == [{"score": 1, "name": "Mine"}]
+
+
+@pytest.mark.django_db
+class TestRescaleReevaluatesOutcomes:
+    def test_outcomes_evaluated_once_after_commit(
+        self, setup, django_capture_on_commit_callbacks, monkeypatch
+    ):
+        calls = []
+        monkeypatch.setattr(
+            "core.cel_service.evaluate_outcomes", lambda ca: calls.append(ca.pk)
+        )
+        ca, ra = setup["ca"], setup["ra"]
+        ra.is_scored, ra.score = True, 80
+        ra.save()
+        with django_capture_on_commit_callbacks(execute=True):
+            _update(ca, {"score_scale_preset": "1-5"})[0].save()
+        assert calls.count(ca.pk) == 1
+        ra.refresh_from_db()
+        assert ra.score == 4

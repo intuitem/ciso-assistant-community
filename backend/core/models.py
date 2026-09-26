@@ -1863,7 +1863,11 @@ class LibraryUpdater:
                     scale_on_prev_defaults = (
                         ca.min_score == prev_min and ca.max_score == prev_max
                     )
-                    definition_on_prev_defaults = ca.scores_definition == prev_def
+                    # An empty definition means "no labels" whether stored as [] or None.
+                    definition_on_prev_defaults = (ca.scores_definition or None) == (
+                        prev_def or None
+                    )
+                    preset_dropped = False
 
                     needs_update = False
                     if scale_on_prev_defaults and score_boundaries_changed:
@@ -1871,7 +1875,14 @@ class LibraryUpdater:
                         ca.max_score = new_framework.max_score
                         needs_update = True
                         ca_with_scale_change.append(ca)
-                    if definition_on_prev_defaults and scores_definition_changed:
+                        # The audit follows the framework now; a preset's catalog
+                        # labels (and wording overrides) no longer apply.
+                        if ca.score_scale_preset:
+                            ca.score_scale_preset = None
+                            preset_dropped = True
+                    if (definition_on_prev_defaults or preset_dropped) and (
+                        scores_definition_changed or preset_dropped
+                    ):
                         ca.scores_definition = new_framework.scores_definition
                         needs_update = True
                     if needs_update:
@@ -1880,7 +1891,12 @@ class LibraryUpdater:
                 if compliance_assessments_to_update:
                     ComplianceAssessment.objects.bulk_update(
                         compliance_assessments_to_update,
-                        ["min_score", "max_score", "scores_definition"],
+                        [
+                            "min_score",
+                            "max_score",
+                            "scores_definition",
+                            "score_scale_preset",
+                        ],
                         batch_size=100,
                     )
                     ca_bounds = {
@@ -8828,6 +8844,15 @@ class ComplianceAssessment(Assessment):
                     ra, field, rescale_score(getattr(ra, field), old_range, new_range)
                 )
             RequirementAssessment.objects.bulk_update(rows, [field])
+
+        # bulk_update skips RequirementAssessment.save(), which normally
+        # re-evaluates outcomes when a score changes.
+        def _evaluate():
+            from core.cel_service import evaluate_outcomes
+
+            evaluate_outcomes(self)
+
+        _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
 
     def save(self, *args, **kwargs) -> None:
         if self.min_score is None:
