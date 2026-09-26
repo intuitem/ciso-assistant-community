@@ -7342,8 +7342,52 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update({"pk": self.kwargs["pk"]})
+        context.update(
+            {
+                "pk": self.kwargs["pk"],
+                "indirect_evidence_links": self._get_indirect_evidence_links(),
+            }
+        )
         return context
+
+    def _get_indirect_evidence_links(self):
+        """Map (requirement_assessment_id, evidence_id) -> [names] of the applied
+        controls and task templates linking that evidence to that requirement assessment.
+        Computed once per request to avoid per-evidence queries.
+        TaskNode.evidences is deprecated (evidences live on the task template)."""
+        pk = self.kwargs["pk"]
+        links = defaultdict(list)
+
+        # Only expose applied controls and task templates the caller is allowed to view
+        applied_controls = AppliedControl.objects.filter(
+            requirement_assessments__compliance_assessment_id=pk,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, AppliedControl
+            ),
+        ).distinct()
+        task_templates = TaskTemplate.objects.filter(
+            requirement_assessments__compliance_assessment_id=pk,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, TaskTemplate
+            ),
+        ).distinct()
+
+        for queryset in (applied_controls, task_templates):
+            queryset = queryset.prefetch_related(
+                "evidences",
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.filter(
+                        compliance_assessment_id=pk
+                    ),
+                ),
+            )
+            for via in queryset:
+                evidence_ids = {e.id for e in via.evidences.all()}
+                for req_assessment in via.requirement_assessments.all():
+                    for evidence_id in evidence_ids:
+                        links[(req_assessment.id, evidence_id)].append(via.name)
+        return links
 
     def get_queryset(self):
         """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
@@ -7358,18 +7402,30 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
 
         compliance_assessment = ComplianceAssessment.objects.get(id=compliance_id)
 
-        # Get all requirement assessments for this compliance assessment
-        requirement_assessments = RequirementAssessment.objects.filter(
-            compliance_assessment=compliance_assessment
-        ).prefetch_related("evidences", "applied_controls__evidences")
-
         # Get visible evidences to filter result
         viewable_evidences = RoleAssignment.get_viewable_object_ids(
             self.request.user, Evidence
         )
 
-        # Collect evidence IDs from both direct and indirect relationships
+        # Get all requirement assessments for this compliance assessment,
+        # only walking through applied controls the caller is allowed to view
+        viewable_applied_controls = AppliedControl.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, AppliedControl
+            )
+        ).prefetch_related("evidences")
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment
+        ).prefetch_related(
+            "evidences",
+            Prefetch("applied_controls", queryset=viewable_applied_controls),
+        )
+
+        # Collect evidence IDs from global, direct and indirect relationships
         evidence_ids = set()
+        for evidence in compliance_assessment.evidences.all():
+            if evidence.id in viewable_evidences:
+                evidence_ids.add(evidence.id)
         for req_assessment in requirement_assessments:
             for evidence in req_assessment.evidences.all():
                 if evidence.id in viewable_evidences:
@@ -7378,6 +7434,22 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
                 for evidence in applied_control.evidences.all():
                     if evidence.id in viewable_evidences:
                         evidence_ids.add(evidence.id)
+
+        # Evidences linked through viewable task templates attached to the
+        # compliance assessment or its requirement assessments
+        task_templates = TaskTemplate.objects.filter(
+            Q(compliance_assessments=compliance_assessment)
+            | Q(requirement_assessments__compliance_assessment=compliance_assessment),
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, TaskTemplate
+            ),
+        ).distinct()
+        task_evidence_ids = set(
+            Evidence.objects.filter(task_templates__in=task_templates).values_list(
+                "id", flat=True
+            )
+        )
+        evidence_ids.update(task_evidence_ids & set(viewable_evidences))
 
         return Evidence.objects.filter(id__in=evidence_ids).distinct()
 
