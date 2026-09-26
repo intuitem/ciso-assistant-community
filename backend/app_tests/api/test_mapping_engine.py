@@ -656,3 +656,103 @@ class TestBestMappingInferences:
         assert best_path == ["urn:fw:A", "urn:fw:C", "urn:fw:D"]
         assert "urn:req:D1" in inferences["requirement_assessments"]
         assert "urn:req:D2" in inferences["requirement_assessments"]
+
+
+# ---------------------------------------------------------------------------
+# Target audit range — an audit can have its own scale, unlike its framework
+# ---------------------------------------------------------------------------
+
+
+class TestTargetAuditRange:
+    def _mapped(self, engine, target_range=None, score=80):
+        src_ra = {
+            "result": "compliant",
+            "status": "done",
+            "score": score,
+            "is_scored": True,
+            "documentation_score": 60,
+            "applied_controls": [],
+            "security_exceptions": [],
+            "evidences": [],
+            "name": "RA-src",
+            "id": "ra-src-id",
+            "source_framework": {"id": "fw-a-id", "name": "Framework A"},
+        }
+        rms = _rms(
+            requirement_mappings=[
+                {
+                    "source_requirement_urn": "urn:req:A1",
+                    "target_requirement_urn": "urn:req:B1",
+                    "relationship": "equal",
+                }
+            ]
+        )
+        result = engine.map_audit_results(
+            _source_audit({"urn:req:A1": src_ra}),
+            rms,
+            hop_index=1,
+            path=["urn:fw:A", "urn:fw:B"],
+            target_range=target_range,
+        )
+        return result["requirement_assessments"]["urn:req:B1"]
+
+    def test_target_audit_range_blocks_scores_despite_matching_framework(self):
+        engine = _make_engine(
+            frameworks={
+                "urn:fw:A": {"min_score": 0, "max_score": 100},
+                "urn:fw:B": {"min_score": 0, "max_score": 100},
+            }
+        )
+        target_ra = self._mapped(engine, target_range=(1, 5))
+        assert target_ra["result"] == "compliant"
+        assert target_ra.get("score") is None
+        assert target_ra.get("documentation_score") is None
+
+    def test_target_audit_range_allows_scores_despite_framework(self):
+        engine = _make_engine(
+            frameworks={
+                "urn:fw:A": {"min_score": 0, "max_score": 100},
+                "urn:fw:B": {"min_score": 1, "max_score": 5},
+            }
+        )
+        assert self._mapped(engine, target_range=(0, 100))["score"] == 80
+
+    def test_best_inferences_applies_range_on_final_hop(self):
+        engine = _make_engine(
+            frameworks={
+                "urn:fw:A": {"min_score": 0, "max_score": 100},
+                "urn:fw:B": {"min_score": 0, "max_score": 100},
+            }
+        )
+        rms = _rms(
+            requirement_mappings=[
+                {
+                    "source_requirement_urn": "urn:req:A1",
+                    "target_requirement_urn": "urn:req:B1",
+                    "relationship": "equal",
+                }
+            ]
+        )
+        engine.all_paths_between = lambda *_args, **_kw: [["urn:fw:A", "urn:fw:B"]]
+        engine.get_rms = lambda _pair: rms
+        source = _source_audit(
+            {
+                "urn:req:A1": {
+                    "result": "compliant",
+                    "score": 80,
+                    "is_scored": True,
+                    "applied_controls": [],
+                    "security_exceptions": [],
+                    "evidences": [],
+                    "name": "RA",
+                    "id": "ra",
+                    "source_framework": {"id": "fw-a-id", "name": "A"},
+                }
+            }
+        )
+        blocked, _ = engine.best_mapping_inferences(
+            source, "urn:fw:A", "urn:fw:B", target_range=(1, 5)
+        )
+        assert blocked["requirement_assessments"]["urn:req:B1"].get("score") is None
+        allowed, _ = engine.best_mapping_inferences(source, "urn:fw:A", "urn:fw:B")
+        assert allowed["requirement_assessments"]["urn:req:B1"]["score"] == 80

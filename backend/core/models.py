@@ -1,3 +1,7 @@
+import copy
+import math
+from decimal import ROUND_HALF_UP, Decimal
+from fractions import Fraction
 import json
 import os
 import re
@@ -1862,7 +1866,11 @@ class LibraryUpdater:
                     scale_on_prev_defaults = (
                         ca.min_score == prev_min and ca.max_score == prev_max
                     )
-                    definition_on_prev_defaults = ca.scores_definition == prev_def
+                    # An empty definition means "no labels" whether stored as [] or None.
+                    definition_on_prev_defaults = (ca.scores_definition or None) == (
+                        prev_def or None
+                    )
+                    preset_dropped = False
 
                     needs_update = False
                     if scale_on_prev_defaults and score_boundaries_changed:
@@ -1870,7 +1878,22 @@ class LibraryUpdater:
                         ca.max_score = new_framework.max_score
                         needs_update = True
                         ca_with_scale_change.append(ca)
-                    if definition_on_prev_defaults and scores_definition_changed:
+                        # The audit follows the framework now; a preset's catalog
+                        # labels (and wording overrides) no longer apply.
+                        if ca.score_scale_preset:
+                            ca.score_scale_preset = None
+                            preset_dropped = True
+                    # Labels only follow the framework together with its range:
+                    # an audit on its own range keeps its own (possibly empty)
+                    # labels.
+                    range_follows = scale_on_prev_defaults or (
+                        ca.min_score,
+                        ca.max_score,
+                    ) == (new_framework.min_score, new_framework.max_score)
+                    if (
+                        (definition_on_prev_defaults and range_follows)
+                        or preset_dropped
+                    ) and (scores_definition_changed or preset_dropped):
                         ca.scores_definition = new_framework.scores_definition
                         needs_update = True
                     if needs_update:
@@ -1879,7 +1902,12 @@ class LibraryUpdater:
                 if compliance_assessments_to_update:
                     ComplianceAssessment.objects.bulk_update(
                         compliance_assessments_to_update,
-                        ["min_score", "max_score", "scores_definition"],
+                        [
+                            "min_score",
+                            "max_score",
+                            "scores_definition",
+                            "score_scale_preset",
+                        ],
                         batch_size=100,
                     )
                     ca_bounds = {
@@ -1997,10 +2025,10 @@ class LibraryUpdater:
                                 ra_pks_to_update.add(ra.pk)
                                 requirement_assessment_objects_to_update.append(ra)
 
-                        if (
-                            ra.is_scored
-                            and ra.score is not None
-                            and ra.compliance_assessment in ca_with_scale_change
+                        # Every stored value moves to the new range, ticked or not,
+                        # so none is left outside it.
+                        if ra.compliance_assessment in ca_with_scale_change and (
+                            ra.score is not None or ra.documentation_score is not None
                         ):
                             default_min = (
                                 0
@@ -2034,17 +2062,10 @@ class LibraryUpdater:
                                         and prev_max is not None
                                         and prev_min != prev_max
                                     ):
-                                        # Normalize to 0-1 range
-                                        normalized = (value - prev_min) / (
-                                            prev_max - prev_min
-                                        )
-                                        # Scale to new range
-                                        scaled = ca_min + (
-                                            normalized * (ca_max - ca_min)
-                                        )
-                                        # Round + clamp
-                                        return max(
-                                            min(int(round(scaled)), ca_max), ca_min
+                                        return rescale_score(
+                                            value,
+                                            (prev_min, prev_max),
+                                            (ca_min, ca_max),
                                         )
                                     else:
                                         # Old range invalid → clamp
@@ -2059,9 +2080,12 @@ class LibraryUpdater:
 
                             if new_score != old_score:
                                 ra.score = new_score
-                                ra.is_scored = (
-                                    new_score is not None and self.strategy != "reset"
-                                )
+                                # An unticked (stale) score must not become scored.
+                                if ra.is_scored:
+                                    ra.is_scored = (
+                                        new_score is not None
+                                        and self.strategy != "reset"
+                                    )
                                 if ra.pk not in ra_pks_to_update:
                                     ra_pks_to_update.add(ra.pk)
                                     requirement_assessment_objects_to_update.append(ra)
@@ -2204,6 +2228,16 @@ class LibraryUpdater:
                         ],
                         batch_size=100,
                     )
+                    # bulk_update skips RequirementAssessment.save(), which
+                    # re-evaluates outcomes when a score changes.
+                    for ca in ca_with_scale_change:
+
+                        def _evaluate(ca=ca):
+                            from core.cel_service import evaluate_outcomes
+
+                            evaluate_outcomes(ca)
+
+                        _defer_once("_pending_cel_evaluations", ca.pk, _evaluate)
 
                 # Keep selected_implementation_groups consistent for dynamic frameworks
                 # This must run even if no RA scalar fields changed, because answer
@@ -3699,6 +3733,61 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
                 .exists()
             )
         return self._is_dynamic_cache
+
+    @staticmethod
+    def scale_bound_querysets(framework):
+        return (
+            QuestionChoice.objects.filter(
+                question__requirement_node__framework=framework,
+                add_score__isnull=False,
+            ),
+            RequirementNode.objects.filter(framework=framework).filter(
+                Q(min_score__isnull=False)
+                | Q(max_score__isnull=False)
+                | Q(scores_definition_ref__gt="")
+            ),
+        )
+
+    @classmethod
+    def scale_bound_q(cls, framework):
+        """Boolean expression for annotating querysets (framework may be an OuterRef)."""
+        choices, nodes = cls.scale_bound_querysets(framework)
+        return Exists(choices) | Exists(nodes)
+
+    @property
+    def is_scale_bound(self) -> bool:
+        return any(qs.exists() for qs in self.scale_bound_querysets(self))
+
+    def declares_scale(self) -> bool:
+        return bool(self.scores_definition) or (self.min_score, self.max_score) != (
+            0,
+            100,
+        )
+
+    def default_audit_scale(self, instance_default=..., scale_bound=None) -> dict:
+        """Scale a new audit on this framework gets when none is chosen: the
+        instance default for frameworks that declare no scale, else the framework's."""
+        if instance_default is ...:
+            instance_default = get_default_score_scale()
+        if instance_default and not self.declares_scale():
+            bound = self.is_scale_bound if scale_bound is None else scale_bound
+            if not bound:
+                return {
+                    "source": "instance",
+                    "score_scale_preset": instance_default.get("score_scale_preset"),
+                    "min_score": instance_default["min_score"],
+                    "max_score": instance_default["max_score"],
+                    "scores_definition": copy.deepcopy(
+                        instance_default.get("scores_definition")
+                    ),
+                }
+        return {
+            "source": "framework",
+            "score_scale_preset": None,
+            "min_score": self.min_score,
+            "max_score": self.max_score,
+            "scores_definition": self.scores_definition,
+        }
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.get_name_translated}"
@@ -8440,6 +8529,83 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         return data
 
 
+# Range is frozen per id: rewording lives in the frontend catalog, a new range needs a new id.
+SCORE_SCALE_PRESETS = {
+    "0-100": (0, 100),
+    "0-5": (0, 5),
+    "1-5": (1, 5),
+    "1-4": (1, 4),
+    "0-4": (0, 4),
+}
+MAX_LABELLED_LEVELS = 11
+
+
+def normalize_score_scale(preset, min_score, max_score, levels, default_range=None):
+    """Validate a score scale and return (preset, min_score, max_score).
+
+    A preset forces its range; min/max of None means "use the default".
+    """
+    if preset:
+        if preset not in SCORE_SCALE_PRESETS:
+            raise ValidationError(
+                {"score_scale_preset": "scoreScaleErrorUnknownPreset"}
+            )
+        for field, given, value in zip(
+            ("min_score", "max_score"),
+            (min_score, max_score),
+            SCORE_SCALE_PRESETS[preset],
+        ):
+            if given is not None and given != value:
+                raise ValidationError({field: "scoreScaleErrorPresetRange"})
+        min_score, max_score = SCORE_SCALE_PRESETS[preset]
+    if (min_score is None) != (max_score is None):
+        raise ValidationError({"max_score": "scoreScaleErrorMinMaxTogether"})
+    if min_score is not None:
+        if not all(
+            isinstance(v, int) and not isinstance(v, bool)
+            for v in (min_score, max_score)
+        ):
+            raise ValidationError({"max_score": "scoreScaleErrorIntegers"})
+        if min_score >= max_score:
+            raise ValidationError({"max_score": "scoreScaleRangeError"})
+    score_range = (min_score, max_score) if min_score is not None else default_range
+    if isinstance(levels, dict):
+        levels = levels.get("scale")
+    if isinstance(levels, list) and score_range:
+        for level in levels:
+            score = level.get("score") if isinstance(level, dict) else None
+            if (
+                not isinstance(score, int)
+                or isinstance(score, bool)
+                or not score_range[0] <= score <= score_range[1]
+            ):
+                raise ValidationError(
+                    {"scores_definition": "scoreScaleErrorLevelOutOfRange"}
+                )
+    return preset or None, min_score, max_score
+
+
+def rescale_score(value, old_range, new_range, integer=True):
+    """Map a score proportionally from one range to another, clamped to the new one.
+
+    Exact arithmetic, halves rounded up: round() is half-to-even, which would
+    send 10/30/50/70/90 on 0-100 to 0/2/2/4/4 on 0-5 instead of 1/2/3/4/5.
+    """
+    (old_min, old_max), (new_min, new_max) = old_range, new_range
+    ratio = (Fraction(value) - old_min) / (old_max - old_min)
+    ratio = min(max(ratio, Fraction(0)), Fraction(1))
+    result = new_min + ratio * (new_max - new_min)
+    if integer:
+        return math.floor(result + Fraction(1, 2))
+    exact = Decimal(result.numerator) / Decimal(result.denominator)
+    return float(exact.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+
+def get_default_score_scale() -> dict | None:
+    general = GlobalSettings.objects.filter(name="general").first()
+    return (general.value or {}).get("default_score_scale") if general else None
+
+
 class ComplianceAssessment(Assessment):
     class CalculationMethod(models.TextChoices):
         AVG = "average", "Average"
@@ -8460,6 +8626,13 @@ class ComplianceAssessment(Assessment):
     max_score = models.IntegerField(null=True, verbose_name=_("Maximum score"))
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
+    )
+    score_scale_preset = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        choices=[(key, key) for key in SCORE_SCALE_PRESETS],
+        verbose_name=_("Score scale preset"),
     )
     computed_outcome = models.JSONField(null=True, blank=True)
 
@@ -8650,11 +8823,69 @@ class ComplianceAssessment(Assessment):
             },
         )
 
+    def get_scale_levels(self) -> list | None:
+        """Bare list of level labels; a preset is expanded to every score in its
+        range, tagged with the preset id so clients can resolve the wording."""
+        sd = self.scores_definition
+        scale = sd.get("scale") if isinstance(sd, dict) else sd
+        preset = self.score_scale_preset
+        if not preset or self.max_score - self.min_score + 1 > MAX_LABELLED_LEVELS:
+            return scale
+        own = {
+            level["score"]: level
+            for level in scale or []
+            if isinstance(level, dict) and "score" in level
+        }
+        return [
+            {**own.get(score, {}), "score": score, "preset": preset}
+            for score in range(self.min_score, self.max_score + 1)
+        ]
+
+    def _rescalable_requirements(self):
+        # Requirements with their own scale keep it.
+        return self.requirement_assessments.filter(
+            requirement__min_score__isnull=True, requirement__max_score__isnull=True
+        )
+
+    def rescale_impact(self) -> dict:
+        own_range = self._rescalable_requirements()
+        scores = own_range.filter(score__isnull=False)
+        return {
+            # Same rule as the scoring engine for what counts as scored.
+            "scored": scores.filter(is_scored=True).count(),
+            "scores": scores.filter(is_scored=False).count(),
+            "documentation_scores": own_range.filter(
+                documentation_score__isnull=False
+            ).count(),
+        }
+
+    def rescale_requirement_scores(self, old_range, new_range) -> None:
+        """Carry stored scores over to a new range."""
+        own_range = self._rescalable_requirements()
+        for field in ("score", "documentation_score"):
+            rows = list(own_range.filter(**{f"{field}__isnull": False}))
+            for ra in rows:
+                setattr(
+                    ra, field, rescale_score(getattr(ra, field), old_range, new_range)
+                )
+            RequirementAssessment.objects.bulk_update(rows, [field])
+
+        # bulk_update skips RequirementAssessment.save(), which normally
+        # re-evaluates outcomes when a score changes.
+        def _evaluate():
+            from core.cel_service import evaluate_outcomes
+
+            evaluate_outcomes(self)
+
+        _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
+
     def save(self, *args, **kwargs) -> None:
         if self.min_score is None:
-            self.min_score = self.framework.min_score
-            self.max_score = self.framework.max_score
-            self.scores_definition = self.framework.scores_definition
+            scale = self.framework.default_audit_scale()
+            self.min_score = scale["min_score"]
+            self.max_score = scale["max_score"]
+            self.scores_definition = scale["scores_definition"]
+            self.score_scale_preset = scale["score_scale_preset"]
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
 
@@ -8749,6 +8980,23 @@ class ComplianceAssessment(Assessment):
         if baseline_assessments:
             updates = []
             m2m_operations = []
+            baseline_range = (baseline.min_score, baseline.max_score)
+            own_range = (self.min_score, self.max_score)
+            convert = baseline_range != own_range and None not in (
+                *baseline_range,
+                *own_range,
+            )
+
+            def carried(value, requirement):
+                # A requirement with its own scale has it in both audits.
+                if (
+                    value is None
+                    or not convert
+                    or requirement.min_score is not None
+                    or requirement.max_score is not None
+                ):
+                    return value
+                return rescale_score(value, baseline_range, own_range)
 
             for assessment in created_assessments:
                 baseline_assessment = baseline_assessments.get(
@@ -8758,9 +9006,11 @@ class ComplianceAssessment(Assessment):
                     # Update scalar fields
                     assessment.result = baseline_assessment.result
                     assessment.status = baseline_assessment.status
-                    assessment.score = baseline_assessment.score
-                    assessment.documentation_score = (
-                        baseline_assessment.documentation_score
+                    assessment.score = carried(
+                        baseline_assessment.score, assessment.requirement
+                    )
+                    assessment.documentation_score = carried(
+                        baseline_assessment.documentation_score, assessment.requirement
                     )
                     assessment.is_scored = baseline_assessment.is_scored
                     assessment.is_score_overridden = (
@@ -10080,7 +10330,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 req.scores_definition_ref
             )
         else:
-            scores_definition = ca_sd.get("scale")
+            scores_definition = ca.get_scale_levels()
             # Inherited default may extend beyond the Node's overridden bounds.
             # Keep only entries that fall inside the resolved range (preserves
             # sparse scales like 0/25/50/75/100); drop the labels entirely if

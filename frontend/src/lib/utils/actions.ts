@@ -88,11 +88,12 @@ export async function handleErrorResponse({
 	Object.entries(res).forEach(([key, value]) => {
 		if (Array.isArray(value)) {
 			value.forEach((item: string) => setError(form, key, safeTranslate(item)));
-		} else {
+		} else if (typeof value === 'string') {
 			setError(form, key, safeTranslate(value));
 		}
 	});
-	return message(form, { status: response.status });
+	// Structured values (e.g. a 409's impact summary) reach the form through the message.
+	return message(form, { status: response.status, data: res });
 }
 
 export async function defaultWriteFormAction({
@@ -186,7 +187,7 @@ export async function defaultWriteFormAction({
 		}
 	}
 
-	let flashParams = {
+	const flashParams = {
 		type: 'success',
 		message: getSuccessMessage({ urlModel, action }) as string
 	};
