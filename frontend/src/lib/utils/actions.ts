@@ -187,7 +187,7 @@ export async function defaultWriteFormAction({
 		}
 	}
 
-	let flashParams = {
+	const flashParams = {
 		type: 'success',
 		message: getSuccessMessage({ urlModel, action }) as string
 	};
