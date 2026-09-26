@@ -5869,6 +5869,7 @@
 	"scoreRange": "Score range",
 	"scoreScale": "Score scale",
 	"scoreScaleHelpText": "Scale used to score each requirement of this audit.",
+	"scoreScaleSourceBaseline": "baseline audit",
 	"scoreScaleConfirmScored": "Scored requirements: {count}",
 	"scoreScaleConfirmHistory": "The score history before today stays on the previous scale.",
 	"scoreScaleConfirmTitle": "Saving will convert existing values from {from} to {to}",

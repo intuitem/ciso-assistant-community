@@ -3760,13 +3760,11 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             ]
 
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
-            # If we're unlocking (setting is_locked to False), allow the operation
-            if "is_locked" in attrs and attrs["is_locked"] is False:
-                return super().validate(attrs)
-
-            # Otherwise, only allow modifying the is_locked field
+            # Unlocking may come with other changes in the same save; they still
+            # go through the checks below. Otherwise only is_locked may change.
+            unlocking = "is_locked" in attrs and attrs["is_locked"] is False
             locked_fields = [field for field in attrs.keys() if field != "is_locked"]
-            if locked_fields:
+            if not unlocking and locked_fields:
                 raise serializers.ValidationError(
                     f"⚠️ Cannot modify the audit attributes when it is locked. Only the 'Locked' field can be modified."
                 )

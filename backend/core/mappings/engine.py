@@ -345,6 +345,7 @@ class MappingEngine:
         requirement_mapping_set: dict,
         hop_index: int,
         path: list[str],
+        target_range: Optional[tuple[int, int]] = None,
     ) -> dict[str, str | dict[str, str]]:
         # Hop_index allows us to know if the source_audit is the 'real' source, or a transition audit.
         # The first hop in 1.
@@ -360,12 +361,20 @@ class MappingEngine:
         target_framework_urn = requirement_mapping_set.get("target_framework_urn", "")
         target_framework = self.frameworks.get(target_framework_urn)
 
-        # Check if score ranges match between source and target frameworks
-        scores_compatible = (
-            target_framework
-            and target_framework.get("min_score") == source_audit.get("min_score")
-            and target_framework.get("max_score") == source_audit.get("max_score")
-        )
+        # Scores are only copied onto an identical range. On the final hop into
+        # a real audit, that audit's range wins over its framework's: the
+        # audit may have its own scale.
+        source_range = (source_audit.get("min_score"), source_audit.get("max_score"))
+        if target_range is not None:
+            scores_compatible = None not in source_range and source_range == tuple(
+                target_range
+            )
+        else:
+            scores_compatible = (
+                target_framework
+                and target_framework.get("min_score") == source_range[0]
+                and target_framework.get("max_score") == source_range[1]
+            )
 
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
@@ -656,6 +665,7 @@ class MappingEngine:
         source_urn: str,
         dest_urn: str,
         max_depth: Optional[int] = None,
+        target_range: Optional[tuple[int, int]] = None,
     ) -> tuple[dict, list[str]]:
         paths = self.all_paths_between(source_urn, dest_urn, max_depth)
         inferences = {}
@@ -674,6 +684,7 @@ class MappingEngine:
                     rms,
                     hop_index=hop_index,
                     path=path,
+                    target_range=target_range if urn == path[-1] else None,
                 )
                 hop_index += 1
                 tmp_urn = urn

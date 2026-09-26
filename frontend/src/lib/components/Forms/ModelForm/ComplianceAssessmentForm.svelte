@@ -159,6 +159,26 @@
 
 	let frameworkRequest = 0;
 
+	// A copy of an audit on the same framework keeps the baseline's scale by
+	// default (the backend applies the same rule), so show that as "Default".
+	async function applyBaselineDefault(frameworkId: string, request: number) {
+		if (!initialData.baseline) return;
+		const baseline = await fetch(`/compliance-assessments/${initialData.baseline}`)
+			.then((r) => (r.ok ? r.json() : null))
+			.catch(() => null);
+		if (request !== frameworkRequest || baseline?.framework?.id !== frameworkId) return;
+		frameworkScoring = {
+			...frameworkScoring,
+			audit_default_scale: {
+				source: 'baseline',
+				score_scale_preset: baseline.score_scale_preset ?? null,
+				min_score: baseline.min_score,
+				max_score: baseline.max_score,
+				scores_definition: baseline.scores_definition ?? null
+			}
+		};
+	}
+
 	async function handleFrameworkChange(id: string) {
 		const request = ++frameworkRequest;
 		if (!id) frameworkScoring = null;
@@ -184,7 +204,10 @@
 						is_scale_bound: r['is_scale_bound'],
 						audit_default_scale: r['audit_default_scale']
 					};
-					if (!object.id) onScaleChange(null);
+					if (!object.id) {
+						onScaleChange(null);
+						applyBaselineDefault(id, request);
+					}
 
 					defaultImplementationGroups = implementation_groups
 						.filter((group) => group.default_selected)

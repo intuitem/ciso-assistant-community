@@ -784,3 +784,138 @@ class TestRescaleReevaluatesOutcomes:
         assert calls.count(ca.pk) == 1
         ra.refresh_from_db()
         assert ra.score == 4
+
+
+@pytest.mark.django_db
+class TestUnlockWithScaleChange:
+    def _locked_scored(self, setup):
+        ca, ra = setup["ca"], setup["ra"]
+        ra.is_scored, ra.score = True, 80
+        ra.save()
+        ca.is_locked = True
+        ca.save()
+        return ca, ra
+
+    def test_unlock_and_rescale_needs_confirmation(self, setup):
+        from core.serializers import ScoreRescaleConfirmationRequired
+
+        ca, _ = self._locked_scored(setup)
+        with pytest.raises(ScoreRescaleConfirmationRequired):
+            _update(
+                ca, {"is_locked": False, "score_scale_preset": "1-5"}, confirm=False
+            )
+
+    def test_unlock_and_rescale_converts(self, setup):
+        ca, ra = self._locked_scored(setup)
+        serializer, valid = _update(
+            ca, {"is_locked": False, "score_scale_preset": "1-5"}
+        )
+        assert valid, serializer.errors
+        ca = serializer.save()
+        ra.refresh_from_db()
+        assert (ca.is_locked, ca.min_score, ca.max_score, ra.score) == (False, 1, 5, 4)
+
+    def test_unlock_still_validates_target(self, setup):
+        ca, _ = self._locked_scored(setup)
+        serializer, valid = _update(
+            ca, {"is_locked": False, "score_scale_preset": "1-5", "target_score": 9}
+        )
+        assert not valid
+        assert "target_score" in serializer.errors
+
+    def test_locked_audit_still_refuses_changes(self, setup):
+        ca, _ = self._locked_scored(setup)
+        serializer, valid = _update(ca, {"score_scale_preset": "1-5"})
+        assert not valid
+
+
+@pytest.mark.django_db
+class TestBaselineCopy:
+    def _api(self):
+        from iam.models import User
+        from rest_framework.test import APIClient
+
+        admin = User.objects.create_superuser(
+            email="baseline-admin@test.local", password="x"
+        )
+        api = APIClient()
+        api.force_authenticate(admin)
+        return api
+
+    def _baseline(self, setup):
+        ra = setup["ra"]
+        ra.is_scored, ra.score, ra.documentation_score = True, 80, 40
+        ra.save()
+        return setup["ca"]
+
+    def _create(self, setup, **extra):
+        response = self._api().post(
+            "/api/compliance-assessments/",
+            {
+                "name": "From baseline",
+                "folder": str(setup["folder"].id),
+                "framework": str(setup["fw"].id),
+                "baseline": str(setup["ca"].id),
+                **extra,
+            },
+            format="json",
+        )
+        assert response.status_code == 201, response.json()
+        new = ComplianceAssessment.objects.get(id=response.json()["id"])
+        ra = new.requirement_assessments.get(requirement=setup["rn"])
+        return new, ra
+
+    def test_copy_keeps_baseline_scale_over_instance_default(self, setup):
+        self._baseline(setup)
+        _set_instance_default(
+            {"score_scale_preset": "1-5", "min_score": 1, "max_score": 5}
+        )
+        new, ra = self._create(setup)
+        assert (new.min_score, new.max_score, new.score_scale_preset) == (0, 100, None)
+        assert (ra.score, ra.documentation_score) == (80, 40)
+
+    def test_explicit_scale_converts_copied_scores(self, setup):
+        self._baseline(setup)
+        new, ra = self._create(setup, score_scale_preset="1-5")
+        assert (new.min_score, new.max_score) == (1, 5)
+        assert (ra.score, ra.documentation_score) == (4, 3)
+
+
+@pytest.mark.django_db
+class TestSameFrameworkMergeConversion:
+    def test_scores_follow_target_scale(self, setup):
+        from core.mappings.merge import rescaled_to_target
+
+        target = ComplianceAssessment.objects.create(
+            name="Target",
+            framework=setup["fw"],
+            folder=setup["folder"],
+            score_scale_preset="1-5",
+            min_score=1,
+            max_score=5,
+        )
+        results = {
+            "min_score": 0,
+            "max_score": 100,
+            "requirement_assessments": {
+                setup["rn"].urn: {
+                    "score": 80,
+                    "documentation_score": 40,
+                    "result": "compliant",
+                }
+            },
+        }
+        converted = rescaled_to_target(results, target)
+        ra = converted["requirement_assessments"][setup["rn"].urn]
+        assert (ra["score"], ra["documentation_score"], ra["result"]) == (
+            4,
+            3,
+            "compliant",
+        )
+        assert results["requirement_assessments"][setup["rn"].urn]["score"] == 80
+
+    def test_same_scale_is_untouched(self, setup):
+        from core.mappings.merge import rescaled_to_target
+
+        results = {"min_score": 0, "max_score": 100, "requirement_assessments": {}}
+        assert rescaled_to_target(results, setup["ca"]) is results

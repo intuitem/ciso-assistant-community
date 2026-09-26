@@ -5879,6 +5879,7 @@
 	"scoreRange": "Plage de notes",
 	"scoreScale": "Échelle de notation",
 	"scoreScaleHelpText": "Échelle utilisée pour noter chaque exigence de cet audit.",
+	"scoreScaleSourceBaseline": "audit de référence",
 	"scoreScaleConfirmScored": "Exigences notées : {count}",
 	"scoreScaleConfirmHistory": "L'historique des scores antérieur à aujourd'hui reste sur l'ancienne échelle.",
 	"scoreScaleConfirmTitle": "L'enregistrement convertira les valeurs existantes de {from} à {to}",

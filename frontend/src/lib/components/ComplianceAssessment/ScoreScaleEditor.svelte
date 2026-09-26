@@ -293,7 +293,9 @@
 						·
 						{defaultScale.source === 'instance'
 							? m.scoreScaleSourceInstance()
-							: m.scoreScaleSourceFramework()}</span
+							: defaultScale.source === 'baseline'
+								? m.scoreScaleSourceBaseline()
+								: m.scoreScaleSourceFramework()}</span
 					>
 				{:else}
 					<span class="text-sm font-medium">{m.scoreScaleNoDefault()}</span>

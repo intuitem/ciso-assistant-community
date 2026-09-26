@@ -25,7 +25,7 @@ export interface ScoreScaleValue {
 }
 
 export interface DefaultScoreScale extends Omit<ScoreScaleValue, 'scores_definition'> {
-	source: 'framework' | 'instance';
+	source: 'framework' | 'instance' | 'baseline';
 	scores_definition: ScoreLevel[] | null;
 }
 

@@ -2,6 +2,7 @@ from django.db.utils import IntegrityError, OperationalError, ProgrammingError
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, Font
+import copy
 import csv
 import hashlib
 import json
@@ -13617,6 +13618,23 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             "create_applied_controls_from_suggestions", False
         )
 
+        scale_fields = (
+            "score_scale_preset",
+            "min_score",
+            "max_score",
+            "scores_definition",
+        )
+        if (
+            baseline
+            and baseline.framework == serializer.validated_data.get("framework")
+            and serializer.validated_data.get("min_score") is None
+        ):
+            # No scale chosen: a copy keeps the baseline's scale.
+            for field in scale_fields:
+                serializer.validated_data[field] = copy.deepcopy(
+                    getattr(baseline, field)
+                )
+
         with transaction.atomic():
             instance: ComplianceAssessment = serializer.save()
             instance.create_requirement_assessments(baseline)
@@ -13634,7 +13652,11 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 max_depth = get_mapping_max_depth()
 
                 best_results, _ = engine.best_mapping_inferences(
-                    audit_from_results, source_urn, dest_urn, max_depth
+                    audit_from_results,
+                    source_urn,
+                    dest_urn,
+                    max_depth,
+                    target_range=(instance.min_score, instance.max_score),
                 )
                 # Empty when no mapping path exists between the two
                 # frameworks, which is a legitimate outcome: the audit is
