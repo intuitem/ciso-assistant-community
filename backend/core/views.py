@@ -133,6 +133,11 @@ from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
+from core.domain_quality_checks import (
+    BLOCKS as DOMAIN_QUALITY_BLOCKS,
+    domain_quality_checks,
+    object_xrays,
+)
 from rest_framework import filters, generics, permissions, status, viewsets
 from custom_fields.filters import CustomFieldFilterBackend, CustomFieldSearchFilter
 from django.utils.translation import gettext_lazy as _, get_language
@@ -4180,7 +4185,18 @@ class RiskAssessmentFilterSet(GenericFilterSet):
         return queryset.filter(status__in=value)
 
 
-class RiskAssessmentViewSet(BaseModelViewSet):
+class XRaysMixin:
+    @action(detail=True, methods=["get"], url_path="x-rays")
+    def x_rays(self, request, pk):
+        obj = self.get_object()
+        if isinstance(
+            obj, ComplianceAssessment
+        ) and obj.folder_id in get_respondent_scoped_folder_ids(request.user):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return Response(object_xrays(obj, request.user))
+
+
+class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
     """
     API endpoint that allows risk assessments to be viewed or edited.
     """
@@ -9352,11 +9368,13 @@ class FolderViewSet(BaseModelViewSet):
         )
         viewable_ra_ids = RoleAssignment.get_viewable_object_ids(user, RiskAssessment)
 
+        domain_checks = domain_quality_checks(folders, user)
         res = {
             str(f.id): {
                 "folder": {"id": f.id, "name": f.name},
                 "compliance_assessments": {"objects": {}},
                 "risk_assessments": {"objects": {}},
+                **domain_checks[str(f.id)],
             }
             for f in folders
         }
@@ -9379,6 +9397,8 @@ class FolderViewSet(BaseModelViewSet):
     @staticmethod
     def _has_findings(folder_entry) -> bool:
         return any(
+            folder_entry[block]["count"] for block in DOMAIN_QUALITY_BLOCKS
+        ) or any(
             assessment["quality_check"]["count"]
             for group in ("compliance_assessments", "risk_assessments")
             for assessment in folder_entry[group]["objects"].values()
@@ -12298,7 +12318,7 @@ class ComplianceAssessmentFilterSet(GenericFilterSet):
         return queryset.exclude(entityassessment__isnull=False)
 
 
-class ComplianceAssessmentViewSet(BaseModelViewSet):
+class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
     """

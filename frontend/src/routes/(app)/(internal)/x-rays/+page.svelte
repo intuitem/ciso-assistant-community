@@ -5,10 +5,13 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import AssessmentIssues from '$lib/components/XRays/AssessmentIssues.svelte';
+	import IssueSections from '$lib/components/XRays/IssueSections.svelte';
 	import {
+		DOMAIN_BLOCKS,
 		SEVERITIES,
 		aggregateQualityChecks,
 		hasVisibleIssues,
+		severityGroups,
 		type SeverityKey
 	} from '$lib/components/XRays/utils';
 
@@ -28,6 +31,13 @@
 		info: true
 	});
 
+	const GROUPS = [
+		{ value: 'compliance_assessments', label: () => m.complianceAssessments() },
+		{ value: 'risk_assessments', label: () => m.riskAssessments() },
+		{ value: 'governance', label: () => m.governance() },
+		{ value: 'operations', label: () => m.operations() }
+	];
+
 	const processFoldersData = (rawData: any): any[] => {
 		if (!rawData || typeof rawData !== 'object') {
 			return [];
@@ -44,13 +54,19 @@
 				risk_assessments: {
 					...valueObj.risk_assessments,
 					...aggregateQualityChecks(valueObj.risk_assessments)
-				}
+				},
+				...Object.fromEntries(
+					DOMAIN_BLOCKS.map((block) => [
+						block,
+						{ errors: [], warnings: [], info: [], ...valueObj[block] }
+					])
+				)
 			};
 		});
 	};
 
 	const folderCount = (folder: any, key: SeverityKey) =>
-		folder.compliance_assessments[key].length + folder.risk_assessments[key].length;
+		GROUPS.reduce((acc, group) => acc + folder[group.value][key].length, 0);
 
 	const countBySeverity = (folders: any[], key: SeverityKey) =>
 		folders.reduce((acc, folder) => acc + folderCount(folder, key), 0);
@@ -84,12 +100,11 @@
 	};
 
 	const defaultTab = (folder: any) =>
-		compareCounts(
-			bucketCounts(folder.risk_assessments),
-			bucketCounts(folder.compliance_assessments)
-		) < 0
-			? 'risk_assessments'
-			: 'compliance_assessments';
+		GROUPS.reduce((best, group) =>
+			compareCounts(bucketCounts(folder[group.value]), bucketCounts(folder[best.value])) < 0
+				? group
+				: best
+		).value;
 
 	const allOpen = (folders: any[]) =>
 		folders.length > 0 && folders.every((folder) => openDomains[folder.id]);
@@ -238,9 +253,9 @@
 								}}
 							>
 								<Tabs.List>
-									{#each [{ value: 'compliance_assessments', label: m.complianceAssessments() }, { value: 'risk_assessments', label: m.riskAssessments() }] as tab (tab.value)}
+									{#each GROUPS as tab (tab.value)}
 										<Tabs.Trigger value={tab.value} class="inert px-2">
-											{tab.label}
+											{tab.label()}
 											{#each SEVERITIES as severity (severity.key)}
 												{#if folder[tab.value][severity.key].length > 0 && activeSeverities[severity.key]}
 													<span class="badge {severity.preset}">
@@ -269,6 +284,18 @@
 														{activeSeverities}
 													/>
 												{/each}
+											</div>
+										{/if}
+									</Tabs.Content>
+								{/each}
+								{#each DOMAIN_BLOCKS as block (block)}
+									<Tabs.Content value={block}>
+										{@const groups = severityGroups(folder[block], activeSeverities)}
+										{#if groups.length === 0}
+											<p class="text-sm text-surface-600-400 py-4">{m.xRaysNoIssues()}</p>
+										{:else}
+											<div class="py-2">
+												<IssueSections {groups} />
 											</div>
 										{/if}
 									</Tabs.Content>
