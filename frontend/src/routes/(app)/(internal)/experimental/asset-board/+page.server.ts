@@ -7,10 +7,9 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
+import { idOf } from './positions';
 
 const BATCH = 40;
-
-const idOf = (ref: any): string => (typeof ref === 'object' && ref !== null ? ref.id : ref);
 
 function chunks<T>(items: T[], size: number): T[][] {
 	const out: T[][] = [];

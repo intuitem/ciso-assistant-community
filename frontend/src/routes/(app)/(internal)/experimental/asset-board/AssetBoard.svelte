@@ -31,6 +31,7 @@
 		savePinned,
 		loadInstructionsOpen,
 		saveInstructionsOpen,
+		idOf,
 		type XY
 	} from './positions';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -84,7 +85,7 @@
 	let knownAssetIds = $state<Set<string>>(new Set());
 	let pinnedIds = $state<string[]>(loadPinned(folderId));
 	let pinnedAssets = $state<AssetItem[]>([]);
-	let parentsById = new Map<string, string[]>();
+	const queues = new Map<string, Promise<boolean>>();
 	let searchOpen = $state(false);
 	let searchQuery = $state('');
 	let searchResults = $state<AssetItem[]>([]);
@@ -96,7 +97,6 @@
 		if (searchOpen) searchInput?.focus();
 	});
 
-	const idOf = (ref: any): string => (typeof ref === 'object' && ref !== null ? ref.id : ref);
 	const folderOf = (a: AssetItem) =>
 		typeof a.folder === 'object' && a.folder !== null
 			? { id: a.folder.id, name: a.folder.str ?? '' }
@@ -120,7 +120,7 @@
 		const hidden = new Set(hiddenAssetIds.filter((id) => !ghosts.has(id)));
 		const onBoard = (id: string) => localIds.has(id) || ghosts.has(id) || hidden.has(id);
 
-		parentsById = new Map(
+		const parentsById = new Map<string, string[]>(
 			[...assets, ...ghosts.values()].map((a) => [a.id, (a.parent_assets ?? []).map(idOf)])
 		);
 
@@ -345,7 +345,9 @@
 				if (pendingParentId) {
 					const parentToWire = pendingParentId;
 					for (const newAssetId of added) {
-						void patchParentAssets(newAssetId, [parentToWire]).then((ok) => {
+						void updateParents(newAssetId, (parents) =>
+							Array.from(new Set([...parents, parentToWire]))
+						).then((ok) => {
 							if (ok) invalidateAll();
 						});
 					}
@@ -428,16 +430,39 @@
 		}
 	}
 
-	function currentParentsOf(childId: string): string[] {
-		return parentsById.get(childId) ?? [];
+	function updateParents(
+		childId: string,
+		change: (parents: string[]) => string[]
+	): Promise<boolean> {
+		const run = async () => {
+			let current: string[];
+			try {
+				const [row] = await fetchAllByIds<AssetItem>(fetch, '/assets', [childId]);
+				if (!Array.isArray(row?.parent_assets)) throw new Error('parents unavailable');
+				current = row.parent_assets.map(idOf);
+			} catch {
+				toastStore.trigger({
+					message: 'Network error updating asset relationship',
+					background: 'preset-tonal-error'
+				});
+				return false;
+			}
+			return patchParentAssets(childId, change(current));
+		};
+		const queued = (queues.get(childId) ?? Promise.resolve(true)).then(run, run);
+		queues.set(childId, queued);
+		void queued.finally(() => {
+			if (queues.get(childId) === queued) queues.delete(childId);
+		});
+		return queued;
 	}
 
 	async function handleConnect(connection: Connection) {
 		if (!connection.source || !connection.target) return;
-		const newParents = Array.from(
-			new Set([...currentParentsOf(connection.target), connection.source])
+		const source = connection.source;
+		const ok = await updateParents(connection.target, (parents) =>
+			Array.from(new Set([...parents, source]))
 		);
-		const ok = await patchParentAssets(connection.target, newParents);
 		if (!ok) {
 			// Revert: drop this edge from local state
 			edges = edges.filter(
@@ -457,8 +482,9 @@
 			byTarget.get(e.target)!.add(e.source);
 		}
 		for (const [childId, removedSources] of byTarget) {
-			const remaining = currentParentsOf(childId).filter((p) => !removedSources.has(p));
-			const ok = await patchParentAssets(childId, remaining);
+			const ok = await updateParents(childId, (parents) =>
+				parents.filter((p) => !removedSources.has(p))
+			);
 			if (ok) void invalidateAll();
 			if (!ok) {
 				// Re-add removed edges to local state. `type: 'asset'` is required —
@@ -473,6 +499,7 @@
 							source: src,
 							target: childId,
 							type: 'asset',
+							data: { crossDomain: !knownAssetIds.has(src) || !knownAssetIds.has(childId) },
 							markerEnd: {
 								type: MarkerType.ArrowClosed,
 								color: 'var(--color-surface-600)'
@@ -648,8 +675,7 @@
 		confirmDeleteAsset,
 		deleteEdge: async (source: string, target: string) => {
 			// Same logic as ondelete, but for one specific edge selected via the UI button.
-			const remaining = currentParentsOf(target).filter((p) => p !== source);
-			const ok = await patchParentAssets(target, remaining);
+			const ok = await updateParents(target, (parents) => parents.filter((p) => p !== source));
 			if (ok) {
 				edges = edges.filter((e) => !(e.source === source && e.target === target));
 				toastStore.trigger({ message: 'Link removed', background: 'preset-tonal-success' });
