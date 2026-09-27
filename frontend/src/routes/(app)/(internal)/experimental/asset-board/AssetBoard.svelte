@@ -141,6 +141,8 @@
 					target: childId,
 					type: 'asset',
 					data: { crossDomain: cross },
+					selectable: !hidden.has(pid),
+					deletable: !hidden.has(pid),
 					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' }
 				});
 			}
