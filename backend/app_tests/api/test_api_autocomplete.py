@@ -6,6 +6,7 @@ from rest_framework import status
 
 from core.models import (
     AppliedControl,
+    ReferenceControl,
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
@@ -13,6 +14,7 @@ from core.models import (
     Vulnerability,
 )
 from iam.models import Folder, UserGroup
+from tprm.models import Entity, Solution
 
 
 def _rows(response):
@@ -149,6 +151,35 @@ class TestLightweightAutocompletePayloads:
 
         row = next(r for r in _rows(response) if r["name"] == "Firewall")
         assert row["category"] == "Technical"
+
+    def test_reference_control_payload_carries_category(self, authenticated_client):
+        ReferenceControl.objects.create(
+            name="MFA", category="technical", folder=Folder.get_root_folder()
+        )
+
+        response = authenticated_client.get(reverse("reference-controls-autocomplete"))
+
+        row = next(r for r in _rows(response) if r["name"] == "MFA")
+        assert row["category"] == "technical"
+
+    def test_solution_folder_is_the_provider_entity_folder(self, authenticated_client):
+        domain = Folder.objects.create(
+            name="Vendors", content_type=Folder.ContentType.DOMAIN
+        )
+        provider = Entity.objects.create(name="Acme", folder=domain)
+        Solution.objects.create(name="Acme SaaS", provider_entity=provider)
+
+        response = authenticated_client.get(reverse("solutions-autocomplete"))
+
+        row = next(r for r in _rows(response) if r["name"] == "Acme SaaS")
+        assert str(row["folder"]["id"]) == str(domain.id)
+
+    def test_actor_payload_carries_type(self, authenticated_client):
+        response = authenticated_client.get(reverse("actors-autocomplete"))
+
+        rows = _rows(response)
+        assert rows
+        assert {r["type"] for r in rows} <= {"user", "team", "entity"}
 
     def test_vulnerability_payload_is_label_only(self, authenticated_client):
         root = Folder.get_root_folder()

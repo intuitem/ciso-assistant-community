@@ -1599,8 +1599,15 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
         "filtering_labels",
     ]
 
+    def get_autocomplete_serializer_class(self):
+        from tprm.serializers import SolutionAutocompleteSerializer
+
+        return SolutionAutocompleteSerializer
+
     def get_queryset(self):
         # folder is serialized via source="provider_entity.folder"; pull it in one join
+        if self.action == "autocomplete":
+            return super().get_queryset().select_related("provider_entity__folder")
         return (
             super()
             .get_queryset()
