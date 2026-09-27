@@ -31,6 +31,7 @@ Output:
 """
 
 import argparse
+import json
 from datetime import date
 
 import openpyxl
@@ -53,14 +54,78 @@ IMPLEMENTATION_GROUPS = [
     ("tier3", "Tier 3 - Tactical"),
 ]
 
+# Verbatim from the SCF "Cybersecurity & Data Privacy Capability Maturity Model (C|P-CMM)"
 SCORES = [
-    (0, "Not Performed"),
-    (1, "Performed Informally"),
-    (2, "Planned & Tracked"),
-    (3, "Well Defined"),
-    (4, "Quantitatively Controlled"),
-    (5, "Continuously Improving"),
+    (
+        0,
+        "Not Performed",
+        (
+            "This level of maturity is defined as “non-existence practices,” where the "
+            "control is not being performed. Practices are non-existent, where a "
+            "reasonable person would conclude the control is not being performed."
+        ),
+    ),
+    (
+        1,
+        "Performed Informally",
+        (
+            "This level of maturity is defined as “ad hoc practices,” where the control "
+            "is being performed, but lacks completeness & consistency. Performance "
+            "depends on specific knowledge and effort of the individual performing the "
+            "task(s), where the performance of these practices is not proactively governed."
+        ),
+    ),
+    (
+        2,
+        "Planned & Tracked",
+        (
+            "Practices are “requirements-driven” where the intent of control is met in "
+            "some circumstances, but not standardized across the entire organization. "
+            "Controls are implemented in some, but not all applicable "
+            "circumstances/environments (e.g., specific enclaves, facilities or locations)."
+        ),
+    ),
+    (
+        3,
+        "Well Defined",
+        (
+            "This level of maturity is defined as “enterprise-wide standardization,” "
+            "where the practices are well-defined and standardized across the "
+            "organization. Controls are implemented in all applicable "
+            "circumstances/environments (deviations are documented and justified)."
+        ),
+    ),
+    (
+        4,
+        "Quantitatively Controlled",
+        (
+            "This level of maturity is defined as “metrics-driven practices,” where in "
+            "addition to being well-defined and standardized practices across the "
+            "organization, there are detailed metrics to enable governance oversight."
+        ),
+    ),
+    (
+        5,
+        "Continuously Improving",
+        (
+            "This level of maturity is defined as “world-class practices,” where the "
+            "practices are not only well-defined and standardized across the "
+            "organization, as well as having detailed metrics, but the process is "
+            "continuously improving."
+        ),
+    ),
 ]
+
+FIELD_VISIBILITY = {
+    "score": {"auditor": "edit", "respondent": "hidden"},
+    "is_scored": {"auditor": "edit", "respondent": "hidden"},
+    "documentation_score": {"auditor": "hidden", "respondent": "hidden"},
+    "result": {"auditor": "edit", "respondent": "edit"},
+    "extended_result": {"auditor": "hidden", "respondent": "hidden"},
+    "status": {"auditor": "hidden", "respondent": "hidden"},
+    "task_templates": {"auditor": "hidden", "respondent": "hidden"},
+    "applied_controls": {"auditor": "edit", "respondent": "edit"},
+}
 
 DESCRIPTION = (
     "SCF: Secure Controls Framework\nhttps://securecontrolsframework.com/about-us/"
@@ -159,6 +224,7 @@ def write_workbook(destination_file, version, publication_date, content_rows):
             ("min_score", 0),
             ("max_score", 5),
             ("scores_definition", "scores"),
+            ("field_visibility", json.dumps(FIELD_VISIBILITY)),
         ],
     )
     sheet(
@@ -185,7 +251,7 @@ def write_workbook(destination_file, version, publication_date, content_rows):
     sheet("scores_meta", [("type", "scores"), ("name", "scores")])
     sheet(
         "scores_content",
-        [("score", "name", "description")] + [(s, n, None) for s, n in SCORES],
+        [("score", "name", "description")] + SCORES,
     )
     wb.save(destination_file)
 
