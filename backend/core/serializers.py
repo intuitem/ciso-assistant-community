@@ -1065,10 +1065,11 @@ class AssetAutocompleteSerializer(BaseModelSerializer):
 
 class AppliedControlAutocompleteSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    category = serializers.CharField(source="get_category_display")
 
     class Meta:
         model = AppliedControl
-        fields = ["id", "name", "ref_id", "folder"]
+        fields = ["id", "name", "ref_id", "folder", "category"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
