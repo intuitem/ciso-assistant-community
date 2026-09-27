@@ -132,7 +132,7 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 			position?: 'suffix' | 'prefix';
 			classes?: string;
 		};
-		lazy?: boolean; // Enable lazy loading for large option sets (e.g., assets)
+		lazy?: boolean; // Defaults to true; set false to load every option up front
 	};
 	batchCreate?: {
 		label?: string; // i18n key for button title (defaults to 'batchCreate')
@@ -1022,8 +1022,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			}
 		],
@@ -2085,8 +2084,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			},
 			{
@@ -2314,8 +2312,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'ebios_rm_studies',
 				urlModel: 'assets',
 				addExisting: {
-					parentField: 'assets',
-					lazy: true
+					parentField: 'assets'
 				}
 			}
 		],
@@ -2811,8 +2808,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			},
 			{
@@ -2844,8 +2840,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'findings',
 				urlModel: 'task-templates',
 				addExisting: {
-					parentField: 'task_templates',
-					lazy: true
+					parentField: 'task_templates'
 				}
 			}
 		],
@@ -2930,8 +2925,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			},
 			{
@@ -3216,8 +3210,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			},
 			{
@@ -3235,8 +3228,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: false,
 				disableDelete: true,
 				addExisting: {
-					parentField: 'assets',
-					lazy: true
+					parentField: 'assets'
 				}
 			},
 			{

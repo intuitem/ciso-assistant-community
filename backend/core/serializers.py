@@ -1065,10 +1065,38 @@ class AssetAutocompleteSerializer(BaseModelSerializer):
 
 class AppliedControlAutocompleteSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    category = serializers.CharField(source="get_category_display")
 
     class Meta:
         model = AppliedControl
+        fields = ["id", "name", "ref_id", "folder", "category"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
+class VulnerabilityAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Vulnerability
         fields = ["id", "name", "ref_id", "folder"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
+class RiskScenarioAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    risk_assessment = FieldsRelatedField()
+
+    class Meta:
+        model = RiskScenario
+        fields = ["id", "name", "ref_id", "folder", "risk_assessment"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
