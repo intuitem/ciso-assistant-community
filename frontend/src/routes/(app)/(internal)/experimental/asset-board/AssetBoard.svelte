@@ -19,9 +19,10 @@
 
 	import AssetNodeComponent from './AssetNode.svelte';
 	import GhostNodeComponent from './GhostNode.svelte';
-	import { computeLayout } from './layout';
+	import { computeLayout } from '$lib/components/AssetGraph/layout';
+	import { createLinkWriter, idOf } from '$lib/components/AssetGraph/links';
 	import { fetchAllByIds } from '$lib/utils/pagination';
-	import AssetEdgeComponent from './AssetEdge.svelte';
+	import AssetEdgeComponent from '$lib/components/AssetGraph/AssetEdge.svelte';
 	import {
 		loadPositions,
 		savePositions,
@@ -31,7 +32,6 @@
 		savePinned,
 		loadInstructionsOpen,
 		saveInstructionsOpen,
-		idOf,
 		type XY
 	} from './positions';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -70,6 +70,9 @@
 		$props();
 
 	const toastStore = getToastStore();
+	const { updateParents } = createLinkWriter((message) =>
+		toastStore.trigger({ message, background: 'preset-tonal-error' })
+	);
 	const modalStore = getModalStore();
 
 	const nodeTypes = { asset: AssetNodeComponent, ghost: GhostNodeComponent };
@@ -85,7 +88,6 @@
 	let knownAssetIds = $state<Set<string>>(new Set());
 	let pinnedIds = $state<string[]>(loadPinned(folderId));
 	let pinnedAssets = $state<AssetItem[]>([]);
-	const queues = new Map<string, Promise<boolean>>();
 	let searchOpen = $state(false);
 	let searchQuery = $state('');
 	let searchResults = $state<AssetItem[]>([]);
@@ -403,60 +405,6 @@
 		return true;
 	}
 
-	async function patchParentAssets(childId: string, parentIds: string[]): Promise<boolean> {
-		try {
-			const res = await fetch(`/assets/${childId}`, {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ parent_assets: parentIds })
-			});
-			if (!res.ok) {
-				const err = await res.json().catch(() => ({}));
-				const msg =
-					(err && (err.parent_assets || err.detail || err.non_field_errors)) ?? 'Update failed';
-				toastStore.trigger({
-					message: typeof msg === 'string' ? msg : JSON.stringify(msg),
-					background: 'preset-tonal-error'
-				});
-				return false;
-			}
-			return true;
-		} catch (e) {
-			toastStore.trigger({
-				message: 'Network error updating asset relationship',
-				background: 'preset-tonal-error'
-			});
-			return false;
-		}
-	}
-
-	function updateParents(
-		childId: string,
-		change: (parents: string[]) => string[]
-	): Promise<boolean> {
-		const run = async () => {
-			let current: string[];
-			try {
-				const [row] = await fetchAllByIds<AssetItem>(fetch, '/assets', [childId]);
-				if (!Array.isArray(row?.parent_assets)) throw new Error('parents unavailable');
-				current = row.parent_assets.map(idOf);
-			} catch {
-				toastStore.trigger({
-					message: 'Network error updating asset relationship',
-					background: 'preset-tonal-error'
-				});
-				return false;
-			}
-			return patchParentAssets(childId, change(current));
-		};
-		const queued = (queues.get(childId) ?? Promise.resolve(true)).then(run, run);
-		queues.set(childId, queued);
-		void queued.finally(() => {
-			if (queues.get(childId) === queued) queues.delete(childId);
-		});
-		return queued;
-	}
-
 	async function handleConnect(connection: Connection) {
 		if (!connection.source || !connection.target) return;
 		const source = connection.source;
@@ -668,7 +616,7 @@
 		modalStore.trigger(modal);
 	}
 
-	setContext('assetBoard', {
+	setContext('assetGraph', {
 		unpinGhost,
 		renameAsset,
 		toggleAssetType,
@@ -806,7 +754,7 @@
 							<li>Drag bottom handle of one asset onto another to link it as a parent</li>
 							<li>Drag bottom handle onto empty canvas to create a child asset</li>
 							<li>Double-click empty canvas to create a free-standing asset</li>
-							<li>Double-click a node's name to rename it</li>
+							<li>Double-click a node to open its dependency map; use the pencil to rename it</li>
 							<li>
 								Click the <span class="font-semibold">PR/SP</span> pill to toggle the asset type
 							</li>
