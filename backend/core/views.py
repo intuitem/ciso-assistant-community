@@ -3462,6 +3462,7 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
                             # Reuse existing asset
                             asset = existing_asset
 
+                            linked_parent = parent_asset
                             # Update parent relationship if needed and parent exists
                             if (
                                 parent_asset
@@ -3483,6 +3484,7 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
                                 if link.is_valid():
                                     link.save()
                                 else:
+                                    linked_parent = None
                                     errors.append(
                                         {"line": line_content, "errors": link.errors}
                                     )
@@ -3495,8 +3497,8 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
                                     "id": str(asset.id),
                                     "name": asset.name,
                                     "type": asset.get_type_display(),
-                                    "parent": parent_asset.name
-                                    if parent_asset
+                                    "parent": linked_parent.name
+                                    if linked_parent
                                     else None,
                                     "depth": depth,
                                 }

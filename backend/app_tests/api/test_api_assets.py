@@ -606,3 +606,5 @@ class TestCrossDomainAssetLinkPermissions:
         assert r.status_code == status.HTTP_201_CREATED, r.content
         assert r.json()["errors"], r.content
         assert not self.sibling.parent_assets.exists()
+        reused = {a["name"]: a["parent"] for a in r.json()["reused_assets"]}
+        assert reused["sibling"] is None, r.content
