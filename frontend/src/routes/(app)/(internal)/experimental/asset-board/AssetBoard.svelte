@@ -173,6 +173,7 @@
 			const ys = neighbours.map((n) => localPos.get(n)?.y).filter((y) => y !== undefined);
 			return ys.length ? Math.min(...ys) : 60;
 		};
+		const newSpots: Record<string, XY> = {};
 		const ghostPosition = (id: string): XY => {
 			if (positions[id]) return positions[id];
 			const isParent = assets.some((a) => (a.parent_assets ?? []).some((p) => idOf(p) === id));
@@ -181,6 +182,7 @@
 			while (taken.some((p) => p.x === x && Math.abs(p.y - y) < 70)) y += 70;
 			const spot = { x, y };
 			taken.push(spot);
+			newSpots[id] = spot;
 			return spot;
 		};
 
@@ -215,6 +217,7 @@
 			connectable: false
 		}));
 
+		if (Object.keys(newSpots).length) positions = { ...positions, ...newSpots };
 		nodes = [...localNodes, ...ghostNodes, ...hiddenNodes];
 		edges = flowEdges;
 		knownAssetIds = localIds;
@@ -290,11 +293,10 @@
 
 	// Initial load from localStorage and graph build
 	positions = loadPositions(folderId);
+	let pendingInitialLayout = $state(Object.keys(positions).length === 0);
 	buildGraph();
 
 	void loadPinnedAssets();
-
-	let pendingInitialLayout = $state(Object.keys(positions).length === 0);
 
 	function applyLayout() {
 		const laidOut = computeLayout(nodes, edges);
