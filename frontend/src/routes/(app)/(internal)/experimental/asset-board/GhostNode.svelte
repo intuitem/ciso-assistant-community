@@ -25,7 +25,6 @@
 	let hovered = $state(false);
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="relative rounded-base border-[1.5px] border-dashed px-3 py-2 min-w-[160px] max-w-[220px] select-none opacity-80 hover:opacity-100 transition-opacity
 		{data.hidden ? 'border-surface-400 bg-surface-100-900' : 'border-warning-400 bg-warning-50-950'}"

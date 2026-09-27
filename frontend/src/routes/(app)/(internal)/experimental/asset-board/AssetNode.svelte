@@ -96,7 +96,6 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="asset-node relative rounded-base border-[1.5px] bg-surface-50-950 px-3 py-2 min-w-[160px] max-w-[220px] select-none shadow-sm {borderClass}"
 	onmouseenter={() => (hovered = true)}

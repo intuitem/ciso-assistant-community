@@ -20,6 +20,7 @@
 	import AssetNodeComponent from './AssetNode.svelte';
 	import GhostNodeComponent from './GhostNode.svelte';
 	import { computeLayout } from './layout';
+	import { fetchAllByIds } from '$lib/utils/pagination';
 	import AssetEdgeComponent from './AssetEdge.svelte';
 	import {
 		loadPositions,
@@ -229,11 +230,9 @@
 			return;
 		}
 		try {
-			const res = await fetch(`/assets?id=${pinnedIds.join(',')}&limit=200`);
-			const body = res.ok ? await res.json() : { results: [] };
-			pinnedAssets = body.results ?? [];
+			pinnedAssets = await fetchAllByIds<AssetItem>(fetch, '/assets', pinnedIds);
 		} catch {
-			pinnedAssets = [];
+			return;
 		}
 	}
 
@@ -279,14 +278,15 @@
 			try {
 				const res = await fetch(`/assets?search=${encodeURIComponent(q)}&limit=25`);
 				const body = res.ok ? await res.json() : { results: [] };
+				if (searchQuery.trim() !== q) return;
 				const onBoard = new Set(nodes.map((n) => n.id));
 				searchResults = (body.results ?? []).filter(
 					(a: AssetItem) => folderOf(a).id !== folderId && !onBoard.has(a.id)
 				);
 			} catch {
-				searchResults = [];
+				if (searchQuery.trim() === q) searchResults = [];
 			} finally {
-				searching = searchQuery.trim() !== q;
+				if (searchQuery.trim() === q) searching = false;
 			}
 		}, 250);
 	}

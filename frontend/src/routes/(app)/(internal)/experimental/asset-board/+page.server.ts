@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { fetchAllPages } from '$lib/utils/pagination';
+import { fetchAllByIds, fetchAllPages } from '$lib/utils/pagination';
 import { modelSchema } from '$lib/utils/schemas';
 import { defaultWriteFormAction, defaultDeleteFormAction } from '$lib/utils/actions';
 import { superValidate } from 'sveltekit-superforms';
@@ -29,12 +29,13 @@ async function loadExternalNeighbours(fetch: typeof globalThis.fetch, assets: an
 	}
 
 	const byId = new Map<string, any>();
+	let parentsResolved = true;
 
-	for (const batch of chunks([...externalParentIds], BATCH)) {
-		const rows = await fetchAllPages(fetch, `${BASE_API_URL}/assets/?id=${batch.join(',')}`).catch(
-			() => []
-		);
+	try {
+		const rows = await fetchAllByIds(fetch, `${BASE_API_URL}/assets/`, [...externalParentIds]);
 		for (const r of rows) byId.set(r.id, r);
+	} catch {
+		parentsResolved = false;
 	}
 
 	for (const batch of chunks([...localIds], BATCH)) {
@@ -45,7 +46,7 @@ async function loadExternalNeighbours(fetch: typeof globalThis.fetch, assets: an
 
 	return {
 		externalAssets: [...byId.values()],
-		hiddenAssetIds: [...externalParentIds].filter((id) => !byId.has(id))
+		hiddenAssetIds: parentsResolved ? [...externalParentIds].filter((id) => !byId.has(id)) : []
 	};
 }
 
