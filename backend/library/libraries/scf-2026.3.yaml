@@ -22,25 +22,67 @@ objects:
       https://securecontrolsframework.com/about-us/'
     min_score: 0
     max_score: 5
+    field_visibility:
+      score:
+        auditor: edit
+        respondent: hidden
+      is_scored:
+        auditor: edit
+        respondent: hidden
+      documentation_score:
+        auditor: hidden
+        respondent: hidden
+      result:
+        auditor: edit
+        respondent: edit
+      extended_result:
+        auditor: hidden
+        respondent: hidden
+      status:
+        auditor: hidden
+        respondent: hidden
+      task_templates:
+        auditor: hidden
+        respondent: hidden
+      applied_controls:
+        auditor: edit
+        respondent: edit
     scores_definition:
     - score: 0
       name: Not Performed
-      description: null
+      description: "This level of maturity is defined as \u201Cnon-existence practices,\u201D\
+        \ where the control is not being performed. Practices are non-existent, where\
+        \ a reasonable person would conclude the control is not being performed."
     - score: 1
       name: Performed Informally
-      description: null
+      description: "This level of maturity is defined as \u201Cad hoc practices,\u201D\
+        \ where the control is being performed, but lacks completeness & consistency.\
+        \ Performance depends on specific knowledge and effort of the individual performing\
+        \ the task(s), where the performance of these practices is not proactively\
+        \ governed."
     - score: 2
       name: Planned & Tracked
-      description: null
+      description: "Practices are \u201Crequirements-driven\u201D where the intent\
+        \ of control is met in some circumstances, but not standardized across the\
+        \ entire organization. Controls are implemented in some, but not all applicable\
+        \ circumstances/environments (e.g., specific enclaves, facilities or locations)."
     - score: 3
       name: Well Defined
-      description: null
+      description: "This level of maturity is defined as \u201Centerprise-wide standardization,\u201D\
+        \ where the practices are well-defined and standardized across the organization.\
+        \ Controls are implemented in all applicable circumstances/environments (deviations\
+        \ are documented and justified)."
     - score: 4
       name: Quantitatively Controlled
-      description: null
+      description: "This level of maturity is defined as \u201Cmetrics-driven practices,\u201D\
+        \ where in addition to being well-defined and standardized practices across\
+        \ the organization, there are detailed metrics to enable governance oversight."
     - score: 5
       name: Continuously Improving
-      description: null
+      description: "This level of maturity is defined as \u201Cworld-class practices,\u201D\
+        \ where the practices are not only well-defined and standardized across the\
+        \ organization, as well as having detailed metrics, but the process is continuously\
+        \ improving."
     implementation_groups_definition:
     - ref_id: tier1
       name: Tier 1 - Strategic
