@@ -84,3 +84,23 @@ export function savePinned(folderId: string, ids: string[]): void {
 		// ignore quota errors
 	}
 }
+
+const INSTRUCTIONS_KEY = 'assetBoard:instructionsOpen';
+
+export function loadInstructionsOpen(): boolean {
+	if (!browser) return false;
+	try {
+		return localStorage.getItem(INSTRUCTIONS_KEY) === 'true';
+	} catch {
+		return false;
+	}
+}
+
+export function saveInstructionsOpen(open: boolean): void {
+	if (!browser) return;
+	try {
+		localStorage.setItem(INSTRUCTIONS_KEY, String(open));
+	} catch {
+		// ignore quota errors
+	}
+}

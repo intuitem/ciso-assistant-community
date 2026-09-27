@@ -28,6 +28,8 @@
 		saveViewport as saveViewportLS,
 		loadPinned,
 		savePinned,
+		loadInstructionsOpen,
+		saveInstructionsOpen,
 		type XY
 	} from './positions';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -74,7 +76,7 @@
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
 	let positions = $state<Record<string, XY>>({});
-	let instructionsOpen = $state(true);
+	let instructionsOpen = $state(loadInstructionsOpen());
 	// drop coordinates + optional parent for the next asset created via the canvas
 	let pendingPlacement = $state<XY | null>(null);
 	let pendingParentId = $state<string | null>(null);
@@ -753,7 +755,10 @@
 					class="w-full flex items-center justify-between px-3 py-2 font-semibold cursor-pointer hover:bg-surface-200-800 rounded-base"
 					aria-expanded={instructionsOpen}
 					aria-controls="asset-board-instructions"
-					onclick={() => (instructionsOpen = !instructionsOpen)}
+					onclick={() => {
+						instructionsOpen = !instructionsOpen;
+						saveInstructionsOpen(instructionsOpen);
+					}}
 				>
 					<span>
 						<i class="fa-solid fa-info-circle mr-1"></i>Instructions
