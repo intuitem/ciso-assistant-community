@@ -1077,6 +1077,33 @@ class AppliedControlAutocompleteSerializer(BaseModelSerializer):
         return data
 
 
+class VulnerabilityAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Vulnerability
+        fields = ["id", "name", "ref_id", "folder"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
+class RiskScenarioAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    risk_assessment = FieldsRelatedField()
+
+    class Meta:
+        model = RiskScenario
+        fields = ["id", "name", "ref_id", "folder", "risk_assessment"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     parent_assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)

@@ -133,8 +133,8 @@
 		// Opt-in: /autocomplete omits optionsInfoFields/optionsExtraFields sources,
 		// so those badges vanish. Flip once viewsets declare autocomplete_fields.
 		lazy = false,
-		lazyLimit = 20,
-		lazyThreshold = 50,
+		lazyLimit = 50,
+		lazyThreshold = 100,
 		maxVisibleChips: _maxVisibleChips = 3,
 		portalDropdown = false
 	}: Props = $props();
