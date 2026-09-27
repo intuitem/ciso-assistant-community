@@ -31,6 +31,7 @@ Output:
 """
 
 import argparse
+from datetime import date
 
 import openpyxl
 import pandas as pd
@@ -86,7 +87,9 @@ def build_content(source_file, sheet_name):
         if not ref_id:
             continue
         domain = clean(row[COL_DOMAIN])
-        if domain and domain != previous_domain:
+        if not domain:
+            raise ValueError(f'Control "{ref_id}" has no "{COL_DOMAIN}"')
+        if domain != previous_domain:
             rows.append((None, 1, ref_id.split("-")[0], domain, None, None, None))
             previous_domain = domain
 
@@ -124,6 +127,9 @@ def write_workbook(destination_file, version, publication_date, content_rows):
         ws = wb.create_sheet(title)
         for r in rows:
             ws.append(list(r))
+            for cell in ws[ws.max_row]:
+                if cell.data_type == "f":
+                    cell.data_type = "s"
 
     library_meta = [
         ("type", "library"),
@@ -188,7 +194,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[1])
     parser.add_argument("source_file", help="Official SCF workbook")
     parser.add_argument("version", help='SCF version, e.g. "2026.3"')
-    parser.add_argument("--publication-date", help="YYYY-MM-DD")
+    parser.add_argument(
+        "--publication-date", type=date.fromisoformat, help="YYYY-MM-DD"
+    )
     parser.add_argument("--output", help='Defaults to "scf-<version>.xlsx"')
     args = parser.parse_args()
 
