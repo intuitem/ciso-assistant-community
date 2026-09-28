@@ -99,8 +99,9 @@
 	let rescaleImpact = $derived.by(() => {
 		const pending = ($formErrors as Record<string, string[] | undefined>)?.confirm_rescale?.length;
 		if (!pending) return null;
-		const impact: Record<string, any> =
-			($formMessage as { data?: Record<string, any> } | undefined)?.data?.rescale_impact ?? {};
+		const impact: Record<string, unknown> =
+			($formMessage as { data?: { rescale_impact?: Record<string, unknown> } } | undefined)?.data
+				?.rescale_impact ?? {};
 		// DRF sends counts as strings: "0" must not read as a count.
 		return Object.fromEntries(
 			Object.entries(impact).map(([key, value]) => [
@@ -370,7 +371,7 @@
 	>
 		<i class="fa-solid fa-circle-exclamation mt-0.5"></i>
 		<ul>
-			{#each scaleErrors as error}
+			{#each scaleErrors as error (error)}
 				<li>{error}</li>
 			{/each}
 		</ul>

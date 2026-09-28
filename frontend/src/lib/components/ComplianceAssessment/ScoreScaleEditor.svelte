@@ -112,7 +112,7 @@
 	function setCell(score: number, loc: string, text: string) {
 		const name = text.trim();
 		const level = levels.find((l) => l.score === score) ?? { score, translations: {} };
-		const translations = { ...(level.translations ?? {}) };
+		const translations = { ...level.translations };
 		if (name) translations[loc] = { ...translations[loc], name };
 		else delete translations[loc];
 		const fallback =
@@ -138,7 +138,7 @@
 		const old = languages[idx];
 		languages = languages.map((l, i) => (i === idx ? loc : l));
 		levels = levels.map((level) => {
-			const translations = { ...(level.translations ?? {}) };
+			const translations = { ...level.translations };
 			if (translations[old]) {
 				translations[loc] = translations[old];
 				delete translations[old];
@@ -152,7 +152,7 @@
 		const loc = languages[idx];
 		languages = languages.filter((_, i) => i !== idx);
 		levels = levels.map((level) => {
-			const translations = { ...(level.translations ?? {}) };
+			const translations = { ...level.translations };
 			delete translations[loc];
 			return { ...level, translations };
 		});
@@ -184,7 +184,7 @@
 	</div>
 
 	<div class="flex flex-wrap gap-2" role="radiogroup" aria-label={m.scoreScale()}>
-		{#each SCORE_SCALE_PRESETS as p}
+		{#each SCORE_SCALE_PRESETS as p (p.id)}
 			<button
 				type="button"
 				role="radio"
@@ -236,7 +236,7 @@
 		<p class="text-xs text-surface-600-400" data-testid="score-scale-preview">
 			{#if presetPreview.length}
 				<span class="font-medium">{m.scoreScaleLevels()}</span>
-				{#each presetPreview as level, idx}
+				{#each presetPreview as level, idx (level.score)}
 					<span class="font-mono text-surface-500">{level.score}</span>
 					{level.name}{idx < presetPreview.length - 1 ? ' · ' : ''}
 				{/each}
@@ -311,7 +311,7 @@
 												onchange={(e) => changeLanguage(idx, e.currentTarget.value)}
 												aria-label={m.language()}
 											>
-												{#each [loc, ...unusedLocales] as l}
+												{#each [loc, ...unusedLocales] as l (l)}
 													<option value={l}
 														>{(defaultLangLabels as Record<string, string>)[l] ?? l}</option
 													>

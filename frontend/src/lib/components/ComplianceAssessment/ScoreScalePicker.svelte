@@ -109,7 +109,7 @@
 		<p class="text-xs text-surface-600-400" data-testid="score-scale-preview">
 			{#if preview.length}
 				<span class="font-medium">{m.scoreScaleLevels()}</span>
-				{#each preview as level, idx}
+				{#each preview as level, idx (level.score)}
 					<span class="font-mono text-surface-500">{level.score}</span>
 					{level.name}{idx < preview.length - 1 ? ' · ' : ''}
 				{/each}
