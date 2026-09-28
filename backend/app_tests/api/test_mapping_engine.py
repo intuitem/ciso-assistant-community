@@ -31,6 +31,7 @@ def _make_engine(**overrides) -> MappingEngine:
     engine.framework_mappings = defaultdict(list)
     engine.frameworks = {}
     engine.direct_mappings = set()
+    engine.own_scale_urns = set()
     engine.fields_to_map = [
         "result",
         "status",

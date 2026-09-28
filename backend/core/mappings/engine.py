@@ -3,6 +3,7 @@ from core.models import (
     Framework,
     StoredLibrary,
     ComplianceAssessment,
+    RequirementNode,
     rescale_score,
 )
 from django.db.models.query import QuerySet
@@ -27,6 +28,11 @@ class MappingEngine:
             self._framework_mappings,
             self._direct_mappings,
         ) = self.load_rms_data()
+        self.own_scale_urns = set(
+            RequirementNode.objects.exclude(
+                min_score__isnull=True, max_score__isnull=True
+            ).values_list("urn", flat=True)
+        )
 
         self.fields_to_map: list[str] = [
             "result",
@@ -393,6 +399,7 @@ class MappingEngine:
             src_assessment = source_audit["requirement_assessments"].get(src)
             if src_assessment is None:
                 continue
+            copy_scores = scores_compatible and not {src, dst} & self.own_scale_urns
 
             # Track whether this mapping entry actually wrote data.
             mapped = False
@@ -401,7 +408,7 @@ class MappingEngine:
                 # If we have matching score ranges on the target framework, copy
                 # the whole assessment (including score fields). Otherwise only
                 # copy non-score fields to avoid misrepresenting scores.
-                if scores_compatible:
+                if copy_scores:
                     # Fix 2: Use .get() for collision detection instead of
                     # defaultdict auto-creation.  An empty dict {} (from a
                     # previous defaultdict miss) is falsy, so this is safe.
@@ -491,7 +498,7 @@ class MappingEngine:
                             target_assessment[m2m_field] = src_values
 
                 # Copy score fields if scores are compatible
-                if scores_compatible:
+                if copy_scores:
                     for score_field in [
                         "score",
                         "is_scored",
