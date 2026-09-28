@@ -50,7 +50,6 @@ def command_setup(db):
     fw = Framework.objects.create(
         name="Recompute FW",
         folder=folder,
-        is_published=True,
         min_score=0,
         max_score=100,
     )
@@ -62,7 +61,6 @@ def command_setup(db):
         ref_id="REQ-RESULT",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     q1 = Question.objects.create(
         requirement_node=rn_result,
@@ -73,7 +71,6 @@ def command_setup(db):
         order=0,
         weight=1,
         folder=folder,
-        is_published=True,
     )
     q1_good = QuestionChoice.objects.create(
         question=q1,
@@ -84,7 +81,6 @@ def command_setup(db):
         compute_result="compliant",
         order=0,
         folder=folder,
-        is_published=True,
     )
     QuestionChoice.objects.create(
         question=q1,
@@ -95,7 +91,6 @@ def command_setup(db):
         compute_result="non_compliant",
         order=1,
         folder=folder,
-        is_published=True,
     )
     q2 = Question.objects.create(
         requirement_node=rn_result,
@@ -106,7 +101,6 @@ def command_setup(db):
         order=1,
         weight=1,
         folder=folder,
-        is_published=True,
     )
     q2_good = QuestionChoice.objects.create(
         question=q2,
@@ -117,7 +111,6 @@ def command_setup(db):
         compute_result="compliant",
         order=0,
         folder=folder,
-        is_published=True,
     )
     QuestionChoice.objects.create(
         question=q2,
@@ -128,7 +121,6 @@ def command_setup(db):
         compute_result="non_compliant",
         order=1,
         folder=folder,
-        is_published=True,
     )
 
     # --- score-only requirement (no compute_result anywhere) ---
@@ -138,7 +130,6 @@ def command_setup(db):
         ref_id="REQ-SCORE",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     q3 = Question.objects.create(
         requirement_node=rn_score,
@@ -149,7 +140,6 @@ def command_setup(db):
         order=0,
         weight=1,
         folder=folder,
-        is_published=True,
     )
     QuestionChoice.objects.create(
         question=q3,
@@ -159,7 +149,6 @@ def command_setup(db):
         add_score=5,
         order=0,
         folder=folder,
-        is_published=True,
     )
 
     perimeter = Perimeter.objects.create(name="Recompute Perim", folder=folder)
@@ -168,7 +157,6 @@ def command_setup(db):
         framework=fw,
         folder=folder,
         perimeter=perimeter,
-        is_published=True,
         min_score=0,
         max_score=100,
     )

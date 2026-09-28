@@ -3,10 +3,12 @@ import re
 import uuid
 
 from django.db import IntegrityError
+from django.db.models import Prefetch
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 
+from core.permissions import FeatureFlagRequired
 from core.views import (
     BATCH_SIZE_LIMIT,
     BaseModelViewSet as AbstractBaseModelViewSet,
@@ -22,7 +24,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
 from iam.models import RoleAssignment, Folder, Permission
-from core.models import Asset
+from core.models import AppliedControl, Asset
 from .models import (
     BusinessImpactAnalysis,
     AssetAssessment,
@@ -409,6 +411,22 @@ class AssetAssessmentViewSet(BaseModelViewSet):
     search_fields = ["bia__name", "asset__name"]
     ordering = ["asset"]
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("bia", "asset", "asset__folder")
+            .prefetch_related(
+                "dependencies",
+                "evidences",
+                # Serialized with its folder: join it in the prefetch query.
+                Prefetch(
+                    "associated_controls",
+                    queryset=AppliedControl.objects.select_related("folder"),
+                ),
+            )
+        )
+
     def _get_asset_verdict(self, asset):
         """
         Calculate verdict based on security and recovery objectives vs capabilities.
@@ -656,6 +674,8 @@ class EscalationThresholdViewSet(BaseModelViewSet):
 
 class DoraIncidentReportViewSet(BaseModelViewSet):
     model = DoraIncidentReport
+    feature_flag = "dora"
+    permission_classes = BaseModelViewSet.permission_classes + [FeatureFlagRequired]
     filterset_fields = ["incident", "incident_submission", "folder"]
     search_fields = ["incident__name", "incident_description"]
 

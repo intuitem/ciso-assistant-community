@@ -66,8 +66,9 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="classification-levels"
+	optionsEndpoint="classification-levels?is_visible=true&object_classification__is_visible=true"
 	optionsLabelField="label"
+	optionsExtraFields={[['object_classification', 'str']]}
 	field="classification"
 	label={m.classification()}
 	nullable
@@ -98,6 +99,10 @@
 		optionsEndpoint="applied-controls"
 		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
+		optionsInfoFields={{
+			fields: [{ field: 'category', translate: true }],
+			position: 'prefix'
+		}}
 		field="applied_controls"
 		label={m.appliedControls()}
 		cacheLock={cacheLocks['applied_controls']}
@@ -124,5 +129,16 @@
 		label={m.processings()}
 		cacheLock={cacheLocks['processings']}
 		bind:cachedValue={formDataCache['processings']}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="assets"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="assets"
+		label={m.assets()}
+		cacheLock={cacheLocks['assets']}
+		bind:cachedValue={formDataCache['assets']}
 	/>
 </Dropdown>

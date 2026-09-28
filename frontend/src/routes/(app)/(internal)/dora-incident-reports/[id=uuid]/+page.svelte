@@ -27,5 +27,4 @@
 	incidentRef={data.incidentRef}
 	reportId={data.reportId}
 	validation={data.validation}
-	userOptions={data.userOptions}
 />

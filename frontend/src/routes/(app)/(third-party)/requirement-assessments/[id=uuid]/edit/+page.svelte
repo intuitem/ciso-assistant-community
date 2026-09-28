@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { RequirementAssessmentSchema } from '$lib/utils/schemas';
+	import { FindingSchema, RequirementAssessmentSchema } from '$lib/utils/schemas';
+	import { getModelInfo } from '$lib/utils/crud';
 	import type { ActionData, PageData } from './$types';
 
 	import { page } from '$app/state';
@@ -13,7 +14,12 @@
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getSecureRedirect, getFieldVisibility, alignmentColorMap } from '$lib/utils/helpers';
+	import {
+		getSecureRedirect,
+		getFieldVisibility,
+		isFieldVisible,
+		alignmentColorMap
+	} from '$lib/utils/helpers';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import { hideSuggestions } from '$lib/utils/stores';
@@ -28,7 +34,9 @@
 	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import { superForm } from 'sveltekit-superforms';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { getFlash } from 'sveltekit-flash-message';
+	import { page as pageStore } from '$app/stores';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -103,6 +111,89 @@
 			title: safeTranslate('add-' + data.measureModel.localName)
 		};
 		modalStore.trigger(modal);
+	}
+
+	// Off by default: only teams who work this way see the button.
+	const canRaiseFinding = $derived(
+		!!page.data?.featureflags?.findings_from_requirements &&
+			canPerformActionOnObject({
+				user: page.data.user,
+				action: 'add',
+				model: 'finding',
+				object: data.requirementAssessment
+			})
+	);
+	// Picking an existing finding edits that finding, so it needs change rather than add.
+	const canBindFinding = $derived(
+		!!page.data?.featureflags?.findings_from_requirements &&
+			canPerformActionOnObject({
+				user: page.data.user,
+				action: 'change',
+				model: 'finding',
+				object: data.requirementAssessment
+			})
+	);
+
+	const flash = getFlash(pageStore);
+
+	async function modalFindingCreateForm(): Promise<void> {
+		// The audit's binder is created on first use, so the finding has somewhere to live
+		// and the audit gets its findings list for free.
+		const res = await fetch(
+			`/requirement-assessments/${data.requirementAssessment.id}/findings-binder`,
+			{ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }
+		);
+		if (!res.ok) {
+			// Never fail silently: a missing route or a permission refusal both land here.
+			flash.set({ type: 'error', message: `${m.anErrorOccurred()} (${res.status})` });
+			return;
+		}
+		const binder = await res.json();
+
+		const findingModel = getModelInfo('findings');
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: defaults(
+					{
+						findings_assessment: binder.id,
+						// The assessment implies the requirement; setting the catalog node too
+						// just renders the same thing twice on the finding.
+						requirement_assessment: data.requirementAssessment.id
+					},
+					zod(FindingSchema)
+				),
+				formAction: '?/createFinding',
+				model: findingModel,
+				debug: false
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: m.raiseFinding()
+		});
+	}
+
+	function modalTaskTemplateCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.taskTemplateCreateForm,
+				formAction: '?/createTaskTemplate',
+				model: data.taskTemplateModel,
+				invalidateAll: false,
+				debug: false
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: m.addTaskTemplate(),
+			response: (r: boolean) => {
+				if (r) refreshKey = !refreshKey;
+			}
+		});
 	}
 
 	function modalEvidenceCreateForm(): void {
@@ -307,16 +398,25 @@
 	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
+	const showTaskTemplates = $derived(fieldVis.showTaskTemplates);
 	const showEvidences = $derived(fieldVis.showEvidences);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
 	const showComments = $derived(fieldVis.showComments);
 
 	const isAuditor = $derived(viewerRole === 'auditor');
 	const canShowAppliedControls = $derived(showAppliedControls && !page.data.user.is_third_party);
+	// Same gate as applied controls, on top of the finding permissions.
+	const showFindings = $derived(
+		(canRaiseFinding || canBindFinding) &&
+			isFieldVisible(complianceAssessment, 'findings', viewerRole) &&
+			!page.data.user.is_third_party
+	);
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';
+		if (showTaskTemplates) return 'task_templates';
 		if (showEvidences) return 'evidences';
+		if (showFindings) return 'findings';
 		// Security exceptions are auditor-only — not part of the per-CA visibility model.
 		if (isAuditor) return 'security_exceptions';
 		return 'applied_controls';
@@ -357,6 +457,20 @@
 	});
 
 	$effect(() => {
+		if (form?.newTaskTemplate) {
+			refreshKey = !refreshKey;
+			requirementAssessmentForm.form.update(
+				(current: Record<string, any>) => ({
+					...current,
+					task_templates: [...(current.task_templates ?? []), form?.newTaskTemplate]
+				}),
+				{ taint: false }
+			);
+			form.newTaskTemplate = undefined;
+		}
+	});
+
+	$effect(() => {
 		if (form?.newSecurityException) {
 			refreshKey = !refreshKey;
 			requirementAssessmentForm.form.update(
@@ -367,6 +481,20 @@
 				{ taint: false }
 			);
 			form.newSecurityException = undefined;
+		}
+	});
+
+	$effect(() => {
+		if (form?.newFinding) {
+			refreshKey = !refreshKey;
+			requirementAssessmentForm.form.update(
+				(current: Record<string, any>) => ({
+					...current,
+					findings: [...(current.findings ?? []), form?.newFinding]
+				}),
+				{ taint: false }
+			);
+			form.newFinding = undefined;
 		}
 	});
 
@@ -537,7 +665,7 @@
 			{...rest}
 		>
 			{#snippet children({ form, data })}
-				{#if canShowAppliedControls || showEvidences || isAuditor}
+				{#if canShowAppliedControls || showTaskTemplates || showEvidences || showFindings || isAuditor}
 					<div class="card shadow-lg bg-surface-50-950">
 						<Tabs
 							value={group}
@@ -551,6 +679,11 @@
 										>{m.appliedControls()}</Tabs.Trigger
 									>
 								{/if}
+								{#if showTaskTemplates}
+									<Tabs.Trigger value="task_templates" data-testid="task-templates-tab"
+										>{m.taskTemplates()}</Tabs.Trigger
+									>
+								{/if}
 								{#if showEvidences}
 									<Tabs.Trigger value="evidences" data-testid="evidences-tab"
 										>{m.evidences()}</Tabs.Trigger
@@ -558,6 +691,11 @@
 								{/if}
 								{#if isAuditor}
 									<Tabs.Trigger value="security_exceptions">{m.securityExceptions()}</Tabs.Trigger>
+								{/if}
+								{#if showFindings}
+									<Tabs.Trigger value="findings" data-testid="findings-tab"
+										>{m.findings()}</Tabs.Trigger
+									>
 								{/if}
 								<Tabs.Indicator />
 							</Tabs.List>
@@ -616,12 +754,17 @@
 										{#key refreshKey}
 											<AutocompleteSelect
 												multiple
+												lazy
 												{form}
 												optionsEndpoint="applied-controls"
 												optionsDetailedUrlParameters={[
 													['scope_folder_id', page.data.requirementAssessment.folder.id]
 												]}
 												optionsExtraFields={[['folder', 'str']]}
+												optionsInfoFields={{
+													fields: [{ field: 'category', translate: true }],
+													position: 'prefix'
+												}}
 												field="applied_controls"
 												placeholder={m.appliedControlsPlaceholder()}
 											/>
@@ -633,6 +776,46 @@
 											hideFilters={true}
 											URLModel="applied-controls"
 											expectedCount={countMasked(page.data.requirementAssessment.applied_controls)}
+										/>
+									</div>
+								</Tabs.Content>
+							{/if}
+							{#if showTaskTemplates}
+								<Tabs.Content value="task_templates">
+									<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+										<i class="fa-solid fa-info-circle"></i>
+										<p>{m.requirementTaskTemplateHelpText()}</p>
+									</div>
+									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+										<span class="flex flex-row justify-end items-center">
+											<button
+												class="btn preset-filled-primary-500 self-end"
+												onclick={modalTaskTemplateCreateForm}
+												data-testid="add-task-template-button"
+												type="button"
+												><i class="fa-solid fa-plus mr-2"></i>{m.addTaskTemplate()}</button
+											>
+										</span>
+										{#key refreshKey}
+											<AutocompleteSelect
+												multiple
+												lazy
+												{form}
+												optionsEndpoint="task-templates"
+												optionsExtraFields={[['folder', 'str']]}
+												optionsDetailedUrlParameters={[
+													['scope_folder_id', page.data.requirementAssessment.folder.id]
+												]}
+												field="task_templates"
+											/>
+										{/key}
+										<ModelTable
+											source={page.data.tables['task-templates']}
+											hideFilters={true}
+											URLModel="task-templates"
+											expectedCount={countMasked(page.data.requirementAssessment.task_templates)}
+											baseEndpoint="/task-templates?requirement_assessments={page.data
+												.requirementAssessment.id}"
 										/>
 									</div>
 								</Tabs.Content>
@@ -654,6 +837,7 @@
 										{#key refreshKey}
 											<AutocompleteSelect
 												multiple
+												lazy
 												{form}
 												optionsEndpoint="evidences"
 												optionsExtraFields={[['folder', 'str']]}
@@ -688,6 +872,7 @@
 										{#key refreshKey}
 											<AutocompleteSelect
 												multiple
+												lazy
 												{form}
 												optionsEndpoint="security-exceptions"
 												optionsExtraFields={[['folder', 'str']]}
@@ -704,6 +889,47 @@
 											baseEndpoint="/security-exceptions?requirement_assessments={page.data
 												.requirementAssessment.id}"
 										/>
+									</div>
+								</Tabs.Content>
+							{/if}
+							{#if showFindings}
+								<Tabs.Content value="findings">
+									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+										{#if canRaiseFinding}
+											<span class="flex flex-row justify-end items-center">
+												<button
+													class="btn preset-filled-primary-500 self-end"
+													onclick={modalFindingCreateForm}
+													data-testid="raise-finding-button"
+													type="button"
+													><i class="fa-solid fa-plus mr-2"></i>{m.raiseFinding()}</button
+												>
+											</span>
+										{/if}
+										{#key refreshKey}
+											{#if canBindFinding}
+												<AutocompleteSelect
+													multiple
+													lazy
+													{form}
+													optionsEndpoint="findings"
+													optionsDetailedUrlParameters={[
+														['requirement_assessment', '--'],
+														['requirement_assessment', page.data.requirementAssessment.id]
+													]}
+													optionsExtraFields={[['folder', 'str']]}
+													field="findings"
+												/>
+											{/if}
+											<ModelTable
+												source={page.data.tables['findings']}
+												hideFilters={true}
+												URLModel="findings"
+												expectedCount={countMasked(page.data.requirementAssessment.findings)}
+												baseEndpoint="/findings?requirement_assessment={page.data
+													.requirementAssessment.id}"
+											/>
+										{/key}
 									</div>
 								</Tabs.Content>
 							{/if}

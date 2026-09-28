@@ -28,6 +28,7 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
         "filtering_labels",
         "urn",
         "source",
+        "published_date",
     ]
     search_fields = ["name", "ref_id", "description", "cvss_vector", "aliases"]
 

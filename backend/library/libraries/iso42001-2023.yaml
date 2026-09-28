@@ -10,8 +10,8 @@ description: 'Outline of ISO 42001-2023 -  Artificial intelligence Management sy
 
   You can purchase the standard for full details.'
 copyright: ISO - You can purchase the standard for full details.
-version: 1
-publication_date: 2025-12-15
+version: 2
+publication_date: 2026-09-10
 provider: ISO
 packager: intuitem
 objects:
@@ -707,7 +707,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8
       ref_id: A.8.3
       name: External reporting
-      description: Report externally on AI system activities as required.
+      description: Enable relevant parties to report negative effects.
       implementation_groups:
       - controls
     - urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.4

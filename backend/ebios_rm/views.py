@@ -3,13 +3,14 @@ import uuid
 
 import django_filters as df
 import pandas as pd
-from django.db.models import Case, F, FloatField, ProtectedError, Value, When
+from django.db.models import Case, F, FloatField, Value, When
 from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     GenericFilterSet,
     SmartOrderingFilter,
+    actor_prefetch,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
@@ -36,7 +37,6 @@ from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-from rest_framework.status import HTTP_409_CONFLICT
 
 
 import structlog
@@ -58,6 +58,23 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "assets", "genericcollection"]
 
     model = EbiosRMStudy
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "reference_entity", "risk_matrix")
+            .prefetch_related(
+                "assets__folder",
+                "compliance_assessments",
+                "risk_assessments",
+                actor_prefetch("authors"),
+                actor_prefetch("reviewers"),
+                "validationflow_set__approver",
+                "roto_set",
+                "operational_scenarios",
+            )
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -1084,7 +1101,14 @@ class AttackPathViewSet(BaseModelViewSet):
 class OperationalScenarioViewSet(BaseModelViewSet):
     model = OperationalScenario
 
-    filterset_fields = ["ebios_rm_study", "likelihood"]
+    filterset_fields = ["ebios_rm_study", "likelihood", "threats", "techniques"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related("threats", "techniques", "techniques__parent")
+        )
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
@@ -1156,28 +1180,21 @@ class ElementaryActionViewSet(BaseModelViewSet):
 
     filterset_class = ElementaryActionFilter
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        try:
-            return super().destroy(request, *args, **kwargs)
-        except ProtectedError:
-            operating_modes = list(
-                OperatingMode.objects.filter(
-                    kill_chain_steps__elementary_action=instance
-                ).distinct()
-            )
-            names = ", ".join(om.name for om in operating_modes[:10])
-            return Response(
-                {
-                    "detail": (
-                        f"Cannot delete elementary action '{instance.name}' — it is "
-                        f"used in {len(operating_modes)} operating mode kill chain(s)"
-                        + (f": {names}" if names else "")
-                        + ". Remove it from those kill chains first."
-                    ),
-                },
-                status=HTTP_409_CONFLICT,
-            )
+    def get_protected_error_response_data(self, instance, error):
+        operating_modes = list(
+            OperatingMode.objects.filter(
+                kill_chain_steps__elementary_action=instance
+            ).distinct()
+        )
+        names = ", ".join(om.name for om in operating_modes[:10])
+        return {
+            "detail": (
+                f"Cannot delete elementary action '{instance.name}' — it is "
+                f"used in {len(operating_modes)} operating mode kill chain(s)"
+                + (f": {names}" if names else "")
+                + ". Remove it from those kill chains first."
+            ),
+        }
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get icon choices")

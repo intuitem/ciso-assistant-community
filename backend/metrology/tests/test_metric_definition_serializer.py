@@ -251,3 +251,53 @@ class TestCustomMetricSampleWriteSerializerValidatesValueShape:
 
         assert not serializer.is_valid()
         assert "value" in serializer.errors
+
+    def test_accepts_legacy_json_string_result(self, metric_instance):
+        serializer = CustomMetricSampleWriteSerializer(
+            data={
+                "metric_instance": str(metric_instance.pk),
+                "timestamp": "2024-01-01T00:00:00Z",
+                "value": '{"result": 1.0}',
+            }
+        )
+
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.validated_data["value"] == {"result": 1.0}
+
+    def test_accepts_legacy_json_string_choice_index(self, qualitative_instance):
+        serializer = CustomMetricSampleWriteSerializer(
+            data={
+                "metric_instance": str(qualitative_instance.pk),
+                "timestamp": "2024-01-01T00:00:00Z",
+                "value": '{"choice_index": 1}',
+            }
+        )
+
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.validated_data["value"] == {"choice_index": 1}
+
+    @pytest.mark.parametrize("bad_value", ["null", "99.9", "[]", "false", '"null"'])
+    def test_rejects_legacy_json_string_that_does_not_decode_to_an_object(
+        self, metric_instance, bad_value
+    ):
+        errors = self._errors_for_value(metric_instance, bad_value)
+
+        assert "value" in errors
+
+    def test_rejects_legacy_json_string_null_on_the_value_schema(self, metric_instance):
+        errors = self._errors_for_value(metric_instance, "null")
+
+        assert "is not of type 'object'" in str(errors["value"][0])
+
+    def test_accepts_partial_update_of_legacy_string_valued_sample(
+        self, metric_instance
+    ):
+        sample = _sample_with_value(metric_instance, '{"result": 1.0}')
+
+        serializer = CustomMetricSampleWriteSerializer(
+            instance=sample,
+            data={"observation": "still fine"},
+            partial=True,
+        )
+
+        assert serializer.is_valid(), serializer.errors

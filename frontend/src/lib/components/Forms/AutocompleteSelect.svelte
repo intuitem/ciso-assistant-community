@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate, translateChoiceLabel } from '$lib/utils/i18n';
+	import { fetchAllByIds, fetchAllPages } from '$lib/utils/pagination';
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount, untrack } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { getSearchTarget, normalizeSearchString } from '$lib/utils/helpers';
-	import MultiSelect from 'svelte-multiselect';
+	import MultiSelect, { type LoadOptionsParams } from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
 	import * as m from '$paraglide/messages.js';
 	import { run } from 'svelte/legacy';
@@ -32,6 +33,8 @@
 		field: string;
 		valuePath?: string; // Default will be handled in destructuring
 		helpText?: string | undefined;
+		/** Extra classes on the help text, for a field whose hint carries an action. */
+		helpTextClass?: string;
 		form: SuperForm<Record<string, unknown>, any>;
 		resetForm?: boolean;
 		multiple?: boolean;
@@ -76,7 +79,6 @@
 		lazy?: boolean;
 		lazyLimit?: number;
 		lazyThreshold?: number;
-		minSearchLength?: number;
 		maxVisibleChips?: number;
 		portalDropdown?: boolean;
 	}
@@ -88,6 +90,7 @@
 		field,
 		valuePath = field,
 		helpText = undefined,
+		helpTextClass = '',
 		form,
 		resetForm = false,
 		multiple = false,
@@ -127,10 +130,11 @@
 		mount = () => null,
 		optionSnippet = undefined,
 		placeholder = '',
+		// Opt-in: /autocomplete omits optionsInfoFields/optionsExtraFields sources,
+		// so those badges vanish. Flip once viewsets declare autocomplete_fields.
 		lazy = false,
-		lazyLimit = 20,
-		lazyThreshold = 50,
-		minSearchLength = 2,
+		lazyLimit = 50,
+		lazyThreshold = 100,
 		maxVisibleChips: _maxVisibleChips = 3,
 		portalDropdown = false
 	}: Props = $props();
@@ -159,15 +163,10 @@
 	});
 
 	if (translateOptions) {
-		options = options.map((option) => {
-			const fromLabel = safeTranslate(option.label);
-			if (fromLabel !== option.label) return { ...option, translatedLabel: fromLabel };
-			if (option.label === option.value) {
-				const fromValue = safeTranslate(option.value);
-				if (fromValue !== option.value) return { ...option, translatedLabel: fromValue };
-			}
-			return { ...option, translatedLabel: option.label };
-		});
+		options = options.map((option) => ({
+			...option,
+			translatedLabel: translateChoiceLabel(option.label, option.value)
+		}));
 	}
 
 	let optionHashmap: Record<string, Option> = {};
@@ -206,7 +205,7 @@
 	}
 
 	const multiSelectOptions = {
-		minSelect: $constraints && $constraints.required === true ? 1 : 0,
+		minSelect: multiple && $constraints && $constraints.required === true ? 1 : 0,
 		maxSelect: multiple ? undefined : 1,
 		liSelectedClass: multiple
 			? '!chip !bg-surface-300-700 !text-surface-900-100'
@@ -218,15 +217,36 @@
 	};
 
 	let isLoading = $state(false);
-	let lazySearchPending = $state(false);
-	let lazyHasSearched = $state(false);
-	let lazyDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-	let lazyInputEl = $state<HTMLInputElement | null>(null);
-	let effectiveLazy = $state(lazy);
-	const LAZY_HINT_VALUE = '__lazy_hint__';
+	// Static-options selects have nothing to search server-side.
+	let effectiveLazy = $state(lazy && Boolean(optionsEndpoint));
+	const LAZY_COUNT_VALUE = '__lazy_count__';
+	// The library derives the next offset from its own list length, which the
+	// pinned suggestions and the count row inflate — track the server offset here.
+	let lazyServerOffset = 0;
+	let lazyGeneration = 0;
+	let lazyShown = new Set<string>();
 	let multiSelectOpen = $state(false);
-	const passthroughFilter = () => true;
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
+
+	function autocompleteBase() {
+		// optionsEndpoint may carry a query string ("folders?content_type=DO"):
+		// the /autocomplete action must be inserted before it. Some callers
+		// already target the autocomplete action — don't double the segment.
+		const [path, query] = optionsEndpoint.split('?');
+		const base = path.endsWith('/autocomplete') ? path : `${path}/autocomplete`;
+		return query ? `${base}?${query}` : base;
+	}
+
+	// Surface suggested options in lazy mode, where no option list is fetched
+	// up front — otherwise suggestions would only appear after typing.
+	function seedSuggestions() {
+		if (!optionsSuggestions?.length) return;
+		const existing = new Set(options.map((o) => o.value));
+		const suggested = processOptions(optionsSuggestions).filter((o) => !existing.has(o.value));
+		if (suggested.length > 0) {
+			options = [...options, ...suggested];
+		}
+	}
 
 	function buildEndpoint(extra?: Record<string, string>, baseOverride?: string) {
 		let endpoint = `/${baseOverride ?? optionsEndpoint}`;
@@ -267,10 +287,13 @@
 					if (probeResponse.ok) {
 						const probeData = await probeResponse.json();
 						const items = probeData?.results ?? probeData;
-						const totalCount = probeData?.count ?? (Array.isArray(items) ? items.length : 0);
 						const returnedCount = Array.isArray(items) ? items.length : 0;
-						if (totalCount <= lazyThreshold && returnedCount >= totalCount) {
-							// Small dataset with complete response — use eager mode
+						// Only a paginated envelope can have been truncated; a bare array
+						// is already complete and has no /autocomplete to search against.
+						const paginated =
+							Boolean(probeData) && !Array.isArray(probeData) && 'count' in probeData;
+						const totalCount = paginated ? probeData.count : returnedCount;
+						if (!paginated || (totalCount <= lazyThreshold && returnedCount >= totalCount)) {
 							effectiveLazy = false;
 							if (returnedCount > 0) {
 								options = processOptions(items);
@@ -285,34 +308,44 @@
 							// Large dataset — stay in lazy mode, only fetch selected items
 							effectiveLazy = true;
 							await fetchSelectedItems();
+							seedSuggestions();
 						}
 					} else {
 						// Probe failed — fall back to lazy mode
 						effectiveLazy = true;
 						await fetchSelectedItems();
+						seedSuggestions();
 					}
 				} else {
-					const endpoint = buildEndpoint();
-					const response = await fetch(endpoint, { cache: browserCache });
-					if (response.ok) {
-						const data = await response.json().then((res) => res?.results ?? res);
-						if (data.length > 0) {
-							options = processOptions(data);
-						}
-						const isRequired = mandatory || $constraints?.required;
-						const hasNoOptions = options.length === 0;
-						const isMissing = isRequired && hasNoOptions;
-						if (updateMissingConstraint) {
-							updateMissingConstraint(field, isMissing);
-						}
+					// Explicit eager mode: fetch the complete collection, not
+					// just the first server page.
+					const data = await fetchAllPages(cachedFetch, buildEndpoint());
+					if (data.length > 0) {
+						options = processOptions(data);
+					}
+					const isRequired = mandatory || $constraints?.required;
+					const hasNoOptions = options.length === 0;
+					const isMissing = isRequired && hasNoOptions;
+					if (updateMissingConstraint) {
+						updateMissingConstraint(field, isMissing);
 					}
 				}
 				optionsLoaded = true;
 			}
-			if (initialValue !== undefined && initialValue !== null && initialValue !== '') {
+			// Only seed the selection when the user hasn't picked anything yet:
+			// on edit forms this tail runs after async round-trips (probe +
+			// hydration in lazy mode), and a fast user can change the value
+			// before it lands — seeding then would clobber their choice back
+			// to the initial value, which is what would get saved.
+			if (
+				selected.length === 0 &&
+				initialValue !== undefined &&
+				initialValue !== null &&
+				initialValue !== ''
+			) {
 				const ids = (Array.isArray(initialValue) ? initialValue : [initialValue]).map(String);
 				selected = options.filter((item) => ids.includes(String(item.value)));
-			} else if (options.length === 1 && $constraints?.required) {
+			} else if (selected.length === 0 && options.length === 1 && $constraints?.required) {
 				selected = [options[0]];
 			}
 		} catch (error) {
@@ -321,6 +354,9 @@
 			isLoading = false;
 		}
 	}
+
+	// fetch with the component's cache mode, for the paging helpers.
+	const cachedFetch: typeof fetch = (input, init) => fetch(input, { cache: browserCache, ...init });
 
 	const NULL_OPTION: Option = { label: '--', value: '--', translatedLabel: '--' };
 
@@ -335,71 +371,110 @@
 	});
 
 	async function fetchSelectedItems() {
-		if (!initialValue) return;
-		const ids = Array.isArray(initialValue) ? initialValue : [initialValue];
+		// Hydrate the current form value, not the mount-time one: a re-fetch
+		// (e.g. after a dependent form update) must not resurrect the initial
+		// selection and drop what the user just picked.
+		const current = $value ?? initialValue;
+		if (current === undefined || current === null || current === '') return;
+		const ids = Array.isArray(current) ? current : [current];
 		if (ids.length === 0) return;
 
-		const lazyBase = effectiveLazy ? `${optionsEndpoint}/autocomplete` : undefined;
-		const endpoint = buildEndpoint({ id: ids.join(',') }, lazyBase);
-		const response = await fetch(endpoint, { cache: browserCache });
-		if (response.ok) {
-			const data = await response.json().then((res) => res?.results ?? res);
-			if (data.length > 0) {
-				options = processOptions(data);
-			}
+		const lazyBase = effectiveLazy ? autocompleteBase() : undefined;
+		// Chunked and paged: the id list can exceed both the URL length budget
+		// and the server page size, and a truncated hydration would sync a
+		// truncated selection back into the form value (silent data loss).
+		const data = await fetchAllByIds(
+			cachedFetch,
+			buildEndpoint(undefined, lazyBase),
+			ids.map(String)
+		);
+		if (data.length > 0) {
+			const hydrated = processOptions(data);
+			const hydratedValues = new Set(hydrated.map((o) => String(o.value)));
+			// Keep already-selected options the hydration did not return.
+			options = [...selected.filter((o) => !hydratedValues.has(String(o.value))), ...hydrated];
 		}
 	}
 
-	async function lazySearch(searchTerm: string) {
-		if (!effectiveLazy || !optionsEndpoint) return;
-		if (!searchTerm || searchTerm.length < minSearchLength) {
-			// Keep only already-selected options visible
-			options = selected.length > 0 ? [...selected] : [];
-			lazyHasSearched = false;
-			return;
+	// svelte-multiselect `loadOptions` callback: an empty search browses the
+	// collection page by page, a non-empty one narrows it server-side.
+	async function loadLazyPage({ search, offset, limit }: LoadOptionsParams) {
+		if (offset === 0) {
+			lazyGeneration++;
+			lazyServerOffset = 0;
+			lazyShown = new Set();
 		}
-
-		isLoading = true;
-		lazyHasSearched = true;
+		const generation = lazyGeneration;
+		const term = search.trim();
+		const params: Record<string, string> = {
+			limit: String(limit),
+			offset: String(lazyServerOffset),
+			// Order by what the label shows; DRF drops fields a model lacks.
+			ordering:
+				optionsLabelField === 'auto' ? 'ref_id,name' : optionsLabelField.replaceAll('.', '__')
+		};
+		if (term) params.search = term;
+		const endpoint = buildEndpoint(params, autocompleteBase());
 		try {
-			const lazyBase = `${optionsEndpoint}/autocomplete`;
-			const endpoint = buildEndpoint(
-				{
-					search: searchTerm,
-					limit: String(lazyLimit)
-				},
-				lazyBase
-			);
 			const response = await fetch(endpoint, { cache: 'no-store' });
-			if (response.ok) {
-				const data = await response.json().then((res) => res?.results ?? res);
-				const searchResults = data.length > 0 ? processOptions(data) : [];
-				// Merge with currently selected items so they remain visible
-				const selectedSet = new Set(selected.map((s) => s.value));
-				const merged = [...selected];
-				for (const opt of searchResults) {
-					if (!selectedSet.has(opt.value)) {
-						merged.push(opt);
-					}
-				}
-				options = merged;
+			if (!response.ok) {
+				console.error(`Error loading ${optionsEndpoint}: ${response.status} ${endpoint}`);
+				return { options: [], hasMore: false };
 			}
+			const data = await response.json();
+			if (generation !== lazyGeneration) return { options: [], hasMore: false };
+			const items: unknown[] = data?.results ?? data ?? [];
+			const total: number | undefined = data?.count;
+			lazyServerOffset += items.length;
+			const hasMore = total !== undefined && lazyServerOffset < total;
+
+			const pinned =
+				offset === 0 && !term && optionsSuggestions?.length
+					? processOptions(optionsSuggestions)
+					: [];
+			const page = [...pinned, ...processOptions(items, false)].filter((o) => {
+				const key = String(o.value);
+				if (lazyShown.has(key)) return false;
+				lazyShown.add(key);
+				return true;
+			});
+
+			const known = new Set(options.map((o) => String(o.value)));
+			const unknown = page.filter((o) => !known.has(String(o.value)));
+			if (unknown.length > 0) options = [...options, ...unknown];
+
+			if (offset === 0 && hasMore) {
+				page.unshift({
+					label: m.lazyResultsCount({ count: total }),
+					value: LAZY_COUNT_VALUE,
+					disabled: true
+				} as Option);
+			}
+			return { options: page, hasMore };
 		} catch (error) {
-			console.error(`Error searching ${optionsEndpoint}:`, error);
-		} finally {
-			isLoading = false;
+			console.error(`Error loading ${optionsEndpoint}:`, error);
+			return { options: [], hasMore: false };
 		}
 	}
 
-	function processOptions(objects: any[]) {
+	const lazyLoadOptions = {
+		fetch: loadLazyPage,
+		batchSize: lazyLimit,
+		debounceMs: 300
+	};
+
+	function processOptions(objects: any[], sort = true) {
 		const append = (x: string, y: string) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
 
 		const processed = objects
 			.map((object) => {
-				const mainLabel =
+				const composedLabel =
 					optionsLabelField === 'auto'
 						? append(object.ref_id, object.name || object.description)
 						: getNestedValue(object, optionsLabelField);
+				// Lightweight payloads (e.g. autocomplete) may lack the label
+				// fields — fall back to the server-side display string.
+				const mainLabel = composedLabel || object.str || '';
 
 				const extraParts = optionsExtraFields.map((fieldPath) => {
 					const value = getNestedValue(object, fieldPath[0], fieldPath[1]);
@@ -440,12 +515,7 @@
 					suggested: optionsSuggestions?.some(
 						(s) => getNestedValue(s, optionsValueField) === valueField
 					),
-					translatedLabel:
-						safeTranslate(fullLabel) !== fullLabel
-							? safeTranslate(fullLabel)
-							: safeTranslate(valueField) !== valueField
-								? safeTranslate(valueField)
-								: fullLabel,
+					translatedLabel: translateChoiceLabel(fullLabel, valueField),
 					path,
 					infoString,
 					contentType: object?.content_type || ''
@@ -460,8 +530,11 @@
 			.filter(
 				(option) =>
 					optionsSelfSelect || option.value !== getNestedValue(optionsSelf, optionsValueField)
-			)
-			.sort((a, b) => {
+			);
+		// Server-paged batches keep the server order: sorting each page on its own
+		// would interleave out of order once pages are appended.
+		if (sort)
+			processed.sort((a, b) => {
 				// Show suggested items first
 				if (a.suggested && !b.suggested) return -1;
 				if (!a.suggested && b.suggested) return 1;
@@ -513,7 +586,14 @@
 			if (valueArray.length === 0) {
 				selected = [];
 			} else {
-				selected = options.filter((item) => valueArray.includes(String(item.value)));
+				// Resolve from the known options, but never drop an already
+				// selected option just because the (lazy, page-sized) option
+				// list was replaced meanwhile.
+				const known = new Map<string, Option>();
+				for (const item of [...untrack(() => selected), ...options]) {
+					known.set(String(item.value), item);
+				}
+				selected = valueArray.map((v) => known.get(v)).filter((o): o is Option => Boolean(o));
 			}
 		}
 	});
@@ -604,28 +684,7 @@
 				!effectiveLazy);
 	});
 
-	$effect(() => {
-		if (!effectiveLazy || !lazyInputEl) return;
-		const el = lazyInputEl;
-		const handler = () => {
-			const text = el.value;
-			if (lazyDebounceTimer) clearTimeout(lazyDebounceTimer);
-			if (text.length >= minSearchLength) {
-				lazySearchPending = true;
-			} else {
-				lazySearchPending = false;
-			}
-			lazyDebounceTimer = setTimeout(() => {
-				lazySearchPending = false;
-				lazySearch(text);
-			}, 300);
-		};
-		el.addEventListener('input', handler);
-		return () => el.removeEventListener('input', handler);
-	});
-
 	onDestroy(() => {
-		if (lazyDebounceTimer) clearTimeout(lazyDebounceTimer);
 		if (updateMissingConstraint) {
 			updateMissingConstraint(field, false);
 		}
@@ -724,26 +783,21 @@
 			bind:open={multiSelectOpen}
 			bind:outerDiv
 			id={inputId}
-			options={new Proxy(
-				effectiveLazy && selected.length > 0 && !lazyHasSearched
-					? [...options, { label: m.typeToSearch(), value: LAZY_HINT_VALUE, disabled: true }]
-					: options,
-				{
-					get(target, prop, receiver) {
-						// Fix: svelte-multiselect's add() uses Array.includes() (reference equality) to
-						// check if a clicked option already exists. In Svelte 5, reactive proxy wrapping
-						// breaks reference identity, causing it to overwrite the clicked option with the
-						// raw search text. Override includes() to compare by .value instead.
-						if (prop === 'includes') {
-							return (item: unknown) =>
-								item !== null && typeof item === 'object' && 'value' in (item as object)
-									? (target as Option[]).some((opt) => opt.value === (item as Option).value)
-									: false;
-						}
-						return Reflect.get(target, prop, receiver);
+			options={new Proxy(options, {
+				get(target, prop, receiver) {
+					// Fix: svelte-multiselect's add() uses Array.includes() (reference equality) to
+					// check if a clicked option already exists. In Svelte 5, reactive proxy wrapping
+					// breaks reference identity, causing it to overwrite the clicked option with the
+					// raw search text. Override includes() to compare by .value instead.
+					if (prop === 'includes') {
+						return (item: unknown) =>
+							item !== null && typeof item === 'object' && 'value' in (item as object)
+								? (target as Option[]).some((opt) => opt.value === (item as Option).value)
+								: false;
 					}
+					return Reflect.get(target, prop, receiver);
 				}
-			)}
+			})}
 			{...multiSelectOptions}
 			outerDivClass="!input !bg-surface-100-900 !px-2 !flex {overflowCssClass}"
 			disabled={_disabled}
@@ -751,17 +805,13 @@
 			{allowUserOptions}
 			duplicates={false}
 			key={JSON.stringify}
-			filterFunc={effectiveLazy ? passthroughFilter : fastFilter}
-			noMatchingOptionsMsg={effectiveLazy
-				? isLoading || lazySearchPending
-					? m.searching()
-					: m.typeToSearch()
-				: undefined}
+			filterFunc={fastFilter}
+			loadOptions={effectiveLazy ? lazyLoadOptions : undefined}
+			noMatchingOptionsMsg={effectiveLazy ? m.noResultFound() : undefined}
 			placeholder={placeholder || (effectiveLazy ? m.typeToSearch() : '')}
-			bind:input={lazyInputEl}
 		>
 			{#snippet option({ option })}
-				{#if option.value === LAZY_HINT_VALUE}
+				{#if option.value === LAZY_COUNT_VALUE}
 					<span class="text-sm italic text-surface-600-400">{option.label}</span>
 				{:else if optionSnippet}
 					{@render optionSnippet?.(option)}
@@ -815,7 +865,7 @@
 							? (option.translatedLabel ?? option.label ?? option)
 							: (option.label ?? option)}
 					{#if option.infoString?.position === 'prefix'}
-						<span class="text-xs text-surface-600-400">&nbsp;{option.infoString.string}</span>
+						<span class="text-xs text-surface-600-400">{option.infoString.string}&nbsp;</span>
 					{/if}
 					{#if option.path}
 						<span>
@@ -861,6 +911,6 @@
 		{/if}
 	</div>
 	{#if helpText}
-		<p class="text-sm text-surface-600-400 whitespace-pre-line">{helpText}</p>
+		<p class="text-sm text-surface-600-400 whitespace-pre-line {helpTextClass}">{helpText}</p>
 	{/if}
 </div>

@@ -184,6 +184,9 @@ class TestComplianceAssessmentsAuthenticated:
         perimeter2 = Perimeter.objects.create(
             name="test2", folder=Folder.objects.create(name="test2")
         )
+        # Framework has no Meta ordering, so all()[0]/all()[1] are
+        # nondeterministic on PostgreSQL — pin the import order explicitly.
+        frameworks = list(Framework.objects.order_by("created_at", "pk"))
 
         EndpointTestsQueries.Auth.update_object(
             test.client,
@@ -194,14 +197,14 @@ class TestComplianceAssessmentsAuthenticated:
                 "description": COMPLIANCE_ASSESSMENT_DESCRIPTION,
                 "version": COMPLIANCE_ASSESSMENT_VERSION,
                 "perimeter": perimeter,
-                "framework": Framework.objects.all()[0],
+                "framework": frameworks[0],
             },
             {
                 "name": "new " + COMPLIANCE_ASSESSMENT_NAME,
                 "description": "new " + COMPLIANCE_ASSESSMENT_DESCRIPTION,
                 "version": COMPLIANCE_ASSESSMENT_VERSION + ".1",
                 "perimeter": str(perimeter2.id),
-                "framework": str(Framework.objects.all()[1].id),
+                "framework": str(frameworks[1].id),
             },
             {
                 "perimeter": {
@@ -213,18 +216,18 @@ class TestComplianceAssessmentsAuthenticated:
                     },
                 },
                 "framework": {
-                    "id": str(Framework.objects.all()[0].id),
-                    "urn": Framework.objects.all()[0].urn,
-                    "str": str(Framework.objects.all()[0]),
+                    "id": str(frameworks[0].id),
+                    "urn": frameworks[0].urn,
+                    "str": str(frameworks[0]),
                     "implementation_groups_definition": None,
                     "outcomes_definition": [],
                     "reference_controls": [
                         {"id": str(rc["id"]), "str": rc["str"], "urn": rc["urn"]}
-                        for rc in Framework.objects.all()[0].reference_controls
+                        for rc in frameworks[0].reference_controls
                     ],
-                    "min_score": Framework.objects.all()[0].min_score,
-                    "max_score": Framework.objects.all()[0].max_score,
-                    "ref_id": str(Framework.objects.all()[0].ref_id),
+                    "min_score": frameworks[0].min_score,
+                    "max_score": frameworks[0].max_score,
+                    "ref_id": str(frameworks[0].ref_id),
                     "has_update": False,
                 },
             },
@@ -509,16 +512,6 @@ class TestComplianceAssessmentMapFrom:
     the engine to exercise partial coverage and mapping_inference.
     """
 
-    @pytest.fixture(autouse=True)
-    def _reset_engine_cache(self):
-        # After each test the django_db transaction rolls back; reload the
-        # global engine so any mapping libraries we created don't leak into
-        # other tests via the in-memory cache.
-        yield
-        from core.mappings.engine import engine
-
-        engine.reload_cache()
-
     # --- helpers -----------------------------------------------------------
     def _audit(self, framework, **kwargs):
         audit = _make_audit(Folder.get_root_folder(), framework, **kwargs)
@@ -567,9 +560,6 @@ class TestComplianceAssessmentMapFrom:
             is_loaded=True,
             content={"requirement_mapping_sets": [rms]},
         )
-        from core.mappings.engine import engine
-
-        engine.reload_cache()
 
     # --- same-framework merge strategy -------------------------------------
     def test_full_copy_into_empty_target(self, authenticated_client):
@@ -806,9 +796,6 @@ class TestComplianceAssessmentMapFrom:
         _make_requirement(src_fw, "A")
         _make_requirement(tgt_fw, "X")
         # no mapping library loaded for this pair
-        from core.mappings.engine import engine
-
-        engine.reload_cache()
 
         source = self._audit(src_fw)
         target = self._audit(tgt_fw)
@@ -852,7 +839,7 @@ class TestComplianceAssessmentDetailActionAuthorization:
     @pytest.fixture
     def outsider_client(self, app_config):
         """An authenticated user with no role assignment on any folder."""
-        user = User.objects.create_user("outsider@tests.com", is_published=True)
+        user = User.objects.create_user("outsider@tests.com")
         client = APIClient()
         client.credentials(
             HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"

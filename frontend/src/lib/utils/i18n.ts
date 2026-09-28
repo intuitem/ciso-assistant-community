@@ -129,3 +129,20 @@ export function unsafeTranslate(
 export function safeTranslate(key: string, params = {}, options = {}): string {
 	return unsafeTranslate(key, params, options) || key;
 }
+
+/**
+ * Translate a select option, preferring the key derived from its value.
+ * Choice endpoints serve the English label from the Django choices, which is
+ * not always the message key — privacy choices key on their `privacy_*` value —
+ * so a label-only lookup leaves those options untranslated. The value is what
+ * tables and detail views translate, so it wins here too.
+ * @param label The option label, used when the value has no message key.
+ * @param value The option value, the canonical message key for choice fields.
+ */
+export function translateChoiceLabel(label: unknown, value: unknown): string {
+	if (typeof value === 'string') {
+		const fromValue = safeTranslate(value);
+		if (fromValue !== value) return fromValue;
+	}
+	return safeTranslate(label as string);
+}

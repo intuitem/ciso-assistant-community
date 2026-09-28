@@ -35,8 +35,8 @@
 {/if}
 
 {#if showDisableMFA}
-	<div class="card bg-white shadow-sm p-4 mt-2">
-		<p class="text-gray-500 text-sm">
+	<div class="card bg-surface-50-950 shadow-sm p-4 mt-2">
+		<p class="text-surface-500 text-sm">
 			{m.disableMFA1()}
 			<a
 				href="{page.url.pathname}/disable-mfa"

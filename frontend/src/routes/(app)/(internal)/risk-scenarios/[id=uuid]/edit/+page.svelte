@@ -207,6 +207,7 @@
 							form={_form}
 							multiple
 							optionsEndpoint="actors"
+							lazy
 							optionsLabelField="str"
 							optionsInfoFields={{
 								fields: [{ field: 'type', translate: true }],
@@ -277,6 +278,7 @@
 						form={_form}
 						multiple
 						optionsEndpoint="threats"
+						lazy
 						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 						optionsExtraFields={[['folder', 'str']]}
 						optionsLabelField="auto"
@@ -310,6 +312,7 @@
 						multiple
 						form={_form}
 						optionsEndpoint="security-exceptions"
+						lazy
 						optionsExtraFields={[['folder', 'str']]}
 						field="security_exceptions"
 						portalDropdown
@@ -349,6 +352,7 @@
 					form={_form}
 					multiple
 					optionsEndpoint="risk-scenarios"
+					lazy
 					optionsExtraFields={[
 						['risk_assessment', 'str'],
 						['ref_id', 'str']
@@ -375,6 +379,7 @@
 									form={_form}
 									nullable
 									optionsEndpoint="threat-models"
+									lazy
 									optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 									optionsExtraFields={[['folder', 'str']]}
 									optionsLabelField="auto"
@@ -480,10 +485,15 @@
 										multiple
 										form={_form}
 										optionsEndpoint="applied-controls"
+										lazy
 										optionsExtraFields={[['folder', 'str']]}
 										optionsDetailedUrlParameters={[
 											['scope_folder_id', page.data.scenario.folder.id]
 										]}
+										optionsInfoFields={{
+											fields: [{ field: 'category', translate: true }],
+											position: 'prefix'
+										}}
 										field="existing_applied_controls"
 										label={m.existingControls()}
 										helpText={m.existingControlsHelper()}
@@ -568,10 +578,15 @@
 										multiple
 										form={_form}
 										optionsEndpoint="applied-controls"
+										lazy
 										optionsExtraFields={[['folder', 'str']]}
 										optionsDetailedUrlParameters={[
 											['scope_folder_id', page.data.scenario.folder.id]
 										]}
+										optionsInfoFields={{
+											fields: [{ field: 'category', translate: true }],
+											position: 'prefix'
+										}}
 										field="applied_controls"
 										label={m.extraAppliedControls()}
 										helpText={m.extraControlsHelper()}

@@ -265,15 +265,21 @@ class TestSimpleTemplates:
         assert first.name == "Phishing Attack"
 
     def test_domains_template(self, api_client, root_folder, all_accessible):
+        """The shipped template nests domains under one another, which only the
+        enterprise edition accepts. Here the first nested row is rejected and the
+        import halts, leaving just the top-level domain.
+        """
         resp = _post_template(
             api_client, "domains_template.xlsx", "Folder", root_folder.id
         )
         assert resp.status_code == 200, resp.json()
         results = resp.json()["results"]
-        assert results["created"] == 4
-        acme = Folder.objects.get(name="ACME Corp", parent_folder=root_folder)
-        it = Folder.objects.get(name="IT Department")
-        assert it.parent_folder == acme
+        assert results["created"] == 1
+        assert results["failed"] == 1
+        assert results["stopped"] is True
+        assert "subDomainsRequirePro" in str(results["errors"])
+        Folder.objects.get(name="ACME Corp", parent_folder=root_folder)
+        assert not Folder.objects.filter(name="IT Department").exists()
 
     def test_security_exceptions_template(
         self, api_client, domain_folder, template_domains, all_accessible
@@ -355,14 +361,13 @@ class TestSimpleTemplates:
 
 def _make_audit(folder, name, ref_id):
     """Pre-existing audit for the EntityAssessments sheet's audit_ref_id/audit_name columns to link to."""
-    fw = Framework.objects.create(name=f"{name} FW", folder=folder, is_published=True)
+    fw = Framework.objects.create(name=f"{name} FW", folder=folder)
     RequirementNode.objects.create(
         framework=fw,
         urn=f"urn:test:{ref_id}:req:1",
         ref_id="REQ1",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     audit = ComplianceAssessment.objects.create(
         name=name, ref_id=ref_id, framework=fw, folder=folder
@@ -433,7 +438,20 @@ class TestAssessmentTemplates:
         template_domains,
         template_perimeter,
         all_accessible,
+        root_folder,
     ):
+        web_control = AppliedControl.objects.create(
+            name="Web frontend TLS hardening",
+            ref_id="AC-WEB-001",
+            folder=domain_folder,
+        )
+        k8s_control = AppliedControl.objects.create(
+            name="Kubernetes Hardening", folder=domain_folder
+        )
+        owner_user = User.objects.create_user("jane.doe@company.com", is_published=True)
+        owner_user.folder = root_folder
+        owner_user.save()
+
         resp = _post_template(
             api_client,
             "findings_assessment_template.xlsx",
@@ -453,7 +471,13 @@ class TestAssessmentTemplates:
         assert first.asset.name == "web frontend"
         assert first.asset.folder == domain_folder
         assert first.asset.type == Asset.Type.SUPPORT
+        assert list(first.applied_controls.all()) == [web_control]
+        assert list(first.owner.all()) == [owner_user.actor]
         assert results["details"]["assets_created"] == 3
+
+        third = Finding.objects.get(ref_id="F.07")
+        assert list(third.applied_controls.all()) == [k8s_control]
+        assert third.owner.count() == 0
 
     def test_risk_assessment_template(
         self,

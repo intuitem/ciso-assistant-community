@@ -614,6 +614,64 @@ describe('indentNode', () => {
 	});
 });
 
+describe('quick-form mode keeps pages flat', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], [], null, { mode: 'quick_form' });
+	}
+
+	function twoPages() {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		s.addNode({ parent: null, preset: 'requirement' });
+		return s;
+	}
+
+	it('refuses to indent a page under the previous one', () => {
+		const s = twoPages();
+		const id = get(s.rootNodes)[1].node.id;
+
+		expect(s.indentNode(id)).toBe(false);
+		const after = get(s.rootNodes);
+		expect(after).toHaveLength(2);
+		expect(after.every((p) => p.depth === 0 && p.node.parent_urn === null)).toBe(true);
+	});
+
+	it('refuses to outdent', () => {
+		const s = twoPages();
+		expect(s.outdentNode(get(s.rootNodes)[0].node.id)).toBe(false);
+		expect(get(s.rootNodes)).toHaveLength(2);
+	});
+
+	it('ignores a parent on addNode, so Alt+Enter cannot nest a page', () => {
+		const s = twoPages();
+		const first = get(s.rootNodes)[0].node.id;
+
+		s.addNode({ parent: first, preset: 'requirement' });
+
+		const after = get(s.rootNodes);
+		expect(after).toHaveLength(3);
+		expect(after.flatMap((p) => p.children)).toHaveLength(0);
+		expect(after.every((p) => p.depth === 0 && p.node.parent_urn === null)).toBe(true);
+	});
+
+	it('keeps pages assessable', () => {
+		const s = twoPages();
+		const id = get(s.rootNodes)[0].node.id;
+		expect(get(s.rootNodes)[0].node.assessable).toBe(true);
+
+		s.toggleAssessable(id);
+		expect(get(s.rootNodes)[0].node.assessable).toBe(true);
+	});
+
+	it('still nests in framework mode', () => {
+		const s = createBuilderState(makeFramework(), [], []);
+		s.addNode({ parent: null, preset: 'group' });
+		s.addNode({ parent: null, preset: 'requirement' });
+		expect(s.indentNode(get(s.rootNodes)[1].node.id)).toBe(true);
+		expect(get(s.rootNodes)[0].children).toHaveLength(1);
+	});
+});
+
 describe('outdentNode', () => {
 	function newStore() {
 		return createBuilderState(makeFramework(), [], []);

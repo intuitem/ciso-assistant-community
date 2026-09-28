@@ -20,6 +20,7 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     applied_controls = FieldsRelatedField(many=True)
     task_templates = FieldsRelatedField(many=True)
     processings = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     classification = serializers.SerializerMethodField()
     document_count = serializers.SerializerMethodField()
@@ -193,14 +194,12 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
                             name=validated_data.get("name")
                             or getattr(policy, "name", ""),
                             folder=policy.folder,
-                            is_published=policy.is_published,
                         )
                         container.policies.add(policy)
                 else:
                     container = DocumentContainer.objects.create(
                         document_type=document_type,
                         name=validated_data.get("name", ""),
-                        is_published=False,
                         **(
                             {"folder": validated_data["folder"]}
                             if validated_data.get("folder")

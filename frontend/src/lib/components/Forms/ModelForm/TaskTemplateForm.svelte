@@ -19,6 +19,7 @@
 		context?: string;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
+		object?: any;
 	}
 
 	let {
@@ -27,7 +28,8 @@
 		cacheLocks = {},
 		context = '',
 		formDataCache = $bindable({}),
-		initialData = {}
+		initialData = {},
+		object = {}
 	}: Props = $props();
 
 	const { value: is_recurrent } = formFieldProxy(form, 'is_recurrent');
@@ -48,6 +50,20 @@
 	let isScheduleTainted = $derived(scheduleTaintedHandler($scheduleTainted));
 </script>
 
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="actors?user__is_third_party=False"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
+	field="assigned_to"
+	cacheLock={cacheLocks['assigned_to']}
+	bind:cachedValue={formDataCache['assigned_to']}
+	label={m.assignedTo()}
+/>
 {#if !$is_recurrent}
 	<TextField
 		type="date"
@@ -215,23 +231,17 @@
 	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="auto"
 	helpText={m.taskTemplateEvidenceHelpText()}
+	helpTextClass="mt-1 border-l-2 border-primary-500 bg-primary-500/5 rounded-r py-1 pl-2"
 	field="evidences"
 	label={m.evidences()}
 	translateOptions={false}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="actors?user__is_third_party=False"
-	optionsLabelField="str"
-	optionsInfoFields={{
-		fields: [{ field: 'type', translate: true }],
-		position: 'prefix'
+	allowUserOptions="append"
+	additionalMultiselectOptions={{
+		createOptionMsg: ({ searchText }: { searchText: string }) =>
+			m.createExpectedEvidence({ name: searchText }),
+		liUserMsgClass: '!text-primary-700 font-semibold',
+		liActiveUserMsgClass: '!bg-primary-500/10'
 	}}
-	field="assigned_to"
-	cacheLock={cacheLocks['assigned_to']}
-	bind:cachedValue={formDataCache['assigned_to']}
-	label={m.assignedTo()}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<AutocompleteSelect
@@ -257,6 +267,10 @@
 		{form}
 		optionsEndpoint="applied-controls"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [{ field: 'category', translate: true }],
+			position: 'prefix'
+		}}
 		field="applied_controls"
 		label={m.appliedControls()}
 	/>

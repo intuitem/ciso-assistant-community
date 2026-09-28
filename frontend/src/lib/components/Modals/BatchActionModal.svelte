@@ -2,6 +2,7 @@
 	import { m } from '$paraglide/messages';
 	import { getModalStore, type ModalStore } from './stores';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import { onMount } from 'svelte';
 
 	function translateOption(option: { label: string; value: string }): string {
@@ -21,9 +22,13 @@
 		optionsEndpoint?: string;
 		enableDoubleDash?: boolean;
 		multiSelect?: boolean;
+		inputType?: 'date';
 		// Optional i18n key for an action-specific warning (receives {count}),
 		// e.g. a cascade disclosure on delete.
 		confirmMessage?: string;
+		// Value fixed by config ("mark as read"): skips the picker, so the modal is a
+		// plain confirmation and this is what gets sent.
+		fixedValue?: string;
 		onConfirm: (value?: string | string[]) => void;
 	}
 
@@ -34,7 +39,9 @@
 		optionsEndpoint,
 		enableDoubleDash = false,
 		multiSelect = false,
+		inputType = undefined,
 		confirmMessage = undefined,
+		fixedValue = undefined,
 		onConfirm
 	}: Props = $props();
 
@@ -46,6 +53,8 @@
 	let deleteConfirmInput: string = $state('');
 
 	const isValueAction = actionType !== 'delete';
+	// Only a value action *without* a fixed value needs the user to choose something.
+	const needsSelection = isValueAction && fixedValue === undefined;
 	const yes = m.yes().toLowerCase();
 
 	const filteredOptions = $derived(
@@ -84,13 +93,16 @@
 	}
 
 	onMount(async () => {
-		if (isValueAction && optionsEndpoint) {
+		if (needsSelection && optionsEndpoint) {
 			loading = true;
 			try {
 				const res = await fetch(`/${optionsEndpoint}`);
 				if (res.ok) {
 					const data = await res.json();
-					options = withDoubleDash(parseOptions(data));
+					// Choice endpoints return dicts and stay as-is; paginated list endpoints
+					// with more than one page need the remaining pages fetched.
+					const items = data?.next ? await fetchAllPages(fetch, `/${optionsEndpoint}`) : data;
+					options = withDoubleDash(parseOptions(items));
 				}
 			} catch (e) {
 				console.error('Failed to fetch options', e);
@@ -103,6 +115,8 @@
 	function handleConfirm() {
 		if (actionType === 'delete') {
 			onConfirm();
+		} else if (fixedValue !== undefined) {
+			onConfirm(fixedValue);
 		} else if (multiSelect) {
 			onConfirm(selectedValues);
 		} else {
@@ -123,9 +137,11 @@
 	const canConfirm = $derived(
 		actionType === 'delete'
 			? !!deleteConfirmInput && deleteConfirmInput.trim().toLowerCase() === yes
-			: multiSelect
-				? selectedValues.length > 0
-				: selectedValue !== ''
+			: fixedValue !== undefined
+				? true
+				: multiSelect
+					? selectedValues.length > 0
+					: selectedValue !== ''
 	);
 </script>
 
@@ -166,7 +182,17 @@
 				</article>
 			{/if}
 
-			{#if loading}
+			{#if !needsSelection}
+				<!-- value comes from the action's config; nothing to pick -->
+			{:else if inputType === 'date'}
+				<input
+					type="date"
+					class="input w-full border border-surface-300-700 rounded px-3 py-2"
+					data-testid="batch-date-input"
+					aria-label={$modalStore[0].title}
+					bind:value={selectedValue}
+				/>
+			{:else if loading}
 				<div class="text-sm text-surface-600-400">Loading...</div>
 			{:else if multiSelect}
 				<div class="space-y-2">

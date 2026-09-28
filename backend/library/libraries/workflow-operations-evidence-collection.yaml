@@ -1,0 +1,212 @@
+urn: urn:intuitem:risk:library:workflow-operations-evidence-collection
+locale: en
+ref_id: workflow-operations-evidence-collection
+name: Evidence collection — pull an evidence file from a tool
+description: 'Pulls a file from a tool on a schedule and files it as a new revision of an evidence,
+  instead of someone downloading it and uploading it by hand. If the tool answers badly or cannot be
+  reached, it warns the team rather than failing quietly. After importing: set evidence_uuid (the id
+  in the evidence''s URL), tool_url and warn_to, and add the tool_token secret. The URL must be https,
+  because the recipe sends the token as a bearer header and credentials are refused over cleartext; if
+  the tool needs no authentication, delete the Authorization header. If a task expects this evidence,
+  the collected file is filed against the occurrence that is currently due, so the task shows its
+  evidence as provided — it is not marked done, which stays a decision someone makes. Optionally the
+  run also records a number the same tool publishes: set metric_uuid and metric_url, where the endpoint
+  answers with a JSON object carrying a numeric "value". Leave metric_uuid empty and that half is
+  skipped.'
+copyright: © intuitem
+version: 5
+publication_date: 2026-09-17
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-evidence-collection:workflow:evidence-collection
+    schema_version: 1
+    ref_id: evidence-collection
+    name: Evidence collection — pull an evidence file from a tool
+    description: 'Every Monday: download the current file from the tool and file it as a new revision
+      of one named evidence, then record the number the tool reports alongside it. The evidence moves
+      to In review, because a file nobody has looked at yet is not an approved one. A tool that answered
+      badly or not at all is reported by email rather than stopping the run.'
+    requires:
+      secrets:
+      - tool_token
+    graph:
+      variables:
+      # By id, not name: names are not unique across domains.
+      - key: evidence_uuid
+        type: string
+        default_value: ''
+      - key: tool_url
+        type: string
+        default_value: https://tool.example.com/exports/latest.csv
+      - key: warn_to
+        type: string
+        default_value: ''
+      # Optional: empty metric_uuid skips that half.
+      - key: metric_uuid
+        type: string
+        default_value: ''
+      - key: metric_url
+        type: string
+        default_value: ''
+      # Conditions read declared variables, never a node's output.
+      - key: collected
+        type: boolean
+        default_value: false
+      - key: number_status
+        type: number
+        default_value: 0
+      nodes:
+      - ref: every_monday
+        type: trigger
+        label: Every Monday
+        trigger_config:
+          type: schedule
+          cron_expression: 0 6 * * 1
+          timezone: UTC
+      - ref: collect_the_file
+        type: action
+        label: Collect the file
+        action_config:
+          type: attach_evidence
+          evidence: '{{evidence_uuid}}'
+          source: url
+          url: '{{tool_url}}'
+          filename: collected-{{today}}.csv
+          new_revision: true
+          # The owed occurrence's id changes every period, so the step finds
+          # it rather than taking it as a variable.
+          find_occurrence: true
+          headers:
+            Authorization: Bearer {{secrets.tool_token}}
+          # Without these the step fails and the run stops, so a tool down for
+          # a month looks like a quiet one. The branch below is what shows it.
+          allow_error_status: true
+          allow_connection_error: true
+        output_mapping:
+          collected: attached
+      - ref: did_it_land
+        type: condition
+        label: Did the file land?
+        branches:
+        - name: Filed
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: collected
+              op: eq
+              value: true
+        - name: Tool did not answer
+          is_default: true
+      - ref: want_a_number
+        type: condition
+        label: Is a metric configured?
+        branches:
+        - name: Record it
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: metric_uuid
+              op: neq
+              value: ''
+        - name: File only
+          is_default: true
+      - ref: pull_the_number
+        type: action
+        label: Ask the tool for the number
+        action_config:
+          type: http_request
+          method: GET
+          url: '{{metric_url}}'
+          timeout: 10
+          headers:
+            Authorization: Bearer {{secrets.tool_token}}
+          # The file is already filed: a missing number must not undo the run.
+          allow_error_status: true
+          allow_connection_error: true
+        output_mapping:
+          number_status: status
+      - ref: got_the_number
+        type: condition
+        label: Did the number arrive?
+        branches:
+        - name: Got it
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: number_status
+              op: eq
+              value: 200
+        - name: No number
+          is_default: true
+      - ref: record_the_number
+        type: action
+        label: Record the number
+        action_config:
+          type: record_measurement
+          metric_instance: '{{metric_uuid}}'
+          value: '{{nodes.pull_the_number.body.value}}'
+          # Cites the file it was read alongside.
+          evidence_revision: '{{nodes.collect_the_file.revision_id}}'
+          observation: Collected from the tool on {{today}}
+      - ref: log_no_number
+        type: action
+        label: Say the number is missing
+        action_config:
+          type: log
+          message: 'The file was filed on {{today}} but no number was recorded: the metric endpoint
+            answered {{number_status}} (0 means it could not be reached at all).'
+      - ref: log_the_outage
+        type: action
+        label: Say the tool did not answer
+        action_config:
+          type: log
+          message: 'Nothing filed on {{today}}: the tool answered {{nodes.collect_the_file.status}}
+            (0 means it could not be reached at all).'
+      - ref: warn_the_team
+        type: action
+        label: Warn the team
+        action_config:
+          type: send_email
+          recipients: '{{warn_to}}'
+          subject: 'Evidence collection failed on {{today}}'
+          body: 'No file was collected today: the tool answered
+            {{nodes.collect_the_file.status}}. A status of 0 means it could not be reached at all.
+            The evidence still carries the file from the last run that worked, so check the date on
+            it before relying on it.'
+      - ref: done
+        type: end
+      edges:
+      - source: every_monday
+        target: collect_the_file
+      - source: collect_the_file
+        target: did_it_land
+      - source: did_it_land
+        target: want_a_number
+        source_branch: Filed
+      - source: did_it_land
+        target: log_the_outage
+        source_branch: Tool did not answer
+      - source: want_a_number
+        target: pull_the_number
+        source_branch: Record it
+      - source: want_a_number
+        target: done
+        source_branch: File only
+      - source: pull_the_number
+        target: got_the_number
+      - source: got_the_number
+        target: record_the_number
+        source_branch: Got it
+      - source: got_the_number
+        target: log_no_number
+        source_branch: No number
+      - source: record_the_number
+        target: done
+      - source: log_no_number
+        target: done
+      - source: log_the_outage
+        target: warn_the_team
+      - source: warn_the_team
+        target: done

@@ -30,6 +30,7 @@
 	{form}
 	field="entity"
 	optionsEndpoint="entities"
+	optionsExtraFields={[['folder', 'str']]}
 	cacheLock={cacheLocks['entity']}
 	bind:cachedValue={formDataCache['entity']}
 	label={m.entity()}

@@ -41,7 +41,7 @@
 	const { value: fieldType } = formFieldProxy(form, 'field_type');
 	const isChoice = $derived($fieldType === 'choice' || $fieldType === 'multi_choice');
 	// Only value_text-backed types can be searched (search scans value_text).
-	const isTextBacked = $derived($fieldType === 'text' || isChoice);
+	const isTextBacked = $derived($fieldType === 'text' || $fieldType === 'url' || isChoice);
 
 	// Definition-level translations {locale: {label, help_text}}, synced for submission.
 	const { value: translationsValue } = formFieldProxy(form, 'translations');

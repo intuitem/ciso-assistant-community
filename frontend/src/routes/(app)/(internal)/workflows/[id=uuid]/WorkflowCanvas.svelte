@@ -143,6 +143,10 @@
 						return config.email || config.type;
 					case 'manage_group_membership':
 						return `${config.operation ?? 'add'} ${config.builtin_group ?? ''}`.trim();
+					case 'ai_extract': {
+						const fields = Object.keys(config.schema?.properties ?? {});
+						return fields.length ? `ai_extract · ${fields.join(', ')}` : config.type;
+					}
 					default:
 						return config.type ?? null;
 				}
@@ -1355,7 +1359,12 @@
 
 	// ---------- graph edits ----------
 
-	function newNodeDomain(type: string, position?: { x: number; y: number }, triggerType?: string) {
+	function newNodeDomain(
+		type: string,
+		position?: { x: number; y: number },
+		triggerType?: string,
+		actionType?: string
+	) {
 		let trigger_config: Record<string, unknown> = {};
 		if (type === 'trigger') {
 			trigger_config = { type: triggerType ?? 'manual' };
@@ -1371,7 +1380,8 @@
 			label: '',
 			task_template: null,
 			subprocess_workflow: null,
-			action_config: type === 'action' ? { type: 'log' } : {},
+			// Discriminator only; the inspector fills the shape on selection.
+			action_config: type === 'action' ? { type: actionType ?? 'log' } : {},
 			loop_config: type === 'loop' ? { collection: '', on_item_error: 'continue' } : {},
 			trigger_config,
 			input_mapping: {},
@@ -1405,7 +1415,12 @@
 		setTimeout(() => flowInstance?.fitView({ duration: 200, padding: 0.2, maxZoom: 1 }), 100);
 	}
 
-	function addNode(type: string, triggerType?: string, position?: { x: number; y: number }) {
+	function addNode(
+		type: string,
+		triggerType?: string,
+		actionType?: string,
+		position?: { x: number; y: number }
+	) {
 		// At most one manual trigger per graph (its entry would be ambiguous).
 		if (
 			type === 'trigger' &&
@@ -1418,7 +1433,7 @@
 			return;
 		}
 		const fallback = { x: 200 + Math.random() * 80, y: 160 + Math.random() * 80 };
-		const domain = newNodeDomain(type, position ?? fallback, triggerType);
+		const domain = newNodeDomain(type, position ?? fallback, triggerType, actionType);
 		const flowNode = toFlowNode(domain, 0);
 		flowNode.position = position ?? fallback;
 		nodes = [...nodes, flowNode];
@@ -1437,7 +1452,7 @@
 	function handleDrop(event: DragEvent) {
 		const raw = event.dataTransfer?.getData('application/ciso-workflow-node');
 		if (!raw) return;
-		let payload: { type?: string; triggerType?: string };
+		let payload: { type?: string; triggerType?: string; actionType?: string };
 		try {
 			payload = JSON.parse(raw);
 		} catch {
@@ -1449,7 +1464,7 @@
 			x: event.clientX,
 			y: event.clientY
 		});
-		addNode(payload.type, payload.triggerType, position);
+		addNode(payload.type, payload.triggerType, payload.actionType, position);
 	}
 
 	function isValidConnection(connection: Connection | Edge): boolean {

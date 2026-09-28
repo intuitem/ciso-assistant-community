@@ -13,6 +13,14 @@
 		title?: string;
 		categories: string[];
 		series: Series[];
+		/** Swap the axes so long category labels get the horizontal room. */
+		horizontal?: boolean;
+		/** Stack group name; omit to keep the bars side by side. */
+		stack?: string;
+		/** Series colors, in series order; omit for the theme palette. */
+		colors?: string[];
+		/** Called with the clicked category index; omit to leave the bars inert. */
+		onSelect?: (index: number) => void;
 		width?: string;
 		height?: string;
 		classesContainer?: string;
@@ -23,6 +31,10 @@
 		title = '',
 		categories,
 		series,
+		horizontal = false,
+		stack,
+		colors,
+		onSelect,
 		width = 'w-auto',
 		height = 'h-full',
 		classesContainer = ''
@@ -38,33 +50,11 @@
 			if (!active) return;
 			const el = document.getElementById(chart_id);
 			if (!el) return;
-			dispose = mountThemeAwareChart(echarts, el, () => {
-				const option = {
-					title: {
-						text: title,
-						textStyle: {
-							fontWeight: 'bold',
-							fontSize: 14
-						}
-					},
-					tooltip: {
-						trigger: 'axis',
-						axisPointer: {
-							type: 'shadow'
-						}
-					},
-					legend: {
-						bottom: 0,
-						left: 'center'
-					},
-					grid: {
-						left: 0,
-						top: 40,
-						right: 0,
-						bottom: 40,
-						containLabel: true
-					},
-					xAxis: {
+			dispose = mountThemeAwareChart(
+				echarts,
+				el,
+				() => {
+					const categoryAxis = {
 						type: 'category',
 						data: categories,
 						axisTick: {
@@ -74,24 +64,66 @@
 							interval: 0,
 							rotate: 0
 						}
-					},
-					yAxis: {
+					};
+					const valueAxis = {
 						type: 'value',
 						allowDecimals: false,
 						minInterval: 1
-					},
-					series: series.map((s) => ({
-						name: s.name,
-						type: 'bar',
-						data: s.data,
-						emphasis: {
-							focus: 'series'
-						}
-					}))
-				};
+					};
+					const option = {
+						title: {
+							text: title,
+							textStyle: {
+								fontWeight: 'bold',
+								fontSize: 14
+							}
+						},
+						tooltip: {
+							trigger: 'axis',
+							axisPointer: {
+								type: 'shadow'
+							}
+						},
+						legend: {
+							bottom: 0,
+							left: 'center'
+						},
+						grid: {
+							left: 0,
+							top: 40,
+							// containLabel keeps labels inside the grid, but the last value-axis
+							// tick is centred on the edge, so half of it still overflows.
+							right: horizontal ? 16 : 0,
+							bottom: 40,
+							containLabel: true
+						},
+						xAxis: horizontal ? valueAxis : categoryAxis,
+						yAxis: horizontal ? categoryAxis : valueAxis,
+						...(colors?.length ? { color: colors } : {}),
+						series: series.map((s) => ({
+							name: s.name,
+							type: 'bar',
+							data: s.data,
+							stack,
+							emphasis: {
+								focus: 'series'
+							}
+						}))
+					};
 
-				return option;
-			});
+					return option;
+				},
+				// onChart re-fires when a theme flip re-inits the chart, so the handler
+				// survives it; a listener attached once outside would be lost.
+				onSelect
+					? {
+							onChart: (chart: any) =>
+								chart.on('click', (params: any) => {
+									if (params.dataIndex !== undefined) onSelect(params.dataIndex);
+								})
+						}
+					: undefined
+			);
 		})();
 		return () => {
 			active = false;

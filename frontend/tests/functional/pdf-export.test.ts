@@ -87,9 +87,20 @@ test('pdf export works properly for compliance assessments', async ({
 		);
 	});
 
-	await test.step('test pdf export on compliance assessment', async () => {
+	await test.step('test audit posture export as pdf', async () => {
 		await page.getByTestId('export-button').click();
-		await exportPdfAndVerify(page, page.getByRole('link', { name: /pdf/i }));
+		await exportPdfAndVerify(page, page.getByTestId('export-option-posture-pdf'));
+	});
+
+	await test.step('test attestation export as pdf', async () => {
+		// The export modal closes on selection, so reopen it for each download.
+		await page.getByTestId('export-button').click();
+		await exportPdfAndVerify(page, page.getByTestId('export-option-attestation-pdf'));
+	});
+
+	await test.step('test action plan export as pdf', async () => {
+		await page.getByTestId('export-button').click();
+		await exportPdfAndVerify(page, page.getByTestId('export-option-ap-pdf'));
 	});
 });
 
@@ -110,13 +121,14 @@ test('pdf export works properly for risk assessment', async ({
 	});
 
 	await test.step('test risk assessment export as pdf', async () => {
-		await page.getByTestId('export-button').click(); // this will be necessary only one time,since it will stay open
-		const pdfLinks = page.getByRole('link', { name: /pdf/i });
-		await exportPdfAndVerify(page, pdfLinks.first());
+		await page.getByTestId('export-button').click();
+		await exportPdfAndVerify(page, page.getByTestId('export-option-pdf'));
 	});
+
 	await test.step('test action plan export as pdf', async () => {
-		const pdfLinks = page.getByRole('link', { name: /pdf/i });
-		await exportPdfAndVerify(page, pdfLinks.last());
+		// The export modal closes on selection, so reopen it for each download.
+		await page.getByTestId('export-button').click();
+		await exportPdfAndVerify(page, page.getByTestId('export-option-ap-pdf'));
 	});
 });
 

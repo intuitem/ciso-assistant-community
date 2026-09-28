@@ -3,6 +3,9 @@ import { expect, test } from '../utils/test-utils.js';
 import { m } from '$paraglide/messages';
 
 test('switching locale works properly', async ({ logedPage, analyticsPage, sideBar, page }) => {
+	// Cycles through every locale with a full SSR reload each time: the default
+	// budget only fits on a fast runner, so triple it.
+	test.slow();
 	await test.step('translation panel is working properly', async () => {
 		await analyticsPage.goto();
 		const allLocales = [...locales];

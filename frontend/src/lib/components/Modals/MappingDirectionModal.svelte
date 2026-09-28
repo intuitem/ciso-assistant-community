@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { getModalStore, type ModalStore } from './stores';
+	import ChoiceCardsModal from './ChoiceCardsModal.svelte';
 	import { m } from '$paraglide/messages';
-
-	const modalStore: ModalStore = getModalStore();
 
 	interface Props {
 		parent: any;
@@ -14,47 +12,24 @@
 
 	let { parent, mapTo, mapFrom }: Props = $props();
 
-	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
-	const cHeader = 'text-2xl font-bold';
-
-	function choose(action: () => void) {
-		modalStore.close();
-		action();
-	}
+	const choices = [
+		{
+			icon: 'fa-diagram-project',
+			iconClass: 'text-emerald-500',
+			label: m.mapToFramework(),
+			description: m.mapToFrameworkDescription(),
+			testId: 'map-to-framework-card',
+			action: mapTo
+		},
+		{
+			icon: 'fa-arrow-right-to-bracket',
+			iconClass: 'text-indigo-500',
+			label: m.mapFromAudit(),
+			description: m.mapFromAuditDescription(),
+			testId: 'map-from-audit-card',
+			action: mapFrom
+		}
+	];
 </script>
 
-{#if $modalStore[0]}
-	<div class="modal-mapping-direction {cBase}">
-		<div class="flex items-center justify-between">
-			<header class={cHeader}>{m.applyMapping()}</header>
-			<button
-				type="button"
-				aria-label={m.close()}
-				class="flex items-center hover:text-primary-500 cursor-pointer"
-				onclick={parent.onClose}
-			>
-				<i class="fa-solid fa-xmark"></i>
-			</button>
-		</div>
-		<div class="grid grid-cols-2 gap-4">
-			<button
-				class="flex flex-col items-start gap-2 p-4 rounded-xl border border-surface-200-800 bg-surface-50-950 text-left hover:bg-surface-100-900 hover:border-primary-400 transition-colors shadow-sm cursor-pointer"
-				onclick={() => choose(mapTo)}
-				data-testid="map-to-framework-card"
-			>
-				<i class="fa-solid fa-diagram-project text-emerald-500 text-2xl"></i>
-				<span class="text-sm font-semibold">{m.mapToFramework()}</span>
-				<span class="text-xs text-surface-600-400">{m.mapToFrameworkDescription()}</span>
-			</button>
-			<button
-				class="flex flex-col items-start gap-2 p-4 rounded-xl border border-surface-200-800 bg-surface-50-950 text-left hover:bg-surface-100-900 hover:border-primary-400 transition-colors shadow-sm cursor-pointer"
-				onclick={() => choose(mapFrom)}
-				data-testid="map-from-audit-card"
-			>
-				<i class="fa-solid fa-arrow-right-to-bracket text-indigo-500 text-2xl"></i>
-				<span class="text-sm font-semibold">{m.mapFromAudit()}</span>
-				<span class="text-xs text-surface-600-400">{m.mapFromAuditDescription()}</span>
-			</button>
-		</div>
-	</div>
-{/if}
+<ChoiceCardsModal {parent} title={m.applyMapping()} {choices} />

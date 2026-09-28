@@ -218,7 +218,7 @@ class FinishACSView(SAMLViewMixin, View):
                 get_account_adapter(request).logout(request)
             login._accept_login(request)  # complete_social_login not working
             record_authentication(request, login)
-            stash_saml_slo_state(request, auth)
+            stash_saml_slo_state(request, auth, user)
         except User.DoesNotExist as e:
             # NOTE: We might want to allow signup some day
             error = AuthError.USER_DOES_NOT_EXIST

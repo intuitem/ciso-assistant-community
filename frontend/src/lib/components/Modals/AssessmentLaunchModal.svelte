@@ -12,12 +12,19 @@
 	interface Props {
 		parent: any;
 		item: string;
+		action?: string;
 		showName?: boolean;
 		defaultName?: string;
 		showDomain?: boolean;
 	}
 
-	let { item, showName = false, defaultName = '', showDomain = false }: Props = $props();
+	let {
+		item,
+		action = '?/launchAssessment',
+		showName = false,
+		defaultName = '',
+		showDomain = false
+	}: Props = $props();
 	const modalStore: ModalStore = getModalStore();
 
 	let name = $state(defaultName);
@@ -52,7 +59,7 @@
 			body.append('item', item);
 			if (showDomain) body.append('folder', folder);
 			if (showName) body.append('name', name.trim());
-			const res = await fetch('?/launchAssessment', { method: 'POST', body });
+			const res = await fetch(action, { method: 'POST', body });
 			const result: any = deserialize(await res.text());
 			if (result.type === 'success' && result.data?.redirect) {
 				modalStore.close();

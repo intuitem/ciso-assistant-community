@@ -3,6 +3,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import { getOptions } from '$lib/utils/crud';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import { composerSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
 	import { onMount } from 'svelte';
@@ -18,9 +19,7 @@
 	let options: { label: string; value: string }[] = $state();
 
 	onMount(async () => {
-		const riskAssessments = await fetch('/risk-assessments')
-			.then((res) => res.json())
-			.then((res) => res.results);
+		const riskAssessments = await fetchAllPages(fetch, '/risk-assessments');
 		options = getOptions({
 			objects: riskAssessments,
 			label: 'str',

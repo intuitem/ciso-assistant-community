@@ -293,62 +293,71 @@
 			<p class="text-sm">{m.loadingTimelineData()}</p>
 		</div>
 	{:then ganttData}
-		{@const result = buildItems(ganttData)}
-		{@const ganttItems = result.items}
-		{@const noDateCount = result.noDateCount}
-		{@const availableFolders = Array.from(result.allFolderIds)
-			.map((id) => ({ id, name: folderMap.get(id) ?? 'Unknown' }))
-			.sort((a, b) => a.name.localeCompare(b.name))}
-
-		<!-- Folder filter (only after data loads, only if multiple domains) -->
-		{#if availableFolders.length > 1}
-			<div class="flex items-center gap-2">
-				<span class="text-xs font-semibold text-surface-500">{m.domains()}</span>
-				<div class="flex flex-wrap gap-1">
-					{#each availableFolders as folder}
-						<button
-							class="px-2 py-0.5 text-xs rounded-md border transition-colors {selectedFolders.has(
-								folder.id
-							)
-								? 'bg-primary-100-900 border-primary-400-600 text-primary-700-300'
-								: selectedFolders.size === 0
-									? 'bg-surface-50-950 border-surface-200-800 text-surface-600-400'
-									: 'bg-surface-50-950 border-surface-200-800 text-surface-500'}"
-							onclick={() => toggleFolder(folder.id)}
-						>
-							{folder.name}
-						</button>
-					{/each}
-					{#if selectedFolders.size > 0}
-						<button
-							class="px-2 py-0.5 text-xs text-surface-500 hover:text-surface-600-400"
-							onclick={() => (selectedFolders = new Set())}
-						>
-							{m.clear()}
-						</button>
-					{/if}
-				</div>
-			</div>
-		{/if}
-
-		<!-- No-date warning -->
-		{#if noDateCount > 0}
+		{#if ganttData.error}
 			<div
-				class="flex items-center gap-2 px-3 py-2 bg-warning-50-950 border border-warning-200-800 rounded-lg text-xs text-warning-700-300"
+				class="flex items-center gap-2 px-3 py-2 bg-error-50-950 border border-error-200-800 rounded-lg text-xs text-error-700-300"
 			>
-				<i class="fa-solid fa-triangle-exclamation"></i>
-				{m.objectsWithNoDateNotShown({ count: noDateCount })}
-			</div>
-		{/if}
-
-		<!-- Chart or empty state -->
-		{#if ganttItems.length === 0}
-			<div class="flex flex-col items-center justify-center py-16 text-surface-500">
-				<i class="fa-solid fa-chart-gantt text-4xl mb-3"></i>
-				<p class="text-sm">{m.noItemsToDisplayAdjustFilters()}</p>
+				<i class="fa-solid fa-circle-exclamation"></i>
+				{m.failedToLoadTimelineData()}
 			</div>
 		{:else}
-			<GanttChart bind:this={ganttRef} items={ganttItems} {zoom} />
+			{@const result = buildItems(ganttData)}
+			{@const ganttItems = result.items}
+			{@const noDateCount = result.noDateCount}
+			{@const availableFolders = Array.from(result.allFolderIds)
+				.map((id) => ({ id, name: folderMap.get(id) ?? 'Unknown' }))
+				.sort((a, b) => a.name.localeCompare(b.name))}
+
+			<!-- Folder filter (only after data loads, only if multiple domains) -->
+			{#if availableFolders.length > 1}
+				<div class="flex items-center gap-2">
+					<span class="text-xs font-semibold text-surface-500">{m.domains()}</span>
+					<div class="flex flex-wrap gap-1">
+						{#each availableFolders as folder}
+							<button
+								class="px-2 py-0.5 text-xs rounded-md border transition-colors {selectedFolders.has(
+									folder.id
+								)
+									? 'bg-primary-100-900 border-primary-400-600 text-primary-700-300'
+									: selectedFolders.size === 0
+										? 'bg-surface-50-950 border-surface-200-800 text-surface-600-400'
+										: 'bg-surface-50-950 border-surface-200-800 text-surface-500'}"
+								onclick={() => toggleFolder(folder.id)}
+							>
+								{folder.name}
+							</button>
+						{/each}
+						{#if selectedFolders.size > 0}
+							<button
+								class="px-2 py-0.5 text-xs text-surface-500 hover:text-surface-600-400"
+								onclick={() => (selectedFolders = new Set())}
+							>
+								{m.clear()}
+							</button>
+						{/if}
+					</div>
+				</div>
+			{/if}
+
+			<!-- No-date warning -->
+			{#if noDateCount > 0}
+				<div
+					class="flex items-center gap-2 px-3 py-2 bg-warning-50-950 border border-warning-200-800 rounded-lg text-xs text-warning-700-300"
+				>
+					<i class="fa-solid fa-triangle-exclamation"></i>
+					{m.objectsWithNoDateNotShown({ count: noDateCount })}
+				</div>
+			{/if}
+
+			<!-- Chart or empty state -->
+			{#if ganttItems.length === 0}
+				<div class="flex flex-col items-center justify-center py-16 text-surface-500">
+					<i class="fa-solid fa-chart-gantt text-4xl mb-3"></i>
+					<p class="text-sm">{m.noItemsToDisplayAdjustFilters()}</p>
+				</div>
+			{:else}
+				<GanttChart bind:this={ganttRef} items={ganttItems} {zoom} />
+			{/if}
 		{/if}
 	{:catch}
 		<div

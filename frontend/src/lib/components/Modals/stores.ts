@@ -29,8 +29,8 @@ export interface ModalSettings {
 	image?: string;
 	/** By default, used to provide a prompt value. */
 	value?: any;
-	/** Provide input attributes as key/value pairs. */
-	valueAttr?: object;
+	/** Provide input attributes as key/value pairs. `multiline`/`rows` render a textarea. */
+	valueAttr?: Record<string, any>;
 	/** Provide your component reference key or object. */
 	component?: ModalComponent | string;
 	/** Provide a function. Returns the response value. */
@@ -57,7 +57,7 @@ export interface ModalSettings {
  * @example
  * ```svelte
  * <script>
- * 	import { getModalStore } from "@skeletonlabs/skeleton";
+ * 	import { getModalStore } from "$lib/components/Modals/stores";
  *
  * 	const modalStore = getModalStore();
  *

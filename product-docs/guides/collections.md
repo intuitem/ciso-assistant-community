@@ -21,7 +21,7 @@ A collection is a thin envelope around nine many-to-many relationships. Anything
 - **CRQ studies** (quantitative risk)
 - **Ebios RM studies**
 - **Entity assessments** (third-party)
-- **Follow-ups** (`findings_assessments`)
+- **Findings binders** (`findings_assessments`)
 - **Documents** — evidences attached to the collection
 - **Exceptions** — security exceptions
 - **Policies**

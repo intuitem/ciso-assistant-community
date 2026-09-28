@@ -1,0 +1,275 @@
+urn: urn:intuitem:risk:library:workflow-operations-finding-ai-triage
+locale: en
+ref_id: workflow-operations-finding-ai-triage
+name: Findings binder — AI triage sweep
+description: 'Walks every finding in a findings binder, asks the configured AI provider to rate it and
+  draft a triage note, then sets the severity and priority on each one. Run it with binder_id set to
+  the binder you want swept. The run log records how many findings the sweep processed. The model only chooses the branch; the severity and priority written
+  on each branch are fixed values in the graph, so the rating a machine suggested is always visible as
+  the branch that iteration took. Each finding costs two AI calls, so a sweep is bounded by
+  WORKFLOW_AI_MAX_CALLS_PER_RUN (50 by default, about 25 findings). Needs an AI provider configured in
+  Global settings — without one the AI steps fail and the run stops rather than guessing.'
+copyright: © intuitem
+version: 1
+publication_date: 2026-09-12
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-finding-ai-triage:workflow:finding-ai-triage
+    schema_version: 1
+    ref_id: finding-ai-triage
+    name: Findings binder — AI triage sweep
+    description: 'Walks every finding in a findings binder, rates it with the configured AI provider,
+      sets its severity and priority and drafts a triage note onto it. Run it with binder_id set to the
+      binder you want swept. The model only chooses the branch; the values written
+      on each branch are fixed in the graph.'
+    graph:
+      variables:
+      - key: binder_id
+        type: string
+        default_value: ''
+      - key: ai_severity
+        type: string
+        default_value: ''
+      - key: ai_rationale
+        type: string
+        default_value: ''
+      - key: ai_needs_review
+        type: boolean
+        default_value: false
+      nodes:
+      - ref: start
+        type: trigger
+        label: Run the sweep
+        trigger_config:
+          type: manual
+      - ref: check_id
+        type: condition
+        label: Was a binder given?
+        branches:
+        - name: given
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: binder_id
+              op: neq
+              value: ''
+        - name: missing
+          is_default: true
+      - ref: no_binder
+        type: action
+        label: Nothing to sweep
+        action_config:
+          type: log
+          message: 'No binder_id was given. Run this workflow with "Run with variables" and set binder_id
+            to the findings binder you want swept.'
+      - ref: fetch
+        type: action
+        label: List the binder's findings
+        action_config:
+          type: read_objects
+          model: finding
+          mode: list
+          order_by: created_at
+          limit: 25
+          filters:
+            operator: and
+            conditions:
+            - field: findings_assessment
+              op: eq
+              value: '{{binder_id}}'
+      - ref: per_finding
+        type: loop
+        label: One finding at a time
+        loop_config:
+          collection: '{{nodes.fetch.results}}'
+          collect: '{{item.name}}'
+          on_item_error: continue
+      - ref: classify
+        type: action
+        label: Rate it
+        action_config:
+          type: ai_extract
+          prompt: 'You are triaging a security finding for a GRC team. Rate how severe it is for the
+            organisation, using these definitions and nothing else:
+
+            critical — regulated or customer data is exposed right now, or an attacker needs no credentials
+            to reach production. Reserve this for the worst finding on the list.
+
+            high — a credible path to production data or a control that has already failed, but exploitation
+            needs a step the attacker does not yet have.
+
+            medium — real weakness confined to non-production, or a control that will fail soon if nobody
+            acts.
+
+            low — hygiene, cosmetic or administrative, with no path to data.
+
+            Most findings are not critical. If two findings differ in blast radius, they must not get the
+            same rating. Then say whether a human should review the rating: set needs_human_review to
+            true ONLY when the text is too vague to rate, or when it describes a possible breach of
+            regulated data that someone may have to notify. A finding is not review-worthy merely
+            because it touches compliance — most are not.'
+          input: '{{item.name}}
+
+            {{item.description}}'
+          schema:
+            type: object
+            properties:
+              severity:
+                type: string
+                enum:
+                - low
+                - medium
+                - high
+                - critical
+              needs_human_review:
+                type: boolean
+              rationale:
+                type: string
+            required:
+            - severity
+            - needs_human_review
+            - rationale
+          max_attempts: 2
+        output_mapping:
+          ai_severity: severity
+          ai_rationale: rationale
+          ai_needs_review: needs_human_review
+      - ref: route
+        type: condition
+        label: How severe did it come back?
+        branches:
+        - name: critical
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: ai_severity
+              op: eq
+              value: critical
+        - name: high
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: ai_severity
+              op: eq
+              value: high
+        - name: medium
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: ai_severity
+              op: eq
+              value: medium
+        - name: low
+          is_default: true
+      - ref: mark_critical
+        type: action
+        label: Critical, P1
+        action_config:
+          type: update_object
+          model: finding
+          id: '{{item.id}}'
+          fields:
+            severity: '4'
+            priority: '1'
+      - ref: mark_high
+        type: action
+        label: High, P2
+        action_config:
+          type: update_object
+          model: finding
+          id: '{{item.id}}'
+          fields:
+            severity: '3'
+            priority: '2'
+      - ref: mark_medium
+        type: action
+        label: Medium, P3
+        action_config:
+          type: update_object
+          model: finding
+          id: '{{item.id}}'
+          fields:
+            severity: '2'
+            priority: '3'
+      - ref: mark_low
+        type: action
+        label: Low, P4
+        action_config:
+          type: update_object
+          model: finding
+          id: '{{item.id}}'
+          fields:
+            severity: '1'
+            priority: '4'
+      - ref: draft_note
+        type: action
+        label: Draft the triage note
+        action_config:
+          type: ai_generate
+          prompt: 'Write a short triage note for the person who will own this finding. Say what the issue
+            is and what to check first. Plain prose, no heading, no bullet list.'
+          input: 'Finding: {{item.name}}
+
+            {{item.description}}
+
+            Assessed severity: {{ai_severity}} — {{ai_rationale}}'
+          max_words: 90
+      - ref: write_note
+        type: action
+        label: Record it as an observation
+        action_config:
+          type: update_object
+          model: finding
+          id: '{{item.id}}'
+          fields:
+            observation: 'AI triage on {{today}} — rated {{ai_severity}}, needs human review: {{ai_needs_review}}.
+              {{nodes.draft_note.text}}'
+      - ref: done
+        type: end
+      edges:
+      - source: start
+        target: check_id
+      - source: check_id
+        target: fetch
+        source_branch: given
+      - source: check_id
+        target: no_binder
+        source_branch: missing
+      - source: no_binder
+        target: done
+      - source: fetch
+        target: per_finding
+      - source: per_finding
+        target: classify
+        source_port: each
+      - source: classify
+        target: route
+      - source: route
+        target: mark_critical
+        source_branch: critical
+      - source: route
+        target: mark_high
+        source_branch: high
+      - source: route
+        target: mark_medium
+        source_branch: medium
+      - source: route
+        target: mark_low
+        source_branch: low
+      - source: mark_critical
+        target: draft_note
+      - source: mark_high
+        target: draft_note
+      - source: mark_medium
+        target: draft_note
+      - source: mark_low
+        target: draft_note
+      - source: draft_note
+        target: write_note
+      - source: write_note
+        target: per_finding
+      - source: per_finding
+        target: done
+        source_port: done

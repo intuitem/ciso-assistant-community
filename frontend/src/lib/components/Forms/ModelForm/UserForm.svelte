@@ -6,6 +6,8 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
+	import { languageOptions } from '$lib/utils/locales';
 	import { page } from '$app/state';
 	interface Props {
 		form: SuperValidated<any>;
@@ -24,6 +26,8 @@
 		shape = {},
 		context
 	}: Props = $props();
+
+	const languageChoices = $derived(languageOptions(model.selectOptions?.['language']));
 </script>
 
 <TextField
@@ -65,6 +69,16 @@
 {#if shape.is_active}
 	<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 {/if}
+<Select
+	{form}
+	field="language"
+	blank
+	options={languageChoices}
+	label={m.language()}
+	helpText={m.userLanguageHelpText()}
+	cacheLock={cacheLocks['language']}
+	bind:cachedValue={formDataCache['language']}
+/>
 
 {#if context !== 'create'}
 	<Checkbox

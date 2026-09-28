@@ -181,8 +181,13 @@ Both providers bill per token consumed, against the account as a whole — there
 
 Most of what a question costs is not the question. The assistant's fixed instructions, the conversation history, the retrieved records and the extra context added on an audit or risk assessment page dominate the input, so a short question on a busy page costs far more than a long one on an empty page. Expect a few thousand input tokens for a simple exchange and a multiple of that where the page carries a lot of context, against several hundred output tokens. Measure your own traffic before budgeting: model, context size and provider pricing all move the figure. Published rates change often, so check [OVHcloud's pricing](https://www.ovhcloud.com/fr/public-cloud/ai-endpoints/) or [OpenRouter's model list](https://openrouter.ai/models) for current figures.
 
+## What else uses this provider
+
+The chat assistant is not the only caller. The **Ask AI for values** and **Ask AI for text** workflow steps appear in the palette when the `chat_mode` feature flag is on, and they read the provider configured here rather than one of their own — so the tokens they spend land on the same bill. A workflow running on a schedule spends without anyone watching, which is the case for setting a limit at the provider. See [AI steps](../features/workflows/actions.md#ai-steps).
+
 ## Related pages
 
 - [General settings](../configuration/settings/general.md) — every field in the **Chat / AI assistant** section
 - [Feature flags](../configuration/settings/feature-flags.md) — turning `chat_mode` on
 - [Helm chart](../installation/helm-chart.md) — enabling chat and Qdrant on Kubernetes
+- [Action reference](../features/workflows/actions.md#ai-steps) — the two workflow steps that call a model

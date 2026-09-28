@@ -12,7 +12,7 @@ export const POST: RequestHandler = async ({ fetch }) => {
 	try {
 		data = await response.json();
 	} catch {
-		return json({ error: 'Unexpected response from server' }, { status: response.status || 500 });
+		return json({ error: 'unexpectedResponseFromServer' }, { status: response.status || 500 });
 	}
 
 	return json(data, { status: response.status });

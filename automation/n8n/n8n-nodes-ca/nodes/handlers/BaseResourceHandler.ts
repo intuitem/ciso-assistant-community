@@ -112,6 +112,56 @@ export abstract class BaseResourceHandler implements IResourceHandler {
   }
 
   /**
+   * Fetch a paginated list endpoint, paging until `next` is exhausted.
+   * Honors the standard `returnAll`/`limit` node parameters: when
+   * `returnAll` is false, paging stops once `limit` rows are collected.
+   * Requests the API's maximum page size (200) per page, but the loop
+   * stays driven by `next`/row counts in case the server clamps it.
+   * Returns a merged `{count, results}` object.
+   */
+  protected async listAll(
+    path: string,
+    params?: Record<string, string | number | boolean>,
+  ): Promise<IDataObject> {
+    // Operations without the returnAll/limit options keep fetching everything
+    const returnAll = this.getParameter<boolean>("returnAll", true);
+    const maxResults = returnAll
+      ? Number.POSITIVE_INFINITY
+      : this.getParameter<number>("limit", 50);
+    const results: IDataObject[] = [];
+    let offset = 0;
+    let count = 0;
+    for (;;) {
+      const url = buildUrl(this.context.credentials.baseUrl, path, {
+        ...params,
+        limit: Math.min(200, maxResults - results.length),
+        ...(offset > 0 && { offset }),
+      });
+      const page = await this.request(
+        "GET",
+        url.replace(this.context.credentials.baseUrl, ""),
+      );
+      if (Array.isArray(page)) {
+        // Non-paginated endpoint — nothing to page through.
+        results.push(...(page as IDataObject[]));
+        count = results.length;
+        break;
+      }
+      const rows = (page.results as IDataObject[] | undefined) ?? [];
+      results.push(...rows);
+      count = (page.count as number | undefined) ?? results.length;
+      offset += rows.length;
+      if (!page.next || rows.length === 0 || results.length >= maxResults) {
+        break;
+      }
+    }
+    if (results.length > maxResults) {
+      results.length = maxResults;
+    }
+    return { count, results };
+  }
+
+  /**
    * List resources with optional filters
    */
   protected async listResources(
@@ -125,16 +175,7 @@ export abstract class BaseResourceHandler implements IResourceHandler {
       additionalFilters,
     );
 
-    const url = buildUrl(
-      this.context.credentials.baseUrl,
-      `/${this.getEndpoint()}/`,
-      params,
-    );
-
-    return this.request(
-      "GET",
-      url.replace(this.context.credentials.baseUrl, ""),
-    );
+    return this.listAll(`/${this.getEndpoint()}/`, params);
   }
 
   /**

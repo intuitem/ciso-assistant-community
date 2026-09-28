@@ -1281,6 +1281,10 @@
 						optionsEndpoint="applied-controls"
 						optionsDetailedUrlParameters={[['folder', run.folder.id]]}
 						optionsExtraFields={[['folder', 'str']]}
+						optionsInfoFields={{
+							fields: [{ field: 'category', translate: true }],
+							position: 'prefix'
+						}}
 						label="Applied control"
 					/>
 				</div>

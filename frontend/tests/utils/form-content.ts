@@ -17,6 +17,12 @@ type FormField = {
 	type: FormFieldType;
 };
 
+/** Lazy selects surface options through server-side search on name/description.
+ * Option labels compose scope and ref_id prefixes ("folder/ref_id - name"), so
+ * strip them to type a fragment the backend search can actually match. */
+const lazySearchText = (label: string): string =>
+	String(label).split('/').pop()!.split(' - ').pop()!;
+
 export class FormContent {
 	readonly formTitle: Locator;
 	readonly saveButton: Locator;
@@ -124,6 +130,10 @@ export class FormContent {
 								);
 								await field.locator.click();
 								const optionLocator = this.optionLocator(field, values[key].value);
+								// If the option isn't immediately visible, type to trigger lazy search
+								if (!(await optionLocator.isVisible())) {
+									await field.locator.getByRole('combobox').fill(lazySearchText(values[key].value));
+								}
 								await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 								await optionLocator.click();
 
@@ -133,7 +143,7 @@ export class FormContent {
 								const optionLocator = this.optionLocator(field, values[key]);
 								// If the option isn't immediately visible, type to trigger lazy search
 								if (!(await optionLocator.isVisible())) {
-									await field.locator.getByRole('combobox').fill(values[key]);
+									await field.locator.getByRole('combobox').fill(lazySearchText(values[key]));
 								}
 								await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 								await optionLocator.click();
@@ -158,7 +168,7 @@ export class FormContent {
 						const optionLocator = this.optionLocator(field, val);
 						// If the option isn't immediately visible, type to trigger lazy search
 						if (!(await optionLocator.isVisible())) {
-							await field.locator.getByRole('combobox').fill(val);
+							await field.locator.getByRole('combobox').fill(lazySearchText(val));
 						}
 						await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 						await optionLocator.click();

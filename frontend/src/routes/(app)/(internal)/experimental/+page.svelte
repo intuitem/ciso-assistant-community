@@ -2,6 +2,7 @@
 	import Article from '$lib/components/DataViz/Article.svelte';
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
+	import { experimentalExtras } from '$lib/utils/experimental-extras';
 
 	$pageTitle = 'Experimental';
 </script>
@@ -14,22 +15,10 @@
 		tags={['analysis', 'audit']}
 	/>
 	<Article
-		title={m.findings()}
-		desc={m.findingsExplorer()}
-		link="/findings"
-		tags={['analysis', 'findings']}
-	/>
-	<Article
 		title="Batch Creation"
 		desc="Create multiple assets, entities, or feared events at once from a simple text list"
 		link="/experimental/batch-create"
 		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
-	/>
-	<Article
-		title={m.lbListLibraryBuilder()}
-		desc={m.lbListCardDesc()}
-		link="/experimental/library-builder"
-		tags={['libraries', 'builder', 'packager']}
 	/>
 	<Article
 		title="Bulk evidence upload"
@@ -55,6 +44,9 @@
 		link="/experimental/analytics-export"
 		tags={['analytics', 'export', 'xlsx', 'reporting']}
 	/>
+	{#each experimentalExtras as extra (extra.link)}
+		<Article title={extra.title} desc={extra.desc} link={extra.link} tags={extra.tags} />
+	{/each}
 	<!-- <Article -->
 	<!-- 	title="Multi-file evidence (UX prototype)" -->
 	<!-- 	desc="Imagine an evidence whose revisions hold multiple files at once. History timeline with file-level diff (added / removed / replaced / unchanged) and arbitrary revision compare. Static fake data, no backend." -->

@@ -32,7 +32,6 @@ class TestReferenceControlsUnauthenticated:
                 "name": REFERENCE_CONTROL_NAME,
                 "description": REFERENCE_CONTROL_DESCRIPTION,
                 "folder": Folder.objects.create(name="test"),
-                "is_published": True,
             },
         )
 
@@ -62,7 +61,6 @@ class TestReferenceControlsUnauthenticated:
                 "name": REFERENCE_CONTROL_NAME,
                 "description": REFERENCE_CONTROL_DESCRIPTION,
                 "folder": Folder.objects.create(name="test"),
-                "is_published": True,
             },
             {
                 "ref_id": "new " + REFERENCE_CONTROL_REF_ID,
@@ -82,7 +80,6 @@ class TestReferenceControlsUnauthenticated:
                 "ref_id": REFERENCE_CONTROL_REF_ID,
                 "name": REFERENCE_CONTROL_NAME,
                 "folder": Folder.objects.create(name="test"),
-                "is_published": True,
             },
         )
 
@@ -104,7 +101,6 @@ class TestReferenceControlsAuthenticated:
                 "description": REFERENCE_CONTROL_DESCRIPTION,
                 "urn": REFERENCE_CONTROL_URN,
                 "provider": REFERENCE_CONTROL_PROVIDER,
-                "is_published": True,
             },
             {
                 "folder": {
@@ -150,7 +146,6 @@ class TestReferenceControlsAuthenticated:
                 "description": REFERENCE_CONTROL_DESCRIPTION,
                 "urn": REFERENCE_CONTROL_URN,
                 "provider": REFERENCE_CONTROL_PROVIDER,
-                "is_published": True,
             },
             {
                 "ref_id": REFERENCE_CONTROL_REF_ID,

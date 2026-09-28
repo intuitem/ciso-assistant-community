@@ -21,7 +21,7 @@ There are 8 built-in roles. The table below gives the high-level shape of each o
 | Approver               | Read the objects of its domains, and approve or reject risk acceptances and validation flow steps.                                                                                   | Create or update business objects. Its read scope is slightly narrower than Reader — no third-party module, dashboards or metrics. |
 | Respondent             | Answer the requirements assigned to it: set compliance results, attach or create applied controls and evidences, comment. See [assignments.md](../../features/assignments.md "mention"). | Create audits or assessments. Reach the risk, governance or administration modules.                                              |
 | Third-party respondent | The same answering capability as a Respondent, restricted to the questionnaire of the entity assessment the user was invited to. See [tprm.md](../../guides/tprm.md "mention").      | See or do anything outside that questionnaire. Create or update applied controls.                                                |
-| Technical tester       | Create and run [technical postures](../../concepts/technical-postures.md) and their results, and manage the findings assessments and findings that follow up on them.                | Everything else — read-only on assets, frameworks and perimeters, no access to audits or risk assessments.                        |
+| Technical tester       | Create and run [technical postures](../../concepts/technical-postures.md) and their results, and manage the findings binders and findings that follow up on them.                | Everything else — read-only on assets, frameworks and perimeters, no access to audits or risk assessments.                        |
 
 The _Technical tester_ role is only useful once the `posture_assessments` feature flag is on (default off) — see [Technical postures](../../concepts/technical-postures.md). Its user group is created on every domain regardless.
 
@@ -54,7 +54,7 @@ They are created for each domain you add. For example, if you create a domain _R
 
 They give corresponding permissions on the domain scope so on every object inside _R\&D_.
 
-The _Third-party respondent_ group is the exception: it is not created upfront on domains, but on the dedicated enclave of an entity assessment, when you invite third-party contacts to answer its questionnaire.
+The _Third-party respondent_ group is the exception: it is not created upfront on domains, but on the [third-party workspace](../../concepts/third-party-risk.md#the-third-party-workspace) of an entity, when you invite that third party's contacts to answer a questionnaire. There is one workspace — and therefore one respondent group — per third party per domain, so a vendor assessed several times keeps the same access across rounds.
 
 ### Managing group members
 

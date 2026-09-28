@@ -13,7 +13,7 @@ User groups are attached to a folder (a domain). Membership is the reverse side 
 - Adding a user to a domain group only grants that group's domain-scoped roles; it cannot escalate access beyond the manager's own authority.
 - The last direct member of the built-in `BI-UG-ADM` administrators group is protected: membership management can never empty it (mirroring the safeguard on the user form).
 
-This preserves the single golden source of access control (role assignments) and the existing RBAC model — see [Access control model](architecture/data-model.md#access-control-model).
+This preserves the single golden source of access control (role assignments) and the existing RBAC model — see [Access control model](architecture/data-model.md#access-control-model). The user-side form enforces the same `change_usergroup`-per-group-folder rule on membership changes, along with the broader account-protection invariants — see [User Account Security Policy](user-account-security-policy.md).
 
 ## For domain managers
 

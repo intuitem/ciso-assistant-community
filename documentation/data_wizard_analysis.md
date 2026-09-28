@@ -179,7 +179,6 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 |-------|------|----------|
 | `annotation` | TextField | Medium |
 | `provider` | CharField | Low |
-| `is_published` | BooleanField | Low |
 | i18n fields | Various | Low |
 
 ---
@@ -223,12 +222,14 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `priority` | No | Integer (1-4: P1-P4) |
 | `observation` | No | Free text |
 | `vulnerabilities` | No | Pipe- or comma-separated vulnerability names (created in the perimeter's folder if missing) |
+| `applied_controls` | No | Pipe-, newline-, semicolon- or comma-separated; matching controls are created or found in the domain (lookup by ref_id then name) |
+| `owner` | No | Semicolon-delimited list of user emails and/or team names. Resolved case-insensitively: first by user email, then by team name. Unresolved entries are skipped with a warning. |
+
+> **Note:** The `owner` field resolves entries against existing users (by email) and teams (by name). Ensure any referenced users and teams are created in CISO Assistant before importing. Unresolved entries will be skipped with a warning and will not block the import.
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
-| `owner` | M2M Actor | High |
-| `applied_controls` | M2M | Medium |
 | `evidences` | M2M | Medium |
 | `threats` | M2M | Medium |
 
@@ -367,6 +368,7 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
+| `default_role` | FK Role | Medium |
 | `content_type` | CharField | Low |
 | `builtin` | BooleanField | Low |
 | `hide_in_selects` | BooleanField | Low |
@@ -426,7 +428,6 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `requirement_assessments` | M2M | Medium |
 | `applied_controls` | M2M | Medium |
 | `assets` | M2M | Medium |
-| `is_published` | BooleanField | Low |
 
 ---
 
@@ -454,7 +455,6 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `assets` | M2M | High |
 | `entities` | M2M | Medium |
 | `qualifications` | M2M Terminology | Medium |
-| `is_published` | BooleanField | Low |
 
 ---
 

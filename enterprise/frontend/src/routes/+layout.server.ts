@@ -56,22 +56,19 @@ function sanitizeClientSettings(
 
 export const load: LayoutServerLoad = async ({ fetch, locals, url }) => {
 	const isSSOAuthenticate = url.pathname.startsWith('/sso/authenticate');
-	const clientSettings =
-		locals.globalSettings ??
-		(isSSOAuthenticate
-			? {
-					name: 'clientSettings',
-					settings: {
-						name: '',
-						logo: '',
-						favicon: '',
-						show_images_unauthenticated: false
-					}
+	const clientSettings = isSSOAuthenticate
+		? {
+				name: 'clientSettings',
+				settings: {
+					name: '',
+					logo: '',
+					favicon: '',
+					show_images_unauthenticated: false
 				}
-			: await fetchClientSettings(fetch));
+			}
+		: await fetchClientSettings(fetch);
 	return {
 		featureFlags: locals.featureFlags,
-		generalSettings: locals.generalSettings,
-		clientSettings: sanitizeClientSettings(clientSettings, Boolean(locals.user))
+		clientSettings: sanitizeClientSettings(clientSettings, Boolean(await locals.getUser()))
 	};
 };

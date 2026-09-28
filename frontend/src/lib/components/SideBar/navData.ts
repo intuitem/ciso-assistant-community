@@ -38,6 +38,23 @@ export const navData = {
 					]
 				},
 				{
+					name: 'notifications',
+					fa_icon: 'fa-solid fa-bell',
+					href: '/notifications',
+					// `exclude` short-circuits `permissions` in canSeeNavItem, so the latter
+					// documents intent rather than gating -- same shape as myAssignments
+					// below. Third-party respondents are email-only in v1, so hide a page
+					// that would always be empty for them.
+					permissions: ['view_notification'],
+					exclude: ['BI-RL-TPR']
+				},
+				{
+					name: 'myRequests',
+					fa_icon: 'fa-solid fa-hand',
+					href: '/my-requests',
+					permissions: ['view_quickformresponse', 'add_quickformresponse']
+				},
+				{
 					name: 'myAssignments',
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',
@@ -98,11 +115,6 @@ export const navData = {
 					name: 'idpGroups',
 					fa_icon: 'fa-solid fa-id-badge',
 					href: '/idp-groups'
-				},
-				{
-					name: 'roleAssignments',
-					fa_icon: 'fa-solid fa-user-tag',
-					href: '/role-assignments'
 				}
 			]
 		},
@@ -154,6 +166,18 @@ export const navData = {
 					fa_icon: 'fa-solid fa-file-code',
 					href: '/document-templates',
 					permissions: ['view_documenttemplate']
+				},
+				{
+					name: 'quickForms',
+					fa_icon: 'fa-solid fa-clipboard-question',
+					href: '/quick-forms',
+					permissions: ['view_quickformpublication']
+				},
+				{
+					name: 'lbListLibraryBuilder',
+					fa_icon: 'fas fa-shapes',
+					href: '/experimental/library-builder',
+					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
 				}
 			]
 		},
@@ -261,6 +285,12 @@ export const navData = {
 					href: '/risk-acceptances'
 				},
 				{
+					name: 'requestQueue',
+					fa_icon: 'fa-solid fa-inbox',
+					href: '/requests',
+					permissions: ['view_quickformresponse']
+				},
+				{
 					name: 'validationFlows',
 					fa_icon: 'fa-solid fa-clipboard-check',
 					href: '/validation-flows',
@@ -272,8 +302,19 @@ export const navData = {
 					href: '/security-exceptions'
 				},
 				{
+					name: 'findings',
+					fa_icon: 'fas fa-bug',
+					href: '/findings'
+				},
+				{
+					name: 'commitments',
+					fa_icon: 'fa-solid fa-handshake',
+					href: '/commitments',
+					permissions: ['view_commitment']
+				},
+				{
 					name: 'followUp',
-					fa_icon: 'fa-solid fa-clipboard-list',
+					fa_icon: 'fas fa-th-list',
 					href: '/findings-assessments'
 				}
 			]

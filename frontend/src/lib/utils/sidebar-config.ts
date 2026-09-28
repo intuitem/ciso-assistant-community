@@ -1,4 +1,5 @@
 type SidebarBackendKeys = {
+	notification_center: boolean;
 	xrays: boolean;
 	incidents: boolean;
 	tasks: boolean;
@@ -11,6 +12,7 @@ type SidebarBackendKeys = {
 	vulnerabilities: boolean;
 	compliance: boolean;
 	campaigns: boolean;
+	commitment_management: boolean;
 	tprm: boolean;
 	privacy: boolean;
 	experimental: boolean;
@@ -23,6 +25,11 @@ type SidebarBackendKeys = {
 	custom_fields: boolean;
 	bia: boolean;
 	project_management: boolean;
+	generic_collections: boolean;
+	accreditations: boolean;
+	projects: boolean;
+	responsibility_matrices: boolean;
+	risk_management: boolean;
 	contracts: boolean;
 	reports: boolean;
 	validation_flows: boolean;
@@ -33,6 +40,7 @@ type SidebarBackendKeys = {
 	right_requests: boolean;
 	data_breaches: boolean;
 	auditee_mode: boolean;
+	quick_forms: boolean;
 	advanced_analytics: boolean;
 	journeys: boolean;
 	policy_documents: boolean;
@@ -47,12 +55,14 @@ type SidebarBackendKeys = {
 };
 
 type SidebarFrontendKeys = {
+	notifications: boolean;
 	xRays: boolean;
 	incidents: boolean;
 	tasks: boolean;
 	tasksReview: boolean;
 	riskAcceptances: boolean;
 	securityExceptions: boolean;
+	findings: boolean;
 	followUp: boolean;
 	ebiosRM: boolean;
 	scoringAssistant: boolean;
@@ -71,6 +81,11 @@ type SidebarFrontendKeys = {
 	customFields: boolean;
 	businessImpactAnalysis: boolean;
 	projectManagement: boolean;
+	genericCollections: boolean;
+	accreditations: boolean;
+	projects: boolean;
+	responsibilityMatrices: boolean;
+	risk: boolean;
 	contracts: boolean;
 	reports: boolean;
 	validationFlows: boolean;
@@ -81,6 +96,9 @@ type SidebarFrontendKeys = {
 	rightRequests: boolean;
 	dataBreaches: boolean;
 	auditDashboard: boolean;
+	quickForms: boolean;
+	myRequests: boolean;
+	requestQueue: boolean;
 	presets: boolean;
 	securityAdvisories: boolean;
 	cwes: boolean;
@@ -88,18 +106,24 @@ type SidebarFrontendKeys = {
 	idpGroups: boolean;
 	serviceAccounts: boolean;
 	postureAssessments: boolean;
+	commitments: boolean;
 };
 
 export function getSidebarVisibleItems(
-	featureFlags: Partial<SidebarBackendKeys>
+	featureFlags: Partial<SidebarBackendKeys> | undefined
 ): SidebarFrontendKeys {
 	return {
+		// Default true: unlike the others this is not a module you opt into, it is the
+		// notification channel that works out of the box (notifications_enable_mailing
+		// defaults off, so email alone leaves most installs silent).
+		notifications: featureFlags?.notification_center ?? true,
 		xRays: featureFlags?.xrays ?? false,
 		incidents: featureFlags?.incidents ?? false,
 		tasks: featureFlags?.tasks ?? false,
 		tasksReview: featureFlags?.control_plan ?? true,
 		riskAcceptances: featureFlags?.risk_acceptances ?? false,
 		securityExceptions: featureFlags?.exceptions ?? false,
+		findings: featureFlags?.follow_up ?? false,
 		followUp: featureFlags?.follow_up ?? false,
 		ebiosRM: featureFlags?.ebiosrm ?? false,
 		scoringAssistant: featureFlags?.scoring_assistant ?? false,
@@ -118,6 +142,11 @@ export function getSidebarVisibleItems(
 		customFields: featureFlags?.custom_fields ?? false,
 		businessImpactAnalysis: featureFlags?.bia ?? true,
 		projectManagement: featureFlags?.project_management ?? false,
+		genericCollections: featureFlags?.generic_collections ?? true,
+		accreditations: featureFlags?.accreditations ?? true,
+		projects: featureFlags?.projects ?? true,
+		responsibilityMatrices: featureFlags?.responsibility_matrices ?? true,
+		risk: featureFlags?.risk_management ?? true,
 		contracts: featureFlags?.contracts ?? false,
 		reports: featureFlags?.reports ?? false,
 		validationFlows: featureFlags?.validation_flows ?? false,
@@ -128,6 +157,9 @@ export function getSidebarVisibleItems(
 		rightRequests: featureFlags?.right_requests ?? true,
 		dataBreaches: featureFlags?.data_breaches ?? true,
 		auditDashboard: featureFlags?.auditee_mode ?? false,
+		quickForms: featureFlags?.quick_forms ?? false,
+		myRequests: featureFlags?.quick_forms ?? false,
+		requestQueue: featureFlags?.quick_forms ?? false,
 		presets: featureFlags?.journeys ?? true,
 		securityAdvisories: featureFlags?.security_advisories ?? true,
 		cwes: featureFlags?.cwes ?? true,
@@ -135,6 +167,7 @@ export function getSidebarVisibleItems(
 		idpGroups: (featureFlags?.idp_groups || featureFlags?.jit_provisioning) ?? false,
 		serviceAccounts: featureFlags?.service_accounts ?? false,
 		postureAssessments: featureFlags?.posture_assessments ?? false,
+		commitments: featureFlags?.commitment_management ?? false,
 		documents: featureFlags?.document_management ?? true,
 		documentTemplates: featureFlags?.document_management ?? true,
 		objectClassifications: featureFlags?.document_management ?? true

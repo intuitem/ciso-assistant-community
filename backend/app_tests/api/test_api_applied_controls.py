@@ -287,9 +287,7 @@ def _make_scoped_reader(folder):
     """User with READER role recursive on `folder` and nothing else.
     Built directly via RoleAssignment so the perimeter is exactly that
     one folder — what the masking assertions rely on."""
-    user = User.objects.create_user(
-        f"reader-{uuid.uuid4().hex[:6]}@perf.test", is_published=True
-    )
+    user = User.objects.create_user(f"reader-{uuid.uuid4().hex[:6]}@perf.test")
     role = Role.objects.get(name=RoleCodename.READER.value)
     ra = RoleAssignment.objects.create(
         user=user,

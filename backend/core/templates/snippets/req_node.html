@@ -35,8 +35,11 @@
           {{ node.assessments.requirement.get_description_translated }}
         </div>
       {% endif %}
-      {# Driven by questions_dict, which is ordered by Question.order, unlike
-         answers_dict, whose order comes from an unordered Answer queryset. #}
+
+      {% comment %}
+      Driven by questions_dict, which is ordered by Question.order, unlike
+      answers_dict, whose order comes from an unordered Answer queryset.
+      {% endcomment %}
       {% if node.questions_dict %}
         <div class="text-left w-full">
           {% for key, question in node.questions_dict.items %}
@@ -78,7 +81,7 @@
               <a
                 class="text-indigo-700 hover:text-indigo-500"
                 target="_blank"
-                href="evidences/{{ evidence.last_revision.attachment.name|basename }}"
+                href="evidences/{{ archive_names|get_item:evidence.id|urlencode }}"
                 >{{ evidence.name }}</a
               >
             </li>
@@ -112,7 +115,7 @@
                   <a
                     class="text-indigo-700 hover:text-indigo-500"
                     target="_blank"
-                    href="evidences/{{ evidence.last_revision.attachment.name|basename }}"
+                    href="evidences/{{ archive_names|get_item:evidence.id|urlencode }}"
                     >{{ control.measure.name }}/{{ evidence.name }}</a
                   >
                 </li>

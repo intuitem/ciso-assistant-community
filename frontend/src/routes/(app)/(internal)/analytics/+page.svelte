@@ -106,7 +106,7 @@
 			user: data.user,
 			action: 'change',
 			model: 'globalsettings',
-			domain: data.user?.root_folder_id
+			domain: data.user?.root_folder_id ?? ''
 		})
 	);
 
@@ -145,8 +145,10 @@
 	});
 
 	function handleTabChange(tabValue: string): void {
-		page.url.searchParams.set('tab', tabValue);
-		goto(page.url);
+		// A fresh URL: goto() on the mutated live object skips the load.
+		const next = new URL(page.url);
+		next.searchParams.set('tab', tabValue);
+		goto(next);
 	}
 
 	async function handleCustomDashboardChange(dashboardId: string): Promise<void> {
@@ -882,7 +884,12 @@
 												<div class="flex items-center gap-3">
 													<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
 													<h3 class="text-lg font-semibold text-surface-900-100">
-														{frameworkName}
+														<a
+															href="/frameworks/{frameworkData.framework_id}"
+															class="hover:text-blue-600 hover:underline"
+														>
+															{frameworkName}
+														</a>
 													</h3>
 												</div>
 												<div class="flex items-center gap-2">
@@ -937,8 +944,9 @@
 													<!-- Assessments Grid -->
 													<div class="grid gap-3">
 														{#each domain.assessments as assessment}
-															<div
-																class="group border border-surface-200-800 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
+															<a
+																href="/compliance-assessments/{assessment.assessment_id}"
+																class="block group border border-surface-200-800 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
 															>
 																<div class="flex justify-between items-start gap-4">
 																	<div class="flex-1 min-w-0">
@@ -1000,7 +1008,7 @@
 																		</div>
 																	</div>
 																</div>
-															</div>
+															</a>
 														{/each}
 													</div>
 												</div>

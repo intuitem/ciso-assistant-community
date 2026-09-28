@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -62,7 +63,9 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 	const fkOptions: Record<string, any[]> = {};
 	await Promise.all(
 		fkEndpoints.map(async (endpoint) => {
-			fkOptions[endpoint] = listResults(await fetchJson(fetch, `${BASE_API_URL}/${endpoint}/`));
+			fkOptions[endpoint] = await fetchAllPages(fetch, `${BASE_API_URL}/${endpoint}/`).catch(
+				() => []
+			);
 		})
 	);
 

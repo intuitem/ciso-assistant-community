@@ -300,7 +300,7 @@
 					}}
 					hideFilters={true}
 					URLModel="validation-flows"
-					baseEndpoint="/validation-flows?approver={data.user.id}"
+					baseEndpoint="/validation-flows?approver={data.user?.id}"
 				/>
 			</div>
 		{/if}
@@ -325,7 +325,7 @@
 					}}
 					hideFilters={true}
 					URLModel="risk-acceptances"
-					baseEndpoint="/risk-acceptances?approver={data.user.id}&state=submitted"
+					baseEndpoint="/risk-acceptances?approver={data.user?.id}&state=submitted"
 				/>
 			</div>
 		{/if}

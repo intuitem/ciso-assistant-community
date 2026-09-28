@@ -7,7 +7,7 @@ import { formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
 import { headData } from '$lib/utils/table';
 import { m } from '$paraglide/messages';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { type TableSource } from '$lib/components/ModelTable/types';
 import type { Actions } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -65,6 +65,8 @@ export const load = (async ({ fetch, params }) => {
 		object.applied_controls?.map((applied_control) => applied_control.id) ?? [];
 	object.security_exceptions =
 		object.security_exceptions?.map((security_exception) => security_exception.id) ?? [];
+	object.task_templates = object.task_templates?.map((task_template) => task_template.id) ?? [];
+	object.findings = object.findings?.map((finding) => finding.id) ?? [];
 	object.nextRequirementAssessmentId = nextRequirementAssessmentId;
 	const form = await superValidate(object, zod(schema), { errors: true });
 
@@ -111,14 +113,16 @@ export const load = (async ({ fetch, params }) => {
 	const tables: Record<string, any> = {};
 
 	await Promise.all(
-		['applied-controls', 'evidences', 'security-exceptions'].map(async (key) => {
-			const table: TableSource = {
-				head: headData(key),
-				body: [],
-				meta: []
-			};
-			tables[key] = table;
-		})
+		['applied-controls', 'task-templates', 'evidences', 'security-exceptions', 'findings'].map(
+			async (key) => {
+				const table: TableSource = {
+					head: headData(key),
+					body: [],
+					meta: []
+				};
+				tables[key] = table;
+			}
+		)
 	);
 
 	const evidenceModel = getModelInfo('evidences');
@@ -142,6 +146,28 @@ export const load = (async ({ fetch, params }) => {
 		);
 	}
 	evidenceModel.selectOptions = evidenceSelectOptions;
+
+	const taskTemplateModel = getModelInfo('task-templates');
+	const taskTemplateCreateSchema = modelSchema('task-templates');
+	const taskTemplateCreateForm = await superValidate(
+		{ requirement_assessments: [params.id], folder: requirementAssessment.folder.id },
+		zod(taskTemplateCreateSchema),
+		{ errors: false }
+	);
+
+	const taskTemplateSelectOptions: Record<string, any> = {};
+	if (taskTemplateModel.selectFields) {
+		await Promise.all(
+			taskTemplateModel.selectFields.map(async (selectField) => {
+				const url = `${baseUrl}/task-templates/${selectField.field}/`;
+				const data = await fetchJson(url);
+				if (data) {
+					taskTemplateSelectOptions[selectField.field] = formatSelectFieldData(data, selectField);
+				}
+			})
+		);
+	}
+	taskTemplateModel.selectOptions = taskTemplateSelectOptions;
 
 	const securityExceptionModel = getModelInfo('security-exceptions');
 	const securityExceptionCreateSchema = modelSchema('security-exceptions');
@@ -181,6 +207,8 @@ export const load = (async ({ fetch, params }) => {
 		measureModel,
 		evidenceModel,
 		evidenceCreateForm,
+		taskTemplateModel,
+		taskTemplateCreateForm,
 		securityExceptionModel,
 		securityExceptionCreateForm,
 		tables,
@@ -227,10 +255,13 @@ export const actions: Actions = {
 			'is_score_overridden',
 			'documentation_score',
 			'observation',
+			'respondent_alignment',
 			'answers',
 			'evidences',
 			'applied_controls',
-			'security_exceptions'
+			'task_templates',
+			'security_exceptions',
+			'findings'
 		];
 		for (const key of visibilityControlled) {
 			if (!(key in currentRa)) {
@@ -328,9 +359,17 @@ export const actions: Actions = {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
 		return { form: result.form, newEvidence: result.form.message.object.id };
 	},
+	createTaskTemplate: async (event) => {
+		const result = await nestedWriteFormAction({ event, action: 'create' });
+		return { form: result.form, newTaskTemplate: result.form.message.object.id };
+	},
 	createSecurityException: async (event) => {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
 		return { form: result.form, newSecurityException: result.form.message.object.id };
+	},
+	createFinding: async (event) => {
+		const result = await nestedWriteFormAction({ event, action: 'create' });
+		return { form: result.form, newFinding: result.form.message.object.id };
 	},
 	createSuggestedControls: async (event) => {
 		const formData = await event.request.formData();

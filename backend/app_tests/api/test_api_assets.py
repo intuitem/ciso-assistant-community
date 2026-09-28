@@ -225,9 +225,7 @@ def _client_for(user):
 
 
 def _make_scoped_reader(folder):
-    user = User.objects.create_user(
-        f"reader-{uuid.uuid4().hex[:6]}@perf.test", is_published=True
-    )
+    user = User.objects.create_user(f"reader-{uuid.uuid4().hex[:6]}@perf.test")
     role = Role.objects.get(name=RoleCodename.READER.value)
     ra = RoleAssignment.objects.create(
         user=user,
@@ -430,3 +428,183 @@ class TestAssetFullEndpoint:
         assert str(asset_b.id) not in bulk, (
             f"scoped reader saw cross-folder asset {asset_b.id} in /full/"
         )
+
+
+def _make_scoped_user(analyst_folder, reader_folder=None):
+    user = User.objects.create_user(f"linker-{uuid.uuid4().hex[:6]}@perf.test")
+    root = Folder.get_root_folder()
+    for codename, folder in (
+        (RoleCodename.ANALYST, analyst_folder),
+        (RoleCodename.READER, reader_folder),
+    ):
+        if folder is None:
+            continue
+        ra = RoleAssignment.objects.create(
+            user=user,
+            role=Role.objects.get(name=codename.value),
+            folder=root,
+            is_recursive=True,
+        )
+        ra.perimeter_folders.add(folder)
+    return user
+
+
+@pytest.mark.django_db
+class TestCrossDomainAssetLinkPermissions:
+    def _domain(self, label):
+        return Folder.objects.create(
+            name=f"link-{label}-{uuid.uuid4().hex[:6]}",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+
+    def setup_method(self):
+        self.folder_a = self._domain("A")
+        self.folder_b = self._domain("B")
+        self.local = Asset.objects.create(
+            folder=self.folder_a, name="local", type=Asset.Type.SUPPORT
+        )
+        self.sibling = Asset.objects.create(
+            folder=self.folder_a, name="sibling", type=Asset.Type.PRIMARY
+        )
+        self.remote = Asset.objects.create(
+            folder=self.folder_b, name="remote", type=Asset.Type.PRIMARY
+        )
+
+    def _patch(self, user, asset, payload):
+        return _client_for(user).patch(
+            f"/api/assets/{asset.id}/", payload, format="json"
+        )
+
+    def test_view_only_parent_cannot_be_linked(self):
+        user = _make_scoped_user(self.folder_a, self.folder_b)
+        r = self._patch(user, self.local, {"parent_assets": [str(self.remote.id)]})
+        assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
+        assert not self.local.parent_assets.exists()
+
+    def test_changeable_parent_can_be_linked(self):
+        user = _make_scoped_user(self.folder_a)
+        extra = RoleAssignment.objects.create(
+            user=user,
+            role=Role.objects.get(name=RoleCodename.ANALYST.value),
+            folder=Folder.get_root_folder(),
+            is_recursive=True,
+        )
+        extra.perimeter_folders.add(self.folder_b)
+        r = self._patch(user, self.local, {"parent_assets": [str(self.remote.id)]})
+        assert r.status_code == status.HTTP_200_OK, r.content
+        assert list(self.local.parent_assets.all()) == [self.remote]
+
+    def test_view_only_asset_cannot_be_linked_as_support(self):
+        user = _make_scoped_user(self.folder_a, self.folder_b)
+        r = self._patch(user, self.sibling, {"support_assets": [str(self.remote.id)]})
+        assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
+        assert not self.remote.parent_assets.exists()
+
+    def test_view_only_parent_cannot_be_unlinked(self):
+        self.local.parent_assets.add(self.remote)
+        user = _make_scoped_user(self.folder_a, self.folder_b)
+        r = self._patch(user, self.local, {"parent_assets": []})
+        assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
+        assert list(self.local.parent_assets.all()) == [self.remote]
+
+    def test_invisible_parent_survives_a_save_that_omits_it(self):
+        self.local.parent_assets.add(self.remote)
+        user = _make_scoped_user(self.folder_a)
+        r = self._patch(
+            user,
+            self.local,
+            {"name": "renamed", "parent_assets": [str(self.sibling.id)]},
+        )
+        assert r.status_code == status.HTTP_200_OK, r.content
+        self.local.refresh_from_db()
+        assert self.local.name == "renamed"
+        assert set(self.local.parent_assets.all()) == {self.remote, self.sibling}
+
+    def test_invisible_support_asset_survives_a_save_that_omits_it(self):
+        self.remote.parent_assets.add(self.sibling)
+        user = _make_scoped_user(self.folder_a)
+        r = self._patch(user, self.sibling, {"support_assets": [str(self.local.id)]})
+        assert r.status_code == status.HTTP_200_OK, r.content
+        assert set(self.sibling.child_assets.all()) == {self.remote, self.local}
+
+    def test_existing_cross_domain_link_does_not_block_other_edits(self):
+        self.local.parent_assets.add(self.remote)
+        user = _make_scoped_user(self.folder_a, self.folder_b)
+        r = self._patch(
+            user,
+            self.local,
+            {
+                "name": "renamed",
+                "parent_assets": [str(self.remote.id), str(self.sibling.id)],
+            },
+        )
+        assert r.status_code == status.HTTP_200_OK, r.content
+        self.local.refresh_from_db()
+        assert self.local.name == "renamed"
+        assert set(self.local.parent_assets.all()) == {self.remote, self.sibling}
+
+    def test_create_with_view_only_parent_is_refused(self):
+        user = _make_scoped_user(self.folder_a, self.folder_b)
+        r = _client_for(user).post(
+            "/api/assets/",
+            {
+                "name": "new",
+                "type": "SP",
+                "folder": str(self.folder_a.id),
+                "parent_assets": [str(self.remote.id)],
+            },
+            format="json",
+        )
+        assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
+        assert not Asset.objects.filter(name="new", folder=self.folder_a).exists()
+
+    def test_restored_invisible_parent_is_part_of_cycle_check(self):
+        self.local.parent_assets.add(self.remote)
+        self.remote.parent_assets.add(self.sibling)
+        user = _make_scoped_user(self.folder_a)
+        r = self._patch(
+            user,
+            self.local,
+            {"parent_assets": [], "support_assets": [str(self.sibling.id)]},
+        )
+        assert r.status_code == status.HTTP_400_BAD_REQUEST, r.content
+        assert not self.local.child_assets.exists()
+
+    def _batch_create(self, user, folder, text):
+        return _client_for(user).post(
+            "/api/assets/batch-create/",
+            {"assets_text": text, "folder": str(folder.id)},
+            format="json",
+        )
+
+    def test_batch_create_refused_without_add_permission(self):
+        user = _make_scoped_user(self.folder_a, self.folder_b)
+        r = self._batch_create(user, self.folder_b, "PR:remote\n  SP:local-b")
+        assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
+        assert not Asset.objects.filter(name="local-b").exists()
+
+    def test_batch_create_cannot_relink_assets_of_an_unseen_domain(self):
+        other = Asset.objects.create(
+            folder=self.folder_b, name="other", type=Asset.Type.SUPPORT
+        )
+        user = _make_scoped_user(self.folder_a)
+        r = self._batch_create(user, self.folder_b, "PR:remote\n  SP:other")
+        assert r.status_code == status.HTTP_403_FORBIDDEN, r.content
+        assert not other.parent_assets.exists()
+
+    def test_batch_create_links_reused_assets(self):
+        user = _make_scoped_user(self.folder_a)
+        r = self._batch_create(user, self.folder_a, "PR:sibling\n  SP:local")
+        assert r.status_code == status.HTTP_201_CREATED, r.content
+        assert list(self.local.parent_assets.all()) == [self.sibling]
+
+    def test_batch_create_refuses_a_cycle_between_reused_assets(self):
+        self.local.parent_assets.add(self.sibling)
+        user = _make_scoped_user(self.folder_a)
+        r = self._batch_create(user, self.folder_a, "SP:local\n  PR:sibling")
+        assert r.status_code == status.HTTP_201_CREATED, r.content
+        assert r.json()["errors"], r.content
+        assert not self.sibling.parent_assets.exists()
+        reused = {a["name"]: a["parent"] for a in r.json()["reused_assets"]}
+        assert reused["sibling"] is None, r.content

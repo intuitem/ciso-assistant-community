@@ -178,7 +178,7 @@
 				<ModelTable
 					backgroundColor="bg-surface-50-950"
 					regionBody="bg-surface-50-950"
-					regionHeadCell="uppercase bg-surface-50-950 text-surface-700-300"
+					regionHeadCell="bg-surface-50-950 text-surface-700-300"
 					source={data.table}
 					URLModel="feared-events"
 					baseEndpoint={'feared-events/?ro_to_couples=' + roto.id}

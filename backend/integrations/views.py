@@ -13,7 +13,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.views import BaseModelViewSet
+from core.views import BaseModelViewSet, SmartOrderingFilter
 from iam.models import RoleAssignment
 from integrations.models import (
     IntegrationConfiguration,
@@ -100,7 +100,7 @@ class IntegrationProviderListView(generics.ListAPIView):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        SmartOrderingFilter,
     ]
 
     filterset_fields = ["provider_type", "name"]

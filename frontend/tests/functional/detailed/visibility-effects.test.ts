@@ -83,6 +83,16 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 	const token = await getAuthToken(page.context());
 
 	/**
+	 * Navigate and wait for SvelteKit to hydrate. `page.goto` resolves on
+	 * `load`, before Svelte attaches event handlers, so a click landing in that
+	 * window is silently dropped. The root layout flags hydration on `<body>`.
+	 */
+	async function gotoHydrated(url: string) {
+		await page.goto(url);
+		await page.locator('body[data-hydrated="true"]').waitFor();
+	}
+
+	/**
 	 * PATCH the audit's field_visibility for a single field, then reload the
 	 * detail page so the new state is reflected in the DOM. The backend merges
 	 * partial field_visibility maps, so sending only the changed field is safe.
@@ -102,7 +112,7 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 			response.ok(),
 			`PATCH failed: ${response.status()} ${await response.text()}`
 		).toBeTruthy();
-		await page.goto(auditDetailUrl);
+		await gotoHydrated(auditDetailUrl);
 	}
 
 	// === Matrix: each donut-bearing field hidden then visible ==============
@@ -122,14 +132,13 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 	}
 
 	await setVisibility('status', HIDDEN);
-	await page.goto(`${auditDetailUrl}/table-mode`);
+	await gotoHydrated(`${auditDetailUrl}/table-mode`);
 
 	const firstRequirementAssessment = page.locator('.table-mode-form').first();
-	await firstRequirementAssessment
-		.locator('[data-scope="accordion"][data-part="item-trigger"]')
-		.filter({ hasText: m.evidence() })
-		.click();
-	await firstRequirementAssessment.getByTestId('select-evidence-button').click();
+	await firstRequirementAssessment.getByTestId('evidence-accordion-trigger').click();
+	const selectEvidenceButton = firstRequirementAssessment.getByTestId('select-evidence-button');
+	await expect(selectEvidenceButton).toBeVisible();
+	await selectEvidenceButton.click();
 
 	await expect(page.getByTestId('modal-title')).toBeVisible();
 	const evidenceField = page.getByTestId('form-input-evidences');
@@ -144,6 +153,50 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 
 	await expect(page.getByTestId('modal-title')).not.toBeVisible();
 	await expect(firstRequirementAssessment.getByText(hiddenStatusEvidenceName)).toBeVisible();
+
+	// === Saving with `result` hidden must not wipe the score ===============
+	// The requirement edit form round-trips every field, `respondent_alignment`
+	// included. That field is hidden by default, so the form posts it back as
+	// null, which the backend read as a deselection and used to reset result
+	// and both scores — but only when `result` was itself absent, i.e. hidden.
+	// The editor cascades is_scored onto score; mirror that here.
+	await setVisibility('score', EVERYONE);
+	await setVisibility('is_scored', EVERYONE);
+	await setVisibility('result', EVERYONE);
+
+	const listResponse = await page.request.get(
+		`${BACKEND_API_URL}/compliance-assessments/${auditId}/requirements_list/?assessable=true`,
+		{ headers: { Authorization: `Token ${token}` } }
+	);
+	expect(listResponse.ok(), `requirements_list failed: ${listResponse.status()}`).toBeTruthy();
+	const raId = (await listResponse.json()).requirement_assessments[0].id;
+	const raUrl = `${BACKEND_API_URL}/requirement-assessments/${raId}/`;
+
+	async function readRequirementAssessment() {
+		const response = await page.request.get(raUrl, {
+			headers: { Authorization: `Token ${token}` }
+		});
+		expect(response.ok(), `RA read failed: ${response.status()}`).toBeTruthy();
+		return response.json();
+	}
+
+	const seededScore = (await readRequirementAssessment()).effective_max_score;
+	const seedResponse = await page.request.patch(raUrl, {
+		data: { result: 'compliant', is_scored: true, score: seededScore },
+		headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` }
+	});
+	expect(seedResponse.ok(), `seed PATCH failed: ${await seedResponse.text()}`).toBeTruthy();
+
+	await setVisibility('result', HIDDEN);
+	await gotoHydrated(`/requirement-assessments/${raId}/edit`);
+	await expect(page.getByTestId('result-field')).toHaveCount(0);
+	await page.getByTestId('save-no-continue-button').click();
+	await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+
+	await setVisibility('result', EVERYONE);
+	const savedRequirementAssessment = await readRequirementAssessment();
+	expect(savedRequirementAssessment.score).toBe(seededScore);
+	expect(savedRequirementAssessment.result).toBe('compliant');
 });
 
 test.afterAll('cleanup', async ({ browser }) => {

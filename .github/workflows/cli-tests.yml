@@ -1,0 +1,44 @@
+name: CLI Tests
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - "cli/**"
+      - ".github/workflows/cli-tests.yml"
+
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cli-tests:
+    runs-on: ubuntu-24.04
+    env:
+      working-directory: ./cli
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.14"]
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install uv and set up python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: Install dependencies
+        working-directory: ${{env.working-directory}}
+        run: uv sync --locked
+      # Nothing else in CI imports cli/ — a syntax error here is invisible
+      # until a user runs clica or the MCP server.
+      - name: Syntax check
+        working-directory: ${{env.working-directory}}
+        run: uv run python -m compileall -q clica.py ca_mcp
+      - name: Run pagination client tests
+        working-directory: ${{env.working-directory}}
+        run: uv run pytest tests/test_pagination_client.py -q

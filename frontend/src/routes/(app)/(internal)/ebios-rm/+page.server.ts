@@ -14,7 +14,7 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { type TableSource } from '$lib/components/ModelTable/types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
@@ -40,10 +40,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	}
 
 	model['selectOptions'] = selectOptions;
-
-	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/`;
-	const res = await fetch(endpoint);
-	const data = await res.json().then((res) => res.results);
 
 	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
 		(obj, key, index) => {

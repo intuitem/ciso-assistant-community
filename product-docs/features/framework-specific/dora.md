@@ -6,6 +6,8 @@ description: Register of Information and structured incident reports for DORA co
 
 The EU [Digital Operational Resilience Act](https://www.eiopa.europa.eu/digital-operational-resilience-act-dora_en) (DORA) imposes two specific reporting obligations that CISO Assistant produces out of the box: the **Register of Information** on ICT third-party arrangements, and structured **major incident reports** filed with the supervisory authority.
 
+Both, and the DORA-specific fields they read from entities, solutions, assets and contracts, are gated by the **dora** [feature flag](../../configuration/settings/feature-flags.md). It is **on** by default — organisations outside DORA's scope can turn it off to keep those fields off their forms.
+
 ## Register of Information (RoI)
 
 DORA Article 28(3) requires regulated financial entities to maintain — and periodically submit — a register listing every ICT third-party service provider, the services consumed from each, the supporting contracts, and a number of classification fields.

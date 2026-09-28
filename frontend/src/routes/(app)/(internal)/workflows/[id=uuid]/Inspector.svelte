@@ -57,7 +57,7 @@
 		subprocessCandidates: Option[];
 		creatableModels?: any[];
 		updatableModels?: any[];
-		readableModels?: { key: string; fields: string[] }[];
+		readableModels?: { key: string; fields: string[]; includable?: string[] }[];
 		fkOptions?: Record<string, Option[]>;
 		workflowId: string;
 		registrationsByRef?: Record<string, any>;
@@ -159,9 +159,13 @@
 		'create_object',
 		'update_object',
 		'attach_evidence',
+		'record_measurement',
+		'post_results',
 		'read_objects',
 		'http_request',
 		'send_email',
+		'ai_extract',
+		'ai_generate',
 		'provision_folder',
 		'provision_user',
 		'manage_group_membership',
@@ -171,6 +175,12 @@
 	];
 
 	const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+
+	// Written as prose or markdown, so a one-line input is the wrong box.
+	const LONG_TEXT_FIELDS = ['description', 'content', 'observation'];
+
+	// 'choice' emits an enum, which is what a branch step can route on.
+	const AI_FIELD_TYPES = ['choice', 'string', 'number', 'boolean'];
 
 	const BUILTIN_GROUPS = [
 		{ code: 'BI-UG-AUD', label: 'reader' },
@@ -190,17 +200,58 @@
 		date_offset: { base: '', days: 30, weeks: 0, output: '' },
 		create_object: { model: 'applied_control', fields: { name: '' }, upsert: false },
 		update_object: { model: 'applied_control', id: '', fields: {}, m2m: {} },
-		attach_evidence: { evidence: '', source: 'text', filename: '', text: '', url: '' },
+		attach_evidence: {
+			evidence: '',
+			source: 'text',
+			filename: '',
+			text: '',
+			url: '',
+			allow_error_status: false,
+			allow_connection_error: false,
+			find_occurrence: false,
+			new_revision: false,
+			task_node: ''
+		},
+		record_measurement: {
+			metric_instance: '',
+			value: '',
+			timestamp: '',
+			observation: '',
+			evidence_revision: ''
+		},
+		post_results: {
+			posture_assessment: '',
+			asset: '',
+			results: '',
+			run_id: '',
+			tool: ''
+		},
 		read_objects: {
 			model: 'applied_control',
 			mode: 'list',
 			filters: {},
 			order_by: '-created_at',
 			limit: 25,
-			offset: ''
+			offset: '',
+			include: []
 		},
-		http_request: { method: 'GET', url: '', headers: {}, body: '', timeout: 15 },
+		http_request: {
+			method: 'GET',
+			url: '',
+			headers: {},
+			body: '',
+			timeout: 15,
+			allow_error_status: false,
+			allow_connection_error: false
+		},
 		send_email: { recipients: '', subject: '', body: '' },
+		ai_extract: {
+			prompt: '',
+			input: '',
+			schema: { type: 'object', properties: {}, required: [] },
+			max_attempts: 2
+		},
+		ai_generate: { prompt: '', input: '', max_words: 200 },
 		provision_folder: { name: '', parent: '', create_default_groups: true },
 		provision_user: {
 			email: '',
@@ -277,13 +328,16 @@
 		onChange();
 	}
 
-	// Older nodes may carry a bare {type} config; make sure the shape the
-	// bindings expect exists before the template reads it.
+	// Older nodes may carry a bare {type} config — so do the ones the palette
+	// drops pre-typed; make sure the shape the bindings expect exists before
+	// the template reads it.
 	$effect(() => {
 		if (nodeDomain?.type === 'action' && actionConfig?.type) {
 			const defaults: any = ACTION_CONFIG_DEFAULTS[actionConfig.type] ?? {};
 			for (const [key, value] of Object.entries(defaults)) {
-				if (actionConfig[key] === undefined) actionConfig[key] = value;
+				// Clone: the nested literals are shared, so two nodes of one
+				// type would otherwise edit the same object.
+				if (actionConfig[key] === undefined) actionConfig[key] = structuredClone(value);
 			}
 		}
 		if (nodeDomain?.type === 'trigger') {
@@ -307,12 +361,16 @@
 		update_object: 'object_id',
 		create_audit: 'created_object_id',
 		attach_evidence: 'filename',
+		record_measurement: 'object_id',
+		post_results: 'created',
 		create_entity_assessment: 'created_object_id',
 		read_objects: 'results.0.name',
 		provision_folder: 'folder_id',
 		provision_user: 'user_id',
 		manage_group_membership: 'group_id',
 		send_email: 'subject',
+		ai_extract: 'category',
+		ai_generate: 'text',
 		date_offset: 'result',
 		log: 'message'
 	};
@@ -521,11 +579,27 @@
 
 	function resetReadModel() {
 		// Field whitelists differ per model: stale filters/ordering would fail
-		// publish validation.
+		// publish validation. Includes are per-model too — the backend rejects
+		// a name the new model does not offer.
 		actionConfig.filters = {};
 		actionConfig.order_by = '-created_at';
+		actionConfig.include = [];
 		readFilterGroups = [];
 		readFilterRawMode = false;
+		onChange();
+	}
+
+	// The backend accepts a bare string as well as a list, so a config authored
+	// through the API or imported from a library can carry either. Spreading a
+	// string would store its characters one by one, and filtering one throws.
+	function readIncludeList(value: unknown): string[] {
+		if (Array.isArray(value)) return value as string[];
+		return typeof value === 'string' && value ? [value] : [];
+	}
+
+	function toggleReadInclude(name: string, checked: boolean) {
+		const current = readIncludeList(actionConfig.include);
+		actionConfig.include = checked ? [...current, name] : current.filter((entry) => entry !== name);
 		onChange();
 	}
 
@@ -754,6 +828,77 @@
 	function removeHeaderRow(index: number) {
 		headerEntries = headerEntries.filter((_, i) => i !== index);
 		syncHeaders();
+	}
+
+	// ---------- ai_extract output fields ----------
+	// Authors name fields and pick types; we build the JSON Schema from that.
+	// Same round-trip shape as headerEntries above.
+	type AiField = { name: string; type: string; choices: string };
+	let aiFields = $state<AiField[]>([]);
+	let aiFieldsNodeId: string | null = null;
+	$effect(() => {
+		const nodeId =
+			nodeDomain?.type === 'action' && actionConfig?.type === 'ai_extract' ? selectedNode.id : null;
+		if (nodeId !== aiFieldsNodeId) {
+			aiFieldsNodeId = nodeId;
+			aiFields = nodeId ? schemaToFields(actionConfig.schema) : [];
+		}
+	});
+
+	function schemaToFields(schema: any): AiField[] {
+		return Object.entries(schema?.properties ?? {}).map(([name, spec]: [string, any]) => ({
+			name,
+			type: Array.isArray(spec?.enum) ? 'choice' : (spec?.type ?? 'string'),
+			choices: Array.isArray(spec?.enum) ? spec.enum.join(', ') : ''
+		}));
+	}
+
+	function syncAiFields() {
+		const properties: Record<string, any> = {};
+		for (const field of aiFields) {
+			const name = field.name.trim();
+			if (!name) continue;
+			if (field.type === 'choice') {
+				const choices = field.choices
+					.split(',')
+					.map((choice) => choice.trim())
+					.filter(Boolean);
+				// An empty enum would validate nothing.
+				properties[name] = choices.length ? { type: 'string', enum: choices } : { type: 'string' };
+			} else {
+				properties[name] = { type: field.type };
+			}
+		}
+		// All required: an absent key makes {{nodes.<ref>.<field>}} unresolvable.
+		actionConfig.schema = {
+			type: 'object',
+			properties,
+			required: Object.keys(properties)
+		};
+		onChange();
+	}
+
+	function aiTypeLabel(fieldType: string): string {
+		// Not m[`...`]: a dynamic index defeats Paraglide tree-shaking.
+		switch (fieldType) {
+			case 'choice':
+				return m.aiTypeChoice();
+			case 'number':
+				return m.aiTypeNumber();
+			case 'boolean':
+				return m.aiTypeBoolean();
+			default:
+				return m.aiTypeString();
+		}
+	}
+
+	function addAiField() {
+		aiFields = [...aiFields, { name: '', type: 'choice', choices: '' }];
+	}
+
+	function removeAiField(index: number) {
+		aiFields = aiFields.filter((_, i) => i !== index);
+		syncAiFields();
 	}
 
 	function optionLabel(option: Option): string {
@@ -1367,15 +1512,30 @@
 						{/if}
 					</label>
 					{#each creatableEntry?.fields ?? [] as field (field)}
+						{@const narrowed = creatableEntry?.allowed_values?.[field]}
 						<label>
-							{@render fieldLabel(safeTranslate(field))}
-							{#if field === 'description'}
+							{@render fieldLabel(
+								safeTranslate(field) +
+									(creatableEntry?.required_fields?.includes(field) ? ' *' : '')
+							)}
+							{#if LONG_TEXT_FIELDS.includes(field)}
 								<textarea
 									class="input w-full text-sm"
-									rows="2"
+									rows={field === 'content' ? 6 : 2}
 									bind:value={actionConfig.fields[field]}
 									oninput={onChange}
 								></textarea>
+							{:else if narrowed?.length}
+								<select
+									class="select w-full text-sm"
+									bind:value={actionConfig.fields[field]}
+									onchange={onChange}
+								>
+									<option value={''}>—</option>
+									{#each narrowed as choice (choice)}
+										<option value={choice}>{safeTranslate(choice)}</option>
+									{/each}
+								</select>
 							{:else}
 								<input
 									type="text"
@@ -1416,7 +1576,16 @@
 										</optgroup>
 									{/if}
 								</select>
-								<span class="text-[10px] text-surface-500">{m.frameworkUrnOrId()}</span>
+								{#if paramName === 'framework'}
+									<span class="text-[10px] text-surface-500">{m.frameworkUrnOrId()}</span>
+								{/if}
+							{:else if LONG_TEXT_FIELDS.includes(paramName)}
+								<textarea
+									class="input w-full text-sm"
+									rows="6"
+									bind:value={actionConfig.fields[paramName]}
+									oninput={onChange}
+								></textarea>
 							{:else}
 								<input
 									type="text"
@@ -1424,7 +1593,9 @@
 									bind:value={actionConfig.fields[paramName]}
 									oninput={onChange}
 								/>
-								<span class="text-[10px] text-surface-500">{m.implementationGroupsHint()}</span>
+								{#if paramName === 'implementation_groups'}
+									<span class="text-[10px] text-surface-500">{m.implementationGroupsHint()}</span>
+								{/if}
 							{/if}
 						</label>
 					{/each}
@@ -1495,10 +1666,10 @@
 									{/each}
 								</select>
 								<span class="text-[10px] text-surface-500">{m.guardedFieldHint()}</span>
-							{:else if field === 'description' || field === 'observation'}
+							{:else if LONG_TEXT_FIELDS.includes(field)}
 								<textarea
 									class="input w-full text-sm"
-									rows="2"
+									rows={field === 'content' ? 6 : 2}
 									bind:value={actionConfig.fields[field]}
 									oninput={onChange}
 								></textarea>
@@ -1627,6 +1798,25 @@
 								oninput={onChange}
 							/>
 						</label>
+						<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+							<input
+								type="checkbox"
+								class="checkbox scale-75"
+								bind:checked={actionConfig.allow_error_status}
+								onchange={onChange}
+							/>
+							{m.httpAllowErrorStatus()}
+						</label>
+						<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+							<input
+								type="checkbox"
+								class="checkbox scale-75"
+								bind:checked={actionConfig.allow_connection_error}
+								onchange={onChange}
+							/>
+							{m.httpAllowConnectionError()}
+						</label>
+						<span class="text-[10px] text-surface-500">{m.attachSourceMissHint()}</span>
 					{:else}
 						<label>
 							{@render fieldLabel(m.content())}
@@ -1638,6 +1828,147 @@
 							></textarea>
 						</label>
 					{/if}
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							checked={actionConfig.find_occurrence}
+							onchange={(e) => {
+								// Hiding the field is not clearing it, and a named
+								// occurrence wins.
+								actionConfig.find_occurrence = e.currentTarget.checked;
+								if (actionConfig.find_occurrence) actionConfig.task_node = '';
+								onChange();
+							}}
+						/>
+						{m.findOccurrence()}
+					</label>
+					<span class="text-[10px] text-surface-500">{m.findOccurrenceHint()}</span>
+					{#if !actionConfig.find_occurrence}
+						<label>
+							{@render fieldLabel(m.taskNode())}
+							<input
+								type="text"
+								class="input w-full text-sm"
+								placeholder={'{{nodes.find_the_occurrence.object.id}}'}
+								bind:value={actionConfig.task_node}
+								oninput={onChange}
+							/>
+							<span class="text-[10px] text-surface-500">{m.taskNodeAttachHint()}</span>
+						</label>
+					{/if}
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.new_revision}
+							onchange={onChange}
+						/>
+						{m.fileAsNewRevision()}
+					</label>
+					<span class="text-[10px] text-surface-500">{m.newRevisionHint()}</span>
+				{:else if actionConfig.type === 'record_measurement'}
+					<label>
+						{@render fieldLabel(m.metricInstance())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{metric_id}}'}
+							bind:value={actionConfig.metric_instance}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.value())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{nodes.fetch.body.coverage}}'}
+							bind:value={actionConfig.value}
+							oninput={onChange}
+						/>
+						<span class="text-[10px] text-surface-500">{m.measurementValueHint()}</span>
+					</label>
+					<label>
+						{@render fieldLabel(m.timestamp())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{now}}'}
+							bind:value={actionConfig.timestamp}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.observation())}
+						<textarea
+							class="input w-full text-sm"
+							rows="2"
+							bind:value={actionConfig.observation}
+							oninput={onChange}
+						></textarea>
+					</label>
+					<label>
+						{@render fieldLabel(m.evidenceRevision())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{nodes.attach.revision_id}}'}
+							bind:value={actionConfig.evidence_revision}
+							oninput={onChange}
+						/>
+					</label>
+				{:else if actionConfig.type === 'post_results'}
+					<label>
+						{@render fieldLabel(m.postureAssessment())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{assessment_id}}'}
+							bind:value={actionConfig.posture_assessment}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.asset())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{item.asset_id}}'}
+							bind:value={actionConfig.asset}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.results())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{nodes.fetch.body.checks}}'}
+							bind:value={actionConfig.results}
+							oninput={onChange}
+						/>
+						<span class="text-[10px] text-surface-500">{m.postResultsHint()}</span>
+					</label>
+					<label>
+						{@render fieldLabel(m.tool())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							bind:value={actionConfig.tool}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.runId())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							bind:value={actionConfig.run_id}
+							oninput={onChange}
+						/>
+						<span class="text-[10px] text-surface-500">{m.postResultsRunIdHint()}</span>
+					</label>
 				{:else if actionConfig.type === 'read_objects'}
 					<label>
 						{@render fieldLabel(m.objectToRead())}
@@ -1662,6 +1993,24 @@
 							<option value="first">{m.readModeFirst()}</option>
 						</select>
 					</label>
+
+					{#if readableEntry?.includable?.length}
+						{@render fieldLabel(m.readInclude())}
+						<p class="text-[10px] text-surface-500">{m.readIncludeHelpText()}</p>
+						<div class="flex flex-col gap-1">
+							{#each readableEntry.includable as name (name)}
+								<label class="flex items-center gap-2 text-sm">
+									<input
+										type="checkbox"
+										class="checkbox"
+										checked={readIncludeList(actionConfig.include).includes(name)}
+										onchange={(e) => toggleReadInclude(name, e.currentTarget.checked)}
+									/>
+									<span>{safeTranslate(name)}</span>
+								</label>
+							{/each}
+						</div>
+					{/if}
 
 					{@render fieldLabel(m.readFilters())}
 					{#if readFilterRawMode}
@@ -1905,8 +2254,132 @@
 							oninput={onChange}
 						/>
 					</label>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.allow_error_status}
+							onchange={onChange}
+						/>
+						{m.httpAllowErrorStatus()}
+					</label>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.allow_connection_error}
+							onchange={onChange}
+						/>
+						{m.httpAllowConnectionError()}
+					</label>
+					<span class="text-[10px] text-surface-500">{m.httpErrorHandlingHint()}</span>
 					<p class="text-[10px] text-surface-500 leading-relaxed">
 						<i class="fa-solid fa-key mr-1"></i>{m.secretsHint({ syntax: '{{secrets.name}}' })}
+					</p>
+				{:else if actionConfig.type === 'ai_extract' || actionConfig.type === 'ai_generate'}
+					<label>
+						{@render fieldLabel(m.aiInstruction())}
+						<textarea
+							class="input w-full text-sm"
+							rows="3"
+							placeholder={m.aiInstructionPlaceholder()}
+							bind:value={actionConfig.prompt}
+							oninput={onChange}
+						></textarea>
+					</label>
+					<label>
+						{@render fieldLabel(m.aiInput())}
+						<textarea
+							class="input w-full text-sm font-mono"
+							rows="2"
+							placeholder={'{{nodes.read_findings.results.0.description}}'}
+							bind:value={actionConfig.input}
+							oninput={onChange}
+						></textarea>
+					</label>
+					{#if actionConfig.type === 'ai_extract'}
+						<div>
+							<div class="flex items-center justify-between mb-1">
+								{@render fieldLabel(m.aiOutputFields())}
+								<button
+									type="button"
+									class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold"
+									onclick={addAiField}
+								>
+									<i class="fa-solid fa-plus mr-0.5"></i>{m.aiAddField()}
+								</button>
+							</div>
+							{#each aiFields as field, index (index)}
+								<div class="flex items-center gap-1 mb-1">
+									<input
+										type="text"
+										class="input text-xs w-24 min-w-0 font-mono shrink-0"
+										placeholder={m.aiFieldName()}
+										bind:value={field.name}
+										oninput={syncAiFields}
+									/>
+									<select
+										class="select text-xs w-20 min-w-0 shrink-0"
+										bind:value={field.type}
+										onchange={syncAiFields}
+									>
+										{#each AI_FIELD_TYPES as fieldType}
+											<option value={fieldType}>{aiTypeLabel(fieldType)}</option>
+										{/each}
+									</select>
+									{#if field.type === 'choice'}
+										<input
+											type="text"
+											class="input text-xs flex-1 min-w-0 font-mono"
+											placeholder={m.aiChoicesPlaceholder()}
+											bind:value={field.choices}
+											oninput={syncAiFields}
+										/>
+									{:else}
+										<span class="flex-1"></span>
+									{/if}
+									<button
+										type="button"
+										aria-label={m.aiRemoveField()}
+										class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0"
+										onclick={() => removeAiField(index)}
+									>
+										<i class="fa-solid fa-xmark"></i>
+									</button>
+								</div>
+							{/each}
+							{#if aiFields.length === 0}
+								<p class="text-[10px] text-surface-500 leading-relaxed">
+									{m.aiNoFieldsHint()}
+								</p>
+							{/if}
+						</div>
+						<label>
+							{@render fieldLabel(m.aiMaxAttempts())}
+							<input
+								type="number"
+								class="input w-full text-sm"
+								min="1"
+								max="5"
+								bind:value={actionConfig.max_attempts}
+								oninput={onChange}
+							/>
+						</label>
+					{:else}
+						<label>
+							{@render fieldLabel(m.aiMaxWords())}
+							<input
+								type="number"
+								class="input w-full text-sm"
+								min="1"
+								max="2000"
+								bind:value={actionConfig.max_words}
+								oninput={onChange}
+							/>
+						</label>
+					{/if}
+					<p class="text-[10px] text-surface-500 leading-relaxed">
+						<i class="fa-solid fa-circle-info mr-1"></i>{m.aiFencingHint()}
 					</p>
 				{:else if actionConfig.type === 'send_email'}
 					<label>
@@ -2200,7 +2673,11 @@
 				</p>
 			{/if}
 
-			{#if ['action', 'subprocess', 'loop'].includes(nodeDomain.type)}
+			<!-- set_variables already writes variables: offering "save results to
+			     variables" on it invites putting the value in the wrong place. Rows an
+			     older draft or an import already carries stay visible so they can be
+			     removed (publish rejects them). -->
+			{#if ['action', 'subprocess', 'loop'].includes(nodeDomain.type) && (actionConfig?.type !== 'set_variables' || Object.keys(nodeDomain.output_mapping ?? {}).length > 0)}
 				<div>
 					<div class="flex items-center justify-between mb-1">
 						{@render fieldLabel(m.outputMapping())}
@@ -2208,7 +2685,7 @@
 							type="button"
 							class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold disabled:opacity-50"
 							onclick={addOutputMapping}
-							disabled={!variables.length}
+							disabled={!variables.length || actionConfig?.type === 'set_variables'}
 						>
 							<i class="fa-solid fa-plus mr-0.5"></i>{m.addMapping()}
 						</button>

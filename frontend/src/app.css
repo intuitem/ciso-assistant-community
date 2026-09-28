@@ -47,6 +47,25 @@
 	@apply text-gray-50 bg-teal-500 hover:bg-teal-400 dark:bg-teal-600 dark:hover:bg-teal-500;
 }
 
+/* v5 styles the <code> element itself and dropped the `code` utility; we still tag
+   <a>/<span> as code, so mirror the v5 base declarations for those. */
+@utility code {
+	&:not(pre &, .ec-line &) {
+		background-color: color-mix(
+			in oklab,
+			light-dark(var(--color-brand-light), var(--color-brand-dark)) 25%,
+			transparent
+		);
+		color: var(--color-surface-950-50);
+		border-radius: var(--radius-base);
+		font-family: var(--font-mono);
+		font-size: var(--text-xs);
+		white-space: nowrap;
+		padding-inline: --spacing(1.5);
+		padding-block: --spacing(0.75);
+	}
+}
+
 @layer utilities {
 	/* (all other styles here...) */
 	html,

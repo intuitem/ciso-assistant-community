@@ -5,10 +5,15 @@
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
-	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton-svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import List from '$lib/components/List/List.svelte';
+	import CommitmentPanel from '$lib/components/CommitmentPanel/CommitmentPanel.svelte';
 
 	interface LocalPageData extends PageData {
 		dryRunData: [string, string][];
@@ -51,9 +56,15 @@
 	}
 
 	let dryRunData: [string, string][] = $derived(data.dryRunData);
+	const commitmentEnabled = $derived(!!page.data?.featureflags?.commitment_management);
 </script>
 
-<DetailView {data}>
+<DetailView {data} widgetsEnabled={commitmentEnabled}>
+	{#snippet widgets()}
+		{#if commitmentEnabled}
+			<CommitmentPanel urlModel="applied-controls" object={data.data} />
+		{/if}
+	{/snippet}
 	{#snippet actions()}
 		{#if dryRunData.length > 0}
 			<button

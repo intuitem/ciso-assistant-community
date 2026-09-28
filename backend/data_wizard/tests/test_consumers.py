@@ -9,6 +9,8 @@ Tests are grouped by consumer. Each group covers:
   - Conflict modes (STOP / SKIP / UPDATE) via process_records
 """
 
+from datetime import date
+
 import pytest
 from unittest.mock import patch, MagicMock
 
@@ -17,6 +19,7 @@ from core.models import (
     AppliedControl,
     Asset,
     Evidence,
+    Finding,
     FindingsAssessment,
     Incident,
     Perimeter,
@@ -455,6 +458,74 @@ class TestEvidenceConsumer:
             {"name": "Audit Log", "folder": str(domain_folder.id)}
         )
         assert found.id == existing.id
+
+    def test_find_existing_is_scoped_to_the_folder(
+        self, base_context, domain_folder, other_folder
+    ):
+        Evidence.objects.create(name="Audit Log", folder=other_folder)
+        consumer = EvidenceRecordConsumer(base_context)
+        assert (
+            consumer.find_existing(
+                {"name": "Audit Log", "folder": str(domain_folder.id)}
+            )
+            is None
+        )
+
+    @pytest.mark.parametrize(
+        "raw,expected",
+        [
+            ("missing", "missing"),
+            ("MISSING", "missing"),
+            ("in_review", "in_review"),
+            ("In review", "in_review"),
+            ("approved", "approved"),
+        ],
+    )
+    def test_status_accepts_key_or_label(self, base_context, raw, expected):
+        consumer = EvidenceRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create({"name": "E", "status": raw}, None)
+        assert error is None
+        assert record_data["status"] == expected
+
+    def test_unknown_status_is_an_error(self, base_context):
+        consumer = EvidenceRecordConsumer(base_context)
+        _, error = consumer.prepare_create({"name": "E", "status": "nope"}, None)
+        assert error is not None and not error.is_warning
+
+    def test_blank_status_falls_back_to_the_model_default(self, base_context):
+        consumer = EvidenceRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create({"name": "E", "status": ""}, None)
+        assert error is None
+        assert "status" not in record_data
+
+    def test_expiry_date_is_normalized(self, base_context):
+        consumer = EvidenceRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create(
+            {"name": "E", "expiry_date": date(2027, 1, 31)}, None
+        )
+        assert record_data["expiry_date"] == "2027-01-31"
+
+    def test_owner_resolved_by_email(self, base_context, admin_user):
+        actor, _ = Actor.objects.get_or_create(user=admin_user)
+        consumer = EvidenceRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "E", "owner": admin_user.email.upper()}, None
+        )
+        assert error is None
+        assert record_data["owner"] == [actor.id]
+
+    def test_owner_column_present_but_blank_clears_the_m2m(self, base_context):
+        consumer = EvidenceRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create({"name": "E", "owner": ""}, None)
+        assert record_data["owner"] == []
+
+    def test_revision_content_is_not_imported(self, base_context):
+        """Definitions only: a link or attachment column must not reach the model."""
+        consumer = EvidenceRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create(
+            {"name": "E", "link": "https://example.com/x", "attachment": "x.pdf"}, None
+        )
+        assert "link" not in record_data and "attachment" not in record_data
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1177,6 +1248,171 @@ class TestFindingsAssessmentConsumer:
         assert result.failed == 1
         assert result.created == 0
         assert fa.findings.count() == 0
+
+    def test_applied_controls_resolved_by_ref_id_and_name(
+        self, domain_folder, admin_user
+    ):
+        ac1 = AppliedControl.objects.create(
+            name="Patch A", ref_id="AC-P1", folder=domain_folder
+        )
+        ac2 = AppliedControl.objects.create(name="Patch B", folder=domain_folder)
+        ctx = self._findings_context(domain_folder, admin_user)
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            ctx,
+            [
+                {
+                    "name": "SQL Injection",
+                    "ref_id": "FIND-AC",
+                    "applied_controls": "AC-P1|Patch B",
+                }
+            ],
+        )
+        assert result.created == 1
+        finding = Finding.objects.get(ref_id="FIND-AC")
+        assert set(finding.applied_controls.all()) == {ac1, ac2}
+
+    def test_skip_duplicate_does_not_create_orphaned_applied_control(
+        self, domain_folder, admin_user, all_accessible
+    ):
+        """A row that SKIP discards because its Finding already exists must
+        never create a new applied control for it — the control would be
+        created but never linked to anything."""
+        perimeter = Perimeter.objects.create(
+            name="Skip Dup Perimeter", folder=domain_folder
+        )
+        seed_ctx = self._findings_context(
+            domain_folder, admin_user, perimeter=perimeter
+        )
+        _run(
+            FindingsAssessmentRecordConsumer,
+            seed_ctx,
+            [{"name": "SQL Injection", "ref_id": "FIND-SKIP", "status": "identified"}],
+        )
+        fa = FindingsAssessment.objects.get(folder=domain_folder)
+
+        skip_ctx = self._findings_context(
+            domain_folder,
+            admin_user,
+            target_id=fa.id,
+            on_conflict=ConflictMode.SKIP,
+        )
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            skip_ctx,
+            [
+                {
+                    "name": "SQL Injection",
+                    "ref_id": "FIND-SKIP",
+                    "applied_controls": "Brand New Control",
+                }
+            ],
+        )
+        assert result.skipped == 1
+        assert result.created == 0
+        assert not AppliedControl.objects.filter(name="Brand New Control").exists()
+
+    def test_stop_duplicate_does_not_create_orphaned_applied_control(
+        self, domain_folder, admin_user, all_accessible
+    ):
+        """Same as above, but for STOP mode: the halted row must not leave an
+        unlinked applied control behind either."""
+        perimeter = Perimeter.objects.create(
+            name="Stop Dup Perimeter", folder=domain_folder
+        )
+        seed_ctx = self._findings_context(
+            domain_folder, admin_user, perimeter=perimeter
+        )
+        _run(
+            FindingsAssessmentRecordConsumer,
+            seed_ctx,
+            [{"name": "SQL Injection", "ref_id": "FIND-STOP", "status": "identified"}],
+        )
+        fa = FindingsAssessment.objects.get(folder=domain_folder)
+
+        stop_ctx = self._findings_context(
+            domain_folder,
+            admin_user,
+            target_id=fa.id,
+            on_conflict=ConflictMode.STOP,
+        )
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            stop_ctx,
+            [
+                {
+                    "name": "SQL Injection",
+                    "ref_id": "FIND-STOP",
+                    "applied_controls": "Another New Control",
+                }
+            ],
+        )
+        assert result.stopped is True
+        assert result.created == 0
+        assert not AppliedControl.objects.filter(name="Another New Control").exists()
+
+    def test_owner_resolved_by_user_email(self, domain_folder, admin_user):
+        actor, _ = Actor.objects.get_or_create(user=admin_user)
+        ctx = self._findings_context(domain_folder, admin_user)
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            ctx,
+            [
+                {
+                    "name": "SQL Injection",
+                    "ref_id": "FIND-OWN",
+                    "owner": admin_user.email,
+                }
+            ],
+        )
+        assert result.created == 1
+        finding = Finding.objects.get(ref_id="FIND-OWN")
+        assert list(finding.owner.all()) == [actor]
+
+    def test_empty_owner_column_clears_existing_owners(self, domain_folder, admin_user):
+        actor, _ = Actor.objects.get_or_create(user=admin_user)
+        perimeter = Perimeter.objects.create(
+            name="Owner Clear Perimeter", folder=domain_folder
+        )
+        seed_ctx = self._findings_context(
+            domain_folder, admin_user, perimeter=perimeter
+        )
+        _run(
+            FindingsAssessmentRecordConsumer,
+            seed_ctx,
+            [
+                {
+                    "name": "Initial",
+                    "ref_id": "FIND-CLR",
+                    "owner": admin_user.email,
+                    "status": "identified",
+                }
+            ],
+        )
+        finding = Finding.objects.get(ref_id="FIND-CLR")
+        assert list(finding.owner.all()) == [actor]
+
+        fa = FindingsAssessment.objects.get(folder=domain_folder)
+        update_ctx = self._findings_context(
+            domain_folder,
+            admin_user,
+            target_id=fa.id,
+            on_conflict=ConflictMode.UPDATE,
+        )
+        _run(
+            FindingsAssessmentRecordConsumer,
+            update_ctx,
+            [
+                {
+                    "name": "Initial",
+                    "ref_id": "FIND-CLR",
+                    "owner": "",
+                    "status": "identified",
+                }
+            ],
+        )
+        finding.refresh_from_db()
+        assert finding.owner.count() == 0
 
 
 # ─────────────────────────────────────────────────────────────────────────────
