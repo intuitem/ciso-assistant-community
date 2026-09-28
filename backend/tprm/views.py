@@ -1378,9 +1378,9 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             )
             for audit in audits
         }
-        counts = ComplianceAssessmentViewSet()._get_optimized_object_data(audits)
-        totals = counts.get("total_requirements", {})
-        assessed = counts.get("assessed_requirements", {})
+        totals, assessed = ComplianceAssessmentViewSet.get_requirement_counts(
+            list(audit_ids)
+        )
         data["review_progress"] = {
             audit.id: int(assessed.get(audit.id, 0) / totals[audit.id] * 100)
             if totals.get(audit.id)
