@@ -1890,7 +1890,11 @@ class LibraryUpdater:
                         ca.max_score,
                     ) == (new_framework.min_score, new_framework.max_score)
                     if (
-                        (definition_on_prev_defaults and range_follows)
+                        (
+                            definition_on_prev_defaults
+                            and range_follows
+                            and not ca.score_scale_preset
+                        )
                         or preset_dropped
                     ) and (scores_definition_changed or preset_dropped):
                         ca.scores_definition = new_framework.scores_definition

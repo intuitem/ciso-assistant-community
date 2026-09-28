@@ -3817,7 +3817,12 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             return
         framework = attrs.get("framework") or getattr(instance, "framework", None)
         baseline = None if instance else attrs.get("baseline")
-        if baseline and framework and baseline.framework_id == framework.id:
+        if (
+            baseline
+            and framework
+            and baseline.framework_id == framework.id
+            and not scale_fields & attrs.keys()
+        ):
             # A copy of an audit keeps its scale by default.
             default = {
                 "source": "baseline",
