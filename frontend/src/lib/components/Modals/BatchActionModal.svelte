@@ -22,6 +22,7 @@
 		optionsEndpoint?: string;
 		enableDoubleDash?: boolean;
 		multiSelect?: boolean;
+		inputType?: 'date';
 		// Optional i18n key for an action-specific warning (receives {count}),
 		// e.g. a cascade disclosure on delete.
 		confirmMessage?: string;
@@ -38,6 +39,7 @@
 		optionsEndpoint,
 		enableDoubleDash = false,
 		multiSelect = false,
+		inputType = undefined,
 		confirmMessage = undefined,
 		fixedValue = undefined,
 		onConfirm
@@ -182,6 +184,14 @@
 
 			{#if !needsSelection}
 				<!-- value comes from the action's config; nothing to pick -->
+			{:else if inputType === 'date'}
+				<input
+					type="date"
+					class="input w-full border border-surface-300-700 rounded px-3 py-2"
+					data-testid="batch-date-input"
+					aria-label={$modalStore[0].title}
+					bind:value={selectedValue}
+				/>
 			{:else if loading}
 				<div class="text-sm text-surface-600-400">Loading...</div>
 			{:else if multiSelect}

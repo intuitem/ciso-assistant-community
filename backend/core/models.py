@@ -170,12 +170,21 @@ class RequirementAssessmentQualityContext:
     controls: dict
     # ra_id -> {evidence_id: (status, expiry_date)}, both attachment paths merged
     evidences: dict
+    # evidence_id -> (something is attached, newest revision's updated_at)
+    evidence_revisions: dict
+
+
+def _evidence_stale_after_days() -> int:
+    """A year by default: shorter turns every annual control into a finding."""
+    from django.conf import settings
+
+    return int(getattr(settings, "XRAYS_EVIDENCE_STALE_AFTER_DAYS", 365))
 
 
 def _build_requirement_assessment_quality_context(
     compliance_assessment, requirement_assessment_ids=None
 ) -> RequirementAssessmentQualityContext:
-    """Resolve the quality-check inputs for a whole audit in three queries.
+    """Resolve the quality-check inputs for a whole audit in four queries.
 
     Filtering on the audit rather than on a list of ids keeps the SQL constant
     when the caller wants every requirement: one audit-scoped join beats an IN
@@ -241,6 +250,26 @@ def _build_requirement_assessment_quality_context(
     ):
         evidences[ra_id][evidence_id] = (status, expiry)
 
+    # One pass over the revisions of every evidence in scope; annotating the
+    # two paths above would double the work.
+    evidence_revisions = {}
+    evidence_ids = {eid for per_ra in evidences.values() for eid in per_ra}
+    if evidence_ids:
+        EvidenceRevision = apps.get_model("core", "EvidenceRevision")
+        for (
+            evidence_id,
+            attachment,
+            link,
+            updated_at,
+        ) in EvidenceRevision.objects.filter(evidence_id__in=evidence_ids).values_list(
+            "evidence_id", "attachment", "link", "updated_at"
+        ):
+            attached, latest = evidence_revisions.get(evidence_id, (False, None))
+            evidence_revisions[evidence_id] = (
+                attached or bool(attachment) or bool(link),
+                updated_at if latest is None else max(latest, updated_at),
+            )
+
     return RequirementAssessmentQualityContext(
         today=date.today(),
         result_visible=_visible("result"),
@@ -250,6 +279,7 @@ def _build_requirement_assessment_quality_context(
         evidences_visible=_visible("evidences"),
         controls=controls,
         evidences=evidences,
+        evidence_revisions=evidence_revisions,
     )
 
 
@@ -343,6 +373,23 @@ def _requirement_assessment_quality_findings(
                 ).format(name),
                 "requirementAssessmentPartialNoStartedControl",
             )
+        # ControlEtaMissed catches a date that passed, never the absence of one.
+        # Gated on `controls` so a partial with nothing attached is reported once,
+        # by requirementAssessmentNoAppliedControl.
+        if (
+            result == Result.PARTIALLY_COMPLIANT
+            and controls
+            and not requirement_assessment.eta
+            and not requirement_assessment.due_date
+            and not any(eta for _status, eta, _expiry in controls.values())
+        ):
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment is partially compliant with no target date for closing the gap"
+                ).format(name),
+                "requirementAssessmentPartialNoPlan",
+            )
         if (
             result == Result.NON_COMPLIANT
             and controls
@@ -390,14 +437,25 @@ def _requirement_assessment_quality_findings(
                 ).format(name),
                 "requirementAssessmentCompliantNoEvidence",
             )
-        if (
+        # Its own msgid rather than widening the one above, which would change
+        # what every existing filter and translation means.
+        if result == Result.PARTIALLY_COMPLIANT and not evidences:
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment is partially compliant but has no evidence attached"
+                ).format(name),
+                "requirementAssessmentPartialNoEvidence",
+            )
+        all_expired = bool(
             claims_compliance
             and evidences
             and all(
                 status == EvidenceStatus.EXPIRED or (expiry and expiry < context.today)
                 for status, expiry in evidences.values()
             )
-        ):
+        )
+        if all_expired:
             report(
                 warnings,
                 _(
@@ -415,13 +473,14 @@ def _requirement_assessment_quality_findings(
                 ).format(name),
                 "requirementAssessmentEvidenceRejected",
             )
-        if (
+        all_draft = bool(
             result == Result.COMPLIANT
             and evidences
             and all(
                 status == EvidenceStatus.DRAFT for status, _expiry in evidences.values()
             )
-        ):
+        )
+        if all_draft:
             report(
                 warnings,
                 _(
@@ -429,6 +488,49 @@ def _requirement_assessment_quality_findings(
                 ).format(name),
                 "requirementAssessmentEvidenceAllDraft",
             )
+
+        # `usable` is what a status cannot give: something is attached, and it
+        # has not lapsed. The two rules above catch only the pure cases, so one
+        # expired evidence plus one empty one passes both in silence.
+        if claims_compliance and evidences:
+            usable = [
+                evidence_id
+                for evidence_id, (status, expiry) in evidences.items()
+                if context.evidence_revisions.get(evidence_id, (False, None))[0]
+                and not (
+                    status == EvidenceStatus.EXPIRED
+                    or (expiry and expiry < context.today)
+                )
+            ]
+            if not usable:
+                # Suppressed when a narrower rule already said it.
+                if not (all_expired or all_draft):
+                    report(
+                        warnings,
+                        _(
+                            "{}: No evidence supporting this requirement assessment is both "
+                            "attached and current"
+                        ).format(name),
+                        "requirementAssessmentNoUsableEvidence",
+                    )
+            else:
+                # Most evidence carries no expiry date, so the newest revision is
+                # the only thing that speaks to currency.
+                latest = max(
+                    context.evidence_revisions[evidence_id][1]
+                    for evidence_id in usable
+                    if context.evidence_revisions[evidence_id][1] is not None
+                )
+                stale_after = _evidence_stale_after_days()
+                if (context.today - latest.date()).days > stale_after:
+                    report(
+                        warnings,
+                        _(
+                            "{}: The most recent evidence supporting this requirement assessment "
+                            "has not been updated in over {} days"
+                        ).format(name, stale_after),
+                        "requirementAssessmentEvidenceStale",
+                    )
 
     # --- did the auditor say why?
     if (
@@ -453,8 +555,11 @@ def _requirement_assessment_quality_findings(
                 "requirementAssessmentNonCompliantNoObservation",
             )
         elif result == Result.PARTIALLY_COMPLIANT:
+            # A warning like its sibling above: both are declared deviations and
+            # the observation is the whole description. Non-compliance describes
+            # itself, so it stays info.
             report(
-                info,
+                warnings,
                 _(
                     "{}: Requirement assessment is partially compliant with no observation"
                 ).format(name),

@@ -8,14 +8,12 @@
 			label: string;
 			refId?: string;
 			type: 'PR' | 'SP' | string;
-			externalLinkCount: number;
 		};
 	}
 
 	let { id, data }: Props = $props();
 
 	const board = getContext<{
-		showExternalLinks: (id: string) => void;
 		renameAsset: (id: string, name: string) => Promise<boolean>;
 		toggleAssetType: (id: string) => Promise<boolean>;
 		confirmDeleteAsset: (id: string, name: string) => void;
@@ -98,7 +96,6 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="asset-node relative rounded-base border-[1.5px] bg-surface-50-950 px-3 py-2 min-w-[160px] max-w-[220px] select-none shadow-sm {borderClass}"
 	onmouseenter={() => (hovered = true)}
@@ -153,17 +150,6 @@
 			{/if}
 		</div>
 	</div>
-
-	{#if data.externalLinkCount > 0}
-		<button
-			type="button"
-			class="nopan nodrag absolute -top-2 -right-2 px-1.5 h-4 rounded-full bg-warning-400 text-white text-[9px] font-semibold flex items-center justify-center hover:bg-warning-500 cursor-pointer shadow"
-			title="External links to assets in other domains"
-			onclick={() => board?.showExternalLinks(id)}
-		>
-			+{data.externalLinkCount}
-		</button>
-	{/if}
 
 	{#if hovered}
 		<div class="nopan nodrag absolute -top-2 -left-2 flex gap-0.5">

@@ -1,34 +1,36 @@
 ---
-description: Automated consistency and quality checks across every audit and risk assessment in the workspace
+description: Automated consistency and quality checks across governance, risk, compliance and operations in the workspace
 ---
 
 # X-rays
 
-**X-rays** is the platform's standing quality-control surface — a single page that scans every audit and risk assessment you have access to and surfaces inconsistencies, missing data, and likely modelling mistakes. It's how you find _"the things you forgot"_ at the end of an assessment campaign without having to open each assessment one by one.
+**X-rays** is the platform's standing quality-control surface — a single page that scans every audit, risk assessment, objective, evidence, finding, applied control and task you have access to and surfaces inconsistencies, missing data, and likely modelling mistakes. It's how you find _"the things you forgot"_ at the end of an assessment campaign without having to open each object one by one.
 
-The page runs on every load — there's no "trigger" button. Issues are shown grouped by domain, then by assessment type, then by rule, with a direct link from each affected object to the form where you fix it.
+The page runs on every load — there's no "trigger" button. Issues are shown grouped by domain, then by area, then by rule, with a direct link from each affected object to the form where you fix it.
 
 ## Where to find it
 
 Sidebar → **X-rays**. Gated by the `xrays` feature flag, **default on** in both community and Enterprise editions.
 
-The page is internal-user only; the sidebar entry is hidden for **Respondent** and **Third-party respondent** roles.
+The sidebar entry is hidden for the **Third-party respondent** role.
 
 ## What it covers
 
-X-rays inspects two assessment families today:
+X-rays groups its checks into the same four areas as the analytics page, one tab each:
 
-- **Audits** (compliance assessments) — plus the requirement assessments, applied controls, and evidences they touch.
-- **Risk assessments** — plus their risk scenarios, applied controls, and risk acceptances.
+- **Governance** — objectives, issues, evidences and findings of the domain.
+- **Risk** — risk assessments, plus their risk scenarios, applied controls, and risk acceptances.
+- **Compliance** — audits (compliance assessments), plus the requirement assessments, applied controls, and evidences they touch.
+- **Operations** — applied controls and tasks of the domain.
 
-The page lists every domain you have access to, with two tabs per domain — one for audits, one for risk assessments — and the assessments inside each tab. Domain badges show the count of errors / warnings / info so you can spot the worst-affected domains at a glance. A severity filter at the top lets you hide whole tiers, so you can sweep errors first and come back to the info items later.
+The page lists every domain you have access to, with the four tabs per domain. **Risk** and **Compliance** list the assessments inside them; **Governance** and **Operations** list their rules directly. Domain badges show the count of errors / warnings / info so you can spot the worst-affected domains at a glance. A severity filter at the top lets you hide whole tiers, so you can sweep errors first and come back to the info items later.
 
 Everything is collapsed by default:
 
 1. A domain is a closed row carrying its issue counts per severity.
-2. Opening it shows its audits and risk assessments, each a closed card with its own counts, on whichever tab holds the most severe issues.
-3. Opening an assessment lists the rules it trips, each with the number and kind of objects affected ("4 requirements").
-4. Opening a rule shows those objects in a paginated table, with the columns that matter for triage (status, ETA, priority for a control; result and status for a requirement; treatment for a scenario). Past ten objects, the table gains a search box that matches the name and every column.
+2. Opening it shows the four tabs, on whichever tab holds the most severe issues. On **Risk** and **Compliance**, each assessment is a closed card with its own counts.
+3. Opening an assessment — or the **Governance** / **Operations** tab — lists the rules it trips, each with the number and kind of objects affected ("4 requirements").
+4. Opening a rule shows those objects in a paginated table, with the columns that matter for triage (status, ETA, priority for a control; result and status for a requirement; treatment for a scenario; status, health and due date for an objective; status and expiry date for an evidence). Past ten objects, the table gains a search box that matches the name and every column.
 
 Domains and assessments with no issue are not listed at all, and a domain's content is only built when you open it, so a workspace with hundreds of domains stays responsive.
 
@@ -52,7 +54,7 @@ Within each assessment, issues are grouped by **rule** (so 17 controls missing a
 
 Below is the full list of checks the platform runs today — useful when you want to know _why_ an issue showed up, or to predict what x-rays will say before you open the page.
 
-### On audits
+### Compliance: audits
 
 | Severity | Check | Triggers when |
 |---|---|---|
@@ -82,7 +84,7 @@ Below is the full list of checks the platform runs today — useful when you wan
 Requirement checks are skipped when the requirement isn't assessable, when it falls outside the audit's selected implementation groups, or when the audit hides a field the check reads — an audit that hides **Status** or **Result** isn't judged on it.
 {% endhint %}
 
-### On risk assessments
+### Risk: risk assessments
 
 | Severity | Check | Triggers when |
 |---|---|---|
@@ -107,6 +109,36 @@ Requirement checks are skipped when the requirement isn't assessable, when it fa
 | Error | ETA is in the past now. Consider updating its status or the date | An applied control's ETA is overdue and the control isn't `active` |
 | Error | Acceptance has expired. Consider updating the status or the date | A risk acceptance's `expiry_date` is in the past |
 
+### Governance
+
+| Severity | Check | Triggers when |
+|---|---|---|
+| Warning | Objective has no applied control nor task | An active objective in `draft` or `in_progress` is linked to no applied control and no task |
+| Warning | Objective is past its due date and not achieved | An active objective's due date has passed and its status is neither `achieved` nor `deprecated` |
+| Warning | Objective is achieved but its health is at risk or off track | Status `achieved` while health is `at_risk` or `off_track` |
+| Info | Objective has no tracking metric | An active objective in `draft` or `in_progress` has no metric |
+| Info | Issue is not addressed by any objective | An `active` issue is linked to no objective |
+| Warning | Evidence is missing | An evidence's status is `missing` |
+| Warning | Evidence is expired | An evidence's status is `expired` |
+| Warning | Evidence expiry date has passed but its status is not expired | The expiry date is in the past while the status was never moved to `expired` |
+| Warning | Finding has no status | A finding's status is undefined |
+| Warning | Finding has no severity | A finding's severity is undefined |
+| Warning | Open finding has no applied control | A finding that is `identified`, `confirmed`, `assigned` or `in_progress` is linked to no applied control |
+
+### Operations
+
+| Severity | Check | Triggers when |
+|---|---|---|
+| Warning | Applied control has no owner | A control that isn't `deprecated` has no owner |
+| Warning | Planned applied control has no ETA | A control in `to_do`, `in_progress` or `on_hold` has no ETA |
+| Warning | Applied control has no status | A control's status is undefined |
+| Warning | Task has no assignee | An enabled task has nobody assigned |
+| Warning | Task occurrence is past its due date | A `pending` or `in_progress` occurrence of an enabled task has a due date in the past |
+
+{% hint style="info" %}
+Governance and Operations checks only look at objects you are allowed to view.
+{% endhint %}
+
 The check list is intentionally opinionated — these are mistakes the team has seen across many engagements. New checks are added over time; treat x-rays as a living spot-check, not a complete audit-readiness oracle.
 
 ## The fix loop
@@ -114,11 +146,20 @@ The check list is intentionally opinionated — these are mistakes the team has 
 X-rays is designed to be a **one-click-away-from-fixing** surface, not a static report:
 
 1. Open **X-rays** — the domains come sorted worst-first, so the top row is where the fire is.
-2. Open it, switch to the right tab (audits / risk assessments), open an assessment, skim the rules it trips.
-3. Open a rule and click any row — the link opens the offending object's **edit** page directly (control, scenario, evidence, requirement assessment, risk acceptance).
-4. Fix it, save, return to x-rays — the row is gone on next refresh.
+2. Open it, switch to the right tab (**Governance**, **Risk**, **Compliance**, **Operations**), open an assessment where there is one, skim the rules it trips.
+3. Open a rule and click any row — the link opens the offending object's **edit** page directly (control, scenario, evidence, requirement assessment, risk acceptance, objective, finding, task).
+4. Fix it and save, or cancel — you land back on x-rays, and the row is gone.
 
 The "go straight to the edit page" behaviour matters: every issue the platform raises is something you can fix in one form. There's no triage step.
+
+## For a single assessment
+
+The checks for one audit or risk assessment are available through the API, in one response:
+
+- `GET /api/compliance-assessments/{id}/x-rays/`
+- `GET /api/risk-assessments/{id}/x-rays/`
+
+The response carries the assessment's own checks under `assessment`, and the **Governance** and **Operations** checks under `governance` and `operations`, restricted to the objects the assessment touches — for an audit, the applied controls and evidences of its requirements, the findings of its findings assessments, and its tasks; for a risk assessment, the applied controls of its scenarios, their evidences, and its tasks. Respondents get a `403` on an audit.
 
 ## When to use it
 
@@ -132,5 +173,7 @@ The "go straight to the edit page" behaviour matters: every issue the platform r
 - [Applied controls](../concepts/applied-controls.md) — fields like ETA, effort, cost, and link that several x-rays checks target.
 - [Risk assessments](../concepts/risk-assessments.md) — the residual-vs-current consistency checks live here.
 - [Audits](../concepts/audits.md) — the compliance-side checks (evidence presence, controls on compliant requirements).
-- [Evidence](../concepts/evidence.md) — the "no file or link" check.
+- [Evidence](../concepts/evidence.md) — the "no file or link" and expiry checks.
+- [Findings assessments](../concepts/findings-assessments.md) — the findings checked in **Governance**.
+- [Tasks](../concepts/tasks.md) — the tasks and occurrences checked in **Operations**.
 - [Feature flags](../configuration/settings/feature-flags.md) — toggle the `xrays` flag.

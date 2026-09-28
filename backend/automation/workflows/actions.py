@@ -45,8 +45,10 @@ from core.models import (
     FilteringLabel,
     Finding,
     FindingsAssessment,
+    FlowEvent,
     Framework,
     Incident,
+    Policy,
     Perimeter,
     RiskAcceptance,
     QuickFormResponse,
@@ -62,6 +64,12 @@ from core.models import (
     Vulnerability,
 )
 from core.tasks import get_missing_email_settings
+from doc_management.models import (
+    DocumentContainer,
+    DocumentRevision,
+    DocumentTemplate,
+    ManagedDocument,
+)
 from privacy.models import (
     DataContractor,
     DataRecipient,
@@ -202,6 +210,9 @@ def register(cls):
 
 class BaseAction:
     action_type = ""
+    #: A remote's payload, not the step's own product: over the node-output
+    #: ceiling it is trimmed rather than failed. No retry shrinks a reply.
+    foreign_output = False
 
     def execute(self, config: dict, instance) -> dict:
         raise NotImplementedError
@@ -364,6 +375,22 @@ CREATABLE_MODELS = {
         "constructor": "_construct_audit",
         "constructor_permissions": {"framework": ["add_complianceassessment"]},
     },
+    "validation_flow": {
+        "model": ValidationFlow,
+        # No name or description on the model; `ref_id` is generated on save.
+        "fields": ["request_notes"],
+        "fk_fields": {},
+        "params": {
+            "approver": None,
+            "validation_deadline": None,
+            "compliance_assessments": None,
+            "evidences": None,
+            "policies": None,
+            "findings_assessments": None,
+            "security_exceptions": None,
+        },
+        "constructor": "_construct_validation_flow",
+    },
     "risk_scenario": {
         "model": RiskScenario,
         # Never the ratings or the treatment: those are the analyst's.
@@ -508,8 +535,21 @@ CREATABLE_MODELS = {
         "model": TaskTemplate,
         # No `schedule`: objects.create() skips field validators and that
         # column's shape is enforced by one.
-        "fields": ["name", "description", "ref_id", "task_date"],
+        "fields": ["name", "description", "ref_id"],
         "fk_fields": {},
+        "params": {
+            "assigned_to": None,
+            "task_date": None,
+            "applied_controls": None,
+            "compliance_assessments": None,
+            "evidences": None,
+            "documents": None,
+        },
+        "constructor": "_construct_task_template",
+        # An updater is what makes upsert possible on a built model. Never a
+        # recurring one: re-dating its occurrences rewrites past ones.
+        "updater": "_update_task_template",
+        "match_filter": Q(is_recurrent=False),
     },
     "right_request": {
         "model": RightRequest,
@@ -525,6 +565,39 @@ CREATABLE_MODELS = {
         ],
         "fk_fields": {},
         "required_fields": ["requested_on"],
+    },
+    "document_container": {
+        "model": DocumentContainer,
+        # The language-independent identity. Its locale variants are separate
+        # rows, so a container is created once and documents hang off it.
+        "fields": ["name", "description", "ref_id", "document_type"],
+        "fk_fields": {},
+    },
+    "managed_document": {
+        "model": ManagedDocument,
+        # `name` titles this locale variant; the container carries the
+        # language-independent one.
+        "fields": ["name", "description", "locale", "template_used"],
+        "fk_fields": {"container": (DocumentContainer, "document-containers")},
+        # The column is nullable — a container-less document is a legacy shape —
+        # but a run has no business creating one: the container is where the
+        # folder, the type and the catalog entry come from.
+        "required_fks": ["container"],
+        # Not a column on this model: the first revision's markdown.
+        "params": {"content": None},
+        "folder_from": "container",
+        "constructor": "_construct_managed_document",
+        # The constructor writes the first revision too.
+        "extra_permissions": ["add_documentrevision"],
+    },
+    "document_revision": {
+        "model": DocumentRevision,
+        # Authored markdown only: an uploaded or linked revision is a file, and
+        # no action can produce one.
+        "fields": ["content", "change_summary"],
+        "fk_fields": {"document": (ManagedDocument, "managed-documents")},
+        "folder_from": "document",
+        "constructor": "_construct_document_revision",
     },
     "entity_assessment": {
         "model": EntityAssessment,
@@ -602,6 +675,393 @@ def _construct_entity_assessment(kwargs, params, instance):
     return assessment
 
 
+def _document_template_content(ref_id, locale, instance):
+    """A built-in template, or one the run identity may see — matched on ref_id
+    and locale with the same `en` fallback the editor uses."""
+    from . import authz
+    from .engine import run_identity
+
+    visible = DocumentTemplate.objects.filter(
+        Q(id__in=authz.viewable_ids(run_identity(instance), DocumentTemplate))
+        | Q(builtin=True)
+    )
+    template = (
+        visible.filter(ref_id=ref_id, locale=locale).first()
+        or visible.filter(ref_id=ref_id, locale="en").first()
+    )
+    if template is None:
+        raise FatalActionError(
+            f"create_object: no document template '{ref_id}' in {locale} or en"
+        )
+    return template.content
+
+
+def _scoped_prefetches(entry, instance, computed):
+    """`prefetch_scoped` as Prefetch objects, each narrowed to what the run may
+    read. Nested paths reuse the parent's scoped queryset so the narrowing is
+    not undone a level down. Only the groups whose computed value this read
+    asked for."""
+    from django.db.models import Prefetch
+
+    from . import authz
+    from .engine import run_identity
+
+    identity = run_identity(instance)
+    # Wider than a top-level read: these hang off a row already in scope, and a
+    # control or an evidence in a parent domain is the normal shape. Narrowing
+    # them to the subtree would also contradict quality_check, which counts
+    # through the join table and sees them all.
+    folders = _accessible_folder_ids(instance.folder)
+
+    def scoped(model):
+        queryset = model.objects.filter(id__in=authz.viewable_ids(identity, model))
+        if get_model_field(model, "folder"):
+            queryset = queryset.filter(folder_id__in=folders)
+        return queryset
+
+    # Deepest first, so a child is built before the parent that nests it, and
+    # named relative to that parent. Only the roots are returned: a nested path
+    # belongs inside its parent's queryset, and Django rejects the same lookup
+    # arriving twice.
+    wanted = {
+        path: model
+        for name, group in entry.prefetch_scoped.items()
+        if name in computed
+        for path, model in group.items()
+    }
+    built = {}
+    for path in sorted(wanted, key=lambda p: -p.count("__")):
+        queryset = scoped(wanted[path])
+        for child in wanted:
+            if child.rpartition("__")[0] == path:
+                queryset = queryset.prefetch_related(built[child])
+        built[path] = Prefetch(path.rpartition("__")[2] or path, queryset=queryset)
+    return [built[path] for path in wanted if "__" not in path]
+
+
+def _identifier_q(model, value):
+    """How a person names one of these when not pasting a UUID. An Actor has no
+    name of its own — it wraps a user, a team or an entity — so it answers to
+    whichever it holds."""
+    if model is Actor:
+        return (
+            Q(user__email__iexact=value)
+            | Q(team__name__iexact=value)
+            | Q(entity__name__iexact=value)
+        )
+    if model is User:
+        return Q(email__iexact=value)
+    if get_model_field(model, "name"):
+        return Q(name__iexact=value)
+    return None
+
+
+def _rows_for(model, raw, instance, label):
+    """Values to rows. Each is a UUID or the name a person knows the row by, as
+    everywhere else a workflow names something. Anything the run may not reach —
+    unknown, outside its folders, invisible to its identity — reads the same, so
+    the error never confirms a row exists elsewhere.
+
+    Same two scopes as _resolve_reference: an id reaches the ancestors, a name
+    only the subtree and the root."""
+    from . import authz
+    from .engine import run_identity
+
+    ids = _as_id_list(raw)
+    if not ids:
+        return []
+    queryset = model.objects.filter(
+        id__in=authz.viewable_ids(run_identity(instance), model)
+    )
+
+    def within(folder_ids):
+        # An Actor has no folder: an IAM special case, and viewable_ids is the
+        # whole answer for it.
+        if get_model_field(model, "folder"):
+            return queryset.filter(folder_id__in=folder_ids)
+        return queryset
+
+    by_id = within(_accessible_folder_ids(instance.folder))
+    by_name = within(_name_scope_folder_ids(instance.folder))
+    rows, unresolved = [], []
+    for value in dict.fromkeys(ids):
+        if UUID_RE.match(value):
+            match = list(by_id.filter(id=value)[:2])
+        else:
+            lookup = _identifier_q(model, value)
+            match = list(by_name.filter(lookup)[:2]) if lookup is not None else []
+        if len(match) > 1:
+            raise ActionError(
+                f"create_object: {label} '{value}' matches more than one object"
+            )
+        if match:
+            rows.append(match[0])
+        else:
+            unresolved.append(value)
+    if unresolved:
+        raise ActionError(
+            f"create_object: {label} '{', '.join(unresolved)}' does not exist or "
+            "is outside this workflow's scope"
+        )
+    return rows
+
+
+def _link_targets(obj, params, instance, relations):
+    """Each name is both a relation on the object and a param holding ids."""
+    for name, model in relations.items():
+        rows = _rows_for(model, params.get(name), instance, name)
+        if rows:
+            getattr(obj, name).set(rows)
+
+
+def _authorize_creation_folder(model, folder, instance):
+    """The create permission, checked where the row will actually land."""
+    from . import authz
+    from .engine import run_identity
+
+    codename = f"add_{model._meta.model_name}"
+    if not authz.can(run_identity(instance), codename, folder):
+        raise ActionError(
+            f"create_object: this workflow may not create a "
+            f"{model._meta.model_name} in '{folder}'"
+        )
+
+
+_TASK_TARGETS = {
+    "applied_controls": AppliedControl,
+    "compliance_assessments": ComplianceAssessment,
+    "evidences": Evidence,
+    # DocumentContainer.task_templates, from this side.
+    "documents": DocumentContainer,
+}
+
+
+def _task_date(params):
+    return (
+        _as_date(params["task_date"], "task_date") if params.get("task_date") else None
+    )
+
+
+def _construct_task_template(kwargs, params, instance):
+    """A one-off task with the occurrence it owes: the board and the reminders
+    read TaskNode, so a template alone shows nothing. Recurrent templates are not
+    creatable here — their occurrences come from a schedule."""
+    assignees = _rows_for(Actor, params.get("assigned_to"), instance, "assigned_to")
+    task_date = _task_date(params)
+
+    with transaction.atomic():
+        template = TaskTemplate.objects.create(
+            task_date=task_date, is_recurrent=False, **kwargs
+        )
+        if assignees:
+            template.assigned_to.set(assignees)
+        _link_targets(template, params, instance, _TASK_TARGETS)
+        TaskNode.objects.create(
+            task_template=template,
+            due_date=task_date,
+            scheduled_date=task_date,
+            folder=template.folder,
+        )
+    # Same notice the editor sends: work assigned to someone who is never told
+    # is not assigned.
+    _notify_assignees(template, assignees)
+    return template
+
+
+def _update_task_template(template, kwargs, params, instance):
+    """The upsert match: the same writes, the occurrence re-dated rather than a
+    second one added, no notice (a refresh is not news). Only what the author
+    supplied is written — an unset `task_date` is not a request to clear it."""
+    assignees = _rows_for(Actor, params.get("assigned_to"), instance, "assigned_to")
+    task_date = _task_date(params)
+
+    with transaction.atomic():
+        for key, value in kwargs.items():
+            setattr(template, key, value)
+        if task_date is not None:
+            template.task_date = task_date
+        template.save()
+        if assignees:
+            template.assigned_to.set(assignees)
+        _link_targets(template, params, instance, _TASK_TARGETS)
+        if task_date is not None:
+            TaskNode.objects.filter(task_template=template).update(
+                due_date=task_date, scheduled_date=task_date
+            )
+    return template
+
+
+def _notify_assignees(template, assignees):
+    """On commit, so nobody hears about a task a later step rolled back."""
+    from core.tasks import send_task_template_assignment_notification
+
+    emails = [email for actor in assignees for email in actor.get_emails()]
+    if not emails:
+        return
+    transaction.on_commit(
+        lambda: _send_quietly(
+            "task assignment",
+            lambda: send_task_template_assignment_notification(template.id, emails),
+            task_template=str(template.id),
+        )
+    )
+
+
+def _send_quietly(what, send, **context):
+    """A mail server being down must not undo the row it was about."""
+    import structlog
+
+    try:
+        send()
+    except Exception as e:
+        structlog.get_logger(__name__).error(
+            f"{what} notification failed", error=e, **context
+        )
+
+
+def _construct_validation_flow(kwargs, params, instance):
+    """A request for sign-off, from the run's identity. `approver` is a single
+    FK, so a second id would be dropped without a word."""
+    from .engine import run_identity
+
+    approvers = _rows_for(User, params.get("approver"), instance, "approver")
+    if len(approvers) > 1:
+        raise FatalActionError("create_object: 'approver' names one user, not several")
+
+    relations = {
+        "compliance_assessments": ComplianceAssessment,
+        "evidences": Evidence,
+        "policies": Policy,
+        "findings_assessments": FindingsAssessment,
+        "security_exceptions": SecurityException,
+    }
+    deadline = (
+        _as_date(params["validation_deadline"], "validation_deadline")
+        if params.get("validation_deadline")
+        else None
+    )
+    requester = run_identity(instance)
+    with transaction.atomic():
+        flow = ValidationFlow.objects.create(
+            approver=approvers[0] if approvers else None,
+            requester=requester,
+            validation_deadline=deadline,
+            **kwargs,
+        )
+        _link_targets(flow, params, instance, relations)
+        # The flow's history starts here, as it does for a request raised by
+        # hand: without it the timeline opens on nothing.
+        FlowEvent.objects.create(
+            validation_flow=flow,
+            event_type=flow.status,
+            event_actor=requester,
+            event_notes=kwargs.get("request_notes") or None,
+            folder=flow.folder,
+        )
+    _notify_approver(flow)
+    return flow
+
+
+def _notify_approver(flow):
+    """On commit, so nobody is asked to sign off on a rolled-back request."""
+    from core.tasks import send_validation_flow_created_notification
+
+    transaction.on_commit(
+        lambda: _send_quietly(
+            "validation flow",
+            lambda: send_validation_flow_created_notification(flow),
+            validation_flow=str(flow.id),
+        )
+    )
+
+
+def _construct_managed_document(kwargs, params, instance):
+    """A document is its content: a ManagedDocument with no revision serves
+    nothing, so v1 is written with it — the shape
+    ManagedDocumentWriteSerializer.create builds for the editor.
+
+    Seeding order is explicit `content`, then the template named by
+    `template_used`, then empty.
+    """
+    from .engine import run_identity
+
+    container = kwargs.get("container")
+    if container is None:
+        raise FatalActionError("create_object: 'container' is required")
+    locale = kwargs.get("locale") or "en"
+    content = params.get("content") or ""
+    if not content and kwargs.get("template_used"):
+        content = _document_template_content(kwargs["template_used"], locale, instance)
+    # save() takes it from the container anyway; set it so the create and the
+    # revision that follows agree.
+    kwargs["folder"] = container.folder
+    kwargs["locale"] = locale
+    with transaction.atomic():
+        # Lock the CONTAINER, not its documents: there is no row to lock when
+        # the locale is new, which is exactly the case the check below guards.
+        # Same reason ManagedDocumentWriteSerializer.create locks it.
+        container = DocumentContainer.objects.select_for_update().get(pk=container.pk)
+        siblings = ManagedDocument.objects.filter(container=container)
+        if siblings.filter(locale=locale).exists():
+            # (container, locale) is the document's identity: a second row for
+            # one locale would make `default_locale` and the catalog ambiguous.
+            raise FatalActionError(
+                f"create_object: '{container}' already has a {locale} document"
+            )
+        kwargs["container"] = container
+        document = ManagedDocument.objects.create(
+            default_locale=not siblings.exists(), **kwargs
+        )
+        document.current_revision = DocumentRevision.objects.create(
+            document=document,
+            version_number=1,
+            content=content,
+            author=run_identity(instance),
+        )
+        document.save()
+    return document
+
+
+def _construct_document_revision(kwargs, params, instance):
+    """The next draft of an existing document. Version numbering and the
+    one-open-draft rule are the editor's (doc_management create-new-draft), held
+    under the same row lock; with no `content` the draft clones what is current,
+    which is what opening a draft in the editor does."""
+    from .engine import run_identity
+
+    document = kwargs.pop("document", None)
+    if document is None:
+        raise FatalActionError("create_object: 'document' is required")
+    content = kwargs.pop("content", None)
+    # save() derives it from the document; the create kwarg would be overwritten.
+    kwargs.pop("folder", None)
+    with transaction.atomic():
+        # One locked read, then both decisions in Python — no aggregate over a
+        # locked queryset, and the lock covers the numbering and the draft check
+        # together.
+        locked = list(
+            DocumentRevision.objects.select_for_update()
+            .filter(document=document)
+            .values_list("version_number", "status")
+        )
+        if any(status == DocumentRevision.Status.DRAFT for _version, status in locked):
+            # Fatal: a retry would find the same draft.
+            raise FatalActionError(
+                f"create_object: '{document.display_name}' already has an open draft"
+            )
+        if content is None:
+            source = document.current_revision or document.revisions.first()
+            content = source.content if source else ""
+        return DocumentRevision.objects.create(
+            document=document,
+            version_number=max((version for version, _s in locked), default=0) + 1,
+            content=content,
+            author=run_identity(instance),
+            status=DocumentRevision.Status.DRAFT,
+            **kwargs,
+        )
+
+
 def _implementation_groups(value, framework):
     groups = _as_id_list(value)
     if not groups:
@@ -659,7 +1119,10 @@ class CreateObjectAction(BaseAction):
                     f"create_object: '{value}' is not an accepted "
                     f"{config.get('model')}.{key}"
                 )
-        named = get_model_field(entry["model"], "name") is not None
+        name_field = get_model_field(entry["model"], "name")
+        # The model decides: a managed document's name is optional because its
+        # container carries the one that matters, a control's is not.
+        named = name_field is not None and not name_field.blank
         if named and not kwargs.get("name") and not config.get("upsert"):
             raise ActionError("create_object: 'name' is required")
         for key in entry.get("required_fields") or []:
@@ -680,45 +1143,50 @@ class CreateObjectAction(BaseAction):
                 .get_limit_choices_to(),
             )
 
-        constructor = entry.get("constructor")
-        if constructor:
-            if config.get("upsert"):
-                raise FatalActionError(
-                    f"create_object: '{config.get('model')}' is built, not "
-                    "matched — upsert does not apply"
-                )
-            params = _construction_params(entry, fields, instance)
-            try:
-                obj = globals()[constructor](
-                    {"folder": _creation_folder(instance), **kwargs}, params, instance
-                )
-            except ValidationError as e:
-                raise ActionError(f"create_object: {'; '.join(e.messages)}")
-            _record_provenance(instance, obj)
-            return {
-                "created_object_id": str(obj.id),
-                "created_object_name": obj.name,
-                "created_object_model": config.get("model"),
-                "created": True,
-            }
-
-        obj = None
-        created = True
+        # save() may take the folder from a parent; an upsert matching on the
+        # instance folder would then miss and hit a unique constraint.
         folder = _creation_folder(instance)
-        # save() may take the folder from a parent. Matching on the instance
-        # folder would then miss and the create would hit a unique constraint.
         folder_from = entry.get("folder_from")
         if folder_from and kwargs.get(folder_from) is not None:
             folder = kwargs[folder_from].folder
+        # authorize_action cleared the workflow's own folder; the row lands
+        # where the trigger or the parent puts it, which a non-recursive grant
+        # need not reach. Built models land the same way.
+        _authorize_creation_folder(entry["model"], folder, instance)
+
+        constructor = entry.get("constructor")
+        if constructor and config.get("upsert") and not entry.get("updater"):
+            raise FatalActionError(
+                f"create_object: '{config.get('model')}' is built, not "
+                "matched — upsert does not apply"
+            )
+
+        obj = None
+        created = True
         if config.get("upsert"):
-            match_fields = _match_fields(entry)
-            match = {key: kwargs.get(key) for key in match_fields}
-            missing = [key for key, value in match.items() if value in ("", None)]
-            if missing:
-                raise ActionError(
-                    f"create_object: upsert requires {', '.join(repr(m) for m in missing)}"
-                )
-            obj = entry["model"].objects.filter(folder=folder, **match).first()
+            obj = _upsert_match(entry, kwargs, folder)
+
+        if constructor:
+            params = _construction_params(entry, fields, instance)
+            try:
+                if obj is None:
+                    obj = globals()[constructor](
+                        {"folder": folder, **kwargs}, params, instance
+                    )
+                else:
+                    created = False
+                    globals()[entry["updater"]](obj, kwargs, params, instance)
+            except ValidationError as e:
+                raise ActionError(f"create_object: {'; '.join(e.messages)}")
+            if created:
+                _record_provenance(instance, obj)
+            return {
+                "created_object_id": str(obj.id),
+                # A built model need not be named: a document revision is "v3".
+                "created_object_name": getattr(obj, "name", None) or str(obj),
+                "created_object_model": config.get("model"),
+                "created": created,
+            }
 
         try:
             if obj is not None:
@@ -740,6 +1208,20 @@ class CreateObjectAction(BaseAction):
             "created_object_model": config.get("model"),
             "created": created,
         }
+
+
+def _upsert_match(entry, kwargs, folder):
+    """The row an upsert would update, if it is already there."""
+    match = {key: kwargs.get(key) for key in _match_fields(entry)}
+    missing = [key for key, value in match.items() if value in ("", None)]
+    if missing:
+        raise ActionError(
+            f"create_object: upsert requires {', '.join(repr(m) for m in missing)}"
+        )
+    rows = entry["model"].objects.filter(folder=folder, **match)
+    if entry.get("match_filter") is not None:
+        rows = rows.filter(entry["match_filter"])
+    return rows.first()
 
 
 def _creation_folder(instance):
@@ -784,7 +1266,7 @@ def _triggering_object(instance):
         model_name = "quickformresponse"
     if not (model_name and pk):
         return None
-    for app_label in ("core", "tprm", "privacy", "resilience"):
+    for app_label in ("core", "tprm", "privacy", "resilience", "doc_management"):
         try:
             model = apps.get_model(app_label, model_name)
         except LookupError:
@@ -821,12 +1303,19 @@ class ReadEntry:
     #: Same, but resolved only when the node config names them in `include`.
     #: For values too expensive to pay for on every read of the model.
     optional_computed: dict[str, Callable] = dataclass_field(default_factory=dict)
+    #: {relation path: model}. Prefetched like `prefetch_related`, but each
+    #: queryset carries the same folder and visibility filters as the read
+    #: itself — a row the run may see must not arrive with children it may not.
+    prefetch_scoped: dict = dataclass_field(default_factory=dict)
     #: Restriction every read of this model must satisfy.
     base_filter: Q | None = None
     #: Integer columns where -1 means "not rated"; range filters skip it.
     skip_unrated: frozenset[str] = frozenset()
     #: Relations the computed callables dereference per row.
     select_related: list[str] = dataclass_field(default_factory=list)
+    #: The same, for the to-many relations a computed walks — without it a
+    #: read pays one query per row per relation.
+    prefetch_related: list[str] = dataclass_field(default_factory=list)
 
     def readable_fields(self) -> list[str]:
         """Return the field names a read node may output, filter and order
@@ -845,6 +1334,80 @@ def _quick_form_answers(response):
         response.answers.select_related("question").prefetch_related("selected_choices")
     )
     return {extract_node_id(urn) or urn: value for urn, value in by_urn.items()}
+
+
+def _evidence_summary(evidence):
+    """What a reader needs to judge whether a piece of evidence backs anything:
+    what it is, whether a file or link is actually attached, and whether it has
+    lapsed. Never `get_size`/`attachment_hash` — those stat and hash the file.
+    `last_revision` sorts the prefetched revisions in Python, so it costs no
+    query once `…__revisions` is prefetched."""
+    revision = evidence.last_revision
+    return {
+        "id": str(evidence.id),
+        "name": evidence.name,
+        "status": evidence.get_status_display(),
+        "expiry_date": (
+            evidence.expiry_date.isoformat() if evidence.expiry_date else None
+        ),
+        # The distinction that matters when a claim is being checked: an
+        # evidence row can exist with nothing behind it.
+        "attached": bool(revision and (revision.attachment or revision.link)),
+    }
+
+
+def _requirement_backing(assessment):
+    """The controls a requirement leans on, each carrying its own evidence.
+
+    Evidence reaches a requirement two ways — attached to the requirement
+    assessment, or attached to one of its controls — and anything weighing a
+    result against what supports it needs both. Nesting the indirect evidence
+    under its control keeps that distinction visible instead of merging the two
+    into one undifferentiated pile."""
+    return [
+        {
+            "id": str(control.id),
+            "ref_id": control.ref_id,
+            "name": control.name,
+            "status": control.get_status_display(),
+            "eta": control.eta.isoformat() if control.eta else None,
+            "evidences": [
+                _evidence_summary(evidence) for evidence in control.evidences.all()
+            ],
+        }
+        for control in assessment.applied_controls.all()
+    ]
+
+
+def _quality_check_with_text(obj):
+    """The quality-check envelope plus its findings as lines a document can use:
+    the template grammar cannot pluck `msg` out of a list of dicts or join them.
+
+    Each `msg` is prefixed with the object it names. Asked about one requirement
+    that prefix is on every line and says nothing; asked about the audit it is
+    the only thing telling the lines apart. Scope decides, not how many
+    requirements happen to have findings. `text` nests under a heading the
+    caller writes.
+    """
+    findings = obj.quality_check()
+    entries = findings["errors"] + findings["warnings"]
+    shared = str(obj) if isinstance(obj, RequirementAssessment) else None
+
+    messages = []
+    for entry in entries:
+        message = entry["msg"]
+        prefix = f"{shared}: "
+        if shared and message.startswith(prefix):
+            message = message[len(prefix) :]
+        messages.append(message)
+
+    return {
+        **findings,
+        # The one question a workflow branches on: did any rule speak?
+        "flagged": bool(entries),
+        "messages": messages,
+        "text": "\n".join(f"  - {message}" for message in messages),
+    }
 
 
 def _requirements_breakdown(assessment):
@@ -955,10 +1518,14 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "computed_outcome": lambda ca: ca.computed_outcome,
             "scores": lambda ca: ca.get_global_score(),
             "requirements": _requirements_breakdown,
+            # Actor ids, the shape task_template's assignees take.
+            "reviewers": lambda ca: [str(a.id) for a in ca.reviewers.all()],
+            "authors": lambda ca: [str(a.id) for a in ca.authors.all()],
         },
+        prefetch_related=["reviewers", "authors"],
         # Opt-in: one call walks every requirement of the audit with its
         # controls and evidences, so no unrelated read pays for it.
-        optional_computed={"quality_check": lambda ca: ca.quality_check()},
+        optional_computed={"quality_check": _quality_check_with_text},
     ),
     "risk_assessment": ReadEntry(
         model=RiskAssessment,
@@ -981,6 +1548,69 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "score": lambda r: r.score,
             "answers": _quick_form_answers,
         },
+    ),
+    "document_container": ReadEntry(
+        model=DocumentContainer,
+        fields=["description", "ref_id", "document_type"],
+        computed={"document_type": lambda c: c.get_document_type_display()},
+    ),
+    "managed_document": ReadEntry(
+        model=ManagedDocument,
+        fields=["description", "locale", "default_locale", "container"],
+        computed={
+            # The variant's own title is optional; the container names it then.
+            "name": lambda d: d.display_name,
+            "container": lambda d: (
+                {
+                    "str": str(d.container),
+                    "id": str(d.container_id),
+                    "name": d.container.name,
+                }
+                if d.container_id
+                else None
+            ),
+            "document_type": lambda d: (
+                d.container.document_type if d.container_id else None
+            ),
+            # The served revision, so a read can branch on what is published
+            # without a second read.
+            "current_revision": lambda d: (
+                {
+                    "id": str(d.current_revision_id),
+                    "version_number": d.current_revision.version_number,
+                    "status": d.current_revision.status,
+                }
+                if d.current_revision_id
+                else None
+            ),
+        },
+        select_related=["container", "current_revision"],
+    ),
+    "document_revision": ReadEntry(
+        model=DocumentRevision,
+        # `content` is the markdown itself: node outputs cap a string leaf at
+        # MAX_LEAF_CHARS, so a whole document reaches an AI step through
+        # output_mapping (variables are not capped), never through
+        # {{nodes.<ref>...}}.
+        fields=[
+            "version_number",
+            "status",
+            "source",
+            "change_summary",
+            "content",
+            "published_at",
+            "document",
+        ],
+        computed={
+            "name": str,
+            "status": lambda r: r.get_status_display(),
+            "document": lambda r: {
+                "str": str(r.document),
+                "id": str(r.document_id),
+                "name": r.document.display_name,
+            },
+        },
+        select_related=["document", "document__container"],
     ),
     "entity_assessment": ReadEntry(
         model=EntityAssessment,
@@ -1015,6 +1645,9 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "documentation_score",
             "eta",
             "due_date",
+            # The assessor's own note. It was writable before it was readable,
+            # which left a run able to overwrite a note it could not see.
+            "observation",
             "compliance_assessment",
         ],
         # Identify the requirement and the audit on every row, under the
@@ -1025,6 +1658,9 @@ READABLE_MODELS: dict[str, ReadEntry] = {
                 "id": str(ra.requirement_id),
                 "ref_id": ra.requirement.ref_id,
                 "name": ra.requirement.name,
+                # The expectation itself. Without it a reader is working from
+                # a title.
+                "description": ra.requirement.description,
             },
             # Subset of the API's FieldsRelatedField dict.
             "compliance_assessment": lambda ra: {
@@ -1033,11 +1669,29 @@ READABLE_MODELS: dict[str, ReadEntry] = {
                 "name": ra.compliance_assessment.name,
             },
         },
-        # Opt-in: each call resolves its own context, so a list read pays for
-        # it per row. Reading the audit's quality check once is cheaper when
-        # the whole audit is in question.
-        optional_computed={"quality_check": lambda ra: ra.quality_check()},
+        # Opt-in: each costs per row, and a page carrying all three is how a
+        # read outgrows one node output.
+        optional_computed={
+            "quality_check": _quality_check_with_text,
+            # What is claimed to satisfy the requirement, and what backs it.
+            "applied_controls": _requirement_backing,
+            "evidences": lambda ra: [
+                _evidence_summary(evidence) for evidence in ra.evidences.all()
+            ],
+        },
         select_related=["requirement", "compliance_assessment"],
+        # Keyed by the computed value that needs it: unasked, unqueried.
+        prefetch_scoped={
+            "applied_controls": {
+                "applied_controls": AppliedControl,
+                "applied_controls__evidences": Evidence,
+                "applied_controls__evidences__revisions": EvidenceRevision,
+            },
+            "evidences": {
+                "evidences": Evidence,
+                "evidences__revisions": EvidenceRevision,
+            },
+        },
     ),
     "risk_scenario": ReadEntry(
         model=RiskScenario,
@@ -1295,6 +1949,7 @@ class ReadObjectsAction(BaseAction):
         if entry is None:
             raise ActionError(f"read_objects: unknown model '{config.get('model')}'")
         fields = entry.readable_fields()
+        computed = _effective_computed(entry, config)
         context = _render_context(instance)
         query = _read_filters_to_q(config.get("filters"), entry, set(fields), context)
 
@@ -1317,8 +1972,14 @@ class ReadObjectsAction(BaseAction):
             .order_by(order_by, "id")  # id tie-break keeps pagination stable
         )
         # Computed callables dereference these per row otherwise.
+        if entry.prefetch_scoped:
+            queryset = queryset.prefetch_related(
+                *_scoped_prefetches(entry, instance, computed)
+            )
         if entry.select_related:
             queryset = queryset.select_related(*entry.select_related)
+        if entry.prefetch_related:
+            queryset = queryset.prefetch_related(*entry.prefetch_related)
         return entry, fields, queryset
 
     def execute(self, config, instance):
@@ -1379,6 +2040,16 @@ class UpdateEntry:
     m2m_fields: dict[str, tuple[type[Model], str]] = dataclass_field(
         default_factory=dict
     )
+    #: Rows this model is writable on at all, when only some of them are (a
+    #: published document revision is a record, its open draft is work).
+    base_filter: Q | None = None
+    #: What base_filter means, appended to the not-found error so a run says
+    #: why the row was refused rather than blaming scope.
+    scope_note: str = ""
+    #: Bookkeeping the API does around its own write — called (obj, updated
+    #: field names, their pre-save values, instance) after save() so a run
+    #: leaves the same trail.
+    after_save: Callable | None = None
 
 
 _ACTOR = (Actor, "actors")
@@ -1392,6 +2063,26 @@ _EXCEPTIONS = (SecurityException, "security-exceptions")
 _ASSESSMENT_STATUSES = frozenset(
     {"planned", "in_progress", "in_review", "done", "deprecated"}
 )
+
+
+def _record_document_edit(revision, updated, before, instance):
+    """The same history the editor keeps, under the run's identity.
+    doc_management owns the policy; this only supplies the editor.
+
+    Deliberately NOT declared as an extra permission: no role grants
+    `add_documentedit` (core/startup.py grants `view_documentedit` only) because
+    the platform writes these rows itself, under `change_documentrevision`.
+    Declaring it would refuse to publish a workflow whose author can do the same
+    thing through the API.
+    """
+    from doc_management.models import record_document_edit
+
+    from .engine import run_identity
+
+    if "content" not in updated:
+        return
+    record_document_edit(revision, run_identity(instance), before.get("content"))
+
 
 UPDATABLE_MODELS: dict[str, UpdateEntry] = {
     # Triage, not judgment. A run may widen the reviewer pool, tighten the date and
@@ -1551,6 +2242,43 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
             "security_exceptions": _EXCEPTIONS,
         },
     ),
+    "document_container": UpdateEntry(
+        model=DocumentContainer,
+        # The language-independent facts and the objects the document answers
+        # for. Publication state lives on the revisions.
+        fields=["description", "ref_id", "document_type"],
+        m2m_fields={
+            "applied_controls": _CONTROLS,
+            "assets": _ASSETS,
+            "filtering_labels": _LABELS,
+        },
+    ),
+    "managed_document": UpdateEntry(
+        model=ManagedDocument,
+        # No `current_revision`: which revision is served is publish()'s to
+        # move, together with deprecating the one it replaces.
+        fields=["description"],
+    ),
+    "document_revision": UpdateEntry(
+        model=DocumentRevision,
+        # The draft's text and the note that explains it. `status` is absent:
+        # publish() deprecates the previous published revision and repoints the
+        # document's current one, so a column write would leave the chain
+        # inconsistent — the reason ValidationFlow and RiskAcceptance are absent
+        # from this registry too.
+        fields=["content", "change_summary"],
+        # What doc_management's own perform_update allows: a revision still
+        # being worked on. Once submitted, validated or published its text is
+        # frozen and the next draft is the way to change it.
+        base_filter=Q(
+            status__in=(
+                DocumentRevision.Status.DRAFT,
+                DocumentRevision.Status.CHANGE_REQUESTED,
+            )
+        ),
+        scope_note="a revision is only rewritable while it is being drafted",
+        after_save=_record_document_edit,
+    ),
     "risk_scenario": UpdateEntry(
         model=RiskScenario,
         # No treatment, no ratings: attach the control, leave the call.
@@ -1635,26 +2363,23 @@ class UpdateObjectAction(BaseAction):
         # Subtree AND changeable by the run identity: the same two-part scope
         # as a read, with change instead of view.
         try:
-            obj = (
-                entry.model.objects.filter(
-                    folder_id__in=_read_scope_folder_ids(instance.folder)
-                )
-                .filter(
-                    id__in=authz.changeable_ids(run_identity(instance), entry.model)
-                )
-                .filter(id=target_id)
-                .first()
-            )
+            rows = entry.model.objects.filter(
+                folder_id__in=_read_scope_folder_ids(instance.folder)
+            ).filter(id__in=authz.changeable_ids(run_identity(instance), entry.model))
+            if entry.base_filter is not None:
+                rows = rows.filter(entry.base_filter)
+            obj = rows.filter(id=target_id).first()
         except ValueError, ValidationError:
             obj = None
         if obj is None:
+            note = f" ({entry.scope_note})" if entry.scope_note else ""
             raise ActionError(
                 f"update_object: no {config.get('model')} '{target_id}' "
-                "in this workflow's scope"
+                f"in this workflow's scope{note}"
             )
 
         fields = render(config.get("fields") or {}, context)
-        updated = {}
+        updated, before = {}, {}
         for key, value in fields.items():
             if key not in entry.fields or value in ("", None):
                 continue
@@ -1664,6 +2389,7 @@ class UpdateObjectAction(BaseAction):
                     f"update_object: a workflow may not set {config.get('model')}"
                     f".{key} to '{value}'"
                 )
+            before[key] = getattr(obj, key)
             setattr(obj, key, value)
             updated[key] = value
         if updated:
@@ -1671,6 +2397,8 @@ class UpdateObjectAction(BaseAction):
                 obj.save()
             except ValidationError as e:
                 raise ActionError(f"update_object: {'; '.join(e.messages)}")
+            if entry.after_save is not None:
+                entry.after_save(obj, updated, before, instance)
 
         relations = {}
         for field_name, spec in (config.get("m2m") or {}).items():
@@ -2384,6 +3112,7 @@ HTTP_DEFAULT_TIMEOUT = 15
 @register
 class HttpRequestAction(BaseAction):
     action_type = "http_request"
+    foreign_output = True
 
     def execute(self, config, instance):
         import requests
@@ -2730,7 +3459,10 @@ AI_SYSTEM_PROMPT = (
 )
 
 AI_INPUT_MAX_CHARS = 20000
-AI_TEXT_MAX_CHARS = 5000
+# ai_generate's backstop, not its control: `max_words` is what an author sets,
+# and its 2000-word ceiling is ~14000 characters, so a lower cap here would cut
+# a long draft (a policy, say) mid-sentence with nothing saying why.
+AI_TEXT_MAX_CHARS = 20000
 # ai_extract's parsed object flows into variables uncapped (output_mapping
 # copies from the output, which the engine's node_outputs cap never sees), so
 # the completion is bounded before it is parsed.
@@ -2861,7 +3593,8 @@ def required_permissions(action_config):
         for param, extra in (entry.get("constructor_permissions") or {}).items():
             if fields.get(param):
                 codenames += extra
-        return codenames
+        # What it builds every time, whatever the config says.
+        return codenames + list(entry.get("extra_permissions") or [])
     if action_type == "attach_evidence":
         # Both modes can create a revision: the default one does when the
         # evidence has none yet.
@@ -3021,7 +3754,7 @@ def validate_create_config(node):
         ]
     fields = config.get("fields") or {}
     errors = []
-    if entry.get("constructor") and config.get("upsert"):
+    if entry.get("constructor") and config.get("upsert") and not entry.get("updater"):
         errors.append(
             (
                 "action_create_upsert_unsupported",
@@ -3081,8 +3814,11 @@ def validate_create_config(node):
                     )
                 )
         # execute_action skips empty FKs, so a missing non-nullable one only
-        # surfaces as an IntegrityError mid-run.
-        if entry["model"]._meta.get_field(fk_name).null:
+        # surfaces as an IntegrityError mid-run. `required_fks` covers the
+        # column the model leaves nullable but this action cannot do without.
+        if entry["model"]._meta.get_field(fk_name).null and fk_name not in (
+            entry.get("required_fks") or ()
+        ):
             continue
         if not fields.get(fk_name):
             errors.append(

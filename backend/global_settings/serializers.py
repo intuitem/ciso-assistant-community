@@ -353,6 +353,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     ebiosrm = serializers.BooleanField(
         source="value.ebiosrm", required=False, default=True
     )
+    risk_management = serializers.BooleanField(
+        source="value.risk_management", required=False, default=True
+    )
     scoring_assistant = serializers.BooleanField(
         source="value.scoring_assistant", required=False, default=True
     )
@@ -394,6 +397,20 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     bia = serializers.BooleanField(source="value.bia", required=False, default=True)
     project_management = serializers.BooleanField(
         source="value.project_management", required=False, default=False
+    )
+    # Per-entry switches inside the Project management menu, which
+    # `project_management` gates as a whole.
+    generic_collections = serializers.BooleanField(
+        source="value.generic_collections", required=False, default=True
+    )
+    accreditations = serializers.BooleanField(
+        source="value.accreditations", required=False, default=True
+    )
+    projects = serializers.BooleanField(
+        source="value.projects", required=False, default=True
+    )
+    responsibility_matrices = serializers.BooleanField(
+        source="value.responsibility_matrices", required=False, default=True
     )
     contracts = serializers.BooleanField(
         source="value.contracts", required=False, default=False
@@ -490,6 +507,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     # role behaviour or IAM config would make two users read different data.
     USER_HIDEABLE_FLAGS = frozenset(
         {
+            "accreditations",
             "bia",
             "commitment_management",
             "compliance",
@@ -502,6 +520,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "exceptions",
             "experimental",
             "follow_up",
+            "generic_collections",
             "incidents",
             "journeys",
             "metrology",
@@ -512,12 +531,15 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "posture_assessments",
             "privacy",
             "project_management",
+            "projects",
             "purposes",
             "quantitative_risk_studies",
             "quick_forms",
             "reports",
+            "responsibility_matrices",
             "right_requests",
             "risk_acceptances",
+            "risk_management",
             "scoring_assistant",
             "security_advisories",
             "cwes",
