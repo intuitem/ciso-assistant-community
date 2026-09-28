@@ -541,9 +541,14 @@
 	// A filter emits one query param per key by default; `params` lets one widget drive several
 	// (a date range emits both bounds).
 	const paramsOf = (field: string): string[] => filters[field]?.params ?? [field];
-	// Column selector is offered on standalone list pages only (embedded tables
-	// pass a curated `fields` prop) -- unrelated to filter persistence below.
+	// Standalone list pages only: offer the column selector (embedded tables pass
+	// a curated `fields` prop) and sync filters with the URL.
 	const isStandaloneTable = $derived(hasRemoteSource && baseEndpoint === `/${URLModel}`);
+	// Embedded tables share the page URL with sibling tables (DetailView keeps
+	// visited tabs mounted) and their filter names overlap (status, owner, ...):
+	// syncing them would leak one table's filters into another. They persist
+	// through the filter store only.
+	const syncFiltersToUrl = $derived(isStandaloneTable);
 	// Unique per parent object + tab (baseEndpoint carries the parent id).
 	// $derived so it updates when this instance is reused for a different
 	// object (DetailView.svelte keys tabs by model name, not by parent id).
@@ -551,14 +556,15 @@
 
 	function seedFilterValues() {
 		const stored = $tableFilterStates[filterStoreKey] ?? {};
+		const urlParams = syncFiltersToUrl ? page.url.searchParams : new URLSearchParams();
 		// Check if any filter-related URL params exist
 		const hasUrlFilterParams = filteredFields.some((field) =>
-			paramsOf(field).some((param: string) => page.url.searchParams.getAll(param).length > 0)
+			paramsOf(field).some((param: string) => urlParams.getAll(param).length > 0)
 		);
 		return Object.fromEntries(
 			filteredFields.map((field: string) => {
 				const urlValues = paramsOf(field).flatMap((param: string) =>
-					page.url.searchParams.getAll(param).map((value) => ({ value, param }))
+					urlParams.getAll(param).map((value) => ({ value, param }))
 				);
 				if (urlValues.length > 0) return [field, urlValues];
 				// Restore persisted filters only when no URL filter params exist at all
@@ -579,8 +585,8 @@
 	});
 
 	const filterInitialData: Record<string, string[]> = {};
-	// convert URL search params and default filters to filter initial data
-	for (const [key, value] of page.url.searchParams) {
+	// convert URL search params (standalone only) and seeded filters to filter initial data
+	for (const [key, value] of syncFiltersToUrl ? page.url.searchParams : []) {
 		filterInitialData[key] ??= [];
 		filterInitialData[key].push(value);
 	}
@@ -636,23 +642,26 @@
 			}
 			for (const [param, values] of Object.entries(buckets)) {
 				handler.filter(values, param);
+				if (!syncFiltersToUrl) continue;
 				page.url.searchParams.delete(param);
 				values.forEach((value: string) => page.url.searchParams.append(param, value));
 			}
 		}
-		history.replaceState(history.state, '', page.url.pathname + page.url.search);
-		// Sync the current crumb's href with the new filter query.
-		breadcrumbs.update((crumbs) => {
-			if (crumbs.length < 2) return crumbs;
-			const last = crumbs[crumbs.length - 1];
-			const lastPath = last.href?.split('?')[0];
-			if (lastPath !== page.url.pathname) return crumbs;
-			const newHref = page.url.pathname + page.url.search;
-			if (last.href === newHref) return crumbs;
-			const next = crumbs.slice();
-			next[next.length - 1] = { ...last, href: newHref };
-			return next;
-		});
+		if (syncFiltersToUrl) {
+			history.replaceState(history.state, '', page.url.pathname + page.url.search);
+			// Sync the current crumb's href with the new filter query.
+			breadcrumbs.update((crumbs) => {
+				if (crumbs.length < 2) return crumbs;
+				const last = crumbs[crumbs.length - 1];
+				const lastPath = last.href?.split('?')[0];
+				if (lastPath !== page.url.pathname) return crumbs;
+				const newHref = page.url.pathname + page.url.search;
+				if (last.href === newHref) return crumbs;
+				const next = crumbs.slice();
+				next[next.length - 1] = { ...last, href: newHref };
+				return next;
+			});
+		}
 		// untracked so resetFilters can delete the entry without retriggering us
 		untrack(() => {
 			$tableFilterStates[filterStoreKey] = { ...filterValues };
