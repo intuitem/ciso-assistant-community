@@ -10,7 +10,11 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
+from core.base_models import (
+    AbstractBaseModel,
+    ETADueDateMixin,
+    NameDescriptionMixin,
+)
 from core.models import (
     Actor,
     AppliedControl,
@@ -659,6 +663,8 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["ebios_rm_study", "entity", "category"]
 
+    IAM_SCOPE_FIELD = "entity"
+
     class Meta:
         verbose_name = _("Stakeholder")
         verbose_name_plural = _("Stakeholders")
@@ -875,7 +881,7 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         "database": {"hex": "f1c0", "fa": "fas fa-database"},
         "key": {"hex": "f084", "fa": "fas fa-key"},
         "search": {"hex": "f002", "fa": "fa-solid fa-magnifying-glass"},
-        "carrot": {"hex": "f084", "fa": "fa-solid fa-carrot"},
+        "carrot": {"hex": "f787", "fa": "fa-solid fa-carrot"},
         "money": {"hex": "f81d", "fa": "fa-solid fa-sack-dollar"},
         "skull": {"hex": "f714", "fa": "fa-solid fa-skull-crossbones"},
         "globe": {"hex": "f0ac", "fa": "fa-solid fa-globe"},
@@ -909,7 +915,6 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         EXPLOIT = 3, "ebiosExploitation"
 
     ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
-    is_published = models.BooleanField(_("published"), default=True)
     threat = models.ForeignKey(
         Threat,
         on_delete=models.SET_NULL,
@@ -1042,6 +1047,13 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         blank=True,
         related_name="operational_scenarios",
         help_text=_("Threats leveraged by the operational scenario"),
+    )
+    techniques = models.ManyToManyField(
+        "sec_intel.Technique",
+        verbose_name=_("Techniques"),
+        blank=True,
+        related_name="operational_scenarios",
+        help_text=_("Adversary techniques leveraged by the operational scenario"),
     )
 
     operating_modes_description = models.TextField(

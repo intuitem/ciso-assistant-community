@@ -6,13 +6,22 @@
 	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '$lib/utils/constants';
 	import {
 		CUSTOM_ACTIONS_COMPONENT,
 		getFieldComponentMap,
 		isFieldFlagEnabled,
-		URL_MODEL_MAP
+		URL_MODEL_MAP,
+		urlModelForDjangoName
 	} from '$lib/utils/crud';
+
+	// Presentational row weighting, declared per model in listViewFields.rowEmphasis.
+	function rowEmphasisClass(row: TableSource): string {
+		const config = listViewFields[URLModel]?.rowEmphasis;
+		if (!config) return '';
+		const expected = 'equals' in config ? config.equals : true;
+		return row.meta?.[config.field] === expected ? (config.class ?? 'font-semibold') : '';
+	}
 
 	// A filter on a flag-gated field must go away with its flag, like its column does.
 	function filtersForActiveFlags(urlModel: string) {
@@ -30,6 +39,7 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount, tick, untrack } from 'svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import { applyUnreadCount } from '$lib/utils/stores';
 
 	// Types
 	import { browser } from '$app/environment';
@@ -49,13 +59,13 @@
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
-	import type { SvelteEvent } from '@skeletonlabs/skeleton-svelte';
+	import type { SvelteEvent } from '$lib/utils/types';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
 	import type { FormDataShape } from '$lib/utils/schemas';
-	import { loadTableData } from './handler';
+	import { getParams, loadTableData } from './handler';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
 	import RowsPerPage from './RowsPerPage.svelte';
@@ -68,7 +78,12 @@
 		hasPermissionAnywhere
 	} from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
-	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
+	import {
+		tableHandlers,
+		tableRefreshers,
+		tableStates,
+		tableColumnStates
+	} from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
@@ -104,6 +119,10 @@
 		displayActions?: boolean;
 		disableCreate?: boolean;
 		disableEdit?: boolean;
+		// A model with no edit form can still have a field worth changing in bulk (an
+		// inbox's read flag), so this is separable from `disableEdit` -- which it
+		// defaults to, leaving existing callers unaffected.
+		disableBatchEdit?: boolean;
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
@@ -123,7 +142,9 @@
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
 		expectedCount?: number;
+		loading?: boolean;
 		onFilterChange?: (filters: Record<string, any>) => void;
+		onQueryChange?: (query: string) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
@@ -166,6 +187,7 @@
 		displayActions = true,
 		disableCreate = false,
 		disableEdit = false,
+		disableBatchEdit = undefined,
 		disableDelete = false,
 		disableView = false,
 		identifierField = 'id',
@@ -189,7 +211,9 @@
 		forcePreventDelete = false,
 		forcePreventEdit = false,
 		expectedCount = undefined,
+		loading = false,
 		onFilterChange = () => {},
+		onQueryChange = () => {},
 		quickFilters,
 		optButton,
 		selectButton,
@@ -206,7 +230,13 @@
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
-	const BUILTIN_EDITABLE_URL_MODELS = ['terminologies', 'entities', 'asset-class'];
+	const BUILTIN_EDITABLE_URL_MODELS = [
+		'terminologies',
+		'entities',
+		'asset-class',
+		'folders',
+		'object-classifications'
+	];
 	// A field's flag(s) can be a single flag name or a list (shown if ANY is on).
 	// Hidden only once every listed flag is a known, explicitly-false feature flag.
 	function isFieldHiddenByFeatureFlags(
@@ -296,12 +326,48 @@
 		$tableColumnStates = next;
 	}
 
+	/**
+	 * Open the object a row points at, rather than the row itself. Returns true when it
+	 * handled the click. The PATCH is fire-and-forget so navigation never waits on it.
+	 */
+	function followRowNavigation(rowMetaData: Record<string, any>): boolean {
+		const nav = listViewFields[URLModel]?.rowNavigation;
+		if (!nav) return false;
+
+		const marked =
+			nav.markField && rowMetaData[nav.markField] === false
+				? fetch(`/${URLModel}/${rowMetaData[identifierField]}/${nav.markField}`, {
+						method: 'PATCH',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ [nav.markField]: true })
+					})
+						.then((res) => (res.ok ? res.json() : null))
+						.then(applyUnreadCount)
+						.catch((error) => console.error(`Could not mark ${nav.markField}:`, error))
+				: Promise.resolve();
+
+		const targetModel = urlModelForDjangoName(rowMetaData[nav.modelField]);
+		const targetId = rowMetaData[nav.idField];
+		if (!targetModel || !targetId) {
+			// Unmapped model, or a target deleted under the row: still counts as read, so
+			// only the navigation is skipped. Refetching before the PATCH lands would
+			// bring the row back unread.
+			marked.finally(() => handler.invalidate());
+			return true;
+		}
+
+		goto(`/${targetModel}/${targetId}`, { breadcrumbAction: 'push' });
+		return true;
+	}
+
 	function onRowClick(event: SvelteEvent<MouseEvent, HTMLTableRowElement>, rowIndex: number): void {
 		if (!interactive) return;
 		event.preventDefault();
 		event.stopPropagation();
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
+
+		if (followRowNavigation(rowMetaData)) return;
 
 		const preferredLabel =
 			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
@@ -381,9 +447,32 @@
 
 	const toastStore = getToastStore();
 
-	if (hasRemoteSource)
-		handler.onChange((state: State) =>
-			loadTableData({
+	// Rows arrive from the API, so on a slow connection an empty table would
+	// otherwise be indistinguishable from a table with no data loaded. Requests
+	// can overlap (search, sort, filters), so count them rather than flag them,
+	// and only show placeholders until the first page has landed: a later
+	// refetch keeps the previous rows on screen.
+	let inFlight = $state(0);
+	let hasLoadedOnce = $state(false);
+	const isFetching = $derived(inFlight > 0 && !hasLoadedOnce);
+	let currentLoad: Promise<any[]> = Promise.resolve([]);
+
+	if (hasRemoteSource) {
+		// The trigger handler calls our reload synchronously before its first
+		// await, so once invalidate() returns, currentLoad is the new request.
+		$tableRefreshers[baseEndpoint] = () => {
+			handler.invalidate();
+			return currentLoad;
+		};
+		handler.onChange((state: State) => {
+			const query = getParams(state);
+			query.delete('offset');
+			query.delete('limit');
+			onQueryChange(query.toString());
+			inFlight += 1;
+			// Per request, so a failure cannot mask a success that overlapped it.
+			let failed = false;
+			currentLoad = loadTableData({
 				state,
 				URLModel,
 				endpoint: baseEndpoint,
@@ -404,11 +493,17 @@
 								},
 				featureFlags: page.data?.featureflags,
 				onError: (error) => {
+					failed = true;
 					console.error(error);
 					toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
 				}
-			})
-		);
+			}).finally(() => {
+				inFlight -= 1;
+				if (!failed) hasLoadedOnce = true;
+			});
+			return currentLoad;
+		});
+	}
 
 	onMount(() => {
 		if (orderBy) {
@@ -416,6 +511,13 @@
 				? handler.sortAsc(orderBy.identifier)
 				: handler.sortDesc(orderBy.identifier);
 		}
+		return () => {
+			if (hasRemoteSource)
+				tableRefreshers.update((r) => {
+					delete r[baseEndpoint];
+					return r;
+				});
+		};
 	});
 
 	const actionsURLModel = URLModel;
@@ -436,6 +538,9 @@
 
 	const filters = $derived(source?.filters ?? tableFilters);
 	const filteredFields = $derived(Object.keys(filters));
+	// A filter emits one query param per key by default; `params` lets one widget drive several
+	// (a date range emits both bounds).
+	const paramsOf = (field: string): string[] => filters[field]?.params ?? [field];
 	// Column selector is offered on standalone list pages only (embedded tables
 	// pass a curated `fields` prop) -- unrelated to filter persistence below.
 	const isStandaloneTable = $derived(hasRemoteSource && baseEndpoint === `/${URLModel}`);
@@ -447,12 +552,14 @@
 	function seedFilterValues() {
 		const stored = $tableFilterStates[filterStoreKey] ?? {};
 		// Check if any filter-related URL params exist
-		const hasUrlFilterParams = filteredFields.some(
-			(field) => page.url.searchParams.getAll(field).length > 0
+		const hasUrlFilterParams = filteredFields.some((field) =>
+			paramsOf(field).some((param: string) => page.url.searchParams.getAll(param).length > 0)
 		);
 		return Object.fromEntries(
 			filteredFields.map((field: string) => {
-				const urlValues = page.url.searchParams.getAll(field).map((value) => ({ value }));
+				const urlValues = paramsOf(field).flatMap((param: string) =>
+					page.url.searchParams.getAll(param).map((value) => ({ value, param }))
+				);
 				if (urlValues.length > 0) return [field, urlValues];
 				// Restore persisted filters only when no URL filter params exist at all
 				if (!hasUrlFilterParams && field in stored) {
@@ -468,7 +575,7 @@
 	$effect(() => onFilterChange(filterValues));
 
 	run(() => {
-		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
+		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter?.hide);
 	});
 
 	const filterInitialData: Record<string, string[]> = {};
@@ -519,17 +626,18 @@
 		}
 
 		for (const field of filteredFields) {
-			const filterValue = filterValues[field];
-			const overrideFilterValue = overrideFilters[field];
-			const finalFilterValue = overrideFilterValue || filterValue;
+			const finalFilterValue = overrideFilters[field] || filterValues[field] || [];
 
-			const fieldFilterParams = finalFilterValue
-				? finalFilterValue.map((v: Record<string, any>) => v.value)
-				: [];
-			handler.filter(fieldFilterParams, field);
-			page.url.searchParams.delete(field);
-			if (finalFilterValue) {
-				finalFilterValue.forEach(({ value }) => page.url.searchParams.append(field, value));
+			const buckets: Record<string, any> = Object.fromEntries(
+				paramsOf(field).map((param: string) => [param, []])
+			);
+			for (const v of finalFilterValue) {
+				(buckets[v.param ?? field] ??= []).push(v.value);
+			}
+			for (const [param, values] of Object.entries(buckets)) {
+				handler.filter(values, param);
+				page.url.searchParams.delete(param);
+				values.forEach((value: string) => page.url.searchParams.append(param, value));
 			}
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
@@ -558,7 +666,8 @@
 	$effect(() => {
 		if (hasRemoteSource && page.form?.form?.posted && page.form?.form?.valid) {
 			console.debug('Form posted, invalidating table');
-			handler.invalidate();
+			// untracked: the reload writes inFlight, which would retrigger this effect
+			untrack(() => handler.invalidate());
 		}
 	});
 
@@ -580,6 +689,8 @@
 				: hasPermissionAnywhere(user, `add_${model.name}`)
 			: false
 	);
+	// Library-managed content: authored in the library builder, never from the table.
+	const LIBRARY_MANAGED_URL_MODELS = ['quick-forms'];
 	let contextMenuCanEditObject = $derived(
 		(model
 			? canPerformActionOnObject({
@@ -596,8 +707,14 @@
 	let contextMenuDisplayEdit = $derived(
 		contextMenuCanEditObject &&
 			URLModel &&
-			!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel)
+			!disableEdit &&
+			!['frameworks', 'risk-matrices', 'ebios-rm', ...LIBRARY_MANAGED_URL_MODELS].includes(URLModel)
 	);
+
+	// The context menu ignored disableEdit/disableView entirely, so a model that
+	// suppressed them in the row actions still offered them on right-click. View
+	// matches TableRowActions: builtin/urn restricts editing, never reading.
+	let contextMenuDisplayView = $derived(!disableView);
 
 	let contextMenuCanDeleteObject = $derived(
 		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&
@@ -678,7 +795,11 @@
 		filteredFields?.reduce((acc, field) => acc + filterValues?.[field]?.length, 0)
 	);
 
+	// Bumped on reset so filters holding their own state (date ranges) remount cleared.
+	let filterResetKey = $state(0);
+
 	async function resetFilters() {
+		filterResetKey++;
 		for (const field of filteredFields) {
 			const defaultValue = defaultFilters[field] ?? [];
 			filterValues[field] = Array.isArray(defaultValue)
@@ -697,6 +818,15 @@
 		delete next[filterStoreKey];
 		$tableFilterStates = next;
 	}
+
+	const APPLIED_CONTROL_STATUS_PRESETS: Record<string, string> = {
+		to_do: 'preset-tonal-primary',
+		in_progress: 'preset-tonal-warning',
+		on_hold: 'preset-tonal-secondary',
+		active: 'preset-tonal-success',
+		degraded: 'preset-tonal-error',
+		deprecated: 'preset-tonal-surface'
+	};
 
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
 		// The badge background is a fixed hex color, so the text must be a fixed color too
@@ -768,6 +898,13 @@
 	};
 
 	let openState = $state(false);
+	// Popover.Content renders while closed and every filter widget fetches its
+	// options on mount, so keep them out of the tree until the first open. Kept
+	// once mounted so reopening does not refetch.
+	let filtersMounted = $state(false);
+	$effect(() => {
+		if (openState) filtersMounted = true;
+	});
 
 	// Search state lifted here so it survives BatchActionBar show/hide cycles
 	let searchValue = $state('');
@@ -775,12 +912,14 @@
 	// Batch selection state
 	let selectedIds: Set<string> = $state(new Set());
 
+	const noBatchFieldEdit = $derived(disableBatchEdit ?? disableEdit);
+
 	const currentBatchActions: BatchActionConfig[] = $derived(
 		URLModel && model
 			? getBatchActions(URLModel, page.data?.featureflags ?? {}).filter((a) =>
 					a.type === 'delete'
 						? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
-						: !disableEdit && hasPermissionAnywhere(user, `change_${model.name}`)
+						: !noBatchFieldEdit && hasPermissionAnywhere(user, `change_${model.name}`)
 				)
 			: []
 	);
@@ -788,7 +927,7 @@
 	// only the lock/disable filters apply here — the child-model permission
 	// filter above would ask the wrong question for parent_action entries.
 	const extraActions = $derived(
-		extraBatchActions.filter((a) => (a.type === 'delete' ? !disableDelete : !disableEdit))
+		extraBatchActions.filter((a) => (a.type === 'delete' ? !disableDelete : !noBatchFieldEdit))
 	);
 	const allBatchActions = $derived([...currentBatchActions, ...extraActions]);
 	const hasBatchActions = $derived(
@@ -867,45 +1006,54 @@
 						<Popover.Content
 							class="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200-800"
 						>
-							<SuperForm {_form} validators={zod(z.object({}))}>
-								{#snippet children({ form })}
-									{#each filteredFields as field}
-										{#if filters[field]?.component}
-											{@const FilterComponent = filters[field].component}
-											<FilterComponent
-												{form}
-												{field}
-												{...filters[field].props}
-												fieldContext="filter"
-												label={safeTranslate(filters[field].props?.label)}
-												onChange={(value) => {
-													const arrayValue = Array.isArray(value) ? value : [value];
-													const sanitizedArrayValue = arrayValue.filter(
-														(v) => v !== null && v !== undefined && v !== ''
-													);
+							{#if filtersMounted}
+								<SuperForm {_form} validators={zod(z.object({}))}>
+									{#snippet children({ form })}
+										{#each filteredFields as field}
+											{#if filters[field]?.component}
+												{@const FilterComponent = filters[field].component}
+												{#key filterResetKey}
+													<FilterComponent
+														{form}
+														{field}
+														{...filters[field].props}
+														fieldContext="filter"
+														label={safeTranslate(filters[field].props?.label)}
+														filterValue={filterValues[field]}
+														onChange={(value) => {
+															const arrayValue = Array.isArray(value) ? value : [value];
+															const sanitizedArrayValue = arrayValue.filter(
+																(v) => v !== null && v !== undefined && v !== ''
+															);
 
-													filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
-												}}
-											/>
+															filterValues[field] = sanitizedArrayValue.map((v) =>
+																typeof v === 'object' && v !== null && 'value' in v
+																	? v
+																	: { value: v }
+															);
+														}}
+													/>
+												{/key}
+											{/if}
+										{/each}
+										{#if filterCount > 0}
+											<div class="flex justify-end pt-1">
+												<button
+													type="button"
+													class="btn preset-tonal-surface text-sm"
+													onclick={() => {
+														resetFilters();
+														openState = false;
+													}}
+												>
+													<i class="fa-solid fa-rotate-left mr-2"></i>
+													{m.resetFilters()}
+												</button>
+											</div>
 										{/if}
-									{/each}
-									{#if filterCount > 0}
-										<div class="flex justify-end pt-1">
-											<button
-												type="button"
-												class="btn preset-tonal-surface text-sm"
-												onclick={() => {
-													resetFilters();
-													openState = false;
-												}}
-											>
-												<i class="fa-solid fa-rotate-left mr-2"></i>
-												{m.resetFilters()}
-											</button>
-										</div>
-									{/if}
-								{/snippet}
-							</SuperForm>
+									{/snippet}
+								</SuperForm>
+							{/if}
 						</Popover.Content>
 					</Popover.Positioner>
 				</Popover>
@@ -929,7 +1077,7 @@
 				{#if canSelectObject}
 					{@render selectButton?.()}
 				{/if}
-				{#if canCreateObject && !disableCreate}
+				{#if canCreateObject && !disableCreate && !LIBRARY_MANAGED_URL_MODELS.includes(URLModel)}
 					{@render addButton?.()}
 				{/if}
 			</div>
@@ -1002,7 +1150,9 @@
 							<tr
 								onclick={(e) => onRowClick(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
-								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
+								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer {rowEmphasisClass(
+									row
+								)}"
 							>
 								{#if hasBatchActions}
 									<td
@@ -1042,7 +1192,7 @@
 											{:else}
 												<div
 													data-testid="model-table-td-array-elem"
-													class="base-font-family whitespace-pre-line break-words"
+													class="font-typo-base whitespace-pre-line break-words"
 												>
 													{#if Array.isArray(value)}
 														{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
@@ -1066,6 +1216,14 @@
 																			{@const itemHref = getRelatedFieldHref(key, val.id, {
 																				fallbackToDashedField: true
 																			})}
+																			{#if key === 'applied_controls' && val.status && val.status !== '--'}
+																				<span
+																					class="badge text-xs {APPLIED_CONTROL_STATUS_PRESETS[
+																						val.status
+																					] ?? 'preset-tonal-surface'}"
+																					>{safeTranslate(val.status)}</span
+																				>
+																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
 																					>{safeTranslate(val.str)}</Anchor
@@ -1076,9 +1234,11 @@
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
 																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
+																			{@const [labelKey, ...valueParts] = val.split(':')}
 																			<span class="text"
-																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																				{val.split(':')[1]}</span
+																				>{unsafeTranslate(labelKey + 'Colon') ??
+																					`${unsafeTranslate(labelKey)}:`}
+																				{valueParts.join(':')}</span
 																			>
 																		{:else}
 																			{val ?? '-'}
@@ -1141,7 +1301,7 @@
 														>
 															{safeTranslate(value.name ?? value.str) ?? '-'}
 														</p>
-													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'end_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on' || key === 'last_assessment_date')}
+													{:else if ISO_8601_REGEX.test(value) && DATE_FIELDS_TO_FORMAT.includes(key)}
 														{formatDateOrDateTime(value, getLocale())}
 													{:else if [true, false].includes(value)}
 														{@const bd = booleanDisplay(value, key, URLModel)}
@@ -1273,10 +1433,32 @@
 								{/if}
 							</tr>
 						{/each}
+						{#if (loading || isFetching) && $rows.length === 0}
+							{#each Array(5) as _}
+								<tr class="even:bg-surface-100-900" data-testid="row-skeleton">
+									{#if hasBatchActions}
+										<td class="w-10"></td>
+									{/if}
+									{#each renderColumnKeys as key (key)}
+										<td>
+											<div class={regionCell}>
+												<div class="space-y-2 py-2 animate-pulse">
+													<div class="h-4 rounded bg-surface-200-800"></div>
+													<div class="h-4 w-3/5 rounded bg-surface-200-800"></div>
+												</div>
+											</div>
+										</td>
+									{/each}
+									{#if displayActions}
+										<td class="text-end {regionCell}"></td>
+									{/if}
+								</tr>
+							{/each}
+						{/if}
 					</tbody>
 				{/snippet}
 			</ContextMenu.Trigger>
-			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
+			{#if contextMenuDisplayEdit || contextMenuDisplayView || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
 					class="z-50 min-w-[180px] outline-hidden bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200-800 rounded-md"
 				>
@@ -1286,7 +1468,7 @@
 						{/each}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 					{/if}
-					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) || URLModel === 'terminologies' || URLModel === 'entities'}
+					{#if contextMenuDisplayEdit}
 						<ContextMenu.Item
 							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
@@ -1300,6 +1482,8 @@
 						>
 							{m.edit()}
 						</ContextMenu.Item>
+					{/if}
+					{#if contextMenuDisplayView}
 						<ContextMenu.Item
 							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {

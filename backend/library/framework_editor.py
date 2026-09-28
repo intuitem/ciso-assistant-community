@@ -71,6 +71,7 @@ QUESTION_KEYS = {
     "config",
     "depends_on",
     "weight",
+    "required",
     "translations",
     "choices",
 }
@@ -165,6 +166,7 @@ def framework_to_editor_doc(framework: dict, *, locale: str = "en") -> dict:
                     "depends_on": q_data.get("depends_on"),
                     "order": q_order,
                     "weight": q_data.get("weight", 1),
+                    "required": q_data.get("required", True) is not False,
                     "requirement_node_id": node_urn,
                     "folder_id": "",
                     "translations": q_data.get("translations"),
@@ -218,17 +220,21 @@ def _clean(mapping: dict) -> dict:
     return {key: value for key, value in mapping.items() if value is not None}
 
 
-def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
+def editor_doc_to_framework_object(
+    editor_doc: dict, *, existing: dict, node_base: str | None = None
+) -> dict:
     """Convert an editor doc back into the library-YAML framework object.
 
     `existing` is the framework object currently in the draft document; it
     provides the pinned framework URN, the set of known item URNs, and the
-    fields the editor does not model.
+    fields the editor does not model. `node_base` overrides the URN base new
+    nodes are minted under (quick form pages reuse this converter with their
+    own token, see quick_form_editor).
     """
     framework_urn = str(existing.get("urn", "")).lower()
     if not framework_urn:
         raise BuilderError("The framework in the draft has no URN")
-    base = node_base_urn(framework_urn)
+    base = node_base or node_base_urn(framework_urn)
 
     existing_nodes = {
         str(node.get("urn", "")).lower(): node
@@ -385,6 +391,9 @@ def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
                 "config": question.get("config"),
                 "depends_on": question.get("depends_on"),
                 "weight": question.get("weight"),
+                # Only the non-default value is emitted, so compliance
+                # documents stay byte-identical.
+                "required": False if question.get("required") is False else None,
                 "translations": question.get("translations"),
                 "choices": q_choices or None,
             }

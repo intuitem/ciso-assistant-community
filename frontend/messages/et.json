@@ -1062,6 +1062,20 @@
 	"appliedControlNoEffort": "Hinnanguline töömaht puudub. See aitab prioriseerimisel",
 	"appliedControlNoCost": "Hinnanguline kulu puudub. See aitab prioriseerimisel",
 	"appliedControlNoLink": "Rakendatud kontrollmeetmel puudub väline link. See aitab järeltegevustes",
+	"appliedControlActiveNoEvidence": "Rakendatud meede on aktiivne, kuid sellele pole lisatud tõendit",
+	"xRaysNoIssues": "Selles kategoorias pole probleeme",
+	"xRaysIssue": "hoiatuse tüüp",
+	"xRaysIssues": "hoiatuse tüübid",
+	"xRaysOccurrence": "mõjutatud üksus",
+	"xRaysOccurrences": "mõjutatud üksused",
+	"xRaysOpenDomain": "Ava domeen",
+	"xRaysOpenAudit": "Ava audit",
+	"xRaysOpenRiskAssessment": "Ava riskihindamine",
+	"xRaysAssessmentStatus": "Hindamise olek",
+	"xRaysToggleSeverity": "Näita või peida {severity}",
+	"xRaysSortBySeverity": "Sorteeri raskusastme järgi",
+	"xRaysSortByName": "Sorteeri nime järgi",
+	"warnings": "Hoiatused",
 	"riskAcceptanceNoExpiryDate": "Aktseptil puudub aegumiskuupäev",
 	"riskAcceptanceExpired": "Aktsept on aegunud. Kaalu oleku või kuupäeva uuendamist",
 	"complianceAssessmentInProgress": "Audit on veel pooleli",
@@ -1342,6 +1356,8 @@
 	"removeIdentifier": "Eemalda identifikaator",
 	"phone": "Telefon",
 	"role": "Roll",
+	"defaultRole": "Vaikimisi roll",
+	"defaultRoleHelpText": "Roll, mis antakse automaatselt sellele domeenile igale kasutajale, kellel on rollimääramine mõnel selle alamdomeenil.",
 	"questions": "Küsimused",
 	"recipientEntity": "Saajaüksus",
 	"financial": "Finants",
@@ -1389,14 +1405,11 @@
 	"mailFailedToSend": "E-kirja saatmine ebaõnnestus",
 	"questionOrQuestions": "Küsimus(ed)",
 	"successfullyUpdatedClientSettings": "Kliendiseaded uuendati edukalt, palun värskenda lehte.",
-	"xRaysEmptyMessage": "Röntgeni kasutamiseks pead looma vähemalt ühe perimeetri.",
+	"xRaysEmptyMessage": "Ühtegi probleemi ei tuvastatud. Röntgen kuvab ainult leidudega valdkondi.",
+	"xRaysLoadingError": "Röntgenanalüüsi ei õnnestunud lõpule viia. Üksikasjad leiate serveri logidest.",
 	"xRaysLoadingData": "Andmete analüüsimine...",
-	"xRaysIssueType": "probleemi tüüp",
-	"xRaysIssueTypes": "probleemi tüübid",
-	"xRaysFinding": "leid",
-	"xRaysFindings": "leiud",
 	"xRaysView": "Vaade",
-	"xRaysDescription": "Röntgen on väga kasulik tööriist perimeetrite lõikes hinnangute ebakõlade tuvastamiseks.",
+	"xRaysDescription": "Tuvastab vastuolud teie auditites ja riskihinnangutes.",
 	"suggestControls": "Soovita kontrollmeetmeid",
 	"createAppliedControlsFromSuggestionsHelpText": "Loo rakendatud kontrollmeetmed raamistiku nõuete soovitatud viitekontrollidest",
 	"createAppliedControlsFromSuggestionsSuccess": "Rakendatud kontrollmeetmed loodi soovitatud viitekontrollidest edukalt",
@@ -2115,6 +2128,7 @@
 	"addOperationalScenario": "Lisa operatiivne stsenaarium",
 	"workshopFour": "Töötuba 4",
 	"noThreat": "Oht puudub",
+	"noTechnique": "Tehnikaid pole",
 	"likely": "Tõenäoline",
 	"unlikely": "Ebatõenäoline",
 	"veryLikely": "Väga tõenäoline",
@@ -2179,7 +2193,8 @@
 	"stakeholderIsSelectedHelpText": "Sidusrühma valik uuringu jaoks",
 	"strategicScenarioHelpText": "Ründeteede kogumid riski allikast kavandatud sihtmärgini",
 	"operatingModesDescriptionHelpText": "Elementaarsete tegevuste jada kirjeldus. Järgmises etapis saad lisada ründeahela detailid.\nKui see väli on tühi, tuletatakse see automaatselt.",
-	"operationalScenarioThreatsHelpText": "Üksiktegevused, mida riski allikas teeb kriitilise toetava vara vastu operatiivstsenaariumi osana",
+	"operationalScenarioThreatsHelpText": "Ohud, mida riski allikas kasutab kriitilise toetava vara vastu operatiivstsenaariumi osana",
+	"operationalScenarioTechniquesHelpText": "Ründajate tehnikad (MITRE ATT&CK ja muud TTP kataloogid), mida selles operatiivstsenaariumis kasutatakse",
 	"operationalScenarioIsSelectedHelpText": "Operatiivstsenaariumi valik uuringu jaoks",
 	"attackPathStakeholdersHelpText": "Ründeteega seotud sidusrühmad",
 	"attackPathIsSelectedHelpText": "Ründetee valik uuringu jaoks",
@@ -2492,7 +2507,6 @@
 	"deactivateServiceAccountConfirm": "Selle teenusekonto deaktiveerimine tühistab kohe kõik kehtivad juurdepääsutokenid ja blokeerib uute väljastamise. Kas jätkata?",
 	"gracePeriod": "Üleminekuperiood",
 	"gracePeriodHelpText": "Praegune saladus jätkab pärast vahetamist töötamist selle aja jooksul, et integratsioone saaks uuendada katkestusteta. Piiratud 1 kuuga.",
-	"gracePeriodTooLong": "Üleminekuperiood ei tohi olla pikem kui 1 kuu.",
 	"previousSecretValidUntil": "Eelmine kliendisaladus kehtib kuni {date}.",
 	"expiresOn": "Aegub {date}",
 	"expiresIn": "Aegub",
@@ -2798,6 +2812,8 @@
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Tokeni autentimismeetod",
 	"oauthPKCEEnabled": "OAuth PKCE lubatud",
+	"oidcAdditionalScopes": "Täiendavad kehtivusalad",
+	"oidcAdditionalScopesHelpText": "Valikulised komadega eraldatud OAuthi kehtivusalad, mis lisatakse vaikimisi kehtivusaladele openid, profile ja email.",
 	"suggestedParentheses": "(soovitatud)",
 	"matchingScenarios": "Sobivad stsenaariumid",
 	"clientSecretAlreadySetHelpText": "Kliendisaladus on juba määratud.",
@@ -4494,19 +4510,12 @@
 	"builderRequirementHint": "Hinnatav, võib siiski sisaldada alamsõlmi",
 	"builderSplashScreen": "Avakuva",
 	"builderSplashScreenHint": "Esitluslik, mittehinnatav",
-	"builderStatusLive": "Aktiivne",
-	"builderStatusLiveTitle": "Mustand vastab sellele, mida auditi vastajad näevad.",
-	"builderStatusUnpublishedChanges": "Avaldamata muudatused",
-	"builderStatusUnpublishedChangesTitle": "Mustandis on muudatused, mis pole auditi vastajatele veel nähtavad. Rakendamiseks avalda.",
-	"builderStatusDraftNothingLive": "Mustand — midagi pole veel aktiivne",
-	"builderStatusDraftNothingLiveTitle": "Mustandis on sisu, kuid midagi pole veel avaldatud. Uued auditid ei näe midagi enne avaldamist.",
 	"builderStatusEmpty": "Tühi",
 	"builderStatusEmptyTitle": "Nõudeid pole veel. Sellel raamistikul põhinevatel uutel audititel pole midagi vastata.",
 	"builderPreview": "Eelvaade",
 	"builderPreviewSaveFirst": "Eelvaateks salvesta esmalt mustand",
 	"builderPreviewAsRespondent": "Eelvaade vastaja vaatest (avaneb uuel vahekaardil)",
 	"builderExportYamlTitle": "Ekspordi raamistik YAML-teegi failina",
-	"builderExportYamlUnpublishedWarning": "Avaldamata muudatusi ei kaasata. Viimaste muudatuste eksportimiseks avalda esmalt.",
 	"builderCopyBase": "Kopeeri baas",
 	"builderCopyBaseTitle": "Kopeeri baaskeele tekst keelde {lang} (olemasolevaid tõlkeid ei kirjutata üle)",
 	"builderCopyBaseQuestion": "Kas kopeerida baastekst?",
@@ -4516,82 +4525,7 @@
 	"builderExpandAllCards": "Laienda kõik kaardid",
 	"builderCollapseAllCards": "Ahenda kõik kaardid",
 	"builderSaveFailed": "Salvestamine ebaõnnestus",
-	"builderPublishedFlash": "Avaldatud!",
 	"builderSaveDraftTitle": "Salvesta mustand (Ctrl+S)",
-	"builderDiscardDraftTitle": "Hülga mustand",
-	"builderDiscard": "Hülga",
-	"builderDiscardAllChangesQuestion": "Kas hüljata kõik muudatused?",
-	"builderYesDiscard": "Jah, hülga",
-	"builderPublishDraftToLiveTitle": "Avalda mustand aktiivseks raamistikuks",
-	"builderPublishing": "Avaldamine...",
-	"builderPublishModalTitle": "Avalda mustand aktiivseks",
-	"builderPublishModalDescription": "See uuendab aktiivset raamistikku. Vaata allolevad muudatused üle.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} nõuet lisatud",
-				"countPlural=other": "{count} nõudeid lisatud"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} küsimus",
-				"countPlural=other": "{count} küsimust"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} nõue eemaldatud",
-				"countPlural=other": "{count} nõuet eemaldatud"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} küsimus",
-				"countPlural=other": "{count} küsimust"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Struktuurseid muudatusi ei tuvastatud (ainult metaandmed).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} lõhkuv muudatus tuvastatud",
-				"countPlural=other": "{count} lõhkuvat muudatust tuvastatud"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Need muudatused võivad mõjutada olemasolevate auditite hindamist, nähtavust või vastavustulemusi.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} olemasolev audit saab mõjutatud",
-				"countPlural=other": "{count} olemasolevat auditit saavad mõjutatud"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Nendesse audititesse lisatakse uued nõuded.",
-	"builderAffectedAuditsRemovedHint": "Eemaldatud nõuded ja nende hindamisandmed kustutatakse nendest audititest.",
-	"builderCouldNotLoadPreview": "Mõju eelvaadet ei õnnestunud laadida. Jätka ettevaatusega.",
-	"builderConfirmPublish": "Kinnita avaldamine",
 	"builderSearchNodes": "Otsi sõlmi...",
 	"builderExpandSidebar": "Laienda külgriba",
 	"builderCollapseSidebar": "Ahenda külgriba",
@@ -4771,7 +4705,6 @@
 	"builderSplashNumberedList": "Nummerdatud loend",
 	"builderSplashLink": "Link",
 	"builderSplashTable": "Tabel",
-	"builderSplashInsertImage": "Sisesta pilt",
 	"builderUntitledQuestion": "Pealkirjata küsimus",
 	"builderNotTranslated": "Tõlkimata",
 	"builderQuestionTextPlaceholder": "Sisesta küsimus...",
@@ -4816,27 +4749,12 @@
 	"builderKbSaveDraft": "Salvesta mustand",
 	"builderKbShowCheatsheet": "Kuva see spikker",
 	"builderKbCloseDialog": "Sulge dialoog või rippmenüü",
-	"builderImportedFramework": "Imporditud raamistik",
-	"builderImportedFrameworkDescription": "See raamistik imporditi teegist ja seda ei saa otse muuta. Muudatuste tegemiseks loo muudetav koopia.",
-	"builderCreateCopyAndEdit": "Loo koopia ja muuda",
-	"builderCreatingCopy": "Koopia loomine...",
-	"builderLoadingEditor": "Redaktori laadimine...",
-	"builderFailedToStartEditor": "Redaktori käivitamine ebaõnnestus",
-	"builderBackToFramework": "Tagasi raamistikku",
-	"builderBackToBuilder": "Tagasi koostajasse",
-	"builderFailedToLoadDraft": "Mustandi laadimine ebaõnnestus",
-	"builderImplementationGroupsHeader": "Rakendusgrupid",
-	"builderNoItemsToPreview": "Eelvaate kirjeid pole.",
-	"builderNoItemsToPreviewHint": "Lisa koostajas hinnatavad nõuded või avakuvad.",
-	"builderBaseLanguageOption": "Baaskeel",
 	"builderFrameworkNameRequired": "Raamistiku nimi on kohustuslik.",
 	"builderFrameworkNameTooLong": "Raamistiku nime pikkus on {length} märki (maksimaalselt 200).",
 	"builderNodeNameTooLong": "Nimi ületab 200 märki ({length}/200). Paiguta pikem tekst kirjelduse väljale.",
 	"builderRefIdTooLong": "'{label}': ref_id pikkus on {length} märki (maksimaalselt 100).",
 	"builderUrnTooLong": "'{label}': URN-i pikkus on {length} märki (maksimaalselt 255).",
-	"builderFailedToSaveDraftBeforePublish": "Mustandi salvestamine enne avaldamist ebaõnnestus.",
 	"builderUnsavedChangesNavigation": "Sul on salvestamata muudatusi, mis lähevad kaotsi. Kas lahkuda?",
-	"builderUnpublishedChangesNavigation": "Sul on avaldamata muudatusi. Mustand on salvestatud ja saad hiljem jätkata. Kas lahkuda?",
 	"bulkEvidenceUpload": "Tõendite hulgiüleslaadimine",
 	"bulkEvidenceUploadDescription": "Laadi ühe korraga üles mitu faili (või terve kaust) tõenditena. Duplikaatfailid (sama SHA-256 sihtvaldkonna sees) tuvastatakse automaatselt. Nimekonfliktid lahendatakse all valitud strateegia järgi.",
 	"targetDomain": "Sihtvaldkond",
@@ -4900,7 +4818,6 @@
 	"builderQuestionTypeUniqueChoice": "Üksikvalik",
 	"builderQuestionTypeMultipleChoice": "Mitmikvalik",
 	"builderQuestionTypeDate": "Kuupäev",
-	"builderChangedOn": "muudetud",
 	"disableMFA": "Keela MFA",
 	"disableMFA1": "Kui see kasutaja on kaotanud juurdepääsu oma teisele tegurile, saate",
 	"disableMFALinkText": "keelata tema MFA",

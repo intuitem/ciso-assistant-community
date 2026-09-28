@@ -5,7 +5,7 @@ import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
-	if (!locals.featureflags?.custom_portals) redirect(302, '/');
+	if (!(await locals.getFeatureFlags())?.custom_portals) redirect(302, '/');
 	// FolderTreeSelect on the page fetches its own org tree, so we only need the documents.
 	const documents = await fetchAllPages(fetch, `${BASE_API_URL}/public-documents/`).catch((e) => {
 		error(e?.status ?? 500, 'Failed to load documents');

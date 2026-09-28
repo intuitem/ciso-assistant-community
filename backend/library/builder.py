@@ -34,6 +34,7 @@ CANONICAL_OBJECT_FIELDS = {
 }
 LIST_OBJECT_FIELDS = [
     "frameworks",
+    "quick_forms",
     "threats",
     "reference_controls",
     "risk_matrices",
@@ -44,6 +45,7 @@ LIST_OBJECT_FIELDS = [
 # "reference_control": recognized on input, never minted.
 URN_TYPE_TOKENS = {
     "frameworks": "framework",
+    "quick_forms": "quick_form",
     "threats": "threat",
     "reference_controls": "reference_control",
     "risk_matrices": "matrix",
@@ -55,7 +57,14 @@ URN_TYPE_TOKENS = {
 # of these kinds gets the bare family URN. Mapping sets are deliberately NOT
 # here — a library legitimately holds several (e.g. both directions of a
 # crosswalk), so they always mint with their own leaf.
-SINGLETON_OBJECT_FIELDS = {"frameworks", "risk_matrices"}
+SINGLETON_OBJECT_FIELDS = {"frameworks", "quick_forms", "risk_matrices"}
+
+# Child-object URN type tokens: a framework's requirement nodes and a quick
+# form's pages live under their own token, derived from the parent URN.
+CHILD_URN_TOKENS = {
+    "frameworks": (":framework:", ":req_node:", "requirement_nodes"),
+    "quick_forms": (":quick_form:", ":qf_page:", "pages"),
+}
 
 POLICY_STRIP = "strip"
 POLICY_PULL = "pull"
@@ -172,6 +181,31 @@ def check_document_shape(objects: dict) -> list:
                 type_error(f"{path}[{index}]", "an object")
         return entries
 
+    def check_questions(questions, owner_path):
+        """Questions hang off a requirement node or a quick form page as a
+        dict keyed by URN; choices are a list of objects."""
+        if questions is None:
+            return
+        if not isinstance(questions, dict):
+            type_error(f"{owner_path}.questions", "an object keyed by URN")
+            return
+        for q_urn, question in questions.items():
+            q_path = f"{owner_path}.questions[{q_urn}]"
+            note_urn(q_urn, q_path)
+            if not isinstance(question, dict):
+                type_error(q_path, "an object")
+                continue
+            choices = question.get("choices")
+            if choices is not None:
+                for choice_index, choice in check_dict_list(
+                    choices, f"{q_path}.choices"
+                ):
+                    choice_urn = choice.get("urn")
+                    if choice_urn is not None and not isinstance(choice_urn, str):
+                        type_error(f"{q_path}.choices[{choice_index}].urn", "a string")
+                    else:
+                        note_urn(choice_urn, f"{q_path}.choices[{choice_index}]")
+
     top_level = {}
     for field in LIST_OBJECT_FIELDS:
         if field not in objects:
@@ -209,30 +243,20 @@ def check_document_shape(objects: dict) -> list:
                 refs = node.get(ref_field)
                 if refs is not None:
                     check_str_list(refs, f"{node_path}.{ref_field}")
-            questions = node.get("questions")
-            if questions is None:
-                continue
-            if not isinstance(questions, dict):
-                type_error(f"{node_path}.questions", "an object keyed by URN")
-                continue
-            for q_urn, question in questions.items():
-                q_path = f"{node_path}.questions[{q_urn}]"
-                note_urn(q_urn, q_path)
-                if not isinstance(question, dict):
-                    type_error(q_path, "an object")
-                    continue
-                choices = question.get("choices")
-                if choices is not None:
-                    for choice_index, choice in check_dict_list(
-                        choices, f"{q_path}.choices"
-                    ):
-                        choice_urn = choice.get("urn")
-                        if choice_urn is not None and not isinstance(choice_urn, str):
-                            type_error(
-                                f"{q_path}.choices[{choice_index}].urn", "a string"
-                            )
-                        else:
-                            note_urn(choice_urn, f"{q_path}.choices[{choice_index}]")
+            check_questions(node.get("questions"), node_path)
+
+    for index, quick_form in top_level.get("quick_forms", []):
+        path = f"content.quick_forms[{index}]"
+        pages = quick_form.get("pages")
+        if pages is None:
+            continue
+        for page_index, page in check_dict_list(pages, f"{path}.pages"):
+            page_path = f"{path}.pages[{page_index}]"
+            page_urn = page.get("urn")
+            if page_urn is not None and not isinstance(page_urn, str):
+                type_error(f"{page_path}.urn", "a string")
+            note_urn(page_urn, page_path)
+            check_questions(page.get("questions"), page_path)
 
     for index, mapping_set in top_level.get("requirement_mapping_sets", []):
         path = f"content.requirement_mapping_sets[{index}]"
@@ -314,20 +338,38 @@ def build_urn_map(
             else:
                 new_urn = f"{base}:{_dedup(_object_leaf(obj), taken_leaves)}"
             urn_map[old_urn] = new_urn
-            if field == "frameworks":
-                node_base = new_urn.replace(":framework:", ":req_node:", 1)
-                _map_requirement_nodes(obj, old_urn, node_base, urn_map)
+            if field in CHILD_URN_TOKENS:
+                parent_token, child_token, list_key = CHILD_URN_TOKENS[field]
+                node_base = new_urn.replace(parent_token, child_token, 1)
+                _map_child_objects(
+                    obj,
+                    old_urn,
+                    node_base,
+                    urn_map,
+                    parent_token,
+                    child_token,
+                    list_key,
+                )
     return urn_map
 
 
-def _map_requirement_nodes(
-    framework: dict, old_framework_urn: str, node_base: str, urn_map: dict
+def _map_child_objects(
+    parent: dict,
+    old_parent_urn: str,
+    node_base: str,
+    urn_map: dict,
+    parent_token: str = ":framework:",
+    child_token: str = ":req_node:",
+    list_key: str = "requirement_nodes",
 ) -> None:
-    # Conventional node namespace of the source framework: keeping each
-    # node's suffix relative to it preserves hierarchical ref schemes.
-    old_node_base = old_framework_urn.replace(":framework:", ":req_node:", 1) + ":"
+    """Map the child URNs (requirement nodes of a framework, pages of a quick
+    form) onto the new parent base. Question and choice URNs extend their
+    owner's URN, so they follow through prefix substitution."""
+    # Conventional child namespace of the source object: keeping each
+    # child's suffix relative to it preserves hierarchical ref schemes.
+    old_node_base = old_parent_urn.replace(parent_token, child_token, 1) + ":"
     taken_leaves = set()
-    for node in framework.get("requirement_nodes") or []:
+    for node in parent.get(list_key) or []:
         old_urn = str(node.get("urn", "")).lower()
         if not old_urn:
             continue
@@ -878,6 +920,26 @@ def _check_field_lengths(objects: dict) -> list:
                     if isinstance(question, dict):
                         for choice in question.get("choices") or []:
                             check(choice, f"{node_path}.questions[{q_urn}].choice")
+    for qf_index, quick_form in enumerate(objects.get("quick_forms") or []):
+        if not isinstance(quick_form, dict):
+            continue
+        base = f"content.quick_forms[{qf_index}]"
+        for page_index, page in enumerate(quick_form.get("pages") or []):
+            if not isinstance(page, dict):
+                continue
+            page_path = f"{base}.pages[{page_index}]"
+            check(page, page_path)
+            questions = page.get("questions")
+            if isinstance(questions, dict):
+                for q_urn, question in questions.items():
+                    if len(str(q_urn)) > _MAX_LENGTHS["urn"]:
+                        errors.append(
+                            f"{page_path}.questions[{q_urn}]: URN is "
+                            f"{len(str(q_urn))} characters (max {_MAX_LENGTHS['urn']})"
+                        )
+                    if isinstance(question, dict):
+                        for choice in question.get("choices") or []:
+                            check(choice, f"{page_path}.questions[{q_urn}].choice")
     return errors
 
 
@@ -987,6 +1049,9 @@ def _check_reference_integrity(draft, user=None) -> list:
     for framework in objects.get("frameworks") or []:
         for node in framework.get("requirement_nodes") or []:
             node_urns.add(str(node.get("urn", "")).lower())
+    for quick_form in objects.get("quick_forms") or []:
+        for page in quick_form.get("pages") or []:
+            node_urns.add(str(page.get("urn", "")).lower())
     internal |= node_urns
 
     declared_dependencies = {str(dep).lower() for dep in draft.dependencies or []}
@@ -1075,6 +1140,27 @@ def _check_reference_integrity(draft, user=None) -> list:
                             f"{q_urn}: depends_on references question {target} "
                             f"which is not in {fw_urn}"
                         )
+    for quick_form in objects.get("quick_forms") or []:
+        qf_urn = str(quick_form.get("urn", "")).lower()
+        form_question_urns = set()
+        for page in quick_form.get("pages") or []:
+            questions = page.get("questions")
+            if isinstance(questions, dict):
+                form_question_urns.update(str(q_urn).lower() for q_urn in questions)
+        for page in quick_form.get("pages") or []:
+            questions = page.get("questions")
+            if not isinstance(questions, dict):
+                continue
+            for q_urn, question in questions.items():
+                depends_on = (question or {}).get("depends_on")
+                target = (
+                    depends_on.get("question") if isinstance(depends_on, dict) else None
+                )
+                if target and str(target).lower() not in form_question_urns:
+                    errors.append(
+                        f"{q_urn}: depends_on references question {target} "
+                        f"which is not in {qf_urn}"
+                    )
     for mapping_set in objects.get("requirement_mapping_sets") or []:
         ms_urn = str(mapping_set.get("urn", "")).lower()
         for ref_field in ("source_framework_urn", "target_framework_urn"):

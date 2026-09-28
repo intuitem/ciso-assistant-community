@@ -5,7 +5,7 @@ import { m } from '$paraglide/messages';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
-	if (!locals.featureflags?.document_management) redirect(302, '/');
+	if (!(await locals.getFeatureFlags())?.document_management) redirect(302, '/');
 	const raw: any[] = await fetchAllPages(
 		fetch,
 		`${BASE_API_URL}/folders/?content_type=DO&content_type=GL`
@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 
 export const actions: Actions = {
 	default: async ({ request, fetch, locals }) => {
-		if (!locals.featureflags?.document_management) redirect(302, '/');
+		if (!(await locals.getFeatureFlags())?.document_management) redirect(302, '/');
 		const form = await request.formData();
 		const file = form.get('file') as File | null;
 		if (!file || file.size === 0) return fail(400, { error: m.zipFileRequired() });

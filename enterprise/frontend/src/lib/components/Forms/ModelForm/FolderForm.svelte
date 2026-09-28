@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import * as m from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
@@ -28,25 +28,19 @@
 		model
 	}: Props = $props();
 
-	const setCreateIamGroups = (value: boolean) => {
-		form.form.update((currentData) => ({
-			...currentData,
-			create_iam_groups: value
-		}));
-	};
+	let displayDefaultRoleSelect = $derived(object.content_type !== 'EN'); // We want to hide the `"default_role"`field `Select` for enclave folders.
 
-	const normalizeParentSelection = (selection: string | string[] | undefined) =>
-		Array.isArray(selection) ? selection.at(-1) : selection;
+	let isRootFolder = $derived(object.content_type === 'GL');
 
-	function handleParentFolderChange(value: string | string[] | undefined) {
-		const selectedId = normalizeParentSelection(value);
-		const rootFolderId = $page.data.user?.root_folder_id;
-		if (!selectedId) {
-			setCreateIamGroups(false);
-			return;
+	onMount(() => {
+		const isEdit = Boolean(object?.id);
+		if (!isEdit && form.data?.create_iam_groups !== true) {
+			form.form.update((currentData) => ({
+				...currentData,
+				create_iam_groups: true
+			}));
 		}
-		setCreateIamGroups(selectedId === rootFolderId);
-	}
+	});
 </script>
 
 {#if importFolder}
@@ -70,6 +64,18 @@
 		label={m.createMissingAssetClasses()}
 		helpText={m.createMissingAssetClassesHelpText()}
 	/>
+{:else if isRootFolder}
+	<AutocompleteSelect
+		{form}
+		translateOptions={false}
+		optionsEndpoint="roles?read_only=true"
+		field="default_role"
+		nullable={true}
+		cacheLock={cacheLocks['default_role']}
+		bind:cachedValue={formDataCache['default_role']}
+		label={m.defaultRole()}
+		helpText={m.defaultRoleHelpText()}
+	/>
 {:else}
 	<FolderTreeSelect
 		{form}
@@ -78,8 +84,20 @@
 		cacheLock={cacheLocks['parent_folder']}
 		bind:cachedValue={formDataCache['parent_folder']}
 		label={m.parentDomain()}
-		onChange={handleParentFolderChange}
 	/>
+	{#if displayDefaultRoleSelect}
+		<AutocompleteSelect
+			{form}
+			translateOptions={false}
+			optionsEndpoint="roles?read_only=true"
+			field="default_role"
+			nullable={true}
+			cacheLock={cacheLocks['default_role']}
+			bind:cachedValue={formDataCache['default_role']}
+			label={m.defaultRole()}
+			helpText={m.defaultRoleHelpText()}
+		/>
+	{/if}
 	<AutocompleteSelect
 		multiple
 		{form}

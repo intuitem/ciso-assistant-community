@@ -10,7 +10,10 @@ from django.db.models import Avg, Count, OuterRef, Q, Subquery, Sum
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.base_models import AbstractBaseModel, NameDescriptionMixin
+from core.base_models import (
+    AbstractBaseModel,
+    NameDescriptionMixin,
+)
 from core.models import (
     Actor,
     AppliedControl,
@@ -36,7 +39,7 @@ from core.models import (
     Vulnerability,
 )
 from global_settings.models import GlobalSettings
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from iam.models import Folder, FolderMixin
 
 logger = structlog.getLogger(__name__)
 
@@ -82,7 +85,6 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
             "Format: [{'name': 'Low', 'description': '', 'translations': {'fr': {'name': 'Faible', 'description': ''}}}]"
         ),
     )
-    is_published = models.BooleanField(default=True, verbose_name=_("Published"))
     higher_is_better = models.BooleanField(
         default=True,
         verbose_name=_("Higher is better"),
@@ -114,9 +116,7 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         return self.display_short
 
 
-class MetricInstance(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
-):
+class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", _("Draft")
         ACTIVE = "active", _("Active")
@@ -175,6 +175,7 @@ class MetricInstance(
         blank=True,
         null=True,
     )
+
     fields_to_check = ["ref_id", "name"]
 
     class Meta:
@@ -192,7 +193,13 @@ class MetricInstance(
         super().save(*args, **kwargs)
 
     def get_latest_sample(self):
-        return self.samples.first()  # ordering is important
+        # last_refresh, current_value and raw_value each want the same row, so the
+        # lookup is memoised per instance. When the caller prefetched `samples`,
+        # first() reads the prefetch cache and costs nothing; ordering is the
+        # model's own ("-timestamp"), so first() really is the latest.
+        if "_latest_sample" not in self.__dict__:
+            self.__dict__["_latest_sample"] = self.samples.first()
+        return self.__dict__["_latest_sample"]
 
     def last_refresh(self):
         latest_sample = self.get_latest_sample()
@@ -439,6 +446,8 @@ class BuiltinMetricSample(AbstractBaseModel):
             "Format depends on object type (e.g., progress, result_breakdown, etc.)"
         ),
     )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("Builtin metric sample")
@@ -981,7 +990,10 @@ class Dashboard(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
 
     @property
     def widget_count(self):
-        return self.widgets.count()
+        # The list endpoint annotates this to avoid a COUNT per row; a lone
+        # object (detail view, admin) still counts on demand.
+        annotated = self.__dict__.get("_widget_count")
+        return annotated if annotated is not None else self.widgets.count()
 
 
 class DashboardWidget(AbstractBaseModel, FolderMixin):
@@ -997,6 +1009,7 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
         AREA = "area", _("Area Chart")
         GAUGE = "gauge", _("Gauge")
         SPARKLINE = "sparkline", _("Sparkline")
+        SMALL_MULTIPLES = "small_multiples", _("Small Multiples")
         TABLE = "table", _("Table")
         TEXT = "text", _("Text")
 

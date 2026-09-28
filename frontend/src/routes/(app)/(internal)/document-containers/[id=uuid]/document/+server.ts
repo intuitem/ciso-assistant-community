@@ -2,15 +2,15 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error, json, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-function assertFeatureEnabled(locals: App.Locals) {
-	if (!locals.featureflags?.document_management) {
+async function assertFeatureEnabled(locals: App.Locals) {
+	if (!(await locals.getFeatureFlags())?.document_management) {
 		error(403, { message: 'Document management feature is disabled' });
 	}
 }
 
 // Create a document or upload image
 export const POST: RequestHandler = async ({ fetch, request, url, locals, params }) => {
-	assertFeatureEnabled(locals);
+	await assertFeatureEnabled(locals);
 
 	// Add a new locale variant with an uploaded file, atomically (multipart).
 	if (url.searchParams.get('_action') === 'add-locale') {
@@ -158,7 +158,7 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals, params
 
 // Proxy GET requests for revisions, diffs, PDF export
 export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
-	assertFeatureEnabled(locals);
+	await assertFeatureEnabled(locals);
 
 	const action = url.searchParams.get('_action');
 
@@ -281,7 +281,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 
 // Delete a document or revision
 export const DELETE: RequestHandler = async ({ fetch, url, locals }) => {
-	assertFeatureEnabled(locals);
+	await assertFeatureEnabled(locals);
 
 	const type = url.searchParams.get('_type');
 	const id = url.searchParams.get('id');

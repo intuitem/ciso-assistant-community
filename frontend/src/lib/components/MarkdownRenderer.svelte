@@ -2,6 +2,7 @@
 	import { marked } from 'marked';
 	import sanitizeHtml from 'sanitize-html';
 	import { sanitizeConfig } from '$lib/utils/markdown';
+	import { mountMermaidBlocks, wrapMermaidBlocks } from '$lib/utils/mermaid';
 	import * as m from '$paraglide/messages';
 
 	interface Props {
@@ -42,6 +43,8 @@
 				: `<input${attrs} aria-label="${/\bchecked\b/.test(attrs) ? m.taskItemChecked() : m.taskItemUnchecked()}" />`
 		);
 
+		html = wrapMermaidBlocks(html);
+
 		// Clean up excessive spacing
 		html = html
 			.replace(/>\s+</g, '><') // Remove whitespace between tags
@@ -55,10 +58,17 @@
 	}
 
 	let renderedContent = $derived(processContent(content));
+
+	let container: HTMLDivElement | undefined = $state();
+
+	$effect(() => {
+		if (container && renderedContent) return mountMermaidBlocks(container);
+	});
 </script>
 
 {#if renderedContent}
 	<div
+		bind:this={container}
 		class="prose prose-sm dark:prose-invert max-w-none wrap-break-word whitespace-pre-line {className}"
 	>
 		{@html renderedContent}
@@ -66,3 +76,19 @@
 {:else}
 	<span class="text-surface-600-400 italic">--</span>
 {/if}
+
+<style>
+	:global(.mermaid-diagram) {
+		display: flex;
+		justify-content: center;
+		margin: 1em 0;
+		overflow-x: auto;
+		white-space: normal;
+	}
+
+	:global(.mermaid-diagram pre) {
+		width: 100%;
+		white-space: pre;
+		font-family: var(--font-mono, monospace);
+	}
+</style>

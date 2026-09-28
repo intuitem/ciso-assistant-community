@@ -1,6 +1,7 @@
 // define the content of forms
 
 import EvidenceFileName from '$lib/components/ModelTable/field/EvidenceFileName.svelte';
+import NotificationTitle from '$lib/components/ModelTable/field/NotificationTitle.svelte';
 import CommitmentTarget from '$lib/components/ModelTable/field/CommitmentTarget.svelte';
 import ScheduleDisplay from '$lib/components/ModelTable/field/ScheduleDisplay.svelte';
 import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
@@ -131,7 +132,7 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 			position?: 'suffix' | 'prefix';
 			classes?: string;
 		};
-		lazy?: boolean; // Enable lazy loading for large option sets (e.g., assets)
+		lazy?: boolean; // Defaults to true; set false to load every option up front
 	};
 	batchCreate?: {
 		label?: string; // i18n key for button title (defaults to 'batchCreate')
@@ -211,6 +212,30 @@ export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 	vulnerabilities: 'vulnerabilities'
 };
 
+// Models never created from their list page: library-managed content, membership rows
+// written elsewhere, or records that only exist as a child of something else.
+export const NON_CREATABLE_URL_MODELS = [
+	// System-generated: written by producers, never by a user.
+	'notifications',
+	'risk-matrices',
+	'frameworks',
+	'requirement-mapping-sets',
+	'user-groups',
+	'role-assignments',
+	'qualifications',
+	'commitments',
+	'quick-form-responses',
+	'quick-forms',
+	// Own a list route with no create affordance on it.
+	'presets',
+	'ttp-catalogs'
+];
+
+// Models whose creation is a page, not a modal on the list.
+export const CREATE_ROUTE_OVERRIDES: Record<string, string> = {
+	'document-containers': '/documents/new'
+};
+
 export interface ModelMapEntry {
 	name: string;
 	localName: string;
@@ -252,6 +277,16 @@ type ModelMap = {
 };
 
 export const URL_MODEL_MAP: ModelMap = {
+	notifications: {
+		name: 'notification',
+		localName: 'notification',
+		localNamePlural: 'notifications',
+		verboseName: 'Notification',
+		verboseNamePlural: 'Notifications'
+		// No `foreignKeyFields`: the domain is the derived `target_folder`, and linking it
+		// would 404 for a recipient holding no role there -- which is the normal case (ADR
+		// notification-recipient-scoped-access).
+	},
 	folders: {
 		name: 'folder',
 		localName: 'domain',
@@ -261,7 +296,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		listViewUrlParams: '?content_type=DO&content_type=GL',
 		foreignKeyFields: [
 			{ field: 'parent_folder', urlModel: 'folders' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'default_role', urlModel: 'roles' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'folder', urlModel: 'perimeters' },
@@ -933,6 +969,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'assets',
+				urlModel: 'document-containers',
+				addExisting: {
+					parentField: 'documents'
+				}
+			},
+			{
+				field: 'assets',
 				urlModel: 'compliance-assessments',
 				disableCreate: true,
 				disableDelete: true
@@ -979,8 +1022,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			}
 		],
@@ -1170,6 +1212,95 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reference_controls', urlModel: 'reference-controls' }
 		]
 	},
+	'quick-forms': {
+		name: 'quickform',
+		localName: 'quickForm',
+		localNamePlural: 'quickForms',
+		verboseName: 'Quick form',
+		verboseNamePlural: 'Quick forms',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'provider' },
+			{ field: 'folder' },
+			{ field: 'library' },
+			{ field: 'pages_count' },
+			{ field: 'responses_count' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'quick_form', urlModel: 'quick-form-responses', disableCreate: true }
+		]
+	},
+	'quick-form-publications': {
+		name: 'quickformpublication',
+		customNameDescription: true,
+		localName: 'quickFormPublication',
+		localNamePlural: 'quickFormPublications',
+		verboseName: 'Quick form publication',
+		verboseNamePlural: 'Quick form publications',
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'quick_form' },
+			{ field: 'folder' },
+			{ field: 'submission_folder' },
+			{ field: 'enabled' },
+			{ field: 'audience_groups' },
+			{ field: 'default_reviewers' },
+			{ field: 'allow_multiple_drafts' },
+			{ field: 'responses_count' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{
+				field: 'submission_folder',
+				urlModel: 'folders',
+				urlParams: 'content_type=DO&content_type=GL'
+			},
+			{ field: 'quick_form', urlModel: 'quick-forms' },
+			{ field: 'audience_groups', urlModel: 'user-groups' },
+			{ field: 'default_reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'publication', urlModel: 'quick-form-responses', disableCreate: true }
+		]
+	},
+	'quick-form-responses': {
+		name: 'quickformresponse',
+		localName: 'quickFormResponse',
+		localNamePlural: 'quickFormResponses',
+		verboseName: 'Quick form response',
+		verboseNamePlural: 'Quick form responses',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'quick_form' },
+			{ field: 'folder' },
+			{ field: 'status' },
+			{ field: 'respondents' },
+			{ field: 'reviewers' },
+			{ field: 'submitted_by' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'score' },
+			{ field: 'observation' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'quick_form', urlModel: 'quick-forms' },
+			{ field: 'respondents', urlModel: 'actors', urlParams: 'is_third_party=false' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' }
+		],
+		selectFields: [{ field: 'status' }]
+	},
 	evidences: {
 		name: 'evidence',
 		localName: 'evidence',
@@ -1265,6 +1396,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'task_templates', urlModel: 'task-templates' },
 			{ field: 'processings', urlModel: 'processings' },
+			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'classification', urlModel: 'classification-levels' }
 		],
@@ -1952,8 +2084,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			},
 			{
@@ -2181,8 +2312,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'ebios_rm_studies',
 				urlModel: 'assets',
 				addExisting: {
-					parentField: 'assets',
-					lazy: true
+					parentField: 'assets'
 				}
 			}
 		],
@@ -2355,9 +2485,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Operational scenario',
 		verboseNamePlural: 'Operational scenarios',
 		markdownFields: ['operating_modes_description'],
+		flaggedFields: {
+			techniques: 'ttps'
+		},
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'techniques', urlModel: 'techniques' },
 			{
 				field: 'attack_path',
 				urlModel: 'attack-paths',
@@ -2479,6 +2613,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'approver' },
 			{ field: 'observation' },
 			{ field: 'link' },
+			// Where this record came from, when automation produced it. Rendered by the
+			// generic `produced_from` branch, which routes per entry rather than per field.
+			{ field: 'produced_from' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		],
@@ -2671,8 +2808,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			},
 			{
@@ -2704,8 +2840,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'findings',
 				urlModel: 'task-templates',
 				addExisting: {
-					parentField: 'task_templates',
-					lazy: true
+					parentField: 'task_templates'
 				}
 			}
 		],
@@ -2790,8 +2925,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			},
 			{
@@ -2935,6 +3069,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'incidents',
 				disableCreate: true,
 				disableDelete: true
+			},
+			{
+				field: 'task_templates',
+				urlModel: 'findings',
+				disableCreate: true,
+				disableDelete: true
 			}
 		]
 	},
@@ -2987,7 +3127,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }, { field: 'kind' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'framework', urlModel: 'frameworks' },
+			{ field: 'frameworks', urlModel: 'frameworks' },
 			{ field: 'perimeters', urlModel: 'perimeters' },
 			{ field: 'entities', urlModel: 'entities' }
 		],
@@ -3022,7 +3162,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: [
 			{ field: 'status' },
-			{ field: 'framework' },
+			{ field: 'frameworks' },
 			{ field: 'folder' },
 			{ field: 'perimeters' }
 		]
@@ -3070,8 +3210,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			},
 			{
@@ -3089,8 +3228,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: false,
 				disableDelete: true,
 				addExisting: {
-					parentField: 'assets',
-					lazy: true
+					parentField: 'assets'
 				}
 			},
 			{
@@ -3305,7 +3443,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'object-classifications': {
-		name: 'objectClassification',
+		name: 'objectclassification',
 		localName: 'objectClassification',
 		localNamePlural: 'objectClassifications',
 		verboseName: 'Object classification',
@@ -3323,7 +3461,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'classification-levels': {
-		name: 'classificationLevel',
+		name: 'classificationlevel',
 		localName: 'classificationLevel',
 		localNamePlural: 'classificationLevels',
 		verboseName: 'Classification level',
@@ -3761,6 +3899,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'metric_instance', urlModel: 'metric-instances' },
 			{ field: 'evidence_revision', urlModel: 'evidence-revisions' }
 		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'metric_instance' },
+			{ field: 'timestamp', type: 'datetime' },
+			{ field: 'display_value' },
+			{ field: 'observation' },
+			{ field: 'evidence_revision' },
+			{ field: 'folder' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
 		filters: [{ field: 'folder' }, { field: 'metric_instance' }]
 	},
 	dashboards: {
@@ -3855,6 +4004,10 @@ export const URL_MODEL_MAP: ModelMap = {
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 const FIELD_COMPONENT_MAP = {
+	notifications: {
+		// No value in the payload; NotificationTitle computes it.
+		title: NotificationTitle
+	},
 	commitments: {
 		target: CommitmentTarget
 	},
@@ -4052,6 +4205,18 @@ export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
 	// The urlmodel of {model}_duplicate must be {model}
 	map['urlModel'] = baseModel;
 	return map;
+};
+
+/** Django model name -> route segment, derived from URL_MODEL_MAP. */
+export const urlModelForDjangoName = (name: string): string | null => {
+	const hit = Object.entries(URL_MODEL_MAP).find(([, entry]) => entry.name === name);
+	return hit ? hit[0] : null;
+};
+
+/** Human label for a Django model name, from the same map. */
+export const localNameForDjangoName = (name: string): string | null => {
+	const hit = Object.values(URL_MODEL_MAP).find((entry) => entry.name === name);
+	return hit ? (hit.localName ?? hit.verboseName ?? null) : null;
 };
 
 export const urlParamModelVerboseName = (model: string): string => {

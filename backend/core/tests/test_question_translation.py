@@ -28,7 +28,6 @@ def translated_node(db):
     fw = Framework.objects.create(
         name="Translation Test FW",
         folder=folder,
-        is_published=True,
     )
     rn = RequirementNode.objects.create(
         framework=fw,
@@ -36,7 +35,6 @@ def translated_node(db):
         ref_id="TR-REQ",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
 
     q_sc = Question.objects.create(
@@ -47,7 +45,6 @@ def translated_node(db):
         type=Question.Type.UNIQUE_CHOICE,
         order=0,
         folder=folder,
-        is_published=True,
         translations={"fr": {"text": "Choisissez une couleur"}},
     )
     c1 = QuestionChoice.objects.create(
@@ -58,7 +55,6 @@ def translated_node(db):
         description="A red choice",
         order=0,
         folder=folder,
-        is_published=True,
         translations={"fr": {"value": "Rouge", "description": "Un choix rouge"}},
     )
     c2 = QuestionChoice.objects.create(
@@ -68,7 +64,6 @@ def translated_node(db):
         value="Blue",
         order=1,
         folder=folder,
-        is_published=True,
         translations={"fr": {"value": "Bleu"}},
     )
 
@@ -80,7 +75,6 @@ def translated_node(db):
         type=Question.Type.TEXT,
         order=1,
         folder=folder,
-        is_published=True,
         translations={"fr": {"text": "Décrivez votre approche"}},
     )
 
@@ -90,7 +84,6 @@ def translated_node(db):
         framework=fw,
         folder=folder,
         perimeter=perimeter,
-        is_published=True,
     )
     ra = RequirementAssessment.objects.create(
         compliance_assessment=ca,
@@ -157,16 +150,13 @@ class TestGetQuestionsTranslated:
 
     def test_returns_none_for_no_questions(self, db):
         folder = Folder.get_root_folder()
-        fw = Framework.objects.create(
-            name="Empty Trans FW", folder=folder, is_published=True
-        )
+        fw = Framework.objects.create(name="Empty Trans FW", folder=folder)
         rn = RequirementNode.objects.create(
             framework=fw,
             urn="urn:test:trans:empty",
             ref_id="TR-EMPTY",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         with translation_override("fr"):
             assert rn.get_questions_translated is None
@@ -203,14 +193,13 @@ class TestGetQuestionsTranslatedConfig:
 
     def test_includes_config_when_present(self, db):
         folder = Folder.get_root_folder()
-        fw = Framework.objects.create(name="Cfg FW", folder=folder, is_published=True)
+        fw = Framework.objects.create(name="Cfg FW", folder=folder)
         rn = RequirementNode.objects.create(
             framework=fw,
             urn="urn:test:cfg:r1",
             ref_id="R-1",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         Question.objects.create(
             requirement_node=rn,
@@ -220,7 +209,6 @@ class TestGetQuestionsTranslatedConfig:
             type="number",
             config={"widget": "slider", "min": 0, "max": 100, "step": 5},
             folder=folder,
-            is_published=True,
         )
         result = rn.get_questions_translated
         assert result["urn:test:cfg:q1"]["config"] == {
@@ -232,14 +220,13 @@ class TestGetQuestionsTranslatedConfig:
 
     def test_omits_config_when_absent(self, db):
         folder = Folder.get_root_folder()
-        fw = Framework.objects.create(name="NoCfg FW", folder=folder, is_published=True)
+        fw = Framework.objects.create(name="NoCfg FW", folder=folder)
         rn = RequirementNode.objects.create(
             framework=fw,
             urn="urn:test:nocfg:r1",
             ref_id="R-1",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         Question.objects.create(
             requirement_node=rn,
@@ -249,7 +236,6 @@ class TestGetQuestionsTranslatedConfig:
             type="number",
             config=None,
             folder=folder,
-            is_published=True,
         )
         result = rn.get_questions_translated
         assert "config" not in result["urn:test:nocfg:q1"]

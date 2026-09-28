@@ -4,13 +4,15 @@
  * - "positive": true = green, false = gray (default)
  * - "warning": true = orange, false = gray
  * - "warning_when_false": true = green, false = orange
+ * - "warning_when_false_blank": true = empty, false = orange
  * - "neutral": true = gray, false = gray
  *
  * Lookup order: "urlmodel:field" first, then "field" as global fallback.
  * Only fields with non-default polarity need to be listed here.
  */
 
-export type BooleanPolarity = 'positive' | 'warning' | 'warning_when_false' | 'neutral';
+export type BooleanPolarity =
+	'positive' | 'warning' | 'warning_when_false' | 'warning_when_false_blank' | 'neutral';
 
 const POLARITY_MAP: Map<string, BooleanPolarity> = new Map([
 	// Global defaults (apply unless overridden by a model-specific entry)
@@ -32,10 +34,13 @@ const POLARITY_MAP: Map<string, BooleanPolarity> = new Map([
 	['recovery_documented', 'warning_when_false'],
 	['recovery_tested', 'warning_when_false'],
 	['recovery_targets_met', 'warning_when_false'],
-	['within_tolerance', 'warning_when_false']
+	['within_tolerance', 'warning_when_false'],
 
 	// Model-specific overrides — use "urlmodel:field" format, e.g.:
 	// ['contracts:is_active', 'warning'],
+
+	// Unread is the loud state; a handled row says nothing rather than saying "green".
+	['notifications:is_read', 'warning_when_false_blank']
 ]);
 
 export function getBooleanPolarity(fieldName: string, urlModel?: string): BooleanPolarity {
@@ -57,6 +62,9 @@ export function booleanDisplay(
 	const polarity = getBooleanPolarity(fieldName, urlModel);
 
 	if (value) {
+		if (polarity === 'warning_when_false_blank') {
+			return { icon: 'fa-regular fa-circle', colorClass: 'text-gray-400' };
+		}
 		if (polarity === 'warning') {
 			return { icon: 'fa-solid fa-circle', colorClass: 'text-orange-500' };
 		}
@@ -67,7 +75,7 @@ export function booleanDisplay(
 	}
 
 	// value is false
-	if (polarity === 'warning_when_false') {
+	if (polarity === 'warning_when_false' || polarity === 'warning_when_false_blank') {
 		return { icon: 'fa-solid fa-circle', colorClass: 'text-orange-500' };
 	}
 	return { icon: 'fa-regular fa-circle', colorClass: 'text-gray-400' };

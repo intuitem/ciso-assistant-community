@@ -46,7 +46,7 @@ export const actions: Actions = {
 	upload: async (event) => {
 		const formData = await event.request.formData();
 		const form = await superValidate(formData, zod(LibraryUploadSchema));
-		const locale = event.locals.user?.preferences?.lang;
+		const locale = (await event.locals.getUser())?.preferences?.lang;
 
 		if (formData.has('file')) {
 			const { file } = Object.fromEntries(formData) as { file: File };

@@ -4,7 +4,7 @@ import type { RequestHandler } from './$types';
 
 // Proxy the IAM-scoped uploaded-file endpoint so the browser gets it with auth.
 export const GET: RequestHandler = async ({ fetch, url, locals }) => {
-	if (!locals.featureflags?.document_management) {
+	if (!(await locals.getFeatureFlags())?.document_management) {
 		error(403, { message: 'Document management feature is disabled' });
 	}
 	const rev = url.searchParams.get('rev');

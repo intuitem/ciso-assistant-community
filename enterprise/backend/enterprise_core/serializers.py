@@ -30,11 +30,23 @@ logger = structlog.get_logger(__name__)
 
 
 class FolderWriteSerializer(CommunityFolderWriteSerializer):
+    BUILTIN_EDITABLE_FIELDS = {"name", "default_role"}
+
+    class Meta(CommunityFolderWriteSerializer.Meta):
+        # The default role is configurable here only; the community serializer
+        # excludes it (fixed baseline on the root). The eligibility and enclave
+        # validators are inherited from the community class and bind here.
+        exclude = [
+            field
+            for field in CommunityFolderWriteSerializer.Meta.exclude
+            if field != "default_role"
+        ]
+
     def validate_parent_folder(self, parent_folder):
+        """Nesting is allowed here, so this replaces the community policy outright
+        (hence `_resolve_parent_folder`, not `super()`); only cycles remain to reject.
         """
-        Check that the folders graph will not contain cycles
-        """
-        parent_folder = super().validate_parent_folder(parent_folder)
+        parent_folder = self._resolve_parent_folder(parent_folder)
         if not self.instance:
             return parent_folder
         if parent_folder:
@@ -46,25 +58,6 @@ class FolderWriteSerializer(CommunityFolderWriteSerializer):
                     "errorFolderGraphMustNotContainCycles"
                 )
         return parent_folder
-
-
-class RoleReadSerializer(BaseModelSerializer):
-    name = serializers.CharField(source="__str__")
-    permissions = serializers.SerializerMethodField()
-    folder = FieldsRelatedField()
-
-    class Meta:
-        model = Role
-        fields = "__all__"
-
-    def get_permissions(self, obj):
-        return [{"str": perm.codename} for perm in obj.permissions.all()]
-
-
-class RoleWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = Role
-        fields = "__all__"
 
 
 class EditorPermissionMixin:
@@ -119,7 +112,7 @@ class UserWriteSerializer(CommunityUserWriteSerializer, EditorPermissionMixin):
 class ClientSettingsWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ClientSettings
-        exclude = ["is_published", "folder"]
+        exclude = ["folder"]
 
 
 class ClientSettingsReadSerializer(BaseModelSerializer):
@@ -142,7 +135,7 @@ class ClientSettingsReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = ClientSettings
-        exclude = ["is_published", "folder"]
+        exclude = ["folder"]
 
 
 class LogEntrySerializer(serializers.ModelSerializer):
@@ -326,6 +319,12 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     service_accounts = serializers.BooleanField(
         source="value.service_accounts", required=False, default=False
     )
+
+    # The only enterprise flag that merely hides a navigation area; the rest
+    # change what the data means or are configuration.
+    USER_HIDEABLE_FLAGS = CommunityFeatureFlagSerializer.USER_HIDEABLE_FLAGS | {
+        "campaigns"
+    }
 
 
 class ServiceAccountWriteSerializer(CommunityServiceAccountWriteSerializer):

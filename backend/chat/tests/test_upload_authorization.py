@@ -22,7 +22,7 @@ def domain(app_ready):
 
 
 def _user_in_role(email, role_name, folder):
-    user = User.objects.create_user(email, is_published=True)
+    user = User.objects.create_user(email)
     user.folder = folder
     user.save()
     group = UserGroup.objects.create(name=f"grp-{email}", folder=folder)

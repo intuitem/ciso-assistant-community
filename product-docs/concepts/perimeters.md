@@ -4,6 +4,8 @@ A **perimeter** is an _optional_ scope refinement an assessment or risk study ca
 
 Perimeters are optional everywhere they appear: an assessment without a perimeter is scoped to its domain only. Use them when you need to track several distinct scopes inside the same domain, or to roll up assessments by scope rather than by domain.
 
+<figure><img src="../.gitbook/assets/perimeters-list.png" alt=""><figcaption><p>Three perimeters inside a single domain</p></figcaption></figure>
+
 ## When to use a domain vs a perimeter
 
 The two concepts solve different problems — and the choice matters because it shapes both _who can see what_ and _how reports roll up_.

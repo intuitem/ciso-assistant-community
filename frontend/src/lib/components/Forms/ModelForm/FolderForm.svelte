@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import * as m from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import FileInput from '../FileInput.svelte';
 	import Checkbox from '../Checkbox.svelte';

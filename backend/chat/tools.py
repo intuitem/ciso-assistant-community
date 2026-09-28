@@ -922,7 +922,6 @@ def _build_create_proposal(arguments: dict, scope, parsed_context=None) -> dict 
         "created_at",
         "updated_at",
         "folder",
-        "is_published",
         "urn",
         "ref_id",
         "locale",

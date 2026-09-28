@@ -4,7 +4,7 @@ import { tableSourceMapper } from '$lib/utils/table';
 import { getModelInfo } from '$lib/utils/crud';
 import { loadValidationFlowFormData, formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { type TableSource } from '$lib/components/ModelTable/types';
 import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
@@ -21,7 +21,7 @@ export const load: LayoutServerLoad = async ({ fetch, params, cookies, locals })
 		if (res.status === 404) {
 			// Check if focus mode is active
 			const focusFolderId = cookies.get('focus_folder_id');
-			const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
+			const focusModeEnabled = (await locals.getFeatureFlags())?.focus_mode ?? false;
 			const isFocusModeActive = focusFolderId && focusModeEnabled;
 
 			const message = isFocusModeActive

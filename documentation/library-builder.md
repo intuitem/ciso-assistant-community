@@ -28,8 +28,6 @@ presets, metrics).
    controls/threats by URN; cross-library links are `dependencies`.
 4. **Untrusted input.** The draft is client data; nothing in it is acted on
    until it goes through the loader's existing validation + RBAC scoping.
-5. **One signal, one meaning.** `is_published` is the IAM visibility flag only;
-   builder lifecycle is the draft state. No overloading.
 
 ## Identity
 

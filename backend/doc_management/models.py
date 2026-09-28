@@ -5,10 +5,12 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from auditlog.registry import auditlog
+
 from core.base_models import AbstractBaseModel
 from core.models import FilteringLabelMixin, I18nObjectMixin
 from core.validators import validate_file_name, validate_file_size
-from iam.models import FolderMixin, User
+from iam.models import FolderMixin, Folder, User
 
 
 class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
@@ -63,6 +65,7 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
     processings = models.ManyToManyField(
         "privacy.Processing", blank=True, related_name="documents"
     )
+    assets = models.ManyToManyField("core.Asset", blank=True, related_name="documents")
 
     fields_to_check = ["name"]
 
@@ -74,20 +77,15 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         propagate = False
         if self.pk:
             old = (
-                DocumentContainer.objects.filter(pk=self.pk)
-                .values("folder_id", "is_published")
-                .first()
+                DocumentContainer.objects.filter(pk=self.pk).values("folder_id").first()
             )
-            if old and (
-                old["folder_id"] != self.folder_id
-                or old["is_published"] != self.is_published
-            ):
+            if old and (old["folder_id"] != self.folder_id):
                 propagate = True
         super().save(*args, **kwargs)
-        # Children denormalize folder/is_published from the container, so a
+        # Children denormalize folder from the container, so a
         # container move/publish must reach the already-saved rows too.
         if propagate:
-            fields = {"folder_id": self.folder_id, "is_published": self.is_published}
+            fields = {"folder_id": self.folder_id}
             self.documents.update(**fields)
             DocumentRevision.objects.filter(document__container=self).update(**fields)
             DocumentAttachment.objects.filter(document__container=self).update(**fields)
@@ -120,6 +118,7 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
         related_name="+",
     )
     template_used = models.CharField(max_length=200, null=True, blank=True)
+
     fields_to_check = ["container", "locale"]
 
     class Meta:
@@ -129,7 +128,7 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     def save(self, *args, **kwargs):
         if self.container_id:
             self.folder = self.container.folder
-            self.is_published = self.container.is_published
+
         super().save(*args, **kwargs)
 
     @property
@@ -152,6 +151,12 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         VALIDATED = "validated", _("Validated")
         PUBLISHED = "published", _("Published")
         DEPRECATED = "deprecated", _("Deprecated")
+
+    # `reviewer` is also written by mark_change_requested(), so it only means
+    # "approver" once the revision reached one of these.
+    APPROVED_STATUSES = frozenset(
+        {Status.VALIDATED, Status.PUBLISHED, Status.DEPRECATED}
+    )
 
     document = models.ForeignKey(
         ManagedDocument, on_delete=models.CASCADE, related_name="revisions"
@@ -209,6 +214,7 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         related_name="+",
     )
     editing_since = models.DateTimeField(null=True, blank=True)
+
     fields_to_check = ["document", "version_number"]
 
     class Meta:
@@ -225,7 +231,7 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
-        self.is_published = self.document.is_published
+
         if self.source == self.Source.UPLOADED and not self.file:
             raise ValidationError("Uploaded revisions require a file.")
         if self.status == self.Status.DRAFT:
@@ -310,6 +316,7 @@ class DocumentAttachment(AbstractBaseModel, FolderMixin):
         blank=True,
         related_name="document_attachments",
     )
+
     fields_to_check = []
 
     class Meta:
@@ -318,7 +325,6 @@ class DocumentAttachment(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
-        self.is_published = self.document.is_published
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -347,6 +353,7 @@ class DocumentEdit(AbstractBaseModel, FolderMixin):
     )
     summary = models.CharField(max_length=500, blank=True)
     content_snapshot = models.TextField(blank=True)
+
     fields_to_check = []
 
     class Meta:
@@ -356,12 +363,34 @@ class DocumentEdit(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.revision.folder
-        self.is_published = self.revision.is_published
         super().save(*args, **kwargs)
 
     def __str__(self):
         editor_str = self.editor.email if self.editor else "unknown"
         return f"Edit by {editor_str} on {self.created_at}"
+
+
+MAX_EDITS_PER_REVISION = 20
+
+
+def record_document_edit(revision, editor, previous_content):
+    """Snapshot a draft's content change, keeping the most recent entries. One
+    place, so the editor's PATCH and a workflow leave the same history."""
+    if (
+        revision.status != DocumentRevision.Status.DRAFT
+        or revision.content == previous_content
+    ):
+        return
+    DocumentEdit.objects.create(
+        revision=revision,
+        editor=editor,
+        summary=revision.change_summary or "",
+        content_snapshot=revision.content,
+    )
+    keep = revision.edits.order_by("-created_at").values_list("pk", flat=True)[
+        :MAX_EDITS_PER_REVISION
+    ]
+    revision.edits.exclude(pk__in=list(keep)).delete()
 
 
 class DocumentTemplate(AbstractBaseModel, FolderMixin, I18nObjectMixin):
@@ -431,6 +460,8 @@ class DocumentReference(AbstractBaseModel):
     )
     fields_to_check = []
 
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -477,3 +508,29 @@ def recompute_references(container) -> None:
             ],
             ignore_conflicts=True,
         )
+
+
+common_exclude = ["created_at", "updated_at"]
+
+# Registered so document work leaves an audit trail — and, through it, fires the
+# engine's internal-event triggers, which derive their model list from this
+# registry.
+auditlog.register(
+    DocumentContainer,
+    m2m_fields={"policies", "applied_controls", "task_templates", "assets"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(ManagedDocument, exclude_fields=common_exclude)
+auditlog.register(
+    DocumentRevision,
+    # `content` is excluded, so a content-only save writes no log row: DocumentEdit
+    # already snapshots every save of a draft, and mirroring whole markdown diffs
+    # here would make these the largest rows in the log by far. The editing lock
+    # goes too: the editor renews it every few minutes, and each renewal would
+    # otherwise be a log row and a `documentrevision.updated` event evaluated
+    # against every enabled trigger. What remains — the revision appearing, and
+    # its status moving through review to published — is the lifecycle a reader
+    # (or a trigger) is after.
+    exclude_fields=common_exclude
+    + ["content", "file", "pdf_snapshot", "editing_user", "editing_since"],
+)

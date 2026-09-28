@@ -180,56 +180,59 @@
 	helpText={m.supportingAssetsHelpText()}
 />
 {#if typeConfig}
-	<Dropdown
-		open={false}
-		style="hover:text-primary-700"
-		icon="fa-solid fa-shield-halved"
-		header={typeConfig.securityLabel}
-	>
-		<div class="flex flex-col space-y-4">
-			{#each securityObjectives as objective}
-				<span class="flex flex-row items-end space-x-4">
-					<Checkbox
+	<!-- Remount the inputs when the asset type changes -->
+	{#key data.type}
+		<Dropdown
+			open={false}
+			style="hover:text-primary-700"
+			icon="fa-solid fa-shield-halved"
+			header={typeConfig.securityLabel}
+		>
+			<div class="flex flex-col space-y-4">
+				{#each securityObjectives as objective}
+					<span class="flex flex-row items-end space-x-4">
+						<Checkbox
+							{form}
+							field={objective}
+							label={''}
+							valuePath="{typeConfig.securityKey}.objectives.{objective}.is_enabled"
+							checkboxComponent="switch"
+							class="h-full flex flex-row items-center justify-center my-1"
+							classesContainer="h-full"
+						/>
+						<RadioGroup
+							possibleOptions={securityObjectiveOptions}
+							{form}
+							label={safeTranslate(objective)}
+							labelKey="label"
+							key="value"
+							field={objective}
+							valuePath="{typeConfig.securityKey}.objectives.{objective}.value"
+							disabled={data[typeConfig.securityKey]?.objectives?.[objective]?.is_enabled === false}
+						/>
+					</span>
+				{/each}
+			</div>
+		</Dropdown>
+		<Dropdown
+			open={false}
+			style="hover:text-indigo-700"
+			icon="fa-regular fa-clock"
+			header={typeConfig.recoveryLabel}
+		>
+			<div class="flex flex-col space-y-4">
+				{#each disasterRecoveryObjectives as objective}
+					<Duration
 						{form}
 						field={objective}
-						label={''}
-						valuePath="{typeConfig.securityKey}.objectives.{objective}.is_enabled"
-						checkboxComponent="switch"
-						class="h-full flex flex-row items-center justify-center my-1"
-						classesContainer="h-full"
-					/>
-					<RadioGroup
-						possibleOptions={securityObjectiveOptions}
-						{form}
 						label={safeTranslate(objective)}
-						labelKey="label"
-						key="value"
-						field={objective}
-						valuePath="{typeConfig.securityKey}.objectives.{objective}.value"
-						disabled={data[typeConfig.securityKey]?.objectives?.[objective]?.is_enabled === false}
+						helpText={Object.hasOwn(m, `${objective}HelpText`) ? m[`${objective}HelpText`]() : ''}
+						valuePath="{typeConfig.recoveryKey}.objectives.{objective}.value"
 					/>
-				</span>
-			{/each}
-		</div>
-	</Dropdown>
-	<Dropdown
-		open={false}
-		style="hover:text-indigo-700"
-		icon="fa-regular fa-clock"
-		header={typeConfig.recoveryLabel}
-	>
-		<div class="flex flex-col space-y-4">
-			{#each disasterRecoveryObjectives as objective}
-				<Duration
-					{form}
-					field={objective}
-					label={safeTranslate(objective)}
-					helpText={Object.hasOwn(m, `${objective}HelpText`) ? m[`${objective}HelpText`]() : ''}
-					valuePath="{typeConfig.recoveryKey}.objectives.{objective}.value"
-				/>
-			{/each}
-		</div>
-	</Dropdown>
+				{/each}
+			</div>
+		</Dropdown>
+	{/key}
 {/if}
 {#if data.type === 'PR' && doraEnabled}
 	<Dropdown

@@ -18,7 +18,8 @@ import zipfile
 import tempfile
 from datetime import date, datetime, timedelta, timezone
 from types import MappingProxyType
-from typing import Dict, Any, List, Tuple, Final
+from collections.abc import Sequence
+from typing import Dict, Any, List, Tuple, Final, Optional
 import time
 from django.db.models import (
     F,
@@ -42,7 +43,7 @@ from django.db.models import (
     QuerySet,
     Prefetch,
 )
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, Concat
 
 from collections import defaultdict
 import pytz
@@ -87,6 +88,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
+from django.core.files.uploadedfile import UploadedFile
 
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from core.constants import LEGACY_TTP_LIBRARIES
@@ -124,13 +126,18 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models, transaction
 from django.forms import IntegerField as FormIntegerField
 from django.forms import ValidationError
-from django.http import FileResponse, HttpResponse, StreamingHttpResponse
+from django.http import FileResponse, HttpResponse, StreamingHttpResponse, HttpRequest
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
+from core.domain_quality_checks import (
+    BLOCKS as DOMAIN_QUALITY_BLOCKS,
+    domain_quality_checks,
+    object_xrays,
+)
 from rest_framework import filters, generics, permissions, status, viewsets
 from custom_fields.filters import CustomFieldFilterBackend, CustomFieldSearchFilter
 from django.utils.translation import gettext_lazy as _, get_language
@@ -160,6 +167,17 @@ from rest_framework.exceptions import (
 
 
 from core.helpers import *
+from core.validators import sanitize_file_name
+from core.answer_attachments import (
+    answer_for_upload,
+    AttachmentError,
+    add_attachment,
+    attachments_for,
+    promote_to_evidence,
+    safe_filename_header,
+)
+from core.answer_attachments import serialize as serialize_attachment
+from core.answer_attachments import serve as serve_attachment
 from core.models import (
     Commitment,
     AppliedControl,
@@ -172,6 +190,7 @@ from core.models import (
     Terminology,
     Team,
 )
+from core.pagination import CustomLimitOffsetPagination
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     build_answers_dict,
@@ -189,16 +208,13 @@ from dateutil import relativedelta as rd
 
 from ebios_rm.models import (
     EbiosRMStudy,
-    FearedEvent,
     RoTo,
-    StrategicScenario,
     Stakeholder,
-    AttackPath,
 )
 
-from tprm.models import Entity, Solution, Contract
-from privacy.models import Processing, DataBreach, RightRequest
-from resilience.models import AssetAssessment, BusinessImpactAnalysis
+from tprm.models import Entity
+from privacy.models import Processing, DataBreach
+from resilience.models import AssetAssessment
 
 from .models import *
 from .serializers import *
@@ -219,7 +235,12 @@ from serdes.serializers import ExportSerializer
 from django.contrib.admin.utils import NestedObjects
 from django.db import router
 from global_settings.models import GlobalSettings
-from global_settings.utils import ff_is_enabled, general_setting_is_enabled
+from global_settings.utils import (
+    USER_FEATURE_FLAGS_PREFERENCE_KEY,
+    ff_is_enabled,
+    general_setting_is_enabled,
+    get_user_hideable_feature_flags,
+)
 
 from core import commitment
 
@@ -487,12 +508,14 @@ def escape_csv_row(row):
 
 
 ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+XLSX_MAX_CELL_CHARS = 32_767
 
 
 def sanitize_xlsx_value(value):
-    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)."""
+    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)
+    and cap strings at Excel's per-cell limit."""
     if isinstance(value, str):
-        return ILLEGAL_XLSX_CHARS_RE.sub("", value)
+        return ILLEGAL_XLSX_CHARS_RE.sub("", value)[:XLSX_MAX_CELL_CHARS]
     return value
 
 
@@ -788,6 +811,45 @@ class GenericFilterSet(df.FilterSet):
 
     id = UUIDInFilter(field_name="id", lookup_expr="in")
 
+    # Range lookups every date column gets, so listing a date in filterset_fields is
+    # enough to make it filterable from the table UI. On a DateTimeField the `date`
+    # transform is what the UI uses: a bare `lte` on a timestamp would drop its last day.
+    DATE_LOOKUPS = ("exact", "gte", "lte", "gt", "lt", "isnull")
+    # `lt`/`gt`: half-open bounds, so a BI partition boundary lands in one page.
+    DATETIME_LOOKUPS = (
+        "date",
+        "date__gte",
+        "date__lte",
+        "date__gt",
+        "date__lt",
+        "gte",
+        "lte",
+        "gt",
+        "lt",
+        "isnull",
+    )
+    ALWAYS_FILTERABLE_DATES = ("created_at", "updated_at")
+
+    @classmethod
+    def get_fields(cls):
+        fields = super().get_fields()
+        model = cls._meta.model
+        if model is None:
+            return fields
+        for name in [*fields, *cls.ALWAYS_FILTERABLE_DATES]:
+            try:
+                field = model._meta.get_field(name)
+            except FieldDoesNotExist:
+                continue
+            if isinstance(field, models.DateTimeField):
+                extra = cls.DATETIME_LOOKUPS
+            elif isinstance(field, models.DateField):
+                extra = cls.DATE_LOOKUPS
+            else:
+                continue
+            fields[name] = list(dict.fromkeys([*fields.get(name, []), *extra]))
+        return fields
+
     @classmethod
     def filter_for_lookup(cls, field, lookup_type):
         DEFAULTS = dict(cls.FILTER_DEFAULTS)
@@ -858,18 +920,6 @@ class GenericFilterSet(df.FilterSet):
                 "filter_class": df.IsoDateTimeFilter,
             },
         }
-
-
-class TimestampRangeFilterMixin(df.FilterSet):
-    """ISO-8601 created_at/updated_at range params for BI clients
-    (Power BI incremental refresh). Mix into FilterSets of viewsets
-    that use filterset_class; list-style viewsets declare the same
-    lookups via dict-form filterset_fields."""
-
-    created_at__gte = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="gte")
-    created_at__lt = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="lt")
-    updated_at__gte = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="gte")
-    updated_at__lt = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="lt")
 
 
 class SmartOrderingFilter(filters.OrderingFilter):
@@ -1003,6 +1053,50 @@ def actor_prefetch(field_name: str) -> Prefetch:
         field_name,
         queryset=Actor.objects.select_related("user", "team", "entity"),
     )
+
+
+# Mirrors ``Actor.__str__``: the underlying user's full name when it has one,
+# else its email, else the team's or entity's name. Lowercased so the sort
+# agrees between Postgres and SQLite.
+ACTOR_ORDERING_LABEL = Lower(
+    Coalesce(
+        Case(
+            When(
+                Q(user__first_name__gt="", user__last_name__gt=""),
+                then=Concat("user__first_name", Value(" "), "user__last_name"),
+            ),
+            default=F("user__email"),
+            output_field=CharField(),
+        ),
+        "team__name",
+        "entity__name",
+        output_field=CharField(),
+    )
+)
+
+
+def annotate_actor_ordering(queryset, view, field: str = "authors"):
+    """Make an ``Actor`` M2M column sortable, keyed on its first member's label.
+
+    DRF validates ``ordering`` against concrete fields only, so a header click on
+    such a column used to be dropped in silence. The view pairs this with
+    ``ordering_remap = {field: f"{field}_label"}``.
+
+    Annotated only when the request actually orders by the column: the subquery
+    would otherwise ride along on every list page, including the pagination count.
+    """
+    params = getattr(getattr(view, "request", None), "query_params", None)
+    ordering = params.get("ordering", "") if params else ""
+    if field not in {term.strip().lstrip("-") for term in ordering.split(",")}:
+        return queryset
+    related_query_name = f"{queryset.model._meta.model_name}_{field}"
+    first_label = (
+        Actor.objects.filter(**{related_query_name: OuterRef("pk")})
+        .annotate(_label=ACTOR_ORDERING_LABEL)
+        .order_by("_label")
+        .values("_label")[:1]
+    )
+    return queryset.annotate(**{f"{field}_label": Subquery(first_label)})
 
 
 RESTRICTED_BUCKET_KEY = "_restricted"
@@ -1150,7 +1244,55 @@ class AutocompleteMixin:
         return Response(data)
 
 
-class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
+class SparseFieldsMixin:
+    """``?fields=a,b,c`` trims a GET response to a subset of the columns.
+
+    Subtractive only, and only the top-level serializer: nested ones share this
+    request's context and would be cut by the same names. An unknown name is a
+    400. Reduces serialization, not the queryset's prefetching.
+    """
+
+    sparse_fields_param = "fields"
+    sparse_fields_always = frozenset({"id"})
+
+    def get_serializer(self, *args, **kwargs):
+        return self.apply_sparse_fields(super().get_serializer(*args, **kwargs))
+
+    def apply_sparse_fields(self, serializer):
+        """Trim a serializer to the requested fields.
+
+        An action building its own serializer must call this, or ``fields`` is
+        silently ignored there.
+        """
+        request = getattr(self, "request", None)
+        if request is None or request.method != "GET":
+            return serializer
+
+        raw = request.query_params.get(self.sparse_fields_param)
+        if not raw:
+            return serializer
+        requested = {name.strip() for name in raw.split(",") if name.strip()}
+        if not requested:
+            return serializer
+
+        target = getattr(serializer, "child", serializer)
+        available = set(getattr(target, "fields", {}))
+        unknown = requested - available
+        if unknown:
+            raise DRFValidationError(
+                {
+                    self.sparse_fields_param: (
+                        f"unknown field(s): {', '.join(sorted(unknown))}"
+                    )
+                }
+            )
+
+        for name in available - (requested | self.sparse_fields_always):
+            target.fields.pop(name)
+        return serializer
+
+
+class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -1166,14 +1308,28 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
 
     @property
     def filterset_class(self):
-        # If you have defined filterset_fields, build the FilterSet on the fly.
-        if self.filterset_fields:
-            return filterset_factory(
-                model=self.model,
-                filterset=GenericFilterSet,
-                fields=self.filterset_fields,
-            )
-        return None
+        # Built even with no filterset_fields: GenericFilterSet still contributes the
+        # created_at/updated_at ranges and the id lookup.
+        if not self.model:
+            return None
+        return filterset_factory(
+            model=self.model,
+            filterset=GenericFilterSet,
+            fields=self.filterset_fields or [],
+        )
+
+    @action(detail=True, name="Get the object's relation neighbourhood")
+    def neighborhood(self, request, pk=None):
+        """One pass over the curated relations, for the graph drawer."""
+        from core.neighborhood import build
+
+        # The action hangs off the base viewset, so the flag is checked here rather
+        # than with FeatureFlagRequired — that attribute would gate every model's
+        # whole API, not this one action.
+        if not ff_is_enabled("relations_graph"):
+            raise PermissionDenied("This feature is not enabled.")
+
+        return Response(build(self.get_object(), request.user))
 
     def get_queryset(self) -> models.query.QuerySet:
         if not self.model:
@@ -1198,12 +1354,21 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         )
         queryset = self.model.objects.filter(id__in=object_ids_view)
 
-        model_field_names = {f.name for f in self.model._meta.get_fields()}
+        model_fields = {f.name: f for f in self.model._meta.get_fields()}
 
-        if "parent_folder" in model_field_names:
-            queryset = queryset.select_related("parent_folder")
+        # Folder itself carries a *reverse* relation named "folder"; select_related
+        # only accepts forward FKs, so match on the descriptor, not on the name.
+        joinable = [
+            name
+            for name in ("folder", "parent_folder")
+            if (f := model_fields.get(name)) is not None
+            and f.many_to_one
+            and f.concrete
+        ]
+        if joinable:
+            queryset = queryset.select_related(*joinable)
 
-        if "filtering_labels" in model_field_names:
+        if "filtering_labels" in model_fields:
             queryset = queryset.prefetch_related("filtering_labels")
 
         return queryset
@@ -1531,11 +1696,23 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         dispatch_webhook_event(instance, "updated", serializer=serializer)
         return instance
 
+    def cascade_preclear(self, instance):
+        """Querysets to delete before `instance` cascades, for trees Django
+        refuses to collect: a PROTECT reference between two children of one
+        parent is a ProtectedError even though deleting the parent removes
+        both. Listed here rather than in a perform_destroy override so the
+        cascade_info preview excludes them too and cannot refuse a delete that
+        would succeed."""
+        return []
+
     def perform_destroy(self, instance):
         # resolve for "destroy" explicitly so batch_action can call this too
         serializer_class = self.get_serializer_class(action="destroy")
         serializer = serializer_class(instance, context=self.get_serializer_context())
-        serializer.delete(instance)
+        with transaction.atomic():
+            for queryset in self.cascade_preclear(instance):
+                queryset.delete()
+            serializer.delete(instance)
         try:
             dispatch_webhook_event(instance, "deleted")
         except Exception:
@@ -1985,10 +2162,22 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         affected_bucket = {"by_model": {}, "_seen": set()}
         blocked_bucket = {"by_model": {}, "_seen": set()}
 
+        # Cleared before the cascade (see cascade_preclear), so gone by the
+        # time the PROTECT would be evaluated.
+        precleared_index = set()
+        for queryset in self.cascade_preclear(instance):
+            pre_collector = NestedObjects(using=router.db_for_write(instance))
+            pre_collector.collect(list(queryset))
+            for model, objs in pre_collector.model_objs.items():
+                for o in objs:
+                    precleared_index.add((model.__name__, str(getattr(o, "pk", ""))))
+
         # 0) PROTECT/RESTRICT references: NestedObjects.collect() swallows the
         # ProtectedError and parks the blockers here.
         for obj in getattr(collector, "protected", ()):
             if is_hidden_model(type(obj)) or not is_visible(obj):
+                continue
+            if (type(obj).__name__, str(getattr(obj, "pk", ""))) in precleared_index:
                 continue
             add_grouped(blocked_bucket, obj)
 
@@ -2164,24 +2353,24 @@ class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
         folders = {f.id: f for f in Folder.objects.all()}
         for obj in initial_objects:
             path = []
-            if hasattr(obj, "folder"):
-                queue = deque([obj.folder.id])
-            elif hasattr(obj, "parent_folder") and obj.parent_folder:
-                queue = deque([obj.parent_folder.id])
+            if getattr(obj, "folder_id", None):
+                queue = deque([obj.folder_id])
+            elif getattr(obj, "parent_folder_id", None):
+                queue = deque([obj.parent_folder_id])
             else:
                 continue
             while queue:
                 folder_id = queue.popleft()
                 folder = folders[folder_id]
-                if folder.parent_folder:
+                if folder.parent_folder_id:
                     path.append(
                         {
                             "str": str(folder),
                             "id": folder.id,
-                            "parent_id": folder.parent_folder.id,
+                            "parent_id": folder.parent_folder_id,
                         }
                     )
-                    queue.append(folder.parent_folder.id)
+                    queue.append(folder.parent_folder_id)
             path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
 
         return {
@@ -2406,7 +2595,7 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
-class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):
+class AssetFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
     asset_class__isnull = df.BooleanFilter(
@@ -2829,7 +3018,9 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         context = self.get_serializer_context()
         context["optimized_data"] = optimized_data
 
-        serializer = AssetReadSerializer(objects, many=True, context=context)
+        serializer = self.apply_sparse_fields(
+            AssetReadSerializer(objects, many=True, context=context)
+        )
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)
         if field_models:
@@ -3208,6 +3399,16 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="add_asset"),
+                folder=folder,
+            ):
+                return Response(
+                    {"error": "You do not have permission to add assets here"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
             # Parse the assets text with indentation (2 spaces per level)
             lines = [line.rstrip() for line in assets_text.split("\n") if line.strip()]
             created_assets = []
@@ -3215,110 +3416,140 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
             errors = []
             depth_stack = []  # Stack of assets at each depth level
 
-            for line in lines:
-                # Count leading spaces and calculate depth (2 spaces = 1 level)
-                leading_spaces = len(line) - len(line.lstrip())
-                depth = leading_spaces // 2
-                line_content = line.strip()
+            try:
+                with transaction.atomic():
+                    for line in lines:
+                        # Count leading spaces and calculate depth (2 spaces = 1 level)
+                        leading_spaces = len(line) - len(line.lstrip())
+                        depth = leading_spaces // 2
+                        line_content = line.strip()
 
-                # Check for type prefix (SP: or PR:)
-                asset_type = Asset.Type.SUPPORT  # default
-                asset_name = line_content
+                        # Check for type prefix (SP: or PR:)
+                        asset_type = Asset.Type.SUPPORT  # default
+                        asset_name = line_content
 
-                if line_content.upper().startswith("SP:"):
-                    asset_type = Asset.Type.SUPPORT
-                    asset_name = line_content[3:].strip()
-                elif line_content.upper().startswith("PR:"):
-                    asset_type = Asset.Type.PRIMARY
-                    asset_name = line_content[3:].strip()
+                        if line_content.upper().startswith("SP:"):
+                            asset_type = Asset.Type.SUPPORT
+                            asset_name = line_content[3:].strip()
+                        elif line_content.upper().startswith("PR:"):
+                            asset_type = Asset.Type.PRIMARY
+                            asset_name = line_content[3:].strip()
 
-                if not asset_name:
-                    errors.append({"line": line_content, "error": "Empty asset name"})
-                    continue
+                        if not asset_name:
+                            errors.append(
+                                {"line": line_content, "error": "Empty asset name"}
+                            )
+                            continue
 
-                # Trim stack to current depth
-                depth_stack = depth_stack[:depth]
+                        # Trim stack to current depth
+                        depth_stack = depth_stack[:depth]
 
-                # Parent is the asset at the previous depth level (skip None entries from errors)
-                parent_asset = None
-                if depth_stack:
-                    # Find the last non-None entry in the stack
-                    for i in range(len(depth_stack) - 1, -1, -1):
-                        if depth_stack[i] is not None:
-                            parent_asset = depth_stack[i]
-                            break
+                        # Parent is the asset at the previous depth level (skip None entries from errors)
+                        parent_asset = None
+                        if depth_stack:
+                            # Find the last non-None entry in the stack
+                            for i in range(len(depth_stack) - 1, -1, -1):
+                                if depth_stack[i] is not None:
+                                    parent_asset = depth_stack[i]
+                                    break
 
-                # Check if asset already exists in the folder
-                existing_asset = Asset.objects.filter(
-                    name=asset_name, folder=folder
-                ).first()
+                        # Check if asset already exists in the folder
+                        existing_asset = Asset.objects.filter(
+                            name=asset_name, folder=folder
+                        ).first()
 
-                if existing_asset:
-                    # Reuse existing asset
-                    asset = existing_asset
+                        if existing_asset:
+                            # Reuse existing asset
+                            asset = existing_asset
 
-                    # Update parent relationship if needed and parent exists
-                    if parent_asset and parent_asset not in asset.parent_assets.all():
-                        asset.parent_assets.add(parent_asset)
+                            linked_parent = parent_asset
+                            # Update parent relationship if needed and parent exists
+                            if (
+                                parent_asset
+                                and parent_asset not in asset.parent_assets.all()
+                            ):
+                                link = AssetWriteSerializer(
+                                    asset,
+                                    data={
+                                        "parent_assets": [
+                                            *asset.parent_assets.values_list(
+                                                "id", flat=True
+                                            ),
+                                            parent_asset.id,
+                                        ]
+                                    },
+                                    partial=True,
+                                    context={"request": request},
+                                )
+                                if link.is_valid():
+                                    link.save()
+                                else:
+                                    linked_parent = None
+                                    errors.append(
+                                        {"line": line_content, "errors": link.errors}
+                                    )
 
-                    # Add to stack for potential children
-                    depth_stack.append(asset)
+                            # Add to stack for potential children
+                            depth_stack.append(asset)
 
-                    reused_assets.append(
-                        {
-                            "id": str(asset.id),
-                            "name": asset.name,
-                            "type": asset.get_type_display(),
-                            "parent": parent_asset.name if parent_asset else None,
-                            "depth": depth,
-                        }
-                    )
-                else:
-                    # Create new asset using the serializer to respect IAM
-                    asset_data = {
-                        "name": asset_name,
-                        "type": asset_type,
-                        "folder": str(folder.id),
-                    }
+                            reused_assets.append(
+                                {
+                                    "id": str(asset.id),
+                                    "name": asset.name,
+                                    "type": asset.get_type_display(),
+                                    "parent": linked_parent.name
+                                    if linked_parent
+                                    else None,
+                                    "depth": depth,
+                                }
+                            )
+                        else:
+                            # Create new asset using the serializer to respect IAM
+                            asset_data = {
+                                "name": asset_name,
+                                "type": asset_type,
+                                "folder": str(folder.id),
+                            }
 
-                    # Add parent relationship if exists
-                    if parent_asset:
-                        asset_data["parent_assets"] = [parent_asset.id]
+                            # Add parent relationship if exists
+                            if parent_asset:
+                                asset_data["parent_assets"] = [parent_asset.id]
 
-                    serializer = AssetWriteSerializer(
-                        data=asset_data, context={"request": request}
-                    )
-
-                    if serializer.is_valid():
-                        try:
-                            asset = serializer.save()
-                        except PermissionDenied as e:
-                            return Response(
-                                {"error": e.detail},
-                                status=status.HTTP_403_FORBIDDEN,
+                            serializer = AssetWriteSerializer(
+                                data=asset_data, context={"request": request}
                             )
 
-                        # Add to stack for potential children
-                        depth_stack.append(asset)
+                            if serializer.is_valid():
+                                asset = serializer.save()
 
-                        created_assets.append(
-                            {
-                                "id": str(asset.id),
-                                "name": asset.name,
-                                "type": asset.get_type_display(),
-                                "parent": parent_asset.name if parent_asset else None,
-                                "depth": depth,
-                            }
-                        )
-                    else:
-                        # Error creating asset - add None to stack to maintain depth
-                        depth_stack.append(None)
-                        errors.append(
-                            {
-                                "line": line_content,
-                                "errors": serializer.errors,
-                            }
-                        )
+                                # Add to stack for potential children
+                                depth_stack.append(asset)
+
+                                created_assets.append(
+                                    {
+                                        "id": str(asset.id),
+                                        "name": asset.name,
+                                        "type": asset.get_type_display(),
+                                        "parent": parent_asset.name
+                                        if parent_asset
+                                        else None,
+                                        "depth": depth,
+                                    }
+                                )
+                            else:
+                                # Error creating asset - add None to stack to maintain depth
+                                depth_stack.append(None)
+                                errors.append(
+                                    {
+                                        "line": line_content,
+                                        "errors": serializer.errors,
+                                    }
+                                )
+            except PermissionDenied as e:
+                return Response(
+                    {"error": e.detail},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
             return Response(
                 {
@@ -3336,7 +3567,7 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         except Exception as e:
             logger.error("Error in batch asset creation", error=e)
             return Response(
-                {"error": str(e)},
+                {"error": "Batch asset creation failed"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -3360,6 +3591,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
     """
 
     model = ReferenceControl
+    autocomplete_fields = ["category"]
     filterset_fields = [
         "folder",
         "category",
@@ -3674,25 +3906,24 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "cwes": ["exact"],
         "created_at": ["gte", "lt"],
         "updated_at": ["gte", "lt"],
+        "due_date": ["exact"],
     }
     search_fields = ["name", "description", "ref_id"]
 
-    @action(detail=False, name="Lightweight autocomplete search")
-    def autocomplete(self, request):
-        from core.serializers import VulnerabilityReadSerializer
+    autocomplete_serializer_class = VulnerabilityAutocompleteSerializer
 
-        qs = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(qs)
-        objects = page if page is not None else qs
-        serializer = VulnerabilityReadSerializer(objects, many=True)
-        data = serializer.data
-        field_models = self._get_fieldsrelated_map(serializer)
-        if field_models:
-            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
-            data = self._filter_related_fields(data, field_models, allowed_ids)
-        if page is not None:
-            return self.get_paginated_response(data)
-        return Response(data)
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action == "autocomplete":
+            return qs
+        return qs.prefetch_related(
+            "applied_controls",
+            "assets",
+            "security_exceptions",
+            "security_advisories",
+            "cwes",
+            "filtering_labels__folder",
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -3969,6 +4200,7 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "reviewers": ["exact"],
             "genericcollection": ["exact"],
             "due_date": ["exact", "year", "month"],
+            "eta": ["exact"],
         }
 
     def filter_status(self, queryset, name, value):
@@ -3978,17 +4210,30 @@ class RiskAssessmentFilterSet(GenericFilterSet):
         return queryset.filter(status__in=value)
 
 
-class RiskAssessmentViewSet(BaseModelViewSet):
+class XRaysMixin:
+    @action(detail=True, methods=["get"], url_path="x-rays")
+    def x_rays(self, request, pk):
+        obj = self.get_object()
+        if isinstance(
+            obj, ComplianceAssessment
+        ) and obj.folder_id in get_respondent_scoped_folder_ids(request.user):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return Response(object_xrays(obj, request.user))
+
+
+class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
     """
     API endpoint that allows risk assessments to be viewed or edited.
     """
 
     model = RiskAssessment
     filterset_class = RiskAssessmentFilterSet
+    ordering_remap = {"authors": "authors_label"}
+    ordering_nulls_last = ("authors_label",)
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.select_related(
+        queryset = queryset.select_related(
             "folder",
             "perimeter",
             "perimeter__folder",
@@ -3999,6 +4244,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             actor_prefetch("reviewers"),
             "risk_scenarios",
         )
+        return annotate_actor_ordering(queryset, self)
 
     def perform_create(self, serializer):
         instance: RiskAssessment = serializer.save()
@@ -4689,6 +4935,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     name=scenario.name,
                     description=scenario.description,
                     treatment=scenario.treatment,
+                    inherent_proba=scenario.inherent_proba,
+                    inherent_impact=scenario.inherent_impact,
                     current_proba=scenario.current_proba,
                     current_impact=scenario.current_impact,
                     residual_proba=scenario.residual_proba,
@@ -5222,7 +5470,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
 APPLIED_CONTROL_LINKED_FIELD_NAMES = [f[0] for f in APPLIED_CONTROL_LINKED_FIELDS]
 
 
-class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
+class AppliedControlFilterSet(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     reference_control = df.ModelMultipleChoiceFilter(
         queryset=ReferenceControl.objects.all()
@@ -5392,6 +5640,8 @@ class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
             "findings": ["exact"],
             "incidents": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
+            "start_date": ["exact"],
+            "expiry_date": ["exact"],
             "ref_id": ["exact"],
             "processings": ["exact"],
             "genericcollection": ["exact"],
@@ -5779,8 +6029,8 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         context = self.get_serializer_context()
         context["daily_rate"] = GlobalSettings.get_daily_rate()
 
-        serializer = AppliedControlBulkReadSerializer(
-            objects, many=True, context=context
+        serializer = self.apply_sparse_fields(
+            AppliedControlBulkReadSerializer(objects, many=True, context=context)
         )
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)
@@ -5970,6 +6220,44 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
     def per_status(self, request):
         data = applied_control_per_status(request.user)
         return Response({"results": data})
+
+    @action(detail=False, name="Counts per folder and status for the kanban board")
+    def counts_per_folder(self, request):
+        """Per-swimlane totals for the kanban board.
+
+        The board shows one card per control, so loading every row just to
+        count them does not scale. This returns the same numbers from one
+        aggregate query, honouring the caller's filters and visibility, which
+        lets the board render truthful headers while fetching cards only for
+        the swimlanes the user actually opens.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        # order_by() clears the model's default ordering: left in place, `name`
+        # joins the GROUP BY and every control comes back as its own group.
+        rows = (
+            queryset.values("folder_id", "status")
+            .annotate(count=Count("id"))
+            .order_by()
+        )
+
+        per_folder: dict = defaultdict(dict)
+        total = 0
+        for row in rows:
+            status = row["status"] or AppliedControl.Status.UNDEFINED
+            per_folder[row["folder_id"]][status] = row["count"]
+            total += row["count"]
+
+        results = [
+            {
+                "folder": {"id": str(folder.id), "str": str(folder)},
+                "per_status": per_folder[folder.id],
+                "count": sum(per_folder[folder.id].values()),
+            }
+            for folder in Folder.objects.filter(id__in=list(per_folder.keys()))
+        ]
+        results.sort(key=lambda entry: entry["folder"]["str"].lower())
+
+        return Response({"results": results, "total": total})
 
     @action(detail=False, name="Get the ordered todo applied controls")
     def todo(self, request):
@@ -7214,7 +7502,7 @@ class IntegerInFilter(df.BaseInFilter, df.NumberFilter):
     field_class = FormIntegerField
 
 
-class RiskScenarioFilter(TimestampRangeFilterMixin, GenericFilterSet):
+class RiskScenarioFilter(GenericFilterSet):
     risk_assessment = df.ModelMultipleChoiceFilter(
         queryset=RiskAssessment.objects.all()
     )
@@ -7306,6 +7594,7 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
     filterset_class = RiskScenarioFilter
     ordering = ["ref_id"]
     search_fields = ["name", "description", "ref_id"]
+    autocomplete_serializer_class = RiskScenarioAutocompleteSerializer
 
     export_config = {
         "fields": {
@@ -7446,18 +7735,34 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        if self.action == "autocomplete":
+            return queryset.select_related("risk_assessment")
         return queryset.select_related(
             "risk_assessment",
             "risk_assessment__risk_matrix",
             "risk_assessment__perimeter",
             "risk_assessment__perimeter__folder",
+            "risk_origin",
+            "operational_scenario__ebios_rm_study",
         ).prefetch_related(
             "threats",
             "assets",
             "applied_controls",
             "existing_applied_controls",
-            "owner",
+            actor_prefetch("owner"),
             "security_exceptions",
+            "threat_models",
+            "vulnerabilities",
+            "incidents",
+            "qualifications",
+            # str(antecedent) renders folder and risk_assessment: join them in the
+            # prefetch query instead of two lookups per rendered scenario.
+            Prefetch(
+                "antecedent_scenarios",
+                queryset=RiskScenario.objects.select_related(
+                    "folder", "risk_assessment"
+                ),
+            ),
         )
 
     def _perform_write(self, serializer):
@@ -7933,6 +8238,7 @@ class ValidationFlowFilterSet(GenericFilterSet):
             "evidences",
             "security_exceptions",
             "policies",
+            "validation_deadline",
         ]
 
 
@@ -8097,7 +8403,16 @@ class ActorViewSet(BaseModelViewSet):
     http_method_names = ["get", "head", "options"]
 
     model = Actor
-    search_fields = []
+    autocomplete_fields = ["type"]
+    # An actor is searched through whichever of user/team/entity it wraps: with no
+    # search fields the lazy pickers returned an unfiltered, page-capped list.
+    search_fields = [
+        "user__email",
+        "user__first_name",
+        "user__last_name",
+        "team__name",
+        "entity__name",
+    ]
     ordering = [
         "type_rank",
         "display_name",
@@ -8173,6 +8488,45 @@ class UserViewSet(BaseModelViewSet):
     def language(self, request):
         return Response(dict(settings.LANGUAGES))
 
+    @action(detail=True, name="Teams the user belongs to")
+    def teams(self, request, pk=None):
+        """Membership is three separate relations, and which one matched is the useful
+        part -- it is why the user is addressed when the team is.
+
+        Its own action rather than a field on UserReadSerializer: that serializer feeds
+        the users list, where three relation lookups per row would be an N+1.
+        """
+        user = self.get_object()
+        led = set(Team.objects.filter(leader=user).values_list("id", flat=True))
+        deputy = set(user.deputy_teams.values_list("id", flat=True))
+        member = set(user.teams.values_list("id", flat=True))
+
+        # `view_user` is not `view_team`: retrieving the user must not disclose teams
+        # in domains the requester cannot browse. Same masking `retrieve` applies to
+        # the `user_groups` beside this on the profile page.
+        viewable = set(RoleAssignment.get_viewable_object_ids(request.user, Team))
+
+        rows = []
+        for team in Team.objects.filter(
+            id__in=(led | deputy | member) & viewable
+        ).select_related("folder"):
+            rows.append(
+                {
+                    "id": str(team.id),
+                    "str": str(team),
+                    "role": "leader"
+                    if team.id in led
+                    else "deputy"
+                    if team.id in deputy
+                    else "member",
+                    "folder": {"id": str(team.folder_id), "str": str(team.folder)}
+                    if team.folder_id
+                    else None,
+                    "team_email": team.team_email or None,
+                }
+            )
+        return Response(sorted(rows, key=lambda r: r["str"].lower()))
+
     def get_queryset(self):
         # Use base IAM filtering
         # but ensure current user is always included
@@ -8203,60 +8557,131 @@ class UserViewSet(BaseModelViewSet):
             )
         )
 
-    def update(self, request: Request, *args, **kwargs) -> Response:
-        user = self.get_object()
-        # This form edits DIRECT group membership only, so the guard protects the
-        # last *directly*-managed (BI-UG-ADM) administrator — the lockout-proof
-        # anchor that SCIM/IdP can never reach and that must always exist.
-        # Admins inherited via an IdP group are managed by the IdP, not here, so
-        # they neither gate this check nor count toward it.
-        # Only relevant when the request actually rewrites group membership;
-        # a partial edit that omits user_groups can't strip the admin group.
-        if (
-            "user_groups" in request.data
-            and user.user_groups.filter(name="BI-UG-ADM").exists()
+    # Fields whose change on a direct administrator could end in a zero-admin
+    # lockout: group membership (stripping BI-UG-ADM) and the lifecycle fields
+    # that deactivate, now or on expiry.
+    LOCKOUT_SENSITIVE_FIELDS = ("user_groups", "is_active", "expiry_date")
+
+    def perform_update(self, serializer):
+        """Authoritative pass on the last-admin invariants, under the admin-group
+        lock and in the same transaction as the write.
+
+        UserWriteSerializer runs the same predicates during validation, but that
+        read happens before any lock is taken, so on its own it is check-then-act:
+        two concurrent requests stripping BI-UG-ADM from two *different* admins
+        both see a second admin still standing and both proceed, leaving none.
+
+        This lives in perform_update rather than update() because batch_action
+        calls it directly. A lock only excludes writers that take it, so leaving
+        the batch path outside would not merely leave batch writes unprotected —
+        it would let them slip past the lock a concurrent update() is holding.
+        NOTE: select_for_update is a no-op on SQLite, which has no
+        SELECT ... FOR UPDATE; the checks still hold there, only the window stays
+        open."""
+        instance = serializer.instance
+        attrs = serializer.validated_data
+        if not (
+            instance is not None
+            and any(field in attrs for field in self.LOCKOUT_SENSITIVE_FIELDS)
+            and UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists()
         ):
-            with transaction.atomic():
-                # Lock the admin group row so this check-then-act can't race a
-                # concurrent admin-membership change into a zero-admin lockout.
-                admin_group = (
-                    UserGroup.objects.select_for_update()
-                    .filter(name="BI-UG-ADM")
-                    .first()
+            return super().perform_update(serializer)
+
+        with transaction.atomic():
+            UserGroup.objects.select_for_update().filter(name="BI-UG-ADM").first()
+            if "user_groups" in attrs and UserWriteSerializer.strips_last_admin_group(
+                instance, attrs["user_groups"]
+            ):
+                self._deny_lockout(
+                    "last_admin_group",
+                    {"error": "attemptToRemoveOnlyAdminUserGroup"},
+                    instance,
                 )
-                direct_admin_count = User.objects.filter(
-                    user_groups__name="BI-UG-ADM"
-                ).count()
-                if direct_admin_count == 1 and admin_group is not None:
-                    new_user_groups = set(request.data["user_groups"])
-                    if str(admin_group.pk) not in new_user_groups:
-                        return Response(
-                            {"error": "attemptToRemoveOnlyAdminUserGroup"},
-                            status=status.HTTP_403_FORBIDDEN,
-                        )
-                return super().update(request, *args, **kwargs)
+            offending = UserWriteSerializer.deactivates_last_active_admin(
+                instance, attrs
+            )
+            if offending:
+                self._deny_lockout(
+                    "last_active_admin",
+                    {
+                        field: ["attemptToDeactivateOnlyAdminAccountError"]
+                        for field in offending
+                    },
+                    instance,
+                )
+            return super().perform_update(serializer)
 
-        return super().update(request, *args, **kwargs)
+    def _deny_lockout(self, guard: str, errors: dict, user) -> None:
+        """Log the refused write as a security event, then raise it. Raising
+        inside perform_update rolls the transaction back, and batch_action
+        collects the PermissionDenied into its per-object `failed` list."""
+        logger.warning(
+            "denied privileged user operation",
+            guard=guard,
+            errors=errors,
+            requester=self.request.user.email,
+            target=user.email,
+        )
+        raise PermissionDenied(errors)
 
-    def destroy(self, request, *args, **kwargs):
-        user = self.get_object()
+    def _deny_destroy(self, guard: str, error_key: str, user) -> None:
+        """Log the denied deletion as a security event, then raise it. DRF
+        renders the dict detail as the response body, so the payload stays
+        `{"error": ...}` on both the single-object and batch paths."""
+        errors = {"error": error_key}
+        logger.warning(
+            "denied privileged user operation",
+            guard=guard,
+            errors=errors,
+            requester=self.request.user.email,
+            target=user.email,
+        )
+        raise PermissionDenied(errors)
+
+    def perform_destroy(self, instance):
+        """Every deletion guard lives here, not in destroy(): batch_action calls
+        perform_destroy() directly, so a guard placed in destroy() would leave
+        POST /users/batch-action/ {"action": "delete"} as an unguarded path to
+        the very deletions this protects against."""
+        # SCIM owns this account's lifecycle: identity fields are immutable via
+        # the API (see UserWriteSerializer) and deprovisioning normally arrives
+        # through SCIM. Manual deletion is the admin-only escape hatch for a
+        # decommissioned SCIM integration, not a user-manager operation.
+        if instance.is_scim_managed and not self.request.user.is_admin():
+            self._deny_destroy("scim_delete", "onlyAdminCanDeleteScimAccount", instance)
+        # Deleting an administrator is a lifecycle operation on the admin
+        # group's power: require the right that guards its membership, so the
+        # deactivation guard (UserWriteSerializer) can't be bypassed by
+        # reaching for the bigger hammer. Non-admin accounts stay deletable
+        # with plain delete_user, consistent with their deactivation.
+        if instance.is_admin() and not RoleAssignment.is_access_allowed(
+            user=self.request.user,
+            perm=UserWriteSerializer._change_usergroup_perm(),
+            folder=Folder.get_root_folder(),
+        ):
+            self._deny_destroy(
+                "admin_delete", "deletingAdminAccountRequiresAdminRights", instance
+            )
         # Protect the last direct (locally-managed) administrator — see update().
-        if user.user_groups.filter(name="BI-UG-ADM").exists():
+        if UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists():
             with transaction.atomic():
                 # Lock the admin group row so this check-then-act can't race a
                 # concurrent admin removal into a zero-admin lockout.
+                # NOTE: a no-op on SQLite, which has no SELECT ... FOR UPDATE;
+                # the check itself still holds, only the race window remains.
                 UserGroup.objects.select_for_update().filter(name="BI-UG-ADM").first()
                 direct_admin_count = User.objects.filter(
                     user_groups__name="BI-UG-ADM"
                 ).count()
                 if direct_admin_count == 1:
-                    return Response(
-                        {"error": "attemptToDeleteOnlyAdminAccountError"},
-                        status=status.HTTP_403_FORBIDDEN,
+                    self._deny_destroy(
+                        "last_admin_delete",
+                        "attemptToDeleteOnlyAdminAccountError",
+                        instance,
                     )
-                return super().destroy(request, *args, **kwargs)
+                return super().perform_destroy(instance)
 
-        return super().destroy(request, *args, **kwargs)
+        return super().perform_destroy(instance)
 
 
 class TranslatedNameOrderingFilter(SmartOrderingFilter):
@@ -8587,6 +9012,256 @@ class FolderViewSet(BaseModelViewSet):
         folder = serializer.save()
         Folder.create_default_ug_and_ra(folder)
 
+    @action(detail=False, methods=["post"])
+    def reorganize(self, request):
+        """Apply a set of folder moves and deletions as one transaction.
+
+        Payload: {"moves": [{"folder", "parent_folder", "from_parent"}],
+                  "deletes": [{"folder"}]}
+        """
+        moves = request.data.get("moves") or []
+        deletes = request.data.get("deletes") or []
+        if not isinstance(moves, list) or not isinstance(deletes, list):
+            return Response(
+                {"moves": "moves and deletes must be lists"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Every entry is read with .get(), so a bare string would 500 rather than 400.
+        if not all(isinstance(entry, dict) for entry in (*moves, *deletes)):
+            return Response(
+                {"moves": "each move and delete must be an object"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not moves and not deletes:
+            return Response(
+                {"moves": "At least one move or delete is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Each delete scans every model for a folder FK, so an unbounded batch is
+        # folder count times model count in one request.
+        if len(moves) + len(deletes) > BATCH_SIZE_LIMIT:
+            return Response(
+                {"error": "too many ids", "max": BATCH_SIZE_LIMIT},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        seen: set[str] = set()
+        for move in moves:
+            folder_id = str(move.get("folder", ""))
+            if folder_id in seen:
+                return Response(
+                    {"moves": f"Folder {folder_id} appears more than once"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            seen.add(folder_id)
+            # Required: guards against overwriting a concurrent change.
+            if not move.get("from_parent"):
+                return Response(
+                    {
+                        "moves": f"Move for folder {folder_id} is missing from_parent, "
+                        "which is required so a concurrent change cannot be overwritten"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # An unreadable folder reads as missing rather than as a target.
+        visible = {str(f.id): f for f in self.get_queryset()}
+
+        conflicts = []
+        planned = []
+        for move in moves:
+            folder_id = str(move.get("folder", ""))
+            target_id = str(move.get("parent_folder", ""))
+            folder = visible.get(folder_id)
+            target = visible.get(target_id)
+
+            if folder is None:
+                conflicts.append({"folder": folder_id, "reason": "folderGone"})
+                continue
+            if target is None:
+                conflicts.append({"folder": folder_id, "reason": "targetGone"})
+                continue
+
+            expected = move.get("from_parent")
+            current = str(folder.parent_folder_id) if folder.parent_folder_id else None
+            if str(expected) != str(current):
+                conflicts.append(
+                    {
+                        "folder": folder_id,
+                        "reason": "movedElsewhere",
+                        "name": folder.name,
+                        "current_parent": current,
+                    }
+                )
+                continue
+
+            if current == target_id:
+                continue  # already where the draft wants it
+
+            planned.append((folder, target, current))
+
+        planned_deletes = []
+        seen_deletes: set[str] = set()
+        for entry in deletes:
+            folder_id = str(entry.get("folder", ""))
+            if folder_id in seen_deletes:
+                continue  # destroying it twice would double the reported count
+            seen_deletes.add(folder_id)
+            folder = visible.get(folder_id)
+            if folder is None:
+                conflicts.append({"folder": folder_id, "reason": "folderGone"})
+                continue
+            if folder.content_type == Folder.ContentType.ROOT:
+                conflicts.append({"folder": folder_id, "reason": "cannotDeleteRoot"})
+                continue
+            if folder_id in seen:
+                conflicts.append({"folder": folder_id, "reason": "movedAndDeleted"})
+                continue
+            planned_deletes.append(folder)
+
+        if conflicts:
+            return Response({"conflicts": conflicts}, status=status.HTTP_409_CONFLICT)
+
+        try:
+            self._apply_reorganisation(planned, planned_deletes)
+        except ReorganisationConflict as exc:
+            return Response(
+                {"conflicts": exc.conflicts}, status=status.HTTP_409_CONFLICT
+            )
+
+        # No inverse is returned: replaying a stale one would overwrite concurrent
+        # changes. Reverting means drafting the moves back.
+        return Response(
+            {
+                "applied": len(planned),
+                "deleted": len(planned_deletes),
+                "skipped": len(moves) - len(planned),
+            }
+        )
+
+    @staticmethod
+    def _folder_content_models() -> list:
+        """Every model that could hold a folder's content.
+
+        Exhaustive rather than curated: deletion cascades through every FK. The IAM
+        objects every domain auto-provisions are exempt, or nothing would be deletable.
+        Models whose table this edition never created are dropped up front: probing one
+        raises, and on PostgreSQL that aborts the surrounding transaction, so the error
+        cannot simply be caught and skipped.
+        """
+        from django.apps import apps
+        from django.db import connection
+
+        tables = set(connection.introspection.table_names())
+        exempt = {"iam.UserGroup", "iam.RoleAssignment"}
+        return [
+            model
+            for model in apps.get_models()
+            if model is not Folder
+            and model._meta.label not in exempt
+            and model._meta.db_table in tables
+            and any(
+                f.name == "folder" and f.related_model is Folder
+                for f in model._meta.fields
+            )
+        ]
+
+    @staticmethod
+    def _folder_emptiness_blocker(folder, content_models) -> "str | None":
+        """Why this folder may not be deleted, or None."""
+        if Folder.objects.filter(parent_folder=folder).exists():
+            return "hasSubDomains"
+        for model in content_models:
+            if model.objects.filter(folder=folder).exists():
+                return "notEmpty"
+        return None
+
+    def _apply_reorganisation(self, planned, planned_deletes):
+        with transaction.atomic():
+            # The plan was built outside this transaction, so re-read every row it
+            # touches under lock: a concurrent move or delete may have invalidated it,
+            # and the stale instances would write back their whole pre-read state.
+            # Ordered, so two reorganisations cannot deadlock against each other.
+            ids = (
+                {folder.id for folder, _, _ in planned}
+                | {target.id for _, target, _ in planned}
+                | {folder.id for folder in planned_deletes}
+            )
+            fresh = {
+                f.id: f
+                for f in Folder.objects.select_for_update()
+                .filter(id__in=ids)
+                .order_by("id")
+            }
+
+            conflicts = []
+            for folder, target, expected in planned:
+                current = fresh.get(folder.id)
+                if current is None:
+                    conflicts.append({"folder": str(folder.id), "reason": "folderGone"})
+                    continue
+                if target.id not in fresh:
+                    conflicts.append({"folder": str(folder.id), "reason": "targetGone"})
+                    continue
+                now = (
+                    str(current.parent_folder_id) if current.parent_folder_id else None
+                )
+                if now != expected:
+                    conflicts.append(
+                        {
+                            "folder": str(folder.id),
+                            "reason": "movedElsewhere",
+                            "name": current.name,
+                            "current_parent": now,
+                        }
+                    )
+            for folder in planned_deletes:
+                if folder.id not in fresh:
+                    conflicts.append({"folder": str(folder.id), "reason": "folderGone"})
+            if conflicts:
+                raise ReorganisationConflict(conflicts)
+
+            planned = [(fresh[f.id], fresh[t.id], e) for f, t, e in planned]
+            planned_deletes = [fresh[f.id] for f in planned_deletes]
+
+            # Park every mover at the root first: a valid final arrangement can pass
+            # through an intermediate cycle (swapping two subtrees). Bare save, since
+            # going via the serializer would demand add permission on the root.
+            root = Folder.get_root_folder()
+            for folder, _, _ in planned:
+                folder.parent_folder = root
+                folder.save()
+
+            for folder, target, _ in planned:
+                serializer = self.get_serializer_class(action="partial_update")(
+                    folder,
+                    data={"parent_folder": str(target.id)},
+                    partial=True,
+                    context=self.get_serializer_context(),
+                )
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+
+            # Last, so a folder emptied by the moves above qualifies. The model scan
+            # is resolved once for the whole batch, not per folder.
+            blocked = []
+            content_models = self._folder_content_models() if planned_deletes else []
+            for folder in planned_deletes:
+                reason = self._folder_emptiness_blocker(folder, content_models)
+                if reason:
+                    blocked.append(
+                        {
+                            "folder": str(folder.id),
+                            "name": folder.name,
+                            "reason": reason,
+                        }
+                    )
+            if blocked:
+                raise ReorganisationConflict(blocked)  # atomic: rolls the moves back
+
+            for folder in planned_deletes:
+                self.perform_destroy(folder)
+
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -8610,14 +9285,26 @@ class FolderViewSet(BaseModelViewSet):
 
         viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
 
-        # Add ancestors so viewable folders aren't orphaned
-        needed_folders = set(viewable_objects)
+        children_by_parent, parent_of, perimeters_by_folder = build_folder_indexes(
+            include_perimeters=include_perimeters
+        )
 
+        # Opt-in: one grouped query per curated content model.
+        with_counts = request.query_params.get("with_counts", "").lower() in [
+            "true",
+            "1",
+            "yes",
+        ]
+        content_counts = folder_direct_content_counts() if with_counts else None
+
+        # Ancestors, so viewable folders aren't orphaned. In memory: against the DB
+        # this cost one query per folder per level.
+        needed_folders = set(viewable_objects)
         for folder_id in viewable_objects:
-            current = Folder.objects.get(pk=folder_id)
-            while current and current.parent_folder_id:
-                needed_folders.add(current.parent_folder_id)
-                current = Folder.objects.get(pk=current.parent_folder_id)
+            current = parent_of.get(folder_id)
+            while current is not None and current not in needed_folders:
+                needed_folders.add(current)
+                current = parent_of.get(current)
 
         # Optional per-node writable annotation
         write_perm_codename = request.query_params.get("write_perm")
@@ -8625,37 +9312,36 @@ class FolderViewSet(BaseModelViewSet):
         if write_perm_codename:
             perm = Permission.objects.filter(codename=write_perm_codename).first()
             if perm is not None:
-                writable_ids = {
-                    f.id
-                    for f in Folder.objects.filter(id__in=needed_folders)
-                    if RoleAssignment.is_access_allowed(
-                        user=request.user, perm=perm, folder=f
-                    )
-                }
+                # In bulk: the per-folder is_access_allowed loop dominated the endpoint.
+                writable_ids = set(
+                    RoleAssignment.get_allowed_folder_ids(request.user, perm)
+                )
             else:
                 writable_ids = set()
 
+        root_folder = Folder.get_root_folder()
+
         folders_list = []
-        for folder in (
-            Folder.objects.exclude(content_type="GL")
-            .filter(id__in=needed_folders, parent_folder=Folder.get_root_folder())
-            .distinct()
-        ):
+        for folder in children_by_parent.get(root_folder.id, ()):
+            if folder["content_type"] == "GL" or folder["id"] not in needed_folders:
+                continue
             # Skip enclaves at top level if not included
             if (
                 not include_enclaves
-                and folder.content_type == Folder.ContentType.ENCLAVE
+                and folder["content_type"] == Folder.ContentType.ENCLAVE
             ):
                 continue
             entry = {
-                "name": folder.name,
-                "uuid": folder.id,
-                "viewable": folder.id in viewable_objects,
-                "writable": writable_ids is None or folder.id in writable_ids,
-                "content_type": folder.content_type,
+                "name": folder["name"],
+                "uuid": folder["id"],
+                "viewable": folder["id"] in viewable_objects,
+                "writable": writable_ids is None or folder["id"] in writable_ids,
+                "content_type": folder["content_type"],
             }
+            if content_counts is not None and entry["viewable"]:
+                entry["content_count"] = content_counts.get(folder["id"], 0)
             # Add enclave-specific styling
-            if folder.content_type == Folder.ContentType.ENCLAVE:
+            if folder["content_type"] == Folder.ContentType.ENCLAVE:
                 entry.update(
                     {
                         "symbol": "triangle",
@@ -8664,27 +9350,29 @@ class FolderViewSet(BaseModelViewSet):
                     }
                 )
             folder_content = get_folder_content(
-                folder,
+                folder["id"],
                 include_perimeters=include_perimeters,
                 include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
+                children_by_parent=children_by_parent,
+                perimeters_by_folder=perimeters_by_folder,
                 writable_ids=writable_ids,
+                content_counts=content_counts,
             )
             if len(folder_content) > 0:
                 entry.update({"children": folder_content})
             folders_list.append(entry)
-
-        root_folder = Folder.get_root_folder()
-        return Response(
-            {
-                "name": root_folder.name,
-                "uuid": str(root_folder.id),
-                "content_type": root_folder.content_type,
-                "writable": writable_ids is None or root_folder.id in writable_ids,
-                "children": folders_list,
-            }
-        )
+        root_entry = {
+            "name": root_folder.name,
+            "uuid": str(root_folder.id),
+            "content_type": root_folder.content_type,
+            "writable": writable_ids is None or root_folder.id in writable_ids,
+            "children": folders_list,
+        }
+        if content_counts is not None and root_folder.id in viewable_objects:
+            root_entry["content_count"] = content_counts.get(root_folder.id, 0)
+        return Response(root_entry)
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -8699,6 +9387,9 @@ class FolderViewSet(BaseModelViewSet):
         """
         Helper method to aggregate quality checks for a queryset of folders.
         Enforces RBAC for both folders and assessments.
+
+        Objects are reduced to the reference the X-rays page links on: the full
+        read serializers cost about twenty queries each for two fields.
         """
         # Get viewable assessment IDs for proper RBAC
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
@@ -8706,41 +9397,63 @@ class FolderViewSet(BaseModelViewSet):
         )
         viewable_ra_ids = RoleAssignment.get_viewable_object_ids(user, RiskAssessment)
 
+        domain_checks = domain_quality_checks(folders, user)
         res = {
             str(f.id): {
-                "folder": FolderReadSerializer(f).data,
+                "folder": {"id": f.id, "name": f.name},
                 "compliance_assessments": {"objects": {}},
                 "risk_assessments": {"objects": {}},
+                **domain_checks[str(f.id)],
             }
             for f in folders
         }
         for ca in ComplianceAssessment.objects.filter(
             folder__in=folders, id__in=viewable_ca_ids
         ):
-            res[str(ca.folder.id)]["compliance_assessments"]["objects"][str(ca.id)] = {
-                "object": ComplianceAssessmentReadSerializer(ca).data,
+            res[str(ca.folder_id)]["compliance_assessments"]["objects"][str(ca.id)] = {
+                "object": {"id": ca.id, "name": ca.name},
                 "quality_check": ca.quality_check(),
             }
         for ra in RiskAssessment.objects.filter(
             folder__in=folders, id__in=viewable_ra_ids
         ):
-            res[str(ra.folder.id)]["risk_assessments"]["objects"][str(ra.id)] = {
-                "object": RiskAssessmentReadSerializer(ra).data,
+            res[str(ra.folder_id)]["risk_assessments"]["objects"][str(ra.id)] = {
+                "object": {"id": ra.id, "name": ra.name},
                 "quality_check": ra.quality_check(),
             }
         return res
+
+    @staticmethod
+    def _has_findings(folder_entry) -> bool:
+        return any(
+            folder_entry[block]["count"] for block in DOMAIN_QUALITY_BLOCKS
+        ) or any(
+            assessment["quality_check"]["count"]
+            for group in ("compliance_assessments", "risk_assessments")
+            for assessment in folder_entry[group]["objects"].values()
+        )
 
     @action(detail=False, methods=["get"])
     def quality_check(self, request):
         """
         Returns the quality check of assessments grouped by folder.
+
+        Folders without a single finding are left out: they render as empty
+        cards and, on large instances, make up most of the response.
         """
         viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
         folders = Folder.objects.filter(id__in=viewable_objects).exclude(
             content_type=Folder.ContentType.ROOT
         )
+        results = self._get_quality_checks_for_folders(folders, request.user)
         return Response(
-            {"results": self._get_quality_checks_for_folders(folders, request.user)}
+            {
+                "results": {
+                    folder_id: entry
+                    for folder_id, entry in results.items()
+                    if self._has_findings(entry)
+                }
+            }
         )
 
     @action(detail=True, methods=["get"], url_path="quality_check")
@@ -8990,6 +9703,32 @@ class FolderViewSet(BaseModelViewSet):
         return Response(res)
 
 
+class RoleViewSet(BaseModelViewSet):
+    """
+    Read-only roles endpoint: serves the folder default-role display and pickers.
+
+    Role management (create/update/delete, with per-folder group provisioning)
+    is not exposed here; a module may register its own RoleViewSet on the same
+    route, which takes precedence over this one.
+    """
+
+    model = Role
+    ordering_fields = ["name"]
+    http_method_names = ["get", "head", "options"]
+    filter_backends = [
+        DjangoFilterBackend,
+        RoleFilter,
+    ]
+
+    def get_queryset(self):
+        # Hide only dedicated per-SA roles; a shared builtin role stays visible.
+        return (
+            super()
+            .get_queryset()
+            .exclude(service_accounts__isnull=False, builtin=False)
+        )
+
+
 class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -8998,7 +9737,15 @@ class UserPreferencesView(APIView):
         return Response(prefs, status=status.HTTP_200_OK)
 
     def patch(self, request) -> Response:
-        prefs = request.user.get_preferences()
+        # `preferences` is one JSON column, so concurrent patches would each save a
+        # snapshot taken before the other's write. ATOMIC_REQUESTS is off, so the
+        # transaction is explicit.
+        with transaction.atomic():
+            user = User.objects.select_for_update().get(pk=request.user.pk)
+            return self._patch_preferences(request, user)
+
+    def _patch_preferences(self, request, user) -> Response:
+        prefs = user.get_preferences()
 
         if "lang" in request.data:
             new_language = request.data.get("lang")
@@ -9014,7 +9761,10 @@ class UserPreferencesView(APIView):
 
         if "date_format" in request.data:
             new_date_format = request.data.get("date_format")
-            if new_date_format not in request.user.DATE_FORMATS:
+            if (
+                not isinstance(new_date_format, str)
+                or new_date_format not in request.user.DATE_FORMATS
+            ):
                 logger.error(
                     f"Error in UserPreferencesView: date_format={new_date_format} available formats={request.user.DATE_FORMATS}"
                 )
@@ -9051,10 +9801,54 @@ class UserPreferencesView(APIView):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 ui_prefs["landing"] = new_landing
+            if "onboarding_dismissed" in new_ui:
+                new_dismissed = new_ui.get("onboarding_dismissed")
+                if not isinstance(new_dismissed, bool):
+                    return Response(
+                        {"error": "onboarding_dismissed must be a boolean."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                ui_prefs["onboarding_dismissed"] = new_dismissed
             prefs["ui"] = ui_prefs
 
+        if "feature_flags" in request.data:
+            new_flags = request.data.get("feature_flags")
+            if not isinstance(new_flags, dict):
+                return Response(
+                    {"error": "Feature flag preferences must be an object."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            hideable = get_user_hideable_feature_flags()
+            unknown = sorted(set(new_flags) - hideable)
+            if unknown:
+                logger.error(
+                    "Error in UserPreferencesView: flags are not user-hideable",
+                    flags=unknown,
+                )
+                return Response(
+                    {"error": "These feature flags cannot be set per user."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if any(not isinstance(value, bool) for value in new_flags.values()):
+                return Response(
+                    {"error": "Feature flag preferences must be booleans."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            # Sparse and false-only: a flag set back to true is dropped, so it
+            # follows the instance again and can never widen it.
+            hidden = prefs.get(USER_FEATURE_FLAGS_PREFERENCE_KEY)
+            hidden = dict(hidden) if isinstance(hidden, dict) else {}
+            for name, visible in new_flags.items():
+                if visible:
+                    hidden.pop(name, None)
+                else:
+                    hidden[name] = False
+            prefs[USER_FEATURE_FLAGS_PREFERENCE_KEY] = hidden
+
+        user.preferences = prefs
+        user.save(update_fields=["preferences"])
+        # The request's own instance would otherwise keep the pre-patch snapshot.
         request.user.preferences = prefs
-        request.user.save(update_fields=["preferences"])
         return Response({}, status=status.HTTP_200_OK)
 
 
@@ -9414,6 +10208,14 @@ class FrameworkFilter(GenericFilterSet):
         fields = ["provider"]
 
 
+class ReorganisationConflict(Exception):
+    """The tree moved under a reorganisation, or a staged delete is no longer empty."""
+
+    def __init__(self, conflicts):
+        self.conflicts = conflicts
+        super().__init__("Folders staged for deletion are not empty")
+
+
 class DraftValidationError(Exception):
     """Raised when a framework draft fails controlled validation checks."""
 
@@ -9769,7 +10571,9 @@ class FrameworkViewSet(BaseModelViewSet):
         detail=True, methods=["get"], name="Get framework coverage data from mappings"
     )
     def mapping_stats(self, request, pk):
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         framework_urn = Framework.objects.filter(id=pk).values_list("urn")[0][0]
         res = engine.paths_and_coverages(framework_urn)
@@ -10002,6 +10806,7 @@ class RequirementViewSet(BaseModelViewSet):
                 "evidences",
                 "applied_controls",
                 "security_exceptions",
+                "findings",
             )
         )
         serialized_requirement_assessments = RequirementAssessmentReadSerializer(
@@ -10162,7 +10967,7 @@ class RequirementViewSet(BaseModelViewSet):
         )
 
 
-class EvidenceFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
+class EvidenceFilterSet(GenericFilterSet):
     owner = NullableModelChoiceFilter(queryset=Actor.objects.all())
 
     class Meta:
@@ -10206,6 +11011,7 @@ class EvidenceViewSet(BaseModelViewSet):
                 "requirement_assessments",
                 "security_exceptions",
                 "contracts",
+                "task_templates",
                 "filtering_labels",
                 actor_prefetch("owner"),
             )
@@ -10238,7 +11044,11 @@ class EvidenceViewSet(BaseModelViewSet):
                 response = HttpResponse(
                     revision.attachment,
                     content_type=mimetypes.guess_type(filename)[0],
-                    headers={"Content-Disposition": f"attachment; filename={filename}"},
+                    headers={
+                        "Content-Disposition": safe_filename_header(
+                            "attachment", filename
+                        )
+                    },
                     status=status.HTTP_200_OK,
                 )
         return response
@@ -10261,7 +11071,7 @@ class EvidenceViewSet(BaseModelViewSet):
         url_path="batch-upload",
         parser_classes=[MultiPartParser, FormParser],
     )
-    def batch_upload(self, request):
+    def batch_upload(self, request: HttpRequest):
         """
         Bulk-upload evidences from a multipart payload.
 
@@ -10357,6 +11167,9 @@ class EvidenceViewSet(BaseModelViewSet):
             field = entry.get("field")
             name = (entry.get("name") or field or "").strip()
             rel_path = entry.get("rel_path") or None
+            if not isinstance(rel_path, str):
+                rel_path = None
+
             result = {"field": field, "name": name, "rel_path": rel_path}
 
             upload = request.FILES.get(field) if field else None
@@ -10495,7 +11308,15 @@ class EvidenceViewSet(BaseModelViewSet):
         result["revision_id"] = str(revision.id) if revision else None
         result["version"] = revision.version if revision else 1
 
-    def _batch_add_revision(self, result, summary, evidence, upload, rel_path, request):
+    def _batch_add_revision(
+        self,
+        result: dict,
+        summary: dict,
+        evidence: Evidence,
+        upload: UploadedFile,
+        rel_path: Optional[str],
+        request: HttpRequest,
+    ):
         """Create a new EvidenceRevision against an existing Evidence (auto-bumps version)."""
         rev_serializer = EvidenceRevisionWriteSerializer(
             data={
@@ -10523,13 +11344,20 @@ class EvidenceViewSet(BaseModelViewSet):
         result["version"] = revision.version
         summary["revision_added"] += 1
 
-    def _batch_replace_revision(self, result, summary, evidence, upload, rel_path):
+    def _batch_replace_revision(
+        self,
+        result: dict,
+        summary: dict,
+        evidence: Evidence,
+        upload: UploadedFile,
+        rel_path: Optional[str],
+    ):
         """Overwrite the last revision's attachment in place — preserves Evidence id and M2M links."""
         revision = evidence.last_revision
         if revision is None:
             revision = EvidenceRevision(evidence=evidence)
-        old_attachment = revision.attachment
-        revision.attachment = upload
+        superseded_name = revision.set_new_attachment(upload)
+
         if rel_path:
             revision.observation = f"path: {rel_path}"
         try:
@@ -10547,9 +11375,10 @@ class EvidenceViewSet(BaseModelViewSet):
             result["error"] = " ".join(messages)
             summary["errors"] += 1
             return
+
         revision.save()
-        if old_attachment:
-            old_attachment.delete(save=False)
+        if superseded_name and superseded_name != revision.attachment.name:
+            revision.attachment.storage.delete(superseded_name)
         result["outcome"] = "replaced"
         result["evidence_id"] = str(evidence.id)
         result["revision_id"] = str(revision.id)
@@ -10557,7 +11386,7 @@ class EvidenceViewSet(BaseModelViewSet):
         summary["replaced"] += 1
 
     @staticmethod
-    def _batch_find_unique_name(name, folder):
+    def _batch_find_unique_name(name: str, folder: Folder) -> str:
         """Append ' (1)', ' (2)' ... before the extension until the name is free in folder."""
         if "." in name:
             base, _, ext = name.rpartition(".")
@@ -10607,7 +11436,9 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
                     evidence.attachment,
                     content_type=content_type,
                     headers={
-                        "Content-Disposition": f"attachment; filename={evidence.filename()}"
+                        "Content-Disposition": safe_filename_header(
+                            "attachment", evidence.filename()
+                        )
                     },
                     status=status.HTTP_200_OK,
                 )
@@ -10636,19 +11467,22 @@ class UploadAttachmentView(APIView):
         revision = None
         evidence = None
 
-        # RBAC: scope to objects the user has change permission on (upload is a write)
-        accessible_evidence_ids = RoleAssignment.get_changeable_object_ids(
-            request.user, Evidence
-        )
-
         try:
-            revision = EvidenceRevision.objects.get(
-                pk=pk, evidence__id__in=accessible_evidence_ids
-            )
+            if not RoleAssignment.is_object_accessible(
+                request.user, "change", EvidenceRevision, pk
+            ):
+                raise EvidenceRevision.DoesNotExist
+
+            revision = EvidenceRevision.objects.get(pk=pk)
             evidence = revision.evidence
         except EvidenceRevision.DoesNotExist:
             try:
-                evidence = Evidence.objects.get(pk=pk, id__in=accessible_evidence_ids)
+                if not RoleAssignment.is_object_accessible(
+                    request.user, "change", Evidence, pk
+                ):
+                    raise Evidence.DoesNotExist
+
+                evidence = Evidence.objects.get(pk=pk)
             except Evidence.DoesNotExist:
                 return Response(
                     {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND
@@ -10661,28 +11495,30 @@ class UploadAttachmentView(APIView):
 
         attachment = request.FILES.get("file")
         if attachment and attachment.name != "undefined":
-            if not revision.attachment or revision.attachment != attachment:
-                old_attachment = revision.attachment
-                revision.attachment = attachment
-                try:
-                    revision.full_clean()
-                except ValidationError as e:
-                    revision.attachment = old_attachment
-                    messages = []
-                    if hasattr(e, "message_dict"):
-                        for field_messages in e.message_dict.values():
-                            messages.extend(field_messages)
-                    elif hasattr(e, "messages"):
-                        messages = e.messages
-                    else:
-                        messages = [str(e.message)]
-                    return Response(
-                        {"detail": " ".join(messages)},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                if old_attachment:
-                    old_attachment.delete()
-                revision.save()
+            old_attachment = revision.attachment
+            old_original_filename = revision.original_filename
+            superseded_name = revision.set_new_attachment(attachment)
+
+            try:
+                revision.full_clean()
+            except ValidationError as e:
+                revision.attachment = old_attachment
+                revision.original_filename = old_original_filename
+                messages = []
+                if hasattr(e, "message_dict"):
+                    for field_messages in e.message_dict.values():
+                        messages.extend(field_messages)
+                elif hasattr(e, "messages"):
+                    messages = e.messages
+                else:
+                    messages = [str(e.message)]
+                return Response(
+                    {"detail": " ".join(messages)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            revision.save()
+            if superseded_name and superseded_name != revision.attachment.name:
+                revision.attachment.storage.delete(superseded_name)
 
         return Response(status=status.HTTP_200_OK)
 
@@ -10968,6 +11804,10 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
         "issues",
         "assigned_to",
         "is_active",
+        "start_date",
+        "eta",
+        "due_date",
+        "closing_date",
     ]
     search_fields = ["name", "description"]
 
@@ -11037,7 +11877,14 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
 class OrganisationIssueViewSet(BaseModelViewSet):
     model = OrganisationIssue
 
-    filterset_fields = ["folder", "category", "origin", "status"]
+    filterset_fields = [
+        "folder",
+        "category",
+        "origin",
+        "status",
+        "start_date",
+        "expiration_date",
+    ]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -11469,28 +12316,48 @@ def _preview_suggestions_for_compliance_assessment(
     return list(best.values())
 
 
-class ComplianceAssessmentViewSet(BaseModelViewSet):
+class ComplianceAssessmentFilterSet(GenericFilterSet):
+    is_tprm = df.BooleanFilter(method="filter_is_tprm", label="Third-party audit")
+
+    class Meta:
+        model = ComplianceAssessment
+        fields = [
+            "name",
+            "ref_id",
+            "folder",
+            "framework",
+            "perimeter",
+            "campaign",
+            "status",
+            "ebios_rm_studies",
+            "assets",
+            "evidences",
+            "authors",
+            "reviewers",
+            "genericcollection",
+            "due_date",
+            "eta",
+        ]
+
+    def filter_is_tprm(self, queryset, name, value):
+        if value is None:
+            return queryset
+        if value:
+            return queryset.filter(entityassessment__isnull=False).distinct()
+        return queryset.exclude(entityassessment__isnull=False)
+
+
+class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
     """
 
     model = ComplianceAssessment
-    filterset_fields = [
-        "name",
-        "ref_id",
-        "folder",
-        "framework",
-        "perimeter",
-        "campaign",
-        "status",
-        "ebios_rm_studies",
-        "assets",
-        "evidences",
-        "authors",
-        "reviewers",
-        "genericcollection",
-    ]
+    filterset_class = ComplianceAssessmentFilterSet
+    filterset_fields = ComplianceAssessmentFilterSet.Meta.fields
     search_fields = ["name", "description", "ref_id", "framework__name"]
+    ordering_remap = {"authors": "authors_label"}
+    ordering_nulls_last = ("authors_label",)
 
     def get_serializer_class(self, **kwargs):
         action = kwargs.get("action", self.action)
@@ -11522,7 +12389,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ).get(id=has_mapping_path_to)
             except ComplianceAssessment.DoesNotExist, ValueError:
                 return qs.none()
-            from core.mappings.engine import engine
+            from core.mappings.engine import MappingEngine
+
+            engine = MappingEngine()
 
             max_depth = get_mapping_max_depth()
             source_urns = engine.get_source_framework_urns(
@@ -11741,6 +12610,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "entityassessment_set",
             )
 
+        # Outside the list branch: `ordering_remap` rewrites `authors` on every
+        # action, so any action handed the list query string (the CSV export, the
+        # autocomplete endpoint) needs the column it is rewritten to. The helper
+        # is already a no-op unless the request orders by it.
+        qs = annotate_actor_ordering(qs, self)
+
         # No requirement_assessments prefetch on the list action: progress is
         # served by `_get_optimized_object_data` (no-IG audits) or the model's
         # scalar-only counts (IG audits); nothing else in the list serializer
@@ -11801,7 +12676,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     )
     def frameworks(self, request, pk):
         audit = self.get_object()
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         audit_from_results = engine.load_audit_fields(audit)
         max_depth = get_mapping_max_depth()
@@ -11864,6 +12741,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "requirement_progress",
                 "score",
                 "observations",
+                "applied_controls",
                 "answers",
             ]
             writer.writerow(columns)
@@ -11893,9 +12771,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         req.status,
                         req.score,
                         req.observation,
+                        ",".join(c.name for c in req.applied_controls.all()),
                     ]
                 else:
-                    row += ["", "", "", "", ""]
+                    row += ["", "", "", "", "", ""]
                 row.append(
                     render_answers_cell(
                         req_node.get_questions_translated,
@@ -11963,6 +12842,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "extended_result": req.extended_result,
                 "requirement_progress": req.status,
                 "observations": escape_excel_formula(req.observation),
+                "applied_controls": ", ".join(
+                    escape_excel_formula(c.name) for c in req.applied_controls.all()
+                ),
             }
             if show_documentation_score:
                 entry["implementation_score"] = req.score
@@ -12753,13 +13635,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         create_applied_controls = serializer.validated_data.pop(
             "create_applied_controls_from_suggestions", False
         )
-        from core.mappings.engine import engine
 
         with transaction.atomic():
             instance: ComplianceAssessment = serializer.save()
             instance.create_requirement_assessments(baseline)
 
             if baseline and baseline.framework != instance.framework:
+                # Built here rather than above: it reads the whole mapping
+                # graph, and most audits are created without a baseline.
+                from core.mappings.engine import MappingEngine
+
+                engine = MappingEngine()
+
                 source_urn = baseline.framework.urn
                 audit_from_results = engine.load_audit_fields(baseline)
                 dest_urn = serializer.validated_data["framework"].urn
@@ -12768,18 +13655,26 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 best_results, _ = engine.best_mapping_inferences(
                     audit_from_results, source_urn, dest_urn, max_depth
                 )
+                # Empty when no mapping path exists between the two
+                # frameworks, which is a legitimate outcome: the audit is
+                # created, just not pre-filled.
+                inferences = best_results.get("requirement_assessments", {})
+                if not inferences:
+                    logger.warning(
+                        "No mapping path between the baseline and the target framework",
+                        source=source_urn,
+                        dest=dest_urn,
+                    )
 
                 requirement_assessments_to_update: list[RequirementAssessment] = []
 
                 target_requirement_assessments = RequirementAssessment.objects.filter(
                     compliance_assessment=instance,
-                    requirement__urn__in=best_results["requirement_assessments"],
+                    requirement__urn__in=inferences,
                 )
 
                 for req in target_requirement_assessments:
-                    source = best_results["requirement_assessments"][
-                        req.requirement.urn
-                    ]
+                    source = inferences[req.requirement.urn]
                     for field in [
                         "result",
                         "status",
@@ -12812,37 +13707,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for ra in requirement_assessments_to_update:
-                    if best_results["requirement_assessments"][ra.requirement.urn].get(
-                        "applied_controls"
-                    ):
+                    if inferences[ra.requirement.urn].get("applied_controls"):
                         ra.applied_controls.add(
                             *[
                                 control
-                                for control in best_results["requirement_assessments"][
-                                    ra.requirement.urn
-                                ]["applied_controls"]
+                                for control in inferences[ra.requirement.urn][
+                                    "applied_controls"
+                                ]
                             ]
                         )
-                    if best_results["requirement_assessments"][ra.requirement.urn].get(
-                        "evidences"
-                    ):
+                    if inferences[ra.requirement.urn].get("evidences"):
                         ra.evidences.add(
                             *[
                                 evidence
-                                for evidence in best_results["requirement_assessments"][
-                                    ra.requirement.urn
-                                ]["evidences"]
+                                for evidence in inferences[ra.requirement.urn][
+                                    "evidences"
+                                ]
                             ]
                         )
-                    if best_results["requirement_assessments"][ra.requirement.urn].get(
-                        "security_exceptions"
-                    ):
+                    if inferences[ra.requirement.urn].get("security_exceptions"):
                         ra.security_exceptions.add(
                             *[
                                 exception
-                                for exception in best_results[
-                                    "requirement_assessments"
-                                ][ra.requirement.urn]["security_exceptions"]
+                                for exception in inferences[ra.requirement.urn][
+                                    "security_exceptions"
+                                ]
                             ]
                         )
 
@@ -13176,7 +14065,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related("reference_controls", "threats", "questions__choices")
             .all(),
         )
         tree = get_sorted_requirement_nodes(
@@ -13479,7 +14368,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         if UUID(pk) in object_ids_view:
             compliance_assessment = self.get_object()
-            (index_content, evidences) = generate_html(compliance_assessment)
+            (index_content, evidences, archive_names) = generate_html(
+                compliance_assessment
+            )
             zip_name = f"{sanitize_filename(compliance_assessment.name)}-{sanitize_filename(compliance_assessment.framework.name)}-{datetime.now():%Y-%m-%d-%H-%M}.zip"
 
             # Create temporary file that will be automatically deleted
@@ -13488,25 +14379,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             try:
                 with zipfile.ZipFile(temp_file, "w") as zipf:
                     for evidence in evidences:
-                        if (
-                            evidence.last_revision
-                            and evidence.last_revision.attachment
-                            and default_storage.exists(
-                                evidence.last_revision.attachment.name
+                        # last_revision re-queries; omit one file rather than abort.
+                        entry_name = archive_names.get(evidence.id)
+                        revision = evidence.last_revision
+                        if not entry_name or not revision or not revision.attachment:
+                            continue
+                        if not default_storage.exists(revision.attachment.name):
+                            continue
+                        with default_storage.open(
+                            revision.attachment.name
+                        ) as attachment_file:
+                            zipf.writestr(
+                                f"evidences/{entry_name}", attachment_file.read()
                             )
-                        ):
-                            with default_storage.open(
-                                evidence.last_revision.attachment.name
-                            ) as attachment_file:
-                                zipf.writestr(
-                                    os.path.join(
-                                        "evidences",
-                                        os.path.basename(
-                                            evidence.last_revision.attachment.name
-                                        ),
-                                    ),
-                                    attachment_file.read(),
-                                )
                     zipf.writestr("index.html", index_content)
 
                 # Seek to beginning for reading
@@ -14095,7 +14980,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         target_ras = target_data["requirement_assessments"]
         current_results = engine.summary_results(target_data)
@@ -15068,6 +15955,15 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     # nobody has add_requirementassessment, they are created with the audit.
     permission_overrides = {"findings_binder": "change_requirementassessment"}
 
+    @action(detail=True, methods=["get"], url_path="quality_check")
+    def quality_check_detail(self, request, pk):
+        """Quality findings for a single requirement assessment.
+
+        The audit-level check at /compliance-assessments/{id}/quality_check runs
+        the very same rules over every requirement in scope.
+        """
+        return Response(self.get_object().quality_check())
+
     @action(detail=True, methods=["post"], url_path="findings-binder")
     def findings_binder(self, request, pk=None):
         """Return the audit's findings binder, creating it on first use."""
@@ -15079,6 +15975,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
         requirement_assessment = self.get_object()
         audit = requirement_assessment.compliance_assessment
+        if audit.is_locked:
+            return Response(
+                {"error": "Cannot raise a finding on a locked audit"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         # `add_findingsassessment` on the audit's folder is what authorizes creating it.
         if not RoleAssignment.is_access_allowed(
@@ -15156,6 +16057,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "applied_controls",  # ManyToManyField to AppliedControl
                 "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
+                "findings",  # Reverse FK from Finding serialized as FieldsRelatedField
                 "answers",  # Reverse FK from Answer, used by get_answers() in read serializer
                 "answers__question",  # Needed by build_answers_dict() to get question.urn and question.type
                 "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
@@ -15403,7 +16305,9 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="graph-data")
     def graph_data_list(self, request):
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         max_depth = get_mapping_max_depth()
 
@@ -15532,35 +16436,76 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
         return Response({"nodes": nodes, "links": links, "categories": categories})
 
-    @action(detail=True, methods=["get"], url_path="graph_data")
-    def graph_data(self, request, pk=None):
-        obj = StoredLibrary.objects.get(id=pk)
+    @staticmethod
+    def _framework_content(urn, label):
+        lib = StoredLibrary.objects.filter(
+            content__framework__urn=urn,
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        ).first()
+        if not lib:
+            raise NotFound(f"{label} framework library not found")
+        return lib.content["framework"]
+
+    def _mapping_context(self):
+        """Resolve the mapping set and both framework contents.
+
+        get_object() keeps the folder-scoped queryset in play.
+        """
+        obj = self.get_object()
 
         mapping_set = obj.content.get(
             "requirement_mapping_sets",
             [obj.content.get("requirement_mapping_set", {})],
         )[0]
 
-        source_framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn=mapping_set["source_framework_urn"],
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
-        if not source_framework_lib:
-            raise NotFound("Source framework library not found")
+        source_framework = self._framework_content(
+            mapping_set["source_framework_urn"], "Source"
+        )
+        target_framework = self._framework_content(
+            mapping_set["target_framework_urn"], "Target"
+        )
+        return mapping_set, source_framework, target_framework
 
-        target_framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn=mapping_set["target_framework_urn"],
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
-        if not target_framework_lib:
-            raise NotFound("Target framework library not found")
+    @staticmethod
+    def _coverage_meta(
+        source_framework,
+        target_framework,
+        req_mappings,
+        source_urns,
+        target_urns,
+    ):
+        linked_source_urns = {
+            mapping.get("source_requirement_urn")
+            for mapping in req_mappings
+            if mapping.get("source_requirement_urn") in source_urns
+        }
+        linked_target_urns = {
+            mapping.get("target_requirement_urn")
+            for mapping in req_mappings
+            if mapping.get("target_requirement_urn") in target_urns
+        }
 
-        source_framework = source_framework_lib.content["framework"]
-        target_framework = target_framework_lib.content["framework"]
+        return {
+            "display_name": f"{source_framework['name']} ➜ {target_framework['name']}",
+            "source_framework": source_framework["name"],
+            "target_framework": target_framework["name"],
+            "source_coverage": round(len(linked_source_urns) / len(source_urns) * 100)
+            if source_urns
+            else 0,
+            "target_coverage": round(len(linked_target_urns) / len(target_urns) * 100)
+            if target_urns
+            else 0,
+            "source_total": len(source_urns),
+            "source_linked": len(linked_source_urns),
+            "target_total": len(target_urns),
+            "target_linked": len(linked_target_urns),
+        }
+
+    @action(detail=True, methods=["get"], url_path="graph_data")
+    def graph_data(self, request, pk=None):
+        mapping_set, source_framework, target_framework = self._mapping_context()
 
         source_nodes_dict = {
             n.get("urn"): n for n in source_framework["requirement_nodes"]
@@ -15630,46 +16575,79 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
                 }
             )
 
-        # Calculate coverage in both directions
-        source_assessable_count = len(snodes_idx)
-        target_assessable_count = len(tnodes_idx)
-
-        linked_source_urns = set(
-            mapping.get("source_requirement_urn")
-            for mapping in req_mappings
-            if mapping.get("source_requirement_urn") in snodes_idx
+        meta = self._coverage_meta(
+            source_framework,
+            target_framework,
+            req_mappings,
+            snodes_idx.keys(),
+            tnodes_idx.keys(),
         )
-        linked_target_urns = set(
-            mapping.get("target_requirement_urn")
-            for mapping in req_mappings
-            if mapping.get("target_requirement_urn") in tnodes_idx
-        )
-
-        source_coverage = (
-            round(len(linked_source_urns) / source_assessable_count * 100)
-            if source_assessable_count > 0
-            else 0
-        )
-        target_coverage = (
-            round(len(linked_target_urns) / target_assessable_count * 100)
-            if target_assessable_count > 0
-            else 0
-        )
-
-        meta = {
-            "display_name": f"{source_framework['name']} ➜ {target_framework['name']}",
-            "source_framework": source_framework["name"],
-            "target_framework": target_framework["name"],
-            "source_coverage": source_coverage,
-            "target_coverage": target_coverage,
-            "source_total": source_assessable_count,
-            "source_linked": len(linked_source_urns),
-            "target_total": target_assessable_count,
-            "target_linked": len(linked_target_urns),
-        }
 
         return Response(
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
+        )
+
+    @action(detail=True, methods=["get"], url_path="table_data")
+    def table_data(self, request, pk=None):
+        """Flat mapping rows plus both requirement inventories.
+
+        Unmapped requirements ship too: they are the gaps the aggregate views show.
+        """
+        mapping_set, source_framework, target_framework = self._mapping_context()
+
+        def inventory(framework):
+            return {
+                req["urn"]: {
+                    "urn": req["urn"],
+                    "ref_id": req.get("ref_id"),
+                    "name": req.get("name"),
+                    "description": req.get("description"),
+                }
+                for req in framework["requirement_nodes"]
+                if req.get("assessable", False) and req.get("urn")
+            }
+
+        source_requirements = inventory(source_framework)
+        target_requirements = inventory(target_framework)
+
+        rows = []
+        # Libraries repeat links and carry no mapping id; the index is the only row identity.
+        for index, mapping in enumerate(mapping_set.get("requirement_mappings", [])):
+            source = source_requirements.get(mapping.get("source_requirement_urn"))
+            target = target_requirements.get(mapping.get("target_requirement_urn"))
+            if not source or not target:
+                continue
+            rows.append(
+                {
+                    "index": index,
+                    "source_urn": source["urn"],
+                    "source_ref_id": source["ref_id"],
+                    "source_name": source["name"],
+                    "target_urn": target["urn"],
+                    "target_ref_id": target["ref_id"],
+                    "target_name": target["name"],
+                    "relationship": mapping.get("relationship"),
+                    "rationale": mapping.get("rationale"),
+                    "strength_of_relationship": mapping.get("strength_of_relationship"),
+                    "annotation": mapping.get("annotation"),
+                }
+            )
+
+        meta = self._coverage_meta(
+            source_framework,
+            target_framework,
+            mapping_set.get("requirement_mappings", []),
+            source_requirements.keys(),
+            target_requirements.keys(),
+        )
+
+        return Response(
+            {
+                "rows": rows,
+                "source_requirements": list(source_requirements.values()),
+                "target_requirements": list(target_requirements.values()),
+                "meta": meta,
+            }
         )
 
 
@@ -15746,18 +16724,51 @@ def get_build(request):
 # NOTE: Important functions/classes from old views.py, to be reviewed
 
 
+def build_evidence_archive_names(evidences: Sequence[Evidence]) -> dict:
+    """Zip entry name per evidence, unique within one archive.
+
+    Computed once for both the template and the zip writer: a divergence is a dead link.
+    """
+    names = {}
+    taken = set()
+    for evidence in sorted(evidences, key=lambda e: str(e.id)):
+        revision = evidence.last_revision
+        if not revision or not revision.attachment:
+            continue
+        # Never trusted: an unsanitized row would be a traversal-capable zip entry.
+        base = sanitize_file_name(revision.filename() or "") or "file"
+        stem, extension = os.path.splitext(base)
+        candidate, counter = base, 1
+        # Case-insensitive: the archive is often extracted on Windows or macOS.
+        while candidate.lower() in taken:
+            counter += 1
+            candidate = f"{stem} ({counter}){extension}"
+        taken.add(candidate.lower())
+        names[evidence.id] = candidate
+    return names
+
+
 def generate_html(
     compliance_assessment: ComplianceAssessment,
-) -> Tuple[str, list[Evidence]]:
+) -> Tuple[str, list[Evidence], dict]:
     selected_evidences = []
 
-    requirement_nodes = RequirementNode.objects.filter(
-        framework=compliance_assessment.framework
-    ).order_by("order_id")
+    requirement_nodes = (
+        RequirementNode.objects.filter(framework=compliance_assessment.framework)
+        .order_by("order_id")
+        .prefetch_related("questions__choices")
+    )
 
-    assessments = RequirementAssessment.objects.filter(
-        compliance_assessment=compliance_assessment,
-    ).all()
+    assessments = (
+        RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+        )
+        .select_related("requirement")
+        .prefetch_related(
+            "answers__question",
+            "answers__selected_choices",
+        )
+    )
 
     implementation_groups = compliance_assessment.selected_implementation_groups
     graph = get_sorted_requirement_nodes(
@@ -15803,7 +16814,9 @@ def generate_html(
         answers_dict_by_urn[a.requirement.urn] = build_answers_dict(a.answers.all())
 
     questions_dict_by_urn = {}
-    for node in requirement_nodes.prefetch_related("questions__choices"):
+    # requirement_nodes is already evaluated (node_per_urn) with questions__choices
+    # prefetched; calling prefetch_related() again would clone and re-run it.
+    for node in requirement_nodes:
         # A question hidden by an unsatisfied depends_on does not apply here, so
         # the report must not list it as unanswered.
         qd = visible_questions(
@@ -15881,16 +16894,18 @@ def generate_html(
         top_level_nodes_data.append(node_data)
         selected_evidences += node_evidences
 
+    evidences = list(set(selected_evidences))
+    archive_names = build_evidence_archive_names(evidences)
+
     data = {
         "compliance_assessment": compliance_assessment,
         "top_level_nodes": top_level_nodes_data,
         "assessments": assessments,
         "ancestors": ancestors,
+        "archive_names": archive_names,
     }
 
-    return render_to_string("core/audit_report.html", data), list(
-        set(selected_evidences)
-    )
+    return render_to_string("core/audit_report.html", data), evidences, archive_names
 
 
 def export_mp_csv(request):
@@ -16123,8 +17138,11 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "compliance_assessment",
         "filtering_labels",
         "genericcollection",
+        "reported_at",
     ]
     search_fields = ["name", "description", "ref_id"]
+    ordering_remap = {"authors": "authors_label"}
+    ordering_nulls_last = ("authors_label",)
 
     def get_queryset(self):
         dealt_with_statuses = [
@@ -16133,7 +17151,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             Finding.Status.DISMISSED,
             Finding.Status.CLOSED,
         ]
-        return (
+        queryset = (
             super()
             .get_queryset()
             .select_related("folder", "perimeter")
@@ -16156,6 +17174,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 ),
             )
         )
+        return annotate_actor_ordering(queryset, self)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -16562,6 +17581,11 @@ class FindingFilterSet(GenericFilterSet):
     findings_assessment = NullableModelChoiceFilter(
         queryset=FindingsAssessment.objects.all()
     )
+    # Same convention: the requirement assessment picker asks for the unbound
+    # findings alongside its own.
+    requirement_assessment = NullableModelChoiceFilter(
+        queryset=RequirementAssessment.objects.all()
+    )
 
     class Meta:
         model = Finding
@@ -16574,14 +17598,15 @@ class FindingFilterSet(GenericFilterSet):
             "priority": ["exact"],
             "asset": ["exact"],
             "requirement_node": ["exact"],
-            "requirement_assessment": ["exact"],
             "filtering_labels": ["exact"],
             "applied_controls": ["exact"],
             "evidences": ["exact"],
             "vulnerabilities": ["exact"],
+            "task_templates": ["exact"],
             "due_date": ["exact"],
             "created_at": ["gte", "lt"],
             "updated_at": ["gte", "lt"],
+            "eta": ["exact"],
         }
 
 
@@ -16756,6 +17781,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "filtering_labels": ["exact"],
         "created_at": ["gte", "lt"],
         "updated_at": ["gte", "lt"],
+        "reported_at": ["exact"],
     }
 
     def get_queryset(self):
@@ -17404,6 +18430,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "findings",
             "requirement_assessments",
             "filtering_labels",
+            "task_date",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
@@ -18778,7 +19805,13 @@ class ObjectClassificationViewSet(BaseModelViewSet):
 
 class ClassificationLevelViewSet(BaseModelViewSet):
     model = ClassificationLevel
-    filterset_fields = ["object_classification", "folder", "is_visible", "builtin"]
+    filterset_fields = [
+        "object_classification",
+        "object_classification__is_visible",
+        "folder",
+        "is_visible",
+        "builtin",
+    ]
     search_fields = ["name", "description", "abbreviation"]
     ordering = ["object_classification", "rank"]
 
@@ -19177,6 +20210,7 @@ class QuestionViewSet(BaseModelViewSet):
     search_fields = ["text", "annotation"]
     filterset_fields = [
         "requirement_node",
+        "page",
         "type",
         "urn",
     ]
@@ -19185,7 +20219,9 @@ class QuestionViewSet(BaseModelViewSet):
         qs = (
             super()
             .get_queryset()
-            .select_related("requirement_node", "requirement_node__framework", "folder")
+            .select_related(
+                "requirement_node", "requirement_node__framework", "page", "folder"
+            )
             .prefetch_related("choices")
         )
         # Allow filtering by framework
@@ -19216,6 +20252,7 @@ class AnswerViewSet(BaseModelViewSet):
     search_fields = []
     filterset_fields = [
         "requirement_assessment",
+        "response",
         "question",
     ]
 
@@ -19236,286 +20273,6 @@ class AnswerViewSet(BaseModelViewSet):
         if ca_id:
             qs = qs.filter(requirement_assessment__compliance_assessment_id=ca_id)
         return qs
-
-
-# ---------------------------------------------------------------------------
-# Universal Search
-# ---------------------------------------------------------------------------
-
-
-def _search_entry(model, slug, *, ref_id=False, limit=200, extra_search=None):
-    """Helper to build a search config entry."""
-    return {
-        "model": model,
-        "slug": slug,
-        "ref_id": ref_id,
-        "limit": limit,
-        # Additional fields to search on (icontains) beyond name/description/ref_id.
-        # These are ORM lookup paths, e.g. "framework__name" for a FK join.
-        "extra_search": extra_search or [],
-    }
-
-
-SEARCHABLE_MODELS = [
-    # limit: per-model cap on broad fetch. Large tables (RequirementNode,
-    # ReferenceControl) get a tighter limit to avoid starving smaller models.
-    # extra_search: additional fields to query via icontains for this model.
-    # --- Organization ---
-    _search_entry(Folder, "folders"),
-    _search_entry(Perimeter, "perimeters", ref_id=True),
-    # --- Catalog ---
-    _search_entry(Framework, "frameworks", ref_id=True),
-    _search_entry(Threat, "threats", ref_id=True, limit=100, extra_search=["provider"]),
-    _search_entry(ReferenceControl, "reference-controls", ref_id=True, limit=100),
-    _search_entry(RiskMatrix, "risk-matrices", ref_id=True, limit=50),
-    _search_entry(RequirementNode, "requirement-nodes", ref_id=True, limit=100),
-    # --- Assets ---
-    _search_entry(Asset, "assets", ref_id=True),
-    _search_entry(Vulnerability, "vulnerabilities", ref_id=True, limit=100),
-    # --- Operations ---
-    _search_entry(AppliedControl, "applied-controls", ref_id=True),
-    _search_entry(Policy, "policies", ref_id=True),
-    _search_entry(Incident, "incidents", ref_id=True),
-    _search_entry(Finding, "findings", ref_id=True),
-    _search_entry(SecurityException, "security-exceptions", ref_id=True),
-    _search_entry(TaskTemplate, "task-templates", ref_id=True, limit=100),
-    _search_entry(Evidence, "evidences"),
-    # --- Governance ---
-    _search_entry(RiskAcceptance, "risk-acceptances"),
-    # --- Risk ---
-    _search_entry(RiskAssessment, "risk-assessments", ref_id=True),
-    _search_entry(
-        RiskScenario,
-        "risk-scenarios",
-        ref_id=True,
-        extra_search=["risk_assessment__name"],
-    ),
-    # --- Compliance ---
-    _search_entry(
-        ComplianceAssessment,
-        "compliance-assessments",
-        ref_id=True,
-        extra_search=["framework__name"],
-    ),
-    # --- TPRM ---
-    _search_entry(Entity, "entities", ref_id=True),
-    _search_entry(Solution, "solutions", extra_search=["provider_entity__name"]),
-    _search_entry(Contract, "contracts", ref_id=True),
-    # --- EBIOS RM ---
-    _search_entry(EbiosRMStudy, "ebios-rm"),
-    _search_entry(FearedEvent, "feared-events"),
-    _search_entry(StrategicScenario, "strategic-scenarios"),
-    _search_entry(AttackPath, "attack-paths"),
-    # --- Privacy ---
-    _search_entry(Processing, "processings", ref_id=True),
-    _search_entry(DataBreach, "data-breaches", ref_id=True),
-    _search_entry(RightRequest, "right-requests", ref_id=True),
-    # --- Resilience ---
-    _search_entry(BusinessImpactAnalysis, "business-impact-analysis"),
-]
-
-
-_ACCENT_MAP = {
-    "a": "[aàáâãäåæ]",
-    "e": "[eèéêë]",
-    "i": "[iìíîï]",
-    "o": "[oòóôõöø]",
-    "u": "[uùúûü]",
-    "c": "[cç]",
-    "n": "[nñ]",
-    "y": "[yýÿ]",
-    "s": "[sß]",
-}
-
-
-def _accent_regex(word: str) -> str:
-    """Convert a word to a regex pattern that matches accented variants.
-
-    E.g. "referentiel" -> "r[eèéêë]f[eèéêë]r[eèéêë][nñ]t[iìíîï][eèéêë]l"
-    Works on both SQLite and PostgreSQL with __iregex.
-    """
-    return "".join(_ACCENT_MAP.get(c, re.escape(c)) for c in word.lower())
-
-
-@api_view(["GET"])
-@permission_classes([permissions.IsAuthenticated])
-def global_search(request):
-    """
-    Universal fuzzy search across all searchable models.
-
-    GET /api/search/?q=firewall+policy&type=applied-controls,assets
-    """
-    from rapidfuzz import fuzz
-
-    EMPTY_RESPONSE = {"results": [], "query": "", "count": 0, "total_candidates": 0}
-
-    # Cap query length to avoid excessive icontains processing across all models.
-    # 200 chars is far beyond any realistic search; words capped at 20 since each
-    # word generates 2-3 Q objects per model (~1000+ total at the limit).
-    # Minimum 2 chars to avoid single-character fan-out (e.g. q=a matching everything).
-    query = request.query_params.get("q", "").strip()[:200]
-    if len(query) < 2:
-        return Response(EMPTY_RESPONSE)
-
-    type_filter = request.query_params.get("type", "")
-    allowed_types = set(type_filter.split(",")) if type_filter else None
-
-    words = query.split()[:20]
-    # Build prefix set for typo-tolerant broad fetch (first 3 chars of each word)
-    prefixes = {w[:3].lower() for w in words if len(w) >= 3}
-
-    candidates = []
-
-    for entry in SEARCHABLE_MODELS:
-        model_class = entry["model"]
-        url_slug = entry["slug"]
-        has_ref_id = entry["ref_id"]
-        max_per_model = entry["limit"]
-        extra_search = entry["extra_search"]
-
-        if allowed_types and url_slug not in allowed_types:
-            continue
-
-        # Permission-aware queryset
-        accessible_ids = RoleAssignment.get_viewable_object_ids(
-            request.user, model_class
-        )
-        qs = model_class.objects.filter(id__in=accessible_ids)
-
-        # ComplianceAssessment has extra respondent scoping: users who lack the
-        # full auditor view (view_compliance_assessment_full) in a folder can only see
-        # assessments where they have a requirement assignment. Mirror the logic
-        # from ComplianceAssessmentViewSet.
-        if model_class is ComplianceAssessment:
-            respondent_folders = get_respondent_scoped_folder_ids(request.user)
-            if respondent_folders:
-                user_actors = Actor.get_all_for_user(request.user)
-                qs = qs.filter(
-                    ~Q(folder_id__in=respondent_folders)
-                    | Q(requirement_assignments__actor__in=user_actors)
-                ).distinct()
-
-        # Build Q filter for each word on searchable fields.
-        # Uses iregex with accent-folding character classes so that e.g.
-        # "referentiel" matches "RÉFÉRENTIEL" on SQLite (whose LIKE is
-        # ASCII-only and can't fold accents).
-        field_names = {f.name for f in model_class._meta.get_fields()}
-        searchable = ["name", "description"]
-        if has_ref_id:
-            searchable.append("ref_id")
-        # Models with i18n translations store localized names/descriptions in a
-        # JSONField. Searching it catches all translated variants at once.
-        if "translations" in field_names:
-            searchable.append("translations")
-        searchable.extend(extra_search)
-
-        q_filter = Q()
-        for word in words:
-            pattern = _accent_regex(word)
-            word_q = Q()
-            for field in searchable:
-                word_q |= Q(**{f"{field}__iregex": pattern})
-            q_filter |= word_q
-
-        # Also add prefix-based matching for typo tolerance (name + ref_id only)
-        for prefix in prefixes:
-            prefix_pattern = _accent_regex(prefix)
-            prefix_q = Q(**{"name__iregex": prefix_pattern})
-            if has_ref_id:
-                prefix_q |= Q(**{"ref_id__iregex": prefix_pattern})
-            q_filter |= prefix_q
-
-        # Detect optional display fields present on this model (reuses field_names from above)
-        extra_fields = []
-        if has_ref_id:
-            extra_fields.append("ref_id")
-        if "folder" in field_names:
-            extra_fields.append("folder__name")
-        if "provider_entity" in field_names:
-            extra_fields.append("provider_entity__name")
-        if model_class is RequirementNode:
-            extra_fields.append("framework_id")
-
-        results = qs.filter(q_filter).values(
-            "id",
-            "name",
-            "description",
-            *extra_fields,
-        )[:max_per_model]
-
-        for row in results:
-            candidates.append(
-                {
-                    "type": url_slug,
-                    "id": str(row["id"]),
-                    "name": row["name"] or "",
-                    "ref_id": row.get("ref_id", "") or "",
-                    "description": row.get("description") or "",
-                    "folder": row.get("folder__name", "") or "",
-                    "provider": row.get("provider_entity__name", "") or "",
-                    "framework_id": str(row["framework_id"])
-                    if row.get("framework_id")
-                    else None,
-                }
-            )
-
-    # Strip accents/diacritics for accent-insensitive matching and scoring.
-    # SQLite's LIKE is only ASCII case-insensitive, and rapidfuzz treats
-    # accented chars as distinct — normalizing levels the playing field.
-    import unicodedata
-
-    def strip_accents(s: str) -> str:
-        return "".join(
-            c
-            for c in unicodedata.normalize("NFD", s)
-            if unicodedata.category(c) != "Mn"
-        ).lower()
-
-    query_norm = strip_accents(query)
-
-    # Score and rank with rapidfuzz
-    for candidate in candidates:
-        name_norm = strip_accents(candidate["name"])
-        ref_norm = strip_accents(candidate["ref_id"])
-        desc_norm = strip_accents(candidate["description"])
-
-        # Fuzzy scores (on normalized strings for accent-insensitive comparison)
-        name_score = fuzz.WRatio(query_norm, name_norm)
-        ref_score = fuzz.WRatio(query_norm, ref_norm) if ref_norm else 0
-        desc_score = fuzz.partial_ratio(query_norm, desc_norm) * 0.4
-
-        # Substring bonus: literal match in name or ref_id should rank very
-        # high. WRatio penalizes long names unfairly (e.g. "recyf" vs
-        # "RECYF : REFERENTIEL CYBER France..." scores only 24).
-        substring_bonus = 0
-        if query_norm in name_norm:
-            substring_bonus = 95 if name_norm.startswith(query_norm) else 90
-        if query_norm in ref_norm:
-            substring_bonus = max(substring_bonus, 95)
-
-        candidate["score"] = max(name_score, ref_score, desc_score, substring_bonus)
-
-    # Sort by score descending, return top 50
-    candidates.sort(key=lambda c: c["score"], reverse=True)
-    top_results = candidates[:50]
-
-    # Build final response: add URLs and truncate descriptions for the wire
-    for r in top_results:
-        if r["type"] == "requirement-nodes" and r.get("framework_id"):
-            # Link to parent framework (no standalone requirement detail page yet)
-            r["url"] = f"/frameworks/{r['framework_id']}"
-        else:
-            r["url"] = f"/{r['type']}/{r['id']}"
-        r["description"] = r["description"][:200]
-
-    return Response(
-        {
-            "results": top_results,
-            "query": query,
-            "count": len(top_results),
-            "total_candidates": len(candidates),
-        }
-    )
 
 
 def metrics_view(request):
@@ -19560,3 +20317,1325 @@ def metrics_view(request):
         )
 
     return HttpResponse(generate_latest(), content_type=CONTENT_TYPE_LATEST)
+
+
+# ---------------------------------------------------------------------------
+# Quick forms
+# ---------------------------------------------------------------------------
+
+
+class QuickFormViewSet(BaseModelViewSet):
+    """Read-only: quick forms are library content, authored in the library
+    builder and published through the loader."""
+
+    model = QuickForm
+    # POST is allowed only so the `preview` action can take an answers body:
+    # http_method_names is enforced before the action is dispatched, so leaving it out
+    # 405s the preview. Creating a quick form stays closed, below.
+    http_method_names = ["get", "head", "options", "post"]
+    filterset_fields = ["folder", "library"]
+    search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("folder", "library")
+
+    def create(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @action(detail=True, methods=["post"], name="Preview a published form")
+    def preview(self, request, pk):
+        """Answer a published form without creating a response.
+
+        Same evaluator as the draft preview — the live rows are turned back into the
+        document shape it takes — so an author checking a published form and one
+        checking a draft are looking at the same rules.
+        """
+        from core.cel_service import evaluate_quick_form_document
+
+        quick_form = self.get_object()
+        pages = []
+        for page in (
+            QuickFormPage.objects.filter(quick_form=quick_form)
+            .prefetch_related("questions__choices")
+            .order_by("order")
+        ):
+            pages.append(
+                {
+                    "urn": page.urn,
+                    "ref_id": page.ref_id,
+                    "name": page.get_name_translated,
+                    "description": page.get_description_translated,
+                    "visibility_expression": page.visibility_expression,
+                    "questions": page.get_questions_translated() or {},
+                }
+            )
+        document = {
+            "urn": quick_form.urn,
+            "pages": pages,
+            "outcomes_definition": quick_form.outcomes_definition or [],
+            "scores_definition": quick_form.scores_definition,
+        }
+        answers = request.data.get("answers")
+        evaluation = evaluate_quick_form_document(
+            document, answers if isinstance(answers, dict) else {}
+        )
+        hidden = set(evaluation["hidden_pages"])
+        return Response(
+            {
+                "name": quick_form.get_name_translated,
+                "description": quick_form.get_description_translated,
+                "outcomes_definition": document["outcomes_definition"],
+                "pages": [{**page, "hidden": page["urn"] in hidden} for page in pages],
+                "hidden_pages": evaluation["hidden_pages"],
+                "missing_required": evaluation["missing_required"],
+                "progress": evaluation["progress"],
+                "score": evaluation["score"],
+                "computed_outcome": evaluation["computed_outcome"],
+            }
+        )
+
+    @action(detail=True, methods=["get"], name="Quick form pages")
+    def pages(self, request, pk):
+        quick_form = self.get_object()
+        pages = (
+            QuickFormPage.objects.filter(quick_form=quick_form)
+            .select_related("folder", "quick_form")
+            .prefetch_related("questions__choices")
+            .order_by("order")
+        )
+        return Response(QuickFormPageReadSerializer(pages, many=True).data)
+
+
+class QuickFormPageViewSet(BaseModelViewSet):
+    model = QuickFormPage
+    http_method_names = ["get", "head", "options"]
+    filterset_fields = ["quick_form"]
+    search_fields = ["name", "description"]
+    ordering = ["order"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "quick_form")
+            .prefetch_related("questions__choices")
+        )
+
+
+def _outcome_sla_due_date(response):
+    """Earliest due date implied by the outcomes that fired.
+
+    An outcome rule may carry `sla_days`; every key on a rule other than
+    `expression`/`ref_id` passes through into `computed_outcome`, so this needs no
+    schema of its own. Returns None when no fired outcome declares one.
+    """
+    days = []
+    for payload in (response.computed_outcome or {}).values():
+        if not isinstance(payload, dict) or "sla_days" not in payload:
+            continue
+        try:
+            days.append(int(payload["sla_days"]))
+        except TypeError, ValueError:
+            continue
+    days = [d for d in days if d >= 0]
+    if not days:
+        return None
+    return (timezone.now() + timedelta(days=min(days))).date()
+
+
+def emit_quick_form_event(response, action):
+    """Announce a lifecycle point to the workflow engine.
+
+    A CUD event cannot express these: answering saves the row too. Deferred to commit.
+    `quick_form_ref`/`_urn` travel with the id because a pk does not survive export.
+    """
+    from automation.workflows.events import dispatch_internal_event
+
+    payload = {
+        "id": str(response.id),
+        "ref_id": response.ref_id,
+        "name": response.name,
+        "quick_form": str(response.quick_form_id),
+        "quick_form_ref": response.quick_form.ref_id,
+        "quick_form_urn": response.quick_form.urn,
+        "publication": str(response.publication_id)
+        if response.publication_id
+        else None,
+        "status": response.status,
+        "resolution": response.resolution,
+        "outcome_refs": response.outcome_refs,
+        "score": response.score,
+        "submitted_by": str(response.submitted_by_id)
+        if response.submitted_by_id
+        else None,
+        "decided_by": str(response.decided_by_id) if response.decided_by_id else None,
+    }
+    transaction.on_commit(
+        lambda: dispatch_internal_event(
+            f"quickformresponse.{action}", payload, response.folder_id
+        )
+    )
+
+
+def emit_quick_form_submitted(response):
+    emit_quick_form_event(response, "submitted")
+
+
+def _reference_labels(response, user=None):
+    """{question urn: [{id, label, folder}]}, scoped like the picker."""
+    from core.object_references import ReferenceError_, labels_for
+
+    out = {}
+    for answer in response.answers.select_related("question").all():
+        if answer.question.type != Question.Type.OBJECT_REFERENCE:
+            continue
+        try:
+            out[answer.question.urn] = labels_for(
+                answer.question, response.folder, answer.value or [], user=user
+            )
+        except ReferenceError_:
+            out[answer.question.urn] = []
+    return out
+
+
+def _self_validation_allowed(response) -> bool:
+    """The escape hatch for small organisations. Never in a personal folder: its owner
+    holds analyst there, so they would raise and approve unseen."""
+    from iam.models import Folder
+
+    if response.folder.content_type == Folder.ContentType.PERSONAL:
+        return False
+    return general_setting_is_enabled("allow_self_validation")
+
+
+def _can_review(user, response):
+    """Holds `approve` on the folder and is not the requester."""
+    if not RoleAssignment.is_access_allowed(
+        user=user,
+        perm=Permission.objects.get(codename="approve_quickformresponse"),
+        folder=response.folder,
+    ):
+        return False
+    if _self_validation_allowed(response):
+        return True
+    return not response.is_requester(user)
+
+
+def quick_form_response_content(response, user=None):
+    """Everything the fill view needs in one call: ordered pages with translated
+    questions, the answers dict, hidden pages, progress, score and outcome. Shared by
+    the reviewer surface and the requester's own, so the two cannot drift."""
+    from core.cel_service import evaluate_quick_form
+    from core.utils import build_answers_dict
+
+    evaluation = evaluate_quick_form(response, persist=False)
+    hidden = set(evaluation["hidden_pages"])
+    pages = []
+    for page in (
+        QuickFormPage.objects.filter(quick_form_id=response.quick_form_id)
+        .prefetch_related("questions__choices")
+        .order_by("order")
+    ):
+        pages.append(
+            {
+                "id": str(page.id),
+                "urn": page.urn,
+                "ref_id": page.ref_id,
+                "name": page.get_name_translated,
+                "description": page.get_description_translated,
+                "order": page.order,
+                "hidden": page.urn in hidden,
+                "questions": page.get_questions_translated() or {},
+            }
+        )
+    answers = build_answers_dict(
+        response.answers.select_related("question").prefetch_related("selected_choices")
+    )
+    attachments = attachments_for(response.answers.all())
+    references = _reference_labels(response, user)
+    return Response(
+        {
+            "id": str(response.id),
+            "name": response.name,
+            "status": response.status,
+            "quick_form": {
+                "id": str(response.quick_form_id),
+                "name": response.quick_form.get_name_translated,
+                "description": response.quick_form.get_description_translated,
+                "outcomes_definition": response.quick_form.outcomes_definition,
+                "scores_definition": response.quick_form.scores_definition,
+            },
+            "pages": pages,
+            "answers": answers,
+            "attachments": attachments,
+            "references": references,
+            "produced_objects": response.produced_objects or [],
+            "hidden_pages": evaluation["hidden_pages"],
+            "missing_required": evaluation["missing_required"],
+            "progress": evaluation["progress"],
+            "score": evaluation["score"],
+            "computed_outcome": evaluation["computed_outcome"],
+            "can_edit_answers": response.status == QuickFormResponse.Status.DRAFT
+            and (user is None or response.is_requester(user)),
+            # Whether this viewer may decide. Computed here so the action bar shows
+            # what the server will actually accept instead of 403ing on click.
+            "can_review": _can_review(user, response) if user is not None else False,
+            "started_at": response.started_at,
+            "submitted_at": response.submitted_at,
+            "observation": response.observation,
+        }
+    )
+
+
+def my_request_row(r):
+    """One row of a requester's own list: enough to decide what to open next."""
+    return {
+        "id": str(r.id),
+        "ref_id": r.ref_id,
+        "name": r.name,
+        "status": r.status,
+        "resolution": r.resolution,
+        "quick_form": r.quick_form.name,
+        "publication": r.publication.name if r.publication_id else None,
+        "cloned_from": r.cloned_from.ref_id if r.cloned_from_id else None,
+        "score": r.score,
+        "computed_outcome": r.computed_outcome,
+        "progress": {
+            "answered_count": r.answers.exclude(Answer.empty_value_q()).count(),
+            "total_count": Question.objects.filter(
+                page__quick_form_id=r.quick_form_id
+            ).count(),
+        },
+        "due_date": r.due_date,
+        "submitted_at": r.submitted_at,
+        "updated_at": r.updated_at,
+    }
+
+
+def entitled_quick_form_publications(user):
+    """Publications `user` may file against: enabled, and either targeted at one of
+    their groups or untargeted.
+
+    Audience entitlement is the access control for filing a request, so this
+    deliberately bypasses IAM folder scoping — a requester is not expected to hold
+    any role on the domain their response lands in.
+    """
+    return (
+        QuickFormPublication.objects.filter(enabled=True)
+        .filter(
+            Q(audience_groups__in=user.user_groups.all())
+            | Q(audience_groups__isnull=True)
+        )
+        .select_related("quick_form", "folder", "submission_folder")
+        .distinct()
+        .order_by("order", "name")
+    )
+
+
+def start_quick_form_response(user, publication):
+    """Create `user`'s response for `publication`, or hand back the draft they
+    already have. Returns (response, resumed).
+
+    Built through the ORM rather than the write serializer: that serializer checks
+    `add_quickformresponse` on the target folder, the permission a requester is
+    precisely not expected to hold. Nothing here is user input — form, domain and
+    reviewers all come from the publication, and entitlement is the caller's job to
+    check before calling.
+    """
+    requester = Actor.objects.filter(user=user, entity__isnull=True).first()
+
+    with transaction.atomic():
+        if requester is not None and not publication.allow_multiple_drafts:
+            # Inside the transaction, and serialised on the requester's own Actor row.
+            # A double click, or a tile clicked in two tabs, otherwise has both requests
+            # find no draft and create one each — and `respondents` is an M2M, so no
+            # unique constraint can catch it afterwards.
+            Actor.objects.select_for_update().filter(pk=requester.pk).first()
+            draft = (
+                QuickFormResponse.objects.filter(
+                    publication=publication,
+                    status=QuickFormResponse.Status.DRAFT,
+                    respondents=requester,
+                )
+                .order_by("-created_at")
+                .first()
+            )
+            if draft is not None:
+                return draft, True
+
+        response = QuickFormResponse.objects.create(
+            name=publication.name,
+            quick_form=publication.quick_form,
+            folder=publication.target_folder,
+            publication=publication,
+            # Self-service has no "not started yet": the requester is filling it now,
+            # and there are no respondents to notify — they are the respondent.
+            started_at=timezone.now(),
+        )
+        response.seed_answers()
+        if requester is not None:
+            response.respondents.set([requester])
+        reviewers = list(publication.default_reviewers.all())
+        if reviewers:
+            response.reviewers.set(reviewers)
+    return response, False
+
+
+class MyRequestViewSet(viewsets.ViewSet):
+    """The requester's own surface, authorised by respondent membership.
+
+    Someone who files through a publication holds no `view`/`change`/`delete` on the
+    domain their response lands in — that is the whole point of the tier — so the
+    ordinary response viewset 403s them out of their own request. Every action here
+    resolves the row through `_own_response`, which is the authorisation: you may act
+    on a response you are a respondent on, and on no other.
+
+    Deliberately narrow. Reviewer transitions (claim, accept, reject, request changes)
+    are not reachable here; they stay on QuickFormResponseViewSet under ordinary
+    folder RBAC, because reviewers are privileged users by construction.
+    """
+
+    def _own_response(self, request, pk):
+        actors = Actor.get_all_for_user(request.user)
+        return (
+            QuickFormResponse.objects.filter(pk=pk, respondents__in=actors)
+            .select_related("quick_form", "folder", "publication")
+            .distinct()
+            .first()
+        )
+
+    def retrieve(self, request, pk=None):
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(QuickFormResponseReadSerializer(response).data)
+
+    @action(detail=True, name="Fill payload for the caller's own request")
+    def content(self, request, pk=None):
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return quick_form_response_content(response, request.user)
+
+    @action(detail=True, methods=["patch"], name="Answer the caller's own request")
+    def answers(self, request, pk=None):
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if response.status != QuickFormResponse.Status.DRAFT:
+            return Response(
+                {"error": "responseLocked"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        # Applied directly rather than through the write serializer: that serializer
+        # checks `change_quickformresponse` on the folder, which a requester does not
+        # hold. The authorisation here is respondent membership, already established.
+        from core.utils import apply_answers_dict
+
+        answers = request.data.get("answers") or {}
+        if not isinstance(answers, dict):
+            return Response(
+                {"answers": "must be an object keyed by URN"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        questions_by_urn = {
+            q.urn: q
+            for q in Question.objects.filter(
+                page__quick_form_id=response.quick_form_id
+            ).prefetch_related("choices")
+        }
+        unknown = set(answers) - set(questions_by_urn)
+        if unknown:
+            return Response(
+                {"answers": f"unknown question urn(s): {sorted(unknown)[:3]}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        with transaction.atomic():
+            apply_answers_dict(
+                "response", response, questions_by_urn, answers, user=request.user
+            )
+            response.refresh_title_from_answers()
+        response.refresh_from_db()
+        return Response(quick_form_response_content(response, request.user).data)
+
+    @action(detail=True, methods=["post"], name="Submit the caller's own request")
+    def submit(self, request, pk=None):
+        from core.cel_service import evaluate_quick_form
+        from core.tasks import send_quick_form_submitted_notification
+
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if response.status != QuickFormResponse.Status.DRAFT:
+            return Response(
+                {"error": "invalidTransition", "from": response.status},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        evaluation = evaluate_quick_form(response, persist=True)
+        if not evaluation["progress"]["complete"]:
+            return Response(
+                {
+                    "error": "responseIncomplete",
+                    "progress": evaluation["progress"],
+                    "missing_required": evaluation["missing_required"],
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        response.status = QuickFormResponse.Status.SUBMITTED
+        response.submitted_at = timezone.now()
+        response.submitted_by = request.user
+        response.observation = None
+        update_fields = [
+            "status",
+            "submitted_at",
+            "submitted_by",
+            "observation",
+            "updated_at",
+        ]
+        sla_due = _outcome_sla_due_date(response)
+        if sla_due is not None and (
+            response.due_date is None or sla_due < response.due_date
+        ):
+            response.due_date = sla_due
+            update_fields.append("due_date")
+        response.save(update_fields=update_fields)
+        emit_quick_form_submitted(response)
+        transaction.on_commit(
+            lambda pk=response.pk: send_quick_form_submitted_notification(pk)
+        )
+        return Response(QuickFormResponseReadSerializer(response).data)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="attachments",
+        parser_classes=[MultiPartParser, FormParser],
+        name="Attach a file to the caller's own request",
+    )
+    def attachments(self, request, pk=None):
+        """Same upload rules as the reviewer path; the gate is respondent
+        membership rather than folder RBAC, and only a draft accepts files."""
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if response.status != QuickFormResponse.Status.DRAFT:
+            return Response(
+                {"error": "responseLocked"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        answer = answer_for_upload(response, request.data.get("question"))
+        if answer is None:
+            return Response(
+                {"error": "unknownQuestion"}, status=status.HTTP_404_NOT_FOUND
+            )
+        upload = request.FILES.get("file")
+        if upload is None:
+            return Response({"error": "noFile"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            attachment = add_attachment(answer, upload, request.user)
+        except AttachmentError as e:
+            return Response(
+                {"error": e.code, "detail": e.detail},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        response.recompute()
+        return Response(
+            serialize_attachment(attachment), status=status.HTTP_201_CREATED
+        )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="reference-options",
+        name="Objects an object-reference question may point at",
+    )
+    def reference_options(self, request, pk=None):
+        """Options for one object-reference question on this request."""
+        from core.object_references import ReferenceError_, options_for
+
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        question = Question.objects.filter(
+            page__quick_form_id=response.quick_form_id,
+            urn=request.query_params.get("question"),
+            type=Question.Type.OBJECT_REFERENCE,
+        ).first()
+        if question is None:
+            return Response(
+                {"error": "unknownQuestion"}, status=status.HTTP_404_NOT_FOUND
+            )
+        try:
+            return Response(
+                options_for(
+                    question,
+                    response.folder,
+                    request.query_params.get("search", ""),
+                    user=request.user,
+                )
+            )
+        except ReferenceError_ as e:
+            logger.warning("Bad object-reference question config", error=e)
+            return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=r"attachments/(?P<attachment_id>[^/.]+)/download",
+        name="Read back a file on the caller's own request",
+    )
+    def download_attachment(self, request, pk=None, attachment_id=None):
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        attachment = AnswerAttachment.objects.filter(
+            id=attachment_id, answer__response=response
+        ).first()
+        if attachment is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return serve_attachment(attachment)
+
+    @action(
+        detail=True,
+        methods=["delete"],
+        url_path=r"attachments/(?P<attachment_id>[^/.]+)",
+        name="Remove a file from the caller's own request",
+    )
+    def remove_attachment(self, request, pk=None, attachment_id=None):
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if response.status != QuickFormResponse.Status.DRAFT:
+            return Response(
+                {"error": "responseLocked"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        attachment = AnswerAttachment.objects.filter(
+            id=attachment_id, answer__response=response
+        ).first()
+        if attachment is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if attachment.promoted_to_id:
+            return Response(
+                {"error": "alreadyPromoted"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        attachment.delete()
+        response.recompute()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"], name="Abandon the caller's own request")
+    def drop(self, request, pk=None):
+        """Drop is the requester abandoning their own request. It is not a rejection
+        — that verdict is the reviewer's — so it closes with its own resolution."""
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if response.status not in (
+            QuickFormResponse.Status.SUBMITTED,
+            QuickFormResponse.Status.IN_REVIEW,
+        ):
+            return Response(
+                {"error": "invalidTransition", "from": response.status},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        response.status = QuickFormResponse.Status.CLOSED
+        response.resolution = QuickFormResponse.Resolution.DROPPED
+        response.assignee = None
+        observation = request.data.get("observation")
+        if observation is not None:
+            response.observation = observation
+        response.save(
+            update_fields=[
+                "status",
+                "resolution",
+                "assignee",
+                "observation",
+                "updated_at",
+            ]
+        )
+        return Response(QuickFormResponseReadSerializer(response).data)
+
+    @action(detail=True, methods=["post"], name="Clone the caller's own request")
+    def clone(self, request, pk=None):
+        """A clone is a new request that happens to descend from an old one: all
+        answers copied, a fresh reference, and `cloned_from` recording the chain —
+        DER.000055 exists because DER.000012 was rejected. Contrast request-changes,
+        which reopens the *same* request and keeps its reference."""
+        source = self._own_response(request, pk)
+        if source is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        with transaction.atomic():
+            clone = QuickFormResponse.objects.create(
+                name=source.name,
+                description=source.description,
+                quick_form=source.quick_form,
+                folder=source.folder,
+                publication=source.publication,
+                cloned_from=source,
+            )
+            clone.seed_answers()
+            clone.respondents.set(source.respondents.all())
+            clone.reviewers.set(source.reviewers.all())
+            answers_by_question = {
+                a.question_id: a
+                for a in Answer.objects.filter(response=clone).select_related(
+                    "question"
+                )
+            }
+            through = []
+            for original in Answer.objects.filter(response=source).prefetch_related(
+                "selected_choices"
+            ):
+                target = answers_by_question.get(original.question_id)
+                if target is None:
+                    continue
+                target.value = original.value
+                target.save(update_fields=["value"])
+                for choice in original.selected_choices.all():
+                    through.append(
+                        Answer.selected_choices.through(
+                            answer_id=target.id, questionchoice_id=choice.id
+                        )
+                    )
+            if through:
+                Answer.selected_choices.through.objects.bulk_create(
+                    through, ignore_conflicts=True
+                )
+            clone.refresh_from_db()
+            clone.recompute()
+        return Response(
+            {
+                "redirect": f"/quick-form-responses/{clone.id}",
+                "ref_id": clone.ref_id,
+                "cloned_from": source.ref_id,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    def destroy(self, request, pk=None):
+        response = self._own_response(request, pk)
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if not response.is_deletable(request.user):
+            return Response(
+                {"error": "onlyDraftsCanBeDeleted", "status": response.status},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        response.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def list(self, request):
+        """The caller's own requests, drafts first. Not folder-scoped — this is the
+        only way back to a draft — and narrower than folder scoping in the other
+        direction: it can never surface someone else's request."""
+        actors = Actor.get_all_for_user(request.user)
+        # Ordered in the database so the rows a page contains are stable: sorting the
+        # page after slicing would give a different answer per offset.
+        responses = (
+            QuickFormResponse.objects.filter(respondents__in=actors)
+            .select_related("quick_form", "folder", "publication")
+            .distinct()
+            .annotate(
+                status_rank=Case(
+                    When(status=QuickFormResponse.Status.DRAFT, then=Value(0)),
+                    When(status=QuickFormResponse.Status.SUBMITTED, then=Value(1)),
+                    When(status=QuickFormResponse.Status.IN_REVIEW, then=Value(2)),
+                    When(status=QuickFormResponse.Status.CLOSED, then=Value(3)),
+                    default=Value(4),
+                    output_field=IntegerField(),
+                )
+            )
+            .order_by("status_rank", "-updated_at", "id")
+        )
+        paginator = CustomLimitOffsetPagination()
+        page = paginator.paginate_queryset(responses, request, view=self)
+        return paginator.get_paginated_response(
+            [my_request_row(r) for r in (page if page is not None else responses)]
+        )
+
+
+class QuickFormPublicationViewSet(BaseModelViewSet):
+    """Authoring CRUD is ordinary folder-scoped RBAC. The three audience actions
+    below are not: they are the elevated path that lets someone file and follow a
+    request without any role on the domain the response lands in.
+
+    They deliberately avoid `get_object()` and `get_queryset()` — both enforce the
+    folder scoping we are stepping around — and authorise on audience membership
+    instead, exactly as PortalViewSet does for entitled portals. `RBACPermissions.
+    has_permission` is a no-op, so no model-level gate fires on the way in.
+    """
+
+    model = QuickFormPublication
+    filterset_fields = ["folder", "quick_form", "enabled"]
+    search_fields = ["name", "description"]
+
+    def _entitled_queryset(self, request):
+        return entitled_quick_form_publications(request.user)
+
+    @action(detail=False, name="Publications the caller may file against")
+    def mine(self, request):
+        return Response(
+            [
+                {
+                    "id": str(publication.id),
+                    "name": publication.name,
+                    "description": publication.description,
+                    "icon": publication.icon,
+                    "quick_form": {
+                        "id": str(publication.quick_form_id),
+                        "name": publication.quick_form.name,
+                    },
+                    "domain": str(publication.target_folder),
+                }
+                for publication in self._entitled_queryset(request)
+            ]
+        )
+
+    @action(detail=True, methods=["post"], name="Start or resume a request")
+    def start(self, request, pk=None):
+        """Create the caller's response for this publication, or hand back the draft
+        they already have.
+
+        The elevated step: the row is built through the ORM rather than the write
+        serializer, because that serializer checks `add_quickformresponse` on the
+        target folder — the very permission a requester is not expected to hold.
+        Nothing here is user input: the form, the domain and the reviewers all come
+        from the publication, and entitlement was checked above.
+        """
+        publication = self._entitled_queryset(request).filter(pk=pk).first()
+        if publication is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        response_object, resumed = start_quick_form_response(request.user, publication)
+        return Response(
+            {
+                "redirect": f"/quick-form-responses/{response_object.id}",
+                "resumed": resumed,
+                "ref_id": response_object.ref_id,
+            }
+        )
+
+
+class QuickFormResponseViewSet(BaseModelViewSet):
+    """Filled instances of a quick form. Regular RBAC only: respondents are
+    the notification audience, not a grant."""
+
+    model = QuickFormResponse
+    filterset_fields = [
+        "folder",
+        "quick_form",
+        "status",
+        "respondents",
+        "reviewers",
+        "assignee",
+        "resolution",
+        # Outcome rows are the queryable projection of `computed_outcome`, which is
+        # a JSON blob django-filter cannot reach.
+        "outcomes__ref_id",
+    ]
+    search_fields = ["name", "description"]
+    permission_overrides = {
+        "awaiting_conversion": "view_quickformresponse",
+        "content": "view_quickformresponse",
+        "set_status": "view_quickformresponse",
+        "start": "change_quickformresponse",
+        "status": "view_quickformresponse",
+    }
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related("folder", "quick_form")
+            .prefetch_related("respondents", "reviewers")
+        )
+        if self.request.query_params.get("mine") in ("true", "1"):
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(respondents__in=user_actors).distinct()
+        return qs
+
+    def destroy(self, request, *args, **kwargs):
+        """Deletion is narrow by design. A draft may be deleted; a submitted or
+        in-review request may not — it is dropped, which leaves a record; a closed
+        one is administrator-only, because the decision has been made."""
+        response = self.get_object()
+        if not response.is_deletable(request.user):
+            return Response(
+                {
+                    "error": "closedRequestsAreAdminOnly"
+                    if response.status == QuickFormResponse.Status.CLOSED
+                    else "onlyDraftsCanBeDeleted",
+                    "status": response.status,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="attachments",
+        parser_classes=[MultiPartParser, FormParser],
+        name="Attach a file to an answer",
+    )
+    def attachments(self, request, pk):
+        """Reviewer-side upload. The requester's equivalent lives on
+        MyRequestViewSet; only the gate differs, the rules are shared."""
+        response = self.get_object()
+        if response.status == QuickFormResponse.Status.CLOSED:
+            # Attaching re-scores, moving the outcome the decision rested on.
+            return Response(
+                {"error": "responseClosed"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        answer = answer_for_upload(response, request.data.get("question"))
+        if answer is None:
+            return Response(
+                {"error": "unknownQuestion"}, status=status.HTTP_404_NOT_FOUND
+            )
+        upload = request.FILES.get("file")
+        if upload is None:
+            return Response({"error": "noFile"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            attachment = add_attachment(answer, upload, request.user)
+        except AttachmentError as e:
+            return Response(
+                {"error": e.code, "detail": e.detail},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        response.recompute()
+        return Response(
+            serialize_attachment(attachment), status=status.HTTP_201_CREATED
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path=r"attachments/(?P<attachment_id>[^/.]+)/promote",
+        name="Promote an attachment to evidence",
+    )
+    def promote_attachment(self, request, pk, attachment_id=None):
+        """A reviewer decides this file is worth keeping. Creates the evidence and
+        its first revision; on an audit answer it also lands on the requirement."""
+        response = self.get_object()
+        attachment = AnswerAttachment.objects.filter(
+            id=attachment_id, answer__response=response
+        ).first()
+        if attachment is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        evidence, created = promote_to_evidence(attachment, request.user)
+        return Response(
+            {
+                "evidence": str(evidence.id),
+                "name": evidence.name,
+                "created": created,
+            }
+        )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="reference-options",
+        name="Objects an object-reference question may point at",
+    )
+    def reference_options(self, request, pk):
+        """Options for one object-reference question on this request."""
+        from core.object_references import ReferenceError_, options_for
+
+        response = self.get_object()
+        if response is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        question = Question.objects.filter(
+            page__quick_form_id=response.quick_form_id,
+            urn=request.query_params.get("question"),
+            type=Question.Type.OBJECT_REFERENCE,
+        ).first()
+        if question is None:
+            return Response(
+                {"error": "unknownQuestion"}, status=status.HTTP_404_NOT_FOUND
+            )
+        try:
+            return Response(
+                options_for(
+                    question,
+                    response.folder,
+                    request.query_params.get("search", ""),
+                    user=request.user,
+                )
+            )
+        except ReferenceError_ as e:
+            logger.warning("Bad object-reference question config", error=e)
+            return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=r"attachments/(?P<attachment_id>[^/.]+)/download",
+        name="Open a file attached to this request",
+    )
+    def download_attachment(self, request, pk, attachment_id=None):
+        """Needs no more than the view right `get_object` established."""
+        response = self.get_object()
+        attachment = AnswerAttachment.objects.filter(
+            id=attachment_id, answer__response=response
+        ).first()
+        if attachment is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return serve_attachment(attachment)
+
+    @action(
+        detail=True,
+        methods=["delete"],
+        url_path=r"attachments/(?P<attachment_id>[^/.]+)",
+        name="Remove an attachment",
+    )
+    def remove_attachment(self, request, pk, attachment_id=None):
+        response = self.get_object()
+        if response.status == QuickFormResponse.Status.CLOSED:
+            return Response(
+                {"error": "responseClosed"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        attachment = AnswerAttachment.objects.filter(
+            id=attachment_id, answer__response=response
+        ).first()
+        if attachment is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if attachment.promoted_to_id:
+            # The evidence now depends on these bytes.
+            return Response(
+                {"error": "alreadyPromoted"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        attachment.delete()
+        response.recompute()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=False, url_path="awaiting-conversion", name="Accepted but unconverted"
+    )
+    def awaiting_conversion(self, request):
+        """Accepted requests that produced nothing: the reconciliation worklist.
+
+        A run that never started leaves no trace, so this reads the outcome rather than
+        the machinery.
+        """
+        from django.contrib.contenttypes.models import ContentType
+
+        produced = ProducedObjectLink.objects.filter(
+            source_content_type=ContentType.objects.get_for_model(QuickFormResponse),
+            source_object_id=models.OuterRef("pk"),
+        )
+        rows = list(
+            self.get_queryset()
+            .filter(
+                status=QuickFormResponse.Status.CLOSED,
+                resolution=QuickFormResponse.Resolution.ACCEPTED,
+            )
+            .annotate(has_produced=Exists(produced))
+            .filter(has_produced=False)
+            .select_related("quick_form", "folder")
+            .order_by("-updated_at")
+        )
+        return Response(
+            {
+                "count": len(rows),
+                "results": [
+                    {
+                        "id": str(r.id),
+                        "ref_id": r.ref_id,
+                        "name": r.name,
+                        "quick_form": r.quick_form.name,
+                        "folder": r.folder.name,
+                        "closed_at": r.updated_at,
+                    }
+                    for r in rows
+                ],
+            }
+        )
+
+    @action(detail=True, url_path="suggested-actions", name="Supervised actions")
+    def suggested_actions(self, request, pk):
+        """Manual workflows offered for this request.
+
+        The reactive path decides for itself; this is the other half — the reviewer
+        has read the request and commits to a sequence. The outcomes its own answers
+        produced are what select which sequences are worth offering, so the list is a
+        suggestion rather than a menu.
+        """
+        from automation.workflows.supervised import suggested_actions
+
+        response = self.get_object()
+        folder_ids = [f.id for f in response.folder.get_parent_folders()] + [
+            response.folder_id
+        ]
+        return Response(suggested_actions(response, "quick_form_response", folder_ids))
+
+    @action(detail=True, methods=["post"], url_path="run-action", name="Run an action")
+    def run_action(self, request, pk):
+        """Run one of the offered sequences against this request.
+
+        Only a version this request actually offers may be started, so the endpoint
+        cannot be used to point an arbitrary workflow at an arbitrary object.
+        """
+        from automation.workflows.engine import EngineError
+        from automation.workflows.models import WorkflowNode, WorkflowVersion
+        from automation.workflows.supervised import (
+            run_supervised_action,
+            suggested_actions,
+        )
+
+        response = self.get_object()
+        # A supervised sequence acts on the request the way a decision does — same gate.
+        denied = self._deciding_denied(request, response)
+        if denied is not None:
+            return denied
+        folder_ids = [f.id for f in response.folder.get_parent_folders()] + [
+            response.folder_id
+        ]
+        offered = suggested_actions(response, "quick_form_response", folder_ids)
+        wanted = str(request.data.get("version") or "")
+        match = next((o for o in offered if o["version"] == wanted), None)
+        if match is None:
+            return Response(
+                {"error": "actionNotOffered"}, status=status.HTTP_404_NOT_FOUND
+            )
+        try:
+            instance = run_supervised_action(
+                response,
+                "quick_form_response",
+                WorkflowVersion.objects.get(pk=match["version"]),
+                WorkflowNode.objects.get(pk=match["entry_node"]),
+                request.user,
+            )
+        except EngineError as e:
+            return Response(
+                {"error": e.user_message}, status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(
+            {
+                "instance": str(instance.id),
+                "status": instance.status,
+                "workflow": match["name"],
+            }
+        )
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(QuickFormResponse.Status.choices))
+
+    @action(detail=True, methods=["get"], name="Quick form response content")
+    def content(self, request, pk):
+        return quick_form_response_content(self.get_object(), request.user)
+
+    @action(detail=True, methods=["post"], name="Start quick form response")
+    def start(self, request, pk):
+        """Mark the response as started and notify the respondents. Idempotent
+        on the timestamp; notifications are sent on every call."""
+        from core.tasks import send_quick_form_started_notification
+
+        response = self.get_object()
+        if response.status != QuickFormResponse.Status.DRAFT:
+            return Response(
+                {"error": "responseNotInProgress"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if response.started_at is None:
+            response.started_at = timezone.now()
+            response.save(update_fields=["started_at"])
+        transaction.on_commit(
+            lambda pk=response.pk: send_quick_form_started_notification(pk)
+        )
+        return Response(QuickFormResponseReadSerializer(response).data)
+
+    # (from, to) -> config, the whole lifecycle in one table.
+    #   check_completion: every visible required question must be answered
+    #   observation: "clear" drops it, "optional" keeps it
+    #   resolution: written to `resolution` when the request closes
+    #   actor: who may drive it — "requester" transitions are also reachable
+    #          through the audience-scoped MyRequestViewSet
+    #   unlocks: hands authoring back to the requester
+    TRANSITIONS = {
+        ("draft", "submitted"): {
+            "check_completion": True,
+            "observation": "clear",
+            "actor": "requester",
+        },
+        # Claiming is optional: a quick decision should not require it first.
+        ("submitted", "in_review"): {"observation": "optional", "actor": "reviewer"},
+        ("submitted", "closed"): {"observation": "optional", "actor": "reviewer"},
+        ("submitted", "draft"): {
+            "observation": "optional",
+            "actor": "reviewer",
+            "unlocks": True,
+        },
+        ("in_review", "closed"): {"observation": "optional", "actor": "reviewer"},
+        ("in_review", "draft"): {
+            "observation": "optional",
+            "actor": "reviewer",
+            "unlocks": True,
+        },
+        # Release: back to the open queue, assignee cleared.
+        ("in_review", "submitted"): {"observation": "optional", "actor": "reviewer"},
+    }
+
+    # Reject is the reviewer's act, drop is the requester's; neither substitutes for
+    # the other, so they are separate resolutions on the same closing transition.
+    #: What a *reviewer* may put on a closing transition. The model defines four
+    #: resolutions, but only two are a person's to choose here: `DROPPED` belongs to the
+    #: requester and is set by `MyRequestViewSet.drop`, and `AUTO` means no person
+    #: decided, so a person selecting it would be a lie in the register.
+    REVIEWER_RESOLUTIONS = {
+        QuickFormResponse.Resolution.ACCEPTED,
+        QuickFormResponse.Resolution.REJECTED,
+    }
+
+    def _deciding_denied(self, request, response):
+        """Error Response when this person may not decide, else None."""
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="approve_quickformresponse"),
+            folder=response.folder,
+        ):
+            return Response(
+                {"error": "approvalPermissionRequired"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if response.is_requester(request.user) and not _self_validation_allowed(
+            response
+        ):
+            return Response(
+                {"error": "selfValidationNotAllowed"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return None
+
+    @action(detail=True, methods=["post"], url_path="set-status")
+    def set_status(self, request, pk):
+        from core.cel_service import evaluate_quick_form
+        from core.tasks import (
+            send_quick_form_reopened_notification,
+            send_quick_form_submitted_notification,
+        )
+
+        response = self.get_object()
+        new_status = request.data.get("status")
+        if new_status not in QuickFormResponse.Status.values:
+            return Response(
+                {"error": "invalidStatus"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        config = self.TRANSITIONS.get((response.status, new_status))
+        if config is None:
+            return Response(
+                {
+                    "error": "invalidTransition",
+                    "from": response.status,
+                    "to": new_status,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if config.get("actor") == "reviewer":
+            denied = self._deciding_denied(request, response)
+            if denied is not None:
+                return denied
+        elif config.get("actor") == "requester" and not response.is_requester(
+            request.user
+        ):
+            # Folder rights let a reviewer read and route a request, not put it forward
+            # on someone else's behalf.
+            return Response(
+                {"error": "onlyRequesterCanSubmit"}, status=status.HTTP_403_FORBIDDEN
+            )
+        if config.get("check_completion"):
+            evaluation = evaluate_quick_form(response, persist=True)
+            if not evaluation["progress"]["complete"]:
+                return Response(
+                    {
+                        "error": "responseIncomplete",
+                        "progress": evaluation["progress"],
+                        "missing_required": evaluation["missing_required"],
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        observation = request.data.get("observation")
+        if config.get("observation") == "clear":
+            response.observation = None
+        elif observation is not None:
+            response.observation = observation
+
+        resolution = request.data.get("resolution") or ""
+        if new_status == QuickFormResponse.Status.CLOSED:
+            if resolution not in self.REVIEWER_RESOLUTIONS:
+                return Response(
+                    {
+                        "error": "resolutionRequired",
+                        "choices": sorted(self.REVIEWER_RESOLUTIONS),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            response.resolution = resolution
+        elif response.resolution:
+            # Reopening clears the verdict: the request is live again.
+            response.resolution = ""
+
+        previous_status = response.status
+        response.status = new_status
+        update_fields = ["status", "resolution", "observation", "updated_at"]
+
+        if new_status == QuickFormResponse.Status.CLOSED:
+            # Who actually decided, as opposed to who picked it up: an exception raised
+            # from this request needs an approver, and `assignee` is optional.
+            response.decided_by = request.user
+            update_fields.append("decided_by")
+        elif response.decided_by_id is not None:
+            # Reopened: the verdict is withdrawn, so its author is too.
+            response.decided_by = None
+            update_fields.append("decided_by")
+
+        if new_status == QuickFormResponse.Status.IN_REVIEW:
+            claimer = Actor.objects.filter(
+                user=request.user, entity__isnull=True
+            ).first()
+            if claimer is not None:
+                response.assignee = claimer
+                update_fields.append("assignee")
+        elif (
+            response.status != QuickFormResponse.Status.CLOSED
+            and response.assignee_id is not None
+        ):
+            # Released or sent back: nobody is working it any more.
+            response.assignee = None
+            update_fields.append("assignee")
+
+        # A release (`in_review -> submitted`) is not a submission: recording the
+        # reviewer as `submitted_by` would bar them from ever deciding it.
+        is_real_submission = (
+            new_status == QuickFormResponse.Status.SUBMITTED
+            and previous_status == QuickFormResponse.Status.DRAFT
+        )
+        if is_real_submission:
+            response.submitted_at = timezone.now()
+            # Who pressed submit, not who created the row: the two differ whenever a
+            # response is reassigned, and the reviewer set is derived against it.
+            response.submitted_by = request.user
+            update_fields += ["submitted_at", "submitted_by"]
+            sla_due = _outcome_sla_due_date(response)
+            # Most urgent wins, and an outcome never loosens a date a human set.
+            if sla_due is not None and (
+                response.due_date is None or sla_due < response.due_date
+            ):
+                response.due_date = sla_due
+                update_fields.append("due_date")
+        response.save(update_fields=update_fields)
+
+        if is_real_submission:
+            emit_quick_form_submitted(response)
+            transaction.on_commit(
+                lambda pk=response.pk: send_quick_form_submitted_notification(pk)
+            )
+        elif new_status == QuickFormResponse.Status.CLOSED:
+            # The decision is the interesting moment: `resolution` is on the payload, so
+            # a workflow waits for "accepted" rather than for "no longer open".
+            emit_quick_form_event(response, "closed")
+        elif (
+            new_status == QuickFormResponse.Status.DRAFT
+            and response.started_at is not None
+        ):
+            transaction.on_commit(
+                lambda pk=response.pk: send_quick_form_reopened_notification(pk)
+            )
+        return Response(QuickFormResponseReadSerializer(response).data)
