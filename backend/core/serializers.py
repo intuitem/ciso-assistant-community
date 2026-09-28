@@ -3889,7 +3889,11 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         self._effective_score_range = resolved
         if resolved == current:
             return
-        if framework and framework.is_scale_bound:
+        if (
+            framework
+            and framework.is_scale_bound
+            and resolved != (framework.min_score, framework.max_score)
+        ):
             raise serializers.ValidationError(
                 {"score_scale_preset": "scoreScaleBoundToFramework"}
             )

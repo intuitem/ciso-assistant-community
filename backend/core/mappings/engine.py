@@ -3,6 +3,7 @@ from core.models import (
     Framework,
     StoredLibrary,
     ComplianceAssessment,
+    rescale_score,
 )
 from django.db.models.query import QuerySet
 from collections import defaultdict, deque
@@ -361,20 +362,26 @@ class MappingEngine:
         target_framework_urn = requirement_mapping_set.get("target_framework_urn", "")
         target_framework = self.frameworks.get(target_framework_urn)
 
-        # Scores are only copied onto an identical range. On the final hop into
-        # a real audit, that audit's range wins over its framework's: the
-        # audit may have its own scale.
         source_range = (source_audit.get("min_score"), source_audit.get("max_score"))
         if target_range is not None:
-            scores_compatible = None not in source_range and source_range == tuple(
-                target_range
-            )
+            target_range = tuple(target_range)
+            scores_compatible = None not in (*source_range, *target_range)
         else:
             scores_compatible = (
                 target_framework
                 and target_framework.get("min_score") == source_range[0]
                 and target_framework.get("max_score") == source_range[1]
             )
+
+        def scaled(field, value):
+            if (
+                field in ("score", "documentation_score")
+                and value is not None
+                and target_range is not None
+                and source_range != target_range
+            ):
+                return rescale_score(value, source_range, target_range)
+            return value
 
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
@@ -414,9 +421,9 @@ class MappingEngine:
                                 existing_result, new_result
                             )
                     else:
-                        target_audit["requirement_assessments"][dst] = (
-                            src_assessment.copy()
-                        )
+                        target_audit["requirement_assessments"][dst] = {
+                            k: scaled(k, v) for k, v in src_assessment.items()
+                        }
                     mapped = True
                 else:
                     target_assessment = target_audit["requirement_assessments"][dst]
@@ -491,8 +498,8 @@ class MappingEngine:
                         "documentation_score",
                     ]:
                         if score_field in src_assessment:
-                            target_assessment[score_field] = src_assessment.get(
-                                score_field
+                            target_assessment[score_field] = scaled(
+                                score_field, src_assessment.get(score_field)
                             )
 
                 # Handle result: keep the most restrictive

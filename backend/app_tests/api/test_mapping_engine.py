@@ -696,7 +696,7 @@ class TestTargetAuditRange:
         )
         return result["requirement_assessments"]["urn:req:B1"]
 
-    def test_target_audit_range_blocks_scores_despite_matching_framework(self):
+    def test_target_audit_range_rescales_scores_despite_matching_framework(self):
         engine = _make_engine(
             frameworks={
                 "urn:fw:A": {"min_score": 0, "max_score": 100},
@@ -705,8 +705,8 @@ class TestTargetAuditRange:
         )
         target_ra = self._mapped(engine, target_range=(1, 5))
         assert target_ra["result"] == "compliant"
-        assert target_ra.get("score") is None
-        assert target_ra.get("documentation_score") is None
+        assert target_ra["score"] == 4
+        assert target_ra["documentation_score"] == 3
 
     def test_target_audit_range_allows_scores_despite_framework(self):
         engine = _make_engine(
@@ -750,9 +750,9 @@ class TestTargetAuditRange:
                 }
             }
         )
-        blocked, _ = engine.best_mapping_inferences(
+        rescaled, _ = engine.best_mapping_inferences(
             source, "urn:fw:A", "urn:fw:B", target_range=(1, 5)
         )
-        assert blocked["requirement_assessments"]["urn:req:B1"].get("score") is None
+        assert rescaled["requirement_assessments"]["urn:req:B1"]["score"] == 4
         allowed, _ = engine.best_mapping_inferences(source, "urn:fw:A", "urn:fw:B")
         assert allowed["requirement_assessments"]["urn:req:B1"]["score"] == 80
