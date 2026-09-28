@@ -12,7 +12,7 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
 )
-from iam.models import Folder, Permission, RoleAssignment
+from iam.models import Folder, Permission, RoleAssignment, User
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ComplianceAssessmentViewSet,
@@ -85,13 +85,6 @@ DORA_ROI_PERMISSIONS = (
     "view_asset",
     "view_contract",
 )
-
-
-def _actor_ref(actor) -> str:
-    specific = actor.specific
-    return (
-        getattr(specific, "email", "") or getattr(specific, "ref_id", "") or str(actor)
-    )
 
 
 def _join_lines(values) -> str:
@@ -1177,30 +1170,34 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
                 "escape": True,
             },
             "entity_ref_id": {
-                "source": "entity.ref_id",
+                "source": "_export_entity.ref_id",
                 "label": "entity_ref_id",
                 "escape": True,
             },
-            "entity": {"source": "entity.name", "label": "entity", "escape": True},
+            "entity": {
+                "source": "_export_entity.name",
+                "label": "entity",
+                "escape": True,
+            },
             "solution_ref_id": {
-                "source": "solutions",
+                "source": "_export_solutions",
                 "label": "solution_ref_id",
-                "format": lambda qs: _join_lines(s.ref_id for s in qs.all()),
+                "format": lambda objs: _join_lines(s.ref_id for s in objs),
                 "escape": True,
             },
             "solution": {
-                "source": "solutions",
+                "source": "_export_solutions",
                 "label": "solution",
-                "format": lambda qs: _join_lines(s.name for s in qs.all()),
+                "format": lambda objs: _join_lines(s.name for s in objs),
                 "escape": True,
             },
             "compliance_assessment": {
-                "source": "compliance_assessment.name",
+                "source": "_export_compliance_assessment.name",
                 "label": "questionnaire",
                 "escape": True,
             },
             "framework": {
-                "source": "compliance_assessment.framework.name",
+                "source": "_export_compliance_assessment.framework.name",
                 "label": "framework",
                 "escape": True,
             },
@@ -1224,45 +1221,37 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
                 "label": "observation",
                 "escape": True,
             },
-            "author_ref": {
-                "source": "authors",
-                "label": "author_ref",
-                "format": lambda qs: _join_lines(_actor_ref(a) for a in qs.all()),
-                "escape": True,
-            },
             "author": {
-                "source": "authors",
+                "source": "_export_authors",
                 "label": "author",
-                "format": lambda qs: _join_lines(str(a) for a in qs.all()),
-                "escape": True,
-            },
-            "reviewer_ref": {
-                "source": "reviewers",
-                "label": "reviewer_ref",
-                "format": lambda qs: _join_lines(_actor_ref(a) for a in qs.all()),
+                "format": lambda objs: _join_lines(str(a) for a in objs),
                 "escape": True,
             },
             "reviewer": {
-                "source": "reviewers",
+                "source": "_export_reviewers",
                 "label": "reviewer",
-                "format": lambda qs: _join_lines(str(a) for a in qs.all()),
+                "format": lambda objs: _join_lines(str(a) for a in objs),
                 "escape": True,
             },
             "representative_email": {
-                "source": "representatives",
+                "source": "_export_representatives",
                 "label": "representative_email",
-                "format": lambda qs: _join_lines(u.email for u in qs.all()),
+                "format": lambda objs: _join_lines(u.email for u in objs),
                 "escape": True,
             },
             "representative": {
-                "source": "representatives",
+                "source": "_export_representatives",
                 "label": "representative",
-                "format": lambda qs: _join_lines(str(u) for u in qs.all()),
+                "format": lambda objs: _join_lines(str(u) for u in objs),
                 "escape": True,
             },
-            "domain": {"source": "folder.name", "label": "domain", "escape": True},
+            "domain": {
+                "source": "_export_folder.name",
+                "label": "domain",
+                "escape": True,
+            },
             "perimeter": {
-                "source": "perimeter.name",
+                "source": "_export_perimeter.name",
                 "label": "perimeter",
                 "escape": True,
             },
@@ -1408,22 +1397,62 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
 
         return data
 
-    def _get_export_queryset(self):
-        from tprm.serializers import EntityAssessmentReadSerializer
+    EXPORT_BATCH_SIZE = 200
 
-        rows = list(
+    def _get_export_queryset(self):
+        queryset = (
             super()
             ._get_export_queryset()
             .prefetch_related(actor_prefetch("authors"), actor_prefetch("reviewers"))
         )
-        serializer = EntityAssessmentReadSerializer(
-            context={"optimized_data": self._get_optimized_object_data(rows)}
-        )
-        for ea in rows:
-            ea._export_completion = serializer.get_completion(ea)
-            ea._export_review_progress = serializer.get_review_progress(ea)
-            ea._export_assignment_status = serializer.get_assignment_status(ea)
-        return rows
+        return self._iter_export_rows(queryset)
+
+    def _iter_export_rows(self, queryset):
+        """Yield rows batch by batch, related objects masked as in `list`."""
+        from tprm.serializers import EntityAssessmentReadSerializer
+
+        field_models = self._get_fieldsrelated_map(EntityAssessmentReadSerializer())
+        allowed = self._get_accessible_ids_map(set(field_models.values()))
+        user_id = str(self.request.user.pk)
+
+        def visible(obj, model):
+            ids = allowed.get(model)
+            return (
+                ids is None
+                or str(obj.pk) in ids
+                or (model is User and str(obj.pk) == user_id)
+            )
+
+        ids = list(dict.fromkeys(queryset.values_list("pk", flat=True)))
+        for start in range(0, len(ids), self.EXPORT_BATCH_SIZE):
+            batch = ids[start : start + self.EXPORT_BATCH_SIZE]
+            by_id = {ea.pk: ea for ea in queryset.filter(pk__in=batch)}
+            rows = [by_id[pk] for pk in batch if pk in by_id]
+            serializer = EntityAssessmentReadSerializer(
+                context={"optimized_data": self._get_optimized_object_data(rows)}
+            )
+            for ea in rows:
+                ea._export_completion = serializer.get_completion(ea)
+                ea._export_review_progress = serializer.get_review_progress(ea)
+                ea._export_assignment_status = serializer.get_assignment_status(ea)
+                for field in ("entity", "folder", "perimeter", "compliance_assessment"):
+                    obj = getattr(ea, field)
+                    setattr(
+                        ea,
+                        f"_export_{field}",
+                        obj if obj and visible(obj, field_models[field]) else None,
+                    )
+                for field in ("solutions", "authors", "reviewers", "representatives"):
+                    setattr(
+                        ea,
+                        f"_export_{field}",
+                        [
+                            obj
+                            for obj in getattr(ea, field).all()
+                            if visible(obj, field_models[field])
+                        ],
+                    )
+                yield ea
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
