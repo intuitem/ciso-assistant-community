@@ -684,14 +684,13 @@ export const EvidenceRevisionSchema = z.object({
 
 export const GeneralSettingsSchema = z.object({
 	security_objective_scale: z.string(),
-	default_score_scale: z
+	organisation_score_scale: z
 		.object({
 			score_scale_preset: z.string().nullable(),
 			min_score: z.number().int(),
 			max_score: z.number().int(),
 			scores_definition: z.array(z.any())
 		})
-		.nullable()
 		.optional(),
 	ebios_radar_green_zone_radius: z.number(),
 	ebios_radar_yellow_zone_radius: z.number(),

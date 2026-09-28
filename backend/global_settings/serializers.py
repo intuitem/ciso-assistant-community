@@ -1,3 +1,4 @@
+import copy
 import ipaddress
 import re
 import uuid
@@ -67,7 +68,7 @@ def validate_default_dashboard_value(value):
 
 GENERAL_SETTINGS_KEYS = [
     "security_objective_scale",
-    "default_score_scale",
+    "organisation_score_scale",
     "ebios_radar_max",
     "ebios_radar_green_zone_radius",
     "ebios_radar_yellow_zone_radius",
@@ -116,17 +117,26 @@ LLM_URL_DEFAULTS = {
 }
 
 
-def _normalize_default_score_scale(value):
+# Proposed on the audit form for frameworks without a scale of their own.
+DEFAULT_ORGANISATION_SCORE_SCALE = {
+    "score_scale_preset": "0-5",
+    "min_score": 0,
+    "max_score": 5,
+    "scores_definition": [],
+}
+
+
+def _normalize_organisation_score_scale(value):
     from core.models import normalize_score_scale
 
     if not isinstance(value, dict):
         raise serializers.ValidationError(
-            {"default_score_scale": "scoreScaleErrorInvalid"}
+            {"organisation_score_scale": "scoreScaleErrorInvalid"}
         )
     levels = value.get("scores_definition")
     if levels is not None and not isinstance(levels, list):
         raise serializers.ValidationError(
-            {"default_score_scale": "scoreScaleErrorInvalid"}
+            {"organisation_score_scale": "scoreScaleErrorInvalid"}
         )
     try:
         preset, min_score, max_score = normalize_score_scale(
@@ -136,10 +146,10 @@ def _normalize_default_score_scale(value):
             levels,
         )
     except DjangoValidationError as e:
-        raise serializers.ValidationError({"default_score_scale": e.messages})
+        raise serializers.ValidationError({"organisation_score_scale": e.messages})
     if min_score is None:
         raise serializers.ValidationError(
-            {"default_score_scale": "scoreScaleErrorRangeRequired"}
+            {"organisation_score_scale": "scoreScaleErrorRangeRequired"}
         )
     return {
         "score_scale_preset": preset,
@@ -159,6 +169,11 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         if "value" in ret and isinstance(ret["value"], dict):
             ret["value"].pop("openai_api_key", None)
+            # Always a value, so the audit form never re-implements the fallback.
+            if not ret["value"].get("organisation_score_scale"):
+                ret["value"]["organisation_score_scale"] = copy.deepcopy(
+                    DEFAULT_ORGANISATION_SCORE_SCALE
+                )
         return ret
 
     def update(self, instance, validated_data):
@@ -206,8 +221,10 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                             {key: "URL hostname could not be resolved."}
                         )
             # Validate builtin_metrics_retention_days minimum value
-            if key == "default_score_scale" and value is not None:
-                validated_data["value"][key] = _normalize_default_score_scale(value)
+            if key == "organisation_score_scale":
+                validated_data["value"][key] = _normalize_organisation_score_scale(
+                    value
+                )
             if key == "builtin_metrics_retention_days":
                 if not isinstance(value, int) or value < 1:
                     raise serializers.ValidationError(

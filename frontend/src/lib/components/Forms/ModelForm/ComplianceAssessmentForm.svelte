@@ -11,8 +11,14 @@
 	import { page } from '$app/state';
 	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
-	import ScoreScaleEditor from '$lib/components/ComplianceAssessment/ScoreScaleEditor.svelte';
-	import { scaleLevels, type ScoreScaleValue } from '$lib/utils/score-scales';
+	import ScoreScalePicker from '$lib/components/ComplianceAssessment/ScoreScalePicker.svelte';
+	import {
+		scaleLevels,
+		scaleOptions,
+		type FrameworkScale,
+		type ScaleOption,
+		type ScoreScaleValue
+	} from '$lib/utils/score-scales';
 	import { untrack } from 'svelte';
 
 	interface Props {
@@ -49,29 +55,42 @@
 
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
 
-	let frameworkScoring = $state<Record<string, any> | null>(null);
+	let frameworkScoring = $state<FrameworkScale | null>(null);
+	let baselineScale = $state<ScoreScaleValue | null>(null);
+	// The option the user picked; until then the proposed one applies.
+	let pickedScale = $state<string | null>(null);
 
 	const SCALE_FIELDS = ['score_scale_preset', 'min_score', 'max_score', 'scores_definition'];
 	let scaleDirty = $state(false);
 
-	function initialScale(): ScoreScaleValue | null {
-		if (!object?.id) return null;
-		const current: ScoreScaleValue = {
-			score_scale_preset: object.score_scale_preset ?? null,
-			min_score: object.min_score,
-			max_score: object.max_score,
-			scores_definition: scaleLevels(object.scores_definition)
-		};
-		const fallback = frameworkScoring?.audit_default_scale;
-		const sameAsDefault =
-			fallback &&
-			current.min_score === fallback.min_score &&
-			current.max_score === fallback.max_score &&
-			current.score_scale_preset === fallback.score_scale_preset &&
-			JSON.stringify(current.scores_definition) ===
-				JSON.stringify(scaleLevels(fallback.scores_definition));
-		return sameAsDefault ? null : current;
-	}
+	let organisationScale = $derived(
+		(page.data.settings?.organisation_score_scale ?? null) as ScoreScaleValue | null
+	);
+	let currentScale = $derived<ScoreScaleValue | null>(
+		object?.id
+			? {
+					score_scale_preset: object.score_scale_preset ?? null,
+					min_score: object.min_score,
+					max_score: object.max_score,
+					scores_definition: scaleLevels(object.scores_definition)
+				}
+			: null
+	);
+	let scaleChoice = $derived(
+		frameworkScoring
+			? scaleOptions({
+					framework: frameworkScoring,
+					organisation: organisationScale,
+					baseline: baselineScale,
+					current: currentScale
+				})
+			: null
+	);
+	let selectedScale = $derived(
+		pickedScale && scaleChoice?.options.some((o) => o.id === pickedScale)
+			? pickedScale
+			: (scaleChoice?.selected ?? '')
+	);
 
 	const formErrors = form.errors;
 	let rescalePanel = $state<HTMLElement | null>(null);
@@ -133,17 +152,34 @@
 		saveButton?.focus();
 	}
 
-	function onScaleChange(value: ScoreScaleValue | null) {
-		scaleDirty = true;
-		form.form.update((d) => ({
-			...d,
-			confirm_rescale: false,
-			score_scale_preset: value?.score_scale_preset ?? null,
-			min_score: value?.min_score ?? null,
-			max_score: value?.max_score ?? null,
-			scores_definition: value?.scores_definition ?? null
-		}));
+	// null lets the backend copy the framework's scale.
+	function writeScale(value: ScoreScaleValue | null, taint = true) {
+		form.form.update(
+			(d) => ({
+				...d,
+				confirm_rescale: false,
+				score_scale_preset: value?.score_scale_preset ?? null,
+				min_score: value?.min_score ?? null,
+				max_score: value?.max_score ?? null,
+				scores_definition: value?.scores_definition ?? null
+			}),
+			{ taint }
+		);
 	}
+
+	function onScaleSelect(option: ScaleOption) {
+		pickedScale = option.id;
+		scaleDirty = true;
+		writeScale(option.value);
+	}
+
+	// New audit: the proposed option is sent explicitly, because the backend
+	// never applies the organisation scale on its own.
+	$effect(() => {
+		if (object?.id || !scaleChoice || pickedScale) return;
+		const proposed = scaleChoice.options.find((o) => o.id === scaleChoice.selected);
+		untrack(() => writeScale(proposed?.value ?? null, false));
+	});
 
 	$effect(() => {
 		if (!object?.id || scaleDirty) return;
@@ -166,29 +202,29 @@
 
 	let frameworkRequest = 0;
 
-	// A copy of an audit on the same framework keeps the baseline's scale by
-	// default (the backend applies the same rule), so show that as "Default".
-	async function applyBaselineDefault(frameworkId: string, request: number) {
+	// Copies propose the baseline audit's scale when it is on the same framework.
+	async function loadBaselineScale(frameworkId: string, request: number) {
 		if (!initialData.baseline) return;
 		// The audit detail URL is a page (HTML); global-score is its JSON scale summary.
 		const baseline = await fetch(`/compliance-assessments/${initialData.baseline}/global-score`)
 			.then((r) => (r.ok ? r.json() : null))
 			.catch(() => null);
 		if (request !== frameworkRequest || baseline?.framework !== frameworkId) return;
-		frameworkScoring = {
-			...frameworkScoring,
-			audit_default_scale: {
-				source: 'baseline',
-				score_scale_preset: baseline.score_scale_preset ?? null,
-				min_score: baseline.min_score,
-				max_score: baseline.max_score,
-				scores_definition: baseline.scores_definition ?? null
-			}
+		baselineScale = {
+			score_scale_preset: baseline.score_scale_preset ?? null,
+			min_score: baseline.min_score,
+			max_score: baseline.max_score,
+			// A preset's labels come from the catalog.
+			scores_definition: baseline.score_scale_preset ? [] : scaleLevels(baseline.scores_definition)
 		};
 	}
 
 	async function handleFrameworkChange(id: string) {
 		const request = ++frameworkRequest;
+		if (!object?.id) {
+			pickedScale = null;
+			baselineScale = null;
+		}
 		if (!id) frameworkScoring = null;
 		if (id) {
 			await fetch(`/frameworks/${id}`)
@@ -209,13 +245,9 @@
 						min_score: r['min_score'],
 						max_score: r['max_score'],
 						scores_definition: r['scores_definition'],
-						is_scale_bound: r['is_scale_bound'],
-						audit_default_scale: r['audit_default_scale']
+						is_scale_bound: r['is_scale_bound']
 					};
-					if (!object.id) {
-						onScaleChange(null);
-						applyBaselineDefault(id, request);
-					}
+					if (!object.id) loadBaselineScale(id, request);
 
 					defaultImplementationGroups = implementation_groups
 						.filter((group) => group.default_selected)
@@ -423,22 +455,15 @@
 			{frameworkDefaults}
 		/>
 
-		{#if frameworkScoring}
-			{#key frameworkScoring}
-				<ScoreScaleEditor
-					value={initialScale()}
-					onChange={onScaleChange}
-					defaultScale={frameworkScoring.audit_default_scale}
-					declaredRange={frameworkScoring.min_score !== 0 ||
-					frameworkScoring.max_score !== 100 ||
-					scaleLevels(frameworkScoring.scores_definition).length
-						? { min: frameworkScoring.min_score, max: frameworkScoring.max_score }
-						: null}
-					isScaleBound={frameworkScoring.is_scale_bound}
-					currentRange={object?.id ? { min: object.min_score, max: object.max_score } : null}
-					{scoringEnabled}
-				/>
-			{/key}
+		{#if scaleChoice}
+			<ScoreScalePicker
+				options={scaleChoice.options}
+				selected={selectedScale}
+				onSelect={onScaleSelect}
+				isScaleBound={frameworkScoring?.is_scale_bound}
+				currentRange={object?.id ? { min: object.min_score, max: object.max_score } : null}
+				{scoringEnabled}
+			/>
 		{/if}
 
 		{#if scoringEnabled}

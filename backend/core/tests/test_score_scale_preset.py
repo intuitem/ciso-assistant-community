@@ -266,13 +266,13 @@ class TestScaleLevelExpansion:
         assert [lvl["score"] for lvl in ca.get_scale_levels()] == [0, 2]
 
 
-def _set_instance_default(value):
+def _set_organisation_scale(value):
     from global_settings.models import GlobalSettings
 
     general, _ = GlobalSettings.objects.get_or_create(
         name="general", defaults={"value": {}}
     )
-    general.value = {**(general.value or {}), "default_score_scale": value}
+    general.value = {**(general.value or {}), "organisation_score_scale": value}
     general.save()
     return general
 
@@ -286,73 +286,45 @@ def _new_audit(setup, framework=None, **fields):
     )
 
 
+_ORG_1_4 = {"score_scale_preset": "1-4", "min_score": 1, "max_score": 4}
+
+
 @pytest.mark.django_db
-class TestInstanceDefaultScale:
-    def test_preset_default_applies_to_undeclared_framework(self, setup):
-        _set_instance_default(
-            {"score_scale_preset": "1-4", "min_score": 1, "max_score": 4}
-        )
-        ca = _new_audit(setup)
-        assert (ca.min_score, ca.max_score, ca.score_scale_preset) == (1, 4, "1-4")
+class TestOrganisationScaleOnlyProposedByTheForm:
+    """The backend never applies the organisation scale: without a scale in the
+    request an audit gets its framework's, so non-form clients behave as before."""
 
-    def test_custom_default_is_copied(self, setup):
-        levels = [{"score": 1, "name": "Low", "translations": {"nl": {"name": "Laag"}}}]
-        _set_instance_default(
+    def test_orm_creation_keeps_framework_scale(self, setup):
+        _set_organisation_scale(_ORG_1_4)
+        ca = _new_audit(setup)
+        assert (ca.min_score, ca.max_score, ca.score_scale_preset) == (0, 100, None)
+
+    def test_api_creation_without_scale_keeps_framework_scale(self, setup):
+        from iam.models import User
+        from rest_framework.test import APIClient
+
+        _set_organisation_scale(_ORG_1_4)
+        admin = User.objects.create_superuser(
+            email="org-admin@test.local", password="x"
+        )
+        api = APIClient()
+        api.force_authenticate(admin)
+        response = api.post(
+            "/api/compliance-assessments/",
             {
-                "score_scale_preset": None,
-                "min_score": 1,
-                "max_score": 3,
-                "scores_definition": levels,
-            }
+                "name": "API audit",
+                "folder": str(setup["folder"].id),
+                "framework": str(setup["fw"].id),
+            },
+            format="json",
         )
-        ca = _new_audit(setup)
-        assert (ca.min_score, ca.max_score, ca.score_scale_preset) == (1, 3, None)
-        assert ca.scores_definition == levels
-        levels[0]["name"] = "changed"
-        assert ca.scores_definition[0]["name"] == "Low"
+        assert response.status_code == 201, response.json()
+        created = ComplianceAssessment.objects.get(id=response.json()["id"])
+        assert (created.min_score, created.max_score) == (0, 100)
 
-    def test_declared_framework_keeps_its_scale(self, setup):
-        _set_instance_default(
-            {"score_scale_preset": "1-4", "min_score": 1, "max_score": 4}
-        )
-        fw = Framework.objects.create(
-            name="FW declared",
-            urn="urn:test:fw-declared",
-            min_score=0,
-            max_score=5,
-            folder=setup["folder"],
-        )
-        ca = _new_audit(setup, framework=fw)
-        assert (ca.min_score, ca.max_score, ca.score_scale_preset) == (0, 5, None)
-
-    def test_bound_framework_keeps_its_scale(self, setup):
-        _set_instance_default(
-            {"score_scale_preset": "1-4", "min_score": 1, "max_score": 4}
-        )
-        TestScaleBoundFramework()._add_scored_question(setup)
-        ca = _new_audit(setup)
-        assert (ca.min_score, ca.max_score) == (0, 100)
-
-    def test_existing_audits_untouched(self, setup):
-        _set_instance_default(
-            {"score_scale_preset": "1-4", "min_score": 1, "max_score": 4}
-        )
-        setup["ca"].save()
-        setup["ca"].refresh_from_db()
-        assert (setup["ca"].min_score, setup["ca"].max_score) == (0, 100)
-
-    def test_default_chip_resolution(self, setup):
-        _set_instance_default(
-            {"score_scale_preset": "0-5", "min_score": 0, "max_score": 5}
-        )
-        scale = setup["fw"].default_audit_scale()
-        assert scale["source"] == "instance"
-        assert (scale["min_score"], scale["max_score"]) == (0, 5)
-
-    def test_back_to_default_on_edit_uses_instance_default(self, setup):
-        _set_instance_default(
-            {"score_scale_preset": "1-4", "min_score": 1, "max_score": 4}
-        )
+    def test_back_to_framework_scale_on_edit(self, setup):
+        _set_organisation_scale(_ORG_1_4)
+        _update(setup["ca"], {"score_scale_preset": "0-5"})[0].save()
         serializer, valid = _update(
             setup["ca"],
             {
@@ -364,20 +336,26 @@ class TestInstanceDefaultScale:
         )
         assert valid, serializer.errors
         ca = serializer.save()
-        assert (ca.min_score, ca.max_score, ca.score_scale_preset) == (1, 4, "1-4")
+        assert (ca.min_score, ca.max_score, ca.score_scale_preset) == (0, 100, None)
+
+    def test_existing_audits_untouched(self, setup):
+        _set_organisation_scale(_ORG_1_4)
+        setup["ca"].save()
+        setup["ca"].refresh_from_db()
+        assert (setup["ca"].min_score, setup["ca"].max_score) == (0, 100)
 
 
 @pytest.mark.django_db
-class TestDefaultScoreScaleSetting:
+class TestOrganisationScoreScaleSetting:
     def _update(self, value):
         from global_settings.serializers import GeneralSettingsSerializer
 
-        general = _set_instance_default(None)
+        general = _set_organisation_scale(_ORG_1_4)
         GeneralSettingsSerializer().update(
-            general, {"value": {"default_score_scale": value}}
+            general, {"value": {"organisation_score_scale": value}}
         )
         general.refresh_from_db()
-        return general.value["default_score_scale"]
+        return general.value["organisation_score_scale"]
 
     def test_preset_normalized(self):
         stored = self._update({"score_scale_preset": "0-5"})
@@ -388,12 +366,28 @@ class TestDefaultScoreScaleSetting:
             "scores_definition": [],
         }
 
-    def test_clear(self):
-        assert self._update(None) is None
+    def test_custom_with_translations_normalized(self):
+        levels = [
+            {"score": 1, "name": "Low", "translations": {"fr": {"name": "Faible"}}}
+        ]
+        stored = self._update(
+            {"min_score": 1, "max_score": 3, "scores_definition": levels}
+        )
+        assert (
+            stored["score_scale_preset"],
+            stored["min_score"],
+            stored["max_score"],
+        ) == (
+            None,
+            1,
+            3,
+        )
+        assert stored["scores_definition"] == levels
 
     @pytest.mark.parametrize(
         "value",
         [
+            None,
             {"score_scale_preset": "9-9"},
             {"min_score": 3, "max_score": 3},
             {"min_score": 1},
@@ -407,6 +401,27 @@ class TestDefaultScoreScaleSetting:
 
         with pytest.raises(ValidationError):
             self._update(value)
+
+    def test_absent_value_reads_as_zero_five(self):
+        from global_settings.models import GlobalSettings
+        from global_settings.serializers import GeneralSettingsSerializer
+
+        general, _ = GlobalSettings.objects.get_or_create(
+            name="general", defaults={"value": {}}
+        )
+        general.value = {
+            k: v
+            for k, v in (general.value or {}).items()
+            if k != "organisation_score_scale"
+        }
+        general.save()
+        value = GeneralSettingsSerializer(general).data["value"]
+        assert value["organisation_score_scale"] == {
+            "score_scale_preset": "0-5",
+            "min_score": 0,
+            "max_score": 5,
+            "scores_definition": [],
+        }
 
 
 @pytest.mark.django_db
@@ -443,7 +458,6 @@ class TestWrappedFrameworkScale:
     """Loaded frameworks store {"scale": [...]}, not a bare list."""
 
     def test_wrapped_scale_flows_to_audit_and_api(self, setup):
-        from core.serializers import FrameworkReadSerializer
 
         wrapped = {
             "scale": [
@@ -459,13 +473,9 @@ class TestWrappedFrameworkScale:
             scores_definition=wrapped,
             folder=setup["folder"],
         )
-        assert fw.declares_scale()
         ca = _new_audit(setup, framework=fw)
         assert ca.scores_definition == wrapped
         assert [lvl["score"] for lvl in ca.get_scale_levels()] == [1, 2, 3, 4]
-        default = FrameworkReadSerializer(fw).data["audit_default_scale"]
-        assert default["source"] == "framework"
-        assert [lvl["score"] for lvl in default["scores_definition"]] == [1, 2, 3, 4]
 
 
 class TestRescaleScore:
@@ -863,7 +873,7 @@ class TestBaselineCopy:
 
     def test_copy_keeps_baseline_scale_over_instance_default(self, setup):
         self._baseline(setup)
-        _set_instance_default(
+        _set_organisation_scale(
             {"score_scale_preset": "1-5", "min_score": 1, "max_score": 5}
         )
         new, ra = self._create(setup)
@@ -1056,7 +1066,7 @@ class TestTargetOnCreation:
         assert "target_score" in response.json()
 
     def test_valid_target_on_baseline_scale_despite_instance_default(self, setup):
-        _set_instance_default(
+        _set_organisation_scale(
             {"score_scale_preset": "1-5", "min_score": 1, "max_score": 5}
         )
         response = self._post(setup, baseline=str(setup["ca"].id), target_score=80)
@@ -1197,7 +1207,7 @@ class TestLabelMigration:
         from django.apps import apps
 
         module = importlib.import_module(
-            "core.migrations.0191_copy_framework_scale_labels_to_audits"
+            "core.migrations.0190_compliance_assessment_score_scale"
         )
         module.copy_framework_labels(apps, None)
 

@@ -3024,7 +3024,6 @@ class FrameworkReadSerializer(ReferentialSerializer):
     has_update = serializers.BooleanField(read_only=True)
     has_compliance_assessments = serializers.SerializerMethodField()
     is_scale_bound = serializers.SerializerMethodField()
-    audit_default_scale = serializers.SerializerMethodField()
     scores_definition = serializers.SerializerMethodField()
     # The complete per-role visibility map a new CA created from this framework
     # would inherit: DEFAULT_VISIBILITY ⊕ framework.field_visibility. The
@@ -3051,18 +3050,6 @@ class FrameworkReadSerializer(ReferentialSerializer):
         if flag is not None:
             return flag
         return obj.is_scale_bound
-
-    def get_audit_default_scale(self, obj):
-        if "_default_score_scale" not in self.context:
-            self.context["_default_score_scale"] = get_default_score_scale()
-        scale = obj.default_audit_scale(
-            instance_default=self.context["_default_score_scale"],
-            scale_bound=self.get_is_scale_bound(obj),
-        )
-        sd = scale["scores_definition"]
-        if isinstance(sd, dict):
-            scale["scores_definition"] = sd.get("scale")
-        return scale
 
     def get_scores_definition(self, obj):
         sd = obj.scores_definition
@@ -3839,8 +3826,18 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 "max_score": baseline.max_score,
                 "scores_definition": copy.deepcopy(baseline.scores_definition),
             }
+        elif framework:
+            # No scale sent: the framework's. The organisation scale is only
+            # ever proposed by the form, so non-form clients behave as before.
+            default = {
+                "source": "framework",
+                "score_scale_preset": None,
+                "min_score": framework.min_score,
+                "max_score": framework.max_score,
+                "scores_definition": framework.scores_definition,
+            }
         else:
-            default = framework.default_audit_scale() if framework else None
+            default = None
         default_range = (
             (default["min_score"], default["max_score"]) if default else None
         )

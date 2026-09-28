@@ -1,4 +1,4 @@
-from django.db import migrations
+from django.db import migrations, models
 
 
 def _levels(definition):
@@ -11,7 +11,7 @@ def copy_framework_labels(apps, schema_editor):
     """Audits no longer fall back to their framework's labels at display time.
 
     Copy them onto the audits that relied on that fallback (no labels of their
-    own, no preset, still on the framework's range) so nothing changes for them.
+    own, still on the framework's range) so nothing changes for them.
     """
     ComplianceAssessment = apps.get_model("core", "ComplianceAssessment")
     to_update = []
@@ -35,9 +35,19 @@ def copy_framework_labels(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0190_compliance_assessment_score_scale_preset"),
+        ("core", "0189_evidencerevision_original_filename"),
     ]
 
     operations = [
+        migrations.AddField(
+            model_name="complianceassessment",
+            name="score_scale_preset",
+            field=models.CharField(
+                blank=True,
+                max_length=20,
+                null=True,
+                verbose_name="Score scale preset",
+            ),
+        ),
         migrations.RunPython(copy_framework_labels, migrations.RunPython.noop),
     ]

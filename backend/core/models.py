@@ -1,4 +1,3 @@
-import copy
 import math
 from decimal import ROUND_HALF_UP, Decimal
 from fractions import Fraction
@@ -3757,37 +3756,6 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
     @property
     def is_scale_bound(self) -> bool:
         return any(qs.exists() for qs in self.scale_bound_querysets(self))
-
-    def declares_scale(self) -> bool:
-        return bool(self.scores_definition) or (self.min_score, self.max_score) != (
-            0,
-            100,
-        )
-
-    def default_audit_scale(self, instance_default=..., scale_bound=None) -> dict:
-        """Scale a new audit on this framework gets when none is chosen: the
-        instance default for frameworks that declare no scale, else the framework's."""
-        if instance_default is ...:
-            instance_default = get_default_score_scale()
-        if instance_default and not self.declares_scale():
-            bound = self.is_scale_bound if scale_bound is None else scale_bound
-            if not bound:
-                return {
-                    "source": "instance",
-                    "score_scale_preset": instance_default.get("score_scale_preset"),
-                    "min_score": instance_default["min_score"],
-                    "max_score": instance_default["max_score"],
-                    "scores_definition": copy.deepcopy(
-                        instance_default.get("scores_definition")
-                    ),
-                }
-        return {
-            "source": "framework",
-            "score_scale_preset": None,
-            "min_score": self.min_score,
-            "max_score": self.max_score,
-            "scores_definition": self.scores_definition,
-        }
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.get_name_translated}"
@@ -8535,7 +8503,7 @@ SCORE_SCALE_PRESETS = {
     "0-5": (0, 5),
     "1-5": (1, 5),
     "1-4": (1, 4),
-    "0-4": (0, 4),
+    "0-3": (0, 3),
 }
 MAX_LABELLED_LEVELS = 11
 
@@ -8601,11 +8569,6 @@ def rescale_score(value, old_range, new_range, integer=True):
     return float(exact.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
-def get_default_score_scale() -> dict | None:
-    general = GlobalSettings.objects.filter(name="general").first()
-    return (general.value or {}).get("default_score_scale") if general else None
-
-
 class ComplianceAssessment(Assessment):
     class CalculationMethod(models.TextChoices):
         AVG = "average", "Average"
@@ -8627,11 +8590,11 @@ class ComplianceAssessment(Assessment):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
+    # One of SCORE_SCALE_PRESETS (validated in normalize_score_scale), or null.
     score_scale_preset = models.CharField(
         max_length=20,
         null=True,
         blank=True,
-        choices=[(key, key) for key in SCORE_SCALE_PRESETS],
         verbose_name=_("Score scale preset"),
     )
     computed_outcome = models.JSONField(null=True, blank=True)
@@ -8880,12 +8843,13 @@ class ComplianceAssessment(Assessment):
         _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
 
     def save(self, *args, **kwargs) -> None:
+        # No scale chosen: the framework's (the organisation scale is only
+        # ever proposed by the form, so API/import behaviour never changes).
         if self.min_score is None:
-            scale = self.framework.default_audit_scale()
-            self.min_score = scale["min_score"]
-            self.max_score = scale["max_score"]
-            self.scores_definition = scale["scores_definition"]
-            self.score_scale_preset = scale["score_scale_preset"]
+            self.min_score = self.framework.min_score
+            self.max_score = self.framework.max_score
+            self.scores_definition = self.framework.scores_definition
+            self.score_scale_preset = None
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
 
