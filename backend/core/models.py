@@ -2030,8 +2030,14 @@ class LibraryUpdater:
 
                         # Every stored value moves to the new range, ticked or not,
                         # so none is left outside it.
-                        if ra.compliance_assessment in ca_with_scale_change and (
-                            ra.score is not None or ra.documentation_score is not None
+                        if (
+                            ra.compliance_assessment in ca_with_scale_change
+                            and requirement_node_object.min_score is None
+                            and requirement_node_object.max_score is None
+                            and (
+                                ra.score is not None
+                                or ra.documentation_score is not None
+                            )
                         ):
                             default_min = (
                                 0
