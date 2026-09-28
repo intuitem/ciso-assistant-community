@@ -553,6 +553,20 @@
 	// $derived so it updates when this instance is reused for a different
 	// object (DetailView.svelte keys tabs by model name, not by parent id).
 	const filterStoreKey = $derived(`${page.url.pathname}::${baseEndpoint}`);
+	// Order-insensitive fingerprint of one field's selection. Values are
+	// `{ value, param? }` objects or bare strings (defaultFilters allows both).
+	const filterFingerprint = (field: string, values: any[] = []) =>
+		values
+			.map((v) =>
+				typeof v === 'object' && v !== null ? `${v.param ?? field}=${v.value}` : `${field}=${v}`
+			)
+			.sort()
+			.join('&');
+	const isDefaultFilterState = (state: Record<string, any[]>) =>
+		filteredFields.every(
+			(field) =>
+				filterFingerprint(field, state[field]) === filterFingerprint(field, defaultFilters[field])
+		);
 
 	function seedFilterValues() {
 		const stored = $tableFilterStates[filterStoreKey] ?? {};
@@ -662,9 +676,17 @@
 				return next;
 			});
 		}
-		// untracked so resetFilters can delete the entry without retriggering us
+		// untracked so resetFilters can delete the entry without retriggering us.
+		// A default selection isn't stored: seeding falls back to defaultFilters
+		// anyway, so untouched tables leave no entry behind in localStorage.
 		untrack(() => {
-			$tableFilterStates[filterStoreKey] = { ...filterValues };
+			if (!isDefaultFilterState(filterValues)) {
+				$tableFilterStates[filterStoreKey] = { ...filterValues };
+			} else if (filterStoreKey in $tableFilterStates) {
+				const next = { ...$tableFilterStates };
+				delete next[filterStoreKey];
+				$tableFilterStates = next;
+			}
 		});
 		if (hasRemoteSource)
 			setTimeout(() => {
