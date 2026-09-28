@@ -9,9 +9,13 @@ from core.models import (
     Question,
     QuestionChoice,
     RequirementAssessment,
+    RequirementAssignment,
     RequirementNode,
 )
-from core.utils import update_selected_implementation_groups
+from core.utils import (
+    sync_requirement_assignments,
+    update_selected_implementation_groups,
+)
 from iam.models import Folder
 
 
@@ -505,3 +509,222 @@ class TestIGFilteringSQLiteCompat:
         # save() calls upsert_daily_metrics() internally — must not crash
         d["ca"].refresh_from_db()
         assert d["ca"].selected_implementation_groups == ["base"]
+
+
+@pytest.fixture
+def assignment_setup(db):
+    """Dynamic framework with two assignments, where an answer reveals a requirement.
+
+    Node layout, by order_id: an orphan question outside any assignment, the same
+    question inside Alice's, then the requirements the answer may reveal, then a
+    requirement owned by Bob.
+    """
+    folder = Folder.get_root_folder()
+    fw = Framework.objects.create(
+        name="Assignment IG Framework",
+        folder=folder,
+        implementation_groups_definition=[
+            {"ref_id": "base", "default_selected": True},
+            {"ref_id": "advanced"},
+        ],
+    )
+
+    def node(node_id, order_id, groups):
+        return RequirementNode.objects.create(
+            framework=fw,
+            urn=f"urn:test:assign:req:{node_id}",
+            ref_id=node_id.upper(),
+            assessable=True,
+            folder=folder,
+            order_id=order_id,
+            implementation_groups=groups,
+        )
+
+    def question(node, node_id):
+        q = Question.objects.create(
+            requirement_node=node,
+            urn=f"urn:test:assign:q:{node_id}",
+            ref_id=f"Q{node_id.upper()}",
+            text="Go advanced?",
+            type=Question.Type.UNIQUE_CHOICE,
+            order=0,
+            weight=1,
+            folder=folder,
+        )
+        yes = QuestionChoice.objects.create(
+            question=q,
+            urn=f"urn:test:assign:choice:{node_id}:yes",
+            ref_id=f"C{node_id.upper()}Y",
+            value="Yes",
+            order=0,
+            folder=folder,
+            select_implementation_groups=["advanced"],
+        )
+        no = QuestionChoice.objects.create(
+            question=q,
+            urn=f"urn:test:assign:choice:{node_id}:no",
+            ref_id=f"C{node_id.upper()}N",
+            value="No",
+            order=1,
+            folder=folder,
+            select_implementation_groups=[],
+        )
+        return q, yes, no
+
+    rn_orphan = node("orphan", 0, ["base"])
+    rn_base = node("base", 1, ["base"])
+    rn_advanced = node("advanced", 2, ["advanced"])
+    rn_both = node("both", 3, ["base", "advanced"])
+    rn_other = node("other", 4, ["base"])
+
+    q_orphan, orphan_yes, _orphan_no = question(rn_orphan, "orphan")
+    q_base, base_yes, base_no = question(rn_base, "base")
+
+    perimeter = Perimeter.objects.create(name="Assign Perim", folder=folder)
+    ca = ComplianceAssessment.objects.create(
+        name="Assign CA",
+        framework=fw,
+        folder=folder,
+        perimeter=perimeter,
+        selected_implementation_groups=["base"],
+    )
+
+    def assessment(requirement):
+        return RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=requirement, folder=folder
+        )
+
+    ra_orphan = assessment(rn_orphan)
+    ra_base = assessment(rn_base)
+    ra_advanced = assessment(rn_advanced)
+    ra_both = assessment(rn_both)
+    ra_other = assessment(rn_other)
+
+    alice = RequirementAssignment.objects.create(
+        compliance_assessment=ca, folder=folder
+    )
+    alice.requirement_assessments.set([ra_base])
+    bob = RequirementAssignment.objects.create(compliance_assessment=ca, folder=folder)
+    bob.requirement_assessments.set([ra_other])
+
+    return {
+        "ca": ca,
+        "folder": folder,
+        "q_orphan": q_orphan,
+        "q_base": q_base,
+        "orphan_yes": orphan_yes,
+        "base_yes": base_yes,
+        "base_no": base_no,
+        "ra_orphan": ra_orphan,
+        "ra_base": ra_base,
+        "ra_advanced": ra_advanced,
+        "ra_both": ra_both,
+        "ra_other": ra_other,
+        "alice": alice,
+        "bob": bob,
+    }
+
+
+def _answer(setup, requirement_assessment, question, choice):
+    answer, _ = Answer.objects.get_or_create(
+        requirement_assessment=requirement_assessment,
+        question=question,
+        folder=setup["folder"],
+    )
+    answer.selected_choices.set([choice])
+
+
+def _answer_base(setup, choice):
+    _answer(setup, setup["ra_base"], setup["q_base"], choice)
+
+
+def _assigned_ids(assignment):
+    return set(assignment.requirement_assessments.values_list("id", flat=True))
+
+
+@pytest.mark.django_db
+class TestSyncRequirementAssignments:
+    def test_revealed_requirement_joins_the_trigger_assignment(self, assignment_setup):
+        d = assignment_setup
+        _answer_base(d, d["base_yes"])
+
+        update_selected_implementation_groups(d["ca"])
+
+        assert _assigned_ids(d["alice"]) == {d["ra_base"].id, d["ra_advanced"].id}
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+    def test_already_visible_requirement_stays_unassigned(self, assignment_setup):
+        """Visible under 'base' already, so leaving it out was the auditor's call."""
+        d = assignment_setup
+        _answer_base(d, d["base_yes"])
+
+        update_selected_implementation_groups(d["ca"])
+
+        assert d["ra_both"].id not in _assigned_ids(d["alice"])
+        assert d["ra_both"].id not in _assigned_ids(d["bob"])
+
+    def test_trigger_outside_any_assignment_is_skipped(self, assignment_setup):
+        """The orphan answers first; routing falls through to the assigned trigger."""
+        d = assignment_setup
+        _answer(d, d["ra_orphan"], d["q_orphan"], d["orphan_yes"])
+        _answer_base(d, d["base_yes"])
+
+        update_selected_implementation_groups(d["ca"])
+
+        assert d["ra_advanced"].id in _assigned_ids(d["alice"])
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+    def test_in_progress_assignment_receives(self, assignment_setup):
+        """Deliberate: the respondent reveals requirements while working, not in draft."""
+        d = assignment_setup
+        d["alice"].status = RequirementAssignment.Status.IN_PROGRESS
+        d["alice"].save()
+        _answer_base(d, d["base_yes"])
+
+        update_selected_implementation_groups(d["ca"])
+
+        assert d["ra_advanced"].id in _assigned_ids(d["alice"])
+
+    def test_submitted_assignment_receives_nothing(self, assignment_setup):
+        d = assignment_setup
+        d["alice"].status = RequirementAssignment.Status.SUBMITTED
+        d["alice"].save()
+        _answer_base(d, d["base_yes"])
+
+        update_selected_implementation_groups(d["ca"])
+
+        assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+    def test_deselected_group_leaves_the_assignment(self, assignment_setup):
+        """Changing the answer back drops what it had revealed."""
+        d = assignment_setup
+        _answer_base(d, d["base_yes"])
+        update_selected_implementation_groups(d["ca"])
+        d["ca"].refresh_from_db()
+
+        _answer_base(d, d["base_no"])
+        update_selected_implementation_groups(d["ca"])
+
+        assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+    def test_empty_selection_keeps_every_assignment(self, assignment_setup):
+        """No selected group means the whole audit is in scope, so nothing is out of it."""
+        d = assignment_setup
+        d["ca"].selected_implementation_groups = []
+        d["ca"].save()
+
+        sync_requirement_assignments(d["ca"], {}, {"base"})
+
+        assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+    def test_answer_selecting_no_group_changes_nothing(self, assignment_setup):
+        d = assignment_setup
+        _answer_base(d, d["base_no"])
+
+        update_selected_implementation_groups(d["ca"])
+
+        assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
+        assert _assigned_ids(d["bob"]) == {d["ra_other"].id}

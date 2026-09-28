@@ -71,13 +71,11 @@
 			// node is not registered as opened
 			if (!expandedNodes.includes(node.id)) {
 				expandedNodes.push(node.id);
-				expandedNodes = expandedNodes;
 			}
 		} else {
 			// node is registered as open
 			if (expandedNodes.includes(node.id)) {
 				expandedNodes.splice(expandedNodes.indexOf(node.id), 1);
-				expandedNodes = expandedNodes;
 			}
 		}
 	}
@@ -87,29 +85,24 @@
 			// node is not registered as checked
 			if (!checkedNodes.includes(node.id)) {
 				checkedNodes.push(node.id);
-				checkedNodes = checkedNodes;
 			}
 
 			// node is not indeterminate but registered as indeterminate
 			if (!indeterminate && indeterminateNodes.includes(node.id)) {
 				indeterminateNodes.splice(indeterminateNodes.indexOf(node.id), 1);
-				indeterminateNodes = indeterminateNodes;
 			}
 		} else {
 			// node is registered as checked
 			if (checkedNodes.includes(node.id)) {
 				checkedNodes.splice(checkedNodes.indexOf(node.id), 1);
-				checkedNodes = checkedNodes;
 			}
 
 			// node is indeterminate but not registered as indeterminate
 			if (indeterminate && !indeterminateNodes.includes(node.id)) {
 				indeterminateNodes.push(node.id);
-				indeterminateNodes = indeterminateNodes;
 				// node is not indeterminate but registered as indeterminate
 			} else if (!indeterminate && indeterminateNodes.includes(node.id)) {
 				indeterminateNodes.splice(indeterminateNodes.indexOf(node.id), 1);
-				indeterminateNodes = indeterminateNodes;
 			}
 		}
 	}
@@ -122,7 +115,6 @@
 					group.push(node.id);
 				}
 			});
-			group = group;
 		} else {
 			nodes.forEach((node) => {
 				if (checkedNodes.includes(node.id) && group !== node.id) {
@@ -143,7 +135,7 @@
 	function areAllChildrenHiddenRecursive(node: TreeViewNode): boolean {
 		if (!node.children || node.children.length === 0) return false;
 		return node.children.every(
-			(child) => child.contentProps.hidden || areAllChildrenHiddenRecursive(child)
+			(child) => child.contentProps?.hidden || areAllChildrenHiddenRecursive(child)
 		);
 	}
 </script>

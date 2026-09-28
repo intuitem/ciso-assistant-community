@@ -50,7 +50,6 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 
 			await sideBar.logout();
 
-			await expect(mailer.page.getByText('{{').last()).toBeHidden(); // Wait for mailhog to load the emails
 			const lastMail = await mailer.getLastEmail();
 			await lastMail.hasWelcomeEmailDetails();
 			await lastMail.hasEmailRecipient(vars.user.email);

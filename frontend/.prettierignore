@@ -8,6 +8,8 @@ node_modules
 !.env.example
 /tests/reports/*
 /tests/results/*
+/tests/docs-screenshots/.auth/*
+/tests/docs-screenshots/.results/*
 **/paraglide
 project.inlang/
 

@@ -1,0 +1,12 @@
+[package]
+name = "merman"
+version = "0.3.0"
+entrypoint = "lib.typ"
+compiler = "0.15.0"
+authors = ["Mingzhen Zhuang <@Latias94>"]
+license = "MIT OR Apache-2.0"
+description = "Render Mermaid diagrams as SVG."
+repository = "https://github.com/Latias94/merman"
+keywords = ["mermaid", "diagrams", "svg", "wasm"]
+categories = ["visualization", "integration"]
+exclude = ["examples/**"]

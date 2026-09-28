@@ -64,7 +64,34 @@ A draft can be saved in any state. Publishing requires a sound graph, so the bui
 | Unknown creatable model | Pick a model from the list |
 | This model is built, not matched | Untick **Update when it already exists** for audits and entity assessments created from a framework |
 | A choice field has a value the object does not accept | Use one of the listed values |
+| `'x' is required to create a 'y'` | A field the object cannot be stored without is empty. The bold fields in the [action reference](actions.md#create-object) |
 | The output variable is not a valid, declared, non-reserved variable | Pick a declared variable |
+| Which metric instance is not set | Set the metric instance on the Record a measurement step |
+| A value is required | Set the value on the Record a measurement step |
+| Which posture assessment is not set | Set it on the Post scan results step |
+| Which asset is not set | Set it on the Post scan results step |
+| Results are required | Point the Post scan results step at a step output or a JSON list |
+| Results must reference a step's output or be a JSON list | The text in **Results** is neither an expression nor valid JSON |
+| A URL is required | Set the URL on the HTTP request step |
+| `'X' is not one of DELETE, GET, PATCH, POST, PUT` | Pick a method from the list |
+| Headers must be name/value pairs | Rebuild the headers. A single pasted line is not a header table |
+| The timeout must be between 1 and 30 seconds | Use a value in range. The step no longer accepts one it would silently shorten |
+| Credentials may only travel over `https` | The URL is `http` and the step carries a secret or an `Authorization` header. Use `https` |
+| A recipient is required | Set at least one address on the Send email step |
+| `'x' is not an email address` | Fix the address. Expressions are left alone and checked on the run |
+| A name is required | Set the folder name on the Provision domain step |
+| An email is required | Set the email on the Provision user step |
+| A user is required | Set the user on the Manage group membership step |
+| Set a group, or a folder and a built-in group | The step needs one or the other, and a folder alone is not enough |
+| `'x' is not one of add, remove` | Pick an operation. An unrecognised one used to be treated as **Add** |
+| This step has no instruction for the model | Fill **Instruction** on the AI step |
+| This step has no output schema — describe the fields the model must return | Add at least one row to **Values to return** |
+| The output schema must be an object with at least one property | Same. A step that returns nothing addressable has nothing for `{{nodes.x.y}}` to read |
+| The output schema is not valid | Only reachable on an imported file that carries a hand-written schema |
+| `'x' reads 'y', which the output schema does not define` | **Save results to variables** points at a value the step does not return. Fix the path or add the value |
+| `'max_attempts' must be a whole number between 1 and 5` | Use a value in range |
+| `'max_words' must be a whole number between 1 and 2000` | Use a value in range |
+| `'x' only accepts a fixed set of values, so it cannot be set from '{{...}}', which carries an AI answer` | Branch on the answer with a Condition and write the value on each branch. See [AI steps](actions.md#ai-steps) |
 
 ## Not available in this version
 

@@ -60,6 +60,7 @@
 <HiddenInput {form} field="security_exceptions" />
 <HiddenInput {form} field="timeline_entries" />
 <HiddenInput {form} field="contracts" />
+<HiddenInput {form} field="task_templates" />
 
 {#if context !== 'edit'}
 	<FileInput

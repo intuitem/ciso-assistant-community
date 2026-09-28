@@ -170,7 +170,7 @@ cleanup() {
 
 django_args() {
   if [[ -n "$ENTERPRISE" ]]; then
-    echo " --settings=$ENTERPRISE_SETTINGS"
+    echo "--settings=$ENTERPRISE_SETTINGS"
   fi
 }
 
@@ -185,14 +185,20 @@ build_frontend() {
   fi
 }
 
+# Hash the SOURCES. Hashing the overlay's `.build/` instead would compare a build against
+# itself: it only changes once a build has run, so every source edit after the first build
+# looked unchanged and the enterprise tests silently ran against stale code.
 compute_frontend_hash() {
+  local sources=("$APP_DIR"/frontend/{src,messages})
   if [[ -n "$ENTERPRISE" ]]; then
-    echo "Computing the hash for the enterprise version of the frontend..."
-    find "$APP_DIR"/enterprise/frontend/.build/frontend/{src,messages} -type f \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" \) -print0 | xargs -0 md5sum | md5sum
-    return
-  else
-    find "$APP_DIR"/frontend/{src,messages} -type f \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" \) -print0 | xargs -0 md5sum | md5sum
+    sources+=("$APP_DIR"/enterprise/frontend/src)
   fi
+  # app.css and app.html go into the bundle too, so an edit to either has to invalidate it.
+  # `find` walks in directory order, which is not stable here, so sort before the digest:
+  # unsorted, the same tree hashed differently run to run and nothing was ever reused.
+  find "${sources[@]}" -type f \
+    \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" -o -name "*.css" -o -name "*.html" \) \
+    -print0 | xargs -0 md5sum | LC_ALL=C sort | md5sum
 }
 
 run_tests() {
@@ -228,9 +234,9 @@ if [[ ! " ${SCRIPT_SHORT_ARGS[@]} " =~ " -m " ]]; then
   if command -v docker &>/dev/null; then
     echo "Starting mailer service..."
     if [[ -z "$DO_NOT_USE_SUDO" ]]; then
-      MAILER_PID=$(sudo docker run -d -p "$MAILER_SMTP_SERVER_PORT":1025 -p "$MAILER_WEB_SERVER_PORT":8025 mailhog/mailhog)
+      MAILER_PID=$(sudo docker run -d -p "$MAILER_SMTP_SERVER_PORT":1025 -p "$MAILER_WEB_SERVER_PORT":8025 -e MP_SMTP_AUTH_ACCEPT_ANY=1 -e MP_SMTP_AUTH_ALLOW_INSECURE=1 axllent/mailpit:v1.31.1)
     else
-      MAILER_PID=$(docker run -d -p "$MAILER_SMTP_SERVER_PORT":1025 -p "$MAILER_WEB_SERVER_PORT":8025 mailhog/mailhog)
+      MAILER_PID=$(docker run -d -p "$MAILER_SMTP_SERVER_PORT":1025 -p "$MAILER_WEB_SERVER_PORT":8025 -e MP_SMTP_AUTH_ACCEPT_ANY=1 -e MP_SMTP_AUTH_ALLOW_INSECURE=1 axllent/mailpit:v1.31.1)
     fi
     echo "Mailer service started on ports $MAILER_SMTP_SERVER_PORT/$MAILER_WEB_SERVER_PORT (Container ID: ${MAILER_PID:0:6})"
   else
@@ -290,23 +296,23 @@ export LICENSE_SEATS=999
 
 cd "$APP_DIR"/backend/ || exit 1
 if [[ $KEEP_DATABASE_SNAPSHOT -ne 1 ]]; then
-  uv run python3 manage.py makemigrations"$(django_args)"
-  uv run python3 manage.py migrate"$(django_args)"
+  uv run python3 manage.py makemigrations $(django_args)
+  uv run python3 manage.py migrate $(django_args)
 elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]]; then
-  uv run python3 manage.py makemigrations"$(django_args)"
-  uv run python3 manage.py migrate"$(django_args)"
+  uv run python3 manage.py makemigrations $(django_args)
+  uv run python3 manage.py migrate $(django_args)
   cp "$DB_DIR/$DB_NAME" "$DB_DIR/$DB_INIT_NAME"
 else
   # Copying the initial database instead of applying the migrations saves a lot of time
   cp "$DB_DIR/$DB_INIT_NAME" "$DB_DIR/$DB_NAME"
 fi
 
-uv run python3 manage.py createsuperuser --noinput"$(django_args)"
+uv run python3 manage.py createsuperuser --noinput $(django_args)
 if [[ -n "$STORE_BACKEND_OUTPUT" ]]; then
-  nohup uv run python3 manage.py runserver "$BACKEND_PORT""$(django_args)" >"$APP_DIR"/frontend/tests/utils/.testbackendoutput.out 2>&1 &
+  nohup uv run python3 manage.py runserver "$BACKEND_PORT" $(django_args) >"$APP_DIR"/frontend/tests/utils/.testbackendoutput.out 2>&1 &
   echo "You can view the backend server output at $APP_DIR/frontend/tests/utils/.testbackendoutput.out"
 else
-  nohup uv run python3 manage.py runserver "$BACKEND_PORT""$(django_args)" >/dev/null 2>&1 &
+  nohup uv run python3 manage.py runserver "$BACKEND_PORT" $(django_args) >/dev/null 2>&1 &
 fi
 BACKEND_PID=$!
 echo "Test backend server started on port $BACKEND_PORT (PID: $BACKEND_PID)"

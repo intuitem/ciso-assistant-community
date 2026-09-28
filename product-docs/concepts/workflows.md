@@ -22,10 +22,12 @@ You build workflows visually, on a canvas. No code is involved, and everything a
 | Reactions | When a finding is created at high severity, open a remediation control and link it |
 | Sweeps | Every night, mark lapsed security exceptions as expired |
 | Intake | A scanner posts vulnerabilities to a URL and each one is recorded |
+| Collection | Every night, pull an export from a tool, file it as evidence and record what it measured |
+| Triage | Ask a model to classify an incoming finding, then branch on its answer |
 | Outbound | When a control goes live, post to your ITSM or chat tool |
 | Provisioning | Create a domain, its groups and its first user in one run |
 
-Twenty-five ready-made workflows ship as [templates](../features/workflows/templates.md). Most people start by installing one and adapting it.
+Thirty ready-made workflows ship as [templates](../features/workflows/templates.md). Most people start by installing one and adapting it.
 
 
 ## A workflow is a graph

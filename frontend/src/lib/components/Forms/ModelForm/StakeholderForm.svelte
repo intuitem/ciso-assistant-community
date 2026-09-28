@@ -6,7 +6,7 @@
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
-	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
+	import { type ModalComponent, type ModalSettings } from '$lib/components/Modals/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { page } from '$app/state';
 	import { safeTranslate } from '$lib/utils/i18n';

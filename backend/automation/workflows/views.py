@@ -153,7 +153,7 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     def creatable_models(self, request):
         """The create_object registry, so the builder's forms stay in sync
         with what the backend actually accepts."""
-        from .actions import CREATABLE_MODELS
+        from .actions import CREATABLE_MODELS, _match_fields
 
         return Response(
             [
@@ -171,9 +171,16 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
                         for name, target in (entry.get("params") or {}).items()
                     },
                     "required_params": entry.get("required_params") or [],
+                    "required_fields": entry.get("required_fields") or [],
+                    # Narrowed choices, so the builder offers what the action
+                    # accepts rather than everything the column allows.
+                    "allowed_values": {
+                        field: sorted(entry["allowed_values"][field])
+                        for field in entry.get("allowed_values") or {}
+                    },
                     # A built model is assembled, not matched.
                     "upsert": not entry.get("constructor"),
-                    "match_on": entry.get("match_on", "name"),
+                    "match_on": list(_match_fields(entry)),
                 }
                 for key, entry in CREATABLE_MODELS.items()
             ]
@@ -193,6 +200,9 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
                     "fields": entry.readable_fields(),
                     # Output-only aggregates; not filterable/orderable.
                     "computed": sorted(entry.computed.keys()),
+                    # Same, but only resolved when a node names them in
+                    # `include` — they cost too much to return by default.
+                    "includable": sorted(entry.optional_computed.keys()),
                 }
                 for key, entry in READABLE_MODELS.items()
             ]
