@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("core", "0188_quickformpublication_quickformresponse_and_more"),
+        ("core", "0189_evidencerevision_original_filename"),
     ]
 
     operations = [
