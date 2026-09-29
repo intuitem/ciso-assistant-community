@@ -100,7 +100,11 @@
 	function setRange(nextMin: number, nextMax: number) {
 		min = nextMin;
 		max = nextMax;
-		if (max > min) levels = levels.filter((l) => l.score >= min && l.score <= max);
+		// Past MAX_LABELLED_LEVELS the grid is hidden: don't keep labels nobody sees.
+		if (max > min)
+			levels = hasLabelledLevels(min, max)
+				? levels.filter((l) => l.score >= min && l.score <= max)
+				: [];
 		commit();
 	}
 

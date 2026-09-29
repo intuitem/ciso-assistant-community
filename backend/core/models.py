@@ -1884,11 +1884,8 @@ class LibraryUpdater:
                             preset_dropped = True
                     # Labels only follow the framework together with its range:
                     # an audit on its own range keeps its own (possibly empty)
-                    # labels.
-                    range_follows = scale_on_prev_defaults or (
-                        ca.min_score,
-                        ca.max_score,
-                    ) == (new_framework.min_score, new_framework.max_score)
+                    # labels, even when that range matches the new framework's.
+                    range_follows = scale_on_prev_defaults
                     if (
                         (
                             definition_on_prev_defaults
@@ -8549,7 +8546,9 @@ def normalize_score_scale(preset, min_score, max_score, levels, default_range=No
     score_range = (min_score, max_score) if min_score is not None else default_range
     if isinstance(levels, dict):
         levels = levels.get("scale")
-    if isinstance(levels, list) and score_range:
+    if levels is not None and not isinstance(levels, list):
+        raise ValidationError({"scores_definition": "scoreScaleErrorInvalid"})
+    if levels and score_range:
         for level in levels:
             score = level.get("score") if isinstance(level, dict) else None
             if (

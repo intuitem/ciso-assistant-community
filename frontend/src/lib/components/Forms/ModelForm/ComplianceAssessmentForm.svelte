@@ -96,20 +96,20 @@
 	let rescalePanel = $state<HTMLElement | null>(null);
 	let rescaleConfirmButton = $state<HTMLButtonElement | null>(null);
 	const formMessage = form.message;
-	let rescaleImpact = $derived.by(() => {
+	interface RescaleImpact {
+		from?: [number, number];
+		to?: [number, number];
+		scored?: number;
+		scores?: number;
+		documentation_scores?: number;
+		target?: [number, number];
+	}
+	let rescaleImpact = $derived.by((): RescaleImpact | null => {
 		const pending = ($formErrors as Record<string, string[] | undefined>)?.confirm_rescale?.length;
 		if (!pending) return null;
-		const impact: Record<string, unknown> =
-			($formMessage as { data?: { rescale_impact?: Record<string, unknown> } } | undefined)?.data
-				?.rescale_impact ?? {};
-		// DRF sends counts as strings: "0" must not read as a count.
-		return Object.fromEntries(
-			Object.entries(impact).map(([key, value]) => [
-				key,
-				typeof value === 'string' && value.trim() !== '' && !isNaN(Number(value))
-					? Number(value)
-					: value
-			])
+		return (
+			($formMessage as { data?: { rescale_impact?: RescaleImpact } } | undefined)?.data
+				?.rescale_impact ?? {}
 		);
 	});
 
@@ -462,7 +462,11 @@
 				selected={selectedScale}
 				onSelect={onScaleSelect}
 				isScaleBound={frameworkScoring?.is_scale_bound}
-				currentRange={object?.id ? { min: object.min_score, max: object.max_score } : null}
+				currentRange={object?.id
+					? { min: object.min_score, max: object.max_score }
+					: baselineScale
+						? { min: baselineScale.min_score, max: baselineScale.max_score }
+						: null}
 				{scoringEnabled}
 			/>
 		{/if}

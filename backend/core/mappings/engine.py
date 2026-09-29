@@ -410,9 +410,10 @@ class MappingEngine:
             mapped = False
 
             if rel in ("equal", "superset"):
-                # If we have matching score ranges on the target framework, copy
-                # the whole assessment (including score fields). Otherwise only
-                # copy non-score fields to avoid misrepresenting scores.
+                # Scores are copied when both sides are comparable: converted
+                # into the target audit's range, or kept as-is on a requirement
+                # scale shared by source and target. Otherwise only non-score
+                # fields are copied, to avoid misrepresenting scores.
                 if copy_scores:
                     # Fix 2: Use .get() for collision detection instead of
                     # defaultdict auto-creation.  An empty dict {} (from a
@@ -503,7 +504,7 @@ class MappingEngine:
                         else:
                             target_assessment[m2m_field] = src_values
 
-                # Copy score fields if scores are compatible
+                # Copy score fields (converted if needed) when comparable
                 if copy_scores:
                     for score_field in [
                         "score",

@@ -671,13 +671,22 @@ class TestRescaleConfirmation:
         api.force_authenticate(admin)
         setup["ra"].score = 60
         setup["ra"].save()
+        setup["ca"].target_score = 60
+        setup["ca"].save()
         url = f"/api/compliance-assessments/{setup['ca'].id}/"
         response = api.patch(url, {"score_scale_preset": "0-5"}, format="json")
         assert response.status_code == 409
         body = response.json()
         assert body["confirm_rescale"] == ["scoreScaleConfirmRequired"]
-        assert body["rescale_impact"]["scored"] == "0"
-        assert body["rescale_impact"]["scores"] == "1"
+        # Native JSON numbers, not DRF's stringified error details.
+        assert body["rescale_impact"] == {
+            "from": [0, 100],
+            "to": [0, 5],
+            "scored": 0,
+            "scores": 1,
+            "documentation_scores": 0,
+            "target": [60, 3],
+        }
         response = api.patch(
             url, {"score_scale_preset": "0-5", "confirm_rescale": True}, format="json"
         )
@@ -771,6 +780,35 @@ class TestLibraryUpdateWithPreset:
         custom_ca.refresh_from_db()
         assert (custom_ca.min_score, custom_ca.max_score) == (1, 3)
         assert custom_ca.scores_definition == [{"score": 1, "name": "Mine"}]
+
+    def test_unlabelled_scale_matching_new_range_keeps_no_labels(self):
+        from core.models import LoadedLibrary, StoredLibrary
+
+        stored, _ = StoredLibrary.store_library_content(
+            _LIB.format(version=1, scale="").encode("utf-8")
+        )
+        stored.load()
+        fw = Framework.objects.get(urn="urn:intuitem:test:framework:scale-update")
+        # An organisation custom scale that happens to equal the new range.
+        own_ca = ComplianceAssessment.objects.create(
+            name="Own 1-4",
+            framework=fw,
+            folder=Folder.get_root_folder(),
+            min_score=1,
+            max_score=4,
+            scores_definition=[],
+        )
+
+        StoredLibrary.store_library_content(
+            _LIB.format(version=2, scale=_SCALE_V2).encode("utf-8")
+        )
+        assert (
+            LoadedLibrary.objects.get(urn=stored.urn).update(strategy="clamp") is None
+        )
+
+        own_ca.refresh_from_db()
+        assert (own_ca.min_score, own_ca.max_score) == (1, 4)
+        assert not own_ca.scores_definition
 
 
 @pytest.mark.django_db
@@ -936,6 +974,14 @@ class TestWrappedDefinitionValidation:
                 "score_scale_preset": "1-5",
                 "scores_definition": {"scale": [{"score": 80}]},
             },
+        )
+        assert not valid
+        assert "scores_definition" in serializer.errors
+
+    def test_non_list_definition_refused(self, setup):
+        serializer, valid = _update(
+            setup["ca"],
+            {"score_scale_preset": "1-5", "scores_definition": "Low, High"},
         )
         assert not valid
         assert "scores_definition" in serializer.errors

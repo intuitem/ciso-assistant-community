@@ -3697,9 +3697,12 @@ class ScoreRescaleConfirmationRequired(APIException):
 
     def __init__(self, impact: dict):
         self.impact = impact
-        super().__init__(
-            {"confirm_rescale": ["scoreScaleConfirmRequired"], "rescale_impact": impact}
-        )
+        super().__init__()
+        # Set after init: APIException would turn every number into a string.
+        self.detail = {
+            "confirm_rescale": ["scoreScaleConfirmRequired"],
+            "rescale_impact": impact,
+        }
 
 
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
@@ -4103,6 +4106,11 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    def validate_score_scale_preset(self, value):
+        if value and value not in SCORE_SCALE_PRESETS:
+            raise serializers.ValidationError("scoreScaleErrorUnknownPreset")
+        return value
 
     class Meta:
         model = ComplianceAssessment

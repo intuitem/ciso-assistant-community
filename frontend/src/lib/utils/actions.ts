@@ -92,6 +92,8 @@ export async function handleErrorResponse({
 			setError(form, key, safeTranslate(value));
 		}
 	});
+	// setError only runs for string values; nested errors must still refuse the save.
+	form.valid = false;
 	// Structured values (e.g. a 409's impact summary) reach the form through the message.
 	return message(form, { status: response.status, data: res });
 }
