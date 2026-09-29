@@ -3869,6 +3869,7 @@ export interface BatchActionConfig {
 	value?: string;
 	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
+	inputType?: 'date';
 	children?: BatchActionConfig[];
 	minSelection?: number;
 	maxSelection?: number;
@@ -4001,6 +4002,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 					field: 'priority',
 					optionsEndpoint: 'applied-controls/priority',
 					enableDoubleDash: true
+				},
+				{
+					type: 'change_field',
+					label: 'changeEta',
+					icon: 'fa-solid fa-calendar-day',
+					field: 'eta',
+					inputType: 'date'
 				},
 				{
 					type: 'change_field',

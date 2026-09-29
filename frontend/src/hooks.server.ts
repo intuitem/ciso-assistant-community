@@ -1,5 +1,6 @@
 import { BASE_API_URL, DEFAULT_LANGUAGE } from '$lib/utils/constants';
 import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
+import { bufferJsonResponse } from '$lib/utils/responses';
 import type { User } from '$lib/utils/types';
 import {
 	error,
@@ -319,7 +320,8 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	// Not awaiting getUser(): the LOCALE cookie carries the same preference.
 	const currentLang =
 		event.locals.user?.preferences?.lang || event.cookies.get('LOCALE') || DEFAULT_LANGUAGE;
-	if (request.url.startsWith(BASE_API_URL)) {
+	const toBackend = request.url.startsWith(BASE_API_URL);
+	if (toBackend) {
 		// Default to JSON unless the request is already a multipart upload (FormData)
 		const ct = request.headers.get('Content-Type') || '';
 		if (!ct.includes('multipart')) {
@@ -402,8 +404,9 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 			}
 		}
 
-		return response;
+		return bufferJsonResponse(response);
 	}
 
-	return fetch(request);
+	const response = await fetch(request);
+	return toBackend ? bufferJsonResponse(response) : response;
 };

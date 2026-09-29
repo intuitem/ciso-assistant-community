@@ -62,7 +62,25 @@ export const ISSUE_COLUMNS: Record<string, Column[]> = {
 		{ key: 'expiry_date', label: () => m.expiryDate(), kind: 'date' }
 	],
 	risk_assessment: [{ key: 'status', label: () => m.status(), kind: 'enum' }],
-	complianceassessment: [{ key: 'status', label: () => m.status(), kind: 'enum' }]
+	complianceassessment: [{ key: 'status', label: () => m.status(), kind: 'enum' }],
+	organisationobjective: [
+		{ key: 'status', label: () => m.status(), kind: 'enum' },
+		{ key: 'health', label: () => m.health(), kind: 'enum' },
+		{ key: 'due_date', label: () => m.dueDate(), kind: 'date' }
+	],
+	organisationissue: [{ key: 'status', label: () => m.status(), kind: 'enum' }],
+	evidence: [
+		{ key: 'status', label: () => m.status(), kind: 'enum' },
+		{ key: 'expiry_date', label: () => m.expiryDate(), kind: 'date' }
+	],
+	finding: [
+		{ key: 'status', label: () => m.status(), kind: 'enum' },
+		{ key: 'due_date', label: () => m.dueDate(), kind: 'date' }
+	],
+	tasknode: [
+		{ key: 'status', label: () => m.status(), kind: 'enum' },
+		{ key: 'due_date', label: () => m.dueDate(), kind: 'date' }
+	]
 };
 
 const OBJECT_LABELS: Record<string, () => string> = {
@@ -70,7 +88,12 @@ const OBJECT_LABELS: Record<string, () => string> = {
 	riskscenario: () => m.riskScenarios(),
 	requirementassessment: () => m.requirements(),
 	riskacceptance: () => m.riskAcceptances(),
-	evidence: () => m.evidences()
+	evidence: () => m.evidences(),
+	organisationobjective: () => m.objectives(),
+	organisationissue: () => m.organisationIssues(),
+	finding: () => m.findings(),
+	tasktemplate: () => m.taskTemplates(),
+	tasknode: () => m.taskNodes()
 };
 
 export const occurrenceLabel = (objType: string, count: number): string => {
@@ -148,6 +171,31 @@ export const aggregateQualityChecks = (item: any): Record<SeverityKey, any[]> =>
 
 	return result;
 };
+
+export const DOMAIN_BLOCKS = ['governance', 'operations'] as const;
+
+export type SeverityBucket = Partial<Record<SeverityKey, unknown[]>>;
+
+export interface XRaysReport {
+	object: { id: string; name: string; type: string };
+	assessment: SeverityBucket & { count: number };
+	governance: SeverityBucket & { count: number };
+	operations: SeverityBucket & { count: number };
+}
+
+export const severityGroups = (
+	bucket: SeverityBucket | undefined,
+	activeSeverities: Record<SeverityKey, boolean>,
+	assessmentType = '',
+	assessmentId = ''
+) =>
+	SEVERITIES.filter(({ key }) => activeSeverities[key])
+		.map((severity) => ({
+			...severity,
+			total: bucket?.[severity.key]?.length ?? 0,
+			issues: aggregateIssuesByType(bucket?.[severity.key], assessmentType, assessmentId)
+		}))
+		.filter((group) => group.issues.length > 0);
 
 export const hasVisibleIssues = (
 	assessment: any,
