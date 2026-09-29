@@ -1933,6 +1933,16 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
                 )
                 continue
 
+            # `objects_by_id` is a snapshot: an earlier id in this batch may have
+            # cascaded onto this row. The permission lookup below would then resolve
+            # against nothing and report a denial the caller never hit.
+            if (
+                action_type == "delete"
+                and not self.model.objects.filter(pk=obj.pk).exists()
+            ):
+                succeeded.append({"id": str(obj_id), "name": str(obj)})
+                continue
+
             if not RoleAssignment.is_access_allowed(
                 user=request.user,
                 perm=required_perm,

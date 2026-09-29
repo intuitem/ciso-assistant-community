@@ -3,6 +3,7 @@
 	import { getModalStore, type ModalStore } from './stores';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { fetchAllPages } from '$lib/utils/pagination';
+	import { subtreeIds } from '$lib/utils/tree';
 	import { onMount } from 'svelte';
 
 	function translateOption(option: { label: string; value: string }): string {
@@ -20,6 +21,9 @@
 			'delete' | 'change_field' | 'change_m2m' | 'add_m2m' | 'remove_m2m' | 'change_folder';
 		count: number;
 		optionsEndpoint?: string;
+		// Rows the picker must not offer as a target, together with everything filed
+		// below them.
+		excludeIds?: string[];
 		enableDoubleDash?: boolean;
 		multiSelect?: boolean;
 		inputType?: 'date';
@@ -37,6 +41,7 @@
 		actionType,
 		count,
 		optionsEndpoint,
+		excludeIds = [],
 		enableDoubleDash = false,
 		multiSelect = false,
 		inputType = undefined,
@@ -102,7 +107,13 @@
 					// Choice endpoints return dicts and stay as-is; paginated list endpoints
 					// with more than one page need the remaining pages fetched.
 					const items = data?.next ? await fetchAllPages(fetch, `/${optionsEndpoint}`) : data;
-					options = withDoubleDash(parseOptions(items));
+					const parsed = parseOptions(items);
+					const rows = items?.results ?? items;
+					const excluded =
+						excludeIds.length > 0 && Array.isArray(rows)
+							? subtreeIds(rows, excludeIds)
+							: new Set<string>();
+					options = withDoubleDash(parsed.filter((o) => !excluded.has(o.value)));
 				}
 			} catch (e) {
 				console.error('Failed to fetch options', e);

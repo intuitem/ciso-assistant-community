@@ -12,6 +12,7 @@ import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeSt
 import WorkflowToggleActive from '$lib/components/ContextMenu/workflows/ToggleActive.svelte';
 import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo, isFieldFlagEnabled } from './crud';
+import { folderBatchActions } from './folder-batch-actions';
 import { toCamelCase } from './locales';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
@@ -3874,6 +3875,10 @@ export interface BatchActionConfig {
 	minSelection?: number;
 	maxSelection?: number;
 	confirmMessage?: string; // i18n key for an extra confirm warning, receives {count}
+	// Drop the selected rows, and everything filed below them, from the target
+	// picker: reparenting a row into its own descendant is a cycle the API rejects.
+	// Reads each option's `parent_folder`, so it only fits models keyed on that.
+	excludeSelectedSubtree?: boolean;
 }
 
 export interface ParentActionConfig {
@@ -4559,6 +4564,15 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	folders: [
+		...folderBatchActions,
+		{
+			type: 'delete',
+			label: 'delete',
+			icon: 'fa-solid fa-trash',
+			confirmMessage: 'confirmDeleteDomains'
+		}
 	],
 	'metric-instances': [
 		{

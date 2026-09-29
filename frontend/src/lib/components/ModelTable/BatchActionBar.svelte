@@ -131,6 +131,7 @@
 				actionType: action.type,
 				count,
 				optionsEndpoint: action.optionsEndpoint,
+				excludeIds: action.excludeSelectedSubtree ? ids : [],
 				enableDoubleDash: action.enableDoubleDash ?? false,
 				multiSelect: action.multiSelect ?? false,
 				inputType: action.inputType,

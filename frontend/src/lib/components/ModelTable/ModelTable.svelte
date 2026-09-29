@@ -911,10 +911,19 @@
 		(currentBatchActions.length > 0 && deleteForm !== undefined) || extraActions.length > 0
 	);
 
-	let selectAllChecked = $derived.by(() => {
-		const pageIds = $rows.filter((r: any) => r.meta?.id).map((r: any) => r.meta.id);
-		return pageIds.length > 0 && pageIds.every((id: string) => selectedIds.has(id));
-	});
+	// The batch endpoint refuses every builtin object, so offering one for selection
+	// can only end in a per-row failure the caller could do nothing about.
+	function isRowSelectable(row: { meta?: { id?: string; builtin?: boolean } }): boolean {
+		return Boolean(row?.meta?.id) && !row.meta?.builtin;
+	}
+
+	const selectableRowIds = $derived(
+		$rows.filter(isRowSelectable).map((r: any) => r.meta.id as string)
+	);
+
+	let selectAllChecked = $derived(
+		selectableRowIds.length > 0 && selectableRowIds.every((id) => selectedIds.has(id))
+	);
 
 	function toggleRowSelection(id: string) {
 		const next = new Set(selectedIds);
@@ -927,12 +936,7 @@
 	}
 
 	function toggleSelectAll() {
-		const pageIds = $rows.filter((r: any) => r.meta?.id).map((r: any) => r.meta.id);
-		if (selectAllChecked) {
-			selectedIds = new Set();
-		} else {
-			selectedIds = new Set(pageIds);
-		}
+		selectedIds = selectAllChecked ? new Set() : new Set(selectableRowIds);
 	}
 
 	function clearSelection() {
@@ -1132,21 +1136,27 @@
 								)}"
 							>
 								{#if hasBatchActions}
+									{@const selectable = isRowSelectable(row)}
 									<td
-										class="group/check w-10 text-center cursor-pointer"
+										class="group/check w-10 text-center {selectable
+											? 'cursor-pointer'
+											: 'cursor-not-allowed'}"
 										onclick={(e) => {
 											e.stopPropagation();
-											if (meta?.id) toggleRowSelection(meta.id);
+											if (selectable) toggleRowSelection(meta.id);
 										}}
 									>
 										<span
-											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-100-900/10"
+											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors {selectable
+												? 'group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-100-900/10'
+												: ''}"
 										>
 											<input
 												type="checkbox"
 												class="checkbox pointer-events-none"
 												aria-label={m.selectRow()}
 												checked={selectedIds.has(meta?.id)}
+												disabled={!selectable}
 												tabindex={-1}
 											/>
 										</span>
