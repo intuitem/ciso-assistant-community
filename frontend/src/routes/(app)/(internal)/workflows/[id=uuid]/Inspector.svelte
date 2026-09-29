@@ -171,8 +171,12 @@
 		'manage_group_membership',
 		'set_variables',
 		'date_offset',
+		'compute',
 		'log'
 	];
+
+	// Functions the compute step adds on top of CEL's own, shown as a hint.
+	const COMPUTE_FUNCTIONS = 'sum avg min max round floor ceil abs size double int string has';
 
 	const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
@@ -198,6 +202,7 @@
 		log: { message: '' },
 		set_variables: { variables: {} },
 		date_offset: { base: '', days: 30, weeks: 0, output: '' },
+		compute: { expressions: {} },
 		create_object: { model: 'applied_control', fields: { name: '' }, upsert: false },
 		update_object: { model: 'applied_control', id: '', fields: {}, m2m: {} },
 		attach_evidence: {
@@ -770,26 +775,34 @@
 		onChange();
 	}
 
-	function renameSetVariableRow(oldKey: string, newKey: string) {
-		if (!newKey || newKey === oldKey || (actionConfig.variables ?? {})[newKey] !== undefined)
-			return;
-		actionConfig.variables = renameMappingKey(actionConfig.variables, oldKey, newKey);
+	// set_variables keeps its rows under `variables`, compute under
+	// `expressions`; both are "declared variable -> value" maps.
+	type ValueRowsField = 'variables' | 'expressions';
+
+	function renameValueRow(field: ValueRowsField, oldKey: string, newKey: string) {
+		if (!newKey || newKey === oldKey || (actionConfig[field] ?? {})[newKey] !== undefined) return;
+		actionConfig[field] = renameMappingKey(actionConfig[field], oldKey, newKey);
 		onChange();
 	}
 
-	function addSetVariableRow() {
-		const used = new Set(Object.keys(actionConfig.variables ?? {}));
+	function addValueRow(field: ValueRowsField) {
+		const used = new Set(Object.keys(actionConfig[field] ?? {}));
 		const candidate = variables.find((v) => !used.has(v.key));
 		if (!candidate) return;
-		actionConfig.variables = { ...actionConfig.variables, [candidate.key]: '' };
+		actionConfig[field] = { ...actionConfig[field], [candidate.key]: '' };
 		onChange();
 	}
 
-	function removeSetVariableRow(key: string) {
-		const { [key]: _, ...rest } = actionConfig.variables;
-		actionConfig.variables = rest;
+	function removeValueRow(field: ValueRowsField, key: string) {
+		const { [key]: _, ...rest } = actionConfig[field];
+		actionConfig[field] = rest;
 		onChange();
 	}
+
+	const renameSetVariableRow = (oldKey: string, newKey: string) =>
+		renameValueRow('variables', oldKey, newKey);
+	const addSetVariableRow = () => addValueRow('variables');
+	const removeSetVariableRow = (key: string) => removeValueRow('variables', key);
 
 	// HTTP headers are a plain dict in the config, but editing keys in place
 	// would recreate the inputs on every keystroke. Edit an entries array
@@ -2665,19 +2678,72 @@
 					<p class="text-[10px] text-surface-500 leading-relaxed">
 						<i class="fa-solid fa-calendar-day mr-1"></i>{m.dateOffsetHint()}
 					</p>
+				{:else if actionConfig.type === 'compute' && actionConfig.expressions}
+					<div>
+						<div class="flex items-center justify-between mb-1">
+							{@render fieldLabel(m.computeExpressions())}
+							<button
+								type="button"
+								class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold disabled:opacity-50"
+								onclick={() => addValueRow('expressions')}
+								disabled={!variables.length}
+							>
+								<i class="fa-solid fa-plus"></i>
+							</button>
+						</div>
+						{#each Object.keys(actionConfig.expressions) as key (key)}
+							<div class="flex items-center gap-1 mb-1">
+								<select
+									class="select text-xs font-mono w-24 shrink-0 px-1 py-0.5"
+									value={key}
+									onchange={(e) => renameValueRow('expressions', key, e.currentTarget.value)}
+									data-testid="compute-key"
+								>
+									{#each mappingKeyOptions(actionConfig.expressions, key) as option (option)}
+										<option value={option}>{option}</option>
+									{/each}
+								</select>
+								<span class="text-xs text-surface-500 shrink-0">=</span>
+								<input
+									type="text"
+									class="input text-xs font-mono flex-1 min-w-0"
+									placeholder="likelihood * impact"
+									bind:value={actionConfig.expressions[key]}
+									oninput={onChange}
+									data-testid="compute-expression"
+								/>
+								<button
+									type="button"
+									aria-label="Remove"
+									class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0"
+									onclick={() => removeValueRow('expressions', key)}
+								>
+									<i class="fa-solid fa-xmark"></i>
+								</button>
+							</div>
+						{/each}
+					</div>
+					<p class="text-[10px] text-surface-500 leading-relaxed">
+						<i class="fa-solid fa-calculator mr-1"></i>{m.computeHint()}
+					</p>
+					<p class="text-[10px] text-surface-500 leading-relaxed font-mono break-words">
+						{COMPUTE_FUNCTIONS}
+					</p>
 				{/if}
-				<p class="text-[10px] text-surface-500 leading-relaxed">
-					<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>{m.templatingHint({
-						syntax: '{{variable}}'
-					})}
-				</p>
+				{#if actionConfig.type !== 'compute'}
+					<p class="text-[10px] text-surface-500 leading-relaxed">
+						<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>{m.templatingHint({
+							syntax: '{{variable}}'
+						})}
+					</p>
+				{/if}
 			{/if}
 
-			<!-- set_variables already writes variables: offering "save results to
-			     variables" on it invites putting the value in the wrong place. Rows an
-			     older draft or an import already carries stay visible so they can be
-			     removed (publish rejects them). -->
-			{#if ['action', 'subprocess', 'loop'].includes(nodeDomain.type) && (actionConfig?.type !== 'set_variables' || Object.keys(nodeDomain.output_mapping ?? {}).length > 0)}
+			<!-- set_variables and compute already write variables: offering "save
+			     results to variables" on them invites putting the value in the wrong
+			     place. Rows an older draft or an import already carries stay visible
+			     so they can be removed (publish rejects them). -->
+			{#if ['action', 'subprocess', 'loop'].includes(nodeDomain.type) && (!['set_variables', 'compute'].includes(actionConfig?.type) || Object.keys(nodeDomain.output_mapping ?? {}).length > 0)}
 				<div>
 					<div class="flex items-center justify-between mb-1">
 						{@render fieldLabel(m.outputMapping())}
@@ -2685,7 +2751,8 @@
 							type="button"
 							class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold disabled:opacity-50"
 							onclick={addOutputMapping}
-							disabled={!variables.length || actionConfig?.type === 'set_variables'}
+							disabled={!variables.length ||
+								['set_variables', 'compute'].includes(actionConfig?.type)}
 						>
 							<i class="fa-solid fa-plus mr-0.5"></i>{m.addMapping()}
 						</button>

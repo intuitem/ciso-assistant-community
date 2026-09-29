@@ -23,6 +23,7 @@ from .actions import (
 from .actions import validate_action_config as _validate_action_config
 from .actions import validate_read_config as _validate_read_config
 from .context import RESERVED_VARIABLE_KEYS
+from .expressions import referenced_paths
 from .triggers import validate_trigger_config
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
@@ -473,7 +474,29 @@ def _referenced_node_refs(node):
             node.loop_config or {},
         ]
     )
-    return set(NODE_REF_RE.findall(blob))
+    refs = set(NODE_REF_RE.findall(blob))
+    # compute expressions name outputs as bare `nodes.<ref>` paths, not
+    # {{...}} templates, so the regex above does not see them.
+    for path in _compute_paths(node):
+        segments = path.split(".")
+        if segments[0] == "nodes" and len(segments) > 1:
+            refs.add(segments[1])
+    return refs
+
+
+def _compute_paths(node):
+    """Every path a compute node's expressions read, or an empty set for any
+    other node."""
+    config = node.action_config or {}
+    if config.get("type") != "compute":
+        return set()
+    expressions = config.get("expressions") or {}
+    if not isinstance(expressions, dict):
+        return set()
+    paths = set()
+    for expression in expressions.values():
+        paths |= referenced_paths(expression)
+    return paths
 
 
 def _ai_sources(nodes):
@@ -496,37 +519,50 @@ def _ai_sources(nodes):
                 refs.add(node.ref)
             variables |= {str(key) for key in (node.output_mapping or {})}
         elif action_type == "set_variables":
-            setters.append(node)
+            setters.append((node, "variables", _template_paths))
+        elif action_type == "compute":
+            # Same hop, other syntax: a compute entry reads bare CEL paths
+            # instead of {{tokens}}, and a derived number is still a guess.
+            setters.append((node, "expressions", referenced_paths))
 
     changed = bool(setters)
     while changed:
         changed = False
-        for node in setters:
-            assigned = (node.action_config or {}).get("variables") or {}
+        for node, field, paths_of in setters:
+            assigned = (node.action_config or {}).get(field) or {}
             if not isinstance(assigned, dict):
                 continue
             for key, value in assigned.items():
                 if str(key) in variables:
                     continue
-                if _ai_sources_in(value, refs, variables):
+                if _ai_sources_among(paths_of(value), refs, variables):
                     variables.add(str(key))
                     changed = True
     return refs, variables
 
 
-def _ai_sources_in(value, ai_refs, ai_variables):
-    """AI-derived references a config value reads, as the author wrote them."""
+def _template_paths(value):
+    """The {{token}} paths a config value reads, as the author wrote them."""
     if not isinstance(value, str):
         # set_variables may assign a dict or list; the tokens are in there.
         value = json.dumps(value, default=str)
+    return set(TEMPLATE_TOKEN_RE.findall(value))
+
+
+def _ai_sources_in(value, ai_refs, ai_variables):
+    """AI-derived references a config value reads, as the author wrote them."""
+    return _ai_sources_among(_template_paths(value), ai_refs, ai_variables)
+
+
+def _ai_sources_among(paths, ai_refs, ai_variables):
     found = set()
-    for token in TEMPLATE_TOKEN_RE.findall(value):
-        segments = token.split(".")
+    for path in paths:
+        segments = path.split(".")
         if segments[0] == "nodes":
             if len(segments) > 1 and segments[1] in ai_refs:
-                found.add(token)
+                found.add(path)
         elif segments[0] in ai_variables:
-            found.add(token)
+            found.add(path)
     return found
 
 

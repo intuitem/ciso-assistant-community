@@ -43,6 +43,31 @@ Computes a date by adding days and weeks to a base date. Use it for due dates.
 
 Output: `result` (ISO date), `base`. No permission required.
 
+### Compute
+
+Set variables with operators. Each row names a variable and gives a [CEL](https://cel.dev) expression that computes it: a risk score from likelihood and impact, a ratio between two Read objects counts, a loop counter, an SLA picked by severity.
+
+| Setting | |
+|---|---|
+| Expressions | One row per variable: the variable key and its expression |
+
+Expressions read the same things `{{ }}` does, without the braces: a variable by its key, `payload.some.path`, `nodes.<ref>.<path>`, `item` and `index` inside a loop. Rows run in order and each can use the ones above it, so an intermediate value does not need its own step.
+
+```
+score        = likelihood * impact
+label        = score > 12 ? 'high' : 'low'
+coverage     = round(double(nodes.done.count) / double(nodes.total.count) * 100.0, 1)
+sla_days     = payload.severity == 'critical' ? 1 : 30
+worst        = max(nodes.fetch.results.map(r, r.score))
+total        = total + item
+```
+
+Numbers are strict, as in CEL: an int and a double do not mix (`3 * 2.5` fails, `double(3) * 2.5` works) and dividing two ints drops the remainder (`7 / 2` is `3`). The step fails with a message that names the row and the problem.
+
+On top of CEL's own `size`, `has`, `int`, `double`, `string` and the `map`, `filter`, `exists`, `all` macros, these functions are available: `sum`, `avg`, `min`, `max` over a list of numbers, `round(x)`, `round(x, digits)`, `floor`, `ceil`, `abs`.
+
+Output: the computed values, keyed by variable. Refuses the reserved keys `now`, `today` and `payload`. Syntax errors are caught when you publish; type errors, missing fields and division by zero fail the step at run time and are not retried. No permission required.
+
 ### Read objects
 
 Queries objects of one kind inside the workflow's scope.

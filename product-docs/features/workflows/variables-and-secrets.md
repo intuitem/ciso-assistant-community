@@ -35,6 +35,7 @@ You can also create a variable where you need it: the variable select of a condi
 | **Save results to variables** on a step | After that step runs |
 | A **Set variables** step | When it runs |
 | A **Date offset** step with **Store the result in** | When it runs |
+| A **Compute** step | When it runs |
 | **Run with variables** | At run start, for one manual run |
 
 ### What variables are for
