@@ -22,6 +22,8 @@ from ..resolvers import (
     resolve_risk_matrix_id,
     resolve_asset_id,
     resolve_entity_id,
+    _normalize_for_matching,
+    _find_terminology_match,
 )
 from ..utils.response_formatter import (
     success_response,
@@ -34,52 +36,6 @@ from ..utils.response_formatter import (
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
-
-
-def _normalize_for_matching(text: str) -> str:
-    """Normalize text for fuzzy matching: lowercase, strip, remove trailing 's' for plurals"""
-    normalized = text.lower().strip()
-    # Handle common plural forms
-    if normalized.endswith("s") and len(normalized) > 2:
-        normalized = normalized[:-1]
-    # Handle underscores vs spaces
-    normalized = normalized.replace("_", " ").replace("-", " ")
-    return normalized
-
-
-def _find_terminology_match(terminologies: list, user_input: str) -> dict | None:
-    """Find a terminology that matches the user input.
-
-    Matches against:
-    - Base name field (snake_case like "organized_crime")
-    - All translations in the translations dict
-
-    Uses case-insensitive, plural-insensitive matching.
-    """
-    normalized_input = _normalize_for_matching(user_input)
-
-    for term in terminologies:
-        # Match against the base name
-        if _normalize_for_matching(term.get("name", "")) == normalized_input:
-            return term
-
-        # Match against translations
-        translations = term.get("translations", {})
-        if isinstance(translations, dict):
-            for locale, locale_data in translations.items():
-                if isinstance(locale_data, dict):
-                    translated_name = locale_data.get("name", "")
-                    if (
-                        translated_name
-                        and _normalize_for_matching(translated_name) == normalized_input
-                    ):
-                        return term
-                elif isinstance(locale_data, str):
-                    # Some translations might be stored as direct strings
-                    if _normalize_for_matching(locale_data) == normalized_input:
-                        return term
-
-    return None
 
 
 def _resolve_or_create_risk_origin(risk_origin_input: str) -> tuple[str, bool]:
