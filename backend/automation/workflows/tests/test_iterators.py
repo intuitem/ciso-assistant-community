@@ -324,6 +324,8 @@ class TestLoopNode:
             "count": 0,
             "results": [],
             "errors": [],
+            # Ran to the end; nothing cut it short.
+            "stopped": None,
         }
 
     def test_non_list_collection_is_an_error(self):

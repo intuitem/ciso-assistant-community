@@ -1,5 +1,8 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { contentDispositionHeader } from '$lib/utils/contentDisposition';
+import {
+	contentDispositionHeader,
+	parseContentDispositionFilename
+} from '$lib/utils/contentDisposition';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -22,7 +25,7 @@ export const GET: RequestHandler = async ({ fetch, setHeaders, params }) => {
 			throw new Error('Missing Content-Disposition header');
 		}
 
-		const fileName = contentDisposition.split('filename=')[1]?.replace(/"/g, '').trim();
+		const fileName = parseContentDispositionFilename(contentDisposition);
 		if (!fileName) {
 			throw new Error('Invalid filename in Content-Disposition');
 		}

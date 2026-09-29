@@ -41,7 +41,7 @@ TRANSITIONS = {
     (State.IN_NEGOTIATION, State.DECLINED): {"side": OWNER, "requires_note": True},
     (State.COMMITTED, State.IN_NEGOTIATION): {"side": ANY, "requires_note": True},
     # Segregation of duties: an owner who can both make and close their own promise is a
-    # self-certification loop, which is exactly the complaint behind SUP-1604.
+    # self-certification loop.
     (State.COMMITTED, State.FULFILLED): {"side": COUNTERPARTY},
     (State.DECLINED, State.IN_NEGOTIATION): {"side": ANY},
 }

@@ -142,8 +142,10 @@ def compute_map_from_merge(target_audit, source_audit):
       IG-correct denominators and current/projected distributions.
     Returns (None, None, None, None) when no mapping path exists.
     """
-    from core.mappings.engine import engine
+    from core.mappings.engine import MappingEngine
     from core.views import get_mapping_max_depth
+
+    engine = MappingEngine()
 
     source_urn = source_audit.framework.urn
     dest_urn = target_audit.framework.urn

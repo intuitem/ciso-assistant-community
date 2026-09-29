@@ -31,7 +31,7 @@
 		{#if incoming.length}
 			<div>
 				<p class="mb-1 font-semibold text-surface-600-400">
-					<i class="fa-solid fa-arrow-down-left mr-1"></i>{m.referencedBy()} ({incoming.length})
+					<i class="fa-solid fa-reply mr-1"></i>{m.referencedBy()} ({incoming.length})
 				</p>
 				<ul class="list-disc space-y-1 pl-5">
 					{#each incoming as r (r.id)}

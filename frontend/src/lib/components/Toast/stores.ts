@@ -52,7 +52,7 @@ const TOAST_STORE_KEY = 'toastStore';
  * @example
  * ```svelte
  * <script>
- * 	import { getToastStore } from "@skeletonlabs/skeleton";
+ * 	import { getToastStore } from "$lib/components/Toast/stores";
  *
  * 	const toastStore = getToastStore();
  *

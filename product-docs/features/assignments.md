@@ -55,9 +55,21 @@ An assignment moves through the following states:
 * `changes_requested`: the reviewer asked for corrections, the respondent is expected to resubmit.
 * `closed`: reviewed and accepted.
 
-Once an assignment leaves `draft`, its scope (assigned actors and requirements) is locked, so the agreement between the auditor and the respondent stays consistent while work is ongoing. Edit and delete are therefore only available in `draft`.
+Once an assignment leaves `draft`, its scope (assigned actors and requirements) is locked, so the agreement between the auditor and the respondent stays consistent while work is ongoing. Edit and delete are therefore only available in `draft`. Dynamic frameworks are the one exception, described below.
 
 To change a locked assignment, a reviewer reopens it back to `draft` from any other state, which unlocks editing and reassignment. Respondents are notified by email of a reopening only when it comes from `in_progress` or `changes_requested`, the states where they were actively working; reopening a `submitted` or `closed` assignment stays silent.
+
+### Assignments on a dynamic framework
+
+Some frameworks are dynamic: a choice in a question selects an implementation group, which decides which requirements the audit actually covers. On those, answering a question can select a new implementation group and bring requirements into the audit that were not visible when the assignment was built. Those requirements are added automatically to the assignment holding the question that revealed them, so the respondent actually gets the follow-up questions their own answer triggered.
+
+This is the only case where an assignment's scope changes outside `draft`, and it stays narrow:
+
+* only requirements that were genuinely hidden before are added, never one the auditor saw and chose to leave out;
+* a `submitted` or `closed` assignment is never touched, in either direction, and keeps the scope it was reviewed on;
+* if the revealing question belongs to no assignment, nothing is added and the auditor dispatches the new requirements manually.
+
+The reverse applies too: changing an answer so an implementation group is deselected removes the requirements that left the scope from their assignment. A requirement that comes back later is routed again by the same rule, so it may land on a different assignment than the one it had.
 
 ### Reviewing item by item
 

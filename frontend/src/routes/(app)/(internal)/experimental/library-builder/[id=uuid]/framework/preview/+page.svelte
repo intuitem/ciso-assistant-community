@@ -172,17 +172,17 @@
 </script>
 
 <!-- Header bar -->
-<div class="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+<div class="sticky top-0 z-40 bg-surface-50-950 border-b border-surface-200-800 shadow-sm">
 	<div class="flex items-center gap-3 py-3 px-6">
 		<a
 			href={builderHref}
-			class="text-sm text-gray-400 hover:text-gray-600 transition-colors shrink-0 flex items-center gap-1.5"
+			class="text-sm text-surface-400-600 hover:text-surface-600-400 transition-colors shrink-0 flex items-center gap-1.5"
 		>
 			<i class="fa-solid fa-arrow-left"></i>
 			<span>Back to builder</span>
 		</a>
 
-		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
+		<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
 
 		<span
 			class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-purple-100 text-purple-700"
@@ -190,14 +190,14 @@
 			<i class="fa-solid fa-eye mr-1"></i>Preview
 		</span>
 
-		<span class="text-sm text-gray-600 truncate">{meta.name || draft.name}</span>
+		<span class="text-sm text-surface-600-400 truncate">{meta.name || draft.name}</span>
 
 		{#if availableLanguages.length > 0}
 			<div class="ml-auto flex items-center gap-1.5 shrink-0">
-				<i class="fa-solid fa-language text-gray-400 text-xs"></i>
+				<i class="fa-solid fa-language text-surface-400-600 text-xs"></i>
 				<select
 					value={previewLanguage ?? ''}
-					class="text-xs border border-gray-200 rounded px-1.5 py-1 focus:border-blue-500 outline-none bg-white cursor-pointer"
+					class="text-xs border border-surface-200-800 rounded px-1.5 py-1 focus:border-blue-500 outline-none bg-surface-50-950 cursor-pointer"
 					onchange={(e) => (previewLanguage = e.currentTarget.value || null)}
 				>
 					<option value="">Base language</option>
@@ -213,8 +213,10 @@
 <div class="max-w-3xl mx-auto px-4 py-6 space-y-4">
 	<!-- Implementation Group filter -->
 	{#if igDefs.length > 0}
-		<div class="flex flex-wrap items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-			<span class="text-xs font-medium text-gray-500 uppercase tracking-wide mr-1"
+		<div
+			class="flex flex-wrap items-center gap-2 p-3 bg-surface-100-900 rounded-lg border border-surface-200-800"
+		>
+			<span class="text-xs font-medium text-surface-500 uppercase tracking-wide mr-1"
 				>Filter by implementation group</span
 			>
 			{#each igDefs as ig}
@@ -225,7 +227,7 @@
 					class="px-3 py-1 rounded-full text-xs font-medium transition-colors border
 						{active
 						? 'bg-purple-600 text-white border-purple-600'
-						: 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}"
+						: 'bg-surface-50-950 text-surface-600-400 border-surface-300-700 hover:bg-surface-100-900'}"
 					onclick={() => toggleGroup(ig.ref_id)}
 					title={chip.title}
 				>
@@ -235,7 +237,7 @@
 			{#if selectedGroups.size > 0}
 				<button
 					type="button"
-					class="text-xs text-gray-400 hover:text-gray-600 ml-1"
+					class="text-xs text-surface-400-600 hover:text-surface-600-400 ml-1"
 					onclick={() => (selectedGroups = new Set())}
 				>
 					Clear
@@ -246,7 +248,7 @@
 
 	<!-- Card -->
 	{#if navItems.length === 0}
-		<div class="text-center text-gray-400 py-12">
+		<div class="text-center text-surface-400-600 py-12">
 			<i class="fa-solid fa-folder-open text-3xl mb-3"></i>
 			{#if selectedGroups.size > 0}
 				<p>No requirements match the selected implementation groups.</p>
@@ -268,14 +270,16 @@
 			<SplashCard
 				name={t(node.translations, 'name', node.name)}
 				description={t(node.translations, 'description', node.description)}
-				class="card bg-white shadow-md"
+				class="card bg-surface-50-950 shadow-md"
 			/>
 		{:else if currentItem.type === 'requirement'}
 			{@const node = currentItem.data.node}
 			{@const questions = currentItem.data.questions}
 			{@const questionsDict = toQuestionDict(questions)}
 			{@const hasQuestions = Object.keys(questionsDict).length > 0}
-			<div class="card bg-white shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 space-y-4">
+			<div
+				class="card bg-surface-50-950 shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 space-y-4"
+			>
 				<h3 class="text-xl font-semibold text-orange-600">
 					{node.ref_id ? `${node.ref_id} - ` : ''}{t(node.translations, 'name', node.name) ||
 						'Untitled'}
@@ -292,7 +296,7 @@
 				{/if}
 				{#if igDefs.length > 0 && (node.implementation_groups ?? []).length > 0}
 					<div class="flex flex-wrap items-center gap-1.5">
-						<span class="text-xs text-gray-500 mr-1">Implementation groups:</span>
+						<span class="text-xs text-surface-500 mr-1">Implementation groups:</span>
 						{#each node.implementation_groups ?? [] as refId}
 							{@const chip = igChip(refId)}
 							<span
@@ -325,15 +329,15 @@
 				type="button"
 				class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
 					{currentIndex > 0
-					? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-					: 'bg-gray-50 text-gray-300 cursor-not-allowed'}"
+					? 'bg-surface-100-900 text-surface-700-300 hover:bg-surface-200-800'
+					: 'bg-surface-100-900 text-surface-300-700 cursor-not-allowed'}"
 				disabled={currentIndex === 0}
 				onclick={handlePrev}
 			>
 				<i class="fa-solid fa-chevron-left mr-1.5"></i>Previous
 			</button>
 
-			<span class="text-sm text-gray-500">
+			<span class="text-sm text-surface-500">
 				{currentIndex + 1} / {navItems.length}
 			</span>
 
@@ -341,8 +345,8 @@
 				type="button"
 				class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
 					{currentIndex < navItems.length - 1
-					? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-					: 'bg-gray-50 text-gray-300 cursor-not-allowed'}"
+					? 'bg-surface-100-900 text-surface-700-300 hover:bg-surface-200-800'
+					: 'bg-surface-100-900 text-surface-300-700 cursor-not-allowed'}"
 				disabled={currentIndex === navItems.length - 1}
 				onclick={handleNext}
 			>
