@@ -524,25 +524,32 @@
 		return v == null ? '--' : Math.round(Number(v) * 10) / 10;
 	}
 
-	// Audit progress analytics (assessable requirements only).
-	const assessableTotal = $derived(
-		tocSections.filter((s) => s.result !== '__section__' && s.result !== '__splash__').length
+	const assessableTOCSections = $derived(
+		tocSections.filter(
+			(section) => section.result !== '__section__' && section.result !== '__splash__'
+		)
 	);
+
+	// Audit progress analytics (assessable requirements only).
+	const assessableTotal = $derived(assessableTOCSections.length);
 	const filteredAssessableTotal = $derived(
-		tocSections.filter((s) => {
-			if (s.result === '__section__' || s.result === '__splash__') {
-				return false;
-			}
-			if (contextTreeView.excludeNotApplicableRequirements && s.result === 'not_applicable') {
+		assessableTOCSections.filter((section) => {
+			if (contextTreeView.excludeNotApplicableRequirements && section.result === 'not_applicable') {
 				return false;
 			}
 			return true;
 		}).length
 	);
-	const assessedCount = $derived(
-		tocSections.filter(
-			(s) => s.result !== '__section__' && s.result !== '__splash__' && s.result !== 'not_assessed'
-		).length
+	const filteredAssessedCount = $derived(
+		assessableTOCSections.filter((section) => {
+			if (section.result === 'not_assessed') {
+				return false;
+			}
+			if (contextTreeView.excludeNotApplicableRequirements && section.result === 'not_applicable') {
+				return false;
+			}
+			return true;
+		}).length
 	);
 
 	// Scroll to a requirement, expanding any collapsed parent section first.
@@ -876,15 +883,15 @@
 								{m.tableOfContents()}
 							</button>
 						{/if}
-						{#if showResult && assessableTotal > 0}
+						{#if showResult && filteredAssessableTotal > 0}
 							<div class="flex flex-1 items-center gap-3 min-w-[200px]">
 								<span class="text-xs font-medium text-surface-500 shrink-0">
-									{m.progress()}: {assessedCount}/{assessableTotal}
+									{m.progress()}: {filteredAssessedCount}/{filteredAssessableTotal}
 								</span>
 								<div
 									class="flex flex-1 h-5 overflow-hidden rounded-sm border border-surface-200-800 bg-surface-100-900"
 									role="img"
-									aria-label="{m.progress()}: {assessedCount}/{assessableTotal}"
+									aria-label="{m.progress()}: {filteredAssessedCount}/{filteredAssessableTotal}"
 								>
 									{#each filteredResultCounts as opt (opt.value)}
 										{#if opt.count > 0}

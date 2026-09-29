@@ -182,7 +182,7 @@
 	const ctx = getContextRecursiveTreeView();
 
 	// New percentages re-computed(re-calculated) after excluding the `"not_applicable"` requirements.
-	// a 20%("compliant") 10%(non-co"mpliant) 10%("not_applicable") would become 30%("compliant") 15%("not_applicable").
+	// a 25%("partially_compliant"), 50%("compliant") 25%("not_applicable") would become 33%("partially_compliant") 67%("compliant").
 	const applicableOrderedResultPercentages = orderedResultPercentages
 		.map(({ result, percentage }) => {
 			const newPercentageValue =
