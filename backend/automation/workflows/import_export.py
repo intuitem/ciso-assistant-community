@@ -438,6 +438,8 @@ KNOWN_KEYS = {
         "description",
         "graph",
         "secrets",
+        # Written by _export_workflow and read back on import.
+        "requires",
         "source_urn",
         "source_version",
         "version",

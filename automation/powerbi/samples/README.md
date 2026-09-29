@@ -69,7 +69,10 @@ ships exactly these six):
 Known v1 gaps, accepted deliberately (visuals use the facts' inline
 `folder_name` columns instead): the other facts are not wired to `Folders`,
 so a single Folders slicer does not drive every page; the
-`Risk Scenario - Vulnerability` bridge is loaded but unwired. Wire
+`Risk Scenario - Vulnerability` bridge is loaded but unwired. The tables added
+in connector 1.1.0 (task occurrences, third-party assessments, contracts, risk
+acceptances, and the Actors dimension with its ownership bridges) are not in
+the template either — a report per owner is the obvious page to add next. Wire
 `folder_id → Folders[id]` on the remaining facts and both bridge edges when
 promoting the template. Set **Both** cross-filter only on a bridge→fact edge
 if a dimension slicer must filter facts through it.

@@ -22,9 +22,13 @@ An action does one thing: reads objects, creates one, sends an email, calls an e
 | Create object | Creates an object of a chosen kind, optionally updating an existing one with the same name |
 | Update object | Changes fields and links on one existing object |
 | Attach a file to an evidence | Adds a file, typed or downloaded, to an evidence |
+| Record a measurement | Files a number against a metric instance |
+| Post scan results | Files a batch of results against a technical posture |
 | Read objects | Queries objects with filters, as a page or a single match |
 | HTTP request | Calls an external URL |
 | Send email | Sends plain-text email |
+| Ask AI for values | Asks the AI provider for named values, in the shape you define |
+| Ask AI for text | Asks the AI provider for a summary or a note |
 | Provision domain | Creates a domain |
 | Provision user | Creates or updates a user |
 | Manage group membership | Adds a user to a group or removes them |

@@ -193,7 +193,13 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         super().save(*args, **kwargs)
 
     def get_latest_sample(self):
-        return self.samples.first()  # ordering is important
+        # last_refresh, current_value and raw_value each want the same row, so the
+        # lookup is memoised per instance. When the caller prefetched `samples`,
+        # first() reads the prefetch cache and costs nothing; ordering is the
+        # model's own ("-timestamp"), so first() really is the latest.
+        if "_latest_sample" not in self.__dict__:
+            self.__dict__["_latest_sample"] = self.samples.first()
+        return self.__dict__["_latest_sample"]
 
     def last_refresh(self):
         latest_sample = self.get_latest_sample()
@@ -984,7 +990,10 @@ class Dashboard(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
 
     @property
     def widget_count(self):
-        return self.widgets.count()
+        # The list endpoint annotates this to avoid a COUNT per row; a lone
+        # object (detail view, admin) still counts on demand.
+        annotated = self.__dict__.get("_widget_count")
+        return annotated if annotated is not None else self.widgets.count()
 
 
 class DashboardWidget(AbstractBaseModel, FolderMixin):
@@ -1000,6 +1009,7 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
         AREA = "area", _("Area Chart")
         GAUGE = "gauge", _("Gauge")
         SPARKLINE = "sparkline", _("Sparkline")
+        SMALL_MULTIPLES = "small_multiples", _("Small Multiples")
         TABLE = "table", _("Table")
         TEXT = "text", _("Text")
 

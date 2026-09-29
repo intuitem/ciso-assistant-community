@@ -1,4 +1,7 @@
 import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
+import { formatSelectFieldData } from '$lib/utils/select-field';
+import { discardBody } from '$lib/utils/responses';
+export { formatSelectFieldData };
 import {
 	getModelInfo,
 	MODEL_FEATURE_FLAGS,
@@ -7,7 +10,7 @@ import {
 	type SelectField,
 	type SelectFieldData
 } from '$lib/utils/crud';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { type TableSource } from '$lib/components/ModelTable/types';
 
 import { modelSchema, type FormDataShape } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
@@ -33,32 +36,6 @@ interface LoadValidationFlowFormDataParams {
  * The return value is meant to be assigned to `model.selectOptions[field]` inside load functions.
  * The data will then be usable by components like `<AutoCompleteSelect {...} />` / `<Select {...} />`.
  */
-export function formatSelectFieldData(
-	responseData: Record<string, string>,
-	selectField: SelectField
-): SelectFieldData[] {
-	const isNumber = selectField.valueType === 'number';
-	const isOptionList = Array.isArray(responseData);
-
-	let fieldOptions = [];
-
-	if (isOptionList) {
-		fieldOptions = responseData.map((option) => ({
-			label: option.label,
-			value: isNumber ? parseInt(option.value) : option.value
-		}));
-	} else {
-		fieldOptions = Object.entries(responseData).map(([key, value]) => ({
-			label: value,
-			value: isNumber ? parseInt(key) : key
-		}));
-	}
-
-	if (isNumber) {
-		fieldOptions.sort((a, b) => a.value - b.value);
-	}
-	return fieldOptions;
-}
 
 /**
  * Load validation flow form data with preset values and select options.
@@ -96,6 +73,7 @@ export const loadValidationFlowFormData = async ({
 						selectField
 					);
 				} else {
+					await discardBody(response);
 					console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 				}
 			})
@@ -111,6 +89,7 @@ export const loadDetail = async ({ event, model, id }) => {
 
 	const res = await event.fetch(endpoint);
 	if (!res.ok) {
+		await discardBody(res);
 		if (res.status === 404) {
 			// Check if focus mode is active
 			const focusFolderId = event.cookies.get('focus_folder_id');
@@ -256,30 +235,8 @@ export const loadDetail = async ({ event, model, id }) => {
 
 					const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 
+					// Filled when a create form opens: see ensureSelectOptions.
 					const selectOptions: Record<string, any> = {};
-
-					if (info.selectFields) {
-						await Promise.all(
-							info.selectFields.map(async (selectField) => {
-								let url = `${BASE_API_URL}/${info.endpointUrl || info.urlModel}/${selectField.field}/`;
-								if (selectField.formNestedField && selectField.detail === true) {
-									url = `${BASE_API_URL}/${selectField.endpointUrl}/${initialData[selectField.formNestedField]}/${selectField.field}/`;
-								}
-								const response = await event.fetch(url);
-								if (response.ok) {
-									const responseData = await response.json();
-									selectOptions[selectField.field] = formatSelectFieldData(
-										responseData,
-										selectField
-									);
-								} else {
-									console.error(
-										`Failed to fetch data for ${selectField.field}: ${response.statusText}`
-									);
-								}
-							})
-						);
-					}
 					relatedModels[e.urlModel] = {
 						urlModel,
 						info,
@@ -317,6 +274,8 @@ export const loadDetail = async ({ event, model, id }) => {
 							if (typeof countData.count === 'number') {
 								relatedModels[e.urlModel].count = countData.count;
 							}
+						} else {
+							await discardBody(countRes);
 						}
 					} catch {
 						// Graceful degradation — leave count as undefined
@@ -341,6 +300,8 @@ export const loadDetail = async ({ event, model, id }) => {
 			const parentObject = await objectResponse.json();
 			const parentSchema = modelSchema(model.urlModel);
 			updateForm = await superValidate(parentObject, zod(parentSchema), { errors: false });
+		} else {
+			await discardBody(objectResponse);
 		}
 	}
 

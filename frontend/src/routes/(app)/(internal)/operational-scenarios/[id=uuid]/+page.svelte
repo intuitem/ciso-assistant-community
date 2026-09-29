@@ -244,6 +244,35 @@
 					{/if}
 				</ul>
 			</div>
+			{#if page.data.featureflags?.ttps}
+				<div class="w-full p-4 bg-surface-50-950 border rounded-md shadow-xs">
+					<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
+						<i class="fa-solid fa-crosshairs text-orange-500"></i>
+						<span>{m.techniques()}</span>
+					</h3>
+					{#if operationalScenario.techniques && countMasked(operationalScenario.techniques) > 0}
+						<div class="alert preset-tonal-warning mb-2">
+							<i class="fa-solid fa-triangle-exclamation"></i>
+							<span
+								>{m.objectsNotVisible({ count: countMasked(operationalScenario.techniques) })}</span
+							>
+						</div>
+					{/if}
+					<ul class="list-disc list-inside text-surface-600-400">
+						{#if operationalScenario.techniques?.length}
+							{#each operationalScenario.techniques as technique}
+								{#if technique.id && technique.str}
+									<li>
+										<a class="anchor" href="/techniques/{technique.id}">{technique.str}</a>
+									</li>
+								{/if}
+							{/each}
+						{:else}
+							<li>{m.noTechnique()}</li>
+						{/if}
+					</ul>
+				</div>
+			{/if}
 			{#if Object.keys(data.relatedModels).length > 0}
 				<div class="card shadow-lg mt-8 bg-surface-50-950 w-full">
 					<Tabs

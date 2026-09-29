@@ -1,6 +1,7 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterAll, afterEach } from 'vitest';
 
-import { safeTranslate, setUseRiskCategoryLabel } from './i18n';
+import { baseLocale, overwriteGetLocale } from '$paraglide/runtime';
+import { safeTranslate, setUseRiskCategoryLabel, translateChoiceLabel } from './i18n';
 
 describe('use_risk_category_label wording swap', () => {
 	afterEach(() => {
@@ -28,5 +29,43 @@ describe('use_risk_category_label wording swap', () => {
 		setUseRiskCategoryLabel(true);
 		setUseRiskCategoryLabel(false);
 		expect(safeTranslate('qualifications')).toBe('Qualifications');
+	});
+});
+
+describe('translateChoiceLabel', () => {
+	afterAll(() => {
+		overwriteGetLocale(() => baseLocale);
+	});
+
+	it('prefers the key derived from the value over the one derived from the label', () => {
+		// Both resolve; the value is the key tables and detail views use.
+		expect(translateChoiceLabel('Other', 'privacy_other')).toBe('Other (Specify in Description)');
+	});
+
+	it('falls back to the label when the value has no message key', () => {
+		expect(translateChoiceLabel('France', 'FR')).toBe('France');
+	});
+
+	it('falls back to the label for a non-string value', () => {
+		expect(translateChoiceLabel('Critical', 1)).toBe('Critical');
+	});
+
+	it('returns the label untouched when neither has a message key', () => {
+		expect(translateChoiceLabel('Acme Corp', 'b3f1c0de-0000-4000-8000-000000000000')).toBe(
+			'Acme Corp'
+		);
+	});
+
+	it('translates privacy choices, whose keys follow the value and not the label', () => {
+		overwriteGetLocale(() => 'nl');
+		// The English label from the choice endpoint has no message key, so a
+		// label-only lookup left these dropdowns untranslated.
+		expect(translateChoiceLabel('Unauthorized Disclosure', 'privacy_unauthorized_disclosure')).toBe(
+			'Ongeoorloofde openbaarmaking'
+		);
+		expect(translateChoiceLabel('Destruction', 'privacy_destruction')).toBe('Vernietiging');
+		expect(translateChoiceLabel('Authority Notified', 'privacy_authority_notified')).toBe(
+			'Autoriteit geïnformeerd'
+		);
 	});
 });

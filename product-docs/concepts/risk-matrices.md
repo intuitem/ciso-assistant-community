@@ -38,6 +38,8 @@ A matrix has four pieces:
 
 The grid is the substance of the matrix; the visual rendering (orientation, colours, layout) is handled by the UI based on the loaded matrix definition.
 
+<figure><img src="../.gitbook/assets/risk-matrix-detail.png" alt=""><figcaption><p>The 5x5 ISO-27005 grid: probability levels down the side, impact levels along the bottom, each cell resolving to a risk level</p></figcaption></figure>
+
 ## Why a matrix is fixed per risk assessment
 
 When a risk assessment is created, its risk matrix is captured and **stays fixed** for the lifetime of that assessment. Re-evaluating the same scenarios against a different matrix would silently change the risk levels under your feet, which is exactly what auditors don't want.

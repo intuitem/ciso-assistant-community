@@ -81,7 +81,7 @@
               <a
                 class="text-indigo-700 hover:text-indigo-500"
                 target="_blank"
-                href="evidences/{{ evidence.last_revision.attachment.name|basename }}"
+                href="evidences/{{ archive_names|get_item:evidence.id|urlencode }}"
                 >{{ evidence.name }}</a
               >
             </li>
@@ -115,7 +115,7 @@
                   <a
                     class="text-indigo-700 hover:text-indigo-500"
                     target="_blank"
-                    href="evidences/{{ evidence.last_revision.attachment.name|basename }}"
+                    href="evidences/{{ archive_names|get_item:evidence.id|urlencode }}"
                     >{{ control.measure.name }}/{{ evidence.name }}</a
                   >
                 </li>

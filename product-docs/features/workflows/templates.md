@@ -26,6 +26,7 @@ Every template follows the same rules:
 | Non-compliant requirement, open and link a remediation control | Requirement assessment updated | Creates an applied control, links it to the requirement, notifies the owner. Never touches the result. |
 | Validation decided, route the outcome | Validation flow updated | Branches on the decision and sends a different email per outcome. The reference example for branches. |
 | Validation requested, notify the approver | Validation flow created | Emails the approver with the deadline. |
+| Audit, AI evidence challenge | Manual, or an audit moving to **in review** | Walks every requirement the audit calls compliant, partially compliant or not applicable — the three answers that assert something. The platform's own quality rules judge each one first, and only the ones they pass reach the configured AI provider, which is asked the single thing a rule cannot decide: whether what is written and attached answers what the requirement asks for. The findings and the answers are assembled into a Record document, and the audit's reviewers get a dated task to read it. Results and scores are never touched — no workflow can write them. `WORKFLOW_AI_MAX_CALLS_PER_RUN` (50 by default) is what bounds a run. Needs the `chat_mode` flag and a provider. Set `audit_id`, or enable the trigger. |
 
 ## Risk
 
@@ -37,6 +38,9 @@ Every template follows the same rules:
 | Security exceptions past their date, mark expired | Daily 06:00 | Marks lapsed exceptions as expired and mails the list. Expiry is a fact about a date. |
 | Overdue findings, daily digest | Daily 07:00 | Findings past their due date and not closed. |
 | Untreated high risks, weekly sweep | Monday 09:00 | Risk scenarios at or above a level whose treatment is still open. The level index depends on your matrix. |
+| Derogation triage, route and open the exception | Derogation request submitted | Opens the exception in draft, then branches on the answers: high exposure is dated tightly and escalated, routine is left alone. |
+| Derogation, attach a compensating control | Manual, from a request with no compensating control | Creates the control, notes it on the request and tells the requester. It does not accept the request. |
+| Derogation, approved request becomes an exception | Derogation request closed | Creates the security exception from the answers, links the control the requester named and notes the exception back on the request. |
 
 ## Operations
 
@@ -47,11 +51,13 @@ Every template follows the same rules:
 | Domain onboarding pack | Manual | Creates a domain with default groups, provisions a user, adds them to the analyst group. Fill the variables and run it per new team. |
 | Third party added, start its assessment | Entity created | Creates an entity assessment for the new third party. |
 | Third party added, tiered due diligence | Entity created | Branches on dependency. Critical gets the full questionnaire and two weeks, the rest the core implementation group and six weeks. Uses Date offset. |
+| Evidence collection, pull an evidence file from a tool | Schedule | Every Monday, downloads the current file from a tool and files it as a new revision of one evidence. If a task expects that evidence, the file answers for the occurrence currently due, so the task shows its evidence as provided. Warns by email when the tool answers badly or not at all. Optionally records a number the same tool publishes. Set `evidence_uuid`, `tool_url` and `warn_to`, add the `tool_token` secret. |
 | External report, download it and file it as evidence | Webhook | Downloads a file from a base URL you control plus a caller-supplied path, attaches it to a new evidence. |
 | Personal access token created, notify security | Token created | Notice whenever a long-lived credential is minted. |
 | Read-only explorer | Manual | Reads a few applied controls and logs them. Touches nothing. The safest first Execute. |
 | Scanner intake, record vulnerabilities from a webhook | Webhook | Each posted entry becomes a vulnerability, matched on name so re-posting updates instead of duplicating. |
 | Third-party portfolio review, every active vendor | Manual | Walks the whole portfolio page by page. Same four steps for twelve vendors or twelve hundred. The reference example for paged loops. |
+| Findings binder, AI triage sweep | Manual | Walks every finding in a binder, rates it with the configured AI provider and drafts a triage note. Needs the `chat_mode` flag and a provider. Set `binder_id`. |
 
 ## Privacy
 

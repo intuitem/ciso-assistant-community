@@ -224,6 +224,14 @@
 						cacheLock={cacheLocks['oauth_pkce_enabled']}
 						helpText={m.oidcPKCEEnabledHelpText()}
 					/>
+					<TextField
+						{form}
+						field="additional_scopes"
+						label={m.oidcAdditionalScopes()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['additional_scopes']}
+						helpText={m.oidcAdditionalScopesHelpText()}
+					/>
 					{#if page.data?.featureFlagSettings?.jit_provisioning}
 						<TextField
 							{form}
