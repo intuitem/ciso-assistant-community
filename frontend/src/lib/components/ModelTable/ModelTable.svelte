@@ -694,6 +694,16 @@
 			}, 10);
 	});
 
+	// Refetch when the page reloads its data (invalidateAll() swaps page.url for a
+	// new URL object). Standalone tables get this from syncing filters with the
+	// URL above; embedded ones no longer touch it, so track it here.
+	let pageUrlSeen = false;
+	$effect(() => {
+		page.url;
+		if (!pageUrlSeen) return void (pageUrlSeen = true);
+		if (hasRemoteSource && !syncFiltersToUrl) untrack(() => handler.invalidate());
+	});
+
 	$effect(() => {
 		if (hasRemoteSource && page.form?.form?.posted && page.form?.form?.valid) {
 			console.debug('Form posted, invalidating table');
