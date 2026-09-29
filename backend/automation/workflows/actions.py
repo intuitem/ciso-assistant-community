@@ -4180,7 +4180,10 @@ def validate_compute_config(node):
         key = str(key)
         if key in RESERVED_VARIABLE_KEYS:
             errors.append(
-                ("action_compute_reserved", f"'{key}' is set by the engine on every run")
+                (
+                    "action_compute_reserved",
+                    f"'{key}' is set by the engine on every run",
+                )
             )
         elif not VARIABLE_KEY_RE.match(key):
             errors.append(
