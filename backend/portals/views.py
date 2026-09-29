@@ -149,6 +149,9 @@ class PortalViewSet(CustomPortalsViewSet):
     serializers_module = "portals.serializers"
     filterset_fields = ["folder", "status", "is_public", "is_default", "enabled"]
     search_fields = ["name", "description"]
+    # A POST on a detail route checks add_portal by default. Export is not a create:
+    # it stamps the portal's export version, so it takes the right to change it.
+    permission_overrides = {"export": "change_portal"}
 
     def _entitled_queryset(self, request):
         """Portals the current user may see: enabled, and either targeted at one of
@@ -495,10 +498,12 @@ class PortalViewSet(CustomPortalsViewSet):
             status=status.HTTP_201_CREATED,
         )
 
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["post"])
     def export(self, request, pk=None):
         """Emit the design as a loadable library YAML. Exporting an edited portal
-        again ships the next version, which loads as an update of the last one."""
+        again ships the next version, which loads as an update of the last one.
+        A POST because that stamp is a write: a GET would let any reader, prefetcher
+        or retry move the version on."""
         portal = self.get_object()
         document, _unwired = build_preset_library(portal)
         payload = yaml.safe_dump(

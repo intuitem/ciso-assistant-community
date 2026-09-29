@@ -34,9 +34,37 @@ UNPORTABLE_TARGET_FIELDS = {
 }
 
 
-def _iter_items(content):
-    for section in (content or {}).get("sections", []) or []:
-        for item in section.get("items", []) or []:
+def content_shape_error(content):
+    """What is wrong with the shape of a design, or None. The one check behind every
+    way a design gets in (portal and preset API, library load), so the walks below
+    only ever see {"sections": [{"items": [{...}]}]}."""
+    if not isinstance(content, dict):
+        return "content must be an object"
+    sections = content.get("sections", [])
+    if not isinstance(sections, list):
+        return "content.sections must be a list"
+    for index, section in enumerate(sections):
+        if not isinstance(section, dict):
+            return f"content.sections[{index}] must be an object"
+        items = section.get("items", [])
+        if not isinstance(items, list) or any(
+            not isinstance(item, dict) for item in items
+        ):
+            return f"content.sections[{index}].items must be a list of objects"
+    return None
+
+
+def iter_items(content):
+    # Tolerant anyway: rows written before content_shape_error guarded the preset
+    # API may hold anything.
+    if not isinstance(content, dict):
+        return
+    sections = content.get("sections")
+    for section in sections if isinstance(sections, list) else []:
+        if not isinstance(section, dict):
+            continue
+        items = section.get("items")
+        for item in items if isinstance(items, list) else []:
             if isinstance(item, dict):
                 yield item
 
@@ -88,7 +116,7 @@ def dereference(content, keep_local_ids=False):
     a foreign id would only make the tile look wired."""
     out = copy.deepcopy(content or {})
     unwired = []
-    for item in _iter_items(out):
+    for item in iter_items(out):
         title = item.get("title") or item.get("kind") or "tile"
         target = item.get("target")
         if not isinstance(target, dict):
@@ -130,7 +158,7 @@ def resolve(content):
     does not resolve stays, so the tile can still be wired once its library is."""
     out = copy.deepcopy(content or {})
     unwired = []
-    for item in _iter_items(out):
+    for item in iter_items(out):
         target = item.get("target")
         if not isinstance(target, dict):
             continue

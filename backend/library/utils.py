@@ -600,6 +600,7 @@ class PortalPresetImporter:
 
     def init(self) -> Union[str, None]:
         from portals.models import PortalPreset
+        from portals.references import content_shape_error
 
         if missing_fields := self.REQUIRED_FIELDS - set(self.preset_data.keys()):
             return "Missing the following fields : {}".format(
@@ -627,19 +628,10 @@ class PortalPresetImporter:
                 f"{owner[0]} ({owner[1]})"
             )
         content = self.preset_data.get("content")
-        if not isinstance(content, dict):
-            return "content must be an object"
-        sections = content.get("sections")
-        if not isinstance(sections, list) or not sections:
+        if error := content_shape_error(content):
+            return error
+        if not content.get("sections"):
             return "content.sections must be a non-empty list"
-        for index, section in enumerate(sections):
-            if not isinstance(section, dict):
-                return f"content.sections[{index}] must be an object"
-            items = section.get("items", [])
-            if not isinstance(items, list) or any(
-                not isinstance(item, dict) for item in items
-            ):
-                return f"content.sections[{index}].items must be a list of objects"
         return None
 
     def import_portal_preset(self, library_object: LoadedLibrary):

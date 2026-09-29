@@ -108,8 +108,20 @@ export const actions: Actions = {
 		return { success: true };
 	},
 	setStatus: async ({ params, request, fetch }) => {
-		const status = (await request.formData()).get('status');
-		const res = await patchPortal(fetch, params.id!, { status });
+		const data = await request.formData();
+		const status = data.get('status');
+		const body: Record<string, unknown> = { status };
+		// Publishing sends the editor's design along, so it is saved and judged in the
+		// same request instead of publishing whatever was saved last.
+		const payload = data.get('payload');
+		if (typeof payload === 'string') {
+			try {
+				body.content = JSON.parse(payload);
+			} catch {
+				return fail(400, { error: 'Invalid payload' });
+			}
+		}
+		const res = await patchPortal(fetch, params.id!, body);
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},

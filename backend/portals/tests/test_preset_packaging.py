@@ -1062,28 +1062,38 @@ class TestLibraryUpdateRefresh:
 class TestTemplateEndpoints:
     """Save as template, then Use: the tile must come back wired."""
 
+    @staticmethod
+    def _client_in(group_name, email):
+        from iam.models import User, UserGroup
+        from knox.models import AuthToken
+        from rest_framework.test import APIClient
+
+        user = User.objects.create_user(email=email)
+        group = UserGroup.objects.get(name=group_name)
+        user.folder = group.folder
+        user.save()
+        group.user_set.add(user)
+        client = APIClient()
+        token = AuthToken.objects.create(user=user)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token[1]}")
+        return client
+
     @pytest.fixture
     def client(self, catalog):
         from core.apps import startup
         from global_settings.models import GlobalSettings
-        from iam.models import User, UserGroup
-        from knox.models import AuthToken
-        from rest_framework.test import APIClient
 
         startup(sender=None, **{})
         GlobalSettings.objects.update_or_create(
             name=GlobalSettings.Names.FEATURE_FLAGS,
             defaults={"value": {"custom_portals": True, "quick_forms": True}},
         )
-        user = User.objects.create_user(email="portal-admin@test.local")
-        admin_group = UserGroup.objects.get(name="BI-UG-ADM")
-        user.folder = admin_group.folder
-        user.save()
-        admin_group.user_set.add(user)
-        client = APIClient()
-        token = AuthToken.objects.create(user=user)
-        client.credentials(HTTP_AUTHORIZATION=f"Token {token[1]}")
-        return client
+        return self._client_in("BI-UG-ADM", "portal-admin@test.local")
+
+    @pytest.fixture
+    def reader_client(self, client):
+        # Global auditor: view_portal on the root folder, no change_portal.
+        return self._client_in("BI-UG-GAD", "portal-reader@test.local")
 
     def test_save_then_use_keeps_every_tile_wired(self, catalog, client):
         local_only = Framework.objects.create(
@@ -1196,3 +1206,81 @@ class TestTemplateEndpoints:
             format="json",
         )
         assert launched.status_code == 200, launched.json()
+
+    def test_a_malformed_template_design_is_a_400_not_a_crash(self, catalog, client):
+        created = client.post(
+            "/api/portal-presets/",
+            {
+                "name": "Broken",
+                "folder": str(catalog["folder"].id),
+                "content": {"sections": ["not-a-section"]},
+            },
+            format="json",
+        )
+        assert created.status_code == 400
+        assert "content" in created.json()
+
+        # A row written before the preset API checked shapes must not 500 on Use.
+        legacy = PortalPreset.objects.create(
+            name="Legacy",
+            folder=catalog["folder"],
+            content={"sections": ["not-a-section"]},
+        )
+        used = client.post(
+            "/api/portals/from-preset/", {"preset": str(legacy.id)}, format="json"
+        )
+        assert used.status_code == 400
+
+    def test_publishing_judges_the_design_sent_with_it(self, catalog, client):
+        portal = _portal(
+            catalog, [{"id": "t1", "kind": "assessment", "title": "Run", "target": {}}]
+        )
+        wired = {
+            "sections": [
+                {
+                    "items": [
+                        {
+                            "id": "t1",
+                            "kind": "assessment",
+                            "title": "Run",
+                            "target": {"framework": str(catalog["fw"].id)},
+                        }
+                    ]
+                }
+            ]
+        }
+
+        rejected = client.patch(
+            f"/api/portals/{portal.id}/", {"status": "published"}, format="json"
+        )
+        assert rejected.status_code == 400
+        assert "status" in rejected.json()
+
+        published = client.patch(
+            f"/api/portals/{portal.id}/",
+            {"status": "published", "content": wired},
+            format="json",
+        )
+        assert published.status_code == 200, published.json()
+        portal.refresh_from_db()
+        assert portal.status == Portal.Status.PUBLISHED
+        assert portal.content["sections"][0]["items"][0]["target"]["framework"]
+
+    def test_export_is_a_post_that_needs_change_rights(
+        self, catalog, client, reader_client
+    ):
+        portal = _portal(catalog, [])
+
+        assert client.get(f"/api/portals/{portal.id}/export/").status_code == 405
+        assert (
+            reader_client.post(f"/api/portals/{portal.id}/export/").status_code == 403
+        )
+        portal.refresh_from_db()
+        assert portal.export_version == 0
+
+        exported = client.post(f"/api/portals/{portal.id}/export/")
+        assert exported.status_code == 200
+        assert "attachment" in exported["Content-Disposition"]
+        assert yaml.safe_load(exported.content)["version"] == 1
+        portal.refresh_from_db()
+        assert portal.export_version == 1

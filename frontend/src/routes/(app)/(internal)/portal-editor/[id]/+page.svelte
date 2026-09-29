@@ -9,7 +9,7 @@
 	import { SCAFFOLDABLE_MODELS } from '$lib/utils/modelTargets';
 	import { urlParamModelVerboseName } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { savedToast, savedToastEnhance } from '$lib/utils/portalActions';
+	import { failureToast, savedToast, savedToastEnhance } from '$lib/utils/portalActions';
 	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
@@ -188,7 +188,7 @@
 		() =>
 		async ({ result, update }: { result: any; update: () => Promise<void> }) => {
 			await update();
-			if (result.type !== 'success') return;
+			if (result.type !== 'success') return failureToast(toast, result);
 			const unwired: string[] = result.data?.unwired ?? [];
 			if (unwired.length === 0) {
 				toast.trigger({
@@ -340,12 +340,14 @@
 					title={m.saveAsTemplate()}><i class="fa-solid fa-clone"></i></button
 				>
 			</form>
-			<a
-				href="/portal-editor/{data.portal.id}/export"
-				class="btn-icon btn-sm preset-tonal"
-				aria-label={m.exportAsLibrary()}
-				title={m.exportAsLibrary()}><i class="fa-solid fa-file-export"></i></a
-			>
+			<!-- No use:enhance: a native POST lets the browser take the attachment. -->
+			<form method="POST" action="/portal-editor/{data.portal.id}/export">
+				<button
+					class="btn-icon btn-sm preset-tonal"
+					aria-label={m.exportAsLibrary()}
+					title={m.exportAsLibrary()}><i class="fa-solid fa-file-export"></i></button
+				>
+			</form>
 		</div>
 	</div>
 
@@ -406,6 +408,11 @@
 				name="status"
 				value={data.portal.status === 'published' ? 'draft' : 'published'}
 			/>
+			{#if !isPublished}
+				<!-- Publish what the author sees: the gate above ran on these tiles, so the
+				     backend has to judge the same ones, not the last saved design. -->
+				<input type="hidden" name="payload" value={payload} />
+			{/if}
 			<button
 				class="btn preset-tonal"
 				disabled={publishBlocked}
