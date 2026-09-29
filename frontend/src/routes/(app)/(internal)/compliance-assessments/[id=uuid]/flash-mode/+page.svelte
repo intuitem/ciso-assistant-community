@@ -14,6 +14,8 @@
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/state';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
 
 	interface Props {
 		data: PageData;
@@ -21,12 +23,20 @@
 
 	let { data }: Props = $props();
 
+	const complianceAssessment = $derived(data.compliance_assessment);
+	const canEdit = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'change',
+			model: URL_MODEL_MAP['requirement-assessments'].name,
+			object: complianceAssessment
+		})
+	);
 	let isReadOnly = $derived(
-		data.compliance_assessment.is_locked || data.compliance_assessment.status === 'in_review'
+		complianceAssessment.is_locked || complianceAssessment.status === 'in_review' || !canEdit
 	);
 
 	// Field visibility for auditor role
-	const complianceAssessment = $derived(data.compliance_assessment);
 	const fieldVis = $derived(getFieldVisibility(complianceAssessment, 'auditor'));
 	const showAnswers = $derived(fieldVis.showAnswers);
 	const showResult = $derived(fieldVis.showResult);
@@ -402,9 +412,11 @@
 				<div class="readonly-banner">
 					<i class="fa-solid fa-lock"></i>
 					<span>
-						{data.compliance_assessment.is_locked
+						{complianceAssessment.is_locked
 							? m.lockedAssessmentMessage()
-							: m.assessmentInReviewMessage()}
+							: complianceAssessment.status === 'in_review'
+								? m.assessmentInReviewMessage()
+								: m.readOnlyNoChangePermissionMessage()}
 					</span>
 				</div>
 			{/if}

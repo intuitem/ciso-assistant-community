@@ -25,6 +25,8 @@ A library starts life as a **stored** record — its YAML is parsed and register
 | Loaded library | `LoadedLibrary` | Activated; contents visible across the platform |
 | Mapping set | `RequirementMappingSet` | Crosswalk between two frameworks |
 
+<figure><img src="../.gitbook/assets/libraries-catalog.png" alt=""><figcaption><p>The library store, where a stored library is loaded on demand</p></figcaption></figure>
+
 ## Stored vs loaded
 
 A library can be in one of two states:

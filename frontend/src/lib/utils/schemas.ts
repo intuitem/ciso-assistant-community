@@ -340,6 +340,7 @@ export const AppliedControlSchema = z.object({
 	findings: z.string().uuid().optional().array().optional(),
 	task_templates: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
+	control_documents: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	integration_config: z.string().optional().nullable(),
 	remote_object_id: z.string().optional().nullable(),
@@ -508,6 +509,7 @@ export const RequirementAssessmentSchema = z.object({
 	observation: z.string().optional().nullable(),
 	respondent_alignment: z.string().optional().nullable(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional(),
 	noRedirect: z.boolean().default(false),
 	nextRequirementAssessmentId: z.string().uuid().optional().nullable()
 });
@@ -628,6 +630,7 @@ export const EvidenceSchema = z.object({
 	security_exceptions: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	timeline_entries: z.string().optional().array().optional(),
 	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
+	task_templates: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	link: z
 		.string()
@@ -745,6 +748,11 @@ export const FeatureFlagsSchema = z.object({
 	custom_fields: z.boolean().optional(),
 	bia: z.boolean().optional(),
 	project_management: z.boolean().optional(),
+	generic_collections: z.boolean().optional(),
+	accreditations: z.boolean().optional(),
+	projects: z.boolean().optional(),
+	responsibility_matrices: z.boolean().optional(),
+	risk_management: z.boolean().optional(),
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
@@ -764,6 +772,7 @@ export const FeatureFlagsSchema = z.object({
 	quick_forms: z.boolean().optional(),
 	advanced_analytics: z.boolean().optional(),
 	comments: z.boolean().optional(),
+	notification_center: z.boolean().optional(),
 	relations_graph: z.boolean().optional(),
 	journeys: z.boolean().optional(),
 	policy_documents: z.boolean().optional(),
@@ -871,7 +880,15 @@ export const SSOSettingsSchema = z.object({
 		])
 		.optional()
 		.nullable(),
-	oauth_pkce_enabled: z.boolean().optional().default(false)
+	oauth_pkce_enabled: z.boolean().optional().default(false),
+	additional_scopes: z
+		.string()
+		.trim()
+		.max(1000)
+		.regex(
+			/^(?:[\x21\x23-\x2b\x2d-\x5b\x5d-\x7e]+(?:[ \t]*,[ \t]*[\x21\x23-\x2b\x2d-\x5b\x5d-\x7e]+)*)?$/
+		)
+		.optional()
 });
 
 export const EntitiesSchema = z.object({
@@ -1423,6 +1440,7 @@ export const operationalScenarioSchema = z.object({
 	ebios_rm_study: z.string(),
 	attack_path: z.string().uuid(),
 	threats: z.string().uuid().optional().array().optional(),
+	techniques: z.string().uuid().optional().array().optional(),
 	operating_modes_description: z.string().optional(),
 	likelihood: z.number().optional().default(-1),
 	is_selected: z.boolean().default(true),
@@ -1757,7 +1775,7 @@ export const ElementaryActionSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	threat: z.string().uuid().optional(),
+	threat: z.string().uuid().optional().nullable(),
 	icon: z.string().optional().nullable(),
 	attack_stage: z.number().default(0),
 	operating_modes: z.string().uuid().optional().array().optional()
@@ -1835,7 +1853,7 @@ export const ObjectClassificationSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
 	is_visible: z.boolean().default(true),
-	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+	translations: z.record(z.string().min(1), z.any()).optional()
 });
 
 export const ClassificationLevelSchema = z.object({
@@ -1845,7 +1863,7 @@ export const ClassificationLevelSchema = z.object({
 	abbreviation: z.string().optional().default(''),
 	hexcolor: z.string().optional().default(''),
 	is_visible: z.boolean().default(true),
-	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+	translations: z.record(z.string().min(1), z.any()).optional()
 });
 
 export const AssetClassSchema = z.object({

@@ -21,6 +21,7 @@
 	import MappingInferenceView from '$lib/components/ComplianceAssessment/MappingInferenceView.svelte';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import Question from '$lib/components/Forms/Question.svelte';
 	import { countMasked } from '$lib/utils/related-visibility';
 
 	interface Props {
@@ -94,7 +95,8 @@
 		showDocumentationScore,
 		showRespondentAlignment,
 		showComments,
-		showAnnotation
+		showAnnotation,
+		showAnswers
 	} = getFieldVisibility(complianceAssessment, viewerRole);
 
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
@@ -114,7 +116,7 @@
 
 <div class="card space-y-2 p-4 bg-surface-50-950 shadow-sm">
 	<div class="flex flex-row space-x-2 items-center">
-		<code class="code">{data.requirement.urn}</code>
+		<code>{data.requirement.urn}</code>
 		{#if showStatus}
 			<span
 				class="badge h-fit"
@@ -396,11 +398,22 @@
 	{/if}
 	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
 		<h1 class="font-semibold text-sm">{m.questions()}</h1>
-		{#each Object.entries(data.requirementAssessment.requirement.questions) as [urn, question]}
-			<li class="flex justify-between items-center border rounded-xl p-2 disabled">
-				<p>{question.text} ({safeTranslate(question.type)})</p>
-			</li>
-		{/each}
+		{#if showAnswers}
+			<div data-testid="read-only-answers-field">
+				<Question
+					questions={data.requirementAssessment.requirement.questions}
+					initialValue={data.requirementAssessment.answers ?? {}}
+					field="answers"
+					disabled={true}
+				/>
+			</div>
+		{:else}
+			{#each Object.entries(data.requirementAssessment.requirement.questions) as [urn, question]}
+				<li class="flex justify-between items-center border rounded-xl p-2 disabled">
+					<p>{question.text} ({safeTranslate(question.type)})</p>
+				</li>
+			{/each}
+		{/if}
 	{/if}
 	{#if data.requirementAssessment.observation}
 		<div class="card p-4 space-y-2 preset-tonal-primary">
