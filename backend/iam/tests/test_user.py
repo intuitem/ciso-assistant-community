@@ -114,3 +114,45 @@ class TestUser:
         editors = User.get_editors()
         assert len(editors) == 1
         assert user in editors
+
+
+@pytest.mark.django_db
+class TestLicenseSeats:
+    """The shipped roles, not a fabricated stand-in: `TestUser` builds its own
+    permission list, so it keeps passing while a real role drifts."""
+
+    # A seat is for editing work. These roles read, or approve — the approver's
+    # `change_validationflow` is exempt precisely so approving stays free.
+    SEATLESS_ROLES = ["BI-RL-AUD", "BI-RL-BSL", "BI-RL-APP"]
+
+    @pytest.mark.usefixtures("domain_perimeter_fixture")
+    @pytest.mark.parametrize("role_name", SEATLESS_ROLES)
+    def test_shipped_role_does_not_consume_a_seat(self, role_name: str) -> None:
+        user = User.objects.create_user(email=f"{role_name}@tests.com")
+        folder = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN).last()
+        assignment = RoleAssignment.objects.create(
+            user=user,
+            role=Role.objects.get(name=role_name),
+            folder=folder,
+            is_recursive=True,
+        )
+        assignment.perimeter_folders.add(folder)
+
+        user.refresh_from_db()
+        assert not user.is_editor
+        assert user not in User.get_editors()
+
+    @pytest.mark.parametrize("role_name", SEATLESS_ROLES)
+    def test_shipped_role_holds_no_billable_write_permission(
+        self, role_name: str
+    ) -> None:
+        """Same rule read off the role itself, so a failure names the permission
+        that started billing rather than only the role that broke."""
+        write_prefixes = ("add_", "change_", "delete_")
+        billable = {
+            permission.codename
+            for permission in Role.objects.get(name=role_name).permissions.all()
+            if permission.codename.startswith(write_prefixes)
+            and permission.codename not in User.NON_SEAT_PERMISSIONS
+        }
+        assert billable == set()

@@ -1290,12 +1290,16 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             and self.idp_groups.filter(user_groups__name="BI-UG-ADM").exists()
         )
 
-    # Permissions that grant write access but do not consume a license seat
+    # Permissions that grant write access but do not consume a license seat.
+    # Everyone receives notifications, so marking one read or deleting it is a
+    # recipient's housekeeping on their own inbox, not editing work.
     NON_SEAT_PERMISSIONS = {
         "change_validationflow",
         "add_chatsession",
         "change_chatsession",
         "delete_chatsession",
+        "change_notification",
+        "delete_notification",
     }
 
     @property
