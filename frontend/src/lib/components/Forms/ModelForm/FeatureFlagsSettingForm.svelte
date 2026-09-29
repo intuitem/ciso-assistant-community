@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { m } from '$paraglide/messages';
-	import BackgroundCheckbox from '$lib/components/Forms/BackgroundCheckbox.svelte';
+	import FeatureFlagGroupList from '$lib/components/Forms/FeatureFlagGroupList.svelte';
 	import { page } from '$app/state';
+	import { getFeatureFlagGroups } from '$lib/utils/feature-flag-groups';
 
 	interface Props {
 		form: SuperForm<Record<string, boolean | undefined>>;
@@ -10,355 +11,11 @@
 
 	let { form }: Props = $props();
 
-	const { form: formData } = form;
+	const { form: formData, errors } = form;
 
 	const availableKeys: string[] = Object.keys(page.data.featureFlagSettings ?? {});
 
-	const featureFlagGroups = [
-		{
-			category: m.organization(),
-			description: m.organisationDescription(),
-			fields: [
-				{
-					field: 'organisation_objectives',
-					label: m.organisationObjectives(),
-					description: m.organisationObjectivesDescription()
-				},
-				{
-					field: 'organisation_issues',
-					label: m.organisationIssues(),
-					description: m.organisationIssuesDescription()
-				},
-				{
-					field: 'journeys',
-					label: m.journeys(),
-					description: m.journeysDescription()
-				},
-				{
-					field: 'custom_portals',
-					label: m.customPortals(),
-					description: m.customPortalsDescription()
-				}
-			].filter(({ field }) => availableKeys.includes(field))
-		},
-		{
-			category: m.catalog(),
-			description: m.CatalogDescription(),
-			fields: [
-				{
-					field: 'security_advisories',
-					label: m.securityAdvisories(),
-					description: m.securityAdvisoriesDescription()
-				},
-				{
-					field: 'cwes',
-					label: m.cwe(),
-					description: m.cweDescription()
-				}
-			].filter(({ field }) => availableKeys.includes(field))
-		},
-		{
-			category: m.operations(),
-			description: m.operationsDescription(),
-			fields: [
-				{
-					field: 'tasks',
-					label: m.tasks(),
-					description: m.taskTemplatesDescription()
-				},
-				{
-					field: 'control_plan',
-					label: m.tasksReview(),
-					description: m.controlPlanDescription()
-				},
-				{
-					field: 'xrays',
-					label: m.xRays(),
-					description: m.xRaysDescription()
-				},
-				{
-					field: 'incidents',
-					label: m.incidents(),
-					description: m.incidentsDescription()
-				},
-				{
-					field: 'follow_up',
-					label: m.findingsManagement(),
-					description: m.findingsAssessmentsDescription()
-				},
-				{
-					field: 'metrology',
-					label: m.metrology(),
-					description: m.metrologyDescription()
-				}
-			].filter(({ field }) => availableKeys.includes(field))
-		},
-		{
-			category: m.assetClassManagementAndGovernance(),
-			description: m.assetClassManagementAndGovernanceDescription(),
-			fields: [
-				{
-					field: 'project_management',
-					label: m.projectManagement(),
-					description: m.projectManagementDescription()
-				},
-				{
-					field: 'reports',
-					label: m.reports(),
-					description: m.reportsDescription()
-				},
-				{
-					field: 'tprm',
-					label: m.thirdParty(),
-					description: m.thirdPartyDescription()
-				},
-				{
-					field: 'contracts',
-					label: m.contracts(),
-					description: m.contractsDescription()
-				},
-				{
-					field: 'external_ratings',
-					label: m.externalRatings(),
-					description: m.externalRatingsDescription()
-				},
-				{
-					field: 'validation_flows',
-					label: m.validationFlows(),
-					description: m.validationFlowsDescription()
-				},
-				{
-					field: 'workflows',
-					label: m.workflows(),
-					description: m.workflowsFlagDescription()
-				},
-				{
-					field: 'policy_documents',
-					label: m.policyDocumentsFlag(),
-					description: m.policyDocumentsFlagDescription()
-				},
-				{
-					field: 'document_management',
-					label: m.documentManagementFlag(),
-					description: m.documentManagementFlagDescription()
-				},
-				{
-					field: 'exceptions',
-					label: m.securityExceptions(),
-					description: m.securityExceptionsDescription()
-				}
-			].filter(({ field }) => availableKeys.includes(field))
-		},
-		{
-			category: m.compliance(),
-			description: m.complianceDescription(),
-			fields: [
-				{
-					field: 'compliance',
-					label: m.compliance(),
-					description: m.complianceAssessmentsDescription()
-				},
-				{
-					field: 'campaigns',
-					label: m.campaigns(),
-					description: m.campaignsDescription()
-				},
-				{
-					field: 'findings_from_requirements',
-					label: m.findingsFromRequirements(),
-					description: m.findingsFromRequirementsDescription()
-				},
-				{
-					field: 'auditee_mode',
-					label: m.auditeeMode(),
-					description: m.auditeeModeDescription()
-				},
-				{
-					field: 'quick_forms',
-					label: m.formsAndRequests(),
-					description: m.formsAndRequestsDescription()
-				},
-				{
-					field: 'advanced_analytics',
-					label: m.advancedAnalytics(),
-					description: m.advancedAnalyticsDescription()
-				},
-				{
-					field: 'audit_tree_inheritance',
-					label: m.auditTreeInheritance(),
-					description: m.auditTreeInheritanceDescription()
-				},
-				{
-					field: 'posture_assessments',
-					label: m.postureAssessments(),
-					description: m.postureAssessmentsDescription()
-				},
-				{
-					field: 'commitment_management',
-					label: m.commitmentManagement(),
-					description: m.commitmentManagementDescription()
-				},
-				{
-					field: 'dora',
-					label: m.dora(),
-					description: m.doraFlagDescription()
-				}
-			].filter(({ field }) => availableKeys.includes(field))
-		},
-		{
-			category: m.riskManagement(),
-			description: m.riskManagementDescription(),
-			fields: [
-				{
-					field: 'risk_acceptances',
-					label: m.riskAcceptances(),
-					description: m.riskAcceptancesDescription()
-				},
-				{
-					field: 'inherent_risk',
-					label: m.inherentRisk(),
-					description: m.inherentRiskLevelHelpText()
-				},
-				{
-					field: 'vulnerabilities',
-					label: m.vulnerabilities(),
-					description: m.vulnerabilitiesDescription()
-				},
-				{
-					field: 'ebiosrm',
-					label: m.ebiosRM(),
-					description: m.ebiosRmDescription()
-				},
-				{
-					field: 'quantitative_risk_studies',
-					label: m.quantitativeRiskStudies(),
-					description: m.quantitativeRiskStudiesDescription()
-				},
-				{
-					field: 'threat_modeling',
-					label: m.threatModeling(),
-					description: m.threatModelingDescription()
-				},
-				{
-					field: 'ttps',
-					label: m.ttpCatalogs(),
-					description: m.ttpsDescription()
-				},
-				{
-					field: 'scoring_assistant',
-					label: m.scoringAssistant(),
-					description: m.scoringAssistantDescription()
-				},
-				{
-					field: 'bia',
-					label: m.businessImpactAnalysis(),
-					description: m.businessImpactAnalysisDescription()
-				}
-			].filter(({ field }) => availableKeys.includes(field))
-		},
-		{
-			category: m.gdpr(),
-			description: m.gdprDescription(),
-			fields: [
-				{
-					field: 'privacy',
-					label: m.privacy(),
-					description: m.privacyDescription()
-				},
-				{
-					field: 'personal_data',
-					label: m.personalData(),
-					description: m.personalDataDescription()
-				},
-				{
-					field: 'purposes',
-					label: m.purposes(),
-					description: m.purposesDescription()
-				},
-				{
-					field: 'right_requests',
-					label: m.rightRequests(),
-					description: m.rightRequestsDescription()
-				},
-				{
-					field: 'data_breaches',
-					label: m.dataBreaches(),
-					description: m.dataBreachesDescription()
-				}
-			].filter(({ field }) => availableKeys.includes(field))
-		},
-		{
-			category: m.extra(),
-			description: m.extraDescription(),
-			fields: [
-				{
-					field: 'focus_mode',
-					label: m.focusMode(),
-					description: m.focusModeTooltip()
-				},
-				{
-					field: 'idp_groups',
-					label: m.idpGroups(),
-					description: m.idpGroupsDescription()
-				},
-				{
-					field: 'jit_provisioning',
-					label: m.jitProvisioning(),
-					description: m.jitProvisioningDescription()
-				},
-				{
-					field: 'service_accounts',
-					label: m.serviceAccounts(),
-					description: m.serviceAccountsDescription()
-				},
-				{
-					field: 'terminologies',
-					label: m.terminologies(),
-					description: m.riskOriginHelpText()
-				},
-				{
-					field: 'custom_fields',
-					label: m.customFields(),
-					description: m.customFieldsDescription()
-				},
-				{
-					field: 'outgoing_webhooks',
-					label: m.webhooks(),
-					description: m.webhooksDescription()
-				},
-				{
-					field: 'audit_log_forwarding',
-					label: m.auditLogForwarding(),
-					description: m.auditLogForwardingDescription()
-				},
-				{
-					field: 'comments',
-					label: m.comments(),
-					description: m.commentsDescription()
-				},
-				{
-					field: 'relations_graph',
-					label: m.relationsGraph(),
-					description: m.relationsGraphDescription()
-				},
-				{
-					field: 'experimental',
-					label: m.experimental(),
-					description: m.experimentalFeatures()
-				},
-				{
-					field: 'chat_mode',
-					label: m.chatMode(),
-					description: m.chatModeDescription()
-				},
-				{
-					field: 'object_audit_trail',
-					label: m.objectAuditTrail(),
-					description: m.objectAuditTrailDescription()
-				}
-			].filter(({ field }) => availableKeys.includes(field))
-		}
-	].filter((group) => group.fields.length > 0);
+	const featureFlagGroups = getFeatureFlagGroups(availableKeys);
 
 	const allFields: string[] = featureFlagGroups.flatMap((g) => g.fields.map((f) => f.field));
 
@@ -538,52 +195,33 @@
 		<div class="text-center text-surface-600-400 py-12">{m.noFeatureFlagsMatch()}</div>
 	{/if}
 
-	{#each filteredGroups as group (group.category)}
-		{@const groupFields = group.fields.map((f) => f.field)}
-		{@const groupEnabled = groupFields.filter((f) => $formData[f]).length}
-		<div class="bg-surface-50-950 shadow-sm rounded-xl p-6 border border-surface-200-800">
-			<div class="mb-4 flex items-start justify-between gap-4">
-				<div>
-					<h2 class="text-xl font-bold text-surface-950-50">{group.category}</h2>
-					<p class="text-sm text-surface-600-400 mt-1">{group.description}</p>
-				</div>
-				<div class="flex items-center gap-2 shrink-0">
-					<span class="text-xs text-surface-600-400 whitespace-nowrap"
-						>{groupEnabled}/{groupFields.length}</span
-					>
-					<button
-						type="button"
-						class="btn btn-sm preset-tonal-primary"
-						title={m.enableAll()}
-						onclick={() => setFields(groupFields, true)}
-					>
-						<i class="fa-solid fa-check"></i>
-					</button>
-					<button
-						type="button"
-						class="btn btn-sm preset-tonal"
-						title={m.disableAll()}
-						onclick={() => setFields(groupFields, false)}
-					>
-						<i class="fa-solid fa-xmark"></i>
-					</button>
-				</div>
-			</div>
-			<div
-				class="grid gap-4"
-				style="grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); grid-auto-rows: 1fr;"
+	<FeatureFlagGroupList
+		groups={filteredGroups}
+		errorsFor={(field) => $errors[field] ?? []}
+		isEnabled={(field) => Boolean($formData[field])}
+		onToggle={(field, next) => setFields([field], next)}
+	>
+		{#snippet groupActions(group)}
+			{@const groupFields = group.fields.map((f) => f.field)}
+			<span class="text-xs text-surface-600-400 whitespace-nowrap"
+				>{groupFields.filter((f) => $formData[f]).length}/{groupFields.length}</span
 			>
-				{#each group.fields as { field, label, description } (field)}
-					<BackgroundCheckbox
-						{form}
-						{field}
-						{label}
-						helpText={description}
-						classesContainer="h-full"
-						classes="h-full"
-					/>
-				{/each}
-			</div>
-		</div>
-	{/each}
+			<button
+				type="button"
+				class="btn btn-sm preset-tonal-primary"
+				title={m.enableAll()}
+				onclick={() => setFields(groupFields, true)}
+			>
+				<i class="fa-solid fa-check"></i>
+			</button>
+			<button
+				type="button"
+				class="btn btn-sm preset-tonal"
+				title={m.disableAll()}
+				onclick={() => setFields(groupFields, false)}
+			>
+				<i class="fa-solid fa-xmark"></i>
+			</button>
+		{/snippet}
+	</FeatureFlagGroupList>
 </div>

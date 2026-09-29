@@ -1,6 +1,9 @@
 <script lang="ts" module>
-	import { dynamicTransition } from '$lib/components/utils/transitions';
-	import { type Transition, type TransitionParams } from '@skeletonlabs/skeleton-svelte';
+	import {
+		dynamicTransition,
+		type Transition,
+		type TransitionParams
+	} from '$lib/components/utils/transitions';
 	import { fade, fly } from 'svelte/transition';
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -25,35 +28,34 @@
 	const dispatch = createEventDispatcher<ModalEvent>();
 
 	// Types
-	import type { CssClasses, SvelteEvent } from '@skeletonlabs/skeleton-svelte';
-	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton-svelte';
-	import { getModalStore } from './stores';
+	import type { SvelteEvent } from '$lib/utils/types';
+	import { getModalStore, type ModalComponent, type ModalSettings } from './stores';
 
 	interface Props {
 		// Props (components)
 		components?: Record<string, ModalComponent>;
 		// Props (backdrop)
-		position?: CssClasses;
+		position?: string;
 		// Props (modal)
-		background?: CssClasses;
-		width?: CssClasses;
-		height?: CssClasses;
-		padding?: CssClasses;
-		spacing?: CssClasses;
-		rounded?: CssClasses;
-		shadow?: CssClasses;
-		zIndex?: CssClasses;
+		background?: string;
+		width?: string;
+		height?: string;
+		padding?: string;
+		spacing?: string;
+		rounded?: string;
+		shadow?: string;
+		zIndex?: string;
 		// Props (buttons)
-		buttonNeutral?: CssClasses;
-		buttonPositive?: CssClasses;
-		buttonTextCancel?: CssClasses;
-		buttonTextConfirm?: CssClasses;
-		buttonTextSubmit?: CssClasses;
+		buttonNeutral?: string;
+		buttonPositive?: string;
+		buttonTextCancel?: string;
+		buttonTextConfirm?: string;
+		buttonTextSubmit?: string;
 		// Props (regions)
-		regionBackdrop?: CssClasses;
-		regionHeader?: CssClasses;
-		regionBody?: CssClasses;
-		regionFooter?: CssClasses;
+		regionBackdrop?: string;
+		regionHeader?: string;
+		regionBody?: string;
+		regionFooter?: string;
 		// Props (transition)
 		transitions?: any;
 		transitionIn?: TransitionIn;

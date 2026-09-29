@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { discardBody } from '$lib/utils/responses';
 import { error } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
@@ -15,6 +16,7 @@ const withFallback = async (
 ) => {
 	const res = await fetch(primary, init);
 	if (res.status !== 403 && res.status !== 404) return { res, ownSurface: false };
+	await discardBody(res);
 	return { res: await fetch(fallback, init), ownSurface: true };
 };
 
@@ -25,13 +27,18 @@ export const load = (async ({ fetch, params }) => {
 		withFallback(fetch, reviewer, own),
 		withFallback(fetch, `${reviewer}content/`, `${own}content/`)
 	]);
-	if (!responseRes.res.ok) error(responseRes.res.status === 404 ? 404 : 403, 'Request not found');
+	if (!responseRes.res.ok) {
+		await discardBody(responseRes.res, contentRes.res);
+		error(responseRes.res.status === 404 ? 404 : 403, 'Request not found');
+	}
 	const response = await responseRes.res.json();
 	// Supervised actions are a reviewer's affordance; a requester's call 403s and the
 	// list is simply empty for them.
 	const actionsRes = await fetch(`${reviewer}suggested-actions/`);
 	return {
-		suggestedActions: actionsRes.ok ? await actionsRes.json() : [],
+		suggestedActions: actionsRes.ok
+			? await actionsRes.json()
+			: await discardBody(actionsRes).then(() => []),
 		URLModel: 'quick-form-responses',
 		response,
 		content: await contentRes.res.json(),

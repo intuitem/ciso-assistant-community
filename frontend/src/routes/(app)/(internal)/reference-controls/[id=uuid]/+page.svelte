@@ -3,8 +3,12 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
-	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton-svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import List from '$lib/components/List/List.svelte';
 

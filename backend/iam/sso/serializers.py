@@ -103,6 +103,17 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         default=False,
         source="settings.oauth_pkce_enabled",
     )  # NOTE: Only used for OIDC
+    additional_scopes = serializers.RegexField(
+        regex=(
+            r"^[\x21\x23-\x2b\x2d-\x5b\x5d-\x7e]+"
+            r"(?:[ \t]*,[ \t]*[\x21\x23-\x2b\x2d-\x5b\x5d-\x7e]+)*$"
+        ),
+        required=False,
+        allow_blank=True,
+        max_length=1000,
+        source="settings.additional_scopes",
+        help_text="Comma-separated OAuth scopes appended to the default OIDC scopes.",
+    )  # NOTE: Only used for OIDC
     provider_name = serializers.CharField(
         required=False,
         allow_blank=True,

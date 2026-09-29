@@ -119,12 +119,10 @@
 		if (checked) {
 			if (index < 0) {
 				group.push(value);
-				group = group;
 			}
 		} else {
 			if (index >= 0) {
 				group.splice(index, 1);
-				group = group;
 			}
 		}
 		if (!indeterminate) onParentChange();
@@ -150,7 +148,6 @@
 				indeterminate = true;
 				if (index >= 0) {
 					group.splice(index, 1);
-					group = group;
 				}
 			} else if (
 				childrenValues.every((c) => Array.isArray(childrenGroup) && childrenGroup.includes(c))
@@ -158,7 +155,6 @@
 				indeterminate = false;
 				if (index < 0) {
 					group.push(value);
-					group = group;
 				}
 			} else if (
 				childrenValues.some((c) => Array.isArray(childrenGroup) && childrenGroup.includes(c))
@@ -166,13 +162,11 @@
 				indeterminate = true;
 				if (index >= 0) {
 					group.splice(index, 1);
-					group = group;
 				}
 			} else {
 				indeterminate = false;
 				if (index >= 0) {
 					group.splice(index, 1);
-					group = group;
 				}
 			}
 		} else {

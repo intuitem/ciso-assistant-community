@@ -17,6 +17,7 @@ from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
     GenericFilterSet,
+    actor_prefetch,
     escape_excel_formula,
 )
 from core.models import (
@@ -33,6 +34,7 @@ from tprm.models import (
     EntityScore,
     Representative,
     Solution,
+    SolutionSubcontractor,
     EntityAssessment,
     Contract,
 )
@@ -1547,6 +1549,7 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
     """
 
     model = Solution
+
     export_config = {
         "filename": "solutions_export",
         "fields": {
@@ -1596,9 +1599,33 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
         "filtering_labels",
     ]
 
+    def get_autocomplete_serializer_class(self):
+        from tprm.serializers import SolutionAutocompleteSerializer
+
+        return SolutionAutocompleteSerializer
+
     def get_queryset(self):
         # folder is serialized via source="provider_entity.folder"; pull it in one join
-        return super().get_queryset().select_related("provider_entity__folder")
+        if self.action == "autocomplete":
+            return super().get_queryset().select_related("provider_entity__folder")
+        return (
+            super()
+            .get_queryset()
+            .select_related("provider_entity__folder", "recipient_entity")
+            .prefetch_related(
+                "assets",
+                "contracts",
+                actor_prefetch("owner"),
+                # The nested serializer reads subcontractor and recipient on every
+                # chain row: join them in the prefetch query.
+                Prefetch(
+                    "subcontracting_chain",
+                    queryset=SolutionSubcontractor.objects.select_related(
+                        "subcontractor", "recipient"
+                    ),
+                ),
+            )
+        )
 
     @action(detail=False, name="Get data location storage choices")
     def data_location_storage(self, request):

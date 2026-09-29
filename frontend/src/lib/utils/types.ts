@@ -43,6 +43,7 @@ export interface LoginRequestBody {
 }
 
 export const URL_MODEL = [
+	'notifications',
 	'folders',
 	'perimeters',
 	'risk-matrices',
@@ -284,3 +285,8 @@ export interface CacheLock {
 	promise: Promise<any>;
 	resolve: (_: any) => any;
 }
+
+/** A DOM event with `currentTarget` narrowed to the element the handler is bound to. */
+export type SvelteEvent<E extends Event = Event, T extends EventTarget = Element> = E & {
+	currentTarget: EventTarget & T;
+};
