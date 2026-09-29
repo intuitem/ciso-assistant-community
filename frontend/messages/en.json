@@ -6028,7 +6028,7 @@
 	"dateOffsetHint": "An empty base date offsets from the run's own date. Negative values move backwards.",
 	"compute": "Compute",
 	"computeExpressions": "Expressions",
-	"computeHint": "One row per variable: the variable and a CEL expression that computes it. Rows run in order and can use the ones above. Numbers are strict: 3 * 2.5 fails, double(3) * 2.5 works, and 7 / 2 is 3. Reference a step output as nodes.<ref>.<path>, the loop element as item.",
+	"computeHint": "One row per variable: the variable and a CEL expression that computes it. Rows run in order and can use the ones above. Ints and doubles mix (3 * 2.5 is 7.5); two ints divide without remainder (7 / 2 is 3). Reference a step output as nodes.<ref>.<path>, the loop element as item.",
 	"log": "Log",
 	"workflowVariables": "Variables",
 	"workflowTaskTemplate": "Task template",

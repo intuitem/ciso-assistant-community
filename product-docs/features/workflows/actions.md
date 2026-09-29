@@ -62,9 +62,9 @@ worst        = max(nodes.fetch.results.map(r, r.score))
 total        = total + item
 ```
 
-Numbers are strict, as in CEL: an int and a double do not mix (`3 * 2.5` fails, `double(3) * 2.5` works) and dividing two ints drops the remainder (`7 / 2` is `3`). The step fails with a message that names the row and the problem.
+A `number` variable holds an int or a double depending on what wrote it, so unlike canonical CEL the two mix: when one side of an operator is a double, the other is promoted (`3 * 2.5` is `7.5`). An expression with only ints stays int, so dividing two ints drops the remainder as in CEL (`7 / 2` is `3`, `7 / 2.0` is `3.5`). A number and a string do not mix. The step fails with a message that names the row and the problem.
 
-On top of CEL's own `size`, `has`, `int`, `double`, `string` and the `map`, `filter`, `exists`, `all` macros, these functions are available: `sum`, `avg`, `min`, `max` over a list of numbers, `round(x)`, `round(x, digits)`, `floor`, `ceil`, `abs`.
+On top of CEL's own `size`, `has`, `int`, `double`, `string`, `timestamp` and the `map`, `filter`, `exists`, `all` macros, these functions are available: `sum` and `avg` over a list of numbers; `min` and `max` over a list of numbers, of strings (ISO dates sort correctly) or of timestamps; `round(x)`, `round(x, digits)`, `floor`, `ceil`, `abs`.
 
 Output: the computed values, keyed by variable. Refuses the reserved keys `now`, `today` and `payload`. Syntax errors are caught when you publish; type errors, missing fields and division by zero fail the step at run time and are not retried. No permission required.
 

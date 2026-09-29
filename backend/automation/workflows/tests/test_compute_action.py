@@ -94,10 +94,20 @@ class TestEvaluate:
         assert evaluate("(a + b) * 2", {"a": 3, "b": 4}) == 14
         assert isinstance(evaluate("a / 2", {"a": 7}), int)
 
-    def test_mixing_int_and_double_is_refused_with_a_hint(self):
-        with pytest.raises(ExpressionError, match=r"double\(\.\.\.\)"):
-            evaluate("count * weight", {"count": 3, "weight": 2.5})
-        assert evaluate("double(count) * weight", {"count": 3, "weight": 2.5}) == 7.5
+    def test_mixing_int_and_double_promotes_to_double(self):
+        # A `number` variable does not say int or double; the payload decides.
+        context = {"count": 3, "weight": 2.5}
+        assert evaluate("count * weight", context) == 7.5
+        assert evaluate("weight + count > 5", context) is True
+        assert evaluate("count == 3.0", context) is True
+        # Promoted comparisons still feed CEL's own logic and ternary.
+        assert evaluate("count > weight ? 'more' : 'less'", context) == "more"
+        assert evaluate("count < weight || count == 3.0", context) is True
+        assert evaluate("double(count) * weight", context) == 7.5
+        # All-int expressions keep CEL's int semantics, so indexes still work.
+        assert evaluate("[9, 8][count - 2]", context) == 8
+        with pytest.raises(ExpressionError, match="cannot combine int and string"):
+            evaluate("count + 'x'", context)
 
     def test_dotted_paths_reach_node_outputs_and_lists(self):
         context = {"nodes": {"fetch": {"count": 7, "results": [{"score": 3}]}}}
@@ -114,8 +124,21 @@ class TestEvaluate:
         assert evaluate("sum(empty)", rows) == 0
         with pytest.raises(ExpressionError, match="empty list"):
             evaluate("avg(empty)", rows)
-        with pytest.raises(ExpressionError, match="mixes int and double"):
-            evaluate("sum([1, 2.5])", {})
+        assert evaluate("sum([1, 2.5])", {}) == 3.5
+        assert evaluate("max([1, 2.5])", {}) == 2.5
+
+    def test_min_and_max_over_strings_and_timestamps(self):
+        dates = {"dates": ["2026-03-01", "2026-01-15"]}
+        assert evaluate("max(dates)", dates) == "2026-03-01"
+        assert evaluate("min(dates)", dates) == "2026-01-15"
+        assert (
+            evaluate("max(dates.map(d, timestamp(d + 'T00:00:00Z')))", dates)
+            == "2026-03-01T00:00:00+00:00"
+        )
+        with pytest.raises(ExpressionError, match="one kind"):
+            evaluate("max(['a', 1])", {})
+        with pytest.raises(ExpressionError, match="takes a list of numbers"):
+            evaluate("sum(['a', 'b'])", {})
 
     def test_rounding_helpers(self):
         assert evaluate("round(2.567, 2)", {}) == 2.57
@@ -292,14 +315,32 @@ class TestComputeAction:
                 {
                     "label": "Bad",
                     "type": "compute",
-                    "expressions": {"x": "count * weight"},
+                    "expressions": {"x": "count * label"},
+                }
+            ],
+            variables=[var("count", default=3), var("label", "string", "high")],
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert any(
+            "cannot combine int and string" in message
+            for message in error_messages(instance)
+        )
+
+    def test_int_and_double_variables_mix(self):
+        version = flow(
+            [
+                {
+                    "label": "Weighted",
+                    "type": "compute",
+                    "expressions": {"weighted": "count * weight"},
                 }
             ],
             variables=[var("count", default=3), var("weight", default=2.5)],
         )
         instance = start_instance(version)
-        assert instance.status == WorkflowInstance.Status.FAILED
-        assert any("double(...)" in message for message in error_messages(instance))
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert instance.variables["weighted"] == 7.5
 
     def test_division_by_zero_fails_the_node(self):
         version = flow(
@@ -382,10 +423,10 @@ class TestComputeValidation:
         ) == {"action_compute_unmapped_output"}
 
     def test_type_errors_are_a_runtime_matter(self):
-        # 3 * 2.5 only fails once evaluated; publish cannot know the types.
+        # 3 * 'x' only fails once evaluated; publish cannot know the types.
         assert (
             validate_compute_config(
-                self._node({"type": "compute", "expressions": {"x": "count * weight"}})
+                self._node({"type": "compute", "expressions": {"x": "count * label"}})
             )
             == []
         )

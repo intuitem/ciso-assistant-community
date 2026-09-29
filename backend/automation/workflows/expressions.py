@@ -8,18 +8,26 @@ product already uses for compliance outcomes and quick forms, so authors learn
 one syntax.
 
 The evaluator is pure: no side effects, guaranteed termination, no access to
-anything but the render context handed to it. Numbers stay strict as in CEL
-itself — `1 + 2.5` is an error, `1 / 2` is integer division — and the error
-message says how to coerce (`double(x)`, `int(x)`).
+anything but the render context handed to it.
+
+Numbers: the product types a variable as `number` without saying int or
+double, and a payload or a step output decides which one arrives at runtime.
+So unlike canonical CEL, mixing the two is not an error here: when one side of
+an arithmetic or comparison operator is a double, the other is promoted. An
+all-int expression stays int, so `7 / 2` is `3` as in CEL, and counters and
+list indexes keep working. Every valid CEL expression returns the same value
+as in CEL; only expressions that would have failed on a type mix now succeed.
 """
 
 from __future__ import annotations
 
 import math
+import operator
 import re
 
 import celpy
 import celpy.celtypes as celtypes
+from celpy.evaluation import bool_eq, bool_ge, bool_gt, bool_le, bool_lt, bool_ne
 from lark import Token, Tree
 
 
@@ -27,8 +35,6 @@ class ExpressionError(Exception):
     """A CEL expression that cannot be compiled or evaluated. The message is
     author-facing and already mentions the expression key when known."""
 
-
-_MIXED_NUMBERS = "mixes int and double — wrap one side with double(...) or int(...)"
 
 # celpy reports a missing overload with the grammar rule name; translate the
 # ones an author will actually hit into the operator they wrote.
@@ -122,44 +128,105 @@ def from_cel(value):
     return str(value)
 
 
-# ---------- helper functions CEL lacks ----------
+# ---------- number promotion ----------
 #
-# Aggregates take a list and keep CEL's int/double strictness: a homogeneous
-# int list yields an int, a homogeneous double list a double, a mix is an
-# error. avg always yields a double.
+# celpy resolves every operator through the program's function table, so the
+# promotion is scoped to compute programs: the compliance evaluator in
+# core.cel_service keeps canonical strictness.
+
+_INTS = (celtypes.IntType, celtypes.UintType, int)
+_DOUBLES = (celtypes.DoubleType, float)
 
 
 def _kind(value):
-    """'int', 'double' or None. celpy hands intermediate results to functions
-    as plain int/float as often as IntType/DoubleType, so both spellings
-    count; bool is excluded because it subclasses int."""
+    """'int', 'double', 'string', 'timestamp' or None. celpy hands intermediate
+    results to functions as plain int/float/str as often as the CEL types, so
+    both spellings count; bool is excluded because it subclasses int."""
     if isinstance(value, (bool, celtypes.BoolType)):
         return None
-    if isinstance(value, (celtypes.IntType, celtypes.UintType, int)):
+    if isinstance(value, _INTS):
         return "int"
-    if isinstance(value, (celtypes.DoubleType, float)):
+    if isinstance(value, _DOUBLES):
         return "double"
+    if isinstance(value, (celtypes.StringType, str)):
+        return "string"
+    if isinstance(value, celtypes.TimestampType):
+        return "timestamp"
     return None
 
 
+def _promoting(op):
+    """`op` with int/double promotion: when exactly one operand is a double,
+    both become doubles. Anything else is passed through untouched, so string,
+    list, timestamp and error semantics are celpy's own."""
+
+    def apply(left, right):
+        left_kind, right_kind = _kind(left), _kind(right)
+        if {left_kind, right_kind} == {"int", "double"}:
+            return op(
+                celtypes.DoubleType(float(left)), celtypes.DoubleType(float(right))
+            )
+        return op(left, right)
+
+    return apply
+
+
+OPERATORS = {
+    "_+_": _promoting(operator.add),
+    "_-_": _promoting(operator.sub),
+    "_*_": _promoting(operator.mul),
+    "_/_": _promoting(operator.truediv),
+    # Comparisons wrap celpy's own, which return BoolType and keep CEL's
+    # equality semantics for everything that is not a promoted number pair.
+    "_<_": _promoting(bool_lt),
+    "_<=_": _promoting(bool_le),
+    "_>_": _promoting(bool_gt),
+    "_>=_": _promoting(bool_ge),
+    "_==_": _promoting(bool_eq),
+    "_!=_": _promoting(bool_ne),
+}
+
+
+# ---------- helper functions CEL lacks ----------
+#
+# sum/avg take a list of numbers with the same promotion as the operators: an
+# all-int list yields an int, any double makes the result a double. avg always
+# yields a double. min/max also accept a homogeneous list of strings (ISO dates
+# sort lexically) or of timestamps.
+
+
 def _wrap(value, kind):
-    return (
-        celtypes.DoubleType(float(value))
-        if kind == "double"
-        else celtypes.IntType(int(value))
-    )
+    if kind == "double":
+        return celtypes.DoubleType(float(value))
+    if kind == "int":
+        return celtypes.IntType(int(value))
+    if kind == "string":
+        return celtypes.StringType(str(value))
+    return value
 
 
-def _numbers(values, name):
+def _items(values, name):
     if not isinstance(values, (celtypes.ListType, list, tuple)):
         raise ValueError(f"{name}() takes a list")
     items = list(values)
     kinds = {_kind(item) for item in items}
     if None in kinds:
-        raise ValueError(f"{name}() takes a list of numbers")
+        raise ValueError(f"{name}() takes a list of numbers, strings or timestamps")
+    if kinds <= {"int", "double"}:
+        return items, ("double" if "double" in kinds else "int")
     if len(kinds) > 1:
-        raise ValueError(f"{name}() {_MIXED_NUMBERS}")
-    return items, (kinds.pop() if kinds else "int")
+        raise ValueError(
+            f"{name}() takes a list of one kind — this one mixes "
+            f"{' and '.join(sorted(kinds))}"
+        )
+    return items, kinds.pop()
+
+
+def _numbers(values, name):
+    items, kind = _items(values, name)
+    if kind not in ("int", "double"):
+        raise ValueError(f"{name}() takes a list of numbers")
+    return items, kind
 
 
 def _sum(values):
@@ -176,23 +243,28 @@ def _avg(values):
     return celtypes.DoubleType(sum(float(x) for x in items) / len(items))
 
 
-def _min(values):
-    items, kind = _numbers(values, "min")
+def _extreme(values, name, pick):
+    items, kind = _items(values, name)
     if not items:
-        raise ValueError("min() of an empty list")
-    return _wrap(min(items), kind)
+        raise ValueError(f"{name}() of an empty list")
+    if kind == "double":
+        return celtypes.DoubleType(pick(float(x) for x in items))
+    if kind == "int":
+        return celtypes.IntType(pick(int(x) for x in items))
+    return _wrap(pick(items), kind)
+
+
+def _min(values):
+    return _extreme(values, "min", min)
 
 
 def _max(values):
-    items, kind = _numbers(values, "max")
-    if not items:
-        raise ValueError("max() of an empty list")
-    return _wrap(max(items), kind)
+    return _extreme(values, "max", max)
 
 
 def _number(value, name):
     kind = _kind(value)
-    if kind is None:
+    if kind not in ("int", "double"):
         raise ValueError(f"{name}() takes a number")
     return kind
 
@@ -263,8 +335,6 @@ def _describe(error):
         rule = match.group(1)
         operator = _RULE_LABELS.get(rule, rule)
         types = [_TYPE_NAMES.get(name, name) for name in _CLASS_RE.findall(message)]
-        if {"int", "double"} <= set(types):
-            return f"'{operator}' {_MIXED_NUMBERS}"
         if types:
             return f"'{operator}' cannot combine {' and '.join(types)}"
         return f"'{operator}' has no overload for these types"
@@ -307,7 +377,7 @@ def evaluate(expression, context):
     JSON-shaped too. Every failure is an ExpressionError."""
     ast = compile_expression(expression)
     cel_context = {str(k): to_cel(v) for k, v in context.items()}
-    program = _environment().program(ast, functions=FUNCTIONS)
+    program = _environment().program(ast, functions={**OPERATORS, **FUNCTIONS})
     try:
         result = program.evaluate(cel_context)
     except celpy.CELEvalError as e:
