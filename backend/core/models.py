@@ -8570,9 +8570,12 @@ def rescale_score(value, old_range, new_range, integer=True):
     send 10/30/50/70/90 on 0-100 to 0/2/2/4/4 on 0-5 instead of 1/2/3/4/5.
     """
     (old_min, old_max), (new_min, new_max) = old_range, new_range
-    ratio = (Fraction(value) - old_min) / (old_max - old_min)
-    ratio = min(max(ratio, Fraction(0)), Fraction(1))
-    result = new_min + ratio * (new_max - new_min)
+    if old_max == old_min:
+        result = min(max(Fraction(value), Fraction(new_min)), Fraction(new_max))
+    else:
+        ratio = (Fraction(value) - old_min) / (old_max - old_min)
+        ratio = min(max(ratio, Fraction(0)), Fraction(1))
+        result = new_min + ratio * (new_max - new_min)
     if integer:
         return math.floor(result + Fraction(1, 2))
     exact = Decimal(result.numerator) / Decimal(result.denominator)

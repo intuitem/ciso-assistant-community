@@ -28,11 +28,12 @@ class MappingEngine:
             self._framework_mappings,
             self._direct_mappings,
         ) = self.load_rms_data()
-        self.own_scale_urns = set(
-            RequirementNode.objects.exclude(
+        self.own_scales = {
+            urn: (min_score, max_score)
+            for urn, min_score, max_score in RequirementNode.objects.exclude(
                 min_score__isnull=True, max_score__isnull=True
-            ).values_list("urn", flat=True)
-        )
+            ).values_list("urn", "min_score", "max_score")
+        }
 
         self.fields_to_map: list[str] = [
             "result",
@@ -379,9 +380,10 @@ class MappingEngine:
                 and target_framework.get("max_score") == source_range[1]
             )
 
-        def scaled(field, value):
+        def scaled(field, value, own_scale):
             if (
-                field in ("score", "documentation_score")
+                own_scale is None
+                and field in ("score", "documentation_score")
                 and value is not None
                 and target_range is not None
                 and source_range != target_range
@@ -399,7 +401,10 @@ class MappingEngine:
             src_assessment = source_audit["requirement_assessments"].get(src)
             if src_assessment is None:
                 continue
-            copy_scores = scores_compatible and not {src, dst} & self.own_scale_urns
+            own_scale = self.own_scales.get(src)
+            copy_scores = own_scale == self.own_scales.get(dst) and (
+                own_scale is not None or scores_compatible
+            )
 
             # Track whether this mapping entry actually wrote data.
             mapped = False
@@ -429,7 +434,8 @@ class MappingEngine:
                             )
                     else:
                         target_audit["requirement_assessments"][dst] = {
-                            k: scaled(k, v) for k, v in src_assessment.items()
+                            k: scaled(k, v, own_scale)
+                            for k, v in src_assessment.items()
                         }
                     mapped = True
                 else:
@@ -506,7 +512,9 @@ class MappingEngine:
                     ]:
                         if score_field in src_assessment:
                             target_assessment[score_field] = scaled(
-                                score_field, src_assessment.get(score_field)
+                                score_field,
+                                src_assessment.get(score_field),
+                                own_scale,
                             )
 
                 # Handle result: keep the most restrictive
