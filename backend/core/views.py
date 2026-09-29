@@ -3399,6 +3399,16 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="add_asset"),
+                folder=folder,
+            ):
+                return Response(
+                    {"error": "You do not have permission to add assets here"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
             # Parse the assets text with indentation (2 spaces per level)
             lines = [line.rstrip() for line in assets_text.split("\n") if line.strip()]
             created_assets = []
@@ -3406,110 +3416,140 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
             errors = []
             depth_stack = []  # Stack of assets at each depth level
 
-            for line in lines:
-                # Count leading spaces and calculate depth (2 spaces = 1 level)
-                leading_spaces = len(line) - len(line.lstrip())
-                depth = leading_spaces // 2
-                line_content = line.strip()
+            try:
+                with transaction.atomic():
+                    for line in lines:
+                        # Count leading spaces and calculate depth (2 spaces = 1 level)
+                        leading_spaces = len(line) - len(line.lstrip())
+                        depth = leading_spaces // 2
+                        line_content = line.strip()
 
-                # Check for type prefix (SP: or PR:)
-                asset_type = Asset.Type.SUPPORT  # default
-                asset_name = line_content
+                        # Check for type prefix (SP: or PR:)
+                        asset_type = Asset.Type.SUPPORT  # default
+                        asset_name = line_content
 
-                if line_content.upper().startswith("SP:"):
-                    asset_type = Asset.Type.SUPPORT
-                    asset_name = line_content[3:].strip()
-                elif line_content.upper().startswith("PR:"):
-                    asset_type = Asset.Type.PRIMARY
-                    asset_name = line_content[3:].strip()
+                        if line_content.upper().startswith("SP:"):
+                            asset_type = Asset.Type.SUPPORT
+                            asset_name = line_content[3:].strip()
+                        elif line_content.upper().startswith("PR:"):
+                            asset_type = Asset.Type.PRIMARY
+                            asset_name = line_content[3:].strip()
 
-                if not asset_name:
-                    errors.append({"line": line_content, "error": "Empty asset name"})
-                    continue
+                        if not asset_name:
+                            errors.append(
+                                {"line": line_content, "error": "Empty asset name"}
+                            )
+                            continue
 
-                # Trim stack to current depth
-                depth_stack = depth_stack[:depth]
+                        # Trim stack to current depth
+                        depth_stack = depth_stack[:depth]
 
-                # Parent is the asset at the previous depth level (skip None entries from errors)
-                parent_asset = None
-                if depth_stack:
-                    # Find the last non-None entry in the stack
-                    for i in range(len(depth_stack) - 1, -1, -1):
-                        if depth_stack[i] is not None:
-                            parent_asset = depth_stack[i]
-                            break
+                        # Parent is the asset at the previous depth level (skip None entries from errors)
+                        parent_asset = None
+                        if depth_stack:
+                            # Find the last non-None entry in the stack
+                            for i in range(len(depth_stack) - 1, -1, -1):
+                                if depth_stack[i] is not None:
+                                    parent_asset = depth_stack[i]
+                                    break
 
-                # Check if asset already exists in the folder
-                existing_asset = Asset.objects.filter(
-                    name=asset_name, folder=folder
-                ).first()
+                        # Check if asset already exists in the folder
+                        existing_asset = Asset.objects.filter(
+                            name=asset_name, folder=folder
+                        ).first()
 
-                if existing_asset:
-                    # Reuse existing asset
-                    asset = existing_asset
+                        if existing_asset:
+                            # Reuse existing asset
+                            asset = existing_asset
 
-                    # Update parent relationship if needed and parent exists
-                    if parent_asset and parent_asset not in asset.parent_assets.all():
-                        asset.parent_assets.add(parent_asset)
+                            linked_parent = parent_asset
+                            # Update parent relationship if needed and parent exists
+                            if (
+                                parent_asset
+                                and parent_asset not in asset.parent_assets.all()
+                            ):
+                                link = AssetWriteSerializer(
+                                    asset,
+                                    data={
+                                        "parent_assets": [
+                                            *asset.parent_assets.values_list(
+                                                "id", flat=True
+                                            ),
+                                            parent_asset.id,
+                                        ]
+                                    },
+                                    partial=True,
+                                    context={"request": request},
+                                )
+                                if link.is_valid():
+                                    link.save()
+                                else:
+                                    linked_parent = None
+                                    errors.append(
+                                        {"line": line_content, "errors": link.errors}
+                                    )
 
-                    # Add to stack for potential children
-                    depth_stack.append(asset)
+                            # Add to stack for potential children
+                            depth_stack.append(asset)
 
-                    reused_assets.append(
-                        {
-                            "id": str(asset.id),
-                            "name": asset.name,
-                            "type": asset.get_type_display(),
-                            "parent": parent_asset.name if parent_asset else None,
-                            "depth": depth,
-                        }
-                    )
-                else:
-                    # Create new asset using the serializer to respect IAM
-                    asset_data = {
-                        "name": asset_name,
-                        "type": asset_type,
-                        "folder": str(folder.id),
-                    }
+                            reused_assets.append(
+                                {
+                                    "id": str(asset.id),
+                                    "name": asset.name,
+                                    "type": asset.get_type_display(),
+                                    "parent": linked_parent.name
+                                    if linked_parent
+                                    else None,
+                                    "depth": depth,
+                                }
+                            )
+                        else:
+                            # Create new asset using the serializer to respect IAM
+                            asset_data = {
+                                "name": asset_name,
+                                "type": asset_type,
+                                "folder": str(folder.id),
+                            }
 
-                    # Add parent relationship if exists
-                    if parent_asset:
-                        asset_data["parent_assets"] = [parent_asset.id]
+                            # Add parent relationship if exists
+                            if parent_asset:
+                                asset_data["parent_assets"] = [parent_asset.id]
 
-                    serializer = AssetWriteSerializer(
-                        data=asset_data, context={"request": request}
-                    )
-
-                    if serializer.is_valid():
-                        try:
-                            asset = serializer.save()
-                        except PermissionDenied as e:
-                            return Response(
-                                {"error": e.detail},
-                                status=status.HTTP_403_FORBIDDEN,
+                            serializer = AssetWriteSerializer(
+                                data=asset_data, context={"request": request}
                             )
 
-                        # Add to stack for potential children
-                        depth_stack.append(asset)
+                            if serializer.is_valid():
+                                asset = serializer.save()
 
-                        created_assets.append(
-                            {
-                                "id": str(asset.id),
-                                "name": asset.name,
-                                "type": asset.get_type_display(),
-                                "parent": parent_asset.name if parent_asset else None,
-                                "depth": depth,
-                            }
-                        )
-                    else:
-                        # Error creating asset - add None to stack to maintain depth
-                        depth_stack.append(None)
-                        errors.append(
-                            {
-                                "line": line_content,
-                                "errors": serializer.errors,
-                            }
-                        )
+                                # Add to stack for potential children
+                                depth_stack.append(asset)
+
+                                created_assets.append(
+                                    {
+                                        "id": str(asset.id),
+                                        "name": asset.name,
+                                        "type": asset.get_type_display(),
+                                        "parent": parent_asset.name
+                                        if parent_asset
+                                        else None,
+                                        "depth": depth,
+                                    }
+                                )
+                            else:
+                                # Error creating asset - add None to stack to maintain depth
+                                depth_stack.append(None)
+                                errors.append(
+                                    {
+                                        "line": line_content,
+                                        "errors": serializer.errors,
+                                    }
+                                )
+            except PermissionDenied as e:
+                return Response(
+                    {"error": e.detail},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
             return Response(
                 {
@@ -3527,7 +3567,7 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         except Exception as e:
             logger.error("Error in batch asset creation", error=e)
             return Response(
-                {"error": str(e)},
+                {"error": "Batch asset creation failed"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -3551,6 +3591,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
     """
 
     model = ReferenceControl
+    autocomplete_fields = ["category"]
     filterset_fields = [
         "folder",
         "category",
@@ -3869,36 +3910,20 @@ class VulnerabilityViewSet(BaseModelViewSet):
     }
     search_fields = ["name", "description", "ref_id"]
 
+    autocomplete_serializer_class = VulnerabilityAutocompleteSerializer
+
     def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .prefetch_related(
-                "applied_controls",
-                "assets",
-                "security_exceptions",
-                "security_advisories",
-                "cwes",
-                "filtering_labels__folder",
-            )
+        qs = super().get_queryset()
+        if self.action == "autocomplete":
+            return qs
+        return qs.prefetch_related(
+            "applied_controls",
+            "assets",
+            "security_exceptions",
+            "security_advisories",
+            "cwes",
+            "filtering_labels__folder",
         )
-
-    @action(detail=False, name="Lightweight autocomplete search")
-    def autocomplete(self, request):
-        from core.serializers import VulnerabilityReadSerializer
-
-        qs = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(qs)
-        objects = page if page is not None else qs
-        serializer = VulnerabilityReadSerializer(objects, many=True)
-        data = serializer.data
-        field_models = self._get_fieldsrelated_map(serializer)
-        if field_models:
-            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
-            data = self._filter_related_fields(data, field_models, allowed_ids)
-        if page is not None:
-            return self.get_paginated_response(data)
-        return Response(data)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -7569,6 +7594,7 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
     filterset_class = RiskScenarioFilter
     ordering = ["ref_id"]
     search_fields = ["name", "description", "ref_id"]
+    autocomplete_serializer_class = RiskScenarioAutocompleteSerializer
 
     export_config = {
         "fields": {
@@ -7709,6 +7735,8 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        if self.action == "autocomplete":
+            return queryset.select_related("risk_assessment")
         return queryset.select_related(
             "risk_assessment",
             "risk_assessment__risk_matrix",
@@ -8375,6 +8403,7 @@ class ActorViewSet(BaseModelViewSet):
     http_method_names = ["get", "head", "options"]
 
     model = Actor
+    autocomplete_fields = ["type"]
     # An actor is searched through whichever of user/team/entity it wraps: with no
     # search fields the lazy pickers returned an unfiltered, page-capped list.
     search_fields = [

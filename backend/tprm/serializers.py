@@ -856,6 +856,19 @@ class SolutionSubcontractorWriteSerializer(serializers.Serializer):
     )
 
 
+class SolutionAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField(source="provider_entity.folder")
+
+    class Meta:
+        model = Solution
+        fields = ["id", "name", "ref_id", "folder"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
 class SolutionReadSerializer(BaseModelSerializer):
     provider_entity = FieldsRelatedField()
     recipient_entity = FieldsRelatedField()

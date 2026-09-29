@@ -6842,5 +6842,6 @@
 	"teamLeader": "Leader",
 	"teamDeputy": "Deputy",
 	"teamMember": "Member",
-	"noTeams": "You do not belong to any team."
+	"noTeams": "You do not belong to any team.",
+	"lazyResultsCount": "{count} results · scroll or type to narrow"
 }

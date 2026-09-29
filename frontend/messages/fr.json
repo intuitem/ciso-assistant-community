@@ -6821,5 +6821,6 @@
 	"teamLeader": "Responsable",
 	"teamDeputy": "Adjoint",
 	"teamMember": "Membre",
-	"noTeams": "Vous n'appartenez à aucune équipe."
+	"noTeams": "Vous n'appartenez à aucune équipe.",
+	"lazyResultsCount": "{count} résultats · faites défiler ou affinez la recherche"
 }

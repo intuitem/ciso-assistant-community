@@ -340,6 +340,7 @@ export const AppliedControlSchema = z.object({
 	findings: z.string().uuid().optional().array().optional(),
 	task_templates: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
+	control_documents: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	integration_config: z.string().optional().nullable(),
 	remote_object_id: z.string().optional().nullable(),

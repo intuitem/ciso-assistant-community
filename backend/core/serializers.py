@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from django.conf import settings
 from core.models import *
+from doc_management.models import DocumentContainer
 from core.serializer_fields import (
     FieldsRelatedField,
     HashSlugRelatedField,
@@ -829,6 +830,7 @@ class AssetWriteSerializer(
         exclude = ["business_value"]
 
     def validate(self, data):
+        self._check_linked_assets_changeable(data)
         parent_assets = data.get("parent_assets", [])
         support_assets = data.get("child_assets", [])
         """
@@ -846,6 +848,44 @@ class AssetWriteSerializer(
                         "errorAssetGraphMustNotContainCycles"
                     )
         return super().validate(data)
+
+    def _check_linked_assets_changeable(self, data):
+        request = self.context.get("request")
+        if request is None:
+            return
+        perm = Permission.objects.get(codename="change_asset")
+        for field, error_key in (
+            ("parent_assets", "parent_assets"),
+            ("child_assets", "support_assets"),
+        ):
+            if field not in data:
+                continue
+            proposed = {a.id: a for a in data[field] or []}
+            current = (
+                {a.id: a for a in getattr(self.instance, field).all()}
+                if self.instance is not None
+                else {}
+            )
+            removed = [current[i] for i in current.keys() - proposed.keys()]
+            unseen = [
+                a
+                for a in removed
+                if not RoleAssignment.is_object_readable(request.user, Asset, a.id)
+            ]
+            if unseen:
+                data[field] = [*proposed.values(), *unseen]
+            touched = [proposed[i] for i in proposed.keys() - current.keys()] + [
+                a for a in removed if a not in unseen
+            ]
+            for asset in touched:
+                if not RoleAssignment.is_access_allowed(
+                    user=request.user, perm=perm, folder=asset.folder
+                ):
+                    raise PermissionDenied(
+                        {
+                            error_key: "You do not have permission to change the linked asset"
+                        }
+                    )
 
     def create(self, validated_data):
         parent_assets = validated_data.pop("parent_assets", None)
@@ -1066,10 +1106,38 @@ class AssetAutocompleteSerializer(BaseModelSerializer):
 
 class AppliedControlAutocompleteSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    category = serializers.CharField(source="get_category_display")
 
     class Meta:
         model = AppliedControl
+        fields = ["id", "name", "ref_id", "folder", "category"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
+class VulnerabilityAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Vulnerability
         fields = ["id", "name", "ref_id", "folder"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
+class RiskScenarioAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    risk_assessment = FieldsRelatedField()
+
+    class Meta:
+        model = RiskScenario
+        fields = ["id", "name", "ref_id", "folder", "risk_assessment"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -1488,6 +1556,9 @@ class AppliedControlWriteSerializer(
     )
     incidents = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Incident.objects.all()
+    )
+    control_documents = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=DocumentContainer.objects.all()
     )
     cost = serializers.JSONField(required=False, allow_null=True)
     integration_config = serializers.PrimaryKeyRelatedField(
@@ -5935,7 +6006,7 @@ class FindingReadSerializer(FindingWriteSerializer):
     threats = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
     reference_controls = FieldsRelatedField(many=True)
-    applied_controls = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(["id", "status"], many=True)
     filtering_labels = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     task_templates = FieldsRelatedField(many=True)
