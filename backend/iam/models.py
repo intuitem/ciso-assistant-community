@@ -9,7 +9,6 @@ from typing import Any, List, Literal, Optional, Final
 from typing import TYPE_CHECKING, cast
 import secrets
 import uuid
-import itertools
 from allauth.account.models import EmailAddress
 from django.utils import timezone
 from django.db import models, transaction
