@@ -1218,7 +1218,7 @@
 	oninputcapture={trackInput}
 >
 	{#if selectedNode && nodeDomain}
-		<div class="p-3 space-y-3">
+		<div class="p-3 space-y-3 [&>label]:block">
 			<div class="flex items-center gap-2">
 				<span class="badge preset-tonal text-[10px] uppercase">
 					{safeTranslate(
@@ -3300,7 +3300,7 @@
 			</div>
 		</div>
 	{:else if selectedEdge && edgeDomain}
-		<div class="p-3 space-y-3">
+		<div class="p-3 space-y-3 [&>label]:block">
 			<span class="badge preset-tonal text-[10px] uppercase">
 				<i class="fa-solid fa-arrow-right-long mr-1"></i>{m.edgeLabel()}
 			</span>
