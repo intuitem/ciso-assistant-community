@@ -616,6 +616,15 @@ class TestFolderDefaultRole:
             root_folder.default_role = original_default_role
             root_folder.save()
 
+    def test_pinned_default_role_is_eligible(self):
+        """The role startup() pins must pass the default-role validator, or an admin
+        who changes the root's default role can never pick the baseline again."""
+        from core.serializers import FolderWriteSerializer
+
+        FolderWriteSerializer().validate_default_role(
+            Role.objects.get(name="BI-RL-BSL")
+        )
+
     def test_group_member_gets_default_role_access(
         self, ctx: TestFolderDefaultRole.UserInfo
     ):
