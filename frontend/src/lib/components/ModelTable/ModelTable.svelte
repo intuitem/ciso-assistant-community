@@ -352,7 +352,8 @@
 
 	/**
 	 * Mark a row as read when it is opened (notifications). Fire-and-forget with keepalive
-	 * so it survives the navigation, and also covers rows opened in a new tab.
+	 * so it survives the navigation, and also covers rows opened in a new tab. Bound in the
+	 * capture phase because Anchor stops propagation of modified clicks.
 	 */
 	function onRowOpen(event: MouseEvent, meta: Record<string, any>): void {
 		const nav = listViewFields[URLModel]?.rowNavigation;
@@ -1117,7 +1118,7 @@
 							{@const meta = row?.meta ?? row}
 							{@const href = rowHref(meta)}
 							<tr
-								onclick={(e) => onRowOpen(e, meta)}
+								onclickcapture={(e) => onRowOpen(e, meta)}
 								onauxclick={(e) => e.button === 1 && onRowOpen(e, meta)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
 								class="relative hover:bg-surface-200-800 even:bg-surface-100-900 {rowEmphasisClass(
