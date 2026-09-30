@@ -327,66 +327,54 @@
 	}
 
 	/**
-	 * Open the object a row points at, rather than the row itself. Returns true when it
-	 * handled the click. The PATCH is fire-and-forget so navigation never waits on it.
+	 * Where a row leads. Rows are real links (a stretched <a> over the row), so the browser
+	 * handles plain, modified and middle clicks natively. Undefined when the row is not
+	 * navigable.
 	 */
-	function followRowNavigation(rowMetaData: Record<string, any>): boolean {
+	function rowHref(meta: Record<string, any>): string | undefined {
+		if (!interactive || !URLModel || !meta?.[identifierField]) return undefined;
+		// Some rows open the object they point at rather than themselves (notifications)
 		const nav = listViewFields[URLModel]?.rowNavigation;
-		if (!nav) return false;
-
-		const marked =
-			nav.markField && rowMetaData[nav.markField] === false
-				? fetch(`/${URLModel}/${rowMetaData[identifierField]}/${nav.markField}`, {
-						method: 'PATCH',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ [nav.markField]: true })
-					})
-						.then((res) => (res.ok ? res.json() : null))
-						.then(applyUnreadCount)
-						.catch((error) => console.error(`Could not mark ${nav.markField}:`, error))
-				: Promise.resolve();
-
-		const targetModel = urlModelForDjangoName(rowMetaData[nav.modelField]);
-		const targetId = rowMetaData[nav.idField];
-		if (!targetModel || !targetId) {
-			// Unmapped model, or a target deleted under the row: still counts as read, so
-			// only the navigation is skipped. Refetching before the PATCH lands would
-			// bring the row back unread.
-			marked.finally(() => handler.invalidate());
-			return true;
+		if (nav) {
+			const targetModel = urlModelForDjangoName(meta[nav.modelField]);
+			const targetId = meta[nav.idField];
+			return targetModel && targetId ? `/${targetModel}/${targetId}` : undefined;
 		}
-
-		goto(`/${targetModel}/${targetId}`, { breadcrumbAction: 'push' });
-		return true;
+		return `/${URLModel}/${meta[identifierField]}${detailQueryParameter}`;
 	}
 
-	function onRowClick(event: SvelteEvent<MouseEvent, HTMLTableRowElement>, rowIndex: number): void {
-		if (!interactive) return;
-		// Rows are not links: leave modified clicks to the browser (links inside cells, view icon).
-		// Must run before preventDefault(), which would cancel the native new tab on those links.
-		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-		event.preventDefault();
-		event.stopPropagation();
-		const rowMetaData = $rows[rowIndex].meta;
-		if (!rowMetaData[identifierField] || !URLModel) return;
-
-		if (followRowNavigation(rowMetaData)) return;
-
-		const preferredLabel =
-			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
-		const label =
-			preferredLabel ||
-			rowMetaData.str ||
-			rowMetaData.name ||
-			rowMetaData.email ||
-			rowMetaData.label ||
-			rowMetaData[identifierField];
-
-		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
-			label,
-			breadcrumbAction: 'push'
-		});
+	function rowLabel(meta: Record<string, any>): string {
+		const preferredLabel = URLModel === 'reference-controls' ? meta.name || meta.ref_id : undefined;
+		return (
+			preferredLabel || meta.str || meta.name || meta.email || meta.label || meta[identifierField]
+		);
 	}
+
+	/**
+	 * Mark a row as read when it is opened (notifications). Fire-and-forget with keepalive
+	 * so it survives the navigation, and also covers rows opened in a new tab.
+	 */
+	function onRowOpen(event: MouseEvent, meta: Record<string, any>): void {
+		const nav = listViewFields[URLModel]?.rowNavigation;
+		if (!nav?.markField || meta?.[nav.markField] !== false) return;
+		const href = rowHref(meta);
+		const target = event.target as HTMLElement;
+		// Only the row itself: clicks on links or buttons inside the row are theirs
+		if (href ? !target.closest('.row-link') : target.closest(INTERACTIVE_SELECTOR)) return;
+		fetch(`/${URLModel}/${meta[identifierField]}/${nav.markField}`, {
+			method: 'PATCH',
+			keepalive: true,
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ [nav.markField]: true })
+		})
+			.then((res) => (res.ok ? res.json() : null))
+			.then(applyUnreadCount)
+			// Target unmapped or deleted: the row still counts as read, refetch to show it
+			.then(() => !href && handler.invalidate())
+			.catch((error) => console.error(`Could not mark ${nav.markField}:`, error));
+	}
+
+	const INTERACTIVE_SELECTOR = 'a, button, input, select, textarea, label, [role="button"]';
 
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
@@ -1127,16 +1115,20 @@
 					<tbody {...props} class="w-full border-b border-b-surface-100-900 {regionBody}">
 						{#each $rows as row, rowIndex}
 							{@const meta = row?.meta ?? row}
+							{@const href = rowHref(meta)}
 							<tr
-								onclick={(e) => onRowClick(e, rowIndex)}
+								onclick={(e) => onRowOpen(e, meta)}
+								onauxclick={(e) => e.button === 1 && onRowOpen(e, meta)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
-								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer {rowEmphasisClass(
+								class="relative hover:bg-surface-200-800 even:bg-surface-100-900 {rowEmphasisClass(
 									row
 								)}"
+								class:row-linked={href}
+								class:cursor-pointer={href}
 							>
 								{#if hasBatchActions}
 									<td
-										class="group/check w-10 text-center cursor-pointer"
+										class="group/check relative z-1 w-10 text-center cursor-pointer"
 										onclick={(e) => {
 											e.stopPropagation();
 											if (meta?.id) toggleRowSelection(meta.id);
@@ -1155,10 +1147,18 @@
 										</span>
 									</td>
 								{/if}
-								{#each renderColumnKeys as key (key)}
+								{#each renderColumnKeys as key, keyIndex (key)}
 									{@const value = row[key]}
 									{@const component = fieldComponentMap[key]}
 									<td>
+										{#if keyIndex === 0 && href}
+											<Anchor
+												{href}
+												label={rowLabel(meta)}
+												breadcrumbAction="push"
+												class="row-link unstyled"
+											></Anchor>
+										{/if}
 										<div class={regionCell}>
 											{#if component && browser}
 												{@const CellComponent = component}
@@ -1519,3 +1519,29 @@
 		{/if}
 	</footer>
 </div>
+
+<style>
+	/* Stretched link: the row's <a> covers the whole row (the <tr> is its containing block) */
+	tr :global(.row-link)::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+	tr :global(.row-link:focus-visible) {
+		outline: none;
+	}
+	tr.row-linked:has(:global(.row-link:focus-visible)) {
+		outline: 2px solid var(--color-primary-500);
+		outline-offset: -2px;
+	}
+	/* Anything interactive inside a linked row stays clickable above the row link */
+	tr.row-linked
+		:global(
+			:is(a, button, input, select, textarea, label, summary, [role='button'], [tabindex]):not(
+				.row-link
+			)
+		) {
+		position: relative;
+		z-index: 1;
+	}
+</style>
