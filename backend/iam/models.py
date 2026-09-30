@@ -2137,36 +2137,41 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         If `is_recursive` is `True`: the indirectly allowed folders are included (meaning `RoleAssignment.is_recursive` isn't ignored).
         """
 
-        """if not isinstance(principal, (User, UserGroup)):
-            return {}"""
-
-        if isinstance(principal, User):
-            role_assignments = RoleAssignment.get_role_assignments_from_user(principal)
-        elif isinstance(principal, UserGroup):
-            role_assignments = RoleAssignment.objects.filter(user_group=principal)
-        else:
+        if not isinstance(principal, (User, UserGroup)):
             return {}
 
-        folder_id_to_codenames = defaultdict(set)
+        directly_assigned_codenames: dict[uuid.UUID, set[str]] = defaultdict(set)
+        recursively_assigned_codenames: dict[uuid.UUID, set[str]] = defaultdict(set)
 
-        # This implementation has `O(N)` complexity (with `N = len(role_assignments)`).
-        # It's kind of hard to to better (if possible), and this function is fast enough for now anyway.
-        for role_assignment in role_assignments:
-            role_assignment_folders = role_assignment.perimeter_folders.all()
-            codenames = set(
-                role_assignment.role.permissions.values_list("codename", flat=True)
-            )
+        for (
+            folder_id,
+            codename,
+            _,
+            is_grant_recursive,
+        ) in RoleAssignment._get_directly_granted_permissions(principal):
+            if folder_id is None or codename is None:
+                continue
 
-            if role_assignment.is_recursive and is_recursive:
-                descendants = Folder.objects.filter(
-                    ancestors__in=role_assignment_folders
-                ).distinct()
-            else:
-                descendants = []
+            directly_assigned_codenames[folder_id].add(codename)
+            if is_recursive and is_grant_recursive:
+                recursively_assigned_codenames[folder_id].add(codename)
 
-            folders = itertools.chain(role_assignment_folders, descendants)
-            for folder in folders:
-                folder_id_to_codenames[str(folder.id)].update(codenames)
+        folder_id_to_codenames: dict[str, set[str]] = defaultdict(set)
+        for folder_id, codenames in directly_assigned_codenames.items():
+            folder_id_to_codenames[str(folder_id)] |= codenames
+
+        if len(recursively_assigned_codenames) > 0:
+            recursive_folder_ids = list(recursively_assigned_codenames.keys())
+
+            for (
+                folder_id,
+                descendant_folder_id,
+            ) in Folder.descendants.through.objects.filter(
+                from_folder_id__in=recursive_folder_ids
+            ).values_list("from_folder_id", "to_folder_id"):
+                folder_id_to_codenames[str(descendant_folder_id)] |= (
+                    recursively_assigned_codenames[folder_id]
+                )
 
         return folder_id_to_codenames
 
