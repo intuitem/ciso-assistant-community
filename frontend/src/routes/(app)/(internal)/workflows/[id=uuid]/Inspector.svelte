@@ -2780,7 +2780,7 @@
 							<div class="flex items-center gap-1.5">
 								<button
 									type="button"
-									class="btn-icon preset-tonal w-6 h-6 text-xs shrink-0"
+									class="btn-icon preset-tonal w-6 h-6 text-xs shrink-0 hover:preset-filled-primary-500"
 									onclick={addComputeRow}
 									disabled={!variables.length}
 									aria-label={m.computeAddRow()}
