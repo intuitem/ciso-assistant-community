@@ -44,6 +44,7 @@
 	// Types
 	import { browser } from '$app/environment';
 	import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
+	import MarkdownDescription from '$lib/components/ModelTable/field/MarkdownDescription.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
@@ -374,6 +375,20 @@
 			// Target unmapped or deleted: the row still counts as read, refetch to show it
 			.then(() => !href && handler.invalidate())
 			.catch((error) => console.error(`Could not mark ${nav.markField}:`, error));
+	}
+
+	// Markdown that may render a link: inline/reference links, autolinked URLs or emails, raw <a>
+	const MARKDOWN_LINK_HINT = /\]\(|\]\[|^\s*\[[^\]]+\]:|https?:\/\/|www\.|<a\b|@/im;
+
+	/**
+	 * Whether a cell can itself be a link to its row (raised above the row link so clamped
+	 * content still scrolls on hover). Only cells that cannot render links of their own:
+	 * plain values, and Markdown without links. A link inside a link is invalid HTML.
+	 */
+	function isCellLink(value: unknown, component: unknown): boolean {
+		if (value != null && typeof value === 'object') return false;
+		if (!component) return true;
+		return component === MarkdownDescription && !MARKDOWN_LINK_HINT.test(String(value ?? ''));
 	}
 
 	const INTERACTIVE_SELECTOR = 'a, button, input, select, textarea, label, [role="button"]';
@@ -1152,8 +1167,7 @@
 								{#each renderColumnKeys as key, keyIndex (key)}
 									{@const value = row[key]}
 									{@const component = fieldComponentMap[key]}
-									{@const cellLink =
-										href && !component && (value == null || typeof value !== 'object')}
+									{@const cellLink = href && isCellLink(value, component)}
 									<td>
 										{#if keyIndex === 0 && href}
 											<Anchor
@@ -1163,9 +1177,7 @@
 												class="row-link unstyled"
 											></Anchor>
 										{/if}
-										<!-- Plain-value cells are their own (duplicate) link to the row, raised above the
-										     row link, so their clamped content still scrolls on hover. Cells that can
-										     hold links (components, arrays, objects) stay under the row link. -->
+										<!-- See isCellLink: some cells are their own (duplicate) link to the row -->
 										{#snippet cellBody()}
 											{#if component && browser}
 												{@const CellComponent = component}
