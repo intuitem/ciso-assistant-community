@@ -15,6 +15,8 @@
 	import { fetchHookSecret, publicHookUrl } from './hook-url';
 	import { postOps } from './ops';
 	import DataBrowser from './DataBrowser.svelte';
+	import CelInput from './CelInput.svelte';
+	import { recipes as computeRecipes, type Scope as CelScope } from './compute-assist';
 	import { dig, renderTemplate } from './expressions';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 	import {
@@ -836,6 +838,32 @@
 
 	function removeComputeRow(index: number) {
 		actionConfig.expressions = computeRows().filter((_, i) => i !== index);
+		onChange();
+	}
+
+	// What the autocomplete and the recipes can see from this node.
+	const celScope = $derived<CelScope>({
+		variables,
+		referenceVariables,
+		referenceNodes,
+		upstreamNodes
+	});
+
+	// A recipe lands in a new row on the first free variable; with none free
+	// it replaces the last row's expression, so it never disappears silently.
+	function addRecipeRow(expression: string) {
+		const rows = computeRows();
+		const used = new Set(rows.map((row) => row.key));
+		const candidate = variables.find((v) => !used.has(v.key));
+		if (candidate) {
+			actionConfig.expressions = [...rows, { key: candidate.key, expression }];
+		} else if (rows.length) {
+			actionConfig.expressions = rows.map((row, i) =>
+				i === rows.length - 1 ? { ...row, expression } : row
+			);
+		} else {
+			return;
+		}
 		onChange();
 	}
 
@@ -2763,14 +2791,34 @@
 					<div>
 						<div class="flex items-center justify-between mb-1">
 							{@render fieldLabel(m.computeExpressions())}
-							<button
-								type="button"
-								class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold disabled:opacity-50"
-								onclick={addComputeRow}
-								disabled={!variables.length}
-							>
-								<i class="fa-solid fa-plus"></i>
-							</button>
+							<div class="flex items-center gap-2">
+								<select
+									class="select text-[10px] py-0 px-1 h-5 w-auto"
+									value=""
+									disabled={!variables.length}
+									data-testid="compute-recipes"
+									onchange={(e) => {
+										const recipe = computeRecipes(celScope).find(
+											(r) => r.id === e.currentTarget.value
+										);
+										if (recipe) addRecipeRow(recipe.expression);
+										e.currentTarget.value = '';
+									}}
+								>
+									<option value="">{m.computeRecipes()}</option>
+									{#each computeRecipes(celScope) as recipe (recipe.id)}
+										<option value={recipe.id}>{safeTranslate(recipe.id)}</option>
+									{/each}
+								</select>
+								<button
+									type="button"
+									class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold disabled:opacity-50"
+									onclick={addComputeRow}
+									disabled={!variables.length}
+								>
+									<i class="fa-solid fa-plus"></i>
+								</button>
+							</div>
 						</div>
 						{#each actionConfig.expressions as row, index (index)}
 							<div class="flex items-center gap-1 mb-1">
@@ -2785,14 +2833,12 @@
 									{/each}
 								</select>
 								<span class="text-xs text-surface-500 shrink-0">=</span>
-								<input
-									type="text"
-									class="input text-xs font-mono flex-1 min-w-0"
-									placeholder="likelihood * impact"
+								<CelInput
 									bind:value={row.expression}
+									scope={celScope}
+									placeholder="likelihood * impact"
 									oninput={onChange}
-									data-syntax="cel"
-									data-testid="compute-expression"
+									testid="compute-expression"
 								/>
 								<button
 									type="button"
