@@ -2780,7 +2780,7 @@
 							<div class="flex items-center gap-1.5">
 								<button
 									type="button"
-									class="btn preset-tonal h-6 w-6 p-0 text-[10px] disabled:opacity-50"
+									class="btn-icon preset-tonal w-6 h-6 text-xs shrink-0"
 									onclick={addComputeRow}
 									disabled={!variables.length}
 									aria-label={m.computeAddRow()}
@@ -2817,7 +2817,7 @@
 										<button
 											type="button"
 											aria-label="Remove"
-											class="text-surface-500 hover:text-error-500 cursor-pointer text-xs shrink-0 h-6 w-6 flex items-center justify-center"
+											class="btn-icon preset-tonal w-6 h-6 text-[10px] shrink-0 hover:preset-filled-error-500"
 											onclick={() => removeComputeRow(index)}
 										>
 											<i class="fa-solid fa-xmark"></i>
