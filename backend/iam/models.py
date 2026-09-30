@@ -1296,6 +1296,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         "add_chatsession",
         "change_chatsession",
         "delete_chatsession",
+        "change_notification",
+        "delete_notification",
     }
 
     @property
