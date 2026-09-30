@@ -2405,6 +2405,7 @@
 				{readableModels}
 				{fkOptions}
 				{workflowId}
+				versionId={activeVersionId}
 				{registrationsByRef}
 				onRegistrationsChanged={refreshRegistrations}
 				referenceRunId={referenceRun?.id ?? null}

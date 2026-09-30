@@ -60,6 +60,7 @@
 		readableModels?: { key: string; fields: string[]; includable?: string[] }[];
 		fkOptions?: Record<string, Option[]>;
 		workflowId: string;
+		versionId?: string | null;
 		registrationsByRef?: Record<string, any>;
 		onRegistrationsChanged?: () => void;
 		referenceRunId?: string | null;
@@ -92,6 +93,7 @@
 		readableModels = [],
 		fkOptions = {},
 		workflowId,
+		versionId = null,
 		registrationsByRef = {},
 		onRegistrationsChanged,
 		referenceRunId = null,
@@ -129,6 +131,10 @@
 	let copiedExpression = $state(false);
 	function insertExpression(expression: string) {
 		const el = lastFocusedInput;
+		// A compute row is CEL: the same path, without the template braces.
+		if (el?.dataset.syntax === 'cel') {
+			expression = expression.replace(/^\{\{\s*(.*?)\s*\}\}$/, '$1');
+		}
 		if (el && document.contains(el)) {
 			const start = el.selectionStart ?? el.value.length;
 			const end = el.selectionEnd ?? start;
@@ -832,6 +838,52 @@
 		actionConfig.expressions = computeRows().filter((_, i) => i !== index);
 		onChange();
 	}
+
+	// Live result of each compute row, evaluated server-side against the
+	// reference run (or the draft's defaults): the editor shows what the engine
+	// will compute, with the engine's own error messages.
+	type ComputePreview = { ok: true; value: unknown; type: string } | { ok: false; error: string };
+	let computePreviews = $state<Record<number, ComputePreview>>({});
+	let computePreviewTimer: ReturnType<typeof setTimeout> | null = null;
+	let computePreviewSeq = 0;
+	let computePreviewNodeId: string | null = null;
+
+	async function refreshComputePreviews() {
+		if (!versionId) return;
+		const rows = computeRows();
+		const seq = ++computePreviewSeq;
+		const results: Record<number, ComputePreview> = {};
+		await Promise.all(
+			rows.map(async (row, index) => {
+				if (!row.expression.trim()) return;
+				try {
+					const res = await postOps(workflowId, 'preview-expression', {
+						version: versionId,
+						expression: row.expression,
+						rows_above: rows.slice(0, index),
+						reference_run: referenceRunId
+					});
+					if (res.ok) results[index] = await res.json();
+				} catch {
+					// Network hiccup: keep the previous preview rather than flash an error.
+				}
+			})
+		);
+		if (seq === computePreviewSeq) computePreviews = results;
+	}
+
+	$effect(() => {
+		if (actionConfig?.type !== 'compute') return;
+		// Tracked: the rows, the reference run and the selected node.
+		const signature = JSON.stringify(computeRows()) + referenceRunId;
+		if (nodeDomain?.id !== computePreviewNodeId) {
+			computePreviewNodeId = nodeDomain?.id ?? null;
+			computePreviews = {};
+		}
+		void signature;
+		if (computePreviewTimer) clearTimeout(computePreviewTimer);
+		computePreviewTimer = setTimeout(refreshComputePreviews, 300);
+	});
 
 	// HTTP headers are a plain dict in the config, but editing keys in place
 	// would recreate the inputs on every keystroke. Edit an entries array
@@ -2739,6 +2791,7 @@
 									placeholder="likelihood * impact"
 									bind:value={row.expression}
 									oninput={onChange}
+									data-syntax="cel"
 									data-testid="compute-expression"
 								/>
 								<button
@@ -2750,6 +2803,22 @@
 									<i class="fa-solid fa-xmark"></i>
 								</button>
 							</div>
+							{#if computePreviews[index]}
+								{@const preview = computePreviews[index]}
+								<p
+									class="text-[10px] font-mono pl-1 mb-1 break-all {preview.ok
+										? 'text-success-600 dark:text-success-400'
+										: 'text-error-500'}"
+									data-testid="compute-preview"
+								>
+									{#if preview.ok}
+										= {JSON.stringify(preview.value)}
+										<span class="text-surface-500">· {preview.type}</span>
+									{:else}
+										<i class="fa-solid fa-triangle-exclamation mr-1"></i>{preview.error}
+									{/if}
+								</p>
+							{/if}
 						{/each}
 					</div>
 					<p class="text-[10px] text-surface-500 leading-relaxed">
