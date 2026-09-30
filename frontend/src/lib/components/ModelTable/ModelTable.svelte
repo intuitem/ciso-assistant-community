@@ -330,7 +330,7 @@
 	 * Open the object a row points at, rather than the row itself. Returns true when it
 	 * handled the click. The PATCH is fire-and-forget so navigation never waits on it.
 	 */
-	function followRowNavigation(rowMetaData: Record<string, any>): boolean {
+	function followRowNavigation(rowMetaData: Record<string, any>, newTab: boolean): boolean {
 		const nav = listViewFields[URLModel]?.rowNavigation;
 		if (!nav) return false;
 
@@ -356,7 +356,10 @@
 			return true;
 		}
 
-		goto(`/${targetModel}/${targetId}`, { breadcrumbAction: 'push' });
+		if (newTab) {
+			window.open(`/${targetModel}/${targetId}`, '_blank', 'noopener');
+			marked.finally(() => handler.invalidate());
+		} else goto(`/${targetModel}/${targetId}`, { breadcrumbAction: 'push' });
 		return true;
 	}
 
@@ -367,11 +370,11 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
 
-		if (followRowNavigation(rowMetaData)) return;
+		const newTab = event.metaKey || event.ctrlKey;
+		if (followRowNavigation(rowMetaData, newTab)) return;
 
 		const detailURL = `/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`;
-		// Rows are not real links, so emulate the native cmd/ctrl+click behaviour
-		if (event.metaKey || event.ctrlKey) {
+		if (newTab) {
 			window.open(detailURL, '_blank', 'noopener');
 			return;
 		}
