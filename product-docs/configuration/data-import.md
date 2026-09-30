@@ -325,6 +325,8 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
   * `transfer`
 * **assets**\
   Newline-, semicolon- or comma-separated asset names or ref\_ids. Missing assets are auto-created in the domain folder with the default type Support, provided you may add assets there — otherwise the name is reported as a warning on the row.
+* **threats**\
+  Newline-, semicolon- or comma-separated threat ref\_ids (or names) of existing threats you can view, such as the ones loaded from a library. Threats are only linked, never created: an unknown one is reported as a warning on the row.
 * **justification**: String
 
 1: The string must represent a value present in the chosen risk matrix

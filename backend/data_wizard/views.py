@@ -57,6 +57,7 @@ from core.models import (
     TaskNode,
     TaskTemplate,
     Terminology,
+    Threat,
     Vulnerability,
 )
 from core.serializers import (
@@ -610,6 +611,25 @@ def _resolve_applied_controls(value: Any, folder: "Folder", request) -> SideObje
         AppliedControlWriteSerializer,
         extra_create_data={"status": "to_do"},
     )
+
+
+def _resolve_threats(value: Any, threats: models.QuerySet) -> SideObjects:
+    """Link threats by ref_id, then by name, among *threats*; never creates one.
+
+    Unlike assets, threats mostly come from libraries and live in the root
+    folder, so the lookup cannot be scoped to the import's folder.
+    """
+    resolved = SideObjects()
+    for token in _split_multi_separator(value):
+        threat = (
+            threats.filter(ref_id=token).first()
+            or threats.filter(name__iexact=token).first()
+        )
+        if threat is None:
+            resolved.failed.append(token)
+        else:
+            resolved.ids.append(threat.id)
+    return resolved
 
 
 def _resolve_owners(value: Any) -> list[UUID]:
@@ -2014,6 +2034,8 @@ class RiskAssessmentContext:
     risk_assessment: RiskAssessment
     folder: Folder
     matrix_mappings: dict
+    # Threats the user may view, the candidates for the `threats` column.
+    threats: models.QuerySet
 
 
 class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
@@ -2102,6 +2124,11 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
                 risk_assessment=risk_assessment,
                 folder=risk_assessment.folder,
                 matrix_mappings=build_matrix_mappings(risk_assessment.risk_matrix),
+                threats=Threat.objects.filter(
+                    id__in=RoleAssignment.get_viewable_object_ids(
+                        self.request.user, Threat
+                    )
+                ),
             ), None
 
         except Perimeter.DoesNotExist:
@@ -2161,6 +2188,7 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
         assets = _resolve_assets(
             record.get("assets") or record.get("asset"), context.folder, self.request
         )
+        threats = _resolve_threats(record.get("threats"), context.threats)
         self._record_side_effects("assets_created", assets)
         self._record_side_effects("applied_controls_created", existing_controls)
         self._record_side_effects("applied_controls_created", additional_controls)
@@ -2197,6 +2225,10 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
                 record.get("filtering_labels") or record.get("labels")
             ),
         }
+        # Only set when something resolved, so that on update a cell of
+        # unknown threats warns instead of wiping the scenario's links.
+        if threats.ids:
+            scenario_data["threats"] = threats.ids
 
         unresolved = existing_controls.failed + additional_controls.failed
         messages = []
@@ -2204,6 +2236,8 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             messages.append(f"Could not resolve controls: {', '.join(unresolved)}")
         if assets.failed:
             messages.append(f"Could not resolve assets: {', '.join(assets.failed)}")
+        if threats.failed:
+            messages.append(f"Could not resolve threats: {', '.join(threats.failed)}")
         if messages:
             return scenario_data, Error(
                 record=record, error="; ".join(messages), is_warning=True
