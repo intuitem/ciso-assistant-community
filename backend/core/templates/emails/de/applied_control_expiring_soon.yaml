@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Maßnahmen in ${days_remaining} Tagen fällig"
+body: |
+  Hallo,
+
+  Anzahl der in ${days_remaining} Tagen fälligen Maßnahmen: ${control_count}
+
+  ${control_list}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um diese Maßnahmen zu prüfen und abzuschließen: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

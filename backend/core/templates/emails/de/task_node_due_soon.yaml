@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Aufgaben in ${days_remaining} Tagen fällig"
+body: |
+  Hallo,
+
+  Anzahl der in ${days_remaining} Tagen fälligen Aufgaben: ${task_count}
+
+  ${task_list}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um diese Aufgaben zu prüfen und abzuschließen: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

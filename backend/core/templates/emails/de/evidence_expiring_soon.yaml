@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Nachweise laufen in ${days_remaining} Tagen ab"
+body: |
+  Hallo,
+
+  Anzahl der in ${days_remaining} Tagen ablaufenden Nachweise: ${evidence_count}
+
+  ${evidence_list}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um diese Nachweise zu prüfen und zu aktualisieren: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.
