@@ -2,12 +2,11 @@ import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
 
-import { BASE_API_URL } from '$lib/utils/constants';
 import { env } from '$env/dynamic/public';
 
 const loginPageRegex = /^[a-zA-Z0-9]+:\/\/[^\/]+\/login\/?.*$/;
 
-export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) => {
+export const load = loadFlash(async ({ locals, url, cookies, request }) => {
 	const user = await locals.getUser();
 	if (!user && !url.pathname.includes('/login')) {
 		redirect(302, `/login?next=${url.pathname}`);
@@ -43,38 +42,6 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		}
 	}
 
-	// Fetch accessible folder tree for Focus Mode selector
-	let orgTree: {
-		name: string;
-		uuid: string | null;
-		viewable?: boolean;
-		children?: unknown[];
-	} | null = null;
-	const focusModeEnabled = featureflags?.focus_mode ?? false;
-	if (user && focusModeEnabled) {
-		try {
-			const treeRes = await fetch(
-				`${BASE_API_URL}/folders/org_tree/?include_perimeters=false&no_focus=true`
-			);
-			if (treeRes.ok) {
-				orgTree = await treeRes.json();
-			}
-		} catch (e) {
-			console.error('Failed to fetch folder tree for focus mode:', e);
-		}
-	}
-
-	let licenseStatus = {};
-	try {
-		const licenseRes = await fetch(`${BASE_API_URL}/license-status/`);
-		if (licenseRes.ok) {
-			licenseStatus = await licenseRes.json();
-		} else {
-			console.error('Failed to fetch license status:', licenseRes.status, licenseRes.statusText);
-		}
-	} catch (e) {
-		console.error('Error fetching license status:', e);
-	}
 	const LICENSE_EXPIRATION_NOTIFY_DAYS = Object.hasOwn(env, 'PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS')
 		? env.PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS
 		: 7;
@@ -87,9 +54,7 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		user,
 		settings,
 		featureflags,
-		licenseStatus,
 		LICENSE_EXPIRATION_NOTIFY_DAYS,
-		LICENSE_EXPIRATION_MESSAGE,
-		orgTree
+		LICENSE_EXPIRATION_MESSAGE
 	};
 }) satisfies LayoutServerLoad;
