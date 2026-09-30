@@ -12,8 +12,11 @@
 		source,
 		target,
 		markerEnd,
-		selected
+		selected,
+		data
 	}: EdgeProps = $props();
+
+	const dash = $derived(data?.crossDomain ? ' stroke-dasharray: 6 4;' : '');
 
 	const board = getContext<{
 		deleteEdge: (source: string, target: string) => void;
@@ -34,9 +37,11 @@
 <BaseEdge
 	{path}
 	{markerEnd}
-	style={selected
+	style={(selected
 		? 'stroke: var(--color-secondary-500); stroke-width: 3;'
-		: 'stroke: var(--color-surface-500); stroke-width: 2;'}
+		: data?.crossDomain
+			? 'stroke: var(--color-warning-500); stroke-width: 2;'
+			: 'stroke: var(--color-surface-500); stroke-width: 2;') + dash}
 />
 
 {#if selected}

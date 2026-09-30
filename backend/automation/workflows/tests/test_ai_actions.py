@@ -824,3 +824,58 @@ class TestAiProvenanceThroughSetVariables:
         # The hop reads nothing AI, so the write is an ordinary literal path.
         codes = self.codes(self.graph(hops=1, seed="expired"))
         assert "action_update_ai_value_on_fenced_field" not in codes
+
+
+@pytest.mark.django_db
+def test_the_token_ceiling_is_named_in_the_run(
+    dispatch, django_capture_on_commit_callbacks, monkeypatch
+):
+    """The run log is where someone looks first, and "the AI provider call
+    failed" sends them to the provider. The model running past our own ceiling
+    is ours to say, and safe to."""
+    from chat.providers import TruncatedCompletion
+
+    class Runaway:
+        def generate(self, *args, **kwargs):
+            raise TruncatedCompletion(
+                "the model reached the 4096-token ceiling before finishing its answer"
+            )
+
+    monkeypatch.setattr("chat.providers.get_llm_strict", Runaway, raising=True)
+    version = ai_flow(
+        {"type": "ai_extract", "prompt": "Classify", "schema": SEVERITY_SCHEMA}
+    )
+    with django_capture_on_commit_callbacks(execute=True):
+        instance = start_instance(version)
+    with django_capture_on_commit_callbacks(execute=True):
+        dispatch.run()
+    instance.refresh_from_db()
+
+    said = " ".join(log.message or "" for log in instance.logs.all())
+    assert "4096-token ceiling" in said
+    assert "the AI provider call failed" not in said
+
+
+@pytest.mark.django_db
+def test_an_oversized_deferred_output_fails_the_node_instead_of_stranding_it(
+    dispatch, llm, django_capture_on_commit_callbacks, settings
+):
+    """The claim on the token is already committed, so a cap breach must not
+    roll the resume back: the token would stay WAITING forever."""
+    settings.WORKFLOW_NODE_OUTPUT_BUDGET = 100
+    schema = {
+        "type": "object",
+        "properties": {"first": {"type": "string"}, "second": {"type": "string"}},
+        "required": ["first", "second"],
+    }
+    llm(json.dumps({"first": "x" * 400, "second": "y"}))
+    version = ai_flow({"type": "ai_extract", "prompt": "Classify", "schema": schema})
+    with django_capture_on_commit_callbacks(execute=True):
+        instance = start_instance(version)
+    with django_capture_on_commit_callbacks(execute=True):
+        dispatch.run()
+    instance.refresh_from_db()
+
+    assert instance.status == WorkflowInstance.Status.FAILED
+    assert not instance.tokens.filter(status=WorkflowToken.Status.WAITING).exists()
+    assert any("were dropped" in (log.message or "") for log in instance.logs.all())
