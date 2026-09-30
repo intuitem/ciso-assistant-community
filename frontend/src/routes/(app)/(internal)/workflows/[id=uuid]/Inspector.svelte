@@ -16,7 +16,7 @@
 	import { postOps } from './ops';
 	import DataBrowser from './DataBrowser.svelte';
 	import CelInput from './CelInput.svelte';
-	import { recipes as computeRecipes, type Scope as CelScope } from './compute-assist';
+	import type { Scope as CelScope } from './compute-assist';
 	import { dig, renderTemplate } from './expressions';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 	import {
@@ -841,31 +841,13 @@
 		onChange();
 	}
 
-	// What the autocomplete and the recipes can see from this node.
+	// What the autocomplete can see from this node.
 	const celScope = $derived<CelScope>({
 		variables,
 		referenceVariables,
 		referenceNodes,
 		upstreamNodes
 	});
-
-	// A recipe lands in a new row on the first free variable; with none free
-	// it replaces the last row's expression, so it never disappears silently.
-	function addRecipeRow(expression: string) {
-		const rows = computeRows();
-		const used = new Set(rows.map((row) => row.key));
-		const candidate = variables.find((v) => !used.has(v.key));
-		if (candidate) {
-			actionConfig.expressions = [...rows, { key: candidate.key, expression }];
-		} else if (rows.length) {
-			actionConfig.expressions = rows.map((row, i) =>
-				i === rows.length - 1 ? { ...row, expression } : row
-			);
-		} else {
-			return;
-		}
-		onChange();
-	}
 
 	// Live result of each compute row, evaluated server-side against the
 	// reference run (or the draft's defaults): the editor shows what the engine
@@ -2796,24 +2778,6 @@
 						<div class="flex items-center justify-between gap-1.5 mb-2">
 							{@render fieldLabel(m.computeExpressions())}
 							<div class="flex items-center gap-1.5">
-								<select
-									class="select text-[10px] h-6 py-0 pl-1.5 pr-6 w-auto"
-									value=""
-									disabled={!variables.length}
-									data-testid="compute-recipes"
-									onchange={(e) => {
-										const recipe = computeRecipes(celScope).find(
-											(r) => r.id === e.currentTarget.value
-										);
-										if (recipe) addRecipeRow(recipe.expression);
-										e.currentTarget.value = '';
-									}}
-								>
-									<option value="">{m.computeRecipes()}</option>
-									{#each computeRecipes(celScope) as recipe (recipe.id)}
-										<option value={recipe.id}>{safeTranslate(recipe.id)}</option>
-									{/each}
-								</select>
 								<button
 									type="button"
 									class="btn preset-tonal h-6 w-6 p-0 text-[10px] disabled:opacity-50"

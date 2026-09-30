@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-	applySuggestion,
-	buildSuggestions,
-	currentToken,
-	recipes,
-	type Scope
-} from './compute-assist';
+import { applySuggestion, buildSuggestions, currentToken, type Scope } from './compute-assist';
 
 const scope: Scope = {
 	variables: [
@@ -99,27 +93,5 @@ describe('applySuggestion', () => {
 	it('keeps text after the cursor', () => {
 		const [impact] = buildSuggestions('imp', scope);
 		expect(applySuggestion('imp * 2', 3, 0, impact)).toEqual({ value: 'impact * 2', cursor: 6 });
-	});
-});
-
-describe('recipes', () => {
-	it("uses the author's number variables and results step", () => {
-		const byId = Object.fromEntries(recipes(scope).map((r) => [r.id, r.expression]));
-		expect(byId.recipeScore).toBe('likelihood * impact');
-		expect(byId.recipeRatio).toBe('round(double(likelihood) / double(impact) * 100.0, 1)');
-		expect(byId.recipeWorst).toBe('max(nodes.fetch.results.map(r, r.score))');
-		expect(byId.recipeCounter).toBe('likelihood + 1');
-	});
-
-	it('falls back to placeholder names on an empty scope', () => {
-		const empty: Scope = {
-			variables: [],
-			referenceVariables: {},
-			referenceNodes: [],
-			upstreamNodes: []
-		};
-		const byId = Object.fromEntries(recipes(empty).map((r) => [r.id, r.expression]));
-		expect(byId.recipeScore).toBe('likelihood * impact');
-		expect(byId.recipeWorst).toBe('max(nodes.fetch.results.map(r, r.score))');
 	});
 });

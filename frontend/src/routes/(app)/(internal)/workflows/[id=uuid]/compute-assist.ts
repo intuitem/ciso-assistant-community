@@ -1,5 +1,5 @@
 // Authoring help for compute rows: what a CEL expression can reference at the
-// cursor, and a handful of ready-made expressions. Pure functions so the
+// cursor. Pure functions so the
 // popover component stays thin and this stays unit-testable.
 
 import { dig } from './expressions';
@@ -199,45 +199,4 @@ export function applySuggestion(
 		value: next,
 		cursor: tokenStart + suggestion.insert.length - (suggestion.cursorBack ?? 0)
 	};
-}
-
-// ---------- recipes ----------
-
-export type Recipe = { id: string; expression: string };
-
-function numberKeys(scope: Scope): string[] {
-	return scope.variables.filter((v) => !v.type || v.type === 'number').map((v) => v.key);
-}
-
-/** The first upstream step that yields a `results` list, or a placeholder ref. */
-function resultsRef(scope: Scope): string {
-	for (const node of scope.referenceNodes) {
-		const output = node.output as Record<string, unknown> | null;
-		if (output && Array.isArray(output.results)) return node.key;
-	}
-	for (const node of scope.upstreamNodes) {
-		const config = node.actionConfig ?? {};
-		if (config.type === 'read_objects' && (config.mode ?? 'list') === 'list') return node.ref;
-	}
-	return 'fetch';
-}
-
-/** Common expressions, with the author's own variable and step names where they can be guessed. */
-export function recipes(scope: Scope): Recipe[] {
-	const numbers = numberKeys(scope);
-	const [a = 'likelihood', b = 'impact'] = numbers;
-	const [done = 'done', total = 'total'] = numbers;
-	const counter = numbers[0] ?? 'counter';
-	const ref = resultsRef(scope);
-	return [
-		{ id: 'recipeScore', expression: `${a} * ${b}` },
-		{ id: 'recipeRatio', expression: `round(double(${done}) / double(${total}) * 100.0, 1)` },
-		{
-			id: 'recipeSla',
-			expression: "payload.severity == 'critical' ? 1 : payload.severity == 'high' ? 3 : 30"
-		},
-		{ id: 'recipeWorst', expression: `max(nodes.${ref}.results.map(r, r.score))` },
-		{ id: 'recipeLatestDate', expression: `max(nodes.${ref}.results.map(r, r.due_date))` },
-		{ id: 'recipeCounter', expression: `${counter} + 1` }
-	];
 }
