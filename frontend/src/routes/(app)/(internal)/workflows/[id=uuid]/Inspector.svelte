@@ -2820,19 +2820,30 @@
 								</button>
 							</div>
 						</div>
+						<!-- Stacked rows: the panel is narrow, so the expression takes the
+						     whole width on its own line and wraps rather than scrolling. -->
 						{#each actionConfig.expressions as row, index (index)}
-							<div class="flex items-center gap-1 mb-1">
-								<select
-									class="select text-xs font-mono w-24 shrink-0 px-1 py-0.5"
-									value={row.key}
-									onchange={(e) => renameComputeRow(index, e.currentTarget.value)}
-									data-testid="compute-key"
-								>
-									{#each computeKeyOptions(row.key) as option (option)}
-										<option value={option}>{option}</option>
-									{/each}
-								</select>
-								<span class="text-xs text-surface-500 shrink-0">=</span>
+							<div class="mb-2" data-testid="compute-row">
+								<div class="flex items-center justify-between gap-1 mb-0.5">
+									<select
+										class="select text-xs font-mono min-w-0 max-w-[70%] px-1 py-0.5"
+										value={row.key}
+										onchange={(e) => renameComputeRow(index, e.currentTarget.value)}
+										data-testid="compute-key"
+									>
+										{#each computeKeyOptions(row.key) as option (option)}
+											<option value={option}>{option}</option>
+										{/each}
+									</select>
+									<button
+										type="button"
+										aria-label="Remove"
+										class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0 px-1"
+										onclick={() => removeComputeRow(index)}
+									>
+										<i class="fa-solid fa-xmark"></i>
+									</button>
+								</div>
 								<CelInput
 									bind:value={row.expression}
 									scope={celScope}
@@ -2840,31 +2851,23 @@
 									oninput={onChange}
 									testid="compute-expression"
 								/>
-								<button
-									type="button"
-									aria-label="Remove"
-									class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0"
-									onclick={() => removeComputeRow(index)}
-								>
-									<i class="fa-solid fa-xmark"></i>
-								</button>
+								{#if computePreviews[index]}
+									{@const preview = computePreviews[index]}
+									<p
+										class="text-[10px] font-mono pl-1 mt-0.5 break-all {preview.ok
+											? 'text-success-600 dark:text-success-400'
+											: 'text-error-500'}"
+										data-testid="compute-preview"
+									>
+										{#if preview.ok}
+											= {JSON.stringify(preview.value)}
+											<span class="text-surface-500">· {preview.type}</span>
+										{:else}
+											<i class="fa-solid fa-triangle-exclamation mr-1"></i>{preview.error}
+										{/if}
+									</p>
+								{/if}
 							</div>
-							{#if computePreviews[index]}
-								{@const preview = computePreviews[index]}
-								<p
-									class="text-[10px] font-mono pl-1 mb-1 break-all {preview.ok
-										? 'text-success-600 dark:text-success-400'
-										: 'text-error-500'}"
-									data-testid="compute-preview"
-								>
-									{#if preview.ok}
-										= {JSON.stringify(preview.value)}
-										<span class="text-surface-500">· {preview.type}</span>
-									{:else}
-										<i class="fa-solid fa-triangle-exclamation mr-1"></i>{preview.error}
-									{/if}
-								</p>
-							{/if}
 						{/each}
 					</div>
 					<p class="text-[10px] text-surface-500 leading-relaxed">

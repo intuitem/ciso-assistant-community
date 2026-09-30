@@ -1,7 +1,14 @@
 <script lang="ts">
-	// One-line CEL input with an autocomplete popover: variables, step
-	// outputs, loop item, seeds, functions, and list/string methods after a
-	// dot. Keeps `data-syntax="cel"` so the data browser inserts bare paths.
+	// CEL input with an autocomplete popover: variables, step outputs, loop
+	// item, seeds, functions, and list/string methods after a dot. Keeps
+	// `data-syntax="cel"` so the data browser inserts bare paths.
+	//
+	// It is a textarea that behaves like a single-line input: the inspector is
+	// narrow, and a formula that scrolls sideways inside a 150px box is
+	// unreadable. The field wraps and grows with its content instead, so the
+	// whole expression stays visible. Enter never inserts a line break (it
+	// accepts a suggestion); Shift+Enter does, for authors who want to format
+	// a long expression, which CEL reads as whitespace.
 	import {
 		applySuggestion,
 		buildSuggestions,
@@ -20,7 +27,20 @@
 
 	let { value = $bindable(''), scope, placeholder = '', oninput, testid }: Props = $props();
 
-	let input = $state<HTMLInputElement | null>(null);
+	let input = $state<HTMLTextAreaElement | null>(null);
+
+	// `field-sizing: content` does this in CSS where supported; the manual
+	// resize covers the rest and costs nothing where it is redundant.
+	function autosize(el: HTMLTextAreaElement | null) {
+		if (!el) return;
+		el.style.height = 'auto';
+		el.style.height = `${el.scrollHeight}px`;
+	}
+
+	$effect(() => {
+		void value;
+		autosize(input);
+	});
 	let suggestions = $state<Suggestion[]>([]);
 	let selected = $state(0);
 	let tokenStart = $state(0);
@@ -60,6 +80,11 @@
 	}
 
 	function onKeydown(event: KeyboardEvent) {
+		if (event.key === 'Enter' && !event.shiftKey && !open) {
+			// Single-line semantics: Enter is not a line break here.
+			event.preventDefault();
+			return;
+		}
 		if (!open) return;
 		if (event.key === 'ArrowDown') {
 			event.preventDefault();
@@ -77,6 +102,7 @@
 	}
 
 	function onInput() {
+		autosize(input);
 		refresh();
 		oninput?.();
 	}
@@ -87,11 +113,11 @@
 	}
 </script>
 
-<div class="relative flex-1 min-w-0">
-	<input
+<div class="relative w-full min-w-0">
+	<textarea
 		bind:this={input}
-		type="text"
-		class="input text-xs font-mono w-full min-w-0"
+		rows="1"
+		class="input text-xs font-mono w-full min-w-0 resize-none overflow-hidden leading-snug py-1 [field-sizing:content] [overflow-wrap:anywhere]"
 		{placeholder}
 		bind:value
 		oninput={onInput}
@@ -100,13 +126,14 @@
 		onblur={onBlur}
 		autocomplete="off"
 		spellcheck="false"
+		wrap="soft"
 		data-syntax="cel"
 		data-testid={testid}
 		role="combobox"
 		aria-expanded={open}
 		aria-autocomplete="list"
 		aria-controls={open ? 'cel-suggestions' : undefined}
-	/>
+	></textarea>
 	{#if open}
 		<ul
 			id="cel-suggestions"
