@@ -6030,6 +6030,8 @@
 	"computeExpressions": "Expressions",
 	"computeHint": "Rows run in order and can use the ones above. Ints and doubles mix; two ints divide without remainder (7 / 2 is 3). Type to get suggestions, pick a recipe to start from one.",
 	"computeRecipes": "Recipes…",
+	"computeAddRow": "Add a row",
+	"computeEmpty": "No expressions yet. Add a row, or start from a recipe.",
 	"recipeScore": "Score from two factors",
 	"recipeRatio": "Ratio as a percentage",
 	"recipeSla": "SLA days by severity",

@@ -2788,12 +2788,16 @@
 						<i class="fa-solid fa-calendar-day mr-1"></i>{m.dateOffsetHint()}
 					</p>
 				{:else if actionConfig.type === 'compute' && Array.isArray(actionConfig.expressions)}
+					<!-- Each row is a card: variable on top, the expression full width below,
+					     the live result as the card's last line. The card boundary is what
+					     makes the three read as one unit in a narrow panel; without it the
+					     gaps inside a row and between rows look alike. -->
 					<div>
-						<div class="flex items-center justify-between mb-1">
+						<div class="flex items-center justify-between gap-1.5 mb-2">
 							{@render fieldLabel(m.computeExpressions())}
-							<div class="flex items-center gap-2">
+							<div class="flex items-center gap-1.5">
 								<select
-									class="select text-[10px] py-0 px-1 h-5 w-auto"
+									class="select text-[10px] h-6 py-0 pl-1.5 pr-6 w-auto"
 									value=""
 									disabled={!variables.length}
 									data-testid="compute-recipes"
@@ -2812,70 +2816,89 @@
 								</select>
 								<button
 									type="button"
-									class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold disabled:opacity-50"
+									class="btn preset-tonal h-6 w-6 p-0 text-[10px] disabled:opacity-50"
 									onclick={addComputeRow}
 									disabled={!variables.length}
+									aria-label={m.computeAddRow()}
+									title={m.computeAddRow()}
 								>
 									<i class="fa-solid fa-plus"></i>
 								</button>
 							</div>
 						</div>
-						<!-- Stacked rows: the panel is narrow, so the expression takes the
-						     whole width on its own line and wraps rather than scrolling. -->
-						{#each actionConfig.expressions as row, index (index)}
-							<div class="mb-2" data-testid="compute-row">
-								<div class="flex items-center justify-between gap-1 mb-0.5">
-									<select
-										class="select text-xs font-mono min-w-0 max-w-[70%] px-1 py-0.5"
-										value={row.key}
-										onchange={(e) => renameComputeRow(index, e.currentTarget.value)}
-										data-testid="compute-key"
-									>
-										{#each computeKeyOptions(row.key) as option (option)}
-											<option value={option}>{option}</option>
-										{/each}
-									</select>
-									<button
-										type="button"
-										aria-label="Remove"
-										class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0 px-1"
-										onclick={() => removeComputeRow(index)}
-									>
-										<i class="fa-solid fa-xmark"></i>
-									</button>
+						{#if !actionConfig.expressions.length}
+							<p
+								class="text-[10px] text-surface-500 leading-relaxed rounded border border-dashed border-surface-200-800 px-2 py-1.5"
+							>
+								{m.computeEmpty()}
+							</p>
+						{/if}
+						<div class="space-y-2">
+							{#each actionConfig.expressions as row, index (index)}
+								<div
+									class="rounded border border-surface-200-800 bg-surface-100-900/40 p-1.5 space-y-1"
+									data-testid="compute-row"
+								>
+									<div class="flex items-center gap-1">
+										<select
+											class="select text-xs font-mono flex-1 min-w-0 h-6 py-0 pl-1.5 pr-6"
+											value={row.key}
+											onchange={(e) => renameComputeRow(index, e.currentTarget.value)}
+											data-testid="compute-key"
+										>
+											{#each computeKeyOptions(row.key) as option (option)}
+												<option value={option}>{option}</option>
+											{/each}
+										</select>
+										<button
+											type="button"
+											aria-label="Remove"
+											class="text-surface-500 hover:text-error-500 cursor-pointer text-xs shrink-0 h-6 w-6 flex items-center justify-center"
+											onclick={() => removeComputeRow(index)}
+										>
+											<i class="fa-solid fa-xmark"></i>
+										</button>
+									</div>
+									<CelInput
+										bind:value={row.expression}
+										scope={celScope}
+										placeholder="likelihood * impact"
+										oninput={onChange}
+										testid="compute-expression"
+									/>
+									{#if computePreviews[index]}
+										{@const preview = computePreviews[index]}
+										<p
+											class="text-[10px] font-mono flex items-baseline gap-1.5 px-0.5 break-all"
+											data-testid="compute-preview"
+										>
+											{#if preview.ok}
+												<span class="text-surface-500 shrink-0">=</span>
+												<span class="text-success-600 dark:text-success-400"
+													>{JSON.stringify(preview.value)}</span
+												>
+												<span
+													class="ml-auto shrink-0 text-[9px] uppercase tracking-wide text-surface-400-600"
+													>{preview.type}</span
+												>
+											{:else}
+												<i class="fa-solid fa-triangle-exclamation text-error-500 shrink-0"></i>
+												<span class="text-error-500">{preview.error}</span>
+											{/if}
+										</p>
+									{/if}
 								</div>
-								<CelInput
-									bind:value={row.expression}
-									scope={celScope}
-									placeholder="likelihood * impact"
-									oninput={onChange}
-									testid="compute-expression"
-								/>
-								{#if computePreviews[index]}
-									{@const preview = computePreviews[index]}
-									<p
-										class="text-[10px] font-mono pl-1 mt-0.5 break-all {preview.ok
-											? 'text-success-600 dark:text-success-400'
-											: 'text-error-500'}"
-										data-testid="compute-preview"
-									>
-										{#if preview.ok}
-											= {JSON.stringify(preview.value)}
-											<span class="text-surface-500">· {preview.type}</span>
-										{:else}
-											<i class="fa-solid fa-triangle-exclamation mr-1"></i>{preview.error}
-										{/if}
-									</p>
-								{/if}
-							</div>
-						{/each}
+							{/each}
+						</div>
 					</div>
-					<p class="text-[10px] text-surface-500 leading-relaxed">
-						<i class="fa-solid fa-calculator mr-1"></i>{m.computeHint()}
-					</p>
-					<p class="text-[10px] text-surface-500 leading-relaxed font-mono break-words">
-						{COMPUTE_FUNCTIONS}
-					</p>
+					<div class="space-y-1">
+						<p class="text-[10px] text-surface-500 leading-relaxed">
+							<i class="fa-solid fa-calculator mr-1"></i>{m.computeHint()}
+						</p>
+						<p class="text-[10px] text-surface-400-600 leading-relaxed font-mono break-words">
+							{COMPUTE_FUNCTIONS}
+						</p>
+					</div>
 				{/if}
 				{#if actionConfig.type !== 'compute'}
 					<p class="text-[10px] text-surface-500 leading-relaxed">

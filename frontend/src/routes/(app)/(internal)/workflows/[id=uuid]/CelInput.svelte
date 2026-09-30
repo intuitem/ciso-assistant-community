@@ -25,7 +25,9 @@
 		testid?: string;
 	}
 
-	let { value = $bindable(''), scope, placeholder = '', oninput, testid }: Props = $props();
+	// No default on the binding: a freshly mounted instance must never push an
+	// empty string up into the row it displays.
+	let { value = $bindable(), scope, placeholder = '', oninput, testid }: Props = $props();
 
 	let input = $state<HTMLTextAreaElement | null>(null);
 
