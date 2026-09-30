@@ -2339,7 +2339,6 @@ export const listViewFields = {
 		head: ['version', 'evidence', 'file', 'size', 'updatedAt'],
 		body: ['version', 'evidence', 'attachment', 'size', 'updated_at'],
 		filters: {
-			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
 		}
