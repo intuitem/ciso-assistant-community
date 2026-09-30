@@ -1,8 +1,8 @@
-subject: "CISO Assistant: Ausnahmen laufen in ${days_remaining} Tagen ab"
+subject: "CISO Assistant: Ausnahmen laufen in ${days_remaining} ${days_remaining_unit} ab"
 body: |
   Hallo,
 
-  Anzahl der in ${days_remaining} Tagen ablaufenden Ausnahmen: ${exception_count}
+  Anzahl der in ${days_remaining} ${days_remaining_unit} ablaufenden Ausnahmen: ${exception_count}
 
   ${exception_list}
 

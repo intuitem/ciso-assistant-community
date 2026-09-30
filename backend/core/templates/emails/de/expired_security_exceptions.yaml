@@ -1,8 +1,8 @@
-subject: "CISO Assistant: Seit ${expired_since} Tagen abgelaufene Ausnahmen"
+subject: "CISO Assistant: Seit ${expired_since} ${expired_since_unit} abgelaufene Ausnahmen"
 body: |
   Hallo,
 
-  Anzahl der seit ${expired_since} Tagen abgelaufenen Ausnahmen: ${exception_count}
+  Anzahl der seit ${expired_since} ${expired_since_unit} abgelaufenen Ausnahmen: ${exception_count}
 
   ${exception_list}
 

@@ -1,8 +1,8 @@
-subject: "CISO Assistant: Freigabefrist in ${days} Tagen"
+subject: "CISO Assistant: Freigabefrist in ${days} ${days_unit}"
 body: |
   Hallo,
 
-  Bei den folgenden Freigabeanträgen endet die Frist in ${days} Tagen. Anzahl: ${validation_count}
+  Bei den folgenden Freigabeanträgen endet die Frist in ${days} ${days_unit}. Anzahl: ${validation_count}
 
   ${validation_list}
 
