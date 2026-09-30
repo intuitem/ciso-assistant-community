@@ -369,6 +369,13 @@
 
 		if (followRowNavigation(rowMetaData)) return;
 
+		const detailURL = `/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`;
+		// Rows are not real links, so emulate the native cmd/ctrl+click behaviour
+		if (event.metaKey || event.ctrlKey) {
+			window.open(detailURL, '_blank', 'noopener');
+			return;
+		}
+
 		const preferredLabel =
 			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
 		const label =
@@ -379,7 +386,7 @@
 			rowMetaData.label ||
 			rowMetaData[identifierField];
 
-		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
+		goto(detailURL, {
 			label,
 			breadcrumbAction: 'push'
 		});
