@@ -1,3 +1,4 @@
+import copy
 import importlib
 from typing import Any
 
@@ -10,6 +11,7 @@ from django.utils import timezone
 
 from django.conf import settings
 from core.models import *
+from doc_management.models import DocumentContainer
 from core.serializer_fields import (
     FieldsRelatedField,
     HashSlugRelatedField,
@@ -29,7 +31,7 @@ from iam.models import *
 from django.contrib.auth.models import Permission
 
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import APIException, PermissionDenied
 from django.core.exceptions import FieldDoesNotExist
 from django.core.exceptions import ValidationError as DjangoValidationError
 
@@ -828,6 +830,7 @@ class AssetWriteSerializer(
         exclude = ["business_value"]
 
     def validate(self, data):
+        self._check_linked_assets_changeable(data)
         parent_assets = data.get("parent_assets", [])
         support_assets = data.get("child_assets", [])
         """
@@ -845,6 +848,44 @@ class AssetWriteSerializer(
                         "errorAssetGraphMustNotContainCycles"
                     )
         return super().validate(data)
+
+    def _check_linked_assets_changeable(self, data):
+        request = self.context.get("request")
+        if request is None:
+            return
+        perm = Permission.objects.get(codename="change_asset")
+        for field, error_key in (
+            ("parent_assets", "parent_assets"),
+            ("child_assets", "support_assets"),
+        ):
+            if field not in data:
+                continue
+            proposed = {a.id: a for a in data[field] or []}
+            current = (
+                {a.id: a for a in getattr(self.instance, field).all()}
+                if self.instance is not None
+                else {}
+            )
+            removed = [current[i] for i in current.keys() - proposed.keys()]
+            unseen = [
+                a
+                for a in removed
+                if not RoleAssignment.is_object_readable(request.user, Asset, a.id)
+            ]
+            if unseen:
+                data[field] = [*proposed.values(), *unseen]
+            touched = [proposed[i] for i in proposed.keys() - current.keys()] + [
+                a for a in removed if a not in unseen
+            ]
+            for asset in touched:
+                if not RoleAssignment.is_access_allowed(
+                    user=request.user, perm=perm, folder=asset.folder
+                ):
+                    raise PermissionDenied(
+                        {
+                            error_key: "You do not have permission to change the linked asset"
+                        }
+                    )
 
     def create(self, validated_data):
         parent_assets = validated_data.pop("parent_assets", None)
@@ -1065,10 +1106,38 @@ class AssetAutocompleteSerializer(BaseModelSerializer):
 
 class AppliedControlAutocompleteSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    category = serializers.CharField(source="get_category_display")
 
     class Meta:
         model = AppliedControl
+        fields = ["id", "name", "ref_id", "folder", "category"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
+class VulnerabilityAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Vulnerability
         fields = ["id", "name", "ref_id", "folder"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
+class RiskScenarioAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    risk_assessment = FieldsRelatedField()
+
+    class Meta:
+        model = RiskScenario
+        fields = ["id", "name", "ref_id", "folder", "risk_assessment"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -1487,6 +1556,9 @@ class AppliedControlWriteSerializer(
     )
     incidents = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Incident.objects.all()
+    )
+    control_documents = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=DocumentContainer.objects.all()
     )
     cost = serializers.JSONField(required=False, allow_null=True)
     integration_config = serializers.PrimaryKeyRelatedField(
@@ -3022,6 +3094,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     is_dynamic = serializers.BooleanField(read_only=True)
     has_update = serializers.BooleanField(read_only=True)
     has_compliance_assessments = serializers.SerializerMethodField()
+    is_scale_bound = serializers.SerializerMethodField()
     scores_definition = serializers.SerializerMethodField()
     # The complete per-role visibility map a new CA created from this framework
     # would inherit: DEFAULT_VISIBILITY ⊕ framework.field_visibility. The
@@ -3042,6 +3115,12 @@ class FrameworkReadSerializer(ReferentialSerializer):
         if flag is not None:
             return flag
         return obj.complianceassessment_set.exists()
+
+    def get_is_scale_bound(self, obj):
+        flag = getattr(obj, "scale_bound_flag", None)
+        if flag is not None:
+            return flag
+        return obj.is_scale_bound
 
     def get_scores_definition(self, obj):
         sd = obj.scores_definition
@@ -3173,6 +3252,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     requirement_assessments = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
+    task_templates = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     owner = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
@@ -3215,6 +3295,10 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     contracts = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Contract.objects.all(), required=False
     )
+    # Reverse M2M (declared on TaskTemplate): DRF does not pick it up from Meta.
+    task_templates = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=TaskTemplate.objects.all(), required=False
+    )
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -3242,8 +3326,12 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         attachment = validated_data.pop("attachment", None)
         link = validated_data.pop("link", None)
         observation = validated_data.pop("observation", None)
+        task_templates = validated_data.pop("task_templates", [])
 
         evidence = super().create(validated_data)
+
+        if task_templates:
+            evidence.task_templates.set(task_templates)
 
         # A revision stands for a deposited artifact. Opening an empty one just to
         # have a row makes an evidence that holds nothing look like it holds
@@ -3264,10 +3352,14 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         # Track old folder before update
         old_folder_id = instance.folder_id
+        task_templates = validated_data.pop("task_templates", None)
 
         # Handle properly owner field cleaning
         with transaction.atomic():
             instance = super().update(instance, validated_data)
+
+            if task_templates is not None:
+                instance.task_templates.set(task_templates)
 
             # Update all EvidenceRevisions' folder if the Evidence's folder changed
             if old_folder_id != instance.folder_id:
@@ -3670,7 +3762,24 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
         ]
 
 
+class ScoreRescaleConfirmationRequired(APIException):
+    status_code = 409
+    default_code = "score_rescale_confirmation_required"
+
+    def __init__(self, impact: dict):
+        self.impact = impact
+        super().__init__()
+        # Set after init: APIException would turn every number into a string.
+        self.detail = {
+            "confirm_rescale": ["scoreScaleConfirmRequired"],
+            "rescale_impact": impact,
+        }
+
+
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
+    confirm_rescale = serializers.BooleanField(
+        write_only=True, required=False, default=False
+    )
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -3695,17 +3804,39 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     )
 
     def validate(self, attrs):
-        if hasattr(self, "instance") and self.instance and self.instance.is_locked:
-            # If we're unlocking (setting is_locked to False), allow the operation
-            if "is_locked" in attrs and attrs["is_locked"] is False:
-                return super().validate(attrs)
+        # Drop implementation groups that don't exist in the framework.
+        if "selected_implementation_groups" in attrs or (
+            "framework" in attrs and self.instance
+        ):
+            framework = attrs.get("framework") or getattr(
+                self.instance, "framework", None
+            )
+            defined = {
+                ig.get("ref_id")
+                for ig in (
+                    getattr(framework, "implementation_groups_definition", None) or []
+                )
+            }
+            selected = attrs.get(
+                "selected_implementation_groups",
+                getattr(self.instance, "selected_implementation_groups", None),
+            )
+            selected = selected if isinstance(selected, list) else []
+            attrs["selected_implementation_groups"] = [
+                g for g in selected if isinstance(g, str) and g in defined
+            ]
 
-            # Otherwise, only allow modifying the is_locked field
+        if hasattr(self, "instance") and self.instance and self.instance.is_locked:
+            # Unlocking may come with other changes in the same save; they still
+            # go through the checks below. Otherwise only is_locked may change.
+            unlocking = "is_locked" in attrs and attrs["is_locked"] is False
             locked_fields = [field for field in attrs.keys() if field != "is_locked"]
-            if locked_fields:
+            if not unlocking and locked_fields:
                 raise serializers.ValidationError(
                     f"⚠️ Cannot modify the audit attributes when it is locked. Only the 'Locked' field can be modified."
                 )
+
+        self._validate_score_scale(attrs, confirm=attrs.pop("confirm_rescale", False))
 
         target = attrs.get(
             "target_score",
@@ -3724,23 +3855,137 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 }
             )
         if target is not None:
-            min_s = attrs.get(
-                "min_score",
-                getattr(self.instance, "min_score", None) if self.instance else None,
-            )
-            max_s = attrs.get(
-                "max_score",
-                getattr(self.instance, "max_score", None) if self.instance else None,
+            min_s, max_s = getattr(self, "_effective_score_range", None) or (
+                attrs.get(
+                    "min_score",
+                    getattr(self.instance, "min_score", None)
+                    if self.instance
+                    else None,
+                ),
+                attrs.get(
+                    "max_score",
+                    getattr(self.instance, "max_score", None)
+                    if self.instance
+                    else None,
+                ),
             )
             if min_s is not None and max_s is not None:
                 if not (min_s <= target <= max_s):
                     raise serializers.ValidationError(
-                        {
-                            "target_score": f"Target score must be between {min_s} and {max_s}."
-                        }
+                        {"target_score": "targetScoreOutOfRange"}
                     )
 
         return super().validate(attrs)
+
+    def _validate_score_scale(self, attrs, confirm=False):
+        scale_fields = {
+            "score_scale_preset",
+            "min_score",
+            "max_score",
+            "scores_definition",
+        }
+        instance = self.instance
+        # Creation always resolves the scale, so the target is checked against
+        # the range the audit will actually get.
+        if instance and not scale_fields & attrs.keys():
+            return
+        framework = attrs.get("framework") or getattr(instance, "framework", None)
+        baseline = None if instance else attrs.get("baseline")
+        if (
+            baseline
+            and framework
+            and baseline.framework_id == framework.id
+            and not scale_fields & attrs.keys()
+        ):
+            # A copy of an audit keeps its scale by default.
+            default = {
+                "source": "baseline",
+                "score_scale_preset": baseline.score_scale_preset,
+                "min_score": baseline.min_score,
+                "max_score": baseline.max_score,
+                "scores_definition": copy.deepcopy(baseline.scores_definition),
+            }
+        elif framework:
+            # No scale sent: the framework's. The organisation scale is only
+            # ever proposed by the form, so non-form clients behave as before.
+            default = {
+                "source": "framework",
+                "score_scale_preset": None,
+                "min_score": framework.min_score,
+                "max_score": framework.max_score,
+                "scores_definition": framework.scores_definition,
+            }
+        else:
+            default = None
+        default_range = (
+            (default["min_score"], default["max_score"]) if default else None
+        )
+
+        preset = attrs.get("score_scale_preset")
+        min_s = attrs.get(
+            "min_score", None if preset else getattr(instance, "min_score", None)
+        )
+        max_s = attrs.get(
+            "max_score", None if preset else getattr(instance, "max_score", None)
+        )
+        try:
+            preset, min_s, max_s = normalize_score_scale(
+                preset, min_s, max_s, attrs.get("scores_definition"), default_range
+            )
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(e.message_dict)
+        if preset:
+            attrs["min_score"], attrs["max_score"] = min_s, max_s
+
+        resolved = (min_s, max_s) if min_s is not None else default_range
+        if min_s is None:
+            if default and (
+                attrs.get("scores_definition") or default["source"] == "baseline"
+            ):
+                attrs["min_score"], attrs["max_score"] = default_range
+                attrs["score_scale_preset"] = default["score_scale_preset"]
+                if not attrs.get("scores_definition"):
+                    attrs["scores_definition"] = default["scores_definition"]
+            else:
+                attrs["score_scale_preset"] = None
+                attrs["scores_definition"] = None
+        elif (
+            "score_scale_preset" not in attrs
+            and instance
+            and instance.score_scale_preset
+        ):
+            if SCORE_SCALE_PRESETS.get(instance.score_scale_preset) != resolved:
+                attrs["score_scale_preset"] = None
+
+        current = (
+            (instance.min_score, instance.max_score) if instance else default_range
+        )
+        self._effective_score_range = resolved
+        if resolved == current:
+            return
+        if (
+            framework
+            and framework.is_scale_bound
+            and resolved != (framework.min_score, framework.max_score)
+        ):
+            raise serializers.ValidationError(
+                {"score_scale_preset": "scoreScaleBoundToFramework"}
+            )
+        if instance and None not in (*current, *resolved):
+            self._score_rescale = (current, resolved)
+            impact = instance.rescale_impact()
+            unchanged = attrs.get("target_score", instance.target_score) == (
+                instance.target_score
+            )
+            if unchanged and instance.target_score is not None:
+                attrs["target_score"] = rescale_score(
+                    instance.target_score, current, resolved, integer=False
+                )
+                impact["target"] = [instance.target_score, attrs["target_score"]]
+            if not confirm and any(impact.values()):
+                raise ScoreRescaleConfirmationRequired(
+                    {"from": list(current), "to": list(resolved), **impact}
+                )
 
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
@@ -3806,6 +4051,11 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         with transaction.atomic():
             # Perform the main update (fields + M2M)
             updated_instance = super().update(instance, validated_data)
+
+            if rescale := getattr(self, "_score_rescale", None):
+                updated_instance.rescale_requirement_scores(*rescale)
+                # save() snapshotted today's metrics before the scores moved.
+                updated_instance.upsert_daily_metrics()
 
             # For dynamic frameworks, recompute IGs from current answers so the
             # answer-driven calc always wins over any manual override submitted
@@ -3928,6 +4178,11 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
 
+    def validate_score_scale_preset(self, value):
+        if value and value not in SCORE_SCALE_PRESETS:
+            raise serializers.ValidationError("scoreScaleErrorUnknownPreset")
+        return value
+
     class Meta:
         model = ComplianceAssessment
         fields = [
@@ -3947,6 +4202,7 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "min_score",
             "max_score",
             "scores_definition",
+            "score_scale_preset",
             "score_calculation_method",
             "target_score",
             "anchor_na_to_target",
@@ -4396,7 +4652,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
             if answers_data and isinstance(answers_data, dict):
                 # Convert incoming answers dict to Answer model updates
-                from core.models import Answer, Question
+                from core.models import Question
 
                 questions_by_urn = {
                     q.urn: q
@@ -5758,7 +6014,7 @@ class FindingReadSerializer(FindingWriteSerializer):
     threats = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
     reference_controls = FieldsRelatedField(many=True)
-    applied_controls = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(["id", "status"], many=True)
     filtering_labels = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     task_templates = FieldsRelatedField(many=True)

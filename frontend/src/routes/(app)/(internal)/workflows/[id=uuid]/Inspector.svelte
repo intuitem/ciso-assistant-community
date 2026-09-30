@@ -57,7 +57,7 @@
 		subprocessCandidates: Option[];
 		creatableModels?: any[];
 		updatableModels?: any[];
-		readableModels?: { key: string; fields: string[] }[];
+		readableModels?: { key: string; fields: string[]; includable?: string[] }[];
 		fkOptions?: Record<string, Option[]>;
 		workflowId: string;
 		registrationsByRef?: Record<string, any>;
@@ -176,6 +176,9 @@
 
 	const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
+	// Written as prose or markdown, so a one-line input is the wrong box.
+	const LONG_TEXT_FIELDS = ['description', 'content', 'observation'];
+
 	// 'choice' emits an enum, which is what a branch step can route on.
 	const AI_FIELD_TYPES = ['choice', 'string', 'number', 'boolean'];
 
@@ -229,7 +232,8 @@
 			filters: {},
 			order_by: '-created_at',
 			limit: 25,
-			offset: ''
+			offset: '',
+			include: []
 		},
 		http_request: {
 			method: 'GET',
@@ -575,11 +579,27 @@
 
 	function resetReadModel() {
 		// Field whitelists differ per model: stale filters/ordering would fail
-		// publish validation.
+		// publish validation. Includes are per-model too — the backend rejects
+		// a name the new model does not offer.
 		actionConfig.filters = {};
 		actionConfig.order_by = '-created_at';
+		actionConfig.include = [];
 		readFilterGroups = [];
 		readFilterRawMode = false;
+		onChange();
+	}
+
+	// The backend accepts a bare string as well as a list, so a config authored
+	// through the API or imported from a library can carry either. Spreading a
+	// string would store its characters one by one, and filtering one throws.
+	function readIncludeList(value: unknown): string[] {
+		if (Array.isArray(value)) return value as string[];
+		return typeof value === 'string' && value ? [value] : [];
+	}
+
+	function toggleReadInclude(name: string, checked: boolean) {
+		const current = readIncludeList(actionConfig.include);
+		actionConfig.include = checked ? [...current, name] : current.filter((entry) => entry !== name);
 		onChange();
 	}
 
@@ -1498,10 +1518,10 @@
 								safeTranslate(field) +
 									(creatableEntry?.required_fields?.includes(field) ? ' *' : '')
 							)}
-							{#if field === 'description'}
+							{#if LONG_TEXT_FIELDS.includes(field)}
 								<textarea
 									class="input w-full text-sm"
-									rows="2"
+									rows={field === 'content' ? 6 : 2}
 									bind:value={actionConfig.fields[field]}
 									oninput={onChange}
 								></textarea>
@@ -1556,7 +1576,16 @@
 										</optgroup>
 									{/if}
 								</select>
-								<span class="text-[10px] text-surface-500">{m.frameworkUrnOrId()}</span>
+								{#if paramName === 'framework'}
+									<span class="text-[10px] text-surface-500">{m.frameworkUrnOrId()}</span>
+								{/if}
+							{:else if LONG_TEXT_FIELDS.includes(paramName)}
+								<textarea
+									class="input w-full text-sm"
+									rows="6"
+									bind:value={actionConfig.fields[paramName]}
+									oninput={onChange}
+								></textarea>
 							{:else}
 								<input
 									type="text"
@@ -1564,7 +1593,9 @@
 									bind:value={actionConfig.fields[paramName]}
 									oninput={onChange}
 								/>
-								<span class="text-[10px] text-surface-500">{m.implementationGroupsHint()}</span>
+								{#if paramName === 'implementation_groups'}
+									<span class="text-[10px] text-surface-500">{m.implementationGroupsHint()}</span>
+								{/if}
 							{/if}
 						</label>
 					{/each}
@@ -1635,10 +1666,10 @@
 									{/each}
 								</select>
 								<span class="text-[10px] text-surface-500">{m.guardedFieldHint()}</span>
-							{:else if field === 'description' || field === 'observation'}
+							{:else if LONG_TEXT_FIELDS.includes(field)}
 								<textarea
 									class="input w-full text-sm"
-									rows="2"
+									rows={field === 'content' ? 6 : 2}
 									bind:value={actionConfig.fields[field]}
 									oninput={onChange}
 								></textarea>
@@ -1962,6 +1993,24 @@
 							<option value="first">{m.readModeFirst()}</option>
 						</select>
 					</label>
+
+					{#if readableEntry?.includable?.length}
+						{@render fieldLabel(m.readInclude())}
+						<p class="text-[10px] text-surface-500">{m.readIncludeHelpText()}</p>
+						<div class="flex flex-col gap-1">
+							{#each readableEntry.includable as name (name)}
+								<label class="flex items-center gap-2 text-sm">
+									<input
+										type="checkbox"
+										class="checkbox"
+										checked={readIncludeList(actionConfig.include).includes(name)}
+										onchange={(e) => toggleReadInclude(name, e.currentTarget.checked)}
+									/>
+									<span>{safeTranslate(name)}</span>
+								</label>
+							{/each}
+						</div>
+					{/if}
 
 					{@render fieldLabel(m.readFilters())}
 					{#if readFilterRawMode}

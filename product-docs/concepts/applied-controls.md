@@ -81,6 +81,8 @@ Why the lifecycle matters across the platform:
 
 The transitions aren't enforced as a strict state machine — you can move a control between any two statuses — but staying within the lifecycle above makes audit trails and analytics meaningful.
 
+<figure><img src="../.gitbook/assets/applied-controls-full.png" alt=""><figcaption><p>The applied control list, showing Status, Priority and ETA together</p></figcaption></figure>
+
 ## Financial tracking
 
 Applied controls carry a structured **cost** field, so the financial weight of your security programme isn't a separate spreadsheet — it's attached to the controls themselves and rolled up wherever they appear (most notably on every [action plan](../features/action-plans.md)).

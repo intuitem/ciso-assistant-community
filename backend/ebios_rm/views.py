@@ -1101,7 +1101,14 @@ class AttackPathViewSet(BaseModelViewSet):
 class OperationalScenarioViewSet(BaseModelViewSet):
     model = OperationalScenario
 
-    filterset_fields = ["ebios_rm_study", "likelihood"]
+    filterset_fields = ["ebios_rm_study", "likelihood", "threats", "techniques"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related("threats", "techniques", "techniques__parent")
+        )
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):

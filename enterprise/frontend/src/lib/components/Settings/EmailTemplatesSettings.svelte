@@ -1,6 +1,5 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages';
-	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { LOCALE_DISPLAY_MAP } from '$lib/utils/constants';
 	import { fetchAllPages } from '$lib/utils/pagination';
 	import {
@@ -91,8 +90,9 @@
 				throw new Error('Failed to load templates');
 			}
 			const available = await availableRes.json();
-			// Default to enabled if the backend doesn't report the flag,
-			// so the Switch stays in controlled mode (checked never undefined).
+			// Default to enabled when the backend does not report the flag. Read-only
+			// here: it only dims the row and shows a badge, since sending is configured
+			// in Settings > Notifications.
 			availableTemplates = available.map((t: TemplateInfo) => ({
 				...t,
 				is_enabled: t.is_enabled ?? true
@@ -102,58 +102,6 @@
 			error = 'Failed to load templates';
 		}
 		loading = false;
-	}
-
-	// Templates with an in-flight toggle request; their switch is disabled
-	// so a second click can't race the first (last response would win).
-	let pendingToggles = $state<Set<string>>(new Set());
-
-	function requestSetEnabled(template: TemplateInfo, isEnabled: boolean) {
-		if (pendingToggles.has(template.template_key)) return;
-		if (!isEnabled && template.category === 'core') {
-			// Flip the state right away so the switch and its hidden native
-			// input stay in sync; revert if the modal is cancelled/dismissed.
-			template.is_enabled = false;
-			const modal: ModalSettings = {
-				type: 'confirm',
-				title: m.disableCoreEmailTitle(),
-				body: m.disableCoreEmailWarning(),
-				response: (confirmed: boolean) => {
-					template.is_enabled = true;
-					if (confirmed) setTemplateEnabled(template, false);
-				}
-			};
-			modalStore.trigger(modal);
-			return;
-		}
-		setTemplateEnabled(template, isEnabled);
-	}
-
-	async function setTemplateEnabled(template: TemplateInfo, isEnabled: boolean) {
-		const previous = template.is_enabled;
-		template.is_enabled = isEnabled;
-		error = '';
-		pendingToggles.add(template.template_key);
-		pendingToggles = new Set(pendingToggles);
-		try {
-			const res = await fetch('/fe-api/custom-email-templates/set-enabled', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					template_key: template.template_key,
-					is_enabled: isEnabled
-				})
-			});
-			if (!res.ok) {
-				throw new Error('Failed to update template status');
-			}
-		} catch {
-			template.is_enabled = previous;
-			error = 'Failed to update template status';
-		} finally {
-			pendingToggles.delete(template.template_key);
-			pendingToggles = new Set(pendingToggles);
-		}
 	}
 
 	function getOverride(key: string, lang: string): TemplateOverride | undefined {
@@ -318,6 +266,9 @@
 
 <div class="flex flex-col gap-6">
 	<span class="text-surface-600-400">{m.emailTemplatesDescription()}</span>
+	<!-- Whether a notification goes out at all is an operational setting and lives in
+	     Settings > Notifications. This page is only about what it says. -->
+	<p class="text-sm text-surface-600-400 mt-1">{m.emailTemplatesSendingHint()}</p>
 
 	{#if successMessage}
 		<div class="alert preset-filled-success-500 p-3">
@@ -506,19 +457,6 @@
 								<p class="text-sm text-surface-600-400 truncate">
 									{templateDescription(template.template_key)}
 								</p>
-							</div>
-							<div class="shrink-0" title={m.toggleEmailSending()}>
-								<Switch
-									name="template-enabled-{template.template_key}"
-									checked={template.is_enabled}
-									disabled={pendingToggles.has(template.template_key)}
-									onCheckedChange={(e) => requestSetEnabled(template, e.checked)}
-								>
-									<Switch.Control>
-										<Switch.Thumb />
-									</Switch.Control>
-									<Switch.HiddenInput />
-								</Switch>
 							</div>
 							<button
 								class="btn btn-sm preset-outlined-primary-500 shrink-0"

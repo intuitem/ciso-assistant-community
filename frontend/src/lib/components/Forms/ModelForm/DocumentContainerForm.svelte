@@ -66,8 +66,9 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="classification-levels"
+	optionsEndpoint="classification-levels?is_visible=true&object_classification__is_visible=true"
 	optionsLabelField="label"
+	optionsExtraFields={[['object_classification', 'str']]}
 	field="classification"
 	label={m.classification()}
 	nullable

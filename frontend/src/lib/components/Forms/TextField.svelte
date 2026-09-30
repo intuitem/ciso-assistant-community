@@ -9,6 +9,7 @@
 	interface Props {
 		class?: string;
 		type?: string;
+		step?: string | number;
 		classesContainer?: string;
 		label?: string | undefined;
 		field: string;
@@ -26,6 +27,7 @@
 	let {
 		class: _class = '',
 		type = 'text',
+		step = 'any',
 		classesContainer = '',
 		label = $bindable(),
 		field,
@@ -160,6 +162,7 @@
 				bind:value={$value}
 				{...$constraints}
 				{...rest}
+				{...type === 'number' ? { step } : {}}
 				{disabled}
 				{required}
 			/>

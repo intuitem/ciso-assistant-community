@@ -37,6 +37,8 @@ An audit assesses compliance against the chosen framework. The evaluation of a s
 
 A requirement assessment is not a single value — it captures _several dimensions_ at once, separating **the compliance result** from **how the work got done** and from **the depth of the implementation**. The point is that the same row tracks the auditor's view, the analyst's progress, and the maturity of the underlying implementation without conflating them.
 
+<figure><img src="../.gitbook/assets/audits-list.png" alt=""><figcaption><p>Audits listed with their framework, perimeter and Progress percentage</p></figcaption></figure>
+
 ### Progress column
 
 Every audit in the audit tables (and on dashboards and campaigns) shows a **Progress** percentage. It answers a single question: _how much of the audit has been assessed?_
@@ -88,6 +90,8 @@ For questionnaire-driven frameworks (whether authored in the [library builder](.
 Text type questions are not taken into account for the result computation: leaving one empty does not hold the requirement at **Not assessed**.
 
 If you maintain a tenant whose audits were produced under the older boolean-collapse logic, see [Special cases — Recompute assessment results](../installation/special-cases.md#recompute-assessment-results-after-the-semantic-compute_result-upgrade) for the realignment procedure.
+
+<figure><img src="../.gitbook/assets/audit-detail.png" alt=""><figcaption><p>The audit page — the compliance donut summarises the results across every assessable requirement</p></figcaption></figure>
 
 ### Analyst dimension (assignee + workflow status)
 

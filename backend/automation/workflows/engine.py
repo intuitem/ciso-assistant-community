@@ -367,7 +367,16 @@ def complete_deferred_action(token: WorkflowToken, output: dict) -> None:
 
     def on_resume(instance):
         node = token.current_node
-        _persist_node_output(node, output, instance)
+        try:
+            _persist_node_output(node, output, instance)
+        except FatalActionError as e:
+            # The dispatch claim is already committed: escaping would roll the
+            # resume back and leave the token WAITING for a task that is never
+            # delivered again (as _refresh_status does for a subprocess).
+            token.status = WorkflowToken.Status.ACTIVE
+            token.save(update_fields=["status", "updated_at"])
+            _handle_failure(token, str(e), retryable=False)
+            return
         _log(
             instance,
             WorkflowInstanceLog.EventType.ACTION_EXECUTED,
@@ -805,22 +814,34 @@ def _process_loop(token):
     _loop_next_iteration(token)
 
 
+def _loop_stop_reason(state):
+    """Why a loop stops before its items do. Checked between iterations, so it
+    stops before the next item's side effects rather than after all of them."""
+    collected = len(state.get("results") or [])
+    if state.get("processed", 0) >= loop_max_items():
+        return f"stopped after {loop_max_items()} items"
+    if collected >= MAX_COLLECTION_ITEMS:
+        return f"stopped after collecting {MAX_COLLECTION_ITEMS} items"
+    # Predictive, against the widest item seen: noticing once over means having
+    # collected what cannot be kept, and dropping it loses work the run did.
+    room = node_output_budget() - state.get("collected_chars", 0)
+    if collected and room <= state.get("widest_item", 0):
+        return (
+            f"stopped after collecting {collected} items: another would not fit "
+            f"in one node output (WORKFLOW_NODE_OUTPUT_BUDGET)"
+        )
+    return None
+
+
 def _loop_next_iteration(controller):
     node = controller.current_node
     instance = controller.instance
     state = controller.loop_state
     state["index"] += 1
 
-    if state.get("processed", 0) >= loop_max_items():
-        # Pages must not become a way around the item ceiling: a run is capped
-        # at MAX_STEPS, so an unbounded sweep would fail late instead of
-        # stopping cleanly.
-        state["errors"].append(
-            {
-                "index": state["index"],
-                "message": f"stopped after {loop_max_items()} items",
-            }
-        )
+    stop = _loop_stop_reason(state)
+    if stop:
+        state["stopped"] = stop
         _loop_finish(controller)
         return
 
@@ -879,6 +900,10 @@ def _loop_body_returned(controller, failed):
         value = dig(ctx, match.group(1)) if match else render(collect, ctx)
         controller.instance._iteration_context = None
         state["results"].append(value)
+        # Rough on purpose: it only has to notice the ceiling coming.
+        size = len(str(value))
+        state["collected_chars"] = state.get("collected_chars", 0) + size
+        state["widest_item"] = max(state.get("widest_item", 0), size)
         controller.loop_state = state
         controller.save(update_fields=["loop_state", "updated_at"])
     _loop_next_iteration(controller)
@@ -904,12 +929,8 @@ def _loop_load_next_page(controller, state):
     if not state.get("read") or not state.get("next_offset"):
         return False
     if state.get("pages", 0) >= loop_max_pages():
-        state["errors"].append(
-            {
-                "index": state["index"],
-                "message": f"stopped after {loop_max_pages()} pages",
-            }
-        )
+        # A ceiling, not an item that failed — same as the others.
+        state["stopped"] = f"stopped after {loop_max_pages()} pages"
         return False
     try:
         items, next_offset = _read_snapshot_page(
@@ -947,12 +968,27 @@ def _loop_finish(controller):
         "results": state["results"],
         "errors": state["errors"],
         "pages": state.get("pages", 0),
+        # Why it ended early. Not in `errors`: no item went wrong, and a step
+        # branching on failures must not see one here.
+        "stopped": state.get("stopped"),
     }
-    _persist_node_output(node, output, instance)
+    try:
+        _persist_node_output(node, output, instance)
+    except FatalActionError as e:
+        # Runs under the body token that closed the last iteration: escaping
+        # here would route the loop's failure through _handle_failure, which
+        # collects that iteration again and arrives back with a second raise,
+        # this one outside the run transaction. Fail the loop itself.
+        controller.loop_state = {}
+        controller.save(update_fields=["loop_state", "updated_at"])
+        _fail_token(controller, str(e))
+        return
     failed = len(state["errors"])
     message = f"processed {output['count']} items"
     if failed:
         message += f" · {failed} failed"
+    if output["stopped"]:
+        message += f" · {output['stopped']}"
     _log(
         instance,
         WorkflowInstanceLog.EventType.LOOP_COMPLETED,
@@ -1023,33 +1059,71 @@ def _start_subprocess(token):
         raise EngineError(f"Subprocess failed ({child})")
 
 
+def _foreign_output(node):
+    """Whether this node's output is a remote's payload rather than the step's
+    own product. Declared by the action, not guessed from its name."""
+    from .actions import ACTION_REGISTRY
+
+    action = ACTION_REGISTRY.get((node.action_config or {}).get("type"))
+    return bool(getattr(action, "foreign_output", False))
+
+
 def _store_node_output(node, output, instance):
     """Record the node's output (in memory) for {{nodes.<ref>.<path>}} references
-    and the builder's reference-run data browser. Structure-preserving: nested
-    JSON stays navigable and referenceable; only oversized leaves and collections
-    shrink. The display log truncates flat and harder. Persisting is the caller's
-    job — see _persist_node_output."""
+    and the builder's data browser. Persisting is the caller's job — see
+    _persist_node_output.
+
+    Dropping records fails the node: they are the next node's input, so a silent
+    cut means a write-up short of what the run processed. Shortening one string
+    keeps the value, so that stays quiet — as does a payload the action declared
+    foreign, where the trim markers say what was cut.
+    """
     key = node.ref or str(node.id)
-    instance.node_outputs[key] = _cap_structure(output)
+    lost = []
+    instance.node_outputs[key] = _cap_structure(output, lost=lost)
+    if lost and not _foreign_output(node):
+        # Only the character budget is a setting; naming it for the item and
+        # depth caps, which are constants, would misdirect.
+        raisable = {remedy for _what, remedy in lost if remedy}
+        hint = f" Or raise {', '.join(sorted(raisable))}." if raisable else ""
+        raise FatalActionError(
+            f"This step produced more than one node output can hold, so "
+            f"{'; '.join(what for what, _remedy in lost)}. Narrow what the step "
+            f"reads.{hint}"
+        )
 
 
 MAX_LEAF_CHARS = 1000
-MAX_COLLECTION_ITEMS = 100
+MAX_COLLECTION_ITEMS = 2000
 MAX_STRUCTURE_DEPTH = 10
 
 
-def _cap_structure(value, budget=None, depth=0):
-    """Bound node_outputs without flattening: dicts and lists keep their shape
-    (so paths into them keep working), long strings truncate, huge collections
-    tail-omit, and a global character budget backstops pathological payloads."""
+def node_output_budget():
+    """Characters one node output may hold. `node_outputs` keeps every node's
+    output in one JSONField, rewritten on each node completion."""
+    return int(getattr(settings, "WORKFLOW_NODE_OUTPUT_BUDGET", 500_000))
+
+
+def _cap_structure(value, budget=None, depth=0, lost=None):
+    """Bound node_outputs without flattening: dicts and lists keep their shape so
+    paths into them keep working. `lost` collects what the caller no longer
+    has."""
     if budget is None:
-        budget = [32000]
+        budget = [node_output_budget()]
+
+    def drop(what, remedy=None):
+        if lost is not None:
+            lost.append((what, remedy))
+
     if budget[0] <= 0:
+        drop("the output budget ran out", "WORKFLOW_NODE_OUTPUT_BUDGET")
         return "<truncated: output budget exceeded>"
     if depth > MAX_STRUCTURE_DEPTH:
+        drop(f"nesting past {MAX_STRUCTURE_DEPTH} levels was dropped")
         return "<truncated: max depth>"
 
     if isinstance(value, str):
+        # Quiet: the value is still there and says how much was cut.
         if len(value) > MAX_LEAF_CHARS:
             budget[0] -= MAX_LEAF_CHARS
             return f"{value[:MAX_LEAF_CHARS]}… <{len(value)} chars truncated>"
@@ -1060,19 +1134,31 @@ def _cap_structure(value, budget=None, depth=0):
         capped = {}
         for index, (key, item) in enumerate(value.items()):
             if index >= MAX_COLLECTION_ITEMS or budget[0] <= 0:
+                drop(
+                    f"{len(value) - index} of {len(value)} keys were dropped",
+                    None
+                    if index >= MAX_COLLECTION_ITEMS
+                    else "WORKFLOW_NODE_OUTPUT_BUDGET",
+                )
                 capped["<omitted>"] = f"{len(value) - index} more keys"
                 break
             budget[0] -= len(str(key))
-            capped[key] = _cap_structure(item, budget, depth + 1)
+            capped[key] = _cap_structure(item, budget, depth + 1, lost)
         return capped
 
     if isinstance(value, list):
         capped_items = []
         for index, item in enumerate(value):
             if index >= MAX_COLLECTION_ITEMS or budget[0] <= 0:
+                drop(
+                    f"{len(value) - index} of {len(value)} items were dropped",
+                    None
+                    if index >= MAX_COLLECTION_ITEMS
+                    else "WORKFLOW_NODE_OUTPUT_BUDGET",
+                )
                 capped_items.append(f"<{len(value) - index} more items>")
                 break
-            capped_items.append(_cap_structure(item, budget, depth + 1))
+            capped_items.append(_cap_structure(item, budget, depth + 1, lost))
         return capped_items
 
     budget[0] -= 8
@@ -1372,9 +1458,19 @@ def _refresh_status(instance):
             if parent_token.status != WorkflowToken.Status.WAITING:
                 return
             parent_token.instance = parent_instance
-            _persist_node_output(
-                parent_token.current_node, instance.variables, parent_instance
-            )
+            try:
+                _persist_node_output(
+                    parent_token.current_node, instance.variables, parent_instance
+                )
+            except FatalActionError as e:
+                # A child whose variables outgrow the output cap fails the
+                # parent's node; letting it escape would roll this block back
+                # and leave the parent token waiting for a child that is done.
+                parent_token.status = WorkflowToken.Status.ACTIVE
+                parent_token.save(update_fields=["status", "updated_at"])
+                _handle_failure(parent_token, str(e), retryable=False)
+                _run(parent_instance)
+                return
             # resume_token re-acquires the same row lock in this transaction
             # (a no-op) and re-checks WAITING before advancing.
             resume_token(parent_token)

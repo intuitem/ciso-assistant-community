@@ -15,6 +15,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { consumeCreateIntent } from '$lib/utils/create-intent';
 
 	interface Props {
 		data: PageData;
@@ -42,6 +43,11 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	$effect(() => {
+		if (!isAdmin) return;
+		consumeCreateIntent({ urlModel: URLModel, modelName: data.model.name, open: modalCreateForm });
+	});
 
 	function modalSecret(object: Record<string, any>): void {
 		const modalComponent: ModalComponent = {

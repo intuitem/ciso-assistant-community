@@ -13,7 +13,13 @@ from .models import (
     WorkflowSecret,
     WorkflowVersion,
 )
-from .actions import AI_ACTION_TYPES, UPDATABLE_MODELS, _writable_values
+from .actions import (
+    AI_ACTION_TYPES,
+    CREATABLE_MODELS,
+    UPDATABLE_MODELS,
+    _creatable_values,
+    _writable_values,
+)
 from .actions import validate_action_config as _validate_action_config
 from .actions import validate_read_config as _validate_read_config
 from .context import RESERVED_VARIABLE_KEYS
@@ -529,17 +535,35 @@ def _validate_ai_value_fencing(node, ai_refs, ai_variables):
     record a guess as fact, and the registry cannot tell a template from a
     literal at the write site. Branch on the output and write literals instead.
 
+    Creating a row is the same problem as updating one — a severity a model
+    guessed reads as a severity someone set, whichever verb wrote it — so both
+    write actions are checked, each against its own registry's fence.
+
     Provenance is followed through set_variables (see _ai_sources), so routing
     the answer through a variable first does not evade this."""
     config = node.action_config or {}
-    if config.get("type") != "update_object":
+    action_type = config.get("type")
+    if action_type == "update_object":
+        entry = UPDATABLE_MODELS.get(config.get("model"))
+        fields, fenced = (
+            (entry.fields, lambda key: _writable_values(entry, key))
+            if entry is not None
+            else (None, None)
+        )
+    elif action_type == "create_object":
+        entry = CREATABLE_MODELS.get(config.get("model"))
+        fields, fenced = (
+            (entry["fields"], lambda key: _creatable_values(entry, key))
+            if entry is not None
+            else (None, None)
+        )
+    else:
         return []
-    entry = UPDATABLE_MODELS.get(config.get("model"))
     if entry is None or not (ai_refs or ai_variables):
         return []
     errors = []
     for key, value in sorted((config.get("fields") or {}).items()):
-        if key not in entry.fields or _writable_values(entry, key) is None:
+        if key not in fields or fenced(key) is None:
             continue
         for source in sorted(_ai_sources_in(value, ai_refs, ai_variables)):
             errors.append(

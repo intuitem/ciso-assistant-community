@@ -1,6 +1,7 @@
 // define the content of forms
 
 import EvidenceFileName from '$lib/components/ModelTable/field/EvidenceFileName.svelte';
+import NotificationTitle from '$lib/components/ModelTable/field/NotificationTitle.svelte';
 import CommitmentTarget from '$lib/components/ModelTable/field/CommitmentTarget.svelte';
 import ScheduleDisplay from '$lib/components/ModelTable/field/ScheduleDisplay.svelte';
 import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
@@ -131,7 +132,7 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 			position?: 'suffix' | 'prefix';
 			classes?: string;
 		};
-		lazy?: boolean; // Enable lazy loading for large option sets (e.g., assets)
+		lazy?: boolean; // Defaults to true; set false to load every option up front
 	};
 	batchCreate?: {
 		label?: string; // i18n key for button title (defaults to 'batchCreate')
@@ -214,6 +215,8 @@ export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 // Models never created from their list page: library-managed content, membership rows
 // written elsewhere, or records that only exist as a child of something else.
 export const NON_CREATABLE_URL_MODELS = [
+	// System-generated: written by producers, never by a user.
+	'notifications',
 	'risk-matrices',
 	'frameworks',
 	'requirement-mapping-sets',
@@ -274,6 +277,16 @@ type ModelMap = {
 };
 
 export const URL_MODEL_MAP: ModelMap = {
+	notifications: {
+		name: 'notification',
+		localName: 'notification',
+		localNamePlural: 'notifications',
+		verboseName: 'Notification',
+		verboseNamePlural: 'Notifications'
+		// No `foreignKeyFields`: the domain is the derived `target_folder`, and linking it
+		// would 404 for a recipient holding no role there -- which is the normal case (ADR
+		// notification-recipient-scoped-access).
+	},
 	folders: {
 		name: 'folder',
 		localName: 'domain',
@@ -627,7 +640,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'applied_controls',
-				urlModel: 'document-containers'
+				urlModel: 'document-containers',
+				addExisting: {
+					parentField: 'control_documents'
+				}
 			},
 			{
 				field: 'applied_controls',
@@ -658,20 +674,26 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'applied_controls',
 				urlModel: 'findings',
-				disableCreate: true,
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'findings'
+				}
 			},
 			{
 				field: 'applied_controls',
 				urlModel: 'assets',
 				disableDelete: true,
-				disableCreate: true
+				addExisting: {
+					parentField: 'assets'
+				}
 			},
 			{
 				field: 'applied_controls',
 				urlModel: 'incidents',
-				disableCreate: true,
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'incidents'
+				}
 			}
 		],
 		selectFields: [
@@ -1009,8 +1031,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			}
 		],
@@ -2072,8 +2093,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			},
 			{
@@ -2301,8 +2321,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'ebios_rm_studies',
 				urlModel: 'assets',
 				addExisting: {
-					parentField: 'assets',
-					lazy: true
+					parentField: 'assets'
 				}
 			}
 		],
@@ -2475,9 +2494,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Operational scenario',
 		verboseNamePlural: 'Operational scenarios',
 		markdownFields: ['operating_modes_description'],
+		flaggedFields: {
+			techniques: 'ttps'
+		},
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'techniques', urlModel: 'techniques' },
 			{
 				field: 'attack_path',
 				urlModel: 'attack-paths',
@@ -2794,8 +2817,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			},
 			{
@@ -2827,8 +2849,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'findings',
 				urlModel: 'task-templates',
 				addExisting: {
-					parentField: 'task_templates',
-					lazy: true
+					parentField: 'task_templates'
 				}
 			}
 		],
@@ -2913,8 +2934,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			},
 			{
@@ -3199,8 +3219,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					optionsInfoFields: {
 						fields: [{ field: 'category', translate: true }],
 						position: 'prefix'
-					},
-					lazy: true
+					}
 				}
 			},
 			{
@@ -3218,8 +3237,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: false,
 				disableDelete: true,
 				addExisting: {
-					parentField: 'assets',
-					lazy: true
+					parentField: 'assets'
 				}
 			},
 			{
@@ -3434,7 +3452,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'object-classifications': {
-		name: 'objectClassification',
+		name: 'objectclassification',
 		localName: 'objectClassification',
 		localNamePlural: 'objectClassifications',
 		verboseName: 'Object classification',
@@ -3452,7 +3470,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'classification-levels': {
-		name: 'classificationLevel',
+		name: 'classificationlevel',
 		localName: 'classificationLevel',
 		localNamePlural: 'classificationLevels',
 		verboseName: 'Classification level',
@@ -3995,6 +4013,10 @@ export const URL_MODEL_MAP: ModelMap = {
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 const FIELD_COMPONENT_MAP = {
+	notifications: {
+		// No value in the payload; NotificationTitle computes it.
+		title: NotificationTitle
+	},
 	commitments: {
 		target: CommitmentTarget
 	},

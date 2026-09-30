@@ -278,7 +278,7 @@
 	<div class="card bg-surface-50-950 shadow-lg">
 		<div class="px-6 py-4 border-b border-surface-200-800">
 			<h2 class="h4 font-bold">
-				<i class="fa-solid fa-chart-radar mr-2"></i>
+				<i class="fa-solid fa-chart-simple mr-2"></i>
 				{m.radarComparisonByTopLevel()}
 			</h2>
 		</div>

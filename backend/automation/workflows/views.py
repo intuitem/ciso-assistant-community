@@ -200,6 +200,9 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
                     "fields": entry.readable_fields(),
                     # Output-only aggregates; not filterable/orderable.
                     "computed": sorted(entry.computed.keys()),
+                    # Same, but only resolved when a node names them in
+                    # `include` — they cost too much to return by default.
+                    "includable": sorted(entry.optional_computed.keys()),
                 }
                 for key, entry in READABLE_MODELS.items()
             ]
