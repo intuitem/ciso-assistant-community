@@ -361,7 +361,8 @@
 		const href = rowHref(meta);
 		const target = event.target as HTMLElement;
 		// Only the row itself: clicks on links or buttons inside the row are theirs
-		if (href ? !target.closest('.row-link') : target.closest(INTERACTIVE_SELECTOR)) return;
+		if (href ? !target.closest('.row-link, .row-cell-link') : target.closest(INTERACTIVE_SELECTOR))
+			return;
 		fetch(`/${URLModel}/${meta[identifierField]}/${nav.markField}`, {
 			method: 'PATCH',
 			keepalive: true,
@@ -1151,6 +1152,8 @@
 								{#each renderColumnKeys as key, keyIndex (key)}
 									{@const value = row[key]}
 									{@const component = fieldComponentMap[key]}
+									{@const cellLink =
+										href && !component && (value == null || typeof value !== 'object')}
 									<td>
 										{#if keyIndex === 0 && href}
 											<Anchor
@@ -1160,7 +1163,10 @@
 												class="row-link unstyled"
 											></Anchor>
 										{/if}
-										<div class={regionCell}>
+										<!-- Plain-value cells are their own (duplicate) link to the row, raised above the
+										     row link, so their clamped content still scrolls on hover. Cells that can
+										     hold links (components, arrays, objects) stay under the row link. -->
+										{#snippet cellBody()}
 											{#if component && browser}
 												{@const CellComponent = component}
 												{#if CellComponent === LecChartPreview}
@@ -1366,7 +1372,20 @@
 													{@render badge?.(key, row)}
 												</div>
 											{/if}
-										</div>
+										{/snippet}
+										{#if cellLink}
+											<Anchor
+												{href}
+												label={rowLabel(meta)}
+												breadcrumbAction="push"
+												tabindex="-1"
+												aria-hidden="true"
+												class="row-cell-link block relative z-1 {regionCell}"
+												>{@render cellBody()}</Anchor
+											>
+										{:else}
+											<div class={regionCell}>{@render cellBody()}</div>
+										{/if}
 									</td>
 								{/each}
 								{#if displayActions}
