@@ -18,6 +18,15 @@
 	import type { DateFormatPreference } from '$lib/utils/datetime';
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import ScoreScaleEditor from '$lib/components/ComplianceAssessment/ScoreScaleEditor.svelte';
+
+	// The backend always returns a value; this only covers a missing one.
+	const ORGANISATION_SCALE_FALLBACK = {
+		score_scale_preset: '0-5',
+		min_score: 0,
+		max_score: 5,
+		scores_definition: []
+	};
 
 	interface Props {
 		form: SuperForm<any>;
@@ -435,6 +444,11 @@
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
+				<ScoreScaleEditor
+					value={$formStore.organisation_score_scale ?? ORGANISATION_SCALE_FALLBACK}
+					onChange={(value) => form.form.update((d) => ({ ...d, organisation_score_scale: value }))}
+					helpText={m.organisationScoreScaleHelpText()}
+				/>
 				<Checkbox
 					{form}
 					field="disable_partially_compliant_result"
