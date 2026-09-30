@@ -362,19 +362,15 @@
 
 	function onRowClick(event: SvelteEvent<MouseEvent, HTMLTableRowElement>, rowIndex: number): void {
 		if (!interactive) return;
+		// Rows are not links: leave modified clicks to the browser (links inside cells, view icon).
+		// Must run before preventDefault(), which would cancel the native new tab on those links.
+		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 		event.preventDefault();
 		event.stopPropagation();
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
 
 		if (followRowNavigation(rowMetaData)) return;
-
-		const detailURL = `/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`;
-		// Rows are not real links, so emulate the native cmd/ctrl+click behaviour
-		if (event.metaKey || event.ctrlKey) {
-			window.open(detailURL, '_blank', 'noopener');
-			return;
-		}
 
 		const preferredLabel =
 			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
@@ -386,7 +382,7 @@
 			rowMetaData.label ||
 			rowMetaData[identifierField];
 
-		goto(detailURL, {
+		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
 			label,
 			breadcrumbAction: 'push'
 		});
