@@ -297,12 +297,31 @@ class DateOffsetAction(BaseAction):
         return {"result": result.isoformat(), "base": base_date.isoformat()}
 
 
+def compute_rows(config):
+    """The (key, expression) rows of a compute config, in authored order.
+    Rows that are not a dict are skipped; a missing key or expression becomes
+    an empty string so validation can name the row."""
+    rows = (config or {}).get("expressions") or []
+    if not isinstance(rows, list):
+        return []
+    return [
+        (str(row.get("key") or ""), row.get("expression") or "")
+        for row in rows
+        if isinstance(row, dict)
+    ]
+
+
 @register
 class ComputeAction(BaseAction):
-    """set_variables with operators: each entry is a variable key and a CEL
+    """set_variables with operators: each row is a variable key and a CEL
     expression over the render context (variables, {{nodes.*}} outputs, loop
-    item/index, payload). Entries run in order and each sees the ones before
+    item/index, payload). Rows run in order and each sees the ones before
     it, so an intermediate value need not be its own step.
+
+    Rows are a list, not a dict: the order is semantic, and PostgreSQL's jsonb
+    reorders object keys (by length, then bytewise), which would evaluate
+    `label = score > 12 ? ...` before `score` on one database and after it on
+    the other.
 
     Pure and deterministic, so every failure is fatal: a retry would evaluate
     the same expression over the same data."""
@@ -310,18 +329,17 @@ class ComputeAction(BaseAction):
     action_type = "compute"
 
     def execute(self, config, instance):
-        expressions = config.get("expressions") or {}
-        if not isinstance(expressions, dict) or not expressions:
+        rows = compute_rows(config)
+        if not rows:
             raise FatalActionError("compute: this step has no expressions")
-        reserved = RESERVED_VARIABLE_KEYS & set(expressions)
+        reserved = RESERVED_VARIABLE_KEYS & {key for key, _ in rows}
         if reserved:
             raise FatalActionError(
                 f"compute: {', '.join(sorted(reserved))} is set by the engine"
             )
         context = _render_context(instance)
         results = {}
-        for key, expression in expressions.items():
-            key = str(key)
+        for key, expression in rows:
             if not VARIABLE_KEY_RE.match(key):
                 raise FatalActionError(
                     f"compute: '{key}' is not a writable variable name"
@@ -4167,8 +4185,8 @@ def validate_compute_config(node):
     config = node.action_config or {}
     if config.get("type") != "compute":
         return []
-    expressions = config.get("expressions") or {}
-    if not isinstance(expressions, dict) or not expressions:
+    rows = compute_rows(config)
+    if not rows:
         return [
             (
                 "action_compute_empty",
@@ -4176,8 +4194,8 @@ def validate_compute_config(node):
             )
         ]
     errors = []
-    for key, expression in sorted(expressions.items()):
-        key = str(key)
+    seen = set()
+    for key, expression in rows:
         if key in RESERVED_VARIABLE_KEYS:
             errors.append(
                 (
@@ -4189,12 +4207,21 @@ def validate_compute_config(node):
             errors.append(
                 ("action_compute_bad_key", f"'{key}' is not a writable variable name")
             )
+        elif key in seen:
+            errors.append(
+                (
+                    "action_compute_duplicate_key",
+                    f"'{key}' is computed twice — keep one row per variable",
+                )
+            )
+        seen.add(key)
         try:
             compile_expression(expression)
         except ExpressionError as e:
             errors.append(("action_compute_bad_expression", f"'{key}': {e}"))
+    keys = {key for key, _ in rows}
     for key, path in sorted((node.output_mapping or {}).items()):
-        if str(path) not in expressions:
+        if str(path) not in keys:
             errors.append(
                 (
                     "action_compute_unmapped_output",

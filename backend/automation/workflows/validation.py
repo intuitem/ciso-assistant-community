@@ -20,6 +20,7 @@ from .actions import (
     _creatable_values,
     _writable_values,
 )
+from .actions import compute_rows as _compute_rows
 from .actions import validate_action_config as _validate_action_config
 from .actions import validate_read_config as _validate_read_config
 from .context import RESERVED_VARIABLE_KEYS
@@ -490,11 +491,8 @@ def _compute_paths(node):
     config = node.action_config or {}
     if config.get("type") != "compute":
         return set()
-    expressions = config.get("expressions") or {}
-    if not isinstance(expressions, dict):
-        return set()
     paths = set()
-    for expression in expressions.values():
+    for _, expression in _compute_rows(config):
         paths |= referenced_paths(expression)
     return paths
 
@@ -519,26 +517,30 @@ def _ai_sources(nodes):
                 refs.add(node.ref)
             variables |= {str(key) for key in (node.output_mapping or {})}
         elif action_type == "set_variables":
-            setters.append((node, "variables", _template_paths))
+            setters.append((_set_variables_rows(node), _template_paths))
         elif action_type == "compute":
-            # Same hop, other syntax: a compute entry reads bare CEL paths
+            # Same hop, other syntax: a compute row reads bare CEL paths
             # instead of {{tokens}}, and a derived number is still a guess.
-            setters.append((node, "expressions", referenced_paths))
+            setters.append((_compute_rows(node.action_config), referenced_paths))
 
     changed = bool(setters)
     while changed:
         changed = False
-        for node, field, paths_of in setters:
-            assigned = (node.action_config or {}).get(field) or {}
-            if not isinstance(assigned, dict):
-                continue
-            for key, value in assigned.items():
-                if str(key) in variables:
+        for rows, paths_of in setters:
+            for key, value in rows:
+                if key in variables:
                     continue
                 if _ai_sources_among(paths_of(value), refs, variables):
-                    variables.add(str(key))
+                    variables.add(key)
                     changed = True
     return refs, variables
+
+
+def _set_variables_rows(node):
+    assigned = (node.action_config or {}).get("variables") or {}
+    if not isinstance(assigned, dict):
+        return []
+    return [(str(key), value) for key, value in assigned.items()]
 
 
 def _template_paths(value):

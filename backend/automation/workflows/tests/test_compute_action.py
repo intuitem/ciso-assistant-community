@@ -163,6 +163,8 @@ class TestEvaluate:
             evaluate("1 / n", {"n": 0})
         with pytest.raises(ExpressionError, match="not a variable"):
             evaluate("unknown + 1", {})
+        with pytest.raises(ExpressionError, match="sub-expression of '\\?:'"):
+            evaluate("unknown > 1 ? 'a' : 'b'", {})
         with pytest.raises(ExpressionError, match="no field 'x'"):
             evaluate("m.x", {"m": {}})
         with pytest.raises(ExpressionError, match="integer overflow"):
@@ -196,21 +198,25 @@ class TestReferencedPaths:
 @pytest.mark.django_db
 class TestComputeAction:
     def test_writes_variables_and_node_output(self):
+        # `label` reads `score`, and sorts before it: PostgreSQL's jsonb
+        # reorders object keys, which is why rows are a list and not a dict.
         version = flow(
             [
                 {
                     "label": "Score",
                     "type": "compute",
-                    "expressions": {
-                        "score": "likelihood * impact",
-                        "label": "score > 12 ? 'high' : 'low'",
-                    },
+                    "expressions": [
+                        {"key": "score", "expression": "likelihood * impact"},
+                        {"key": "label", "expression": "score > 12 ? 'high' : 'low'"},
+                    ],
                 }
             ],
             variables=[var("likelihood", default=4), var("impact", default=4)],
         )
         instance = start_instance(version)
-        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert instance.status == WorkflowInstance.Status.COMPLETED, error_messages(
+            instance
+        )
         assert instance.variables["score"] == 16
         assert instance.variables["label"] == "high"
         assert instance.node_outputs["score"] == {"score": 16, "label": "high"}
@@ -221,10 +227,10 @@ class TestComputeAction:
                 {
                     "label": "Ratio",
                     "type": "compute",
-                    "expressions": {
-                        "ratio": "double(done) / double(total)",
-                        "percent": "round(ratio * 100.0, 1)",
-                    },
+                    "expressions": [
+                        {"key": "ratio", "expression": "double(done) / double(total)"},
+                        {"key": "percent", "expression": "round(ratio * 100.0, 1)"},
+                    ],
                 }
             ],
             variables=[var("done", default=1), var("total", default=3)],
@@ -244,7 +250,9 @@ class TestComputeAction:
                 {
                     "label": "Length",
                     "type": "compute",
-                    "expressions": {"length": "size(nodes.note.message)"},
+                    "expressions": [
+                        {"key": "length", "expression": "size(nodes.note.message)"}
+                    ],
                 },
             ],
         )
@@ -257,9 +265,12 @@ class TestComputeAction:
                 {
                     "label": "Due",
                     "type": "compute",
-                    "expressions": {
-                        "sla_days": "payload.severity == 'critical' ? 1 : 30"
-                    },
+                    "expressions": [
+                        {
+                            "key": "sla_days",
+                            "expression": "payload.severity == 'critical' ? 1 : 30",
+                        }
+                    ],
                 }
             ],
         )
@@ -284,7 +295,10 @@ class TestComputeAction:
             label="Add",
             action_config={
                 "type": "compute",
-                "expressions": {"total": "total + item", "seen": "index + 1"},
+                "expressions": [
+                    {"key": "total", "expression": "total + item"},
+                    {"key": "seen", "expression": "index + 1"},
+                ],
             },
         )
         end = node("end")
@@ -315,7 +329,7 @@ class TestComputeAction:
                 {
                     "label": "Bad",
                     "type": "compute",
-                    "expressions": {"x": "count * label"},
+                    "expressions": [{"key": "x", "expression": "count * label"}],
                 }
             ],
             variables=[var("count", default=3), var("label", "string", "high")],
@@ -333,7 +347,9 @@ class TestComputeAction:
                 {
                     "label": "Weighted",
                     "type": "compute",
-                    "expressions": {"weighted": "count * weight"},
+                    "expressions": [
+                        {"key": "weighted", "expression": "count * weight"}
+                    ],
                 }
             ],
             variables=[var("count", default=3), var("weight", default=2.5)],
@@ -348,7 +364,7 @@ class TestComputeAction:
                 {
                     "label": "Ratio",
                     "type": "compute",
-                    "expressions": {"ratio": "done / total"},
+                    "expressions": [{"key": "ratio", "expression": "done / total"}],
                 }
             ],
             variables=[var("done", default=1), var("total", default=0)],
@@ -361,7 +377,13 @@ class TestComputeAction:
 
     def test_reserved_keys_are_refused_at_runtime(self):
         version = flow(
-            [{"label": "Spoof", "type": "compute", "expressions": {"today": "'1999'"}}]
+            [
+                {
+                    "label": "Spoof",
+                    "type": "compute",
+                    "expressions": [{"key": "today", "expression": "'1999'"}],
+                }
+            ]
         )
         instance = start_instance(version)
         assert instance.status == WorkflowInstance.Status.FAILED
@@ -379,7 +401,13 @@ class TestComputeValidation:
         assert (
             validate_compute_config(
                 self._node(
-                    {"type": "compute", "expressions": {"x": "a + 1", "y": "x * 2"}}
+                    {
+                        "type": "compute",
+                        "expressions": [
+                            {"key": "x", "expression": "a + 1"},
+                            {"key": "y", "expression": "x * 2"},
+                        ],
+                    }
                 )
             )
             == []
@@ -387,7 +415,7 @@ class TestComputeValidation:
 
     def test_an_empty_step_is_caught(self):
         assert self.codes(
-            validate_compute_config(self._node({"type": "compute", "expressions": {}}))
+            validate_compute_config(self._node({"type": "compute", "expressions": []}))
         ) == {"action_compute_empty"}
         assert self.codes(validate_compute_config(self._node({"type": "compute"}))) == {
             "action_compute_empty"
@@ -395,7 +423,15 @@ class TestComputeValidation:
 
     def test_syntax_errors_are_caught_at_publish(self):
         errors = validate_compute_config(
-            self._node({"type": "compute", "expressions": {"x": "a +", "y": ""}})
+            self._node(
+                {
+                    "type": "compute",
+                    "expressions": [
+                        {"key": "x", "expression": "a +"},
+                        {"key": "y", "expression": ""},
+                    ],
+                }
+            )
         )
         assert self.codes(errors) == {"action_compute_bad_expression"}
         assert len(errors) == 2
@@ -406,17 +442,47 @@ class TestComputeValidation:
                 self._node(
                     {
                         "type": "compute",
-                        "expressions": {"today": "1", "9x": "1", "ok": "1"},
+                        "expressions": [
+                            {"key": "today", "expression": "1"},
+                            {"key": "9x", "expression": "1"},
+                            {"key": "ok", "expression": "1"},
+                        ],
                     }
                 )
             )
         ) == {"action_compute_reserved", "action_compute_bad_key"}
 
+    def test_duplicate_keys_are_caught(self):
+        assert self.codes(
+            validate_compute_config(
+                self._node(
+                    {
+                        "type": "compute",
+                        "expressions": [
+                            {"key": "x", "expression": "1"},
+                            {"key": "x", "expression": "2"},
+                        ],
+                    }
+                )
+            )
+        ) == {"action_compute_duplicate_key"}
+
+    def test_a_dict_shaped_config_is_treated_as_empty(self):
+        # The shape an early draft used; jsonb would reorder it.
+        assert self.codes(
+            validate_compute_config(
+                self._node({"type": "compute", "expressions": {"x": "1"}})
+            )
+        ) == {"action_compute_empty"}
+
     def test_output_mapping_must_name_a_computed_key(self):
         assert self.codes(
             validate_compute_config(
                 self._node(
-                    {"type": "compute", "expressions": {"x": "1"}},
+                    {
+                        "type": "compute",
+                        "expressions": [{"key": "x", "expression": "1"}],
+                    },
                     output_mapping={"y": "z"},
                 )
             )
@@ -426,7 +492,12 @@ class TestComputeValidation:
         # 3 * 'x' only fails once evaluated; publish cannot know the types.
         assert (
             validate_compute_config(
-                self._node({"type": "compute", "expressions": {"x": "count * label"}})
+                self._node(
+                    {
+                        "type": "compute",
+                        "expressions": [{"key": "x", "expression": "count * label"}],
+                    }
+                )
             )
             == []
         )
@@ -440,7 +511,9 @@ class TestComputeGraphValidation:
                 {
                     "label": "Length",
                     "type": "compute",
-                    "expressions": {"n": "nodes.missing.count + 1"},
+                    "expressions": [
+                        {"key": "n", "expression": "nodes.missing.count + 1"}
+                    ],
                 }
             ],
             variables=[var("n")],
@@ -455,7 +528,9 @@ class TestComputeGraphValidation:
                 {
                     "label": "Length",
                     "type": "compute",
-                    "expressions": {"n": "size(nodes.note.message)"},
+                    "expressions": [
+                        {"key": "n", "expression": "size(nodes.note.message)"}
+                    ],
                 },
             ],
             variables=[var("n")],
@@ -490,7 +565,10 @@ class TestAiProvenanceThroughCompute:
         hop = node(
             "action",
             ref="hop",
-            action_config={"type": "compute", "expressions": {"derived": expression}},
+            action_config={
+                "type": "compute",
+                "expressions": [{"key": "derived", "expression": expression}],
+            },
         )
         write = node(
             "action",

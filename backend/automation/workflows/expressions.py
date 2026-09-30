@@ -50,8 +50,11 @@ _RULE_LABELS = {
     "relation_ge": ">=",
     "relation_eq": "==",
     "relation_ne": "!=",
+    "_?_:_": "?:",
 }
-_OVERLOAD_RE = re.compile(r"found no matching overload for Token\('RULE', '(\w+)'\)")
+_OVERLOAD_RE = re.compile(
+    r"found no matching overload for (?:Token\('RULE', '(\w+)'\)|(\S+)) applied to"
+)
 _CLASS_RE = re.compile(r"<class '(?:[\w.]*\.)?(\w+)'>")
 _UNDECLARED_RE = re.compile(r"undeclared reference to '([^']+)'")
 _NO_MEMBER_RE = re.compile(r"no such member in mapping: '([^']+)'")
@@ -332,9 +335,16 @@ def _describe(error):
         inner = str(error)
     match = _OVERLOAD_RE.search(message)
     if match:
-        rule = match.group(1)
+        rule = match.group(1) or match.group(2)
         operator = _RULE_LABELS.get(rule, rule)
         types = [_TYPE_NAMES.get(name, name) for name in _CLASS_RE.findall(message)]
+        if "CELEvalError" in types:
+            # celpy evaluates a ternary's branches eagerly and hands the
+            # failing one to the operator as an error value.
+            return (
+                f"a sub-expression of '{operator}' failed — a variable it uses "
+                "does not exist yet, or a type does not match"
+            )
         if types:
             return f"'{operator}' cannot combine {' and '.join(types)}"
         return f"'{operator}' has no overload for these types"
