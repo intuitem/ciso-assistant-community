@@ -5,10 +5,12 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import timedelta
+from pprint import isrecursive
 from typing import Any, List, Literal, Optional, Final
 from typing import TYPE_CHECKING, cast
 import secrets
 import uuid
+import itertools
 from allauth.account.models import EmailAddress
 from django.utils import timezone
 from django.db import models, transaction
@@ -2133,51 +2135,39 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         Return a `folder.id => permission.codename` listing all the permissions (identified by their codenames) granted for each `folder`.
 
-        If `is_recusive` is `True`: the indirectly allowed folders are included (meaning `RoleAssignment.is_recursive` isn't ignored).
+        If `is_recursive` is `True`: the indirectly allowed folders are included (meaning `RoleAssignment.is_recursive` isn't ignored).
         """
 
-        if not isinstance(principal, (User, UserGroup)):
+        """if not isinstance(principal, (User, UserGroup)):
+            return {}"""
+
+        if isinstance(principal, User):
+            role_assignments = RoleAssignment.get_role_assignments_from_user(principal)
+        elif isinstance(principal, UserGroup):
+            role_assignments = RoleAssignment.objects.filter(user_group=principal)
+        else:
             return {}
 
-        directly_granted_permissions: list[tuple[uuid.UUID, str, bool]] = [
-            (folder_id, codename, is_recursive)
-            for folder_id, codename, _, is_recursive in (
-                RoleAssignment._get_directly_granted_permissions(principal)
+        folder_id_to_codenames = defaultdict(set)
+
+        # This implementation has `O(N)` complexity (with `N = len(role_assignments)`).
+        # It's kind of hard to to better (if possible), and this function is fast enough for now anyway.
+        for role_assignment in role_assignments:
+            role_assignment_folders = role_assignment.perimeter_folders.all()
+            codenames = set(
+                role_assignment.role.permissions.values_list("codename", flat=True)
             )
-            if folder_id is not None and codename is not None
-        ]
 
-        folder_id_to_codenames: dict[str, set[str]] = defaultdict(set)
-        for folder_id, codename, _ in directly_granted_permissions:
-            folder_id_to_codenames[str(folder_id)].add(codename)
+            if role_assignment.is_recursive and is_recursive:
+                descendants = Folder.objects.filter(
+                    ancestors__in=role_assignment_folders
+                ).distinct()
+            else:
+                descendants = []
 
-        if is_recursive:
-            recursive_directly_granted_permissions: list[
-                tuple[uuid.UUID, str, bool]
-            ] = [
-                (folder_id, codename, is_recursive)
-                for folder_id, codename, is_recursive in directly_granted_permissions
-                if is_recursive
-            ]
-
-            recursive_folder_ids = {
-                folder_id
-                for (folder_id, _, _) in recursive_directly_granted_permissions
-            }
-            descendants_map: dict = defaultdict(set)
-
-            for from_id, to_id in Folder.descendants.through.objects.filter(
-                from_folder_id__in=recursive_folder_ids
-            ).values_list("from_folder_id", "to_folder_id"):
-                descendants_map[from_id].add(to_id)
-
-            for (
-                folder_id,
-                codename,
-                is_recursive,
-            ) in recursive_directly_granted_permissions:
-                for descendant_id in descendants_map.get(folder_id, ()):
-                    folder_id_to_codenames[str(descendant_id)].add(codename)
+            folders = itertools.chain(role_assignment_folders, descendants)
+            for folder in folders:
+                folder_id_to_codenames[str(folder.id)].update(codenames)
 
         return folder_id_to_codenames
 
