@@ -2135,51 +2135,44 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         Return a `folder.id => permission.codename` listing all the permissions (identified by their codenames) granted for each `folder`.
 
-        If `is_recusive` is `True`: the indirectly allowed folders are included (meaning `RoleAssignment.is_recursive` isn't ignored).
+        If `is_recursive` is `True`: the indirectly allowed folders are included (meaning `RoleAssignment.is_recursive` isn't ignored).
         """
 
         if not isinstance(principal, (User, UserGroup)):
             return {}
 
-        directly_granted_permissions: list[tuple[uuid.UUID, str, bool]] = [
-            (folder_id, codename, is_recursive)
-            for folder_id, codename, _, is_recursive in (
-                RoleAssignment._get_directly_granted_permissions(principal)
-            )
-            if folder_id is not None and codename is not None
-        ]
+        directly_assigned_codenames: dict[uuid.UUID, set[str]] = defaultdict(set)
+        recursively_assigned_codenames: dict[uuid.UUID, set[str]] = defaultdict(set)
+
+        for (
+            folder_id,
+            codename,
+            _,
+            is_grant_recursive,
+        ) in RoleAssignment._get_directly_granted_permissions(principal):
+            if folder_id is None or codename is None:
+                continue
+
+            directly_assigned_codenames[folder_id].add(codename)
+            if is_recursive and is_grant_recursive:
+                recursively_assigned_codenames[folder_id].add(codename)
 
         folder_id_to_codenames: dict[str, set[str]] = defaultdict(set)
-        for folder_id, codename, _ in directly_granted_permissions:
-            folder_id_to_codenames[str(folder_id)].add(codename)
+        for folder_id, codenames in directly_assigned_codenames.items():
+            folder_id_to_codenames[str(folder_id)] |= codenames
 
-        if is_recursive:
-            recursive_directly_granted_permissions: list[
-                tuple[uuid.UUID, str, bool]
-            ] = [
-                (folder_id, codename, is_recursive)
-                for folder_id, codename, is_recursive in directly_granted_permissions
-                if is_recursive
-            ]
-
-            recursive_folder_ids = {
-                folder_id
-                for (folder_id, _, _) in recursive_directly_granted_permissions
-            }
-            descendants_map: dict = defaultdict(set)
-
-            for from_id, to_id in Folder.descendants.through.objects.filter(
-                from_folder_id__in=recursive_folder_ids
-            ).values_list("from_folder_id", "to_folder_id"):
-                descendants_map[from_id].add(to_id)
+        if len(recursively_assigned_codenames) > 0:
+            recursive_folder_ids = list(recursively_assigned_codenames.keys())
 
             for (
                 folder_id,
-                codename,
-                is_recursive,
-            ) in recursive_directly_granted_permissions:
-                for descendant_id in descendants_map.get(folder_id, ()):
-                    folder_id_to_codenames[str(descendant_id)].add(codename)
+                descendant_folder_id,
+            ) in Folder.descendants.through.objects.filter(
+                from_folder_id__in=recursive_folder_ids
+            ).values_list("from_folder_id", "to_folder_id"):
+                folder_id_to_codenames[str(descendant_folder_id)] |= (
+                    recursively_assigned_codenames[folder_id]
+                )
 
         return folder_id_to_codenames
 
