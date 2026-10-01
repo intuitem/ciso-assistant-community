@@ -973,6 +973,51 @@ class SmartOrderingFilter(filters.OrderingFilter):
         return term
 
 
+class ComputedRankOrderingFilter(filters.BaseFilterBackend):
+    """Rank rows on a column no database column holds, before pagination.
+
+    A view opts in with ``computed_ordering_field`` and a
+    ``get_computed_ordering_ranks`` returning a ``{pk: rank}`` map for the rows
+    it is handed; the ranks land in a ``<field>_rank`` annotation that
+    ``ordering_remap`` points the client-facing column at. Rows missing from
+    the map rank 0.
+
+    Ranking reads every filtered row, so it runs only when the request orders
+    by that column. Declare it after the narrowing backends and before the
+    ordering one, which needs the annotation to already be there.
+    """
+
+    def filter_queryset(self, request: Request, queryset: QuerySet, view) -> QuerySet:
+        field = getattr(view, "computed_ordering_field", None)
+        if not field:
+            return queryset
+        requested = {
+            term.strip().lstrip("-")
+            for term in request.query_params.get("ordering", "").split(",")
+        }
+        if field not in requested:
+            return queryset
+        ranks = view.get_computed_ordering_ranks(queryset)
+        # Grouped by rank rather than one branch per row: a percentage has at
+        # most 101 distinct values, so the CASE stays bounded by the value
+        # domain instead of growing with the table.
+        pks_by_rank: dict[int, list] = {}
+        for pk, rank in ranks.items():
+            pks_by_rank.setdefault(rank, []).append(pk)
+        return queryset.annotate(
+            **{
+                f"{field}_rank": Case(
+                    *[
+                        When(pk__in=pks, then=Value(rank))
+                        for rank, pks in pks_by_rank.items()
+                    ],
+                    default=Value(0),
+                    output_field=IntegerField(),
+                )
+            }
+        )
+
+
 PERSONAL_FOLDER_SENTINEL = "__personal__"
 
 
@@ -12661,8 +12706,32 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
     filterset_class = ComplianceAssessmentFilterSet
     filterset_fields = ComplianceAssessmentFilterSet.Meta.fields
     search_fields = ["name", "description", "ref_id", "framework__name"]
-    ordering_remap = {"authors": "authors_label"}
+    ordering_remap = {"authors": "authors_label", "progress": "progress_rank"}
     ordering_nulls_last = ("authors_label",)
+    computed_ordering_field = "progress"
+    filter_backends = [
+        b for b in BaseModelViewSet.filter_backends if b is not SmartOrderingFilter
+    ] + [ComputedRankOrderingFilter, SmartOrderingFilter]
+
+    def get_computed_ordering_ranks(self, queryset: QuerySet) -> dict[UUID, int]:
+        """Percent complete per audit id, the integer the list already renders.
+
+        `progress` is derived in Python, not stored: the mode comes from the
+        audit's `field_visibility` and implementation-group audits intersect
+        two JSON lists, so no annotation can express it. Reading ids rather
+        than objects keeps the ranking clear of the list's select/prefetch.
+        """
+        audit_ids = list(queryset.values_list("id", flat=True))
+        if not audit_ids:
+            return {}
+        totals, assessed = self.get_requirement_counts(audit_ids)
+        ranks: dict[UUID, int] = {}
+        for audit_id in audit_ids:
+            total = totals.get(audit_id, 0)
+            ranks[audit_id] = (
+                int((assessed.get(audit_id, 0) / total) * 100) if total else 0
+            )
+        return ranks
 
     def get_serializer_class(self, **kwargs):
         action = kwargs.get("action", self.action)

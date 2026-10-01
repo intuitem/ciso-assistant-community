@@ -875,3 +875,93 @@ class TestComplianceAssessmentDetailActionAuthorization:
                 f"/api/compliance-assessments/{missing}/{action}/"
             )
             assert resp.status_code == status.HTTP_404_NOT_FOUND, action
+
+
+def _list_ordered_ids(
+    client: APIClient, ordering: str, among: list | None
+) -> list[str]:
+    r = client.get(f"/api/compliance-assessments/?ordering={ordering}")
+    assert r.status_code == status.HTTP_200_OK, r.content
+    body = r.json()
+    results = body["results"] if isinstance(body, dict) and "results" in body else body
+    if among is None:
+        return [item["id"] for item in results]
+    wanted = {str(audit_id) for audit_id in among}
+    return [item["id"] for item in results if item["id"] in wanted]
+
+
+def _audit_at_progress(folder: Folder, done: int, total: int) -> ComplianceAssessment:
+    framework = _make_framework()
+    for i in range(total):
+        _make_requirement(framework, f"O{i}")
+    audit = _make_audit(folder, framework)
+    audit.create_requirement_assessments()
+    for ra in list(audit.requirement_assessments.all())[:done]:
+        ra.status = RequirementAssessment.Status.DONE
+        ra.save(update_fields=["status"])
+    return audit
+
+
+@pytest.mark.django_db
+class TestComplianceAssessmentProgressOrdering:
+    """`progress` has no column: it is derived in Python, so DRF used to drop
+    `?ordering=progress` as an unknown field and the header click did nothing."""
+
+    def _fixture(self, client: APIClient) -> dict[int, ComplianceAssessment]:
+        root = Folder.get_root_folder()
+        audits = {
+            0: _audit_at_progress(root, 0, 4),
+            50: _audit_at_progress(root, 2, 4),
+            100: _audit_at_progress(root, 4, 4),
+        }
+        # Implementation-group audit: only the 3 selected requirements count,
+        # one of them done. This is the branch no SQL annotation can express.
+        framework = _make_framework()
+        for i in range(3):
+            _make_requirement(framework, f"G{i}", implementation_groups=["g1"])
+        _make_requirement(framework, "G3", implementation_groups=["g2"])
+        ig_audit = _make_audit(root, framework, selected_implementation_groups=["g1"])
+        ig_audit.create_requirement_assessments()
+        selected = ig_audit.requirement_assessments.filter(
+            requirement__implementation_groups=["g1"]
+        )
+        first = selected.first()
+        first.status = RequirementAssessment.Status.DONE
+        first.save(update_fields=["status"])
+        audits[33] = ig_audit
+
+        for expected, audit in audits.items():
+            assert _list_progress(client, audit.id) == expected
+        return audits
+
+    def test_ascending_orders_by_computed_progress(
+        self, authenticated_client: APIClient
+    ) -> None:
+        audits = self._fixture(authenticated_client)
+        ids = _list_ordered_ids(
+            authenticated_client, "progress", [a.id for a in audits.values()]
+        )
+        assert ids == [str(audits[p].id) for p in (0, 33, 50, 100)]
+
+    def test_descending_orders_by_computed_progress(
+        self, authenticated_client: APIClient
+    ) -> None:
+        audits = self._fixture(authenticated_client)
+        ids = _list_ordered_ids(
+            authenticated_client, "-progress", [a.id for a in audits.values()]
+        )
+        assert ids == [str(audits[p].id) for p in (100, 50, 33, 0)]
+
+    def test_first_page_holds_the_globally_highest(
+        self, authenticated_client: APIClient
+    ) -> None:
+        """Ranking the page after slicing it would reorder the same rows
+        instead of choosing them, so pin the slice against the full order."""
+        self._fixture(authenticated_client)
+        full = _list_ordered_ids(authenticated_client, "-progress", among=None)
+
+        r = authenticated_client.get(
+            "/api/compliance-assessments/?ordering=-progress&limit=2"
+        )
+        assert r.status_code == status.HTTP_200_OK, r.content
+        assert [item["id"] for item in r.json()["results"]] == full[:2]
