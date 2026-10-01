@@ -3,8 +3,8 @@
 The command realigns stored RequirementAssessment.result/score for audits
 built before the semantic compute_result aggregation. These tests cover the
 behaviours that matter operationally: it fixes stale results, honours
---dry-run, is idempotent, and never touches requirements that are not
-compute_result-driven (so a manually set result is preserved).
+--dry-run, is idempotent, never touches requirements that are neither
+compute_result-driven nor weighted, and preserves a manually set result.
 """
 
 from io import StringIO
@@ -249,4 +249,25 @@ class TestRecomputeAssessmentResultsCommand:
         self._run(d["ca"])
 
         d["ra_score"].refresh_from_db()
+        assert d["ra_score"].result == RequirementAssessment.Result.COMPLIANT
+
+    def test_weighted_score_only_requirement_is_recomputed(self, command_setup):
+        """A weighted question puts a score-only requirement in scope: its stale
+        score is fixed and its manual result is preserved."""
+        d = command_setup
+        q3 = d["rn_score"].questions.get()
+        q3.weight = 3
+        q3.save(update_fields=["weight"])
+        _answer(d["ra_score"], q3, q3.choices.get(), d["folder"])
+        _set_stored(
+            d["ra_score"],
+            score=100,
+            is_scored=True,
+            result=RequirementAssessment.Result.COMPLIANT,
+        )
+
+        self._run(d["ca"])
+
+        d["ra_score"].refresh_from_db()
+        assert d["ra_score"].score == 5
         assert d["ra_score"].result == RequirementAssessment.Result.COMPLIANT
