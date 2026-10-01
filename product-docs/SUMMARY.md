@@ -2,13 +2,13 @@
 
 * [👋 Welcome](README.md)
 
-## ── 🧭 Introduction
+## ── 🧭 Introduction ──
 
 * [💭 Philosophy](introduction/philosophy.md)
 * [📖 Vocabulary](introduction/vocabulary.md)
 * [⚖️ Community vs PRO](introduction/editions.md)
 
-## ── 🧠 Concepts
+## ── 🧠 Concepts ──
 
 * 🧱 Foundations
   * [Domains](concepts/domains.md)
@@ -57,7 +57,7 @@
   * [Terminology](concepts/terminology.md)
   * [Object classifications](concepts/object-classification.md)
 
-## ── 🚀 Installation
+## ── 🚀 Installation ──
 
 * [🧭 Overview](installation/README.md)
 * [⚡ Quick start](installation/quick-start.md)
