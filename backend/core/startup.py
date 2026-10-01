@@ -2108,6 +2108,15 @@ TECHNICAL_TESTER_PERMISSIONS_LIST = [
 ]
 
 
+# Users always live in the root folder, so this role only has an effect when
+# granted on Global. It deliberately excludes change/delete: editing and removing
+# users stays with administrators.
+USER_CREATOR_PERMISSIONS_LIST = [
+    "add_user",
+    "view_user",
+]
+
+
 def seed_feature_flag_defaults():
     """Fill in flags the stored row has never heard of.
 
@@ -2206,6 +2215,46 @@ def ensure_admin_user():
 
     for u in User.objects.filter(is_superuser=True):
         u.user_groups.add(administrators)
+
+
+def ensure_user_creator_group():
+    """Sync the User creator role and ensure its Global group exists.
+
+    Only called when `DELEGATED_USER_CREATION` is set. Turning the setting off
+    later leaves an existing role, group and memberships in place.
+
+    The assignment is non-recursive on purpose: users always live in the root
+    folder, so the grant is only meaningful on Global itself.
+    """
+    from django.contrib.auth.models import Permission
+
+    from iam.models import Folder, Role, RoleAssignment, UserGroup
+
+    role, _ = Role.objects.get_or_create(
+        name=RoleCodename.USER_CREATOR.value, builtin=True
+    )
+    role.permissions.set(
+        Permission.objects.filter(codename__in=USER_CREATOR_PERMISSIONS_LIST)
+    )
+
+    root_folder = Folder.get_root_folder()
+    if UserGroup.objects.filter(
+        name=UserGroupCodename.GLOBAL_USER_CREATOR.value, folder=root_folder
+    ).exists():
+        return
+    global_user_creators = UserGroup.objects.create(
+        name=UserGroupCodename.GLOBAL_USER_CREATOR.value,
+        folder=root_folder,
+        builtin=True,
+    )
+    ra = RoleAssignment.objects.create(
+        user_group=global_user_creators,
+        role=role,
+        is_recursive=False,
+        builtin=True,
+        folder=root_folder,
+    )
+    ra.perimeter_folders.add(root_folder)
 
 
 def startup(sender=None, **kwargs):
@@ -2371,6 +2420,9 @@ def startup(sender=None, **kwargs):
             folder=Folder.get_root_folder(),
         )
         ra.perimeter_folders.add(global_auditees.folder)
+
+    if getattr(settings, "DELEGATED_USER_CREATION", False):
+        ensure_user_creator_group()
 
     # Create default Qualifications
     try:
