@@ -1045,14 +1045,8 @@
 	"associatedFindingsAssessments": "Přidružené následné kroky",
 	"hourCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"countPlural=one": "{count} Hodina",
 				"countPlural=other": "{count} Hodiny"
@@ -1061,13 +1055,8 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Minuta",
 				"countPlural=other": "{count} Minuty"
@@ -1076,13 +1065,8 @@
 	],
 	"dayCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Den",
 				"countPlural=other": "{count} Dny"
@@ -1091,13 +1075,8 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} objekt není viditelný.",
 				"countPlural=other": "{count} objekty nejsou viditelné."
@@ -1187,14 +1166,8 @@
 	"errorFetching": "Nelze načíst informace o kaskádě. Zkuste to prosím znovu.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"count=0": "Žádné další objekty nebudou ovlivněny.",
 				"countPlural=one": "{count} související objekt nebude smazán, ale ztratí jedno nebo více vztahů.",
@@ -1354,13 +1327,8 @@
 	"builderNoRulesOrGroupsConfigured": "Nejsou nakonfigurována žádná pravidla ani skupiny",
 	"builderOutcomeRuleSummary": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} pravidel výsledků",
 				"countPlural=other": "{count} pravidel výsledků"
@@ -1369,13 +1337,8 @@
 	],
 	"builderImplementationGroupsSummaryShort": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} skupin",
 				"countPlural=other": "{count} skupin"
@@ -1388,13 +1351,8 @@
 	"builderScoreScale": "Stupnice skóre",
 	"builderScaleLevel": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} úrovní",
 				"countPlural=other": "{count} úrovní"
@@ -1464,13 +1422,8 @@
 	"builderAssessableLeaf": "Hodnotitelný koncový uzel",
 	"builderAssessableWithChildren": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Hodnotitelný · {count} potomek",
 				"countPlural=other": "Hodnotitelný · {count} potomků"
@@ -1479,13 +1432,8 @@
 	],
 	"builderGroupWithChildren": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Skupina · {count} potomek",
 				"countPlural=other": "Skupina · {count} potomků"
@@ -1512,13 +1460,8 @@
 	"builderAddQuestion": "Přidat otázku",
 	"builderChildrenHidden": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} potomek skryt",
 				"countPlural=other": "{count} potomků skryto"
@@ -1545,14 +1488,8 @@
 	"builderChangeTypeWarning": "Změna typu smaže stávající možnosti. Pokračovat?",
 	"builderShownWhenAnswers": [
 		{
-			"declarations": [
-				"input count",
-				"input ref",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Zobrazeno, když {ref} = {count} odpovědí",
 				"countPlural=other": "Zobrazeno, když {ref} = {count} odpovědí"
@@ -5399,13 +5336,8 @@
 	"lbListEmpty": "prázdný",
 	"lbCountFrameworks": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} rámec",
 				"countPlural=few": "{count} rámce",
@@ -5415,13 +5347,8 @@
 	],
 	"lbCountThreats": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} hrozba",
 				"countPlural=few": "{count} hrozby",
@@ -5431,13 +5358,8 @@
 	],
 	"lbCountReferenceControls": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} referenční opatření",
 				"countPlural=few": "{count} referenční opatření",
@@ -5447,13 +5369,8 @@
 	],
 	"lbCountRiskMatrices": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} matice rizik",
 				"countPlural=few": "{count} matice rizik",
@@ -5463,13 +5380,8 @@
 	],
 	"lbCountRequirementMappingSets": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} mapování",
 				"countPlural=few": "{count} mapování",
@@ -5479,13 +5391,8 @@
 	],
 	"lbCountPreset": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} šablona",
 				"countPlural=few": "{count} šablony",
@@ -5495,13 +5402,8 @@
 	],
 	"lbCountMetricDefinitions": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} definice metriky",
 				"countPlural=few": "{count} definice metriky",
@@ -5721,13 +5623,8 @@
 	"noFlaggedItemsHint": "Není označeno žádné zjištění. Respondent uvidí pouze poznámku níže – označte v dotazníku položky k opravě, abyste jej navedli na to, co je třeba upravit.",
 	"itemsNeedingChanges": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} položka vyžaduje změny",
 				"countPlural=few": "{count} položky vyžadují změny",
@@ -5873,13 +5770,8 @@
 	"notificationTitleValidationFlowUpdated": "Validace '{validation_ref_id}' je nyní {new_status}",
 	"unreadNotifications": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} nepřečtené oznámení",
 				"countPlural=few": "{count} nepřečtená oznámení",
@@ -6019,13 +5911,8 @@
 	"scheduleYearly": "Ročně",
 	"scheduleEveryNDays": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Každý den",
 				"countPlural=few": "Každé {count} dny",
@@ -6035,13 +5922,8 @@
 	],
 	"scheduleEveryNWeeks": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Každý týden",
 				"countPlural=few": "Každé {count} týdny",
@@ -6051,13 +5933,8 @@
 	],
 	"scheduleEveryNMonths": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Každý měsíc",
 				"countPlural=few": "Každé {count} měsíce",
@@ -6067,13 +5944,8 @@
 	],
 	"scheduleEveryNYears": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Každý rok",
 				"countPlural=few": "Každé {count} roky",
@@ -6083,13 +5955,8 @@
 	],
 	"dueInDays": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "za {count} den",
 				"countPlural=few": "za {count} dny",
@@ -6795,13 +6662,8 @@
 	"builderRequired": "Povinné",
 	"lbCountQuickForms": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} rychlý formulář",
 				"countPlural=few": "{count} rychlé formuláře",
@@ -6811,13 +6673,8 @@
 	],
 	"builderPageStatus": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Stránka · {count} otázka",
 				"countPlural=few": "Stránka · {count} otázky",
@@ -6887,13 +6744,8 @@
 	"onlyYou": "Pouze vy",
 	"alsoNotified": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Byla upozorněna {count} další osoba",
 				"countPlural=few": "Byly upozorněny {count} další osoby",
