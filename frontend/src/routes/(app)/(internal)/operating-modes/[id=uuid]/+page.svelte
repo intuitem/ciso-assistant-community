@@ -206,6 +206,7 @@
 		<OperatingModeGraph
 			elementaryActions={data.elementaryActions}
 			killChainSteps={data.killChainSteps}
+			probabilityChoices={data.probabilityChoices}
 			operatingModeId={data.operatingModeId}
 			graphColumns={data.data.graph_columns ?? {}}
 			readonly={!editMode}

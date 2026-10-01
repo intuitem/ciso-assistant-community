@@ -22,6 +22,7 @@
 	import StageColumnNodeComponent from './nodes/StageColumnNode.svelte';
 	import LogicEdgeComponent from './edges/LogicEdge.svelte';
 	import EditorSidebar from './EditorSidebar.svelte';
+	import StepEditModal from './StepEditModal.svelte';
 
 	interface ElementaryActionItem {
 		id: string;
@@ -31,8 +32,13 @@
 	}
 
 	interface KillChainStep {
+		id: string;
 		elementary_action: any;
 		antecedents: any[];
+		assets?: any[];
+		success_probability?: number;
+		success_probability_pct?: number | null;
+		technical_difficulty?: number;
 		logic_operator?: string | null;
 		position_x?: number;
 		position_y?: number;
@@ -45,6 +51,7 @@
 	interface Props {
 		elementaryActions: ElementaryActionItem[];
 		killChainSteps: KillChainStep[];
+		probabilityChoices?: Record<string, string>;
 		operatingModeId: string;
 		graphColumns?: GraphColumns;
 		onSaved?: () => void;
@@ -56,6 +63,7 @@
 	let {
 		elementaryActions,
 		killChainSteps,
+		probabilityChoices = {},
 		operatingModeId,
 		graphColumns = {},
 		onSaved,
@@ -123,6 +131,8 @@
 	let dragOverStage = $state<number | null>(null);
 	let showHelp = $state(false);
 	let selectedEdgeId = $state<string | null>(null);
+	let editedStepId = $state<string | null>(null);
+	const editedStep = $derived(nodes.find((n) => n.id === editedStepId));
 
 	// Track the app dark mode (`.dark` on <html>) so SvelteFlow uses its native dark
 	// theme via colorMode. SvelteFlow defaults to light otherwise (white canvas).
@@ -145,7 +155,7 @@
 		},
 		deleteNode: (id: string) => handleDeleteNode(id),
 		toggleOperator: (id: string) => handleToggleOperator(id),
-		editNode: (id: string) => onEditAction?.(id),
+		editStep: (id: string) => (editedStepId = id),
 		markDirty: () => (dirty = true)
 	});
 
@@ -217,7 +227,7 @@
 
 			const hasLogicOp = !!step.logic_operator && antecedents.length > 1;
 			if (hasLogicOp) {
-				ops.set(eaId, step.logic_operator as 'AND' | 'OR');
+				ops.set(step.id, step.logic_operator as 'AND' | 'OR');
 			}
 
 			const hasSavedPosition = (step.position_x ?? 0) !== 0 || (step.position_y ?? 0) !== 0;
@@ -225,7 +235,7 @@
 			const posY = hasSavedPosition ? step.position_y! : NODE_PADDING_Y + count * NODE_GAP_Y;
 
 			flowNodes.push({
-				id: eaId,
+				id: step.id,
 				type: 'action',
 				position: { x: posX, y: posY },
 				parentId: stageColumnId(stage),
@@ -237,7 +247,14 @@
 					label: ea.name,
 					iconClass: ea.icon_fa_class ?? '',
 					stage,
-					logicOp: hasLogicOp ? (step.logic_operator as 'AND' | 'OR') : null
+					logicOp: hasLogicOp ? (step.logic_operator as 'AND' | 'OR') : null,
+					elementaryActionId: eaId,
+					assets: (step.assets ?? []).map((a: any) => (typeof a === 'object' ? a.id : a)),
+					assetLabels: (step.assets ?? []).map((a: any) => (typeof a === 'object' ? a.str : a)),
+					successProbability: step.success_probability ?? -1,
+					successProbabilityPct: step.success_probability_pct ?? null,
+					technicalDifficulty: step.technical_difficulty ?? -1,
+					successProbabilityLabel: probabilityChoices[String(step.success_probability ?? -1)]
 				}
 			} as Node);
 			stageCount[stage] = count + 1;
@@ -246,16 +263,16 @@
 				const ant = antecedents[ai];
 				const antId = typeof ant === 'object' ? ant.id : ant;
 				flowEdges.push({
-					id: `e-${antId}-${eaId}`,
+					id: `e-${antId}-${step.id}`,
 					source: antId,
-					target: eaId,
+					target: step.id,
 					type: 'logic',
 					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' },
 					style: 'stroke: var(--color-surface-500); stroke-width: 2;',
 					data: {
 						logicOp: ai === 0 && hasLogicOp ? step.logic_operator : null,
 						targetStage: stage,
-						targetNodeId: eaId
+						targetNodeId: step.id
 					}
 				});
 			}
@@ -280,7 +297,7 @@
 		untrack(() => {
 			nodes = nodes.map((n) => {
 				if (n.type !== 'action') return n;
-				const ea = eaMap.get(n.id);
+				const ea = eaMap.get((n.data as any).elementaryActionId);
 				if (!ea) return n;
 				const newStage = getStageNumber(ea.attack_stage);
 				return {
@@ -325,8 +342,8 @@
 		return () => window.removeEventListener('beforeprint', handleBeforePrint);
 	});
 
-	const placedNodeIds = $derived(
-		new Set(nodes.filter((n) => n.type === 'action').map((n) => n.id))
+	const placedActionIds = $derived(
+		new Set(nodes.filter((n) => n.type === 'action').map((n) => (n.data as any).elementaryActionId))
 	);
 
 	function isValidConnection(connection: Connection): boolean {
@@ -500,7 +517,6 @@
 		if (!actionJson) return;
 
 		const action: ElementaryActionItem = JSON.parse(actionJson);
-		if (placedNodeIds.has(action.id)) return;
 
 		const stage = getStageNumber(action.attack_stage);
 
@@ -509,7 +525,7 @@
 		);
 
 		const newNode: Node = {
-			id: action.id,
+			id: `new-${crypto.randomUUID()}`,
 			type: 'action',
 			position: { x: NODE_PADDING_X, y: NODE_PADDING_Y + nodesInStage.length * NODE_GAP_Y },
 			parentId: stageColumnId(stage),
@@ -521,7 +537,13 @@
 				label: action.name,
 				iconClass: action.icon_fa_class ?? '',
 				stage,
-				logicOp: null
+				logicOp: null,
+				elementaryActionId: action.id,
+				assets: [],
+				assetLabels: [],
+				successProbability: -1,
+				successProbabilityPct: null,
+				technicalDifficulty: -1
 			}
 		} as Node;
 
@@ -536,8 +558,13 @@
 			const antecedentIds = edges.filter((e) => e.target === node.id).map((e) => e.source);
 
 			return {
-				elementary_action: node.id,
+				id: node.id,
+				elementary_action: (node.data as any).elementaryActionId,
 				antecedents: antecedentIds,
+				assets: (node.data as any).assets ?? [],
+				success_probability: (node.data as any).successProbability ?? -1,
+				success_probability_pct: (node.data as any).successProbabilityPct ?? null,
+				technical_difficulty: (node.data as any).technicalDifficulty ?? -1,
 				logic_operator:
 					antecedentIds.length > 1
 						? ((node.data as any).logicOp ?? logicOps.get(node.id) ?? 'AND')
@@ -576,7 +603,7 @@
 >
 	{#if !readonly}
 		<div transition:slide={{ axis: 'x', duration: 300 }}>
-			<EditorSidebar {elementaryActions} {placedNodeIds} {onCreateAction} />
+			<EditorSidebar {elementaryActions} {placedActionIds} {onCreateAction} {onEditAction} />
 		</div>
 	{/if}
 
@@ -598,6 +625,7 @@
 				ondrop={readonly ? undefined : handleDrop}
 				onpaneclick={handlePaneClick}
 				nodesDraggable={!readonly}
+				zoomOnDoubleClick={false}
 				nodesConnectable={!readonly}
 				elementsSelectable={!readonly}
 				oninit={handleFlowInit}
@@ -685,6 +713,34 @@
 		</div>
 	</div>
 </div>
+
+{#if editedStep}
+	<StepEditModal
+		label={(editedStep.data as any).label}
+		assets={(editedStep.data as any).assets ?? []}
+		assetLabels={(editedStep.data as any).assetLabels ?? []}
+		successProbability={(editedStep.data as any).successProbability ?? -1}
+		successProbabilityPct={(editedStep.data as any).successProbabilityPct ?? null}
+		{probabilityChoices}
+		onApply={(values) => {
+			nodes = nodes.map((n) =>
+				n.id === editedStepId
+					? {
+							...n,
+							data: {
+								...n.data,
+								...values,
+								successProbabilityLabel: probabilityChoices[String(values.successProbability)]
+							}
+						}
+					: n
+			);
+			dirty = true;
+			editedStepId = null;
+		}}
+		onClose={() => (editedStepId = null)}
+	/>
+{/if}
 
 <style>
 	:global(.svelte-flow) {

@@ -1401,7 +1401,15 @@ export const ebiosRMSchema = z.object({
 	assets: z.string().uuid().optional().array().optional(),
 	folder: z.string(),
 	compliance_assessments: z.string().uuid().optional().array().optional(),
-	reference_entity: z.string().optional()
+	reference_entity: z.string().optional(),
+	classification: z.string().uuid().optional().nullable(),
+	objectives: z.string().optional(),
+	constraints_hypotheses: z.string().optional(),
+	strategic_cycle_months: z.number().int().min(0).optional().nullable(),
+	operational_cycle_months: z.number().int().min(0).optional().nullable(),
+	responsibility_matrix: z.string().uuid().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const fearedEventsSchema = z.object({
@@ -1828,6 +1836,7 @@ export const KillChainSchema = z.object({
 	// is_highlighted: z.boolean().default(false),
 	antecedents: z.string().uuid().optional().array().optional(),
 	logic_operator: z.string().optional().nullable(),
+	assets: z.string().uuid().optional().array().optional(),
 	folder: z.string()
 });
 

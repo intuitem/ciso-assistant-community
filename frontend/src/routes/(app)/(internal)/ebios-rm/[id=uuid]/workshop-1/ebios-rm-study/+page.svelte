@@ -17,6 +17,8 @@
 	} from '$lib/components/Modals/stores';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { countMasked } from '$lib/utils/related-visibility';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { getLocale } from '$paraglide/runtime';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -123,6 +125,16 @@
 				<span class="badge text-xs {statusMap[ebiosRmStudy.status]}">
 					{safeTranslate(ebiosRmStudy.status)}
 				</span>
+				{#if ebiosRmStudy.classification}
+					<span
+						class="badge border-2 font-bold uppercase"
+						style="border-color: {ebiosRmStudy.classification.hexcolor ||
+							'currentColor'}; color: {ebiosRmStudy.classification.hexcolor || 'inherit'}"
+						title={m.classification()}
+					>
+						{ebiosRmStudy.classification.label}
+					</span>
+				{/if}
 			</div>
 			{#if canEditObject}
 				<Anchor
@@ -155,8 +167,20 @@
 			</span>
 			<span class="text-sm text-surface-600-400"
 				>{m.quotationMethodSemiColon()}
-				<span class="font-bold">{safeTranslate(ebiosRmStudy.quotation_method)}</span>
+				<span class="font-bold">{safeTranslate(ebiosRmStudy.quotation_method_display)}</span>
 			</span>
+			{#if ebiosRmStudy.eta}
+				<span class="text-sm text-surface-600-400"
+					>{m.eta()}:
+					<span class="font-bold">{formatDateOrDateTime(ebiosRmStudy.eta, getLocale())}</span>
+				</span>
+			{/if}
+			{#if ebiosRmStudy.due_date}
+				<span class="text-sm text-surface-600-400"
+					>{m.dueDate()}:
+					<span class="font-bold">{formatDateOrDateTime(ebiosRmStudy.due_date, getLocale())}</span>
+				</span>
+			{/if}
 		</div>
 		<div
 			id="activityOne"
@@ -176,6 +200,48 @@
 				</div>
 			{:else}
 				<p class="text-surface-600-400">{m.noDescription()}</p>
+			{/if}
+			{#if ebiosRmStudy.objectives || ebiosRmStudy.constraints_hypotheses || ebiosRmStudy.strategic_cycle_months || ebiosRmStudy.operational_cycle_months || ebiosRmStudy.responsibility_matrix}
+				<div
+					class="w-full grid md:grid-cols-2 gap-4 p-4 bg-surface-50-950 border rounded-md shadow-xs"
+				>
+					{#if ebiosRmStudy.objectives}
+						<div>
+							<h4 class="font-semibold text-surface-700-300">{m.objectives()}</h4>
+							<MarkdownRenderer content={ebiosRmStudy.objectives} />
+						</div>
+					{/if}
+					{#if ebiosRmStudy.constraints_hypotheses}
+						<div>
+							<h4 class="font-semibold text-surface-700-300">{m.constraintsHypotheses()}</h4>
+							<MarkdownRenderer content={ebiosRmStudy.constraints_hypotheses} />
+						</div>
+					{/if}
+					<div class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-surface-600-400 md:col-span-2">
+						{#if ebiosRmStudy.strategic_cycle_months}
+							<span
+								>{m.strategicCycleMonths()}:
+								<span class="font-bold">{ebiosRmStudy.strategic_cycle_months}</span></span
+							>
+						{/if}
+						{#if ebiosRmStudy.operational_cycle_months}
+							<span
+								>{m.operationalCycleMonths()}:
+								<span class="font-bold">{ebiosRmStudy.operational_cycle_months}</span></span
+							>
+						{/if}
+						{#if ebiosRmStudy.responsibility_matrix}
+							<span
+								>{m.responsibilityMatrix()}:
+								<Anchor
+									class="anchor"
+									href="/responsibility-matrices/{ebiosRmStudy.responsibility_matrix.id}"
+									>{ebiosRmStudy.responsibility_matrix.str}</Anchor
+								></span
+							>
+						{/if}
+					</div>
+				</div>
 			{/if}
 			<div class="w-full p-4 bg-surface-50-950 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">

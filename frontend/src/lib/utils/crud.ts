@@ -2312,6 +2312,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'reference_entity', urlModel: 'entities' },
+			{ field: 'classification', urlModel: 'classification-levels' },
+			{ field: 'responsibility_matrix', urlModel: 'responsibility-matrices' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'last_risk_assessment', urlModel: 'risk-assessments' },
 			{ field: 'validation_flows', urlModel: 'validation-flows' }
@@ -2599,7 +2601,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'operating_mode', urlModel: 'operating-modes' },
 			{ field: 'elementary_action', urlModel: 'elementary-actions' },
-			{ field: 'antecedents', urlModel: 'elementary-actions' },
+			{ field: 'antecedents', urlModel: 'kill-chains' },
+			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'logic_operator' }]

@@ -70,8 +70,13 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         DEPRECATED = "deprecated", _("Deprecated")
 
     class QuotationMethod(models.TextChoices):
-        MANUAL = "manual", "Manual"
-        EXPRESS = "express", "Express"
+        MANUAL = "manual", "quotationMethodExpressDirect"
+        EXPRESS = "express", "quotationMethodExpressOperatingModes"
+        STANDARD = "standard", "quotationMethodStandard"
+        ADVANCED = "advanced", "quotationMethodAdvanced"
+
+    # Standard and advanced need the elementary-action roll-up (fiche méthode 8).
+    AVAILABLE_QUOTATION_METHODS = (QuotationMethod.MANUAL, QuotationMethod.EXPRESS)
 
     META_JSONSCHEMA = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -173,6 +178,34 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         related_name="ebios_rm_study_authors",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    objectives = models.TextField(blank=True, verbose_name=_("Objectives"))
+    constraints_hypotheses = models.TextField(
+        blank=True, verbose_name=_("Constraints and hypotheses")
+    )
+    strategic_cycle_months = models.PositiveSmallIntegerField(
+        null=True, blank=True, verbose_name=_("Strategic cycle (months)")
+    )
+    operational_cycle_months = models.PositiveSmallIntegerField(
+        null=True, blank=True, verbose_name=_("Operational cycle (months)")
+    )
+    responsibility_matrix = models.ForeignKey(
+        "pmbok.ResponsibilityMatrix",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="ebios_rm_studies",
+        verbose_name=_("Responsibility matrix"),
+        help_text=_("RACI of the study participants"),
+    )
+    classification = models.ForeignKey(
+        "core.ClassificationLevel",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Classification"),
+        help_text=_("Protection marking of the study"),
+    )
     meta = models.JSONField(
         default=get_initial_meta,
         verbose_name=_("Metadata"),
@@ -185,7 +218,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         default=QuotationMethod.EXPRESS,
         verbose_name=_("Quotation method"),
         help_text=_(
-            "Method used to quote the study: 'manual' for manual likelihood assessment, 'express' for automatic propagation from operating modes"
+            "Likelihood method: 'manual' and 'express' are variants of the guide's express method (direct estimate, most likely operating mode); 'standard' and 'advanced' rate each elementary action"
         ),
     )
 
@@ -1212,10 +1245,34 @@ class KillChain(AbstractBaseModel, FolderMixin):
     )
 
     antecedents = models.ManyToManyField(
-        ElementaryAction,
-        related_name="kill_chain_antecedents",
+        "self",
+        symmetrical=False,
+        related_name="successors",
         blank=True,
-        help_text="Elementary actions that are antecedents to this action in the kill chain",
+        help_text="Kill chain steps of the same operating mode that precede this step",
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        related_name="kill_chain_steps",
+        verbose_name=_("Supporting assets"),
+        help_text=_("Supporting assets this elementary action applies to"),
+    )
+    success_probability = models.SmallIntegerField(
+        default=-1,
+        verbose_name=_("Success probability"),
+        help_text=_("Level on the study's likelihood scale, -1 when not rated"),
+    )
+    success_probability_pct = models.FloatField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name=_("Success probability (%)"),
+    )
+    technical_difficulty = models.SmallIntegerField(
+        default=-1,
+        verbose_name=_("Technical difficulty"),
+        help_text=_("Level on the study's likelihood scale, -1 when not rated"),
     )
     position_x = models.FloatField(
         default=0,
@@ -1239,20 +1296,21 @@ class KillChain(AbstractBaseModel, FolderMixin):
         self.folder = self.operating_mode.folder
         super().save(*args, **kwargs)
 
-    def clean(self):
-        existing = KillChain.objects.filter(
-            operating_mode=self.operating_mode,
-            elementary_action=self.elementary_action,
-        )
-        if self.pk:
-            existing = existing.exclude(pk=self.pk)
-
-        if existing.exists():
-            raise ValidationError(
-                {
-                    "elementary_action": f"The elementary action '{self.elementary_action}' is already used in this operating mode's kill chain."
-                }
-            )
+    def descendant_ids(self) -> set:
+        """Ids of every step reachable from this one through successors."""
+        edges: dict = {}
+        for step_id, antecedent_id in KillChain.antecedents.through.objects.filter(
+            from_killchain__operating_mode_id=self.operating_mode_id
+        ).values_list("from_killchain_id", "to_killchain_id"):
+            edges.setdefault(antecedent_id, set()).add(step_id)
+        seen: set = set()
+        stack = [self.pk]
+        while stack:
+            for successor_id in edges.get(stack.pop(), ()):
+                if successor_id not in seen:
+                    seen.add(successor_id)
+                    stack.append(successor_id)
+        return seen
 
     def __str__(self):
         return f"{self.operating_mode} - {self.elementary_action.name}"

@@ -6,6 +6,7 @@
 	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -31,6 +32,9 @@
 	}: Props = $props();
 
 	let activeActivity: string | null = $state(null);
+	const responsibilityMatricesEnabled = $derived(
+		!!page.data?.featureflags?.responsibility_matrices
+	);
 	let hasEntities = $state(false);
 
 	onMount(() => {
@@ -76,6 +80,18 @@
 		cacheLock={cacheLocks['status']}
 		bind:cachedValue={formDataCache['status']}
 	/>
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="classification-levels?is_visible=true&object_classification__is_visible=true"
+		optionsLabelField="label"
+		optionsExtraFields={[['object_classification', 'str']]}
+		field="classification"
+		label={m.classification()}
+		helpText={m.ebiosRmStudyClassificationHelpText()}
+		nullable
+		cacheLock={cacheLocks['classification']}
+		bind:cachedValue={formDataCache['classification']}
+	/>
 	{#if hasEntities}
 		<AutocompleteSelect
 			{form}
@@ -95,6 +111,24 @@
 		bind:cachedValue={formDataCache['risk_matrix']}
 		label={m.riskMatrix()}
 		helpText={m.ebiosRmMatrixHelpText()}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="eta"
+		label={m.eta()}
+		helpText={m.etaHelpText()}
+		cacheLock={cacheLocks['eta']}
+		bind:cachedValue={formDataCache['eta']}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="due_date"
+		label={m.dueDate()}
+		helpText={m.dueDateHelpText()}
+		cacheLock={cacheLocks['due_date']}
+		bind:cachedValue={formDataCache['due_date']}
 	/>
 {:else if context === 'ebiosRmStudy'}
 	<div
@@ -124,6 +158,18 @@
 			label={m.status()}
 			cacheLock={cacheLocks['status']}
 			bind:cachedValue={formDataCache['status']}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="classification-levels?is_visible=true&object_classification__is_visible=true"
+			optionsLabelField="label"
+			optionsExtraFields={[['object_classification', 'str']]}
+			field="classification"
+			label={m.classification()}
+			helpText={m.ebiosRmStudyClassificationHelpText()}
+			nullable
+			cacheLock={cacheLocks['classification']}
+			bind:cachedValue={formDataCache['classification']}
 		/>
 		<AutocompleteSelect
 			{form}
@@ -189,6 +235,69 @@
 			bind:cachedValue={formDataCache['reviewers']}
 			label={m.reviewers()}
 		/>
+		<TextField
+			type="date"
+			{form}
+			field="eta"
+			label={m.eta()}
+			helpText={m.etaHelpText()}
+			cacheLock={cacheLocks['eta']}
+			bind:cachedValue={formDataCache['eta']}
+		/>
+		<TextField
+			type="date"
+			{form}
+			field="due_date"
+			label={m.dueDate()}
+			helpText={m.dueDateHelpText()}
+			cacheLock={cacheLocks['due_date']}
+			bind:cachedValue={formDataCache['due_date']}
+		/>
+		<MarkdownField
+			{form}
+			field="objectives"
+			label={m.objectives()}
+			cacheLock={cacheLocks['objectives']}
+			bind:cachedValue={formDataCache['objectives']}
+		/>
+		<MarkdownField
+			{form}
+			field="constraints_hypotheses"
+			label={m.constraintsHypotheses()}
+			cacheLock={cacheLocks['constraints_hypotheses']}
+			bind:cachedValue={formDataCache['constraints_hypotheses']}
+		/>
+		<div class="grid grid-cols-2 gap-2">
+			<NumberField
+				{form}
+				field="strategic_cycle_months"
+				min="0"
+				label={m.strategicCycleMonths()}
+				cacheLock={cacheLocks['strategic_cycle_months']}
+				bind:cachedValue={formDataCache['strategic_cycle_months']}
+			/>
+			<NumberField
+				{form}
+				field="operational_cycle_months"
+				min="0"
+				label={m.operationalCycleMonths()}
+				cacheLock={cacheLocks['operational_cycle_months']}
+				bind:cachedValue={formDataCache['operational_cycle_months']}
+			/>
+		</div>
+		{#if responsibilityMatricesEnabled}
+			<AutocompleteSelect
+				{form}
+				optionsEndpoint="responsibility-matrices"
+				optionsExtraFields={[['folder', 'str']]}
+				field="responsibility_matrix"
+				label={m.responsibilityMatrix()}
+				helpText={m.ebiosRmStudyResponsibilityMatrixHelpText()}
+				nullable
+				cacheLock={cacheLocks['responsibility_matrix']}
+				bind:cachedValue={formDataCache['responsibility_matrix']}
+			/>
+		{/if}
 	</div>
 	<div
 		class="relative p-2 space-y-2 rounded-md {activeActivity === 'two'

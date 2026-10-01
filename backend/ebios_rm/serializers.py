@@ -34,6 +34,13 @@ class EbiosRMStudyWriteSerializer(BaseModelSerializer):
         model = EbiosRMStudy
         exclude = ["created_at", "updated_at"]
 
+    def validate_quotation_method(self, value):
+        if value not in EbiosRMStudy.AVAILABLE_QUOTATION_METHODS:
+            raise serializers.ValidationError(
+                "This likelihood method is not available yet."
+            )
+        return value
+
 
 class EbiosRMStudyReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
@@ -47,6 +54,13 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     risk_assessments = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
+    classification = FieldsRelatedField(
+        ["id", "label", "abbreviation", "hexcolor", {"object_classification": ["id"]}]
+    )
+    responsibility_matrix = FieldsRelatedField()
+    quotation_method_display = serializers.CharField(
+        source="get_quotation_method_display", read_only=True
+    )
     roto_count = serializers.IntegerField()
     selected_roto_count = serializers.IntegerField()
     selected_attack_path_count = serializers.IntegerField()
@@ -91,6 +105,10 @@ class EbiosRMStudyImportExportSerializer(BaseModelSerializer):
             "description",
             "eta",
             "due_date",
+            "objectives",
+            "constraints_hypotheses",
+            "strategic_cycle_months",
+            "operational_cycle_months",
             "version",
             "status",
             "observation",
@@ -583,41 +601,62 @@ class KillChainWriteSerializer(BaseModelSerializer):
         exclude = ["created_at", "updated_at"]
 
     def validate(self, attrs):
-        elementary_action = attrs.get("elementary_action")
-        antecedents = attrs.get("antecedents", [])
-        attack_stage = elementary_action.attack_stage
+        instance = self.instance
+        elementary_action = attrs.get("elementary_action") or getattr(
+            instance, "elementary_action", None
+        )
+        operating_mode = attrs.get("operating_mode") or getattr(
+            instance, "operating_mode", None
+        )
+        scale_size = len(operating_mode.parsed_matrix["probability"])
+        for field in ("success_probability", "technical_difficulty"):
+            level = attrs.get(field)
+            if level is not None and not -1 <= level < scale_size:
+                raise serializers.ValidationError(
+                    {field: f"Level must be between -1 and {scale_size - 1}."}
+                )
 
-        if attack_stage == ElementaryAction.AttackStage.KNOW and antecedents:
+        antecedents = attrs.get("antecedents")
+        if antecedents is None:
+            return super().validate(attrs)
+
+        if (
+            antecedents
+            and elementary_action.attack_stage == ElementaryAction.AttackStage.KNOW
+        ):
             raise serializers.ValidationError(
-                "Antecedents cannot be selected in attack stage 'Know'."
+                {
+                    "antecedents": "Antecedents cannot be selected in attack stage 'Know'."
+                }
             )
 
-        if elementary_action in antecedents:
+        for antecedent in antecedents:
+            if instance is not None and antecedent.pk == instance.pk:
+                raise serializers.ValidationError(
+                    {"antecedents": "A kill chain step cannot be its own antecedent."}
+                )
+            if antecedent.operating_mode_id != operating_mode.id:
+                raise serializers.ValidationError(
+                    {
+                        "antecedents": f"Antecedent '{antecedent}' belongs to another operating mode."
+                    }
+                )
+            if (
+                antecedent.elementary_action.attack_stage
+                > elementary_action.attack_stage
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "antecedents": f"The attack stage of the antecedent '{antecedent}' needs to be the same or before the attack stage of the elementary action"
+                    }
+                )
+
+        if instance is not None and instance.descendant_ids() & {
+            antecedent.pk for antecedent in antecedents
+        }:
             raise serializers.ValidationError(
-                "An elementary action cannot be its own antecedent."
+                {"antecedents": "These antecedents would create a cycle."}
             )
-
-        if antecedents:
-            for antecedent in antecedents:
-                if not KillChain.objects.filter(
-                    operating_mode=attrs.get("operating_mode"),
-                    elementary_action=antecedent,
-                ).exists():
-                    raise serializers.ValidationError(
-                        f"Antecedent '{antecedent}' has not been used in the operating mode yet"
-                    )
-
-                antecedent_kill_chain = KillChain.objects.filter(
-                    operating_mode=attrs.get("operating_mode"),
-                    elementary_action=antecedent,
-                ).first()
-
-                if antecedent_kill_chain and antecedent.attack_stage > attack_stage:
-                    raise serializers.ValidationError(
-                        {
-                            "antecedents": f"The attack stage of the antecedent '{antecedent}' needs to be the same or before the attack stage of the elementary action"
-                        }
-                    )
 
         return super().validate(attrs)
 
@@ -626,6 +665,7 @@ class KillChainReadSerializer(BaseModelSerializer):
     operating_mode = FieldsRelatedField()
     elementary_action = FieldsRelatedField()
     antecedents = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(["id", "type"], many=True)
     attack_stage = serializers.CharField()
     folder = FieldsRelatedField()
     str = serializers.CharField(source="__str__")

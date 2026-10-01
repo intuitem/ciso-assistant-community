@@ -14,7 +14,7 @@ from core.views import (
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
-from core.models import Terminology
+from core.models import Asset, Terminology
 from openpyxl.styles import Alignment
 
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
@@ -63,7 +63,13 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         return (
             super()
             .get_queryset()
-            .select_related("folder", "reference_entity", "risk_matrix")
+            .select_related(
+                "folder",
+                "reference_entity",
+                "risk_matrix",
+                "classification__object_classification",
+                "responsibility_matrix",
+            )
             .prefetch_related(
                 "assets__folder",
                 "compliance_assessments",
@@ -84,7 +90,12 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get quotation method choices")
     def quotation_method(self, request):
-        return Response(dict(EbiosRMStudy.QuotationMethod.choices))
+        return Response(
+            {
+                method.value: method.label
+                for method in EbiosRMStudy.AVAILABLE_QUOTATION_METHODS
+            }
+        )
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
@@ -210,12 +221,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
             kill_chain_steps = KillChainReadSerializer(steps, many=True).data
 
-            # Collect all EAs referenced in kill chain steps
-            ea_ids = set()
-            for step in steps:
-                ea_ids.add(step.elementary_action_id)
-                for ant in step.antecedents.all():
-                    ea_ids.add(ant.id)
+            ea_ids = {step.elementary_action_id for step in steps}
 
             eas = ElementaryAction.objects.filter(id__in=ea_ids)
             elementary_actions = [
@@ -421,6 +427,16 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     "description": study.description or "",
                     "version": study.version or "",
                     "status": study.status or "",
+                    "classification": str(study.classification)
+                    if study.classification
+                    else "",
+                    "objectives": study.objectives,
+                    "constraints_hypotheses": study.constraints_hypotheses,
+                    "strategic_cycle_months": study.strategic_cycle_months or "",
+                    "operational_cycle_months": study.operational_cycle_months or "",
+                    "responsibility_matrix": str(study.responsibility_matrix)
+                    if study.responsibility_matrix
+                    else "",
                     "eta": str(study.eta) if study.eta else "",
                     "due_date": str(study.due_date) if study.due_date else "",
                     "observation": study.observation or "",
@@ -688,7 +704,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         "likelihood": om.get_likelihood_display().get("name", ""),
                         "elementary_actions": "\n".join(
                             [
-                                step.elementary_action.name
+                                f"{step.elementary_action.name} ({', '.join(asset.name for asset in step.assets.all())})"
+                                if step.assets.all()
+                                else step.elementary_action.name
                                 for step in om.kill_chain_steps.all()
                             ]
                         ),
@@ -1130,49 +1148,9 @@ class OperationalScenarioViewSet(BaseModelViewSet):
 
 
 class ElementaryActionFilter(GenericFilterSet):
-    operating_mode_available_actions = df.ModelChoiceFilter(
-        queryset=OperatingMode.objects.all(),
-        method="filter_operating_mode_available_actions",
-        label="Operating mode available actions",
-    )
-    operating_mode_available_antecedents = df.ModelChoiceFilter(
-        queryset=OperatingMode.objects.all(),
-        method="filter_operating_mode_available_antecedents",
-        label="Operating mode available antecedents",
-    )
-
-    def filter_operating_mode_available_actions(self, queryset, name, value):
-        operating_mode = value
-        kc_qs = KillChain.objects.filter(operating_mode=operating_mode)
-        exclude_kill_chain = self.data.get("exclude_kill_chain")
-        if exclude_kill_chain:
-            kc_qs = kc_qs.exclude(id=exclude_kill_chain)
-        used_elementary_actions = kc_qs.values_list("elementary_action", flat=True)
-        return queryset.exclude(id__in=used_elementary_actions)
-
-    def filter_operating_mode_available_antecedents(self, queryset, name, value):
-        operating_mode = value
-        kc_qs = KillChain.objects.filter(operating_mode=operating_mode)
-        action_id = self.data.get("actual_action")
-        action = ElementaryAction.objects.filter(id=action_id).first()
-        used_elementary_actions_ids = kc_qs.values_list("elementary_action", flat=True)
-        used_elementary_actions = ElementaryAction.objects.filter(
-            id__in=used_elementary_actions_ids
-        ).exclude(id=action_id if action else None)
-        if action:
-            precedent_actions = used_elementary_actions.filter(
-                attack_stage__lte=action.attack_stage
-            )
-        else:
-            precedent_actions = used_elementary_actions
-        return queryset.filter(id__in=precedent_actions)
-
     class Meta:
         model = ElementaryAction
-        fields = [
-            "operating_mode_available_actions",
-            "operating_mode_available_antecedents",
-        ]
+        fields = ["attack_stage", "threat"]
 
 
 class ElementaryActionViewSet(BaseModelViewSet):
@@ -1258,7 +1236,17 @@ class OperatingModeViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"], name="Save graph for Operating Mode")
     def save_graph(self, request, pk):
+        """
+        Replace the operating mode's kill chain with the posted graph.
+
+        Each step is keyed by "id": an existing step's UUID updates that step,
+        any other key (a client-side id for a node not saved yet) creates one.
+        Antecedents reference those keys. Steps left out are deleted. "assets"
+        is applied only when sent, so a graph save never drops them.
+        """
         from django.db import transaction
+
+        from iam.models import RoleAssignment
 
         mo = self.get_object()
         kill_chain_steps = request.data.get("kill_chain_steps", [])
@@ -1268,117 +1256,173 @@ class OperatingModeViewSet(BaseModelViewSet):
             )
         graph_columns = request.data.get("graph_columns", None)
 
-        # Validate all steps
-        from iam.models import RoleAssignment, Folder
-
         accessible_ea_ids = set(
             RoleAssignment.get_viewable_object_ids(request.user, ElementaryAction)
         )
-        seen_ea_ids = set()
-        errors = []
+        accessible_asset_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Asset)
+        )
+        existing_steps = {str(step.id): step for step in mo.kill_chain_steps.all()}
+        scale_size = len(mo.parsed_matrix["probability"])
 
+        errors = []
+        parsed = []
+        keys = set()
         for i, step in enumerate(kill_chain_steps):
             if not isinstance(step, dict):
                 errors.append(f"Step {i}: invalid step payload.")
                 continue
-            ea_id = step.get("elementary_action")
-            antecedent_ids = step.get("antecedents", [])
-            logic_operator = step.get("logic_operator")
-
-            if not ea_id:
-                errors.append(f"Step {i}: missing elementary_action.")
-                continue
-
             try:
-                ea_id = uuid.UUID(str(ea_id))
-            except ValueError, AttributeError:
+                ea_id = uuid.UUID(str(step.get("elementary_action")))
+            except ValueError, AttributeError, TypeError:
                 errors.append(f"Step {i}: invalid elementary_action UUID.")
                 continue
-
             if ea_id not in accessible_ea_ids:
                 errors.append(f"Step {i}: elementary action is not accessible.")
                 continue
 
-            if ea_id in seen_ea_ids:
-                errors.append(f"Step {i}: duplicate elementary action in kill chain.")
+            key = str(step.get("id") or ea_id)
+            if key in keys:
+                errors.append(f"Step {i}: duplicate step id.")
                 continue
-            seen_ea_ids.add(ea_id)
+            keys.add(key)
 
-            try:
-                ea = ElementaryAction.objects.get(pk=ea_id)
-            except ElementaryAction.DoesNotExist:
-                errors.append(f"Step {i}: elementary action not found.")
-                continue
-
-            # Validate antecedents
-            parsed_antecedents = []
-            for ant_id in antecedent_ids:
-                try:
-                    ant_uuid = uuid.UUID(str(ant_id))
-                except ValueError, AttributeError:
-                    errors.append(f"Step {i}: invalid antecedent UUID.")
-                    continue
-
-                if ant_uuid == ea_id:
-                    errors.append(
-                        f"Step {i}: an elementary action cannot be its own antecedent."
-                    )
-                    continue
-
-                if ant_uuid not in accessible_ea_ids:
-                    errors.append(f"Step {i}: antecedent is not accessible.")
-                    continue
-
-                try:
-                    ant_ea = ElementaryAction.objects.get(pk=ant_uuid)
-                except ElementaryAction.DoesNotExist:
-                    errors.append(f"Step {i}: antecedent not found.")
-                    continue
-
-                if ant_ea.attack_stage > ea.attack_stage:
-                    errors.append(
-                        f"Step {i}: antecedent attack stage must be same or before the action's stage."
-                    )
-                    continue
-
-                parsed_antecedents.append(ant_uuid)
-
+            logic_operator = step.get("logic_operator")
             if logic_operator and logic_operator not in ("AND", "OR"):
                 errors.append(f"Step {i}: logic_operator must be 'AND', 'OR', or null.")
+
+            antecedent_keys = [str(a) for a in step.get("antecedents", []) or []]
+            if key in antecedent_keys:
+                errors.append(f"Step {i}: a step cannot be its own antecedent.")
+
+            asset_ids = step.get("assets")
+            if asset_ids is not None:
+                if not isinstance(asset_ids, list):
+                    errors.append(f"Step {i}: assets must be an array.")
+                    asset_ids = None
+                else:
+                    try:
+                        asset_ids = [uuid.UUID(str(a)) for a in asset_ids]
+                    except ValueError, AttributeError, TypeError:
+                        errors.append(f"Step {i}: invalid asset UUID.")
+                        asset_ids = None
+                    else:
+                        if not set(asset_ids) <= accessible_asset_ids:
+                            errors.append(f"Step {i}: asset is not accessible.")
+
+            ratings = {}
+            for field in ("success_probability", "technical_difficulty"):
+                if field in step:
+                    level = step[field]
+                    if not isinstance(level, int) or not -1 <= level < scale_size:
+                        errors.append(
+                            f"Step {i}: {field} must be an integer between -1 and {scale_size - 1}."
+                        )
+                    else:
+                        ratings[field] = level
+            if "success_probability_pct" in step:
+                pct = step["success_probability_pct"]
+                if pct is not None and (
+                    isinstance(pct, bool)
+                    or not isinstance(pct, (int, float))
+                    or not 0 <= pct <= 100
+                ):
+                    errors.append(
+                        f"Step {i}: success_probability_pct must be between 0 and 100."
+                    )
+                else:
+                    ratings["success_probability_pct"] = pct
+
+            parsed.append(
+                {
+                    "ratings": ratings,
+                    "index": i,
+                    "key": key,
+                    "ea_id": ea_id,
+                    "antecedent_keys": antecedent_keys,
+                    "logic_operator": logic_operator,
+                    "assets": asset_ids,
+                    "position_x": step.get("position_x", 0),
+                    "position_y": step.get("position_y", 0),
+                }
+            )
+
+        stages = dict(
+            ElementaryAction.objects.filter(
+                id__in={p["ea_id"] for p in parsed}
+            ).values_list("id", "attack_stage")
+        )
+        stage_by_key = {p["key"]: stages.get(p["ea_id"]) for p in parsed}
+        for p in parsed:
+            for antecedent_key in p["antecedent_keys"]:
+                if antecedent_key not in stage_by_key:
+                    errors.append(f"Step {p['index']}: unknown antecedent.")
+                elif stage_by_key[antecedent_key] > stage_by_key[p["key"]]:
+                    errors.append(
+                        f"Step {p['index']}: antecedent attack stage must be same or before the action's stage."
+                    )
+
+        # Kahn's algorithm: every step must be reachable without a cycle.
+        indegree = {p["key"]: 0 for p in parsed}
+        successors = {p["key"]: [] for p in parsed}
+        for p in parsed:
+            for antecedent_key in set(p["antecedent_keys"]):
+                if antecedent_key in successors:
+                    successors[antecedent_key].append(p["key"])
+                    indegree[p["key"]] += 1
+        queue = [k for k, d in indegree.items() if d == 0]
+        visited = 0
+        while queue:
+            current = queue.pop()
+            visited += 1
+            for successor in successors[current]:
+                indegree[successor] -= 1
+                if indegree[successor] == 0:
+                    queue.append(successor)
+        if visited != len(parsed):
+            errors.append("The kill chain graph contains a cycle.")
 
         if errors:
             return Response({"errors": errors}, status=400)
 
-        # Atomically replace all kill chain steps
         with transaction.atomic():
-            mo.kill_chain_steps.all().delete()
             if graph_columns is not None:
                 mo.graph_columns = graph_columns
                 mo.save(update_fields=["graph_columns"])
 
-            for step in kill_chain_steps:
-                ea_id = uuid.UUID(str(step["elementary_action"]))
-                antecedent_ids = [
-                    uuid.UUID(str(a)) for a in step.get("antecedents", [])
-                ]
-                logic_operator = step.get("logic_operator")
-                is_highlighted = step.get("is_highlighted", False)
-                position_x = step.get("position_x", 0)
-                position_y = step.get("position_y", 0)
+            saved = {}
+            for p in parsed:
+                antecedent_count = len(set(p["antecedent_keys"]))
+                fields = {
+                    "elementary_action_id": p["ea_id"],
+                    "logic_operator": p["logic_operator"]
+                    if antecedent_count > 1
+                    else None,
+                    "position_x": p["position_x"],
+                    "position_y": p["position_y"],
+                    **p["ratings"],
+                }
+                step = existing_steps.get(p["key"])
+                if step is None:
+                    step = KillChain.objects.create(
+                        operating_mode=mo, folder=mo.folder, **fields
+                    )
+                else:
+                    for name, value in fields.items():
+                        setattr(step, name, value)
+                    step.save()
+                if p["assets"] is not None:
+                    step.assets.set(p["assets"])
+                saved[p["key"]] = step
 
-                kc = KillChain.objects.create(
-                    operating_mode=mo,
-                    elementary_action_id=ea_id,
-                    logic_operator=logic_operator if len(antecedent_ids) > 1 else None,
-                    is_highlighted=is_highlighted,
-                    position_x=position_x,
-                    position_y=position_y,
-                    folder=mo.folder,
+            for p in parsed:
+                saved[p["key"]].antecedents.set(
+                    [saved[k] for k in set(p["antecedent_keys"])]
                 )
-                if antecedent_ids:
-                    kc.antecedents.set(antecedent_ids)
 
-        # Return updated graph
+            kept_ids = {step.id for step in saved.values()}
+            mo.kill_chain_steps.exclude(id__in=kept_ids).delete()
+
         return self.build_graph(request, pk)
 
     @action(detail=True, name="Build graph for Operating Mode")
@@ -1395,65 +1439,84 @@ class OperatingModeViewSet(BaseModelViewSet):
         }
         panel_nodes = {panel: [] for panel in panels.values()}
 
-        # Collect all elementary actions that are part of kill chain steps
-        kill_chain_ea_ids = set()
-        for step in mo.kill_chain_steps.all():
-            kill_chain_ea_ids.add(step.elementary_action.id)
-            # Also add antecedents
-            for ant in step.antecedents.all():
-                kill_chain_ea_ids.add(ant.id)
-
-        # Create nodes only for elementary actions in the kill chain
-        kill_chain_eas = ElementaryAction.objects.filter(
-            id__in=kill_chain_ea_ids
-        ).order_by("attack_stage")
-
-        for ea in kill_chain_eas:
-            stage = ea.attack_stage
-            entry = {"id": ea.id, "label": ea.name, "group": groups.get(stage)}
+        steps = (
+            mo.kill_chain_steps.select_related("elementary_action")
+            .prefetch_related("antecedents__elementary_action")
+            .order_by("elementary_action__attack_stage", "created_at")
+        )
+        for step in steps:
+            ea = step.elementary_action
+            entry = {
+                "id": step.id,
+                "label": ea.name,
+                "group": groups.get(ea.attack_stage),
+                "elementary_action": ea.id,
+            }
             if ea.icon:
                 entry["icon"] = ea.icon_fa_hex
             nodes.append(entry)
-            panel_name = panels.get(stage)
+            panel_name = panels.get(ea.attack_stage)
             if panel_name:
-                panel_nodes[panel_name].append(ea.id)
+                panel_nodes[panel_name].append(step.id)
 
-        # Build links based on kill chain steps
-        for step in mo.kill_chain_steps.all().order_by(
-            "elementary_action__attack_stage"
-        ):
-            ea = step.elementary_action
-            if step.antecedents.exists():
-                target = ea.id
-                if step.logic_operator:
-                    # Get the stage from the first antecedent for panel placement
-                    antecedent_stage = step.antecedents.first().attack_stage
-                    nodes.append(
-                        {
-                            "id": step.id,
-                            "icon": step.logic_operator,
-                            "shape": "circle",
-                            "size": 45,
-                        }
-                    )
-                    # Add logic operator to the same panel as its antecedents
-                    panel_name = panels.get(antecedent_stage)
-                    if panel_name:
-                        panel_nodes[panel_name].append(step.id)
-                    target = step.id
-                    links.append({"source": step.id, "target": ea.id})
-                for ant in step.antecedents.all().order_by("attack_stage"):
-                    links.append({"source": ant.id, "target": target})
+        for step in steps:
+            antecedents = sorted(
+                step.antecedents.all(),
+                key=lambda a: a.elementary_action.attack_stage,
+            )
+            if not antecedents:
+                continue
+            target = step.id
+            if step.logic_operator:
+                operator_id = f"{step.id}-{step.logic_operator}"
+                nodes.append(
+                    {
+                        "id": operator_id,
+                        "icon": step.logic_operator,
+                        "shape": "circle",
+                        "size": 45,
+                    }
+                )
+                panel_name = panels.get(antecedents[0].elementary_action.attack_stage)
+                if panel_name:
+                    panel_nodes[panel_name].append(operator_id)
+                links.append({"source": operator_id, "target": step.id})
+                target = operator_id
+            for antecedent in antecedents:
+                links.append({"source": antecedent.id, "target": target})
 
         return Response(
             {"nodes": nodes, "links": links, "panelNodes": panel_nodes, "mo_id": mo.id}
         )
 
 
+class KillChainFilter(GenericFilterSet):
+    available_antecedents_for = df.UUIDFilter(
+        method="filter_available_antecedents_for",
+        label="Steps that can precede the given step",
+    )
+    max_attack_stage = df.NumberFilter(
+        field_name="elementary_action__attack_stage", lookup_expr="lte"
+    )
+
+    def filter_available_antecedents_for(self, queryset, name, value):
+        step = KillChain.objects.filter(id=value).first()
+        if step is None:
+            return queryset
+        return queryset.filter(
+            operating_mode=step.operating_mode,
+            elementary_action__attack_stage__lte=step.elementary_action.attack_stage,
+        ).exclude(id__in={step.id} | step.descendant_ids())
+
+    class Meta:
+        model = KillChain
+        fields = ["operating_mode", "elementary_action"]
+
+
 class KillChainViewSet(BaseModelViewSet):
     model = KillChain
 
-    filterset_fields = ["operating_mode"]
+    filterset_class = KillChainFilter
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get logic operators choices")

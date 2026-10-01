@@ -2885,7 +2885,7 @@ export const listViewFields = {
 			'description',
 			'folder',
 			'status',
-			'quotation_method',
+			'quotation_method_display',
 			'created_at',
 			'updated_at'
 		],
@@ -3039,8 +3039,14 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'likelihood']
 	},
 	'kill-chains': {
-		head: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator'],
-		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
+		head: [
+			'elementary_action',
+			'attack_stage',
+			'antecedents',
+			'logic_operator',
+			'supportingAssets'
+		],
+		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator', 'assets']
 	},
 	notifications: {
 		head: ['read', 'category', 'title', 'created_at'],

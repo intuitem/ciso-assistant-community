@@ -178,6 +178,16 @@
 
 	<!-- Study Header -->
 	<div class="mb-6">
+		{#if study.classification}
+			<span
+				class="badge border-2 font-bold uppercase"
+				style="border-color: {study.classification.hexcolor || 'currentColor'}; color: {study
+					.classification.hexcolor || 'inherit'}"
+				title={m.classification()}
+			>
+				{study.classification.label}
+			</span>
+		{/if}
 		<h1 class="text-3xl font-bold text-surface-950-50 mb-2">{study.name}</h1>
 		{#if study.description}
 			<div class="text-surface-600-400 mb-4">
@@ -732,7 +742,7 @@
 			{#if study.quotation_method}
 				<div class="mb-4 text-sm">
 					<span class="font-semibold text-surface-700-300">{m.quotationMethod()}:</span>
-					<span class="ml-2">{safeTranslate(study.quotation_method)}</span>
+					<span class="ml-2">{safeTranslate(study.quotation_method_display)}</span>
 				</div>
 			{/if}
 			<div class="space-y-6">
