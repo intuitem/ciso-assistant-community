@@ -8,6 +8,8 @@
 * [📖 Vocabulary](introduction/vocabulary.md)
 * [⚖️ Community vs PRO](introduction/editions.md)
 
+---
+
 ## 🧠 Concepts
 
 * 🧱 Foundations
