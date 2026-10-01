@@ -2,15 +2,13 @@
 
 * [👋 Welcome](README.md)
 
-## 🧭 Introduction
+## ── 🧭 Introduction
 
 * [💭 Philosophy](introduction/philosophy.md)
 * [📖 Vocabulary](introduction/vocabulary.md)
 * [⚖️ Community vs PRO](introduction/editions.md)
 
----
-
-## 🧠 Concepts
+## ── 🧠 Concepts
 
 * 🧱 Foundations
   * [Domains](concepts/domains.md)
@@ -59,7 +57,7 @@
   * [Terminology](concepts/terminology.md)
   * [Object classifications](concepts/object-classification.md)
 
-## 🚀 Installation
+## ── 🚀 Installation
 
 * [🧭 Overview](installation/README.md)
 * [⚡ Quick start](installation/quick-start.md)
@@ -84,7 +82,7 @@
   * [Migrate between different databases](installation/migrate-database.md)
 * [❓ Frequent questions](installation/faq.md)
 
-## ⚙️ Configuration
+## ── ⚙️ Configuration ──
 
 * [🧭 Overview](configuration/README.md)
 * [🎛️ Settings](configuration/settings/README.md)
@@ -140,7 +138,7 @@
 * [🌐 Changing the language](configuration/language.md)
 * [📅 Date format](configuration/date-format.md)
 
-## 🗺️ Guides
+## ── 🗺️ Guides ──
 
 * [🧭 Overview](guides/README.md)
 * [💡 General tips](guides/general-tips.md)
@@ -170,7 +168,7 @@
   * [Third-Party Risk Management](guides/tprm.md)
   * [Common TPRM pitfalls](guides/tprm-challenges.md)
 
-## ✨ Features
+## ── ✨ Features ──
 
 * [Catalogue overview](features/README.md)
 * [Analytics](features/analytics.md)
@@ -224,7 +222,7 @@
   * [DORA](features/framework-specific/dora.md)
   * [MonServiceSécurisé](features/framework-specific/monservicesecurise.md)
 
-## 🔌 AI and Integrations
+## ── 🔌 AI and Integrations ──
 
 * [Overview](integrations/README.md)
 * [API reference](integrations/api.md)
@@ -239,7 +237,7 @@
   * [Jira](integrations/third-party/jira.md)
   * [ServiceNow](integrations/third-party/servicenow.md)
 
-## 🤝 Contributing
+## ── 🤝 Contributing ──
 
 * [🧭 Overview](contributing/README.md)
 * [📚 Frameworks and libraries](contributing/framework.md)
