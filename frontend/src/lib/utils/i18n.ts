@@ -111,7 +111,10 @@ export function unsafeTranslate(
 			const parts = key.split('/');
 			const translatedParts = parts.map((part) => {
 				const camelCasePart = toCamelCase(part);
-				return m[camelCasePart] ? m[camelCasePart](params, options) : part;
+				if (!m[camelCasePart]) return part;
+				const lead = part.slice(0, part.length - part.trimStart().length);
+				const trail = part.slice(part.trimEnd().length);
+				return lead + m[camelCasePart](params, options) + trail;
 			});
 			return translatedParts.join('/');
 		}
