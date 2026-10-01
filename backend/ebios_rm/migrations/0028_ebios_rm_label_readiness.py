@@ -69,13 +69,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="ebiosrmstudy",
-            name="operational_cycle_months",
-            field=models.PositiveSmallIntegerField(
-                blank=True, null=True, verbose_name="Operational cycle (months)"
-            ),
-        ),
-        migrations.AddField(
-            model_name="ebiosrmstudy",
             name="responsibility_matrix",
             field=models.ForeignKey(
                 blank=True,
@@ -85,13 +78,6 @@ class Migration(migrations.Migration):
                 related_name="ebios_rm_studies",
                 to="pmbok.responsibilitymatrix",
                 verbose_name="Responsibility matrix",
-            ),
-        ),
-        migrations.AddField(
-            model_name="ebiosrmstudy",
-            name="strategic_cycle_months",
-            field=models.PositiveSmallIntegerField(
-                blank=True, null=True, verbose_name="Strategic cycle (months)"
             ),
         ),
         migrations.AddField(

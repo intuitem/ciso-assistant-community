@@ -182,12 +182,6 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     constraints_hypotheses = models.TextField(
         blank=True, verbose_name=_("Constraints and hypotheses")
     )
-    strategic_cycle_months = models.PositiveSmallIntegerField(
-        null=True, blank=True, verbose_name=_("Strategic cycle (months)")
-    )
-    operational_cycle_months = models.PositiveSmallIntegerField(
-        null=True, blank=True, verbose_name=_("Operational cycle (months)")
-    )
     responsibility_matrix = models.ForeignKey(
         "pmbok.ResponsibilityMatrix",
         on_delete=models.SET_NULL,

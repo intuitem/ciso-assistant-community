@@ -1405,9 +1405,7 @@ export const ebiosRMSchema = z.object({
 	classification: z.string().uuid().optional().nullable(),
 	objectives: z.string().optional(),
 	constraints_hypotheses: z.string().optional(),
-	strategic_cycle_months: z.number().int().min(0).optional().nullable(),
-	operational_cycle_months: z.number().int().min(0).optional().nullable(),
-	responsibility_matrix: z.string().uuid().optional().nullable(),
+	responsibility_matrix: z.string().optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });

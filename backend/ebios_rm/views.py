@@ -55,7 +55,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     API endpoint that allows ebios rm studies to be viewed or edited.
     """
 
-    filterset_fields = ["folder", "assets", "genericcollection"]
+    filterset_fields = ["folder", "assets", "genericcollection", "classification"]
 
     model = EbiosRMStudy
 
@@ -81,6 +81,58 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 "operational_scenarios",
             )
         )
+
+    def _process_responsibility_matrix(self, request) -> None:
+        """
+        Turn a name typed into the responsibility matrix picker into a matrix.
+
+        Like typed evidences on task templates: reuse a matrix of that name the
+        user can see in the study's domain, otherwise create one there through its
+        write serializer (default roles for the preset, add permission checked).
+        """
+        value = request.data.get("responsibility_matrix")
+        if not value or not isinstance(value, str):
+            return
+        try:
+            uuid.UUID(value)
+            return
+        except ValueError:
+            pass
+        from iam.models import Folder, RoleAssignment
+        from pmbok.models import ResponsibilityMatrix
+        from pmbok.serializers import ResponsibilityMatrixWriteSerializer
+
+        folder_id = request.data.get("folder")
+        if not folder_id and self.kwargs.get("pk"):
+            folder_id = self.get_object().folder_id
+        folder = Folder.objects.filter(id=folder_id).first()
+        if folder is None:
+            return
+        matrix = ResponsibilityMatrix.objects.filter(
+            name=value,
+            folder=folder,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                request.user, ResponsibilityMatrix
+            ),
+        ).first()
+        if matrix is None:
+            serializer = ResponsibilityMatrixWriteSerializer(
+                data={"name": value, "folder": str(folder.id)},
+                context={"request": request},
+            )
+            serializer.is_valid(raise_exception=True)
+            matrix = serializer.save()
+        if hasattr(request.data, "_mutable"):
+            request.data._mutable = True
+        request.data["responsibility_matrix"] = str(matrix.id)
+
+    def create(self, request, *args, **kwargs):
+        self._process_responsibility_matrix(request)
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        self._process_responsibility_matrix(request)
+        return super().update(request, *args, **kwargs)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -432,8 +484,6 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     else "",
                     "objectives": study.objectives,
                     "constraints_hypotheses": study.constraints_hypotheses,
-                    "strategic_cycle_months": study.strategic_cycle_months or "",
-                    "operational_cycle_months": study.operational_cycle_months or "",
                     "responsibility_matrix": str(study.responsibility_matrix)
                     if study.responsibility_matrix
                     else "",

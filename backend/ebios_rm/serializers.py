@@ -54,9 +54,7 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     risk_assessments = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
-    classification = FieldsRelatedField(
-        ["id", "label", "abbreviation", "hexcolor", {"object_classification": ["id"]}]
-    )
+    classification = serializers.SerializerMethodField()
     responsibility_matrix = FieldsRelatedField()
     quotation_method_display = serializers.CharField(
         source="get_quotation_method_display", read_only=True
@@ -81,6 +79,19 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
 
     def get_counters(self, obj):
         return obj.get_counters()
+
+    def get_classification(self, obj):
+        level = obj.classification
+        if not level:
+            return None
+        # Same shape as document containers: no "str" key, so tables render a
+        # colored chip instead of a related-object link.
+        return {
+            "id": str(level.id),
+            "name": level.label,
+            "abbreviation": level.abbreviation,
+            "hexcolor": level.hexcolor,
+        }
 
     class Meta:
         model = EbiosRMStudy
@@ -107,8 +118,6 @@ class EbiosRMStudyImportExportSerializer(BaseModelSerializer):
             "due_date",
             "objectives",
             "constraints_hypotheses",
-            "strategic_cycle_months",
-            "operational_cycle_months",
             "version",
             "status",
             "observation",

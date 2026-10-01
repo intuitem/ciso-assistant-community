@@ -2889,8 +2889,13 @@ export const listViewFields = {
 			'created_at',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['classification'],
+			body: ['classification']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
+			classification: CLASSIFICATION_FILTER,
 			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
 			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
 			status: ORGANISATION_ISSUE_STATUS_FILTER,

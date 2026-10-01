@@ -6,7 +6,6 @@
 	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -267,24 +266,6 @@
 			cacheLock={cacheLocks['constraints_hypotheses']}
 			bind:cachedValue={formDataCache['constraints_hypotheses']}
 		/>
-		<div class="grid grid-cols-2 gap-2">
-			<NumberField
-				{form}
-				field="strategic_cycle_months"
-				min="0"
-				label={m.strategicCycleMonths()}
-				cacheLock={cacheLocks['strategic_cycle_months']}
-				bind:cachedValue={formDataCache['strategic_cycle_months']}
-			/>
-			<NumberField
-				{form}
-				field="operational_cycle_months"
-				min="0"
-				label={m.operationalCycleMonths()}
-				cacheLock={cacheLocks['operational_cycle_months']}
-				bind:cachedValue={formDataCache['operational_cycle_months']}
-			/>
-		</div>
 		{#if responsibilityMatricesEnabled}
 			<AutocompleteSelect
 				{form}
@@ -293,6 +274,7 @@
 				field="responsibility_matrix"
 				label={m.responsibilityMatrix()}
 				helpText={m.ebiosRmStudyResponsibilityMatrixHelpText()}
+				allowUserOptions
 				nullable
 				cacheLock={cacheLocks['responsibility_matrix']}
 				bind:cachedValue={formDataCache['responsibility_matrix']}
@@ -336,7 +318,8 @@
 	<MarkdownField
 		{form}
 		field="observation"
-		label={m.observation()}
+		label={m.executiveSummary()}
+		helpText={m.ebiosRmExecutiveSummaryHelpText()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
 	/>

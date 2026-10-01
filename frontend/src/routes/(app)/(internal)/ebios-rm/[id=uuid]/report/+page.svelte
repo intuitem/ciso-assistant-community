@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ClassificationBadge from '$lib/components/ClassificationBadge.svelte';
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -66,6 +67,23 @@
 
 	const { reportData } = data;
 	const study = reportData.study;
+
+	// Repeat the protection marking in the margin of every printed page (CSS page margin boxes).
+	const printMarkingStyle = $derived.by(() => {
+		const classification = study.classification;
+		if (!classification) return '';
+		const label = String(classification.name ?? classification.label ?? classification.str ?? '')
+			.toUpperCase()
+			.replace(/\\/g, '\\\\')
+			.replace(/"/g, '\\"')
+			.replace(/</g, '\\3C ')
+			.replace(/\s+/g, ' ');
+		const color = /^#[0-9a-fA-F]{3,8}$/.test(classification.hexcolor ?? '')
+			? classification.hexcolor
+			: 'inherit';
+		const box = `content: "${label}"; font-weight: 700; font-size: 9pt; color: ${color};`;
+		return `<style>@media print { @page { @top-center { ${box} } @bottom-center { ${box} } } }</style>`;
+	});
 	const useBubbles = data.useBubbles;
 	const inherentRiskEnabled = data.inherentRiskEnabled;
 
@@ -178,16 +196,7 @@
 
 	<!-- Study Header -->
 	<div class="mb-6">
-		{#if study.classification}
-			<span
-				class="badge border-2 font-bold uppercase"
-				style="border-color: {study.classification.hexcolor || 'currentColor'}; color: {study
-					.classification.hexcolor || 'inherit'}"
-				title={m.classification()}
-			>
-				{study.classification.label}
-			</span>
-		{/if}
+		<ClassificationBadge classification={study.classification} />
 		<h1 class="text-3xl font-bold text-surface-950-50 mb-2">{study.name}</h1>
 		{#if study.description}
 			<div class="text-surface-600-400 mb-4">
@@ -206,6 +215,18 @@
 		</div>
 	</div>
 
+	{#if study.observation}
+		<section class="mb-6 p-4 bg-surface-50-950 border border-surface-200-800 rounded-lg">
+			<h2 class="text-lg font-semibold text-surface-950-50 mb-2 flex items-center gap-2">
+				<i class="fa-solid fa-clipboard-list text-surface-600-400"></i>
+				<span>{m.executiveSummary()}</span>
+			</h2>
+			<div class="text-surface-700-300">
+				<MarkdownRenderer content={study.observation} />
+			</div>
+		</section>
+	{/if}
+
 	<!-- Workshop 1 -->
 	<div id="workshop-1" class="my-12 scroll-mt-20 workshop-divider">
 		<hr class="border-t-4 border-pink-600" />
@@ -215,6 +236,67 @@
 			</span>
 		</div>
 	</div>
+
+	<section class="mb-6 p-4 bg-surface-50-950 border border-surface-200-800 rounded-lg">
+		<h3 class="text-lg font-semibold text-surface-950-50 mb-3 flex items-center gap-2">
+			<i class="fa-solid fa-bullseye"></i>
+			{safeTranslate(m.ebiosWs1_1())}
+		</h3>
+		<div class="grid md:grid-cols-2 gap-4 text-sm">
+			<div>
+				<h4 class="font-semibold text-surface-700-300">{m.objectives()}</h4>
+				{#if study.objectives}
+					<MarkdownRenderer content={study.objectives} />
+				{:else}
+					<p class="text-surface-500">--</p>
+				{/if}
+			</div>
+			<div>
+				<h4 class="font-semibold text-surface-700-300">{m.constraintsHypotheses()}</h4>
+				{#if study.constraints_hypotheses}
+					<MarkdownRenderer content={study.constraints_hypotheses} />
+				{:else}
+					<p class="text-surface-500">--</p>
+				{/if}
+			</div>
+		</div>
+		<div class="mt-3 flex flex-wrap gap-x-8 gap-y-1 text-sm text-surface-600-400">
+			<span
+				>{m.eta()}:
+				<span class="font-semibold"
+					>{study.eta ? formatDateOrDateTime(study.eta, getLocale()) : '--'}</span
+				></span
+			>
+			<span
+				>{m.dueDate()}:
+				<span class="font-semibold"
+					>{study.due_date ? formatDateOrDateTime(study.due_date, getLocale()) : '--'}</span
+				></span
+			>
+			{#if study.responsibility_matrix}
+				<span
+					>{m.responsibilityMatrix()}:
+					<span class="font-semibold">{study.responsibility_matrix.str}</span></span
+				>
+			{/if}
+			{#if study.authors?.length}
+				<span
+					>{m.authors()}:
+					<span class="font-semibold"
+						>{study.authors.map((a: { str: string }) => a.str).join(', ')}</span
+					></span
+				>
+			{/if}
+			{#if study.reviewers?.length}
+				<span
+					>{m.reviewers()}:
+					<span class="font-semibold"
+						>{study.reviewers.map((a: { str: string }) => a.str).join(', ')}</span
+					></span
+				>
+			{/if}
+		</div>
+	</section>
 
 	<!-- Selected Assets -->
 	<section class="mb-6">
@@ -256,19 +338,6 @@
 							</div>
 						</div>
 					{/each}
-				</div>
-			</div>
-		{/if}
-
-		<!-- Observation -->
-		{#if study.observation}
-			<div class="mb-4 p-4 bg-surface-50-950 border border-surface-200-800 rounded-lg">
-				<h3 class="text-lg font-semibold text-surface-950-50 mb-2 flex items-center gap-2">
-					<i class="fa-solid fa-eye text-surface-600-400"></i>
-					<span>{m.observation()}</span>
-				</h3>
-				<div class="text-surface-600-400">
-					<MarkdownRenderer content={study.observation} />
 				</div>
 			</div>
 		{/if}
@@ -1413,6 +1482,10 @@
 		</section>
 	{/if}
 </div>
+
+<svelte:head>
+	{@html printMarkingStyle}
+</svelte:head>
 
 <style>
 	:global(html) {
