@@ -319,8 +319,9 @@ export function questionScoreBounds(scores: number[], multiple: boolean): [numbe
 
 /**
  * Map a weighted SUM total back onto the unweighted scale of the same questions
- * (mirrors core.utils.project_weighted_sum). With every weight at 1 the two
- * ranges coincide and the total comes back unchanged.
+ * (mirrors core.utils.project_weighted_sum). Each side of 0 is scaled on its
+ * own, so a choice worth 0 stays neutral. With every weight at 1 the two ranges
+ * coincide and the total comes back unchanged.
  */
 export function projectWeightedSum(
 	total: number,
@@ -329,9 +330,8 @@ export function projectWeightedSum(
 	lo: number,
 	hi: number
 ): number {
-	const span = weightedHi - weightedLo;
-	if (span <= 0) return total;
-	return lo + ((total - weightedLo) * (hi - lo)) / span;
+	if (total >= 0) return weightedHi > 0 ? (total * hi) / weightedHi : total;
+	return weightedLo < 0 ? (total * lo) / weightedLo : total;
 }
 
 export function computeRequirementScoreAndResult(requirementAssessment: any, answers: any) {

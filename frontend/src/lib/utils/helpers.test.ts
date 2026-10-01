@@ -120,7 +120,14 @@ describe('projectWeightedSum', () => {
 		expect(projectWeightedSum(42, 0, 100, 0, 100)).toBe(42);
 	});
 
-	it('falls back to the raw total on a zero-width range', () => {
-		expect(projectWeightedSum(7, 5, 5, 0, 10)).toBe(7);
+	it('returns the raw total when nothing carries weight', () => {
+		expect(projectWeightedSum(0, 0, 0, 0, 10)).toBe(0);
+	});
+
+	it('keeps a choice worth 0 neutral when a question can go negative', () => {
+		// Weight 3 on [-10, 0], weight 1 on [0, 50]: weighted [-30, 50], unweighted [-10, 50].
+		expect(projectWeightedSum(0, -30, 50, -10, 50)).toBe(0);
+		expect(projectWeightedSum(-30, -30, 50, -10, 50)).toBe(-10);
+		expect(projectWeightedSum(50, -30, 50, -10, 50)).toBe(50);
 	});
 });

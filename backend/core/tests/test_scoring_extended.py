@@ -1603,6 +1603,15 @@ class TestWeightedSum:
         assert _answer(d, "good", "bad") == 75
         assert _answer(d, "bad", "bad") == 0
 
+    def test_choice_worth_zero_stays_neutral(self, weighted_sum_setup):
+        """q1 (weight 3) scores -10/0, q2 (weight 1) 50/0. Answering 0 on both must
+        score 0: anchoring the projection on the weighted minimum gave 12."""
+        d = weighted_sum_setup
+        d["q1_good"].add_score = -10
+        d["q1_good"].save(update_fields=["add_score"])
+        assert _answer(d, "bad", "bad") == 0
+        assert _answer(d, "bad", "good") == 50
+
     def test_mean_is_untouched_by_the_projection(self, weighted_sum_setup):
         d = weighted_sum_setup
         ca = d["ra"].compliance_assessment
