@@ -4,9 +4,9 @@
 
 ## ── 🧭 Introduction ──
 
-  * [💭 Philosophy](introduction/philosophy.md)
-  * [📖 Vocabulary](introduction/vocabulary.md)
-  * [⚖️ Community vs PRO](introduction/editions.md)
+* [💭 Philosophy](introduction/philosophy.md)
+* [📖 Vocabulary](introduction/vocabulary.md)
+* [⚖️ Community vs PRO](introduction/editions.md)
 
 ## ── 🧠 Concepts ──
 
