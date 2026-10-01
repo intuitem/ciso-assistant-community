@@ -2380,6 +2380,18 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'stakeholders',
 		verboseName: 'Stakeholder',
 		verboseNamePlural: 'Stakeholders',
+		// Criteria and criticality are shown by StakeholderCriticalityWidget.
+		detailViewFields: [
+			{ field: 'ebios_rm_study' },
+			{ field: 'entity' },
+			{ field: 'category' },
+			{ field: 'is_selected' },
+			{ field: 'applied_controls' },
+			{ field: 'justification' },
+			{ field: 'folder' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		],
 		foreignKeyFields: [
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },

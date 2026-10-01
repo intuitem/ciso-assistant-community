@@ -247,7 +247,15 @@ class StakeholderReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
-    entity = FieldsRelatedField()
+    entity = FieldsRelatedField(
+        [
+            "id",
+            "default_dependency",
+            "default_penetration",
+            "default_maturity",
+            "default_trust",
+        ]
+    )
     applied_controls = FieldsRelatedField(many=True)
     category = serializers.SerializerMethodField()
 
