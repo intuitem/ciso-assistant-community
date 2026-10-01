@@ -1,5 +1,4 @@
 import pytest
-
 from core.models import AppliedControl, RiskAssessment, Terminology
 from ebios_rm.helpers import detect_sync_sources, sync_risk_assessment
 from ebios_rm.models import (
@@ -11,12 +10,13 @@ from ebios_rm.models import (
     Stakeholder,
     StrategicScenario,
 )
+from ebios_rm.tests.fixtures import *
 from tprm.models import Entity
 
-from ebios_rm.tests.fixtures import *
 
-
-def _build_scenario_chain(study, *, attack_path_selected, operational_scenario_selected):
+def _build_scenario_chain(
+    study, *, attack_path_selected, operational_scenario_selected
+):
     """Build a full RO/TO -> strategic scenario -> attack path -> operational
     scenario chain, with a stakeholder + applied control hanging off the
     attack path (mirrors what workshop 3/4 produce)."""
