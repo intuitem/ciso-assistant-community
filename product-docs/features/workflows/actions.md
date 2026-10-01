@@ -66,6 +66,8 @@ A `number` variable holds an int or a double depending on what wrote it, so unli
 
 On top of CEL's own `size`, `has`, `int`, `double`, `string`, `timestamp` and the `map`, `filter`, `exists`, `all` macros, these functions are available: `sum` and `avg` over a list of numbers; `min` and `max` over a list of numbers, of strings (ISO dates sort correctly) or of timestamps; `round(x)`, `round(x, digits)`, `floor`, `ceil`, `abs`.
 
+In the editor, each row shows its result as you type, `= 16` with the type, evaluated against the reference run shown under **Available data** or, before any run, against the variables' defaults. A row that cannot be evaluated shows the same error the run would log. Typing opens suggestions: variables with their current value, `nodes.<ref>.` paths, `item` and `index` inside a loop, functions, and list or string methods after a dot. Clicking a value under **Available data** inserts its path.
+
 Output: the computed values, keyed by variable. Refuses the reserved keys `now`, `today` and `payload`. Syntax errors are caught when you publish; type errors, missing fields and division by zero fail the step at run time and are not retried. No permission required.
 
 ### Read objects

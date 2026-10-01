@@ -185,7 +185,7 @@
 
 	// Functions the compute step adds on top of CEL's own, shown as a hint.
 	const COMPUTE_FUNCTIONS =
-		'sum avg min max round floor ceil abs size double int string timestamp has';
+		'sum avg min max round floor ceil abs size has int double string timestamp duration';
 
 	const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
