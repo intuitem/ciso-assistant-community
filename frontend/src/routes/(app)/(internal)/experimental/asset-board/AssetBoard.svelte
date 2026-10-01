@@ -19,7 +19,7 @@
 
 	import AssetNodeComponent from './AssetNode.svelte';
 	import GhostNodeComponent from './GhostNode.svelte';
-	import { computeLayout } from './layout';
+	import { computeLayout } from './board-layout';
 	import { fetchAllByIds } from '$lib/utils/pagination';
 	import AssetEdgeComponent from './AssetEdge.svelte';
 	import {

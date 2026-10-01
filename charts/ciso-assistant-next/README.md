@@ -1,6 +1,6 @@
 # ciso-assistant
 
-![Version: 0.13.0](https://img.shields.io/badge/Version-0.13.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.0.4](https://img.shields.io/badge/AppVersion-v4.0.4-informational?style=flat-square)
+![Version: 0.13.1](https://img.shields.io/badge/Version-0.13.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.0.7](https://img.shields.io/badge/AppVersion-v4.0.7-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -26,7 +26,7 @@ helm-docs
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://qdrant.github.io/qdrant-helm | qdrant | 1.18.2 |
+| https://qdrant.github.io/qdrant-helm | qdrant | 1.19.1 |
 | oci://registry-1.docker.io/bitnamicharts | postgresql | 16.6.3 |
 
 ## Installing the chart
