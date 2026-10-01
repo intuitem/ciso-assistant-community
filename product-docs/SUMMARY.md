@@ -120,6 +120,7 @@
   * [Examples](configuration/libraries/examples.md)
   * [Guided example: create your first framework](configuration/libraries/guided-example.md)
   * [🧩 Library objects](configuration/libraries/library-objects/README.md)
+    * [Library metadata](configuration/libraries/library-objects/library-metadata.md)
     * [Framework](configuration/libraries/library-objects/framework.md)
     * [Implementation groups](configuration/libraries/library-objects/implementation-groups.md)
     * [Answers](configuration/libraries/library-objects/answers.md)

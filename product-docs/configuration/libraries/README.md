@@ -22,10 +22,11 @@ You normally do not edit YAML directly, including when updating a library. You'l
 
 ## What can a library contain?
 
-The following pages describe each element separately. Not every element is needed for every library.
+The following pages describe each object separately. Not every object is needed for every library.
 
 | Element | What it is for |
 | --- | --- |
+| [Library metadata](library-objects/library-metadata.md) | Required properties that identify and describe the library itself. |
 | [Framework](library-objects/framework.md) | A tree of sections and requirements used to run audits. |
 | [Implementation groups](library-objects/implementation-groups.md) | Optional groups that select a relevant subset of framework requirements. |
 | [Answers](library-objects/answers.md) | Reusable answer sets used by questions defined in framework requirements. |
@@ -35,6 +36,8 @@ The following pages describe each element separately. Not every element is neede
 | [URN prefixes](library-objects/urn-prefixes.md) | Technical prefixes used when you need to link external/internal threats/reference controls to requirements of a framework |
 | [Risk matrices](library-objects/risk-matrices.md) | The probability, impact, and risk-level model used in risk assessments. |
 | [Mappings](library-objects/mappings.md) | Links between the requirements of two frameworks. |
+
+Every Excel version of a library must include a `library_meta` sheet, which defines the properties of the library as a whole. See [Library metadata](library-objects/library-metadata.md) for more details.
 
 For an overview of how these elements relate to one another, see [Library objects](library-objects/README.md).
 

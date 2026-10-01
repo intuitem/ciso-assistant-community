@@ -10,6 +10,7 @@ A library is made of one or more objects. Some define what you assess, others pr
 
 | Object | Use it when you need to... |
 | --- | --- |
+| [Library metadata](library-metadata.md) | Define the required identity and properties of the library itself. This object type is mandatory. |
 | [Framework](framework.md) | Define a hierarchy of sections and requirements for an audit. |
 | [Implementation groups](implementation-groups.md) | Offer different requirement scopes, such as Basic, Standard, and Advanced. |
 | [Answers](answers.md) | Define reusable answer sets for questions in framework requirements. |
@@ -31,6 +32,7 @@ A risk matrix supports risk assessments. A mapping can connect requirements from
 ```mermaid
 flowchart TD
     L[Library]
+    LM[Library metadata]
     F[Framework]
     IG[Implementation groups]
     A[Answers]
@@ -41,6 +43,7 @@ flowchart TD
     M[Mappings]
     U[URN prefixes]
 
+    L --> LM
     L --> F
     L --> T
     L --> RC
