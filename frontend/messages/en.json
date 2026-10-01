@@ -6786,6 +6786,8 @@
 	"dateNext7Days": "Next 7 days",
 	"dateNext30Days": "Next 30 days",
 	"dateNext90Days": "Next 90 days",
+	"includeNotApplicableRequirements": "Include not applicable requirements",
+	"excludeNotApplicableRequirements": "Exclude not applicable requirements",
 	"table": "Table",
 	"oneToOne": "One to one",
 	"aggregatePerSource": "Aggregate per source",

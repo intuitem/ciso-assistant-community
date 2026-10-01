@@ -6081,5 +6081,7 @@
 	"workflowVariables": "Variabelen",
 	"workflowVersion": "Workflowversie",
 	"workflowVersions": "Workflowversies",
-	"workflowYamlFile": "Workflow-YAML-bestand"
+	"workflowYamlFile": "Workflow-YAML-bestand",
+	"includeNotApplicableRequirements": "Niet-toepasselijke vereisten opnemen",
+	"excludeNotApplicableRequirements": "Niet-toepasselijke vereisten uitsluiten"
 }
