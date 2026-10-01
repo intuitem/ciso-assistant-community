@@ -479,7 +479,7 @@ class WorkflowVersionViewSet(WorkflowsFeatureGate, BaseModelViewSet):
                 instance=instance,
             )
         except PreviewRequestError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
         return Response(result)
 
     @action(detail=True, methods=["get"], url_path="required-permissions")

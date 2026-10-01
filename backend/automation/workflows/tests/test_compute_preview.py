@@ -179,26 +179,19 @@ class TestPreviewEndpoint:
         assert resp.status_code == 400
         assert resp.data == {"error": "referenceRunNotFound"}
 
-    def test_oversized_requests_are_refused(self, admin):
+    def test_oversized_requests_are_refused_with_a_code_only(self, admin):
         version = build()
-        assert (
-            post_preview(version, admin, {"expression": "1 + " * 1000}).status_code
-            == 400
+        resp = post_preview(version, admin, {"expression": "1 + " * 1000})
+        assert resp.status_code == 400
+        # A stable code, never exception text: nothing about the server leaks.
+        assert resp.data == {"error": "previewExpressionTooLong"}
+        too_many = post_preview(
+            version,
+            admin,
+            {"expression": "1", "rows_above": [{"key": "k", "expression": "1"}] * 51},
         )
-        assert (
-            post_preview(
-                version,
-                admin,
-                {
-                    "expression": "1",
-                    "rows_above": [{"key": "k", "expression": "1"}] * 51,
-                },
-            ).status_code
-            == 400
+        assert too_many.data == {"error": "previewRowsInvalid"}
+        not_a_list = post_preview(
+            version, admin, {"expression": "1", "rows_above": "nope"}
         )
-        assert (
-            post_preview(
-                version, admin, {"expression": "1", "rows_above": "nope"}
-            ).status_code
-            == 400
-        )
+        assert not_a_list.data == {"error": "previewRowsInvalid"}

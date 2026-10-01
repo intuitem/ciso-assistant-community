@@ -17,7 +17,13 @@ MAX_ROWS_ABOVE = 50
 
 
 class PreviewRequestError(ValueError):
-    """The request is malformed (not an evaluation failure): reported as 400."""
+    """The request is malformed (not an evaluation failure): reported as 400
+    with `code`, a stable identifier the frontend can translate. Only the
+    code leaves the server."""
+
+    def __init__(self, code):
+        super().__init__(code)
+        self.code = code
 
 
 def type_name(value):
@@ -56,15 +62,15 @@ def _rows(raw):
     if raw is None:
         return []
     if not isinstance(raw, list) or len(raw) > MAX_ROWS_ABOVE:
-        raise PreviewRequestError("rows_above must be a list of at most 50 rows")
+        raise PreviewRequestError("previewRowsInvalid")
     rows = []
     for row in raw:
         if not isinstance(row, dict):
-            raise PreviewRequestError("each row needs a key and an expression")
+            raise PreviewRequestError("previewRowsInvalid")
         key = str(row.get("key") or "")
         expression = row.get("expression") or ""
         if not isinstance(expression, str) or len(expression) > MAX_EXPRESSION_LENGTH:
-            raise PreviewRequestError("an expression is too long")
+            raise PreviewRequestError("previewExpressionTooLong")
         rows.append((key, expression))
     return rows
 
@@ -75,7 +81,7 @@ def preview_compute_row(version, expression, rows_above=None, instance=None):
     "error"}; a row above that fails is reported as this row's error, since
     this row cannot run without it."""
     if not isinstance(expression, str) or len(expression) > MAX_EXPRESSION_LENGTH:
-        raise PreviewRequestError("expression must be a string of at most 2000 chars")
+        raise PreviewRequestError("previewExpressionTooLong")
     context = preview_context(version, instance)
     results = {}
     for key, above in _rows(rows_above):
