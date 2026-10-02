@@ -313,6 +313,6 @@ Individual users' most recently typed packager is also remembered locally and ta
 - [Excel-driven authoring](excel.md) — the alternative Excel-to-YAML workflow for cross-instance publishing.
 - [Designing your own libraries](../libraries/custom-libraries.md) — the library YAML format the builder produces.
 - [Getting your custom framework](../libraries/custom-frameworks.md) — quick-start for a single-framework library.
-- [Library upgrade](../libraries/library-upgrade.md) — what changes are safe to ship in a later version.
+- [Update a library](../libraries/update-library.md) — how to publish a new version and apply it to existing audits.
 - Concepts: [Frameworks](../../concepts/frameworks.md) · [Risk matrices](../../concepts/risk-matrices.md) · [Journeys](../../concepts/journeys.md) · [Mappings](../../concepts/mappings.md).
 - [Contributing → Frameworks and libraries](../../contributing/framework.md) — how to upstream authored content to the community catalogue.

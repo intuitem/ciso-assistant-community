@@ -1,21 +1,21 @@
 # Table of contents
 
-* [Welcome](README.md)
+* [👋 Welcome](README.md)
 
-## Introduction
+## ── 🧭 Introduction ──
 
-* [Philosophy](introduction/philosophy.md)
-* [Vocabulary](introduction/vocabulary.md)
-* [Community vs PRO](introduction/editions.md)
+* [💭 Philosophy](introduction/philosophy.md)
+* [📖 Vocabulary](introduction/vocabulary.md)
+* [⚖️ Community vs PRO](introduction/editions.md)
 
-## Concepts
+## ── 🧠 Concepts ──
 
-* Foundations
+* 🧱 Foundations
   * [Domains](concepts/domains.md)
   * [Perimeters](concepts/perimeters.md)
   * [Actors and teams](concepts/actors-and-teams.md)
   * [IAM and scoping](concepts/iam-and-scoping.md)
-* Catalog
+* 🗂️ Catalog
   * [Libraries](concepts/libraries.md)
   * [Frameworks](concepts/frameworks.md)
   * [Mappings](concepts/mappings.md)
@@ -24,68 +24,68 @@
   * [Threat intelligence](concepts/threat-intel.md)
   * [Metrics](concepts/metrics.md)
   * [Journeys](concepts/journeys.md)
-* Assets and resilience
+* 🛡️ Assets and resilience
   * [Assets](concepts/assets.md)
   * [Asset classes](concepts/asset-classes.md)
   * [Business impact analyses](concepts/business-impact-analyses.md)
-* Operations
+* 🔧 Operations
   * [Applied controls](concepts/applied-controls.md)
   * [Tasks](concepts/tasks.md)
   * [Commitments](concepts/commitments.md)
   * [Incidents](concepts/incidents.md)
   * [Workflows](concepts/workflows.md)
-* Governance
+* 🏛️ Governance
   * [Quick forms and requests](concepts/quick-forms.md)
   * [Policies](concepts/policies.md)
   * [Documents](concepts/documents.md)
   * [Findings binders](concepts/findings-assessments.md)
   * [Validation flows](concepts/validation-flows.md)
-* Risk
+* ⚠️ Risk
   * [Risk assessments](concepts/risk-assessments.md)
   * [EBIOS RM](concepts/ebios-rm.md)
   * [Quantitative risk studies](concepts/quantitative-risk-studies.md)
   * [Vulnerabilities](concepts/vulnerabilities.md)
-* Compliance
-  * [Audits](concepts/audits.md)
+* ✅ Compliance
+  * [🧾 Audits](concepts/audits.md)
     * [Manage extended result](concepts/extended-results.md)
   * [Technical postures](concepts/technical-postures.md)
   * [Evidence](concepts/evidence.md)
-* Specialised modules
+* 🧩 Specialised modules
   * [Third-party risk](concepts/third-party-risk.md)
   * [Privacy register](concepts/privacy-register.md)
   * [Project management](concepts/project-management.md)
   * [Terminology](concepts/terminology.md)
   * [Object classifications](concepts/object-classification.md)
 
-## Installation
+## ── 🚀 Installation ──
 
-* [Overview](installation/README.md)
-* [Quick start](installation/quick-start.md)
-* [Prerequisites](installation/prerequisites.md)
-* Deployment methods
+* [🧭 Overview](installation/README.md)
+* [⚡ Quick start](installation/quick-start.md)
+* [✅ Prerequisites](installation/prerequisites.md)
+* 🚚 Deployment methods
   * [Local](installation/local.md)
   * [Docker rootless configuration](installation/docker-rootless.md)
   * [Remote/Virtualization](installation/remote-virtualization.md)
   * [Deploy on a VPS](installation/vps.md)
   * [Windows](installation/windows.md)
   * [Helm Chart](installation/helm-chart.md)
-* Post-install setup
+* 🔩 Post-install setup
   * [Custom certificates](installation/custom-certificates.md)
   * [Managing secrets](installation/managing-secrets.md)
   * [Setting up S3](installation/s3.md)
   * [Setting up mailer](installation/mailer.md)
   * [Prometheus metrics](installation/prometheus-metrics.md)
   * [Structured logging](installation/structured-logging.md)
-* Maintenance
+* 🛠️ Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
   * [Migrate between different databases](installation/migrate-database.md)
-* [Frequent questions](installation/faq.md)
+* [❓ Frequent questions](installation/faq.md)
 
-## Configuration
+## ── ⚙️ Configuration ──
 
-* [Overview](configuration/README.md)
-* [Settings](configuration/settings/README.md)
+* [🧭 Overview](configuration/README.md)
+* [🎛️ Settings](configuration/settings/README.md)
   * [General settings](configuration/settings/general.md)
   * [Feature flags](configuration/settings/feature-flags.md)
   * [Vulnerability SLA policy](configuration/settings/vulnerability-sla.md)
@@ -94,67 +94,83 @@
   * [Branding](configuration/settings/branding.md)
   * [Custom templates](configuration/settings/custom-templates.md)
   * [API pagination](configuration/settings/api-pagination.md)
-* [Organization](configuration/organization/README.md)
+* [🏢 Organization](configuration/organization/README.md)
   * [Add and manage users](configuration/organization/users.md)
   * [User groups](configuration/organization/user-groups.md)
   * [Custom roles](configuration/organization/custom-roles.md)
   * [Understanding the IAM model](configuration/organization/iam-model.md)
   * [Teams](configuration/organization/teams.md)
-* [SSO](configuration/sso/README.md)
+* [🔐 SSO](configuration/sso/README.md)
   * [SAML](configuration/sso/saml.md)
   * [OpenID Connect (OIDC)](configuration/sso/oidc.md)
   * [SCIM provisioning and IdP groups](configuration/sso/scim.md)
-  * [Identity providers](configuration/sso/identity-providers/README.md)
+  * [👥 Identity providers](configuration/sso/identity-providers/README.md)
     * [Microsoft Entra ID](configuration/sso/identity-providers/entra-id.md)
     * [Okta](configuration/sso/identity-providers/okta.md)
     * [Google Workspace](configuration/sso/identity-providers/google-workspace.md)
     * [Keycloak](configuration/sso/identity-providers/keycloak.md)
-* [Multi-Factor Authentication (MFA)](configuration/mfa.md)
-* [Libraries](configuration/libraries/README.md)
-  * [Designing your own libraries](configuration/libraries/custom-libraries.md)
-  * [Getting your custom framework](configuration/libraries/custom-frameworks.md)
-  * [CIS Controls / Cloud Controls Matrix (CCM)](configuration/libraries/cis-controls.md)
-  * [Library upgrade](configuration/libraries/library-upgrade.md)
-  * [Upgrading a library](configuration/libraries/upgrading-a-library.md)
-  * [Library clean-up](configuration/libraries/library-cleanup.md)
-* [Authoring](configuration/authoring/README.md)
+* [🔒 Multi-Factor Authentication (MFA)](configuration/mfa.md)
+* [📦 Libraries](configuration/libraries/README.md)
+  * [Excel file anatomy](configuration/libraries/excel-file-anatomy.md)
+  * [🧩 Library objects](configuration/libraries/library-objects/README.md)
+    * [Library metadata](configuration/libraries/library-objects/library-metadata.md)
+    * [Framework](configuration/libraries/library-objects/framework.md)
+    * [Implementation groups](configuration/libraries/library-objects/implementation-groups.md)
+    * [Answers](configuration/libraries/library-objects/answers.md)
+    * [Scores](configuration/libraries/library-objects/scores.md)
+    * [Threats](configuration/libraries/library-objects/threats.md)
+    * [Reference controls](configuration/libraries/library-objects/reference-controls.md)
+    * [URN prefixes](configuration/libraries/library-objects/urn-prefixes.md)
+    * [Risk matrices](configuration/libraries/library-objects/risk-matrices.md)
+    * [Mappings](configuration/libraries/library-objects/mappings.md)
+  * [Create a library with Excel](configuration/libraries/create-library-with-excel.md)
+  * [Translate library content](configuration/libraries/translations.md)
+  * [Import a library](configuration/libraries/import-library.md)
+  * [Test a library](configuration/libraries/test-library.md)
+  * [Update a library](configuration/libraries/update-library.md)
+  * [Migrate a library from v1 to v2](configuration/libraries/migrate-v1-to-v2.md)
+  * [Examples](configuration/libraries/examples.md)
+  * [Guided example: create your first framework](configuration/libraries/guided-example.md)
+  * [🧷 Special cases](configuration/libraries/special-cases/README.md)
+    * [CIS Controls and Cloud Controls Matrix (CCM)](configuration/libraries/special-cases/cis-controls-and-ccm.md)
+* [✍️ Authoring](configuration/authoring/README.md)
   * [Library builder](configuration/authoring/library-builder.md)
   * [Excel-driven authoring](configuration/authoring/excel.md)
-* [Data import wizard](configuration/data-import.md)
-* [Changing the language](configuration/language.md)
-* [Date format](configuration/date-format.md)
+* [🪄 Data import wizard](configuration/data-import.md)
+* [🌐 Changing the language](configuration/language.md)
+* [📅 Date format](configuration/date-format.md)
 
-## Guides
+## ── 🗺️ Guides ──
 
-* [Overview](guides/README.md)
-* [General tips](guides/general-tips.md)
-* Getting started
+* [🧭 Overview](guides/README.md)
+* [💡 General tips](guides/general-tips.md)
+* 🌱 Getting started
   * [Initial setup](guides/initial-setup.md)
   * [Creating your first perimeter](guides/first-perimeter.md)
   * [Creating your first audit](guides/first-audit.md)
   * [Creating your first risk assessment](guides/first-risk-assessment.md)
   * [Building your first workflow](guides/first-workflow.md)
   * [Filing and deciding your first request](guides/first-quick-form.md)
-* Assessments
+* 📋 Assessments
   * [Basic audit](guides/basic-audit.md)
   * [Customize your audit](guides/customize-audit.md)
   * [EBIOS RM study](guides/ebios-rm.md)
   * [Cyber risk quantification](guides/quantitative-risk.md)
   * [Cyber risk quantification — methodology](guides/quantitative-risk-methodology.md)
   * [Conducting a Business Impact Analysis](guides/bia.md)
-* Programme management
+* 📌 Programme management
   * [Managing a project](guides/projects.md)
   * [Managing a collection](guides/collections.md)
   * [Managing an accreditation](guides/accreditations.md)
   * [Managing a responsibility matrix](guides/responsibility-matrix.md)
-* Documents
+* 📄 Documents
   * [Authoring documents](guides/documents/authoring-documents.md)
   * [Document templates](guides/documents/document-templates.md)
-* Third-party
+* 🏢 Third-party
   * [Third-Party Risk Management](guides/tprm.md)
   * [Common TPRM pitfalls](guides/tprm-challenges.md)
 
-## Features
+## ── ✨ Features ──
 
 * [Catalogue overview](features/README.md)
 * [Analytics](features/analytics.md)
@@ -185,7 +201,7 @@
 * [Action plans](features/action-plans.md)
 * [Working with tables](features/working-with-tables.md)
 * [Custom fields](features/custom-fields.md)
-* [Workflow builder](features/workflows/README.md)
+* [🔀 Workflow builder](features/workflows/README.md)
   * [Triggers](features/workflows/triggers.md)
   * [Steps](features/workflows/steps.md)
   * [Expressions](features/workflows/expressions.md)
@@ -202,13 +218,13 @@
 * [My assignments](features/my-assignments.md)
 * [Notifications](features/notifications.md)
 * [Portals and trust center](features/portals.md)
-* [Framework-specific features](features/framework-specific/README.md)
+* [🎯 Framework-specific features](features/framework-specific/README.md)
   * [ISO 27001](features/framework-specific/iso.md)
   * [CCB CyFun](features/framework-specific/cyfun.md)
   * [DORA](features/framework-specific/dora.md)
   * [MonServiceSécurisé](features/framework-specific/monservicesecurise.md)
 
-## AI and Integrations
+## ── 🔌 AI and Integrations ──
 
 * [Overview](integrations/README.md)
 * [API reference](integrations/api.md)
@@ -219,15 +235,15 @@
 * [Hosted AI providers](integrations/ai-providers.md)
 * [MCP setup guide](integrations/mcp.md)
 * [Power BI connector](integrations/powerbi.md)
-* [Third-party integrations](integrations/third-party/README.md)
+* [🔗 Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)
   * [ServiceNow](integrations/third-party/servicenow.md)
 
-## Contributing
+## ── 🤝 Contributing ──
 
-* [Overview](contributing/README.md)
-* [Frameworks and libraries](contributing/framework.md)
-* [Code (features and fixes)](contributing/code.md)
-* [Translations](contributing/translation.md)
-* [Documentation](contributing/documentation.md)
-* [Feature page template](contributing/feature-page-template.md)
+* [🧭 Overview](contributing/README.md)
+* [📚 Frameworks and libraries](contributing/framework.md)
+* [💻 Code (features and fixes)](contributing/code.md)
+* [🗣️ Translations](contributing/translation.md)
+* [📝 Documentation](contributing/documentation.md)
+* [📐 Feature page template](contributing/feature-page-template.md)
