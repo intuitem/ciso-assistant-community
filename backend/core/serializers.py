@@ -1,6 +1,6 @@
 import copy
 import importlib
-from typing import Any
+from typing import Any, Optional
 from datetime import datetime
 
 import structlog
@@ -12,8 +12,80 @@ from rest_framework.exceptions import APIException, PermissionDenied
 from django.core.exceptions import FieldDoesNotExist
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.conf import settings
+from django.core.validators import validate_email
+from rest_framework import serializers
 
-from core.models import *
+from core.models import (
+    SCORE_SCALE_PRESETS,
+    Actor,
+    Answer,
+    AppliedControl,
+    Assessment,
+    Asset,
+    AssetCapability,
+    AssetClass,
+    Campaign,
+    ClassificationLevel,
+    Comment,
+    Commitment,
+    ComplianceAssessment,
+    Evidence,
+    EvidenceRevision,
+    FilteringLabel,
+    Finding,
+    FindingsAssessment,
+    FlowEvent,
+    Framework,
+    Incident,
+    LibraryFilteringLabel,
+    LoadedLibrary,
+    ObjectClassification,
+    OrganisationIssue,
+    OrganisationObjective,
+    Perimeter,
+    Policy,
+    Preset,
+    PresetJourney,
+    PresetJourneyStep,
+    Question,
+    QuestionChoice,
+    QuickForm,
+    QuickFormPage,
+    QuickFormPublication,
+    QuickFormResponse,
+    ReferenceControl,
+    ReferentialObjectMixin,
+    RequirementAssessment,
+    RequirementAssignment,
+    RequirementAssignmentEvent,
+    RequirementMappingSet,
+    RequirementNode,
+    RiskAcceptance,
+    RiskAssessment,
+    RiskMatrix,
+    RiskScenario,
+    SecurityException,
+    StoredLibrary,
+    TaskNode,
+    TaskTemplate,
+    Team,
+    Terminology,
+    Threat,
+    TimelineEntry,
+    ValidationFlow,
+    Vulnerability,
+    normalize_score_scale,
+    rescale_score,
+)
+from iam.models import (
+    Folder,
+    IAMGroupSet,
+    IdPGroup,
+    Role,
+    RoleAssignment,
+    User,
+    UserGroup,
+)
 from doc_management.models import DocumentContainer
 from core.serializer_fields import (
     FieldsRelatedField,
@@ -29,9 +101,7 @@ from pmbok.models import GenericCollection
 from doc_management.models import DocumentContainer
 from global_settings.utils import ff_is_enabled
 from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
-from iam.models import *
 from integrations.models import IntegrationConfiguration, SyncMapping
-from rest_framework import serializers
 
 logger = structlog.get_logger(__name__)
 
@@ -279,7 +349,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
         try:
             object_created = super().create(validated_data)
             return object_created
-        except ValidationError as e:
+        except DjangoValidationError as e:
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
 
