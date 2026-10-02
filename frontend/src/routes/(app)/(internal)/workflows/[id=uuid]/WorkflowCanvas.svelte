@@ -1618,6 +1618,13 @@
 		return id;
 	}
 
+	// The value every run starts with; null clears it. Validated by type in
+	// the panel before it gets here, and again at publish.
+	function updateVariableDefault(id: string, value: unknown) {
+		variables = variables.map((v) => (v.id === id ? { ...v, default_value: value } : v));
+		markDirty();
+	}
+
 	function removeVariable(id: string) {
 		variables = variables.filter((v) => v.id !== id);
 		// Strip branch conditions that referenced it so the save doesn't 400.
@@ -2361,6 +2368,7 @@
 							columns
 							onAddVariable={addVariable}
 							onRemoveVariable={removeVariable}
+							onUpdateVariableDefault={updateVariableDefault}
 							onAddSecret={addSecret}
 							onRemoveSecret={removeSecret}
 						/>

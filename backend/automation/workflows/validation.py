@@ -46,6 +46,9 @@ DISABLED_ACTION_TYPES = frozenset({"emit_event"})
 
 
 def validate_graph(version):
+    # Local: engine imports actions, actions is imported here.
+    from .engine import coerce_variable_value
+
     errors = []
     nodes = list(version.nodes.prefetch_related("branches"))
     edges = list(version.edges.all())
@@ -67,6 +70,20 @@ def validate_graph(version):
                     "rename this variable",
                 )
             )
+        if variable.default_value is not None:
+            # The editor writes typed defaults; YAML and older graphs may not.
+            # Same rule as the run dialog's seeds, so a default never fails
+            # where a seed would pass.
+            try:
+                coerce_variable_value(variable.default_value, variable.type)
+            except (ValueError, TypeError):
+                errors.append(
+                    _error(
+                        "variable_default_invalid",
+                        f"'{variable.key}' has a default that is not a valid "
+                        f"{variable.type}",
+                    )
+                )
 
     loop_ids = {n.id for n in nodes if n.type == WorkflowNode.Type.LOOP}
     for edge in edges:
