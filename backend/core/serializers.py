@@ -2970,7 +2970,6 @@ class FolderWriteSerializer(BaseModelSerializer):
             and iam_group_set is not None
         ):
             raise serializers.ValidationError(
-                # TODO: Maybe this error message isn't perfectly adapted anymore (check it).
                 {"iam_groups": "globalFolderMustKeepIamGroupsEnabled"}
             )
 
