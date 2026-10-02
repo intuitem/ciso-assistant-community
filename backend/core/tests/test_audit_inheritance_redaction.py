@@ -364,8 +364,10 @@ def test_hidden_ancestor_verdict_never_steers_the_winner(admin_client, tree):
     # Group is out of the chain altogether; Eurostar (visible) is still in it.
     assert [e["ca_name"] for e in inh["path"]] == ["Eurostar"]
 
-    # A target whose own verdict is hidden contributes nothing to the choice
-    # either, and its row does not tell the viewer what it was.
+    # A target whose own verdict is hidden gets no overlay at all: nothing can
+    # be combined for this viewer, no ancestor stands in for the hidden verdict
+    # (which would also swap the target's visible score for the ancestor's),
+    # and the row does not tell the viewer what the verdict was.
     teams = cas["Teams+"]
     teams.field_visibility = {**teams.field_visibility, **HIDE_RESULT}
     teams.save(update_fields=["field_visibility"])
@@ -375,7 +377,24 @@ def test_hidden_ancestor_verdict_never_steers_the_winner(admin_client, tree):
         seen.append(_row(admin_client, fw, "Teams+"))
     assert seen[0] == seen[1]
     assert seen[0]["result"] is None
-    inh = seen[0]["inheritance"]
-    assert inh["own"] is None
-    assert inh["effective_result"] is None
-    assert inh["source"]["ca_name"] == "Eurostar"
+    assert seen[0]["inheritance"] is None
+    assert seen[0]["score"] == 3
+
+
+@pytest.mark.django_db
+def test_lazy_redactor_only_resolves_viewable_audits(tree):
+    """An audit outside the viewable set is never fetched: fully hidden."""
+    from core.audit_inheritance import REDACTABLE_FIELDS, make_overlay_redactor
+
+    _, cas = tree
+    teams, group = cas["Teams+"], cas["Group"]
+    hidden_for_ca = make_overlay_redactor([], set(), viewable_ca_ids=[teams.id])
+    # Teams+ shows scores and results: resolved through the lazy fetch.
+    assert hidden_for_ca(str(teams.id)) == frozenset()
+    # Group exists and hides scores, but is not viewable: everything hidden,
+    # not just what its own visibility would hide.
+    assert hidden_for_ca(str(group.id)) == frozenset(REDACTABLE_FIELDS)
+    # Without a viewable set nothing is fetched at all.
+    assert make_overlay_redactor([], set())(str(teams.id)) == frozenset(
+        REDACTABLE_FIELDS
+    )

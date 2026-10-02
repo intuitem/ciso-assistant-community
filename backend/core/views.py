@@ -10338,7 +10338,7 @@ class FrameworkViewSet(BaseModelViewSet):
         # live audits on this framework, so they are in all_visible_cas unless
         # a campaign filter narrowed it; the redactor fetches those lazily.
         hidden_for_ca = make_overlay_redactor(
-            all_visible_cas, respondent_folders, lazy=True
+            all_visible_cas, respondent_folders, viewable_ca_ids=viewable_ca_ids
         )
 
         aggregation_strategy = get_strategy()
@@ -13966,7 +13966,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         hidden_for_ca = make_overlay_redactor(
             [compliance_assessment],
             get_respondent_scoped_folder_ids(request.user),
-            lazy=True,
+            viewable_ca_ids=viewable_ca_ids,
         )
         result = build_overlay_map(
             compliance_assessment,
