@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { isDark } from '$lib/utils/helpers';
 
 	interface Props {
 		operatingMode: {
@@ -16,11 +17,11 @@
 
 {#if operatingMode}
 	<div
-		class="rounded-md border border-error-300-700 bg-error-50-950 px-3 py-2 text-sm space-y-1"
+		class="rounded-md border border-primary-200-800 bg-primary-50 dark:bg-primary-950/40 px-3 py-2 text-sm space-y-1"
 		data-testid="most-likely-operating-mode"
 	>
 		<p class="flex flex-wrap items-center gap-2">
-			<i class="fa-solid fa-crosshairs text-error-600-400"></i>
+			<i class="fa-solid fa-crosshairs text-primary-600-400"></i>
 			<span class="font-semibold text-surface-700-300">{m.mostLikelyOperatingMode()}</span>
 			{#if linked}
 				<a href="/operating-modes/{operatingMode.id}" class="anchor">{operatingMode.str}</a>
@@ -29,7 +30,10 @@
 			{/if}
 			{#if operatingMode.likelihood?.name}
 				<span
-					class="badge text-xs"
+					class="badge text-xs {operatingMode.likelihood.hexcolor &&
+					!isDark(operatingMode.likelihood.hexcolor)
+						? 'text-surface-950'
+						: ''}"
 					style={operatingMode.likelihood.hexcolor
 						? `background-color: ${operatingMode.likelihood.hexcolor}`
 						: ''}>{operatingMode.likelihood.name}</span

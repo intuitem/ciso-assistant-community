@@ -75,7 +75,11 @@ def default_section(size: int) -> dict:
             },
             "pertinence_grid": [list(row) for row in DEFAULT_PERTINENCE_GRID],
         },
-        "success_probability": _resample(DEFAULT_SUCCESS_PROBABILITY, size),
+        "success_probability": (
+            [_level(name) for name in DEFAULT_SUCCESS_PROBABILITY[1:]]
+            if size == 4
+            else _resample(DEFAULT_SUCCESS_PROBABILITY, size)
+        ),
         "technical_difficulty": _resample(DEFAULT_TECHNICAL_DIFFICULTY, size),
         "likelihood_grid": default_likelihood_grid(size),
     }

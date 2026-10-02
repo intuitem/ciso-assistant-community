@@ -3026,8 +3026,8 @@ export const listViewFields = {
 		}
 	},
 	'elementary-actions': {
-		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'threat'],
-		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
+		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'technique', 'threat'],
+		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'technique', 'threat'],
 		filters: {
 			attack_stage: {
 				component: AutocompleteSelect,

@@ -840,7 +840,12 @@
 					<div class="border-2 border-warning-200-800 rounded-lg p-4 bg-warning-50-950">
 						<div class="mb-4">
 							<h3 class="text-lg font-semibold text-warning-900-100 mb-2">
-								<i class="fa-solid fa-gears mr-2"></i>{opScenario.ref_id || m.operationalScenario()}
+								<i class="fa-solid fa-gears mr-2"></i>{[
+									opScenario.ref_id,
+									opScenario.attack_path?.name
+								]
+									.filter(Boolean)
+									.join(' · ') || m.operationalScenario()}
 							</h3>
 							{#if strategicScenario}
 								<div class="text-sm mb-3">

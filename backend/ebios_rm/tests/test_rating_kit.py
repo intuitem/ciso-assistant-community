@@ -65,7 +65,12 @@ class TestDefaults:
             "difficultyHigh",
             "difficultyVeryHigh",
         ]
-        assert len(section["success_probability"]) == 4
+        assert [level["name"] for level in section["success_probability"]] == [
+            "successProbabilityLow",
+            "successProbabilitySignificant",
+            "successProbabilityVeryHigh",
+            "successProbabilityNearCertain",
+        ]
         assert len(section["likelihood_grid"]) == 4
 
     @pytest.mark.parametrize("motivation", [1, 2, 3, 4])
@@ -156,7 +161,7 @@ class TestStudyUsesItsMatrix:
         study = basic_ebios_rm_study_fixture
         ro_to = _ro_to(study, motivation=1, resources=1)
         assert ro_to.pertinence == 1
-        assert ro_to.get_motivation_display() == "very_low"
+        assert ro_to.get_motivation_display() == "Very low"
 
         study.risk_matrix = _custom_matrix(study.risk_matrix)
         study.save()
@@ -254,3 +259,38 @@ def test_defaults_endpoint(admin_client):
         ).status_code
         == 400
     )
+
+
+class TestEbiosMatrixTemplate:
+    def test_template_matches_the_defaults(self):
+        from pathlib import Path
+
+        import yaml
+        from django.conf import settings
+
+        path = (
+            Path(settings.BASE_DIR) / "library/libraries/risk-matrix-4x4-ebios-rm.yaml"
+        )
+        matrix = yaml.safe_load(path.read_text())["objects"]["risk_matrix"][0]
+        section = matrix["ebios_rm"]
+        defaults = rating_kit.default_section(len(matrix["probability"]))
+
+        assert rating_kit.validate(section, len(matrix["probability"])) == []
+        assert section["likelihood_grid"] == defaults["likelihood_grid"]
+        assert (
+            section["ro_to"]["pertinence_grid"] == defaults["ro_to"]["pertinence_grid"]
+        )
+        for key in ("success_probability", "technical_difficulty"):
+            assert len(section[key]) == len(defaults[key])
+        for key in rating_kit.RO_TO_SCALES:
+            assert len(section["ro_to"][key]) == len(defaults["ro_to"][key])
+
+    @pytest.mark.django_db
+    def test_builtin_template_is_not_customized(
+        self, admin_client, basic_ebios_rm_study_fixture
+    ):
+        study = basic_ebios_rm_study_fixture
+        response = admin_client.get(f"/api/ebios-rm/studies/{study.id}/rating-kit/")
+        assert response.status_code == 200, response.content
+        assert response.json()["customized"] is False
+        assert response.json()["success_probability"][0]["name"] == "Low"

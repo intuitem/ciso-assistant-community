@@ -171,7 +171,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     for level in study.parsed_matrix["probability"]
                 ],
                 "matrix": {"id": str(matrix.id), "name": str(matrix)},
-                "customized": bool(matrix.json_definition.get("ebios_rm")),
+                "customized": bool(matrix.json_definition.get("ebios_rm"))
+                and not (matrix.library and matrix.library.builtin),
             }
         )
 
@@ -1298,6 +1299,13 @@ class ElementaryActionViewSet(BaseModelViewSet):
     model = ElementaryAction
 
     filterset_class = ElementaryActionFilter
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "threat", "technique__parent__parent")
+        )
 
     def get_protected_error_response_data(self, instance, error):
         operating_modes = list(
