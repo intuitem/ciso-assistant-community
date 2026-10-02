@@ -18,7 +18,11 @@ from ebios_rm.models import (
     RoTo,
     StrategicScenario,
 )
-from ebios_rm.serializers import KillChainReadSerializer, KillChainWriteSerializer
+from ebios_rm.serializers import (
+    ElementaryActionWriteSerializer,
+    KillChainReadSerializer,
+    KillChainWriteSerializer,
+)
 
 from ebios_rm.tests.fixtures import *
 
@@ -604,3 +608,142 @@ def test_switching_method_keeps_typed_operating_mode_likelihood(
     study.save()
     operating_mode.refresh_from_db()
     assert operating_mode.effective_likelihood == 2
+
+
+@pytest.mark.django_db
+class TestReviewFixes:
+    def test_changing_attack_stage_of_a_used_action_is_checked(
+        self, operating_mode_fixture, elementary_actions_fixture
+    ):
+        know, enter, exploit = elementary_actions_fixture
+        know_step = KillChain.objects.create(
+            operating_mode=operating_mode_fixture, elementary_action=know
+        )
+        enter_step = KillChain.objects.create(
+            operating_mode=operating_mode_fixture, elementary_action=enter
+        )
+        enter_step.antecedents.add(know_step)
+
+        serializer = ElementaryActionWriteSerializer(
+            know,
+            data={"attack_stage": ElementaryAction.AttackStage.EXPLOIT},
+            partial=True,
+        )
+        assert not serializer.is_valid()
+
+        serializer = ElementaryActionWriteSerializer(
+            exploit,
+            data={"attack_stage": ElementaryAction.AttackStage.KNOW},
+            partial=True,
+        )
+        assert serializer.is_valid(), serializer.errors
+
+    def test_know_step_accepts_a_know_antecedent(
+        self, operating_mode_fixture, elementary_actions_fixture
+    ):
+        know, _, _ = elementary_actions_fixture
+        first = KillChain.objects.create(
+            operating_mode=operating_mode_fixture, elementary_action=know
+        )
+        serializer = KillChainWriteSerializer(
+            data={
+                "operating_mode": operating_mode_fixture.id,
+                "elementary_action": know.id,
+                "antecedents": [first.id],
+            }
+        )
+        assert serializer.is_valid(), serializer.errors
+
+    def test_changing_a_step_rechecks_its_kept_links(
+        self,
+        basic_ebios_rm_study_fixture,
+        operating_mode_fixture,
+        elementary_actions_fixture,
+    ):
+        know, enter, exploit = elementary_actions_fixture
+        enter_step = KillChain.objects.create(
+            operating_mode=operating_mode_fixture, elementary_action=enter
+        )
+        exploit_step = KillChain.objects.create(
+            operating_mode=operating_mode_fixture, elementary_action=exploit
+        )
+        exploit_step.antecedents.add(enter_step)
+
+        serializer = KillChainWriteSerializer(
+            exploit_step, data={"elementary_action": know.id}, partial=True
+        )
+        assert not serializer.is_valid()
+        assert "antecedents" in serializer.errors
+
+        know_step = KillChain.objects.create(
+            operating_mode=operating_mode_fixture, elementary_action=know
+        )
+        enter_step.antecedents.add(know_step)
+        serializer = KillChainWriteSerializer(
+            know_step, data={"elementary_action": exploit.id}, partial=True
+        )
+        assert not serializer.is_valid()
+        assert "elementary_action" in serializer.errors
+
+        other_mode = _operating_mode(basic_ebios_rm_study_fixture, "other mode")
+        serializer = KillChainWriteSerializer(
+            enter_step, data={"operating_mode": other_mode.id}, partial=True
+        )
+        assert not serializer.is_valid()
+        assert "operating_mode" in serializer.errors
+
+    def test_smaller_matrix_clamps_step_ratings(
+        self, basic_ebios_rm_study_fixture, elementary_actions_fixture
+    ):
+        from core.models import RiskMatrix, StoredLibrary
+
+        study = basic_ebios_rm_study_fixture
+        study.quotation_method = EbiosRMStudy.QuotationMethod.ADVANCED
+        study.save()
+        know, _, _ = elementary_actions_fixture
+        operating_mode = _operating_mode(study)
+        step = KillChain.objects.create(
+            operating_mode=operating_mode,
+            elementary_action=know,
+            success_probability=3,
+            technical_difficulty=3,
+        )
+        StoredLibrary.objects.get(
+            urn="urn:intuitem:risk:library:risk-matrix-3x3-mult"
+        ).load()
+
+        study.risk_matrix = RiskMatrix.objects.get(
+            urn="urn:intuitem:risk:matrix:3x3-mult"
+        )
+        study.save()
+
+        step.refresh_from_db()
+        operating_mode.refresh_from_db()
+        assert (step.success_probability, step.technical_difficulty) == (2, 2)
+        assert 0 <= operating_mode.computed_likelihood <= 2
+
+    def test_refresh_ratings_follows_a_changed_matrix(
+        self, basic_ebios_rm_study_fixture
+    ):
+        from ebios_rm import rating_kit
+
+        study = basic_ebios_rm_study_fixture
+        ro_to = _operating_mode(
+            study
+        ).operational_scenario.attack_path.strategic_scenario.ro_to_couple
+        ro_to.motivation, ro_to.resources = 4, 4
+        ro_to.save()
+        before = ro_to.pertinence
+
+        matrix = study.risk_matrix
+        section = rating_kit.default_section(len(matrix.json_definition["probability"]))
+        section["ro_to"]["pertinence_grid"] = [[0] * 4 for _ in range(4)]
+        matrix.json_definition = {**matrix.json_definition, "ebios_rm": section}
+        matrix.save()
+
+        EbiosRMStudy.objects.get(id=study.id).refresh_ratings()
+        ro_to.refresh_from_db()
+        assert ro_to.pertinence != before
+        assert ro_to.pertinence == rating_kit.pertinence(
+            rating_kit.resolve(matrix.json_definition)["ro_to"], 4, 4
+        )

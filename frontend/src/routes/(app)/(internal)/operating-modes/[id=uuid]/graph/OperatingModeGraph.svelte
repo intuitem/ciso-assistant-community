@@ -279,9 +279,10 @@
 			const count = stageCount[stage] ?? 0;
 			const antecedents = step.antecedents ?? [];
 
-			const hasLogicOp = !!step.logic_operator && antecedents.length > 1;
-			if (hasLogicOp) {
-				ops.set(step.id, step.logic_operator as 'AND' | 'OR');
+			const logicOp =
+				antecedents.length > 1 ? ((step.logic_operator ?? 'OR') as 'AND' | 'OR') : null;
+			if (logicOp) {
+				ops.set(step.id, logicOp);
 			}
 
 			const hasSavedPosition = (step.position_x ?? 0) !== 0 || (step.position_y ?? 0) !== 0;
@@ -301,7 +302,7 @@
 					label: ea.name,
 					iconClass: ea.icon_fa_class ?? '',
 					stage,
-					logicOp: hasLogicOp ? (step.logic_operator as 'AND' | 'OR') : null,
+					logicOp,
 					elementaryActionId: eaId,
 					assets: (step.assets ?? []).map((a: any) => (typeof a === 'object' ? a.id : a)),
 					assetLabels: (step.assets ?? []).map((a: any) => (typeof a === 'object' ? a.str : a)),
@@ -324,7 +325,7 @@
 					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' },
 					style: 'stroke: var(--color-surface-500); stroke-width: 2;',
 					data: {
-						logicOp: ai === 0 && hasLogicOp ? step.logic_operator : null,
+						logicOp: ai === 0 ? logicOp : null,
 						targetStage: stage,
 						targetNodeId: step.id
 					}

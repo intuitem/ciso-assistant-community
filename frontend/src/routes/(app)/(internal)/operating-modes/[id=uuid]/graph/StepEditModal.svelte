@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { superForm, defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -135,16 +134,6 @@
 			disableDoubleDash
 			label={m.successProbability()}
 			helpText={m.successProbabilityHelpText()}
-		/>
-		<NumberField
-			form={_form}
-			field="success_probability_pct"
-			cachedValue={undefined}
-			step="any"
-			min="0"
-			max="100"
-			label={m.successProbabilityPct()}
-			helpText={m.successProbabilityPctHelpText()}
 		/>
 		{#if difficultyChoices}
 			<Select

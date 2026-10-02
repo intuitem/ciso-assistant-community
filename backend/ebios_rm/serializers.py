@@ -609,7 +609,9 @@ class ElementaryActionWriteSerializer(BaseModelSerializer):
             for kc in KillChain.objects.filter(
                 elementary_action=instance
             ).select_related("operating_mode__operational_scenario__ebios_rm_study"):
-                bad_antecedents = kc.antecedents.filter(attack_stage__gt=attack_stage)
+                bad_antecedents = kc.antecedents.filter(
+                    elementary_action__attack_stage__gt=attack_stage
+                )
                 if bad_antecedents.exists():
                     mo = kc.operating_mode
                     op_scenario = mo.operational_scenario
@@ -617,9 +619,13 @@ class ElementaryActionWriteSerializer(BaseModelSerializer):
                     conflicting_modes[str(mo.id)] = f"{study} → {op_scenario} → {mo}"
 
             # Case 2: EA is used as an antecedent — check the action it feeds into
-            for kc in KillChain.objects.filter(antecedents=instance).select_related(
-                "operating_mode__operational_scenario__ebios_rm_study",
-                "elementary_action",
+            for kc in (
+                KillChain.objects.filter(antecedents__elementary_action=instance)
+                .distinct()
+                .select_related(
+                    "operating_mode__operational_scenario__ebios_rm_study",
+                    "elementary_action",
+                )
             ):
                 if attack_stage > kc.elementary_action.attack_stage:
                     mo = kc.operating_mode
@@ -715,18 +721,31 @@ class KillChainWriteSerializer(BaseModelSerializer):
                 )
 
         antecedents = attrs.get("antecedents")
+        relationship_changed = instance is not None and bool(
+            {"elementary_action", "operating_mode"} & attrs.keys()
+        )
+        if antecedents is None and relationship_changed:
+            antecedents = list(instance.antecedents.all())
         if antecedents is None:
             return super().validate(attrs)
 
-        if (
-            antecedents
-            and elementary_action.attack_stage == ElementaryAction.AttackStage.KNOW
-        ):
-            raise serializers.ValidationError(
-                {
-                    "antecedents": "Antecedents cannot be selected in attack stage 'Know'."
-                }
-            )
+        if relationship_changed:
+            for successor in instance.successors.select_related("elementary_action"):
+                if successor.operating_mode_id != operating_mode.id:
+                    raise serializers.ValidationError(
+                        {
+                            "operating_mode": f"Successor '{successor}' belongs to another operating mode."
+                        }
+                    )
+                if (
+                    elementary_action.attack_stage
+                    > successor.elementary_action.attack_stage
+                ):
+                    raise serializers.ValidationError(
+                        {
+                            "elementary_action": f"The attack stage of the successor '{successor}' needs to be the same or after the attack stage of the elementary action"
+                        }
+                    )
 
         for antecedent in antecedents:
             if instance is not None and antecedent.pk == instance.pk:

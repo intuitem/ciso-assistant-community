@@ -3,6 +3,7 @@ import uuid
 
 import django_filters as df
 import pandas as pd
+from django.db import transaction
 from django.db.models import Case, F, FloatField, Value, When
 from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
@@ -126,12 +127,14 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         request.data["responsibility_matrix"] = str(matrix.id)
 
     def create(self, request, *args, **kwargs):
-        self._process_responsibility_matrix(request)
-        return super().create(request, *args, **kwargs)
+        with transaction.atomic():
+            self._process_responsibility_matrix(request)
+            return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-        self._process_responsibility_matrix(request)
-        return super().update(request, *args, **kwargs)
+        with transaction.atomic():
+            self._process_responsibility_matrix(request)
+            return super().update(request, *args, **kwargs)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -1405,8 +1408,6 @@ class OperatingModeViewSet(BaseModelViewSet):
         Antecedents reference those keys. Steps left out are deleted. "assets"
         is applied only when sent, so a graph save never drops them.
         """
-        from django.db import transaction
-
         from iam.models import RoleAssignment
 
         mo = self.get_object()

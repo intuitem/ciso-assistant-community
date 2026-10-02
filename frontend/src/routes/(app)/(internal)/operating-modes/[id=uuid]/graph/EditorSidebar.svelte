@@ -146,7 +146,7 @@
 										type="button"
 										aria-label="{m.edit()} {action.name}"
 										title="{m.edit()} {m.elementaryAction()}"
-										class="hidden group-hover:inline-flex text-surface-500 hover:text-primary-500 cursor-pointer"
+										class="inline-flex opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-surface-500 hover:text-primary-500 cursor-pointer"
 										onclick={() => onEditAction(action.id)}
 									>
 										<i class="fa-solid fa-pen-to-square text-[10px]"></i>

@@ -2451,7 +2451,7 @@ class LibraryUpdater:
                 if key in matrix:  # If all keys are mandatory this condition is useless
                     matrix_dict["json_definition"][key] = matrix[key]
 
-            RiskMatrix.objects.update_or_create(
+            risk_matrix, _ = RiskMatrix.objects.update_or_create(
                 urn=matrix["urn"].lower(),
                 defaults=matrix_dict,
                 create_defaults={
@@ -2461,6 +2461,8 @@ class LibraryUpdater:
                     "library": self.old_library,
                 },
             )
+            for study in risk_matrix.ebios_rm_studies.all():
+                study.refresh_ratings()
 
     def update_requirement_mapping_sets(self):
         for requirement_mapping_set in self.new_requirement_mapping_sets:

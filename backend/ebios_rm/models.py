@@ -277,6 +277,15 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                         min_impact, min(strategic_scenario.gravity_forced, max_impact)
                     )
                     strategic_scenario.save(update_fields=["gravity_forced"])
+                steps = KillChain.objects.filter(
+                    operating_mode__operational_scenario__ebios_rm_study=self
+                )
+                steps.filter(success_probability__gt=max_prob).update(
+                    success_probability=max_prob
+                )
+                steps.filter(technical_difficulty__gt=max_prob).update(
+                    technical_difficulty=max_prob
+                )
                 self.__dict__.pop("_rating_kit_cache", None)
                 for ro_to in self.roto_set.all():
                     ro_to.ebios_rm_study = self
@@ -314,6 +323,17 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
     def ro_to_scales(self, translated: bool = False) -> dict:
         return self.rating_kit(translated)["ro_to"]
+
+    def refresh_ratings(self):
+        self.__dict__.pop("_rating_kit_cache", None)
+        for ro_to in self.roto_set.all():
+            ro_to.ebios_rm_study = self
+            ro_to.save(update_fields=["pertinence"])
+        if self.quotation_method in self.STEP_QUOTATION_METHODS:
+            for operating_mode in OperatingMode.objects.filter(
+                operational_scenario__ebios_rm_study=self
+            ):
+                operating_mode.save(update_fields=["computed_likelihood"])
 
     @property
     def parsed_matrix(self):

@@ -150,6 +150,20 @@ class TestStudyResponsibilityMatrixFromName:
             == 1
         )
 
+    def test_failed_study_write_leaves_no_matrix(
+        self, admin_client, basic_ebios_rm_study_fixture
+    ):
+        from pmbok.models import ResponsibilityMatrix
+
+        response = admin_client.patch(
+            f"/api/ebios-rm/studies/{basic_ebios_rm_study_fixture.id}/",
+            {"responsibility_matrix": "Orphan RACI", "quotation_method": "bogus"},
+            format="json",
+        )
+
+        assert response.status_code == 400, response.content
+        assert not ResponsibilityMatrix.objects.filter(name="Orphan RACI").exists()
+
     def test_existing_id_is_left_alone(
         self, admin_client, basic_ebios_rm_study_fixture
     ):

@@ -9,7 +9,7 @@ Our security commitments are detailed in:
 
 ## Supported Versions
 
-CISO Assistant uses semantic versioning (`MAJOR.MINOR.PATCH`). Minor versions are released every few weeks, and patch versions as needed. Fixes ship as new patch releases of the latest minor version; they are not backported to earlier minor versions.
+CISO Assistant uses semantic versioning (`MAJOR.MINOR.PATCH`). Minor versions are released every few weeks, and patch versions as needed. Fixes ship as new patch releases of the latest minor version. Functional fixes are not backported to earlier minor versions; security fixes may be, case by case (see below).
 
 | Version                                | Functional fixes (MCO) | Security fixes (MCS) |
 | -------------------------------------- | ---------------------- | -------------------- |
