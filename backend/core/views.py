@@ -9300,7 +9300,11 @@ class FolderViewSet(BaseModelViewSet):
             "include_enclaves", "False"
         ).lower() in ["true", "1", "yes"]
 
-        viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        # A set: the tree builders test membership once per folder, and `in` on a
+        # QuerySet scans its cached list, which is quadratic in the folder count.
+        viewable_objects = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        )
 
         children_by_parent, parent_of, perimeters_by_folder = build_folder_indexes(
             include_perimeters=include_perimeters
