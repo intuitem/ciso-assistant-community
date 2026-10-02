@@ -95,6 +95,7 @@
 		showDocumentationScore,
 		showRespondentAlignment,
 		showComments,
+		showAnnotation,
 		showAnswers
 	} = getFieldVisibility(complianceAssessment, viewerRole);
 
@@ -214,7 +215,7 @@
 			<MarkdownRenderer content={data.requirement.description} />
 		</div>
 	{/if}
-	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
+	{#if has_threats || has_reference_controls || (annotation && showAnnotation) || mappingInference.result}
 		<div class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto">
 			<h2 class="font-semibold text-base flex flex-row justify-between">
 				<div>
@@ -275,7 +276,7 @@
 						</div>
 					</div>
 				{/if}
-				{#if annotation}
+				{#if annotation && showAnnotation}
 					<div class="my-2">
 						<p class="font-medium">
 							<i class="fa-solid fa-pencil"></i>

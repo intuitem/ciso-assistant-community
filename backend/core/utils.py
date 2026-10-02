@@ -1799,6 +1799,8 @@ DEFAULT_VISIBILITY = {
     # Findings are the auditor's verdict; a missing key would resolve to
     # EVERYONE_EDIT and show them to the auditee.
     "findings": AUDITOR_ONLY,
+    # Annotations are meant to help the auditor interpret/answer the requirement, respondents don't really need it.
+    "annotation": AUDITOR_ONLY,
 }
 
 
@@ -1819,6 +1821,7 @@ THIRD_PARTY_VISIBILITY = {
     "evidences": EVERYONE_EDIT,
     "observation": EVERYONE_EDIT,
     "comments": EVERYONE_EDIT,
+    "annotation": AUDITOR_ONLY,
 }
 
 

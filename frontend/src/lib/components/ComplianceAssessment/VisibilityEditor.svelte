@@ -2,6 +2,7 @@
 	import { VISIBILITY_FIELDS, type RoleAccess } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	type Pair = { auditor: RoleAccess; respondent: RoleAccess };
 	type VisibilityMap = Record<string, Pair>;
@@ -19,21 +20,6 @@
 	}
 
 	let { value, onChange, disabled = false, frameworkDefaults = null }: Props = $props();
-
-	const FIELD_LABELS: Record<string, () => string> = {
-		result: m.result,
-		status: m.status,
-		score: m.score,
-		documentation_score: m.documentationScore,
-		extended_result: m.extendedResult,
-		observation: m.observation,
-		answers: m.answers,
-		evidences: m.evidences,
-		applied_controls: m.appliedControls,
-		task_templates: m.taskTemplates,
-		respondent_alignment: m.respondentAlignment,
-		comments: m.comments
-	};
 
 	const FEATURE_FLAG_BY_FIELD: Record<string, string> = { comments: 'comments' };
 
@@ -160,7 +146,7 @@
 	<div class="max-w-xl">
 		{#each visibleFields as field}
 			{@const pill = pillFor(field)}
-			{@const label = FIELD_LABELS[field]?.() ?? field}
+			{@const label = safeTranslate(field)}
 			<div class="flex items-center justify-between gap-3 py-1">
 				<span class="text-sm text-surface-700-300">{label}</span>
 				<div
