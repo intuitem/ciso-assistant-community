@@ -10,7 +10,7 @@ Library metadata describes the library as a whole: its identity, version, main a
 
 The `library_meta` worksheet is a special case: it is a single two-column key-value table, not a pair of `<object>_meta` and `<object>_content` sheets. Put each property in column A and its value in column B. Use one row per property.
 
-An asterisk (<mark style="color:$danger;">*</mark>) marks a required property. `T` marks a property that supports translations.
+An asterisk (<mark style="color:$danger;">*</mark>) marks a required property. <mark style="color:$info;">T</mark> marks a property that supports translations.
 
 | Property | Meaning | Format / allowed values |
 | --- | --- | --- |
@@ -19,8 +19,8 @@ An asterisk (<mark style="color:$danger;">*</mark>) marks a required property. `
 | `version`<mark style="color:$danger;">*</mark> | The library version. Increase it whenever you publish an update | Positive whole number > 0 |
 | `locale`<mark style="color:$danger;">*</mark> | The primary language of the library | Two lowercase letters from [ISO 639 Set 1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes#Table) (e.g. `en`, `fr`) |
 | `ref_id`<mark style="color:$danger;">*</mark> | The library reference identifier | Letters, numbers, `.`, `_`, or `-` only; no spaces |
-| `name`<mark style="color:$danger;">*</mark> T | The library name | Text |
-| `description`<mark style="color:$danger;">*</mark> T | The library description | Text |
+| `name`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | The library name | Text |
+| `description`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | The library description | Text |
 | `copyright`<mark style="color:$danger;">*</mark> | The library copyright notice | Text |
 | `provider`<mark style="color:$danger;">*</mark> | The organization that provides the library's content | Text |
 | `packager`<mark style="color:$danger;">*</mark> | The person or organization that packaged the library | Text |
