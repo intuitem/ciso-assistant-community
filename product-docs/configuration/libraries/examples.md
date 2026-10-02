@@ -43,6 +43,6 @@ Here are the object types you will find in this example:
 | `imp_grp_meta`, `imp_grp_content` | Implementation groups used to scope questionnaire requirements and choices. |
 | `answ_meta`, `answ_content` | Reusable answer types and choices, with examples of scoring, compliance results, colors, and translations. |
 
-### Which one should I check first?
+## Which one should I check first?
 
 Start with the framework example to understand the general workbook structure and see several library objects together. Then, explore the questionnaire example if your framework will guide users through structured questions and answers. It shows conditional questions and how answer choices can affect scores and compliance results.
