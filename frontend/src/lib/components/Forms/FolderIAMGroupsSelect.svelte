@@ -107,7 +107,6 @@
 	});
 </script>
 
-<!-- One grid for all the rows so the name / "create" / "recursive" columns line up. -->
 <div
 	class="grid grid-cols-[repeat(3,max-content)] justify-start items-center gap-x-6 gap-y-3 {classes}"
 >

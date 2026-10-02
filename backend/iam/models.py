@@ -221,7 +221,6 @@ class IAMGroupSet:
             builtin=True,
             name__in=IAMGroupSet.USER_GROUP_NAMES,
             # IdP-managed user groups aren't mutable by this mechanism.
-            # TODO: (I guess i should exclude the IdP-managed user-groups from the frontend view)
             idp_groups__isnull=True,
         )
         if folder is not None:
@@ -277,7 +276,6 @@ class IAMGroupSet:
             for user_group_name in user_group_to_create_names
         ]
 
-        # TODO: Check if it doesn't bypass an important `UserGroup.save` or whatever method/signal (which is important).
         new_user_groups = UserGroup.objects.bulk_create(user_groups_to_create)
 
         role_assignment_to_create = [
@@ -325,7 +323,6 @@ class IAMGroupSet:
             is_recursive = user_group_name_to_is_recursive[user_group_name]
             role_assignment.is_recursive = is_recursive
 
-        # TODO: Check if it doesn't bypass an important `RoleAssignment.save` or whatever method/signal (which is important).
         RoleAssignment.objects.bulk_update(
             role_assignments, ["is_recursive"], batch_size=1000
         )
