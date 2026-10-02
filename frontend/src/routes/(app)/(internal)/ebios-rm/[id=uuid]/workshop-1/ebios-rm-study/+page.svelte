@@ -174,18 +174,19 @@
 					? 'text-primary-500'
 					: 'text-surface-600-400'}">{m.activityOne()}</span
 			>
-			{#if ebiosRmStudy.description}
-				<div class="text-surface-600-400 text-justify w-full">
-					<MarkdownRenderer content={ebiosRmStudy.description} />
-				</div>
-			{:else}
-				<p class="text-surface-600-400">{m.noDescription()}</p>
-			{/if}
 			<div class="w-full p-4 bg-surface-50-950 border rounded-md shadow-xs space-y-4">
 				<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
 					<i class="fa-solid fa-bullseye text-purple-500"></i>
 					<span>{safeTranslate(m.ebiosWs1_1())}</span>
 				</h3>
+				<div>
+					<h4 class="font-semibold text-surface-700-300">{m.description()}</h4>
+					{#if ebiosRmStudy.description}
+						<MarkdownRenderer content={ebiosRmStudy.description} />
+					{:else}
+						<p class="text-surface-500">--</p>
+					{/if}
+				</div>
 				<div class="grid md:grid-cols-2 gap-4">
 					<div>
 						<h4 class="font-semibold text-surface-700-300">{m.objectives()}</h4>

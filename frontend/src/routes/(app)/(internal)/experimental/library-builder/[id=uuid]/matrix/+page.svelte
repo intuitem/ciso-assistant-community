@@ -441,11 +441,13 @@
 		/>
 	</div>
 
-	<EbiosRmSectionEditor
-		bind:section={ebiosRm}
-		likelihoodLevels={probabilityLevels}
-		{activeLang}
-		{baseLang}
-		onchange={() => (unsaved = true)}
-	/>
+	{#if page.data.featureflags?.ebiosrm || ebiosRm}
+		<EbiosRmSectionEditor
+			bind:section={ebiosRm}
+			likelihoodLevels={probabilityLevels}
+			{activeLang}
+			{baseLang}
+			onchange={() => (unsaved = true)}
+		/>
+	{/if}
 </div>
