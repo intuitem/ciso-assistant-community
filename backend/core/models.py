@@ -9475,6 +9475,45 @@ class ComplianceAssessment(Assessment):
             "maturity_score": maturity_score,
         }
 
+    def get_scores_for(self, requirement_assessments) -> dict:
+        """Scores of a subset of RAs (a section, an implementation group),
+        filtered and aggregated like get_global_score so they stay consistent
+        with the tree and the global score. Layers with nothing scored are None.
+        """
+        na = RequirementAssessment.Result.NOT_APPLICABLE
+        scored = [
+            ra
+            for ra in requirement_assessments
+            if (self.anchor_na_to_target and ra.result == na)
+            or (ra.is_scored and ra.score is not None and ra.result != na)
+        ]
+        impl_score = doc_score = None
+        if scored:
+            impl_score = self._compute_raw_score_for_field(
+                scored, None, "score", self.anchor_na_to_target
+            )
+            if self.show_documentation_score:
+                doc_score = self._compute_raw_score_for_field(
+                    scored, None, "documentation_score", self.anchor_na_to_target
+                )
+        impl_score = None if impl_score == -1 else impl_score
+        doc_score = None if doc_score == -1 else doc_score
+        # Maturity uses the unrounded layers so rounding only happens once.
+        enabled = [s for s in [impl_score, doc_score] if s is not None]
+        return {
+            "implementation_score": round_score(impl_score)
+            if impl_score is not None
+            else None,
+            "documentation_score": round_score(doc_score)
+            if doc_score is not None
+            else None,
+            "maturity_score": round_score(sum(enabled) / len(enabled))
+            if enabled
+            else None,
+            "scored_count": len(scored),
+            "total_weight": sum(ra.requirement.weight or 1 for ra in scored),
+        }
+
     def get_total_max_score(self):
         """
         Calculate the theoretical total maximum score based on the score_calculation_method.

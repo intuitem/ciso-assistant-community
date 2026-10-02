@@ -15385,7 +15385,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         ras = RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment,
             requirement__assessable=True,
-        ).select_related("requirement")
+        ).select_related("requirement", "compliance_assessment")
 
         # Auditee filtering
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
@@ -15429,57 +15429,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 continue
 
             results = defaultdict(int)
-            weighted_score = 0
-            total_weight = 0
-            doc_weighted_score = 0
-            doc_total_weight = 0
-            scored_count = 0
-            is_sum = (
-                compliance_assessment.score_calculation_method
-                == compliance_assessment.CalculationMethod.SUM
-            )
             for ra in assessable_list:
                 results[ra.result] += 1
-                # Anchored N/A counts as the target on both layers, like the
-                # global score.
-                anchored = (
-                    compliance_assessment.anchor_na_to_target
-                    and ra.result == "not_applicable"
-                )
-                if anchored or (ra.is_scored and ra.result != "not_applicable"):
-                    weight = ra.requirement.weight if ra.requirement.weight else 1
-                    if anchored:
-                        req = ra.requirement
-                        score = doc = compliance_assessment.na_anchor_score(
-                            req.min_score
-                            if req.min_score is not None
-                            else compliance_assessment.min_score,
-                            req.max_score
-                            if req.max_score is not None
-                            else compliance_assessment.max_score,
-                        )
-                    else:
-                        score = ra.score or 0
-                        doc = ra.documentation_score or 0
-                    weighted_score += score * weight
-                    total_weight += weight
-                    scored_count += 1
-                    if compliance_assessment.show_documentation_score:
-                        doc_weighted_score += doc * weight
-                        doc_total_weight += weight
-
-            if is_sum:
-                section_score = weighted_score if total_weight > 0 else None
-                section_doc_score = doc_weighted_score if doc_total_weight > 0 else None
-            else:
-                section_score = (
-                    weighted_score / total_weight if total_weight > 0 else None
-                )
-                section_doc_score = (
-                    doc_weighted_score / doc_total_weight
-                    if doc_total_weight > 0
-                    else None
-                )
+            scores = compliance_assessment.get_scores_for(assessable_list)
 
             node_name = (
                 get_referential_translation(node, "name")
@@ -15487,36 +15439,13 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 or node.ref_id
                 or str(node.id)
             )
-            # Compute maturity as average of enabled layers
-            enabled_scores = [
-                s for s in [section_score, section_doc_score] if s is not None
-            ]
-            section_maturity = (
-                round_score(sum(enabled_scores) / len(enabled_scores))
-                if enabled_scores
-                else None
-            )
-            # Round the layers only after the maturity used their full value.
-            section_score = (
-                round_score(section_score) if section_score is not None else None
-            )
-            section_doc_score = (
-                round_score(section_doc_score)
-                if section_doc_score is not None
-                else None
-            )
-
             sections.append(
                 {
                     "ref_id": node.ref_id,
                     "name": node_name,
                     "total_assessable": len(assessable_list),
                     "results": dict(results),
-                    "implementation_score": section_score,
-                    "documentation_score": section_doc_score,
-                    "maturity_score": section_maturity,
-                    "scored_count": scored_count,
-                    "total_weight": total_weight,
+                    **scores,
                 }
             )
 
@@ -15854,7 +15783,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         ras = RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment,
             requirement__assessable=True,
-        ).select_related("requirement")
+        ).select_related("requirement", "compliance_assessment")
 
         # Auditee filtering
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
@@ -15904,75 +15833,12 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
             results = defaultdict(int)
             assessed = 0
-            weighted_score = 0
-            total_weight = 0
-            doc_weighted_score = 0
-            doc_total_weight = 0
-            scored_count = 0
-            is_sum = (
-                compliance_assessment.score_calculation_method
-                == compliance_assessment.CalculationMethod.SUM
-            )
-
             for ra in matching_ras:
                 results[ra.result] += 1
                 if ra.result != "not_assessed":
                     assessed += 1
-                # Anchored N/A counts as the target on both layers, like the
-                # global score.
-                anchored = (
-                    compliance_assessment.anchor_na_to_target
-                    and ra.result == "not_applicable"
-                )
-                if anchored or (ra.is_scored and ra.result != "not_applicable"):
-                    weight = ra.requirement.weight if ra.requirement.weight else 1
-                    if anchored:
-                        req = ra.requirement
-                        score = doc = compliance_assessment.na_anchor_score(
-                            req.min_score
-                            if req.min_score is not None
-                            else compliance_assessment.min_score,
-                            req.max_score
-                            if req.max_score is not None
-                            else compliance_assessment.max_score,
-                        )
-                    else:
-                        score = ra.score or 0
-                        doc = ra.documentation_score or 0
-                    weighted_score += score * weight
-                    total_weight += weight
-                    scored_count += 1
-                    if compliance_assessment.show_documentation_score:
-                        doc_weighted_score += doc * weight
-                        doc_total_weight += weight
-
             total = len(matching_ras)
-            if is_sum:
-                group_score = weighted_score if total_weight > 0 else None
-                group_doc_score = doc_weighted_score if doc_total_weight > 0 else None
-            else:
-                group_score = (
-                    weighted_score / total_weight if total_weight > 0 else None
-                )
-                group_doc_score = (
-                    doc_weighted_score / doc_total_weight
-                    if doc_total_weight > 0
-                    else None
-                )
-
-            enabled_scores = [
-                s for s in [group_score, group_doc_score] if s is not None
-            ]
-            group_maturity = (
-                round_score(sum(enabled_scores) / len(enabled_scores))
-                if enabled_scores
-                else None
-            )
-            # Round the layers only after the maturity used their full value.
-            group_score = round_score(group_score) if group_score is not None else None
-            group_doc_score = (
-                round_score(group_doc_score) if group_doc_score is not None else None
-            )
+            scores = compliance_assessment.get_scores_for(matching_ras)
 
             groups.append(
                 {
@@ -15983,10 +15849,10 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "progress_percent": round(assessed / total * 100)
                     if total > 0
                     else 0,
-                    "implementation_score": group_score,
-                    "documentation_score": group_doc_score,
-                    "maturity_score": group_maturity,
-                    "scored_count": scored_count,
+                    "implementation_score": scores["implementation_score"],
+                    "documentation_score": scores["documentation_score"],
+                    "maturity_score": scores["maturity_score"],
+                    "scored_count": scores["scored_count"],
                 }
             )
 

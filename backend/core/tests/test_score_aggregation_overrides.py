@@ -674,9 +674,9 @@ class TestRadarDataNormalizesMixedScales:
         self, admin_client, mixed_scale_setup
     ):
         """With anchor_na_to_target on, the analytics section scores count an
-        N/A RA as the CA target projected onto its own scale, on both layers:
-        A1 = 4, A2 N/A on 0..1 -> target 2/5 projected = 0.4.
-        Section A = (4 + 0.4) / 2 = 2.2 (excluding A2 would yield 4).
+        N/A RA as the CA target projected onto its own scale, on both layers,
+        like the global score: A1 = 4/5 (0.8), A2 N/A -> target 2/5 (0.4).
+        Section A = 0.6 * 5 = 3.0 (excluding A2 would yield 4).
         """
         ca = mixed_scale_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
@@ -695,6 +695,28 @@ class TestRadarDataNormalizesMixedScales:
         response = admin_client.get(url)
         assert response.status_code == 200
         section_a = next(s for s in response.json()["sections"] if s["ref_id"] == "A")
-        assert section_a["implementation_score"] == 2.2
-        assert section_a["documentation_score"] == 2.2
-        assert section_a["maturity_score"] == 2.2
+        assert section_a["implementation_score"] == 3.0
+        assert section_a["documentation_score"] == 3.0
+        assert section_a["maturity_score"] == 3.0
+
+    def test_section_compliance_matches_tree_aggregation(
+        self, admin_client, mixed_scale_setup
+    ):
+        """Analytics section scores follow the audit's method and scale
+        normalisation, like the tree: A1 = 4/5 (0.8), A2 = 1/1 (1.0), so
+        section A = 0.9 * 5 = 4.5. A raw average would give (4 + 1) / 2 = 2.5.
+        """
+        ca = mixed_scale_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.save()
+        _score(mixed_scale_setup, "a1", 4)
+        _score(mixed_scale_setup, "a2", 1)
+
+        url = reverse(
+            "compliance-assessments-section-compliance", kwargs={"pk": str(ca.pk)}
+        )
+        response = admin_client.get(url)
+        assert response.status_code == 200
+        section_a = next(s for s in response.json()["sections"] if s["ref_id"] == "A")
+        assert section_a["implementation_score"] == 4.5
+        assert section_a["maturity_score"] == 4.5
