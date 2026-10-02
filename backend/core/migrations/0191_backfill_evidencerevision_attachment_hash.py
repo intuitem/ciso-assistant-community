@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("core", "0189_evidencerevision_original_filename"),
+        ("core", "0190_compliance_assessment_score_scale"),
     ]
 
     operations = [
