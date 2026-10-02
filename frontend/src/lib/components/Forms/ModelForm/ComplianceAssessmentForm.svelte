@@ -476,13 +476,17 @@
 		{/if}
 
 		{#if scoringEnabled}
+			<!-- On create the method follows the framework default: restoring a value
+			     cached by an earlier modal would override it once the field mounts. -->
 			<Select
 				{form}
 				options={model.selectOptions['score_calculation_method']}
 				field="score_calculation_method"
 				label={m.scoreCalculationMethod()}
 				helpText={m.scoreCalculationMethodHelpText()}
-				cacheLock={cacheLocks['score_calculation_method']}
+				cacheLock={object?.id || initialData.baseline
+					? cacheLocks['score_calculation_method']
+					: undefined}
 				bind:cachedValue={formDataCache['score_calculation_method']}
 				disableDoubleDash
 			/>
