@@ -29,11 +29,20 @@ const scope: Scope = {
 describe('currentToken', () => {
 	it('takes the identifier path ending at the cursor', () => {
 		const value = '2 * nodes.fetch.cou';
-		expect(currentToken(value, value.length)).toEqual({ start: 4, text: 'nodes.fetch.cou' });
+		expect(currentToken(value, value.length)).toEqual({
+			start: 4,
+			end: value.length,
+			text: 'nodes.fetch.cou'
+		});
 	});
 
 	it('is empty after an operator or a space', () => {
-		expect(currentToken('a + ', 4)).toEqual({ start: 4, text: '' });
+		expect(currentToken('a + ', 4)).toEqual({ start: 4, end: 4, text: '' });
+	});
+
+	it('extends over the rest of the word when the cursor is inside it', () => {
+		// `likel|ihood * 2`: typed prefix is `likel`, the word runs to 10.
+		expect(currentToken('likelihood * 2', 5)).toEqual({ start: 0, end: 10, text: 'likel' });
 	});
 });
 
@@ -84,14 +93,24 @@ describe('applySuggestion', () => {
 	it('replaces the token and puts the cursor inside parentheses', () => {
 		const value = '1 + rou';
 		const [round] = buildSuggestions('rou', scope);
-		expect(applySuggestion(value, value.length, 4, round)).toEqual({
+		expect(applySuggestion(value, 4, value.length, round)).toEqual({
 			value: '1 + round()',
 			cursor: 10
 		});
 	});
 
-	it('keeps text after the cursor', () => {
+	it('keeps text after the token', () => {
 		const [impact] = buildSuggestions('imp', scope);
-		expect(applySuggestion('imp * 2', 3, 0, impact)).toEqual({ value: 'impact * 2', cursor: 6 });
+		expect(applySuggestion('imp * 2', 0, 3, impact)).toEqual({ value: 'impact * 2', cursor: 6 });
+	});
+
+	it('replaces the whole word when accepted from inside it', () => {
+		const value = 'likel * 2';
+		const token = currentToken(value, 3);
+		const [likelihood] = buildSuggestions(token.text, scope);
+		expect(applySuggestion(value, token.start, token.end, likelihood)).toEqual({
+			value: 'likelihood * 2',
+			cursor: 10
+		});
 	});
 });

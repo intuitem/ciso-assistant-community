@@ -858,28 +858,35 @@
 	let computePreviewSeq = 0;
 	let computePreviewNodeId: string | null = null;
 
+	// One request for the whole step: the backend evaluates the rows in a
+	// single pass and answers one result per row (null for a blank row).
 	async function refreshComputePreviews() {
 		if (!versionId) return;
 		const rows = computeRows();
-		const seq = ++computePreviewSeq;
-		const results: Record<number, ComputePreview> = {};
-		await Promise.all(
-			rows.map(async (row, index) => {
-				if (!row.expression.trim()) return;
-				try {
-					const res = await postOps(workflowId, 'preview-expression', {
-						version: versionId,
-						expression: row.expression,
-						rows_above: rows.slice(0, index),
-						reference_run: referenceRunId
-					});
-					if (res.ok) results[index] = await res.json();
-				} catch {
-					// Network hiccup: keep the previous preview rather than flash an error.
-				}
-			})
-		);
-		if (seq === computePreviewSeq) computePreviews = results;
+		const seq = computePreviewSeq;
+		if (!rows.some((row) => row.expression.trim())) {
+			computePreviews = {};
+			return;
+		}
+		try {
+			const res = await postOps(workflowId, 'preview-expression', {
+				version: versionId,
+				rows,
+				reference_run: referenceRunId
+			});
+			if (!res.ok) return;
+			const body = await res.json();
+			// A later edit, node change or run change bumped the sequence while
+			// this was in flight: its rows no longer match ours, drop it.
+			if (seq !== computePreviewSeq) return;
+			const results: Record<number, ComputePreview> = {};
+			(body.results ?? []).forEach((result: ComputePreview | null, index: number) => {
+				if (result) results[index] = result;
+			});
+			computePreviews = results;
+		} catch {
+			// Network hiccup: keep the previous preview rather than flash an error.
+		}
 	}
 
 	$effect(() => {
@@ -891,6 +898,8 @@
 			computePreviews = {};
 		}
 		void signature;
+		// Invalidate anything in flight now, not when the debounce fires.
+		computePreviewSeq += 1;
 		if (computePreviewTimer) clearTimeout(computePreviewTimer);
 		computePreviewTimer = setTimeout(refreshComputePreviews, 300);
 	});

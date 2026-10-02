@@ -30,6 +30,8 @@
 	let { value = $bindable(), scope, placeholder = '', oninput, testid }: Props = $props();
 
 	let input = $state<HTMLTextAreaElement | null>(null);
+	// One CelInput per compute row: ids must not collide across rows.
+	const uid = $props.id();
 
 	// `field-sizing: content` does this in CSS where supported; the manual
 	// resize covers the rest and costs nothing where it is redundant.
@@ -46,6 +48,7 @@
 	let suggestions = $state<Suggestion[]>([]);
 	let selected = $state(0);
 	let tokenStart = $state(0);
+	let tokenEnd = $state(0);
 	let open = $derived(suggestions.length > 0);
 
 	function refresh() {
@@ -56,6 +59,7 @@
 		// or after a space has nothing to finish.
 		const token = currentToken(el.value, cursor);
 		tokenStart = token.start;
+		tokenEnd = token.end;
 		suggestions = buildSuggestions(token.text, scope);
 		selected = 0;
 	}
@@ -67,8 +71,7 @@
 	function accept(suggestion: Suggestion) {
 		const el = input;
 		if (!el) return;
-		const cursor = el.selectionStart ?? el.value.length;
-		const next = applySuggestion(el.value, cursor, tokenStart, suggestion);
+		const next = applySuggestion(el.value, tokenStart, tokenEnd, suggestion);
 		value = next.value;
 		el.value = next.value;
 		el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -134,16 +137,18 @@
 		role="combobox"
 		aria-expanded={open}
 		aria-autocomplete="list"
-		aria-controls={open ? 'cel-suggestions' : undefined}
+		aria-controls={open ? `${uid}-list` : undefined}
+		aria-activedescendant={open ? `${uid}-opt-${selected}` : undefined}
 	></textarea>
 	{#if open}
 		<ul
-			id="cel-suggestions"
+			id="{uid}-list"
 			role="listbox"
 			class="absolute left-0 right-0 top-full mt-0.5 z-50 max-h-48 overflow-auto rounded border border-surface-200-800 bg-surface-50-950 shadow-lg text-[10px] font-mono"
 		>
 			{#each suggestions as suggestion, index (suggestion.kind + suggestion.insert)}
 				<li
+					id="{uid}-opt-{index}"
 					role="option"
 					aria-selected={index === selected}
 					class="flex items-baseline gap-2 px-2 py-1 cursor-pointer {index === selected

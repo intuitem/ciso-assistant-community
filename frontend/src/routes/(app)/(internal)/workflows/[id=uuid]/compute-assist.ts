@@ -69,11 +69,22 @@ const STRING_METHODS: { name: string; insert: string; signature: string }[] = [
 const TOKEN_CHARS = /[A-Za-z0-9_.]/;
 const MAX_SUGGESTIONS = 8;
 
-/** The identifier path ending at the cursor: `nodes.fetch.cou` in `2 * nodes.fetch.cou|`. */
-export function currentToken(value: string, cursor: number): { start: number; text: string } {
-	let start = Math.max(0, Math.min(cursor, value.length));
+/**
+ * The identifier path around the cursor. `text` is what was typed up to the
+ * cursor (what suggestions match); `end` extends over the rest of the word, so
+ * accepting a suggestion replaces the whole word: `likel|ihood` becomes
+ * `likelihood`, not `likelihoodihood`.
+ */
+export function currentToken(
+	value: string,
+	cursor: number
+): { start: number; end: number; text: string } {
+	const at = Math.max(0, Math.min(cursor, value.length));
+	let start = at;
 	while (start > 0 && TOKEN_CHARS.test(value[start - 1])) start -= 1;
-	return { start, text: value.slice(start, cursor) };
+	let end = at;
+	while (end < value.length && TOKEN_CHARS.test(value[end])) end += 1;
+	return { start, end, text: value.slice(start, at) };
 }
 
 export function shortValue(value: unknown, max = 24): string {
@@ -187,14 +198,14 @@ export function buildSuggestions(token: string, scope: Scope): Suggestion[] {
 	return suggestions.slice(0, MAX_SUGGESTIONS);
 }
 
-/** Replace the token that ends at `cursor` with the suggestion. */
+/** Replace the token spanning [tokenStart, tokenEnd) with the suggestion. */
 export function applySuggestion(
 	value: string,
-	cursor: number,
 	tokenStart: number,
+	tokenEnd: number,
 	suggestion: Suggestion
 ): { value: string; cursor: number } {
-	const next = value.slice(0, tokenStart) + suggestion.insert + value.slice(cursor);
+	const next = value.slice(0, tokenStart) + suggestion.insert + value.slice(tokenEnd);
 	return {
 		value: next,
 		cursor: tokenStart + suggestion.insert.length - (suggestion.cursorBack ?? 0)
