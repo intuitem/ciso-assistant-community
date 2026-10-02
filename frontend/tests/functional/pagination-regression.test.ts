@@ -88,15 +88,30 @@ const createdFolderIds: string[] = [];
 const createdUserIds: string[] = [];
 const createdRoleIds: string[] = [];
 
+/** The builtin IAM user groups a domain can provision (the backend's `IAMGroupSet`). */
+const IAM_GROUP_USER_GROUP_NAMES = [
+	'BI-UG-AUD',
+	'BI-UG-APP',
+	'BI-UG-ANA',
+	'BI-UG-DMA',
+	'BI-UG-ADE',
+	'BI-UG-TST'
+] as const;
+
 async function createDomain(
 	page: Page,
 	token: string,
 	name: string,
-	createIamGroups = false
+	withIamGroups = false
 ): Promise<string> {
 	const folder = await apiPost(page, token, '/folders/', {
 		name,
-		create_iam_groups: createIamGroups
+		...(withIamGroups && {
+			iam_groups: IAM_GROUP_USER_GROUP_NAMES.map((user_group_name) => ({
+				user_group_name,
+				is_recursive: true
+			}))
+		})
 	});
 	createdFolderIds.push(folder.id);
 	return folder.id;
@@ -114,7 +129,7 @@ test('lazy picker search finds a user group beyond the first page', async ({ log
 
 	// User groups cannot be created directly (no role carries add_usergroup:
 	// they are only provisioned automatically), so seed them through domains
-	// with create_iam_groups — each such domain provisions 6 builtin groups.
+	// with iam_groups — each such domain provisions 6 builtin groups.
 	// 10 filler domains -> 60 groups that both sort (name ordering, "aa-" <
 	// "zz-") and were created (creation ordering) before the needle domain's
 	// groups: whatever the backend orders by, the needle group is beyond the

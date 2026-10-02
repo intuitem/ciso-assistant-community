@@ -3121,7 +3121,6 @@ class FolderImportExportSerializer(BaseModelSerializer):
             "name",
             "description",
             "content_type",
-            "create_iam_groups",
             "created_at",
             "updated_at",
         ]
@@ -6298,7 +6297,7 @@ class QuickStartSerializer(serializers.Serializer):
             folder_data = {
                 "content_type": Folder.ContentType.DOMAIN,
                 "name": "Starter",
-                "create_iam_groups": True,
+                "iam_groups": IAMGroupSet.create_with_all_roles().to_json(),
             }
             folder_serializer = FolderWriteSerializer(
                 data=folder_data, context=self.context
