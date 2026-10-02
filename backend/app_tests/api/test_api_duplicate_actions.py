@@ -13,7 +13,7 @@ from core.models import (
     RiskMatrix,
     RiskScenario,
 )
-from iam.models import Folder, User, UserGroup
+from iam.models import Folder, IAMGroupSet, User, UserGroup
 
 MATRIX_DEFINITION = {
     "type": "risk_matrix",
@@ -43,9 +43,8 @@ def _make_domain(name):
         name=name,
         content_type=Folder.ContentType.DOMAIN,
         parent_folder=Folder.get_root_folder(),
-        create_iam_groups=True,
     )
-    Folder.create_default_ug_and_ra(folder)
+    IAMGroupSet.create_with_all_roles().apply(folder)
     return folder
 
 
@@ -54,7 +53,7 @@ def _client_for(email, memberships):
     user = User.objects.create_user(email)
     for group_name, folder in memberships:
         group = UserGroup.objects.get(name=group_name, folder=folder)
-        group.user_set.add(user)
+        group.users.add(user)
     user.folder = memberships[0][1]
     user.save()
     client = APIClient()

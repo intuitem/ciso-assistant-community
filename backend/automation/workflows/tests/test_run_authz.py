@@ -16,7 +16,7 @@ from django.utils import timezone
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from core.models import AppliedControl
-from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+from iam.models import Folder, IAMGroupSet, Role, RoleAssignment, User, UserGroup
 from automation.workflows.engine import run_identity, start_instance
 from automation.workflows.graph import save_graph
 from automation.workflows.models import (
@@ -770,9 +770,8 @@ class TestPrivilegeBranches:
             name=f"MembOk-{uuid.uuid4()}",
             parent_folder=Folder.get_root_folder(),
             content_type=Folder.ContentType.DOMAIN,
-            create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(domain)
+        IAMGroupSet.create_with_all_roles().apply(domain)
         member = User.objects.create_user(email="member@authz.test")
         runner = User.objects.create_user(email="mgr@authz.test")
         grant(runner, domain, ["change_usergroup"])  # NOT change_user

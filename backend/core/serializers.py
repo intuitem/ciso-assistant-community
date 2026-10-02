@@ -8,7 +8,6 @@ from django.db import models, transaction
 from django.db.models import F, Q
 from django.utils import timezone
 from django.contrib.auth.models import Permission
-from rest_framework import serializers
 from rest_framework.exceptions import APIException, PermissionDenied
 from django.core.exceptions import FieldDoesNotExist
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -32,6 +31,7 @@ from global_settings.utils import ff_is_enabled
 from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
 from iam.models import *
 from integrations.models import IntegrationConfiguration, SyncMapping
+from rest_framework import serializers
 
 logger = structlog.get_logger(__name__)
 

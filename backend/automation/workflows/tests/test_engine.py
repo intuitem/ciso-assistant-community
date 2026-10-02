@@ -4,7 +4,7 @@ import pytest
 from rest_framework.test import APIClient, APIRequestFactory, force_authenticate
 
 from core.models import AppliedControl
-from iam.models import Folder, User, UserGroup
+from iam.models import Folder, IAMGroupSet, User, UserGroup
 from automation.workflows.engine import broadcast_event, start_instance
 from automation.workflows.graph import save_graph
 from automation.workflows.models import (
@@ -1186,9 +1186,8 @@ class TestManualRunAuthz:
             name="Run domain",
             parent_folder=Folder.get_root_folder(),
             content_type=Folder.ContentType.DOMAIN,
-            create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(domain)
+        IAMGroupSet.create_with_all_roles().apply(domain)
         workflow = self._publish_in(domain)
         analyst = User.objects.create_user(email="ana@example.com")
         analyst.user_groups.add(UserGroup.objects.get(folder=domain, name="BI-UG-ANA"))

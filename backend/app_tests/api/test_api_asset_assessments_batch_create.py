@@ -3,7 +3,15 @@ from knox.models import AuthToken
 from rest_framework.test import APIClient
 from core.models import Asset, Perimeter, RiskMatrix, StoredLibrary
 from core.views import BATCH_SIZE_LIMIT
-from iam.models import Folder, Permission, Role, RoleAssignment, User, UserGroup
+from iam.models import (
+    Folder,
+    IAMGroupSet,
+    Permission,
+    Role,
+    RoleAssignment,
+    User,
+    UserGroup,
+)
 from resilience.models import (
     AssetAssessment,
     BusinessImpactAnalysis,
@@ -19,7 +27,7 @@ def client_for(email, group_name, folder):
     group = UserGroup.objects.get(name=group_name, folder=folder)
     user.folder = group.folder
     user.save()
-    group.user_set.add(user)
+    group.users.add(user)
     client = APIClient()
     token = AuthToken.objects.create(user=user)[1]
     client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
@@ -53,9 +61,8 @@ class TestAssetAssessmentsBatchCreate:
             name="test-domain",
             content_type=Folder.ContentType.DOMAIN,
             parent_folder=Folder.get_root_folder(),
-            create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(folder)
+        IAMGroupSet.create_with_all_roles().apply(folder)
         perimeter = Perimeter.objects.create(name="test", folder=folder)
         StoredLibrary.objects.get(
             urn="urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm"
@@ -227,9 +234,8 @@ class TestAssetAssessmentsBatchRemove:
             name="test-domain",
             content_type=Folder.ContentType.DOMAIN,
             parent_folder=Folder.get_root_folder(),
-            create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(folder)
+        IAMGroupSet.create_with_all_roles().apply(folder)
         perimeter = Perimeter.objects.create(name="test", folder=folder)
         StoredLibrary.objects.get(
             urn="urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm"

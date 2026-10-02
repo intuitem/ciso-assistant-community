@@ -32,7 +32,7 @@ def authenticated_client(app_config):
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()
-    admin_group.user_set.add(admin)
+    admin_group.users.add(admin)
     client = APIClient()
     _auth_token = AuthToken.objects.create(user=admin)
     auth_token = _auth_token[1]

@@ -335,6 +335,16 @@ class IAMGroupSet:
             ]
         )
 
+    @staticmethod
+    def create_with_all_roles() -> IAMGroupSet:
+        """Create and return an `IAMGroupSet` with all allowed roles and their role assignments set to (`is_recursive=True`)."""
+        return IAMGroupSet.create(
+            [
+                {"user_group_name": name, "is_recursive": True}
+                for name in sorted(IAMGroupSet.USER_GROUP_NAMES)
+            ]
+        )
+
 
 class Folder(NameDescriptionMixin):
     """A folder is a container for other folders or any object

@@ -22,7 +22,7 @@ from core.models import (
     StoredLibrary,
 )
 from core.startup import startup
-from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+from iam.models import Folder, IAMGroupSet, Role, RoleAssignment, User, UserGroup
 
 FIXTURE = Path(__file__).parent / "fixtures" / "test-splash-assessable.yaml"
 
@@ -44,9 +44,8 @@ def audit_with_assignment(app_config):
         name="DashboardScopingDomain",
         content_type=Folder.ContentType.DOMAIN,
         parent_folder=Folder.get_root_folder(),
-        create_iam_groups=True,
     )
-    Folder.create_default_ug_and_ra(domain)
+    IAMGroupSet.create_with_all_roles().apply(domain)
     perimeter = Perimeter.objects.create(name="P1", folder=domain)
     ca = ComplianceAssessment.objects.create(
         name="Audit", framework=framework, perimeter=perimeter, folder=domain
@@ -85,7 +84,7 @@ def test_dashboard_hides_assignments_the_user_cannot_open(audit_with_assignment)
         )
     )
     ug = UserGroup.objects.create(name="PartialUG", folder=domain)
-    ug.user_set.add(respondent)
+    ug.users.add(respondent)
     ra = RoleAssignment.objects.create(
         user_group=ug, role=role, folder=Folder.get_root_folder(), is_recursive=True
     )
@@ -109,7 +108,7 @@ def test_dashboard_lists_assignments_for_builtin_auditee(audit_with_assignment):
     domain, ca, respondent, assignment = audit_with_assignment
 
     auditee_group = UserGroup.objects.get(name="BI-UG-ADE", folder=domain)
-    auditee_group.user_set.add(respondent)
+    auditee_group.users.add(respondent)
 
     client = APIClient()
     client.force_authenticate(user=respondent)
