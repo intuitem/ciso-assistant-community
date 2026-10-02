@@ -880,7 +880,7 @@
 								<span
 									class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
 								>
-									{m.score()}:
+									{m.implementationScore()}:
 									<span class="font-semibold">{fmtScore(auditScores?.implementation_score)}</span>
 									{#if auditScores?.max_score}<span class="text-surface-400-600"
 											>/{auditScores.max_score}</span
