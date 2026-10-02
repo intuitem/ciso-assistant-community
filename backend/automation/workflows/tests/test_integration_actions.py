@@ -340,7 +340,7 @@ class TestIamActions:
         provision_folder = {
             "type": "provision_folder",
             "name": "HR — {{payload.department}}",
-            "create_default_groups": True,
+            "iam_groups": IAMGroupSet.create_with_all_roles().to_json(),
         }
         provision_user = {
             "type": "provision_user",
