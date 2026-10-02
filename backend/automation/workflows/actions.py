@@ -3249,7 +3249,9 @@ class ProvisionFolderAction(BaseAction):
             parent = instance.folder
 
         iam_groups = config.get("iam_groups")
-        if not isinstance(iam_groups, list) or not all(isinstance(iam_group, dict) for iam_group in iam_groups):
+        if not isinstance(iam_groups, list) or not all(
+            isinstance(iam_group, dict) for iam_group in iam_groups
+        ):
             raise ActionError("iam_groups: MUST be a list of dicts")
 
         folder = Folder.objects.filter(

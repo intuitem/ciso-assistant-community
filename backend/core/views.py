@@ -132,7 +132,15 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup, IAMGroupSet
+from iam.models import (
+    Folder,
+    IdPGroup,
+    Permission,
+    RoleAssignment,
+    User,
+    UserGroup,
+    IAMGroupSet,
+)
 from core.domain_quality_checks import (
     BLOCKS as DOMAIN_QUALITY_BLOCKS,
     domain_quality_checks,
@@ -8865,12 +8873,21 @@ class UserGroupViewSet(BaseModelViewSet):
         is_unused_query = ~Exists(User.objects.filter(user_groups=OuterRef("pk")))
         # There's no RBAC for the `UserGroup` model (no one have the `"change_usergroup"` `Permission` (even admins)).
         # So we only allow users to delete `UserGroup` objects in folders they have the right to modify (`"change_folder"`).
-        changeable_folder_ids = RoleAssignment.get_changeable_object_ids(request.user, Folder)
+        changeable_folder_ids = RoleAssignment.get_changeable_object_ids(
+            request.user, Folder
+        )
 
         root_folder_id = Folder.get_root_folder_id()
-        assert root_folder_id is not None, "This endpoint can't work without a root folder."
+        assert root_folder_id is not None, (
+            "This endpoint can't work without a root folder."
+        )
 
-        unused_iam_user_groups = IAMGroupSet.get_iam_user_groups(None).filter(folder_id__in=changeable_folder_ids).exclude(folder_id=root_folder_id).filter(is_unused_query)
+        unused_iam_user_groups = (
+            IAMGroupSet.get_iam_user_groups(None)
+            .filter(folder_id__in=changeable_folder_ids)
+            .exclude(folder_id=root_folder_id)
+            .filter(is_unused_query)
+        )
 
         deleted_count, _ = unused_iam_user_groups.delete()
         return Response({"count": deleted_count})
@@ -8930,7 +8947,6 @@ class UserGroupViewSet(BaseModelViewSet):
         ):
             return False
         return True
-
 
     @action(detail=True, methods=["post"], url_path="remove-members")
     def remove_members(self, request, pk=None):

@@ -2810,7 +2810,9 @@ class UserGroupReadSerializer(BaseModelSerializer):
     user_count = serializers.SerializerMethodField()
 
     def get_is_recursive(self, user_group: UserGroup):
-        return RoleAssignment.objects.filter(user_group=user_group, is_recursive=True).exists()
+        return RoleAssignment.objects.filter(
+            user_group=user_group, is_recursive=True
+        ).exists()
 
     def get_user_count(self, user_group: UserGroup) -> int:
         return user_group.users.count()
@@ -2893,6 +2895,7 @@ class RoleAssignmentWriteSerializer(BaseModelSerializer):
         model = RoleAssignment
         fields = "__all__"
 
+
 class FolderWriteSerializer(BaseModelSerializer):
     iam_groups = serializers.ListField(
         child=serializers.DictField(),
@@ -2919,7 +2922,9 @@ class FolderWriteSerializer(BaseModelSerializer):
         data["iam_groups"] = IAMGroupSet.from_folder(instance).to_json()
         return data
 
-    def validate_iam_groups(self, iam_groups: Optional[list[dict]]) -> Optional[IAMGroupSet]:
+    def validate_iam_groups(
+        self, iam_groups: Optional[list[dict]]
+    ) -> Optional[IAMGroupSet]:
         if iam_groups is None:
             return
 
@@ -2960,9 +2965,12 @@ class FolderWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         iam_group_set: Optional[IAMGroupSet] = validated_data.get("iam_groups")
 
-        if instance.content_type == Folder.ContentType.ROOT and iam_group_set is not None:
+        if (
+            instance.content_type == Folder.ContentType.ROOT
+            and iam_group_set is not None
+        ):
             raise serializers.ValidationError(
-                #TODO: Maybe this error message isn't perfectly adapted anymore (check it).
+                # TODO: Maybe this error message isn't perfectly adapted anymore (check it).
                 {"iam_groups": "globalFolderMustKeepIamGroupsEnabled"}
             )
 

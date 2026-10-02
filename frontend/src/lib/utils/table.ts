@@ -1660,13 +1660,7 @@ export const CWE_FILTER: ListViewFilterConfig = {
 export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'contentType', 'parentDomain', 'labels'],
-		body: [
-			'name',
-			'description',
-			'content_type',
-			'parent_folder',
-			'filtering_labels'
-		],
+		body: ['name', 'description', 'content_type', 'parent_folder', 'filtering_labels'],
 		filters: {
 			content_type: CONTENT_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER

@@ -107,6 +107,7 @@ def _get_root_folder() -> Optional[Folder]:
 
 _ENCLAVE_FOLDER_CONTENT_TYPE_STRING: Final[str] = "EN"
 
+
 @dataclass(frozen=True)
 class IAMGroup:
     """
@@ -114,20 +115,25 @@ class IAMGroup:
 
     (Which is a triplet of `UserGroup`/`Role`/`RoleAssignment` (assigning this `UserGroup` to this `Role`))
     """
+
     user_group_name: str
     """Codename(`UserGroup.name`) of the user group."""
     is_recursive: bool
     """Whether the underlying `RoleAssignment` will be recursive or not (see `RoleAssignment.is_recursive`)."""
 
-    BUILTIN_PAIRS: ClassVar[Mapping[UserGroupCodename, RoleCodename]] = MappingProxyType({
-        #TODO: Copy the `builtin_paris` codenames.
-        UserGroupCodename.READER: RoleCodename.READER,
-        UserGroupCodename.APPROVER: RoleCodename.APPROVER,
-        UserGroupCodename.ANALYST: RoleCodename.ANALYST,
-        UserGroupCodename.DOMAIN_MANAGER: RoleCodename.DOMAIN_MANAGER,
-        UserGroupCodename.AUDITEE: RoleCodename.AUDITEE,
-        UserGroupCodename.TECHNICAL_TESTER: RoleCodename.TECHNICAL_TESTER,
-    })
+    BUILTIN_PAIRS: ClassVar[Mapping[UserGroupCodename, RoleCodename]] = (
+        MappingProxyType(
+            {
+                # TODO: Copy the `builtin_paris` codenames.
+                UserGroupCodename.READER: RoleCodename.READER,
+                UserGroupCodename.APPROVER: RoleCodename.APPROVER,
+                UserGroupCodename.ANALYST: RoleCodename.ANALYST,
+                UserGroupCodename.DOMAIN_MANAGER: RoleCodename.DOMAIN_MANAGER,
+                UserGroupCodename.AUDITEE: RoleCodename.AUDITEE,
+                UserGroupCodename.TECHNICAL_TESTER: RoleCodename.TECHNICAL_TESTER,
+            }
+        )
+    )
     """Allowed IAM groups."""
 
     def get_role_name(self) -> str:
@@ -140,17 +146,23 @@ class IAMGroup:
         try:
             user_group_name = UserGroupCodename(self.user_group_name)
         except ValueError as e:
-            raise ValidationError(f"The {self.user_group_name!r} name is an invalid UserGroupCodename.") from e
+            raise ValidationError(
+                f"The {self.user_group_name!r} name is an invalid UserGroupCodename."
+            ) from e
         else:
             is_allowed_name = user_group_name in self.BUILTIN_PAIRS
             if not is_allowed_name:
-                raise ValidationError(f"The {user_group_name!r} IAMGroup user_group name isn't allowed.")
+                raise ValidationError(
+                    f"The {user_group_name!r} IAMGroup user_group name isn't allowed."
+                )
 
     def to_json(self) -> dict:
         return {
             "user_group_name": self.user_group_name,
             "is_recursive": self.is_recursive,
-            "translated_role_name": get_translated_builtin_role_name(self.get_role_name()),
+            "translated_role_name": get_translated_builtin_role_name(
+                self.get_role_name()
+            ),
         }
 
     @staticmethod
@@ -169,19 +181,21 @@ class IAMGroup:
 
         return IAMGroup(user_group_name, is_recursive)
 
+
 @dataclass(frozen=True)
 class IAMGroupSet:
     iam_groups: list[IAMGroup]
 
-    USER_GROUP_NAMES: ClassVar[frozenset[str]] = frozenset({
-        str(user_group_name)
-        for user_group_name in IAMGroup.BUILTIN_PAIRS.keys()
-    })
+    USER_GROUP_NAMES: ClassVar[frozenset[str]] = frozenset(
+        {str(user_group_name) for user_group_name in IAMGroup.BUILTIN_PAIRS.keys()}
+    )
 
     @staticmethod
     def from_folder(folder: Folder) -> IAMGroupSet:
         user_groups = IAMGroupSet.get_iam_user_groups(folder)
-        role_assignments = RoleAssignment.objects.filter(user_group__in=user_groups, builtin=True)
+        role_assignments = RoleAssignment.objects.filter(
+            user_group__in=user_groups, builtin=True
+        )
         user_group_id_to_role_assignment: dict[uuid.UUID, RoleAssignment] = {
             role_assignment.user_group_id: role_assignment
             for role_assignment in role_assignments
@@ -190,7 +204,9 @@ class IAMGroupSet:
         iam_groups = [
             IAMGroup(
                 user_group.name,
-                ra.is_recursive if (ra := user_group_id_to_role_assignment.get(user_group.id)) else False,
+                ra.is_recursive
+                if (ra := user_group_id_to_role_assignment.get(user_group.id))
+                else False,
             )
             for user_group in user_groups
         ]
@@ -205,7 +221,7 @@ class IAMGroupSet:
             builtin=True,
             name__in=IAMGroupSet.USER_GROUP_NAMES,
             # IdP-managed user groups aren't mutable by this mechanism.
-            #TODO: (I guess i should exclude the IdP-managed user-groups from the frontend view)
+            # TODO: (I guess i should exclude the IdP-managed user-groups from the frontend view)
             idp_groups__isnull=True,
         )
         if folder is not None:
@@ -222,11 +238,17 @@ class IAMGroupSet:
         """
 
         if folder.content_type != Folder.ContentType.DOMAIN:
-            raise ValidationError("Can't set IAM Groups for a non-DOMAIN folder. (Is this folder a ROOT/ENCLAVE folder ?)")
+            raise ValidationError(
+                "Can't set IAM Groups for a non-DOMAIN folder. (Is this folder a ROOT/ENCLAVE folder ?)"
+            )
 
-        new_user_group_name_set = set(iam_group.user_group_name for iam_group in self.iam_groups)
+        new_user_group_name_set = set(
+            iam_group.user_group_name for iam_group in self.iam_groups
+        )
         current_user_groups = self.get_iam_user_groups(folder)
-        current_user_groups_name_set = {user_group.name for user_group in current_user_groups}
+        current_user_groups_name_set = {
+            user_group.name for user_group in current_user_groups
+        }
         user_group_name_to_role_name = {
             iam_group.user_group_name: iam_group.get_role_name()
             for iam_group in self.iam_groups
@@ -255,30 +277,43 @@ class IAMGroupSet:
             for user_group_name in user_group_to_create_names
         ]
 
-        #TODO: Check if it doesn't bypass an important `UserGroup.save` or whatever method/signal (which is important).
+        # TODO: Check if it doesn't bypass an important `UserGroup.save` or whatever method/signal (which is important).
         new_user_groups = UserGroup.objects.bulk_create(user_groups_to_create)
 
         role_assignment_to_create = [
             # We set `is_recursive` to `False` as it will be updated(fixed) by the `RoleAssignment.objects.bulk_update` right after.
             RoleAssignment(
-                role=Role.objects.get(name=user_group_name_to_role_name[new_user_group.name]),
+                role=Role.objects.get(
+                    name=user_group_name_to_role_name[new_user_group.name]
+                ),
                 user_group=new_user_group,
                 builtin=True,
                 is_recursive=False,
             )
             for new_user_group in new_user_groups
         ]
-        new_role_assignments = RoleAssignment.objects.bulk_create(role_assignment_to_create)
+        new_role_assignments = RoleAssignment.objects.bulk_create(
+            role_assignment_to_create
+        )
 
         # Set the `perimeter_folders` of the newly created role assignments to `folder`.
         RoleAssignmentToFolder = RoleAssignment.perimeter_folders.through
-        RoleAssignmentToFolder.objects.bulk_create([
-            RoleAssignmentToFolder(roleassignment_id=new_role_assignment.id, folder_id=folder.id)
-            for new_role_assignment in new_role_assignments
-        ], batch_size=1000)
+        RoleAssignmentToFolder.objects.bulk_create(
+            [
+                RoleAssignmentToFolder(
+                    roleassignment_id=new_role_assignment.id, folder_id=folder.id
+                )
+                for new_role_assignment in new_role_assignments
+            ],
+            batch_size=1000,
+        )
 
         user_groups = self.get_iam_user_groups(folder)
-        role_assignments = RoleAssignment.objects.filter(user_group__in=user_groups).select_related("user_group").select_for_update(of=("self",))
+        role_assignments = (
+            RoleAssignment.objects.filter(user_group__in=user_groups)
+            .select_related("user_group")
+            .select_for_update(of=("self",))
+        )
 
         user_group_name_to_is_recursive = {
             iam_group.user_group_name: iam_group.is_recursive
@@ -290,8 +325,10 @@ class IAMGroupSet:
             is_recursive = user_group_name_to_is_recursive[user_group_name]
             role_assignment.is_recursive = is_recursive
 
-        #TODO: Check if it doesn't bypass an important `RoleAssignment.save` or whatever method/signal (which is important).
-        RoleAssignment.objects.bulk_update(role_assignments, ["is_recursive"], batch_size=1000)
+        # TODO: Check if it doesn't bypass an important `RoleAssignment.save` or whatever method/signal (which is important).
+        RoleAssignment.objects.bulk_update(
+            role_assignments, ["is_recursive"], batch_size=1000
+        )
 
     @staticmethod
     def create(iam_groups: list[dict]) -> IAMGroupSet:
@@ -300,6 +337,7 @@ class IAMGroupSet:
                 IAMGroup.create(iam_group_data) for iam_group_data in iam_groups
             ]
         )
+
 
 class Folder(NameDescriptionMixin):
     """A folder is a container for other folders or any object

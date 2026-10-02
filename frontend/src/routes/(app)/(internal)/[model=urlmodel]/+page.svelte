@@ -656,8 +656,8 @@
 									'delete-unused-user-groups',
 									m.deleteUnusedUserGroups(),
 									m.deleteUnusedUserGroupsConfirm()
-								)}
-						><i class="fa-solid fa-trash-can"></i></button>
+								)}><i class="fa-solid fa-trash-can"></i></button
+						>
 					{/if}
 				{/snippet}
 				{#snippet badge(key, row)}

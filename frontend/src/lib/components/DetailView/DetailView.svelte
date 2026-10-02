@@ -644,8 +644,11 @@
 													{m.objectsNotVisible({ count: hiddenCountForValue })}
 												</p>
 											{:else if key === 'iam_groups'}
-												{#each value as {translated_role_name, is_recursive}}
-													<div>{translated_role_name} {#if is_recursive}({m.isRecursive()}){/if}</div>
+												{#each value as { translated_role_name, is_recursive }}
+													<div>
+														{translated_role_name}
+														{#if is_recursive}({m.isRecursive()}){/if}
+													</div>
 												{/each}
 											{:else if key === 'asset_class'}
 												<!-- Special case for asset_class - Always translate the value -->

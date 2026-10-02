@@ -109,8 +109,8 @@ const NameDescriptionMixin = {
 
 const iamGroupSchema = z.object({
 	user_group_name: z.string(),
-	is_recursive: z.boolean().default(false),
-})
+	is_recursive: z.boolean().default(false)
+});
 
 export const FolderSchema = z.object({
 	...NameDescriptionMixin,

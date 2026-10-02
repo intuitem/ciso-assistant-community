@@ -104,6 +104,6 @@
 		allowUserOptions="append"
 	/>
 	{#if displayIAMGroups}
-		<FolderIAMGroupsSelect {form}/>
+		<FolderIAMGroupsSelect {form} />
 	{/if}
 {/if}

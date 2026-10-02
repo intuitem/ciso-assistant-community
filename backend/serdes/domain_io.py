@@ -28,7 +28,10 @@ from django.forms import ValidationError
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.text import slugify
-from rest_framework.exceptions import PermissionDenied, ValidationError as DRFValidationError
+from rest_framework.exceptions import (
+    PermissionDenied,
+    ValidationError as DRFValidationError,
+)
 
 from core.models import (
     Answer,
@@ -428,8 +431,12 @@ def import_objects(
     try:
         iam_group_set = None
         if raw_iam_groups is not None:
-            if not isinstance(raw_iam_groups, list) or not all(isinstance(iam_group, dict) for iam_group in raw_iam_groups):
-                raise DRFValidationError("The 'iam_groups' value MUST be a list of dicts (or None).")
+            if not isinstance(raw_iam_groups, list) or not all(
+                isinstance(iam_group, dict) for iam_group in raw_iam_groups
+            ):
+                raise DRFValidationError(
+                    "The 'iam_groups' value MUST be a list of dicts (or None)."
+                )
 
             iam_group_set = IAMGroupSet.create(raw_iam_groups)
 
