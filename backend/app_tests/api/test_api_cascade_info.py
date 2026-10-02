@@ -133,3 +133,104 @@ def test_role_assignment_emails_not_leaked_to_view_only_role(app_ready, target_f
     resp = client.get(_url(target_folder))
     assert resp.status_code == 403
     assert "victim@cascade.test" not in resp.content.decode()
+
+
+# ---------------------------------------------------------------------------
+# Entity assessments: the destroy override deletes the linked audit when it
+# lives in an enclave (third party workspace), even though the FK is SET_NULL. The preview must say so.
+# ---------------------------------------------------------------------------
+
+
+def _entity_assessment_with_audit(folder, enclave: bool):
+    import uuid
+
+    from core.models import ComplianceAssessment, Framework, Perimeter
+    from tprm.models import Entity, EntityAssessment
+
+    perimeter = Perimeter.objects.create(name="Perimeter", folder=folder)
+    entity = Entity.objects.create(name="Vendor", folder=folder)
+    framework = Framework.objects.create(
+        folder=Folder.get_root_folder(),
+        name="fw",
+        urn=f"urn:test:framework:{uuid.uuid4().hex[:12]}",
+        ref_id="fw",
+    )
+    audit_folder = folder
+    if enclave:
+        audit_folder = Folder.objects.create(
+            name="Vendor",
+            parent_folder=folder,
+            content_type=Folder.ContentType.ENCLAVE,
+        )
+    audit = ComplianceAssessment.objects.create(
+        name="VENDOR-AUDIT",
+        folder=audit_folder,
+        framework=framework,
+        perimeter=None if enclave else perimeter,
+    )
+    return EntityAssessment.objects.create(
+        name="EA",
+        folder=folder,
+        perimeter=perimeter,
+        entity=entity,
+        compliance_assessment=audit,
+    )
+
+
+def _bucket_names(bucket):
+    return {o["name"] for o in bucket["related_objects"]}
+
+
+def test_entity_assessment_preview_reports_enclave_audit_as_deleted(
+    admin_client, target_folder
+):
+    ea = _entity_assessment_with_audit(target_folder, enclave=True)
+    res = admin_client.get(f"/api/entity-assessments/{ea.id}/cascade-info/")
+    assert res.status_code == 200
+    assert "VENDOR-AUDIT" in _bucket_names(res.json()["deleted"])
+    assert "VENDOR-AUDIT" not in _bucket_names(res.json()["affected"])
+
+
+def test_entity_assessment_preview_in_shared_enclave_only_deletes_own_audit(
+    admin_client, target_folder
+):
+    from core.models import ComplianceAssessment
+
+    ea = _entity_assessment_with_audit(target_folder, enclave=True)
+    ComplianceAssessment.objects.create(
+        name="SIBLING-AUDIT",
+        folder=ea.compliance_assessment.folder,
+        framework=ea.compliance_assessment.framework,
+    )
+    res = admin_client.get(f"/api/entity-assessments/{ea.id}/cascade-info/")
+    assert res.status_code == 200
+    deleted = _bucket_names(res.json()["deleted"])
+    assert "VENDOR-AUDIT" in deleted
+    assert "SIBLING-AUDIT" not in deleted
+
+
+def test_entity_assessment_preview_keeps_non_enclave_audit_as_affected(
+    admin_client, target_folder
+):
+    ea = _entity_assessment_with_audit(target_folder, enclave=False)
+    res = admin_client.get(f"/api/entity-assessments/{ea.id}/cascade-info/")
+    assert res.status_code == 200
+    assert "VENDOR-AUDIT" in _bucket_names(res.json()["affected"])
+    assert "VENDOR-AUDIT" not in _bucket_names(res.json()["deleted"])
+
+
+def test_entity_assessment_batch_delete_removes_enclave_audit(
+    admin_client, target_folder
+):
+    from core.models import ComplianceAssessment
+
+    ea = _entity_assessment_with_audit(target_folder, enclave=True)
+    audit_id = ea.compliance_assessment_id
+    res = admin_client.post(
+        "/api/entity-assessments/batch-action/",
+        {"action": "delete", "ids": [str(ea.id)]},
+        format="json",
+    )
+    assert res.status_code == 200, res.content
+    assert res.json()["failed"] == []
+    assert not ComplianceAssessment.objects.filter(pk=audit_id).exists()

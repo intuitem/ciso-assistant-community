@@ -224,8 +224,6 @@ BASELINE_READER_PERMISSIONS_LIST = [
     "view_requirementmappingset",
     # notifications
     "view_notification",
-    "change_notification",
-    "delete_notification",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
