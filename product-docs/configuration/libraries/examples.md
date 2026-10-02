@@ -10,9 +10,7 @@ Both workbooks include an `info` sheet that explains the example. It is for refe
 
 ## Example framework
 
-{% file src="https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/example_framework.xlsx" %}
-Download `example_framework.xlsx`
-{% endfile %}
+[Download `example_framework.xlsx`](https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/example_framework.xlsx)
 
 This broad example shows a framework with a hierarchy of sections and assessable requirements, plus several optional supporting objects. It is useful when you want to see how framework requirements, scoring, answers, implementation groups, threats, and reference controls can be represented in one library.
 
@@ -32,9 +30,7 @@ Here are the object types you will find in this example:
 
 ## Example questionnaire
 
-{% file src="https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/example_questionnaire.xlsx" %}
-Download `example_questionnaire.xlsx`
-{% endfile %}
+[Download `example_questionnaire.xlsx`](https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/example_questionnaire.xlsx)
 
 A questionnaire in CISO Assistant is still a **framework**. This example focuses on requirements assessed through questions and demonstrates more advanced questionnaire behavior, including conditional questions, implementation groups, answer-choice scoring and compliance results, and translations.
 
