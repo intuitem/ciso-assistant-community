@@ -24,6 +24,7 @@ from __future__ import annotations
 import math
 import operator
 import re
+from decimal import ROUND_HALF_UP, Decimal
 
 import celpy
 import celpy.celtypes as celtypes
@@ -174,11 +175,21 @@ def _promoting(op):
     return apply
 
 
+def _int_only_mod(left, right):
+    """`%` is int-only in CEL and celpy has no double overload, so a mixed or
+    double modulo gets a message that says what to do rather than a generic
+    overload failure."""
+    if _kind(left) == "int" and _kind(right) == "int":
+        return operator.mod(left, right)
+    raise ValueError("'%' takes two ints — wrap the operands with int(...)")
+
+
 OPERATORS = {
     "_+_": _promoting(operator.add),
     "_-_": _promoting(operator.sub),
     "_*_": _promoting(operator.mul),
     "_/_": _promoting(operator.truediv),
+    "_%_": lambda left, right: _int_only_mod(left, right),
     # Comparisons wrap celpy's own, which return BoolType and keep CEL's
     # equality semantics for everything that is not a promoted number pair.
     "_<_": _promoting(bool_lt),
@@ -269,16 +280,26 @@ def _number(value, name):
     kind = _kind(value)
     if kind not in ("int", "double"):
         raise ValueError(f"{name}() takes a number")
+    if kind == "double" and not math.isfinite(float(value)):
+        raise ValueError(f"{name}() of a non-finite number")
     return kind
 
 
 def _round(value, digits=None):
+    """Half up, not Python's banker's rounding: a 2.5 score rounds to 3 and
+    0.125 to 0.13, which is what an author reading a risk or maturity score
+    expects."""
     _number(value, "round")
+    places = 0
+    if digits is not None:
+        if _kind(digits) != "int":
+            raise ValueError("round() digits must be an int")
+        places = int(digits)
+    quantum = Decimal(1).scaleb(-places)
+    rounded = Decimal(str(float(value))).quantize(quantum, rounding=ROUND_HALF_UP)
     if digits is None:
-        return celtypes.IntType(round(float(value)))
-    if _kind(digits) != "int":
-        raise ValueError("round() digits must be an int")
-    return celtypes.DoubleType(round(float(value), int(digits)))
+        return celtypes.IntType(int(rounded))
+    return celtypes.DoubleType(float(rounded))
 
 
 def _floor(value):
@@ -329,10 +350,12 @@ def _describe(error):
     # ("return error for overflow" covers every ValueError) and the real
     # message, including the ones FUNCTIONS raise, sits in the third slot.
     inner = None
+    exc_class = args[1] if len(args) > 1 and isinstance(args[1], type) else None
     if len(args) >= 3 and isinstance(args[2], tuple) and args[2]:
         inner = str(args[2][0])
     if isinstance(error, ArithmeticError):
-        inner = str(error)
+        # Raised directly (not wrapped by celpy): a single-arg exception.
+        inner = str(error) or type(error).__name__
     match = _OVERLOAD_RE.search(message)
     if match:
         rule = match.group(1) or match.group(2)
@@ -355,9 +378,9 @@ def _describe(error):
             return "integer overflow"
         if inner == "list index out of range":
             return "list index out of range"
-        if isinstance(args[1], type) and issubclass(args[1], ArithmeticError):
-            return inner
-        if isinstance(args[1], type) and issubclass(args[1], (ValueError, IndexError)):
+        if exc_class is None or issubclass(
+            exc_class, (ArithmeticError, ValueError, IndexError)
+        ):
             return inner
     match = _UNDECLARED_RE.search(message)
     if match:
@@ -396,15 +419,32 @@ def evaluate(expression, context):
         raise ExpressionError(_describe(e))
     if isinstance(result, celpy.CELEvalError):
         raise ExpressionError(_describe(result))
-    return from_cel(result)
+    return _finite(from_cel(result))
+
+
+def _finite(value):
+    """inf and NaN cannot be stored: Django serializes them as Infinity/NaN,
+    which PostgreSQL's jsonb rejects and strict JSON renderers refuse."""
+    if isinstance(value, float) and not math.isfinite(value):
+        raise ExpressionError("the result is not a finite number")
+    if isinstance(value, list):
+        for item in value:
+            _finite(item)
+    elif isinstance(value, dict):
+        for item in value.values():
+            _finite(item)
+    return value
 
 
 def referenced_paths(expression):
-    """Dotted paths the expression reads (`nodes.fetch.count`, `weight`),
-    including their prefixes. Function names are excluded; macro-bound names
-    (the `x` in `items.filter(x, ...)`) are included, an over-approximation
-    that only matters to the AI provenance walk. Returns an empty set for an
-    expression that does not parse: the syntax error is reported elsewhere."""
+    """Dotted paths the expression reads, as maximal chains: `nodes.fetch.count`
+    and `weight`, not their prefixes. `nodes["fetch"].count` yields the same
+    path as `nodes.fetch.count`; an index that is not a string literal becomes
+    a `*` segment (`nodes.*`), which the provenance walk treats as reading
+    every step. Function names are excluded; macro-bound names (the `x` in
+    `items.filter(x, ...)`) are included, an over-approximation that only
+    matters to the AI provenance walk. Returns an empty set for an expression
+    that does not parse: the syntax error is reported elsewhere."""
     try:
         ast = compile_expression(expression)
     except ExpressionError:
@@ -414,7 +454,25 @@ def referenced_paths(expression):
         path = _path_of(subtree)
         if path:
             paths.add(path)
-    return paths
+    # Every chain also produced its prefixes; keep the longest ones only.
+    return {
+        p for p in paths if not any(q != p and q.startswith(p + ".") for q in paths)
+    }
+
+
+def _string_literal(tree):
+    """The text of a string literal expression, or None for anything else."""
+    node = tree
+    while isinstance(node, Tree) and node.data != "literal":
+        if len(node.children) != 1:
+            return None
+        node = node.children[0]
+    if not isinstance(node, Tree) or not node.children:
+        return None
+    token = str(node.children[0])
+    if len(token) >= 2 and token[0] == token[-1] and token[0] in "'\"":
+        return token[1:-1]
+    return None
 
 
 def _path_of(tree):
@@ -436,4 +494,12 @@ def _path_of(tree):
     if tree.data == "member_dot_arg" and tree.children:
         # A method call: the receiver is what's referenced, not the method.
         return _path_of(tree.children[0])
+    if tree.data == "member_index" and len(tree.children) >= 2:
+        base = _path_of(tree.children[0])
+        if not base:
+            return None
+        key = _string_literal(tree.children[1])
+        # A computed index can reach any member: `*` marks it so the
+        # provenance walk treats `nodes[key]` as reading every step.
+        return f"{base}.{key}" if key is not None else f"{base}.*"
     return None

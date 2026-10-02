@@ -64,7 +64,7 @@ total        = total + item
 
 A `number` variable holds an int or a double depending on what wrote it, so unlike canonical CEL the two mix: when one side of an operator is a double, the other is promoted (`3 * 2.5` is `7.5`). An expression with only ints stays int, so dividing two ints drops the remainder as in CEL (`7 / 2` is `3`, `7 / 2.0` is `3.5`). A number and a string do not mix. The step fails with a message that names the row and the problem.
 
-On top of CEL's own `size`, `has`, `int`, `double`, `string`, `timestamp` and the `map`, `filter`, `exists`, `all` macros, these functions are available: `sum` and `avg` over a list of numbers; `min` and `max` over a list of numbers, of strings (ISO dates sort correctly) or of timestamps; `round(x)`, `round(x, digits)`, `floor`, `ceil`, `abs`.
+On top of CEL's own `size`, `has`, `int`, `double`, `string`, `timestamp` and the `map`, `filter`, `exists`, `all` macros, these functions are available: `sum` and `avg` over a list of numbers; `min` and `max` over a list of numbers, of strings (ISO dates sort correctly) or of timestamps; `round(x)`, `round(x, digits)` (half up: `round(2.5)` is `3`), `floor`, `ceil`, `abs`. `%` takes two ints.
 
 In the editor, each row shows its result as you type, `= 16` with the type, evaluated against the reference run shown under **Available data** or, before any run, against the variables' defaults. A row that cannot be evaluated shows the same error the run would log. Typing opens suggestions: variables with their current value, `nodes.<ref>.` paths, `item` and `index` inside a loop, functions, and list or string methods after a dot. Clicking a value under **Available data** inserts its path.
 

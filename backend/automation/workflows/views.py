@@ -5,6 +5,9 @@ import json
 import yaml
 from django.contrib.auth.models import Permission
 import django_filters as df
+import uuid
+
+import structlog
 from django.db import transaction
 from django.db.models import Count, Prefetch
 from django.http import HttpResponse
@@ -61,6 +64,8 @@ from .validation import DISABLED_ACTION_TYPES, DISABLED_NODE_TYPES, validate_gra
 
 LONG_CACHE_TTL = 60
 
+
+logger = structlog.get_logger(__name__)
 
 class _NoAliasSafeLoader(yaml.SafeLoader):
     """SafeLoader that rejects aliases. Alias expansion happens AFTER
@@ -450,37 +455,49 @@ class WorkflowVersionViewSet(WorkflowsFeatureGate, BaseModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="preview-expression")
     def preview_expression(self, request, pk=None):
-        """Evaluate one compute row for the editor, against a reference run of
-        this workflow or the draft's defaults. Evaluation failures come back
-        as 200 {ok: false, error}: they are the answer, not a fault."""
-        from .preview import PreviewRequestError, preview_compute_row
+        """Evaluate the compute rows of one step for the editor, against a
+        reference run of this workflow or the draft's defaults. Evaluation
+        failures come back as 200 results with ok: false: they are the
+        answer, not a fault. Malformed requests get a 400 with a stable code."""
+        from .preview import PreviewRequestError, preview_compute_rows
 
         version = self.get_object()
         data = request.data if isinstance(request.data, dict) else {}
         instance = None
         run_id = data.get("reference_run")
         if run_id:
-            # Same workflow only: the run list the editor picks from is already
-            # RBAC-scoped, and this keeps a version from reading another
-            # workflow's data through a guessed id.
-            instance = WorkflowInstance.objects.filter(
-                id=run_id, workflow=version.workflow
-            ).first()
+            try:
+                run_uuid = uuid.UUID(str(run_id))
+            except ValueError:
+                run_uuid = None
+            # Same workflow, and a run this user may view. Instances keep
+            # their folder when a workflow moves, so seeing the version does
+            # not imply seeing every run; without this, a run id and the
+            # expression `nodes` would return every step output.
+            if run_uuid is not None:
+                instance = WorkflowInstance.objects.filter(
+                    id=run_uuid,
+                    workflow=version.workflow,
+                    id__in=RoleAssignment.get_viewable_object_ids(
+                        request.user, WorkflowInstance
+                    ),
+                ).first()
             if instance is None:
                 return Response(
                     {"error": "referenceRunNotFound"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         try:
-            result = preview_compute_row(
-                version,
-                data.get("expression", ""),
-                rows_above=data.get("rows_above"),
-                instance=instance,
-            )
+            results = preview_compute_rows(version, data.get("rows"), instance=instance)
         except PreviewRequestError as e:
+            logger.warning(
+                "compute_preview_bad_request",
+                code=e.code,
+                version_id=str(version.id),
+                user_id=str(request.user.id),
+            )
             return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(result)
+        return Response({"results": results})
 
     @action(detail=True, methods=["get"], url_path="required-permissions")
     def required_permissions(self, request, pk=None):

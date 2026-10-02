@@ -10,10 +10,10 @@ what answers, so what the preview shows is what the run will compute.
 from __future__ import annotations
 
 from .context import temporal_seeds
-from .expressions import ExpressionError, evaluate
+from .expressions import ExpressionError, evaluate, referenced_paths
 
 MAX_EXPRESSION_LENGTH = 2000
-MAX_ROWS_ABOVE = 50
+MAX_ROWS = 50
 
 
 class PreviewRequestError(ValueError):
@@ -59,9 +59,7 @@ def preview_context(version, instance=None):
 
 
 def _rows(raw):
-    if raw is None:
-        return []
-    if not isinstance(raw, list) or len(raw) > MAX_ROWS_ABOVE:
+    if not isinstance(raw, list) or len(raw) > MAX_ROWS:
         raise PreviewRequestError("previewRowsInvalid")
     rows = []
     for row in raw:
@@ -75,24 +73,34 @@ def _rows(raw):
     return rows
 
 
-def preview_compute_row(version, expression, rows_above=None, instance=None):
-    """Evaluate `expression` after the rows above it, the way the compute
-    action would. Returns {"ok": True, "value", "type"} or {"ok": False,
-    "error"}; a row above that fails is reported as this row's error, since
-    this row cannot run without it."""
-    if not isinstance(expression, str) or len(expression) > MAX_EXPRESSION_LENGTH:
-        raise PreviewRequestError("previewExpressionTooLong")
+def preview_compute_rows(version, rows, instance=None):
+    """One result per row, in order, each evaluated after the rows above it
+    the way the compute action would, in a single pass over one context.
+    A blank row gets None. A row that reads a row that failed is reported as
+    failing because of it, since it cannot run without it."""
     context = preview_context(version, instance)
-    results = {}
-    for key, above in _rows(rows_above):
-        if not key or not above.strip():
+    results, values, failed = [], {}, set()
+    for key, expression in _rows(rows):
+        if not expression.strip():
+            results.append(None)
+            continue
+        roots = {path.split(".")[0] for path in referenced_paths(expression)}
+        broken = sorted(roots & failed)
+        if broken:
+            results.append(
+                {"ok": False, "error": f"'{broken[0]}' (a row above) failed"}
+            )
+            if key:
+                failed.add(key)
             continue
         try:
-            results[key] = evaluate(above, {**context, **results})
+            value = evaluate(expression, {**context, **values})
         except ExpressionError as e:
-            return {"ok": False, "error": f"'{key}' (a row above) failed: {e}"}
-    try:
-        value = evaluate(expression, {**context, **results})
-    except ExpressionError as e:
-        return {"ok": False, "error": str(e)}
-    return {"ok": True, "value": value, "type": type_name(value)}
+            results.append({"ok": False, "error": str(e)})
+            if key:
+                failed.add(key)
+            continue
+        if key:
+            values[key] = value
+        results.append({"ok": True, "value": value, "type": type_name(value)})
+    return results

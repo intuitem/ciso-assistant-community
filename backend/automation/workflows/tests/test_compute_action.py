@@ -142,7 +142,7 @@ class TestEvaluate:
 
     def test_rounding_helpers(self):
         assert evaluate("round(2.567, 2)", {}) == 2.57
-        assert evaluate("round(2.5)", {}) == 2
+        assert evaluate("round(2.5)", {}) == 3  # half up, not banker's
         assert evaluate("floor(2.7)", {}) == 2
         assert evaluate("ceil(2.1)", {}) == 3
         assert evaluate("abs(-3)", {}) == 3
@@ -615,4 +615,134 @@ class TestAiProvenanceThroughCompute:
     def test_an_unrelated_expression_is_not_tainted(self):
         assert "action_update_ai_value_on_fenced_field" not in self.codes(
             self.graph("'high'")
+        )
+
+
+class TestReviewRegressions:
+    """Behaviours pinned by the review of the compute action."""
+
+    def test_round_is_half_up(self):
+        assert evaluate("round(2.5)", {}) == 3
+        assert evaluate("round(-2.5)", {}) == -3
+        assert evaluate("round(0.125, 2)", {}) == 0.13
+        assert evaluate("round(1234.5, -2)", {}) == 1200.0
+
+    def test_modulo_is_int_only_with_a_hint(self):
+        assert evaluate("7 % 2", {}) == 1
+        with pytest.raises(ExpressionError, match=r"int\(\.\.\.\)"):
+            evaluate("7 % 2.5", {})
+
+    def test_non_finite_results_are_refused(self):
+        for expression in ["1.0 / 0.0", "0.0 / 0.0", "[1.0 / 0.0]", "{'a': 0.0 / 0.0}"]:
+            with pytest.raises(ExpressionError, match="not a finite number"):
+                evaluate(expression, {})
+
+    def test_helpers_on_non_finite_input_are_an_expression_error(self):
+        # floor(inf) raised a single-arg OverflowError that _describe mishandled.
+        for expression in ["floor(1.0 / 0.0)", "ceil(0.0 / 0.0)", "round(x / 0.0)"]:
+            with pytest.raises(ExpressionError, match="non-finite"):
+                evaluate(expression, {"x": 1.0})
+
+    def test_index_access_is_a_path(self):
+        assert referenced_paths("nodes['ai'].answer") == {"nodes.ai.answer"}
+        assert referenced_paths('nodes["a"]["b"]') == {"nodes.a.b"}
+
+    def test_a_computed_index_is_a_wildcard(self):
+        assert referenced_paths("nodes[key].x") == {"nodes.*.x", "key"}
+
+    def test_paths_are_maximal_chains_including_function_arguments(self):
+        assert referenced_paths("size(items.filter(x, x.score > limit))") == {
+            "items",
+            "x.score",
+            "limit",
+        }
+        assert referenced_paths("has(nodes.fetch.count)") == {"nodes.fetch.count"}
+
+
+@pytest.mark.django_db
+class TestAiProvenanceEscapes:
+    """Ways a compute row could carry an AI answer past the fence that plain
+    `.field` tracking missed."""
+
+    def graph(self, expression, output_mapping=None, write="{{derived}}"):
+        workflow = Workflow.objects.create(
+            name="Escape", folder=Folder.get_root_folder()
+        )
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
+        start = node("trigger", trigger_config={"type": "manual"})
+        classify = node(
+            "action",
+            ref="classify",
+            action_config={
+                "type": "ai_extract",
+                "prompt": "Classify",
+                "schema": SEVERITY_SCHEMA,
+            },
+            output_mapping={"ai_severity": "severity"},
+        )
+        hop = node(
+            "action",
+            ref="hop",
+            action_config={
+                "type": "compute",
+                "expressions": [{"key": "derived", "expression": expression}],
+            },
+            output_mapping=output_mapping or {},
+        )
+        update = node(
+            "action",
+            ref="write",
+            action_config={
+                "type": "update_object",
+                "model": "finding",
+                "id": "{{finding_id}}",
+                "fields": {"severity": write},
+            },
+        )
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [start, classify, hop, update, end],
+                "edges": [
+                    edge(start, classify),
+                    edge(classify, hop),
+                    edge(hop, update),
+                    edge(update, end),
+                ],
+                "variables": [
+                    {"id": str(uuid.uuid4()), "key": key, "type": "string"}
+                    for key in ["finding_id", "ai_severity", "derived", "alias"]
+                ],
+            },
+        )
+        return {error["code"] for error in validate_graph(version)}
+
+    def test_index_access_to_the_ai_step_is_fenced(self):
+        assert "action_update_ai_value_on_fenced_field" in self.graph(
+            "nodes['classify']['severity']"
+        )
+
+    def test_a_computed_index_over_nodes_is_fenced(self):
+        assert "action_update_ai_value_on_fenced_field" in self.graph(
+            "nodes[key].severity"
+        )
+
+    def test_an_output_mapping_alias_of_a_tainted_row_is_fenced(self):
+        assert "action_update_ai_value_on_fenced_field" in self.graph(
+            "nodes.classify.severity",
+            output_mapping={"alias": "derived"},
+            write="{{alias}}",
+        )
+
+    def test_the_compute_steps_own_output_is_fenced(self):
+        assert "action_update_ai_value_on_fenced_field" in self.graph(
+            "nodes.classify.severity", write="{{nodes.hop.derived}}"
+        )
+
+    def test_an_untainted_step_output_is_not(self):
+        assert "action_update_ai_value_on_fenced_field" not in self.graph(
+            "'high'", write="{{nodes.hop.derived}}"
         )

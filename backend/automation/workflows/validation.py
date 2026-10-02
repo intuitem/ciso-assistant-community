@@ -480,7 +480,7 @@ def _referenced_node_refs(node):
     # {{...}} templates, so the regex above does not see them.
     for path in _compute_paths(node):
         segments = path.split(".")
-        if segments[0] == "nodes" and len(segments) > 1:
+        if segments[0] == "nodes" and len(segments) > 1 and segments[1] != "*":
             refs.add(segments[1])
     return refs
 
@@ -517,21 +517,36 @@ def _ai_sources(nodes):
                 refs.add(node.ref)
             variables |= {str(key) for key in (node.output_mapping or {})}
         elif action_type == "set_variables":
-            setters.append((_set_variables_rows(node), _template_paths))
+            setters.append((node, _set_variables_rows(node), _template_paths))
         elif action_type == "compute":
             # Same hop, other syntax: a compute row reads bare CEL paths
             # instead of {{tokens}}, and a derived number is still a guess.
-            setters.append((_compute_rows(node.action_config), referenced_paths))
+            setters.append((node, _compute_rows(node.action_config), referenced_paths))
 
     changed = bool(setters)
     while changed:
         changed = False
-        for rows, paths_of in setters:
-            for key, value in rows:
-                if key in variables:
-                    continue
-                if _ai_sources_among(paths_of(value), refs, variables):
-                    variables.add(key)
+        for node, rows, paths_of in setters:
+            tainted = {
+                key
+                for key, value in rows
+                if _ai_sources_among(paths_of(value), refs, variables)
+            }
+            if not tainted:
+                continue
+            # The step's own output carries the answer under those keys, so
+            # {{nodes.<ref>.<key>}} downstream is a source too.
+            if node.ref and node.ref not in refs:
+                refs.add(node.ref)
+                changed = True
+            for key in tainted - variables:
+                variables.add(key)
+                changed = True
+            # An output_mapping alias of a tainted row is the same value
+            # under another name.
+            for alias, source in (node.output_mapping or {}).items():
+                if str(source) in tainted and str(alias) not in variables:
+                    variables.add(str(alias))
                     changed = True
     return refs, variables
 
@@ -561,7 +576,11 @@ def _ai_sources_among(paths, ai_refs, ai_variables):
     for path in paths:
         segments = path.split(".")
         if segments[0] == "nodes":
-            if len(segments) > 1 and segments[1] in ai_refs:
+            # `nodes` alone or `nodes.*` (a computed index) can reach any
+            # step: read as every AI output rather than none.
+            if ai_refs and (len(segments) == 1 or segments[1] == "*"):
+                found.add(path)
+            elif len(segments) > 1 and segments[1] in ai_refs:
                 found.add(path)
         elif segments[0] in ai_variables:
             found.add(path)
