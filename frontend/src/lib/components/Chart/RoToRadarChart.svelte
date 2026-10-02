@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { escapeHtml } from '$lib/utils/helpers';
 	import { onMount } from 'svelte';
 	import { mountThemeAwareChart, isDarkTheme } from '$lib/utils/echartsTheme';
 	import { m } from '$paraglide/messages';
@@ -30,15 +31,6 @@
 	const NOT_RETAINED = '#43a047';
 
 	const chartId = `${name}_radar_div`;
-
-	function escapeHtml(value: unknown): string {
-		return String(value ?? '')
-			.replaceAll('&', '&amp;')
-			.replaceAll('<', '&lt;')
-			.replaceAll('>', '&gt;')
-			.replaceAll('"', '&quot;')
-			.replaceAll("'", '&#39;');
-	}
 
 	function truncate(text: string, size = 28): string {
 		return text.length > size ? `${text.slice(0, size - 1)}…` : text;
