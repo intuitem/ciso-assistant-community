@@ -320,12 +320,15 @@ def editor_doc_to_framework_object(
         if q_urn and q_urn in existing_question_urns and q_urn not in claimed:
             claimed.add(q_urn)
         else:
-            leaf = urn_safe_leaf(question.get("ref_id") or "") or str(len(claimed) + 1)
-            candidate = f"{node_urn}:question:{leaf}"
-            suffix = 2
-            while candidate in existing_question_urns or candidate in claimed:
-                candidate = f"{node_urn}:question:{leaf}-{suffix}"
-                suffix += 1
+            # Numbered like the Excel converter (…:question:N), after the
+            # highest number already used under this node.
+            prefix = f"{node_urn}:question:"
+            numbers = [
+                int(urn[len(prefix) :])
+                for urn in (*existing_question_urns, *claimed)
+                if urn.startswith(prefix) and urn[len(prefix) :].isdigit()
+            ]
+            candidate = f"{prefix}{max(numbers, default=0) + 1}"
             old_q_urn = q_urn
             q_urn = candidate
             claimed.add(q_urn)

@@ -33,7 +33,8 @@ presets, metrics).
 
 A library's identity is two prerequisite fields (the Excel `library_meta`):
 
-- `packager` — author/org identifier
+- `packager` — author/org identifier, at most 32 characters (it is the URN
+  namespace; checked when set or changed, so older drafts keep theirs)
 - `ref_id` — the library's reference id
 
 These deterministically generate the URN family (type token varies, same
@@ -56,6 +57,13 @@ loader keeps recognizing it for existing libraries; the builder mints only
 
 Object URNs are pinned to `ref_id`, **never derived from the display name** —
 this is what eliminates rename/slug drift.
+
+Question and choice URNs extend their owner's and are numbered as in the Excel
+converter: `{node_urn}:question:{n}`, then `{question_urn}:choice:{n}`. A new
+question takes the highest number already used under its node + 1, so a removed
+question's number only comes back if it was the last; the question's `ref_id`
+in the editor does not shape its URN. URNs already in the document are kept
+verbatim.
 
 `packager`/`ref_id` are **freely chosen** — no scoping or namespace restriction.
 Loading a library is an act of trust in its packager (you choose to load it),
