@@ -891,6 +891,36 @@ class TestAnnotateTreeAggregatedScores:
         # C1 falls back to S2 only
         assert self._find(tree, "C1")["aggregated_score"] == 40
 
+    @pytest.mark.parametrize("target, anchored", [(30, 30), (None, 100)])
+    def test_na_anchored_to_target(self, deep_tree_setup, target, anchored):
+        """
+        With anchor_na_to_target, an N/A leaf counts as the target (or the max
+        when no target is set) in its parents, on both layers, like the global
+        score. S1 = avg(R1 anchored, R2=60).
+        """
+        ca = deep_tree_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.anchor_na_to_target = True
+        ca.target_score = target
+        ca.show_documentation_score = True
+        ca.save()
+
+        RequirementAssessment.objects.filter(requirement__ref_id="R1").update(
+            result=RequirementAssessment.Result.NOT_APPLICABLE
+        )
+        RequirementAssessment.objects.filter(requirement__ref_id="R2").update(
+            documentation_score=60
+        )
+
+        tree = self._build_tree(ca)
+
+        r1 = self._find(tree, "R1")
+        assert r1["aggregated_score"] == anchored
+        assert r1["aggregated_documentation_score"] == anchored
+        s1 = self._find(tree, "S1")
+        assert s1["aggregated_score"] == (anchored + 60) / 2
+        assert s1["aggregated_documentation_score"] == (anchored + 60) / 2
+
     def test_weighted_avg_of_avg_respects_child_weights(self, scoring_setup):
         """
         Section A (w=1 each): avg = (80+60)/2 = 70

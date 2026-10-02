@@ -15440,13 +15440,32 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
             for ra in assessable_list:
                 results[ra.result] += 1
-                if ra.is_scored and ra.result != "not_applicable":
+                # Anchored N/A counts as the target on both layers, like the
+                # global score.
+                anchored = (
+                    compliance_assessment.anchor_na_to_target
+                    and ra.result == "not_applicable"
+                )
+                if anchored or (ra.is_scored and ra.result != "not_applicable"):
                     weight = ra.requirement.weight if ra.requirement.weight else 1
-                    weighted_score += (ra.score or 0) * weight
+                    if anchored:
+                        req = ra.requirement
+                        score = doc = compliance_assessment.na_anchor_score(
+                            req.min_score
+                            if req.min_score is not None
+                            else compliance_assessment.min_score,
+                            req.max_score
+                            if req.max_score is not None
+                            else compliance_assessment.max_score,
+                        )
+                    else:
+                        score = ra.score or 0
+                        doc = ra.documentation_score or 0
+                    weighted_score += score * weight
                     total_weight += weight
                     scored_count += 1
                     if compliance_assessment.show_documentation_score:
-                        doc_weighted_score += (ra.documentation_score or 0) * weight
+                        doc_weighted_score += doc * weight
                         doc_total_weight += weight
 
             if is_sum:
@@ -15899,13 +15918,32 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 results[ra.result] += 1
                 if ra.result != "not_assessed":
                     assessed += 1
-                if ra.is_scored and ra.result != "not_applicable":
+                # Anchored N/A counts as the target on both layers, like the
+                # global score.
+                anchored = (
+                    compliance_assessment.anchor_na_to_target
+                    and ra.result == "not_applicable"
+                )
+                if anchored or (ra.is_scored and ra.result != "not_applicable"):
                     weight = ra.requirement.weight if ra.requirement.weight else 1
-                    weighted_score += (ra.score or 0) * weight
+                    if anchored:
+                        req = ra.requirement
+                        score = doc = compliance_assessment.na_anchor_score(
+                            req.min_score
+                            if req.min_score is not None
+                            else compliance_assessment.min_score,
+                            req.max_score
+                            if req.max_score is not None
+                            else compliance_assessment.max_score,
+                        )
+                    else:
+                        score = ra.score or 0
+                        doc = ra.documentation_score or 0
+                    weighted_score += score * weight
                     total_weight += weight
                     scored_count += 1
                     if compliance_assessment.show_documentation_score:
-                        doc_weighted_score += (ra.documentation_score or 0) * weight
+                        doc_weighted_score += doc * weight
                         doc_total_weight += weight
 
             total = len(matching_ras)

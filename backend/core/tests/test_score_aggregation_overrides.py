@@ -669,3 +669,32 @@ class TestRadarDataNormalizesMixedScales:
         assert radar["maturity_scores"][0] == 3.0
         # Radar slice and global score agree (only section A is scored).
         assert body["base"]["global_score"] == 3.0
+
+    def test_section_compliance_anchors_na_to_target(
+        self, admin_client, mixed_scale_setup
+    ):
+        """With anchor_na_to_target on, the analytics section scores count an
+        N/A RA as the CA target projected onto its own scale, on both layers:
+        A1 = 4, A2 N/A on 0..1 -> target 2/5 projected = 0.4.
+        Section A = (4 + 0.4) / 2 = 2.2 (excluding A2 would yield 4).
+        """
+        ca = mixed_scale_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.anchor_na_to_target = True
+        ca.target_score = 2
+        ca.show_documentation_score = True
+        ca.save()
+        ra_a1 = _score(mixed_scale_setup, "a1", 4)
+        ra_a1.documentation_score = 4
+        ra_a1.save()
+        _score(mixed_scale_setup, "a2", None, is_scored=False, result="not_applicable")
+
+        url = reverse(
+            "compliance-assessments-section-compliance", kwargs={"pk": str(ca.pk)}
+        )
+        response = admin_client.get(url)
+        assert response.status_code == 200
+        section_a = next(s for s in response.json()["sections"] if s["ref_id"] == "A")
+        assert section_a["implementation_score"] == 2.2
+        assert section_a["documentation_score"] == 2.2
+        assert section_a["maturity_score"] == 2.2

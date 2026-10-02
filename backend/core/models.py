@@ -9136,6 +9136,25 @@ class ComplianceAssessment(Assessment):
 
         return changes
 
+    def na_anchor_score(self, ra_min, ra_max):
+        """Score an N/A requirement counts for when anchor_na_to_target is on.
+
+        The CA-wide target is projected onto the requirement's own scale, so
+        mixed scales stay coherent; without a target it counts as its max.
+        """
+        ca_min, ca_max = self.min_score, self.max_score
+        if (
+            self.target_score is not None
+            and ca_min is not None
+            and ca_max is not None
+            and ca_max > ca_min
+            and ra_max > ra_min
+        ):
+            ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
+            ca_ratio = (ca_target_clamped - ca_min) / (ca_max - ca_min)
+            return ra_min + ca_ratio * (ra_max - ra_min)
+        return ra_max
+
     def _compute_score_for_field(
         self, requirement_assessments, ig, score_field, anchor_na_to_target=False
     ):
