@@ -10,20 +10,20 @@ Library metadata describes the library as a whole: its identity, version, main a
 
 The `library_meta` worksheet is a special case: it is a single two-column key-value table, not a pair of `<object>_meta` and `<object>_content` sheets. Put each property in column A and its value in column B. Use one row per property.
 
-An asterisk (`*`) marks a required property. `T` marks a property that supports translations.
+An asterisk (<mark style="color:$danger;">*</mark>) marks a required property. `T` marks a property that supports translations.
 
 | Property | Meaning | Format / allowed values |
 | --- | --- | --- |
-| \* `type` | Identifies this as library metadata | Enter `library` |
-| \* `urn` | The library's unique URN. Keep it unchanged when publishing a new version of the same library. | A library URN starting with `urn:`; use lowercase letters, numbers, `:`, `.`, `_`, or `-` only; no spaces |
-| \* `version` | The library version. Increase it whenever you publish an update | Positive whole number > 0 |
-| \* `locale` | The primary language of the library | Two lowercase letters from [ISO 639 Set 1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes#Table) (e.g. `en`, `fr`) |
-| \* `ref_id` | The library reference identifier | Letters, numbers, `.`, `_`, or `-` only; no spaces |
-| \* T `name` | The library name | Text |
-| \* T `description` | The library description | Text |
-| \* `copyright` | The library copyright notice | Text |
-| \* `provider` | The organization that provides the library's content | Text |
-| \* `packager` | The person or organization that packaged the library | Text |
+| `type`<mark style="color:$danger;">*</mark> | Identifies this as library metadata | Enter `library` |
+| `urn`<mark style="color:$danger;">*</mark> | The library's unique URN. Keep it unchanged when publishing a new version of the same library. | A library URN starting with `urn:`; use lowercase letters, numbers, `:`, `.`, `_`, or `-` only; no spaces |
+| `version`<mark style="color:$danger;">*</mark> | The library version. Increase it whenever you publish an update | Positive whole number > 0 |
+| `locale`<mark style="color:$danger;">*</mark> | The primary language of the library | Two lowercase letters from [ISO 639 Set 1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes#Table) (e.g. `en`, `fr`) |
+| `ref_id`<mark style="color:$danger;">*</mark> | The library reference identifier | Letters, numbers, `.`, `_`, or `-` only; no spaces |
+| `name`<mark style="color:$danger;">*</mark> T | The library name | Text |
+| `description`<mark style="color:$danger;">*</mark> T | The library description | Text |
+| `copyright`<mark style="color:$danger;">*</mark> | The library copyright notice | Text |
+| `provider`<mark style="color:$danger;">*</mark> | The organization that provides the library's content | Text |
+| `packager`<mark style="color:$danger;">*</mark> | The person or organization that packaged the library | Text |
 | `labels` | Search labels for the library. The converter and CISO rewrites them in uppercase. | Separate labels with commas or line breaks. Do not include spaces within a label. |
 | `dependencies` | URNs of other libraries this library depends on. Most library authors can leave this out. | Library URNs separated by commas or line breaks. Use only for specific cases. |
 
