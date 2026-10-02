@@ -294,3 +294,8 @@ class TestEbiosMatrixTemplate:
         assert response.status_code == 200, response.content
         assert response.json()["customized"] is False
         assert response.json()["success_probability"][0]["name"] == "Low"
+
+    @pytest.mark.django_db
+    def test_loaded_library_payload_keeps_the_section(self, ebios_rm_matrix_fixture):
+        payload = ebios_rm_matrix_fixture.library._objects
+        assert "ebios_rm" in payload["risk_matrix"][0]

@@ -31,6 +31,15 @@
 
 	const chartId = `${name}_radar_div`;
 
+	function escapeHtml(value: unknown): string {
+		return String(value ?? '')
+			.replaceAll('&', '&amp;')
+			.replaceAll('<', '&lt;')
+			.replaceAll('>', '&gt;')
+			.replaceAll('"', '&quot;')
+			.replaceAll("'", '&#39;');
+	}
+
 	function truncate(text: string, size = 28): string {
 		return text.length > size ? `${text.slice(0, size - 1)}…` : text;
 	}
@@ -116,10 +125,10 @@
 								if (!couple) return '';
 								const level = couple.pertinence_level;
 								return [
-									`<b>${couple.risk_origin}</b>`,
-									couple.target_objective,
-									couple.target_objective_category,
-									`${m.pertinence()} : ${level > 0 ? `${level} · ${pertinenceLabels[level - 1]}` : '--'}`,
+									`<b>${escapeHtml(couple.risk_origin)}</b>`,
+									escapeHtml(couple.target_objective),
+									escapeHtml(couple.target_objective_category),
+									`${m.pertinence()} : ${level > 0 ? `${level} · ${escapeHtml(pertinenceLabels[level - 1])}` : '--'}`,
 									couple.is_selected ? m.selected() : m.notSelected()
 								].join('<br/>');
 							}

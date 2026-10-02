@@ -257,6 +257,13 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                             min_impact, min(feared_event.gravity, max_impact)
                         )
                         feared_event.save(update_fields=["gravity"])
+                modes = OperatingMode.objects.filter(
+                    operational_scenario__ebios_rm_study=self
+                )
+                modes.filter(likelihood__gt=max_prob).update(likelihood=max_prob)
+                modes.filter(computed_likelihood__gt=max_prob).update(
+                    computed_likelihood=max_prob
+                )
                 for operational_scenario in self.operational_scenarios.all():
                     if operational_scenario.likelihood_forced is not None:
                         operational_scenario.likelihood_forced = max(

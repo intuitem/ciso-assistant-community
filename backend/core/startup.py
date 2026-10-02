@@ -2411,9 +2411,15 @@ def startup(sender=None, **kwargs):
     # Create default Terminologies
     try:
         Terminology.create_default_roto_risk_origins()
-        Terminology.create_default_roto_target_objective_categories()
     except Exception as e:
         logger.error("Error creating default ROTO Risk Origins", exc_info=True)
+
+    try:
+        Terminology.create_default_roto_target_objective_categories()
+    except Exception as e:
+        logger.error(
+            "Error creating default ROTO Target Objective Categories", exc_info=True
+        )
 
     # Create default Entity Relationships
     try:

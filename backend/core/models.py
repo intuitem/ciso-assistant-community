@@ -2656,6 +2656,8 @@ class LoadedLibrary(LibraryMixin):
             res["risk_matrix"]["impact"] = update_translations(matrix.impact)
             res["risk_matrix"]["risk"] = update_translations(matrix.risk)
             res["risk_matrix"]["grid"] = matrix.grid
+            if "ebios_rm" in matrix.json_definition:
+                res["risk_matrix"]["ebios_rm"] = matrix.json_definition["ebios_rm"]
             res["strength_of_knowledge"] = matrix.strength_of_knowledge
             res["risk_matrix"] = [res["risk_matrix"]]
         return res

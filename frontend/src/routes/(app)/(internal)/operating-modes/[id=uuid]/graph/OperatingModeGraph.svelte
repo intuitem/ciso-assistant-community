@@ -171,7 +171,7 @@
 					antecedents,
 					logicOperator:
 						antecedents.length > 1
-							? ((data.logicOp ?? logicOps.get(n.id) ?? 'AND') as 'AND' | 'OR')
+							? ((data.logicOp ?? logicOps.get(n.id) ?? 'OR') as 'AND' | 'OR')
 							: null,
 					probability: data.successProbability ?? UNRATED,
 					difficulty: data.technicalDifficulty ?? UNRATED
@@ -508,7 +508,7 @@
 	}
 
 	function handleToggleOperator(nodeId: string) {
-		const current = logicOps.get(nodeId) ?? 'AND';
+		const current = logicOps.get(nodeId) ?? 'OR';
 		const newOp = current === 'AND' ? 'OR' : 'AND';
 		logicOps = new Map(logicOps).set(nodeId, newOp);
 
@@ -641,7 +641,7 @@
 				technical_difficulty: (node.data as any).technicalDifficulty ?? -1,
 				logic_operator:
 					antecedentIds.length > 1
-						? ((node.data as any).logicOp ?? logicOps.get(node.id) ?? 'AND')
+						? ((node.data as any).logicOp ?? logicOps.get(node.id) ?? 'OR')
 						: null,
 				is_highlighted: false,
 				position_x: node.position.x,

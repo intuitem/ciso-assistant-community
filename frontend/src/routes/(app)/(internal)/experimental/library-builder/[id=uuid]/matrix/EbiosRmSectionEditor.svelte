@@ -44,6 +44,7 @@
 	const customized = $derived(!!section);
 
 	let defaults = $state<Section | null>(null);
+	let defaultsFailed = $state(false);
 	let open = $state({ workshop2: false, workshop4: false });
 
 	// Defaults are i18n keys; written into the library as plain text in its base
@@ -55,8 +56,9 @@
 		}));
 	}
 
-	async function fetchDefaults(levels: number): Promise<Section> {
+	async function fetchDefaults(levels: number): Promise<Section | null> {
 		const res = await fetch(`/ebios-rm/rating-kit-defaults?size=${levels}`);
+		if (!res.ok) return null;
 		const raw = await res.json();
 		return {
 			ro_to: {
@@ -75,23 +77,27 @@
 	$effect(() => {
 		const levels = size;
 		if (levels < 1) return;
-		fetchDefaults(levels).then((fetched) => {
-			defaults = fetched;
-			const current = section;
-			if (!current || current.success_probability.length === levels) return;
-			// Step scales follow the probability levels: keep edits, default the rest.
-			const keep = (edited: RatingLevel[], fallback: RatingLevel[]) =>
-				fallback.map((level, index) => edited[index] ?? level);
-			section = {
-				...current,
-				success_probability: keep(current.success_probability, fetched.success_probability),
-				technical_difficulty: keep(current.technical_difficulty, fetched.technical_difficulty),
-				likelihood_grid: fetched.likelihood_grid.map((row, p) =>
-					row.map((cell, d) => Math.min(current.likelihood_grid[p]?.[d] ?? cell, levels - 1))
-				)
-			};
-			onchange();
-		});
+		fetchDefaults(levels)
+			.then((fetched) => {
+				defaultsFailed = !fetched;
+				if (!fetched) return;
+				defaults = fetched;
+				const current = section;
+				if (!current || current.success_probability.length === levels) return;
+				// Step scales follow the probability levels: keep edits, default the rest.
+				const keep = (edited: RatingLevel[], fallback: RatingLevel[]) =>
+					fallback.map((level, index) => edited[index] ?? level);
+				section = {
+					...current,
+					success_probability: keep(current.success_probability, fetched.success_probability),
+					technical_difficulty: keep(current.technical_difficulty, fetched.technical_difficulty),
+					likelihood_grid: fetched.likelihood_grid.map((row, p) =>
+						row.map((cell, d) => Math.min(current.likelihood_grid[p]?.[d] ?? cell, levels - 1))
+					)
+				};
+				onchange();
+			})
+			.catch(() => (defaultsFailed = true));
 	});
 
 	// What the studies use: the custom section, or the guide values.
@@ -336,6 +342,9 @@
 						<i class="fa-solid fa-pen mr-1"></i>{m.lbEbiosRmCustomize()}
 					{/if}
 				</button>
+				{#if defaultsFailed}
+					<span class="text-xs text-error-600-400">{m.anErrorOccurred()}</span>
+				{/if}
 			{/if}
 		</div>
 	</div>

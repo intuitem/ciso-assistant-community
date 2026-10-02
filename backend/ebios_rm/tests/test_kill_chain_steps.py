@@ -688,6 +688,33 @@ class TestReviewFixes:
         assert (step.success_probability, step.technical_difficulty) == (2, 2)
         assert 0 <= operating_mode.computed_likelihood <= 2
 
+    def test_smaller_matrix_clamps_express_likelihoods(
+        self, basic_ebios_rm_study_fixture
+    ):
+        from core.models import RiskMatrix, StoredLibrary
+
+        study = basic_ebios_rm_study_fixture
+        study.quotation_method = EbiosRMStudy.QuotationMethod.EXPRESS
+        study.save()
+        operating_mode = _operating_mode(study)
+        operating_mode.likelihood = 3
+        operating_mode.save()
+        StoredLibrary.objects.get(
+            urn="urn:intuitem:risk:library:risk-matrix-3x3-mult"
+        ).load()
+
+        study.risk_matrix = RiskMatrix.objects.get(
+            urn="urn:intuitem:risk:matrix:3x3-mult"
+        )
+        study.save()
+
+        operating_mode.refresh_from_db()
+        scenario = operating_mode.operational_scenario
+        scenario.refresh_from_db()
+        assert operating_mode.likelihood == 2
+        assert scenario.likelihood == 2
+        assert scenario.get_likelihood_display()
+
     def test_refresh_ratings_follows_a_changed_matrix(
         self, basic_ebios_rm_study_fixture
     ):
