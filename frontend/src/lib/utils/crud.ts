@@ -2365,12 +2365,21 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'terminologies',
 				urlParams: 'field_path=ro_to.risk_origin&is_visible=true'
 			},
+			{
+				field: 'target_objective_category',
+				urlModel: 'terminologies',
+				urlParams: 'field_path=ro_to.target_objective_category&is_visible=true'
+			},
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [
-			{ field: 'motivation', valueType: 'number' },
-			{ field: 'resources', valueType: 'number' },
-			{ field: 'activity', valueType: 'number' }
+			...['motivation', 'resources', 'activity'].map((field) => ({
+				field,
+				valueType: 'number' as const,
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
+			}))
 		]
 	},
 	stakeholders: {
@@ -2445,6 +2454,15 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'strategic_scenario',
 				urlModel: 'attack-paths',
 				endpointUrl: 'ebios-rm/attack-paths'
+			}
+		],
+		selectFields: [
+			{
+				field: 'gravity',
+				valueType: 'number',
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
 			}
 		],
 		detailViewFields: [

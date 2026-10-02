@@ -10,6 +10,7 @@ from core.apps import startup
 from core.models import Asset, Terminology
 from ebios_rm.models import (
     AttackPath,
+    EbiosRMStudy,
     ElementaryAction,
     KillChain,
     OperatingMode,
@@ -486,6 +487,9 @@ class TestKillChainStepSerializers:
 def test_migration_converts_action_antecedents_to_steps(
     basic_ebios_rm_study_fixture, elementary_actions_fixture
 ):
+    know, enter, _ = elementary_actions_fixture
+    operating_mode = _operating_mode(basic_ebios_rm_study_fixture)
+
     executor = MigrationExecutor(connection)
     before = [("ebios_rm", "0027_operationalscenario_techniques")]
     after = [("ebios_rm", "0028_ebios_rm_label_readiness")]
@@ -493,8 +497,6 @@ def test_migration_converts_action_antecedents_to_steps(
     apps = executor.loader.project_state(before).apps
     HistoricalKillChain = apps.get_model("ebios_rm", "KillChain")
 
-    know, enter, _ = elementary_actions_fixture
-    operating_mode = _operating_mode(basic_ebios_rm_study_fixture)
     know_step = HistoricalKillChain.objects.create(
         operating_mode_id=operating_mode.id,
         elementary_action_id=know.id,
@@ -519,3 +521,86 @@ def test_migration_converts_action_antecedents_to_steps(
     executor.migrate(executor.loader.graph.leaf_nodes())
 
     assert antecedent_ids == [know_step.id]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_migration_loses_no_antecedent_link(
+    basic_ebios_rm_study_fixture, elementary_actions_fixture
+):
+    know, enter, exploit = elementary_actions_fixture
+    operating_mode = _operating_mode(basic_ebios_rm_study_fixture)
+
+    executor = MigrationExecutor(connection)
+    before = [("ebios_rm", "0027_operationalscenario_techniques")]
+    after = [("ebios_rm", "0028_ebios_rm_label_readiness")]
+    executor.migrate(before)
+    HistoricalKillChain = executor.loader.project_state(before).apps.get_model(
+        "ebios_rm", "KillChain"
+    )
+
+    def step(action):
+        return HistoricalKillChain.objects.create(
+            operating_mode_id=operating_mode.id,
+            elementary_action_id=action.id,
+            folder_id=operating_mode.folder_id,
+        )
+
+    # the same action twice (uniqueness was only checked in clean()),
+    # and a dangling antecedent whose step was deleted (exploit has none)
+    know_step, know_again = step(know), step(know)
+    enter_step = step(enter)
+    enter_step.antecedents.add(know.id, exploit.id)
+
+    executor = MigrationExecutor(connection)
+    executor.migrate(after)
+    MigratedKillChain = executor.loader.project_state(after).apps.get_model(
+        "ebios_rm", "KillChain"
+    )
+    migrated = MigratedKillChain.objects.get(id=enter_step.id)
+    antecedents = set(migrated.antecedents.values_list("id", flat=True))
+    legacy = set(migrated.legacy_antecedent_actions.values_list("id", flat=True))
+
+    executor = MigrationExecutor(connection)
+    executor.migrate(before)
+    RolledBack = executor.loader.project_state(before).apps.get_model(
+        "ebios_rm", "KillChain"
+    )
+    restored = set(
+        RolledBack.objects.get(id=enter_step.id).antecedents.values_list(
+            "id", flat=True
+        )
+    )
+
+    executor = MigrationExecutor(connection)
+    executor.migrate(executor.loader.graph.leaf_nodes())
+
+    assert antecedents == {know_step.id, know_again.id}
+    assert legacy == {know.id, exploit.id}
+    assert restored == {know.id, exploit.id}
+
+
+@pytest.mark.django_db
+def test_switching_method_keeps_typed_operating_mode_likelihood(
+    basic_ebios_rm_study_fixture, elementary_actions_fixture
+):
+    study = basic_ebios_rm_study_fixture
+    know, _, _ = elementary_actions_fixture
+    operating_mode = _operating_mode(study)
+    operating_mode.likelihood = 2
+    operating_mode.save()
+    KillChain.objects.create(
+        operating_mode=operating_mode, elementary_action=know, success_probability=0
+    )
+
+    study.quotation_method = EbiosRMStudy.QuotationMethod.STANDARD
+    study.save()
+    operating_mode.refresh_from_db()
+    assert operating_mode.likelihood == 2
+    assert (
+        operating_mode.effective_likelihood == operating_mode.computed_likelihood == 0
+    )
+
+    study.quotation_method = EbiosRMStudy.QuotationMethod.EXPRESS
+    study.save()
+    operating_mode.refresh_from_db()
+    assert operating_mode.effective_likelihood == 2

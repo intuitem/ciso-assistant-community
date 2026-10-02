@@ -23,12 +23,20 @@
 	import LogicEdgeComponent from './edges/LogicEdge.svelte';
 	import EditorSidebar from './EditorSidebar.svelte';
 	import StepEditModal from './StepEditModal.svelte';
+	import {
+		UNRATED,
+		computeQuotation,
+		type RatingKit,
+		type RatingLevel
+	} from '$lib/utils/ebios-quotation';
+	import { ratingLevelLabel } from '$lib/utils/ebios-rating-kit';
 
 	interface ElementaryActionItem {
 		id: string;
 		name: string;
 		attack_stage: string;
 		icon_fa_class?: string;
+		rating_help?: string | null;
 	}
 
 	interface KillChainStep {
@@ -52,6 +60,8 @@
 		elementaryActions: ElementaryActionItem[];
 		killChainSteps: KillChainStep[];
 		probabilityChoices?: Record<string, string>;
+		ratingKit?: RatingKit | null;
+		quotationMethod?: string;
 		operatingModeId: string;
 		graphColumns?: GraphColumns;
 		onSaved?: () => void;
@@ -64,6 +74,8 @@
 		elementaryActions,
 		killChainSteps,
 		probabilityChoices = {},
+		ratingKit = null,
+		quotationMethod = '',
 		operatingModeId,
 		graphColumns = {},
 		onSaved,
@@ -134,6 +146,40 @@
 	let editedStepId = $state<string | null>(null);
 	const editedStep = $derived(nodes.find((n) => n.id === editedStepId));
 
+	const stepBased = $derived(quotationMethod === 'standard' || quotationMethod === 'advanced');
+	const advanced = $derived(quotationMethod === 'advanced');
+	// Step ratings use the matrix's EBIOS RM scales; the overall result uses its likelihood axis.
+	const toChoices = (levels: RatingLevel[]) =>
+		Object.fromEntries([
+			['-1', '--'],
+			...levels.map((level, index) => [String(index), ratingLevelLabel(level)])
+		]) as Record<string, string>;
+	const successProbabilityChoices = $derived(
+		ratingKit ? toChoices(ratingKit.success_probability) : probabilityChoices
+	);
+	const difficultyChoices = $derived(ratingKit ? toChoices(ratingKit.technical_difficulty) : {});
+	// Live roll-up of the graph being edited, saved or not (fiche méthode 8).
+	const quotation = $derived.by(() => {
+		if (!stepBased) return null;
+		const steps = nodes
+			.filter((n) => n.type === 'action')
+			.map((n) => {
+				const data = n.data as any;
+				const antecedents = edges.filter((e) => e.target === n.id).map((e) => e.source);
+				return {
+					id: n.id,
+					antecedents,
+					logicOperator:
+						antecedents.length > 1
+							? ((data.logicOp ?? logicOps.get(n.id) ?? 'AND') as 'AND' | 'OR')
+							: null,
+					probability: data.successProbability ?? UNRATED,
+					difficulty: data.technicalDifficulty ?? UNRATED
+				};
+			});
+		return computeQuotation(steps, quotationMethod, ratingKit?.likelihood_grid ?? []);
+	});
+
 	// Track the app dark mode (`.dark` on <html>) so SvelteFlow uses its native dark
 	// theme via colorMode. SvelteFlow defaults to light otherwise (white canvas).
 	let isDark = $state(false);
@@ -153,6 +199,14 @@
 		get readonly() {
 			return readonly;
 		},
+		get quotation() {
+			return quotation;
+		},
+		get advanced() {
+			return advanced;
+		},
+		probabilityLabel: (level: number) => successProbabilityChoices[String(level)],
+		difficultyLabel: (level: number) => difficultyChoices[String(level)],
 		deleteNode: (id: string) => handleDeleteNode(id),
 		toggleOperator: (id: string) => handleToggleOperator(id),
 		editStep: (id: string) => (editedStepId = id),
@@ -254,7 +308,7 @@
 					successProbability: step.success_probability ?? -1,
 					successProbabilityPct: step.success_probability_pct ?? null,
 					technicalDifficulty: step.technical_difficulty ?? -1,
-					successProbabilityLabel: probabilityChoices[String(step.success_probability ?? -1)]
+					successProbabilityLabel: successProbabilityChoices[String(step.success_probability ?? -1)]
 				}
 			} as Node);
 			stageCount[stage] = count + 1;
@@ -289,6 +343,25 @@
 	}
 
 	initFromKillChain();
+
+	// An edge skipping a stage column can run across an unrelated node: draw it above
+	// the nodes (LogicEdge adds a halo) so it reads as a crossing, not as a link.
+	$effect(() => {
+		const stageById = new Map(
+			nodes.filter((n) => n.type === 'action').map((n) => [n.id, (n.data as any).stage as number])
+		);
+		const layer = (e: Edge) =>
+			(stageById.get(e.target) ?? 0) - (stageById.get(e.source) ?? 0) > 1 ? 1 : 0;
+		if (edges.some((e) => (e.zIndex ?? 0) !== layer(e))) {
+			untrack(() => {
+				edges = edges.map((e) => ({
+					...e,
+					zIndex: layer(e),
+					data: { ...e.data, skipsStage: layer(e) === 1 }
+				}));
+			});
+		}
+	});
 
 	// Sync action node display data when elementaryActions change (e.g., after modal edit)
 	$effect(() => {
@@ -640,6 +713,27 @@
 				}}
 			>
 				<Background variant={BackgroundVariant.Dots} gap={20} />
+				{#if quotation}
+					<Panel position="bottom-center">
+						<div
+							class="flex items-center gap-3 rounded-base border border-surface-300-700 bg-surface-50-950 px-3 py-1.5 text-xs shadow-sm"
+							data-testid="operating-mode-quotation"
+						>
+							<span class="text-surface-600-400">
+								<i class="fa-solid fa-calculator mr-1"></i>{m.computedLikelihood()}
+							</span>
+							{#if quotation.likelihood === UNRATED}
+								<span class="text-surface-500 italic">{m.rateEveryStepToComputeLikelihood()}</span>
+							{:else}
+								<span class="font-bold">{probabilityChoices[String(quotation.likelihood)]}</span>
+								<span class="flex items-center gap-1 text-error-600-400">
+									<span class="inline-block h-0.5 w-4 rounded bg-error-500"></span>
+									{m.criticalPath()}
+								</span>
+							{/if}
+						</div>
+					</Panel>
+				{/if}
 				{#if !readonly}
 					<Panel position="top-left">
 						<div class="flex items-start gap-2">
@@ -721,7 +815,12 @@
 		assetLabels={(editedStep.data as any).assetLabels ?? []}
 		successProbability={(editedStep.data as any).successProbability ?? -1}
 		successProbabilityPct={(editedStep.data as any).successProbabilityPct ?? null}
-		{probabilityChoices}
+		technicalDifficulty={(editedStep.data as any).technicalDifficulty ?? -1}
+		ratingHelp={elementaryActions.find(
+			(ea) => ea.id === (editedStep.data as any).elementaryActionId
+		)?.rating_help ?? null}
+		probabilityChoices={successProbabilityChoices}
+		difficultyChoices={advanced ? difficultyChoices : null}
 		onApply={(values) => {
 			nodes = nodes.map((n) =>
 				n.id === editedStepId
@@ -730,7 +829,8 @@
 							data: {
 								...n.data,
 								...values,
-								successProbabilityLabel: probabilityChoices[String(values.successProbability)]
+								successProbabilityLabel:
+									successProbabilityChoices[String(values.successProbability)]
 							}
 						}
 					: n

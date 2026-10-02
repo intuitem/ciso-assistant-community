@@ -1,4 +1,5 @@
 <script lang="ts">
+	import MostLikelyOperatingMode from '$lib/components/EbiosRM/MostLikelyOperatingMode.svelte';
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
@@ -273,6 +274,11 @@
 					</ul>
 				</div>
 			{/if}
+			{#if operationalScenario.most_likely_operating_mode}
+				<div class="w-full mt-6">
+					<MostLikelyOperatingMode operatingMode={operationalScenario.most_likely_operating_mode} />
+				</div>
+			{/if}
 			{#if Object.keys(data.relatedModels).length > 0}
 				<div class="card shadow-lg mt-8 bg-surface-50-950 w-full">
 					<Tabs
@@ -368,7 +374,17 @@
 								{/if}
 								<span>{m.likelihood()}</span>
 							</h3>
-							<span>{operationalScenario.likelihood.name}</span>
+							<span
+								>{operationalScenario.likelihood.name}
+								{#if operationalScenario.likelihood_forced !== null && operationalScenario.likelihood_forced !== undefined}
+									<i
+										class="fa-solid fa-thumbtack ml-1 text-xs"
+										title={m.forcedValueTooltip({
+											value: operationalScenario.computed_likelihood?.name ?? '--'
+										})}
+									></i>
+								{/if}</span
+							>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
 						</Popover.Trigger>
 						<Popover.Positioner>
@@ -407,7 +423,17 @@
 								{/if}
 								<span>{m.gravity()}</span>
 							</h3>
-							<span>{operationalScenario.gravity.name}</span>
+							<span
+								>{operationalScenario.gravity.name}
+								{#if operationalScenario.gravity_forced}
+									<i
+										class="fa-solid fa-thumbtack ml-1 text-xs"
+										title={m.forcedValueTooltip({
+											value: operationalScenario.computed_gravity?.name ?? '--'
+										})}
+									></i>
+								{/if}</span
+							>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
 						</Popover.Trigger>
 						<Popover.Positioner>

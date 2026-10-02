@@ -45,6 +45,13 @@ export const load: PageServerLoad = async (event) => {
 			.then(readOptional)
 	]);
 
+	const studyId = detail.data?.ebios_rm_study?.id;
+	const ratingKit = studyId
+		? await event
+				.fetch(`${BASE_API_URL}/ebios-rm/studies/${studyId}/rating-kit/`)
+				.then(readOptional)
+		: null;
+
 	const eaInitialData: Record<string, any> = {};
 	if (object.folder) {
 		eaInitialData['folder'] = object.folder.id ?? object.folder;
@@ -75,6 +82,7 @@ export const load: PageServerLoad = async (event) => {
 		elementaryActions,
 		killChainSteps,
 		probabilityChoices: probabilityChoices ?? {},
+		ratingKit,
 		operatingModeId: event.params.id,
 		eaModel: {
 			urlModel: 'elementary-actions',

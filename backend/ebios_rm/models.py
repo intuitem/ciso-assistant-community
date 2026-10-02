@@ -4,7 +4,6 @@ from auditlog.registry import auditlog
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
-from django.db.models import Case, When, IntegerField, Q
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -28,6 +27,7 @@ from core.models import (
 from core.validators import (
     JSONSchemaInstanceValidator,
 )
+from ebios_rm import rating_kit
 from iam.models import FolderMixin, User
 from tprm.models import Entity
 
@@ -75,8 +75,18 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         STANDARD = "standard", "quotationMethodStandard"
         ADVANCED = "advanced", "quotationMethodAdvanced"
 
-    # Standard and advanced need the elementary-action roll-up (fiche méthode 8).
-    AVAILABLE_QUOTATION_METHODS = (QuotationMethod.MANUAL, QuotationMethod.EXPRESS)
+    AVAILABLE_QUOTATION_METHODS = (
+        QuotationMethod.MANUAL,
+        QuotationMethod.EXPRESS,
+        QuotationMethod.STANDARD,
+        QuotationMethod.ADVANCED,
+    )
+    COMPUTED_QUOTATION_METHODS = (
+        QuotationMethod.EXPRESS,
+        QuotationMethod.STANDARD,
+        QuotationMethod.ADVANCED,
+    )
+    STEP_QUOTATION_METHODS = (QuotationMethod.STANDARD, QuotationMethod.ADVANCED)
 
     META_JSONSCHEMA = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -248,11 +258,29 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                         )
                         feared_event.save(update_fields=["gravity"])
                 for operational_scenario in self.operational_scenarios.all():
+                    if operational_scenario.likelihood_forced is not None:
+                        operational_scenario.likelihood_forced = max(
+                            min_prob,
+                            min(operational_scenario.likelihood_forced, max_prob),
+                        )
                     if operational_scenario.likelihood >= 0:
                         operational_scenario.likelihood = max(
                             min_prob, min(operational_scenario.likelihood, max_prob)
                         )
-                        operational_scenario.save(update_fields=["likelihood"])
+                        operational_scenario.save(
+                            update_fields=["likelihood", "likelihood_forced"]
+                        )
+                for strategic_scenario in self.strategic_scenarios.filter(
+                    gravity_forced__isnull=False
+                ):
+                    strategic_scenario.gravity_forced = max(
+                        min_impact, min(strategic_scenario.gravity_forced, max_impact)
+                    )
+                    strategic_scenario.save(update_fields=["gravity_forced"])
+                self.__dict__.pop("_rating_kit_cache", None)
+                for ro_to in self.roto_set.all():
+                    ro_to.ebios_rm_study = self
+                    ro_to.save(update_fields=["pertinence"])
 
         with transaction.atomic():
             super().save(*args, **kwargs)
@@ -262,9 +290,30 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                         folder=self.folder
                     )
 
-        if self.quotation_method == "express":
+        if self.quotation_method in self.STEP_QUOTATION_METHODS:
+            for operating_mode in OperatingMode.objects.filter(
+                operational_scenario__ebios_rm_study=self
+            ):
+                operating_mode.save(update_fields=["computed_likelihood"])
+        elif self.quotation_method == self.QuotationMethod.EXPRESS:
             for scenario in self.operational_scenarios.all():
                 scenario.update_likelihood_from_operating_modes()
+
+    def rating_kit(self, translated: bool = False) -> dict:
+        """The matrix's EBIOS RM scales and grids, defaults filled in."""
+        cache = self.__dict__.setdefault("_rating_kit_cache", {})
+        key = (self.risk_matrix_id, translated)
+        if key not in cache:
+            definition = (
+                self.risk_matrix.parse_json_translated()
+                if translated
+                else self.risk_matrix.json_definition
+            )
+            cache[key] = rating_kit.resolve(definition)
+        return cache[key]
+
+    def ro_to_scales(self, translated: bool = False) -> dict:
+        return self.rating_kit(translated)["ro_to"]
 
     @property
     def parsed_matrix(self):
@@ -450,46 +499,6 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         return FearedEvent.format_gravity(self.gravity, self.parsed_matrix)
 
 
-class RoToQuerySet(models.QuerySet):
-    def with_pertinence(self):
-        """Annotate queryset with pertinence for ordering"""
-        pertinence_annotation = Case(
-            # Handle undefined cases (motivation = 0 or resources = 0)
-            models.When(Q(motivation=0) | models.Q(resources=0), then=0),  # UNDEFINED
-            # Matrix[0][0-3] - motivation=1
-            When(motivation=1, resources=1, then=1),
-            When(motivation=1, resources=2, then=1),
-            When(motivation=1, resources=3, then=2),
-            When(motivation=1, resources=4, then=2),
-            # Matrix[1][0-3] - motivation=2
-            When(motivation=2, resources=1, then=1),
-            When(motivation=2, resources=2, then=2),
-            When(motivation=2, resources=3, then=3),
-            When(motivation=2, resources=4, then=3),
-            # Matrix[2][0-3] - motivation=3
-            When(motivation=3, resources=1, then=2),
-            When(motivation=3, resources=2, then=3),
-            When(motivation=3, resources=3, then=3),
-            When(motivation=3, resources=4, then=4),
-            # Matrix[3][0-3] - motivation=4
-            When(motivation=4, resources=1, then=2),
-            When(motivation=4, resources=2, then=3),
-            When(motivation=4, resources=3, then=4),
-            When(motivation=4, resources=4, then=4),
-            default=0,
-            output_field=IntegerField(),
-        )
-        return self.annotate(pertinence=pertinence_annotation)
-
-
-class RoToManager(models.Manager):
-    def get_queryset(self):
-        return RoToQuerySet(self.model, using=self._db)
-
-    def with_pertinence(self):
-        return self.get_queryset().with_pertinence()
-
-
 class RoTo(AbstractBaseModel, FolderMixin):
     class Motivation(models.IntegerChoices):
         UNDEFINED = 0, "undefined"
@@ -542,6 +551,18 @@ class RoTo(AbstractBaseModel, FolderMixin):
         },
     )
     target_objective = models.TextField(verbose_name=_("Target objective"))
+    target_objective_category = models.ForeignKey(
+        Terminology,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Target objective category"),
+        related_name="roto_target_objective_categories",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+    )
     motivation = models.PositiveSmallIntegerField(
         verbose_name=_("Motivation"),
         choices=Motivation.choices,
@@ -558,12 +579,17 @@ class RoTo(AbstractBaseModel, FolderMixin):
         default=Activity.UNDEFINED,
         validators=[MaxValueValidator(4)],
     )
+    pertinence = models.PositiveSmallIntegerField(
+        verbose_name=_("Pertinence"),
+        choices=Pertinence.choices,
+        default=Pertinence.UNDEFINED,
+        editable=False,
+        help_text=_("Derived from motivation and resources through the study's matrix"),
+    )
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
     fields_to_check = ["ebios_rm_study", "target_objective", "risk_origin"]
-
-    objects = RoToManager()
 
     def __str__(self) -> str:
         return f"{self.risk_origin.get_name_translated} - {self.target_objective}"
@@ -575,6 +601,11 @@ class RoTo(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
+        self.pertinence = rating_kit.pertinence(
+            self.ebios_rm_study.ro_to_scales(), self.motivation, self.resources
+        )
+        if (update_fields := kwargs.get("update_fields")) is not None:
+            kwargs["update_fields"] = {*update_fields, "pertinence"}
         super().save(*args, **kwargs)
         EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
             updated_at=timezone.now()
@@ -588,18 +619,24 @@ class RoTo(AbstractBaseModel, FolderMixin):
         )
         return result
 
-    def get_pertinence_display(self):
-        PERTINENCE_MATRIX = [
-            [1, 1, 2, 2],
-            [1, 2, 3, 3],
-            [2, 3, 3, 4],
-            [2, 3, 4, 4],
+    def _scale_label(self, scale: str, level: int) -> str:
+        if not level:
+            return "undefined"
+        return self.ebios_rm_study.ro_to_scales(translated=True)[scale][level - 1][
+            "name"
         ]
-        if self.motivation == 0 or self.resources == 0:
-            return self.Pertinence(self.Pertinence.UNDEFINED).label
-        return self.Pertinence(
-            PERTINENCE_MATRIX[self.motivation - 1][self.resources - 1]
-        ).label
+
+    def get_motivation_display(self):
+        return self._scale_label("motivation", self.motivation)
+
+    def get_resources_display(self):
+        return self._scale_label("resources", self.resources)
+
+    def get_activity_display(self):
+        return self._scale_label("activity", self.activity)
+
+    def get_pertinence_display(self):
+        return self._scale_label("pertinence", self.pertinence)
 
     def get_gravity(self):
         gravity = -1
@@ -782,6 +819,12 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         blank=True,
         help_text=_("Override gravity with this specific feared event's gravity"),
     )
+    gravity_forced = models.SmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_("Forced gravity"),
+        help_text=_("Gravity level set by the analyst, replacing the computed one"),
+    )
 
     fields_to_check = ["ebios_rm_study", "name", "ref_id"]
 
@@ -808,12 +851,28 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         )
         return result
 
-    def get_gravity_display(self):
+    @property
+    def computed_gravity(self) -> int:
         if self.focused_feared_event:
-            gravity = self.focused_feared_event.gravity
-        else:
-            gravity = self.ro_to_couple.get_gravity()
-        return FearedEvent.format_gravity(gravity, self.ebios_rm_study.parsed_matrix)
+            return self.focused_feared_event.gravity
+        return self.ro_to_couple.get_gravity()
+
+    @property
+    def gravity(self) -> int:
+        """Gravity in effect: forced, else focused feared event, else the RoTo's."""
+        if self.gravity_forced is not None:
+            return self.gravity_forced
+        return self.computed_gravity
+
+    def get_gravity_display(self):
+        return FearedEvent.format_gravity(
+            self.gravity, self.ebios_rm_study.parsed_matrix
+        )
+
+    def get_computed_gravity_display(self):
+        return FearedEvent.format_gravity(
+            self.computed_gravity, self.ebios_rm_study.parsed_matrix
+        )
 
 
 class AttackPath(NameDescriptionMixin, FolderMixin):
@@ -890,7 +949,7 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
 
     @property
     def gravity(self):
-        return self.ro_to_couple.get_gravity()
+        return self.strategic_scenario.gravity
 
 
 class ElementaryAction(NameDescriptionMixin, FolderMixin):
@@ -942,6 +1001,15 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         EXPLOIT = 3, "ebiosExploitation"
 
     ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
+    technique = models.ForeignKey(
+        "sec_intel.Technique",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="ebios_rm_elementary_actions",
+        verbose_name=_("Technique"),
+        help_text=_("Catalogue technique this elementary action derives from"),
+    )
     threat = models.ForeignKey(
         Threat,
         on_delete=models.SET_NULL,
@@ -996,6 +1064,12 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
         related_name="operating_modes",
     )
     likelihood = models.SmallIntegerField(default=-1, verbose_name="Likelihood")
+    computed_likelihood = models.SmallIntegerField(
+        default=-1,
+        editable=False,
+        verbose_name="Computed likelihood",
+        help_text="Roll-up of the step ratings under the standard and advanced methods",
+    )
     graph_columns = models.JSONField(
         default=dict,
         blank=True,
@@ -1011,6 +1085,8 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.operational_scenario.folder
+        if self.pk and (quotation := self.quotation()) is not None:
+            self.computed_likelihood = quotation.likelihood
         super().save(*args, **kwargs)
         self.operational_scenario.update_likelihood_from_operating_modes()
         EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
@@ -1038,10 +1114,27 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
 
+    @property
+    def effective_likelihood(self) -> int:
+        """The computed roll-up under step methods; the analyst's own value otherwise."""
+        if self.ebios_rm_study.quotation_method in EbiosRMStudy.STEP_QUOTATION_METHODS:
+            return self.computed_likelihood
+        return self.likelihood
+
     def get_likelihood_display(self):
         return OperationalScenario.format_likelihood(
-            self.likelihood, self.parsed_matrix
+            self.effective_likelihood, self.parsed_matrix
         )
+
+    def quotation(self):
+        """Roll-up of the step ratings under a standard or advanced study, else None."""
+        from ebios_rm.quotation import quote_operating_mode
+
+        return quote_operating_mode(self)
+
+    def refresh_likelihood(self):
+        if self.ebios_rm_study.quotation_method in EbiosRMStudy.STEP_QUOTATION_METHODS:
+            self.save(update_fields=["computed_likelihood"])
 
     @classmethod
     def get_default_ref_id(cls, operational_scenario):
@@ -1089,6 +1182,12 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         blank=True,
     )
     likelihood = models.SmallIntegerField(default=-1, verbose_name=_("Likelihood"))
+    likelihood_forced = models.SmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_("Forced likelihood"),
+        help_text=_("Likelihood level set by the analyst, replacing the computed one"),
+    )
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
@@ -1103,6 +1202,12 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
+        # `likelihood` always holds the value in effect, so every reader picks up
+        # a forced value; clearing it falls back to the computed one.
+        if self.likelihood_forced is not None:
+            self.likelihood = self.likelihood_forced
+        elif self.pk and self.computed_likelihood is not None:
+            self.likelihood = self.computed_likelihood
         super().save(*args, **kwargs)
         EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
             updated_at=timezone.now()
@@ -1115,6 +1220,32 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
             updated_at=timezone.now()
         )
         return result
+
+    @property
+    def computed_likelihood(self) -> int | None:
+        """Likelihood derived by the study's method; None when it is estimated directly."""
+        if (
+            self.ebios_rm_study.quotation_method
+            not in EbiosRMStudy.COMPUTED_QUOTATION_METHODS
+        ):
+            return None
+        source = (
+            "computed_likelihood"
+            if self.ebios_rm_study.quotation_method
+            in EbiosRMStudy.STEP_QUOTATION_METHODS
+            else "likelihood"
+        )
+        max_likelihood = self.operating_modes.aggregate(max_l=models.Max(source))[
+            "max_l"
+        ]
+        return -1 if max_likelihood is None else max_likelihood
+
+    def get_computed_likelihood_display(self):
+        if self.computed_likelihood is None:
+            return None
+        return OperationalScenario.format_likelihood(
+            self.computed_likelihood, self.parsed_matrix
+        )
 
     @property
     def risk_matrix(self):
@@ -1204,17 +1335,57 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
             "value": risk_index,
         }
 
+    def most_likely_operating_mode(self) -> dict | None:
+        """
+        The operating mode the computed likelihood comes from (the least-effort one),
+        with the critical steps of its kill chain under standard and advanced methods.
+        """
+        if (
+            self.ebios_rm_study.quotation_method
+            not in EbiosRMStudy.COMPUTED_QUOTATION_METHODS
+        ):
+            return None
+        candidates = []
+        for operating_mode in self.operating_modes.all():
+            if operating_mode.effective_likelihood < 0:
+                continue
+            quotation = operating_mode.quotation()
+            effort = quotation.effort if quotation else -1
+            # Highest likelihood first; on a tie, the lowest cumulative difficulty.
+            rank = (operating_mode.effective_likelihood, -effort if effort >= 0 else 0)
+            candidates.append((rank, operating_mode, quotation))
+        if not candidates:
+            return None
+        _, operating_mode, quotation = max(candidates, key=lambda c: c[0])
+        critical_steps = []
+        if quotation is not None:
+            steps = {
+                str(step.id): step
+                for step in operating_mode.kill_chain_steps.select_related(
+                    "elementary_action"
+                )
+            }
+            critical_steps = [
+                {"id": step_id, "name": steps[step_id].elementary_action.name}
+                for step_id in quotation.critical_steps()
+            ]
+        return {
+            "id": str(operating_mode.id),
+            "str": " - ".join(
+                filter(None, [operating_mode.ref_id, operating_mode.name])
+            ),
+            "likelihood": operating_mode.get_likelihood_display(),
+            "critical_steps": critical_steps,
+        }
+
     def update_likelihood_from_operating_modes(self):
-        if self.ebios_rm_study.quotation_method != "express":
+        if (
+            self.ebios_rm_study.quotation_method
+            not in EbiosRMStudy.COMPUTED_QUOTATION_METHODS
+        ):
             return
-
-        max_likelihood = (
-            self.operating_modes.aggregate(max_l=models.Max("likelihood"))["max_l"]
-            if self.operating_modes.exists()
-            else -1
-        )
-
-        self.likelihood = max_likelihood
+        if self.likelihood_forced is not None:
+            return
         self.save(update_fields=["likelihood"])
 
 
@@ -1244,6 +1415,14 @@ class KillChain(AbstractBaseModel, FolderMixin):
         related_name="successors",
         blank=True,
         help_text="Kill chain steps of the same operating mode that precede this step",
+    )
+    # Action-based antecedents from before steps became graph nodes, kept untouched
+    legacy_antecedent_actions = models.ManyToManyField(
+        ElementaryAction,
+        related_name="kill_chain_antecedents",
+        blank=True,
+        editable=False,
+        help_text="Antecedent elementary actions recorded before antecedents pointed to steps",
     )
     assets = models.ManyToManyField(
         Asset,

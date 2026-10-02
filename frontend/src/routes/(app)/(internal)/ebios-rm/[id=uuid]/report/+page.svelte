@@ -1,4 +1,5 @@
 <script lang="ts">
+	import MostLikelyOperatingMode from '$lib/components/EbiosRM/MostLikelyOperatingMode.svelte';
 	import ClassificationBadge from '$lib/components/ClassificationBadge.svelte';
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
@@ -87,12 +88,13 @@
 	const useBubbles = data.useBubbles;
 	const inherentRiskEnabled = data.inherentRiskEnabled;
 
-	const pertinenceColor: Record<string, string> = {
-		undefined: 'bg-surface-200-800 text-surface-700-300',
-		irrelevant: 'bg-success-200-800 text-success-700-300',
-		partially_relevant: 'bg-warning-200-800 text-warning-700-300',
-		fairly_relevant: 'bg-orange-200 text-orange-700 dark:text-orange-300',
-		highly_relevant: 'bg-error-200-800 text-error-700-300'
+	// Keyed by level (0 = undefined): labels come from the study's matrix.
+	const pertinenceColor: Record<number, string> = {
+		0: 'bg-surface-200-800 text-surface-700-300',
+		1: 'bg-success-200-800 text-success-700-300',
+		2: 'bg-warning-200-800 text-warning-700-300',
+		3: 'bg-orange-200 text-orange-700 dark:text-orange-300',
+		4: 'bg-error-200-800 text-error-700-300'
 	};
 
 	function exportPDF() {
@@ -585,7 +587,7 @@
 							</div>
 							<div>
 								<span class="font-semibold text-surface-700-300">{m.pertinence()}:</span>
-								<span class="badge ml-2 {pertinenceColor[roto.pertinence]}"
+								<span class="badge ml-2 {pertinenceColor[roto.pertinence_level]}"
 									>{safeTranslate(roto.pertinence)}</span
 								>
 							</div>
@@ -755,7 +757,14 @@
 											: 'text-surface-950'}"
 										style="background-color: {scenario.gravity.hexcolor}"
 									>
-										{safeTranslate(scenario.gravity.name)}
+										{safeTranslate(
+											scenario.gravity.name
+										)}{#if scenario.gravity_forced !== null && scenario.gravity_forced !== undefined}<i
+												class="fa-solid fa-thumbtack ml-1 text-xs"
+												title={m.forcedValueTooltip({
+													value: scenario.computed_gravity?.name ?? '--'
+												})}
+											></i>{/if}
 									</span>
 								</div>
 								{#if scenario.ref_id}
@@ -866,7 +875,14 @@
 											: 'text-surface-950'}"
 										style="background-color: {opScenario.likelihood.hexcolor}"
 									>
-										{safeTranslate(opScenario.likelihood.name)}
+										{safeTranslate(
+											opScenario.likelihood.name
+										)}{#if opScenario.likelihood_forced !== null && opScenario.likelihood_forced !== undefined}<i
+												class="fa-solid fa-thumbtack ml-1 text-xs"
+												title={m.forcedValueTooltip({
+													value: opScenario.computed_likelihood?.name ?? '--'
+												})}
+											></i>{/if}
 									</span>
 								</div>
 								<div>
@@ -879,7 +895,12 @@
 											: 'text-surface-950'}"
 										style="background-color: {opScenario.gravity.hexcolor}"
 									>
-										{safeTranslate(opScenario.gravity.name)}
+										{safeTranslate(opScenario.gravity.name)}{#if opScenario.gravity_forced}<i
+												class="fa-solid fa-thumbtack ml-1 text-xs"
+												title={m.forcedValueTooltip({
+													value: opScenario.computed_gravity?.name ?? '--'
+												})}
+											></i>{/if}
 									</span>
 								</div>
 								<div>
@@ -955,6 +976,14 @@
 								<h4 class="text-md font-semibold text-surface-950-50 mb-3">
 									<i class="fa-solid fa-cog mr-2"></i>{m.operatingModes()}
 								</h4>
+								{#if opScenario.most_likely_operating_mode}
+									<div class="mb-3">
+										<MostLikelyOperatingMode
+											operatingMode={opScenario.most_likely_operating_mode}
+											linked={false}
+										/>
+									</div>
+								{/if}
 								<div class="space-y-3">
 									{#each opModes as mode}
 										<div class="bg-surface-50-950 border border-surface-200-800 rounded p-3">
@@ -969,7 +998,15 @@
 													</span>
 												{/if}
 												<div class="flex-1">
-													<div class="font-medium text-surface-950-50 text-sm">{mode.name}</div>
+													<div class="font-medium text-surface-950-50 text-sm">
+														{mode.name}
+														{#if opScenario.most_likely_operating_mode?.id === mode.id}
+															<i
+																class="fa-solid fa-crosshairs ml-1 text-error-600-400"
+																title={m.mostLikelyOperatingMode()}
+															></i>
+														{/if}
+													</div>
 													{#if mode.description}
 														<p class="text-surface-600-400 text-xs mt-1">{mode.description}</p>
 													{/if}

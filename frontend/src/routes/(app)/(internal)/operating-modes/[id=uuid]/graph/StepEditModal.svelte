@@ -12,6 +12,7 @@
 		assetLabels: string[];
 		successProbability: number;
 		successProbabilityPct: number | null;
+		technicalDifficulty: number;
 	}
 
 	interface Props {
@@ -20,7 +21,11 @@
 		assetLabels: string[];
 		successProbability: number;
 		successProbabilityPct: number | null;
+		technicalDifficulty: number;
 		probabilityChoices: Record<string, string>;
+		difficultyChoices?: Record<string, string> | null;
+		// Rating factors of the action's catalogue category (fiche méthode 8)
+		ratingHelp?: string | null;
 		onApply: (values: StepValues) => void;
 		onClose: () => void;
 	}
@@ -30,27 +35,34 @@
 		assetLabels,
 		successProbability,
 		successProbabilityPct,
+		technicalDifficulty,
 		probabilityChoices,
+		difficultyChoices = null,
+		ratingHelp = null,
 		onApply,
 		onClose
 	}: Props = $props();
 
-	const probabilityOptions = Object.entries(probabilityChoices).map(([value, name]) => ({
-		label: name,
-		value: Number(value)
-	}));
+	const toOptions = (choices: Record<string, string>) =>
+		Object.entries(choices)
+			.map(([value, name]) => ({ label: name, value: Number(value) }))
+			.sort((a, b) => a.value - b.value);
+	const probabilityOptions = toOptions(probabilityChoices);
+	const difficultyOptions = difficultyChoices ? toOptions(difficultyChoices) : [];
 
 	const schema = z.object({
 		assets: z.array(z.string()).optional(),
 		success_probability: z.number().optional(),
-		success_probability_pct: z.number().min(0).max(100).nullable().optional()
+		success_probability_pct: z.number().min(0).max(100).nullable().optional(),
+		technical_difficulty: z.number().optional()
 	});
 	const _form = superForm(
 		defaults(
 			{
 				assets,
 				success_probability: successProbability,
-				success_probability_pct: successProbabilityPct
+				success_probability_pct: successProbabilityPct,
+				technical_difficulty: technicalDifficulty
 			},
 			zod(schema)
 		),
@@ -78,7 +90,8 @@
 				(assetId) => labelById.get(assetId) ?? initialLabelById.get(assetId) ?? assetId
 			),
 			successProbability: Number($form.success_probability ?? -1),
-			successProbabilityPct: pct === undefined || pct === null || Number.isNaN(pct) ? null : pct
+			successProbabilityPct: pct === undefined || pct === null || Number.isNaN(pct) ? null : pct,
+			technicalDifficulty: Number($form.technical_difficulty ?? -1)
 		});
 	}
 </script>
@@ -133,6 +146,24 @@
 			label={m.successProbabilityPct()}
 			helpText={m.successProbabilityPctHelpText()}
 		/>
+		{#if difficultyChoices}
+			<Select
+				form={_form}
+				options={difficultyOptions}
+				field="technical_difficulty"
+				disableDoubleDash
+				label={m.technicalDifficulty()}
+				helpText={m.technicalDifficultyHelpText()}
+			/>
+		{/if}
+		{#if ratingHelp}
+			<details class="rounded-base border border-surface-200-800 px-3 py-2 text-xs">
+				<summary class="cursor-pointer font-semibold text-surface-700-300">
+					<i class="fa-solid fa-book-open mr-1"></i>{m.ratingHelp()}
+				</summary>
+				<p class="mt-2 whitespace-pre-line text-surface-700-300">{ratingHelp}</p>
+			</details>
+		{/if}
 		<div class="flex justify-end gap-2">
 			<button type="button" class="btn preset-tonal" onclick={onClose}>{m.cancel()}</button>
 			<button

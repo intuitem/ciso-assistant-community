@@ -4,41 +4,46 @@ import django.core.validators
 import django.db.models.deletion
 from django.db import migrations, models
 
+from ebios_rm import rating_kit
+
 
 def antecedent_actions_to_steps(apps, schema_editor):
-    """Antecedents pointed at elementary actions; point them at the step of the
-    same operating mode that uses that action (unique per mode until now)."""
+    """Antecedents pointed at elementary actions; link every step of the same
+    operating mode that uses that action. The action links themselves are kept
+    as legacy_antecedent_actions, so nothing is lost when no step matches."""
     KillChain = apps.get_model("ebios_rm", "KillChain")
     for step in KillChain.objects.prefetch_related("antecedents"):
-        for action in step.antecedents.all():
-            antecedent = (
-                KillChain.objects.filter(
-                    operating_mode_id=step.operating_mode_id,
-                    elementary_action_id=action.id,
-                )
-                .exclude(pk=step.pk)
-                .first()
-            )
-            if antecedent is not None:
-                step.antecedent_steps.add(antecedent)
+        action_ids = [action.id for action in step.antecedents.all()]
+        if not action_ids:
+            continue
+        step.antecedent_steps.add(
+            *KillChain.objects.filter(
+                operating_mode_id=step.operating_mode_id,
+                elementary_action_id__in=action_ids,
+            ).exclude(pk=step.pk)
+        )
 
 
 def antecedent_steps_to_actions(apps, schema_editor):
-    KillChain = apps.get_model("ebios_rm", "KillChain")
-    for step in KillChain.objects.prefetch_related("antecedent_steps"):
-        step.antecedents.set(
-            [
-                antecedent.elementary_action_id
-                for antecedent in step.antecedent_steps.all()
-            ]
+    """The legacy links come back as they were; nothing to rebuild."""
+
+
+def fill_pertinence(apps, schema_editor):
+    RoTo = apps.get_model("ebios_rm", "RoTo")
+    for ro_to in RoTo.objects.select_related("ebios_rm_study__risk_matrix"):
+        scales = rating_kit.resolve(ro_to.ebios_rm_study.risk_matrix.json_definition)
+        ro_to.pertinence = rating_kit.pertinence(
+            scales["ro_to"], ro_to.motivation, ro_to.resources
         )
+        ro_to.save(update_fields=["pertinence"])
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0190_compliance_assessment_score_scale"),
+        ("core", "0191_roto_target_objective_category"),
         ("ebios_rm", "0027_operationalscenario_techniques"),
         ("pmbok", "0008_remove_accreditation_is_published_and_more"),
+        ("sec_intel", "0003_remove_cwe_is_published_and_more"),
     ]
 
     operations = [
@@ -149,13 +154,102 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunPython(antecedent_actions_to_steps, antecedent_steps_to_actions),
-        migrations.RemoveField(
+        migrations.RenameField(
             model_name="killchain",
-            name="antecedents",
+            old_name="antecedents",
+            new_name="legacy_antecedent_actions",
+        ),
+        migrations.AlterField(
+            model_name="killchain",
+            name="legacy_antecedent_actions",
+            field=models.ManyToManyField(
+                blank=True,
+                editable=False,
+                help_text="Antecedent elementary actions recorded before antecedents pointed to steps",
+                related_name="kill_chain_antecedents",
+                to="ebios_rm.elementaryaction",
+            ),
         ),
         migrations.RenameField(
             model_name="killchain",
             old_name="antecedent_steps",
             new_name="antecedents",
+        ),
+        migrations.AddField(
+            model_name="operationalscenario",
+            name="likelihood_forced",
+            field=models.SmallIntegerField(
+                blank=True,
+                help_text="Likelihood level set by the analyst, replacing the computed one",
+                null=True,
+                verbose_name="Forced likelihood",
+            ),
+        ),
+        migrations.AddField(
+            model_name="strategicscenario",
+            name="gravity_forced",
+            field=models.SmallIntegerField(
+                blank=True,
+                help_text="Gravity level set by the analyst, replacing the computed one",
+                null=True,
+                verbose_name="Forced gravity",
+            ),
+        ),
+        migrations.AddField(
+            model_name="roto",
+            name="pertinence",
+            field=models.PositiveSmallIntegerField(
+                choices=[
+                    (0, "undefined"),
+                    (1, "irrelevant"),
+                    (2, "partially_relevant"),
+                    (3, "fairly_relevant"),
+                    (4, "highly_relevant"),
+                ],
+                default=0,
+                editable=False,
+                help_text="Derived from motivation and resources through the study's matrix",
+                verbose_name="Pertinence",
+            ),
+        ),
+        migrations.RunPython(fill_pertinence, migrations.RunPython.noop),
+        migrations.AddField(
+            model_name="roto",
+            name="target_objective_category",
+            field=models.ForeignKey(
+                blank=True,
+                limit_choices_to={
+                    "field_path": "ro_to.target_objective_category",
+                    "is_visible": True,
+                },
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="roto_target_objective_categories",
+                to="core.terminology",
+                verbose_name="Target objective category",
+            ),
+        ),
+        migrations.AddField(
+            model_name="elementaryaction",
+            name="technique",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Catalogue technique this elementary action derives from",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="ebios_rm_elementary_actions",
+                to="sec_intel.technique",
+                verbose_name="Technique",
+            ),
+        ),
+        migrations.AddField(
+            model_name="operatingmode",
+            name="computed_likelihood",
+            field=models.SmallIntegerField(
+                default=-1,
+                editable=False,
+                help_text="Roll-up of the step ratings under the standard and advanced methods",
+                verbose_name="Computed likelihood",
+            ),
         ),
     ]

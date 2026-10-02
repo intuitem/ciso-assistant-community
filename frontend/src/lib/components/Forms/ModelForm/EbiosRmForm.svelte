@@ -9,6 +9,7 @@
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { getModalStore } from '$lib/components/Modals/stores';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -17,6 +18,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		context: string;
+		object?: Record<string, any>;
 		[key: string]: any;
 	}
 
@@ -27,8 +29,32 @@
 		formDataCache = $bindable({}),
 		initialData = {},
 		context,
+		object = {},
 		...rest
 	}: Props = $props();
+
+	const modalStore = getModalStore();
+	const formStore = (form as any).form;
+	// Leaving the direct estimate replaces the likelihoods typed on operational scenarios
+	const savedMethod = object?.quotation_method;
+	let lastMethod = savedMethod;
+	$effect(() => {
+		const method = $formStore?.quotation_method;
+		if (method === lastMethod) return;
+		const leavingDirectEstimate = savedMethod === 'manual' && lastMethod === 'manual';
+		lastMethod = method;
+		if (!leavingDirectEstimate) return;
+		modalStore.trigger({
+			type: 'confirm',
+			title: m.quotationMethodChangeTitle(),
+			body: m.quotationMethodChangeBody(),
+			response: (confirmed: boolean) => {
+				if (confirmed) return;
+				lastMethod = 'manual';
+				formStore.update((data: Record<string, any>) => ({ ...data, quotation_method: 'manual' }));
+			}
+		});
+	});
 
 	let activeActivity: string | null = $state(null);
 	const responsibilityMatricesEnabled = $derived(

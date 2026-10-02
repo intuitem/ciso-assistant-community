@@ -320,7 +320,8 @@
 		risk_matrices: m.lbCountRiskMatrices,
 		requirement_mapping_sets: m.lbCountRequirementMappingSets,
 		metric_definitions: m.lbCountMetricDefinitions,
-		preset: m.lbCountPreset
+		preset: m.lbCountPreset,
+		quick_forms: m.lbCountQuickForms
 	};
 
 	function objectsSummary(draft: any): string {

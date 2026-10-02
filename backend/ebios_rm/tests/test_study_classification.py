@@ -70,7 +70,13 @@ class TestEbiosRMStudyFramingAndMethods:
 
     @pytest.mark.parametrize(
         "method, valid",
-        [("manual", True), ("express", True), ("standard", False), ("advanced", False)],
+        [
+            ("manual", True),
+            ("express", True),
+            ("standard", True),
+            ("advanced", True),
+            ("bogus", False),
+        ],
     )
     def test_only_available_methods_can_be_selected(
         self, basic_ebios_rm_study_fixture, method, valid

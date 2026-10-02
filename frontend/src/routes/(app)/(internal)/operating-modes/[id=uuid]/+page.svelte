@@ -207,6 +207,8 @@
 			elementaryActions={data.elementaryActions}
 			killChainSteps={data.killChainSteps}
 			probabilityChoices={data.probabilityChoices}
+			ratingKit={data.ratingKit}
+			quotationMethod={data.object?.quotation_method}
 			operatingModeId={data.operatingModeId}
 			graphColumns={data.data.graph_columns ?? {}}
 			readonly={!editMode}

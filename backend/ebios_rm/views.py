@@ -22,7 +22,6 @@ from .models import (
     EbiosRMStudy,
     FearedEvent,
     RoTo,
-    RoToQuerySet,
     Stakeholder,
     StrategicScenario,
     AttackPath,
@@ -139,6 +138,52 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(EbiosRMStudy.Status.choices))
 
+    @action(
+        detail=False,
+        name="Get default EBIOS RM rating scales",
+        url_path="rating-kit-defaults",
+    )
+    def rating_kit_defaults(self, request):
+        """Defaults a matrix's `ebios_rm` section falls back to, for `size` levels."""
+        from ebios_rm.rating_kit import default_section
+
+        try:
+            size = int(request.query_params.get("size", 4))
+        except ValueError:
+            return Response({"error": "size must be an integer."}, status=400)
+        if not 1 <= size <= 64:
+            return Response({"error": "size must be between 1 and 64."}, status=400)
+        return Response(default_section(size))
+
+    @action(detail=True, name="Get EBIOS RM rating scales", url_path="rating-kit")
+    def rating_kit(self, request, pk):
+        """Scales and grids of the study's matrix, defaults filled in."""
+        study = self.get_object()
+        matrix = study.risk_matrix
+        return Response(
+            {
+                **study.rating_kit(translated=True),
+                "likelihood": [
+                    {"name": level["name"], "hexcolor": level.get("hexcolor")}
+                    for level in study.parsed_matrix["probability"]
+                ],
+                "matrix": {"id": str(matrix.id), "name": str(matrix)},
+                "customized": bool(matrix.json_definition.get("ebios_rm")),
+            }
+        )
+
+    @action(detail=True, name="Get motivation choices")
+    def motivation(self, request, pk):
+        return Response(ro_to_scale_choices(self.get_object(), "motivation"))
+
+    @action(detail=True, name="Get resources choices")
+    def resources(self, request, pk):
+        return Response(ro_to_scale_choices(self.get_object(), "resources"))
+
+    @action(detail=True, name="Get activity choices")
+    def activity(self, request, pk):
+        return Response(ro_to_scale_choices(self.get_object(), "activity"))
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get quotation method choices")
     def quotation_method(self, request):
@@ -245,11 +290,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         feared_events = FearedEvent.objects.filter(
             ebios_rm_study=study, is_selected=True
         ).order_by("-gravity", "name")
-        ro_to_couples = (
-            RoTo.objects.filter(ebios_rm_study=study, is_selected=True)
-            .with_pertinence()
-            .order_by("-pertinence", "risk_origin__name", "target_objective")
-        )
+        ro_to_couples = RoTo.objects.filter(
+            ebios_rm_study=study, is_selected=True
+        ).order_by("-pertinence", "risk_origin__name", "target_objective")
         stakeholders = Stakeholder.objects.filter(
             ebios_rm_study=study, is_selected=True
         ).order_by("entity__name")
@@ -447,7 +490,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         study = self.get_object()
         # Get all related data
         feared_events = FearedEvent.objects.filter(ebios_rm_study=study)
-        ro_to_couples = RoTo.objects.filter(ebios_rm_study=study).with_pertinence()
+        ro_to_couples = RoTo.objects.filter(ebios_rm_study=study)
         stakeholders = Stakeholder.objects.filter(ebios_rm_study=study)
         strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
         attack_paths = AttackPath.objects.filter(ebios_rm_study=study)
@@ -575,6 +618,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         if roto.risk_origin
                         else "",
                         "target_objective": roto.target_objective,
+                        "target_objective_category": roto.target_objective_category.get_name_translated
+                        if roto.target_objective_category
+                        else "",
                         "motivation": roto.get_motivation_display(),
                         "resources": roto.get_resources_display(),
                         "activity": roto.get_activity_display(),
@@ -717,6 +763,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             # 4.1.1 Operational Scenarios sheet
             os_data = []
             for os in operational_scenarios:
+                most_likely = os.most_likely_operating_mode() or {}
                 os_data.append(
                     {
                         "ref_id": os.ref_id,
@@ -727,6 +774,11 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         "risk_level": os.get_risk_level_display().get("name", ""),
                         "operating_modes_description": os.operating_modes_description
                         or "",
+                        "most_likely_operating_mode": most_likely.get("str", ""),
+                        "critical_steps": " → ".join(
+                            step["name"]
+                            for step in most_likely.get("critical_steps", [])
+                        ),
                         "is_selected": os.is_selected,
                         "justification": os.justification or "",
                     }
@@ -955,6 +1007,13 @@ class FearedEventViewSet(BaseModelViewSet):
             )
 
 
+def ro_to_scale_choices(study, scale: str) -> dict:
+    levels = study.ro_to_scales(translated=True)[scale]
+    return {0: "undefined"} | {
+        index + 1: level["name"] for index, level in enumerate(levels)
+    }
+
+
 class RoToFilter(GenericFilterSet):
     # Add the custom ordering filter
     ordering = df.OrderingFilter(
@@ -982,6 +1041,7 @@ class RoToFilter(GenericFilterSet):
             "ebios_rm_study",
             "is_selected",
             "risk_origin",
+            "target_objective_category",
             "motivation",
             "feared_events",
             "pertinence",
@@ -993,10 +1053,23 @@ class RoToViewSet(BaseModelViewSet):
 
     filterset_class = RoToFilter
 
-    def get_queryset(self):
-        """Always return queryset with pertinence annotation"""
-        queryset = super().get_queryset()
-        return queryset.with_pertinence()
+    @action(detail=True, name="Get motivation choices", url_path="motivation")
+    def study_motivation(self, request, pk):
+        return Response(
+            ro_to_scale_choices(self.get_object().ebios_rm_study, "motivation")
+        )
+
+    @action(detail=True, name="Get resources choices", url_path="resources")
+    def study_resources(self, request, pk):
+        return Response(
+            ro_to_scale_choices(self.get_object().ebios_rm_study, "resources")
+        )
+
+    @action(detail=True, name="Get activity choices", url_path="activity")
+    def study_activity(self, request, pk):
+        return Response(
+            ro_to_scale_choices(self.get_object().ebios_rm_study, "activity")
+        )
 
     @action(detail=False, name="Get motivation choices")
     def motivation(self, request):
@@ -1130,6 +1203,21 @@ class StrategicScenarioViewSet(BaseModelViewSet):
         return queryset.select_related("ro_to_couple").prefetch_related(
             "ro_to_couple__feared_events"
         )
+
+    @action(detail=True, name="Get gravity choices")
+    def gravity(self, request, pk):
+        strategic_scenario: StrategicScenario = self.get_object()
+        undefined = dict([(-1, "--")])
+        _choices = dict(
+            zip(
+                list(range(0, 64)),
+                [
+                    x["name"]
+                    for x in strategic_scenario.ebios_rm_study.parsed_matrix["impact"]
+                ],
+            )
+        )
+        return Response(undefined | _choices)
 
 
 class AttackPathFilter(GenericFilterSet):
@@ -1283,6 +1371,29 @@ class OperatingModeViewSet(BaseModelViewSet):
             return Response(
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
+
+    @action(detail=True, name="Likelihood roll-up of the kill chain steps")
+    def quotation(self, request, pk):
+        """Cumulative step values under the study's standard or advanced method."""
+        mo = self.get_object()
+        quotation = mo.quotation()
+        if quotation is None:
+            return Response({"method": mo.ebios_rm_study.quotation_method})
+        return Response(
+            {
+                "method": mo.ebios_rm_study.quotation_method,
+                "likelihood": quotation.likelihood,
+                "steps": {
+                    step_id: {
+                        "probability": quotation.probability[step_id],
+                        "difficulty": quotation.difficulty.get(step_id),
+                        "likelihood": quotation.step_likelihood[step_id],
+                        "critical": step_id in quotation.critical_path,
+                    }
+                    for step_id in quotation.probability
+                },
+            }
+        )
 
     @action(detail=True, methods=["post"], name="Save graph for Operating Mode")
     def save_graph(self, request, pk):
@@ -1472,6 +1583,7 @@ class OperatingModeViewSet(BaseModelViewSet):
 
             kept_ids = {step.id for step in saved.values()}
             mo.kill_chain_steps.exclude(id__in=kept_ids).delete()
+            mo.refresh_likelihood()
 
         return self.build_graph(request, pk)
 
@@ -1572,3 +1684,18 @@ class KillChainViewSet(BaseModelViewSet):
     @action(detail=False, name="Get logic operators choices")
     def logic_operator(self, request):
         return Response(dict(KillChain.LogicOperator.choices))
+
+    def perform_create(self, serializer):
+        instance = super().perform_create(serializer)
+        instance.operating_mode.refresh_likelihood()
+        return instance
+
+    def perform_update(self, serializer):
+        instance = super().perform_update(serializer)
+        instance.operating_mode.refresh_likelihood()
+        return instance
+
+    def perform_destroy(self, instance):
+        operating_mode = instance.operating_mode
+        super().perform_destroy(instance)
+        operating_mode.refresh_likelihood()
