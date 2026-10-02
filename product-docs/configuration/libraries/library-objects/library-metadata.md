@@ -10,7 +10,7 @@ Library metadata describes the library as a whole: its identity, version, main a
 
 The `library_meta` worksheet is a special case: it is a single two-column key-value table, not a pair of `<object>_meta` and `<object>_content` sheets. Put each property in column A and its value in column B. Use one row per property.
 
-An asterisk (<mark style="color:$danger;">*</mark>) marks a required property. <mark style="color:$info;">T</mark> marks a property that supports translations.
+An asterisk (<mark style="color:$danger;">*</mark>) marks a required property. (<mark style="color:$info;">T</mark>) marks a property that supports translations.
 
 | Property | Meaning | Format / allowed values |
 | --- | --- | --- |
