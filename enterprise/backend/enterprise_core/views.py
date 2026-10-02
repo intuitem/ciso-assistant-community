@@ -351,12 +351,6 @@ class RoleViewSet(BaseModelViewSet):
             processed_folders = []
 
             for folder in folders:
-                if (
-                    folder.content_type == Folder.ContentType.DOMAIN
-                    and not folder.create_iam_groups
-                ):
-                    continue
-
                 ug, _ = UserGroup.objects.get_or_create(
                     folder=folder,
                     name=role.name,

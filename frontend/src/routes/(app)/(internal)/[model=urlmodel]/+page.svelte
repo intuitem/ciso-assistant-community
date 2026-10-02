@@ -77,6 +77,11 @@
 			model: 'vulnerabilities',
 			endpoint: '/vulnerabilities/refresh-due-dates',
 			failed: m.refreshDueDatesFailed
+		},
+		'delete-unused-user-groups': {
+			model: 'user-groups',
+			endpoint: '/user-groups/delete-unused-user-groups',
+			failed: m.deleteUnusedUserGroupsFailed
 		}
 	} as const;
 	type RemoteAction = keyof typeof remoteActions;
@@ -638,6 +643,22 @@
 							{/if}
 						</div>
 					</div>
+				{/snippet}
+				{#snippet optButton()}
+					{#if URLModel === 'user-groups'}
+						<button
+							class="inline-block p-3 btn-mini-secondary w-12 focus:relative disabled:opacity-50 disabled:cursor-not-allowed"
+							title={m.deleteUnusedUserGroups()}
+							aria-label={m.deleteUnusedUserGroups()}
+							disabled={isBusy}
+							onclick={() =>
+								confirmRemoteAction(
+									'delete-unused-user-groups',
+									m.deleteUnusedUserGroups(),
+									m.deleteUnusedUserGroupsConfirm()
+								)}
+						><i class="fa-solid fa-trash-can"></i></button>
+					{/if}
 				{/snippet}
 				{#snippet badge(key, row)}
 					{#if URLModel === 'risk-assessments'}

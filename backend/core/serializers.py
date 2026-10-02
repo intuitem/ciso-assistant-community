@@ -1,6 +1,8 @@
 import copy
 import importlib
-from typing import Any
+from typing import Any, Mapping, ClassVar
+from types import MappingProxyType
+from dataclasses import dataclass
 
 import structlog
 from django.db import models, transaction
@@ -18,7 +20,7 @@ from core.serializer_fields import (
     PathField,
 )
 from core.constants import LEGACY_TTP_LIBRARIES
-from core.utils import time_state
+from core.utils import time_state, UserGroupCodename, RoleCodename
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
 from threat_modeling.models import ThreatModel
@@ -2365,7 +2367,7 @@ class UserWriteSerializer(BaseModelSerializer):
         # filtered to the requester's viewable groups, which would hide the
         # memberships this guard exists to protect.
         current = (
-            set(UserGroup.objects.filter(user=self.instance).select_related("folder"))
+            set(UserGroup.objects.filter(users=self.instance).select_related("folder"))
             if self.instance
             else set()
         )
@@ -2433,7 +2435,7 @@ class UserWriteSerializer(BaseModelSerializer):
         before any lock is held, which is only good enough to fail fast."""
         if instance is None:
             return False
-        if not UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists():
+        if not UserGroup.objects.filter(users=instance, name="BI-UG-ADM").exists():
             return False
         if User.objects.filter(user_groups__name="BI-UG-ADM").count() > 1:
             return False
@@ -2497,7 +2499,7 @@ class UserWriteSerializer(BaseModelSerializer):
         belongs to. DB query, not the visibility-filtered prefetch: memberships
         the requester cannot see must still make the target privileged."""
         groups = list(
-            UserGroup.objects.filter(user=self.instance).select_related("folder")
+            UserGroup.objects.filter(users=self.instance).select_related("folder")
         )
         if not groups:
             return
@@ -2548,7 +2550,7 @@ class UserWriteSerializer(BaseModelSerializer):
             offending.add("expiry_date")
         if not offending:
             return set()
-        if not UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists():
+        if not UserGroup.objects.filter(users=instance, name="BI-UG-ADM").exists():
             return set()
         if (
             User.objects.filter(user_groups__name="BI-UG-ADM", is_active=True)
@@ -2722,7 +2724,7 @@ class UserWriteSerializer(BaseModelSerializer):
             # UserGroup.objects, not instance.user_groups.all(): the latter is the
             # viewset's visibility-filtered prefetch, which would under-report the
             # previous memberships in this audit line.
-            initial_groups = set(UserGroup.objects.filter(user=instance))
+            initial_groups = set(UserGroup.objects.filter(users=instance))
             new_groups = set(group for group in user_groups_data)
 
             if initial_groups != new_groups:
@@ -2804,6 +2806,14 @@ class UserGroupReadSerializer(BaseModelSerializer):
     path = PathField(source="get_folder_full_path", read_only=True)
     name = serializers.CharField(source="__str__")
     folder = FieldsRelatedField()
+    is_recursive = serializers.SerializerMethodField()
+    user_count = serializers.SerializerMethodField()
+
+    def get_is_recursive(self, user_group: UserGroup):
+        return RoleAssignment.objects.filter(user_group=user_group, is_recursive=True).exists()
+
+    def get_user_count(self, user_group: UserGroup) -> int:
+        return user_group.users.count()
 
     class Meta:
         model = UserGroup
@@ -2883,8 +2893,14 @@ class RoleAssignmentWriteSerializer(BaseModelSerializer):
         model = RoleAssignment
         fields = "__all__"
 
-
 class FolderWriteSerializer(BaseModelSerializer):
+    iam_groups = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
+
     class Meta:
         read_only_fields = ["content_type"]
         model = Folder
@@ -2897,6 +2913,17 @@ class FolderWriteSerializer(BaseModelSerializer):
             # (and inherits the validator below).
             "default_role",
         ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["iam_groups"] = IAMGroupSet.from_folder(instance).to_json()
+        return data
+
+    def validate_iam_groups(self, iam_groups: Optional[list[dict]]) -> Optional[IAMGroupSet]:
+        if iam_groups is None:
+            return
+
+        return IAMGroupSet.create(iam_groups)
 
     def validate_default_role(self, default_role):
         if default_role is None:
@@ -2920,46 +2947,31 @@ class FolderWriteSerializer(BaseModelSerializer):
 
         return default_role
 
+    def create(self, validated_data):
+        iam_group_set: Optional[IAMGroupSet] = validated_data.pop("iam_groups", None)
+
+        with transaction.atomic():
+            new_folder = super().create(validated_data)
+            if iam_group_set is not None:
+                iam_group_set.apply(new_folder)
+
+        return new_folder
+
     def update(self, instance, validated_data):
-        if (
-            instance.content_type == Folder.ContentType.ROOT
-            and "create_iam_groups" in validated_data
-            and validated_data["create_iam_groups"] != instance.create_iam_groups
-        ):
+        iam_group_set: Optional[IAMGroupSet] = validated_data.get("iam_groups")
+
+        if instance.content_type == Folder.ContentType.ROOT and iam_group_set is not None:
             raise serializers.ValidationError(
-                {"create_iam_groups": "globalFolderMustKeepIamGroupsEnabled"}
+                #TODO: Maybe this error message isn't perfectly adapted anymore (check it).
+                {"iam_groups": "globalFolderMustKeepIamGroupsEnabled"}
             )
 
-        create_flag_changed = (
-            instance.content_type == Folder.ContentType.DOMAIN
-            and "create_iam_groups" in validated_data
-            and validated_data["create_iam_groups"] != instance.create_iam_groups
-        )
-        if create_flag_changed:
-            new_value = validated_data["create_iam_groups"]
-            if new_value:
-                with transaction.atomic():
-                    updated_instance = super().update(instance, validated_data)
-                    Folder.create_default_ug_and_ra(updated_instance)
-                return updated_instance
+        with transaction.atomic():
+            updated_instance: Folder = super().update(instance, validated_data)
+            if iam_group_set is not None:
+                iam_group_set.apply(updated_instance)
 
-            auto_groups = UserGroup.objects.filter(folder=instance, builtin=True)
-            auto_groups_exist = auto_groups.exists()
-            if auto_groups_exist and (
-                User.objects.filter(user_groups__in=auto_groups).exists()
-                or auto_groups.filter(idp_groups__isnull=False).exists()
-            ):
-                raise serializers.ValidationError(
-                    {"create_iam_groups": "cannotDisableIamGroupsAssignedUsers"}
-                )
-            with transaction.atomic():
-                updated_instance = super().update(instance, validated_data)
-                if auto_groups_exist:
-                    RoleAssignment.objects.filter(user_group__in=auto_groups).delete()
-                    auto_groups.delete()
-            return updated_instance
-
-        return super().update(instance, validated_data)
+        return updated_instance
 
     def validate_name(self, value):
         """
@@ -3016,8 +3028,12 @@ class FolderReadSerializer(BaseModelSerializer):
     parent_folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
     default_role = FieldsRelatedField()
-
     content_type = serializers.CharField(source="get_content_type_display")
+    iam_groups = serializers.SerializerMethodField()
+
+    def get_iam_groups(self, folder: Folder) -> list[dict]:
+        iam_group_set = IAMGroupSet.from_folder(folder)
+        return iam_group_set.to_json()
 
     class Meta:
         model = Folder
@@ -3044,6 +3060,7 @@ class RoleReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     permissions = serializers.SerializerMethodField()
     folder = FieldsRelatedField()
+    codename = serializers.CharField(source="name", read_only=True)
 
     class Meta:
         model = Role
@@ -6218,7 +6235,6 @@ class QuickStartSerializer(serializers.Serializer):
             if not folder_serializer.is_valid(raise_exception=True):
                 return None
             folder = folder_serializer.save()
-            Folder.create_default_ug_and_ra(folder)
 
         perimeter_data = {
             "folder": folder.id,

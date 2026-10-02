@@ -2272,6 +2272,8 @@ def startup(sender=None, **kwargs):
         role, _ = Role.objects.get_or_create(name=name, builtin=True)
         role.permissions.set(Permission.objects.filter(codename__in=perm_list))
 
+    root_folder = Folder.get_root_folder()
+
     # When nothing installed makes the default role configurable, it is
     # hard-coded: the root folder carries the baseline reader role and nothing
     # else is configurable (the folder serializer excludes the field).
@@ -2279,100 +2281,33 @@ def startup(sender=None, **kwargs):
     # merely seeded. Folder trees are one level deep here, so root-only
     # ambience reproduces exactly what `is_published` used to expose.
     if not getattr(settings, "CONFIGURABLE_DEFAULT_ROLE", False):
-        root_folder = Folder.get_root_folder()
         baseline_reader_role = Role.objects.get(name="BI-RL-BSL")
         if root_folder.default_role_id != baseline_reader_role.id:
             root_folder.default_role = baseline_reader_role
             root_folder.save()
 
-    # backfill builtin groups (e.g. technical tester) on pre-existing domains
-    for folder in Folder.objects.filter(
-        content_type=Folder.ContentType.DOMAIN, create_iam_groups=True
+    for user_group_codename, role_codename in (
+        (UserGroupCodename.ADMINISTRATOR, RoleCodename.ADMINISTRATOR),
+        (UserGroupCodename.GLOBAL_READER, RoleCodename.READER),
+        (UserGroupCodename.ANALYST, RoleCodename.ANALYST),
+        (UserGroupCodename.GLOBAL_APPROVER, RoleCodename.APPROVER),
+        (UserGroupCodename.GLOBAL_AUDITEE, RoleCodename.AUDITEE),
     ):
-        Folder.create_default_ug_and_ra(folder)
-    # if global administrators user group does not exist, then create it
-    if not UserGroup.objects.filter(
-        name="BI-UG-ADM", folder=Folder.get_root_folder()
-    ).exists():
-        administrators = UserGroup.objects.create(
-            name="BI-UG-ADM", folder=Folder.get_root_folder(), builtin=True
+        if UserGroup.objects.filter(
+            name=user_group_codename.value, folder=root_folder
+        ).exists():
+            continue
+        user_group = UserGroup.objects.create(
+            name=user_group_codename.value, folder=root_folder, builtin=True
         )
-        ra1 = RoleAssignment.objects.create(
-            user_group=administrators,
-            role=Role.objects.get(name="BI-RL-ADM"),
+        role_assignment = RoleAssignment.objects.create(
+            user_group=user_group,
+            role=Role.objects.get(name=role_codename.value),
             is_recursive=True,
             builtin=True,
-            folder=Folder.get_root_folder(),
+            folder=root_folder,
         )
-        ra1.perimeter_folders.add(administrators.folder)
-    # if global readers user group does not exist, then create it
-    if not UserGroup.objects.filter(
-        name="BI-UG-GAD", folder=Folder.get_root_folder()
-    ).exists():
-        global_readers = UserGroup.objects.create(
-            name="BI-UG-GAD",
-            folder=Folder.objects.get(content_type=Folder.ContentType.ROOT),
-            builtin=True,
-        )
-        ra2 = RoleAssignment.objects.create(
-            user_group=global_readers,
-            role=Role.objects.get(name="BI-RL-AUD"),
-            is_recursive=True,
-            builtin=True,
-            folder=Folder.get_root_folder(),
-        )
-        ra2.perimeter_folders.add(global_readers.folder)
-    if not UserGroup.objects.filter(
-        name=UserGroupCodename.ANALYST.value, folder=Folder.get_root_folder()
-    ).exists():
-        analysts = UserGroup.objects.create(
-            name=UserGroupCodename.ANALYST.value,
-            folder=Folder.get_root_folder(),
-            builtin=True,
-        )
-        ra2 = RoleAssignment.objects.create(
-            user_group=analysts,
-            role=Role.objects.get(name=RoleCodename.ANALYST.value),
-            is_recursive=True,
-            builtin=True,
-            folder=Folder.get_root_folder(),
-        )
-        ra2.perimeter_folders.add(analysts.folder)
-    # if global approvers user group does not exist, then create it
-    if not UserGroup.objects.filter(
-        name="BI-UG-GAP", folder=Folder.get_root_folder()
-    ).exists():
-        global_approvers = UserGroup.objects.create(
-            name="BI-UG-GAP",
-            folder=Folder.objects.get(content_type=Folder.ContentType.ROOT),
-            builtin=True,
-        )
-        ra2 = RoleAssignment.objects.create(
-            user_group=global_approvers,
-            role=Role.objects.get(name="BI-RL-APP"),
-            is_recursive=True,
-            builtin=True,
-            folder=Folder.get_root_folder(),
-        )
-        ra2.perimeter_folders.add(global_approvers.folder)
-
-    # if global auditees user group does not exist, then create it
-    if not UserGroup.objects.filter(
-        name=UserGroupCodename.GLOBAL_AUDITEE.value, folder=Folder.get_root_folder()
-    ).exists():
-        global_auditees = UserGroup.objects.create(
-            name=UserGroupCodename.GLOBAL_AUDITEE.value,
-            folder=Folder.get_root_folder(),
-            builtin=True,
-        )
-        ra = RoleAssignment.objects.create(
-            user_group=global_auditees,
-            role=Role.objects.get(name=RoleCodename.AUDITEE.value),
-            is_recursive=True,
-            builtin=True,
-            folder=Folder.get_root_folder(),
-        )
-        ra.perimeter_folders.add(global_auditees.folder)
+        role_assignment.perimeter_folders.add(root_folder)
 
     # Create default Qualifications
     try:

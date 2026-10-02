@@ -16,7 +16,6 @@ from email.utils import parseaddr
 from urllib.parse import urlsplit
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
 from django.db.models import (
@@ -32,8 +31,10 @@ from django.db.models import (
     Q,
     UUIDField,
 )
+from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
-from iam.models import User
+from iam.models import IAMGroupSet, User
 from core.models import (
     Actor,
     AppliedControl,
@@ -3247,7 +3248,10 @@ class ProvisionFolderAction(BaseAction):
         else:
             parent = instance.folder
 
-        create_groups = bool(config.get("create_default_groups"))
+        iam_groups = config.get("iam_groups")
+        if not isinstance(iam_groups, list) or not all(isinstance(iam_group, dict) for iam_group in iam_groups):
+            raise ActionError("iam_groups: MUST be a list of dicts")
+
         folder = Folder.objects.filter(
             name=name,
             parent_folder=parent,
@@ -3255,18 +3259,19 @@ class ProvisionFolderAction(BaseAction):
         ).first()
         created = folder is None
         if created:
-            folder = Folder.objects.create(
-                name=name,
-                parent_folder=parent,
-                content_type=Folder.ContentType.DOMAIN,
-                create_iam_groups=create_groups,
-            )
-            if create_groups:
-                Folder.create_default_ug_and_ra(folder)
-        elif create_groups and not folder.create_iam_groups:
-            folder.create_iam_groups = True
-            folder.save(update_fields=["create_iam_groups", "updated_at"])
-            Folder.create_default_ug_and_ra(folder)
+            with transaction.atomic():
+                folder = Folder.objects.create(
+                    name=name,
+                    parent_folder=parent,
+                    content_type=Folder.ContentType.DOMAIN,
+                )
+                try:
+                    iam_group_set = IAMGroupSet.create(iam_groups)
+                except DRFValidationError as e:
+                    raise ActionError(f"iam_groups: {e.detail}") from e
+                else:
+                    iam_group_set.apply(folder)
+
         return {
             "folder_id": str(folder.id),
             "folder_name": folder.name,
@@ -3281,7 +3286,7 @@ def _deactivates_last_active_admin(user) -> bool:
     IdP group are managed by the IdP and cannot be the lockout-proof anchor."""
     from iam.models import User, UserGroup
 
-    if not UserGroup.objects.filter(user=user, name="BI-UG-ADM").exists():
+    if not UserGroup.objects.filter(users=user, name="BI-UG-ADM").exists():
         return False
     return (
         not User.objects.filter(user_groups__name="BI-UG-ADM", is_active=True)

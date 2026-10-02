@@ -5,8 +5,9 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Any, List, Literal, Optional, Final
+from typing import Any, List, Literal, Optional, Final, ClassVar, Mapping
 from typing import TYPE_CHECKING, cast
+from types import MappingProxyType
 import secrets
 import uuid
 from allauth.account.models import EmailAddress
@@ -20,6 +21,7 @@ from django.utils.translation import gettext_lazy as _, override as translation_
 from django.urls.base import reverse_lazy
 from django.db.models import Q, F, QuerySet, Case, When, Value, BooleanField
 from knox.models import AuthToken
+from rest_framework.serializers import ValidationError
 
 from core.utils import (
     BUILTIN_USERGROUP_CODENAMES,
@@ -105,6 +107,199 @@ def _get_root_folder() -> Optional[Folder]:
 
 _ENCLAVE_FOLDER_CONTENT_TYPE_STRING: Final[str] = "EN"
 
+@dataclass(frozen=True)
+class IAMGroup:
+    """
+    Represent an IAM Group.
+
+    (Which is a triplet of `UserGroup`/`Role`/`RoleAssignment` (assigning this `UserGroup` to this `Role`))
+    """
+    user_group_name: str
+    """Codename(`UserGroup.name`) of the user group."""
+    is_recursive: bool
+    """Whether the underlying `RoleAssignment` will be recursive or not (see `RoleAssignment.is_recursive`)."""
+
+    BUILTIN_PAIRS: ClassVar[Mapping[UserGroupCodename, RoleCodename]] = MappingProxyType({
+        #TODO: Copy the `builtin_paris` codenames.
+        UserGroupCodename.READER: RoleCodename.READER,
+        UserGroupCodename.APPROVER: RoleCodename.APPROVER,
+        UserGroupCodename.ANALYST: RoleCodename.ANALYST,
+        UserGroupCodename.DOMAIN_MANAGER: RoleCodename.DOMAIN_MANAGER,
+        UserGroupCodename.AUDITEE: RoleCodename.AUDITEE,
+        UserGroupCodename.TECHNICAL_TESTER: RoleCodename.TECHNICAL_TESTER,
+    })
+    """Allowed IAM groups."""
+
+    def get_role_name(self) -> str:
+        user_group_name = UserGroupCodename(self.user_group_name)
+        role_codename = self.BUILTIN_PAIRS[user_group_name]
+        role_name = str(role_codename)
+        return role_name
+
+    def __post_init__(self):
+        try:
+            user_group_name = UserGroupCodename(self.user_group_name)
+        except ValueError as e:
+            raise ValidationError(f"The {self.user_group_name!r} name is an invalid UserGroupCodename.") from e
+        else:
+            is_allowed_name = user_group_name in self.BUILTIN_PAIRS
+            if not is_allowed_name:
+                raise ValidationError(f"The {user_group_name!r} IAMGroup user_group name isn't allowed.")
+
+    def to_json(self) -> dict:
+        return {
+            "user_group_name": self.user_group_name,
+            "is_recursive": self.is_recursive,
+            "translated_role_name": get_translated_builtin_role_name(self.get_role_name()),
+        }
+
+    @staticmethod
+    def create(iam_group_data: dict) -> IAMGroup:
+        is_recursive = iam_group_data.get("is_recursive", False)
+        user_group_name = iam_group_data.get("user_group_name")
+
+        if not isinstance(is_recursive, bool):
+            raise ValidationError("The 'is_recursive' value MUST be a boolean.")
+
+        if user_group_name is None:
+            raise ValidationError("The 'user_group_name' JSON key MUST be set.")
+
+        if not isinstance(user_group_name, str):
+            raise ValidationError("The 'user_group_name' value MUST be a string.")
+
+        return IAMGroup(user_group_name, is_recursive)
+
+@dataclass(frozen=True)
+class IAMGroupSet:
+    iam_groups: list[IAMGroup]
+
+    USER_GROUP_NAMES: ClassVar[frozenset[str]] = frozenset({
+        str(user_group_name)
+        for user_group_name in IAMGroup.BUILTIN_PAIRS.keys()
+    })
+
+    @staticmethod
+    def from_folder(folder: Folder) -> IAMGroupSet:
+        user_groups = IAMGroupSet.get_iam_user_groups(folder)
+        role_assignments = RoleAssignment.objects.filter(user_group__in=user_groups, builtin=True)
+        user_group_id_to_role_assignment: dict[uuid.UUID, RoleAssignment] = {
+            role_assignment.user_group_id: role_assignment
+            for role_assignment in role_assignments
+        }
+
+        iam_groups = [
+            IAMGroup(
+                user_group.name,
+                ra.is_recursive if (ra := user_group_id_to_role_assignment.get(user_group.id)) else False,
+            )
+            for user_group in user_groups
+        ]
+        return IAMGroupSet(iam_groups)
+
+    def to_json(self) -> list[dict]:
+        return [iam_group.to_json() for iam_group in self.iam_groups]
+
+    @staticmethod
+    def get_iam_user_groups(folder: Optional[Folder]) -> QuerySet[UserGroup]:
+        user_groups = UserGroup.objects.filter(
+            builtin=True,
+            name__in=IAMGroupSet.USER_GROUP_NAMES,
+            # IdP-managed user groups aren't mutable by this mechanism.
+            #TODO: (I guess i should exclude the IdP-managed user-groups from the frontend view)
+            idp_groups__isnull=True,
+        )
+        if folder is not None:
+            user_groups = user_groups.filter(folder=folder)
+
+        return user_groups
+
+    @transaction.atomic
+    def apply(self, folder: Folder):
+        """
+        Apply the `self.iam_groups` IAM groups to this folder.
+
+        (Create/update/delete the new `UserGroup`/`RoleAssignment` pairs accordingly).
+        """
+
+        if folder.content_type != Folder.ContentType.DOMAIN:
+            raise ValidationError("Can't set IAM Groups for a non-DOMAIN folder. (Is this folder a ROOT/ENCLAVE folder ?)")
+
+        new_user_group_name_set = set(iam_group.user_group_name for iam_group in self.iam_groups)
+        current_user_groups = self.get_iam_user_groups(folder)
+        current_user_groups_name_set = {user_group.name for user_group in current_user_groups}
+        user_group_name_to_role_name = {
+            iam_group.user_group_name: iam_group.get_role_name()
+            for iam_group in self.iam_groups
+        }
+
+        user_group_to_delete_names = [
+            user_group.name
+            for user_group in current_user_groups
+            if user_group.name not in new_user_group_name_set
+        ]
+        user_group_to_create_names = [
+            user_group_name
+            for user_group_name in new_user_group_name_set
+            if user_group_name not in current_user_groups_name_set
+        ]
+
+        UserGroup.objects.filter(
+            name__in=user_group_to_delete_names,
+            folder=folder,
+            builtin=True,
+        ).delete()
+        # We don't need to delete the `RoleAssignment` as they are deleted when their `UserGroup` is deleted via `models.CASCADE`.
+
+        user_groups_to_create = [
+            UserGroup(name=user_group_name, folder=folder, builtin=True)
+            for user_group_name in user_group_to_create_names
+        ]
+
+        #TODO: Check if it doesn't bypass an important `UserGroup.save` or whatever method/signal (which is important).
+        new_user_groups = UserGroup.objects.bulk_create(user_groups_to_create)
+
+        role_assignment_to_create = [
+            # We set `is_recursive` to `False` as it will be updated(fixed) by the `RoleAssignment.objects.bulk_update` right after.
+            RoleAssignment(
+                role=Role.objects.get(name=user_group_name_to_role_name[new_user_group.name]),
+                user_group=new_user_group,
+                builtin=True,
+                is_recursive=False,
+            )
+            for new_user_group in new_user_groups
+        ]
+        new_role_assignments = RoleAssignment.objects.bulk_create(role_assignment_to_create)
+
+        # Set the `perimeter_folders` of the newly created role assignments to `folder`.
+        RoleAssignmentToFolder = RoleAssignment.perimeter_folders.through
+        RoleAssignmentToFolder.objects.bulk_create([
+            RoleAssignmentToFolder(roleassignment_id=new_role_assignment.id, folder_id=folder.id)
+            for new_role_assignment in new_role_assignments
+        ], batch_size=1000)
+
+        user_groups = self.get_iam_user_groups(folder)
+        role_assignments = RoleAssignment.objects.filter(user_group__in=user_groups).select_related("user_group").select_for_update(of=("self",))
+
+        user_group_name_to_is_recursive = {
+            iam_group.user_group_name: iam_group.is_recursive
+            for iam_group in self.iam_groups
+        }
+
+        for role_assignment in role_assignments:
+            user_group_name = role_assignment.user_group.name
+            is_recursive = user_group_name_to_is_recursive[user_group_name]
+            role_assignment.is_recursive = is_recursive
+
+        #TODO: Check if it doesn't bypass an important `RoleAssignment.save` or whatever method/signal (which is important).
+        RoleAssignment.objects.bulk_update(role_assignments, ["is_recursive"], batch_size=1000)
+
+    @staticmethod
+    def create(iam_groups: list[dict]) -> IAMGroupSet:
+        return IAMGroupSet(
+            iam_groups=[
+                IAMGroup.create(iam_group_data) for iam_group_data in iam_groups
+            ]
+        )
 
 class Folder(NameDescriptionMixin):
     """A folder is a container for other folders or any object
@@ -185,10 +380,6 @@ class Folder(NameDescriptionMixin):
         related_name="ancestors",
     )
     builtin = models.BooleanField(default=False)
-    create_iam_groups = models.BooleanField(
-        default=False,
-        help_text=_("Automatically provision IAM groups for domain folders."),
-    )
     default_role = models.ForeignKey(
         "Role",
         null=True,
@@ -592,7 +783,7 @@ class Folder(NameDescriptionMixin):
             RoleAssignment.objects.filter(
                 role_assignment_filter, user_group__isnull=False
             )
-            .annotate(user_pk=F("user_group__user__id"))
+            .annotate(user_pk=F("user_group__users__id"))
             .order_by()
         )
 
@@ -608,64 +799,6 @@ class Folder(NameDescriptionMixin):
                 user_roles[item.user_pk].append(item.role)
 
         return dict(user_roles)
-
-    @staticmethod
-    def create_default_ug_and_ra(folder: "Folder"):
-        if (
-            folder.content_type != Folder.ContentType.DOMAIN
-            or not folder.create_iam_groups
-        ):
-            return
-
-        root_folder = Folder.get_root_folder()
-        builtin_pairs = [
-            (UserGroupCodename.READER, RoleCodename.READER),
-            (UserGroupCodename.APPROVER, RoleCodename.APPROVER),
-            (UserGroupCodename.ANALYST, RoleCodename.ANALYST),
-            (UserGroupCodename.DOMAIN_MANAGER, RoleCodename.DOMAIN_MANAGER),
-            (UserGroupCodename.AUDITEE, RoleCodename.AUDITEE),
-            (UserGroupCodename.TECHNICAL_TESTER, RoleCodename.TECHNICAL_TESTER),
-        ]
-
-        for ug_codename, role_codename in builtin_pairs:
-            ug, created = UserGroup.objects.get_or_create(
-                name=str(ug_codename),
-                folder=folder,
-                defaults={"builtin": True},
-            )
-            if not created or not ug.builtin:
-                if not ug.builtin:
-                    ug.builtin = True
-                ug.save(update_fields=["builtin"])
-            role = Role.objects.get(name=str(role_codename))
-            ra, _ = RoleAssignment.objects.get_or_create(
-                user_group=ug,
-                role=role,
-                folder=root_folder,
-                defaults={"builtin": True, "is_recursive": True},
-            )
-            Folder._ensure_recursive_assignment(ra)
-            ra.perimeter_folders.add(folder)
-
-        with transaction.atomic():
-            for role in Role.objects.filter(builtin=False):
-                ug, created = UserGroup.objects.get_or_create(
-                    name=role.name,
-                    folder=folder,
-                    defaults={"builtin": True},
-                )
-                if not created or not ug.builtin:
-                    if not ug.builtin:
-                        ug.builtin = True
-                    ug.save(update_fields=["builtin"])
-                ra, _ = RoleAssignment.objects.get_or_create(
-                    user_group=ug,
-                    role=role,
-                    folder=root_folder,
-                    defaults={"builtin": False, "is_recursive": True},
-                )
-                Folder._ensure_recursive_assignment(ra)
-                ra.perimeter_folders.add(folder)
 
     @staticmethod
     def _ensure_recursive_assignment(role_assignment: "RoleAssignment") -> None:
@@ -712,6 +845,13 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         verbose_name = _("user group")
         verbose_name_plural = _("user groups")
 
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "folder"],
+                name="unique_name_per_folder",
+            )
+        ]
+
     def __str__(self) -> str:
         if self.builtin:
             role_codename = BUILTIN_USERGROUP_CODENAMES.get(self.name, self.name)
@@ -722,12 +862,6 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
 
     def get_name_display(self) -> str:
         return self.name
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        super().delete(*args, **kwargs)
 
 
 def is_supported_language(code) -> bool:
@@ -820,7 +954,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         user.user_groups.set(extra_fields.get("user_groups", []))
         if initial_group:
-            initial_group.user_set.add(user)
+            initial_group.users.add(user)
 
         # create an EmailAddress object for the newly created user
         # this is required by allauth
@@ -925,6 +1059,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         UserGroup,
         verbose_name=_("user groups"),
         blank=True,
+        related_name="users",
         help_text=_(
             "The user groups this user belongs to. A user will get all permissions "
             "granted to each of their user groups."
@@ -1283,7 +1418,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         # UserGroup.objects, not self.user_groups: the related manager inherits
         # the viewset's visibility-filtered prefetch, which would hide exactly
         # the membership this answer is about.
-        if UserGroup.objects.filter(user=self, name="BI-UG-ADM").exists():
+        if UserGroup.objects.filter(users=self, name="BI-UG-ADM").exists():
             return True
         return (
             idp_group_role_inheritance_enabled()
@@ -1437,6 +1572,21 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     is_recursive = models.BooleanField(_("sub folders are visible"), default=False)
     builtin = models.BooleanField(default=False)
 
+    class Meta:
+        constraints = [
+            # Ensure a `RoleAssignment` is EITHER:
+            # - `user`-based(`self. is not None`)
+            # - OR `user_group`-based (`self.user_group is not None`).
+            # We don't want a `RoleAssignment` to assign a `Role` to both a `user` and a `user_group`.
+            models.CheckConstraint(
+                condition=(
+                    Q(user_group__isnull=False, user__isnull=True)
+                    | Q(user_group__isnull=True, user__isnull=False)
+                ),
+                name="role_assignment_is_either_for_user_or_user_group",
+            )
+        ]
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
@@ -1464,7 +1614,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         from global_settings.utils import idp_group_role_inheritance_enabled
 
-        filter_query = Q(user=user) | Q(user_group__user=user)
+        filter_query = Q(user=user) | Q(user_group__users=user)
 
         if idp_group_role_inheritance_enabled():
             filter_query |= Q(user_group__idp_groups__users=user)

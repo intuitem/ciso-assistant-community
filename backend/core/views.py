@@ -132,7 +132,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
+from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup, IAMGroupSet
 from core.domain_quality_checks import (
     BLOCKS as DOMAIN_QUALITY_BLOCKS,
     domain_quality_checks,
@@ -2400,7 +2400,6 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
     @action(detail=True, name="Get write data")
     def object(self, request, pk):
         serializer_class = self.get_serializer_class(action="update")
-
         return Response(serializer_class(super().get_object()).data)
 
 
@@ -8600,7 +8599,7 @@ class UserViewSet(BaseModelViewSet):
         if not (
             instance is not None
             and any(field in attrs for field in self.LOCKOUT_SENSITIVE_FIELDS)
-            and UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists()
+            and UserGroup.objects.filter(users=instance, name="BI-UG-ADM").exists()
         ):
             return super().perform_update(serializer)
 
@@ -8680,7 +8679,7 @@ class UserViewSet(BaseModelViewSet):
                 "admin_delete", "deletingAdminAccountRequiresAdminRights", instance
             )
         # Protect the last direct (locally-managed) administrator — see update().
-        if UserGroup.objects.filter(user=instance, name="BI-UG-ADM").exists():
+        if UserGroup.objects.filter(users=instance, name="BI-UG-ADM").exists():
             with transaction.atomic():
                 # Lock the admin group row so this check-then-act can't race a
                 # concurrent admin removal into a zero-admin lockout.
@@ -8861,6 +8860,21 @@ class UserGroupViewSet(BaseModelViewSet):
 
     # Deletion of built-in groups is blocked generically by the permission layer.
 
+    @action(detail=False, methods=["post"], url_path="delete-unused-user-groups")
+    def delete_unused_user_groups(self, request):
+        is_unused_query = ~Exists(User.objects.filter(user_groups=OuterRef("pk")))
+        # There's no RBAC for the `UserGroup` model (no one have the `"change_usergroup"` `Permission` (even admins)).
+        # So we only allow users to delete `UserGroup` objects in folders they have the right to modify (`"change_folder"`).
+        changeable_folder_ids = RoleAssignment.get_changeable_object_ids(request.user, Folder)
+
+        root_folder_id = Folder.get_root_folder_id()
+        assert root_folder_id is not None, "This endpoint can't work without a root folder."
+
+        unused_iam_user_groups = IAMGroupSet.get_iam_user_groups(None).filter(folder_id__in=changeable_folder_ids).exclude(folder_id=root_folder_id).filter(is_unused_query)
+
+        deleted_count, _ = unused_iam_user_groups.delete()
+        return Response({"count": deleted_count})
+
     MEMBER_BATCH_LIMIT = BATCH_SIZE_LIMIT
 
     def _member_ids(self, request) -> list[str]:
@@ -8883,14 +8897,14 @@ class UserGroupViewSet(BaseModelViewSet):
         change_user. Authorized on the group's folder (see permission_overrides)."""
         group = self.get_object()
         users = User.objects.filter(pk__in=self._member_ids(request))
-        group.user_set.add(*users)
+        group.users.add(*users)
         logger.info(
             "users added to user group",
             user_group=group,
             users=list(users),
             actor=request.user,
         )
-        return Response({"count": group.user_set.count()})
+        return Response({"count": group.users.count()})
 
     def _blocks_domain_admin_self_removal(self, actor, group, ids) -> bool:
         """A user may not strip their own domain-admin entitlement by removing
@@ -8917,6 +8931,7 @@ class UserGroupViewSet(BaseModelViewSet):
             return False
         return True
 
+
     @action(detail=True, methods=["post"], url_path="remove-members")
     def remove_members(self, request, pk=None):
         """Remove users from this group (batch). Same authorization as add_members.
@@ -8934,20 +8949,20 @@ class UserGroupViewSet(BaseModelViewSet):
                 direct_admin_count = User.objects.filter(
                     user_groups__name="BI-UG-ADM"
                 ).count()
-                removing = group.user_set.filter(pk__in=ids).count()
+                removing = group.users.filter(pk__in=ids).count()
                 if direct_admin_count - removing < 1:
                     return Response(
                         {"error": "attemptToRemoveOnlyAdminUserGroup"},
                         status=status.HTTP_403_FORBIDDEN,
                     )
-                group.user_set.remove(*users)
+                group.users.remove(*users)
         elif self._blocks_domain_admin_self_removal(request.user, group, ids):
             return Response(
                 {"error": "attemptToRemoveSelfFromDomainAdminGroup"},
                 status=status.HTTP_403_FORBIDDEN,
             )
         else:
-            group.user_set.remove(*users)
+            group.users.remove(*users)
 
         logger.info(
             "users removed from user group",
@@ -8955,7 +8970,7 @@ class UserGroupViewSet(BaseModelViewSet):
             users=list(users),
             actor=request.user,
         )
-        return Response({"count": group.user_set.count()})
+        return Response({"count": group.users.count()})
 
 
 class IdPGroupViewSet(BaseModelViewSet):
@@ -9027,7 +9042,6 @@ class FolderViewSet(BaseModelViewSet):
         Create the default user groups after domain creation
         """
         folder = serializer.save()
-        Folder.create_default_ug_and_ra(folder)
 
     @action(detail=False, methods=["post"])
     def reorganize(self, request):

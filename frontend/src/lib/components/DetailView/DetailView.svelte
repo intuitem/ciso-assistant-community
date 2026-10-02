@@ -643,6 +643,10 @@
 												<p class="text-xs text-yellow-700">
 													{m.objectsNotVisible({ count: hiddenCountForValue })}
 												</p>
+											{:else if key === 'iam_groups'}
+												{#each value as {translated_role_name, is_recursive}}
+													<div>{translated_role_name} {#if is_recursive}({m.isRecursive()}){/if}</div>
+												{/each}
 											{:else if key === 'asset_class'}
 												<!-- Special case for asset_class - Always translate the value -->
 												{#if typeof value === 'object' && (value.str || value.name)}

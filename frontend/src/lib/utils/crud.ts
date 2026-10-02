@@ -1134,6 +1134,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		],
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'folder' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'is_recursive' },
+			{ field: 'builtin' },
+		],
 		reverseForeignKeyFields: [
 			{
 				field: 'user_groups',
