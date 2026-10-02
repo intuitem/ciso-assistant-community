@@ -715,6 +715,40 @@ class TestReviewFixes:
         assert scenario.likelihood == 2
         assert scenario.get_likelihood_display()
 
+    def test_failed_recompute_rolls_back_the_matrix_change(
+        self, basic_ebios_rm_study_fixture, elementary_actions_fixture, monkeypatch
+    ):
+        from core.models import RiskMatrix, StoredLibrary
+
+        study = basic_ebios_rm_study_fixture
+        study.quotation_method = EbiosRMStudy.QuotationMethod.ADVANCED
+        study.save()
+        know, _, _ = elementary_actions_fixture
+        step = KillChain.objects.create(
+            operating_mode=_operating_mode(study),
+            elementary_action=know,
+            success_probability=3,
+            technical_difficulty=3,
+        )
+        StoredLibrary.objects.get(
+            urn="urn:intuitem:risk:library:risk-matrix-3x3-mult"
+        ).load()
+        original_matrix = study.risk_matrix_id
+
+        def fail(*args, **kwargs):
+            raise RuntimeError
+
+        monkeypatch.setattr(OperatingMode, "save", fail)
+        study.risk_matrix = RiskMatrix.objects.get(
+            urn="urn:intuitem:risk:matrix:3x3-mult"
+        )
+        with pytest.raises(RuntimeError):
+            study.save()
+
+        step.refresh_from_db()
+        assert (step.success_probability, step.technical_difficulty) == (3, 3)
+        assert EbiosRMStudy.objects.get(id=study.id).risk_matrix_id == original_matrix
+
     def test_refresh_ratings_follows_a_changed_matrix(
         self, basic_ebios_rm_study_fixture
     ):

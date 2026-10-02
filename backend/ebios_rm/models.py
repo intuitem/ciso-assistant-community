@@ -234,71 +234,76 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         ordering = ["created_at"]
 
     def save(self, *args, **kwargs):
-        folder_changed = False
-        if self.pk:
-            old_study = (
-                EbiosRMStudy.objects.filter(pk=self.pk)
-                .values("risk_matrix_id", "folder_id")
-                .first()
-            )
-            old_matrix_id = old_study["risk_matrix_id"] if old_study else None
-            folder_changed = (
-                old_study is not None and old_study["folder_id"] != self.folder_id
-            )
-
-            if old_matrix_id != self.risk_matrix_id:
-                probabilities = list(range(len(self.risk_matrix.probability or [])))
-                impacts = list(range(len(self.risk_matrix.impact or [])))
-                min_prob, max_prob = min(probabilities), max(probabilities)
-                min_impact, max_impact = min(impacts), max(impacts)
-                for feared_event in self.feared_events.all():
-                    if feared_event.gravity >= 0:
-                        feared_event.gravity = max(
-                            min_impact, min(feared_event.gravity, max_impact)
-                        )
-                        feared_event.save(update_fields=["gravity"])
-                modes = OperatingMode.objects.filter(
-                    operational_scenario__ebios_rm_study=self
-                )
-                modes.filter(likelihood__gt=max_prob).update(likelihood=max_prob)
-                modes.filter(computed_likelihood__gt=max_prob).update(
-                    computed_likelihood=max_prob
-                )
-                for operational_scenario in self.operational_scenarios.all():
-                    if operational_scenario.likelihood_forced is not None:
-                        operational_scenario.likelihood_forced = max(
-                            min_prob,
-                            min(operational_scenario.likelihood_forced, max_prob),
-                        )
-                    if operational_scenario.likelihood >= 0:
-                        operational_scenario.likelihood = max(
-                            min_prob, min(operational_scenario.likelihood, max_prob)
-                        )
-                        operational_scenario.save(
-                            update_fields=["likelihood", "likelihood_forced"]
-                        )
-                for strategic_scenario in self.strategic_scenarios.filter(
-                    gravity_forced__isnull=False
-                ):
-                    strategic_scenario.gravity_forced = max(
-                        min_impact, min(strategic_scenario.gravity_forced, max_impact)
-                    )
-                    strategic_scenario.save(update_fields=["gravity_forced"])
-                steps = KillChain.objects.filter(
-                    operating_mode__operational_scenario__ebios_rm_study=self
-                )
-                steps.filter(success_probability__gt=max_prob).update(
-                    success_probability=max_prob
-                )
-                steps.filter(technical_difficulty__gt=max_prob).update(
-                    technical_difficulty=max_prob
-                )
-                self.__dict__.pop("_rating_kit_cache", None)
-                for ro_to in self.roto_set.all():
-                    ro_to.ebios_rm_study = self
-                    ro_to.save(update_fields=["pertinence"])
-
         with transaction.atomic():
+            folder_changed = False
+            if self.pk:
+                old_study = (
+                    EbiosRMStudy.objects.filter(pk=self.pk)
+                    .values("risk_matrix_id", "folder_id")
+                    .first()
+                )
+                old_matrix_id = old_study["risk_matrix_id"] if old_study else None
+                folder_changed = (
+                    old_study is not None and old_study["folder_id"] != self.folder_id
+                )
+
+                if old_matrix_id != self.risk_matrix_id:
+                    probabilities = list(range(len(self.risk_matrix.probability or [])))
+                    impacts = list(range(len(self.risk_matrix.impact or [])))
+                    min_prob, max_prob = min(probabilities), max(probabilities)
+                    min_impact, max_impact = min(impacts), max(impacts)
+                    for feared_event in self.feared_events.all():
+                        if feared_event.gravity >= 0:
+                            feared_event.gravity = max(
+                                min_impact, min(feared_event.gravity, max_impact)
+                            )
+                            feared_event.save(update_fields=["gravity"])
+                    modes = OperatingMode.objects.filter(
+                        operational_scenario__ebios_rm_study=self
+                    )
+                    modes.filter(likelihood__gt=max_prob).update(likelihood=max_prob)
+                    modes.filter(computed_likelihood__gt=max_prob).update(
+                        computed_likelihood=max_prob
+                    )
+                    steps = KillChain.objects.filter(
+                        operating_mode__operational_scenario__ebios_rm_study=self
+                    )
+                    steps.filter(success_probability__gt=max_prob).update(
+                        success_probability=max_prob
+                    )
+                    steps.filter(technical_difficulty__gt=max_prob).update(
+                        technical_difficulty=max_prob
+                    )
+                    for operational_scenario in self.operational_scenarios.all():
+                        if operational_scenario.likelihood_forced is not None:
+                            operational_scenario.likelihood_forced = max(
+                                min_prob,
+                                min(operational_scenario.likelihood_forced, max_prob),
+                            )
+                        if operational_scenario.likelihood >= 0:
+                            operational_scenario.likelihood = max(
+                                min_prob, min(operational_scenario.likelihood, max_prob)
+                            )
+                        if (
+                            operational_scenario.likelihood >= 0
+                            or operational_scenario.likelihood_forced is not None
+                        ):
+                            operational_scenario.save(
+                                update_fields=["likelihood", "likelihood_forced"]
+                            )
+                    for strategic_scenario in self.strategic_scenarios.filter(
+                        gravity_forced__isnull=False
+                    ):
+                        strategic_scenario.gravity_forced = max(
+                            min_impact,
+                            min(strategic_scenario.gravity_forced, max_impact),
+                        )
+                        strategic_scenario.save(update_fields=["gravity_forced"])
+                    self.__dict__.pop("_rating_kit_cache", None)
+                    for ro_to in self.roto_set.all():
+                        ro_to.ebios_rm_study = self
+                        ro_to.save(update_fields=["pertinence"])
+
             super().save(*args, **kwargs)
             if folder_changed:
                 for model, study_path in STUDY_FOLDER_CASCADE_MODELS.items():
@@ -306,14 +311,14 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                         folder=self.folder
                     )
 
-        if self.quotation_method in self.STEP_QUOTATION_METHODS:
-            for operating_mode in OperatingMode.objects.filter(
-                operational_scenario__ebios_rm_study=self
-            ):
-                operating_mode.save(update_fields=["computed_likelihood"])
-        elif self.quotation_method == self.QuotationMethod.EXPRESS:
-            for scenario in self.operational_scenarios.all():
-                scenario.update_likelihood_from_operating_modes()
+            if self.quotation_method in self.STEP_QUOTATION_METHODS:
+                for operating_mode in OperatingMode.objects.filter(
+                    operational_scenario__ebios_rm_study=self
+                ):
+                    operating_mode.save(update_fields=["computed_likelihood"])
+            elif self.quotation_method == self.QuotationMethod.EXPRESS:
+                for scenario in self.operational_scenarios.all():
+                    scenario.update_likelihood_from_operating_modes()
 
     def rating_kit(self, translated: bool = False) -> dict:
         """The matrix's EBIOS RM scales and grids, defaults filled in."""
