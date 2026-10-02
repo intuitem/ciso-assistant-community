@@ -8,14 +8,7 @@ from ebios_rm.quotation import (
     compute,
     default_likelihood_grid,
 )
-from ebios_rm.tests.test_kill_chain_steps import (
-    _operating_mode,
-    _save_graph,
-    admin_client,
-    elementary_actions_fixture,
-)
-
-from ebios_rm.tests.fixtures import *
+from ebios_rm.tests.test_kill_chain_steps import _operating_mode, _save_graph
 
 
 def _diamond(operator, probabilities, difficulties=(UNRATED,) * 4):

@@ -3,8 +3,6 @@ import pytest
 from core.models import ClassificationLevel, ObjectClassification
 from ebios_rm.serializers import EbiosRMStudyReadSerializer, EbiosRMStudyWriteSerializer
 
-from ebios_rm.tests.fixtures import *
-
 
 @pytest.fixture
 def restricted_level_fixture():

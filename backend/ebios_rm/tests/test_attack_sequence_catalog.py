@@ -8,7 +8,6 @@ from ebios_rm.models import ElementaryAction
 from global_settings.models import GlobalSettings
 from global_settings.utils import clear_feature_flags_cache
 from ebios_rm.serializers import ElementaryActionReadSerializer
-from ebios_rm.tests.test_kill_chain_steps import admin_client
 from sec_intel.models import Tactic, Technique, TTPCatalog
 from sec_intel.views import build_catalog_matrix
 

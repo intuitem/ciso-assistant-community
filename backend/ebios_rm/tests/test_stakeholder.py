@@ -7,8 +7,6 @@ from core.models import Terminology
 
 from tprm.models import Entity
 
-from ebios_rm.tests.fixtures import *
-
 
 @pytest.mark.django_db
 class TestStakeholder:

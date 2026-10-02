@@ -142,7 +142,7 @@ def _ranker(result: Quotation, advanced: bool):
                 result.probability[step_id],
                 -result.difficulty[step_id],
             )
-        return (result.probability[step_id],)
+        return (result.probability[step_id], 0, 0)
 
     return rank
 

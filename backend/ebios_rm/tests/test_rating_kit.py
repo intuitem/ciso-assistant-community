@@ -7,13 +7,8 @@ from core.views import RiskMatrixViewSet
 from ebios_rm import rating_kit
 from ebios_rm.models import KillChain, RoTo
 from ebios_rm.serializers import RoToReadSerializer
-from ebios_rm.tests.test_kill_chain_steps import (
-    _operating_mode,
-    admin_client,
-    elementary_actions_fixture,
-)
+from ebios_rm.tests.test_kill_chain_steps import _operating_mode
 
-from ebios_rm.tests.fixtures import *
 
 LEGACY_PERTINENCE_MATRIX = [
     [1, 1, 2, 2],

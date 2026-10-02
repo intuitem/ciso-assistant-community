@@ -1,12 +1,8 @@
 import pytest
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
-from iam.models import User, UserGroup
-from knox.models import AuthToken
 from rest_framework import status
-from rest_framework.test import APIClient
 
-from core.apps import startup
 from core.models import Asset, Terminology
 from ebios_rm.models import (
     AttackPath,
@@ -23,22 +19,6 @@ from ebios_rm.serializers import (
     KillChainReadSerializer,
     KillChainWriteSerializer,
 )
-
-from ebios_rm.tests.fixtures import *
-
-
-@pytest.fixture
-def admin_client():
-    startup(sender=None)
-    admin = User.objects.create_superuser("admin@kill-chain-steps-tests.com")
-    admin_group = UserGroup.objects.get(name="BI-UG-ADM")
-    admin.folder = admin_group.folder
-    admin.save()
-    admin_group.user_set.add(admin)
-    client = APIClient()
-    token = AuthToken.objects.create(user=admin)
-    client.credentials(HTTP_AUTHORIZATION=f"Token {token[1]}")
-    return client
 
 
 def _operating_mode(study, name="test operating mode"):
@@ -71,20 +51,6 @@ def _operating_mode(study, name="test operating mode"):
 @pytest.fixture
 def operating_mode_fixture(basic_ebios_rm_study_fixture):
     return _operating_mode(basic_ebios_rm_study_fixture)
-
-
-@pytest.fixture
-def elementary_actions_fixture():
-    know = ElementaryAction.objects.create(
-        name="Reconnaissance", attack_stage=ElementaryAction.AttackStage.KNOW
-    )
-    enter = ElementaryAction.objects.create(
-        name="Phishing", attack_stage=ElementaryAction.AttackStage.ENTER
-    )
-    exploit = ElementaryAction.objects.create(
-        name="Exfiltration", attack_stage=ElementaryAction.AttackStage.EXPLOIT
-    )
-    return know, enter, exploit
 
 
 @pytest.fixture

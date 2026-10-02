@@ -3,9 +3,7 @@ import pytest
 from core.models import Terminology
 from ebios_rm.models import RoTo
 from ebios_rm.serializers import RoToImportExportSerializer, RoToReadSerializer
-from ebios_rm.tests.test_kill_chain_steps import admin_client
 
-from ebios_rm.tests.fixtures import *
 
 FICHE_4_CATEGORIES = {
     "espionage",

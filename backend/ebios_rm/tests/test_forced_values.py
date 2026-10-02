@@ -17,8 +17,6 @@ from ebios_rm.serializers import (
     StrategicScenarioWriteSerializer,
 )
 
-from ebios_rm.tests.fixtures import *
-
 
 @pytest.fixture
 def scenario_chain(basic_ebios_rm_study_fixture):
