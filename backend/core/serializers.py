@@ -1,17 +1,19 @@
 import copy
 import importlib
-from typing import Any, Mapping, ClassVar
-from types import MappingProxyType
-from dataclasses import dataclass
+from typing import Any
+from datetime import datetime
 
 import structlog
 from django.db import models, transaction
-from datetime import datetime
-
 from django.db.models import F, Q
 from django.utils import timezone
-
+from django.contrib.auth.models import Permission
+from rest_framework import serializers
+from rest_framework.exceptions import APIException, PermissionDenied
+from django.core.exceptions import FieldDoesNotExist
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.conf import settings
+
 from core.models import *
 from doc_management.models import DocumentContainer
 from core.serializer_fields import (
@@ -20,23 +22,15 @@ from core.serializer_fields import (
     PathField,
 )
 from core.constants import LEGACY_TTP_LIBRARIES
-from core.utils import time_state, UserGroupCodename, RoleCodename
+from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
 from threat_modeling.models import ThreatModel
 from pmbok.models import GenericCollection
 from doc_management.models import DocumentContainer
 from global_settings.utils import ff_is_enabled
-
 from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
 from iam.models import *
-from django.contrib.auth.models import Permission
-
-from rest_framework import serializers
-from rest_framework.exceptions import APIException, PermissionDenied
-from django.core.exceptions import FieldDoesNotExist
-from django.core.exceptions import ValidationError as DjangoValidationError
-
 from integrations.models import IntegrationConfiguration, SyncMapping
 
 logger = structlog.get_logger(__name__)
