@@ -503,7 +503,7 @@
 
 	// Compact score formatting for the header analytics.
 	function fmtScore(v: number | null | undefined) {
-		return v == null ? '--' : Math.round(Number(v) * 10) / 10;
+		return v == null ? '--' : Math.round(Number(v) * 100) / 100;
 	}
 
 	// Audit progress analytics (assessable requirements only).

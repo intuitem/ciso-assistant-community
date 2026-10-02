@@ -219,7 +219,7 @@ from resilience.models import AssetAssessment
 from .models import *
 from .serializers import *
 
-from .models import Severity
+from .models import Severity, round_score
 from . import dora
 from core.mappings.merge import compute_map_from_merge
 
@@ -14814,7 +14814,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 radar_data["compliance_percentages"].append(
                     round(compliance_percentage, 1)
                 )
-                radar_data["maturity_scores"].append(round(maturity_score, 1))
+                radar_data["maturity_scores"].append(round_score(maturity_score))
 
             return radar_data
 
@@ -15450,20 +15450,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         doc_total_weight += weight
 
             if is_sum:
-                section_score = (
-                    int(weighted_score * 10) / 10 if total_weight > 0 else None
-                )
-                section_doc_score = (
-                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
-                )
+                section_score = weighted_score if total_weight > 0 else None
+                section_doc_score = doc_weighted_score if doc_total_weight > 0 else None
             else:
                 section_score = (
-                    int((weighted_score / total_weight) * 10) / 10
-                    if total_weight > 0
-                    else None
+                    weighted_score / total_weight if total_weight > 0 else None
                 )
                 section_doc_score = (
-                    int((doc_weighted_score / doc_total_weight) * 10) / 10
+                    doc_weighted_score / doc_total_weight
                     if doc_total_weight > 0
                     else None
                 )
@@ -15479,8 +15473,17 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 s for s in [section_score, section_doc_score] if s is not None
             ]
             section_maturity = (
-                int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
+                round_score(sum(enabled_scores) / len(enabled_scores))
                 if enabled_scores
+                else None
+            )
+            # Round the layers only after the maturity used their full value.
+            section_score = (
+                round_score(section_score) if section_score is not None else None
+            )
+            section_doc_score = (
+                round_score(section_doc_score)
+                if section_doc_score is not None
                 else None
             )
 
@@ -15907,20 +15910,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
             total = len(matching_ras)
             if is_sum:
-                group_score = (
-                    int(weighted_score * 10) / 10 if total_weight > 0 else None
-                )
-                group_doc_score = (
-                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
-                )
+                group_score = weighted_score if total_weight > 0 else None
+                group_doc_score = doc_weighted_score if doc_total_weight > 0 else None
             else:
                 group_score = (
-                    int((weighted_score / total_weight) * 10) / 10
-                    if total_weight > 0
-                    else None
+                    weighted_score / total_weight if total_weight > 0 else None
                 )
                 group_doc_score = (
-                    int((doc_weighted_score / doc_total_weight) * 10) / 10
+                    doc_weighted_score / doc_total_weight
                     if doc_total_weight > 0
                     else None
                 )
@@ -15929,9 +15926,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 s for s in [group_score, group_doc_score] if s is not None
             ]
             group_maturity = (
-                int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
+                round_score(sum(enabled_scores) / len(enabled_scores))
                 if enabled_scores
                 else None
+            )
+            # Round the layers only after the maturity used their full value.
+            group_score = round_score(group_score) if group_score is not None else None
+            group_doc_score = (
+                round_score(group_doc_score) if group_doc_score is not None else None
             )
 
             groups.append(

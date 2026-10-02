@@ -257,7 +257,11 @@
 					if (!object.id) {
 						form.form.update((currentData) => ({
 							...currentData,
-							selected_implementation_groups: defaultImplementationGroups
+							selected_implementation_groups: defaultImplementationGroups,
+							// Copies keep the baseline's method.
+							score_calculation_method: initialData.baseline
+								? currentData.score_calculation_method
+								: (r['default_score_calculation_method'] ?? currentData.score_calculation_method)
 						}));
 					}
 				});

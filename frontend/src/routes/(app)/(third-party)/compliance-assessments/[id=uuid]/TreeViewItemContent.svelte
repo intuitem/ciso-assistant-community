@@ -169,17 +169,17 @@
 	// Aggregated scores are computed on the backend (see
 	// annotate_tree_with_aggregated_scores in core/helpers.py) so the three
 	// score_calculation_methods share a single implementation with the global
-	// score. The frontend just truncates for display to match Python's int().
+	// score. The frontend rounds to two decimals, like round_score in Python.
 	function nodeScore(): number | null {
 		const raw = (rest as Record<string, any>).aggregated_score;
 		if (typeof raw !== 'number') return null;
-		return Math.floor(raw * 10) / 10;
+		return Math.round(raw * 100) / 100;
 	}
 
 	function nodeDocumentationScore(): number | null {
 		const raw = (rest as Record<string, any>).aggregated_documentation_score;
 		if (typeof raw !== 'number') return null;
-		return Math.floor(raw * 10) / 10;
+		return Math.round(raw * 100) / 100;
 	}
 
 	function nodeTotalMaxScore(): number {

@@ -298,7 +298,7 @@ def deep_tree_setup():
         S3 = 100
         C2 = 100
         C3 = 50
-        Global = avg(C1, C2, C3) = (55 + 100 + 50) / 3 = 68.3 (truncated from 68.33)
+        Global = avg(C1, C2, C3) = (55 + 100 + 50) / 3 = 68.33 (rounded)
     """
     root_folder = Folder.get_root_folder()
     folder = Folder.objects.create(
@@ -515,7 +515,7 @@ class TestDeepTreeAvgOfAvg:
         ca.save()
 
         scores = ca.get_global_score()
-        assert scores["implementation_score"] == 68.3
+        assert scores["implementation_score"] == 68.33
 
     def test_flat_avg_differs_from_recursive(self, deep_tree_setup):
         """
@@ -535,7 +535,7 @@ class TestDeepTreeAvgOfAvg:
         avg_of_avg_score = ca.get_global_score()["implementation_score"]
 
         assert avg_score == 66.0
-        assert avg_of_avg_score == 68.3
+        assert avg_of_avg_score == 68.33
         assert avg_score != avg_of_avg_score
 
 
@@ -557,7 +557,7 @@ class TestAnchorNaToTarget:
             # AVG_OF_AVG with target=3:
             #   Section A: (80+60)/2=70, Section B: (40×1+3×3)/4=12.25
             #   avg(70, 12.25) = 41.1
-            ("average_of_averages", True, 3, 41.1),
+            ("average_of_averages", True, 3, 41.13),
             # Anchor disabled: N/A excluded → (80+60+40)/(1+1+1) = 60.0
             ("average", False, 3, 60.0),
         ],
@@ -692,9 +692,9 @@ class TestThreeLayerScoring:
 
         Documentation:
           Section A: (90+70)/2 = 80, Section B: (50+240)/4 = 72.5
-          Average: (80+72.5)/2 = 76.2  (truncated from 76.25)
+          Average: (80+72.5)/2 = 76.25
 
-        Maturity: (77.5 + 76.2) / 2 = 76.85 → truncated to 76.8
+        Maturity: (77.5 + 76.25) / 2 = 76.875 → rounded to 76.88
         """
         ca = scoring_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
@@ -704,8 +704,8 @@ class TestThreeLayerScoring:
 
         scores = ca.get_global_score()
         assert scores["implementation_score"] == 77.5
-        assert scores["documentation_score"] == 76.2
-        assert scores["maturity_score"] == 76.8
+        assert scores["documentation_score"] == 76.25
+        assert scores["maturity_score"] == 76.88
 
     def test_doc_score_null_treated_as_zero(self, scoring_setup):
         """
@@ -818,7 +818,7 @@ class TestAnnotateTreeAggregatedScores:
         one child has a single leaf (score 4) and the other has multiple
         leaves whose average is ~2.3. With the previous flat weighted-avg,
         the parent showed 2.7; with per-level aggregation it should show
-        (4 + 2.33…) / 2 = 3.17 (stored raw; UI truncates to 3.1).
+        (4 + 2.33…) / 2 = 3.17 (stored raw; UI rounds to 3.17).
         """
         ca = deep_tree_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
