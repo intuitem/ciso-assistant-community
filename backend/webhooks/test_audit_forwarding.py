@@ -28,7 +28,6 @@ def domain_folder(db, root_folder):
         name="Domain A",
         content_type=Folder.ContentType.DOMAIN,
         parent_folder=root_folder,
-        create_iam_groups=False,
     )
 
 

@@ -714,9 +714,7 @@ class TestPrivilegeBranches:
             name=f"ScopeDom-{uuid.uuid4()}",
             parent_folder=Folder.get_root_folder(),
             content_type=Folder.ContentType.DOMAIN,
-            create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(domain)
         runner = User.objects.create_user(email="mgmscope@authz.test")
         grant(runner, domain, ["change_user", "change_usergroup"])
         root_group = UserGroup.objects.filter(
