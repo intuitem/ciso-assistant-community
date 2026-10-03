@@ -1670,6 +1670,22 @@ class TestGlobalUserCreatorGroup:
         ra = RoleAssignment.objects.get(user_group__name="BI-UG-GUC")
         assert ra.is_recursive is False
 
+    def test_interrupted_provisioning_leaves_nothing_behind(self, app_config):
+        """The group and its grant are written together: a run that fails half-way
+        must not leave a group that the next startup's existence check would
+        skip forever."""
+        UserGroup.objects.filter(name="BI-UG-GUC").delete()
+
+        with patch.object(RoleAssignment.objects, "create", side_effect=RuntimeError):
+            with pytest.raises(RuntimeError):
+                ensure_user_creator_group()
+        assert not UserGroup.objects.filter(name="BI-UG-GUC").exists()
+
+        ensure_user_creator_group()
+        ra = RoleAssignment.objects.get(user_group__name="BI-UG-GUC")
+        assert ra.is_recursive is False
+        assert list(ra.perimeter_folders.all()) == [Folder.get_root_folder()]
+
     def test_member_can_create_and_list_users(self, creator_client):
         response = creator_client.post(
             reverse("users-list"), {"email": "newcomer@tests.com"}, format="json"
