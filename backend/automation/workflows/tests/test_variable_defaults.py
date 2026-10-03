@@ -121,6 +121,13 @@ class TestDefaults:
         # ...and the run gets the number, not the string publish accepted.
         assert start_instance(version).variables["threshold"] == 4
 
+    def test_an_empty_default_seeds_null_outside_strings(self):
+        version = build([var("threshold", "number", ""), var("label", "string", "")])
+        assert "variable_default_invalid" not in codes(version)
+        variables = start_instance(version).variables
+        assert variables["threshold"] is None
+        assert variables["label"] == ""
+
     def test_a_non_finite_number_default_is_caught_at_publish(self):
         version = build([var("threshold", "number", "nan")])
         assert "variable_default_invalid" in codes(version)

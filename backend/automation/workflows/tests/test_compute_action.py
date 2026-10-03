@@ -476,6 +476,14 @@ class TestComputeValidation:
             )
         ) == {"action_compute_empty"}
 
+    def test_a_row_that_is_not_a_row_is_refused(self):
+        expressions = [{"key": "x", "expression": "1"}, "y = 2"]
+        assert self.codes(
+            validate_compute_config(
+                self._node({"type": "compute", "expressions": expressions})
+            )
+        ) == {"action_compute_malformed"}
+
     def test_output_mapping_must_name_a_computed_key(self):
         assert self.codes(
             validate_compute_config(

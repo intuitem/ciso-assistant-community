@@ -55,6 +55,7 @@ describe('parseVariableValue', () => {
 		expect(parseVariableValue('date', '2014-02-30')).toEqual({ ok: false });
 		expect(parseVariableValue('date', '2024-02-29')).toEqual({ ok: true, value: '2024-02-29' });
 		expect(parseVariableValue('date', '2023-02-29')).toEqual({ ok: false });
+		expect(parseVariableValue('date', '0001-01-01')).toEqual({ ok: true, value: '0001-01-01' });
 	});
 
 	it('parses JSON and rejects a half-typed value', () => {

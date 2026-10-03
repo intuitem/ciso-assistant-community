@@ -874,10 +874,15 @@
 				rows,
 				reference_run: referenceRunId
 			});
-			if (!res.ok) return;
-			const body = await res.json();
 			// A later edit, node change or run change bumped the sequence while
 			// this was in flight: its rows no longer match ours, drop it.
+			if (seq !== computePreviewSeq) return;
+			if (!res.ok) {
+				// The shown results belong to rows we no longer have an answer for.
+				computePreviews = {};
+				return;
+			}
+			const body = await res.json();
 			if (seq !== computePreviewSeq) return;
 			const results: Record<number, ComputePreview> = {};
 			(body.results ?? []).forEach((result: ComputePreview | null, index: number) => {

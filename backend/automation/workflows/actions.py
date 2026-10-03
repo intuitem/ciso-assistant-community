@@ -4185,6 +4185,16 @@ def validate_compute_config(node):
     config = node.action_config or {}
     if config.get("type") != "compute":
         return []
+    raw = config.get("expressions")
+    # compute_rows skips what is not a row; publish must not, or the run would
+    # quietly do less than the document says.
+    if isinstance(raw, list) and any(not isinstance(row, dict) for row in raw):
+        return [
+            (
+                "action_compute_malformed",
+                "Expressions must be a list of rows, each with a key and an expression",
+            )
+        ]
     rows = compute_rows(config)
     if not rows:
         return [

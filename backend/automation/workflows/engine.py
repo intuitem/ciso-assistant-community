@@ -249,14 +249,19 @@ def coerce_variable_value(value, variable_type):
 def default_variables(version):
     """Declared defaults, coerced to their type the way a run-dialog value is
     (a "4" default on a number seeds 4). A default publish would reject is
-    seeded as stored rather than failing the run."""
+    seeded as stored rather than failing the run. "" is how YAML and older
+    graphs spell "no default", so outside string variables it seeds null."""
     variables = {}
     for variable in version.variables.all():
         value = variable.default_value
+        if value == "" and variable.type != WorkflowVariable.Type.STRING:
+            value = None
         if value is not None:
             try:
                 value = coerce_variable_value(value, variable.type)
             except ValueError:
+                # Publish reports it; a run that started before still gets
+                # the stored value rather than failing at the first step.
                 pass
         variables[variable.key] = value
     return variables

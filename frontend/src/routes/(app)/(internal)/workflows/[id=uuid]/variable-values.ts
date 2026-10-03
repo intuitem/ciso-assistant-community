@@ -20,7 +20,9 @@ function isCalendarDate(text: string): boolean {
 	const match = DATE_RE.exec(text);
 	if (!match) return false;
 	const [year, month, day] = match.slice(1).map(Number);
-	const date = new Date(Date.UTC(year, month - 1, day));
+	// setUTCFullYear, not Date.UTC: that maps years 0-99 to 1900-1999.
+	const date = new Date(0);
+	date.setUTCFullYear(year, month - 1, day);
 	return (
 		date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
 	);
