@@ -131,7 +131,10 @@ def _step_likelihood(result: Quotation, step_id: str, grid) -> int:
     difficulty = result.difficulty[step_id]
     if UNRATED in (probability, difficulty) or not grid:
         return UNRATED
-    return grid[probability][difficulty]
+    try:
+        return grid[probability][difficulty]
+    except IndexError:
+        return UNRATED
 
 
 def _ranker(result: Quotation, advanced: bool):

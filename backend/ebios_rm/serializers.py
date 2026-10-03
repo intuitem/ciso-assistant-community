@@ -121,6 +121,7 @@ class EbiosRMStudyImportExportSerializer(BaseModelSerializer):
             "version",
             "status",
             "observation",
+            "quotation_method",
             "meta",
             "assets",
             "compliance_assessments",

@@ -1414,7 +1414,8 @@ class OperatingModeViewSet(BaseModelViewSet):
         Each step is keyed by "id": an existing step's UUID updates that step,
         any other key (a client-side id for a node not saved yet) creates one.
         Antecedents reference those keys. Steps left out are deleted. "assets"
-        is applied only when sent, so a graph save never drops them.
+        is applied only when sent, so a graph save never drops them; assets the
+        user cannot view stay linked, as keeping a link is not creating one.
         """
         from iam.models import RoleAssignment
 
@@ -1432,7 +1433,14 @@ class OperatingModeViewSet(BaseModelViewSet):
         accessible_asset_ids = set(
             RoleAssignment.get_viewable_object_ids(request.user, Asset)
         )
-        existing_steps = {str(step.id): step for step in mo.kill_chain_steps.all()}
+        existing_steps = {
+            str(step.id): step
+            for step in mo.kill_chain_steps.prefetch_related("assets")
+        }
+        linked_asset_ids = {
+            key: {asset.id for asset in step.assets.all()}
+            for key, step in existing_steps.items()
+        }
         scale_size = len(mo.parsed_matrix["probability"])
 
         errors = []
@@ -1477,7 +1485,9 @@ class OperatingModeViewSet(BaseModelViewSet):
                         errors.append(f"Step {i}: invalid asset UUID.")
                         asset_ids = None
                     else:
-                        if not set(asset_ids) <= accessible_asset_ids:
+                        if not set(asset_ids) <= accessible_asset_ids | (
+                            linked_asset_ids.get(key, set())
+                        ):
                             errors.append(f"Step {i}: asset is not accessible.")
 
             ratings = {}
@@ -1582,7 +1592,10 @@ class OperatingModeViewSet(BaseModelViewSet):
                         setattr(step, name, value)
                     step.save()
                 if p["assets"] is not None:
-                    step.assets.set(p["assets"])
+                    hidden = (
+                        linked_asset_ids.get(p["key"], set()) - accessible_asset_ids
+                    )
+                    step.assets.set(set(p["assets"]) | hidden)
                 saved[p["key"]] = step
 
             for p in parsed:
@@ -1700,8 +1713,12 @@ class KillChainViewSet(BaseModelViewSet):
         return instance
 
     def perform_update(self, serializer):
+        previous_operating_mode = serializer.instance.operating_mode
         instance = super().perform_update(serializer)
         instance.operating_mode.refresh_likelihood()
+        # A step moved to another operating mode leaves its old one to recompute
+        if previous_operating_mode.pk != instance.operating_mode_id:
+            previous_operating_mode.refresh_likelihood()
         return instance
 
     def perform_destroy(self, instance):

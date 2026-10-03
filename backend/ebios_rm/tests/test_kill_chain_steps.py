@@ -774,3 +774,280 @@ class TestReviewFixes:
         assert ro_to.pertinence == rating_kit.pertinence(
             rating_kit.resolve(matrix.json_definition)["ro_to"], 4, 4
         )
+
+
+def _domain_client(email, folder, role="BI-RL-ANA"):
+    """A user holding one built-in role on `folder` only, with an API client."""
+    from knox.models import AuthToken
+    from rest_framework.test import APIClient
+
+    from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+
+    user = User.objects.create_user(email=email, is_published=True)
+    group = UserGroup.objects.create(name=f"group of {email}", folder=folder)
+    group.user_set.add(user)
+    RoleAssignment.objects.create(
+        user_group=group,
+        role=Role.objects.get(name=role),
+        folder=Folder.get_root_folder(),
+        is_recursive=True,
+    ).perimeter_folders.add(folder)
+    client = APIClient()
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"
+    )
+    return client
+
+
+@pytest.mark.django_db
+class TestSaveGraphHiddenAssets:
+    """An analyst of the study's domain edits steps linked to another domain's assets."""
+
+    @pytest.fixture
+    def scoped(self, admin_client, ebios_rm_matrix_fixture):
+        from iam.models import Folder
+
+        root = Folder.get_root_folder()
+        study_domain, other_domain = (
+            Folder.objects.create(
+                name=name, parent_folder=root, content_type=Folder.ContentType.DOMAIN
+            )
+            for name in ("Study domain", "Other domain")
+        )
+        study = EbiosRMStudy.objects.create(
+            name="scoped study",
+            risk_matrix=ebios_rm_matrix_fixture,
+            folder=study_domain,
+        )
+        operating_mode = _operating_mode(study)
+        action = ElementaryAction.objects.create(
+            name="Phishing",
+            attack_stage=ElementaryAction.AttackStage.ENTER,
+            folder=study_domain,
+        )
+        visible = Asset.objects.create(
+            name="Visible", type=Asset.Type.SUPPORT, folder=study_domain
+        )
+        hidden = Asset.objects.create(
+            name="Hidden", type=Asset.Type.SUPPORT, folder=other_domain
+        )
+        linked = KillChain.objects.create(
+            operating_mode=operating_mode, elementary_action=action
+        )
+        linked.assets.set([visible, hidden])
+        other = KillChain.objects.create(
+            operating_mode=operating_mode, elementary_action=action
+        )
+        return {
+            "client": _domain_client(
+                "analyst@kill-chain-steps-tests.com", study_domain
+            ),
+            "study": study,
+            "operating_mode": operating_mode,
+            "action": action,
+            "visible": visible,
+            "hidden": hidden,
+            "linked": linked,
+            "other": other,
+        }
+
+    def _step(self, scoped, step, assets):
+        return {
+            "id": str(step.id),
+            "elementary_action": str(scoped["action"].id),
+            "antecedents": [],
+            "assets": [str(asset.id) for asset in assets],
+        }
+
+    def test_graph_save_keeps_assets_the_user_cannot_view(self, scoped):
+        client, operating_mode = scoped["client"], scoped["operating_mode"]
+        listing = client.get(
+            f"/api/ebios-rm/kill-chains/?operating_mode={operating_mode.id}"
+        )
+        assert listing.status_code == status.HTTP_200_OK
+        # Rebuild the payload as the graph editor does: entries without an id are skipped
+        steps = [
+            {
+                "id": row["id"],
+                "elementary_action": row["elementary_action"]["id"],
+                "antecedents": [],
+                "assets": [a["id"] for a in row["assets"] if a.get("id")],
+            }
+            for row in listing.json()["results"]
+        ]
+        _save_graph(client, operating_mode, steps)
+
+        assert set(scoped["linked"].assets.all()) == {
+            scoped["visible"],
+            scoped["hidden"],
+        }
+
+    def test_graph_save_leaving_a_hidden_asset_out_keeps_it(self, scoped):
+        _save_graph(
+            scoped["client"],
+            scoped["operating_mode"],
+            [
+                self._step(scoped, scoped["linked"], [scoped["visible"]]),
+                self._step(scoped, scoped["other"], []),
+            ],
+        )
+        assert set(scoped["linked"].assets.all()) == {
+            scoped["visible"],
+            scoped["hidden"],
+        }
+
+    def test_hidden_asset_cannot_be_linked_to_another_step(self, scoped):
+        _save_graph(
+            scoped["client"],
+            scoped["operating_mode"],
+            [
+                self._step(scoped, scoped["linked"], [scoped["visible"]]),
+                self._step(scoped, scoped["other"], [scoped["hidden"]]),
+            ],
+            expected=status.HTTP_400_BAD_REQUEST,
+        )
+        assert not scoped["other"].assets.exists()
+
+    def test_hidden_asset_cannot_follow_a_step_id_into_another_mode(self, scoped):
+        """A step id from another operating mode is a new step there, with no links."""
+        target = _operating_mode(scoped["study"], "another operating mode")
+        _save_graph(
+            scoped["client"],
+            target,
+            [self._step(scoped, scoped["linked"], [scoped["hidden"]])],
+            expected=status.HTTP_400_BAD_REQUEST,
+        )
+        assert not target.kill_chain_steps.exists()
+
+
+@pytest.mark.django_db
+def test_moving_a_step_recomputes_both_operating_modes(
+    admin_client, basic_ebios_rm_study_fixture, elementary_actions_fixture
+):
+    study = basic_ebios_rm_study_fixture
+    study.quotation_method = "standard"
+    study.save()
+    source = _operating_mode(study, "source mode")
+    target = _operating_mode(study, "target mode")
+    step = KillChain.objects.create(
+        operating_mode=source,
+        elementary_action=elementary_actions_fixture[0],
+        success_probability=2,
+    )
+    source.refresh_likelihood()
+    source.refresh_from_db()
+    assert source.computed_likelihood == 2
+
+    response = admin_client.patch(
+        f"/api/ebios-rm/kill-chains/{step.id}/",
+        {"operating_mode": str(target.id)},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK, response.content
+    source.refresh_from_db()
+    target.refresh_from_db()
+    assert source.computed_likelihood == -1
+    assert target.computed_likelihood == 2
+
+
+@pytest.mark.django_db(transaction=True)
+def test_migration_breaks_loops_between_steps(
+    basic_ebios_rm_study_fixture, elementary_actions_fixture
+):
+    from datetime import timedelta
+
+    know, enter, _ = elementary_actions_fixture
+    # Before 0028, two actions of one stage could each be the other's antecedent
+    pivot = ElementaryAction.objects.create(
+        name="Pivot", attack_stage=ElementaryAction.AttackStage.ENTER
+    )
+    operating_mode = _operating_mode(basic_ebios_rm_study_fixture)
+
+    executor = MigrationExecutor(connection)
+    before = [("ebios_rm", "0027_operationalscenario_techniques")]
+    after = [("ebios_rm", "0028_ebios_rm_label_readiness")]
+    executor.migrate(before)
+    HistoricalKillChain = executor.loader.project_state(before).apps.get_model(
+        "ebios_rm", "KillChain"
+    )
+
+    def step(action, minutes):
+        created = HistoricalKillChain.objects.create(
+            operating_mode_id=operating_mode.id,
+            elementary_action_id=action.id,
+            folder_id=operating_mode.folder_id,
+        )
+        HistoricalKillChain.objects.filter(id=created.id).update(
+            created_at=created.created_at + timedelta(minutes=minutes)
+        )
+        return created
+
+    older, newer, latest = step(enter, 1), step(pivot, 2), step(know, 3)
+    older.antecedents.add(pivot.id, know.id)  # a newer antecedent, outside any loop
+    newer.antecedents.add(enter.id)
+
+    executor = MigrationExecutor(connection)
+    executor.migrate(after)
+    MigratedKillChain = executor.loader.project_state(after).apps.get_model(
+        "ebios_rm", "KillChain"
+    )
+    antecedents = {
+        step.id: set(
+            MigratedKillChain.objects.get(id=step.id).antecedents.values_list(
+                "id", flat=True
+            )
+        )
+        for step in (older, newer)
+    }
+    legacy = set(
+        MigratedKillChain.objects.get(
+            id=older.id
+        ).legacy_antecedent_actions.values_list("id", flat=True)
+    )
+
+    executor = MigrationExecutor(connection)
+    executor.migrate(executor.loader.graph.leaf_nodes())
+
+    # The older step stays the antecedent of the newer one
+    assert antecedents == {older.id: {latest.id}, newer.id: {older.id}}
+    assert legacy == {pivot.id, know.id}
+
+
+@pytest.mark.django_db(transaction=True)
+def test_migration_fills_pertinence_as_before(basic_ebios_rm_study_fixture):
+    risk_origin, _ = Terminology.objects.get_or_create(
+        name="state",
+        field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
+        defaults={"is_visible": True},
+    )
+    # (motivation, resources): pertinence from the matrix used before 0028
+    expected = {(0, 3): 0, (1, 1): 1, (1, 4): 2, (2, 3): 3, (3, 1): 2, (4, 4): 4}
+    couples = {
+        key: RoTo.objects.create(
+            ebios_rm_study=basic_ebios_rm_study_fixture,
+            risk_origin=risk_origin,
+            target_objective=f"objective {key}",
+            motivation=key[0],
+            resources=key[1],
+        )
+        for key in expected
+    }
+
+    executor = MigrationExecutor(connection)
+    executor.migrate([("ebios_rm", "0027_operationalscenario_techniques")])
+    after = [("ebios_rm", "0028_ebios_rm_label_readiness")]
+    executor = MigrationExecutor(connection)
+    executor.migrate(after)
+    MigratedRoTo = executor.loader.project_state(after).apps.get_model(
+        "ebios_rm", "RoTo"
+    )
+    pertinence = {
+        key: MigratedRoTo.objects.get(id=ro_to.id).pertinence
+        for key, ro_to in couples.items()
+    }
+
+    executor = MigrationExecutor(connection)
+    executor.migrate(executor.loader.graph.leaf_nodes())
+
+    assert pertinence == expected

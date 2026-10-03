@@ -168,6 +168,45 @@ class TestForcedOperationalScenarioLikelihood:
         operational_scenario.refresh_from_db()
         assert operational_scenario.likelihood == 3
 
+    def test_new_scenario_keeps_its_likelihood(self, scenario_chain):
+        """Domain import and the data wizard create scenarios with a likelihood."""
+        study = scenario_chain["study"]
+        study.quotation_method = "express"
+        study.save()
+        attack_path = AttackPath.objects.create(
+            name="Through a partner",
+            ebios_rm_study=study,
+            strategic_scenario=scenario_chain["strategic_scenario"],
+        )
+        operational_scenario = OperationalScenario.objects.create(
+            ebios_rm_study=study, attack_path=attack_path, likelihood=2
+        )
+        operational_scenario.refresh_from_db()
+        assert operational_scenario.likelihood == 2
+
+        # From then on the operating modes drive it
+        mode = self._operating_mode(operational_scenario, 3)
+        operational_scenario.refresh_from_db()
+        assert operational_scenario.likelihood == 3
+        mode.delete()
+        operational_scenario.refresh_from_db()
+        assert operational_scenario.likelihood == -1
+
+    def test_clearing_forced_likelihood_without_operating_modes(self, scenario_chain):
+        study = scenario_chain["study"]
+        study.quotation_method = "express"
+        study.save()
+        operational_scenario = scenario_chain["operational_scenario"]
+        operational_scenario.likelihood_forced = 2
+        operational_scenario.save()
+        operational_scenario.refresh_from_db()
+        assert operational_scenario.likelihood == 2
+
+        operational_scenario.likelihood_forced = None
+        operational_scenario.save()
+        operational_scenario.refresh_from_db()
+        assert operational_scenario.likelihood == -1
+
     def test_direct_estimate_has_no_computed_likelihood(self, scenario_chain):
         study = scenario_chain["study"]
         study.quotation_method = "manual"

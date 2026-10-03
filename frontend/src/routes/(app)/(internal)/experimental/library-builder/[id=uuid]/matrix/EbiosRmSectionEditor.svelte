@@ -83,16 +83,35 @@
 				if (!fetched) return;
 				defaults = fetched;
 				const current = section;
-				if (!current || current.success_probability.length === levels) return;
-				// Step scales follow the probability levels: keep edits, default the rest.
-				const keep = (edited: RatingLevel[], fallback: RatingLevel[]) =>
-					fallback.map((level, index) => edited[index] ?? level);
+				if (!current) return;
+				// Every key is optional in a library and, as in the backend's resolve(), an
+				// empty one takes the default; step scales follow the probability levels.
+				// Keep edits, default the rest.
+				const given = (value: unknown) => Array.isArray(value) && value.length > 0;
+				const roTo: Partial<RoToSection> = current.ro_to ?? {};
+				const missing = (Object.keys(fetched.ro_to) as (keyof RoToSection)[]).filter(
+					(key) => !given(roTo[key])
+				);
+				const complete =
+					!missing.length &&
+					current.success_probability?.length === levels &&
+					current.technical_difficulty?.length === levels &&
+					current.likelihood_grid?.length === levels;
+				if (complete) return;
+				const keep = (edited: RatingLevel[] | undefined, fallback: RatingLevel[]) =>
+					fallback.map((level, index) => edited?.[index] ?? level);
 				section = {
 					...current,
+					ro_to: {
+						...fetched.ro_to,
+						...Object.fromEntries(
+							Object.entries(roTo).filter(([key]) => !missing.includes(key as keyof RoToSection))
+						)
+					},
 					success_probability: keep(current.success_probability, fetched.success_probability),
 					technical_difficulty: keep(current.technical_difficulty, fetched.technical_difficulty),
 					likelihood_grid: fetched.likelihood_grid.map((row, p) =>
-						row.map((cell, d) => Math.min(current.likelihood_grid[p]?.[d] ?? cell, levels - 1))
+						row.map((cell, d) => Math.min(current.likelihood_grid?.[p]?.[d] ?? cell, levels - 1))
 					)
 				};
 				onchange();

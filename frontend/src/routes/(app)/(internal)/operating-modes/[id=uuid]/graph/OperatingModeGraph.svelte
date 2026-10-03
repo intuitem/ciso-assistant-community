@@ -278,6 +278,8 @@
 			const stage = getStageNumber(ea.attack_stage);
 			const count = stageCount[stage] ?? 0;
 			const antecedents = step.antecedents ?? [];
+			// Assets the user cannot view come without an id; the backend keeps them linked.
+			const assets = (step.assets ?? []).filter((a: any) => typeof a !== 'object' || a?.id);
 
 			const logicOp =
 				antecedents.length > 1 ? ((step.logic_operator ?? 'OR') as 'AND' | 'OR') : null;
@@ -304,8 +306,8 @@
 					stage,
 					logicOp,
 					elementaryActionId: eaId,
-					assets: (step.assets ?? []).map((a: any) => (typeof a === 'object' ? a.id : a)),
-					assetLabels: (step.assets ?? []).map((a: any) => (typeof a === 'object' ? a.str : a)),
+					assets: assets.map((a: any) => (typeof a === 'object' ? a.id : a)),
+					assetLabels: assets.map((a: any) => (typeof a === 'object' ? a.str : a)),
 					successProbability: step.success_probability ?? -1,
 					successProbabilityPct: step.success_probability_pct ?? null,
 					technicalDifficulty: step.technical_difficulty ?? -1,
@@ -344,6 +346,20 @@
 	}
 
 	initFromKillChain();
+
+	// The page reloads its steps after a save: rebuild from them so nodes added here
+	// carry their server ids, and the next save updates those steps instead of
+	// recreating them. Unsaved changes are left alone.
+	let loadedSteps: KillChainStep[] | undefined;
+	$effect(() => {
+		const steps = killChainSteps;
+		if (loadedSteps !== undefined && steps !== loadedSteps) {
+			untrack(() => {
+				if (!dirty) initFromKillChain();
+			});
+		}
+		loadedSteps = steps;
+	});
 
 	// An edge skipping a stage column can run across an unrelated node: draw it above
 	// the nodes (LogicEdge adds a halo) so it reads as a crossing, not as a link.
@@ -432,8 +448,23 @@
 		if (connection.source === connection.target) return false;
 		if (edges.some((e) => e.source === connection.source && e.target === connection.target))
 			return false;
+		// The step graph must stay free of loops, as the backend checks on save
+		if (reaches(connection.target, connection.source)) return false;
 
 		return true;
+	}
+
+	function reaches(fromId: string, toId: string): boolean {
+		const seen = new Set<string>();
+		const stack = [fromId];
+		while (stack.length) {
+			const id = stack.pop()!;
+			if (id === toId) return true;
+			if (seen.has(id)) continue;
+			seen.add(id);
+			for (const e of edges) if (e.source === id) stack.push(e.target);
+		}
+		return false;
 	}
 
 	function updateNodeLogicData(nodeId: string) {

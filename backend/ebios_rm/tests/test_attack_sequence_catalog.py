@@ -54,6 +54,15 @@ class TestAttackSequenceCatalog:
         assert phishing.parent.urn == TECHNIQUE + "intrusion-internet"
         assert recruitment.annotation.startswith("- Number of potential targets")
 
+    def test_sub_technique_label_without_ref_id(self, catalog):
+        phishing = Technique.objects.get(
+            urn=TECHNIQUE + "intrusion-internet.hameconnage"
+        )
+        assert phishing.ref_id is None
+        assert str(phishing) == (
+            f"{phishing.parent.get_name_translated}: {phishing.get_name_translated}"
+        )
+
     @pytest.mark.parametrize(
         "flags, status", [({"ttps": False, "ebiosrm": True}, 200), ({}, 403)]
     )

@@ -83,7 +83,8 @@
 			folder: ea.folder?.id ?? ea.folder ?? data.data.folder,
 			attack_stage: getStageNumber(ea.attack_stage),
 			icon: ea.icon?.toLowerCase(),
-			threat: ea.threat?.id ?? ea.threat ?? null
+			threat: ea.threat?.id ?? ea.threat ?? null,
+			technique: ea.technique?.id ?? ea.technique ?? null
 		};
 
 		const eaSchema = modelSchema('elementary-actions');

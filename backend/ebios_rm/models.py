@@ -1235,10 +1235,12 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         # `likelihood` always holds the value in effect, so every reader picks up
-        # a forced value; clearing it falls back to the computed one.
+        # a forced value; clearing it falls back to the computed one. A new scenario
+        # keeps the likelihood it is created with (imports, data wizard): the id is
+        # set before the first insert, so `self.pk` cannot tell a creation apart.
         if self.likelihood_forced is not None:
             self.likelihood = self.likelihood_forced
-        elif self.pk and self.computed_likelihood is not None:
+        elif not self._state.adding and self.computed_likelihood is not None:
             self.likelihood = self.computed_likelihood
         super().save(*args, **kwargs)
         EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(

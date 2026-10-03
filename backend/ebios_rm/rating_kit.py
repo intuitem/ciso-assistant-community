@@ -176,4 +176,7 @@ def pertinence(ro_to_section: dict, motivation: int, resources: int) -> int:
     """Stored pertinence: 0 when undefined, else 1-based level from the grid."""
     if not motivation or not resources:
         return 0
-    return ro_to_section["pertinence_grid"][motivation - 1][resources - 1] + 1
+    try:
+        return ro_to_section["pertinence_grid"][motivation - 1][resources - 1] + 1
+    except IndexError:
+        return 0

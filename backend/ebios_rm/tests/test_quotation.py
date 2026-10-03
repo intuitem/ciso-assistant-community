@@ -142,6 +142,10 @@ class TestAdvancedRollUp:
         )
         assert result.likelihood == UNRATED
 
+    def test_rating_outside_the_grid_is_unrated(self):
+        steps = [Step("a", [], None, probability=3, difficulty=3)]
+        assert compute(steps, "advanced", [[0, 0], [0, 1]]).likelihood == UNRATED
+
 
 @pytest.mark.django_db
 class TestOperatingModeLikelihood:
