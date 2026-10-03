@@ -52,13 +52,6 @@ async function loadExternalNeighbours(fetch: typeof globalThis.fetch, assets: an
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const selectedFolderId = url.searchParams.get('folder') ?? '';
 
-	// Defensive: if the API returns a non-2xx (401/403/500/etc.), degrade to an
-	// empty list so {#each data.folders} doesn't iterate over object keys or throw.
-	const folders = await fetchAllPages(
-		fetch,
-		`${BASE_API_URL}/folders/?content_type=DO&content_type=GL`
-	).catch(() => []);
-
 	let assets: any[] = [];
 	let externalAssets: any[] = [];
 	let hiddenAssetIds: string[] = [];
@@ -91,7 +84,7 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	}));
 
 	return {
-		folders,
+		title: 'Asset whiteboard',
 		assets,
 		externalAssets,
 		hiddenAssetIds,

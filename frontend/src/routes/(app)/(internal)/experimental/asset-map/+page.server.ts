@@ -31,6 +31,7 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const typeData = typeRes.ok ? await typeRes.json() : {};
 
 	return {
+		title: 'Asset dependency map',
 		focus,
 		mode,
 		maxHops,

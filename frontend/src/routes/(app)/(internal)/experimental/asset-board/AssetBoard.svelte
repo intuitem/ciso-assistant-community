@@ -21,6 +21,8 @@
 	import GhostNodeComponent from './GhostNode.svelte';
 	import { computeLayout } from '$lib/components/AssetGraph/layout';
 	import { createLinkWriter, idOf } from '$lib/components/AssetGraph/links';
+	import { createPickerForm } from '$lib/components/AssetGraph/picker';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { fetchAllByIds } from '$lib/utils/pagination';
 	import AssetEdgeComponent from '$lib/components/AssetGraph/AssetEdge.svelte';
 	import {
@@ -89,15 +91,7 @@
 	let pinnedIds = $state<string[]>(loadPinned(folderId));
 	let pinnedAssets = $state<AssetItem[]>([]);
 	let searchOpen = $state(false);
-	let searchQuery = $state('');
-	let searchResults = $state<AssetItem[]>([]);
-	let searchTimer: ReturnType<typeof setTimeout> | undefined;
-	let searching = $state(false);
-	let searchInput = $state<HTMLInputElement | null>(null);
-
-	$effect(() => {
-		if (searchOpen) searchInput?.focus();
-	});
+	const linkPicker = createPickerForm('asset');
 
 	const folderOf = (a: AssetItem) =>
 		typeof a.folder === 'object' && a.folder !== null
@@ -254,9 +248,6 @@
 		positions = { ...positions, [asset.id]: spot };
 		savePositions(folderId, positions);
 		pinnedAssets = [...pinnedAssets.filter((a) => a.id !== asset.id), asset];
-		searchOpen = false;
-		searchQuery = '';
-		searchResults = [];
 		flowInstance?.setCenter(spot.x + 100, spot.y + 30, {
 			zoom: flowInstance.getZoom(),
 			duration: 300
@@ -269,30 +260,20 @@
 		pinnedAssets = pinnedAssets.filter((a) => a.id !== id);
 	}
 
-	function onSearchInput() {
-		clearTimeout(searchTimer);
-		const q = searchQuery.trim();
-		if (q.length < 2) {
-			searchResults = [];
-			searching = false;
+	async function pickExternal(id: string | null) {
+		if (!id) return;
+		linkPicker.clear();
+		searchOpen = false;
+		const existing = nodes.find((n) => n.id === id);
+		if (existing) {
+			flowInstance?.setCenter(existing.position.x + 100, existing.position.y + 30, {
+				zoom: flowInstance.getZoom(),
+				duration: 300
+			});
 			return;
 		}
-		searching = true;
-		searchTimer = setTimeout(async () => {
-			try {
-				const res = await fetch(`/assets?search=${encodeURIComponent(q)}&limit=25`);
-				const body = res.ok ? await res.json() : { results: [] };
-				if (searchQuery.trim() !== q) return;
-				const onBoard = new Set(nodes.map((n) => n.id));
-				searchResults = (body.results ?? []).filter(
-					(a: AssetItem) => folderOf(a).id !== folderId && !onBoard.has(a.id)
-				);
-			} catch {
-				if (searchQuery.trim() === q) searchResults = [];
-			} finally {
-				if (searchQuery.trim() === q) searching = false;
-			}
-		}, 250);
+		const [asset] = await fetchAllByIds<AssetItem>(fetch, '/assets', [id]).catch(() => []);
+		if (asset) pinGhost(asset);
 	}
 
 	// Initial load from localStorage and graph build
@@ -688,38 +669,18 @@
 					<div
 						class="w-80 bg-surface-50-950 border border-surface-300-700 rounded-base shadow-lg p-2"
 					>
-						<input
-							bind:this={searchInput}
-							type="search"
+						<AutocompleteSelect
+							form={linkPicker.form}
+							field="asset"
+							optionsEndpoint="assets"
+							optionsLabelField="auto"
+							optionsInfoFields={{ fields: [{ field: 'type' }], classes: 'text-blue-500' }}
+							optionsExtraFields={[['folder', 'str']]}
+							lazy
+							portalDropdown
 							placeholder="Search assets in other domains…"
-							bind:value={searchQuery}
-							oninput={onSearchInput}
-							class="w-full text-sm rounded-base border-surface-300-700 bg-surface-100-900"
+							onChange={pickExternal}
 						/>
-						<ul class="mt-2 max-h-72 overflow-y-auto">
-							{#each searchResults as result (result.id)}
-								<li>
-									<button
-										type="button"
-										class="w-full text-left px-2 py-1.5 rounded hover:bg-surface-200-800 cursor-pointer"
-										onclick={() => pinGhost(result)}
-									>
-										<div class="text-sm font-semibold text-surface-800-200 truncate">
-											{result.name}
-										</div>
-										<div class="text-[11px] text-surface-500 truncate">
-											<i class="fa-solid fa-sitemap text-[9px] mr-1"></i>{folderOf(result).name}
-										</div>
-									</button>
-								</li>
-							{:else}
-								{#if searching}
-									<li class="px-2 py-1.5 text-xs text-surface-500">Searching…</li>
-								{:else if searchQuery.trim().length >= 2}
-									<li class="px-2 py-1.5 text-xs text-surface-500">No asset found elsewhere</li>
-								{/if}
-							{/each}
-						</ul>
 					</div>
 				{/if}
 			</div>

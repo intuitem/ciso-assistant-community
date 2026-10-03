@@ -22,6 +22,9 @@
 	import AssetEdge from '$lib/components/AssetGraph/AssetEdge.svelte';
 	import { computeLayout } from '$lib/components/AssetGraph/layout';
 	import { createLinkWriter } from '$lib/components/AssetGraph/links';
+	import { createPickerForm } from '$lib/components/AssetGraph/picker';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { fetchAllByIds } from '$lib/utils/pagination';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -54,7 +57,7 @@
 		assetModel: any;
 		onRefocus: (id: string) => void;
 		onExpand: (id: string) => void;
-		onReveal: (id: string) => void;
+		onReveal: (...ids: string[]) => void;
 	}
 
 	let { graph, assetModel, onRefocus, onExpand, onReveal }: Props = $props();
@@ -70,6 +73,8 @@
 	const nodeTypes = { asset: MapNode };
 	const edgeTypes = { asset: AssetEdge };
 	const marker = { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' };
+	const CLEAR_X = 240;
+	const CLEAR_Y = 90;
 
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
@@ -79,10 +84,7 @@
 	let laidOut = false;
 	let helpOpen = $state(false);
 	let searchOpen = $state(false);
-	let searchQuery = $state('');
-	let searchResults = $state<any[]>([]);
-	let searching = $state(false);
-	let searchTimer: ReturnType<typeof setTimeout> | undefined;
+	const linkPicker = createPickerForm('asset');
 	let flow: ReturnType<typeof useSvelteFlow> | null = null;
 
 	function placeNewNode(id: string, links: { source: string; target: string }[]): XY {
@@ -121,10 +123,10 @@
 				let spot = placeNewNode(id, links);
 				while (
 					Object.values(positions).some(
-						(p) => Math.abs(p.x - spot.x) < 40 && Math.abs(p.y - spot.y) < 40
+						(p) => Math.abs(p.x - spot.x) < CLEAR_X && Math.abs(p.y - spot.y) < CLEAR_Y
 					)
 				) {
-					spot = { x: spot.x + 200, y: spot.y };
+					spot = { x: spot.x + CLEAR_X, y: spot.y };
 				}
 				positions[id] = spot;
 			}
@@ -222,7 +224,7 @@
 		);
 		if (ok) {
 			toastStore.trigger({ message: 'Link saved', background: 'preset-tonal-success' });
-			void invalidateAll();
+			onReveal(source, c.target);
 		} else {
 			edges = edges.filter((e) => !(e.source === c.source && e.target === c.target));
 		}
@@ -266,33 +268,29 @@
 				ref: CreateModal,
 				props: { form, model: assetModel, debug: false, invalidateAll: true }
 			},
-			title: asParent ? 'Create a parent asset' : 'Create a supporting asset'
+			title: asParent ? 'Create a parent asset' : 'Create a supporting asset',
+			response: (created: boolean) => {
+				if (created) onReveal(from.id);
+			}
 		};
 		modalStore.trigger(modal);
 	};
 
-	function onSearchInput() {
-		clearTimeout(searchTimer);
-		const q = searchQuery.trim();
-		if (q.length < 2) {
-			searchResults = [];
-			searching = false;
+	function centerOn(id: string) {
+		const at = positions[id];
+		if (at) flow?.setCenter(at.x + 100, at.y + 30, { zoom: flow.getZoom(), duration: 300 });
+	}
+
+	async function pickExisting(id: string | null) {
+		if (!id) return;
+		linkPicker.clear();
+		searchOpen = false;
+		if (nodes.some((n) => n.id === id)) {
+			centerOn(id);
 			return;
 		}
-		searching = true;
-		searchTimer = setTimeout(async () => {
-			try {
-				const res = await fetch(`/assets?search=${encodeURIComponent(q)}&limit=25`);
-				const body = res.ok ? await res.json() : { results: [] };
-				if (searchQuery.trim() !== q) return;
-				const onMap = new Set(nodes.map((n) => n.id));
-				searchResults = (body.results ?? []).filter((a: any) => !onMap.has(a.id));
-			} catch {
-				if (searchQuery.trim() === q) searchResults = [];
-			} finally {
-				if (searchQuery.trim() === q) searching = false;
-			}
-		}, 250);
+		const [asset] = await fetchAllByIds<any>(fetch, '/assets', [id]).catch(() => []);
+		if (asset) addExisting(asset);
 	}
 
 	function addExisting(asset: any) {
@@ -317,20 +315,9 @@
 				folder: folder ? { id: folder.id, str: folder.str, path: folder.str } : undefined
 			}
 		];
-		searchOpen = false;
-		searchQuery = '';
-		searchResults = [];
 		build();
-		flow?.setCenter(positions[asset.id].x + 100, positions[asset.id].y + 30, {
-			zoom: flow.getZoom(),
-			duration: 300
-		});
+		centerOn(asset.id);
 	}
-
-	let searchInput = $state<HTMLInputElement | null>(null);
-	$effect(() => {
-		if (searchOpen) searchInput?.focus();
-	});
 
 	setContext('assetGraph', {
 		refocus: onRefocus,
@@ -382,38 +369,18 @@
 					<div
 						class="w-80 bg-surface-50-950 border border-surface-300-700 rounded-base shadow-lg p-2"
 					>
-						<input
-							bind:this={searchInput}
-							type="search"
+						<AutocompleteSelect
+							form={linkPicker.form}
+							field="asset"
+							optionsEndpoint="assets"
+							optionsLabelField="auto"
+							optionsInfoFields={{ fields: [{ field: 'type' }], classes: 'text-blue-500' }}
+							optionsExtraFields={[['folder', 'str']]}
+							lazy
+							portalDropdown
 							placeholder="Search assets in any domain…"
-							bind:value={searchQuery}
-							oninput={onSearchInput}
-							class="w-full text-sm rounded-base border-surface-300-700 bg-surface-100-900"
+							onChange={pickExisting}
 						/>
-						<ul class="mt-2 max-h-72 overflow-y-auto">
-							{#each searchResults as result (result.id)}
-								<li>
-									<button
-										type="button"
-										class="w-full text-left px-2 py-1.5 rounded hover:bg-surface-200-800 cursor-pointer"
-										onclick={() => addExisting(result)}
-									>
-										<div class="text-sm font-semibold text-surface-800-200 truncate">
-											{result.name}
-										</div>
-										<div class="text-[11px] text-surface-500 truncate">
-											<i class="fa-solid fa-sitemap text-[9px] mr-1"></i>{result.folder?.str}
-										</div>
-									</button>
-								</li>
-							{:else}
-								{#if searching}
-									<li class="px-2 py-1.5 text-xs text-surface-500">Searching…</li>
-								{:else if searchQuery.trim().length >= 2}
-									<li class="px-2 py-1.5 text-xs text-surface-500">No asset found</li>
-								{/if}
-							{/each}
-						</ul>
 					</div>
 				{/if}
 			</div>

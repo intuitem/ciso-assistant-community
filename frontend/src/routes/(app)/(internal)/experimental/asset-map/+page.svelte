@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { onMount, untrack } from 'svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { createPickerForm } from '$lib/components/AssetGraph/picker';
 	import AssetMap from './AssetMap.svelte';
 	import type { PageData } from './$types';
 
@@ -11,9 +13,7 @@
 
 	let { data }: Props = $props();
 
-	let query = $state('');
-	let results = $state<any[]>([]);
-	let timer: ReturnType<typeof setTimeout> | undefined;
+	const focusPicker = createPickerForm('asset');
 
 	const focusNode = $derived(data.graph?.nodes.find((n: any) => n.id === data.graph?.focus));
 
@@ -67,8 +67,7 @@
 	});
 
 	function refocus(id: string) {
-		query = '';
-		results = [];
+		focusPicker.clear();
 		if (focusNode && !focusNode.hidden && focusNode.id !== id) {
 			const current = { id: focusNode.id, name: focusNode.name ?? '' };
 			setTrail([...trail.filter((c) => c.id !== current.id && c.id !== id), current].slice(-8));
@@ -76,24 +75,12 @@
 		navigate({ focus: id });
 	}
 
-	function grow(param: 'expand' | 'reveal', id: string) {
+	function grow(param: 'expand' | 'reveal', ...ids: string[]) {
 		const url = new URL(page.url);
-		if (!url.searchParams.getAll(param).includes(id)) url.searchParams.append(param, id);
-		goto(url, { invalidateAll: true, noScroll: true, keepFocus: true });
-	}
-
-	function onSearch() {
-		clearTimeout(timer);
-		const q = query.trim();
-		if (q.length < 2) {
-			results = [];
-			return;
+		for (const id of ids) {
+			if (!url.searchParams.getAll(param).includes(id)) url.searchParams.append(param, id);
 		}
-		timer = setTimeout(async () => {
-			const res = await fetch(`/assets?search=${encodeURIComponent(q)}&limit=15`).catch(() => null);
-			const body = res?.ok ? await res.json() : { results: [] };
-			if (query.trim() === q) results = body.results ?? [];
-		}, 250);
+		goto(url, { invalidateAll: true, noScroll: true, keepFocus: true });
 	}
 </script>
 
@@ -125,36 +112,23 @@
 			</nav>
 		{/if}
 		<div class="flex-1"></div>
-		<div class="relative">
-			<input
-				type="search"
-				placeholder="Focus on an asset…"
-				bind:value={query}
-				oninput={onSearch}
-				class="w-64 rounded-lg border-surface-300-700 bg-surface-100-900 text-surface-700-300 sm:text-sm"
-			/>
-			{#if results.length}
-				<ul
-					class="absolute right-0 z-20 mt-1 w-80 max-h-72 overflow-y-auto bg-surface-50-950 border border-surface-300-700 rounded-base shadow-lg p-1"
-				>
-					{#each results as result (result.id)}
-						<li>
-							<button
-								type="button"
-								class="w-full text-left px-2 py-1.5 rounded hover:bg-surface-200-800 cursor-pointer"
-								onclick={() => refocus(result.id)}
-							>
-								<div class="text-sm font-semibold text-surface-800-200 truncate">
-									{result.name}
-								</div>
-								<div class="text-[11px] text-surface-500 truncate">
-									<i class="fa-solid fa-sitemap text-[9px] mr-1"></i>{result.folder?.str}
-								</div>
-							</button>
-						</li>
-					{/each}
-				</ul>
-			{/if}
+		<div class="w-72">
+			{#key data.focus}
+				<AutocompleteSelect
+					form={focusPicker.form}
+					field="asset"
+					optionsEndpoint="assets"
+					optionsLabelField="auto"
+					optionsInfoFields={{ fields: [{ field: 'type' }], classes: 'text-blue-500' }}
+					optionsExtraFields={[['folder', 'str']]}
+					lazy
+					portalDropdown
+					placeholder="Focus on an asset…"
+					onChange={(id) => {
+						if (id) refocus(id);
+					}}
+				/>
+			{/key}
 		</div>
 		<div class="flex rounded-lg border border-surface-300-700 overflow-hidden text-sm">
 			<button
@@ -201,7 +175,7 @@
 					assetModel={data.assetModel}
 					onRefocus={refocus}
 					onExpand={(id) => grow('expand', id)}
-					onReveal={(id) => grow('reveal', id)}
+					onReveal={(...ids) => grow('reveal', ...ids)}
 				/>
 			{/key}
 		{:else}
