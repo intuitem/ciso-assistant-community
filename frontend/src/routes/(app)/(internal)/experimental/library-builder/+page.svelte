@@ -425,6 +425,7 @@
 						class="input placeholder:text-surface-500"
 						type="text"
 						bind:value={quickPackager}
+						maxlength="32"
 						placeholder="my-org"
 						onkeydown={(e) => e.key === 'Enter' && createQuick()}
 					/>
@@ -479,6 +480,7 @@
 						class="input placeholder:text-surface-500"
 						type="text"
 						bind:value={newPackager}
+						maxlength="32"
 						oninput={scheduleIdentityCheck}
 						placeholder="my-org"
 					/>

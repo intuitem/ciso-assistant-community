@@ -19,7 +19,7 @@ Because a draft serializes to a plain library **YAML**, you can also export it a
 ## Concepts in one minute
 
 - **Draft (`LibraryDraft`)** — the working document. Editing a draft never mutates live objects.
-- **Identity** — a library is identified by its **packager** and **ref_id** (e.g. `packager = acme`, `ref_id = my-policy`). Every URN in the library derives from them: `urn:acme:risk:framework:my-policy`. Identity is **editable while the library is a draft** and **frozen on first publish** — renaming a draft rewrites the whole URN family for you; once published, it's locked.
+- **Identity** — a library is identified by its **packager** and **ref_id** (e.g. `packager = acme`, `ref_id = my-policy`). Every URN in the library derives from them: `urn:acme:risk:framework:my-policy`. The packager holds at most 32 characters. Identity is **editable while the library is a draft** and **frozen on first publish** — renaming a draft rewrites the whole URN family for you; once published, it's locked.
 - **Publish** — the library-level action (on the draft page) that hands the draft to the standard loader, materializing its objects live and freezing the identity.
 - **Library publication states** (the badge on the draft page and the builder list):
   - **Draft** — never published; identity still editable.
@@ -106,6 +106,8 @@ On a requirement node, click **Add question**:
   - **Color** — optional, for visual differentiation.
 
 The order in the editor is the order respondents see. Keep conditional (`depends_on`) chains shallow — a single hop is easy to reason about; chains are expensive to debug.
+
+Questions are numbered under their requirement, as in libraries built from Excel: `…:question:1`, `…:question:2`, and choices `…:question:1:choice:1`. A new question takes the number after the highest one on its requirement, and a saved question keeps its number when you reorder. In CEL expressions, refer to a question as `answers["<requirement>:question:<n>"]`, where `<requirement>` is the requirement's ref_id in lowercase — e.g. `answers["5.3.2:question:1"].value`.
 
 ### Add outcome rules
 
@@ -295,7 +297,7 @@ The two paths compose: an Excel-built library can be imported into a draft and t
 
 The packager used to pre-fill new drafts is an instance-wide setting.
 
-- Go to **Settings → General settings** and set **Default packager** (defaults to `custom`). It must match `^[a-z0-9_-]+$`.
+- Go to **Settings → General settings** and set **Default packager** (defaults to `custom`). It must match `^[a-z0-9_-]+$` and hold at most 32 characters.
 
 Individual users' most recently typed packager is also remembered locally and takes precedence in the quick-create forms.
 

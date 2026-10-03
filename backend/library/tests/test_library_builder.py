@@ -1003,6 +1003,47 @@ def test_new_question_never_overwrites_an_existing_one():
     assert questions[f"{node_urn}:question:2"]["text"] == "Second question?"
 
 
+def test_new_questions_are_numbered_after_the_highest_one():
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    node_urn = "urn:acme:risk:req_node:source-lib:a.1"
+
+    def save(framework, edit):
+        doc = fw_editor.framework_to_editor_doc(framework, locale="en")
+        edit(doc["questions"])
+        return fw_editor.editor_doc_to_framework_object(doc, existing=framework)
+
+    def question_urns(framework):
+        node = next(n for n in framework["requirement_nodes"] if n["urn"] == node_urn)
+        return list(node["questions"])
+
+    def add(order):
+        # The editor's default ref_id repeats the node's: like in the Excel
+        # converter, it no longer shapes the URN.
+        return lambda questions: questions.append(
+            {
+                "id": f"tmp-q{order}",
+                "urn": None,
+                "ref_id": f"A.1-q{order}",
+                "text": "?",
+                "type": "text",
+                "order": order,
+                "requirement_node_id": node_urn,
+            }
+        )
+
+    def drop_question_2(questions):
+        questions[:] = [q for q in questions if not q["urn"].endswith(":question:2")]
+
+    three = save(save(original, add(1)), add(2))
+    assert question_urns(three) == [f"{node_urn}:question:{n}" for n in (1, 2, 3)]
+
+    # A question removed in an earlier save leaves a gap that is not refilled.
+    refilled = save(save(three, drop_question_2), add(0.5))
+    assert question_urns(refilled) == [f"{node_urn}:question:{n}" for n in (1, 4, 3)]
+
+
 def test_malformed_node_order_is_rejected():
     from library import framework_editor as fw_editor
 

@@ -900,6 +900,7 @@
 								class="input"
 								type="text"
 								bind:value={meta.packager}
+								maxlength="32"
 								disabled={draft.identity_locked}
 							/>
 						</label>

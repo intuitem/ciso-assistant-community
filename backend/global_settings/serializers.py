@@ -250,14 +250,14 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                         }
                     )
             if key == "default_packager":
-                # Identity alphabet of library packagers / ref_ids
-                # (core.LibraryDraft.IDENTITY_REGEX). fullmatch, not match:
-                # `$` would still accept a trailing newline.
+                # Identity alphabet and length of library packagers
+                # (core.LibraryDraft.IDENTITY_REGEX / PACKAGER_MAX_LENGTH).
+                # fullmatch, not match: `$` would still accept a trailing newline.
                 if not isinstance(value, str) or not re.fullmatch(
-                    r"[a-z0-9_-]+", value
+                    r"[a-z0-9_-]{1,32}", value
                 ):
                     raise serializers.ValidationError(
-                        {"default_packager": "Must match [a-z0-9_-]+."}
+                        {"default_packager": "Must match [a-z0-9_-]{1,32}."}
                     )
             if key == "disabled_email_templates":
                 if not isinstance(value, list) or not all(
