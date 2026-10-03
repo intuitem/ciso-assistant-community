@@ -5954,7 +5954,7 @@
 	"scoreScaleNoLabels": "Aucun libellé de niveau : les scores s'affichent en chiffres.",
 	"scoreScaleScoringHidden": "Le score est masqué pour cet audit. Rendez le champ Score visible dans « {section} » ci-dessus pour choisir une échelle.",
 	"scoreScaleCustomHint": "Votre propre plage",
-	"scoreScaleBoundToFramework": "Ce référentiel calcule les scores à partir de ses questions : son échelle ne peut pas être modifiée.",
+	"scoreScaleBoundToFramework": "Ce référentiel définit sa propre échelle de notation : elle ne peut pas être modifiée.",
 	"scoreScaleFallback": "Par défaut",
 	"scoreScaleFallbackHelp": "La première langue s'affiche pour toute personne dont la langue n'a pas de libellé.",
 	"scoreScaleRangeError": "Le score maximum doit être supérieur au score minimum.",

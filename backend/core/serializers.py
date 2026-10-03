@@ -3106,7 +3106,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     third_party_field_visibility = serializers.SerializerMethodField()
 
     implementation_groups_definition = serializers.SerializerMethodField()
-    default_score_calculation_method = serializers.CharField(read_only=True)
+    default_scoring = serializers.DictField(read_only=True)
 
     def get_implementation_groups_definition(self, obj):
         return obj.get_implementation_groups_definition_translated()
@@ -3644,6 +3644,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
+    framework_exports = serializers.ReadOnlyField()
     progress = serializers.SerializerMethodField()
     answers_progress = serializers.SerializerMethodField()
     assets = FieldsRelatedField(many=True)
@@ -3838,6 +3839,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 )
 
         self._validate_score_scale(attrs, confirm=attrs.pop("confirm_rescale", False))
+        self._apply_default_scoring(attrs)
 
         target = attrs.get(
             "target_score",
@@ -3877,6 +3879,19 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     )
 
         return super().validate(attrs)
+
+    def _apply_default_scoring(self, attrs):
+        """New audit: the framework's scoring settings fill the fields the caller
+        left out, so the API, presets and imports match the form. A copy of an
+        audit keeps the caller's settings."""
+        framework = attrs.get("framework")
+        if self.instance or not framework or attrs.get("baseline"):
+            return
+        defaults = framework.default_scoring_for(
+            attrs.get("selected_implementation_groups")
+        )
+        for field, value in defaults.items():
+            attrs.setdefault(field, value)
 
     def _validate_score_scale(self, attrs, confirm=False):
         scale_fields = {

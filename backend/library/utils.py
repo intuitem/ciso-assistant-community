@@ -403,6 +403,11 @@ class FrameworkImporter:
         if isinstance(scores_definition, list):
             scores_definition = {"scale": scores_definition}
 
+        score_calculation_method = self.framework_data.get(
+            "score_calculation_method", "average"
+        )
+        Framework.validate_score_calculation_method(score_calculation_method)
+
         # update_or_create: identical to create() for normal loads (no row
         # exists yet) and adopts a pre-existing library-less framework in
         # place — same URN family, same rows, audits untouched (the adopted
@@ -438,6 +443,10 @@ class FrameworkImporter:
                 ),
                 outcomes_definition=self.framework_data.get("outcomes_definition", []),
                 field_visibility=self.framework_data.get("field_visibility") or {},
+                score_scale_locked=bool(
+                    self.framework_data.get("score_scale_locked", False)
+                ),
+                score_calculation_method=score_calculation_method,
                 provider=library_object.provider,
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,

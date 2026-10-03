@@ -1,6 +1,6 @@
 import pytest
 
-from core.models import ComplianceAssessment, Framework, round_score
+from core.models import round_score
 
 
 @pytest.mark.parametrize(
@@ -16,25 +16,3 @@ from core.models import ComplianceAssessment, Framework, round_score
 )
 def test_round_score_two_decimals_half_up(value, expected):
     assert round_score(value) == expected
-
-
-@pytest.mark.parametrize(
-    "urn, expected",
-    [
-        (
-            "urn:intuitem:risk:framework:ccb-cyfun2025",
-            ComplianceAssessment.CalculationMethod.AVG_OF_AVG,
-        ),
-        (
-            "urn:intuitem:risk:framework:ccb-cff-2023-03-01",
-            ComplianceAssessment.CalculationMethod.AVG_OF_AVG,
-        ),
-        (
-            "urn:intuitem:risk:framework:iso27001-2022",
-            ComplianceAssessment.CalculationMethod.AVG,
-        ),
-    ],
-)
-@pytest.mark.django_db
-def test_default_score_calculation_method(urn, expected):
-    assert Framework(urn=urn).default_score_calculation_method == expected

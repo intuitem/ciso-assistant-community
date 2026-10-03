@@ -5944,7 +5944,7 @@
 	"scoreScaleNoLabels": "No level labels: scores are shown as numbers.",
 	"scoreScaleScoringHidden": "Scoring is hidden for this audit. Make Score visible under {section} above to choose a scale.",
 	"scoreScaleCustomHint": "Your own range",
-	"scoreScaleBoundToFramework": "This framework computes scores from its questions, so its scale cannot be changed.",
+	"scoreScaleBoundToFramework": "This framework defines its own score scale, so it cannot be changed.",
 	"scoreScaleFallback": "Fallback",
 	"scoreScaleFallbackHelp": "The first language is shown to anyone whose language has no label.",
 	"scoreScaleRangeError": "The maximum score must be greater than the minimum score.",

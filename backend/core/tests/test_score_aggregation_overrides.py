@@ -308,7 +308,7 @@ class TestTreeAggregationNoneScoreOnOffsetScale:
     not pull the parent below the audit's min via a negative ratio. Covers
     both the tree path (helpers.annotate_tree_with_aggregated_scores) and
     the shared path used by the radar and global score
-    (models._compute_score_for_field)."""
+    (models._compute_raw_score_for_field)."""
 
     def test_none_score_does_not_produce_negative_aggregate(self):
         from core.helpers import (
@@ -412,9 +412,10 @@ class TestTreeAggregationNoneScoreOnOffsetScale:
 
 @pytest.mark.django_db
 class TestDocumentationScoreNoneLegacySemantic:
-    """documentation_score=None is a legitimate 'no doc' state and must keep
-    its legacy semantic of contributing 0 to the maturity rollup. The strict
-    'exclude None' guard only applies to score-field aggregation."""
+    """documentation_score=None is a legitimate 'no doc' state: it contributes
+    the bottom of the scale to the maturity rollup (0 on 0-based scales, as it
+    always did). The strict 'exclude None' guard only applies to score-field
+    aggregation."""
 
     def test_doc_none_counts_as_zero(self):
         from core.models import RequirementAssessment as RA
@@ -456,23 +457,21 @@ class TestDocumentationScoreNoneLegacySemantic:
         ras = list(RA.objects.filter(compliance_assessment=ca))
         # Implementation: both leaves contribute 4 -> avg 4.
         assert (
-            ca._compute_score_for_field(ras, None, "score", ca.anchor_na_to_target)
+            ca._compute_raw_score_for_field(ras, None, "score", ca.anchor_na_to_target)
             == 4.0
         )
-        # Documentation: r1=4, r2=None counted as 0 -> avg 2 (legacy semantic).
+        # Documentation: r1=4, r2=None counted as the scale min 0 -> avg 2.
         assert (
-            ca._compute_score_for_field(
+            ca._compute_raw_score_for_field(
                 ras, None, "documentation_score", ca.anchor_na_to_target
             )
             == 2.0
         )
 
     def test_doc_none_tree_matches_global_on_offset_scale(self):
-        """On an offset scale (1..4) the tree must also treat documentation_score
-        =None as 0, so its documentation rollup matches the global score. The
-        tree previously neutralised None as ratio 0, which diverged from the
-        global on non-zero-min scales and left the leaf without an explicit
-        aggregated_documentation_score (blank frontend ring instead of 0)."""
+        """On an offset scale (1..4) the tree and the global score both treat
+        documentation_score=None as the scale min (1), never below it, and the
+        leaf carries it explicitly (a blank frontend ring otherwise)."""
         from core.helpers import (
             annotate_tree_with_aggregated_scores,
             get_sorted_requirement_nodes,
@@ -543,15 +542,15 @@ class TestDocumentationScoreNoneLegacySemantic:
                     return f
             return None
 
-        # The None-doc leaf carries an explicit 0, not a missing key.
+        # The None-doc leaf carries an explicit scale min, not a missing key.
         d2_node = _find(tree, leaves["d2"].urn)
-        assert d2_node["aggregated_documentation_score"] == 0
+        assert d2_node["aggregated_documentation_score"] == 1
 
-        # doc avg ratio = ((3-1)/3 + (0-1)/3) / 2 = 1/6 -> 1 + 1/6*3 = 1.5,
+        # doc avg ratio = ((3-1)/3 + (1-1)/3) / 2 = 1/3 -> 1 + 1/3*3 = 2.0,
         # and the tree must agree with the global score's doc layer.
         section_node = _find(tree, section.urn)
         global_doc = ca.get_global_score()["documentation_score"]
-        assert section_node["aggregated_documentation_score"] == global_doc == 1.5
+        assert section_node["aggregated_documentation_score"] == global_doc == 2.0
 
 
 @pytest.mark.django_db
@@ -580,10 +579,7 @@ class TestRadarDataNormalizesMixedScales:
                 compliance_assessment=ca, requirement__in=[a1, a2]
             )
         )
-        result = ca._compute_score_for_field(
-            scored, None, "score", ca.anchor_na_to_target
-        )
-        assert result == 4.5
+        assert ca.get_scores_for(scored)["implementation_score"] == 4.5
 
     def test_sum_radar_keeps_raw_weighted_sum(self, mixed_scale_setup):
         """SUM stays raw — operator's responsibility to interpret across scales."""
@@ -600,10 +596,7 @@ class TestRadarDataNormalizesMixedScales:
             )
         )
         # raw weighted: 4*1 + 1*1 = 5
-        assert (
-            ca._compute_score_for_field(scored, None, "score", ca.anchor_na_to_target)
-            == 5.0
-        )
+        assert ca.get_scores_for(scored)["implementation_score"] == 5.0
 
     def test_compare_endpoint_radar_normalises_mixed_scales(
         self, admin_client, mixed_scale_setup

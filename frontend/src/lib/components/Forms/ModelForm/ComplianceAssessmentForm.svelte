@@ -56,6 +56,37 @@
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
 
 	let frameworkScoring = $state<FrameworkScale | null>(null);
+
+	// Scoring settings the framework proposes for a new audit (Framework.default_scoring).
+	interface DefaultScoring {
+		score_calculation_method?: string;
+		anchor_na_to_target?: boolean;
+		target_score?: number;
+		target_score_by_group?: Record<string, number>;
+	}
+	let defaultScoring = $state<DefaultScoring | null>(null);
+	// The target last proposed; it follows the selected groups until the user edits it.
+	let proposedTarget: number | null = null;
+
+	// Same rule as Framework.default_scoring_for: the highest selected group target applies.
+	function defaultTarget(groups: string[] | undefined): number | null {
+		const target = defaultScoring?.target_score;
+		if (target === undefined) return null;
+		if (!groups?.length) return target;
+		return Math.max(...groups.map((g) => defaultScoring?.target_score_by_group?.[g] ?? target));
+	}
+
+	$effect(() => {
+		const groups = $formData.selected_implementation_groups;
+		if (object?.id || initialData.baseline || !defaultScoring?.target_score_by_group) return;
+		untrack(() => {
+			const next = defaultTarget(groups);
+			if ($formData.target_score !== proposedTarget || next === proposedTarget) return;
+			proposedTarget = next;
+			form.form.update((d) => ({ ...d, target_score: next }), { taint: false });
+		});
+	});
+
 	let baselineScale = $state<ScoreScaleValue | null>(null);
 	// The option the user picked; until then the proposed one applies.
 	let pickedScale = $state<string | null>(null);
@@ -241,6 +272,7 @@
 					suggestions = r['reference_controls'].length > 0;
 
 					frameworkDefaults = r['effective_field_visibility'] ?? null;
+					defaultScoring = r['default_scoring'] ?? null;
 
 					frameworkScoring = {
 						min_score: r['min_score'],
@@ -255,13 +287,20 @@
 						.map((group) => group.ref_id);
 
 					if (!object.id) {
+						if (!initialData.baseline) proposedTarget = defaultTarget(defaultImplementationGroups);
 						form.form.update((currentData) => ({
 							...currentData,
 							selected_implementation_groups: defaultImplementationGroups,
-							// Copies keep the baseline's method.
-							score_calculation_method: initialData.baseline
-								? currentData.score_calculation_method
-								: (r['default_score_calculation_method'] ?? currentData.score_calculation_method)
+							// Copies keep the baseline's scoring settings.
+							...(initialData.baseline
+								? {}
+								: {
+										score_calculation_method:
+											defaultScoring?.score_calculation_method ??
+											currentData.score_calculation_method,
+										anchor_na_to_target: defaultScoring?.anchor_na_to_target ?? false,
+										target_score: proposedTarget
+									})
 						}));
 					}
 				});
@@ -476,8 +515,8 @@
 		{/if}
 
 		{#if scoringEnabled}
-			<!-- On create the method follows the framework default: restoring a value
-			     cached by an earlier modal would override it once the field mounts. -->
+			<!-- On create the method and target follow the framework defaults: restoring
+			     a value cached by an earlier modal would override them once the field mounts. -->
 			<Select
 				{form}
 				options={model.selectOptions['score_calculation_method']}
@@ -497,7 +536,7 @@
 				field="target_score"
 				label={m.targetScore()}
 				helpText={m.targetScoreHelpText()}
-				cacheLock={cacheLocks['target_score']}
+				cacheLock={object?.id || initialData.baseline ? cacheLocks['target_score'] : undefined}
 				bind:cachedValue={formDataCache['target_score']}
 			/>
 			<Checkbox

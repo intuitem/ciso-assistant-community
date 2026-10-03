@@ -53,7 +53,6 @@
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 
-	const CYFUN_2025_FRAMEWORK_URN = 'urn:intuitem:risk:framework:ccb-cyfun2025';
 	const ISO27001_FRAMEWORK_URN_PREFIX = 'urn:intuitem:risk:framework:iso27001';
 
 	interface Props {
@@ -409,11 +408,11 @@
 		const id = ca.id;
 		const isInternal = !page.data.user.is_third_party;
 		const frameworkUrn = ca.framework?.urn ?? '';
-		// CyFun stays exact: backend cyfun_xlsx (views.py) hardcodes the 2025
-		// sheet layout, so other versions would 400. Bump both when a new CyFun
-		// ships. ISO27001 is prefix-matched — SoA only navigates to a page
-		// whose semantics carry across 27001 versions.
-		const isCyFun = frameworkUrn === CYFUN_2025_FRAMEWORK_URN;
+		// Framework-specific exports (e.g. the official CyFun self-assessment
+		// tool) come from the backend, which knows the supported versions.
+		// ISO27001 is prefix-matched — SoA only navigates to a page whose
+		// semantics carry across 27001 versions.
+		const frameworkExports: string[] = ca.framework_exports ?? [];
 		const isIso27001 = frameworkUrn.startsWith(ISO27001_FRAMEWORK_URN_PREFIX);
 
 		const auditOptions = [
@@ -454,7 +453,7 @@
 				testId: 'export-option-attestation-pdf'
 			},
 			isInternal &&
-				isCyFun && {
+				frameworkExports.includes('cyfun-xlsx') && {
 					titleKey: 'exportCyFunAssessment',
 					descriptionKey: 'exportCyFunAssessmentDesc',
 					format: 'XLSX' as const,

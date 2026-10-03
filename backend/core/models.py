@@ -83,7 +83,7 @@ from .validators import (
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
-from . import dora
+from . import cyfun, dora
 from collections import defaultdict, deque
 from dataclasses import dataclass
 
@@ -1736,6 +1736,12 @@ class LibraryUpdater:
                     framework_dict["outcomes_definition"] = []
                 # An omitted IG definition means that the framework no longer defines implementation groups.
                 framework_dict.setdefault("implementation_groups_definition", None)
+                # Same for the scoring properties: omitted means back to the defaults.
+                framework_dict.setdefault("score_scale_locked", False)
+                framework_dict.setdefault("score_calculation_method", "average")
+                Framework.validate_score_calculation_method(
+                    framework_dict["score_calculation_method"]
+                )
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
@@ -3704,6 +3710,17 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             "{field_name: {role: 'edit' | 'read' | 'hidden'}}."
         ),
     )
+    score_scale_locked = models.BooleanField(
+        default=False,
+        verbose_name=_("Score scale locked"),
+        help_text=_("The standard defines the score scale: audits cannot change it."),
+    )
+    score_calculation_method = models.CharField(
+        max_length=30,
+        default="average",
+        verbose_name=_("Score calculation method"),
+        help_text=_("Calculation method proposed for new audits."),
+    )
     urn_namespace = models.CharField(
         max_length=50,
         default="custom",
@@ -3811,6 +3828,8 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
                 Q(min_score__isnull=False)
                 | Q(max_score__isnull=False)
                 | Q(scores_definition_ref__gt="")
+                # The framework declares that its standard defines the scale.
+                | Q(framework__score_scale_locked=True)
             ),
         )
 
@@ -3824,21 +3843,46 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
     def is_scale_bound(self) -> bool:
         return any(qs.exists() for qs in self.scale_bound_querysets(self))
 
-    # Frameworks whose reference tool scores an audit as the mean of its
-    # category means (CCB CyFun self-assessment workbook).
-    AVERAGE_OF_AVERAGES_URNS = frozenset(
-        {
-            "urn:intuitem:risk:framework:ccb-cff-2023-03-01",
-            "urn:intuitem:risk:framework:ccb-cyfun2025",
-        }
-    )
+    @staticmethod
+    def validate_score_calculation_method(method):
+        """A library may only declare a calculation method audits support."""
+        if method not in ComplianceAssessment.CalculationMethod.values:
+            raise ValueError(
+                f"invalid score_calculation_method {method!r}: expected one of "
+                f"{', '.join(ComplianceAssessment.CalculationMethod.values)}"
+            )
 
     @property
-    def default_score_calculation_method(self) -> str:
-        """Calculation method proposed when creating an audit on this framework."""
-        if self.urn in self.AVERAGE_OF_AVERAGES_URNS:
-            return ComplianceAssessment.CalculationMethod.AVG_OF_AVG
-        return ComplianceAssessment.CalculationMethod.AVG
+    def default_scoring(self) -> dict:
+        """Scoring settings proposed when creating an audit on this framework.
+
+        `target_score` is expressed on the framework's scale. With implementation
+        groups selected, the highest of their `target_score_by_group` entries
+        applies instead (a group without one counts as `target_score`).
+        """
+        scoring = {"score_calculation_method": self.score_calculation_method}
+        if self.urn == cyfun.CYFUN_2025_URN:
+            # The CCB tools count an N/A requirement as their level's score.
+            scoring |= {
+                "anchor_na_to_target": True,
+                "target_score": cyfun.NA_SCORES[cyfun.level_for_groups(None)],
+                "target_score_by_group": {
+                    group: cyfun.NA_SCORES[level]
+                    for group, level in cyfun.GROUP_LEVELS.items()
+                },
+            }
+        return scoring
+
+    def default_scoring_for(self, selected_implementation_groups) -> dict:
+        """default_scoring resolved for an audit's implementation groups."""
+        scoring = self.default_scoring
+        by_group = scoring.pop("target_score_by_group", {})
+        if selected_implementation_groups and "target_score" in scoring:
+            scoring["target_score"] = max(
+                by_group.get(group, scoring["target_score"])
+                for group in selected_implementation_groups
+            )
+        return scoring
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.get_name_translated}"
@@ -9211,15 +9255,6 @@ class ComplianceAssessment(Assessment):
             return ra_min + ca_ratio * (ra_max - ra_min)
         return ra_max
 
-    def _compute_score_for_field(
-        self, requirement_assessments, ig, score_field, anchor_na_to_target=False
-    ):
-        """Same as _compute_raw_score_for_field, rounded for display."""
-        raw = self._compute_raw_score_for_field(
-            requirement_assessments, ig, score_field, anchor_na_to_target
-        )
-        return raw if raw == -1 else round_score(raw)
-
     def _compute_raw_score_for_field(
         self, requirement_assessments, ig, score_field, anchor_na_to_target=False
     ):
@@ -9262,22 +9297,10 @@ class ComplianceAssessment(Assessment):
                     resolved = ras.get_resolved_scoring()
                     ra_min = resolved["min_score"]
                     ra_max = resolved["max_score"]
-                    if (
-                        self.target_score is not None
-                        and ra_min is not None
-                        and ra_max is not None
-                        and ra_max > ra_min
-                    ):
-                        # Project the CA-wide target score onto the RA scale as a
-                        # ratio so summing across mixed scales stays coherent
-                        # (raw injection would add 80/100 onto a 0-5 RA).
-                        ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
-                        ca_ratio = (ca_target_clamped - ca_min) / ca_range
-                        score = ra_min + ca_ratio * (ra_max - ra_min)
-                    elif ra_max is not None:
-                        score = ra_max
+                    if ra_min is None or ra_max is None:
+                        score = ra_max or 0
                     else:
-                        score = 0
+                        score = self.na_anchor_score(ra_min, ra_max)
                 else:
                     raw = getattr(ras, score_field)
                     if raw is None:
@@ -9304,21 +9327,15 @@ class ComplianceAssessment(Assessment):
 
             is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
             if is_na and anchor_na_to_target:
-                # Project the CA-wide target onto the RA scale as a ratio so
-                # mixed scales stay coherent (CA target 80/100 contributes
-                # 80% of the RA range, not 80 raw).
-                if self.target_score is not None:
-                    ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
-                    ca_ratio = (ca_target_clamped - ca_min) / ca_range
-                    raw = ra_min + ca_ratio * ra_range
-                else:
-                    raw = ra_max
+                raw = self.na_anchor_score(ra_min, ra_max)
             else:
                 raw = getattr(ras, score_field)
                 if raw is None:
                     if score_field == "score":
                         return None
-                    raw = 0
+                    # A missing documentation score is the bottom of the scale
+                    # (0 on 0-based scales), never below it.
+                    raw = ra_min
 
             ratio = (raw - ra_min) / ra_range
             return ratio, (ras.requirement.weight or 1)
@@ -9335,25 +9352,7 @@ class ComplianceAssessment(Assessment):
             if not leaf_ratios:
                 return -1
 
-            all_nodes = RequirementNode.objects.filter(
-                framework=self.framework
-            ).values_list("urn", "parent_urn", "weight")
-
-            children_map = defaultdict(list)
-            node_weights = {}
-            roots = []
-            all_urns = set()
-            parent_links = {}
-            for urn, parent_urn, weight in all_nodes:
-                node_weights[urn] = weight or 1
-                all_urns.add(urn)
-                parent_links[urn] = parent_urn
-            for urn, parent_urn in parent_links.items():
-                if parent_urn and parent_urn in all_urns:
-                    children_map[parent_urn].append(urn)
-                else:
-                    # Orphan or root: keep reachable as a tree root.
-                    roots.append(urn)
+            children_map, node_weights, roots = self._framework_node_tree
 
             computed_ratios = {}
             visiting = set()
@@ -9433,6 +9432,28 @@ class ComplianceAssessment(Assessment):
         # AVG: average of weighted ratios, denormalized onto the CA scale.
         avg_ratio = total_ratio_weighted / total_weight
         return ca_min + avg_ratio * ca_range
+
+    @cached_property
+    def _framework_node_tree(self):
+        """(children, weights, roots) of the framework's nodes by URN, built
+        once per instance: the radar scores each section separately."""
+        all_nodes = RequirementNode.objects.filter(
+            framework=self.framework
+        ).values_list("urn", "parent_urn", "weight")
+        children_map = defaultdict(list)
+        node_weights = {}
+        roots = []
+        parent_links = {}
+        for urn, parent_urn, weight in all_nodes:
+            node_weights[urn] = weight or 1
+            parent_links[urn] = parent_urn
+        for urn, parent_urn in parent_links.items():
+            if parent_urn and parent_urn in parent_links:
+                children_map[parent_urn].append(urn)
+            else:
+                # Orphan or root: keep reachable as a tree root.
+                roots.append(urn)
+        return children_map, node_weights, roots
 
     def get_global_score(
         self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
@@ -9626,6 +9647,17 @@ class ComplianceAssessment(Assessment):
         else:
             # For AVG and AVG_OF_AVG, the score is bounded by max_score
             return self.max_score
+
+    @property
+    def framework_exports(self) -> list[str]:
+        """Exports specific to the audit's framework, by id (its export route),
+        such as an official self-assessment template."""
+        exports = []
+        if cyfun.export_template(
+            self.framework.urn, self.selected_implementation_groups
+        ):
+            exports.append("cyfun-xlsx")
+        return exports
 
     def get_selected_implementation_groups(self):
         framework = self.framework

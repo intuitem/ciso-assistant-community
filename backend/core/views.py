@@ -219,8 +219,8 @@ from resilience.models import AssetAssessment
 from .models import *
 from .serializers import *
 
-from .models import Severity, round_score
-from . import dora
+from .models import Severity
+from . import cyfun, dora
 from core.mappings.merge import compute_map_from_merge
 
 from serdes.utils import (
@@ -12945,77 +12945,60 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
 
         audit = ComplianceAssessment.objects.get(id=pk)
-        CYFUN_FRAMEWORK_URN = "urn:intuitem:risk:framework:ccb-cyfun2025"
-        if audit.framework.urn != CYFUN_FRAMEWORK_URN:
+        # The official tool of the audit's CyFun version and assurance level: it
+        # lists only that level's requirements and applies its N/A score and
+        # thresholds.
+        template = cyfun.export_template(
+            audit.framework.urn, audit.selected_implementation_groups
+        )
+        if template is None:
             return Response(
-                {"error": "This export is only available for CyFun 2025 assessments"},
+                {"error": "This export is only available for CyFun assessments"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        template_path = (
-            Path(__file__).resolve().parent
-            / "templates"
-            / "core"
-            / "CyFun2025_Self-Assessment_tool_ESSENTIAL_v3.1.xlsx"
+        wb = load_workbook(
+            Path(__file__).resolve().parent / "templates" / "core" / template.file
         )
-        wb = load_workbook(template_path)
 
-        SHEET_MAP = {
-            "GV": "GOVERN",
-            "ID": "IDENTIFY",
-            "PR": "PROTECT",
-            "DE": "DETECT",
-            "RS": "RESPOND",
-            "RC": "RECOVER",
-        }
-
-        # Build ref_id → row lookup for each function sheet
-        sheet_row_maps = {}
-        for sheet_name in SHEET_MAP.values():
+        # ref_id -> (sheet, row) of every requirement the tool lists
+        rows = {}
+        for sheet_name in template.sheets:
             ws = wb[sheet_name]
-            row_map = {}
             for row in range(1, ws.max_row + 1):
-                cell_value = ws.cell(row=row, column=6).value  # Column F
+                cell_value = ws.cell(row=row, column=template.requirement_column).value
                 if cell_value and isinstance(cell_value, str):
-                    ref_id = cell_value.split(":")[0].strip().rstrip(".")
+                    ref_id = template.ref_id(cell_value)
                     if ref_id:
-                        row_map[ref_id] = row
-            sheet_row_maps[sheet_name] = row_map
+                        rows[ref_id] = (ws, row)
 
-        # Fetch all requirement assessments
         requirement_assessments = (
             RequirementAssessment.objects.filter(compliance_assessment=audit)
             .select_related("requirement")
             .filter(requirement__assessable=True)
         )
-
         for ra in requirement_assessments:
-            ref_id = ra.requirement.ref_id
-            if not ref_id:
+            target = rows.get((ra.requirement.ref_id or "").upper())
+            if target is None:
                 continue
-
-            prefix = ref_id.split(".")[0]
-            sheet_name = SHEET_MAP.get(prefix)
-            if not sheet_name:
-                continue
-
-            row = sheet_row_maps.get(sheet_name, {}).get(ref_id)
-            if row is None:
-                continue
-
-            ws = wb[sheet_name]
+            ws, row = target
             if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
-                ws.cell(row=row, column=7, value="N/A")  # Column G: doc score
-                ws.cell(row=row, column=8, value="N/A")  # Column H: impl score
+                ws.cell(row=row, column=template.doc_column, value="N/A")
+                ws.cell(row=row, column=template.impl_column, value="N/A")
             else:
                 if ra.documentation_score is not None:
-                    ws.cell(row=row, column=7, value=ra.documentation_score)
+                    ws.cell(
+                        row=row,
+                        column=template.doc_column,
+                        value=ra.documentation_score,
+                    )
                 if ra.score is not None:
-                    ws.cell(row=row, column=8, value=ra.score)
+                    ws.cell(row=row, column=template.impl_column, value=ra.score)
             if ra.observation:
                 ws.cell(
-                    row=row, column=13, value=escape_excel_formula(ra.observation)
-                )  # Column M: comments
+                    row=row,
+                    column=template.comment_column,
+                    value=escape_excel_formula(ra.observation),
+                )
 
         buffer = io.BytesIO()
         wb.save(buffer)
@@ -14784,41 +14767,17 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 else:
                     compliance_percentage = 0
 
-                # Maturity score for the radar slice. Reuse the audit's
-                # configured aggregation so per-RA scale overrides are
-                # normalised the same way as the global score (e.g. a binary
-                # 0..1 requirement contributes 100% at 1, not 1 raw).
-                # Mirror get_global_score's filtering: when anchor_na_to_target
-                # is on, N/A RAs stay in so they anchor to the target; off,
-                # they are excluded along with unscored RAs.
-                # `_compute_score_for_field` returns -1 when nothing is scored.
-                if audit.anchor_na_to_target:
-                    scored_list = [
-                        ra
-                        for ra in assessable_list
-                        if ra.result == "not_applicable" or ra.is_scored
-                    ]
-                else:
-                    scored_list = [
-                        ra
-                        for ra in assessable_list
-                        if ra.is_scored and ra.result != "not_applicable"
-                    ]
-                if scored_list:
-                    computed = audit._compute_score_for_field(
-                        scored_list,
-                        None,
-                        "score",
-                        audit.anchor_na_to_target,
-                    )
-                    maturity_score = 0 if computed == -1 else computed
-                else:
-                    maturity_score = 0
+                # Maturity score for the radar slice: the section's
+                # implementation score, filtered and aggregated like the global
+                # score (per-RA scales normalised, N/A anchored when enabled).
+                maturity_score = audit.get_scores_for(assessable_list)[
+                    "implementation_score"
+                ]
 
                 radar_data["compliance_percentages"].append(
                     round(compliance_percentage, 1)
                 )
-                radar_data["maturity_scores"].append(round_score(maturity_score))
+                radar_data["maturity_scores"].append(maturity_score or 0)
 
             return radar_data
 

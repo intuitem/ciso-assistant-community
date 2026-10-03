@@ -710,7 +710,7 @@ class TestThreeLayerScoring:
     def test_doc_score_null_treated_as_zero(self, scoring_setup):
         """
         When doc scoring is enabled but documentation_score is null on some RAs,
-        those null values should be treated as 0 in the computation.
+        those null values count as the scale minimum (0 here).
         """
         ca = scoring_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
@@ -754,7 +754,7 @@ class TestAnnotateTreeAggregatedScores:
 
     Per-node aggregates are what the tree UI renders at each intermediate
     node. They match the per-node `computed[urn]` values in
-    ComplianceAssessment._compute_score_for_field (not the top-level global
+    ComplianceAssessment._compute_raw_score_for_field (not the top-level global
     score, which uses a flat-average-of-categories rule for structural roots).
     """
 
@@ -818,7 +818,7 @@ class TestAnnotateTreeAggregatedScores:
         one child has a single leaf (score 4) and the other has multiple
         leaves whose average is ~2.3. With the previous flat weighted-avg,
         the parent showed 2.7; with per-level aggregation it should show
-        (4 + 2.33…) / 2 = 3.17 (stored raw; UI rounds to 3.17).
+        (4 + 2.33…) / 2 = 3.17 (rounded like the global score).
         """
         ca = deep_tree_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
@@ -836,8 +836,9 @@ class TestAnnotateTreeAggregatedScores:
         # C1 collects R1,R2,R3 via S1(=avg(4,1)=2.5) and S2(=2), so
         # avg_of_avg C1 = avg(2.5, 2) = 2.25. Not the RC.CO shape — use F1
         # which collects C1(2.25) and C2(=S3=R4=4): F1 = avg(2.25, 4) = 3.125
-        f1 = self._find(tree, "F1")
-        assert round(f1["aggregated_score"], 3) == 3.125
+        # Display values are rounded half up, like the global score and the
+        # CCB workbooks (Python's round() would give 3.12).
+        assert self._find(tree, "F1")["aggregated_score"] == 3.13
 
     def test_avg_per_node_is_flat_weighted_over_subtree_leaves(self, deep_tree_setup):
         """

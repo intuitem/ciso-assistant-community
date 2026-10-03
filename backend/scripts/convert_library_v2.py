@@ -1223,6 +1223,22 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
             )
         framework["field_visibility"] = field_visibility
 
+    # The standard defines the score scale: audits of the framework keep it.
+    if "score_scale_locked" in meta:
+        framework["score_scale_locked"] = str(
+            meta["score_scale_locked"]
+        ).strip().lower() in ("1", "true", "yes", "x")
+
+    # Calculation method proposed for new audits (defaults to "average").
+    if meta.get("score_calculation_method"):
+        method = str(meta["score_calculation_method"]).strip()
+        if method not in ("average", "sum", "average_of_averages"):
+            raise ValueError(
+                f"(framework) Invalid score_calculation_method {method!r}: "
+                "expected average, sum or average_of_averages"
+            )
+        framework["score_calculation_method"] = method
+
     score_name = meta.get("scores_definition")
     if score_name and score_name in object_blocks:
         score_header, score_rows_data = parse_content_rows(
