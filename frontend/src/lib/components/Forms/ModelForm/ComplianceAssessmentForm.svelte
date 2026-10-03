@@ -257,7 +257,11 @@
 					if (!object.id) {
 						form.form.update((currentData) => ({
 							...currentData,
-							selected_implementation_groups: defaultImplementationGroups
+							selected_implementation_groups: defaultImplementationGroups,
+							// Copies keep the baseline's method.
+							score_calculation_method: initialData.baseline
+								? currentData.score_calculation_method
+								: (r['default_score_calculation_method'] ?? currentData.score_calculation_method)
 						}));
 					}
 				});
@@ -472,13 +476,17 @@
 		{/if}
 
 		{#if scoringEnabled}
+			<!-- On create the method follows the framework default: restoring a value
+			     cached by an earlier modal would override it once the field mounts. -->
 			<Select
 				{form}
 				options={model.selectOptions['score_calculation_method']}
 				field="score_calculation_method"
 				label={m.scoreCalculationMethod()}
 				helpText={m.scoreCalculationMethodHelpText()}
-				cacheLock={cacheLocks['score_calculation_method']}
+				cacheLock={object?.id || initialData.baseline
+					? cacheLocks['score_calculation_method']
+					: undefined}
 				bind:cachedValue={formDataCache['score_calculation_method']}
 				disableDoubleDash
 			/>

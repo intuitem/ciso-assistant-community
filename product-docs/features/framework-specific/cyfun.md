@@ -51,7 +51,7 @@ The **CyFun self-assessment** option only appears when the audit is based on the
 The export writes each requirement's **score** into the official template, so two audit settings have to line up first — both on the audit's edit form under **More** (see [Customize your audit](../../guides/customize-audit.md)). Audits created by the CyFun import already have these set; this only matters for audits created manually:
 
 - **Make the score visible.** The **Score** field defaults to _Hidden_ in [field visibility](../../guides/customize-audit.md#field-visibility). Switch it on (and **Documentation score** if you use it) so the score is recorded and lands in the workbook.
-- **Use _Average of averages_ scoring.** Set the [score calculation method](../../guides/customize-audit.md#score-calculation-method) to **Average of averages** — that's the roll-up logic the CyFun framework expects, grouping requirements by category and averaging the category averages.
+- **Use _Average of averages_ scoring.** Set the [score calculation method](../../guides/customize-audit.md#score-calculation-method) to **Average of averages** — that's the roll-up logic the CyFun framework expects, grouping requirements by category and averaging the category averages. New CyFun audits are created with this method by default; audits created before that may still use **Average**. Scores are shown with two decimals, like the CCB workbook.
 
 ### What lands in the workbook
 

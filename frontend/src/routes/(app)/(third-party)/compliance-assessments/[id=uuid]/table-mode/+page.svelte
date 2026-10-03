@@ -503,7 +503,7 @@
 
 	// Compact score formatting for the header analytics.
 	function fmtScore(v: number | null | undefined) {
-		return v == null ? '--' : Math.round(Number(v) * 10) / 10;
+		return v == null ? '--' : Math.round(Number(v) * 100) / 100;
 	}
 
 	// Audit progress analytics (assessable requirements only).
@@ -880,7 +880,9 @@
 								<span
 									class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
 								>
-									{m.score()}:
+									{complianceAssessment.show_documentation_score
+										? m.implementationScore()
+										: m.score()}:
 									<span class="font-semibold">{fmtScore(auditScores?.implementation_score)}</span>
 									{#if auditScores?.max_score}<span class="text-surface-400-600"
 											>/{auditScores.max_score}</span

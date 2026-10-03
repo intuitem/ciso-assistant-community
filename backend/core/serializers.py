@@ -3106,6 +3106,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     third_party_field_visibility = serializers.SerializerMethodField()
 
     implementation_groups_definition = serializers.SerializerMethodField()
+    default_score_calculation_method = serializers.CharField(read_only=True)
 
     def get_implementation_groups_definition(self, obj):
         return obj.get_implementation_groups_definition_translated()

@@ -157,7 +157,7 @@ class TestMixedScaleAggregation:
 
         Ratios: A1=4/5=0.8, A2=1/1=1.0, B1=2/5=0.4, B2=5/5=1.0 (w=3)
         Weighted avg ratio = (0.8 + 1.0 + 0.4 + 3.0) / 6 = 5.2 / 6 ≈ 0.8667
-        Denormalized on CA (0-5): 0.8667 * 5 = 4.333 → 4.3 (truncated to .1)
+        Denormalized on CA (0-5): 0.8667 * 5 = 4.333 → 4.33 (rounded to .01)
         """
         _score(mixed_scale_setup, "a1", 4)
         _score(mixed_scale_setup, "a2", 1)
@@ -168,7 +168,7 @@ class TestMixedScaleAggregation:
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
         ca.save()
 
-        assert ca.get_global_score()["implementation_score"] == 4.3
+        assert ca.get_global_score()["implementation_score"] == 4.33
 
     def test_avg_full_top_of_each_scale_returns_max(self, mixed_scale_setup):
         """Every RA at its own max → global ratio 1.0 → CA max."""
@@ -188,7 +188,7 @@ class TestMixedScaleAggregation:
         Section A: weighted avg of ratios (A1=0.8, A2=1.0) = 0.9
         Section B: weighted avg of ratios (B1=0.4 w1, B2=1.0 w3) = 3.4/4 = 0.85
         Global ratio = (0.9 + 0.85) / 2 = 0.875
-        Denormalized = 0.875 * 5 = 4.375 → 4.3 (int(x*10)/10)
+        Denormalized = 0.875 * 5 = 4.375 → 4.38 (rounded half up)
         """
         _score(mixed_scale_setup, "a1", 4)
         _score(mixed_scale_setup, "a2", 1)
@@ -199,7 +199,7 @@ class TestMixedScaleAggregation:
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
         ca.save()
 
-        assert ca.get_global_score()["implementation_score"] == 4.3
+        assert ca.get_global_score()["implementation_score"] == 4.38
 
     def test_sum_uses_raw_weighted_sum(self, mixed_scale_setup):
         """SUM is intentionally simple: Σ(raw_score × weight), no scale
@@ -247,8 +247,8 @@ class TestAnchorNAToTargetWithMixedScales:
 
         # Ratios: A1=1.0, A2=1.0, B1=4/5=0.8, B2=1.0 (w=3)
         # Weighted avg = (1.0 + 1.0 + 0.8 + 3.0) / 6 = 5.8/6 ≈ 0.9667
-        # Denormalized: 0.9667 * 5 = 4.833 → 4.8
-        assert ca.get_global_score()["implementation_score"] == 4.8
+        # Denormalized: 0.9667 * 5 = 4.833 → 4.83
+        assert ca.get_global_score()["implementation_score"] == 4.83
 
 
 @pytest.fixture
@@ -669,3 +669,54 @@ class TestRadarDataNormalizesMixedScales:
         assert radar["maturity_scores"][0] == 3.0
         # Radar slice and global score agree (only section A is scored).
         assert body["base"]["global_score"] == 3.0
+
+    def test_section_compliance_anchors_na_to_target(
+        self, admin_client, mixed_scale_setup
+    ):
+        """With anchor_na_to_target on, the analytics section scores count an
+        N/A RA as the CA target projected onto its own scale, on both layers,
+        like the global score: A1 = 4/5 (0.8), A2 N/A -> target 2/5 (0.4).
+        Section A = 0.6 * 5 = 3.0 (excluding A2 would yield 4).
+        """
+        ca = mixed_scale_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.anchor_na_to_target = True
+        ca.target_score = 2
+        ca.show_documentation_score = True
+        ca.save()
+        ra_a1 = _score(mixed_scale_setup, "a1", 4)
+        ra_a1.documentation_score = 4
+        ra_a1.save()
+        _score(mixed_scale_setup, "a2", None, is_scored=False, result="not_applicable")
+
+        url = reverse(
+            "compliance-assessments-section-compliance", kwargs={"pk": str(ca.pk)}
+        )
+        response = admin_client.get(url)
+        assert response.status_code == 200
+        section_a = next(s for s in response.json()["sections"] if s["ref_id"] == "A")
+        assert section_a["implementation_score"] == 3.0
+        assert section_a["documentation_score"] == 3.0
+        assert section_a["maturity_score"] == 3.0
+
+    def test_section_compliance_matches_tree_aggregation(
+        self, admin_client, mixed_scale_setup
+    ):
+        """Analytics section scores follow the audit's method and scale
+        normalisation, like the tree: A1 = 4/5 (0.8), A2 = 1/1 (1.0), so
+        section A = 0.9 * 5 = 4.5. A raw average would give (4 + 1) / 2 = 2.5.
+        """
+        ca = mixed_scale_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.save()
+        _score(mixed_scale_setup, "a1", 4)
+        _score(mixed_scale_setup, "a2", 1)
+
+        url = reverse(
+            "compliance-assessments-section-compliance", kwargs={"pk": str(ca.pk)}
+        )
+        response = admin_client.get(url)
+        assert response.status_code == 200
+        section_a = next(s for s in response.json()["sections"] if s["ref_id"] == "A")
+        assert section_a["implementation_score"] == 4.5
+        assert section_a["maturity_score"] == 4.5

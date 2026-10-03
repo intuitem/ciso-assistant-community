@@ -90,13 +90,17 @@ from dataclasses import dataclass
 logger = get_logger(__name__)
 
 
-def _truncate_one_decimal(value: float) -> float:
-    """Truncate *value* to one decimal, matching the JS frontend display.
+def round_score(value: float) -> float:
+    """Round an aggregated score to two decimals, half up.
 
-    A tiny epsilon absorbs float-precision noise introduced by ratio-based
-    aggregation (e.g. 77.49999999999 should still truncate to 77.5).
+    Matches the precision of reference tools such as the CCB CyFun
+    self-assessment workbook. Rounding to 9 decimals first absorbs
+    float-precision noise from ratio-based aggregation (e.g. 2.69499999999
+    must round to 2.70, not 2.69).
     """
-    return int(value * 10 + 1e-9) / 10
+    return float(
+        Decimal(repr(round(value, 9))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    )
 
 
 def _defer_once(conn_attr: str, key, callback):
@@ -3819,6 +3823,22 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
     @property
     def is_scale_bound(self) -> bool:
         return any(qs.exists() for qs in self.scale_bound_querysets(self))
+
+    # Frameworks whose reference tool scores an audit as the mean of its
+    # category means (CCB CyFun self-assessment workbook).
+    AVERAGE_OF_AVERAGES_URNS = frozenset(
+        {
+            "urn:intuitem:risk:framework:ccb-cff-2023-03-01",
+            "urn:intuitem:risk:framework:ccb-cyfun2025",
+        }
+    )
+
+    @property
+    def default_score_calculation_method(self) -> str:
+        """Calculation method proposed when creating an audit on this framework."""
+        if self.urn in self.AVERAGE_OF_AVERAGES_URNS:
+            return ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        return ComplianceAssessment.CalculationMethod.AVG
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.get_name_translated}"
@@ -9172,7 +9192,35 @@ class ComplianceAssessment(Assessment):
 
         return changes
 
+    def na_anchor_score(self, ra_min, ra_max):
+        """Score an N/A requirement counts for when anchor_na_to_target is on.
+
+        The CA-wide target is projected onto the requirement's own scale, so
+        mixed scales stay coherent; without a target it counts as its max.
+        """
+        ca_min, ca_max = self.min_score, self.max_score
+        if (
+            self.target_score is not None
+            and ca_min is not None
+            and ca_max is not None
+            and ca_max > ca_min
+            and ra_max > ra_min
+        ):
+            ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
+            ca_ratio = (ca_target_clamped - ca_min) / (ca_max - ca_min)
+            return ra_min + ca_ratio * (ra_max - ra_min)
+        return ra_max
+
     def _compute_score_for_field(
+        self, requirement_assessments, ig, score_field, anchor_na_to_target=False
+    ):
+        """Same as _compute_raw_score_for_field, rounded for display."""
+        raw = self._compute_raw_score_for_field(
+            requirement_assessments, ig, score_field, anchor_na_to_target
+        )
+        return raw if raw == -1 else round_score(raw)
+
+    def _compute_raw_score_for_field(
         self, requirement_assessments, ig, score_field, anchor_na_to_target=False
     ):
         """
@@ -9191,7 +9239,7 @@ class ComplianceAssessment(Assessment):
         When anchor_na_to_target is True, N/A RAs contribute their resolved
         target (or resolved max if no target is set).
 
-        Returns the computed score, or -1 if no scored requirements exist.
+        Returns the unrounded score, or -1 if no scored requirements exist.
         """
         ca_min = self.min_score
         ca_max = self.max_score
@@ -9241,7 +9289,7 @@ class ComplianceAssessment(Assessment):
                 total_weight += weight
             if total_weight == 0:
                 return -1
-            return _truncate_one_decimal(total)
+            return total
 
         def _ra_ratio_weight(ras):
             if ig and not (ig & set(ras.requirement.implementation_groups or [])):
@@ -9367,7 +9415,7 @@ class ComplianceAssessment(Assessment):
                 return -1
 
             global_ratio = sum(category_ratios) / len(category_ratios)
-            return _truncate_one_decimal(ca_min + global_ratio * ca_range)
+            return ca_min + global_ratio * ca_range
 
         total_ratio_weighted = 0
         total_weight = 0
@@ -9384,7 +9432,7 @@ class ComplianceAssessment(Assessment):
 
         # AVG: average of weighted ratios, denormalized onto the CA scale.
         avg_ratio = total_ratio_weighted / total_weight
-        return _truncate_one_decimal(ca_min + avg_ratio * ca_range)
+        return ca_min + avg_ratio * ca_range
 
     def get_global_score(
         self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
@@ -9453,30 +9501,73 @@ class ComplianceAssessment(Assessment):
             else None
         )
 
-        impl_score = self._compute_score_for_field(
+        impl_score = self._compute_raw_score_for_field(
             requirement_assessments_scored, ig, "score", self.anchor_na_to_target
         )
 
         doc_score = None
         if self.show_documentation_score:
-            doc_score = self._compute_score_for_field(
+            doc_score = self._compute_raw_score_for_field(
                 requirement_assessments_scored,
                 ig,
                 "documentation_score",
                 self.anchor_na_to_target,
             )
 
-        # Maturity is the average of the enabled layers (ignore -1 / None)
+        # Maturity is the average of the enabled layers (ignore -1 / None),
+        # computed on unrounded layers so rounding only happens once.
         enabled = [s for s in [impl_score, doc_score] if s is not None and s != -1]
         if enabled:
-            maturity_score = _truncate_one_decimal(sum(enabled) / len(enabled))
+            maturity_score = round_score(sum(enabled) / len(enabled))
         else:
             maturity_score = impl_score  # -1 if nothing scored
 
+        def _display(score):
+            return score if score is None or score == -1 else round_score(score)
+
         return {
-            "implementation_score": impl_score,
-            "documentation_score": doc_score,
+            "implementation_score": _display(impl_score),
+            "documentation_score": _display(doc_score),
             "maturity_score": maturity_score,
+        }
+
+    def get_scores_for(self, requirement_assessments) -> dict:
+        """Scores of a subset of RAs (a section, an implementation group),
+        filtered and aggregated like get_global_score so they stay consistent
+        with the tree and the global score. Layers with nothing scored are None.
+        """
+        na = RequirementAssessment.Result.NOT_APPLICABLE
+        scored = [
+            ra
+            for ra in requirement_assessments
+            if (self.anchor_na_to_target and ra.result == na)
+            or (ra.is_scored and ra.score is not None and ra.result != na)
+        ]
+        impl_score = doc_score = None
+        if scored:
+            impl_score = self._compute_raw_score_for_field(
+                scored, None, "score", self.anchor_na_to_target
+            )
+            if self.show_documentation_score:
+                doc_score = self._compute_raw_score_for_field(
+                    scored, None, "documentation_score", self.anchor_na_to_target
+                )
+        impl_score = None if impl_score == -1 else impl_score
+        doc_score = None if doc_score == -1 else doc_score
+        # Maturity uses the unrounded layers so rounding only happens once.
+        enabled = [s for s in [impl_score, doc_score] if s is not None]
+        return {
+            "implementation_score": round_score(impl_score)
+            if impl_score is not None
+            else None,
+            "documentation_score": round_score(doc_score)
+            if doc_score is not None
+            else None,
+            "maturity_score": round_score(sum(enabled) / len(enabled))
+            if enabled
+            else None,
+            "scored_count": len(scored),
+            "total_weight": sum(ra.requirement.weight or 1 for ra in scored),
         }
 
     def get_total_max_score(self):
