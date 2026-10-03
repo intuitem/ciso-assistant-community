@@ -168,6 +168,31 @@
 		>
 			{m.activityOne()}
 		</p>
+		<div class="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4">
+			<TextField
+				{form}
+				field="ref_id"
+				label={m.refId()}
+				cacheLock={cacheLocks['ref_id']}
+				bind:cachedValue={formDataCache['ref_id']}
+			/>
+			<TextField
+				{form}
+				field="name"
+				label={m.name()}
+				cacheLock={cacheLocks['name']}
+				bind:cachedValue={formDataCache['name']}
+				data-focusindex="0"
+			/>
+		</div>
+		<MarkdownField
+			{form}
+			field="description"
+			label={m.description()}
+			cacheLock={cacheLocks['description']}
+			bind:cachedValue={formDataCache['description']}
+			data-focusindex="1"
+		/>
 		<FolderTreeSelect
 			{form}
 			field="folder"

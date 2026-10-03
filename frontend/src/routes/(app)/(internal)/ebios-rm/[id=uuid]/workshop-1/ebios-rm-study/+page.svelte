@@ -113,21 +113,6 @@
 				<p>{m.goBackToEbiosRmStudy()}</p>
 			</Anchor>
 
-			<div class="flex items-center space-x-2">
-				{#if ebiosRmStudy.ref_id}
-					<span class="badge bg-pink-200 text-pink-800 font-medium">
-						{m.refIdSemiColon()}
-						{ebiosRmStudy.ref_id}
-					</span>
-				{/if}
-				<span class="text-2xl font-bold">
-					{ebiosRmStudy.name} - v{ebiosRmStudy.version}
-				</span>
-				<span class="badge text-xs {statusMap[ebiosRmStudy.status]}">
-					{safeTranslate(ebiosRmStudy.status)}
-				</span>
-				<ClassificationBadge classification={ebiosRmStudy.classification} />
-			</div>
 			{#if canEditObject}
 				<Anchor
 					href={`${page.url.pathname}/edit?activity=${activeActivity}&next=${page.url.pathname}?activity=${activeActivity}`}
@@ -137,30 +122,6 @@
 					{m.edit()}
 				</Anchor>
 			{/if}
-		</div>
-		<div class="flex justify-center items-center w-full gap-5">
-			<span class="text-sm text-surface-600-400"
-				>{m.domainSemiColon()}
-				<Anchor class="anchor" href="/folders/{ebiosRmStudy.folder.id}"
-					>{ebiosRmStudy.folder.str}</Anchor
-				>
-			</span>
-			<span class="text-sm text-surface-600-400"
-				>{m.referenceEntitySemiColon()}
-				<Anchor class="anchor" href="/entities/{ebiosRmStudy.reference_entity.id}"
-					>{ebiosRmStudy.reference_entity.str}</Anchor
-				>
-			</span>
-			<span class="text-sm text-surface-600-400"
-				>{m.ebiosRmMatrixHelpText()}
-				<Anchor class="anchor" href="/risk-matrices/{ebiosRmStudy.risk_matrix.id}"
-					>{ebiosRmStudy.risk_matrix.str}</Anchor
-				>
-			</span>
-			<span class="text-sm text-surface-600-400"
-				>{m.quotationMethodSemiColon()}
-				<span class="font-bold">{safeTranslate(ebiosRmStudy.quotation_method_display)}</span>
-			</span>
 		</div>
 		<div
 			id="activityOne"
@@ -179,6 +140,45 @@
 					<i class="fa-solid fa-bullseye text-purple-500"></i>
 					<span>{safeTranslate(m.ebiosWs1_1())}</span>
 				</h3>
+				<div class="flex items-center space-x-2">
+					{#if ebiosRmStudy.ref_id}
+						<span class="badge bg-pink-200 text-pink-800 font-medium">
+							{m.refIdSemiColon()}
+							{ebiosRmStudy.ref_id}
+						</span>
+					{/if}
+					<span class="text-2xl font-bold">
+						{ebiosRmStudy.name} - v{ebiosRmStudy.version}
+					</span>
+					<span class="badge text-xs {statusMap[ebiosRmStudy.status]}">
+						{safeTranslate(ebiosRmStudy.status)}
+					</span>
+					<ClassificationBadge classification={ebiosRmStudy.classification} />
+				</div>
+				<div class="flex flex-wrap items-center gap-x-8 gap-y-1">
+					<span class="text-sm text-surface-600-400"
+						>{m.domainSemiColon()}
+						<Anchor class="anchor" href="/folders/{ebiosRmStudy.folder.id}"
+							>{ebiosRmStudy.folder.str}</Anchor
+						>
+					</span>
+					<span class="text-sm text-surface-600-400"
+						>{m.referenceEntitySemiColon()}
+						<Anchor class="anchor" href="/entities/{ebiosRmStudy.reference_entity.id}"
+							>{ebiosRmStudy.reference_entity.str}</Anchor
+						>
+					</span>
+					<span class="text-sm text-surface-600-400"
+						>{m.ebiosRmMatrixHelpText()}
+						<Anchor class="anchor" href="/risk-matrices/{ebiosRmStudy.risk_matrix.id}"
+							>{ebiosRmStudy.risk_matrix.str}</Anchor
+						>
+					</span>
+					<span class="text-sm text-surface-600-400"
+						>{m.quotationMethodSemiColon()}
+						<span class="font-bold">{safeTranslate(ebiosRmStudy.quotation_method_display)}</span>
+					</span>
+				</div>
 				<div>
 					<h4 class="font-semibold text-surface-700-300">{m.description()}</h4>
 					{#if ebiosRmStudy.description}
