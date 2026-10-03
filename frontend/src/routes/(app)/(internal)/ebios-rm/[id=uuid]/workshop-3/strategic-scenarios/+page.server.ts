@@ -38,9 +38,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	if (model.selectFields) {
 		await Promise.all(
 			model.selectFields.map(async (selectField) => {
-				const url = model.endpointUrl
-					? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
-					: `${BASE_API_URL}/${model.urlModel}/${selectField.field}/`;
+				// Choices that depend on the study's matrix are served per study
+				const studyScoped = selectField.detail && selectField.formNestedField === 'ebios_rm_study';
+				const url = studyScoped
+					? `${BASE_API_URL}/${selectField.endpointUrl}/${params.id}/${selectField.field}/`
+					: model.endpointUrl
+						? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
+						: `${BASE_API_URL}/${model.urlModel}/${selectField.field}/`;
 				const response = await fetch(url);
 				if (!response.ok) {
 					console.error(`Failed to fetch data from ${url}: ${response.statusText}`);
