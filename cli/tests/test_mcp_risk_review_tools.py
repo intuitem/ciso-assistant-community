@@ -189,6 +189,21 @@ class TestResolveActor:
         assert "Ambiguous" in msg and "found 7" in msg
         assert "Enzo 4" in msg and "Enzo 5" not in msg
 
+    def test_unknown_email_does_not_fall_back_to_partial_match(self):
+        actors = [
+            {
+                "id": UUID_A,
+                "str": "Jo Ann",
+                "type": "user",
+                "specific": {"id": "u1", "str": "Jo Ann"},
+            }
+        ]
+        users = [{"id": "u1", "email": "joann@corp.com"}]
+        fake = _router({"/actors/": actors, "/users/": users})
+        with patch.object(resolvers, "fetch_all_results", fake):
+            with pytest.raises(ValueError, match="not found"):
+                resolvers.resolve_actor_id("ann@corp.com")
+
     def test_not_found(self):
         with patch.object(resolvers, "fetch_all_results", _router({"/actors/": []})):
             with pytest.raises(ValueError, match="not found"):

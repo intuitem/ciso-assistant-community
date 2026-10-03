@@ -148,7 +148,9 @@ def resolve_risk_assessment_id(assessment_name_or_id: str) -> str:
     )
 
     if error:
-        raise ValueError(f"Risk assessment '{assessment_name_or_id}' API error: {error}")
+        raise ValueError(
+            f"Risk assessment '{assessment_name_or_id}' API error: {error}"
+        )
 
     if not assessments:
         raise ValueError(f"Risk assessment '{assessment_name_or_id}' not found")
@@ -494,7 +496,9 @@ def resolve_entity_id(entity_name_or_id: str) -> str:
     if "-" in entity_name_or_id and len(entity_name_or_id) == 36:
         return entity_name_or_id
 
-    entities, error = fetch_all_results("/entities/", params={"name": entity_name_or_id})
+    entities, error = fetch_all_results(
+        "/entities/", params={"name": entity_name_or_id}
+    )
 
     if error:
         raise ValueError(f"Entity '{entity_name_or_id}' API error: {error}")
@@ -657,9 +661,7 @@ def resolve_feared_event_id(feared_event_name_or_id: str) -> str:
     )
 
     if error:
-        raise ValueError(
-            f"Feared event '{feared_event_name_or_id}' API error: {error}"
-        )
+        raise ValueError(f"Feared event '{feared_event_name_or_id}' API error: {error}")
 
     if not feared_events:
         raise ValueError(f"Feared event '{feared_event_name_or_id}' not found")
@@ -731,9 +733,7 @@ def resolve_attack_path_id(attack_path_name_or_id: str) -> str:
     )
 
     if error:
-        raise ValueError(
-            f"Attack path '{attack_path_name_or_id}' API error: {error}"
-        )
+        raise ValueError(f"Attack path '{attack_path_name_or_id}' API error: {error}")
 
     if not attack_paths:
         raise ValueError(f"Attack path '{attack_path_name_or_id}' not found")
@@ -768,9 +768,7 @@ def resolve_elementary_action_id(action_name_or_id: str) -> str:
     )
 
     if error:
-        raise ValueError(
-            f"Elementary action '{action_name_or_id}' API error: {error}"
-        )
+        raise ValueError(f"Elementary action '{action_name_or_id}' API error: {error}")
 
     if not actions:
         raise ValueError(f"Elementary action '{action_name_or_id}' not found")
@@ -937,6 +935,8 @@ def resolve_actor_id(actor_ref: str) -> str:
             f"Ambiguous actor '{ref}', found {len(exact)} exact matches: {labels}. "
             "Use the actor UUID"
         )
+    if "@" in ref:
+        raise ValueError(f"Actor with email '{ref}' not found")
 
     # 3. single search hit
     if len(actors) == 1:
