@@ -2312,6 +2312,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'reference_entity', urlModel: 'entities' },
+			{ field: 'classification', urlModel: 'classification-levels' },
+			{ field: 'responsibility_matrix', urlModel: 'responsibility-matrices' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'last_risk_assessment', urlModel: 'risk-assessments' },
 			{ field: 'validation_flows', urlModel: 'validation-flows' }
@@ -2363,12 +2365,21 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'terminologies',
 				urlParams: 'field_path=ro_to.risk_origin&is_visible=true'
 			},
+			{
+				field: 'target_objective_category',
+				urlModel: 'terminologies',
+				urlParams: 'field_path=ro_to.target_objective_category&is_visible=true'
+			},
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [
-			{ field: 'motivation', valueType: 'number' },
-			{ field: 'resources', valueType: 'number' },
-			{ field: 'activity', valueType: 'number' }
+			...['motivation', 'resources', 'activity'].map((field) => ({
+				field,
+				valueType: 'number' as const,
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
+			}))
 		]
 	},
 	stakeholders: {
@@ -2378,6 +2389,18 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'stakeholders',
 		verboseName: 'Stakeholder',
 		verboseNamePlural: 'Stakeholders',
+		// Criteria and criticality are shown by StakeholderCriticalityWidget.
+		detailViewFields: [
+			{ field: 'ebios_rm_study' },
+			{ field: 'entity' },
+			{ field: 'category' },
+			{ field: 'is_selected' },
+			{ field: 'applied_controls' },
+			{ field: 'justification' },
+			{ field: 'folder' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		],
 		foreignKeyFields: [
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
@@ -2431,6 +2454,15 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'strategic_scenario',
 				urlModel: 'attack-paths',
 				endpointUrl: 'ebios-rm/attack-paths'
+			}
+		],
+		selectFields: [
+			{
+				field: 'gravity',
+				valueType: 'number',
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
 			}
 		],
 		detailViewFields: [
@@ -2599,7 +2631,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'operating_mode', urlModel: 'operating-modes' },
 			{ field: 'elementary_action', urlModel: 'elementary-actions' },
-			{ field: 'antecedents', urlModel: 'elementary-actions' },
+			{ field: 'antecedents', urlModel: 'kill-chains' },
+			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'logic_operator' }]

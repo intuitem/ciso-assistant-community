@@ -5,8 +5,6 @@ from ebios_rm.models import AttackPath, OperationalScenario, RoTo, StrategicScen
 from ebios_rm.serializers import OperationalScenarioReadSerializer
 from sec_intel.models import Technique
 
-from ebios_rm.tests.fixtures import *
-
 
 @pytest.fixture
 def basic_attack_path_fixture(basic_ebios_rm_study_fixture):

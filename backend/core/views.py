@@ -3884,6 +3884,10 @@ class RiskMatrixViewSet(BaseModelViewSet):
                 if not isinstance(val, int) or val < 0 or val >= len(risk):
                     errors.append(f"Grid cell [{i}][{j}] has invalid risk index {val}.")
 
+        from ebios_rm.rating_kit import validate as validate_ebios_rm
+
+        errors.extend(validate_ebios_rm(json_def.get("ebios_rm"), len(probability)))
+
         for category_name, levels in [
             ("probability", probability),
             ("impact", impact),

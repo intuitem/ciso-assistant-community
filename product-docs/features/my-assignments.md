@@ -77,4 +77,4 @@ The page fetches counts first (cheap aggregate query per category), then each ta
 
 - [Actors and teams](../concepts/actors-and-teams.md) — the actor model and how team membership resolves to assignments.
 - [Dashboards](dashboards.md) — the sibling surface for composed metric views.
-- [Notifications](notifications.md) — push-style alerts when an assignment changes hands or approaches its due date.
+- [Notifications](notifications.md) — in-app and email alerts when an assignment changes hands or approaches its due date.
