@@ -50,6 +50,9 @@ async def update_asset(
     dro_rto: int = None,
     dro_rpo: int = None,
     dro_mtd: int = None,
+    rc_rto: int = None,
+    rc_rpo: int = None,
+    rc_mtd: int = None,
     asset_class: str = None,
 ) -> str:
     """Update asset properties
@@ -84,7 +87,13 @@ async def update_asset(
         dro_rto: Recovery Time Objective in seconds
         dro_rpo: Recovery Point Objective in seconds
         dro_mtd: Maximum Tolerable Downtime in seconds
+        rc_rto: Recovery capability RTO in seconds (actual achievable value; set on support assets)
+        rc_rpo: Recovery capability RPO in seconds (support assets)
+        rc_mtd: Recovery capability MTD in seconds (support assets)
         asset_class: Asset class ID/name
+
+    Note: support assets inherit dro_* objectives from their primary assets, so
+    values set via dro_* on a support asset are not displayed. Use rc_* there.
     """
     try:
         from ..resolvers import resolve_vulnerability_id
@@ -161,17 +170,34 @@ async def update_asset(
                 dro_rto,
                 dro_rpo,
                 dro_mtd,
+                rc_rto,
+                rc_rpo,
+                rc_mtd,
             ]
         )
         if needs_objectives:
-            fetch_res = make_get_request(f"/assets/{resolved_asset_id}/")
+            # /object/ returns the raw JSON fields; the detail endpoint only
+            # returns display strings, which can't be merged.
+            fetch_res = make_get_request(f"/assets/{resolved_asset_id}/object/")
             current_asset = fetch_res.json() if fetch_res.status_code == 200 else {}
 
-            raw_sec = current_asset.get("security_objectives") or {}
-            cur_sec = raw_sec.get("objectives", {}) if isinstance(raw_sec, dict) else {}
+            def _current_objectives(field):
+                raw = current_asset.get(field) or {}
+                return raw.get("objectives", {}) if isinstance(raw, dict) else {}
 
-            raw_dro = current_asset.get("disaster_recovery_objectives") or {}
-            cur_dro = raw_dro.get("objectives", {}) if isinstance(raw_dro, dict) else {}
+            def _merge_recovery(current, rto, rpo, mtd):
+                return {
+                    "objectives": {
+                        key: {
+                            "value": new_val
+                            if new_val is not None
+                            else (current.get(key) or {}).get("value", 0)
+                        }
+                        for key, new_val in (("rto", rto), ("rpo", rpo), ("mtd", mtd))
+                    }
+                }
+
+            cur_sec = _current_objectives("security_objectives")
 
             if any(
                 p is not None
@@ -213,25 +239,20 @@ async def update_asset(
                 }
 
             if any(p is not None for p in [dro_rto, dro_rpo, dro_mtd]):
-                payload["disaster_recovery_objectives"] = {
-                    "objectives": {
-                        "rto": {
-                            "value": dro_rto
-                            if dro_rto is not None
-                            else (cur_dro.get("rto") or {}).get("value", 0)
-                        },
-                        "rpo": {
-                            "value": dro_rpo
-                            if dro_rpo is not None
-                            else (cur_dro.get("rpo") or {}).get("value", 0)
-                        },
-                        "mtd": {
-                            "value": dro_mtd
-                            if dro_mtd is not None
-                            else (cur_dro.get("mtd") or {}).get("value", 0)
-                        },
-                    }
-                }
+                payload["disaster_recovery_objectives"] = _merge_recovery(
+                    _current_objectives("disaster_recovery_objectives"),
+                    dro_rto,
+                    dro_rpo,
+                    dro_mtd,
+                )
+
+            if any(p is not None for p in [rc_rto, rc_rpo, rc_mtd]):
+                payload["recovery_capabilities"] = _merge_recovery(
+                    _current_objectives("recovery_capabilities"),
+                    rc_rto,
+                    rc_rpo,
+                    rc_mtd,
+                )
 
         if not payload:
             return "Error: No fields provided to update"
