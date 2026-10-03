@@ -3884,6 +3884,10 @@ class RiskMatrixViewSet(BaseModelViewSet):
                 if not isinstance(val, int) or val < 0 or val >= len(risk):
                     errors.append(f"Grid cell [{i}][{j}] has invalid risk index {val}.")
 
+        from ebios_rm.rating_kit import validate as validate_ebios_rm
+
+        errors.extend(validate_ebios_rm(json_def.get("ebios_rm"), len(probability)))
+
         for category_name, levels in [
             ("probability", probability),
             ("impact", impact),
@@ -9300,7 +9304,11 @@ class FolderViewSet(BaseModelViewSet):
             "include_enclaves", "False"
         ).lower() in ["true", "1", "yes"]
 
-        viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        # A set: the tree builders test membership once per folder, and `in` on a
+        # QuerySet scans its cached list, which is quadratic in the folder count.
+        viewable_objects = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        )
 
         children_by_parent, parent_of, perimeters_by_folder = build_folder_indexes(
             include_perimeters=include_perimeters

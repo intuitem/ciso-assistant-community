@@ -573,7 +573,8 @@ class QuickFormImporter:
 
 
 class ReferentialImporterMixin:
-    REQUIRED_FIELDS = {"ref_id", "urn"}
+    # ref_id is optional: some publishers (e.g. ANSSI fiches méthode) number nothing.
+    REQUIRED_FIELDS = {"urn"}
 
     def __init__(self, data: dict, index: int = 0):
         self.data = data
@@ -588,7 +589,7 @@ class ReferentialImporterMixin:
         return dict(
             library=library_object,
             urn=self.data["urn"].lower(),
-            ref_id=self.data["ref_id"],
+            ref_id=self.data.get("ref_id"),
             name=self.data.get("name"),
             description=self.data.get("description"),
             annotation=self.data.get("annotation"),
@@ -621,7 +622,7 @@ class TTPCatalogImporter(ReferentialImporterMixin):
 
 
 class TacticImporter(ReferentialImporterMixin):
-    REQUIRED_FIELDS = {"ref_id", "urn", "catalog_urn"}
+    REQUIRED_FIELDS = {"urn", "catalog_urn"}
 
     def import_object(self, library_object: LoadedLibrary):
         self._object = Tactic.objects.create(
@@ -796,7 +797,14 @@ class MetricDefinitionImporter:
 # The couple (URN, locale) is unique. ===> Check this in the future
 class RiskMatrixImporter:
     REQUIRED_FIELDS = {"ref_id", "urn", "json_definition"}
-    MATRIX_FIELDS = {"probability", "impact", "risk", "grid", "strength_of_knowledge"}
+    MATRIX_FIELDS = {
+        "probability",
+        "impact",
+        "risk",
+        "grid",
+        "strength_of_knowledge",
+        "ebios_rm",
+    }
 
     def __init__(self, risk_matrix_data: dict):
         self.risk_matrix_data = risk_matrix_data

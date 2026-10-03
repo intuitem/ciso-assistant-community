@@ -1176,6 +1176,10 @@ def process_model_relationships(
                 _fields["risk_origin"],
                 Terminology.FieldPath.ROTO_RISK_ORIGIN,
             )
+            _fields["target_objective_category"] = import_terminologies(
+                _fields.get("target_objective_category"),
+                Terminology.FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            )
 
         case "stakeholder":
             _fields.update(

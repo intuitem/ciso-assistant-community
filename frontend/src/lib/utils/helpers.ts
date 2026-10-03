@@ -150,6 +150,18 @@ export function formatActorName(
 	return full || actor.email || actor.str || '';
 }
 
+const HTML_ESCAPES: Record<string, string> = {
+	'&': '&amp;',
+	'<': '&lt;',
+	'>': '&gt;',
+	'"': '&quot;',
+	"'": '&#39;'
+};
+
+export function escapeHtml(value: unknown): string {
+	return String(value ?? '').replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
+}
+
 export function isDark(hexcolor: string | undefined): boolean {
 	if (!hexcolor) return false;
 	const r = parseInt(hexcolor.slice(1, 3), 16);
