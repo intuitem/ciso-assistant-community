@@ -371,7 +371,6 @@ class PresetExecutor:
         serializer = FolderWriteSerializer(data=folder_data, context=context)
         serializer.is_valid(raise_exception=True)
         folder = serializer.save()
-        Folder.create_default_ug_and_ra(folder)
         return folder
 
     def _create_default_perimeter(

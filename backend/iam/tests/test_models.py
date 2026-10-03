@@ -45,7 +45,7 @@ class TestFolder:
             parent_folder=root_folder,
             create_iam_groups=False,
         )
-        Folder.create_default_ug_and_ra(folder)
+        folder.create_default_ug_and_ra()
         assert not UserGroup.objects.filter(folder=folder).exists()
 
     def test_disable_iam_groups_with_members_fails(self):
@@ -53,7 +53,6 @@ class TestFolder:
         folder = Folder.objects.create(
             name="Domain IAM", parent_folder=root_folder, create_iam_groups=True
         )
-        Folder.create_default_ug_and_ra(folder)
         reader_group = UserGroup.objects.get(
             folder=folder, name=str(UserGroupCodename.READER)
         )
@@ -69,7 +68,6 @@ class TestFolder:
         folder = Folder.objects.create(
             name="Domain IAM IdP", parent_folder=root_folder, create_iam_groups=True
         )
-        Folder.create_default_ug_and_ra(folder)
         reader_group = UserGroup.objects.get(
             folder=folder, name=str(UserGroupCodename.READER)
         )
@@ -87,7 +85,6 @@ class TestFolder:
             parent_folder=root_folder,
             create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(folder)
         serializer = FolderWriteSerializer()
         serializer.update(folder, {"create_iam_groups": False})
         folder.refresh_from_db()

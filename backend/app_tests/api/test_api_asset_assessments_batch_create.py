@@ -55,7 +55,6 @@ class TestAssetAssessmentsBatchCreate:
             parent_folder=Folder.get_root_folder(),
             create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(folder)
         perimeter = Perimeter.objects.create(name="test", folder=folder)
         StoredLibrary.objects.get(
             urn="urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm"
@@ -229,7 +228,6 @@ class TestAssetAssessmentsBatchRemove:
             parent_folder=Folder.get_root_folder(),
             create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(folder)
         perimeter = Perimeter.objects.create(name="test", folder=folder)
         StoredLibrary.objects.get(
             urn="urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm"

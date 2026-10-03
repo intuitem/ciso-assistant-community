@@ -403,14 +403,26 @@ class Folder(NameDescriptionMixin):
                         )
 
             if is_create:
+                must_provision_iam_groups = self.create_iam_groups
                 super().save(*args, **kwargs)
                 self._update_descendants_at_creation()
             else:
                 assert current_folder is not None, (
                     "The `current_folder` (snapshot of `self` as it exists in the DB) MUST NOT be `None`."
                 )
+                # A caller excluding the flag from update_fields is not persisting a
+                # flip, so provisioning would not match the stored row.
+                update_fields = kwargs.get("update_fields")
+                must_provision_iam_groups = (
+                    self.create_iam_groups
+                    and not current_folder.create_iam_groups
+                    and (update_fields is None or "create_iam_groups" in update_fields)
+                )
                 self._update_descendants_on_parent_folder_change(current_folder)
                 super().save(*args, **kwargs)
+
+            if must_provision_iam_groups:
+                self.create_default_ug_and_ra()
 
     def delete(self, *args, **kwargs):
         with transaction.atomic():
@@ -609,12 +621,8 @@ class Folder(NameDescriptionMixin):
 
         return dict(user_roles)
 
-    @staticmethod
-    def create_default_ug_and_ra(folder: "Folder"):
-        if (
-            folder.content_type != Folder.ContentType.DOMAIN
-            or not folder.create_iam_groups
-        ):
+    def create_default_ug_and_ra(self) -> None:
+        if self.content_type != Folder.ContentType.DOMAIN or not self.create_iam_groups:
             return
 
         root_folder = Folder.get_root_folder()
@@ -630,7 +638,7 @@ class Folder(NameDescriptionMixin):
         for ug_codename, role_codename in builtin_pairs:
             ug, created = UserGroup.objects.get_or_create(
                 name=str(ug_codename),
-                folder=folder,
+                folder=self,
                 defaults={"builtin": True},
             )
             if not created or not ug.builtin:
@@ -645,13 +653,13 @@ class Folder(NameDescriptionMixin):
                 defaults={"builtin": True, "is_recursive": True},
             )
             Folder._ensure_recursive_assignment(ra)
-            ra.perimeter_folders.add(folder)
+            ra.perimeter_folders.add(self)
 
         with transaction.atomic():
             for role in Role.objects.filter(builtin=False):
                 ug, created = UserGroup.objects.get_or_create(
                     name=role.name,
-                    folder=folder,
+                    folder=self,
                     defaults={"builtin": True},
                 )
                 if not created or not ug.builtin:
@@ -665,7 +673,7 @@ class Folder(NameDescriptionMixin):
                     defaults={"builtin": False, "is_recursive": True},
                 )
                 Folder._ensure_recursive_assignment(ra)
-                ra.perimeter_folders.add(folder)
+                ra.perimeter_folders.add(self)
 
     @staticmethod
     def _ensure_recursive_assignment(role_assignment: "RoleAssignment") -> None:

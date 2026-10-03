@@ -1188,7 +1188,6 @@ class TestManualRunAuthz:
             content_type=Folder.ContentType.DOMAIN,
             create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(domain)
         workflow = self._publish_in(domain)
         analyst = User.objects.create_user(email="ana@example.com")
         analyst.user_groups.add(UserGroup.objects.get(folder=domain, name="BI-UG-ANA"))

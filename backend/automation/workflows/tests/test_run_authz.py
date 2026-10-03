@@ -716,7 +716,6 @@ class TestPrivilegeBranches:
             content_type=Folder.ContentType.DOMAIN,
             create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(domain)
         runner = User.objects.create_user(email="mgmscope@authz.test")
         grant(runner, domain, ["change_user", "change_usergroup"])
         root_group = UserGroup.objects.filter(
@@ -774,7 +773,6 @@ class TestPrivilegeBranches:
             content_type=Folder.ContentType.DOMAIN,
             create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(domain)
         member = User.objects.create_user(email="member@authz.test")
         runner = User.objects.create_user(email="mgr@authz.test")
         grant(runner, domain, ["change_usergroup"])  # NOT change_user
