@@ -21,19 +21,6 @@ When a parent-child relationship is in place, two things follow:
 
 The root is reserved for global, cross-organisation objects (built-in catalogues, the global library) — your own domains always live one level under it, even when no other hierarchy is in place.
 
-## Organisational-only domains — the "Create IAM groups" flag
-
-Not every domain needs to be an IAM boundary. Sometimes you want a domain purely as an **organisational container** — a folder in the tree to group related work — without the platform spinning up the per-role user groups that come with a "real" scoping domain.
-
-The **Create IAM groups** checkbox on the domain form controls this:
-
-- **On** _(default for new domains)_ — the platform auto-provisions one user group per role for the domain. Anyone who needs access to objects in this domain gets placed into one of those groups; the domain is a true IAM scope.
-- **Off** — no user groups are created. The domain exists in the tree, can be picked from selectors, and can host objects, but it carries **no scoping machinery of its own**. Access flows from whatever parent domain it sits under.
-
-Turn the flag off when you want sub-domains that are just structure — for example, breaking a "Subsidiary" domain into a "2025 audits" / "2026 audits" tree purely for organisation, without giving each year its own IAM surface. The setting is shown by the on-form help text: _"IAM groups are used to assign roles to users."_
-
-The flag is **not a one-way choice**. You can flip it on a domain at any time — turning it on later provisions the per-role user groups, turning it off later removes them. So a domain you initially created as a pure folder can later become a real IAM scope (or vice versa) without recreating it or moving its content.
-
 ## Restructuring the tree
 
 The hierarchy is **not frozen at creation**. Editing a domain lets you change its **Parent domain** (PRO), which moves the whole sub-tree — the domain itself and every domain beneath it — under the new parent. Use this to:

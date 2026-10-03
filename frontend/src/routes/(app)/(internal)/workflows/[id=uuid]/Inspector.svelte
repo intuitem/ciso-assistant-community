@@ -12,6 +12,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import FolderIAMGroupsSelect from '$lib/components/Forms/FolderIAMGroupsSelect.svelte';
 	import { fetchHookSecret, publicHookUrl } from './hook-url';
 	import { postOps } from './ops';
 	import DataBrowser from './DataBrowser.svelte';
@@ -252,7 +253,7 @@
 			max_attempts: 2
 		},
 		ai_generate: { prompt: '', input: '', max_words: 200 },
-		provision_folder: { name: '', parent: '', create_default_groups: true },
+		provision_folder: { name: '', parent: '', iam_groups: [] },
 		provision_user: {
 			email: '',
 			first_name: '',
@@ -331,7 +332,7 @@
 	// Older nodes may carry a bare {type} config — so do the ones the palette
 	// drops pre-typed; make sure the shape the bindings expect exists before
 	// the template reads it.
-	$effect(() => {
+	$effect.pre(() => {
 		if (nodeDomain?.type === 'action' && actionConfig?.type) {
 			const defaults: any = ACTION_CONFIG_DEFAULTS[actionConfig.type] ?? {};
 			for (const [key, value] of Object.entries(defaults)) {
@@ -2447,15 +2448,7 @@
 							{/if}
 						</select>
 					</label>
-					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
-						<input
-							type="checkbox"
-							class="checkbox scale-75"
-							bind:checked={actionConfig.create_default_groups}
-							onchange={onChange}
-						/>
-						{m.createDefaultGroups()}
-					</label>
+					<FolderIAMGroupsSelect classes="mt-2" bind:value={actionConfig.iam_groups} />
 				{:else if actionConfig.type === 'provision_user'}
 					<label>
 						{@render fieldLabel(m.userEmail())}

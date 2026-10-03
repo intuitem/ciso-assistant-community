@@ -8,7 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import StoredLibrary
-from iam.models import Folder, User, UserGroup
+from iam.models import Folder, IAMGroupSet, User, UserGroup
 
 from test_vars import *
 
@@ -87,7 +87,7 @@ class EndpointTestsUtils:
         )
         user.folder = user_group.folder
         user.save()
-        user_group.user_set.add(user)
+        user_group.users.add(user)
         client = APIClient()
         _auth_token = AuthToken.objects.create(user=user)
         auth_token = _auth_token[1]
@@ -442,7 +442,7 @@ class EndpointTestsQueries:
                             name=user_group,
                             folder__name=GROUPS_PERMISSIONS[user_group]["folder"],
                         )
-                        group.user_set.add(user)
+                        group.users.add(user)
                         # Assign user to the same folder as the group for IAM visibility
                         user.folder = group.folder
                         user.save()
@@ -644,8 +644,8 @@ class EndpointTestsQueries:
 
             # Uses the API endpoint to create an object with authentication
             payload = build_params.copy()
-            if auto_groups and object is Folder and "create_iam_groups" not in payload:
-                payload["create_iam_groups"] = True
+            if auto_groups and object is Folder and "iam_groups" not in payload:
+                payload["iam_groups"] = IAMGroupSet.create_with_all_roles().to_json()
 
             response = authenticated_client.post(url, payload, format=query_format)
 

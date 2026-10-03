@@ -28,7 +28,6 @@ class TestAuditLogActorContract:
             name="Domain A",
             content_type=Folder.ContentType.DOMAIN,
             parent_folder=root,
-            create_iam_groups=False,
         )
 
     def test_create_populates_native_actor_and_folder_id(self):

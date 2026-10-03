@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import * as m from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -7,6 +6,7 @@
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import FileInput from '../FileInput.svelte';
+	import FolderIAMGroupsSelect from '../FolderIAMGroupsSelect.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -32,15 +32,8 @@
 
 	let isRootFolder = $derived(object.content_type === 'GL');
 
-	onMount(() => {
-		const isEdit = Boolean(object?.id);
-		if (!isEdit && form.data?.create_iam_groups !== true) {
-			form.form.update((currentData) => ({
-				...currentData,
-				create_iam_groups: true
-			}));
-		}
-	});
+	// IAM groups only work for normal folders (not for enclave/root folders).
+	let displayIAMGroups = $derived(object.content_type === 'DO');
 </script>
 
 {#if importFolder}
@@ -110,10 +103,7 @@
 		translateOptions={false}
 		allowUserOptions="append"
 	/>
-	<Checkbox
-		{form}
-		field="create_iam_groups"
-		label={m.createIamGroups()}
-		helpText={m.whenEnabledIamGroupsAreCreatedAutomatically()}
-	/>
+	{#if displayIAMGroups}
+		<FolderIAMGroupsSelect {form} />
+	{/if}
 {/if}

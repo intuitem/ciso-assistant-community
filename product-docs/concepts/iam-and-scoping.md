@@ -85,7 +85,7 @@ When focus is engaged, all the cross-domain composition described above is suppr
 
 ## Related
 
-- [Domains](domains.md) — domain hierarchy, IAM groups, restructuring, moving objects.
+- [Domains](domains.md) — domain hierarchy, restructuring, moving objects.
 - [Actors and teams](actors-and-teams.md) — who gets assigned what.
 - [Understanding the IAM model](../configuration/organization/iam-model.md) — full configuration-side deep dive (SSO, MFA, PATs, accounting).
 - [Focus mode](../features/focus-mode.md) — the PRO tool for scoping back the view.

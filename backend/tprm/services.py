@@ -234,7 +234,7 @@ def workspace_members(folders):
     return {
         user
         for group in UserGroup.objects.filter(folder__in=folders)
-        for user in group.user_set.all()
+        for user in group.users.all()
     }
 
 
@@ -313,7 +313,7 @@ def consolidate_workspaces(entity, domain, sources):
     )
     assignment.perimeter_folders.add(target)
     for group in UserGroup.objects.filter(folder__in=sources):
-        for user in group.user_set.all():
+        for user in group.users.all():
             user.user_groups.add(respondents)
     RoleAssignment.objects.filter(folder__in=sources).delete()
     UserGroup.objects.filter(folder__in=sources).delete()

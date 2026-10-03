@@ -28,7 +28,10 @@ from django.forms import ValidationError
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.text import slugify
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import (
+    PermissionDenied,
+    ValidationError as DRFValidationError,
+)
 
 from core.models import (
     Answer,
@@ -70,7 +73,7 @@ from ebios_rm.models import (
     Stakeholder,
     StrategicScenario,
 )
-from iam.models import Folder, RoleAssignment, User
+from iam.models import Folder, RoleAssignment, User, IAMGroupSet
 from sec_intel.models import Tactic, Technique, TTPCatalog
 from tprm.models import (
     Contract,
@@ -166,6 +169,7 @@ def export_domain(
             f"ciso-assistant-{slugify(instance.name)}-domain-{timezone.now()}"
         )
         dump_data = ExportSerializer.dump_data(scope=[*objects.values()])
+        dump_data["meta"]["iam_groups"] = IAMGroupSet.from_folder(instance).to_json()
 
         logger.debug(
             "Adding JSON dump to zip",
@@ -423,6 +427,22 @@ def import_objects(
         logger.error("No objects found in the dump")
         raise ValidationError({"error": "No objects found in the dump"})
 
+    raw_iam_groups = (parsed_data.get("meta") or {}).get("iam_groups")
+    try:
+        iam_group_set = None
+        if raw_iam_groups is not None:
+            if not isinstance(raw_iam_groups, list) or not all(
+                isinstance(iam_group, dict) for iam_group in raw_iam_groups
+            ):
+                raise DRFValidationError(
+                    "The 'iam_groups' value MUST be a list of dicts (or None)."
+                )
+
+            iam_group_set = IAMGroupSet.create(raw_iam_groups)
+
+    except DRFValidationError as e:
+        raise ValidationError({"iam_groups": e.detail})
+
     # Referentials missing on this instance are created on the fly, in the root
     # folder where everyone sees them. Snapshot so the caller is told which.
     known_asset_classes = set(AssetClass.objects.values_list("id", flat=True))
@@ -497,10 +517,10 @@ def import_objects(
             base_folder = Folder.objects.create(
                 name=domain_name,
                 content_type=Folder.ContentType.DOMAIN,
-                create_iam_groups=True,
             )
             link_dump_database_ids["base_folder"] = base_folder
-            Folder.create_default_ug_and_ra(base_folder)
+            if iam_group_set is not None:
+                iam_group_set.apply(base_folder)
 
             for library in required_libraries:
                 if not LoadedLibrary.objects.filter(

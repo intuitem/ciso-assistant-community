@@ -4,7 +4,7 @@ import pytest
 from rest_framework.test import APIClient, APIRequestFactory, force_authenticate
 
 from core.models import AppliedControl
-from iam.models import Folder, User, UserGroup
+from iam.models import Folder, IAMGroupSet, User, UserGroup
 from automation.workflows.engine import start_instance
 from automation.workflows.graph import save_graph
 from automation.workflows.models import (
@@ -340,7 +340,7 @@ class TestIamActions:
         provision_folder = {
             "type": "provision_folder",
             "name": "HR — {{payload.department}}",
-            "create_default_groups": True,
+            "iam_groups": IAMGroupSet.create_with_all_roles().to_json(),
         }
         provision_user = {
             "type": "provision_user",
@@ -496,7 +496,7 @@ class TestIamActions:
         )
         instance = start_instance(version)
         assert instance.status == WorkflowInstance.Status.FAILED
-        assert sole_admin in admin_group.user_set.all()
+        assert sole_admin in admin_group.users.all()
 
 
 @pytest.mark.django_db
@@ -513,9 +513,8 @@ class TestDeputization:
             name="Deputy domain",
             parent_folder=Folder.get_root_folder(),
             content_type=Folder.ContentType.DOMAIN,
-            create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(domain)
+        IAMGroupSet.create_with_all_roles().apply(domain)
         manager = User.objects.create_user(email="dma@example.com")
         manager.user_groups.add(UserGroup.objects.get(folder=domain, name="BI-UG-DMA"))
 
@@ -674,9 +673,8 @@ class TestSecretApi:
             name=name,
             parent_folder=Folder.get_root_folder(),
             content_type=Folder.ContentType.DOMAIN,
-            create_iam_groups=True,
         )
-        Folder.create_default_ug_and_ra(domain)
+        IAMGroupSet.create_with_all_roles().apply(domain)
         manager = User.objects.create_user(email=email)
         manager.user_groups.add(UserGroup.objects.get(folder=domain, name="BI-UG-DMA"))
         return domain, manager
