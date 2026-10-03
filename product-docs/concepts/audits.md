@@ -116,12 +116,19 @@ This is the auditor's grading language, useful when the framework requires disti
 
 ### Scoring layers
 
-Beyond the binary compliance result, each requirement assessment can carry a **score** on the framework's scale. Scoring captures _how mature or deep_ an implementation is, not just whether it exists. There are two ways to score, depending on what the audit needs:
+Beyond the binary compliance result, each requirement assessment can carry a **score** on the audit's scale. Scoring captures _how mature or deep_ an implementation is, not just whether it exists. There are two ways to score, depending on what the audit needs:
 
 - **Maturity score** _(single layer)_ — one score per requirement, typically used for CMMI-style or NIST-CSF-style maturity assessments.
 - **Implementation + Documentation scores** _(two layers)_ — toggle on **documentation score** to split scoring into _is this implemented?_ and _is the implementation documented?_. The platform computes the maturity score as the average of the enabled layers.
 
-Each requirement assessment uses an **effective scoring scale**. At audit runtime the fallback is the audit's own scoring scale (`ComplianceAssessment`), which is usually initialised from the framework when the audit is created. A requirement can override that audit-level scale with its own `min_score`, `max_score`, and level labels. The scoring UI, documentation score, exports, and tree views use that effective scale for the requirement.
+Each requirement assessment uses an **effective scoring scale**, resolved in this order:
+
+1. **Requirement scale** — a requirement can carry its own `min_score`, `max_score`, and level labels, set by the framework author.
+2. **Audit scale** — otherwise, the audit's own scoring scale (`ComplianceAssessment`).
+
+The audit scale is chosen when the audit is created and stored on the audit. The form proposes the baseline audit's scale for a copy, otherwise the framework's scale when the framework declares one, otherwise the **organisation default** set in [general settings](../configuration/settings/general.md#audits) (0–5 out of the box); a preset can be picked instead. Changing the organisation default later leaves existing audits alone. The audit scale can also be changed after creation, with existing scores converted proportionally — unless the framework's questionnaire computes the scores or some requirements carry their own scale, in which case the framework's scale is fixed. See [Choosing the score scale](../guides/customize-audit.md#choosing-the-score-scale).
+
+The scoring UI, documentation score, exports, and tree views use that effective scale for the requirement.
 
 When an audit contains mixed scales, average-based roll-ups normalise each requirement against its effective range before aggregating, then display the result on the audit scale. Sum-based roll-ups stay raw: they add `score x weight`, and their maximum is the sum of each requirement's effective maximum times its weight.
 
