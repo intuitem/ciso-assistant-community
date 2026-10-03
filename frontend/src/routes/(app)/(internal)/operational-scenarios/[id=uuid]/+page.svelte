@@ -447,7 +447,7 @@
 							</h3>
 							<span class="text-xl font-bold"
 								>{operationalScenario.gravity.name}
-								{#if operationalScenario.gravity_forced}
+								{#if operationalScenario.gravity_forced !== null && operationalScenario.gravity_forced !== undefined}
 									<i
 										class="fa-solid fa-thumbtack ml-1 text-xs"
 										title={m.forcedValueTooltip({

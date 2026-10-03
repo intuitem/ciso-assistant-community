@@ -900,7 +900,9 @@
 											: 'text-surface-950'}"
 										style="background-color: {opScenario.gravity.hexcolor}"
 									>
-										{safeTranslate(opScenario.gravity.name)}{#if opScenario.gravity_forced}<i
+										{safeTranslate(
+											opScenario.gravity.name
+										)}{#if opScenario.gravity_forced !== null && opScenario.gravity_forced !== undefined}<i
 												class="fa-solid fa-thumbtack ml-1 text-xs"
 												title={m.forcedValueTooltip({
 													value: opScenario.computed_gravity?.name ?? '--'

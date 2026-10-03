@@ -473,7 +473,7 @@
 		const newOps = new Map(logicOps);
 
 		if (incomingCount >= 2 && !newOps.has(nodeId)) {
-			newOps.set(nodeId, 'AND');
+			newOps.set(nodeId, 'OR');
 		} else if (incomingCount < 2) {
 			newOps.delete(nodeId);
 		}

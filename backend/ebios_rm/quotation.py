@@ -93,7 +93,8 @@ def compute(steps: list[Step], method: str, grid: list[list[int]] | None = None)
         probability = step.probability
         if antecedents and probability != UNRATED:
             upstream = _combine(
-                [result.probability[a] for a in antecedents], use_max=not is_and
+                [result.probability.get(a, UNRATED) for a in antecedents],
+                use_max=not is_and,
             )
             probability = UNRATED if upstream == UNRATED else min(probability, upstream)
         result.probability[step_id] = probability
@@ -102,7 +103,8 @@ def compute(steps: list[Step], method: str, grid: list[list[int]] | None = None)
             difficulty = step.difficulty
             if antecedents and difficulty != UNRATED:
                 upstream = _combine(
-                    [result.difficulty[a] for a in antecedents], use_max=is_and
+                    [result.difficulty.get(a, UNRATED) for a in antecedents],
+                    use_max=is_and,
                 )
                 difficulty = (
                     UNRATED if upstream == UNRATED else max(difficulty, upstream)

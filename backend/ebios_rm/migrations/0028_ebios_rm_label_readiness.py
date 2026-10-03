@@ -125,7 +125,11 @@ def fill_pertinence(apps, schema_editor):
             try:
                 ro_to.pertinence = grid[ro_to.motivation - 1][ro_to.resources - 1] + 1
             except IndexError, TypeError:
-                pass
+                logger.warning(
+                    "RO/TO %s: motivation or resources outside the pertinence grid, "
+                    "pertinence left undefined",
+                    ro_to.pk,
+                )
         ro_to.save(update_fields=["pertinence"])
 
 

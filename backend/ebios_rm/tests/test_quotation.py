@@ -98,6 +98,27 @@ class TestStandardRollUp:
     def test_empty_graph(self):
         assert compute([], "standard").likelihood == UNRATED
 
+    @pytest.mark.parametrize("method", ["standard", "advanced"])
+    def test_cycle_does_not_raise(self, method):
+        steps = [
+            Step(
+                id="a",
+                antecedents=["b"],
+                logic_operator=None,
+                probability=2,
+                difficulty=1,
+            ),
+            Step(
+                id="b",
+                antecedents=["a"],
+                logic_operator=None,
+                probability=2,
+                difficulty=1,
+            ),
+        ]
+        result = compute(steps, method)
+        assert set(result.probability) == {"a", "b"}
+
     def test_order_independent(self):
         steps = list(reversed(_diamond("OR", (3, 1, 2, 3))))
         assert compute(steps, "standard").likelihood == 2
