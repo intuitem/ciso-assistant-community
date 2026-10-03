@@ -147,6 +147,16 @@ class EntityWriteSerializer(BaseModelSerializer):
             )
         return value
 
+    def update(self, instance, validated_data):
+        old_folder_id = instance.folder_id
+        instance = super().update(instance, validated_data)
+        if old_folder_id != instance.folder_id:
+            # A score is only ever as visible as the entity it is about: the model
+            # copies the folder at score save time, so a moved entity must carry
+            # its scores along or they stay scoped to the old domain.
+            instance.scores.update(folder=instance.folder)
+        return instance
+
 
 class EntityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
