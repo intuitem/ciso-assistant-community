@@ -127,6 +127,39 @@ def map_from_sources(urn, source_ra, same_framework):
     ]
 
 
+def rescaled_to_target(audit_results, target_audit):
+    """Same-framework results carried onto the target audit's scale.
+
+    Requirements with their own scale share it across both audits and are
+    left as they are.
+    """
+    from core.models import RequirementNode, rescale_score
+
+    source_range = (audit_results.get("min_score"), audit_results.get("max_score"))
+    target_range = (target_audit.min_score, target_audit.max_score)
+    if source_range == target_range or None in (*source_range, *target_range):
+        return audit_results
+    own_scale = set(
+        RequirementNode.objects.filter(framework=target_audit.framework)
+        .exclude(min_score__isnull=True, max_score__isnull=True)
+        .values_list("urn", flat=True)
+    )
+    converted = {}
+    for urn, ra in audit_results["requirement_assessments"].items():
+        ra = dict(ra)
+        if urn not in own_scale:
+            for field in ("score", "documentation_score"):
+                if ra.get(field) is not None:
+                    ra[field] = rescale_score(ra[field], source_range, target_range)
+        converted[urn] = ra
+    return {
+        **audit_results,
+        "min_score": target_range[0],
+        "max_score": target_range[1],
+        "requirement_assessments": converted,
+    }
+
+
 def compute_map_from_merge(target_audit, source_audit):
     """
     Compute the merge of source audit data into a target audit.
@@ -154,13 +187,18 @@ def compute_map_from_merge(target_audit, source_audit):
     audit_from_results = engine.load_audit_fields(source_audit)
 
     same_framework = source_audit.framework_id == target_audit.framework_id
+    target_range = (target_audit.min_score, target_audit.max_score)
 
     if same_framework:
-        mapped_results = audit_from_results
+        mapped_results = rescaled_to_target(audit_from_results, target_audit)
     else:
         max_depth = get_mapping_max_depth()
         mapped_results, _ = engine.best_mapping_inferences(
-            audit_from_results, source_urn, dest_urn, max_depth
+            audit_from_results,
+            source_urn,
+            dest_urn,
+            max_depth,
+            target_range=target_range,
         )
 
     if not mapped_results or not mapped_results.get("requirement_assessments"):

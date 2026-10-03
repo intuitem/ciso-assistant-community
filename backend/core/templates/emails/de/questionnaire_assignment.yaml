@@ -1,0 +1,17 @@
+subject: "CISO Assistant: Ihnen wurde ein Fragebogen zugewiesen"
+body: |
+  <img src="https://intuitem.com/ciso-assistant.png" alt="CISO Assistant" width="200">
+
+  **Ihre zentrale GRC-Managementplattform**
+
+  Hallo,
+
+  Ihnen wurde ein Fragebogen zugewiesen. Klicken Sie auf den folgenden Link, um fortzufahren:
+
+  [Fragebogen öffnen](${questionnaire_url})
+
+  Falls der Link nicht funktioniert, kopieren Sie die folgende Adresse in Ihren Browser:
+  ${questionnaire_url}
+
+  Freundliche Grüße
+  Ihr CISO-Assistant-Team
