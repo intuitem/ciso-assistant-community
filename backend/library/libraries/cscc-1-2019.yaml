@@ -1,0 +1,1004 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:cscc-1-2019
+locale: en
+ref_id: cscc-1-2019
+name: Critical Systems Cybersecurity Controls (CSCC-1:2019)
+description: 'NCA Critical Systems Cybersecurity Controls (CSCC-1:2019), the National
+  Cybersecurity Authority''s controls for protecting the Kingdom of Saudi Arabia''s
+  critical systems. An elevated set extending the Essential Cybersecurity Controls
+  (ECC) for systems whose failure or compromise would have major national impact.
+  4 main domains / 21 subdomains / 32 controls. Each subdomain carries its official
+  objective; each subcontrol is a separate assessable requirement under its parent
+  control. Source: https://cdn.nca.gov.sa/api/public/cms/files/f15af01c-dc59-4281-95e2-03a770655937_Critical-Systems-Cybersecurity-Controls.pdf'
+copyright: "\xA9 NCA"
+version: 1
+publication_date: 2026-06-24
+provider: NCA
+packager: community
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cscc-1-2019
+    ref_id: cscc-1-2019
+    name: Critical Systems Cybersecurity Controls (CSCC-1:2019)
+    description: NCA Critical Systems Cybersecurity Controls (CSCC-1:2019). 4 main
+      domains, 21 subdomains, 32 controls. An elevated extension of the ECC for the
+      organization's critical systems.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Cybersecurity Governance
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1
+      ref_id: 1-1
+      name: Cybersecurity Strategy
+      description: To ensure that cybersecurity plans, goals, initiatives and projects
+        are contributing to compliance with related laws and regulations.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-1
+      ref_id: 1-1-1
+      description: "In addition to the controls in ECC subdomain 1-1, the organization\u2019\
+        s cybersecurity strategy must prioritize the support of protecting its critical\
+        \ systems."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1
+      ref_id: 1-2
+      name: Cybersecurity Risk Management
+      description: "To ensure managing cybersecurity risks in a methodological approach\
+        \ in order to protect the organization\u2019s information technology assets\
+        \ as per the organizational policies and procedures and related laws and regulations."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-2-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-2
+      ref_id: 1-2-1
+      description: 'In addition to the controls in ECC subdomain 1-5, cybersecurity
+        risk management methodology must include at least the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-2-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-2-1
+      ref_id: 1-2-1-1
+      description: Conducting a cybersecurity risk assessment on critical systems
+        at least once annually.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-2-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-2-1
+      ref_id: 1-2-1-2
+      description: Creating a cybersecurity risk register for critical systems, and
+        reviewing it at least once every month.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1
+      ref_id: 1-3
+      name: Cybersecurity in Information Technology Project Management
+      description: To ensure that cybersecurity requirements are included in project
+        management methodology and procedures in order to protect the confidentiality,
+        integrity and availability of information technology assets as per organization
+        policies, and procedures, and related laws and regulations.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3
+      ref_id: 1-3-1
+      description: "In addition to the subcontrols in ECC control 1-6-2, cybersecurity\
+        \ requirements of project management and asset (information technology) change\
+        \ management of the organization\u2019s critical systems must include at least\
+        \ the following:"
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-1
+      ref_id: 1-3-1-1
+      description: Conducting a stress test to ensure the capacity of the various
+        components.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-1
+      ref_id: 1-3-1-2
+      description: Ensuring the implementation of business continuity requirements.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3
+      ref_id: 1-3-2
+      description: "In addition to the subcontrols in ECC control 1-6-3, cybersecurity\
+        \ requirements related to software and application development projects of\
+        \ the organization\u2019s critical systems must include at least the following:"
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-2-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-2
+      ref_id: 1-3-2-1
+      description: Conducting a security source code review before the critical system
+        release.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-2-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-2
+      ref_id: 1-3-2-2
+      description: Securing the access, storage, documentation and releases of source
+        code.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-2-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-2
+      ref_id: 1-3-2-3
+      description: Securing the authenticated Application Programming Interface (API).
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-2-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-3-2
+      ref_id: 1-3-2-4
+      description: Secure and trusted migration of applications from testing environments
+        to production environments, along with deletion of any data, IDs or passwords
+        related to the testing environment before the migration.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1
+      ref_id: 1-4
+      name: Periodical Cybersecurity Review and Audit
+      description: To ensure that cybersecurity controls are implemented and in compliance
+        with organizational policies and procedures, as well as related national and
+        international laws, regulations and agreements.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-4-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-4
+      ref_id: 1-4-1
+      description: "With reference to ECC control 1-8-1, the organization\u2019s cybersecurity\
+        \ function must review the implementation of CSCC at least once annually."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-4-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-4
+      ref_id: 1-4-2
+      description: With reference to ECC control 1-8-2, the implementation of CSCC
+        must be reviewed by independent parties within the organization, outside the
+        cybersecurity function at least once every three years.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1
+      ref_id: 1-5
+      name: Cybersecurity in Human Resources
+      description: To ensure that cybersecurity risks and requirements related to
+        personnel (employees and contractors) are managed efficiently prior to employment,
+        during employment and after termination/separation as per organizational policies
+        and procedures, and related laws and regulations.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-5-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-5
+      ref_id: 1-5-1
+      description: 'In addition to the subcontrols in ECC control 1-9-3, personnel
+        cybersecurity requirements prior to employment must include at least the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-5-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-5-1
+      ref_id: 1-5-1-1
+      description: Screening or vetting candidates for working on critical systems.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:1-5-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:1-5-1
+      ref_id: 1-5-1-2
+      description: The technical support and development positions for critical systems,
+        must be filled with experienced Saudi professionals.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Cybersecurity Defense
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-1
+      name: Asset Management
+      description: "To ensure that the organization has an accurate and detailed inventory\
+        \ of information technology assets in order to support the organization\u2019\
+        s cybersecurity and operational requirements to maintain the confidentiality,\
+        \ integrity and availability of information technical assets."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-1-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-1
+      ref_id: 2-1-1
+      description: 'In addition to the controls in ECC subdomain 2-1, cybersecurity
+        requirements for managing information technology assets must include at least
+        the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-1-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-1-1
+      ref_id: 2-1-1-1
+      description: "Maintaining an annually-updated inventory of critical systems\u2019\
+        \ assets."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-1-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-1-1
+      ref_id: 2-1-1-2
+      description: Identifying assets owners and involving them in the asset management
+        lifecycle for critical systems.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-2
+      name: Identity and Access Management
+      description: To ensure the secure and restricted logical access to information
+        technology assets in order to prevent unauthorized access and allow only authorized
+        access for users which are necessary to accomplish assigned tasks.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2
+      ref_id: 2-2-1
+      description: 'In addition to the subcontrols in ECC control 2-2-3, cybersecurity
+        requirements for identity and access management of critical systems must include
+        at least the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1
+      ref_id: 2-2-1-1
+      description: Prohibiting remote access from outside the Kingdom of Saudi Arabia.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1
+      ref_id: 2-2-1-2
+      description: "Restricting remote access from inside the Kingdom of Saudi Arabia\
+        \ and verifying each access attempt by the organization\u2019s security operations\
+        \ center, and continuously monitoring activities related to remote access."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1
+      ref_id: 2-2-1-3
+      description: Using multi-factor authentication for all users.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1
+      ref_id: 2-2-1-4
+      description: Using multi-factor authentication for privileged users, and on
+        systems utilized for managing critical systems stated in control 2-3-1-4.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1
+      ref_id: 2-2-1-5
+      description: Developing and implementing a high-standard and secure password
+        policy.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1
+      ref_id: 2-2-1-6
+      description: 'Utilizing secure methods and algorithms for storing and processing
+        passwords, such as: Hashing functions.'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1-7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1
+      ref_id: 2-2-1-7
+      description: Securely managing service accounts for applications and systems,
+        and disabling interactive login from these accounts.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1-8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-1
+      ref_id: 2-2-1-8
+      description: Prohibiting direct access and interaction with databases for all
+        users except for database administrators. Users' access and interaction with
+        databases must be through applications only, with consideration given to applying
+        security solutions that limit or prohibit visibility of classified data to
+        database administrators.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-2
+      ref_id: 2-2-2
+      description: With reference to ECC subcontrol 2-2-3-5, user identities and access
+        rights to critical systems must be reviewed at least once every three months.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-3
+      name: Information System and Information Processing Facilities Protection
+      description: To ensure the protection of information systems and information
+        processing facilities, (including workstations and infrastructures) against
+        cyber risks.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3
+      ref_id: 2-3-1
+      description: 'In addition to the subcontrols in ECC control 2-3-3, cybersecurity
+        requirements for protecting critical systems and information processing facilities
+        must include at least the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1
+      ref_id: 2-3-1-1
+      description: Whitelisting of application and software operation files that are
+        allowed to execute on servers hosting critical systems.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1
+      ref_id: 2-3-1-2
+      description: Protecting servers hosting critical systems using end-point protection
+        solutions that are approved by the organization.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1
+      ref_id: 2-3-1-3
+      description: "Applying security patches and updates at least once every month\
+        \ for external and internet-connected critical systems and at least once every\
+        \ three months for internal critical systems, in line with the organization\u2019\
+        s approved change management mechanisms."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1
+      ref_id: 2-3-1-4
+      description: Allocating specific workstations in an isolated network (Management
+        Network), that is isolated from other networks or services (e.g., email service
+        or internet), to be used by highly privileged accounts.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1
+      ref_id: 2-3-1-5
+      description: Encrypting the network traffic of non-console administrative access
+        for all technical components of critical systems using secure encryption algorithms
+        and protocols.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1
+      ref_id: 2-3-1-6
+      description: "Reviewing critical systems\u2019 configurations and hardening\
+        \ at least once every six months."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1-7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1
+      ref_id: 2-3-1-7
+      description: Reviewing and changing default configurations, and ensuring the
+        removal of hard-coded, backdoor and/or default passwords, where applicable.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1-8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1
+      ref_id: 2-3-1-8
+      description: "Protecting systems\u2019 logs and critical files from unauthorized\
+        \ access, tampering, illegitimate modification and/or deletion."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-4
+      name: Networks Security Management
+      description: "To ensure the protection of the organization\u2019s network from\
+        \ cyber risks."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4
+      ref_id: 2-4-1
+      description: "In addition to the subcontrols in ECC control 2-5-3, cybersecurity\
+        \ requirements of critical systems\u2019 network security management must\
+        \ include at least the following:"
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1
+      ref_id: 2-4-1-1
+      description: Logically and/or physically segregating and isolating critical
+        systems' networks.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1
+      ref_id: 2-4-1-2
+      description: Reviewing firewall rules and access lists, at least once every
+        six months.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1
+      ref_id: 2-4-1-3
+      description: Prohibiting direct connection between local network devices and
+        critical systems, unless those devices are scanned to ensure they have security
+        controls that meet the acceptable security levels for critical systems.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1
+      ref_id: 2-4-1-4
+      description: Prohibiting critical systems from connecting to a wireless network.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1
+      ref_id: 2-4-1-5
+      description: Protecting against Advanced Persistent Threats (APT) at the network
+        layer.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1
+      ref_id: 2-4-1-6
+      description: Prohibiting connection to the internet for critical systems that
+        provide internal services to the organization and have no strong need to be
+        accessed from outside the organization.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1-7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1
+      ref_id: 2-4-1-7
+      description: Critical systems that provide services to a limited number of organizations
+        (not individuals), shall use networks isolated from the Internet.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1-8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1
+      ref_id: 2-4-1-8
+      description: Protecting against Distributed Denial of Service (DDoS) attacks
+        to limit risks arising from these attacks.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1-9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-4-1
+      ref_id: 2-4-1-9
+      description: "Allowing only whitelisting for critical systems\u2019 firewall\
+        \ access lists."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-5
+      name: Mobile Devices Security
+      description: "To ensure the protection of mobile devices (including laptops,\
+        \ smartphones, tablets) from cyber risks and to ensure the secure handling\
+        \ of the organization\u2019s information (including sensitive information)\
+        \ while utilizing Bring Your Own Device (BYOD) policy."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-5-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-5
+      ref_id: 2-5-1
+      description: 'In addition to the subcontrols in ECC control 2-6-3, cybersecurity
+        requirements for mobile devices security and BYOD in the organization must
+        include at least the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-5-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-5-1
+      ref_id: 2-5-1-1
+      description: Prohibiting access to critical systems from mobile devices except
+        for a temporary period only, after assessing the risks and obtaining the necessary
+        approvals from the cybersecurity function in the organization.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-5-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-5-1
+      ref_id: 2-5-1-2
+      description: Implementing full disk encryption for mobile devices with access
+        to critical systems.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-6
+      name: Data and Information Protection
+      description: "To Ensure the confidentiality, integrity and availability of the\
+        \ organization\u2019s data and information as per organizational policies\
+        \ and procedures, and related laws and regulations."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6
+      ref_id: 2-6-1
+      description: 'In addition to the subcontrols in ECC control 2-7-3, cybersecurity
+        requirements for protecting and handling data and information must include
+        at least the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1
+      ref_id: 2-6-1-1
+      description: "Prohibiting the use of critical systems\u2019 data in any environment\
+        \ other than production environment, except after applying strict controls\
+        \ for protecting that data, such as: data masking or data scrambling techniques."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1
+      ref_id: 2-6-1-2
+      description: Classifying all data within critical systems.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1
+      ref_id: 2-6-1-3
+      description: Protecting classified data of critical systems using data leakage
+        prevention techniques.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1
+      ref_id: 2-6-1-4
+      description: "Identifying retention period for critical systems-associated data,\
+        \ in accordance with relevant legislations. Only required data must be retained\
+        \ in critical systems\u2019 production environments."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1
+      ref_id: 2-6-1-5
+      description: "Prohibiting the transfer of any critical systems\u2019 data from\
+        \ production environment to any other environment."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-7
+      name: Cryptography
+      description: To ensure the proper and efficient use of cryptography to protect
+        information assets as per organizational policies and procedures, and related
+        laws and regulations.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-7-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-7
+      ref_id: 2-7-1
+      description: 'In addition to the subcontrols in ECC control 2-8-3, cybersecurity
+        requirements for cryptography must include at least the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-7-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-7-1
+      ref_id: 2-7-1-1
+      description: "Encrypting all critical systems\u2019 data-in-transit."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-7-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-7-1
+      ref_id: 2-7-1-2
+      description: "Encrypting all critical systems\u2019 data-at-rest at the level\
+        \ of files, database or certain columns within database."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-7-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-7-1
+      ref_id: 2-7-1-3
+      description: Using secure and up-to-date methods, algorithms, keys and devices
+        in accordance with what NCA issues in this regard.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-8
+      name: Backup and Recovery Management
+      description: "To ensure the protection of the organization\u2019s data and information,\
+        \ including information systems and software configurations from cyber risks\
+        \ as per organizational policies and procedures, and related laws and regulations."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-8-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-8
+      ref_id: 2-8-1
+      description: 'In addition to the subcontrols in ECC control 2-9-3, cybersecurity
+        requirements for backup and recovery management must include at least the
+        following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-8-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-8-1
+      ref_id: 2-8-1-1
+      description: Scope and coverage of online and offline backups shall cover all
+        critical systems.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-8-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-8-1
+      ref_id: 2-8-1-2
+      description: "Performing backup within planned intervals, according to the organization\u2019\
+        s risk assessment. NCA recommends performing backup for critical systems on\
+        \ a daily basis."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-8-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-8-1
+      ref_id: 2-8-1-3
+      description: "Securing access, storage and transfer of critical systems\u2019\
+        \ backups and storage media, and protecting it from destruction, unauthorized\
+        \ access or modification."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-8-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-8
+      ref_id: 2-8-2
+      description: With reference to ECC subcontrol 2-9-3-3, a periodical test must
+        be conducted at least once every three months in order to determine the efficiency
+        of recovering critical systems backups.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-9
+      name: Vulnerabilities Management
+      description: To ensure timely detection and effective remediation of technical
+        vulnerabilities to prevent or minimize the probability of exploiting these
+        vulnerabilities to launch cyber attacks against the organization.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-9-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-9
+      ref_id: 2-9-1
+      description: 'In addition to the subcontrols in ECC control 2-10-3, cybersecurity
+        requirements for technical vulnerabilities management of critical systems
+        must include at least the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-9-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-9-1
+      ref_id: 2-9-1-1
+      description: Utilizing trusted methods and tools for vulnerabilities assessments.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-9-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-9-1
+      ref_id: 2-9-1-2
+      description: Assessing and remediating vulnerabilities (by installing security
+        updates and patches) on technical components of critical systems at least
+        once every month for external and internet-connected critical systems, and
+        at least once every three months for internal critical systems.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-9-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-9-1
+      ref_id: 2-9-1-3
+      description: Immediately remediating for critical vulnerabilities, in line with
+        change management processes approved by the organization.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-9-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-9
+      ref_id: 2-9-2
+      description: "With reference to ECC subcontrol 2-10-3-1, vulnerabilities assessments\
+        \ must be conducted on critical systems\u2019 technical components at least\
+        \ once every month."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-10
+      name: Penetration Testing
+      description: "To assess and evaluate the efficiency of the organization\u2019\
+        s cybersecurity defense capabilities through simulated cyber attacks to discover\
+        \ unknown weaknesses within the technical infrastructure that may lead to\
+        \ a cyber breach."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-10-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-10
+      ref_id: 2-10-1
+      description: 'In addition to the subcontrols in ECC control 2-11-3, cybersecurity
+        requirements for penetration testing on critical systems must include at least
+        the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-10-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-10-1
+      ref_id: 2-10-1-1
+      description: "Scope of penetration tests must cover all of the critical systems\u2019\
+        \ technical components and all its internal and external services."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-10-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-10-1
+      ref_id: 2-10-1-2
+      description: Conducting penetration tests by a qualified team.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-10-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-10
+      ref_id: 2-10-2
+      description: With reference to ECC subcontrol 2-11-3-2, penetration tests must
+        be conducted on critical systems at least once every six months.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-11
+      name: Cybersecurity Event Logs and Monitoring Management
+      description: "To ensure timely collection, analysis and monitoring of cybersecurity\
+        \ events for early detection of potential cyber-attacks in order to prevent\
+        \ or minimize the negative impacts on the organization\u2019s operations."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11
+      ref_id: 2-11-1
+      description: 'In addition to the subcontrols in ECC control 2-12-3, cybersecurity
+        requirements for event logs and monitoring management for critical systems
+        must include at least the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11-1
+      ref_id: 2-11-1-1
+      description: Activating cybersecurity event logs on all technical components
+        of critical systems.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11-1
+      ref_id: 2-11-1-2
+      description: Activating and monitoring of alerts and event logs related to file
+        integrity management.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11-1
+      ref_id: 2-11-1-3
+      description: Monitoring and analyzing user behavior.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11-1
+      ref_id: 2-11-1-4
+      description: Monitoring critical systems security events around the clock.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11-1
+      ref_id: 2-11-1-5
+      description: Maintaining and protecting critical systems security events logs.
+        The log shall include all details (e.g., time, date, ID and affected system).
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-11
+      ref_id: 2-11-2
+      description: "With reference to ECC subcontrol 2-12-3-5, retention period of\
+        \ cybersecurity\u2019s critical systems event logs must be 18 months minimum,\
+        \ in accordance with relevant legislative and regulatory requirements."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-12
+      name: Web Application Security
+      description: To ensure the protection of Internet-Facing web applications against
+        cyber risk.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-12-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-12
+      ref_id: 2-12-1
+      description: "In addition to the subcontrols in ECC control 2-15-3, cybersecurity\
+        \ requirements for external web applications for the organization\u2019s critical\
+        \ systems must include at least the following:"
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-12-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-12-1
+      ref_id: 2-12-1-1
+      description: Secure session management, including session authenticity, session
+        lockout and session timeout.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-12-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-12-1
+      ref_id: 2-12-1-2
+      description: Applying the minimum standards of Open Web Application Security
+        Project (OWASP) Top Ten.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-12-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-12
+      ref_id: 2-12-2
+      description: With reference to ECC subcontrol 2-15-3-2, multi-tier architecture
+        principle, with mini- mum 3 tiers, must be used.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2
+      ref_id: 2-13
+      name: Application Security
+      description: "To ensure the protection of the critical systems\u2019 internal\
+        \ applications against cyber risks."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13
+      ref_id: 2-13-1
+      description: "Cybersecurity requirements for critical systems\u2019 internal\
+        \ applications must be defined, documented, and approved."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13
+      ref_id: 2-13-2
+      description: "The cybersecurity requirements for critical systems\u2019 internal\
+        \ applications must be implemented."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13-3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13
+      ref_id: 2-13-3
+      description: "The cybersecurity requirements for critical systems\u2019 internal\
+        \ applications must include at least the following:"
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13-3-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13-3
+      ref_id: 2-13-3-1
+      description: Adopting multi-tier architecture principle, provided that number
+        of tiers is not less than three.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13-3-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13-3
+      ref_id: 2-13-3-2
+      description: Using secure protocols (e.g., HTTPS).
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13-3-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13-3
+      ref_id: 2-13-3-3
+      description: Outlining the acceptable use policy for users.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13-3-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13-3
+      ref_id: 2-13-3-4
+      description: Secure session management, including session authenticity, session
+        lockout and session timeout.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-13
+      ref_id: 2-13-4
+      description: "The cybersecurity requirements for critical systems\u2019 internal\
+        \ applications must be reviewed periodically."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Cybersecurity Resilience
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:3-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:3
+      ref_id: 3-1
+      name: Cybersecurity Resilience Aspects of Business Continuity Management (BCM)
+      description: "To ensure the inclusion of the cybersecurity resiliency requirements\
+        \ within the organization\u2019s business continuity management and to remediate\
+        \ and minimize the impacts on systems, information processing facilities and\
+        \ critical e-services from disasters caused by cybersecurity incidents."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:3-1-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:3-1
+      ref_id: 3-1-1
+      description: 'In addition to the subcontrols in ECC control 3-1-3, cybersecurity
+        requirements for business continuity management must include at least the
+        following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:3-1-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:3-1-1
+      ref_id: 3-1-1-1
+      description: Establishing a disaster recovery center for critical systems.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:3-1-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:3-1-1
+      ref_id: 3-1-1-2
+      description: Incorporating critical systems within disaster recovery plans.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:3-1-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:3-1-1
+      ref_id: 3-1-1-3
+      description: Conducting periodical tests to ensure the efficiency of disaster
+        recovery plans for critical systems, at least once annually.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:3-1-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:3-1-1
+      ref_id: 3-1-1-4
+      description: NCA recommends conducting periodical live Disaster Recovery (DR)
+        test for critical systems.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Third-Party and Cloud Computing Cybersecurity
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:4-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:4
+      ref_id: 4-1
+      name: Third-Party Cybersecurity
+      description: To ensure the protection of assets against cybersecurity risks
+        related to third parties, including outsourcing and managed services as per
+        organizational policies and procedures, and related laws and regulations.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:4-1-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:4-1
+      ref_id: 4-1-1
+      description: 'In addition to the controls in ECC subdomain 4-1, cybersecurity
+        requirements for contracts and agreements with third-parties must include
+        at least the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:4-1-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:4-1-1
+      ref_id: 4-1-1-1
+      description: Screening or vetting of outsourcing and managed services companies
+        and personnel who work on critical systems.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:4-1-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:4-1-1
+      ref_id: 4-1-1-2
+      description: Outsourcing and managed services of critical systems must rely
+        on Saudi companies and organizations, in accordance with the relevant legislative
+        and regulatory requirements.
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:4-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:4
+      ref_id: 4-2
+      name: Cloud Computing and Hosting Cybersecurity
+      description: "To ensure the proper and efficient remediation of cyber risks\
+        \ and the implementation of cybersecurity requirements related to hosting\
+        \ and cloud computing as per organizational policies and procedures, and related\
+        \ laws and regulations. It is also to ensure the protection of the organization\u2019\
+        s information technology assets hosted on the cloud or processed/ managed\
+        \ by third parties."
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:4-2-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:4-2
+      ref_id: 4-2-1
+      description: 'In addition to the subcontrols in ECC control 4-2-3, cybersecurity
+        requirements related to the use of hosting and cloud computing services must
+        include at least the following:'
+    - urn: urn:intuitem:risk:req_node:cscc-1-2019:4-2-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:4-2-1
+      ref_id: 4-2-1-1
+      description: "Hosting of critical systems and any part of their technical components\
+        \ must be inside the organization or within cloud computing services provided\
+        \ by government organizations or Saudi companies that are in compliance with\
+        \ NCA\u2019s Cloud Cybersecurity Controls (CCC), taking into account the classification\
+        \ of the hosted data."
