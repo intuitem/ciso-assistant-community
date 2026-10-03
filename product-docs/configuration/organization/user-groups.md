@@ -10,7 +10,7 @@ Built-in user groups link a domain with a role, which carries a precise set of p
 
 ### Roles
 
-There are 8 built-in roles. The table below gives the high-level shape of each one — the underlying permission matrix has more than 200 entries, so this is deliberately a summary, not an exhaustive list.
+There are 8 built-in roles, plus one more in the PRO edition (see [Delegating user creation](#delegating-user-creation-pro)). The table below gives the high-level shape of each one — the underlying permission matrix has more than 200 entries, so this is deliberately a summary, not an exhaustive list.
 
 | Role                   | Can                                                                                                                                                                                | Cannot                                                                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -40,6 +40,14 @@ Once your instance is created, five user groups are already present:
 * Global - Respondent
 
 They give corresponding permissions on Global scope so on every object of your instance.
+
+### Delegating user creation (PRO)
+
+In the PRO edition, a sixth global group, _Global - User creator_, lets people other than administrators create users. Its _User creator_ role can do only two things: create users and see the list of users. It cannot put users in groups (that takes group-management rights, such as a domain manager has on their own domain's groups), and it cannot edit, deactivate or delete users; those stay with administrators.
+
+Users always belong to the Global domain, so the role only exists in this Global group and is not granted on sub-domains. Like any role with a create permission, it makes its holder a [contributor](../../introduction/editions.md#contributor-seats).
+
+A domain manager who also belongs to _Global - User creator_ can onboard someone end to end: create the user from the **Users** page, then add them to one of their domain's groups with **Add members** (see [Managing group members](#managing-group-members)). The same role can also be given to a [service account](../../integrations/service-accounts.md) that provisions users, on the Global domain.
 
 ### Domain user groups
 
