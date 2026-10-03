@@ -393,7 +393,7 @@
 		savePositions(folderId, updated);
 	}
 
-	function isValidConnection(connection: Connection): boolean {
+	function isValidConnection(connection: Connection | Edge): boolean {
 		if (!connection.source || !connection.target) return false;
 		if (connection.source === connection.target) return false;
 		if (!knownAssetIds.has(connection.source) && !knownAssetIds.has(connection.target)) {
