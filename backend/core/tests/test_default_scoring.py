@@ -1,6 +1,5 @@
 import pytest
 
-from core.cyfun import CYFUN_2025_URN as CYFUN
 from core.models import ComplianceAssessment, Framework, RequirementNode
 from core.serializers import ComplianceAssessmentWriteSerializer
 from iam.models import Folder
@@ -8,8 +7,16 @@ from iam.models import Folder
 AVG = ComplianceAssessment.CalculationMethod.AVG
 AVG_OF_AVG = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
 
+# Levels whose own targets override the framework's (3.5); E has none.
+GROUPS = [
+    {"ref_id": "B", "name": "basic", "target_score": 2.5},
+    {"ref_id": "BK", "name": "basic - key measures", "target_score": 2.5},
+    {"ref_id": "I", "name": "important", "target_score": 3},
+    {"ref_id": "E", "name": "essential"},
+]
 
-def _cyfun(target):
+
+def _anchored(target):
     return {
         "score_calculation_method": AVG_OF_AVG,
         "anchor_na_to_target": True,
@@ -18,54 +25,58 @@ def _cyfun(target):
 
 
 @pytest.mark.parametrize(
-    "urn, groups, expected",
+    "groups, expected",
     [
-        # CyFun 2025 tools count N/A as the level's key measure threshold.
-        (CYFUN, [], _cyfun(3)),
-        (CYFUN, ["E"], _cyfun(3)),
-        (CYFUN, ["I", "IK"], _cyfun(3)),
-        (CYFUN, ["B"], _cyfun(2.5)),
-        (CYFUN, ["BK", "BG"], _cyfun(2.5)),
-        # BASIC and IMPORTANT groups together make an IMPORTANT audit.
-        (CYFUN, ["B", "I"], _cyfun(3)),
-        # Other frameworks only propose their declared calculation method.
-        (
-            "urn:test:framework:avg-of-avg",
-            ["B"],
-            {"score_calculation_method": AVG_OF_AVG},
-        ),
+        ([], _anchored(3.5)),
+        (["B"], _anchored(2.5)),
+        (["B", "BK"], _anchored(2.5)),
+        # The highest target of the selected groups applies.
+        (["B", "I"], _anchored(3)),
+        # A group without its own target counts as the framework's.
+        (["E"], _anchored(3.5)),
+        (["B", "E"], _anchored(3.5)),
     ],
 )
 @pytest.mark.django_db
-def test_default_scoring_for(urn, groups, expected):
-    framework = Framework(urn=urn, score_calculation_method=AVG_OF_AVG)
+def test_default_scoring_for(groups, expected):
+    framework = Framework(
+        score_calculation_method=AVG_OF_AVG,
+        anchor_na_to_target=True,
+        target_score=3.5,
+        implementation_groups_definition=GROUPS,
+    )
     assert framework.default_scoring_for(groups) == expected
 
 
 @pytest.mark.django_db
-def test_framework_without_declared_method_proposes_average():
-    assert Framework(urn="urn:test:framework:plain").default_scoring == {
-        "score_calculation_method": AVG
-    }
+def test_framework_without_declared_scoring_proposes_average():
+    assert Framework().default_scoring == {"score_calculation_method": AVG}
+
+
+@pytest.mark.django_db
+def test_group_targets_need_a_framework_target():
+    """The framework's target is the fallback of groups without one."""
+    framework = Framework(implementation_groups_definition=GROUPS)
+    assert framework.default_scoring_for(["B"]) == {"score_calculation_method": AVG}
 
 
 @pytest.fixture
 def cyfun():
     folder = Folder.get_root_folder()
     framework = Framework.objects.create(
-        name="CyFun 2025",
-        urn=CYFUN,
+        name="Levels",
+        urn="urn:test:framework:levels",
         min_score=1,
         max_score=5,
         folder=folder,
-        implementation_groups_definition=[
-            {"ref_id": ref_id, "name": ref_id} for ref_id in ("B", "BK", "I", "E")
-        ],
+        implementation_groups_definition=GROUPS,
         score_scale_locked=True,
         score_calculation_method=AVG_OF_AVG,
+        anchor_na_to_target=True,
+        target_score=3,
     )
     RequirementNode.objects.create(
-        urn="urn:test:cyfun-default-scoring:1",
+        urn="urn:test:levels-default-scoring:1",
         framework=framework,
         assessable=True,
         folder=folder,
@@ -76,7 +87,7 @@ def cyfun():
 def _serializer(cyfun, valid=True, **data):
     serializer = ComplianceAssessmentWriteSerializer(
         data={
-            "name": "CyFun audit",
+            "name": "Levels audit",
             "folder": str(cyfun["folder"].id),
             "framework": str(cyfun["framework"].id),
             **data,
@@ -92,7 +103,7 @@ class TestDefaultScoringOnCreate:
     framework's, like the form proposes."""
 
     @pytest.mark.parametrize("groups, target", [([], 3), (["E"], 3), (["B"], 2.5)])
-    def test_new_cyfun_audit_gets_level_settings(self, cyfun, groups, target):
+    def test_new_audit_gets_level_settings(self, cyfun, groups, target):
         ca = _serializer(cyfun, selected_implementation_groups=groups).save()
         assert ca.score_calculation_method == AVG_OF_AVG
         assert ca.anchor_na_to_target is True
@@ -109,7 +120,7 @@ class TestDefaultScoringOnCreate:
         assert ca.target_score == 4
 
     def test_locked_scale_rejects_another_scale(self, cyfun):
-        """The CyFun scale is part of the standard: audits keep 1-5."""
+        """A scale the standard defines: audits keep 1-5."""
         serializer = _serializer(cyfun, valid=False, score_scale_preset="0-100")
         assert serializer.errors["score_scale_preset"] == ["scoreScaleBoundToFramework"]
 

@@ -6,6 +6,7 @@ import yaml
 from openpyxl import load_workbook
 
 from core import cyfun
+from core.models import Framework
 from core.utils import EVERYONE_EDIT, build_initial_field_visibility
 
 BACKEND = Path(__file__).resolve().parents[2]
@@ -26,6 +27,33 @@ def test_cyfun_frameworks_declare_their_scoring():
     cyfun2023 = yaml.safe_load(library)["objects"]["framework"]
     assert cyfun2023["score_scale_locked"] is True
     assert cyfun2023["score_calculation_method"] == "average_of_averages"
+
+
+@pytest.mark.parametrize(
+    "groups, target",
+    [
+        ([], 3),
+        (["E"], 3),
+        (["I", "IK"], 3),
+        (["B"], 2.5),
+        (["BK", "BG"], 2.5),
+        # BASIC and IMPORTANT groups together make an IMPORTANT audit.
+        (["B", "I"], 3),
+    ],
+)
+@pytest.mark.django_db
+def test_new_cyfun_2025_audits_count_na_as_their_level_target(groups, target):
+    """The CCB tools count an N/A requirement as their level's key measure
+    threshold (2.5 for BASIC, 3 above)."""
+    framework = _framework()
+    scoring = Framework(
+        score_calculation_method=framework["score_calculation_method"],
+        anchor_na_to_target=framework["anchor_na_to_target"],
+        target_score=framework["target_score"],
+        implementation_groups_definition=framework["implementation_groups_definition"],
+    ).default_scoring_for(groups)
+    assert scoring["anchor_na_to_target"] is True
+    assert scoring["target_score"] == target
 
 
 @pytest.mark.parametrize("library", ["cyfun2025", "ccb-cff-2023-03-01"])

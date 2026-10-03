@@ -83,7 +83,8 @@ from .validators import (
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
-from . import cyfun, dora
+from . import dora
+from .framework_exports import available_for as available_framework_exports
 from collections import defaultdict, deque
 from dataclasses import dataclass
 
@@ -1739,6 +1740,8 @@ class LibraryUpdater:
                 # Same for the scoring properties: omitted means back to the defaults.
                 framework_dict.setdefault("score_scale_locked", False)
                 framework_dict.setdefault("score_calculation_method", "average")
+                framework_dict.setdefault("anchor_na_to_target", False)
+                framework_dict.setdefault("target_score", None)
                 Framework.validate_score_calculation_method(
                     framework_dict["score_calculation_method"]
                 )
@@ -3721,6 +3724,22 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         verbose_name=_("Score calculation method"),
         help_text=_("Calculation method proposed for new audits."),
     )
+    anchor_na_to_target = models.BooleanField(
+        default=False,
+        verbose_name=_("Anchor N/A to target score"),
+        help_text=_(
+            "New audits count not applicable requirements as the target score."
+        ),
+    )
+    target_score = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_("Target score"),
+        help_text=_(
+            "Target score proposed for new audits, on the framework scale. "
+            "Implementation groups can override it."
+        ),
+    )
     urn_namespace = models.CharField(
         max_length=50,
         default="custom",
@@ -3856,21 +3875,23 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
     def default_scoring(self) -> dict:
         """Scoring settings proposed when creating an audit on this framework.
 
-        `target_score` is expressed on the framework's scale. With implementation
-        groups selected, the highest of their `target_score_by_group` entries
-        applies instead (a group without one counts as `target_score`).
+        `target_score` is expressed on the framework's scale. Implementation
+        groups can set their own `target_score`: with groups selected, the
+        highest of their targets applies (a group without one counts as the
+        framework's).
         """
         scoring = {"score_calculation_method": self.score_calculation_method}
-        if self.urn == cyfun.CYFUN_2025_URN:
-            # The CCB tools count an N/A requirement as their level's score.
-            scoring |= {
-                "anchor_na_to_target": True,
-                "target_score": cyfun.NA_SCORES[cyfun.level_for_groups(None)],
-                "target_score_by_group": {
-                    group: cyfun.NA_SCORES[level]
-                    for group, level in cyfun.GROUP_LEVELS.items()
-                },
+        if self.anchor_na_to_target:
+            scoring["anchor_na_to_target"] = True
+        if self.target_score is not None:
+            scoring["target_score"] = self.target_score
+            by_group = {
+                group["ref_id"]: group["target_score"]
+                for group in self.implementation_groups_definition or []
+                if group.get("target_score") is not None
             }
+            if by_group:
+                scoring["target_score_by_group"] = by_group
         return scoring
 
     def default_scoring_for(self, selected_implementation_groups) -> dict:
@@ -9649,15 +9670,18 @@ class ComplianceAssessment(Assessment):
             return self.max_score
 
     @property
-    def framework_exports(self) -> list[str]:
-        """Exports specific to the audit's framework, by id (its export route),
-        such as an official self-assessment template."""
-        exports = []
-        if cyfun.export_template(
-            self.framework.urn, self.selected_implementation_groups
-        ):
-            exports.append("cyfun-xlsx")
-        return exports
+    def framework_exports(self) -> list[dict]:
+        """Exports specific to the audit's framework (core.framework_exports),
+        such as a publisher's official self-assessment template."""
+        return [
+            {
+                "ref_id": export.ref_id,
+                "title": export.title,
+                "description": export.description,
+                "format": export.format,
+            }
+            for export in available_framework_exports(self)
+        ]
 
     def get_selected_implementation_groups(self):
         framework = self.framework

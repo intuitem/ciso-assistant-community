@@ -4545,7 +4545,6 @@ class LoadFileView(APIView):
             "perimeter": perimeter_id,
             "framework": framework.id,
             "folder": folder_id,
-            "score_calculation_method": ComplianceAssessment.CalculationMethod.AVG_OF_AVG,
         }
         level = parsed["assurance_level"]
         if level:

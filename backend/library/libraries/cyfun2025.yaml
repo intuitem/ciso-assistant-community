@@ -23,7 +23,7 @@ description: 'The CyberFundamentals Framework is a framework owned by the Centre
   Version 2025-10-01'
 copyright: "\u24B8 Centre for Cybersecurity Belgium (CCB)"
 version: 9
-publication_date: 2026-10-03
+publication_date: 2026-10-04
 provider: CCB
 packager: intuitem
 translations:
@@ -20864,6 +20864,8 @@ objects:
         respondent: edit
     score_scale_locked: true
     score_calculation_method: average_of_averages
+    anchor_na_to_target: true
+    target_score: 3.0
     scores_definition:
     - score: 1
       name: Initial
@@ -21001,6 +21003,7 @@ objects:
     - ref_id: B
       name: basic
       description: null
+      target_score: 2.5
       translations:
         nl:
           name: basic
@@ -21009,6 +21012,7 @@ objects:
     - ref_id: I
       name: important
       description: null
+      target_score: 3.0
       translations:
         nl:
           name: important
@@ -21017,6 +21021,7 @@ objects:
     - ref_id: E
       name: essential
       description: null
+      target_score: 3.0
       translations:
         nl:
           name: essential
@@ -21025,6 +21030,7 @@ objects:
     - ref_id: BK
       name: basic - key measures
       description: null
+      target_score: 2.5
       translations:
         nl:
           name: basic - kernmaatregelen
@@ -21033,6 +21039,7 @@ objects:
     - ref_id: IK
       name: important - key measures
       description: null
+      target_score: 3.0
       translations:
         nl:
           name: important - kernmaatregelen
@@ -21041,6 +21048,7 @@ objects:
     - ref_id: EK
       name: essential - key measures
       description: null
+      target_score: 3.0
       translations:
         nl:
           name: essential - kernmaatregelen
@@ -21049,6 +21057,7 @@ objects:
     - ref_id: BG
       name: basic - management aspects
       description: null
+      target_score: 2.5
       translations:
         nl:
           name: basic - managementaspecten
@@ -21057,6 +21066,7 @@ objects:
     - ref_id: IG
       name: important - management aspects
       description: null
+      target_score: 3.0
       translations:
         nl:
           name: important - managementaspecten
@@ -21065,6 +21075,7 @@ objects:
     - ref_id: EG
       name: essential - management aspects
       description: null
+      target_score: 3.0
       translations:
         nl:
           name: essential - managementaspecten

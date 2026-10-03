@@ -18,7 +18,10 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
+	import ExportModal, {
+		type ExportFormat,
+		type ExportGroup
+	} from '$lib/components/Modals/ExportModal.svelte';
 
 	import {
 		complianceResultColorMap,
@@ -408,11 +411,16 @@
 		const id = ca.id;
 		const isInternal = !page.data.user.is_third_party;
 		const frameworkUrn = ca.framework?.urn ?? '';
-		// Framework-specific exports (e.g. the official CyFun self-assessment
-		// tool) come from the backend, which knows the supported versions.
+		// Framework-specific exports (e.g. a publisher's official self-assessment
+		// template) come from the backend, which knows which audits support them.
 		// ISO27001 is prefix-matched — SoA only navigates to a page whose
 		// semantics carry across 27001 versions.
-		const frameworkExports: string[] = ca.framework_exports ?? [];
+		const frameworkExports: {
+			ref_id: string;
+			title: string;
+			description: string;
+			format: ExportFormat;
+		}[] = ca.framework_exports ?? [];
 		const isIso27001 = frameworkUrn.startsWith(ISO27001_FRAMEWORK_URN_PREFIX);
 
 		const auditOptions = [
@@ -452,14 +460,15 @@
 				href: `/compliance-assessments/${id}/export/posture-pdf?profile=attestation`,
 				testId: 'export-option-attestation-pdf'
 			},
-			isInternal &&
-				frameworkExports.includes('cyfun-xlsx') && {
-					titleKey: 'exportCyFunAssessment',
-					descriptionKey: 'exportCyFunAssessmentDesc',
-					format: 'XLSX' as const,
-					href: `/compliance-assessments/${id}/export/cyfun-xlsx`,
-					testId: 'export-option-cyfun-xlsx'
-				},
+			...(isInternal
+				? frameworkExports.map((frameworkExport) => ({
+						titleKey: frameworkExport.title,
+						descriptionKey: frameworkExport.description,
+						format: frameworkExport.format,
+						href: `/compliance-assessments/${id}/export/framework/${frameworkExport.ref_id}`,
+						testId: `export-option-${frameworkExport.ref_id}`
+					}))
+				: []),
 			{
 				titleKey: 'exportBundleWithEvidences',
 				descriptionKey: 'exportBundleWithEvidencesDesc',

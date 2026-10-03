@@ -220,7 +220,8 @@ from .models import *
 from .serializers import *
 
 from .models import Severity
-from . import cyfun, dora
+from . import dora, framework_exports
+from django.utils.http import content_disposition_header
 from core.mappings.merge import compute_map_from_merge
 
 from serdes.utils import (
@@ -12935,8 +12936,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
         return response
 
-    @action(detail=True, methods=["get"], name="CyFun Excel Export")
-    def cyfun_xlsx(self, request, pk):
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=r"framework-exports/(?P<export_id>[\w-]+)",
+        name="Framework export",
+    )
+    def framework_export(self, request, pk, export_id):
+        """An export specific to the audit's framework (core.framework_exports)."""
         if not RoleAssignment.is_object_accessible(
             request.user, "view", ComplianceAssessment, UUID(pk)
         ):
@@ -12944,72 +12951,21 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
 
-        audit = ComplianceAssessment.objects.get(id=pk)
-        # The official tool of the audit's CyFun version and assurance level: it
-        # lists only that level's requirements and applies its N/A score and
-        # thresholds.
-        template = cyfun.export_template(
-            audit.framework.urn, audit.selected_implementation_groups
-        )
-        if template is None:
+        export = framework_exports.get(export_id)
+        if export is None:
             return Response(
-                {"error": "This export is only available for CyFun assessments"},
+                {"error": "Unknown export"}, status=status.HTTP_404_NOT_FOUND
+            )
+        audit = ComplianceAssessment.objects.get(id=pk)
+        if not export.supports(audit):
+            return Response(
+                {"error": "This export is not available for this audit"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        wb = load_workbook(
-            Path(__file__).resolve().parent / "templates" / "core" / template.file
-        )
-
-        # ref_id -> (sheet, row) of every requirement the tool lists
-        rows = {}
-        for sheet_name in template.sheets:
-            ws = wb[sheet_name]
-            for row in range(1, ws.max_row + 1):
-                cell_value = ws.cell(row=row, column=template.requirement_column).value
-                if cell_value and isinstance(cell_value, str):
-                    ref_id = template.ref_id(cell_value)
-                    if ref_id:
-                        rows[ref_id] = (ws, row)
-
-        requirement_assessments = (
-            RequirementAssessment.objects.filter(compliance_assessment=audit)
-            .select_related("requirement")
-            .filter(requirement__assessable=True)
-        )
-        for ra in requirement_assessments:
-            target = rows.get((ra.requirement.ref_id or "").upper())
-            if target is None:
-                continue
-            ws, row = target
-            if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
-                ws.cell(row=row, column=template.doc_column, value="N/A")
-                ws.cell(row=row, column=template.impl_column, value="N/A")
-            else:
-                if ra.documentation_score is not None:
-                    ws.cell(
-                        row=row,
-                        column=template.doc_column,
-                        value=ra.documentation_score,
-                    )
-                if ra.score is not None:
-                    ws.cell(row=row, column=template.impl_column, value=ra.score)
-            if ra.observation:
-                ws.cell(
-                    row=row,
-                    column=template.comment_column,
-                    value=escape_excel_formula(ra.observation),
-                )
-
-        buffer = io.BytesIO()
-        wb.save(buffer)
-        buffer.seek(0)
-
-        response = HttpResponse(
-            buffer.getvalue(),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-        response["Content-Disposition"] = (
-            f'attachment; filename="{audit.name}_CyFun_Self-Assessment.xlsx"'
+        file = export.build(audit)
+        response = HttpResponse(file.content, content_type=file.content_type)
+        response["Content-Disposition"] = content_disposition_header(
+            as_attachment=True, filename=file.filename
         )
         return response
 

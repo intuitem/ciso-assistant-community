@@ -79,10 +79,15 @@ def cyfun_audit():
     return ca
 
 
-def _export(client, ca):
-    response = client.get(
-        reverse("compliance-assessments-cyfun-xlsx", kwargs={"pk": str(ca.pk)})
+def _export_url(ca, export_id="cyfun-xlsx"):
+    return reverse(
+        "compliance-assessments-framework-export",
+        kwargs={"pk": str(ca.pk), "export_id": export_id},
     )
+
+
+def _export(client, ca):
+    response = client.get(_export_url(ca))
     assert response.status_code == 200
     return load_workbook(io.BytesIO(response.content))
 
@@ -210,6 +215,14 @@ class TestCyfun2023Export:
         assert _scores_2023(workbook, "essential", "R.AC-3.4") == ("N/A", "N/A")
 
 
+CYFUN_EXPORT = {
+    "ref_id": "cyfun-xlsx",
+    "title": "exportCyFunAssessment",
+    "description": "exportCyFunAssessmentDesc",
+    "format": "XLSX",
+}
+
+
 @pytest.mark.django_db
 class TestFrameworkExports:
     def _detail(self, client, ca):
@@ -220,19 +233,18 @@ class TestFrameworkExports:
         self, admin_client, cyfun_audit, cyfun2023_audit
     ):
         assert self._detail(admin_client, cyfun_audit)["framework_exports"] == [
-            "cyfun-xlsx"
+            CYFUN_EXPORT
         ]
         assert self._detail(admin_client, cyfun2023_audit)["framework_exports"] == [
-            "cyfun-xlsx"
+            CYFUN_EXPORT
         ]
 
     def test_other_frameworks_offer_none(self, admin_client, cyfun_audit):
         cyfun_audit.framework.urn = "urn:test:framework:other"
         cyfun_audit.framework.save()
         assert self._detail(admin_client, cyfun_audit)["framework_exports"] == []
-        response = admin_client.get(
-            reverse(
-                "compliance-assessments-cyfun-xlsx", kwargs={"pk": str(cyfun_audit.pk)}
-            )
-        )
-        assert response.status_code == 400
+        assert admin_client.get(_export_url(cyfun_audit)).status_code == 400
+
+    def test_unknown_export_is_not_found(self, admin_client, cyfun_audit):
+        response = admin_client.get(_export_url(cyfun_audit, "no-such-export"))
+        assert response.status_code == 404

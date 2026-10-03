@@ -238,6 +238,8 @@ A `_meta` of type `framework` contains the following keys:
 - answers_definition: name of an `answers` object
 - score_scale_locked: `x` (or `true`) when the standard defines the score scale. Audits of the framework keep it and cannot switch to another scale.
 - score_calculation_method: `average` (default), `sum` or `average_of_averages`. Calculation method proposed for new audits of the framework.
+- anchor_na_to_target: `x` (or `true`) to have new audits of the framework count not applicable requirements as the target score.
+- target_score: target score proposed for new audits of the framework, on its scale. Implementation groups can override it (see their `target_score` column).
 - field_visibility: JSON object `{"field": {"role": "edit"|"read"|"hidden"}}`, roles `auditor` and `respondent`. Initial field visibility of new audits of the framework, merged per role over the defaults (scores are hidden unless the framework shows them), e.g. `{"score": {"auditor": "edit", "respondent": "edit"}}`.
 
 The `_content` tab for a `framework` object contains the following columns:
@@ -345,6 +347,7 @@ The `_content` tab for a `implementation_groups` object contains the following c
 - name (*)
 - description
 - default_selected : Must be `x` or empty. If `x`, the Implementation Group (IG) is selected by default when creating an audit with the framework. If you're creating a questionnaire, we *STRONGLY* recommend selecting at least 1 IG, and assigning the selected IG to the main questions in your Framework Content sheet.
+- target_score: target score proposed for new audits that select this IG, instead of the framework's `target_score` (which is then required). When several IGs are selected, the highest target applies; an IG without one counts as the framework's.
 
 ### Scores
 

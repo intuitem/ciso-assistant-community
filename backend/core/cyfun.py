@@ -1,10 +1,17 @@
 """CCB CyberFundamentals (CyFun®): framework URNs, assurance levels and the
-official self-assessment tools audits are exported to."""
+official self-assessment tools audits are exported to (the "cyfun-xlsx"
+framework export)."""
 
+import io
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from functools import partial
+from pathlib import Path
+
+from openpyxl import load_workbook
+
+from .framework_exports import ExportFile, FrameworkExport, register
 
 CYFUN_2023_URN = "urn:intuitem:risk:framework:ccb-cff-2023-03-01"
 CYFUN_2025_URN = "urn:intuitem:risk:framework:ccb-cyfun2025"
@@ -19,11 +26,6 @@ GROUP_LEVELS = {
     for level, prefix in zip(LEVELS, "BIE")
     for group in (prefix, f"{prefix}K", f"{prefix}G")
 }
-
-# The CyFun 2025 tools count an N/A requirement as the key measure threshold of
-# their level. It never decreases with the level, so the highest of an audit's
-# group scores is its level's.
-NA_SCORES = {"basic": 2.5, "important": 3, "essential": 3}
 
 # The official CyFun 2025 tool of each level (core/templates/core) and the
 # column of its requirement text; the documentation score, implementation
@@ -123,3 +125,85 @@ def export_template(
             partial(ref_id_2023, level=level),
         )
     return None
+
+
+def _supports(audit) -> bool:
+    return (
+        export_template(audit.framework.urn, audit.selected_implementation_groups)
+        is not None
+    )
+
+
+def build_self_assessment(audit) -> ExportFile:
+    """The official tool of the audit's CyFun version and assurance level,
+    filled with its scores and observations. The tool lists only that level's
+    requirements and applies its own N/A score and thresholds."""
+    from .models import RequirementAssessment
+    from .views import escape_excel_formula
+
+    template = export_template(
+        audit.framework.urn, audit.selected_implementation_groups
+    )
+    wb = load_workbook(
+        Path(__file__).resolve().parent / "templates" / "core" / template.file
+    )
+
+    # ref_id -> (sheet, row) of every requirement the tool lists
+    rows = {}
+    for sheet_name in template.sheets:
+        ws = wb[sheet_name]
+        for row in range(1, ws.max_row + 1):
+            cell_value = ws.cell(row=row, column=template.requirement_column).value
+            if cell_value and isinstance(cell_value, str):
+                ref_id = template.ref_id(cell_value)
+                if ref_id:
+                    rows[ref_id] = (ws, row)
+
+    requirement_assessments = (
+        RequirementAssessment.objects.filter(compliance_assessment=audit)
+        .select_related("requirement")
+        .filter(requirement__assessable=True)
+    )
+    for ra in requirement_assessments:
+        target = rows.get((ra.requirement.ref_id or "").upper())
+        if target is None:
+            continue
+        ws, row = target
+        if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
+            ws.cell(row=row, column=template.doc_column, value="N/A")
+            ws.cell(row=row, column=template.impl_column, value="N/A")
+        else:
+            if ra.documentation_score is not None:
+                ws.cell(
+                    row=row,
+                    column=template.doc_column,
+                    value=ra.documentation_score,
+                )
+            if ra.score is not None:
+                ws.cell(row=row, column=template.impl_column, value=ra.score)
+        if ra.observation:
+            ws.cell(
+                row=row,
+                column=template.comment_column,
+                value=escape_excel_formula(ra.observation),
+            )
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    return ExportFile(
+        buffer.getvalue(),
+        f"{audit.name}_CyFun_Self-Assessment.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+register(
+    FrameworkExport(
+        ref_id="cyfun-xlsx",
+        title="exportCyFunAssessment",
+        description="exportCyFunAssessmentDesc",
+        format="XLSX",
+        supports=_supports,
+        build=build_self_assessment,
+    )
+)

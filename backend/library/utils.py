@@ -447,6 +447,10 @@ class FrameworkImporter:
                     self.framework_data.get("score_scale_locked", False)
                 ),
                 score_calculation_method=score_calculation_method,
+                anchor_na_to_target=bool(
+                    self.framework_data.get("anchor_na_to_target", False)
+                ),
+                target_score=self.framework_data.get("target_score"),
                 provider=library_object.provider,
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,

@@ -1239,6 +1239,15 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
             )
         framework["score_calculation_method"] = method
 
+    # Scoring proposed for new audits: N/A requirements counted as the target
+    # score, which implementation groups can override (see below).
+    if "anchor_na_to_target" in meta:
+        framework["anchor_na_to_target"] = str(
+            meta["anchor_na_to_target"]
+        ).strip().lower() in ("1", "true", "yes", "x")
+    if meta.get("target_score") not in (None, ""):
+        framework["target_score"] = float(meta["target_score"])
+
     score_name = meta.get("scores_definition")
     if score_name and score_name in object_blocks:
         score_header, score_rows_data = parse_content_rows(
@@ -1282,6 +1291,13 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
 
             if data.get("default_selected") is not None:
                 ig_entry["default_selected"] = bool(data.get("default_selected"))
+            if data.get("target_score") not in (None, ""):
+                if "target_score" not in framework:
+                    raise ValueError(
+                        f"(framework) Implementation group {ig_entry['ref_id']!r} "
+                        "sets a target_score: the framework needs one too"
+                    )
+                ig_entry["target_score"] = float(data["target_score"])
 
             attach_translations_from_row(ig_entry, ig_header, row)
             ig_defs.append(ig_entry)
