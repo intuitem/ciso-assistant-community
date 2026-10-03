@@ -1,4 +1,4 @@
-import { handleErrorResponse, normalizeServiceAccountAuthorization } from '$lib/utils/actions';
+import { handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { getSecureRedirect } from '$lib/utils/helpers';
@@ -11,7 +11,7 @@ import { message, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 
-const URLModel = 'service-accounts';
+const URLModel = 'identity-providers';
 
 export const load: PageServerLoad = async (event) => {
 	const model = getModelInfo(URLModel);
@@ -22,26 +22,12 @@ export const load: PageServerLoad = async (event) => {
 	if (!res.ok) {
 		error(res.status as NumericRange<400, 599>, await res.json());
 	}
-	const serviceAccount = await res.json();
+	const socialApp = await res.json();
 	const object = {
-		name: serviceAccount.name,
-		description: serviceAccount.description,
-		identity_source: serviceAccount.identity_source,
-		social_app: serviceAccount.social_app?.id,
-		federated_subject: serviceAccount.federated_subject,
-		permissions: serviceAccount.permissions?.map((permission: { id: number }) => permission.id),
-		folders: serviceAccount.folders?.map((folder: { id: string }) => folder.id),
-		is_recursive: serviceAccount.is_recursive,
-		expiry_date: serviceAccount.expiry_date,
-		is_role_linked: serviceAccount.is_role_linked,
-		is_global_admin: serviceAccount.is_global_admin,
-		role_name: serviceAccount.role_name,
-		role: serviceAccount.role,
-		authorization_mode: serviceAccount.is_global_admin
-			? 'global_admin'
-			: serviceAccount.is_role_linked
-				? 'role'
-				: 'custom'
+		name: socialApp.name,
+		provider_id: socialApp.provider_id,
+		client_id: socialApp.client_id,
+		server_url: socialApp.server_url
 	};
 
 	const form = await superValidate(object, zod(schema), { errors: false });
@@ -64,12 +50,9 @@ export const actions: Actions = {
 			return message(form, { status: 400 });
 		}
 
-		normalizeServiceAccountAuthorization(form.data);
-
 		const model = getModelInfo(URLModel);
 		const endpoint = `${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/`;
 
-		// The backend only implements partial_update for service accounts: PATCH.
 		const res = await event.fetch(endpoint, {
 			method: 'PATCH',
 			body: JSON.stringify(form.data)

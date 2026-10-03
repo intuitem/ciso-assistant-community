@@ -15,6 +15,7 @@ from .views import (
     SCIMTokenViewSet,
     SCIMTokenDeleteView,
     ServiceAccountViewSet,
+    SocialAppViewSet,
 )
 
 urlpatterns = [
@@ -69,6 +70,18 @@ urlpatterns = [
         "service-accounts/<uuid:pk>/rotate-secret/",
         ServiceAccountViewSet.as_view({"post": "rotate_secret"}),
         name="service-account-rotate-secret",
+    ),
+    path(
+        "social-apps/",
+        SocialAppViewSet.as_view({"get": "list", "post": "create"}),
+        name="social-apps",
+    ),
+    path(
+        "social-apps/<int:pk>/",
+        SocialAppViewSet.as_view(
+            {"get": "retrieve", "patch": "partial_update", "delete": "destroy"}
+        ),
+        name="social-app-detail",
     ),
     path("scim-token/", SCIMTokenViewSet.as_view(), name="scim-token"),
     path(
