@@ -19,6 +19,7 @@
 	} from './builder-utils.svelte';
 	import { locales as supportedLocales } from '$paraglide/runtime';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { installKeyboardHandlers } from './keyboard';
 	import {
 		createCollapsedStore,
@@ -192,6 +193,37 @@
 				scores_definition: { ...current, aggregation: value }
 			});
 		}
+	}
+
+	// Single-object reference questions that can name what a response is about.
+	// Only saved questions (with a URN) can be picked.
+	let subjectCandidates = $derived(
+		$rootNodesStore
+			.flatMap((bn) => bn.questions.map((bq) => bq.question))
+			.filter(
+				(q) =>
+					(q.type as string) === 'object_reference' &&
+					!!q.urn &&
+					!(q.config as Record<string, unknown> | null)?.multiple
+			)
+	);
+
+	// Quick forms keep their score settings as {min, max, aggregation} in
+	// scores_definition; frameworks use the scale editor above instead.
+	function quickFormScore(): { min: number; max: number; aggregation: string } {
+		const def = $frameworkStore.scores_definition;
+		const rec = def && typeof def === 'object' && !Array.isArray(def) ? def : {};
+		return {
+			min: typeof rec.min === 'number' ? rec.min : 0,
+			max: typeof rec.max === 'number' ? rec.max : 100,
+			aggregation: typeof rec.aggregation === 'string' ? rec.aggregation : 'sum'
+		};
+	}
+
+	function setQuickFormScore(patch: Partial<{ min: number; max: number; aggregation: string }>) {
+		const def = $frameworkStore.scores_definition;
+		const base = def && typeof def === 'object' && !Array.isArray(def) ? { ...def } : {};
+		builder.updateFramework({ scores_definition: { ...quickFormScore(), ...base, ...patch } });
 	}
 
 	function collectAllParentIds(tree: BuilderNode[]): string[] {
@@ -531,6 +563,76 @@
 									{/if}
 								</p>
 							</div>
+
+							{#if mode === 'quick_form'}
+								<div
+									class="border border-surface-200-800 rounded-lg bg-surface-50-950/50 px-3 py-3 space-y-2"
+									data-testid="quick-form-score-settings"
+								>
+									<p class="text-xs font-medium text-surface-600-400 uppercase tracking-wider">
+										{m.builderQuickFormScore()}
+									</p>
+									<div class="grid grid-cols-3 gap-3">
+										<label class="block">
+											<span class="text-xs text-surface-600-400">{m.aggregation()}</span>
+											<select
+												value={quickFormScore().aggregation}
+												class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
+												onchange={(e) => setQuickFormScore({ aggregation: e.currentTarget.value })}
+											>
+												<option value="sum">{m.builderScoreSumOfQuestions()}</option>
+												<option value="mean">{m.builderScoreMeanOfQuestions()}</option>
+												<option value="pages_sum">{m.builderScoreSumOfPages()}</option>
+												<option value="pages_mean">{m.builderScoreMeanOfPages()}</option>
+											</select>
+										</label>
+										<label class="block">
+											<span class="text-xs text-surface-600-400">{m.minScore()}</span>
+											<input
+												type="number"
+												value={quickFormScore().min}
+												class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1"
+												onblur={(e) =>
+													setQuickFormScore({ min: parseInt(e.currentTarget.value) || 0 })}
+											/>
+										</label>
+										<label class="block">
+											<span class="text-xs text-surface-600-400">{m.maxScore()}</span>
+											<input
+												type="number"
+												value={quickFormScore().max}
+												class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1"
+												onblur={(e) =>
+													setQuickFormScore({ max: parseInt(e.currentTarget.value) || 100 })}
+											/>
+										</label>
+									</div>
+									<p class="text-xs text-surface-500">{m.builderQuickFormScoreHint()}</p>
+								</div>
+								<label class="block" data-testid="subject-question">
+									<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
+										>{m.builderSubjectQuestion()}</span
+									>
+									<select
+										value={$frameworkStore.subject_question_urn ?? ''}
+										class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
+										onchange={(e) =>
+											builder.updateFramework({
+												subject_question_urn: e.currentTarget.value || null
+											})}
+									>
+										<option value="">{m.builderNoSubjectQuestion()}</option>
+										{#each subjectCandidates as question (question.urn)}
+											<option value={question.urn}
+												>{question.text || question.ref_id || question.urn} ({safeTranslate(
+													String(question.config?.model ?? '')
+												)})</option
+											>
+										{/each}
+									</select>
+									<span class="text-xs text-surface-500">{m.builderSubjectQuestionHint()}</span>
+								</label>
+							{/if}
 
 							{#if mode === 'framework'}
 								<!-- Scoring settings -->

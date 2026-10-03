@@ -62,6 +62,9 @@ def quick_form_to_editor_doc(quick_form: dict, *, locale: str = "en") -> dict:
     doc = framework_to_editor_doc(pseudo, locale=locale)
     doc["kind"] = "quick_form"
     doc["framework_meta"]["kind"] = "quick_form"
+    doc["framework_meta"]["subject_question_urn"] = (
+        quick_form.get("subject_question_urn") or None
+    )
     for key in FRAMEWORK_ONLY_META_KEYS:
         doc["framework_meta"].pop(key, None)
     return doc
@@ -95,5 +98,14 @@ def editor_doc_to_quick_form_object(editor_doc: dict, *, existing: dict) -> dict
         )
     for key in FRAMEWORK_ONLY_META_KEYS:
         result.pop(key, None)
+    meta = editor_doc.get("framework_meta") or {}
+    # Absent from the payload means the editor does not model it: keep the
+    # document's value (already carried over with the other unknown keys).
+    if "subject_question_urn" in meta:
+        subject = str(meta.get("subject_question_urn") or "").lower()
+        if subject:
+            result["subject_question_urn"] = subject
+        else:
+            result.pop("subject_question_urn", None)
     result["pages"] = pages
     return result

@@ -11,6 +11,16 @@
 	import { urlModelForDjangoName, localNameForDjangoName } from '$lib/utils/crud';
 	import type { PageData } from './$types';
 
+	// Referenceable models (core/object_references.py REFERENCEABLE) to their routes.
+	const SUBJECT_ROUTES: Record<string, string> = {
+		applied_control: 'applied-controls',
+		asset: 'assets',
+		risk_scenario: 'risk-scenarios',
+		vulnerability: 'vulnerabilities',
+		perimeter: 'perimeters',
+		entity: 'entities'
+	};
+
 	let { data }: { data: PageData } = $props();
 
 	const toastStore = getToastStore();
@@ -47,6 +57,38 @@
 	// The server decides; offering a button it will refuse is worse than hiding it.
 	const canReview = $derived(!!content.can_review);
 	const suggestedActions = $derived((data.suggestedActions ?? []) as any[]);
+	const acceptPreview = $derived((data.acceptPreview ?? []) as any[]);
+
+	// Override at accept, per target. Only the tier target offers it for now.
+	const OVERRIDABLE = new Set(['entity.tier']);
+	let overrides: Record<string, { tier: string; note: string }> = $state({});
+	let overrideTiers: { id: string; name: string }[] = $state([]);
+
+	async function toggleOverride(target: string) {
+		if (overrides[target]) {
+			const { [target]: _, ...rest } = overrides;
+			overrides = rest;
+			return;
+		}
+		if (!overrideTiers.length) {
+			const res = await fetch('/tiers?is_visible=true');
+			const body = res.ok ? await res.json().catch(() => null) : null;
+			const tiers = body?.results ?? body;
+			if (!Array.isArray(tiers) || !tiers.length) {
+				toastStore.trigger({
+					message: m.anErrorOccurred(),
+					background: 'preset-filled-error-500'
+				});
+				return;
+			}
+			overrideTiers = tiers;
+		}
+		overrides = { ...overrides, [target]: { tier: '', note: '' } };
+	}
+
+	const activeOverrides = $derived(
+		Object.fromEntries(Object.entries(overrides).filter(([, o]) => o.tier))
+	);
 
 	// "Why can't I submit?" has to be answerable from the screen. The server resolves
 	// visibility, so it tells us which required questions are still blank.
@@ -71,7 +113,12 @@
 		const status = data?.status;
 		if (typeof status !== 'number' || status < 400) return null;
 		const code = data?.body?.error ?? data?.body?.detail;
-		return typeof code === 'string' ? safeTranslate(code) : safeTranslate('anErrorOccurred');
+		if (typeof code !== 'string') return safeTranslate('anErrorOccurred');
+		// A refused override says why (e.g. a missing justification).
+		const reason = data?.body?.reason;
+		return typeof reason === 'string'
+			? `${safeTranslate(code)}: ${safeTranslate(reason)}`
+			: safeTranslate(code);
 	}
 
 	async function post(action: string, body: Record<string, unknown>) {
@@ -212,6 +259,20 @@
 			</p>
 		{/if}
 
+		{#if content.subject}
+			{@const href = SUBJECT_ROUTES[content.subject.model ?? '']}
+			<p class="text-sm" data-testid="response-subject">
+				<span class="text-xs font-semibold uppercase tracking-wider text-surface-500"
+					>{m.responseSubject()}</span
+				>
+				{#if content.subject.str && href}
+					<a class="anchor ml-1" href={`/${href}/${content.subject.id}`}>{content.subject.str}</a>
+				{:else}
+					<span class="ml-1">{content.subject.str ?? m.objectsNotVisible({ count: 1 })}</span>
+				{/if}
+			</p>
+		{/if}
+
 		{#if content.computed_outcome && Object.keys(content.computed_outcome).length > 0}
 			<div class="flex flex-wrap items-center gap-2">
 				<span class="text-xs font-semibold uppercase tracking-wider text-surface-500"
@@ -225,6 +286,55 @@
 						{(payload as any)?.label ?? (payload as any)?.annotation ?? refId}
 					</span>
 				{/each}
+			</div>
+		{/if}
+
+		{#if content.computed_values && Object.keys(content.computed_values).length > 0}
+			{@const rules = (content.quick_form?.outcomes_definition ?? []) as any[]}
+			<div class="flex flex-wrap items-center gap-3" data-testid="computed-values">
+				<span class="text-xs font-semibold uppercase tracking-wider text-surface-500"
+					>{m.computedValues()}</span
+				>
+				{#each Object.entries(content.computed_values) as [refId, value]}
+					{@const rule = rules.find((r) => r.ref_id === refId)}
+					<span class="text-sm">
+						<span class="text-surface-600-400">{rule?.label ?? rule?.annotation ?? refId}</span>
+						<span class="font-mono font-semibold ml-1"
+							>{Number.isInteger(value) ? value : (value as number).toFixed(2)}</span
+						>
+					</span>
+				{/each}
+			</div>
+		{/if}
+
+		{#if content.applications?.length}
+			<div
+				class="rounded-lg border border-success-300 bg-success-50 dark:bg-success-500/10 p-3"
+				data-testid="applied-on-accept"
+			>
+				<p
+					class="text-xs font-semibold uppercase tracking-wider text-success-700 dark:text-success-400"
+				>
+					<i class="fa-solid fa-circle-check mr-1"></i>{m.appliedOnAccept()}
+				</p>
+				<ul class="mt-2 flex flex-col gap-1 text-sm">
+					{#each content.applications as application (application.target)}
+						<li class="flex flex-wrap items-baseline gap-2">
+							<span class="font-medium">{safeTranslate(application.label)}</span>
+							<span class="font-mono"
+								>{safeTranslate(application.previous || '—')} → {safeTranslate(
+									application.new
+								)}</span
+							>
+							{#if application.overridden}
+								<span class="badge preset-tonal-warning text-xs">{m.override()}</span>
+							{/if}
+							{#if application.note}
+								<span class="text-surface-500">{application.note}</span>
+							{/if}
+						</li>
+					{/each}
+				</ul>
 			</div>
 		{/if}
 
@@ -323,6 +433,58 @@
 					{/each}
 				</div>
 			{/if}
+			{#if (response.status === 'submitted' || response.status === 'in_review') && acceptPreview.length}
+				<div
+					class="rounded-lg border border-surface-200-800 bg-surface-100-900 p-3 text-sm"
+					data-testid="accept-preview"
+				>
+					<p class="text-xs font-semibold uppercase tracking-wider text-surface-500">
+						{m.onAcceptPreview()}
+					</p>
+					<ul class="mt-2 flex flex-col gap-1">
+						{#each acceptPreview as row (row.target)}
+							<li class="flex flex-wrap items-baseline gap-2">
+								<span class="font-medium">{safeTranslate(row.label)}</span>
+								{#if row.subject}<span class="text-surface-500">· {row.subject}</span>{/if}
+								{#if row.ok}
+									<span class="font-mono"
+										>{safeTranslate(row.current || '—')} → {safeTranslate(row.proposed)}</span
+									>
+								{:else}
+									<span class="text-warning-700 dark:text-warning-400">
+										<i class="fa-solid fa-triangle-exclamation mr-1"></i>{safeTranslate(row.reason)}
+									</span>
+								{/if}
+								{#if OVERRIDABLE.has(row.target) && (row.ok || row.reason === 'noTierResolved')}
+									<button
+										type="button"
+										class="text-xs anchor"
+										onclick={() => toggleOverride(row.target)}
+										data-testid="override-toggle"
+									>
+										{overrides[row.target] ? m.cancel() : m.overrideAtAccept()}
+									</button>
+								{/if}
+								{#if overrides[row.target]}
+									<div class="flex w-full flex-wrap items-center gap-2" data-testid="override-form">
+										<select class="select w-40 text-sm" bind:value={overrides[row.target].tier}>
+											<option value="">--</option>
+											{#each overrideTiers as tier (tier.id)}
+												<option value={tier.id}>{safeTranslate(tier.name)}</option>
+											{/each}
+										</select>
+										<input
+											class="input flex-1 min-w-48 text-sm"
+											placeholder={m.overrideJustification()}
+											bind:value={overrides[row.target].note}
+										/>
+									</div>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
 			<!-- The reviewer. Claiming is optional; a decision always carries a resolution. -->
 			<div class="flex flex-wrap items-center gap-2 pt-1">
 				{#if response.status === 'draft'}
@@ -370,7 +532,8 @@
 							post('setStatus', {
 								status: 'closed',
 								resolution: 'accepted',
-								observation: reopenObservation || null
+								observation: reopenObservation || null,
+								...(Object.keys(activeOverrides).length ? { overrides: activeOverrides } : {})
 							})}
 					>
 						<i class="fa-solid fa-check mr-1"></i>{m.quickFormAccept()}

@@ -246,6 +246,8 @@ from core import commitment
 
 import structlog
 
+from core.quick_form_targets import get_target
+
 logger = structlog.get_logger(__name__)
 
 SHORT_CACHE_TTL = 2  # mn
@@ -20390,6 +20392,7 @@ class QuickFormViewSet(BaseModelViewSet):
                     "name": page.get_name_translated,
                     "description": page.get_description_translated,
                     "visibility_expression": page.visibility_expression,
+                    "aggregation": page.aggregation,
                     "questions": page.get_questions_translated() or {},
                 }
             )
@@ -20415,6 +20418,7 @@ class QuickFormViewSet(BaseModelViewSet):
                 "progress": evaluation["progress"],
                 "score": evaluation["score"],
                 "computed_outcome": evaluation["computed_outcome"],
+                "computed_values": evaluation["computed_values"],
             }
         )
 
@@ -20488,6 +20492,7 @@ def emit_quick_form_event(response, action):
         "status": response.status,
         "resolution": response.resolution,
         "outcome_refs": response.outcome_refs,
+        "computed_values": response.computed_values,
         "score": response.score,
         "submitted_by": str(response.submitted_by_id)
         if response.submitted_by_id
@@ -20599,6 +20604,21 @@ def quick_form_response_content(response, user=None):
             "progress": evaluation["progress"],
             "score": evaluation["score"],
             "computed_outcome": evaluation["computed_outcome"],
+            "computed_values": evaluation["computed_values"],
+            "subject": response.subject_summary(user),
+            "applications": [
+                {
+                    "target": a.target,
+                    "label": getattr(get_target(a.target), "label", a.target),
+                    "previous": a.previous_display,
+                    "new": a.new_display,
+                    "overridden": a.overridden,
+                    "note": a.note,
+                    "applied_by": a.applied_by.email if a.applied_by_id else None,
+                    "applied_at": a.created_at,
+                }
+                for a in response.applications.select_related("applied_by")
+            ],
             "can_edit_answers": response.status == QuickFormResponse.Status.DRAFT
             and (user is None or response.is_requester(user)),
             # Whether this viewer may decide. Computed here so the action bar shows
@@ -20624,6 +20644,7 @@ def my_request_row(r):
         "cloned_from": r.cloned_from.ref_id if r.cloned_from_id else None,
         "score": r.score,
         "computed_outcome": r.computed_outcome,
+        "computed_values": r.computed_values,
         "progress": {
             "answered_count": r.answers.exclude(Answer.empty_value_q()).count(),
             "total_count": Question.objects.filter(
@@ -20656,9 +20677,14 @@ def entitled_quick_form_publications(user):
     )
 
 
-def start_quick_form_response(user, publication):
+def start_quick_form_response(user, publication, subject_id=None):
     """Create `user`'s response for `publication`, or hand back the draft they
     already have. Returns (response, resumed).
+
+    With `subject_id`, the form's subject question is pre-answered with it, checked
+    like any answer the requester could give, and only a draft about that same
+    subject is resumed. Raises ReferenceError_ when the form has no subject
+    question or the requester could not have picked that object.
 
     Built through the ORM rather than the write serializer: that serializer checks
     `add_quickformresponse` on the target folder, the permission a requester is
@@ -20666,7 +20692,23 @@ def start_quick_form_response(user, publication):
     reviewers all come from the publication, and entitlement is the caller's job to
     check before calling.
     """
+    from core.object_references import ReferenceError_, validate_ids
+
     requester = Actor.objects.filter(user=user, entity__isnull=True).first()
+    subject_question = None
+    if subject_id is not None:
+        probe = QuickFormResponse(
+            quick_form=publication.quick_form, folder=publication.target_folder
+        )
+        subject_question = probe.subject_question()
+        if subject_question is None:
+            raise ReferenceError_("formHasNoSubjectQuestion")
+        validate_ids(
+            subject_question,
+            publication.target_folder,
+            [str(subject_id)],
+            user=user,
+        )
 
     with transaction.atomic():
         if requester is not None and not publication.allow_multiple_drafts:
@@ -20675,15 +20717,15 @@ def start_quick_form_response(user, publication):
             # find no draft and create one each — and `respondents` is an M2M, so no
             # unique constraint can catch it afterwards.
             Actor.objects.select_for_update().filter(pk=requester.pk).first()
-            draft = (
-                QuickFormResponse.objects.filter(
-                    publication=publication,
-                    status=QuickFormResponse.Status.DRAFT,
-                    respondents=requester,
-                )
-                .order_by("-created_at")
-                .first()
+            drafts = QuickFormResponse.objects.filter(
+                publication=publication,
+                status=QuickFormResponse.Status.DRAFT,
+                respondents=requester,
             )
+            if subject_id is not None:
+                # A draft about another vendor is not the one being asked for.
+                drafts = drafts.filter(subject_object_id=subject_id)
+            draft = drafts.order_by("-created_at").first()
             if draft is not None:
                 return draft, True
 
@@ -20702,6 +20744,11 @@ def start_quick_form_response(user, publication):
         reviewers = list(publication.default_reviewers.all())
         if reviewers:
             response.reviewers.set(reviewers)
+        if subject_question is not None:
+            Answer.objects.filter(response=response, question=subject_question).update(
+                value=[str(subject_id)]
+            )
+            response.recompute()
     return response, False
 
 
@@ -21094,6 +21141,12 @@ class QuickFormPublicationViewSet(BaseModelViewSet):
     def _entitled_queryset(self, request):
         return entitled_quick_form_publications(request.user)
 
+    @action(detail=False, url_path="on-accept-targets", name="Apply-on-accept targets")
+    def on_accept_targets(self, request):
+        from core.quick_form_apply import target_choices
+
+        return Response(target_choices())
+
     @action(detail=False, name="Publications the caller may file against")
     def mine(self, request):
         return Response(
@@ -21108,6 +21161,12 @@ class QuickFormPublicationViewSet(BaseModelViewSet):
                         "name": publication.quick_form.name,
                     },
                     "domain": str(publication.target_folder),
+                    # Lets an object page offer "assess" for the publications
+                    # that write to it.
+                    "targets": [
+                        str((entry or {}).get("target") or "")
+                        for entry in publication.on_accept or []
+                    ],
                 }
                 for publication in self._entitled_queryset(request)
             ]
@@ -21128,7 +21187,15 @@ class QuickFormPublicationViewSet(BaseModelViewSet):
         if publication is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        response_object, resumed = start_quick_form_response(request.user, publication)
+        from core.object_references import ReferenceError_
+
+        try:
+            response_object, resumed = start_quick_form_response(
+                request.user, publication, subject_id=request.data.get("subject")
+            )
+        except ReferenceError_ as e:
+            logger.info("Rejected request subject", error=e.detail or e.code)
+            return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
         return Response(
             {
                 "redirect": f"/quick-form-responses/{response_object.id}",
@@ -21154,11 +21221,14 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         # Outcome rows are the queryable projection of `computed_outcome`, which is
         # a JSON blob django-filter cannot reach.
         "outcomes__ref_id",
+        "subject_content_type",
+        "subject_object_id",
     ]
     search_fields = ["name", "description"]
     permission_overrides = {
         "awaiting_conversion": "view_quickformresponse",
         "content": "view_quickformresponse",
+        "accept_preview": "view_quickformresponse",
         "set_status": "view_quickformresponse",
         "start": "change_quickformresponse",
         "status": "view_quickformresponse",
@@ -21582,6 +21652,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             response.observation = observation
 
         resolution = request.data.get("resolution") or ""
+        overrides = request.data.get("overrides") or {}
         if new_status == QuickFormResponse.Status.CLOSED:
             if resolution not in self.REVIEWER_RESOLUTIONS:
                 return Response(
@@ -21591,6 +21662,25 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            if resolution == QuickFormResponse.Resolution.ACCEPTED and overrides:
+                from core.quick_form_apply import plan
+
+                if not isinstance(overrides, dict):
+                    return Response(
+                        {"error": "invalidOverride"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                for item in plan(response, request.user, overrides):
+                    proposal = item["proposal"]
+                    if item["target"] in overrides and not proposal.ok:
+                        return Response(
+                            {
+                                "error": "invalidOverride",
+                                "target": item["target"],
+                                "reason": proposal.reason,
+                            },
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
             response.resolution = resolution
         elif response.resolution:
             # Reopening clears the verdict: the request is live again.
@@ -21646,6 +21736,15 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                 update_fields.append("due_date")
         response.save(update_fields=update_fields)
 
+        on_accept = None
+        if (
+            new_status == QuickFormResponse.Status.CLOSED
+            and response.resolution == QuickFormResponse.Resolution.ACCEPTED
+        ):
+            from core.quick_form_apply import apply_on_accept
+
+            on_accept = apply_on_accept(response, request.user, overrides)
+
         if is_real_submission:
             emit_quick_form_submitted(response)
             transaction.on_commit(
@@ -21662,4 +21761,18 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             transaction.on_commit(
                 lambda pk=response.pk: send_quick_form_reopened_notification(pk)
             )
-        return Response(QuickFormResponseReadSerializer(response).data)
+        data = QuickFormResponseReadSerializer(
+            response, context={"request": request}
+        ).data
+        if on_accept is not None:
+            data = {**data, "on_accept": on_accept}
+        return Response(data)
+
+    @action(detail=True, methods=["get"], url_path="accept-preview")
+    def accept_preview(self, request, pk):
+        """What accepting would write through the publication's targets, for
+        this reviewer: proposed values, or why a target would write nothing."""
+        from core.quick_form_apply import plan, serialize_plan
+
+        response = self.get_object()
+        return Response(serialize_plan(plan(response, request.user)))

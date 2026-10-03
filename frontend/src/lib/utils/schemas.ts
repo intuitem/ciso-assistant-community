@@ -951,7 +951,15 @@ export const EntitiesSchema = z.object({
 	default_penetration: z.number().optional(),
 	default_maturity: z.number().optional(),
 	default_trust: z.number().optional(),
-	filtering_labels: z.array(z.string()).optional()
+	filtering_labels: z.array(z.string()).optional(),
+	tier: z.string().optional().nullable(),
+	tier_note: z.string().optional()
+});
+
+export const tierSchema = z.object({
+	...NameDescriptionMixin,
+	hexcolor: z.string().optional(),
+	is_visible: z.boolean().optional().default(true)
 });
 
 export const EntityAssessmentSchema = z.object({
@@ -1511,7 +1519,8 @@ export const QuickFormPublicationSchema = z.object({
 	default_reviewers: z.array(z.string().optional()).optional(),
 	allow_multiple_drafts: z.boolean().default(false).optional(),
 	icon: z.string().optional(),
-	order: z.number().default(0).optional()
+	order: z.number().default(0).optional(),
+	on_accept: z.array(z.any()).default([]).optional()
 });
 
 export const QuickFormResponseSchema = z.object({
@@ -2214,6 +2223,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
 	'entity-scores': entityScoreSchema,
+	tiers: tierSchema,
 	solutions: solutionSchema,
 	contracts: contractSchema,
 	vulnerabilities: vulnerabilitySchema,

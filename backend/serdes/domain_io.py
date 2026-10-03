@@ -77,7 +77,9 @@ from tprm.models import (
     Entity,
     EntityAssessment,
     Solution,
+    Tier,
 )
+from tprm.tiers import set_entity_tier
 
 from .serializers import ExportSerializer
 from .utils import (
@@ -1046,6 +1048,17 @@ def process_model_relationships(
             # Create with no parent and wire it up in the post-pass
             # resolve_self_referencing_fks once every entity exists.
             _fields["parent_entity"] = None
+            # The tier travels by name. A missing one is not created: a tier
+            # without a rank would break the ordering of the scale.
+            if tier_name := _fields.pop("tier", None):
+                tier = Tier.objects.filter(name=tier_name).first()
+                if tier is None:
+                    logger.warning(
+                        "Entity import: tier not found on this instance",
+                        tier=tier_name,
+                        entity=_fields.get("name"),
+                    )
+                many_to_many_map_ids["tier"] = tier
             many_to_many_map_ids["relationship_ids"] = import_terminologies(
                 _fields.pop("relationship", []),
                 Terminology.FieldPath.ENTITY_RELATIONSHIP,
@@ -1528,6 +1541,8 @@ def set_many_to_many_relations(
         case "entity":
             if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
                 obj.relationship.set(relationship_ids)
+            if tier := many_to_many_map_ids.get("tier"):
+                set_entity_tier(obj, tier)
 
         case "solution":
             if asset_ids := many_to_many_map_ids.get("asset_ids"):

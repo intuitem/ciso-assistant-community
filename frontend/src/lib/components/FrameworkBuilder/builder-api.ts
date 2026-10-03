@@ -27,6 +27,7 @@ export interface DraftJSON {
 		scores_definition: Record<string, unknown> | null;
 		implementation_groups_definition: Record<string, unknown>[] | null;
 		outcomes_definition: Record<string, unknown>[] | null;
+		subject_question_urn?: string | null;
 		field_visibility?: Record<string, string>;
 		urn_namespace?: string;
 		ref_id?: string | null;

@@ -76,6 +76,26 @@
 		helpText={m.moreOnTerminologiesHelpText()}
 		multiple
 	/>
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint={`tiers?selectable=${object.tier?.id ?? object.tier ?? ''}`}
+		field="tier"
+		cacheLock={cacheLocks['tier']}
+		bind:cachedValue={formDataCache['tier']}
+		label={m.tier()}
+		helpText={m.tierHelpText()}
+		nullable
+	/>
+	{#if ($formData.tier ?? null) !== (object.tier?.id ?? object.tier ?? null)}
+		<TextField
+			{form}
+			field="tier_note"
+			label={m.tierNote()}
+			helpText={m.tierNoteHelpText()}
+			cacheLock={cacheLocks['tier_note']}
+			bind:cachedValue={formDataCache['tier_note']}
+		/>
+	{/if}
 {/if}
 <LegalIdentifierField
 	{form}

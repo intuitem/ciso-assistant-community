@@ -1766,6 +1766,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 "progress": evaluation["progress"],
                 "score": evaluation["score"],
                 "computed_outcome": evaluation["computed_outcome"],
+                "computed_values": evaluation["computed_values"],
             }
         )
 

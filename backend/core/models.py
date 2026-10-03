@@ -56,6 +56,11 @@ from library.helpers import (
 )
 
 from core.utils import format_currency as _fmt_currency
+from core.quick_form_scoring import (
+    normalize_form_aggregation,
+    normalize_page_aggregation,
+    score_bounds,
+)
 from global_settings.models import GlobalSettings
 from integrations.sync_mixin import IntegrationSyncableMixin
 
@@ -2308,6 +2313,9 @@ class LibraryUpdater:
                     "title_question_urn": (
                         new_quick_form.get("title_question_urn") or ""
                     ).lower(),
+                    "subject_question_urn": (
+                        new_quick_form.get("subject_question_urn") or ""
+                    ).lower(),
                     "urn_namespace": urn.split(":")[1]
                     if urn.startswith("urn:")
                     else "custom",
@@ -2357,6 +2365,9 @@ class LibraryUpdater:
                         "translations": page.get("translations", {}),
                         "order": order,
                         "visibility_expression": page.get("visibility_expression"),
+                        "aggregation": normalize_page_aggregation(
+                            page.get("aggregation")
+                        ),
                     }
                     page_object, _ = QuickFormPage.objects.update_or_create(
                         quick_form=quick_form,
@@ -4070,6 +4081,16 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
             "every response from the same entry point carries the same name."
         ),
     )
+    subject_question_urn = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name=_("Subject question"),
+        help_text=_(
+            "URN of a single-object reference question naming what each response "
+            "is about, e.g. the vendor being assessed."
+        ),
+    )
     ref_id_prefix = models.CharField(
         max_length=8,
         blank=True,
@@ -4101,19 +4122,13 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def score_bounds(self) -> tuple[int, int]:
-        definition = self.scores_definition or {}
-        min_score = definition.get("min", 0)
-        max_score = definition.get("max", 100)
-        try:
-            min_score, max_score = int(min_score), int(max_score)
-        except TypeError, ValueError:
-            return 0, 100
-        return (min_score, max_score) if min_score < max_score else (0, 100)
+        return score_bounds(self.scores_definition)
 
     @property
     def score_aggregation(self) -> str:
-        aggregation = (self.scores_definition or {}).get("aggregation", "sum")
-        return aggregation if aggregation in ("sum", "mean") else "sum"
+        return normalize_form_aggregation(
+            (self.scores_definition or {}).get("aggregation")
+        )
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.get_name_translated}"
@@ -4136,6 +4151,19 @@ class QuickFormPage(ReferentialObjectMixin, I18nObjectMixin):
         null=True,
         verbose_name=_("Visibility expression"),
         help_text=_("CEL expression; the page is hidden when it evaluates to false"),
+    )
+
+    class Aggregation(models.TextChoices):
+        SUM = "sum", _("Sum")
+        MAX = "max", _("Maximum")
+        MEAN = "mean", _("Mean")
+
+    aggregation = models.CharField(
+        max_length=10,
+        choices=Aggregation.choices,
+        default=Aggregation.SUM,
+        verbose_name=_("Aggregation"),
+        help_text=_("How the page's question scores combine into the page score"),
     )
 
     fields_to_check = ["urn"]
@@ -4207,6 +4235,12 @@ class QuickFormPublication(NameDescriptionMixin, FolderMixin):
         max_length=64, blank=True, default="", verbose_name=_("Icon")
     )
     order = models.IntegerField(default=0, verbose_name=_("Order"))
+    # What an accepted response writes, and where: [{"target": key, "config": {}}],
+    # keys from core.quick_form_targets. On the publication, never on the
+    # library-upserted QuickForm, so an upgrade cannot rewrite it.
+    on_accept = models.JSONField(
+        default=list, blank=True, verbose_name=_("Apply on accept")
+    )
 
     fields_to_check = ["name"]
 
@@ -11235,13 +11269,32 @@ class QuickFormResponse(
     computed_outcome = models.JSONField(
         blank=True, null=True, verbose_name=_("Computed outcome")
     )
+    # Results of the `kind: number` rules, {ref_id: number}. Kept apart from
+    # `computed_outcome`, whose every key reads as a classification that fired.
+    computed_values = models.JSONField(
+        blank=True, null=True, verbose_name=_("Computed values")
+    )
+    # What the response is about, read from the form's subject question. Generic
+    # because entity is the first subject type, not the only one.
+    subject_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Subject type"),
+    )
+    subject_object_id = models.UUIDField(
+        null=True, blank=True, verbose_name=_("Subject")
+    )
+    subject = GenericForeignKey("subject_content_type", "subject_object_id")
     # Denormalized mirror of the fired outcome ref_ids, comma-joined and sorted.
     # `computed_outcome` is a JSON blob: the API cannot filter it and the workflow
     # engine only filters concrete columns, so routing and reporting need this.
     outcome_refs = models.TextField(
         blank=True, default="", verbose_name=_("Outcome refs")
     )
-    score = models.IntegerField(blank=True, null=True, verbose_name=_("Score"))
+    score = models.FloatField(blank=True, null=True, verbose_name=_("Score"))
     started_at = models.DateTimeField(
         blank=True, null=True, verbose_name=_("Started at")
     )
@@ -11299,6 +11352,12 @@ class QuickFormResponse(
     class Meta:
         verbose_name = _("Quick form response")
         verbose_name_plural = _("Quick form responses")
+        indexes = [
+            models.Index(
+                fields=["subject_content_type", "subject_object_id"],
+                name="qf_response_subject_idx",
+            )
+        ]
         permissions = [
             (
                 "approve_quickformresponse",
@@ -11401,6 +11460,93 @@ class QuickFormResponse(
             QuickFormResponse.objects.filter(pk=self.pk).update(name=title[:limit])
             self.name = title[:limit]
 
+    def subject_question(self):
+        """The form's subject question when it is a single-object reference to a
+        referenceable model, else None."""
+        from core.object_references import REFERENCEABLE
+
+        urn = self.quick_form.subject_question_urn
+        if not urn:
+            return None
+        question = Question.objects.filter(
+            page__quick_form_id=self.quick_form_id, urn__iexact=urn
+        ).first()
+        if question is None or question.type != Question.Type.OBJECT_REFERENCE:
+            return None
+        config = question.config if isinstance(question.config, dict) else {}
+        if config.get("multiple") or config.get("model") not in REFERENCEABLE:
+            return None
+        return question
+
+    def subject_summary(self, user=None) -> dict | None:
+        """What the response is about, as {id, model, str}. The label is filled in
+        only for a caller who may view that object, like answer labels."""
+        from core.object_references import REFERENCEABLE
+        from iam.models import RoleAssignment
+
+        if not self.subject_content_type_id or not self.subject_object_id:
+            return None
+        model_class = self.subject_content_type.model_class()
+        label = model_class._meta.label if model_class else ""
+        data = {
+            "id": str(self.subject_object_id),
+            "model": next(
+                (k for k, v in REFERENCEABLE.items() if v["model"] == label), None
+            ),
+            "str": None,
+        }
+        if (
+            model_class
+            and user is not None
+            and user.is_authenticated
+            and RoleAssignment.is_object_readable(
+                user, model_class, self.subject_object_id
+            )
+        ):
+            target = model_class.objects.filter(pk=self.subject_object_id).first()
+            data["str"] = str(target) if target else None
+        return data
+
+    def refresh_subject_from_answers(self) -> None:
+        """Point the response at the object its subject question names.
+
+        Locked once closed: a decided response keeps the subject it was decided
+        about. The id was checked as reachable when the answer was written.
+        """
+        from core.object_references import REFERENCEABLE
+
+        if self.status == self.Status.CLOSED:
+            return
+        question = self.subject_question()
+        if question is None:
+            return
+        value = (
+            Answer.objects.filter(response=self, question=question)
+            .values_list("value", flat=True)
+            .first()
+        )
+        ids = value if isinstance(value, list) else []
+        subject_id = str(ids[0]) if len(ids) == 1 else None
+        content_type = (
+            ContentType.objects.get_for_model(
+                apps.get_model(REFERENCEABLE[question.config["model"]]["model"])
+            )
+            if subject_id
+            else None
+        )
+        current = (
+            self.subject_content_type_id,
+            str(self.subject_object_id) if self.subject_object_id else None,
+        )
+        wanted = (content_type.id if content_type else None, subject_id)
+        if current == wanted:
+            return
+        QuickFormResponse.objects.filter(pk=self.pk).update(
+            subject_content_type=content_type, subject_object_id=subject_id
+        )
+        self.subject_content_type = content_type
+        self.subject_object_id = subject_id
+
     def seed_answers(self) -> None:
         """One empty Answer per question of the form, like audits do at
         creation, so progress counting and the renderer see every question."""
@@ -11474,6 +11620,58 @@ class AnswerAttachment(AbstractBaseModel, FolderMixin):
 
     def __str__(self) -> str:
         return self.filename
+
+
+class QuickFormApplication(AbstractBaseModel, FolderMixin):
+    """One write an accepted response made through an `on_accept` target: what
+    it changed, where, from what to what, and who accepted it."""
+
+    response = models.ForeignKey(
+        "QuickFormResponse",
+        on_delete=models.CASCADE,
+        related_name="applications",
+        verbose_name=_("Quick form response"),
+    )
+    target = models.CharField(max_length=100, verbose_name=_("Target"))
+    subject_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        related_name="+",
+        verbose_name=_("Subject type"),
+    )
+    subject_object_id = models.UUIDField(verbose_name=_("Subject"))
+    subject = GenericForeignKey("subject_content_type", "subject_object_id")
+    previous_value = models.JSONField(
+        null=True, blank=True, verbose_name=_("Previous value")
+    )
+    previous_display = models.CharField(
+        max_length=255, blank=True, default="", verbose_name=_("Previous")
+    )
+    new_value = models.JSONField(null=True, blank=True, verbose_name=_("New value"))
+    new_display = models.CharField(
+        max_length=255, blank=True, default="", verbose_name=_("New")
+    )
+    overridden = models.BooleanField(default=False, verbose_name=_("Overridden"))
+    note = models.TextField(blank=True, default="", verbose_name=_("Note"))
+    applied_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="quick_form_applications",
+        verbose_name=_("Applied by"),
+    )
+
+    class Meta:
+        verbose_name = _("Quick form application")
+        verbose_name_plural = _("Quick form applications")
+        ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        # As visible as the response that made it.
+        if self.response_id:
+            self.folder_id = self.response.folder_id
+        super().save(*args, **kwargs)
 
 
 class QuickFormOutcome(AbstractBaseModel, FolderMixin):

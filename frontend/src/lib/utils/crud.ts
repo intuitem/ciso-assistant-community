@@ -10,6 +10,7 @@ import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svel
 import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
 import TriggerTypesDisplay from '$lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
+import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
 import { listViewFields } from './table';
 import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
@@ -187,6 +188,8 @@ export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 	entities: 'tprm',
 	'entity-assessments': 'tprm',
 	'entity-scores': 'external_ratings',
+	tiers: 'tprm',
+	'entity-tier-changes': 'tprm',
 	representatives: 'tprm',
 	solutions: 'tprm',
 	findings: 'follow_up',
@@ -1631,6 +1634,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{ field: 'entity', urlModel: 'entity-assessments' },
 			{ field: 'entity', urlModel: 'entity-scores' },
+			{
+				field: 'entity',
+				urlModel: 'entity-tier-changes',
+				disableCreate: true,
+				disableDelete: true
+			},
 			{ field: 'entity', urlModel: 'representatives' },
 			{ field: 'provider_entity', urlModel: 'solutions' },
 			{ field: 'provider_entity', urlModel: 'contracts' }
@@ -1644,7 +1653,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'relationship',
 				urlModel: 'terminologies',
 				urlParams: 'field_path=entity.relationship'
-			}
+			},
+			{ field: 'tier', urlModel: 'tiers', urlParams: 'is_visible=true' }
 		],
 		selectFields: [
 			{ field: 'country' },
@@ -1828,6 +1838,37 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'filtering_labels' }
 		]
+	},
+	tiers: {
+		name: 'tier',
+		localName: 'tier',
+		localNamePlural: 'tiers',
+		verboseName: 'Tier',
+		verboseNamePlural: 'Tiers',
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'rank' },
+			{ field: 'hexcolor' },
+			{ field: 'is_visible' },
+			{ field: 'entities_count' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'tier', urlModel: 'entities', disableCreate: true, disableDelete: true }
+		]
+	},
+	'entity-tier-changes': {
+		name: 'entitytierchange',
+		localName: 'entityTierChange',
+		localNamePlural: 'entityTierChanges',
+		verboseName: 'Entity tier change',
+		verboseNamePlural: 'Entity tier changes',
+		foreignKeyFields: [
+			{ field: 'entity', urlModel: 'entities' },
+			{ field: 'tier', urlModel: 'tiers' },
+			{ field: 'previous_tier', urlModel: 'tiers' }
+		],
+		selectFields: [{ field: 'source' }]
 	},
 	'entity-scores': {
 		name: 'entityscore',
@@ -4050,6 +4091,13 @@ const FIELD_COMPONENT_MAP = {
 	},
 	workflows: {
 		trigger_types: TriggerTypesDisplay
+	},
+	entities: {
+		tier: TierBadge
+	},
+	'entity-tier-changes': {
+		tier: TierBadge,
+		previous_tier: TierBadge
 	}
 };
 

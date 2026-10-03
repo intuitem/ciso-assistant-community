@@ -4,6 +4,9 @@ import time
 from .helpers import get_referential_translation
 from typing import List, Union
 
+from core.object_references import subject_question_error
+from core.quick_form_scoring import PAGE_AGGREGATIONS, normalize_page_aggregation
+
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
     Framework,
@@ -469,6 +472,9 @@ class QuickFormPageImporter:
         questions = self.page_data.get("questions")
         if questions is not None and not isinstance(questions, dict):
             return "questions must be an object keyed by URN"
+        aggregation = self.page_data.get("aggregation")
+        if aggregation is not None and aggregation not in PAGE_AGGREGATIONS:
+            return "aggregation must be one of {}".format(", ".join(PAGE_AGGREGATIONS))
         return None
 
     def import_page(self, quick_form: QuickForm):
@@ -486,6 +492,9 @@ class QuickFormPageImporter:
                 provider=quick_form.provider,
                 order=self.index,
                 visibility_expression=self.page_data.get("visibility_expression"),
+                aggregation=normalize_page_aggregation(
+                    self.page_data.get("aggregation")
+                ),
                 locale=quick_form.locale,
                 default_locale=quick_form.default_locale,
                 translations=self.page_data.get("translations", {}),
@@ -526,6 +535,8 @@ class QuickFormImporter:
                 f"{'s' if len(errors) > 1 else ''} detected, page {index + 1} "
                 f"has the following error : {error}"
             )
+        if (error := subject_question_error(self.quick_form_data)) is not None:
+            return f"[QUICK_FORM_ERROR] {error}"
         return None
 
     def import_quick_form(self, library_object: LoadedLibrary):
@@ -553,6 +564,9 @@ class QuickFormImporter:
                 ref_id_prefix=self.quick_form_data.get("ref_id_prefix") or "",
                 title_question_urn=str(
                     self.quick_form_data.get("title_question_urn") or ""
+                ).lower(),
+                subject_question_urn=str(
+                    self.quick_form_data.get("subject_question_urn") or ""
                 ).lower(),
                 outcomes_definition=self.quick_form_data.get("outcomes_definition")
                 or [],

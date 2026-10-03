@@ -8,6 +8,7 @@ import {
 	validateDraft,
 	buildTree,
 	serializeDraft,
+	hydrateDraft,
 	createBuilderState,
 	nodePassesIgFilter,
 	type Framework,
@@ -558,6 +559,36 @@ describe('serializeDraft round-trip', () => {
 		const ids = draft.nodes.map((x) => x.id);
 		expect(new Set(ids).size).toBe(ids.length);
 		expect(ids).toEqual(['n1']);
+	});
+
+	it('keeps a page score aggregation through serialize and hydrate', () => {
+		const fw = makeFramework();
+		const page: RequirementNode = {
+			id: 'p1',
+			urn: 'urn:x:qf_page:form:p1',
+			ref_id: 'p1',
+			name: 'Data access',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: 0,
+			assessable: true,
+			implementation_groups: null,
+			visibility_expression: null,
+			aggregation: 'max',
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: 'fw-1',
+			folder: 'folder-1',
+			threats: [],
+			reference_controls: []
+		};
+		const draft = serializeDraft(fw, buildTree([page], []));
+		expect(draft.nodes[0].aggregation).toBe('max');
+		const { nodes } = hydrateDraft(draft, 'fw-1');
+		expect(nodes[0].aggregation).toBe('max');
 	});
 });
 

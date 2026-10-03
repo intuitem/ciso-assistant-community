@@ -32,6 +32,7 @@
 	import ContractsForm from './ModelForm/ContractForm.svelte';
 	import RepresentativesForm from './ModelForm/RepresentativeForm.svelte';
 	import EntityScoreForm from './ModelForm/EntityScoreForm.svelte';
+	import TierForm from './ModelForm/TierForm.svelte';
 	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
 	import UsersForm from './ModelForm/UserForm.svelte';
 	import TeamForm from './ModelForm/TeamForm.svelte';
@@ -676,6 +677,8 @@
 				{object}
 				{...rest}
 			/>
+		{:else if URLModel === 'tiers'}
+			<TierForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'representatives'}
 			<RepresentativesForm
 				{form}

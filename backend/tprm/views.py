@@ -1,5 +1,6 @@
 import io
 import re
+import uuid
 
 import django_filters as df
 from django.db import transaction
@@ -28,10 +29,22 @@ from core.models import (
     Terminology,
 )
 from core.utils import compute_respondent_progress
-from django.db.models import Case, IntegerField, OuterRef, Q, Subquery, Value, When
+from django.db.models import (
+    Case,
+    Count,
+    IntegerField,
+    OuterRef,
+    Q,
+    Subquery,
+    Value,
+    When,
+)
 from tprm.models import (
     Entity,
     EntityScore,
+    EntityTierChange,
+    Tier,
+    TierSource,
     Representative,
     Solution,
     SolutionSubcontractor,
@@ -123,6 +136,8 @@ ENTITY_FILTERSET_FIELDS = [
     "default_penetration",
     "default_maturity",
     "default_trust",
+    "tier",
+    "tier_source",
 ]
 
 
@@ -209,8 +224,11 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
     filterset_class = EntityFilterSet
     search_fields = ["name", "description", "legal_identifiers_text"]
     # The column shows the status; chronology is what makes it sortable.
-    ordering_remap = {"last_assessment_status": "last_assessment_date"}
-    ordering_nulls_last = ("last_assessment_date",)
+    ordering_remap = {
+        "last_assessment_status": "last_assessment_date",
+        "tier": "tier__rank",
+    }
+    ordering_nulls_last = ("last_assessment_date", "tier__rank")
 
     @action(detail=False, name="Get last assessment status choices")
     def last_assessment_status(self, request):
@@ -272,6 +290,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                 "folder",
                 "folder__parent_folder",
                 "parent_entity",
+                "tier",
             )
         )
 
@@ -1468,6 +1487,134 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             assessments_data.append(entry)
 
         return Response(assessments_data)
+
+
+class TierFedByMixin:
+    @action(detail=False, url_path="fed-by", name="Publications that set tiers")
+    def fed_by(self, request):
+        """Publications the caller can see whose accepted responses set an
+        entity's tier, with their health."""
+        from core.models import QuickFormPublication
+        from core.quick_form_apply import on_accept_health
+        from iam.models import RoleAssignment
+
+        viewable = RoleAssignment.get_viewable_object_ids(
+            request.user, QuickFormPublication
+        )
+        rows = []
+        for publication in (
+            QuickFormPublication.objects.filter(id__in=viewable)
+            .select_related("quick_form", "folder")
+            .order_by("name")
+        ):
+            if not any(
+                (entry or {}).get("target") == "entity.tier"
+                for entry in publication.on_accept or []
+            ):
+                continue
+            health = next(
+                (
+                    h
+                    for h in on_accept_health(publication)
+                    if h["target"] == "entity.tier"
+                ),
+                {"problems": []},
+            )
+            rows.append(
+                {
+                    "id": str(publication.id),
+                    "name": publication.name,
+                    "enabled": publication.enabled,
+                    "quick_form": publication.quick_form.name,
+                    "domain": str(publication.folder),
+                    "problems": health["problems"],
+                }
+            )
+        return Response(rows)
+
+
+class TierViewSet(TierFedByMixin, BaseModelViewSet):
+    """The organisation's vendor tier scale, highest rank first."""
+
+    model = Tier
+    filterset_fields = ["is_visible", "builtin"]
+    search_fields = ["name", "description"]
+    ordering = ["-rank"]
+
+    def get_queryset(self):
+        qs = super().get_queryset().annotate(entities_count=Count("entities"))
+        # `?selectable=<tier id>`: what a picker may offer for an entity whose
+        # current tier is that one — the visible tiers plus the current tier even
+        # when hidden, so opening and saving the entity does not clear it.
+        if (selectable := self.request.query_params.get("selectable")) is not None:
+            try:
+                current = uuid.UUID(selectable) if selectable else None
+            except ValueError:
+                current = None
+            qs = qs.filter(Q(is_visible=True) | Q(id=current))
+        return qs
+
+    @action(detail=False, methods=["post"], name="Reorder tiers")
+    def reorder(self, request):
+        """Takes every tier id, most critical first, and renumbers the ranks in
+        one transaction. Partial lists are refused: a rank left out would
+        collide with the renumbered ones."""
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_tier"),
+            folder=Folder.get_root_folder(),
+        ):
+            raise PermissionDenied()
+        raw_ids = request.data.get("ids")
+        if not isinstance(raw_ids, list):
+            return Response(
+                {"error": "idsMustListEveryTier"}, status=HTTP_400_BAD_REQUEST
+            )
+        ids = [str(i) for i in raw_ids]
+        existing = {str(pk) for pk in Tier.objects.values_list("id", flat=True)}
+        if len(ids) != len(set(ids)) or set(ids) != existing:
+            return Response(
+                {"error": "idsMustListEveryTier"}, status=HTTP_400_BAD_REQUEST
+            )
+        with transaction.atomic():
+            tiers = {str(t.id): t for t in Tier.objects.select_for_update()}
+            # Park every rank above the current maximum first, so no
+            # intermediate state violates the unique constraint (SQLite cannot
+            # defer it).
+            offset = max(t.rank for t in tiers.values()) + len(ids)
+            for position, tier_id in enumerate(ids):
+                Tier.objects.filter(pk=tier_id).update(rank=offset + position + 1)
+            for position, tier_id in enumerate(ids):
+                Tier.objects.filter(pk=tier_id).update(rank=len(ids) - position)
+        from tprm.serializers import TierReadSerializer
+
+        return Response(
+            TierReadSerializer(
+                self.get_queryset().order_by("-rank"),
+                many=True,
+                context=self.get_serializer_context(),
+            ).data
+        )
+
+
+class EntityTierChangeViewSet(BaseModelViewSet):
+    """History of tier changes. Written only by `set_entity_tier`."""
+
+    model = EntityTierChange
+    http_method_names = ["get", "head", "options"]
+    filterset_fields = ["entity", "tier", "source", "changed_by", "folder"]
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("entity", "tier", "previous_tier", "changed_by", "folder")
+        )
+
+    @action(detail=False, name="Get source choices")
+    def source(self, request):
+        return Response(dict(TierSource.choices))
 
 
 class EntityScoreViewSet(BaseModelViewSet):

@@ -34,8 +34,12 @@
 		visiblePages[Math.min(pageIndex, Math.max(0, visiblePages.length - 1))]
 	);
 	const hiddenPages = $derived((view?.pages ?? []).filter((p: any) => p.hidden));
-	const rules = $derived((view?.outcomes_definition ?? []) as any[]);
+	const allRules = $derived((view?.outcomes_definition ?? []) as any[]);
+	// Numeric rules never fire; they are listed with their value instead.
+	const rules = $derived(allRules.filter((r) => r.kind !== 'number'));
+	const valueRules = $derived(allRules.filter((r) => r.kind === 'number'));
 	const fired = $derived((view?.computed_outcome ?? {}) as Record<string, any>);
+	const values = $derived((view?.computed_values ?? {}) as Record<string, number>);
 
 	// Every change is re-evaluated by the same engine the live form uses, so the
 	// preview cannot quietly disagree with what respondents will get.
@@ -65,6 +69,8 @@
 		pageIndex = 0;
 		evaluate();
 	}
+
+	const formatValue = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(2));
 
 	const label = (rule: any) => rule.label ?? rule.annotation ?? rule.ref_id;
 </script>
@@ -213,6 +219,24 @@
 									class="rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset {COLORS[
 										rule.color ?? ''
 									] ?? NEUTRAL}">{label(rule)}</span
+								>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			{#if valueRules.length}
+				<div class="card bg-surface-50-950 shadow-sm p-4" data-testid="computed-values">
+					<h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-surface-500">
+						{m.computedValues()}
+					</h3>
+					<div class="space-y-1 text-sm">
+						{#each valueRules as rule (rule.ref_id)}
+							<div class="flex justify-between gap-2">
+								<span class="text-surface-600-400">{label(rule)}</span>
+								<span class="font-mono"
+									>{rule.ref_id in values ? formatValue(values[rule.ref_id]) : '—'}</span
 								>
 							</div>
 						{/each}

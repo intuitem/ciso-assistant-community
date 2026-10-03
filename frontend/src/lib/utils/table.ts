@@ -1189,6 +1189,29 @@ export const ENTITY_RELATIONSHIP_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const TIER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'tiers',
+		optionsLabelField: 'name',
+		optionsValueField: 'id',
+		label: 'tier',
+		multiple: true
+	}
+};
+
+export const TIER_SOURCE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'entity-tier-changes/source',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'source',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const LAST_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2454,6 +2477,7 @@ export const listViewFields = {
 		head: [
 			'refId',
 			'name',
+			'tier',
 			'description',
 			'domain',
 			'parentEntity',
@@ -2464,6 +2488,7 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'name',
+			'tier',
 			'description',
 			'folder',
 			'parent_entity',
@@ -2472,8 +2497,16 @@ export const listViewFields = {
 			'default_criticality'
 		],
 		optionalFields: {
-			head: ['lastAssessmentDate', 'filteringLabels', 'referenceLink', 'createdAt', 'updatedAt'],
+			head: [
+				'tierSetAt',
+				'lastAssessmentDate',
+				'filteringLabels',
+				'referenceLink',
+				'createdAt',
+				'updatedAt'
+			],
 			body: [
+				'tier_set_at',
 				'last_assessment_date',
 				'filtering_labels',
 				'reference_link',
@@ -2485,6 +2518,7 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER,
+			tier: TIER_FILTER,
 			last_assessment_status: LAST_ASSESSMENT_STATUS_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
@@ -2581,6 +2615,18 @@ export const listViewFields = {
 			solutions: SOLUTION_FILTER,
 			start_date: dateFilter('start_date'),
 			end_date: dateFilter('end_date')
+		}
+	},
+	tiers: {
+		head: ['name', 'rank', 'color', 'isVisible', 'entitiesCount'],
+		body: ['name', 'rank', 'hexcolor', 'is_visible', 'entities_count']
+	},
+	'entity-tier-changes': {
+		head: ['createdAt', 'tier', 'previousTier', 'source', 'changedBy', 'note', 'entity'],
+		body: ['created_at', 'tier', 'previous_tier', 'source', 'changed_by', 'note', 'entity'],
+		filters: {
+			tier: TIER_FILTER,
+			source: TIER_SOURCE_FILTER
 		}
 	},
 	'entity-scores': {
@@ -4450,6 +4496,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	entities: [
+		{
+			type: 'change_field',
+			label: 'changeTier',
+			icon: 'fa-solid fa-layer-group',
+			field: 'tier',
+			optionsEndpoint: 'tiers?is_visible=true'
+		},
 		{
 			type: 'group',
 			label: 'manageLabels',

@@ -24,6 +24,7 @@ Rules:
 
 import copy
 
+from core.quick_form_scoring import PAGE_AGGREGATIONS
 from library.builder import BuilderError, rebase_tree, urn_safe_leaf
 
 # Node keys owned by the editor: everything else on an existing node is
@@ -38,6 +39,7 @@ EDITOR_NODE_KEYS = {
     "assessable",
     "implementation_groups",
     "visibility_expression",
+    "aggregation",
     "typical_evidence",
     "weight",
     "importance",
@@ -131,6 +133,7 @@ def framework_to_editor_doc(framework: dict, *, locale: str = "en") -> dict:
                 "assessable": bool(node.get("assessable")),
                 "implementation_groups": node.get("implementation_groups"),
                 "visibility_expression": node.get("visibility_expression"),
+                "aggregation": node.get("aggregation"),
                 "typical_evidence": node.get("typical_evidence"),
                 "weight": node.get("weight", 1),
                 "importance": node.get("importance"),
@@ -448,10 +451,24 @@ def editor_doc_to_framework_object(
         display_mode = node.get("display_mode")
         if display_mode and display_mode != "default":
             node_dict["display_mode"] = display_mode
+        previous = existing_nodes.get(canonical)
+        # Page score aggregation (quick forms). Absent from the payload means
+        # the editor does not model it: keep what the document had.
+        aggregation = (
+            node.get("aggregation")
+            if "aggregation" in node
+            else (previous or {}).get("aggregation")
+        )
+        if aggregation and aggregation not in PAGE_AGGREGATIONS:
+            raise BuilderError(
+                f"{canonical}: aggregation must be one of "
+                + ", ".join(PAGE_AGGREGATIONS)
+            )
+        if aggregation and aggregation != "sum":
+            node_dict["aggregation"] = aggregation
         node_questions = questions_by_node.get(canonical)
         if node_questions:
             node_dict["questions"] = node_questions
-        previous = existing_nodes.get(canonical)
         # Threat / reference-control links: lists of full URNs, as in the
         # library YAML. Key absent (or null) → the payload does not model
         # links, keep the existing ones; empty list → deliberate detach-all.

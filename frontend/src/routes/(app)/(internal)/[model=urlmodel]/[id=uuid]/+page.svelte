@@ -2,6 +2,7 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import EntityTierCard from '$lib/components/DetailView/EntityTierCard.svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -105,7 +106,11 @@
 	</div>
 {/if}
 
-<DetailView {data} />
+{#snippet entityWidgets()}
+	<EntityTierCard entity={data.data} />
+{/snippet}
+
+<DetailView {data} widgets={data.model.name === 'entity' ? entityWidgets : undefined} />
 
 {#if data.model.name === 'finding' && page.data?.featureflags?.comments}
 	<div class="mt-4">

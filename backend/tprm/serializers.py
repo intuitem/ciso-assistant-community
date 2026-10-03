@@ -25,10 +25,13 @@ from tprm.models import (
     Entity,
     EntityAssessment,
     EntityScore,
+    EntityTierChange,
     Representative,
     Solution,
     SolutionSubcontractor,
+    Tier,
 )
+from tprm.tiers import set_entity_tier
 
 logger = structlog.get_logger(__name__)
 
@@ -55,6 +58,8 @@ class EntityReadSerializer(BaseModelSerializer):
     filtering_labels = FieldsRelatedField(many=True)
     subcontracts_count = serializers.SerializerMethodField()
     subcontracts_usage = serializers.SerializerMethodField()
+    tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
+    tier_response = FieldsRelatedField(["id", "ref_id"])
 
     def get_legal_identifiers(self, obj):
         """Format legal identifiers as a readable string for display"""
@@ -106,9 +111,49 @@ class EntityWriteSerializer(BaseModelSerializer):
     # is user-owned and fully editable — e.g. renamed to the org's name.
     BUILTIN_EDITABLE_FIELDS = "__all__"
 
+    # Not a model field: the reason given for a tier change, kept on its
+    # history row.
+    tier_note = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, default=""
+    )
+
     class Meta:
         model = Entity
         exclude = ["owned_folders"]
+        read_only_fields = [
+            "tier_source",
+            "tier_set_at",
+            "tier_value",
+            "tier_response",
+        ]
+
+    def validate_tier(self, value):
+        if value is not None and not value.is_visible:
+            current = self.instance.tier_id if self.instance else None
+            if value.id != current:
+                raise serializers.ValidationError(_("This tier is hidden"))
+        return value
+
+    def create(self, validated_data):
+        tier = validated_data.pop("tier", None)
+        note = validated_data.pop("tier_note", "")
+        instance = super().create(validated_data)
+        if tier is not None:
+            set_entity_tier(instance, tier, user=self._user(), note=note)
+        return instance
+
+    def update(self, instance, validated_data):
+        note = validated_data.pop("tier_note", "")
+        has_tier = "tier" in validated_data
+        tier = validated_data.pop("tier", None)
+        instance = super().update(instance, validated_data)
+        if has_tier:
+            set_entity_tier(instance, tier, user=self._user(), note=note)
+        return instance
+
+    def _user(self):
+        request = self.context.get("request")
+        return getattr(request, "user", None)
 
     def to_internal_value(self, data):
         """Convert None to empty string for CharField DORA fields before validation"""
@@ -155,6 +200,7 @@ class EntityImportExportSerializer(BaseModelSerializer):
     relationship = serializers.SlugRelatedField(
         slug_field="name", read_only=True, many=True
     )
+    tier = serializers.SlugRelatedField(slug_field="name", read_only=True)
 
     class Meta:
         model = Entity
@@ -184,6 +230,7 @@ class EntityImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
             "relationship",
+            "tier",
         ]
 
 
@@ -690,6 +737,56 @@ class EntityScoreWriteSerializer(BaseModelSerializer):
             if existing is None:
                 raise
             return self.update(existing, validated_data)
+
+
+class TierReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    entities_count = serializers.SerializerMethodField()
+
+    def get_entities_count(self, obj):
+        annotated = getattr(obj, "entities_count", None)
+        return annotated if annotated is not None else obj.entities.count()
+
+    class Meta:
+        model = Tier
+        exclude = []
+
+
+class TierWriteSerializer(BaseModelSerializer):
+    # The default scale is seeded as built-in so it cannot be deleted, but it is
+    # the organisation's own: rename, recolour, reorder and hide all apply.
+    BUILTIN_EDITABLE_FIELDS = "__all__"
+
+    rank = serializers.IntegerField(min_value=1, required=False)
+
+    class Meta:
+        model = Tier
+        exclude = ["folder", "builtin"]
+
+    def validate_rank(self, value):
+        clash = Tier.objects.filter(rank=value)
+        if self.instance:
+            clash = clash.exclude(pk=self.instance.pk)
+        if clash.exists():
+            raise serializers.ValidationError(_("Another tier already has this rank"))
+        return value
+
+    def create(self, validated_data):
+        # New tiers go to the top; the tiers page reorders them.
+        validated_data.setdefault("rank", Tier.next_rank())
+        return super().create(validated_data)
+
+
+class EntityTierChangeReadSerializer(BaseModelSerializer):
+    entity = FieldsRelatedField()
+    tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
+    previous_tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
+    changed_by = FieldsRelatedField(["id", "email"])
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = EntityTierChange
+        exclude = []
 
 
 class RepresentativeReadSerializer(BaseModelSerializer):

@@ -1545,6 +1545,7 @@ READABLE_MODELS: dict[str, ReadEntry] = {
         ],
         computed={
             "computed_outcome": lambda r: r.computed_outcome,
+            "computed_values": lambda r: r.computed_values,
             "score": lambda r: r.score,
             "answers": _quick_form_answers,
         },

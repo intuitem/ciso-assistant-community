@@ -1,5 +1,6 @@
 <script lang="ts">
 	import FlippableCard from './FlippableCard.svelte';
+	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
 
@@ -36,7 +37,42 @@
 	};
 
 	const groupedData = $derived(groupByFolder(data.data));
+
+	const tiers = $derived((data.tiers ?? []) as any[]);
+	const untiered = $derived(
+		Math.max(
+			0,
+			(data.entitiesCount ?? 0) -
+				tiers.reduce((sum: number, t: any) => sum + (t.entities_count ?? 0), 0)
+		)
+	);
 </script>
+
+{#if tiers.length}
+	<div class="px-6 pt-6" data-testid="entities-by-tier">
+		<h2 class="text-sm font-semibold uppercase tracking-wider text-surface-500 mb-2">
+			{m.entitiesByTier()}
+		</h2>
+		<div class="flex flex-wrap gap-3">
+			{#each tiers as tier (tier.id)}
+				<a
+					href={`/entities?tier=${tier.id}`}
+					class="card flex items-center gap-2 px-3 py-2 bg-surface-50-950 border border-surface-200-800 hover:border-primary-400"
+				>
+					<TierBadge cell={tier} />
+					<span class="font-mono font-semibold">{tier.entities_count}</span>
+				</a>
+			{/each}
+			<a
+				href="/entities"
+				class="card flex items-center gap-2 px-3 py-2 bg-surface-50-950 border border-surface-200-800"
+			>
+				<span class="text-sm text-surface-500">{m.untiered()}</span>
+				<span class="font-mono font-semibold">{untiered}</span>
+			</a>
+		</div>
+	</div>
+{/if}
 
 {#if groupedData && groupedData.length > 0}
 	<div class="p-6 bg-surface-50-950 bg-opacity-95 space-y-8">

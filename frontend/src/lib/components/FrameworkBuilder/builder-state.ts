@@ -83,6 +83,8 @@ export interface RequirementNode {
 	assessable: boolean;
 	implementation_groups: string[] | null;
 	visibility_expression: string | null;
+	/** Quick-form pages only: how question scores combine into the page score. */
+	aggregation?: 'sum' | 'max' | 'mean' | null;
 	typical_evidence: string | null;
 	weight: number;
 	importance: string;
@@ -100,6 +102,8 @@ export interface OutcomeRule {
 	annotation: string;
 	color: string | null;
 	expression: string;
+	/** Quick forms: 'number' rules compute a value instead of firing. */
+	kind?: 'number';
 	translations?: Translations | null;
 }
 
@@ -123,6 +127,8 @@ export interface Framework {
 	scores_definition: Record<string, unknown> | null;
 	implementation_groups_definition: Record<string, unknown>[] | null;
 	outcomes_definition: OutcomeRule[] | null;
+	/** Quick forms: the object-reference question naming what a response is about. */
+	subject_question_urn?: string | null;
 	field_visibility: Record<string, string>;
 	locale?: string;
 	translations?: Translations | null;
@@ -575,6 +581,7 @@ export function serializeNode(n: RequirementNode): Record<string, unknown> {
 		assessable: n.assessable,
 		implementation_groups: n.implementation_groups,
 		visibility_expression: n.visibility_expression,
+		aggregation: n.aggregation ?? null,
 		typical_evidence: n.typical_evidence,
 		weight: n.weight,
 		importance: n.importance,
@@ -663,6 +670,7 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 			scores_definition: fw.scores_definition,
 			implementation_groups_definition: fw.implementation_groups_definition,
 			outcomes_definition: fw.outcomes_definition as Record<string, unknown>[] | null,
+			subject_question_urn: fw.subject_question_urn ?? null,
 			field_visibility: fw.field_visibility,
 			urn_namespace: fw.urn_namespace,
 			ref_id: fw.ref_id
@@ -698,6 +706,7 @@ export function hydrateDraft(
 		scores_definition: meta.scores_definition,
 		implementation_groups_definition: meta.implementation_groups_definition,
 		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null,
+		subject_question_urn: (meta.subject_question_urn ?? null) as string | null,
 		field_visibility: meta.field_visibility ?? {},
 		urn_namespace: meta.urn_namespace ?? 'custom',
 		ref_id: meta.ref_id ?? null
@@ -760,6 +769,7 @@ export function hydrateDraft(
 		assessable: (n.assessable ?? false) as boolean,
 		implementation_groups: (n.implementation_groups ?? null) as string[] | null,
 		visibility_expression: (n.visibility_expression ?? null) as string | null,
+		aggregation: (n.aggregation ?? null) as RequirementNode['aggregation'],
 		typical_evidence: (n.typical_evidence ?? null) as string | null,
 		weight: (n.weight ?? 1) as number,
 		importance: (n.importance ?? '') as string,

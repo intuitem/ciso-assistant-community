@@ -18,6 +18,8 @@ READER_PERMISSIONS_LIST = [
     "view_complianceassessment",
     "view_entityscore",
     "view_entity",
+    "view_tier",
+    "view_entitytierchange",
     "view_entityassessment",
     "view_evidence",
     "view_evidencerevision",
@@ -218,6 +220,8 @@ BASELINE_READER_PERMISSIONS_LIST = [
     "view_assetcapability",
     "view_objectclassification",
     "view_entity",
+    "view_tier",
+    "view_entitytierchange",
     "view_documenttemplate",
     "view_customfielddefinition",
     "view_requirementmapping",
@@ -461,6 +465,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_entityscore",
     "delete_entityscore",
     "view_entity",
+    "view_tier",
+    "view_entitytierchange",
     "view_entityassessment",
     "view_evidence",
     "view_folder",
@@ -927,6 +933,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_entityscore",
     "delete_entityscore",
     "view_entity",
+    "view_tier",
+    "view_entitytierchange",
     "view_entityassessment",
     "view_evidence",
     "view_folder",
@@ -1609,6 +1617,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_entityscore",
     "delete_entityscore",
     "view_entity",
+    "view_tier",
+    "view_entitytierchange",
+    "add_tier",
+    "change_tier",
+    "delete_tier",
     "delete_entity",
     "add_representative",
     "change_representative",
@@ -2424,6 +2437,13 @@ def startup(sender=None, **kwargs):
         Terminology.create_default_entity_score_providers()
     except Exception as e:
         logger.error("Error creating default Entity Score Providers", exc_info=True)
+
+    try:
+        from tprm.models import Tier
+
+        Tier.create_default_tiers()
+    except Exception as e:
+        logger.error("Error creating default Tiers", exc_info=True)
 
     try:
         Terminology.create_default_metric_units()

@@ -54,6 +54,7 @@
 					{
 						title: m.builderCelGroupResponse(),
 						rows: [
+							['response.score', m.builderCelResponseScore()],
 							['response.score_sum', m.builderCelScoreSum()],
 							['response.score_max', m.builderCelScoreMax()],
 							['response.answered_count', m.builderCelAnsweredQuestions()],
@@ -65,6 +66,8 @@
 						title: m.builderCelGroupPages(),
 						rows: [
 							['pages["PAGE_ID"].visible', m.builderCelPageVisible()],
+							['pages["PAGE_ID"].score', m.builderCelPageScore()],
+							['pages["PAGE_ID"].score_max', m.builderCelPageScoreMax()],
 							['pages["PAGE_ID"].answered_count', m.builderCelAnsweredQuestions()],
 							['pages["PAGE_ID"].total_count', m.builderCelTotalQuestions()]
 						],
@@ -84,6 +87,7 @@
 					{
 						title: m.builderCelGroupOther(),
 						rows: [
+							['values.REF_ID', m.builderCelValues()],
 							['computed_outcomes', m.builderCelComputedOutcomes()],
 							['hidden_pages', m.builderCelHiddenPages()]
 						]
@@ -168,7 +172,12 @@
 					<i class="fa-solid fa-grip-vertical text-xs"></i>
 				</span>
 
-				{#if rule.color}
+				{#if rule.kind === 'number'}
+					<span
+						class="text-[10px] font-mono font-semibold px-1 rounded bg-surface-200-800 text-surface-600-400"
+						title={m.builderRuleKindNumber()}>#</span
+					>
+				{:else if rule.color}
 					<span
 						class="w-3 h-3 rounded-full shrink-0 border border-surface-200-800"
 						style="background-color: {rule.color}"
@@ -229,6 +238,30 @@
 						</label>
 					</div>
 
+					{#if mode === 'quick_form'}
+						<label class="block">
+							<span class="text-xs text-surface-600-400">{m.builderRuleKind()}</span>
+							<select
+								class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
+								value={rule.kind === 'number' ? 'number' : 'boolean'}
+								onchange={(e) => {
+									if (e.currentTarget.value === 'number') {
+										rules[index].kind = 'number';
+										rules[index].color = null;
+									} else {
+										delete rules[index].kind;
+									}
+									persist();
+								}}
+								data-testid="outcome-rule-kind"
+							>
+								<option value="boolean">{m.builderRuleKindBoolean()}</option>
+								<option value="number">{m.builderRuleKindNumber()}</option>
+							</select>
+							<span class="text-xs text-surface-500">{m.builderRuleKindHint()}</span>
+						</label>
+					{/if}
+
 					<label class="block">
 						<span class="text-xs text-surface-600-400">{m.builderCelExpression()}</span>
 						<textarea
@@ -245,32 +278,34 @@
 						></textarea>
 					</label>
 
-					<label class="block">
-						<span class="text-xs text-surface-600-400">{m.builderColor()}</span>
-						<div class="flex items-center gap-2">
-							<input
-								type="color"
-								value={rule.color ?? '#6b7280'}
-								class="w-8 h-8 rounded border border-surface-200-800 cursor-pointer"
-								onchange={(e) => {
-									rules[index].color = e.currentTarget.value;
-									persist();
-								}}
-							/>
-							{#if rule.color}
-								<button
-									type="button"
-									class="text-xs text-surface-500 hover:text-surface-600-400"
-									onclick={() => {
-										rules[index].color = null;
+					{#if rule.kind !== 'number'}
+						<label class="block">
+							<span class="text-xs text-surface-600-400">{m.builderColor()}</span>
+							<div class="flex items-center gap-2">
+								<input
+									type="color"
+									value={rule.color ?? '#6b7280'}
+									class="w-8 h-8 rounded border border-surface-200-800 cursor-pointer"
+									onchange={(e) => {
+										rules[index].color = e.currentTarget.value;
 										persist();
 									}}
-								>
-									{m.builderClearAction()}
-								</button>
-							{/if}
-						</div>
-					</label>
+								/>
+								{#if rule.color}
+									<button
+										type="button"
+										class="text-xs text-surface-500 hover:text-surface-600-400"
+										onclick={() => {
+											rules[index].color = null;
+											persist();
+										}}
+									>
+										{m.builderClearAction()}
+									</button>
+								{/if}
+							</div>
+						</label>
+					{/if}
 
 					{#if activeLanguage}
 						{@const lang = activeLanguage}

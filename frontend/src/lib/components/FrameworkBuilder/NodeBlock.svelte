@@ -901,6 +901,35 @@
 			</div>
 		{/if}
 
+		{#if isQuickForm}
+			<div class="px-4 py-2 flex items-center gap-2">
+				<label
+					class="text-[10px] font-semibold uppercase tracking-wider text-surface-500"
+					for="page-aggregation-{node.node.id}"
+				>
+					{m.builderPageScore()}
+					<span class="text-surface-500 ml-1 normal-case" title={m.builderPageScoreTooltip()}
+						>&#9432;</span
+					>
+				</label>
+				<select
+					id="page-aggregation-{node.node.id}"
+					class="text-xs border border-surface-200-800 rounded px-2 py-0.5 bg-surface-50-950"
+					value={node.node.aggregation ?? 'sum'}
+					onchange={(e) =>
+						saveField(
+							'aggregation',
+							e.currentTarget.value === 'sum' ? null : e.currentTarget.value
+						)}
+					data-testid="page-aggregation"
+				>
+					<option value="sum">{m.sum()}</option>
+					<option value="max">{m.maximum()}</option>
+					<option value="mean">{m.average()}</option>
+				</select>
+			</div>
+		{/if}
+
 		<!-- Questions (only for assessable non-splash nodes) -->
 		{#if node.node.assessable && !isSplash}
 			<div class="px-4 py-3 space-y-1">
