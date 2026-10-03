@@ -76,7 +76,7 @@ def validate_graph(version):
             # where a seed would pass.
             try:
                 coerce_variable_value(variable.default_value, variable.type)
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 errors.append(
                     _error(
                         "variable_default_invalid",

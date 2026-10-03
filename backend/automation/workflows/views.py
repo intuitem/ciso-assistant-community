@@ -67,6 +67,7 @@ LONG_CACHE_TTL = 60
 
 logger = structlog.get_logger(__name__)
 
+
 class _NoAliasSafeLoader(yaml.SafeLoader):
     """SafeLoader that rejects aliases. Alias expansion happens AFTER
     parsing, so the upload size cap alone doesn't stop a billion-laughs
