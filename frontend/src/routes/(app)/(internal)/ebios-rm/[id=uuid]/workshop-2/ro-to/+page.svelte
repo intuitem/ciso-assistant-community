@@ -115,11 +115,11 @@
 						<div class="space-y-2 p-2">
 							<div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-surface-600-400">
 								<span class="flex items-center gap-1"
-									><span class="inline-block size-3 rounded-full" style="background:#e53935"
+									><span class="inline-block size-3 rounded-full bg-indigo-500"
 									></span>{m.selected()}</span
 								>
 								<span class="flex items-center gap-1"
-									><span class="inline-block size-3 rounded-full" style="background:#43a047"
+									><span class="inline-block size-3 rounded-full border-2 border-indigo-500"
 									></span>{m.notSelected()}</span
 								>
 								<span>{m.roToRadarHelp()}</span>

@@ -26,9 +26,7 @@
 
 	let { couples, pertinenceLabels, groupBy, title, name, height = 'h-[560px]' }: Props = $props();
 
-	// Fiche méthode 4 colour code
-	const RETAINED = '#e53935';
-	const NOT_RETAINED = '#43a047';
+	const MARK = '#6366f1';
 
 	const chartId = `${name}_radar_div`;
 
@@ -61,7 +59,9 @@
 						index * span + (span * (rank + 1)) / (inSector.length + 1)
 					],
 					couple,
-					itemStyle: { color: couple.is_selected ? RETAINED : NOT_RETAINED }
+					itemStyle: couple.is_selected
+						? { color: MARK }
+						: { color: 'transparent', borderColor: MARK, borderWidth: 2 }
 				}));
 			});
 
