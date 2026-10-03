@@ -32,6 +32,7 @@
 	import TriggersPanel from './TriggersPanel.svelte';
 	import VersionsPanel from './VersionsPanel.svelte';
 	import WorkflowDataPanel from './WorkflowDataPanel.svelte';
+	import { parseVariableValue } from './variable-values';
 	import StepNode from './nodes/StepNode.svelte';
 	import ConditionNode from './nodes/ConditionNode.svelte';
 	import TerminalNode from './nodes/TerminalNode.svelte';
@@ -505,6 +506,15 @@
 	let saveTimer: ReturnType<typeof setTimeout> | null = null;
 	let validationErrors = $state<any[]>([]);
 	let publishing = $state(false);
+	// A default the author is still typing and that does not parse is not in
+	// `variables` yet: publishing would validate the previous value instead.
+	let variableDefaultDrafts = $state<Record<string, string>>({});
+	const invalidDefaultKey = $derived(
+		variables.find((v) => {
+			const draft = variableDefaultDrafts[v.id];
+			return draft !== undefined && !parseVariableValue(v.type, draft).ok;
+		})?.key
+	);
 
 	function markDirty() {
 		if (readonly) return;
@@ -1618,6 +1628,13 @@
 		return id;
 	}
 
+	// The value every run starts with; null clears it. Validated by type in
+	// the panel before it gets here, and again at publish.
+	function updateVariableDefault(id: string, value: unknown) {
+		variables = variables.map((v) => (v.id === id ? { ...v, default_value: value } : v));
+		markDirty();
+	}
+
 	function removeVariable(id: string) {
 		variables = variables.filter((v) => v.id !== id);
 		// Strip branch conditions that referenced it so the save doesn't 400.
@@ -1951,8 +1968,11 @@
 				<button
 					type="button"
 					class="btn preset-filled-primary-500 text-sm"
-					disabled={publishing || saveState === 'saving'}
+					disabled={publishing || saveState === 'saving' || invalidDefaultKey !== undefined}
 					onclick={publish}
+					title={invalidDefaultKey !== undefined
+						? m.variableValueInvalid({ key: invalidDefaultKey })
+						: undefined}
 					data-testid="publish-workflow"
 				>
 					{#if publishing}
@@ -2361,6 +2381,8 @@
 							columns
 							onAddVariable={addVariable}
 							onRemoveVariable={removeVariable}
+							onUpdateVariableDefault={updateVariableDefault}
+							bind:defaultDrafts={variableDefaultDrafts}
 							onAddSecret={addSecret}
 							onRemoveSecret={removeSecret}
 						/>
@@ -2405,6 +2427,7 @@
 				{readableModels}
 				{fkOptions}
 				{workflowId}
+				versionId={activeVersionId}
 				{registrationsByRef}
 				onRegistrationsChanged={refreshRegistrations}
 				referenceRunId={referenceRun?.id ?? null}
