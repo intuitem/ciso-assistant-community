@@ -625,9 +625,7 @@ def build_sync_preview(ebios_rm_study, sources):
         source_data.append(_entry(ap.id, str(ap), "attack_path", ap.gravity))
 
     for ss in sources.get("strategic_scenarios", []):
-        source_data.append(
-            _entry(ss.id, ss.name, "strategic_scenario", ss.ro_to_couple.get_gravity())
-        )
+        source_data.append(_entry(ss.id, ss.name, "strategic_scenario", ss.gravity))
 
     for fe in sources.get("feared_events", []):
         source_data.append(_entry(fe.id, fe.name, "feared_event", fe.gravity))
@@ -945,7 +943,7 @@ def _sync_strategic_scenarios(risk_assessment, selected):
             name=ss.name,
             ref_id=ss.ref_id,
             description=description,
-            impact=ro_to.get_gravity(),
+            impact=ss.gravity,
             likelihood=-1,
             assets=_get_assets_with_descendants(
                 Asset.objects.filter(feared_events__in=feared_events)

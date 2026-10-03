@@ -131,6 +131,16 @@
 			bind:cachedValue={formDataCache['likelihood']}
 			helpText={m.likelihoodHelpText()}
 		/>
+	{:else if object.quotation_method}
+		<Select
+			{form}
+			options={(model.selectOptions?.['likelihood'] ?? []).filter((o) => o.value !== -1)}
+			field="likelihood_forced"
+			label={m.forcedLikelihood()}
+			helpText={m.forcedLikelihoodHelpText()}
+			cacheLock={cacheLocks['likelihood_forced']}
+			bind:cachedValue={formDataCache['likelihood_forced']}
+		/>
 	{/if}
 	<MarkdownField
 		{form}
