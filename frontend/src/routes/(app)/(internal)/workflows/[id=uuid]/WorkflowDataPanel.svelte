@@ -25,6 +25,9 @@
 		onUpdateVariableDefault?: (id: string, value: unknown) => void;
 		onAddSecret?: (name: string, value: string) => void;
 		onRemoveSecret?: (id: string) => void;
+		// Typed default text not yet written through, by variable id. Bound so
+		// the canvas can hold Publish while one is invalid.
+		defaultDrafts?: Record<string, string>;
 	}
 
 	let {
@@ -37,7 +40,8 @@
 		onRemoveVariable,
 		onUpdateVariableDefault,
 		onAddSecret,
-		onRemoveSecret
+		onRemoveSecret,
+		defaultDrafts = $bindable({})
 	}: Props = $props();
 
 	let newVariableKey = $state('');
@@ -55,10 +59,8 @@
 	// the canonical text of a valid value (half-typed JSON, "1." in a number),
 	// and writes the parsed value through as soon as it is valid. Template
 	// reads stay pure; drafts change only in handlers and the effect below.
-	let defaultDrafts = $state<Record<string, string>>({});
-
-	function defaultText(variable: { id: string; default_value?: unknown }): string {
-		return defaultDrafts[variable.id] ?? formatVariableValue(variable.default_value);
+	function defaultText(variable: { id: string; type: string; default_value?: unknown }): string {
+		return defaultDrafts[variable.id] ?? formatVariableValue(variable.default_value, variable.type);
 	}
 
 	function defaultInvalid(variable: { id: string; type: string }) {
@@ -68,7 +70,7 @@
 
 	function editDefault(variable: { id: string; type: string }, raw: string) {
 		const parsed = parseVariableValue(variable.type, raw);
-		if (parsed.ok && formatVariableValue(parsed.value) === raw) {
+		if (parsed.ok && formatVariableValue(parsed.value, variable.type) === raw) {
 			delete defaultDrafts[variable.id];
 		} else {
 			defaultDrafts[variable.id] = raw;
@@ -86,7 +88,8 @@
 			const parsed = parseVariableValue(variable.type, draft);
 			if (
 				parsed.ok &&
-				formatVariableValue(parsed.value) !== formatVariableValue(variable.default_value)
+				formatVariableValue(parsed.value, variable.type) !==
+					formatVariableValue(variable.default_value, variable.type)
 			) {
 				delete defaultDrafts[variable.id];
 			}
@@ -121,7 +124,7 @@
 									class="font-mono text-[9px] text-surface-500 truncate"
 									title={m.variableLastRunValue()}
 								>
-									{formatVariableValue(referenceVariables[variable.key])}
+									{formatVariableValue(referenceVariables[variable.key], variable.type)}
 								</span>
 							{/if}
 							{#if !readonly}
@@ -144,7 +147,7 @@
 						>
 						{#if readonly}
 							<span class="font-mono text-[10px] text-surface-700-300 truncate">
-								{formatVariableValue(variable.default_value) || '—'}
+								{formatVariableValue(variable.default_value, variable.type) || '—'}
 							</span>
 						{:else if variable.type === 'boolean'}
 							<select

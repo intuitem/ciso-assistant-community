@@ -189,7 +189,7 @@ OPERATORS = {
     "_-_": _promoting(operator.sub),
     "_*_": _promoting(operator.mul),
     "_/_": _promoting(operator.truediv),
-    "_%_": lambda left, right: _int_only_mod(left, right),
+    "_%_": _int_only_mod,
     # Comparisons wrap celpy's own, which return BoolType and keep CEL's
     # equality semantics for everything that is not a promoted number pair.
     "_<_": _promoting(bool_lt),
@@ -395,14 +395,39 @@ def _describe(error):
     return message.strip()
 
 
+# A macro nested in another's body multiplies iterations: three levels over
+# 500-item lists is 125M evaluations, from a 2000-character expression.
+MACROS = {"map", "filter", "all", "exists", "exists_one"}
+MAX_MACRO_DEPTH = 2
+
+
 def compile_expression(expression):
     """Parse only; raises ExpressionError with celpy's caret diagram."""
     if not isinstance(expression, str) or not expression.strip():
         raise ExpressionError("the expression is empty")
     try:
-        return _environment().compile(expression)
+        ast = _environment().compile(expression)
     except celpy.CELParseError as e:
         raise ExpressionError(f"syntax error: {_describe(e)}")
+    if _macro_depth(ast) > MAX_MACRO_DEPTH:
+        raise ExpressionError(
+            f"map/filter/all/exists can be nested at most {MAX_MACRO_DEPTH} deep"
+        )
+    return ast
+
+
+def _macro_depth(tree):
+    if not isinstance(tree, Tree):
+        return 0
+    if (
+        tree.data == "member_dot_arg"
+        and len(tree.children) >= 2
+        and str(tree.children[1]) in MACROS
+    ):
+        # A chained receiver (`a.map(...).filter(...)`) runs before, not inside.
+        body = max((_macro_depth(c) for c in tree.children[2:]), default=0)
+        return max(_macro_depth(tree.children[0]), 1 + body)
+    return max((_macro_depth(c) for c in tree.children), default=0)
 
 
 def evaluate(expression, context):
@@ -461,7 +486,10 @@ def referenced_paths(expression):
 
 
 def _string_literal(tree):
-    """The text of a string literal expression, or None for anything else."""
+    """The text of a plain quoted string literal, or None for anything else.
+    Escapes, raw/bytes prefixes and triple quotes are decoded by CEL at
+    evaluation time, so their raw text is not the key: None makes the caller
+    treat the index as computed."""
     node = tree
     while isinstance(node, Tree) and node.data != "literal":
         if len(node.children) != 1:
@@ -470,7 +498,13 @@ def _string_literal(tree):
     if not isinstance(node, Tree) or not node.children:
         return None
     token = str(node.children[0])
-    if len(token) >= 2 and token[0] == token[-1] and token[0] in "'\"":
+    if (
+        len(token) >= 2
+        and token[0] == token[-1]
+        and token[0] in "'\""
+        and "\\" not in token
+        and not token.startswith(token[0] * 3)
+    ):
         return token[1:-1]
     return None
 

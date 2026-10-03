@@ -70,7 +70,8 @@ def validate_graph(version):
                     "rename this variable",
                 )
             )
-        if variable.default_value is not None:
+        # "" is how YAML and older graphs spell "no default".
+        if variable.default_value not in (None, ""):
             # The editor writes typed defaults; YAML and older graphs may not.
             # Same rule as the run dialog's seeds, so a default never fails
             # where a seed would pass.
@@ -552,10 +553,13 @@ def _ai_sources(nodes):
             if not tainted:
                 continue
             # The step's own output carries the answer under those keys, so
-            # {{nodes.<ref>.<key>}} downstream is a source too.
-            if node.ref and node.ref not in refs:
-                refs.add(node.ref)
-                changed = True
+            # {{nodes.<ref>.<key>}} downstream is a source too. Only those
+            # keys: a clean sibling row stays writable to a fenced field.
+            for key in tainted:
+                output = f"{node.ref}.{key}"
+                if node.ref and output not in refs:
+                    refs.add(output)
+                    changed = True
             for key in tainted - variables:
                 variables.add(key)
                 changed = True
@@ -589,6 +593,8 @@ def _ai_sources_in(value, ai_refs, ai_variables):
 
 
 def _ai_sources_among(paths, ai_refs, ai_variables):
+    """`ai_refs` holds whole AI node refs (`classify`) and the tainted outputs
+    of setter steps (`score_step.score`)."""
     found = set()
     for path in paths:
         segments = path.split(".")
@@ -597,7 +603,15 @@ def _ai_sources_among(paths, ai_refs, ai_variables):
             # step: read as every AI output rather than none.
             if ai_refs and (len(segments) == 1 or segments[1] == "*"):
                 found.add(path)
-            elif len(segments) > 1 and segments[1] in ai_refs:
+            elif len(segments) == 1:
+                continue
+            elif segments[1] in ai_refs:
+                found.add(path)
+            elif len(segments) == 2 or segments[2] == "*":
+                # The whole output, or any key of it.
+                if any(ref.startswith(segments[1] + ".") for ref in ai_refs):
+                    found.add(path)
+            elif f"{segments[1]}.{segments[2]}" in ai_refs:
                 found.add(path)
         elif segments[0] in ai_variables:
             found.add(path)

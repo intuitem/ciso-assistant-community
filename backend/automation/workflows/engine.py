@@ -7,6 +7,7 @@ as `waiting`; everything else executes and advances in the same call.
 """
 
 import contextvars
+import math
 import re
 from collections.abc import Callable
 from datetime import date, timedelta
@@ -227,7 +228,10 @@ def coerce_variable_value(value, variable_type):
             try:
                 return int(value)
             except ValueError:
-                return float(value)
+                number = float(value)
+                # "nan"/"inf" parse, but jsonb cannot store them.
+                if math.isfinite(number):
+                    return number
     elif variable_type == WorkflowVariable.Type.BOOLEAN:
         if isinstance(value, bool):
             return value
@@ -240,6 +244,22 @@ def coerce_variable_value(value, variable_type):
     elif variable_type == WorkflowVariable.Type.JSON:
         return value
     raise ValueError(f"not a valid {variable_type} value")
+
+
+def default_variables(version):
+    """Declared defaults, coerced to their type the way a run-dialog value is
+    (a "4" default on a number seeds 4). A default publish would reject is
+    seeded as stored rather than failing the run."""
+    variables = {}
+    for variable in version.variables.all():
+        value = variable.default_value
+        if value is not None:
+            try:
+                value = coerce_variable_value(value, variable.type)
+            except ValueError:
+                pass
+        variables[variable.key] = value
+    return variables
 
 
 def create_instance(
@@ -260,7 +280,7 @@ def create_instance(
         entry_node = default_entry_node(version)
 
     payload = payload or {}
-    variables = {v.key: v.default_value for v in version.variables.all()}
+    variables = default_variables(version)
     for variable_key, path in (entry_node.input_mapping or {}).items():
         value = dig(payload, path)
         if value is not None:

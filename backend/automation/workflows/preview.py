@@ -10,10 +10,12 @@ what answers, so what the preview shows is what the run will compute.
 from __future__ import annotations
 
 from .context import temporal_seeds
+from .engine import default_variables
 from .expressions import ExpressionError, evaluate, referenced_paths
 
 MAX_EXPRESSION_LENGTH = 2000
 MAX_ROWS = 50
+MAX_TOTAL_LENGTH = 20000
 
 
 class PreviewRequestError(ValueError):
@@ -51,7 +53,7 @@ def preview_context(version, instance=None):
     outputs, or the draft's defaults with the engine seeds and no outputs."""
     if instance is not None:
         return {**instance.variables, "nodes": instance.node_outputs}
-    context = {v.key: v.default_value for v in version.variables.all()}
+    context = default_variables(version)
     context.update(temporal_seeds())
     context["payload"] = {}
     context["nodes"] = {}
@@ -70,6 +72,8 @@ def _rows(raw):
         if not isinstance(expression, str) or len(expression) > MAX_EXPRESSION_LENGTH:
             raise PreviewRequestError("previewExpressionTooLong")
         rows.append((key, expression))
+    if sum(len(expression) for _, expression in rows) > MAX_TOTAL_LENGTH:
+        raise PreviewRequestError("previewExpressionTooLong")
     return rows
 
 

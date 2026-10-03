@@ -9,6 +9,15 @@ describe('formatVariableValue', () => {
 		expect(formatVariableValue({ a: 1 })).toBe('{"a":1}');
 	});
 
+	it('shows a json string as JSON so it parses back', () => {
+		expect(formatVariableValue('hello', 'json')).toBe('"hello"');
+		expect(parseVariableValue('json', formatVariableValue('hello', 'json'))).toEqual({
+			ok: true,
+			value: 'hello'
+		});
+		expect(formatVariableValue('hello', 'string')).toBe('hello');
+	});
+
 	it('shows no value as an empty field', () => {
 		expect(formatVariableValue(null)).toBe('');
 		expect(formatVariableValue(undefined)).toBe('');
@@ -43,6 +52,9 @@ describe('parseVariableValue', () => {
 		expect(parseVariableValue('date', '2026-10-02')).toEqual({ ok: true, value: '2026-10-02' });
 		expect(parseVariableValue('date', '02/10/2026')).toEqual({ ok: false });
 		expect(parseVariableValue('date', '2026-13-45')).toEqual({ ok: false });
+		expect(parseVariableValue('date', '2014-02-30')).toEqual({ ok: false });
+		expect(parseVariableValue('date', '2024-02-29')).toEqual({ ok: true, value: '2024-02-29' });
+		expect(parseVariableValue('date', '2023-02-29')).toEqual({ ok: false });
 	});
 
 	it('parses JSON and rejects a half-typed value', () => {

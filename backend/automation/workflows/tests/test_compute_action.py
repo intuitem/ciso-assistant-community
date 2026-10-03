@@ -9,6 +9,7 @@ from automation.workflows.actions import validate_compute_config
 from automation.workflows.engine import start_instance
 from automation.workflows.expressions import (
     ExpressionError,
+    compile_expression,
     evaluate,
     referenced_paths,
 )
@@ -650,6 +651,17 @@ class TestReviewRegressions:
     def test_a_computed_index_is_a_wildcard(self):
         assert referenced_paths("nodes[key].x") == {"nodes.*.x", "key"}
 
+    def test_macro_nesting_is_capped(self):
+        compile_expression("a.map(x, b.filter(y, y > x))")
+        compile_expression("a.map(x, x).filter(y, y > 1).all(z, z > 0)")
+        with pytest.raises(ExpressionError, match="nested at most"):
+            compile_expression("a.map(x, b.map(y, c.exists(z, z == y)))")
+
+    def test_an_escaped_string_index_is_a_wildcard(self):
+        assert referenced_paths("nodes['cl\\x61ssify'].severity") == {
+            "nodes.*.severity"
+        }
+
     def test_paths_are_maximal_chains_including_function_arguments(self):
         assert referenced_paths("size(items.filter(x, x.score > limit))") == {
             "items",
@@ -664,7 +676,9 @@ class TestAiProvenanceEscapes:
     """Ways a compute row could carry an AI answer past the fence that plain
     `.field` tracking missed."""
 
-    def graph(self, expression, output_mapping=None, write="{{derived}}"):
+    def graph(
+        self, expression, output_mapping=None, write="{{derived}}", extra_rows=()
+    ):
         workflow = Workflow.objects.create(
             name="Escape", folder=Folder.get_root_folder()
         )
@@ -687,7 +701,10 @@ class TestAiProvenanceEscapes:
             ref="hop",
             action_config={
                 "type": "compute",
-                "expressions": [{"key": "derived", "expression": expression}],
+                "expressions": [
+                    {"key": "derived", "expression": expression},
+                    *extra_rows,
+                ],
             },
             output_mapping=output_mapping or {},
         )
@@ -714,7 +731,13 @@ class TestAiProvenanceEscapes:
                 ],
                 "variables": [
                     {"id": str(uuid.uuid4()), "key": key, "type": "string"}
-                    for key in ["finding_id", "ai_severity", "derived", "alias"]
+                    for key in [
+                        "finding_id",
+                        "ai_severity",
+                        "derived",
+                        "alias",
+                        "fixed",
+                    ]
                 ],
             },
         )
@@ -745,4 +768,29 @@ class TestAiProvenanceEscapes:
     def test_an_untainted_step_output_is_not(self):
         assert "action_update_ai_value_on_fenced_field" not in self.graph(
             "'high'", write="{{nodes.hop.derived}}"
+        )
+
+    def test_an_escaped_index_is_fenced(self):
+        # CEL decodes it to 'classify'; its raw text is not the ref.
+        assert "action_update_ai_value_on_fenced_field" in self.graph(
+            "nodes['cl\\x61ssify']['severity']"
+        )
+
+    def test_a_triple_quoted_index_is_fenced(self):
+        assert "action_update_ai_value_on_fenced_field" in self.graph(
+            "nodes['''classify''']['severity']"
+        )
+
+    def test_a_clean_sibling_row_of_a_tainted_one_is_not(self):
+        assert "action_update_ai_value_on_fenced_field" not in self.graph(
+            "nodes.classify.severity",
+            write="{{nodes.hop.fixed}}",
+            extra_rows=[{"key": "fixed", "expression": "'high'"}],
+        )
+
+    def test_the_whole_output_of_a_partly_tainted_step_is_fenced(self):
+        assert "action_update_ai_value_on_fenced_field" in self.graph(
+            "nodes.classify.severity",
+            write="{{nodes.hop}}",
+            extra_rows=[{"key": "fixed", "expression": "'high'"}],
         )

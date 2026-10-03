@@ -10,7 +10,12 @@ from iam.models import Folder, Role, RoleAssignment, User
 from automation.workflows.engine import start_instance, trigger_instance
 from automation.workflows.graph import save_graph
 from automation.workflows.models import Workflow, WorkflowVersion
-from automation.workflows.preview import preview_compute_rows, type_name
+from automation.workflows.preview import (
+    MAX_EXPRESSION_LENGTH,
+    PreviewRequestError,
+    preview_compute_rows,
+    type_name,
+)
 from automation.workflows.tests.helpers import publisher_user
 from automation.workflows.views import WorkflowVersionViewSet
 
@@ -169,6 +174,18 @@ class TestPreviewComputeRows:
         assert results[0] == {"ok": False, "error": "'*' cannot combine int and string"}
         assert results[1]["ok"] is False
         assert results[1]["error"].startswith("syntax error")
+
+    def test_the_request_as_a_whole_is_capped(self):
+        version = build(variables=[var("n", default=2)])
+        long_row = "n" + " + n" * ((MAX_EXPRESSION_LENGTH - 1) // 4)
+        with pytest.raises(PreviewRequestError, match="previewExpressionTooLong"):
+            preview_compute_rows(version, [row(f"r{i}", long_row) for i in range(11)])
+
+    def test_a_numeric_string_default_previews_as_a_number(self):
+        version = build(variables=[var("n", default="4")])
+        assert preview_compute_rows(version, [row("d", "n * 2")]) == [
+            {"ok": True, "value": 8, "type": "int"}
+        ]
 
     def test_a_reference_run_supplies_variables_and_node_outputs(self):
         version = build(

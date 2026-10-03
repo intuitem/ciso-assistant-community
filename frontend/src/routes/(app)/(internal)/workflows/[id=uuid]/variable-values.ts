@@ -4,13 +4,27 @@
 
 export type ParsedValue = { ok: true; value: unknown } | { ok: false };
 
-/** A stored value as the text of an input. `null` is an empty field. */
-export function formatVariableValue(value: unknown): string {
+/**
+ * A stored value as the text of an input. `null` is an empty field. A json
+ * variable always shows JSON, so a stored "hello" reads back as `"hello"`.
+ */
+export function formatVariableValue(value: unknown, type?: string): string {
 	if (value === null || value === undefined) return '';
-	return typeof value === 'string' ? value : JSON.stringify(value);
+	return typeof value === 'string' && type !== 'json' ? value : JSON.stringify(value);
 }
 
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/** A real calendar day: Date.parse would roll 2014-02-30 into March. */
+function isCalendarDate(text: string): boolean {
+	const match = DATE_RE.exec(text);
+	if (!match) return false;
+	const [year, month, day] = match.slice(1).map(Number);
+	const date = new Date(Date.UTC(year, month - 1, day));
+	return (
+		date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
+	);
+}
 
 /**
  * The text of an input as a stored value for `type`. An empty field means
@@ -29,9 +43,7 @@ export function parseVariableValue(type: string, raw: string): ParsedValue {
 			if (text === 'true' || text === 'false') return { ok: true, value: text === 'true' };
 			return { ok: false };
 		case 'date':
-			return DATE_RE.test(text) && !Number.isNaN(Date.parse(text))
-				? { ok: true, value: text }
-				: { ok: false };
+			return isCalendarDate(text) ? { ok: true, value: text } : { ok: false };
 		case 'json':
 			try {
 				return { ok: true, value: JSON.parse(text) };
