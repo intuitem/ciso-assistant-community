@@ -1158,12 +1158,14 @@ class StoredLibrary(LibraryMixin):
                 builtin=builtin,
                 hash_checksum=hash_checksum,
                 content=library_objects,
+                # autoload libraries with requirement mapping sets, or that ask for it
                 autoload=bool(
-                    library_objects.get(
+                    library_data.get("autoload")
+                    or library_objects.get(
                         "requirement_mapping_set",
                         library_objects.get("requirement_mapping_sets"),
                     )
-                ),  # autoload is true if the library contains requirement mapping sets
+                ),
             )
             new_library.filtering_labels.set(filtering_labels)
             return new_library, None
@@ -2443,6 +2445,8 @@ class LibraryUpdater:
                 "probability",
                 "impact",
                 "risk",
+                "strength_of_knowledge",
+                "ebios_rm",
             }  # Store this as a constant somewhere (as a static attribute of the class)
             other_keys = set(matrix.keys()) - json_definition_keys
             matrix_dict = {key: matrix[key] for key in other_keys}
@@ -2451,7 +2455,7 @@ class LibraryUpdater:
                 if key in matrix:  # If all keys are mandatory this condition is useless
                     matrix_dict["json_definition"][key] = matrix[key]
 
-            RiskMatrix.objects.update_or_create(
+            risk_matrix, _ = RiskMatrix.objects.update_or_create(
                 urn=matrix["urn"].lower(),
                 defaults=matrix_dict,
                 create_defaults={
@@ -2461,6 +2465,8 @@ class LibraryUpdater:
                     "library": self.old_library,
                 },
             )
+            for study in risk_matrix.ebios_rm_studies.all():
+                study.refresh_ratings()
 
     def update_requirement_mapping_sets(self):
         for requirement_mapping_set in self.new_requirement_mapping_sets:
@@ -2654,6 +2660,8 @@ class LoadedLibrary(LibraryMixin):
             res["risk_matrix"]["impact"] = update_translations(matrix.impact)
             res["risk_matrix"]["risk"] = update_translations(matrix.risk)
             res["risk_matrix"]["grid"] = matrix.grid
+            if "ebios_rm" in matrix.json_definition:
+                res["risk_matrix"]["ebios_rm"] = matrix.json_definition["ebios_rm"]
             res["strength_of_knowledge"] = matrix.strength_of_knowledge
             res["risk_matrix"] = [res["risk_matrix"]]
         return res
@@ -2875,6 +2883,10 @@ class Terminology(NameDescriptionMixin, FolderMixin):
 
     class FieldPath(models.TextChoices):
         ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
+        ROTO_TARGET_OBJECTIVE_CATEGORY = (
+            "ro_to.target_objective_category",
+            "ro_to/target_objective_category",
+        )
         QUALIFICATIONS = "qualifications", "qualifications"
         ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
         ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
@@ -2939,6 +2951,46 @@ class Terminology(NameDescriptionMixin, FolderMixin):
             "name": "other",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+    ]
+
+    # Categories of target objectives from EBIOS RM fiche méthode 4.
+    DEFAULT_ROTO_TARGET_OBJECTIVE_CATEGORIES = [
+        {
+            "name": "espionage",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "strategic_prepositioning",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "influence",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "operational_disruption",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "lucrative",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "challenge_and_amusement",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
             "is_visible": True,
         },
     ]
@@ -3374,6 +3426,10 @@ class Terminology(NameDescriptionMixin, FolderMixin):
     @classmethod
     def create_default_roto_risk_origins(cls):
         cls._seed_defaults(cls.DEFAULT_ROTO_RISK_ORIGINS)
+
+    @classmethod
+    def create_default_roto_target_objective_categories(cls):
+        cls._seed_defaults(cls.DEFAULT_ROTO_TARGET_OBJECTIVE_CATEGORIES)
 
     @classmethod
     def create_default_qualifications(cls):

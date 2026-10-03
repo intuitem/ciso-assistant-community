@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Das Schnellformular '${response_name}' kann bearbeitet werden"
+body: |
+  Hallo,
+
+  Sie wurden für das folgende Schnellformular als Teilnehmer ausgewählt:
+
+  - Antwort: ${response_name}
+  - Formular: ${quick_form_name}
+  - Fällig am: ${due_date}
+
+  Melden Sie sich in CISO Assistant an, um das Formular auszufüllen: [Formular öffnen](${ciso_assistant_url}/quick-form-responses/${response_id})
+
+  Vielen Dank.
