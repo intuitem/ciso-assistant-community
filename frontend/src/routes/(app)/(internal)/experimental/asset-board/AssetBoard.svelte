@@ -19,9 +19,12 @@
 
 	import AssetNodeComponent from './AssetNode.svelte';
 	import GhostNodeComponent from './GhostNode.svelte';
-	import { computeLayout } from './board-layout';
+	import { computeLayout } from '$lib/components/AssetGraph/layout';
+	import { createLinkWriter, idOf } from '$lib/components/AssetGraph/links';
+	import { createPickerForm } from '$lib/components/AssetGraph/picker';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { fetchAllByIds } from '$lib/utils/pagination';
-	import AssetEdgeComponent from './AssetEdge.svelte';
+	import AssetEdgeComponent from '$lib/components/AssetGraph/AssetEdge.svelte';
 	import {
 		loadPositions,
 		savePositions,
@@ -31,7 +34,6 @@
 		savePinned,
 		loadInstructionsOpen,
 		saveInstructionsOpen,
-		idOf,
 		type XY
 	} from './positions';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -70,6 +72,9 @@
 		$props();
 
 	const toastStore = getToastStore();
+	const { updateParents } = createLinkWriter((message) =>
+		toastStore.trigger({ message, background: 'preset-tonal-error' })
+	);
 	const modalStore = getModalStore();
 
 	const nodeTypes = { asset: AssetNodeComponent, ghost: GhostNodeComponent };
@@ -85,17 +90,8 @@
 	let knownAssetIds = $state<Set<string>>(new Set());
 	let pinnedIds = $state<string[]>(loadPinned(folderId));
 	let pinnedAssets = $state<AssetItem[]>([]);
-	const queues = new Map<string, Promise<boolean>>();
 	let searchOpen = $state(false);
-	let searchQuery = $state('');
-	let searchResults = $state<AssetItem[]>([]);
-	let searchTimer: ReturnType<typeof setTimeout> | undefined;
-	let searching = $state(false);
-	let searchInput = $state<HTMLInputElement | null>(null);
-
-	$effect(() => {
-		if (searchOpen) searchInput?.focus();
-	});
+	const linkPicker = createPickerForm('asset');
 
 	const folderOf = (a: AssetItem) =>
 		typeof a.folder === 'object' && a.folder !== null
@@ -252,9 +248,6 @@
 		positions = { ...positions, [asset.id]: spot };
 		savePositions(folderId, positions);
 		pinnedAssets = [...pinnedAssets.filter((a) => a.id !== asset.id), asset];
-		searchOpen = false;
-		searchQuery = '';
-		searchResults = [];
 		flowInstance?.setCenter(spot.x + 100, spot.y + 30, {
 			zoom: flowInstance.getZoom(),
 			duration: 300
@@ -267,30 +260,20 @@
 		pinnedAssets = pinnedAssets.filter((a) => a.id !== id);
 	}
 
-	function onSearchInput() {
-		clearTimeout(searchTimer);
-		const q = searchQuery.trim();
-		if (q.length < 2) {
-			searchResults = [];
-			searching = false;
+	async function pickExternal(id: string | null) {
+		if (!id) return;
+		linkPicker.clear();
+		searchOpen = false;
+		const existing = nodes.find((n) => n.id === id);
+		if (existing) {
+			flowInstance?.setCenter(existing.position.x + 100, existing.position.y + 30, {
+				zoom: flowInstance.getZoom(),
+				duration: 300
+			});
 			return;
 		}
-		searching = true;
-		searchTimer = setTimeout(async () => {
-			try {
-				const res = await fetch(`/assets?search=${encodeURIComponent(q)}&limit=25`);
-				const body = res.ok ? await res.json() : { results: [] };
-				if (searchQuery.trim() !== q) return;
-				const onBoard = new Set(nodes.map((n) => n.id));
-				searchResults = (body.results ?? []).filter(
-					(a: AssetItem) => folderOf(a).id !== folderId && !onBoard.has(a.id)
-				);
-			} catch {
-				if (searchQuery.trim() === q) searchResults = [];
-			} finally {
-				if (searchQuery.trim() === q) searching = false;
-			}
-		}, 250);
+		const [asset] = await fetchAllByIds<AssetItem>(fetch, '/assets', [id]).catch(() => []);
+		if (asset) pinGhost(asset);
 	}
 
 	// Initial load from localStorage and graph build
@@ -391,7 +374,7 @@
 		savePositions(folderId, updated);
 	}
 
-	function isValidConnection(connection: Connection): boolean {
+	function isValidConnection(connection: Connection | Edge): boolean {
 		if (!connection.source || !connection.target) return false;
 		if (connection.source === connection.target) return false;
 		if (!knownAssetIds.has(connection.source) && !knownAssetIds.has(connection.target)) {
@@ -401,60 +384,6 @@
 			return false;
 		}
 		return true;
-	}
-
-	async function patchParentAssets(childId: string, parentIds: string[]): Promise<boolean> {
-		try {
-			const res = await fetch(`/assets/${childId}`, {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ parent_assets: parentIds })
-			});
-			if (!res.ok) {
-				const err = await res.json().catch(() => ({}));
-				const msg =
-					(err && (err.parent_assets || err.detail || err.non_field_errors)) ?? 'Update failed';
-				toastStore.trigger({
-					message: typeof msg === 'string' ? msg : JSON.stringify(msg),
-					background: 'preset-tonal-error'
-				});
-				return false;
-			}
-			return true;
-		} catch (e) {
-			toastStore.trigger({
-				message: 'Network error updating asset relationship',
-				background: 'preset-tonal-error'
-			});
-			return false;
-		}
-	}
-
-	function updateParents(
-		childId: string,
-		change: (parents: string[]) => string[]
-	): Promise<boolean> {
-		const run = async () => {
-			let current: string[];
-			try {
-				const [row] = await fetchAllByIds<AssetItem>(fetch, '/assets', [childId]);
-				if (!Array.isArray(row?.parent_assets)) throw new Error('parents unavailable');
-				current = row.parent_assets.map(idOf);
-			} catch {
-				toastStore.trigger({
-					message: 'Network error updating asset relationship',
-					background: 'preset-tonal-error'
-				});
-				return false;
-			}
-			return patchParentAssets(childId, change(current));
-		};
-		const queued = (queues.get(childId) ?? Promise.resolve(true)).then(run, run);
-		queues.set(childId, queued);
-		void queued.finally(() => {
-			if (queues.get(childId) === queued) queues.delete(childId);
-		});
-		return queued;
 	}
 
 	async function handleConnect(connection: Connection) {
@@ -668,7 +597,7 @@
 		modalStore.trigger(modal);
 	}
 
-	setContext('assetBoard', {
+	setContext('assetGraph', {
 		unpinGhost,
 		renameAsset,
 		toggleAssetType,
@@ -740,38 +669,18 @@
 					<div
 						class="w-80 bg-surface-50-950 border border-surface-300-700 rounded-base shadow-lg p-2"
 					>
-						<input
-							bind:this={searchInput}
-							type="search"
+						<AutocompleteSelect
+							form={linkPicker.form}
+							field="asset"
+							optionsEndpoint="assets"
+							optionsLabelField="auto"
+							optionsInfoFields={{ fields: [{ field: 'type' }], classes: 'text-blue-500' }}
+							optionsExtraFields={[['folder', 'str']]}
+							lazy
+							portalDropdown
 							placeholder="Search assets in other domains…"
-							bind:value={searchQuery}
-							oninput={onSearchInput}
-							class="w-full text-sm rounded-base border-surface-300-700 bg-surface-100-900"
+							onChange={pickExternal}
 						/>
-						<ul class="mt-2 max-h-72 overflow-y-auto">
-							{#each searchResults as result (result.id)}
-								<li>
-									<button
-										type="button"
-										class="w-full text-left px-2 py-1.5 rounded hover:bg-surface-200-800 cursor-pointer"
-										onclick={() => pinGhost(result)}
-									>
-										<div class="text-sm font-semibold text-surface-800-200 truncate">
-											{result.name}
-										</div>
-										<div class="text-[11px] text-surface-500 truncate">
-											<i class="fa-solid fa-sitemap text-[9px] mr-1"></i>{folderOf(result).name}
-										</div>
-									</button>
-								</li>
-							{:else}
-								{#if searching}
-									<li class="px-2 py-1.5 text-xs text-surface-500">Searching…</li>
-								{:else if searchQuery.trim().length >= 2}
-									<li class="px-2 py-1.5 text-xs text-surface-500">No asset found elsewhere</li>
-								{/if}
-							{/each}
-						</ul>
 					</div>
 				{/if}
 			</div>
@@ -806,7 +715,7 @@
 							<li>Drag bottom handle of one asset onto another to link it as a parent</li>
 							<li>Drag bottom handle onto empty canvas to create a child asset</li>
 							<li>Double-click empty canvas to create a free-standing asset</li>
-							<li>Double-click a node's name to rename it</li>
+							<li>Double-click a node to open its dependency map; use the pencil to rename it</li>
 							<li>
 								Click the <span class="font-semibold">PR/SP</span> pill to toggle the asset type
 							</li>
