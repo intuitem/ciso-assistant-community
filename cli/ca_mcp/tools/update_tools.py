@@ -17,7 +17,13 @@ from ..resolvers import (
     resolve_requirement_assessment_id,
     resolve_compliance_assessment_id,
     resolve_task_template_id,
+    resolve_perimeter_id,
+    resolve_actor_ids,
+    resolve_reference_control_id,
+    resolve_qualification_ids,
+    resolve_risk_level_index,
 )
+from .write_tools import _normalize_applied_control_status
 
 
 async def update_asset(
@@ -70,7 +76,7 @@ async def update_asset(
         vulnerabilities: List of vulnerability IDs/names (replaces existing)
         security_exceptions: List of security exception UUIDs (replaces existing)
         filtering_labels: List of label UUIDs (replaces existing)
-        owner: List of owner UUIDs (replaces existing)
+        owner: List of owners as actor UUIDs, emails or names (replaces existing)
         dora_licenced_activity: DORA licensed activity code
         dora_criticality_assessment: DORA criticality assessment code
         dora_criticality_justification: DORA criticality justification text
@@ -122,7 +128,7 @@ async def update_asset(
         if filtering_labels is not None:
             payload["filtering_labels"] = filtering_labels
         if owner is not None:
-            payload["owner"] = owner
+            payload["owner"] = resolve_actor_ids(owner)
         if security_exceptions is not None:
             payload["security_exceptions"] = security_exceptions
         if support_assets is not None:
@@ -268,6 +274,8 @@ async def update_risk_scenario(
     applied_controls: list = None,
     existing_applied_controls: list = None,
     vulnerabilities: list = None,
+    qualifications: list = None,
+    owner: list = None,
 ) -> str:
     """Update risk scenario properties and ratings
 
@@ -283,7 +291,7 @@ async def update_risk_scenario(
         current_impact: Current impact index (from risk matrix)
         residual_proba: Residual probability index (from risk matrix)
         residual_impact: Residual impact index (from risk matrix)
-        treatment: open | mitigate | accept | avoid | transfer
+        treatment: open | mitigate | accept | avoid | transfer | cancelled
         strength_of_knowledge: -1 to 2
         justification: Justification text
         ref_id: Reference ID
@@ -292,6 +300,9 @@ async def update_risk_scenario(
         applied_controls: List of planned control IDs/names (replaces existing)
         existing_applied_controls: List of existing control IDs/names (replaces existing)
         vulnerabilities: List of vulnerability IDs/names exploited by this scenario (replaces existing)
+        qualifications: List of qualifications: letters C/I/A(D)/T(P)
+            (confidentiality/integrity/availability/proof), names or UUIDs (replaces existing)
+        owner: List of owners as actor UUIDs, emails or names (replaces existing)
     """
     try:
         # Resolve risk scenario name to ID if needed
@@ -386,6 +397,12 @@ async def update_risk_scenario(
                 resolved_vulnerabilities.append(resolve_vulnerability_id(vuln))
             payload["vulnerabilities"] = resolved_vulnerabilities
 
+        if qualifications is not None:
+            payload["qualifications"] = resolve_qualification_ids(qualifications)
+
+        if owner is not None:
+            payload["owner"] = resolve_actor_ids(owner)
+
         if not payload:
             return "Error: No fields provided to update"
 
@@ -417,6 +434,8 @@ async def update_applied_control(
     link: str = None,
     ref_id: str = None,
     owner: list = None,
+    reference_control: str = None,
+    assets: list = None,
 ) -> str:
     """Update applied control properties
 
@@ -424,9 +443,9 @@ async def update_applied_control(
         control_id: Control ID/name
         name: New name
         description: New description
-        status: to_do | in_progress | on_hold | active | deprecated | --
+        status: to_do | in_progress | on_hold | active | degraded | deprecated | --
         priority: 1-4 (1=P1, 4=P4)
-        category: policy | process | technical | physical
+        category: policy | process | technical | physical | procedure
         csf_function: identify | protect | detect | respond | recover | govern
         effort: XS | S | M | L | XL
         cost: is a JSON object composed by follwing keys :
@@ -444,7 +463,9 @@ async def update_applied_control(
         expiry_date: Expiry date YYYY-MM-DD
         link: External link (e.g. Jira URL)
         ref_id: Reference ID
-        owner: List of owner UUIDs (replaces existing)
+        owner: List of owners as actor UUIDs, emails or names (replaces existing)
+        reference_control: Reference control UUID, URN, ref_id or name
+        assets: List of asset IDs/names (replaces existing)
     """
     try:
         # Resolve control name to ID if needed
@@ -458,7 +479,7 @@ async def update_applied_control(
         if description is not None:
             payload["description"] = description
         if status is not None:
-            payload["status"] = status
+            payload["status"] = _normalize_applied_control_status(status)
         if priority is not None:
             payload["priority"] = priority
         if category is not None:
@@ -482,7 +503,13 @@ async def update_applied_control(
         if ref_id is not None:
             payload["ref_id"] = ref_id
         if owner is not None:
-            payload["owner"] = owner
+            payload["owner"] = resolve_actor_ids(owner)
+        if reference_control is not None:
+            payload["reference_control"] = resolve_reference_control_id(
+                reference_control
+            )
+        if assets is not None:
+            payload["assets"] = [resolve_asset_id(asset) for asset in assets]
 
         if not payload:
             return "Error: No fields provided to update"
@@ -496,6 +523,152 @@ async def update_applied_control(
             return f"Error updating applied control: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in update_applied_control: {str(e)}"
+
+
+RISK_ASSESSMENT_STATUSES = ["planned", "in_progress", "in_review", "done", "deprecated"]
+
+
+async def update_risk_assessment(
+    risk_assessment_id: str,
+    name: str = None,
+    description: str = None,
+    version: str = None,
+    ref_id: str = None,
+    status: str = None,
+    risk_tolerance: int | str = None,
+    eta: str = None,
+    due_date: str = None,
+) -> str:
+    """Update risk assessment properties
+
+    Args:
+        risk_assessment_id: Risk assessment ID/name
+        name: New name
+        description: New description
+        version: Version string
+        ref_id: Reference ID
+        status: planned | in_progress | in_review | done | deprecated
+        risk_tolerance: Risk level index of the assessment's matrix (-1 = unset),
+            or a risk level name/abbreviation (e.g. "High")
+        eta: ETA date YYYY-MM-DD
+        due_date: Due date YYYY-MM-DD
+    """
+    try:
+        resolved_assessment_id = resolve_risk_assessment_id(risk_assessment_id)
+
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if version is not None:
+            payload["version"] = version
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+        if status is not None:
+            if status not in RISK_ASSESSMENT_STATUSES:
+                return f"Error: Invalid status '{status}'. Must be one of: {', '.join(RISK_ASSESSMENT_STATUSES)}"
+            payload["status"] = status
+        if eta is not None:
+            payload["eta"] = eta
+        if due_date is not None:
+            payload["due_date"] = due_date
+
+        if risk_tolerance is not None:
+            matrix_id = None
+            if (
+                isinstance(risk_tolerance, str)
+                and not risk_tolerance.strip().lstrip("-").isdigit()
+            ):
+                # a level name: resolve it against the assessment's own matrix
+                ra_res = make_get_request(
+                    f"/risk-assessments/{resolved_assessment_id}/"
+                )
+                if ra_res.status_code != 200:
+                    return f"Error fetching risk assessment: {ra_res.status_code} - {ra_res.text}"
+                matrix = ra_res.json().get("risk_matrix")
+                matrix_id = matrix.get("id") if isinstance(matrix, dict) else matrix
+            payload["risk_tolerance"] = resolve_risk_level_index(
+                risk_tolerance, matrix_id
+            )
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(
+            f"/risk-assessments/{resolved_assessment_id}/", payload
+        )
+
+        if res.status_code == 200:
+            assessment = res.json()
+            return f"Updated Risk assessment: {assessment.get('name')} (ID: {assessment.get('id')})"
+        else:
+            return f"Error updating risk assessment: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_risk_assessment: {str(e)}"
+
+
+PERIMETER_LC_STATUSES = [
+    "undefined",
+    "in_design",
+    "in_dev",
+    "in_prod",
+    "eol",
+    "dropped",
+]
+
+
+async def update_perimeter(
+    perimeter_id: str,
+    name: str = None,
+    description: str = None,
+    ref_id: str = None,
+    lc_status: str = None,
+    default_assignee: list = None,
+) -> str:
+    """Update perimeter properties (the folder cannot be changed)
+
+    Args:
+        perimeter_id: Perimeter ID/name
+        name: New name (must not contain "/")
+        description: New description
+        ref_id: Reference ID
+        lc_status: undefined | in_design | in_dev | in_prod | eol | dropped
+        default_assignee: List of default assignees as actor UUIDs, emails or names (replaces existing)
+    """
+    try:
+        resolved_perimeter_id = resolve_perimeter_id(perimeter_id)
+
+        payload = {}
+
+        if name is not None:
+            if "/" in name:
+                return "Error: Perimeter name must not contain '/'"
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+        if lc_status is not None:
+            if lc_status not in PERIMETER_LC_STATUSES:
+                return f"Error: Invalid lc_status '{lc_status}'. Must be one of: {', '.join(PERIMETER_LC_STATUSES)}"
+            payload["lc_status"] = lc_status
+        if default_assignee is not None:
+            payload["default_assignee"] = resolve_actor_ids(default_assignee)
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/perimeters/{resolved_perimeter_id}/", payload)
+
+        if res.status_code == 200:
+            perimeter = res.json()
+            return f"Updated Perimeter: {perimeter.get('name')} (ID: {perimeter.get('id')})"
+        else:
+            return f"Error updating perimeter: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_perimeter: {str(e)}"
 
 
 async def update_requirement_assessment(
@@ -1067,7 +1240,7 @@ async def update_task_template(
         enabled: Enabled flag
         link: Link to evidence (e.g. Jira ticket)
         folder_id: Folder ID/name
-        assigned_to: Array of user UUIDs
+        assigned_to: List of assignees as actor UUIDs, emails or names
         assets: Array of asset UUIDs
         applied_controls: List of applied control IDs/names to associate with this task template. Can be None to leave unchanged, or empty list to clear associations. Elements should be strings representing control identifiers.
         compliance_assessments: Array of compliance assessment UUIDs
@@ -1104,7 +1277,7 @@ async def update_task_template(
         if link is not None:
             payload["link"] = link
         if assigned_to is not None:
-            payload["assigned_to"] = assigned_to
+            payload["assigned_to"] = resolve_actor_ids(assigned_to)
         if assets is not None:
             payload["assets"] = assets
         if applied_controls is not None:
