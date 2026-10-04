@@ -45,3 +45,6 @@ jobs:
       - name: Run MCP risk review tools tests
         working-directory: ${{env.working-directory}}
         run: uv run pytest tests/test_mcp_risk_review_tools.py -q
+      - name: Run MCP deferred gaps tests
+        working-directory: ${{env.working-directory}}
+        run: uv run pytest tests/test_mcp_deferred_gaps.py -q
