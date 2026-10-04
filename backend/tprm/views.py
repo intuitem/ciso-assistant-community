@@ -13,9 +13,10 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
 )
-from iam.models import Folder, Permission, RoleAssignment
+from iam.models import Folder, Permission, RoleAssignment, User
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
+    ComplianceAssessmentViewSet,
     ExportMixin,
     GenericFilterSet,
     actor_prefetch,
@@ -97,6 +98,14 @@ DORA_ROI_PERMISSIONS = (
     "view_asset",
     "view_contract",
 )
+
+
+def _join_lines(values) -> str:
+    return "\n".join(v for v in values if v)
+
+
+def _iso_datetime(value) -> str:
+    return value.isoformat(timespec="seconds") if value else ""
 
 
 def has_dora_roi_access(user) -> bool:
@@ -1163,12 +1172,133 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             )
 
 
-class EntityAssessmentViewSet(BaseModelViewSet):
+class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows entity assessments to be viewed or edited.
     """
 
     model = EntityAssessment
+    export_config = {
+        "filename": "entity_assessments_export",
+        "fields": {
+            "name": {"source": "name", "label": "name", "escape": True},
+            "version": {"source": "version", "label": "version", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "entity_ref_id": {
+                "source": "_export_entity.ref_id",
+                "label": "entity_ref_id",
+                "escape": True,
+            },
+            "entity": {
+                "source": "_export_entity.name",
+                "label": "entity",
+                "escape": True,
+            },
+            "solution_ref_id": {
+                "source": "_export_solutions",
+                "label": "solution_ref_id",
+                "format": lambda objs: _join_lines(s.ref_id for s in objs),
+                "escape": True,
+            },
+            "solution": {
+                "source": "_export_solutions",
+                "label": "solution",
+                "format": lambda objs: _join_lines(s.name for s in objs),
+                "escape": True,
+            },
+            "compliance_assessment": {
+                "source": "_export_compliance_assessment.name",
+                "label": "questionnaire",
+                "escape": True,
+            },
+            "framework": {
+                "source": "_export_compliance_assessment.framework.name",
+                "label": "framework",
+                "escape": True,
+            },
+            "status": {"source": "status", "label": "status"},
+            "assignment_status": {
+                "source": "_export_assignment_status",
+                "label": "assignment_status",
+            },
+            "completion": {"source": "_export_completion", "label": "completion"},
+            "review_progress": {
+                "source": "_export_review_progress",
+                "label": "review_progress",
+            },
+            "eta": {"source": "eta", "label": "eta"},
+            "due_date": {"source": "due_date", "label": "due_date"},
+            "expiry_date": {"source": "expiry_date", "label": "expiry_date"},
+            "criticality": {"source": "criticality", "label": "criticality"},
+            "conclusion": {"source": "conclusion", "label": "conclusion"},
+            "observation": {
+                "source": "observation",
+                "label": "observation",
+                "escape": True,
+            },
+            "author": {
+                "source": "_export_authors",
+                "label": "author",
+                "format": lambda objs: _join_lines(str(a) for a in objs),
+                "escape": True,
+            },
+            "reviewer": {
+                "source": "_export_reviewers",
+                "label": "reviewer",
+                "format": lambda objs: _join_lines(str(a) for a in objs),
+                "escape": True,
+            },
+            "representative_email": {
+                "source": "_export_representatives",
+                "label": "representative_email",
+                "format": lambda objs: _join_lines(u.email for u in objs),
+                "escape": True,
+            },
+            "representative": {
+                "source": "_export_representatives",
+                "label": "representative",
+                "format": lambda objs: _join_lines(str(u) for u in objs),
+                "escape": True,
+            },
+            "domain": {
+                "source": "_export_folder.name",
+                "label": "domain",
+                "escape": True,
+            },
+            "perimeter": {
+                "source": "_export_perimeter.name",
+                "label": "perimeter",
+                "escape": True,
+            },
+            "reference_link": {
+                "source": "reference_link",
+                "label": "reference_link",
+                "escape": True,
+            },
+            "created_at": {
+                "source": "created_at",
+                "label": "created_at",
+                "format": _iso_datetime,
+            },
+            "updated_at": {
+                "source": "updated_at",
+                "label": "updated_at",
+                "format": _iso_datetime,
+            },
+        },
+        "select_related": [
+            "folder",
+            "perimeter",
+            "entity",
+            "compliance_assessment__framework",
+        ],
+        "prefetch_related": ["solutions", "representatives"],
+        "wrap_columns": ["name", "description", "observation"],
+    }
     filterset_fields = [
         "name",
         "status",
@@ -1267,7 +1397,15 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             )
             for audit in audits
         }
-        data["review_progress"] = {audit.id: audit.progress for audit in audits}
+        totals, assessed = ComplianceAssessmentViewSet.get_requirement_counts(
+            list(audit_ids)
+        )
+        data["review_progress"] = {
+            audit.id: int(assessed.get(audit.id, 0) / totals[audit.id] * 100)
+            if totals.get(audit.id)
+            else 0
+            for audit in audits
+        }
 
         statuses: dict = {}
         for audit_id, status_value in RequirementAssignment.objects.filter(
@@ -1277,6 +1415,63 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         data["assignment_statuses"] = statuses
 
         return data
+
+    EXPORT_BATCH_SIZE = 200
+
+    def _get_export_queryset(self):
+        queryset = (
+            super()
+            ._get_export_queryset()
+            .prefetch_related(actor_prefetch("authors"), actor_prefetch("reviewers"))
+        )
+        return self._iter_export_rows(queryset)
+
+    def _iter_export_rows(self, queryset):
+        """Yield rows batch by batch, related objects masked as in `list`."""
+        from tprm.serializers import EntityAssessmentReadSerializer
+
+        field_models = self._get_fieldsrelated_map(EntityAssessmentReadSerializer())
+        allowed = self._get_accessible_ids_map(set(field_models.values()))
+        user_id = str(self.request.user.pk)
+
+        def visible(obj, model):
+            ids = allowed.get(model)
+            return (
+                ids is None
+                or str(obj.pk) in ids
+                or (model is User and str(obj.pk) == user_id)
+            )
+
+        ids = list(dict.fromkeys(queryset.values_list("pk", flat=True)))
+        for start in range(0, len(ids), self.EXPORT_BATCH_SIZE):
+            batch = ids[start : start + self.EXPORT_BATCH_SIZE]
+            by_id = {ea.pk: ea for ea in queryset.filter(pk__in=batch)}
+            rows = [by_id[pk] for pk in batch if pk in by_id]
+            serializer = EntityAssessmentReadSerializer(
+                context={"optimized_data": self._get_optimized_object_data(rows)}
+            )
+            for ea in rows:
+                ea._export_completion = serializer.get_completion(ea)
+                ea._export_review_progress = serializer.get_review_progress(ea)
+                ea._export_assignment_status = serializer.get_assignment_status(ea)
+                for field in ("entity", "folder", "perimeter", "compliance_assessment"):
+                    obj = getattr(ea, field)
+                    setattr(
+                        ea,
+                        f"_export_{field}",
+                        obj if obj and visible(obj, field_models[field]) else None,
+                    )
+                for field in ("solutions", "authors", "reviewers", "representatives"):
+                    setattr(
+                        ea,
+                        f"_export_{field}",
+                        [
+                            obj
+                            for obj in getattr(ea, field).all()
+                            if visible(obj, field_models[field])
+                        ],
+                    )
+                yield ea
 
     def _owned_audit_deletion(self, instance):
         """What deleting this assessment takes down with it: the linked audit when

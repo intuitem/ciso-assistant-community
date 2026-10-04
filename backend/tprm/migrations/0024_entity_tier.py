@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0191_quick_form_tiering"),
+        ("core", "0192_quick_form_tiering"),
         ("iam", "0031_remove_iam_is_published_fields"),
         ("tprm", "0023_remove_contract_is_published_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

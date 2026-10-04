@@ -4,6 +4,7 @@ from django.core.management import call_command
 from structlog import get_logger
 
 from django.conf import settings
+from django.db import transaction
 from core.utils import RoleCodename, UserGroupCodename
 
 logger = get_logger(__name__)
@@ -2121,6 +2122,15 @@ TECHNICAL_TESTER_PERMISSIONS_LIST = [
 ]
 
 
+# Users always live in the root folder, so this role only has an effect when
+# granted on Global. It deliberately excludes change/delete: editing and removing
+# users stays with administrators.
+USER_CREATOR_PERMISSIONS_LIST = [
+    "add_user",
+    "view_user",
+]
+
+
 def seed_feature_flag_defaults():
     """Fill in flags the stored row has never heard of.
 
@@ -2221,6 +2231,64 @@ def ensure_admin_user():
         u.user_groups.add(administrators)
 
 
+@transaction.atomic
+def ensure_global_group(
+    group_codename: UserGroupCodename,
+    role_codename: RoleCodename,
+    *,
+    is_recursive: bool,
+):
+    """Create a builtin group on the root folder, granting `role_codename` on
+    Global, unless the group already exists.
+
+    Atomic so that an existing group is always fully provisioned: a run
+    interrupted between the writes must not leave the group without its grant,
+    since the existence check would then skip it at every later startup.
+    """
+    from iam.models import Folder, Role, RoleAssignment, UserGroup
+
+    root_folder = Folder.get_root_folder()
+    if UserGroup.objects.filter(name=group_codename.value, folder=root_folder).exists():
+        return
+    group = UserGroup.objects.create(
+        name=group_codename.value, folder=root_folder, builtin=True
+    )
+    ra = RoleAssignment.objects.create(
+        user_group=group,
+        role=Role.objects.get(name=role_codename.value, builtin=True),
+        is_recursive=is_recursive,
+        builtin=True,
+        folder=root_folder,
+    )
+    ra.perimeter_folders.add(root_folder)
+
+
+def ensure_user_creator_group():
+    """Sync the User creator role and ensure its Global group exists.
+
+    Only called when `DELEGATED_USER_CREATION` is set. Turning the setting off
+    later leaves an existing role, group and memberships in place.
+
+    The assignment is non-recursive on purpose: users always live in the root
+    folder, so the grant is only meaningful on Global itself.
+    """
+    from django.contrib.auth.models import Permission
+
+    from iam.models import Role
+
+    role, _ = Role.objects.get_or_create(
+        name=RoleCodename.USER_CREATOR.value, builtin=True
+    )
+    role.permissions.set(
+        Permission.objects.filter(codename__in=USER_CREATOR_PERMISSIONS_LIST)
+    )
+    ensure_global_group(
+        UserGroupCodename.GLOBAL_USER_CREATOR,
+        RoleCodename.USER_CREATOR,
+        is_recursive=False,
+    )
+
+
 def startup(sender=None, **kwargs):
     """
     Implement CISO Assistant 1.0 default Roles and User Groups during migrate.
@@ -2248,7 +2316,7 @@ def startup(sender=None, **kwargs):
         ObjectClassification,
         Terminology,
     )
-    from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+    from iam.models import Folder, Role, User
     from tprm.models import Entity
     from privacy.models import create_default_privacy_terminologies
     from global_settings.models import GlobalSettings
@@ -2301,89 +2369,18 @@ def startup(sender=None, **kwargs):
         content_type=Folder.ContentType.DOMAIN, create_iam_groups=True
     ):
         Folder.create_default_ug_and_ra(folder)
-    # if global administrators user group does not exist, then create it
-    if not UserGroup.objects.filter(
-        name="BI-UG-ADM", folder=Folder.get_root_folder()
-    ).exists():
-        administrators = UserGroup.objects.create(
-            name="BI-UG-ADM", folder=Folder.get_root_folder(), builtin=True
-        )
-        ra1 = RoleAssignment.objects.create(
-            user_group=administrators,
-            role=Role.objects.get(name="BI-RL-ADM"),
-            is_recursive=True,
-            builtin=True,
-            folder=Folder.get_root_folder(),
-        )
-        ra1.perimeter_folders.add(administrators.folder)
-    # if global readers user group does not exist, then create it
-    if not UserGroup.objects.filter(
-        name="BI-UG-GAD", folder=Folder.get_root_folder()
-    ).exists():
-        global_readers = UserGroup.objects.create(
-            name="BI-UG-GAD",
-            folder=Folder.objects.get(content_type=Folder.ContentType.ROOT),
-            builtin=True,
-        )
-        ra2 = RoleAssignment.objects.create(
-            user_group=global_readers,
-            role=Role.objects.get(name="BI-RL-AUD"),
-            is_recursive=True,
-            builtin=True,
-            folder=Folder.get_root_folder(),
-        )
-        ra2.perimeter_folders.add(global_readers.folder)
-    if not UserGroup.objects.filter(
-        name=UserGroupCodename.ANALYST.value, folder=Folder.get_root_folder()
-    ).exists():
-        analysts = UserGroup.objects.create(
-            name=UserGroupCodename.ANALYST.value,
-            folder=Folder.get_root_folder(),
-            builtin=True,
-        )
-        ra2 = RoleAssignment.objects.create(
-            user_group=analysts,
-            role=Role.objects.get(name=RoleCodename.ANALYST.value),
-            is_recursive=True,
-            builtin=True,
-            folder=Folder.get_root_folder(),
-        )
-        ra2.perimeter_folders.add(analysts.folder)
-    # if global approvers user group does not exist, then create it
-    if not UserGroup.objects.filter(
-        name="BI-UG-GAP", folder=Folder.get_root_folder()
-    ).exists():
-        global_approvers = UserGroup.objects.create(
-            name="BI-UG-GAP",
-            folder=Folder.objects.get(content_type=Folder.ContentType.ROOT),
-            builtin=True,
-        )
-        ra2 = RoleAssignment.objects.create(
-            user_group=global_approvers,
-            role=Role.objects.get(name="BI-RL-APP"),
-            is_recursive=True,
-            builtin=True,
-            folder=Folder.get_root_folder(),
-        )
-        ra2.perimeter_folders.add(global_approvers.folder)
+    # global builtin groups, each granting its role on the whole tree
+    for group_codename, role_codename in (
+        (UserGroupCodename.ADMINISTRATOR, RoleCodename.ADMINISTRATOR),
+        (UserGroupCodename.GLOBAL_READER, RoleCodename.READER),
+        (UserGroupCodename.ANALYST, RoleCodename.ANALYST),
+        (UserGroupCodename.GLOBAL_APPROVER, RoleCodename.APPROVER),
+        (UserGroupCodename.GLOBAL_AUDITEE, RoleCodename.AUDITEE),
+    ):
+        ensure_global_group(group_codename, role_codename, is_recursive=True)
 
-    # if global auditees user group does not exist, then create it
-    if not UserGroup.objects.filter(
-        name=UserGroupCodename.GLOBAL_AUDITEE.value, folder=Folder.get_root_folder()
-    ).exists():
-        global_auditees = UserGroup.objects.create(
-            name=UserGroupCodename.GLOBAL_AUDITEE.value,
-            folder=Folder.get_root_folder(),
-            builtin=True,
-        )
-        ra = RoleAssignment.objects.create(
-            user_group=global_auditees,
-            role=Role.objects.get(name=RoleCodename.AUDITEE.value),
-            is_recursive=True,
-            builtin=True,
-            folder=Folder.get_root_folder(),
-        )
-        ra.perimeter_folders.add(global_auditees.folder)
+    if getattr(settings, "DELEGATED_USER_CREATION", False):
+        ensure_user_creator_group()
 
     # Create default Qualifications
     try:
@@ -2426,6 +2423,13 @@ def startup(sender=None, **kwargs):
         Terminology.create_default_roto_risk_origins()
     except Exception as e:
         logger.error("Error creating default ROTO Risk Origins", exc_info=True)
+
+    try:
+        Terminology.create_default_roto_target_objective_categories()
+    except Exception as e:
+        logger.error(
+            "Error creating default ROTO Target Objective Categories", exc_info=True
+        )
 
     # Create default Entity Relationships
     try:

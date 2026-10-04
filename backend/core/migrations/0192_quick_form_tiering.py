@@ -10,7 +10,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
-        ("core", "0190_compliance_assessment_score_scale"),
+        ("core", "0191_roto_target_objective_category"),
         ("iam", "0031_remove_iam_is_published_fields"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

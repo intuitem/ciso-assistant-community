@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import StakeholderCriticalityWidget from '$lib/components/EbiosRM/StakeholderCriticalityWidget.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import EntityTierCard from '$lib/components/DetailView/EntityTierCard.svelte';
@@ -106,11 +107,21 @@
 	</div>
 {/if}
 
-{#snippet entityWidgets()}
-	<EntityTierCard entity={data.data} />
-{/snippet}
-
-<DetailView {data} widgets={data.model.name === 'entity' ? entityWidgets : undefined} />
+{#if data.urlModel === 'stakeholders'}
+	<DetailView {data}>
+		{#snippet widgets()}
+			<StakeholderCriticalityWidget stakeholder={data.data} />
+		{/snippet}
+	</DetailView>
+{:else if data.model.name === 'entity'}
+	<DetailView {data}>
+		{#snippet widgets()}
+			<EntityTierCard entity={data.data} />
+		{/snippet}
+	</DetailView>
+{:else}
+	<DetailView {data} />
+{/if}
 
 {#if data.model.name === 'finding' && page.data?.featureflags?.comments}
 	<div class="mt-4">

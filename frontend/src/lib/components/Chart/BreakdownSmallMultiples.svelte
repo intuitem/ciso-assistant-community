@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { escapeHtml } from '$lib/utils/helpers';
 	import { onMount } from 'svelte';
 	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import { m } from '$paraglide/messages';
@@ -32,18 +33,6 @@
 	// A breakdown key can be user-supplied text — qualification names reach the
 	// breakdown as keys — and an ECharts formatter that returns a string has it
 	// rendered as HTML.
-	const HTML_ESCAPES: Record<string, string> = {
-		'&': '&amp;',
-		'<': '&lt;',
-		'>': '&gt;',
-		'"': '&quot;',
-		"'": '&#39;'
-	};
-
-	function escapeHtml(value: unknown): string {
-		return String(value).replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
-	}
-
 	onMount(() => {
 		let active = true;
 		import('echarts').then((module) => {

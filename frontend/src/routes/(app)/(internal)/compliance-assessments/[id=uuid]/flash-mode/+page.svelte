@@ -848,7 +848,10 @@
 		line-height: 1.5;
 		border: 1px solid #e2e8f0;
 		border-radius: 0.5rem;
-		resize: none;
+		field-sizing: content;
+		resize: vertical;
+		min-height: 3.5rem;
+		max-height: 40vh;
 		background: #fff;
 		color: #334155;
 		transition:

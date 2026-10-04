@@ -2470,7 +2470,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
 
             definition = {
                 key: candidate.get(key)
-                for key in ("probability", "impact", "risk", "grid")
+                for key in ("probability", "impact", "risk", "grid", "ebios_rm")
             }
             if matrix_errors := RiskMatrixViewSet._validate_json_definition(definition):
                 return Response(

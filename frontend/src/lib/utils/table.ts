@@ -2931,12 +2931,17 @@ export const listViewFields = {
 			'description',
 			'folder',
 			'status',
-			'quotation_method',
+			'quotation_method_display',
 			'created_at',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['classification'],
+			body: ['classification']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
+			classification: CLASSIFICATION_FILTER,
 			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
 			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
 			status: ORGANISATION_ISSUE_STATUS_FILTER,
@@ -3067,8 +3072,8 @@ export const listViewFields = {
 		}
 	},
 	'elementary-actions': {
-		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'threat'],
-		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
+		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'technique', 'threat'],
+		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'technique', 'threat'],
 		filters: {
 			attack_stage: {
 				component: AutocompleteSelect,
@@ -3085,8 +3090,14 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'likelihood']
 	},
 	'kill-chains': {
-		head: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator'],
-		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
+		head: [
+			'elementary_action',
+			'attack_stage',
+			'antecedents',
+			'logic_operator',
+			'supportingAssets'
+		],
+		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator', 'assets']
 	},
 	notifications: {
 		head: ['read', 'category', 'title', 'created_at'],
