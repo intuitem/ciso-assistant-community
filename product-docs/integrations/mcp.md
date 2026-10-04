@@ -19,7 +19,7 @@ The CISO Assistant MCP server provides **109 tools** covering:
 
 * Risk management (assessments, scenarios, matrices)
 * Compliance audits (frameworks, requirements)
-* Asset management (including objective vs capability gaps with `get_asset_security_gaps`)
+* Asset management
 * Third-party risk management (TPRM)
 * EBIOS RM methodology
 * Privacy / GDPR records (processings, personal data, data subjects, breaches, right requests)
