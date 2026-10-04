@@ -2,8 +2,9 @@
 official self-assessment tools audits are exported to (the "cyfun-xlsx"
 framework export)."""
 
-import io
 import re
+import warnings
+from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
 from functools import partial
@@ -137,18 +138,22 @@ def _supports(audit) -> bool:
 def build_self_assessment(audit) -> ExportFile:
     """The official tool of the audit's CyFun version and assurance level,
     filled with its scores and observations. The tool lists only that level's
-    requirements and applies its own N/A score and thresholds."""
+    requirements and applies its own N/A score and thresholds. Only the filled
+    cells change: charts, dropdowns and formulas stay those of the CCB."""
     from .models import RequirementAssessment
     from .utils import escape_excel_formula, sanitize_xlsx_value
+    from .xlsx_template import fill_template
 
     template = export_template(
         audit.framework.urn, audit.selected_implementation_groups
     )
-    wb = load_workbook(
-        Path(__file__).resolve().parent / "templates" / "core" / template.file
-    )
+    path = Path(__file__).resolve().parent / "templates" / "core" / template.file
 
-    # ref_id -> (sheet, row) of every requirement the tool lists
+    # (sheet, row) of every requirement the tool lists. Reading with openpyxl
+    # is lossless; the file itself is never saved through it.
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Data Validation extension")
+        wb = load_workbook(path)
     rows = {}
     for sheet_name in template.sheets:
         ws = wb[sheet_name]
@@ -157,8 +162,9 @@ def build_self_assessment(audit) -> ExportFile:
             if cell_value and isinstance(cell_value, str):
                 ref_id = template.ref_id(cell_value)
                 if ref_id:
-                    rows[ref_id] = (ws, row)
+                    rows[ref_id] = (sheet_name, row)
 
+    values = defaultdict(dict)
     requirement_assessments = (
         RequirementAssessment.objects.filter(compliance_assessment=audit)
         .select_related("requirement")
@@ -168,31 +174,24 @@ def build_self_assessment(audit) -> ExportFile:
         target = rows.get((ra.requirement.ref_id or "").upper())
         if target is None:
             continue
-        ws, row = target
+        sheet_name, row = target
+        cells = values[sheet_name]
         if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
-            ws.cell(row=row, column=template.doc_column, value="N/A")
-            ws.cell(row=row, column=template.impl_column, value="N/A")
+            cells[(row, template.doc_column)] = "N/A"
+            cells[(row, template.impl_column)] = "N/A"
         elif ra.is_scored:
             # Only the scores the audit counts.
             if audit.show_documentation_score and ra.documentation_score is not None:
-                ws.cell(
-                    row=row,
-                    column=template.doc_column,
-                    value=ra.documentation_score,
-                )
+                cells[(row, template.doc_column)] = ra.documentation_score
             if ra.score is not None:
-                ws.cell(row=row, column=template.impl_column, value=ra.score)
+                cells[(row, template.impl_column)] = ra.score
         if ra.observation:
-            ws.cell(
-                row=row,
-                column=template.comment_column,
-                value=sanitize_xlsx_value(escape_excel_formula(ra.observation)),
+            cells[(row, template.comment_column)] = sanitize_xlsx_value(
+                escape_excel_formula(ra.observation)
             )
 
-    buffer = io.BytesIO()
-    wb.save(buffer)
     return ExportFile(
-        buffer.getvalue(),
+        fill_template(path, values),
         f"{audit.name}_CyFun_Self-Assessment.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )

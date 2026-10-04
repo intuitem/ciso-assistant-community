@@ -61,7 +61,7 @@ The export writes each requirement's **score** into the official template, so a 
 - Each requirement's **documentation score** and **implementation score** are written to the appropriate sheet and row, as counted by the audit: a requirement that isn't scored, or a hidden documentation score, keeps the tool's own value. **Not applicable** results are written as `N/A`.
 - The export holds the whole audit, so respondents scoped to their part of it (auditees, third parties) cannot download it.
 - Observations from requirement assessments populate the comments column.
-- The official template scaffolding (cover page, formulas, summary sheet) is preserved untouched.
+- Only those cells change: the rest of the official tool (cover page, formulas, summary sheet, charts, score dropdowns) is preserved untouched, and the summary is recalculated when the file is opened.
 
 ## Checking the CCB conformity criteria
 
@@ -76,6 +76,8 @@ CyFun 2025 audits show, under **Outcomes**, whether they meet the conditions of 
 | Never excluded                                                            | key measures | key measures | key measures and controls linked to the management aspects |
 
 A key measure's maturity is the average of its documentation and implementation scores; the total and the categories use the audit's maturity score, as displayed. Each condition is highlighted when it holds (total maturity, key measures, categories, exclusions; the category condition holds by default below ESSENTIAL), and **CCB conformity criteria met** when they all do and the audit covers the whole level (its BASIC, IMPORTANT or ESSENTIAL group is selected, or no group at all: key measures alone are not a BASIC audit). A completed, conformant audit therefore has every condition highlighted, and a greyed-out condition shows what is missing.
+
+The check uses the audit's maturity score, so it matches the CCB tool only with the CCB's scoring settings, which new CyFun audits get by default: **Average of averages**, **Anchor N/A to target score** with the level's target (2.5 for BASIC, 3 above), **Scores default to the minimum**, and the documentation score shown. Audits created before these defaults, or whose settings were changed, can show a different verdict from the tool (for instance, unscored requirements left out instead of counted at 1): switch them to these settings under **More** in the audit's edit form.
 
 This is a self-check: conformity is confirmed by the Conformity Assessment Body, from the official self-assessment tool's summary tab.
 

@@ -1,4 +1,6 @@
 import io
+import zipfile
+from pathlib import Path
 
 import pytest
 from django.urls import reverse
@@ -18,6 +20,7 @@ from core.models import (
 from core.utils import EVERYONE_EDIT
 from iam.models import Folder, User, UserGroup
 
+TEMPLATES = Path(cyfun.__file__).resolve().parent / "templates" / "core"
 SCORES_VISIBLE = {
     field: EVERYONE_EDIT for field in ("score", "is_scored", "documentation_score")
 }
@@ -92,10 +95,14 @@ def _export_url(ca, export_id="cyfun-xlsx"):
     )
 
 
-def _export(client, ca):
+def _export_bytes(client, ca):
     response = client.get(_export_url(ca))
     assert response.status_code == 200
-    return load_workbook(io.BytesIO(response.content))
+    return response.content
+
+
+def _export(client, ca):
+    return load_workbook(io.BytesIO(_export_bytes(client, ca)))
 
 
 def _scores(workbook, sheet, ref_id, requirement_column):
@@ -279,3 +286,40 @@ class TestFrameworkExports:
     def test_unknown_export_is_not_found(self, admin_client, cyfun_audit):
         response = admin_client.get(_export_url(cyfun_audit, "no-such-export"))
         assert response.status_code == 404
+
+
+def _template_parts(name):
+    with zipfile.ZipFile(TEMPLATES / name) as archive:
+        return _fidelity(archive)
+
+
+def _fidelity(archive):
+    """Charts, extended data validations (dropdowns) and recalculation flag."""
+    names = archive.namelist()
+    sheets = [n for n in names if n.startswith("xl/worksheets/sheet")]
+    return (
+        sorted(n for n in names if n.startswith("xl/charts/chart")),
+        sum(archive.read(n).count(b"<x14:dataValidation ") for n in sheets),
+    )
+
+
+@pytest.mark.django_db
+class TestExportKeepsTheOfficialTool:
+    """openpyxl would drop the charts and the extended dropdowns on save."""
+
+    @pytest.mark.parametrize("groups", [["B"], ["I"], []])
+    def test_cyfun_2025_tools(self, admin_client, cyfun_audit, groups):
+        cyfun_audit.selected_implementation_groups = groups
+        cyfun_audit.save()
+        template = cyfun.export_template(cyfun.CYFUN_2025_URN, groups).file
+        content = _export_bytes(admin_client, cyfun_audit)
+        with zipfile.ZipFile(io.BytesIO(content)) as archive:
+            assert _fidelity(archive) == _template_parts(template)
+            assert b'fullCalcOnLoad="1"' in archive.read("xl/workbook.xml")
+
+    def test_cyfun_2023_tool(self, admin_client, cyfun2023_audit):
+        content = _export_bytes(admin_client, cyfun2023_audit)
+        with zipfile.ZipFile(io.BytesIO(content)) as archive:
+            charts, dropdowns = _fidelity(archive)
+        assert (charts, dropdowns) == _template_parts(cyfun.TEMPLATE_2023)
+        assert charts and dropdowns
