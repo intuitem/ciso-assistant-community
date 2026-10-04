@@ -29,6 +29,16 @@ from tests.mcp.helpers import (  # noqa: E402
     run,
 )
 
+# Real function, captured before the autouse fixture patches it
+_REAL_READ_SCALE = write_tools._read_objective_scale
+
+
+@pytest.fixture(autouse=True)
+def lossless_scale():
+    """Most tests use raw values unchanged: patch the scale to 0-4."""
+    with patch.object(write_tools, "_read_objective_scale", return_value="0-4") as m:
+        yield m
+
 
 def _obj(value, enabled=True):
     return {"value": value, "is_enabled": enabled}
@@ -463,3 +473,98 @@ class TestRegistration:
         names = {t.name for t in tools}
         assert "get_asset_security_gaps" in names
         assert "update_asset" not in names
+
+
+# ---------------------------------------------------------------------------
+# Scale normalization (same stored values as the web form)
+# ---------------------------------------------------------------------------
+
+
+class TestScaleNormalization:
+    @pytest.mark.parametrize(
+        "scale,given,stored",
+        [
+            ("1-4", 4, 3),
+            ("1-4", 3, 3),
+            ("1-4", 0, 0),
+            ("1-3", 4, 2),
+            ("FIPS-199", 2, 1),
+            ("0-4", 4, 4),
+            ("1-5", 4, 4),
+        ],
+    )
+    def test_canonical_value(self, scale, given, stored):
+        assert write_tools._canonical_value(given, scale) == stored
+
+    def test_create_normalizes_under_default_scale(self, lossless_scale):
+        lossless_scale.return_value = "1-4"
+        post = Mock(return_value=_response(201, {"id": UUID_A, "name": "x"}))
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            patch.object(write_tools, "GLOBAL_FOLDER_ID", None),
+        ):
+            run(write_tools.create_asset(name="DB", asset_type="SP", cap_proof=4))
+        caps = post.call_args.args[1]["security_capabilities"]["objectives"]
+        assert caps["proof"] == _obj(3)
+
+    def test_untouched_value_from_object_is_stable(self, lossless_scale):
+        # /object/ already returns canonical values: writing one criterion
+        # leaves the others exactly as read.
+        lossless_scale.return_value = "1-4"
+        stored = {
+            "type": "SP",
+            "security_capabilities": {
+                "objectives": {"confidentiality": _obj(3), "integrity": _obj(1)}
+            },
+        }
+        get = Mock(return_value=_response(200, stored))
+        patch_req = Mock(return_value=_response(200, {"id": UUID_A, "name": "x"}))
+        with (
+            patch.object(update_tools, "make_get_request", get),
+            patch.object(update_tools, "make_patch_request", patch_req),
+        ):
+            run(update_tools.update_asset(asset_id=UUID_A, cap_integrity=4))
+        caps = patch_req.call_args.args[1]["security_capabilities"]["objectives"]
+        assert caps == {"confidentiality": _obj(3), "integrity": _obj(3)}
+
+    def test_scale_read_failure_sends_nothing(self, lossless_scale):
+        lossless_scale.side_effect = ValueError(
+            "could not read the security objective scale (500); nothing sent"
+        )
+        post = Mock()
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            patch.object(write_tools, "GLOBAL_FOLDER_ID", None),
+        ):
+            result = run(write_tools.create_asset(name="DB", sec_proof=2))
+        post.assert_not_called()
+        assert "nothing sent" in result
+
+    def test_scale_not_read_without_security_values(self, lossless_scale):
+        post = Mock(return_value=_response(201, {"id": UUID_A, "name": "x"}))
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            patch.object(write_tools, "GLOBAL_FOLDER_ID", None),
+        ):
+            run(write_tools.create_asset(name="DB", rcap_rto="2h"))
+        lossless_scale.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "body,expected",
+        [
+            ({"security_objective_scale": "1-3"}, "1-3"),
+            ({"security_objective_scale": "unknown"}, "1-4"),
+            ({}, "1-4"),
+        ],
+    )
+    def test_read_objective_scale(self, body, expected):
+        get = Mock(return_value=_response(200, body))
+        with patch.object(write_tools, "make_get_request", get):
+            assert _REAL_READ_SCALE() == expected
+        get.assert_called_once_with("/settings/general/object/")
+
+    def test_read_objective_scale_failure(self):
+        get = Mock(return_value=_response(403))
+        with patch.object(write_tools, "make_get_request", get):
+            with pytest.raises(ValueError, match="nothing sent"):
+                _REAL_READ_SCALE()

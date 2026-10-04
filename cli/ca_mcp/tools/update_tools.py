@@ -95,6 +95,8 @@ async def update_asset(
     assets (primary ones aggregate them). Only the criteria you pass change:
     every other stored criterion is kept. A value without its _enabled flag
     means enabled; pass <param>_enabled=False to disable a criterion.
+    Values 0-4 are stored as the web form would under the configured scale
+    (e.g. under 1-4, 3 and 4 both display "4" and are stored as 3).
     Not atomic: objectives/capabilities are read then written back, so a
     concurrent edit between the two can be overwritten.
 

@@ -39,6 +39,16 @@ SECURITY_CRITERIA = (
     "safety",
 )
 RECOVERY_KEYS = ("rto", "rpo", "mtd")
+# Backend Asset.SECURITY_OBJECTIVES_SCALES: displayed label per raw value 0-4
+SECURITY_OBJECTIVES_SCALES = {
+    "1-3": [1, 2, 3, 3, 3],
+    "1-4": [1, 2, 3, 4, 4],
+    "1-5": [1, 2, 3, 4, 5],
+    "0-3": [0, 1, 2, 3, 3],
+    "0-4": [0, 1, 2, 3, 4],
+    "FIPS-199": ["low", "moderate", "moderate", "high", "high"],
+}
+DEFAULT_OBJECTIVE_SCALE = "1-4"
 
 
 def _collect_criteria(prefix: str, params: dict) -> dict:
@@ -123,18 +133,51 @@ def _collect_asset_objective_changes(params: dict) -> dict:
     return {field: touched for field, touched in changes.items() if touched}
 
 
+def _read_objective_scale() -> str:
+    """Security objective scale from the general settings (backend default 1-4)."""
+    res = make_get_request("/settings/general/object/")
+    if res.status_code != 200:
+        raise ValueError(
+            f"could not read the security objective scale ({res.status_code}); "
+            "nothing sent"
+        )
+    scale = (res.json() or {}).get("security_objective_scale")
+    return scale if scale in SECURITY_OBJECTIVES_SCALES else DEFAULT_OBJECTIVE_SCALE
+
+
+def _canonical_value(value: int, scale: str) -> int:
+    """Value the web form would store: the first raw value showing the same label.
+
+    Under 1-4, raw 3 and 4 both display "4" and the form stores 3; storing the
+    same keeps MCP and UI values comparable and stable through /object/.
+    """
+    labels = SECURITY_OBJECTIVES_SCALES[scale]
+    return labels.index(labels[value])
+
+
 def _build_asset_objectives(changes: dict, current_asset: dict = None) -> dict:
     """Payload fragment for the touched objective/capability fields.
 
     current_asset is the stored asset as returned by /assets/{id}/object/
     (update); None on create, where only the touched keys are sent.
+    Security values are normalized to the current scale as the web form does.
     """
+    scale = None
+    if "security_objectives" in changes or "security_capabilities" in changes:
+        scale = _read_objective_scale()
     payload = {}
     for field, touched in changes.items():
         stored = (current_asset or {}).get(field) or {}
         stored = stored.get("objectives") if isinstance(stored, dict) else {}
         stored = stored if isinstance(stored, dict) else {}
         if field in ("security_objectives", "security_capabilities"):
+            touched = {
+                criterion: (
+                    _canonical_value(value, scale) if value is not None else None,
+                    enabled,
+                )
+                for criterion, (value, enabled) in touched.items()
+            }
             merged = _merge_criteria(stored, touched)
         else:
             merged = _merge_durations(stored, touched)
@@ -286,7 +329,8 @@ async def create_asset(
     Objectives (sec_*, dro_*) are effective on primary assets (supporting ones
     inherit them); capabilities (cap_*, rcap_*) are effective on supporting
     assets (primary ones aggregate them). A value without its _enabled flag
-    means enabled.
+    means enabled. Values 0-4 are stored as the web form would under the
+    configured scale (e.g. under 1-4, 3 and 4 both display "4" and are stored as 3).
 
     Args:
         name: Asset name
