@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { onMount, onDestroy, tick } from 'svelte';
+	import { onMount, onDestroy, tick, untrack } from 'svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import {
 		createBuilderState,
 		setBuilderContext,
 		getTranslation,
 		withTranslation,
+		extractNodeId,
 		type Framework,
 		type BuilderNode,
 		type RequirementNode,
@@ -208,6 +209,38 @@
 			)
 	);
 
+	// Pages as rules address them (`pages["<node id>"]`), named for the author.
+	let rulePages = $derived(
+		mode === 'quick_form'
+			? $rootNodesStore
+					.map((bn) => ({
+						id: extractNodeId(bn.node.urn) ?? '',
+						label: bn.node.name || bn.node.ref_id || ''
+					}))
+					.filter((p) => p.id)
+			: []
+	);
+
+	// A form whose first object question appears is almost always about that
+	// object: pick it as subject then. Never over an author's choice, and never
+	// on load, so existing forms are left as they are.
+	let previousCandidateCount = untrack(() => subjectCandidates.length);
+	$effect(() => {
+		const count = subjectCandidates.length;
+		const first = subjectCandidates[0];
+		untrack(() => {
+			if (
+				mode === 'quick_form' &&
+				count === 1 &&
+				previousCandidateCount === 0 &&
+				!$frameworkStore.subject_question_urn
+			) {
+				builder.updateFramework({ subject_question_urn: first.urn });
+			}
+			previousCandidateCount = count;
+		});
+	});
+
 	// Quick forms keep their score settings as {min, max, aggregation} in
 	// scores_definition; frameworks use the scale editor above instead.
 	function quickFormScore(): { min: number; max: number; aggregation: string } {
@@ -270,11 +303,43 @@
 		}
 	});
 
+	// Most fields commit on `change`, which fires on blur: saving from inside one
+	// would send the value from before the edit. Blur commits it, then focus and
+	// caret go back so the author keeps typing.
+	function commitFocusedField(): () => void {
+		const el = document.activeElement;
+		if (!(
+			el instanceof HTMLInputElement ||
+			el instanceof HTMLTextAreaElement ||
+			el instanceof HTMLSelectElement
+		)) {
+			return () => {};
+		}
+		const caret =
+			el instanceof HTMLSelectElement ? null : ([el.selectionStart, el.selectionEnd] as const);
+		el.blur();
+		return () => {
+			el.focus();
+			if (caret && caret[0] !== null && el instanceof HTMLTextAreaElement) {
+				el.setSelectionRange(caret[0], caret[1]);
+			} else if (caret && caret[0] !== null && el instanceof HTMLInputElement) {
+				// Some input types (number, color) have no caret to restore.
+				try {
+					el.setSelectionRange(caret[0], caret[1]);
+				} catch {
+					/* not a text input */
+				}
+			}
+		};
+	}
+
 	// Ctrl+S / Cmd+S keyboard shortcut
 	function handleKeydown(e: KeyboardEvent) {
 		if ((e.ctrlKey || e.metaKey) && e.key === 's') {
 			e.preventDefault();
+			const refocus = commitFocusedField();
 			builder.flushDraft();
+			refocus();
 		}
 	}
 
@@ -363,6 +428,15 @@
 
 		<div class="flex-1 min-w-0">
 			<div class="max-w-5xl mx-auto px-6 py-8 space-y-8">
+				{#if $errorsStore.has('save-draft')}
+					<div
+						class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 whitespace-pre-line"
+						role="alert"
+						data-testid="builder-save-error"
+					>
+						<i class="fa-solid fa-triangle-exclamation mr-1"></i>{$errorsStore.get('save-draft')}
+					</div>
+				{/if}
 				<!-- Framework metadata -->
 				<div class="space-y-2" data-framework-metadata>
 					{#if $activeLanguageStore}
@@ -438,7 +512,9 @@
 						/>
 						<textarea
 							value={$frameworkStore.description ?? ''}
-							placeholder={m.builderFrameworkDescriptionPlaceholder()}
+							placeholder={mode === 'quick_form'
+								? m.builderFormDescriptionPlaceholder()
+								: m.builderFrameworkDescriptionPlaceholder()}
 							rows="2"
 							class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
 							onblur={(e) => {
@@ -481,7 +557,9 @@
 									: 'fa-chevron-right'} text-[10px] text-surface-500"
 							></i>
 							<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider"
-								>{m.builderFrameworkSettings()}</span
+								>{mode === 'quick_form'
+									? m.builderFormSettings()
+									: m.builderFrameworkSettings()}</span
 							>
 							{#if !showSettings}
 								<span class="text-xs text-surface-500">{settingsSummary}</span>
@@ -498,7 +576,9 @@
 								>
 								<textarea
 									value={$frameworkStore.annotation ?? ''}
-									placeholder={m.builderFrameworkAnnotationPlaceholder()}
+									placeholder={mode === 'quick_form'
+										? m.builderFormAnnotationPlaceholder()
+										: m.builderFrameworkAnnotationPlaceholder()}
 									rows="2"
 									class="mt-1 w-full text-sm text-surface-600-400 bg-transparent border border-surface-200-800 rounded-lg px-3 py-2 hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 									onblur={(e) => {
@@ -555,11 +635,14 @@
 								<p class="text-[10px] text-surface-500 mt-0.5">
 									{m.urnPreview()}
 									<code
-										>urn:{$frameworkStore.urn_namespace ??
-											'custom'}:risk:framework:{$frameworkStore.ref_id || '…'}</code
+										>urn:{$frameworkStore.urn_namespace ?? 'custom'}:risk:{mode === 'quick_form'
+											? 'quick_form'
+											: 'framework'}:{$frameworkStore.ref_id || '…'}</code
 									>
 									{#if lockUrnEdits}
-										{m.urnLockedComplianceAssessment()}
+										{mode === 'quick_form'
+											? m.urnLockedQuickFormResponses()
+											: m.urnLockedComplianceAssessment()}
 									{/if}
 								</p>
 							</div>
@@ -857,6 +940,7 @@
 								onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
 								activeLanguage={$activeLanguageStore}
 								{mode}
+								pages={rulePages}
 							/>
 
 							{#if mode === 'framework'}
@@ -991,7 +1075,7 @@
 
 				<!-- Global errors -->
 				{#each [...$errorsStore.entries()] as [key, message] (key)}
-					{#if key.startsWith('add-') || key.startsWith('reorder-') || key === 'save-draft'}
+					{#if key.startsWith('add-') || key.startsWith('reorder-')}
 						<div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
 							{message}
 						</div>

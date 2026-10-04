@@ -144,6 +144,51 @@ class TestBuilderRoundTrip:
         kept = editor_doc_to_quick_form_object(doc, existing=FORM_DICT)
         assert kept["subject_question_urn"] == Q_VENDOR
 
+    def test_a_question_added_in_the_editor_can_be_the_subject(self):
+        doc = quick_form_to_editor_doc(FORM_DICT)
+        editor_urn = "urn:test:risk:question:vendor-subject:vendor-q9"
+        added = copy.deepcopy(doc["questions"][0])
+        added.update(id="tmp-id", urn=editor_urn, ref_id="vendor-q9", order=900)
+        doc["questions"].append(added)
+        doc["framework_meta"]["subject_question_urn"] = editor_urn
+
+        urn_map = {}
+        saved = editor_doc_to_quick_form_object(
+            doc, existing=FORM_DICT, urn_map_out=urn_map
+        )
+        canonical = urn_map[editor_urn]
+        assert canonical == f"{PAGE}:question:vendor-q9"
+        assert saved["subject_question_urn"] == canonical
+        assert validate_quick_form_expressions(saved) == []
+
+        # The editor adopts the returned URNs; saving again changes nothing.
+        added["urn"] = canonical
+        doc["framework_meta"]["subject_question_urn"] = canonical
+        again_map = {}
+        again = editor_doc_to_quick_form_object(
+            doc, existing=saved, urn_map_out=again_map
+        )
+        assert set(again["pages"][0]["questions"]) == set(
+            saved["pages"][0]["questions"]
+        )
+        assert again_map["tmp-id"] == canonical
+
+    def test_saving_twice_with_editor_urns_mints_twice(self):
+        """Why the editor must adopt the returned URNs: the server cannot tell a
+        re-sent editor URN from new content, so it mints again."""
+        doc = quick_form_to_editor_doc(FORM_DICT)
+        added = copy.deepcopy(doc["questions"][0])
+        added.update(
+            id="tmp-id",
+            urn="urn:test:risk:question:vendor-subject:vendor-q9",
+            ref_id="vendor-q9",
+            order=900,
+        )
+        doc["questions"].append(added)
+        saved = editor_doc_to_quick_form_object(doc, existing=FORM_DICT)
+        again = editor_doc_to_quick_form_object(doc, existing=saved)
+        assert f"{PAGE}:question:vendor-q9-2" in again["pages"][0]["questions"]
+
 
 @pytest.fixture
 def setup():

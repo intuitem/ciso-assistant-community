@@ -179,4 +179,29 @@ class Migration(migrations.Migration):
                 verbose_name="Subject type",
             ),
         ),
+        migrations.AddField(
+            model_name="quickform",
+            name="on_accept_suggestion",
+            field=models.JSONField(
+                blank=True, default=list, verbose_name="Suggested apply on accept"
+            ),
+        ),
+        migrations.AddField(
+            model_name="quickformpublication",
+            name="show_projection",
+            field=models.BooleanField(
+                default=False,
+                help_text="While filling the form, respondents see what accepting it would write, e.g. the vendor's tier.",
+                verbose_name="Show the projected result to respondents",
+            ),
+        ),
+        migrations.AddField(
+            model_name="quickformpublication",
+            name="always_review",
+            field=models.BooleanField(
+                default=False,
+                help_text="Even when the person submitting could make the change themselves, an accepted review is needed before anything is written.",
+                verbose_name="Always require review",
+            ),
+        ),
     ]

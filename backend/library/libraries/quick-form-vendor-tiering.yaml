@@ -1,0 +1,230 @@
+urn: urn:intuitem:risk:library:vendor-tiering
+locale: en
+ref_id: vendor-tiering
+name: Vendor tiering
+description: >
+  A short starter form to tier a vendor by its inherent risk: three questions on business
+  and operations impact, three on data, privacy and security. Publish it with the "Set the
+  vendor's tier" step to write the tier onto the vendor.
+copyright: © intuitem
+version: 1
+publication_date: 2026-10-04
+provider: intuitem
+packager: intuitem
+objects:
+  quick_forms:
+  - urn: urn:intuitem:risk:quick_form:vendor-tiering
+    ref_id: vendor-tiering
+    name: Vendor tiering
+    description: |-
+      Tiers a vendor by its inherent risk, before any review of its security posture.
+
+      Each scored answer runs from 1 (low) to 4 (critical). Business impact and data exposure are each the average of their three answers, and the inherent risk is the higher of the two: a vendor that runs a critical process matters even if it holds no data, and the reverse.
+
+      Some answers raise the tier on their own: a regulated critical function, a sole supplier behind a critical process, special-category data, or privileged access to your systems.
+    annotation: 'Publishing it with "Set the vendor''s tier" pre-fills the suggested setup below: score
+      bands on Inherent risk (most critical tier from 3.3, then 2.6, then 2.0, the least critical for
+      the rest), Regulated critical function and Single point of failure to the most critical tier,
+      Special-category data and Privileged access to the next one. The tier is the highest of the band
+      and the mapped outcomes. Each dimension averages three answers, so it moves in steps of a third:
+      3.3 is reached by 4-4-2 or 3-3-4, 2.6 by 3-3-2.'
+    ref_id_prefix: VT
+    subject_question_urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:vendor
+    on_accept_suggestion:
+    - target: entity.tier
+      config:
+        bands:
+          outcome: inherent
+          thresholds:
+          - {position: 1, min: 3.3}
+          - {position: 2, min: 2.6}
+          - {position: 3, min: 2.0}
+          - {position: 4}
+        mapping:
+        - {outcome: regulated_function, position: 1}
+        - {outcome: single_point_of_failure, position: 1}
+        - {outcome: special_data, position: 2}
+        - {outcome: privileged_access, position: 2}
+    scores_definition:
+      min: 0
+      max: 4
+      aggregation: pages_mean
+    outcomes_definition:
+    - ref_id: business
+      label: Business impact
+      kind: number
+      expression: pages["business"].score
+    - ref_id: data
+      label: Data exposure
+      kind: number
+      expression: pages["data"].score
+    - ref_id: inherent
+      label: Inherent risk
+      kind: number
+      expression: 'values.business > values.data ? values.business : values.data'
+    - ref_id: regulated_function
+      label: Regulated critical function
+      color: '#dc2626'
+      expression: '"context:question:regulated:choice:yes" in answers["context:question:regulated"].selected_choices'
+    - ref_id: single_point_of_failure
+      label: Single point of failure
+      color: '#dc2626'
+      expression: >-
+        "business:question:b1:choice:stops" in answers["business:question:b1"].selected_choices &&
+        "business:question:b3:choice:sole" in answers["business:question:b3"].selected_choices
+    - ref_id: special_data
+      label: Special-category data
+      color: '#ea580c'
+      expression: '"data:question:d1:choice:special" in answers["data:question:d1"].selected_choices'
+    - ref_id: privileged_access
+      label: Privileged access
+      color: '#ea580c'
+      expression: '"data:question:d3:choice:privileged" in answers["data:question:d3"].selected_choices'
+    - ref_id: regulated_unsure
+      label: Regulated function to confirm
+      color: '#ca8a04'
+      expression: '"context:question:regulated:choice:unsure" in answers["context:question:regulated"].selected_choices'
+    pages:
+    - urn: urn:intuitem:risk:qf_page:vendor-tiering:context
+      ref_id: context
+      name: Context
+      questions:
+        urn:intuitem:risk:qf_page:vendor-tiering:context:question:vendor:
+          type: object_reference
+          text: Vendor
+          config:
+            model: entity
+        urn:intuitem:risk:qf_page:vendor-tiering:context:question:service:
+          type: text
+          text: What service does the vendor provide?
+        urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:
+          type: unique_choice
+          text: Type of service
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:saas
+            value: SaaS or cloud service
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:managed
+            value: Managed service or outsourcing
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:on_premise
+            value: Software or hardware installed on site
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:professional
+            value: Professional services
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:goods
+            value: Goods or facilities
+        urn:intuitem:risk:qf_page:vendor-tiering:context:question:regulated:
+          type: unique_choice
+          text: Does the service support a regulated critical function, such as a DORA critical
+            or important function or a NIS2 essential service?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:regulated:choice:yes
+            value: 'Yes'
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:regulated:choice:no
+            value: 'No'
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:regulated:choice:unsure
+            value: Unsure
+    - urn: urn:intuitem:risk:qf_page:vendor-tiering:business
+      ref_id: business
+      name: Business and operations impact
+      aggregation: mean
+      questions:
+        urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:
+          type: unique_choice
+          text: If the service stopped, what would the impact be?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:choice:negligible
+            value: Negligible
+            add_score: 1
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:choice:workaround
+            value: An inconvenience, a workaround exists
+            add_score: 2
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:choice:disruption
+            value: Significant disruption to a business process
+            add_score: 3
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:choice:stops
+            value: A critical or customer-facing process stops
+            add_score: 4
+        urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:
+          type: unique_choice
+          text: How long could you operate without it?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:choice:month
+            value: More than a month
+            add_score: 1
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:choice:weeks
+            value: One week to one month
+            add_score: 2
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:choice:days
+            value: One day to one week
+            add_score: 3
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:choice:hours
+            value: Less than a day
+            add_score: 4
+        urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:
+          type: unique_choice
+          text: How hard would it be to replace the vendor?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:choice:easy
+            value: Many alternatives, a switch takes days
+            add_score: 1
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:choice:weeks
+            value: A switch takes weeks
+            add_score: 2
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:choice:months
+            value: A switch takes months
+            add_score: 3
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:choice:sole
+            value: Sole source, or more than six months to switch
+            add_score: 4
+    - urn: urn:intuitem:risk:qf_page:vendor-tiering:data
+      ref_id: data
+      name: Data, privacy and security
+      aggregation: mean
+      questions:
+        urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:
+          type: unique_choice
+          text: What is the most sensitive data the vendor accesses, stores or processes?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:choice:public
+            value: None, or public data only
+            add_score: 1
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:choice:internal
+            value: Internal data
+            add_score: 2
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:choice:confidential
+            value: Confidential or personal data
+            add_score: 3
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:choice:special
+            value: Special-category personal data, payment or health data, credentials or secrets
+            add_score: 4
+        urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:
+          type: unique_choice
+          text: How many people's personal data does the vendor handle?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:choice:none
+            value: None
+            add_score: 1
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:choice:small
+            value: Fewer than 1,000
+            add_score: 2
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:choice:medium
+            value: 1,000 to 100,000
+            add_score: 3
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:choice:large
+            value: More than 100,000
+            add_score: 4
+        urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:
+          type: unique_choice
+          text: What access does the vendor have to your systems or network?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:choice:none
+            value: None
+            add_score: 1
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:choice:portal
+            value: User accounts on the vendor's own platform
+            add_score: 2
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:choice:integration
+            value: An integration (API) or remote access
+            add_score: 3
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:choice:privileged
+            value: Privileged or administrator access, or a presence on your network
+            add_score: 4

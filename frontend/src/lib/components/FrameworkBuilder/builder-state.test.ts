@@ -11,11 +11,14 @@ import {
 	hydrateDraft,
 	createBuilderState,
 	nodePassesIgFilter,
+	applyUrnMap,
+	describeSaveError,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
 	type Question
 } from './builder-state';
+import { BuilderRequestError } from './builder-api';
 
 const FW_ID = 'a1b2c3d4-0000-0000-0000-000000000000';
 
@@ -1102,6 +1105,69 @@ describe('node_id repair on draft load', () => {
 		// Beta (duplicate) got a fresh node_id and is now a standalone leaf.
 		expect(extractNodeId(beta.node.urn)).not.toBe('2.1');
 		expect(beta.children).toHaveLength(0);
+	});
+});
+
+describe('applyUrnMap', () => {
+	it('adopts canonical URNs by editor URN or id, keeping ids', () => {
+		const node = makeNode({ urn: null, ref_id: '2', parent_urn: null });
+		const q: Question = {
+			...makeQuestion({ requirement_node: node.id }),
+			id: 'tmp-q',
+			urn: 'urn:custom:risk:question:form:2-q1',
+			depends_on: {
+				question: 'urn:custom:risk:question:form:2-q0',
+				answers: ['urn:custom:risk:question_choice:form:2-q0-c1']
+			},
+			choices: [{ ...makeChoice('tmp-c', 1), urn: null, question: 'tmp-q' }]
+		};
+		const page = 'urn:custom:risk:qf_page:form:2';
+		const [mapped] = applyUrnMap(buildTree([node], [q]), {
+			[node.id.toLowerCase()]: page,
+			'urn:custom:risk:question:form:2-q1': `${page}:question:2-q1`,
+			'urn:custom:risk:question:form:2-q0': `${page}:question:2-q0`,
+			'urn:custom:risk:question_choice:form:2-q0-c1': `${page}:question:2-q0:choice:1`,
+			'tmp-c': `${page}:question:2-q1:choice:1`
+		});
+		expect(mapped.node.urn).toBe(page);
+		expect(mapped.node.id).toBe(node.id);
+		const question = mapped.questions[0].question;
+		expect(question.id).toBe('tmp-q');
+		expect(question.urn).toBe(`${page}:question:2-q1`);
+		expect(question.depends_on).toEqual({
+			question: `${page}:question:2-q0`,
+			answers: [`${page}:question:2-q0:choice:1`]
+		});
+		expect(question.choices[0].urn).toBe(`${page}:question:2-q1:choice:1`);
+	});
+
+	it('leaves unmapped URNs alone', () => {
+		const node = makeNode({ urn: 'urn:custom:risk:qf_page:form:1', parent_urn: null });
+		const [mapped] = applyUrnMap(buildTree([node], []), {});
+		expect(mapped.node.urn).toBe('urn:custom:risk:qf_page:form:1');
+	});
+});
+
+describe('describeSaveError', () => {
+	it('lists where each expression failed', () => {
+		const text = describeSaveError(
+			new BuilderRequestError('invalidExpressions', [
+				{ where: 'outcome', ref_id: 'criticality', error: 'no such key' },
+				{ where: 'page_visibility', ref_id: 'security', error: 'bad' },
+				'urn:x is duplicated'
+			])
+		);
+		const [summary, ...lines] = text.split('\n');
+		expect(summary).not.toBe('invalidExpressions');
+		expect(lines).toEqual([
+			'Rule criticality: no such key',
+			'Page security: bad',
+			'urn:x is duplicated'
+		]);
+	});
+
+	it('falls back to the message alone', () => {
+		expect(describeSaveError(new Error('boom'))).toBe('boom');
 	});
 });
 

@@ -1529,7 +1529,9 @@ export const QuickFormPublicationSchema = z.object({
 	allow_multiple_drafts: z.boolean().default(false).optional(),
 	icon: z.string().optional(),
 	order: z.number().default(0).optional(),
-	on_accept: z.array(z.any()).default([]).optional()
+	on_accept: z.array(z.any()).default([]).optional(),
+	show_projection: z.boolean().default(false).optional(),
+	always_review: z.boolean().default(false).optional()
 });
 
 export const QuickFormResponseSchema = z.object({

@@ -7301,6 +7301,7 @@ class QuickFormReadSerializer(BaseModelSerializer):
     pages_count = serializers.SerializerMethodField()
     responses_count = serializers.SerializerMethodField()
     is_deletable = serializers.SerializerMethodField()
+    suggested_on_accept = serializers.SerializerMethodField()
 
     def get_pages_count(self, obj):
         return obj.pages.count()
@@ -7310,6 +7311,11 @@ class QuickFormReadSerializer(BaseModelSerializer):
 
     def get_is_deletable(self, obj):
         return obj.is_deletable()
+
+    def get_suggested_on_accept(self, obj) -> list[dict]:
+        from core.quick_form_apply import suggested_on_accept
+
+        return suggested_on_accept(obj) if obj.on_accept_suggestion else []
 
     class Meta:
         model = QuickForm

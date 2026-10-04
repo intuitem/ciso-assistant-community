@@ -5,9 +5,11 @@
 
 	interface Props {
 		form: SuperValidated<any>;
+		// A new publication starts from the form's suggested setup.
+		isNew?: boolean;
 	}
 
-	let { form }: Props = $props();
+	let { form, isNew = false }: Props = $props();
 
 	const { value: onAccept, errors } = formFieldProxy(form, 'on_accept');
 	const { value: quickFormId } = formFieldProxy(form, 'quick_form');
@@ -23,23 +25,38 @@
 		return (($onAccept as any[]) ?? []).find((e) => e?.target === TIER_TARGET);
 	}
 
+	const toThresholds = (config: Record<string, any>): Threshold[] =>
+		(config.bands?.thresholds ?? []).map((t: any) => ({
+			tier: String(t.tier ?? ''),
+			min: typeof t.min === 'number' ? t.min : null
+		}));
+	const toMapping = (config: Record<string, any>): MappingRow[] =>
+		(config.mapping ?? []).map((r: any) => ({
+			outcome: String(r.outcome ?? ''),
+			tier: String(r.tier ?? '')
+		}));
+
 	const initial = tierEntry()?.config ?? {};
 	let enabled = $state(!!tierEntry());
 	let useBands = $state(!!initial.bands);
 	let bandOutcome = $state<string>(initial.bands?.outcome ?? '');
-	let thresholds = $state<Threshold[]>(
-		(initial.bands?.thresholds ?? []).map((t: any) => ({
-			tier: String(t.tier ?? ''),
-			min: typeof t.min === 'number' ? t.min : null
-		}))
-	);
+	let thresholds = $state<Threshold[]>(toThresholds(initial));
 	let useMapping = $state(Array.isArray(initial.mapping) && initial.mapping.length > 0);
-	let mapping = $state<MappingRow[]>(
-		(initial.mapping ?? []).map((r: any) => ({
-			outcome: String(r.outcome ?? ''),
-			tier: String(r.tier ?? '')
-		}))
-	);
+	let mapping = $state<MappingRow[]>(toMapping(initial));
+	// The form's library-suggested tier setup, already mapped to this scale.
+	let suggestion = $state<Record<string, any> | null>(null);
+	const isEmpty = () => !useBands && !useMapping;
+
+	function useSuggestion() {
+		if (!suggestion) return;
+		useBands = !!suggestion.bands;
+		bandOutcome = suggestion.bands?.outcome ?? '';
+		thresholds = toThresholds(suggestion);
+		useMapping = Array.isArray(suggestion.mapping) && suggestion.mapping.length > 0;
+		mapping = toMapping(suggestion);
+		enabled = true;
+		sync();
+	}
 
 	let tiers = $state<Tier[]>([]);
 	let rules = $state<Rule[]>([]);
@@ -56,11 +73,18 @@
 		const id = $quickFormId;
 		if (!id) {
 			rules = [];
+			suggestion = null;
 			return;
 		}
 		fetch(`/quick-forms/${id}`)
 			.then((res) => (res.ok ? res.json() : {}))
-			.then((data) => (rules = ((data as any).outcomes_definition ?? []) as Rule[]));
+			.then((data: any) => {
+				rules = (data.outcomes_definition ?? []) as Rule[];
+				suggestion =
+					((data.suggested_on_accept ?? []) as any[]).find((e) => e?.target === TIER_TARGET)
+						?.config ?? null;
+				if (suggestion && isNew && isEmpty()) useSuggestion();
+			});
 	});
 
 	const ruleLabel = (rule: Rule) => rule.label ?? rule.annotation ?? rule.ref_id;
@@ -81,6 +105,15 @@
 		}
 		if (useMapping) config.mapping = mapping;
 		$onAccept = [...others, { target: TIER_TARGET, config }];
+	}
+
+	// One band per visible tier, most critical first, the last catching the
+	// rest: the shape almost every setup takes, left to the author to score.
+	function prefillBands() {
+		if (thresholds.length === 0) {
+			thresholds = tiers.map((tier) => ({ tier: tier.id, min: null }));
+		}
+		if (!bandOutcome && numericRules.length === 1) bandOutcome = numericRules[0].ref_id;
 	}
 
 	function addThreshold() {
@@ -110,7 +143,14 @@
 			checked={enabled}
 			onchange={(e) => {
 				enabled = e.currentTarget.checked;
-				sync();
+				if (enabled && suggestion && isEmpty()) useSuggestion();
+				else {
+					if (enabled && isEmpty() && numericRules.length) {
+						useBands = true;
+						prefillBands();
+					}
+					sync();
+				}
 			}}
 			data-testid="on-accept-tier-toggle"
 		/>
@@ -119,6 +159,18 @@
 
 	{#if enabled}
 		<div class="flex flex-col gap-3 pl-6">
+			{#if suggestion}
+				<div class="flex flex-wrap items-center gap-2 text-xs text-surface-600-400">
+					<i class="fa-solid fa-wand-magic-sparkles"></i>
+					<span>{m.onAcceptSuggestionAvailable()}</span>
+					<button
+						type="button"
+						class="btn btn-sm preset-tonal"
+						onclick={useSuggestion}
+						data-testid="on-accept-use-suggestion">{m.onAcceptUseSuggestion()}</button
+					>
+				</div>
+			{/if}
 			<label class="flex items-center gap-2 text-sm">
 				<input
 					type="checkbox"
@@ -126,6 +178,7 @@
 					checked={useBands}
 					onchange={(e) => {
 						useBands = e.currentTarget.checked;
+						if (useBands) prefillBands();
 						sync();
 					}}
 				/>

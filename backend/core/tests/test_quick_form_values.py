@@ -176,6 +176,20 @@ class TestValidation:
             ]
         )
         assert set(errors) == {"a"}
+        assert "listed before it" in errors["a"]
+
+    def test_an_unknown_page_or_question_names_the_ones_that_exist(self):
+        page = TIERING_FORM["pages"][0]
+        page_id = page["urn"].split(":", 5)[5]
+        errors = self._errors(
+            [
+                {"ref_id": "p", "expression": 'pages["nope"].score > 1.0'},
+                {"ref_id": "q", "expression": 'answers["nope"].answered'},
+            ]
+        )
+        assert errors["p"].startswith("No page 'nope' in this form. Known: ")
+        assert page_id in errors["p"]
+        assert errors["q"].startswith("No answer 'nope' in this form. Known: ")
 
     def test_yes_no_rules_see_every_value(self):
         assert (

@@ -523,7 +523,9 @@
 									: node.node.description
 										? node.node.description.slice(0, 60) +
 											(node.node.description.length > 60 ? '...' : '')
-										: m.builderNodeNamePlaceholder()}
+										: isQuickForm
+											? m.builderPageNamePlaceholder()
+											: m.builderNodeNamePlaceholder()}
 								class="w-full text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:{isSplash
 									? 'border-purple-500'
 									: 'border-blue-500'} px-0.5 py-0.5 outline-none focus-visible:ring-2 {isSplash

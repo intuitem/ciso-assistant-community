@@ -772,9 +772,13 @@ class TierWriteSerializer(BaseModelSerializer):
         return value
 
     def create(self, validated_data):
-        # New tiers go to the top; the tiers page reorders them.
-        validated_data.setdefault("rank", Tier.next_rank())
-        return super().create(validated_data)
+        # New tiers go to the bottom: a scale is entered most critical first,
+        # so each addition lands below the previous one.
+        if "rank" in validated_data:
+            return super().create(validated_data)
+        with transaction.atomic():
+            validated_data["rank"] = Tier.make_room_at_the_bottom()
+            return super().create(validated_data)
 
 
 class EntityTierChangeReadSerializer(BaseModelSerializer):

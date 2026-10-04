@@ -19,6 +19,7 @@ import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWit
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
+import EntityChangeTier from '$lib/components/ContextMenu/entities/ChangeTier.svelte';
 import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
 import ToggleBooleanField from '$lib/components/ContextMenu/ToggleBooleanField.svelte';
 import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
@@ -1197,6 +1198,19 @@ export const TIER_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'id',
 		label: 'tier',
 		multiple: true
+	}
+};
+
+// Entities only: their tier is optional, and "--" lists the untiered ones.
+export const ENTITY_TIER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'tiers',
+		optionsLabelField: 'name',
+		optionsValueField: 'id',
+		label: 'tier',
+		multiple: true,
+		enableDoubleDash: true
 	}
 };
 
@@ -2518,7 +2532,7 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER,
-			tier: TIER_FILTER,
+			tier: ENTITY_TIER_FILTER,
 			last_assessment_status: LAST_ASSESSMENT_STATUS_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
@@ -3891,7 +3905,8 @@ export const contextMenuActions = {
 		{ component: VulnerabilityChangeSeverity, props: {} }
 	],
 	'asset-assessments': [{ component: ToggleRecoveryFlags, props: {} }],
-	'metric-instances': [{ component: MetricInstanceEditValue, props: {} }]
+	'metric-instances': [{ component: MetricInstanceEditValue, props: {} }],
+	entities: [{ component: EntityChangeTier, props: {} }]
 };
 
 // Batch action configuration.

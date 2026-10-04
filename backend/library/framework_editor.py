@@ -224,7 +224,11 @@ def _clean(mapping: dict) -> dict:
 
 
 def editor_doc_to_framework_object(
-    editor_doc: dict, *, existing: dict, node_base: str | None = None
+    editor_doc: dict,
+    *,
+    existing: dict,
+    node_base: str | None = None,
+    urn_map_out: dict | None = None,
 ) -> dict:
     """Convert an editor doc back into the library-YAML framework object.
 
@@ -310,6 +314,9 @@ def editor_doc_to_framework_object(
         )
 
     question_id_to_urn: dict = {}
+    # Reported to the editor only: choice ids are short and never appear
+    # inside the tree, so they stay out of the rebase map.
+    choice_id_to_urn: dict = {}
     # URNs claimed by questions during this save, per node. Minting must
     # avoid both these and every URN existing anywhere in the document —
     # existing questions keep their URN verbatim (whatever their position),
@@ -368,6 +375,9 @@ def editor_doc_to_framework_object(
                 next_index += 1
                 if old_c_urn:
                     urn_map[old_c_urn] = c_urn
+            choice_id = str(choice.get("id") or "").lower()
+            if choice_id and choice_id != c_urn:
+                choice_id_to_urn[choice_id] = c_urn
             q_choices.append(
                 _clean(
                     {
@@ -504,6 +514,10 @@ def editor_doc_to_framework_object(
     for editor_id, canonical in {**node_ids_to_urn, **question_id_to_urn}.items():
         if editor_id and editor_id != canonical:
             urn_map[editor_id] = canonical
+    # The editor keeps its own URNs until told otherwise; sending these back
+    # lets it adopt the canonical ones, or every save re-mints new content.
+    if urn_map_out is not None:
+        urn_map_out.update({**choice_id_to_urn, **urn_map})
     if urn_map:
         requirement_nodes = rebase_tree(requirement_nodes, urn_map)
 

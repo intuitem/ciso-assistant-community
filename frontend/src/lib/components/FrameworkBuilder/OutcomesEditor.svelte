@@ -11,9 +11,25 @@
 		/** Which evaluator the rules will run against — the two expose different
 		 * context roots, and a rule written for the wrong one silently never fires. */
 		mode?: 'framework' | 'quick_form';
+		/** Quick forms: pages a number rule can read the score of. */
+		pages?: { id: string; label: string }[];
 	}
 
-	let { outcomes, onupdate, activeLanguage = null, mode = 'framework' }: Props = $props();
+	let {
+		outcomes,
+		onupdate,
+		activeLanguage = null,
+		mode = 'framework',
+		pages = []
+	}: Props = $props();
+
+	// The picker writes, and only ever replaces, a bare page score: a hand-written
+	// expression is never overwritten by it.
+	const PAGE_SCORE = /^\s*pages\["([^"]+)"\]\.score\s*$/;
+	const pageScoreOf = (expression: string | undefined) =>
+		expression ? (PAGE_SCORE.exec(expression)?.[1] ?? null) : null;
+	const pagePickable = (expression: string | undefined) =>
+		!expression?.trim() || pageScoreOf(expression) !== null;
 
 	let rules: OutcomeRule[] = $state(outcomes.map((r) => ({ ...r })));
 	let expandedIndex: number | null = $state(null);
@@ -277,6 +293,28 @@
 							}}
 						></textarea>
 					</label>
+
+					{#if mode === 'quick_form' && rule.kind === 'number' && pages.length && pagePickable(rule.expression)}
+						<label class="block">
+							<span class="text-xs text-surface-600-400">{m.builderUsePageScore()}</span>
+							<select
+								class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
+								value={pageScoreOf(rule.expression) ?? ''}
+								onchange={(e) => {
+									const id = e.currentTarget.value;
+									rules[index].expression = id ? `pages["${id}"].score` : '';
+									persist();
+								}}
+								data-testid="outcome-rule-page-score"
+							>
+								<option value="">--</option>
+								{#each pages as page (page.id)}
+									<option value={page.id}>{page.label || page.id}</option>
+								{/each}
+							</select>
+							<span class="text-xs text-surface-500">{m.builderUsePageScoreHint()}</span>
+						</label>
+					{/if}
 
 					{#if rule.kind !== 'number'}
 						<label class="block">

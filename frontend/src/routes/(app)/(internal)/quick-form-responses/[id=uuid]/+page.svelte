@@ -3,6 +3,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import Question from '$lib/components/Forms/Question.svelte';
+	import ProjectionCard from '$lib/components/QuickForms/ProjectionCard.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -193,7 +194,7 @@
 				<h1 class="text-xl font-semibold truncate">{response.name}</h1>
 				<p class="text-sm text-surface-500">
 					<a class="anchor" href="/quick-forms/{response.quick_form?.id}">
-						{response.quick_form?.str ?? content.quick_form?.name}
+						{content.quick_form?.name ?? response.quick_form?.str}
 					</a>
 					· {response.folder?.str}
 				</p>
@@ -289,7 +290,7 @@
 			</div>
 		{/if}
 
-		{#if content.computed_values && Object.keys(content.computed_values).length > 0}
+		{#if content.computed_values && Object.keys(content.computed_values).length > 0 && content.scored_complete !== false}
 			{@const rules = (content.quick_form?.outcomes_definition ?? []) as any[]}
 			<div class="flex flex-wrap items-center gap-3" data-testid="computed-values">
 				<span class="text-xs font-semibold uppercase tracking-wider text-surface-500"
@@ -307,6 +308,14 @@
 			</div>
 		{/if}
 
+		{#if content.projection?.length && !content.applications?.length}
+			<ProjectionCard
+				rows={content.projection}
+				rules={content.quick_form?.outcomes_definition ?? []}
+				nested
+			/>
+		{/if}
+
 		{#if content.applications?.length}
 			<div
 				class="rounded-lg border border-success-300 bg-success-50 dark:bg-success-500/10 p-3"
@@ -315,7 +324,9 @@
 				<p
 					class="text-xs font-semibold uppercase tracking-wider text-success-700 dark:text-success-400"
 				>
-					<i class="fa-solid fa-circle-check mr-1"></i>{m.appliedOnAccept()}
+					<i class="fa-solid fa-circle-check mr-1"></i>{response.resolution === 'auto'
+						? m.appliedOnSubmit()
+						: m.appliedOnAccept()}
 				</p>
 				<ul class="mt-2 flex flex-col gap-1 text-sm">
 					{#each content.applications as application (application.target)}
@@ -386,6 +397,12 @@
 					>
 						<i class="fa-solid fa-paper-plane mr-1"></i>{m.quickFormSubmit()}
 					</button>
+					{#if content.on_submit}
+						<span class="text-xs text-surface-500" data-testid="on-submit-hint">
+							<i class="fa-solid {content.on_submit === 'apply' ? 'fa-bolt' : 'fa-user-check'} mr-1"
+							></i>{content.on_submit === 'apply' ? m.onSubmitApplies() : m.onSubmitGoesToReview()}
+						</span>
+					{/if}
 				{:else if response.status === 'submitted' || response.status === 'in_review'}
 					<button
 						type="button"

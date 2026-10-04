@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 
 from core.apps import startup
 from core.models import (
+    Actor,
     Question,
     QuickForm,
     QuickFormApplication,
@@ -17,7 +18,7 @@ from core.models import (
 )
 from core.quick_form_apply import plan, validate_on_accept
 from core.utils import apply_answers_dict
-from iam.models import Folder, UserGroup
+from iam.models import Folder, Role, RoleAssignment, UserGroup
 from tprm.models import Entity, EntityTierChange, Tier, TierSource
 from tprm.tier_target import EntityTierTarget
 from tprm.tiers import set_entity_tier
@@ -228,6 +229,7 @@ class TestResolution:
         proposal = self._proposal(setup, risk="three")
         assert proposal.display == "high"
         assert proposal.value == {"tier": str(_tier("high").id), "value": 3.0}
+        assert (proposal.extra["band"], proposal.extra["outcomes"]) == ("risk", [])
 
     def test_lowest_band_catches_the_rest(self, setup):
         assert self._proposal(setup, risk="one").display == "low"
@@ -237,6 +239,21 @@ class TestResolution:
         assert proposal.display == "critical"
         # The band did not produce the winning tier, so no value is kept.
         assert proposal.value["value"] is None
+        assert proposal.extra["outcomes"] == ["pii"]
+        assert "band" not in proposal.extra
+
+    def test_a_lower_mapped_outcome_is_not_the_reason(self, setup):
+        config = _config()
+        config["mapping"] = [{"outcome": "pii", "tier": str(_tier("low").id)}]
+        QuickFormPublication.objects.filter(pk=setup["publication"].pk).update(
+            on_accept=[{"target": "entity.tier", "config": config}]
+        )
+        proposal = self._proposal(setup, risk="three", pii="yes")
+        assert (proposal.display, proposal.extra["outcomes"]) == ("high", [])
+
+    def test_a_hidden_tier_is_never_proposed(self, setup):
+        Tier.objects.filter(name="high").update(is_visible=False)
+        assert self._proposal(setup, risk="three").reason == "tierHidden"
 
     def test_nothing_resolved_writes_nothing(self, setup):
         config = {"mapping": [{"outcome": "pii", "tier": str(_tier("critical").id)}]}
@@ -353,6 +370,13 @@ class TestEndpoints:
         rows = client.get("/api/tiers/fed-by/").json()
         assert [(r["name"], r["problems"]) for r in rows] == [("Tier a vendor", [])]
 
+    def test_fed_by_reports_a_hidden_tier(self, setup):
+        Tier.objects.filter(name="critical").update(is_visible=False)
+        _user, client = _admin()
+        rows = client.get("/api/tiers/fed-by/").json()
+        row = next(r for r in rows if r["id"] == str(setup["publication"].id))
+        assert row["problems"] == ["tierHidden"]
+
     def test_fed_by_reports_a_broken_config(self, setup):
         _user, client = _admin()
         QuickForm.objects.filter(pk=setup["form"].pk).update(outcomes_definition=[])
@@ -364,3 +388,109 @@ class TestEndpoints:
         rows = client.get("/api/quick-form-publications/mine/").json()
         row = next(r for r in rows if r["id"] == str(setup["publication"].id))
         assert row["targets"] == ["entity.tier"]
+
+
+@pytest.mark.django_db
+class TestMaterialize:
+    SUGGESTION = {
+        "bands": {
+            "outcome": "risk",
+            "thresholds": [
+                {"position": 2, "min": 3},
+                {"position": 3, "min": 2},
+                {"position": 4},
+            ],
+        },
+        "mapping": [{"outcome": "pii", "position": 1}],
+    }
+
+    def test_positions_follow_the_scale(self, setup):
+        assert EntityTierTarget().materialize(self.SUGGESTION) == _config()
+
+    def test_hidden_tiers_are_not_counted(self, setup):
+        Tier.objects.filter(name="critical").update(is_visible=False)
+        config = EntityTierTarget().materialize(
+            {"mapping": [{"outcome": "pii", "position": 1}]}
+        )
+        assert config == {
+            "mapping": [{"outcome": "pii", "tier": str(_tier("high").id)}]
+        }
+
+    def test_a_scale_too_short_gives_nothing(self, setup):
+        Tier.objects.filter(name="low").update(is_visible=False)
+        assert EntityTierTarget().materialize(self.SUGGESTION) is None
+
+    @pytest.mark.parametrize("position", [0, "1", None, 1.0])
+    def test_malformed_positions_give_nothing(self, setup, position):
+        suggestion = {"mapping": [{"outcome": "pii", "position": position}]}
+        assert EntityTierTarget().materialize(suggestion) is None
+
+
+@pytest.mark.django_db
+class TestSelfAssessment:
+    def test_an_assessment_by_someone_who_may_set_the_tier_applies_on_submit(
+        self, setup
+    ):
+        user, client = _admin()
+        response = _response(setup, risk="three")
+        QuickFormResponse.objects.filter(pk=response.pk).update(
+            status=QuickFormResponse.Status.DRAFT, submitted_by=None
+        )
+        response.respondents.add(Actor.objects.get(user=user, entity__isnull=True))
+
+        result = client.post(
+            f"/api/my-requests/{response.id}/submit/", {}, format="json"
+        )
+        assert result.status_code == 200, result.json()
+
+        setup["acme"].refresh_from_db()
+        assert setup["acme"].tier == _tier("high")
+        assert setup["acme"].tier_source == TierSource.ASSESSMENT
+        change = EntityTierChange.objects.get(entity=setup["acme"])
+        assert change.response_id == response.id
+        response.refresh_from_db()
+        assert response.resolution == QuickFormResponse.Resolution.AUTO
+
+
+@pytest.mark.django_db
+class TestDomainManagerScale:
+    def _domain_manager(self, folder, email):
+        user = User.objects.create_user(email=email, is_published=True)
+        assignment = RoleAssignment.objects.create(
+            user=user,
+            role=Role.objects.get(name="BI-RL-DMA"),
+            folder=folder,
+            is_recursive=True,
+        )
+        assignment.perimeter_folders.add(folder)
+        client = APIClient()
+        client.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"
+        )
+        return client
+
+    def test_a_domain_manager_of_global_edits_the_scale(self, setup):
+        client = self._domain_manager(Folder.get_root_folder(), "dm-global@test.local")
+        created = client.post("/api/tiers/", {"name": "Vital"}, format="json")
+        assert created.status_code == 201, created.json()
+
+    def test_a_domain_manager_of_one_domain_does_not(self, setup):
+        client = self._domain_manager(setup["domain"], "dm-local@test.local")
+        assert (
+            client.post("/api/tiers/", {"name": "Vital"}, format="json").status_code
+            == 403
+        )
+
+
+@pytest.mark.django_db
+def test_a_hidden_tier_sends_a_self_assessment_to_review(setup):
+    user, client = _admin()
+    Tier.objects.filter(name="high").update(is_visible=False)
+    response = _response(setup, risk="three")
+    QuickFormResponse.objects.filter(pk=response.pk).update(
+        status=QuickFormResponse.Status.DRAFT, submitted_by=None
+    )
+    response.respondents.add(Actor.objects.get(user=user, entity__isnull=True))
+    client.post(f"/api/my-requests/{response.id}/submit/", {}, format="json")
+    response.refresh_from_db()
+    assert response.status == QuickFormResponse.Status.SUBMITTED

@@ -250,6 +250,7 @@ from core import commitment
 
 import structlog
 
+from core.quick_form_apply import project, suggested_on_accept
 from core.quick_form_targets import get_target
 
 logger = structlog.get_logger(__name__)
@@ -20539,6 +20540,17 @@ class QuickFormViewSet(BaseModelViewSet):
                 "score": evaluation["score"],
                 "computed_outcome": evaluation["computed_outcome"],
                 "computed_values": evaluation["computed_values"],
+                "scored_complete": evaluation["context"]["response"]["scored_complete"],
+                # With the library's suggested setup: the form has no
+                # publication here, and authors want to see where answers lead.
+                "projection": project(
+                    suggested_on_accept(quick_form),
+                    evaluation["computed_values"],
+                    evaluation["computed_outcome"],
+                    ready=evaluation["context"]["response"]["scored_complete"],
+                )
+                if quick_form.on_accept_suggestion
+                else [],
             }
         )
 
@@ -20647,6 +20659,47 @@ def _reference_labels(response, user=None):
     return out
 
 
+def _close_on_submit(response, user) -> list[dict] | None:
+    """Apply a just-submitted response at once when its submitter could make
+    every change by hand (see `can_apply_on_submit`); None when it goes to
+    review. Closed as AUTO: no second person decided, and the register says so."""
+    from core.cel_service import evaluate_quick_form
+    from core.quick_form_apply import apply_on_accept, can_apply_on_submit
+
+    publication = response.publication
+    if publication is None or not publication.on_accept or publication.always_review:
+        return None
+    evaluate_quick_form(response, persist=True)
+    if not can_apply_on_submit(response, user):
+        return None
+    response.status = QuickFormResponse.Status.CLOSED
+    response.resolution = QuickFormResponse.Resolution.AUTO
+    response.decided_by = user
+    response.save(update_fields=["status", "resolution", "decided_by", "updated_at"])
+    applied = apply_on_accept(response, user)
+    emit_quick_form_event(response, "closed")
+    return applied
+
+
+def _on_submit_outcome(response, user, evaluation) -> str | None:
+    """For a draft with on-accept targets: "apply" when submitting will write
+    them at once, "review" when it goes to a reviewer. Read from the answers as
+    they stand, not the last persisted evaluation."""
+    from core.quick_form_apply import can_apply_on_submit
+
+    publication = response.publication
+    if (
+        user is None
+        or response.status != QuickFormResponse.Status.DRAFT
+        or publication is None
+        or not publication.on_accept
+    ):
+        return None
+    response.computed_values = evaluation["computed_values"]
+    response.computed_outcome = evaluation["computed_outcome"]
+    return "apply" if can_apply_on_submit(response, user) else "review"
+
+
 def _self_validation_allowed(response) -> bool:
     """The escape hatch for small organisations. Never in a personal folder: its owner
     holds analyst there, so they would raise and approve unseen."""
@@ -20725,6 +20778,16 @@ def quick_form_response_content(response, user=None):
             "score": evaluation["score"],
             "computed_outcome": evaluation["computed_outcome"],
             "computed_values": evaluation["computed_values"],
+            # Until then an unanswered page scores 0: values read as results.
+            "scored_complete": evaluation["context"]["response"]["scored_complete"],
+            "projection": project(
+                response.publication.on_accept,
+                evaluation["computed_values"],
+                evaluation["computed_outcome"],
+                ready=evaluation["context"]["response"]["scored_complete"],
+            )
+            if response.publication and response.publication.show_projection
+            else [],
             "subject": response.subject_summary(user),
             "applications": [
                 {
@@ -20741,6 +20804,7 @@ def quick_form_response_content(response, user=None):
             ],
             "can_edit_answers": response.status == QuickFormResponse.Status.DRAFT
             and (user is None or response.is_requester(user)),
+            "on_submit": _on_submit_outcome(response, user, evaluation),
             # Whether this viewer may decide. Computed here so the action bar shows
             # what the server will actually accept instead of 403ing on click.
             "can_review": _can_review(user, response) if user is not None else False,
@@ -20990,10 +21054,16 @@ class MyRequestViewSet(viewsets.ViewSet):
             update_fields.append("due_date")
         response.save(update_fields=update_fields)
         emit_quick_form_submitted(response)
-        transaction.on_commit(
-            lambda pk=response.pk: send_quick_form_submitted_notification(pk)
-        )
-        return Response(QuickFormResponseReadSerializer(response).data)
+        applied = _close_on_submit(response, request.user)
+        if applied is None:
+            # Nobody to notify when nothing is left to review.
+            transaction.on_commit(
+                lambda pk=response.pk: send_quick_form_submitted_notification(pk)
+            )
+        data = QuickFormResponseReadSerializer(response).data
+        if applied is not None:
+            data = {**data, "on_accept": applied}
+        return Response(data)
 
     @action(
         detail=True,
@@ -21867,9 +21937,11 @@ class QuickFormResponseViewSet(BaseModelViewSet):
 
         if is_real_submission:
             emit_quick_form_submitted(response)
-            transaction.on_commit(
-                lambda pk=response.pk: send_quick_form_submitted_notification(pk)
-            )
+            on_accept = _close_on_submit(response, request.user)
+            if on_accept is None:
+                transaction.on_commit(
+                    lambda pk=response.pk: send_quick_form_submitted_notification(pk)
+                )
         elif new_status == QuickFormResponse.Status.CLOSED:
             # The decision is the interesting moment: `resolution` is on the payload, so
             # a workflow waits for "accepted" rather than for "no longer open".

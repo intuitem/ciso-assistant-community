@@ -14,13 +14,15 @@
 		model,
 		cacheLocks = {},
 		formDataCache = $bindable({}),
-		initialData = {}
+		initialData = {},
+		context = 'default'
 	}: {
 		form: SuperValidated<Record<string, unknown>>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, unknown>;
 		initialData?: Record<string, unknown>;
+		context?: string;
 	} = $props();
 </script>
 
@@ -107,4 +109,16 @@
 	label={m.allowMultipleDrafts()}
 	helpText={m.quickFormAllowMultipleDraftsHelpText()}
 />
-<OnAcceptEditor {form} />
+<OnAcceptEditor {form} isNew={context !== 'edit'} />
+<Checkbox
+	{form}
+	field="always_review"
+	label={m.alwaysReview()}
+	helpText={m.alwaysReviewHelpText()}
+/>
+<Checkbox
+	{form}
+	field="show_projection"
+	label={m.showProjection()}
+	helpText={m.showProjectionHelpText()}
+/>

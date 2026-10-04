@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 import celpy
 import celpy.celtypes as celtypes
 import structlog
@@ -489,6 +491,7 @@ def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
             "answered_count": answered_count,
             "total_count": total_count,
             "complete": required_missing == 0,
+            "scored_complete": all(item["answered"] for item in items),
         },
         "pages": pages,
         "answers": answers,
@@ -630,6 +633,7 @@ def _quick_form_probe(quick_form: dict) -> dict:
             "answered_count": 0,
             "total_count": 0,
             "complete": False,
+            "scored_complete": False,
         },
         "pages": pages,
         "answers": answers,
@@ -670,13 +674,35 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
             }
         )
 
+    def _message(expression, error) -> str:
+        """The evaluator's text, or for the usual mistake (a page or question
+        id that does not exist) the key and the ids that do."""
+        text = str(error).split("\n")[0]
+        member = re.search(r"no such member in mapping: '([^']*)'", text)
+        if member and f"values.{member[1]}" in expression:
+            return (
+                f"No number rule '{member[1]}' above this one: a rule reads only "
+                "the number rules listed before it"
+            )
+        key = re.search(r"no such key.*StringType\('([^']*)'\)", text)
+        if key is None:
+            return text[:300]
+        for scope in ("pages", "answers"):
+            if (
+                f'{scope}["{key[1]}"]' in expression
+                or f"{scope}['{key[1]}']" in expression
+            ):
+                known = ", ".join(sorted(raw_probe.get(scope) or {})) or "none"
+                return f"No {scope[:-1]} '{key[1]}' in this form. Known: {known}"[:300]
+        return f"Unknown key '{key[1]}'"
+
     def _check(where, ref_id, expression, context=None):
         if not expression:
             return None
         try:
             return env.program(env.compile(expression)).evaluate(context or probe)
         except Exception as e:
-            _error(where, ref_id, expression, str(e).split("\n")[0][:300])
+            _error(where, ref_id, expression, _message(expression, e))
             return None
 
     from core.object_references import subject_question_error
@@ -924,6 +950,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                 "answered_count": totals["answered"],
                 "total_count": totals["total"],
                 "complete": totals["missing"] == 0,
+                "scored_complete": all(item["answered"] for item in items),
             },
             "pages": page_ctx,
             "answers": answer_ctx,

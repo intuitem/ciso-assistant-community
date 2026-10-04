@@ -44,6 +44,11 @@ class Target:
         """Problems a library upgrade may introduce after the config was saved."""
         return self.validate_config(config, quick_form)
 
+    def materialize(self, suggestion: dict) -> dict | None:
+        """A library's instance-independent suggested config turned into a
+        config for this instance, or None when it cannot be."""
+        return suggestion
+
     def current(self, subject) -> tuple[Any, str]:
         """The subject's current value and its display."""
         raise NotImplementedError

@@ -37,23 +37,36 @@ export interface DraftJSON {
 	choices: Record<string, unknown>[];
 }
 
+/** A refused request, with the server's per-item reasons when it sent any. */
+export class BuilderRequestError extends Error {
+	details: unknown[];
+	constructor(message: string, details: unknown) {
+		super(message);
+		this.details = Array.isArray(details) ? details : [];
+	}
+}
+
 async function handleResponse(res: Response): Promise<unknown> {
 	if (!res.ok) {
 		const err = await res.json().catch(() => ({ detail: 'Request failed' }));
-		throw new Error(err.detail ?? err.error ?? JSON.stringify(err));
+		throw new BuilderRequestError(err.detail ?? err.error ?? JSON.stringify(err), err.details);
 	}
 	if (res.status === 204) return null;
 	return res.json();
 }
 
-/** Save draft: PATCH to persist the current draft state */
-export async function apiSaveDraft(frameworkId: string, draft: DraftJSON): Promise<void> {
+/** Save draft: PATCH to persist the current draft state. `urn_map` maps the
+ * editor's URNs/ids to the canonical URNs the server stored. */
+export async function apiSaveDraft(
+	frameworkId: string,
+	draft: DraftJSON
+): Promise<{ urn_map?: Record<string, string> }> {
 	const res = await fetch(apiUrl(frameworkId), {
 		method: 'PATCH',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ _action: 'save-draft', editing_draft: draft })
 	});
-	await handleResponse(res);
+	return ((await handleResponse(res)) ?? {}) as { urn_map?: Record<string, string> };
 }
 
 /** Reference catalog: pickable threats / reference controls for node links. */

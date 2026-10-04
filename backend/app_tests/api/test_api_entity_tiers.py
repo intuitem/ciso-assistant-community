@@ -58,12 +58,28 @@ class TestTierScale:
         high.refresh_from_db()
         assert (high.name, high.hexcolor) == ("Important", "#000000")
 
-    def test_new_tier_goes_to_the_top(self, authenticated_client):
-        response = authenticated_client.post(
-            TIERS_URL, {"name": "Vital"}, format="json"
-        )
-        assert response.status_code == status.HTTP_201_CREATED, response.json()
-        assert response.json()["rank"] == 5
+    def test_new_tiers_go_to_the_bottom_in_entry_order(self, authenticated_client):
+        for name in ("Tier A", "Tier B"):
+            response = authenticated_client.post(
+                TIERS_URL, {"name": name}, format="json"
+            )
+            assert response.status_code == status.HTTP_201_CREATED, response.json()
+        assert list(Tier.objects.order_by("-rank").values_list("name", flat=True)) == [
+            "critical",
+            "high",
+            "medium",
+            "low",
+            "Tier A",
+            "Tier B",
+        ]
+        assert list(Tier.objects.order_by("-rank").values_list("rank", flat=True)) == [
+            6,
+            5,
+            4,
+            3,
+            2,
+            1,
+        ]
 
     def test_duplicate_rank_is_refused(self, authenticated_client):
         response = authenticated_client.post(
@@ -285,6 +301,19 @@ class TestEntityTier:
             f"{ENTITIES_URL}?folder={entity.folder_id}&tier={_tier('high').id}"
         ).json()["results"]
         assert [e["name"] for e in results] == ["Acme"]
+
+    def test_filter_the_untiered(self, authenticated_client, entity):
+        set_entity_tier(entity, _tier("high"))
+        Entity.objects.create(name="Untiered", folder=entity.folder)
+        base = f"{ENTITIES_URL}?folder={entity.folder_id}"
+
+        untiered = authenticated_client.get(f"{base}&tier=--").json()["results"]
+        assert [e["name"] for e in untiered] == ["Untiered"]
+
+        both = authenticated_client.get(
+            f"{base}&tier=--&tier={_tier('high').id}"
+        ).json()["results"]
+        assert sorted(e["name"] for e in both) == ["Acme", "Untiered"]
 
     def test_history_is_read_only(self, authenticated_client, entity):
         set_entity_tier(entity, _tier("high"))

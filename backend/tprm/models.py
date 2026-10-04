@@ -92,6 +92,17 @@ class Tier(NameDescriptionMixin, FolderMixin):
             cls.objects.create(**tier, builtin=True)
 
     @classmethod
+    def make_room_at_the_bottom(cls) -> int:
+        """Shift every rank up by one and return the freed rank 1. Parked above
+        the current range first: rank is unique, and a row-by-row `+ 1`
+        collides with its neighbour (SQLite cannot defer the constraint)."""
+        top = cls.objects.select_for_update().aggregate(top=models.Max("rank"))["top"]
+        if top:
+            cls.objects.update(rank=models.F("rank") + top + 1)
+            cls.objects.update(rank=models.F("rank") - top)
+        return 1
+
+    @classmethod
     def next_rank(cls) -> int:
         top = cls.objects.aggregate(top=models.Max("rank"))["top"]
         return (top or 0) + 1

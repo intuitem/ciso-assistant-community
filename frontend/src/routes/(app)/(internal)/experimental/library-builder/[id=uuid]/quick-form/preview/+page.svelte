@@ -239,7 +239,9 @@
 							<div class="flex justify-between gap-2">
 								<span class="text-surface-600-400">{label(rule)}</span>
 								<span class="font-mono"
-									>{rule.ref_id in values ? formatValue(values[rule.ref_id]) : '—'}</span
+									>{view?.scored_complete !== false && rule.ref_id in values
+										? formatValue(values[rule.ref_id])
+										: '—'}</span
 								>
 							</div>
 						{/each}

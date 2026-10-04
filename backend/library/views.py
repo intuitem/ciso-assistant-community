@@ -1683,9 +1683,10 @@ class LibraryDraftViewSet(BaseModelViewSet):
         )
         if error is not None:
             return error
+        urn_map: dict = {}
         try:
             new_quick_form = qf_editor.editor_doc_to_quick_form_object(
-                editor_doc, existing=quick_form
+                editor_doc, existing=quick_form, urn_map_out=urn_map
             )
         except builder.BuilderError as e:
             # Author-facing validation text by construction — see BuilderError.
@@ -1708,7 +1709,13 @@ class LibraryDraftViewSet(BaseModelViewSet):
             )
         draft.content = content
         draft.save(update_fields=["content", "updated_at"])
-        return Response({"status": "ok", "quick_form_urn": new_quick_form["urn"]})
+        return Response(
+            {
+                "status": "ok",
+                "quick_form_urn": new_quick_form["urn"],
+                "urn_map": urn_map,
+            }
+        )
 
     @action(detail=True, methods=["post"], url_path="quick-form-fill-preview")
     def quick_form_fill_preview(self, request, pk):
@@ -1765,6 +1772,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 "missing_required": evaluation["missing_required"],
                 "progress": evaluation["progress"],
                 "score": evaluation["score"],
+                "scored_complete": evaluation["context"]["response"]["scored_complete"],
                 "computed_outcome": evaluation["computed_outcome"],
                 "computed_values": evaluation["computed_values"],
             }
@@ -1918,9 +1926,10 @@ class LibraryDraftViewSet(BaseModelViewSet):
         )
         if error is not None:
             return error
+        urn_map: dict = {}
         try:
             new_framework = fw_editor.editor_doc_to_framework_object(
-                editor_doc, existing=framework
+                editor_doc, existing=framework, urn_map_out=urn_map
             )
         except builder.BuilderError as e:
             # Author-facing validation text by construction — see BuilderError.
@@ -1941,7 +1950,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
         if self._sync_link_dependencies(draft, content, new_framework, request.user):
             update_fields.append("dependencies")
         draft.save(update_fields=update_fields)
-        return Response({"status": "ok", "framework_urn": new_framework["urn"]})
+        return Response(
+            {"status": "ok", "framework_urn": new_framework["urn"], "urn_map": urn_map}
+        )
 
     @staticmethod
     def _sync_link_dependencies(draft, content, framework, user) -> bool:

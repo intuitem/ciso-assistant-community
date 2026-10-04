@@ -1,7 +1,8 @@
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
-import { apiSaveDraft, type DraftJSON } from './builder-api';
+import { apiSaveDraft, BuilderRequestError, type DraftJSON } from './builder-api';
 import { m } from '$paraglide/messages';
+import { safeTranslate } from '$lib/utils/i18n';
 import { resolveComputeResult } from '$lib/utils/helpers';
 
 // --- Types ---
@@ -238,7 +239,7 @@ export function computeRefId(
  * Generate a URN for a framework item.
  */
 export function generateUrn(
-	type: 'req_node' | 'question' | 'question_choice',
+	type: 'req_node' | 'qf_page' | 'question' | 'question_choice',
 	slug: string,
 	refId: string,
 	urnNamespace: string = 'custom'
@@ -334,6 +335,66 @@ function rewriteTreeUrns(nodes: BuilderNode[], newNs: string, newSlug: string): 
 			}
 		})),
 		children: rewriteTreeUrns(bn.children, newNs, newSlug)
+	}));
+}
+
+/** A refused save as the author should read it: what failed, then where. */
+export function describeSaveError(error: unknown): string {
+	const message = error instanceof Error ? error.message : String(error);
+	const details = error instanceof BuilderRequestError ? error.details : [];
+	const where = (detail: Record<string, unknown>) => {
+		const ref = String(detail.ref_id ?? '');
+		if (detail.where === 'subject_question') return m.builderSubjectQuestion();
+		if (detail.where === 'page_visibility') return m.builderErrorPage({ ref });
+		if (detail.where === 'outcome') return m.builderErrorRule({ ref });
+		return ref;
+	};
+	const lines = details.map((detail) =>
+		detail && typeof detail === 'object'
+			? `${where(detail as Record<string, unknown>)}: ${(detail as Record<string, unknown>).error ?? ''}`
+			: String(detail)
+	);
+	return [safeTranslate(message), ...lines].join('\n');
+}
+
+/**
+ * Adopt the URNs the server settled on at save. Keys are the editor's URNs or
+ * ids (lowercased), values the canonical URNs. Ids are untouched, so open
+ * panels and selections survive; without this every later save re-mints new
+ * content and references to it (subject, depends_on) point at nothing.
+ */
+export function applyUrnMap(nodes: BuilderNode[], urnMap: Record<string, string>): BuilderNode[] {
+	const map = (value: string | null | undefined, id?: string): string | null => {
+		const byUrn = value ? urnMap[value.toLowerCase()] : undefined;
+		const byId = id ? urnMap[id.toLowerCase()] : undefined;
+		return byUrn ?? (value ? value : (byId ?? null));
+	};
+	const mapDependsOn = (dependsOn: Record<string, unknown> | null) => {
+		if (!dependsOn || typeof dependsOn !== 'object') return dependsOn;
+		const result: Record<string, unknown> = { ...dependsOn };
+		if (typeof result.question === 'string') result.question = map(result.question);
+		if (Array.isArray(result.answers)) {
+			result.answers = result.answers.map((a) => (typeof a === 'string' ? map(a) : a));
+		}
+		return result;
+	};
+	return nodes.map((bn) => ({
+		...bn,
+		node: {
+			...bn.node,
+			urn: map(bn.node.urn, bn.node.id),
+			parent_urn: map(bn.node.parent_urn)
+		},
+		questions: bn.questions.map((bq) => ({
+			...bq,
+			question: {
+				...bq.question,
+				urn: map(bq.question.urn, bq.question.id) ?? bq.question.urn,
+				depends_on: mapDependsOn(bq.question.depends_on),
+				choices: bq.question.choices.map((c) => ({ ...c, urn: map(c.urn, c.id) }))
+			}
+		})),
+		children: applyUrnMap(bn.children, urnMap)
 	}));
 }
 
@@ -1081,13 +1142,21 @@ export function createBuilderState(
 			try {
 				const draft = serializeDraft(get(framework), get(rootNodes));
 				(draft as any)._dirty = true; // mark draft as having user changes
-				await apiSaveDraft(apiTarget, draft);
+				const { urn_map: urnMap } = await apiSaveDraft(apiTarget, draft);
+				if (urnMap && Object.keys(urnMap).length) {
+					rootNodes.update((nodes) => applyUrnMap(nodes, urnMap));
+					framework.update((fw) => {
+						const subject = fw.subject_question_urn;
+						const mapped = subject ? urnMap[subject.toLowerCase()] : undefined;
+						return mapped ? { ...fw, subject_question_urn: mapped } : fw;
+					});
+				}
 				unsaved.set(false); // saved to draft, but still unpublished
 				clearError('save-draft');
 				return true;
 			} catch (e) {
 				console.error('[FrameworkBuilder] Draft save failed:', e);
-				setError('save-draft', (e as Error).message);
+				setError('save-draft', describeSaveError(e));
 				return false;
 			} finally {
 				saving.set(false);
@@ -1153,7 +1222,13 @@ export function createBuilderState(
 		const newId = crypto.randomUUID();
 		const newNode: RequirementNode = {
 			id: newId,
-			urn: generateUrn('req_node', getFwSlug(), nodeId, getUrnNs()),
+			// Quick form pages live under qf_page, as the server stores them.
+			urn: generateUrn(
+				mode === 'quick_form' ? 'qf_page' : 'req_node',
+				getFwSlug(),
+				nodeId,
+				getUrnNs()
+			),
 			ref_id: refId,
 			name: null,
 			description: null,

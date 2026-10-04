@@ -2,7 +2,9 @@
 	import { deserialize } from '$app/forms';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
+	import ProjectionCard from '$lib/components/QuickForms/ProjectionCard.svelte';
 	import { m } from '$paraglide/messages';
+	import { isDark } from '$lib/utils/helpers';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -201,6 +203,14 @@
 				</div>
 			</div>
 
+			{#if view?.projection?.length}
+				<ProjectionCard
+					rows={view.projection}
+					rules={allRules}
+					note={m.projectionSuggestedNote()}
+				/>
+			{/if}
+
 			{#if rules.length}
 				<div class="card bg-surface-50-950 shadow-sm p-4">
 					<h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-surface-500">
@@ -215,10 +225,14 @@
 										? 'fa-circle-check text-emerald-500'
 										: 'fa-circle text-surface-300'} mt-0.5 text-xs"
 								></i>
+								<!-- The builder stores a hex colour; the named ones are older forms. -->
 								<span
 									class="rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset {COLORS[
 										rule.color ?? ''
-									] ?? NEUTRAL}">{label(rule)}</span
+									] ?? NEUTRAL}"
+									style={rule.color?.startsWith('#') && on
+										? `background-color: ${rule.color}; color: ${isDark(rule.color) ? 'white' : 'inherit'}`
+										: ''}>{label(rule)}</span
 								>
 							</div>
 						{/each}
@@ -236,7 +250,9 @@
 							<div class="flex justify-between gap-2">
 								<span class="text-surface-600-400">{label(rule)}</span>
 								<span class="font-mono"
-									>{rule.ref_id in values ? formatValue(values[rule.ref_id]) : '—'}</span
+									>{view?.scored_complete !== false && rule.ref_id in values
+										? formatValue(values[rule.ref_id])
+										: '—'}</span
 								>
 							</div>
 						{/each}

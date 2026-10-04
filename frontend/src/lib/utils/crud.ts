@@ -1245,6 +1245,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'library', urlModel: 'loaded-libraries' }
 		],
 		reverseForeignKeyFields: [
+			{ field: 'quick_form', urlModel: 'quick-form-publications' },
 			{ field: 'quick_form', urlModel: 'quick-form-responses', disableCreate: true }
 		]
 	},

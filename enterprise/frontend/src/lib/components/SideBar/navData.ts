@@ -228,6 +228,12 @@ export const navData = {
 					permissions: ['view_quickformpublication']
 				},
 				{
+					name: 'quickFormPublications',
+					fa_icon: 'fa-solid fa-paper-plane',
+					href: '/quick-form-publications',
+					permissions: ['view_quickformpublication']
+				},
+				{
 					name: 'lbListLibraryBuilder',
 					fa_icon: 'fas fa-shapes',
 					href: '/experimental/library-builder',
@@ -489,6 +495,12 @@ export const navData = {
 					name: 'entities',
 					fa_icon: 'fa-solid fa-building',
 					href: '/entities'
+				},
+				{
+					name: 'tierScale',
+					fa_icon: 'fa-solid fa-layer-group',
+					href: '/entities/tiers',
+					permissions: ['view_tier']
 				},
 				{
 					name: 'representatives',

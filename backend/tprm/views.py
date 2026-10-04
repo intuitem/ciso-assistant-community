@@ -19,6 +19,7 @@ from core.views import (
     ComplianceAssessmentViewSet,
     ExportMixin,
     GenericFilterSet,
+    NullableModelChoiceFilter,
     actor_prefetch,
     escape_excel_formula,
 )
@@ -153,6 +154,8 @@ ENTITY_FILTERSET_FIELDS = [
 class EntityFilterSet(GenericFilterSet):
     """`last_assessment_status` is annotated, so the auto-built FilterSet misses it."""
 
+    # "--" lists the vendors not tiered yet.
+    tier = NullableModelChoiceFilter(queryset=Tier.objects.all())
     last_assessment_status = df.MultipleChoiceFilter(
         choices=lambda: (
             list(EntityAssessment.Status.choices)

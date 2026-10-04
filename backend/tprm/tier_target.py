@@ -100,6 +100,54 @@ class EntityTierTarget(Target):
                     errors.append("unknownTier")
         return sorted(set(errors), key=errors.index)
 
+    def health(self, config, quick_form) -> list[str]:
+        """Also flags tiers hidden since the config was saved: accepting would
+        set a tier that is no longer on the scale."""
+        problems = self.validate_config(config, quick_form)
+        bands = config.get("bands") if isinstance(config.get("bands"), dict) else {}
+        mapping = (
+            config.get("mapping") if isinstance(config.get("mapping"), list) else []
+        )
+        used = {
+            str(row.get("tier"))
+            for row in [*(bands.get("thresholds") or []), *mapping]
+            if isinstance(row, dict) and row.get("tier")
+        }
+        if Tier.objects.filter(id__in=used, is_visible=False).exists():
+            problems.append("tierHidden")
+        return problems
+
+    def materialize(self, suggestion):
+        """Positions (1 = the most critical visible tier) to this instance's
+        tier ids; None when the scale is shorter than the suggestion needs."""
+        scale = [str(t.id) for t in Tier.objects.filter(is_visible=True)]
+
+        def tier_at(row):
+            position = row.get("position") if isinstance(row, dict) else None
+            if not isinstance(position, int) or not 1 <= position <= len(scale):
+                raise LookupError
+            return scale[position - 1]
+
+        config = {}
+        try:
+            if bands := suggestion.get("bands"):
+                config["bands"] = {
+                    "outcome": bands.get("outcome"),
+                    "thresholds": [
+                        {"tier": tier_at(row)}
+                        | ({"min": row["min"]} if "min" in row else {})
+                        for row in bands.get("thresholds") or []
+                    ],
+                }
+            if mapping := suggestion.get("mapping"):
+                config["mapping"] = [
+                    {"outcome": row.get("outcome"), "tier": tier_at(row)}
+                    for row in mapping
+                ]
+        except LookupError:
+            return None
+        return config or None
+
     def current(self, subject):
         tier = subject.tier
         return (str(tier.id) if tier else None, tier.name if tier else "")
@@ -137,19 +185,29 @@ class EntityTierTarget(Target):
                     break
 
         fired = set((response.computed_outcome or {}).keys())
+        mapped: list[tuple[Tier, str]] = []
         for row in config.get("mapping") or []:
             tier = tiers.get(str(row.get("tier")))
             if tier is not None and row.get("outcome") in fired:
                 candidates.append((tier, None))
+                mapped.append((tier, row.get("outcome")))
 
         if not candidates:
             return Proposal.refuse("noTierResolved")
         tier, _ = max(candidates, key=lambda c: c[0].rank)
+        # Hidden since the config was saved: never written, as a manual change
+        # could not pick it either. The reviewer sees why and can override.
+        if not tier.is_visible:
+            return Proposal.refuse("tierHidden")
         # The band value is kept only when it is what produced the winning tier.
         band_value = next(
             (v for t, v in candidates if t.id == tier.id and v is not None), None
         )
-        return self._proposal(tier, band_value)
+        proposal = self._proposal(tier, band_value)
+        proposal.extra["outcomes"] = [o for t, o in mapped if t.id == tier.id]
+        if band_value is not None:
+            proposal.extra["band"] = bands.get("outcome")
+        return proposal
 
     def apply(self, subject, proposal, *, response, user) -> None:
         from tprm.tiers import set_entity_tier

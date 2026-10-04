@@ -264,3 +264,76 @@ def on_accept_health(publication) -> list[dict]:
         problems += target.health(entry.get("config") or {}, publication.quick_form)
         rows.append({"target": target.key, "label": target.label, "problems": problems})
     return rows
+
+
+def suggested_on_accept(quick_form) -> list[dict]:
+    """The form's library-suggested `on_accept`, made concrete for this
+    instance. Entries that do not fit (unknown target, other subject model,
+    scale too short, config refused) are left out."""
+    entries = []
+    subject_model = _subject_model_of(quick_form)
+    for entry in quick_form.on_accept_suggestion or []:
+        if not isinstance(entry, dict) or not isinstance(entry.get("config"), dict):
+            continue
+        target = get_target(str(entry.get("target") or ""))
+        if target is None or target.subject_model != subject_model:
+            continue
+        config = target.materialize(entry["config"])
+        if config is None or target.validate_config(config, quick_form):
+            continue
+        entries.append({"target": target.key, "config": config})
+    return entries
+
+
+def project(
+    entries: list[dict], computed_values, computed_outcome, *, ready: bool = True
+) -> list[dict]:
+    """What each target would propose from these results. No subject and no
+    permission involved: it reads the answers' results, never the object.
+    Not `ready` (scored questions left unanswered) proposes nothing: an
+    unanswered page scores 0 and would read as the lowest result."""
+    from types import SimpleNamespace
+
+    results = SimpleNamespace(
+        computed_values=computed_values or {}, computed_outcome=computed_outcome or {}
+    )
+    rows = []
+    for entry in entries:
+        target = get_target(str((entry or {}).get("target") or ""))
+        if target is None:
+            continue
+        try:
+            proposal = (
+                target.resolve(results, entry.get("config") or {})
+                if ready
+                else Proposal.refuse("projectionPending")
+            )
+        except Exception as e:
+            logger.error("on_accept_projection_failed", target=target.key, error=e)
+            proposal = Proposal.refuse("targetError")
+        rows.append(
+            {
+                "target": target.key,
+                "label": target.label,
+                "ok": proposal.ok,
+                "reason": proposal.reason,
+                "proposed": proposal.display if proposal.ok else None,
+                "value": (proposal.value or {}).get("value")
+                if isinstance(proposal.value, dict)
+                else None,
+                **({"extra": proposal.extra} if proposal.extra else {}),
+            }
+        )
+    return rows
+
+
+def can_apply_on_submit(response, user) -> bool:
+    """Whether submitting can apply the publication's targets at once: every
+    target is ready and its permission on the subject is the submitter's own,
+    so a review would grant nothing they do not already have. Anything less
+    (no subject, nothing resolved, a missing right) goes to review."""
+    publication = getattr(response, "publication", None)
+    if publication is None or publication.always_review or not publication.on_accept:
+        return False
+    items = plan(response, user)
+    return bool(items) and all(item["proposal"].ok for item in items)

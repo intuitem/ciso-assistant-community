@@ -2318,6 +2318,8 @@ class LibraryUpdater:
                     "subject_question_urn": (
                         new_quick_form.get("subject_question_urn") or ""
                     ).lower(),
+                    "on_accept_suggestion": new_quick_form.get("on_accept_suggestion")
+                    or [],
                     "urn_namespace": urn.split(":")[1]
                     if urn.startswith("urn:")
                     else "custom",
@@ -4147,6 +4149,12 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
             "is about, e.g. the vendor being assessed."
         ),
     )
+    # What the library suggests a publication writes on accept, in
+    # instance-independent terms (e.g. tier positions, not ids). Pre-fills a
+    # publication's `on_accept`; never applied on its own.
+    on_accept_suggestion = models.JSONField(
+        default=list, blank=True, verbose_name=_("Suggested apply on accept")
+    )
     ref_id_prefix = models.CharField(
         max_length=8,
         blank=True,
@@ -4296,6 +4304,26 @@ class QuickFormPublication(NameDescriptionMixin, FolderMixin):
     # library-upserted QuickForm, so an upgrade cannot rewrite it.
     on_accept = models.JSONField(
         default=list, blank=True, verbose_name=_("Apply on accept")
+    )
+    # Off by default: a form sent to the vendor itself must not show the vendor
+    # how it is about to be rated.
+    show_projection = models.BooleanField(
+        default=False,
+        verbose_name=_("Show the projected result to respondents"),
+        help_text=_(
+            "While filling the form, respondents see what accepting it would "
+            "write, e.g. the vendor's tier."
+        ),
+    )
+    # Off: a submitter who could make every on-accept change by hand gets it
+    # applied on submit instead of waiting for a second person.
+    always_review = models.BooleanField(
+        default=False,
+        verbose_name=_("Always require review"),
+        help_text=_(
+            "Even when the person submitting could make the change themselves, "
+            "an accepted review is needed before anything is written."
+        ),
     )
 
     fields_to_check = ["name"]

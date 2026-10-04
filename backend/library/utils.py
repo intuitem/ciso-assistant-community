@@ -568,6 +568,8 @@ class QuickFormImporter:
                 subject_question_urn=str(
                     self.quick_form_data.get("subject_question_urn") or ""
                 ).lower(),
+                on_accept_suggestion=self.quick_form_data.get("on_accept_suggestion")
+                or [],
                 outcomes_definition=self.quick_form_data.get("outcomes_definition")
                 or [],
                 scores_definition=self.quick_form_data.get("scores_definition"),

@@ -9,6 +9,7 @@ from rest_framework.test import APIClient
 
 from core.apps import startup
 from core.models import (
+    Actor,
     Question,
     QuickForm,
     QuickFormApplication,
@@ -20,7 +21,9 @@ from core.models import (
 from core.quick_form_apply import (
     on_accept_health,
     plan,
+    project,
     serialize_plan,
+    suggested_on_accept,
     validate_on_accept,
 )
 from core.quick_form_targets import TARGETS, Proposal, Target, register
@@ -458,3 +461,147 @@ class TestAccept:
         response.refresh_from_db()
         assert response.status == QuickFormResponse.Status.CLOSED
         assert not QuickFormApplication.objects.exists()
+
+
+@pytest.mark.django_db
+class TestProjection:
+    def test_hidden_unless_the_publication_shows_it(self, setup):
+        _user, client = _admin()
+        response = _submitted_response(setup)
+        url = f"/api/quick-form-responses/{response.id}/content/"
+        assert client.get(url).json()["projection"] == []
+
+        setup["publication"].show_projection = True
+        setup["publication"].save()
+        rows = client.get(url).json()["projection"]
+        assert [(r["target"], r["proposed"]) for r in rows] == [
+            (MissionTarget.key, "level 3")
+        ]
+
+    def test_reads_results_not_the_subject(self, setup):
+        rows = project(ON_ACCEPT, {"level": 2.0}, {})
+        assert (rows[0]["ok"], rows[0]["proposed"]) == (True, "level 2")
+        rows = project(ON_ACCEPT, {}, {})
+        assert (rows[0]["ok"], rows[0]["reason"]) == (False, "valueMissing")
+
+    def test_nothing_until_scored_questions_are_answered(self, setup):
+        rows = project(ON_ACCEPT, {"level": 0.0}, {}, ready=False)
+        assert (rows[0]["ok"], rows[0]["reason"]) == (False, "projectionPending")
+
+    def test_unknown_targets_are_skipped(self, setup):
+        assert project([{"target": "nope", "config": {}}], {}, {}) == []
+
+
+@pytest.mark.django_db
+class TestSuggestion:
+    def test_fitting_entries_are_kept(self, setup):
+        form = setup["form"]
+        form.on_accept_suggestion = [
+            *ON_ACCEPT,
+            {"target": MissionTarget.key, "config": {"value": "unknown"}},
+            {"target": "nope", "config": {}},
+            "malformed",
+        ]
+        assert suggested_on_accept(form) == ON_ACCEPT
+
+    def test_carried_by_the_library(self, setup):
+        assert setup["form"].on_accept_suggestion == []
+        _user, client = _admin()
+        form = client.get(f"/api/quick-forms/{setup['form'].id}/").json()
+        assert form["suggested_on_accept"] == []
+
+    def test_form_preview_projects_with_the_suggestion(self, setup):
+        _user, client = _admin()
+        url = f"/api/quick-forms/{setup['form'].id}/preview/"
+        answers = {Q_LEVEL: f"{Q_LEVEL}:choice:three"}
+        assert (
+            client.post(url, {"answers": answers}, format="json").json()["projection"]
+            == []
+        )
+
+        setup["form"].on_accept_suggestion = ON_ACCEPT
+        setup["form"].save()
+        rows = client.post(url, {"answers": {}}, format="json").json()["projection"]
+        assert rows[0]["reason"] == "projectionPending"
+        # The vendor question is not scored: the projection does not wait for it.
+        rows = client.post(url, {"answers": answers}, format="json").json()[
+            "projection"
+        ]
+        assert rows[0]["proposed"] == "level 3"
+
+
+def _draft_of(setup, user, answered=True):
+    """A draft the user fills themselves (they are its respondent)."""
+    response = QuickFormResponse.objects.create(
+        name="self",
+        quick_form=setup["form"],
+        folder=setup["domain"],
+        publication=setup["publication"],
+        status=QuickFormResponse.Status.DRAFT,
+    )
+    response.seed_answers()
+    questions = {
+        q.urn: q for q in Question.objects.filter(page__quick_form=setup["form"])
+    }
+    answers = {Q_VENDOR: [str(setup["acme"].id)]}
+    if answered:
+        answers[Q_LEVEL] = f"{Q_LEVEL}:choice:three"
+    apply_answers_dict("response", response, questions, answers)
+    response.respondents.add(Actor.objects.get(user=user, entity__isnull=True))
+    response.recompute()
+    return response
+
+
+@pytest.mark.django_db
+class TestApplyOnSubmit:
+    def _submit(self, client, response):
+        return client.post(f"/api/my-requests/{response.id}/submit/", {}, format="json")
+
+    def test_applied_at_once_when_the_submitter_could_do_it(self, setup):
+        user, client = _admin()
+        response = _draft_of(setup, user)
+        result = self._submit(client, response)
+        assert result.status_code == 200, result.json()
+        assert result.json()["on_accept"][0]["applied"] is True
+
+        response.refresh_from_db()
+        assert response.status == QuickFormResponse.Status.CLOSED
+        assert response.resolution == QuickFormResponse.Resolution.AUTO
+        assert response.decided_by_id == user.id == response.submitted_by_id
+        setup["acme"].refresh_from_db()
+        assert setup["acme"].mission == "level 3"
+        log = QuickFormApplication.objects.get(response=response)
+        assert (log.new_display, log.applied_by_id) == ("level 3", user.id)
+
+    def test_always_review_keeps_the_second_pair_of_eyes(self, setup):
+        setup["publication"].always_review = True
+        setup["publication"].save()
+        user, client = _admin()
+        response = _draft_of(setup, user)
+        assert self._submit(client, response).status_code == 200
+        response.refresh_from_db()
+        assert response.status == QuickFormResponse.Status.SUBMITTED
+        setup["acme"].refresh_from_db()
+        assert setup["acme"].mission == "before"
+
+    def test_goes_to_review_without_the_right_on_the_subject(self, setup):
+        user, client = _reviewer_without_entity_rights(setup["domain"])
+        response = _draft_of(setup, user)
+        assert self._submit(client, response).status_code == 200
+        response.refresh_from_db()
+        assert response.status == QuickFormResponse.Status.SUBMITTED
+        assert not QuickFormApplication.objects.exists()
+
+    def test_the_draft_says_what_submitting_will_do(self, setup):
+        user, client = _admin()
+        response = _draft_of(setup, user)
+        url = f"/api/my-requests/{response.id}/content/"
+        assert client.get(url).json()["on_submit"] == "apply"
+
+        setup["publication"].always_review = True
+        setup["publication"].save()
+        assert client.get(url).json()["on_submit"] == "review"
+
+        setup["publication"].on_accept = []
+        setup["publication"].save()
+        assert client.get(url).json()["on_submit"] is None

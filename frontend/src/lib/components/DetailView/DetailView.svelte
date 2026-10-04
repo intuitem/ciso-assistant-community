@@ -31,7 +31,11 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
-	import { canPerformActionOnObject, resolveObjectDomain } from '$lib/utils/access-control';
+	import {
+		canPerformActionOnObject,
+		hasPermissionAnywhere,
+		resolveObjectDomain
+	} from '$lib/utils/access-control';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
@@ -989,6 +993,15 @@
 				>
 					<i class="fa-solid fa-eye mr-2"></i>{m.preview()}
 				</a>
+				{#if data.relatedModels?.['quick-form-publications']?.createForm && hasPermissionAnywhere(user, 'add_quickformpublication')}
+					<button
+						class="btn preset-filled-primary-500 h-fit"
+						data-testid="publish-quick-form"
+						onclick={() => modalCreateForm(data.relatedModels['quick-form-publications'])}
+					>
+						<i class="fa-solid fa-paper-plane mr-2"></i>{m.publish()}
+					</button>
+				{/if}
 			{/if}
 			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} folderId={objectDomain} />
 		</div>
