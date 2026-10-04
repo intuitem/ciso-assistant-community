@@ -39,8 +39,6 @@ SECURITY_CRITERIA = (
     "safety",
 )
 RECOVERY_KEYS = ("rto", "rpo", "mtd")
-# Keys create_asset has always sent as soon as one objective parameter is given
-_LEGACY_SECURITY_KEYS = ("confidentiality", "integrity", "availability")
 
 
 def _collect_criteria(prefix: str, params: dict) -> dict:
@@ -78,16 +76,13 @@ def _collect_durations(prefix: str, params: dict) -> dict:
     }
 
 
-def _merge_criteria(current: dict, touched: dict, base_keys=()) -> dict:
+def _merge_criteria(current: dict, touched: dict) -> dict:
     """Merge touched criteria over the stored ones.
 
     Every stored key that is not touched is kept as is. A touched value
     without its flag means enabled; a flag alone keeps the stored value.
-    base_keys are always present (value 0, disabled when absent).
     """
     merged = {k: dict(v) for k, v in (current or {}).items() if isinstance(v, dict)}
-    for key in base_keys:
-        merged.setdefault(key, {"value": 0, "is_enabled": False})
     for criterion, (value, enabled) in touched.items():
         entry = dict(merged.get(criterion) or {"value": 0, "is_enabled": False})
         if value is not None:
@@ -103,10 +98,8 @@ def _merge_criteria(current: dict, touched: dict, base_keys=()) -> dict:
     return merged
 
 
-def _merge_durations(current: dict, touched: dict, base_keys=()) -> dict:
+def _merge_durations(current: dict, touched: dict) -> dict:
     merged = {k: dict(v) for k, v in (current or {}).items() if isinstance(v, dict)}
-    for key in base_keys:
-        merged.setdefault(key, {"value": 0})
     for key, seconds in touched.items():
         entry = dict(merged.get(key) or {})
         entry["value"] = seconds
@@ -134,29 +127,17 @@ def _build_asset_objectives(changes: dict, current_asset: dict = None) -> dict:
     """Payload fragment for the touched objective/capability fields.
 
     current_asset is the stored asset as returned by /assets/{id}/object/
-    (update); None on create, where C/I/A and rto/rpo/mtd keep their legacy
-    defaults so old calls produce the same payload.
+    (update); None on create, where only the touched keys are sent.
     """
-    creating = current_asset is None
     payload = {}
     for field, touched in changes.items():
         stored = (current_asset or {}).get(field) or {}
         stored = stored.get("objectives") if isinstance(stored, dict) else {}
         stored = stored if isinstance(stored, dict) else {}
         if field in ("security_objectives", "security_capabilities"):
-            base = (
-                _LEGACY_SECURITY_KEYS
-                if creating and field == "security_objectives"
-                else ()
-            )
-            merged = _merge_criteria(stored, touched, base)
+            merged = _merge_criteria(stored, touched)
         else:
-            base = (
-                RECOVERY_KEYS
-                if creating and field == "disaster_recovery_objectives"
-                else ()
-            )
-            merged = _merge_durations(stored, touched, base)
+            merged = _merge_durations(stored, touched)
         payload[field] = {"objectives": merged}
     return payload
 

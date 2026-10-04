@@ -122,7 +122,7 @@ class TestCreateAsset:
             result = run(write_tools.create_asset(**kwargs))
         return result, post
 
-    def test_old_parameters_payload_unchanged(self):
+    def test_only_touched_keys_sent(self):
         _, post = self._call(
             name="ERP", sec_confidentiality=3, sec_integrity_enabled=True, dro_rto=900
         )
@@ -136,16 +136,9 @@ class TestCreateAsset:
                     "objectives": {
                         "confidentiality": _obj(3),
                         "integrity": _obj(0),
-                        "availability": _obj(0, False),
                     }
                 },
-                "disaster_recovery_objectives": {
-                    "objectives": {
-                        "rto": {"value": 900},
-                        "rpo": {"value": 0},
-                        "mtd": {"value": 0},
-                    }
-                },
+                "disaster_recovery_objectives": {"objectives": {"rto": {"value": 900}}},
             },
         )
 
