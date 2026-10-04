@@ -302,11 +302,13 @@ def _section_scores(ca) -> dict[str, dict]:
     }
     children, _weights, _roots = ca.framework_node_tree
 
-    def below(urn):
+    def below(urn, visiting=frozenset()):
+        if urn in visiting:  # parent_urn cycle in a malformed framework
+            return
         for child in children.get(urn, []):
             if child in in_scope:
                 yield in_scope[child]
-            yield from below(child)
+            yield from below(child, visiting | {urn})
 
     sections = {}
     for urn in children:

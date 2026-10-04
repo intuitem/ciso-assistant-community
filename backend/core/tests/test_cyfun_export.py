@@ -15,7 +15,12 @@ from core.models import (
     RequirementAssessment,
     RequirementNode,
 )
+from core.utils import EVERYONE_EDIT
 from iam.models import Folder, User, UserGroup
+
+SCORES_VISIBLE = {
+    field: EVERYONE_EDIT for field in ("score", "is_scored", "documentation_score")
+}
 
 
 @pytest.fixture
@@ -50,6 +55,7 @@ def cyfun_audit():
         ],
     )
     ca = ComplianceAssessment.objects.create(
+        field_visibility=SCORES_VISIBLE,
         name="CyFun export",
         framework=framework,
         folder=folder,
@@ -102,6 +108,30 @@ def _scores(workbook, sheet, ref_id, requirement_column):
 
 @pytest.mark.django_db
 class TestCyfunExportPerLevel:
+    def test_writes_only_the_scores_the_audit_counts(self, admin_client, cyfun_audit):
+        """Scores kept while unscored, and hidden documentation scores, are not
+        exported: the tool keeps its own minimum."""
+        cyfun_audit.selected_implementation_groups = ["B"]
+        cyfun_audit.save()
+        RequirementAssessment.objects.filter(
+            compliance_assessment=cyfun_audit, requirement__ref_id="ID.AM-05.1"
+        ).update(is_scored=False)
+        workbook = _export(admin_client, cyfun_audit)
+        assert _scores(workbook, "IDENTIFY", "ID.AM-05.1", 5) == (1, 1)
+
+        cyfun_audit.show_documentation_score = False
+        cyfun_audit.save()
+        workbook = _export(admin_client, cyfun_audit)
+        assert _scores(workbook, "GOVERN", "GV.OC-03.1", 5) == (1, 3)
+
+    def test_observations_with_control_characters_are_exported(
+        self, admin_client, cyfun_audit
+    ):
+        RequirementAssessment.objects.filter(
+            compliance_assessment=cyfun_audit, requirement__ref_id="GV.OC-03.1"
+        ).update(observation="pasted\x0bfrom Word")
+        _export(admin_client, cyfun_audit)
+
     @pytest.mark.parametrize(
         "groups, level, summary",
         [
@@ -149,6 +179,7 @@ def cyfun2023_audit():
         ],
     )
     ca = ComplianceAssessment.objects.create(
+        field_visibility=SCORES_VISIBLE,
         name="CyFun 2023 export",
         framework=framework,
         folder=folder,

@@ -303,6 +303,23 @@ class TestCyfunEndpoint:
         )
         assert na.result == "not_applicable"
 
+    def test_outdated_loaded_library_is_reported(
+        self, knox_admin_client, domain_folder, cyfun_stored_library
+    ):
+        """An older loaded version lacks the scoring settings the import uses."""
+        assert StoredLibrary.objects.get(urn=CYFUN_LIBRARY_URN).load() is None
+        LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).update(version=1)
+        content = build_workbook(
+            {"GOVERN": [{5: "Essential", 6: "GV.OC-01.1: Mission.", 7: 3, 8: 2}]}
+        )
+        resp = self._post(knox_admin_client, content, domain_folder.id)
+        assert resp.status_code == 200
+        results = resp.json()["results"]
+        assert results["errors"][0]["error"] == "CyfunLibraryOutdated"
+        assert not ComplianceAssessment.objects.filter(
+            framework__urn=CYFUN_2025_URN
+        ).exists()
+
     def test_unknown_workbook_reports_error(self, knox_admin_client, domain_folder):
         wb = openpyxl.Workbook()
         buf = io.BytesIO()

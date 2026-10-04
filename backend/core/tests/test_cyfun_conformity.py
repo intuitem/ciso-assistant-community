@@ -146,6 +146,19 @@ class TestBasic:
 
 
 @pytest.mark.django_db
+class TestScope:
+    def test_partial_scope_is_not_a_full_level(self, framework):
+        """Key measures alone pass each check, but are not a BASIC audit."""
+        audit = _audit(framework, ["BK"])
+        _score(_in_scope(audit), 4)
+        evaluate_outcomes(audit)
+        audit.refresh_from_db()
+        fired = set(audit.computed_outcome)
+        assert fired >= CRITERIA
+        assert MET not in fired
+
+
+@pytest.mark.django_db
 class TestImportantAndEssential:
     def test_important_key_measures_need_3(self, framework):
         audit = _audit(framework, ["I"])

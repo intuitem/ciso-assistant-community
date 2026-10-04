@@ -4512,7 +4512,16 @@ class LoadFileView(APIView):
         except ValueError as e:
             return fail(e.args[0] if e.args else "UnrecognizedCyfunWorkbook")
 
-        if not LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).exists():
+        loaded_library = LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+        if loaded_library is not None and (
+            StoredLibrary.objects.filter(
+                urn=CYFUN_LIBRARY_URN, version__gt=loaded_library.version
+            ).exists()
+        ):
+            # The import relies on the scoring settings of the current library
+            # (calculation method, visibility...): update the library first.
+            return fail("CyfunLibraryOutdated")
+        if loaded_library is None:
             stored_library = StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
             if stored_library is None:
                 return fail("CyfunLibraryNotFound")

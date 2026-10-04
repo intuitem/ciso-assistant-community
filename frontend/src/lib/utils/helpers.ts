@@ -474,7 +474,8 @@ export function filterResultChoices<T extends { value: string }>(
  * Roles known today: 'auditor', 'respondent'. A missing field key — or a
  * missing role within the pair — resolves to 'edit'.
  */
-// Order matches the rendering sequence in the respondent (auditee) view.
+// Order matches the rendering sequence in the respondent (auditee) view; outcomes
+// are audit-level and only shown on the audit page.
 export const VISIBILITY_FIELDS = [
 	'answers',
 	'respondent_alignment',

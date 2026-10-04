@@ -1335,6 +1335,21 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
             outcomes.append(outcome)
         framework["outcomes_definition"] = outcomes
 
+    # Audits must accept what the framework proposes (same rules as the loader).
+    if framework.get("anchor_na_to_target") and "target_score" not in framework:
+        raise ValueError("(framework) anchor_na_to_target needs a target_score")
+    scale = (framework.get("min_score", 0), framework.get("max_score", 100))
+    targets = [("target_score", framework.get("target_score"))] + [
+        (f"implementation group {ig['ref_id']!r} target_score", ig.get("target_score"))
+        for ig in framework.get("implementation_groups_definition") or []
+    ]
+    for label, target in targets:
+        if target is not None and not scale[0] <= target <= scale[1]:
+            raise ValueError(
+                f"(framework) {label} {target} is outside the scale "
+                f"{scale[0]}-{scale[1]}"
+            )
+
     # NOTE: The requirement_nodes loop counts ALL rows (including empty) for its
     # counter logic, so we cannot use parse_content_rows here.
     rows = list(content_ws.iter_rows())

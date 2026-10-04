@@ -133,3 +133,15 @@ class TestDefaultScoringOnCreate:
         data = _serializer(cyfun, baseline=str(baseline.id)).validated_data
         assert "anchor_na_to_target" not in data
         assert "target_score" not in data
+
+    def test_audit_from_another_framework_gets_the_framework_defaults(self, cyfun):
+        """E.g. a CyFun 2025 audit created from a CyFun 2023 baseline."""
+        other = Framework.objects.create(
+            name="Other", urn="urn:test:framework:other", folder=cyfun["folder"]
+        )
+        baseline = ComplianceAssessment.objects.create(
+            name="Baseline", framework=other, folder=cyfun["folder"]
+        )
+        data = _serializer(cyfun, baseline=str(baseline.id)).validated_data
+        assert data["anchor_na_to_target"] is True
+        assert data["target_score"] == 3

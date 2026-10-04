@@ -78,6 +78,28 @@ class TestFrameworkScoringProperties:
         with pytest.raises(ValueError, match="score_calculation_method"):
             load(library(1, "    score_calculation_method: median\n"))
 
+    def test_anchoring_without_target_is_rejected(self):
+        """Every audit created on such a framework would be refused."""
+        with pytest.raises(ValueError, match="target_score is required"):
+            load(library(1, "    anchor_na_to_target: true\n"))
+
+    def test_target_outside_the_scale_is_rejected(self):
+        with pytest.raises(ValueError, match="outside the framework scale"):
+            load(library(1, "    target_score: 7\n"))
+
+    def test_api_rejects_invalid_scoring_defaults(self):
+        from core.serializers import FrameworkWriteSerializer
+
+        framework = load(library(1))
+        for data, field in (
+            ({"score_calculation_method": "median"}, "score_calculation_method"),
+            ({"anchor_na_to_target": True}, "target_score"),
+            ({"target_score": 9}, "target_score"),
+        ):
+            serializer = FrameworkWriteSerializer(framework, data=data, partial=True)
+            assert not serializer.is_valid()
+            assert field in serializer.errors
+
     def test_update_resets_properties_removed_from_the_framework(self):
         load(library(1, PROPERTIES))
         StoredLibrary.store_library_content(library(2))
@@ -208,4 +230,16 @@ class TestConverter:
                 [],
                 [("B", "basic", None)],
                 outcomes=[("passed", None, "Passed", None)],
+            )
+
+    def test_anchoring_without_target_is_rejected(self, tmp_path):
+        with pytest.raises(ValueError, match="needs a target_score"):
+            _convert(tmp_path, [("anchor_na_to_target", "x")], [("B", "basic", None)])
+
+    def test_target_outside_the_scale_is_rejected(self, tmp_path):
+        with pytest.raises(ValueError, match="outside the scale"):
+            _convert(
+                tmp_path,
+                [("target_score", 3)],
+                [("B", "basic", 6)],
             )

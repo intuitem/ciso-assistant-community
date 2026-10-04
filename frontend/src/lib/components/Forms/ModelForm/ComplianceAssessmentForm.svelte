@@ -235,7 +235,8 @@
 
 	let frameworkRequest = 0;
 
-	// Copies propose the baseline audit's scale when it is on the same framework.
+	// Copies propose the baseline audit's scale and scoring settings when it is on
+	// the same framework; otherwise the framework's defaults apply.
 	async function loadBaselineScale(frameworkId: string, request: number) {
 		if (!initialData.baseline) return;
 		// The audit detail URL is a page (HTML); global-score is its JSON scale summary.
@@ -250,6 +251,16 @@
 			// A preset's labels come from the catalog.
 			scores_definition: baseline.score_scale_preset ? [] : scaleLevels(baseline.scores_definition)
 		};
+		form.form.update(
+			(d) => ({
+				...d,
+				score_calculation_method: baseline.score_calculation_method,
+				anchor_na_to_target: baseline.anchor_na_to_target,
+				target_score: baseline.target_score,
+				score_defaults_to_minimum: baseline.score_defaults_to_minimum
+			}),
+			{ taint: false }
+		);
 	}
 
 	async function handleFrameworkChange(id: string) {
@@ -288,21 +299,17 @@
 						.map((group) => group.ref_id);
 
 					if (!object.id) {
-						if (!initialData.baseline) proposedTarget = defaultTarget(defaultImplementationGroups);
+						proposedTarget = defaultTarget(defaultImplementationGroups);
+						// A copy on the same framework then takes the baseline's settings
+						// (loadBaselineScale).
 						form.form.update((currentData) => ({
 							...currentData,
 							selected_implementation_groups: defaultImplementationGroups,
-							// Copies keep the baseline's scoring settings.
-							...(initialData.baseline
-								? {}
-								: {
-										score_calculation_method:
-											defaultScoring?.score_calculation_method ??
-											currentData.score_calculation_method,
-										anchor_na_to_target: defaultScoring?.anchor_na_to_target ?? false,
-										score_defaults_to_minimum: defaultScoring?.score_defaults_to_minimum ?? false,
-										target_score: proposedTarget
-									})
+							score_calculation_method:
+								defaultScoring?.score_calculation_method ?? currentData.score_calculation_method,
+							anchor_na_to_target: defaultScoring?.anchor_na_to_target ?? false,
+							score_defaults_to_minimum: defaultScoring?.score_defaults_to_minimum ?? false,
+							target_score: proposedTarget
 						}));
 					}
 				});
@@ -517,17 +524,15 @@
 		{/if}
 
 		{#if scoringEnabled}
-			<!-- On create the method and target follow the framework defaults: restoring
-			     a value cached by an earlier modal would override them once the field mounts. -->
+			<!-- On create (copies too) the method and target follow the framework or the
+			     baseline: restoring a value cached by an earlier modal would override them. -->
 			<Select
 				{form}
 				options={model.selectOptions['score_calculation_method']}
 				field="score_calculation_method"
 				label={m.scoreCalculationMethod()}
 				helpText={m.scoreCalculationMethodHelpText()}
-				cacheLock={object?.id || initialData.baseline
-					? cacheLocks['score_calculation_method']
-					: undefined}
+				cacheLock={object?.id ? cacheLocks['score_calculation_method'] : undefined}
 				bind:cachedValue={formDataCache['score_calculation_method']}
 				disableDoubleDash
 			/>
@@ -538,7 +543,7 @@
 				field="target_score"
 				label={m.targetScore()}
 				helpText={m.targetScoreHelpText()}
-				cacheLock={object?.id || initialData.baseline ? cacheLocks['target_score'] : undefined}
+				cacheLock={object?.id ? cacheLocks['target_score'] : undefined}
 				bind:cachedValue={formDataCache['target_score']}
 			/>
 			<Checkbox
@@ -554,10 +559,6 @@
 				field="score_defaults_to_minimum"
 				label={m.scoreDefaultsToMinimum()}
 				helpText={m.scoreDefaultsToMinimumHelpText()}
-				cacheLock={object?.id || initialData.baseline
-					? cacheLocks['score_defaults_to_minimum']
-					: undefined}
-				bind:cachedValue={formDataCache['score_defaults_to_minimum']}
 			/>
 		{/if}
 	</div>

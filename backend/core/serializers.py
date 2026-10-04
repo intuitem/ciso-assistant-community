@@ -3159,6 +3159,35 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
     implementation_groups_definition = serializers.JSONField(
         required=False, allow_null=True
     )
+    score_calculation_method = serializers.ChoiceField(
+        choices=ComplianceAssessment.CalculationMethod.choices, required=False
+    )
+
+    SCORING_DEFAULT_FIELDS = (
+        "min_score",
+        "max_score",
+        "anchor_na_to_target",
+        "target_score",
+        "implementation_groups_definition",
+    )
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if any(field in attrs for field in self.SCORING_DEFAULT_FIELDS):
+            current = {
+                field: attrs.get(
+                    field,
+                    getattr(self.instance, field, None)
+                    if self.instance
+                    else Framework._meta.get_field(field).get_default(),
+                )
+                for field in self.SCORING_DEFAULT_FIELDS
+            }
+            try:
+                Framework.validate_scoring_defaults(**current)
+            except ValueError as e:
+                raise serializers.ValidationError({"target_score": str(e)})
+        return attrs
 
     def create(self, validated_data):
         # Strip any non-model fields that leak through from the read serializer
@@ -3883,9 +3912,14 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     def _apply_default_scoring(self, attrs):
         """New audit: the framework's scoring settings fill the fields the caller
         left out, so the API, presets and imports match the form. A copy of an
-        audit keeps the caller's settings."""
+        audit on the same framework keeps the caller's settings."""
         framework = attrs.get("framework")
-        if self.instance or not framework or attrs.get("baseline"):
+        baseline = attrs.get("baseline")
+        if (
+            self.instance
+            or not framework
+            or (baseline and baseline.framework_id == framework.id)
+        ):
             return
         defaults = framework.default_scoring_for(
             attrs.get("selected_implementation_groups")
@@ -4065,13 +4099,14 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         old_scoring_enabled = instance.scoring_enabled
 
         with transaction.atomic():
+            # Stored scores move to the new scale first, so that save() fills
+            # unset scores (score_defaults_to_minimum) on the new scale and
+            # snapshots today's metrics after the move.
+            if rescale := getattr(self, "_score_rescale", None):
+                instance.rescale_requirement_scores(*rescale)
+
             # Perform the main update (fields + M2M)
             updated_instance = super().update(instance, validated_data)
-
-            if rescale := getattr(self, "_score_rescale", None):
-                updated_instance.rescale_requirement_scores(*rescale)
-                # save() snapshotted today's metrics before the scores moved.
-                updated_instance.upsert_daily_metrics()
 
             # For dynamic frameworks, recompute IGs from current answers so the
             # answer-driven calc always wins over any manual override submitted

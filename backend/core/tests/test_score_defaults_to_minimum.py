@@ -117,12 +117,34 @@ class TestScoreDefaultsToMinimum:
         ra.save(update_fields=["result"])
         assert _scores(ra) == (True, 1, 1)
 
-    def test_switched_off_scores_start_over_at_the_minimum(self, framework):
+    def test_switched_off_scores_are_kept(self, framework):
         audit = _audit(framework)
         ra = _ra(audit, "plain")
-        ra.is_scored, ra.score, ra.documentation_score = False, 4, 3
+        ra.is_scored, ra.score, ra.documentation_score = False, 4, None
         ra.save()
-        assert _scores(ra) == (True, 1, 1)
+        assert _scores(ra) == (True, 4, 1)
+
+    def test_turning_scoring_off_and_on_keeps_the_scores(self, framework):
+        audit = _audit(framework)
+        ra = _ra(audit, "plain")
+        ra.score, ra.documentation_score = 4, 3
+        ra.save()
+        hidden = {"auditor": "hidden", "respondent": "hidden"}
+        for score_visibility in (hidden, EVERYONE_EDIT):
+            audit = ComplianceAssessment.objects.get(pk=audit.pk)
+            serializer = ComplianceAssessmentWriteSerializer(
+                audit,
+                data={
+                    "field_visibility": {
+                        "score": score_visibility,
+                        "is_scored": score_visibility,
+                    }
+                },
+                partial=True,
+            )
+            assert serializer.is_valid(), serializer.errors
+            serializer.save()
+        assert _scores(ra) == (True, 4, 3)
 
     def test_entered_scores_are_kept(self, framework):
         audit = _audit(framework)
@@ -148,3 +170,23 @@ class TestScoreDefaultsToMinimum:
     def test_scoring_disabled_leaves_scores_unset(self, framework):
         audit = _audit(framework, field_visibility={"score": {"auditor": "hidden"}})
         assert _scores(_ra(audit, "plain"))[1] is None
+
+    def test_turned_on_with_a_scale_change_fills_on_the_new_scale(self, framework):
+        audit = _audit(framework, score_defaults_to_minimum=False)
+        ComplianceAssessment.objects.filter(pk=audit.pk).update(
+            min_score=0, max_score=5
+        )
+        audit = ComplianceAssessment.objects.get(pk=audit.pk)
+        serializer = ComplianceAssessmentWriteSerializer(
+            audit,
+            data={
+                "min_score": 1,
+                "max_score": 5,
+                "confirm_rescale": True,
+                "score_defaults_to_minimum": True,
+            },
+            partial=True,
+        )
+        assert serializer.is_valid(), serializer.errors
+        serializer.save()
+        assert _scores(_ra(audit, "plain")) == (True, 1, 1)

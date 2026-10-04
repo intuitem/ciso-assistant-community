@@ -238,8 +238,8 @@ A `_meta` of type `framework` contains the following keys:
 - answers_definition: name of an `answers` object
 - score_scale_locked: `x` (or `true`) when the standard defines the score scale. Audits of the framework keep it and cannot switch to another scale.
 - score_calculation_method: `average` (default), `sum` or `average_of_averages`. Calculation method proposed for new audits of the framework.
-- anchor_na_to_target: `x` (or `true`) to have new audits of the framework count not applicable requirements as the target score.
-- target_score: target score proposed for new audits of the framework, on its scale. Implementation groups can override it (see their `target_score` column).
+- anchor_na_to_target: `x` (or `true`) to have new audits of the framework count not applicable requirements as the target score. Requires `target_score`.
+- target_score: target score proposed for new audits of the framework, within its `min_score`-`max_score` scale. Implementation groups can override it (see their `target_score` column). The converter and the loader refuse a missing or out-of-scale target, since audits created on the framework would be refused.
 - score_defaults_to_minimum: `x` (or `true`) to have new audits of the framework give applicable requirements without a score the scale minimum, as in tools where every control starts at the minimum.
 - outcomes_definition: name of an `outcomes` object
 - field_visibility: JSON object `{"field": {"role": "edit"|"read"|"hidden"}}`, roles `auditor` and `respondent`. Initial field visibility of new audits of the framework, merged per role over the defaults (scores are hidden unless the framework shows them), e.g. `{"score": {"auditor": "edit", "respondent": "edit"}}`.

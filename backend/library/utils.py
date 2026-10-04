@@ -407,6 +407,17 @@ class FrameworkImporter:
             "score_calculation_method", "average"
         )
         Framework.validate_score_calculation_method(score_calculation_method)
+        Framework.validate_scoring_defaults(
+            min_score=min_score,
+            max_score=max_score,
+            anchor_na_to_target=bool(
+                self.framework_data.get("anchor_na_to_target", False)
+            ),
+            target_score=self.framework_data.get("target_score"),
+            implementation_groups_definition=self.framework_data.get(
+                "implementation_groups_definition"
+            ),
+        )
 
         # update_or_create: identical to create() for normal loads (no row
         # exists yet) and adopts a pre-existing library-less framework in

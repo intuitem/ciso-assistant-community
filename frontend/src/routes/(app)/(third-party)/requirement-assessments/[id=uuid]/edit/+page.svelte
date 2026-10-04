@@ -1076,9 +1076,10 @@
 							{@const docScoreShown =
 								showDocumentationScore &&
 								page.data.compliance_assessment_score.show_documentation_score}
-							<!-- Scores defaulting to the minimum are always set: no switch. -->
+							<!-- Scores defaulting to the minimum are always set: no switch, unless
+							     this requirement isn't scored yet (e.g. it was not applicable). -->
 							{@const toggleShown =
-								!page.data.compliance_assessment_score.score_defaults_to_minimum}
+								!page.data.compliance_assessment_score.score_defaults_to_minimum || !data.is_scored}
 							{#snippet scoringToggle()}
 								<div>
 									<Checkbox

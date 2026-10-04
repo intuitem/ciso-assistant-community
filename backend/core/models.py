@@ -1743,8 +1743,18 @@ class LibraryUpdater:
                 framework_dict.setdefault("anchor_na_to_target", False)
                 framework_dict.setdefault("target_score", None)
                 framework_dict.setdefault("score_defaults_to_minimum", False)
+                framework_dict.setdefault("field_visibility", {})
                 Framework.validate_score_calculation_method(
                     framework_dict["score_calculation_method"]
+                )
+                Framework.validate_scoring_defaults(
+                    min_score=framework_dict.get("min_score", 0),
+                    max_score=framework_dict.get("max_score", 100),
+                    anchor_na_to_target=framework_dict["anchor_na_to_target"],
+                    target_score=framework_dict["target_score"],
+                    implementation_groups_definition=framework_dict[
+                        "implementation_groups_definition"
+                    ],
                 )
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
@@ -2288,11 +2298,6 @@ class LibraryUpdater:
                     created_ras = RequirementAssessment.objects.bulk_create(
                         requirement_assessment_objects_to_create, batch_size=100
                     )
-                    for ca in ComplianceAssessment.objects.filter(
-                        pk__in={ra.compliance_assessment_id for ra in created_ras},
-                        score_defaults_to_minimum=True,
-                    ):
-                        ca.apply_minimum_score_defaults()
 
                     # Seed answers for newly created assessments
                     answers_to_create = []
@@ -2320,6 +2325,13 @@ class LibraryUpdater:
 
                     if answers_to_create:
                         Answer.objects.bulk_create(answers_to_create, batch_size=500)
+
+                # New requirements, nodes that became assessable and scores
+                # reset by the update all leave scores unset.
+                for ca in ComplianceAssessment.objects.filter(
+                    framework=new_framework, score_defaults_to_minimum=True
+                ):
+                    ca.apply_minimum_score_defaults()
 
     def update_quick_forms(self):
         """Upsert quick forms, pages and questions by URN, prune what the new
@@ -3897,6 +3909,36 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
                 f"invalid score_calculation_method {method!r}: expected one of "
                 f"{', '.join(ComplianceAssessment.CalculationMethod.values)}"
             )
+
+    @staticmethod
+    def validate_scoring_defaults(
+        *,
+        min_score,
+        max_score,
+        anchor_na_to_target,
+        target_score,
+        implementation_groups_definition,
+    ):
+        """Audits must accept what the framework proposes: N/A anchoring needs a
+        target, implementation group targets fall back on the framework's, and
+        every target lies on the framework scale."""
+        group_targets = [
+            (f"implementation group {group.get('ref_id')!r} target_score", target)
+            for group in implementation_groups_definition or []
+            if isinstance(group, dict)
+            and (target := group.get("target_score")) is not None
+        ]
+        if target_score is None and (anchor_na_to_target or group_targets):
+            raise ValueError(
+                "target_score is required with anchor_na_to_target or "
+                "implementation group target scores"
+            )
+        for label, target in [("target_score", target_score), *group_targets]:
+            if target is not None and not min_score <= target <= max_score:
+                raise ValueError(
+                    f"{label} {target} is outside the framework scale "
+                    f"{min_score}-{max_score}"
+                )
 
     @property
     def default_scoring(self) -> dict:
@@ -9077,8 +9119,8 @@ class ComplianceAssessment(Assessment):
 
     def apply_minimum_score_defaults(self, requirement_assessments=None) -> None:
         """With score_defaults_to_minimum, an applicable requirement always has
-        a score: unset or switched-off scores become the scale minimum, on both
-        layers (RequirementAssessment.fill_minimum_scores). Applies to the given
+        a score: unset scores become the scale minimum, on both layers
+        (RequirementAssessment.fill_minimum_scores). Applies to the given
         requirement assessments, updated in place, or to all of the audit's.
         Questionnaire-scored requirements keep their computed score.
         """
@@ -11232,9 +11274,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
     def fill_minimum_scores(self) -> bool:
         """Give an applicable requirement without a score the scale minimum, on
-        both layers (ComplianceAssessment.score_defaults_to_minimum). Scores
-        that were switched off start over at the minimum. Returns whether
-        anything changed."""
+        both layers (ComplianceAssessment.score_defaults_to_minimum). Stored
+        scores are kept, e.g. those preserved while scoring was turned off.
+        Returns whether anything changed."""
         if self.result == self.Result.NOT_APPLICABLE:
             return False
         minimum = self.get_resolved_scoring()["min_score"]
@@ -11242,7 +11284,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             return False
         changed = False
         if not self.is_scored:
-            self.score = self.documentation_score = None
             self.is_scored = True
             changed = True
         if self.score is None:

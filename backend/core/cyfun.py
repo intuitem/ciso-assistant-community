@@ -139,7 +139,7 @@ def build_self_assessment(audit) -> ExportFile:
     filled with its scores and observations. The tool lists only that level's
     requirements and applies its own N/A score and thresholds."""
     from .models import RequirementAssessment
-    from .views import escape_excel_formula
+    from .utils import escape_excel_formula, sanitize_xlsx_value
 
     template = export_template(
         audit.framework.urn, audit.selected_implementation_groups
@@ -172,8 +172,9 @@ def build_self_assessment(audit) -> ExportFile:
         if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
             ws.cell(row=row, column=template.doc_column, value="N/A")
             ws.cell(row=row, column=template.impl_column, value="N/A")
-        else:
-            if ra.documentation_score is not None:
+        elif ra.is_scored:
+            # Only the scores the audit counts.
+            if audit.show_documentation_score and ra.documentation_score is not None:
                 ws.cell(
                     row=row,
                     column=template.doc_column,
@@ -185,7 +186,7 @@ def build_self_assessment(audit) -> ExportFile:
             ws.cell(
                 row=row,
                 column=template.comment_column,
-                value=escape_excel_formula(ra.observation),
+                value=sanitize_xlsx_value(escape_excel_formula(ra.observation)),
             )
 
     buffer = io.BytesIO()

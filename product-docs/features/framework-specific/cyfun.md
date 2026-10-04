@@ -17,7 +17,7 @@ The import accepts the official **CyFun 2025** self-assessment tools, in any of 
 
 One import creates one new audit:
 
-1. The **CyFun 2025** framework library is loaded automatically if it isn't already.
+1. The **CyFun 2025** framework library is loaded automatically if it isn't already. If an older version is loaded, the import stops with `CyfunLibraryOutdated`: update the library first, since the import relies on its scoring settings.
 2. The assurance level is detected from the workbook content, and the audit's implementation group is set to match (basic, important, or essential), so the audit scopes to exactly the requirements of that edition.
 3. For every requirement row, the **Documentation Score** and **Implementation Score** land on the matching requirement assessment, and scoring — including the documentation score — is switched on for the audit automatically. Global and per-category maturity scores are then computed by the platform as usual.
 4. Rows marked `N/A` in the workbook become **Not applicable** results.
@@ -58,7 +58,8 @@ The export writes each requirement's **score** into the official template, so a 
 
 ### What lands in the workbook
 
-- Each requirement's **documentation score** and **implementation score** are written to the appropriate sheet and row; **Not applicable** results are written as `N/A`.
+- Each requirement's **documentation score** and **implementation score** are written to the appropriate sheet and row, as counted by the audit: a requirement that isn't scored, or a hidden documentation score, keeps the tool's own value. **Not applicable** results are written as `N/A`.
+- The export holds the whole audit, so respondents scoped to their part of it (auditees, third parties) cannot download it.
 - Observations from requirement assessments populate the comments column.
 - The official template scaffolding (cover page, formulas, summary sheet) is preserved untouched.
 
@@ -74,7 +75,7 @@ CyFun 2025 audits show, under **Outcomes**, whether they meet the conditions of 
 | Requirements marked **Not applicable** (measures excluded from the scope) | at most 1    | at most 3    | at most 5                                                  |
 | Never excluded                                                            | key measures | key measures | key measures and controls linked to the management aspects |
 
-A key measure's maturity is the average of its documentation and implementation scores; the total and the categories use the audit's maturity score, as displayed. Each condition is highlighted when it holds (total maturity, key measures, categories, exclusions; the category condition holds by default below ESSENTIAL), and **CCB conformity criteria met** when they all do. A completed, conformant audit therefore has every condition highlighted, and a greyed-out condition shows what is missing.
+A key measure's maturity is the average of its documentation and implementation scores; the total and the categories use the audit's maturity score, as displayed. Each condition is highlighted when it holds (total maturity, key measures, categories, exclusions; the category condition holds by default below ESSENTIAL), and **CCB conformity criteria met** when they all do and the audit covers the whole level (its BASIC, IMPORTANT or ESSENTIAL group is selected, or no group at all: key measures alone are not a BASIC audit). A completed, conformant audit therefore has every condition highlighted, and a greyed-out condition shows what is missing.
 
 This is a self-check: conformity is confirmed by the Conformity Assessment Body, from the official self-assessment tool's summary tab.
 

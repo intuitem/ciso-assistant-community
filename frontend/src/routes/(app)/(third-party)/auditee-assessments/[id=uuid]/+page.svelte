@@ -1425,8 +1425,11 @@
 										{@const raScoresDef =
 											requirementAssessment.effective_scores_definition ??
 											complianceAssessment.scores_definition}
-										<!-- Scores defaulting to the minimum are always set: no switch. -->
-										{@const toggleShown = !complianceAssessment.score_defaults_to_minimum}
+										<!-- Scores defaulting to the minimum are always set: no switch, unless
+										     this requirement isn't scored yet (e.g. it was not applicable). -->
+										{@const toggleShown =
+											!complianceAssessment.score_defaults_to_minimum ||
+											!requirementAssessment.is_scored}
 										{#snippet scoringToggle()}
 											<div>
 												<Checkbox

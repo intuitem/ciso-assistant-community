@@ -21090,10 +21090,14 @@ objects:
           name: essential - aspects de management
     outcomes_definition:
     - ref_id: cyfun-conformity-criteria-met
-      expression: '(assessment.maturity_score >= ((assessment.selected_implementation_groups.size()
+      expression: '(assessment.selected_implementation_groups.size() == 0 || ((assessment.selected_implementation_groups.size()
         == 0 || assessment.selected_implementation_groups.exists(g, g in ["E", "EK",
-        "EG"])) ? 3.5 : (assessment.selected_implementation_groups.exists(g, g in
-        ["I", "IK", "IG"]) ? 3.0 : 2.5))) && (requirements.all(k, !(((assessment.selected_implementation_groups.size()
+        "EG"])) ? "E" in assessment.selected_implementation_groups : (assessment.selected_implementation_groups.exists(g,
+        g in ["I", "IK", "IG"]) ? "I" in assessment.selected_implementation_groups
+        : "B" in assessment.selected_implementation_groups))) && (assessment.maturity_score
+        >= ((assessment.selected_implementation_groups.size() == 0 || assessment.selected_implementation_groups.exists(g,
+        g in ["E", "EK", "EG"])) ? 3.5 : (assessment.selected_implementation_groups.exists(g,
+        g in ["I", "IK", "IG"]) ? 3.0 : 2.5))) && (requirements.all(k, !(((assessment.selected_implementation_groups.size()
         == 0 || assessment.selected_implementation_groups.exists(g, g in ["E", "EK",
         "EG"])) ? "EK" : (assessment.selected_implementation_groups.exists(g, g in
         ["I", "IK", "IG"]) ? "IK" : "BK")) in requirements[k].implementation_groups)

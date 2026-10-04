@@ -194,6 +194,8 @@ from core.pagination import CustomLimitOffsetPagination
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     build_answers_dict,
+    escape_excel_formula,
+    sanitize_xlsx_value,
     bulk_update_with_log,
     compare_schema_versions,
     get_respondent_scoped_folder_ids,
@@ -488,40 +490,12 @@ def get_mapping_max_depth():
         return MAPPING_MAX_DEPTH
 
 
-def escape_excel_formula(value):
-    """
-    Escape Excel formula injection by prefixing dangerous characters.
-    Prevents CSV/Formula injection (OWASP) when values start with =+-@
-    """
-    if value is None:
-        return ""
-    s = str(value)
-    if not s:
-        return ""
-    stripped = s.lstrip()
-    if stripped and stripped[0] in ("=", "+", "-", "@"):
-        return "'" + s
-    return s
-
-
 def escape_csv_row(row):
     """Apply formula-injection escaping to every string cell of a CSV row."""
     return [
         escape_excel_formula(value) if isinstance(value, str) else value
         for value in row
     ]
-
-
-ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
-XLSX_MAX_CELL_CHARS = 32_767
-
-
-def sanitize_xlsx_value(value):
-    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)
-    and cap strings at Excel's per-cell limit."""
-    if isinstance(value, str):
-        return ILLEGAL_XLSX_CHARS_RE.sub("", value)[:XLSX_MAX_CELL_CHARS]
-    return value
 
 
 def create_xlsx_response(entries, filename, wrap_columns=None):
@@ -13073,6 +13047,16 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 {"error": "Unknown export"}, status=status.HTTP_404_NOT_FOUND
             )
         audit = ComplianceAssessment.objects.get(id=pk)
+        # An export holds the whole audit: only users with the full view of it,
+        # not respondents scoped to their part.
+        if not RoleAssignment.is_access_allowed(
+            request.user,
+            Permission.objects.get(codename="view_compliance_assessment_full"),
+            audit.folder,
+        ):
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
         if not export.supports(audit):
             return Response(
                 {"error": "This export is not available for this audit"},

@@ -93,3 +93,64 @@ class TestFrameworkExportRegistry:
             )
         )
         assert response.status_code == 400
+
+
+def _domain_audit(urn):
+    """An audit in a domain with its builtin user groups."""
+    domain = Folder.objects.create(
+        name=f"Exports {urn}",
+        content_type=Folder.ContentType.DOMAIN,
+        parent_folder=Folder.get_root_folder(),
+        create_iam_groups=True,
+    )
+    Folder.create_default_ug_and_ra(domain)
+    framework = Framework.objects.create(name="Exports", urn=urn, folder=domain)
+    audit = ComplianceAssessment.objects.create(
+        name="Audit", framework=framework, folder=domain
+    )
+    return domain, audit
+
+
+@pytest.mark.django_db
+class TestFrameworkExportPermissions:
+    def _get(self, user, audit):
+        client = APIClient()
+        client.force_authenticate(user=user)
+        return client.get(
+            reverse(
+                "compliance-assessments-framework-export",
+                kwargs={"pk": str(audit.pk), "export_id": "plain-text"},
+            )
+        )
+
+    def test_respondents_cannot_export_the_whole_audit(self, plain_text_export):
+        startup(sender=None)
+        domain, audit = _domain_audit("urn:test:framework:exports")
+        auditee = User.objects.create_user("auditee@framework-exports-tests.com")
+        UserGroup.objects.get(name="BI-UG-ADE", folder=domain).user_set.add(auditee)
+        assert self._get(auditee, audit).status_code == 403
+
+    def test_users_without_access_cannot_export(self, plain_text_export):
+        startup(sender=None)
+        _domain, audit = _domain_audit("urn:test:framework:exports")
+        outsider = User.objects.create_user("outsider@framework-exports-tests.com")
+        assert self._get(outsider, audit).status_code == 403
+
+
+class TestRegistry:
+    def test_duplicate_id_is_refused(self, plain_text_export):
+        with pytest.raises(ValueError, match="already registered"):
+            framework_exports.register(PLAIN_TEXT)
+
+    def test_id_outside_the_route_is_refused(self):
+        with pytest.raises(ValueError, match="Invalid framework export id"):
+            framework_exports.register(
+                FrameworkExport(
+                    ref_id="no/slash",
+                    title="t",
+                    description="d",
+                    format="MD",
+                    supports=lambda audit: True,
+                    build=lambda audit: None,
+                )
+            )

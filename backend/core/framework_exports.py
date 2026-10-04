@@ -5,6 +5,7 @@ Base models and views only go through this registry. Each export registers
 itself from its own module, which CoreConfig.ready() imports.
 """
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -30,6 +31,11 @@ _registry: dict[str, FrameworkExport] = {}
 
 
 def register(export: FrameworkExport) -> None:
+    # The export route only matches these ids.
+    if not re.fullmatch(r"[\w-]+", export.ref_id):
+        raise ValueError(f"Invalid framework export id {export.ref_id!r}")
+    if export.ref_id in _registry:
+        raise ValueError(f"Framework export {export.ref_id!r} is already registered")
     _registry[export.ref_id] = export
 
 
