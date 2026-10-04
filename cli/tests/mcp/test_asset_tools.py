@@ -446,6 +446,15 @@ class TestAssetSecurityGaps:
             )
         assert "No assets with unmet objectives found" in result
 
+    def test_only_unmet_none_unmet_keeps_truncation(self):
+        get = self._get({UUID_B: CRM}, listing=[{"id": UUID_B}], list_count=120)
+        with patch.object(read_tools, "make_get_request", get):
+            result = run(
+                read_tools.get_asset_security_gaps(folder=UUID_F, only_unmet=True)
+            )
+        assert "1 of 120" in result
+        assert "No assets with unmet objectives found" in result
+
 
 # ---------------------------------------------------------------------------
 # Registration
@@ -468,3 +477,19 @@ class TestRegistration:
         names = {t.name for t in tools}
         assert "get_asset_security_gaps" in names
         assert "update_asset" not in names
+
+    def test_append_tools_not_idempotent(self):
+        from mcp.server.fastmcp import FastMCP
+
+        import ca_mcp.server as server
+
+        fresh = FastMCP("test")
+        with (
+            patch.object(server, "mcp", fresh),
+            patch.object(server, "_registered", False),
+        ):
+            server.register_tools(read_only=False)
+            tools = {t.name: t for t in asyncio.run(fresh.list_tools())}
+        assert tools["update_asset"].annotations.idempotentHint is False
+        assert tools["update_task_template"].annotations.idempotentHint is False
+        assert tools["update_entity"].annotations.idempotentHint is True

@@ -916,7 +916,8 @@ async def get_asset_security_gaps(
             )
 
         if not sections and not errors:
-            return empty_response(
+            # Keep the truncation notice: unchecked assets may still have gaps
+            return truncation + empty_response(
                 "assets with unmet objectives" if only_unmet else "assets", filters
             )
 
