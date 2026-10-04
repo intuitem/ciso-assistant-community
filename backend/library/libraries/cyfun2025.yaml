@@ -20866,6 +20866,7 @@ objects:
     score_calculation_method: average_of_averages
     anchor_na_to_target: true
     target_score: 3.0
+    score_defaults_to_minimum: true
     scores_definition:
     - score: 1
       name: Initial
@@ -21107,7 +21108,6 @@ objects:
         || ((assessment.selected_implementation_groups.size() == 0 || assessment.selected_implementation_groups.exists(g,
         g in ["E", "EK", "EG"])) && "EG" in requirements[k].implementation_groups))))'
       annotation: CCB conformity criteria met
-      color: '#22c55e'
       translations:
         nl:
           annotation: CCB-conformiteitscriteria behaald
@@ -21119,7 +21119,6 @@ objects:
         "EG"])) ? 3.5 : (assessment.selected_implementation_groups.exists(g, g in
         ["I", "IK", "IG"]) ? 3.0 : 2.5))'
       annotation: Total maturity target met
-      color: '#22c55e'
       translations:
         nl:
           annotation: Doel totale maturiteit behaald
@@ -21135,7 +21134,6 @@ objects:
         g in ["E", "EK", "EG"])) ? 3.0 : (assessment.selected_implementation_groups.exists(g,
         g in ["I", "IK", "IG"]) ? 3.0 : 2.5)))'
       annotation: Key measure targets met
-      color: '#22c55e'
       translations:
         nl:
           annotation: Doelen kernmaatregelen behaald
@@ -21146,7 +21144,6 @@ objects:
         g in ["E", "EK", "EG"])) || sections.all(c, !c.matches("^[a-z][a-z][.][a-z][a-z]$")
         || sections[c].maturity_score >= 3.0)'
       annotation: Category targets met
-      color: '#22c55e'
       translations:
         nl:
           annotation: "Doelen categorie\xEBn behaald"
@@ -21164,7 +21161,6 @@ objects:
         || ((assessment.selected_implementation_groups.size() == 0 || assessment.selected_implementation_groups.exists(g,
         g in ["E", "EK", "EG"])) && "EG" in requirements[k].implementation_groups)))'
       annotation: Exclusions within CCB rules
-      color: '#22c55e'
       translations:
         nl:
           annotation: Uitsluitingen binnen de CCB-regels

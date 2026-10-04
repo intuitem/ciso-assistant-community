@@ -1425,6 +1425,8 @@
 										{@const raScoresDef =
 											requirementAssessment.effective_scores_definition ??
 											complianceAssessment.scores_definition}
+										<!-- Scores defaulting to the minimum are always set: no switch. -->
+										{@const toggleShown = !complianceAssessment.score_defaults_to_minimum}
 										{#snippet scoringToggle()}
 											<div>
 												<Checkbox
@@ -1460,7 +1462,9 @@
 														updateScore(requirementAssessment);
 													}}
 													disabled={!canEditScore || !requirementAssessment.is_scored}
-													left={first || !showDocumentationScore ? scoringToggle : undefined}
+													left={toggleShown && (first || !showDocumentationScore)
+														? scoringToggle
+														: undefined}
 												/>
 											{/snippet}
 											{#snippet documentation(first: boolean)}
@@ -1480,7 +1484,7 @@
 														}}
 														disabled={!canEditDocumentationScore ||
 															!requirementAssessment.is_scored}
-														left={first ? scoringToggle : undefined}
+														left={toggleShown && first ? scoringToggle : undefined}
 													/>
 												{/if}
 											{/snippet}

@@ -12,6 +12,7 @@ PROPERTIES = (
     "    score_calculation_method: average_of_averages\n"
     "    anchor_na_to_target: true\n"
     "    target_score: 3\n"
+    "    score_defaults_to_minimum: true\n"
 )
 
 
@@ -61,6 +62,7 @@ class TestFrameworkScoringProperties:
             "score_calculation_method": "average_of_averages",
             "anchor_na_to_target": True,
             "target_score": 3,
+            "score_defaults_to_minimum": True,
         }
 
     def test_omitted_properties_keep_the_defaults(self):
@@ -70,6 +72,7 @@ class TestFrameworkScoringProperties:
         assert framework.score_calculation_method == "average"
         assert framework.anchor_na_to_target is False
         assert framework.target_score is None
+        assert framework.score_defaults_to_minimum is False
 
     def test_unknown_method_is_rejected(self):
         with pytest.raises(ValueError, match="score_calculation_method"):
@@ -86,6 +89,7 @@ class TestFrameworkScoringProperties:
         assert framework.score_calculation_method == "average"
         assert framework.anchor_na_to_target is False
         assert framework.target_score is None
+        assert framework.score_defaults_to_minimum is False
 
 
 def _convert(tmp_path, framework_meta, groups, *, outcomes=()):
@@ -159,11 +163,16 @@ class TestConverter:
     def test_scoring_defaults_and_group_targets(self, tmp_path):
         framework = _convert(
             tmp_path,
-            [("anchor_na_to_target", "x"), ("target_score", 3)],
+            [
+                ("anchor_na_to_target", "x"),
+                ("target_score", 3),
+                ("score_defaults_to_minimum", "x"),
+            ],
             [("B", "basic", 2.5), ("E", "essential", None)],
         )
         assert framework["anchor_na_to_target"] is True
         assert framework["target_score"] == 3.0
+        assert framework["score_defaults_to_minimum"] is True
         targets = {
             group["ref_id"]: group.get("target_score")
             for group in framework["implementation_groups_definition"]

@@ -1076,6 +1076,9 @@
 							{@const docScoreShown =
 								showDocumentationScore &&
 								page.data.compliance_assessment_score.show_documentation_score}
+							<!-- Scores defaulting to the minimum are always set: no switch. -->
+							{@const toggleShown =
+								!page.data.compliance_assessment_score.score_defaults_to_minimum}
 							{#snippet scoringToggle()}
 								<div>
 									<Checkbox
@@ -1103,7 +1106,7 @@
 													? m.implementationScore()
 													: m.score()}
 												disabled={!data.is_scored}
-												left={first || !docScoreShown ? scoringToggle : undefined}
+												left={toggleShown && (first || !docScoreShown) ? scoringToggle : undefined}
 											/>
 										</div>
 									{/if}
@@ -1119,7 +1122,7 @@
 											label={m.documentationScore()}
 											isDoc={true}
 											disabled={!data.is_scored}
-											left={first ? scoringToggle : undefined}
+											left={toggleShown && first ? scoringToggle : undefined}
 										/>
 									{/if}
 								{/snippet}

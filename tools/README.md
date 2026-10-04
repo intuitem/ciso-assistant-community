@@ -240,6 +240,7 @@ A `_meta` of type `framework` contains the following keys:
 - score_calculation_method: `average` (default), `sum` or `average_of_averages`. Calculation method proposed for new audits of the framework.
 - anchor_na_to_target: `x` (or `true`) to have new audits of the framework count not applicable requirements as the target score.
 - target_score: target score proposed for new audits of the framework, on its scale. Implementation groups can override it (see their `target_score` column).
+- score_defaults_to_minimum: `x` (or `true`) to have new audits of the framework give applicable requirements without a score the scale minimum, as in tools where every control starts at the minimum.
 - outcomes_definition: name of an `outcomes` object
 - field_visibility: JSON object `{"field": {"role": "edit"|"read"|"hidden"}}`, roles `auditor` and `respondent`. Initial field visibility of new audits of the framework, merged per role over the defaults (scores are hidden unless the framework shows them), e.g. `{"score": {"auditor": "edit", "respondent": "edit"}}`.
 

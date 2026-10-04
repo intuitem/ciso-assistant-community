@@ -451,6 +451,9 @@ class FrameworkImporter:
                     self.framework_data.get("anchor_na_to_target", False)
                 ),
                 target_score=self.framework_data.get("target_score"),
+                score_defaults_to_minimum=bool(
+                    self.framework_data.get("score_defaults_to_minimum", False)
+                ),
                 provider=library_object.provider,
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,

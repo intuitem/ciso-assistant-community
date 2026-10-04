@@ -2596,6 +2596,8 @@
 	"targetScoreHelpText": "The target maturity score. Used as the replacement value for N/A requirements when anchoring is enabled. Defaults to the maximum score if not set.",
 	"anchorNaToTarget": "Anchor N/A to target score",
 	"anchorNaToTargetHelpText": "When enabled, requirements marked as Not Applicable are included in scoring with their scores replaced by the target score, instead of being excluded.",
+	"scoreDefaultsToMinimum": "Scores default to the minimum",
+	"scoreDefaultsToMinimumHelpText": "Applicable requirements always have a score: one not set yet is the scale minimum, as in the CCB CyFun tools, and the scoring switch is hidden. Turning this off keeps the scores.",
 	"average": "Average",
 	"sum": "Sum",
 	"averageOfAverages": "Average of averages",
