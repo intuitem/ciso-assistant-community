@@ -105,7 +105,7 @@ objects:
           description: Významný dopad. Událost způsobila nebo může způsobit závažné
             narušení služeb, finanční ztrátu poskytovateli nebo značnou újmu jiným
             osobám podle § 15 zákona o kybernetické bezpečnosti.
-    - name: Crititcal
+    - name: Critical
       hexcolor: '#fe4000'
       description: Fatal impact. Long-term unavailability of key regulated services
         threatening the very existence of the company. Extensive and irreversible
@@ -127,8 +127,7 @@ objects:
     probability:
     - name: Low
       hexcolor: '#BBF7D0'
-      description: The threat does not exist or is unlikely. Expected realization
-        of the threat is no more frequent than once every 5 years.
+      description: The threat does not exist, is highly unlikely, or existing vulnerabilities are fully mitigated by implemented security measures. Expected realization is no more frequent than once every 5 years.
       abbreviation: L
       translations:
         cs:
@@ -158,7 +157,8 @@ objects:
     - name: Critical
       hexcolor: '#fe4000'
       description: The threat is very likely to almost certain. Expected realization
-        of the threat is more frequent than once a month.
+        of the threat is more frequent than once The threat does not exist or is unlikely. Expected realization
+        of the threat is no more frequent than once every 5 yearsa month.
       abbreviation: C
       translations:
         cs:
