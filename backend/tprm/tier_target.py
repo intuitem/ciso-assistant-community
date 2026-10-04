@@ -128,6 +128,8 @@ class EntityTierTarget(Target):
                 raise LookupError
             return scale[position - 1]
 
+        if not isinstance(suggestion, dict):
+            return None
         config = {}
         try:
             if bands := suggestion.get("bands"):
@@ -144,7 +146,8 @@ class EntityTierTarget(Target):
                     {"outcome": row.get("outcome"), "tier": tier_at(row)}
                     for row in mapping
                 ]
-        except LookupError:
+        # A library is outside input: any shape it got wrong means no suggestion.
+        except LookupError, TypeError, AttributeError:
             return None
         return config or None
 

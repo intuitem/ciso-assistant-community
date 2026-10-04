@@ -449,7 +449,7 @@ class TestSelfAssessment:
         change = EntityTierChange.objects.get(entity=setup["acme"])
         assert change.response_id == response.id
         response.refresh_from_db()
-        assert response.resolution == QuickFormResponse.Resolution.AUTO
+        assert response.resolution == QuickFormResponse.Resolution.ACCEPTED
 
 
 @pytest.mark.django_db
@@ -494,3 +494,34 @@ def test_a_hidden_tier_sends_a_self_assessment_to_review(setup):
     client.post(f"/api/my-requests/{response.id}/submit/", {}, format="json")
     response.refresh_from_db()
     assert response.status == QuickFormResponse.Status.SUBMITTED
+
+
+@pytest.mark.django_db
+def test_skipped_scored_questions_send_a_self_assessment_to_review(setup):
+    """Optional scored questions left blank score 0 and would read as the
+    lowest tier: never applied without a reviewer."""
+    user, client = _admin()
+    Question.objects.filter(urn__in=[Q_RISK, Q_PII]).update(required=False)
+    response = QuickFormResponse.objects.create(
+        name="partial",
+        quick_form=setup["form"],
+        folder=setup["domain"],
+        publication=setup["publication"],
+    )
+    response.seed_answers()
+    questions = {
+        q.urn: q for q in Question.objects.filter(page__quick_form=setup["form"])
+    }
+    apply_answers_dict(
+        "response", response, questions, {Q_VENDOR: [str(setup["acme"].id)]}
+    )
+    response.respondents.add(Actor.objects.get(user=user, entity__isnull=True))
+    response.recompute()
+
+    content = client.get(f"/api/my-requests/{response.id}/content/").json()
+    assert content["on_submit"] == "review"
+    client.post(f"/api/my-requests/{response.id}/submit/", {}, format="json")
+    response.refresh_from_db()
+    assert response.status == QuickFormResponse.Status.SUBMITTED
+    setup["acme"].refresh_from_db()
+    assert setup["acme"].tier is None

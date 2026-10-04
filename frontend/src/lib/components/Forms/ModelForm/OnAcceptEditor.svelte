@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { formFieldProxy, type SuperValidated } from 'sveltekit-superforms';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
@@ -45,6 +46,8 @@
 	let mapping = $state<MappingRow[]>(toMapping(initial));
 	// The form's library-suggested tier setup, already mapped to this scale.
 	let suggestion = $state<Record<string, any> | null>(null);
+	// Plain variable, not state: the effect below writes it and must not rerun.
+	let loadedFormId: string | null = null;
 	const isEmpty = () => !useBands && !useMapping;
 
 	function useSuggestion() {
@@ -70,7 +73,11 @@
 	});
 
 	$effect(() => {
-		const id = $quickFormId;
+		const id = $quickFormId ? String($quickFormId) : null;
+		// A new publication switching form: the previous form's rules and
+		// tiers mean nothing for the next one, so its setup starts over.
+		if (isNew && loadedFormId && id !== loadedFormId) untrack(resetTierSetup);
+		loadedFormId = id;
 		if (!id) {
 			rules = [];
 			suggestion = null;
@@ -79,6 +86,8 @@
 		fetch(`/quick-forms/${id}`)
 			.then((res) => (res.ok ? res.json() : {}))
 			.then((data: any) => {
+				// A slower answer for a form no longer picked is dropped.
+				if (id !== loadedFormId) return;
 				rules = (data.outcomes_definition ?? []) as Rule[];
 				suggestion =
 					((data.suggested_on_accept ?? []) as any[]).find((e) => e?.target === TIER_TARGET)
@@ -86,6 +95,16 @@
 				if (suggestion && isNew && isEmpty()) useSuggestion();
 			});
 	});
+
+	function resetTierSetup() {
+		enabled = false;
+		useBands = false;
+		bandOutcome = '';
+		thresholds = [];
+		useMapping = false;
+		mapping = [];
+		sync();
+	}
 
 	const ruleLabel = (rule: Rule) => rule.label ?? rule.annotation ?? rule.ref_id;
 

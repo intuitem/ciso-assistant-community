@@ -224,6 +224,18 @@
 	// A form whose first object question appears is almost always about that
 	// object: pick it as subject then. Never over an author's choice, and never
 	// on load, so existing forms are left as they are.
+	// A subject whose question is gone (deleted, or no longer a single-object
+	// reference) would only fail the next save: drop it so it can be re-picked.
+	$effect(() => {
+		const urns = new Set(subjectCandidates.map((q) => q.urn.toLowerCase()));
+		untrack(() => {
+			const subject = $frameworkStore.subject_question_urn;
+			if (mode === 'quick_form' && subject && !urns.has(subject.toLowerCase())) {
+				builder.updateFramework({ subject_question_urn: null });
+			}
+		});
+	});
+
 	let previousCandidateCount = untrack(() => subjectCandidates.length);
 	$effect(() => {
 		const count = subjectCandidates.length;

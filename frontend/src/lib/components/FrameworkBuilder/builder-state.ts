@@ -338,6 +338,42 @@ function rewriteTreeUrns(nodes: BuilderNode[], newNs: string, newSlug: string): 
 	}));
 }
 
+/**
+ * Rewrite page/question/choice node ids a rule names, after a save renamed
+ * them (see the urn map). Only reference positions are touched: `pages[...]`,
+ * `answers[...]` and a choice id before `in answers[`. Mirrors
+ * `rebase_expression` on the server, which already applied it to what it stored.
+ */
+export function rebaseExpression(
+	expression: string | null | undefined,
+	urnMap: Record<string, string>
+): string | null | undefined {
+	if (!expression) return expression;
+	const pages = new Map<string, string>();
+	const questions = new Map<string, string>();
+	const choices = new Map<string, string>();
+	for (const [oldUrn, newUrn] of Object.entries(urnMap)) {
+		if (!oldUrn.includes(':')) continue;
+		const from = extractNodeId(oldUrn);
+		const to = extractNodeId(newUrn);
+		if (!from || !to || from === to) continue;
+		(newUrn.includes(':choice:') ? choices : newUrn.includes(':question:') ? questions : pages).set(
+			from,
+			to
+		);
+	}
+	if (!pages.size && !questions.size && !choices.size) return expression;
+	return expression
+		.replace(/\b(pages|answers)\[\s*(["'])(.*?)\2\s*\]/g, (match, scope, quote, id) => {
+			const to = (scope === 'pages' ? pages : questions).get(id);
+			return to ? `${scope}[${quote}${to}${quote}]` : match;
+		})
+		.replace(/(["'])([^"'\\]*)\1(\s+in\s+answers\s*\[)/g, (match, quote, id, rest) => {
+			const to = choices.get(id);
+			return to ? `${quote}${to}${quote}${rest}` : match;
+		});
+}
+
 /** A refused save as the author should read it: what failed, then where. */
 export function describeSaveError(error: unknown): string {
 	const message = error instanceof Error ? error.message : String(error);
@@ -1144,11 +1180,34 @@ export function createBuilderState(
 				(draft as any)._dirty = true; // mark draft as having user changes
 				const { urn_map: urnMap } = await apiSaveDraft(apiTarget, draft);
 				if (urnMap && Object.keys(urnMap).length) {
-					rootNodes.update((nodes) => applyUrnMap(nodes, urnMap));
+					rootNodes.update((nodes) => {
+						const remapped = applyUrnMap(nodes, urnMap);
+						if (mode !== 'quick_form') return remapped;
+						// The server rewrote the page conditions it stored; keep in step.
+						return remapped.map((bn) => ({
+							...bn,
+							node: {
+								...bn.node,
+								visibility_expression:
+									rebaseExpression(bn.node.visibility_expression, urnMap) ?? null
+							}
+						}));
+					});
 					framework.update((fw) => {
 						const subject = fw.subject_question_urn;
 						const mapped = subject ? urnMap[subject.toLowerCase()] : undefined;
-						return mapped ? { ...fw, subject_question_urn: mapped } : fw;
+						const outcomes =
+							mode === 'quick_form' && Array.isArray(fw.outcomes_definition)
+								? fw.outcomes_definition.map((rule) => ({
+										...rule,
+										expression: rebaseExpression(rule.expression, urnMap) ?? rule.expression
+									}))
+								: fw.outcomes_definition;
+						return {
+							...fw,
+							...(mapped ? { subject_question_urn: mapped } : {}),
+							outcomes_definition: outcomes
+						};
 					});
 				}
 				unsaved.set(false); // saved to draft, but still unpublished
@@ -1713,6 +1772,12 @@ export function createBuilderState(
 		// compliance assessments exist, when URNs are locked.
 		if ((newNs !== oldNs || newSlug !== oldSlug) && !get(framework).has_compliance_assessments) {
 			rootNodes.update((nodes) => rewriteTreeUrns(nodes, newNs, newSlug));
+			// The subject names a question by URN: it follows its question.
+			framework.update((f) =>
+				f.subject_question_urn
+					? { ...f, subject_question_urn: rewriteUrnNsSlug(f.subject_question_urn, newNs, newSlug) }
+					: f
+			);
 		}
 		markDirty();
 	}

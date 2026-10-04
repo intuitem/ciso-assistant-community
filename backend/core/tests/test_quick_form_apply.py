@@ -566,12 +566,41 @@ class TestApplyOnSubmit:
 
         response.refresh_from_db()
         assert response.status == QuickFormResponse.Status.CLOSED
-        assert response.resolution == QuickFormResponse.Resolution.AUTO
+        assert response.resolution == QuickFormResponse.Resolution.ACCEPTED
         assert response.decided_by_id == user.id == response.submitted_by_id
         setup["acme"].refresh_from_db()
         assert setup["acme"].mission == "level 3"
         log = QuickFormApplication.objects.get(response=response)
         assert (log.new_display, log.applied_by_id) == ("level 3", user.id)
+
+    def test_a_failed_write_keeps_nothing_and_goes_to_review(self, setup, monkeypatch):
+        def boom(*args, **kwargs):
+            raise RuntimeError("write failed")
+
+        monkeypatch.setattr(MissionTarget, "apply", boom)
+        user, client = _admin()
+        response = _draft_of(setup, user)
+        result = self._submit(client, response)
+        assert result.status_code == 200, result.json()
+        assert "on_accept" not in result.json()
+        response.refresh_from_db()
+        assert response.status == QuickFormResponse.Status.SUBMITTED
+        assert response.resolution == ""
+        assert not QuickFormApplication.objects.exists()
+
+    def test_the_status_transition_applies_too(self, setup):
+        user, client = _admin()
+        response = _draft_of(setup, user)
+        result = client.post(
+            f"/api/quick-form-responses/{response.id}/set-status/",
+            {"status": "submitted"},
+            format="json",
+        )
+        assert result.status_code == 200, result.json()
+        response.refresh_from_db()
+        assert response.status == QuickFormResponse.Status.CLOSED
+        setup["acme"].refresh_from_db()
+        assert setup["acme"].mission == "level 3"
 
     def test_always_review_keeps_the_second_pair_of_eyes(self, setup):
         setup["publication"].always_review = True
@@ -605,3 +634,33 @@ class TestApplyOnSubmit:
         setup["publication"].on_accept = []
         setup["publication"].save()
         assert client.get(url).json()["on_submit"] is None
+
+    def test_only_the_requester_is_told(self, setup):
+        user, _client = _admin()
+        response = _draft_of(setup, user)
+        _other, other_client = _reviewer_without_entity_rights(setup["domain"])
+        payload = other_client.get(
+            f"/api/quick-form-responses/{response.id}/content/"
+        ).json()
+        assert payload["on_submit"] is None
+
+
+@pytest.mark.django_db
+class TestMalformedSuggestion:
+    @pytest.mark.parametrize(
+        "config",
+        [{"bands": []}, {"mapping": ["x"]}, {"bands": {"thresholds": 3}}, "nope"],
+    )
+    def test_a_bad_shape_is_no_suggestion(self, setup, config):
+        from tprm.tier_target import EntityTierTarget
+
+        assert EntityTierTarget().materialize(config) is None
+
+    def test_the_form_endpoint_still_answers(self, setup):
+        form = setup["form"]
+        form.on_accept_suggestion = [{"target": "entity.tier", "config": {"bands": []}}]
+        form.save()
+        _user, client = _admin()
+        result = client.get(f"/api/quick-forms/{form.id}/")
+        assert result.status_code == 200
+        assert result.json()["suggested_on_accept"] == []

@@ -327,13 +327,20 @@ def project(
     return rows
 
 
-def can_apply_on_submit(response, user) -> bool:
+def can_apply_on_submit(response, user, *, scored_complete: bool = True) -> bool:
     """Whether submitting can apply the publication's targets at once: every
     target is ready and its permission on the subject is the submitter's own,
     so a review would grant nothing they do not already have. Anything less
-    (no subject, nothing resolved, a missing right) goes to review."""
+    (no subject, nothing resolved, a missing right, scored questions left
+    unanswered — they score 0 and would read as the lowest result) goes to
+    review."""
     publication = getattr(response, "publication", None)
-    if publication is None or publication.always_review or not publication.on_accept:
+    if (
+        not scored_complete
+        or publication is None
+        or publication.always_review
+        or not publication.on_accept
+    ):
         return False
     items = plan(response, user)
     return bool(items) and all(item["proposal"].ok for item in items)

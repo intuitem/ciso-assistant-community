@@ -93,10 +93,13 @@ class Tier(NameDescriptionMixin, FolderMixin):
 
     @classmethod
     def make_room_at_the_bottom(cls) -> int:
-        """Shift every rank up by one and return the freed rank 1. Parked above
-        the current range first: rank is unique, and a row-by-row `+ 1`
-        collides with its neighbour (SQLite cannot defer the constraint)."""
-        top = cls.objects.select_for_update().aggregate(top=models.Max("rank"))["top"]
+        """Shift every rank up by one and return the freed rank 1. Call inside a
+        transaction. Parked above the current range first: rank is unique, and a
+        row-by-row `+ 1` collides with its neighbour (SQLite cannot defer the
+        constraint). The rows are locked through a plain select: Django drops
+        `select_for_update` from an aggregate."""
+        ranks = list(cls.objects.select_for_update().values_list("rank", flat=True))
+        top = max(ranks, default=0)
         if top:
             cls.objects.update(rank=models.F("rank") + top + 1)
             cls.objects.update(rank=models.F("rank") - top)

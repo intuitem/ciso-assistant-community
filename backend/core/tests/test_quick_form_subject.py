@@ -173,6 +173,62 @@ class TestBuilderRoundTrip:
         )
         assert again_map["tmp-id"] == canonical
 
+    def test_rules_written_before_the_first_save_follow_the_ids(self):
+        """A page and question added and renamed in the editor are stored under
+        ids derived from their ref_id: rules naming the editor's ids follow."""
+        doc = quick_form_to_editor_doc(FORM_DICT)
+        page = copy.deepcopy(doc["nodes"][0])
+        page.update(
+            id="tmp-page",
+            urn="urn:test:risk:qf_page:vendor-subject:2",
+            ref_id="scoring",
+            name="Scoring",
+            order_id=2,
+        )
+        doc["nodes"].append(page)
+        question = copy.deepcopy(doc["questions"][0])
+        question.update(
+            id="tmp-q",
+            urn="urn:test:risk:question:vendor-subject:2-q1",
+            ref_id="2-q1",
+            requirement_node_id="tmp-page",
+            type="unique_choice",
+            config=None,
+        )
+        doc["questions"].append(question)
+        doc["choices"].append(
+            {
+                "id": "tmp-c",
+                "urn": "urn:test:risk:question_choice:vendor-subject:2-q1-c1",
+                "question_id": "tmp-q",
+                "value": "Yes",
+                "add_score": 1,
+                "order": 0,
+            }
+        )
+        doc["framework_meta"]["outcomes_definition"] = [
+            {"ref_id": "score", "kind": "number", "expression": 'pages["2"].score'},
+            {
+                "ref_id": "yes",
+                "expression": '"2-q1-c1" in answers["2-q1"].selected_choices',
+            },
+            {"ref_id": "literal", "expression": 'answers["2-q1"].value == "2"'},
+        ]
+
+        urn_map = {}
+        saved = editor_doc_to_quick_form_object(
+            doc, existing=FORM_DICT, urn_map_out=urn_map
+        )
+        rules = {r["ref_id"]: r["expression"] for r in saved["outcomes_definition"]}
+        assert rules["score"] == 'pages["scoring"].score'
+        assert rules["yes"] == (
+            '"scoring:question:2-q1:choice:1" in '
+            'answers["scoring:question:2-q1"].selected_choices'
+        )
+        # A plain value that happens to equal an old id is left alone.
+        assert rules["literal"] == 'answers["scoring:question:2-q1"].value == "2"'
+        assert validate_quick_form_expressions(saved) == []
+
     def test_saving_twice_with_editor_urns_mints_twice(self):
         """Why the editor must adopt the returned URNs: the server cannot tell a
         re-sent editor URN from new content, so it mints again."""

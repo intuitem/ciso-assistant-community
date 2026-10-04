@@ -13,6 +13,7 @@ import {
 	nodePassesIgFilter,
 	applyUrnMap,
 	describeSaveError,
+	rebaseExpression,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
@@ -1145,6 +1146,31 @@ describe('applyUrnMap', () => {
 		const node = makeNode({ urn: 'urn:custom:risk:qf_page:form:1', parent_urn: null });
 		const [mapped] = applyUrnMap(buildTree([node], []), {});
 		expect(mapped.node.urn).toBe('urn:custom:risk:qf_page:form:1');
+	});
+});
+
+describe('rebaseExpression', () => {
+	const urnMap = {
+		'urn:x:risk:qf_page:f:1': 'urn:x:risk:qf_page:f:intro',
+		'urn:x:risk:question:f:1-q1': 'urn:x:risk:qf_page:f:intro:question:1-q1',
+		'urn:x:risk:question_choice:f:1-q1-c1': 'urn:x:risk:qf_page:f:intro:question:1-q1:choice:1',
+		'tmp-id': 'urn:x:risk:qf_page:f:intro:question:1-q1'
+	};
+
+	it('follows renamed pages, questions and choices', () => {
+		expect(rebaseExpression('pages["1"].score', urnMap)).toBe('pages["intro"].score');
+		expect(rebaseExpression("pages['1'].score > 2.0", urnMap)).toBe("pages['intro'].score > 2.0");
+		expect(rebaseExpression('"1-q1-c1" in answers["1-q1"].selected_choices', urnMap)).toBe(
+			'"intro:question:1-q1:choice:1" in answers["intro:question:1-q1"].selected_choices'
+		);
+	});
+
+	it('leaves plain values and unknown ids alone', () => {
+		expect(rebaseExpression('answers["1-q1"].value == "1"', urnMap)).toBe(
+			'answers["intro:question:1-q1"].value == "1"'
+		);
+		expect(rebaseExpression('pages["other"].score', urnMap)).toBe('pages["other"].score');
+		expect(rebaseExpression('pages["1"].score', {})).toBe('pages["1"].score');
 	});
 });
 

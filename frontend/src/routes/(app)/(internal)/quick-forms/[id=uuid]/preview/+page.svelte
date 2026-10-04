@@ -24,6 +24,8 @@
 			'bg-violet-100 text-violet-800 ring-violet-300 dark:bg-violet-950 dark:text-violet-200 dark:ring-violet-800',
 		blue: 'bg-sky-100 text-sky-800 ring-sky-300 dark:bg-sky-950 dark:text-sky-200 dark:ring-sky-800'
 	};
+	// Library data reaches an inline style: only a bare hex colour gets through.
+	const HEX_COLOR = /^#[0-9a-fA-F]{3,8}$/;
 	const NEUTRAL =
 		'bg-surface-100 text-surface-700 ring-surface-300 dark:bg-surface-900 dark:text-surface-300 dark:ring-surface-700';
 
@@ -230,7 +232,7 @@
 									class="rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset {COLORS[
 										rule.color ?? ''
 									] ?? NEUTRAL}"
-									style={rule.color?.startsWith('#') && on
+									style={HEX_COLOR.test(rule.color ?? '') && on
 										? `background-color: ${rule.color}; color: ${isDark(rule.color) ? 'white' : 'inherit'}`
 										: ''}>{label(rule)}</span
 								>

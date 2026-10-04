@@ -324,7 +324,8 @@
 				<p
 					class="text-xs font-semibold uppercase tracking-wider text-success-700 dark:text-success-400"
 				>
-					<i class="fa-solid fa-circle-check mr-1"></i>{response.resolution === 'auto'
+					<i class="fa-solid fa-circle-check mr-1"></i>{response.decided_by &&
+					response.decided_by === response.submitted_by
 						? m.appliedOnSubmit()
 						: m.appliedOnAccept()}
 				</p>

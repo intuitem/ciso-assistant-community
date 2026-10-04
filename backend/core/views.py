@@ -20659,24 +20659,41 @@ def _reference_labels(response, user=None):
     return out
 
 
+class _NotAllApplied(Exception):
+    pass
+
+
 def _close_on_submit(response, user) -> list[dict] | None:
     """Apply a just-submitted response at once when its submitter could make
     every change by hand (see `can_apply_on_submit`); None when it goes to
-    review. Closed as AUTO: no second person decided, and the register says so."""
+    review. Accepted with the submitter as decider, so workflows and reports
+    treat it as any acceptance; decider == submitter marks a self-assessment.
+    All or nothing: if a target fails to write, nothing is kept and the
+    response goes to review."""
     from core.cel_service import evaluate_quick_form
     from core.quick_form_apply import apply_on_accept, can_apply_on_submit
 
     publication = response.publication
     if publication is None or not publication.on_accept or publication.always_review:
         return None
-    evaluate_quick_form(response, persist=True)
-    if not can_apply_on_submit(response, user):
+    evaluation = evaluate_quick_form(response, persist=True)
+    scored_complete = evaluation["context"]["response"]["scored_complete"]
+    if not can_apply_on_submit(response, user, scored_complete=scored_complete):
         return None
-    response.status = QuickFormResponse.Status.CLOSED
-    response.resolution = QuickFormResponse.Resolution.AUTO
-    response.decided_by = user
-    response.save(update_fields=["status", "resolution", "decided_by", "updated_at"])
-    applied = apply_on_accept(response, user)
+    try:
+        with transaction.atomic():
+            response.status = QuickFormResponse.Status.CLOSED
+            response.resolution = QuickFormResponse.Resolution.ACCEPTED
+            response.decided_by = user
+            response.save(
+                update_fields=["status", "resolution", "decided_by", "updated_at"]
+            )
+            applied = apply_on_accept(response, user)
+            if not all(row["applied"] for row in applied):
+                raise _NotAllApplied
+    except _NotAllApplied:
+        response.refresh_from_db()
+        return None
     emit_quick_form_event(response, "closed")
     return applied
 
@@ -20688,16 +20705,23 @@ def _on_submit_outcome(response, user, evaluation) -> str | None:
     from core.quick_form_apply import can_apply_on_submit
 
     publication = response.publication
+    # Whoever submits decides the path, so only they get an answer.
     if (
         user is None
         or response.status != QuickFormResponse.Status.DRAFT
         or publication is None
         or not publication.on_accept
+        or not response.is_requester(user)
     ):
         return None
     response.computed_values = evaluation["computed_values"]
     response.computed_outcome = evaluation["computed_outcome"]
-    return "apply" if can_apply_on_submit(response, user) else "review"
+    scored_complete = evaluation["context"]["response"]["scored_complete"]
+    return (
+        "apply"
+        if can_apply_on_submit(response, user, scored_complete=scored_complete)
+        else "review"
+    )
 
 
 def _self_validation_allowed(response) -> bool:
