@@ -1,8 +1,7 @@
-"""Unit tests for the MCP deferred gaps: asset objectives/capabilities, entity
-relationship, list_objects types, append mode, task template assets.
+"""Unit tests for the MCP asset tools: objectives/capabilities, durations, append mode, security gaps.
 
 Network calls are mocked at their import sites, as in
-test_mcp_risk_review_tools.py.
+test_risk_review_tools.py.
 """
 
 import asyncio
@@ -12,48 +11,23 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parents[2]))
 
 from ca_mcp import resolvers  # noqa: E402
 from ca_mcp.tools import (  # noqa: E402
-    generic_tools,
     read_tools,
-    tprm_tools,
     update_tools,
     write_tools,
 )
-
-UUID_A = "11111111-1111-1111-1111-111111111111"
-UUID_B = "22222222-2222-2222-2222-222222222222"
-UUID_C = "33333333-3333-3333-3333-333333333333"
-UUID_D = "44444444-4444-4444-4444-444444444444"
-UUID_F = "ffffffff-ffff-ffff-ffff-ffffffffffff"
-
-
-def _response(status_code=200, json_data=None, text=""):
-    res = Mock()
-    res.status_code = status_code
-    res.json.return_value = json_data if json_data is not None else {}
-    res.text = text
-    return res
-
-
-def _router(routes):
-    calls = []
-
-    def fake(endpoint, params=None, **kwargs):
-        calls.append((endpoint, dict(params or {})))
-        value = routes.get(endpoint, [])
-        if callable(value):
-            value = value(params or {})
-        return value, None
-
-    fake.calls = calls
-    return fake
-
-
-def run(coro):
-    return asyncio.run(coro)
+from tests.mcp.helpers import (  # noqa: E402
+    UUID_A,
+    UUID_B,
+    UUID_D,
+    UUID_F,
+    _response,
+    _router,
+    run,
+)
 
 
 def _obj(value, enabled=True):
@@ -481,197 +455,8 @@ class TestAssetSecurityGaps:
 
 
 # ---------------------------------------------------------------------------
-# Entity relationship / address
+# Registration
 # ---------------------------------------------------------------------------
-
-RELATIONSHIPS = [
-    {
-        "id": "r-supplier",
-        "name": "supplier",
-        "builtin": True,
-        "translations": {"fr": "fournisseur"},
-    },
-    {"id": "r-client", "name": "client", "builtin": True, "translations": {}},
-    {
-        "id": "r-custom",
-        "name": "Cloud provider",
-        "builtin": False,
-        "translations": {},
-    },
-]
-
-
-class TestEntityRelationship:
-    def test_create_entity_resolves_relationship(self):
-        fake = _router({"/terminologies/": RELATIONSHIPS})
-        post = Mock(return_value=_response(201, {"id": UUID_A, "name": "Acme"}))
-        with (
-            patch.object(resolvers, "fetch_all_results", fake),
-            patch.object(tprm_tools, "make_post_request", post),
-            patch.object(tprm_tools, "make_patch_request") as patch_req,
-        ):
-            run(
-                tprm_tools.create_entity(
-                    name="Acme",
-                    folder_id=UUID_F,
-                    relationship=["Supplier", "fournisseur", "cloud provider", UUID_C],
-                    address="1 rue de la Paix",
-                )
-            )
-        patch_req.assert_not_called()
-        payload = post.call_args.args[1]
-        assert payload["relationship"] == ["r-supplier", "r-custom", UUID_C]
-        assert payload["address"] == "1 rue de la Paix"
-        assert fake.calls == [
-            (
-                "/terminologies/",
-                {"field_path": "entity.relationship", "is_visible": "true"},
-            )
-        ]
-
-    def test_create_entity_old_payload_unchanged(self):
-        post = Mock(return_value=_response(201, {"id": UUID_A, "name": "Acme"}))
-        with patch.object(tprm_tools, "make_post_request", post):
-            run(tprm_tools.create_entity(name="Acme", folder_id=UUID_F))
-        payload = post.call_args.args[1]
-        assert "relationship" not in payload and "address" not in payload
-
-    def test_unknown_relationship_never_creates(self):
-        fake = _router({"/terminologies/": RELATIONSHIPS})
-        post = Mock()
-        with (
-            patch.object(resolvers, "fetch_all_results", fake),
-            patch.object(tprm_tools, "make_post_request", post),
-        ):
-            result = run(
-                tprm_tools.create_entity(
-                    name="Acme", folder_id=UUID_F, relationship=["Competitor"]
-                )
-            )
-        post.assert_not_called()
-        assert "Competitor" in result and "supplier" in result and "client" in result
-
-    def test_update_entity(self):
-        fake = _router({"/terminologies/": RELATIONSHIPS})
-        patch_req = Mock(return_value=_response(200, {"id": UUID_A, "name": "Acme"}))
-        with (
-            patch.object(resolvers, "fetch_all_results", fake),
-            patch.object(tprm_tools, "make_patch_request", patch_req),
-        ):
-            run(
-                tprm_tools.update_entity(
-                    entity_id=UUID_A, relationship=["client"], address="Paris"
-                )
-            )
-        assert patch_req.call_args.args == (
-            f"/entities/{UUID_A}/",
-            {"relationship": ["r-client"], "address": "Paris"},
-        )
-
-
-# ---------------------------------------------------------------------------
-# update_task_template
-# ---------------------------------------------------------------------------
-
-
-class TestUpdateTaskTemplate:
-    def _patch_ok(self):
-        return patch.object(
-            update_tools,
-            "make_patch_request",
-            return_value=_response(200, {"id": UUID_A, "name": "T"}),
-        )
-
-    def test_assets_resolved_in_folder(self):
-        with (
-            self._patch_ok() as patch_req,
-            patch.object(
-                update_tools, "resolve_asset_id", return_value=UUID_C
-            ) as resolve_asset,
-        ):
-            run(
-                update_tools.update_task_template(
-                    task_id=UUID_A, folder_id=UUID_F, assets=["ERP"]
-                )
-            )
-        resolve_asset.assert_called_once_with("ERP", folder_id=UUID_F)
-        assert patch_req.call_args.args[1] == {"folder": UUID_F, "assets": [UUID_C]}
-
-    def test_assets_unscoped_without_folder(self):
-        with (
-            self._patch_ok() as patch_req,
-            patch.object(
-                update_tools, "resolve_asset_id", return_value=UUID_C
-            ) as resolve_asset,
-        ):
-            run(update_tools.update_task_template(task_id=UUID_A, assets=["ERP"]))
-        resolve_asset.assert_called_once_with("ERP", folder_id=None)
-        assert patch_req.call_args.args[1] == {"assets": [UUID_C]}
-
-    def test_append_text(self):
-        get = Mock(
-            return_value=_response(200, {"description": "Old", "observation": ""})
-        )
-        with (
-            self._patch_ok() as patch_req,
-            patch.object(update_tools, "make_get_request", get),
-        ):
-            run(
-                update_tools.update_task_template(
-                    task_id=UUID_A,
-                    description="New",
-                    observation="Note",
-                    append_text=True,
-                )
-            )
-        get.assert_called_once_with(f"/task-templates/{UUID_A}/")
-        assert patch_req.call_args.args[1] == {
-            "description": "Old\n\nNew",
-            "observation": "Note",
-        }
-
-    def test_append_fetch_failure_sends_nothing(self):
-        get = Mock(return_value=_response(500, text="boom"))
-        with (
-            self._patch_ok() as patch_req,
-            patch.object(update_tools, "make_get_request", get),
-        ):
-            result = run(
-                update_tools.update_task_template(
-                    task_id=UUID_A, observation="Note", append_text=True
-                )
-            )
-        patch_req.assert_not_called()
-        assert "nothing sent" in result
-
-
-# ---------------------------------------------------------------------------
-# list_objects types / registration
-# ---------------------------------------------------------------------------
-
-
-class TestListObjectsTypes:
-    @pytest.mark.parametrize(
-        "object_type,path",
-        [
-            ("reference_controls", "reference-controls"),
-            ("terminologies", "terminologies"),
-            ("representatives", "representatives"),
-        ],
-    )
-    def test_registered(self, object_type, path):
-        assert generic_tools.OBJECTS[object_type] == path
-
-    def test_list_reference_controls(self):
-        get = Mock(
-            return_value=_response(
-                200, {"count": 1, "results": [{"id": UUID_A, "name": "MFA"}]}
-            )
-        )
-        with patch.object(generic_tools, "make_get_request", get):
-            result = run(generic_tools.list_objects("reference_controls"))
-        assert get.call_args.args[0] == "/reference-controls/"
-        assert "MFA" in result
 
 
 class TestRegistration:
