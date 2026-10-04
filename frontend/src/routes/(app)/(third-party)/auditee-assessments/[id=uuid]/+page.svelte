@@ -1425,8 +1425,26 @@
 										{@const raScoresDef =
 											requirementAssessment.effective_scores_definition ??
 											complianceAssessment.scores_definition}
+										{#snippet scoringToggle()}
+											<div>
+												<Checkbox
+													form={isScoredForms[requirementAssessment.id]}
+													field="is_scored"
+													disabled={!canEditScore}
+													label={''}
+													helpText={m.scoringHelpText()}
+													checkboxComponent="switch"
+													classes="h-full flex flex-row items-center justify-center my-1"
+													classesContainer="h-full flex flex-row items-center space-x-4"
+													onChange={async (newValue) => {
+														requirementAssessment.is_scored = newValue;
+														await update(requirementAssessment, 'is_scored');
+													}}
+												/>
+											</div>
+										{/snippet}
 										<ScorePair>
-											{#snippet implementation()}
+											{#snippet implementation(first: boolean)}
 												<Score
 													form={scoreForms[requirementAssessment.id]}
 													min_score={raMin}
@@ -1442,28 +1460,10 @@
 														updateScore(requirementAssessment);
 													}}
 													disabled={!canEditScore || !requirementAssessment.is_scored}
-												>
-													{#snippet left()}
-														<div>
-															<Checkbox
-																form={isScoredForms[requirementAssessment.id]}
-																field="is_scored"
-																disabled={!canEditScore}
-																label={''}
-																helpText={m.scoringHelpText()}
-																checkboxComponent="switch"
-																classes="h-full flex flex-row items-center justify-center my-1"
-																classesContainer="h-full flex flex-row items-center space-x-4"
-																onChange={async (newValue) => {
-																	requirementAssessment.is_scored = newValue;
-																	await update(requirementAssessment, 'is_scored');
-																}}
-															/>
-														</div>
-													{/snippet}
-												</Score>
+													left={first || !showDocumentationScore ? scoringToggle : undefined}
+												/>
 											{/snippet}
-											{#snippet documentation()}
+											{#snippet documentation(first: boolean)}
 												{#if showDocumentationScore}
 													<Score
 														form={docScoreForms[requirementAssessment.id]}
@@ -1480,6 +1480,7 @@
 														}}
 														disabled={!canEditDocumentationScore ||
 															!requirementAssessment.is_scored}
+														left={first ? scoringToggle : undefined}
 													/>
 												{/if}
 											{/snippet}

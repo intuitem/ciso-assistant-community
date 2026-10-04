@@ -1073,8 +1073,24 @@
 								</div>
 							{/if}
 						{:else if data.result !== 'not_applicable'}
+							{@const docScoreShown =
+								showDocumentationScore &&
+								page.data.compliance_assessment_score.show_documentation_score}
+							{#snippet scoringToggle()}
+								<div>
+									<Checkbox
+										{form}
+										field="is_scored"
+										label={''}
+										helpText={m.scoringHelpText()}
+										checkboxComponent="switch"
+										classes="h-full flex flex-row items-center justify-center my-1"
+										classesContainer="h-full flex flex-row items-center space-x-4"
+									/>
+								</div>
+							{/snippet}
 							<ScorePair>
-								{#snippet implementation()}
+								{#snippet implementation(first: boolean)}
 									{#if showScore}
 										<div class="flex flex-col" data-testid="score-field">
 											<Score
@@ -1087,26 +1103,13 @@
 													? m.implementationScore()
 													: m.score()}
 												disabled={!data.is_scored}
-											>
-												{#snippet left()}
-													<div>
-														<Checkbox
-															{form}
-															field="is_scored"
-															label={''}
-															helpText={m.scoringHelpText()}
-															checkboxComponent="switch"
-															classes="h-full flex flex-row items-center justify-center my-1"
-															classesContainer="h-full flex flex-row items-center space-x-4"
-														/>
-													</div>
-												{/snippet}
-											</Score>
+												left={first || !docScoreShown ? scoringToggle : undefined}
+											/>
 										</div>
 									{/if}
 								{/snippet}
-								{#snippet documentation()}
-									{#if showDocumentationScore && page.data.compliance_assessment_score.show_documentation_score}
+								{#snippet documentation(first: boolean)}
+									{#if docScoreShown}
 										<Score
 											{form}
 											min_score={resolvedMin}
@@ -1116,6 +1119,7 @@
 											label={m.documentationScore()}
 											isDoc={true}
 											disabled={!data.is_scored}
+											left={first ? scoringToggle : undefined}
 										/>
 									{/if}
 								{/snippet}

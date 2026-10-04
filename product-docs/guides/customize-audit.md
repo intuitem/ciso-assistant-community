@@ -31,6 +31,7 @@ In the order they appear on the panel (mirroring the respondent view):
 | **Status** | Auditor only | The lifecycle status of the requirement assessment. |
 | **Result** | Auditor + Respondent | Compliant / partial / non-compliant / N/A. |
 | **Extended result** | Auditor only | Free-form qualifier alongside the result. Cannot be more permissive than **Result**. |
+| **Outcomes** | Auditor + Respondent | The framework's outcomes shown on the audit (e.g. the CCB conformity criteria for CyFun). Independent of **Result**: a framework judged on scores can show its outcomes with **Result** hidden. Audits created before this setting start from their **Result** visibility. |
 | **Score** | Hidden | Numeric score. |
 | **Documentation score** | Hidden | Companion score for documentation maturity. Cannot be more permissive than **Score**. |
 | **Applied controls** | Auditor + Respondent | The controls linked to this requirement. |

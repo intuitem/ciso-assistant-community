@@ -109,6 +109,7 @@
 	const showAnswers = $derived(fieldVis.showAnswers);
 	const showResult = $derived(fieldVis.showResult);
 	const showExtendedResult = $derived(fieldVis.showExtendedResult);
+	const showOutcomes = $derived(fieldVis.showOutcomes);
 	const showStatus = $derived(fieldVis.showStatus);
 	const showScore = $derived(fieldVis.showScore);
 
@@ -833,9 +834,9 @@
 					<div class="font-medium">{m.createdAt()}</div>
 					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
 				</div>
-				{#if showResult && compliance_assessment.framework.outcomes_definition?.length}
+				{#if showOutcomes && compliance_assessment.framework.outcomes_definition?.length}
 					<div>
-						<div class="text-sm font-medium text-surface-800-200">{safeTranslate('outcomes')}</div>
+						<div class="text-sm font-medium text-surface-800-200">{m.computedOutcomes()}</div>
 						<div class="flex flex-wrap gap-1.5 mt-1">
 							{#each compliance_assessment.framework.outcomes_definition as rule}
 								{@const isActive =

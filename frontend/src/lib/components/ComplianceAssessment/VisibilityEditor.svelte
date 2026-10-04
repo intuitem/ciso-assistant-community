@@ -26,6 +26,7 @@
 		score: m.score,
 		documentation_score: m.documentationScore,
 		extended_result: m.extendedResult,
+		outcomes: m.computedOutcomes,
 		observation: m.observation,
 		answers: m.answers,
 		evidences: m.evidences,

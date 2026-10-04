@@ -481,6 +481,7 @@ export const VISIBILITY_FIELDS = [
 	'status',
 	'result',
 	'extended_result',
+	'outcomes',
 	'score',
 	'documentation_score',
 	'applied_controls',
@@ -555,6 +556,7 @@ export function getFieldVisibility(
 	showRespondentAlignment: boolean;
 	showComments: boolean;
 	showExtendedResult: boolean;
+	showOutcomes: boolean;
 } {
 	return {
 		showAnswers: isFieldVisible(complianceAssessment, 'answers', viewerRole),
@@ -572,7 +574,8 @@ export function getFieldVisibility(
 			viewerRole
 		),
 		showComments: isFieldVisible(complianceAssessment, 'comments', viewerRole),
-		showExtendedResult: isFieldVisible(complianceAssessment, 'extended_result', viewerRole)
+		showExtendedResult: isFieldVisible(complianceAssessment, 'extended_result', viewerRole),
+		showOutcomes: isFieldVisible(complianceAssessment, 'outcomes', viewerRole)
 	};
 }
 
