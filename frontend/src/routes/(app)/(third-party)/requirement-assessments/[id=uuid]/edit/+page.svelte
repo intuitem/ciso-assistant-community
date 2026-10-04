@@ -24,6 +24,7 @@
 
 	import { hideSuggestions } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
+	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
 	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import { countMasked } from '$lib/utils/related-visibility';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
@@ -1072,47 +1073,53 @@
 								</div>
 							{/if}
 						{:else if data.result !== 'not_applicable'}
-							{#if showScore}
-								<div class="flex flex-col" data-testid="score-field">
-									<Score
-										{form}
-										min_score={resolvedMin}
-										max_score={resolvedMax}
-										scores_definition={resolvedScoresDef}
-										field="score"
-										label={page.data.compliance_assessment_score.show_documentation_score
-											? m.implementationScore()
-											: m.score()}
-										disabled={!data.is_scored}
-									>
-										{#snippet left()}
-											<div>
-												<Checkbox
-													{form}
-													field="is_scored"
-													label={''}
-													helpText={m.scoringHelpText()}
-													checkboxComponent="switch"
-													classes="h-full flex flex-row items-center justify-center my-1"
-													classesContainer="h-full flex flex-row items-center space-x-4"
-												/>
-											</div>
-										{/snippet}
-									</Score>
-								</div>
-							{/if}
-							{#if showDocumentationScore && page.data.compliance_assessment_score.show_documentation_score}
-								<Score
-									{form}
-									min_score={resolvedMin}
-									max_score={resolvedMax}
-									scores_definition={resolvedScoresDef}
-									field="documentation_score"
-									label={m.documentationScore()}
-									isDoc={true}
-									disabled={!data.is_scored}
-								/>
-							{/if}
+							<ScorePair>
+								{#snippet implementation()}
+									{#if showScore}
+										<div class="flex flex-col" data-testid="score-field">
+											<Score
+												{form}
+												min_score={resolvedMin}
+												max_score={resolvedMax}
+												scores_definition={resolvedScoresDef}
+												field="score"
+												label={page.data.compliance_assessment_score.show_documentation_score
+													? m.implementationScore()
+													: m.score()}
+												disabled={!data.is_scored}
+											>
+												{#snippet left()}
+													<div>
+														<Checkbox
+															{form}
+															field="is_scored"
+															label={''}
+															helpText={m.scoringHelpText()}
+															checkboxComponent="switch"
+															classes="h-full flex flex-row items-center justify-center my-1"
+															classesContainer="h-full flex flex-row items-center space-x-4"
+														/>
+													</div>
+												{/snippet}
+											</Score>
+										</div>
+									{/if}
+								{/snippet}
+								{#snippet documentation()}
+									{#if showDocumentationScore && page.data.compliance_assessment_score.show_documentation_score}
+										<Score
+											{form}
+											min_score={resolvedMin}
+											max_score={resolvedMax}
+											scores_definition={resolvedScoresDef}
+											field="documentation_score"
+											label={m.documentationScore()}
+											isDoc={true}
+											disabled={!data.is_scored}
+										/>
+									{/if}
+								{/snippet}
+							</ScorePair>
 						{/if}
 					{/if}
 

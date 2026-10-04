@@ -12,6 +12,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
 	import { m } from '$paraglide/messages';
+	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
 	import { auditFiltersStore } from '$lib/utils/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -306,53 +307,59 @@
 									{@const scoreMin = rawNode.min_score ?? 0}
 									{@const range = max_score - scoreMin}
 									{@const safeScore = rawNode.score ?? scoreMin}
-									<div class="relative" title={scoreLabel}>
-										<Progress
-											value={range > 0
-												? Math.max(0, Math.min(100, ((safeScore - scoreMin) * 100) / range))
-												: 0}
-											min={0}
-											max={100}
-											data-testid="progress-ring-svg"
-										>
-											<Progress.Circle class="[--size:--spacing(12)]">
-												<Progress.CircleTrack />
-												<Progress.CircleRange
-													class={displayScoreColor(rawNode.score, max_score, false, scoreMin)}
-												/>
-											</Progress.Circle>
-											<div class="absolute inset-0 flex items-center justify-center">
-												<span class="text-xs font-bold">{rawNode.score}</span>
+									<ScorePair>
+										{#snippet implementation()}
+											<div class="relative" title={scoreLabel}>
+												<Progress
+													value={range > 0
+														? Math.max(0, Math.min(100, ((safeScore - scoreMin) * 100) / range))
+														: 0}
+													min={0}
+													max={100}
+													data-testid="progress-ring-svg"
+												>
+													<Progress.Circle class="[--size:--spacing(12)]">
+														<Progress.CircleTrack />
+														<Progress.CircleRange
+															class={displayScoreColor(rawNode.score, max_score, false, scoreMin)}
+														/>
+													</Progress.Circle>
+													<div class="absolute inset-0 flex items-center justify-center">
+														<span class="text-xs font-bold">{rawNode.score}</span>
+													</div>
+												</Progress>
 											</div>
-										</Progress>
-									</div>
-									{#if showDocumentationScore}
-										{@const safeDoc = rawNode.documentation_score ?? scoreMin}
-										<div class="relative" title={m.documentationScore()}>
-											<Progress
-												value={range > 0
-													? Math.max(0, Math.min(100, ((safeDoc - scoreMin) * 100) / range))
-													: 0}
-												min={0}
-												max={100}
-											>
-												<Progress.Circle class="[--size:--spacing(12)]">
-													<Progress.CircleTrack />
-													<Progress.CircleRange
-														class={displayScoreColor(
-															rawNode.documentation_score,
-															max_score,
-															false,
-															scoreMin
-														)}
-													/>
-												</Progress.Circle>
-												<div class="absolute inset-0 flex items-center justify-center">
-													<span class="text-xs font-bold">{rawNode.documentation_score}</span>
+										{/snippet}
+										{#snippet documentation()}
+											{#if showDocumentationScore}
+												{@const safeDoc = rawNode.documentation_score ?? scoreMin}
+												<div class="relative" title={m.documentationScore()}>
+													<Progress
+														value={range > 0
+															? Math.max(0, Math.min(100, ((safeDoc - scoreMin) * 100) / range))
+															: 0}
+														min={0}
+														max={100}
+													>
+														<Progress.Circle class="[--size:--spacing(12)]">
+															<Progress.CircleTrack />
+															<Progress.CircleRange
+																class={displayScoreColor(
+																	rawNode.documentation_score,
+																	max_score,
+																	false,
+																	scoreMin
+																)}
+															/>
+														</Progress.Circle>
+														<div class="absolute inset-0 flex items-center justify-center">
+															<span class="text-xs font-bold">{rawNode.documentation_score}</span>
+														</div>
+													</Progress>
 												</div>
-											</Progress>
-										</div>
-									{/if}
+											{/if}
+										{/snippet}
+									</ScorePair>
 								{/if}
 							</div>
 						</Anchor>
@@ -524,51 +531,90 @@
 					{#if showScore}
 						{#if hasParentNode}
 							{#if nodeScore() !== null}
-								<div class="relative" title={scoreLabel}>
-									<Progress
-										value={formatScoreValue(
-											nodeScore(),
-											nodeTotalMaxScore(),
-											false,
-											nodeTotalMinScore()
-										)}
-										min={0}
-										max={100}
-										data-testid="progress-ring-svg"
-									>
-										<Progress.Circle class="[--size:--spacing(12)]">
-											<Progress.CircleTrack />
-											<Progress.CircleRange
-												class={displayScoreColor(
+								<ScorePair>
+									{#snippet implementation()}
+										<div class="relative" title={scoreLabel}>
+											<Progress
+												value={formatScoreValue(
 													nodeScore(),
 													nodeTotalMaxScore(),
 													false,
 													nodeTotalMinScore()
 												)}
-											/>
-										</Progress.Circle>
-										<div class="absolute inset-0 flex items-center justify-center">
-											<span class="text-xs font-bold">{nodeScore()}</span>
+												min={0}
+												max={100}
+												data-testid="progress-ring-svg"
+											>
+												<Progress.Circle class="[--size:--spacing(12)]">
+													<Progress.CircleTrack />
+													<Progress.CircleRange
+														class={displayScoreColor(
+															nodeScore(),
+															nodeTotalMaxScore(),
+															false,
+															nodeTotalMinScore()
+														)}
+													/>
+												</Progress.Circle>
+												<div class="absolute inset-0 flex items-center justify-center">
+													<span class="text-xs font-bold">{nodeScore()}</span>
+												</div>
+											</Progress>
 										</div>
-									</Progress>
-								</div>
-								{#if showDocumentationScore}
-									<div class="relative" title={m.documentationScore()}>
+									{/snippet}
+									{#snippet documentation()}
+										{#if showDocumentationScore}
+											<div class="relative" title={m.documentationScore()}>
+												<Progress
+													value={formatScoreValue(
+														nodeDocumentationScore(),
+														nodeTotalMaxScore(),
+														false,
+														nodeTotalMinScore()
+													)}
+													min={0}
+													max={100}
+												>
+													<Progress.Circle class="[--size:--spacing(12)]">
+														<Progress.CircleTrack />
+														<Progress.CircleRange
+															class={displayScoreColor(
+																nodeDocumentationScore(),
+																nodeTotalMaxScore(),
+																false,
+																nodeTotalMinScore()
+															)}
+														/>
+													</Progress.Circle>
+													<div class="absolute inset-0 flex items-center justify-center">
+														<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+													</div>
+												</Progress>
+											</div>
+										{/if}
+									{/snippet}
+								</ScorePair>
+							{/if}
+						{:else if nodeScore() !== null}
+							<ScorePair>
+								{#snippet implementation()}
+									<div class="relative" title={scoreLabel}>
 										<Progress
 											value={formatScoreValue(
-												nodeDocumentationScore(),
+												nodeScore(),
 												nodeTotalMaxScore(),
 												false,
 												nodeTotalMinScore()
 											)}
 											min={0}
 											max={100}
+											data-testid="progress-ring-svg"
 										>
 											<Progress.Circle class="[--size:--spacing(12)]">
 												<Progress.CircleTrack />
 												<Progress.CircleRange
 													class={displayScoreColor(
-														nodeDocumentationScore(),
+														nodeScore(),
 														nodeTotalMaxScore(),
 														false,
 														nodeTotalMinScore()
@@ -576,70 +622,43 @@
 												/>
 											</Progress.Circle>
 											<div class="absolute inset-0 flex items-center justify-center">
-												<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+												<span class="text-xs font-bold">{nodeScore()}</span>
 											</div>
 										</Progress>
 									</div>
-								{/if}
-							{/if}
-						{:else if nodeScore() !== null}
-							<div class="relative" title={scoreLabel}>
-								<Progress
-									value={formatScoreValue(
-										nodeScore(),
-										nodeTotalMaxScore(),
-										false,
-										nodeTotalMinScore()
-									)}
-									min={0}
-									max={100}
-									data-testid="progress-ring-svg"
-								>
-									<Progress.Circle class="[--size:--spacing(12)]">
-										<Progress.CircleTrack />
-										<Progress.CircleRange
-											class={displayScoreColor(
-												nodeScore(),
-												nodeTotalMaxScore(),
-												false,
-												nodeTotalMinScore()
-											)}
-										/>
-									</Progress.Circle>
-									<div class="absolute inset-0 flex items-center justify-center">
-										<span class="text-xs font-bold">{nodeScore()}</span>
-									</div>
-								</Progress>
-							</div>
-							{#if showDocumentationScore}
-								<div class="relative" title={m.documentationScore()}>
-									<Progress
-										value={formatScoreValue(
-											nodeDocumentationScore(),
-											nodeTotalMaxScore(),
-											false,
-											nodeTotalMinScore()
-										)}
-										min={0}
-										max={100}
-									>
-										<Progress.Circle class="[--size:--spacing(12)]">
-											<Progress.CircleTrack />
-											<Progress.CircleRange
-												class={displayScoreColor(
+								{/snippet}
+								{#snippet documentation()}
+									{#if showDocumentationScore}
+										<div class="relative" title={m.documentationScore()}>
+											<Progress
+												value={formatScoreValue(
 													nodeDocumentationScore(),
 													nodeTotalMaxScore(),
 													false,
 													nodeTotalMinScore()
 												)}
-											/>
-										</Progress.Circle>
-										<div class="absolute inset-0 flex items-center justify-center">
-											<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+												min={0}
+												max={100}
+											>
+												<Progress.Circle class="[--size:--spacing(12)]">
+													<Progress.CircleTrack />
+													<Progress.CircleRange
+														class={displayScoreColor(
+															nodeDocumentationScore(),
+															nodeTotalMaxScore(),
+															false,
+															nodeTotalMinScore()
+														)}
+													/>
+												</Progress.Circle>
+												<div class="absolute inset-0 flex items-center justify-center">
+													<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+												</div>
+											</Progress>
 										</div>
-									</Progress>
-								</div>
-							{/if}
+									{/if}
+								{/snippet}
+							</ScorePair>
 						{/if}
 					{/if}
 				</div>
