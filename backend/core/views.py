@@ -12551,6 +12551,20 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         replacing the Count(distinct=True) annotations dropped from the
         list queryset. Bounded by `len(queryset)` (≤ page size), so the
         cost is independent of the total RA table size.
+        """
+        optimized_data = super()._get_optimized_object_data(queryset)
+        audit_ids = [a.id for a in queryset]
+        if not audit_ids:
+            return optimized_data
+
+        total_map, assessed_map = self.get_requirement_counts(audit_ids)
+        optimized_data["total_requirements"] = total_map
+        optimized_data["assessed_requirements"] = assessed_map
+        return optimized_data
+
+    @staticmethod
+    def get_requirement_counts(audit_ids) -> tuple[dict, dict]:
+        """(total, assessed) assessable requirement counts per audit id.
 
         Audits without implementation groups go through per-mode GROUP BY
         buckets; audits with implementation groups share one scalar
@@ -12558,11 +12572,6 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         two JSON lists, which SQL can't do).
         """
         from core.models import Question
-
-        optimized_data = super()._get_optimized_object_data(queryset)
-        audit_ids = [a.id for a in queryset]
-        if not audit_ids:
-            return optimized_data
 
         # The progress mode (status visible = status-driven) and the content
         # branches are audit-level facts known before querying, so audits are
@@ -12719,9 +12728,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 ):
                     assessed_map[ca_id] += 1
 
-        optimized_data["total_requirements"] = total_map
-        optimized_data["assessed_requirements"] = assessed_map
-        return optimized_data
+        return total_map, assessed_map
 
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
