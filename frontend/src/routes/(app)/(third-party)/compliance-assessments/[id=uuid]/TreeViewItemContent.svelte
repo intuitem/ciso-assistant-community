@@ -170,6 +170,9 @@
 	// annotate_tree_with_aggregated_scores in core/helpers.py) so the three
 	// score_calculation_methods share a single implementation with the global
 	// score, and rounded there like it (round_score), so they are shown as is.
+	// Shown on hover over the score rings, which carry no label of their own.
+	const scoreLabel = $derived(showDocumentationScore ? m.implementationScore() : m.score());
+
 	function nodeScore(): number | null {
 		const raw = (rest as Record<string, any>).aggregated_score;
 		return typeof raw === 'number' ? raw : null;
@@ -303,7 +306,7 @@
 									{@const scoreMin = rawNode.min_score ?? 0}
 									{@const range = max_score - scoreMin}
 									{@const safeScore = rawNode.score ?? scoreMin}
-									<div class="relative">
+									<div class="relative" title={scoreLabel}>
 										<Progress
 											value={range > 0
 												? Math.max(0, Math.min(100, ((safeScore - scoreMin) * 100) / range))
@@ -325,7 +328,7 @@
 									</div>
 									{#if showDocumentationScore}
 										{@const safeDoc = rawNode.documentation_score ?? scoreMin}
-										<div class="relative">
+										<div class="relative" title={m.documentationScore()}>
 											<Progress
 												value={range > 0
 													? Math.max(0, Math.min(100, ((safeDoc - scoreMin) * 100) / range))
@@ -521,7 +524,7 @@
 					{#if showScore}
 						{#if hasParentNode}
 							{#if nodeScore() !== null}
-								<div class="relative">
+								<div class="relative" title={scoreLabel}>
 									<Progress
 										value={formatScoreValue(
 											nodeScore(),
@@ -550,7 +553,7 @@
 									</Progress>
 								</div>
 								{#if showDocumentationScore}
-									<div class="relative">
+									<div class="relative" title={m.documentationScore()}>
 										<Progress
 											value={formatScoreValue(
 												nodeDocumentationScore(),
@@ -580,7 +583,7 @@
 								{/if}
 							{/if}
 						{:else if nodeScore() !== null}
-							<div class="relative">
+							<div class="relative" title={scoreLabel}>
 								<Progress
 									value={formatScoreValue(
 										nodeScore(),
@@ -609,7 +612,7 @@
 								</Progress>
 							</div>
 							{#if showDocumentationScore}
-								<div class="relative">
+								<div class="relative" title={m.documentationScore()}>
 									<Progress
 										value={formatScoreValue(
 											nodeDocumentationScore(),
