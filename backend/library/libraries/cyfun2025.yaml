@@ -20862,6 +20862,12 @@ objects:
       documentation_score:
         auditor: edit
         respondent: edit
+      extended_result:
+        auditor: hidden
+        respondent: hidden
+      status:
+        auditor: hidden
+        respondent: hidden
     score_scale_locked: true
     score_calculation_method: average_of_averages
     anchor_na_to_target: true

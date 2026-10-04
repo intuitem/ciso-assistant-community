@@ -7,7 +7,7 @@ from openpyxl import load_workbook
 
 from core import cyfun
 from core.models import Framework
-from core.utils import EVERYONE_EDIT, build_initial_field_visibility
+from core.utils import EVERYONE_EDIT, HIDDEN, build_initial_field_visibility
 
 BACKEND = Path(__file__).resolve().parents[2]
 FUNCTION_SHEETS = ("GOVERN", "IDENTIFY", "PROTECT", "DETECT", "RESPOND", "RECOVER")
@@ -68,6 +68,15 @@ def test_new_audits_show_scores_to_auditors_and_respondents(library):
     )
     for field in ("score", "is_scored", "documentation_score"):
         assert visibility[field] == EVERYONE_EDIT
+
+
+def test_new_cyfun_2025_audits_hide_extended_result_and_progress_status():
+    """The CCB tools have neither; progress then follows compliance."""
+    visibility = build_initial_field_visibility(
+        SimpleNamespace(field_visibility=_framework()["field_visibility"])
+    )
+    assert visibility["extended_result"] == HIDDEN
+    assert visibility["status"] == HIDDEN
 
 
 @pytest.mark.parametrize(
