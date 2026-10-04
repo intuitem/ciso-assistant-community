@@ -275,10 +275,6 @@ LOOPBACK_ORIGINS = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"
 _registered = False
 
 
-# Updates with an append_text option: repeating the call appends the text again.
-NON_IDEMPOTENT_UPDATES = {"update_asset", "update_task_template"}
-
-
 def _annotations(fn, is_read):
     """Behaviour hints so a client can gate destructive calls. Annotations are
     hints, not a security boundary — the read-only profile is the boundary.
@@ -299,9 +295,7 @@ def _annotations(fn, is_read):
         )
     if name.startswith(("update_", "sync_")):
         return ToolAnnotations(
-            readOnlyHint=False,
-            destructiveHint=True,
-            idempotentHint=name not in NON_IDEMPOTENT_UPDATES,
+            readOnlyHint=False, destructiveHint=True, idempotentHint=True
         )
     # create_/import_/refresh_: additive, and not idempotent
     return ToolAnnotations(

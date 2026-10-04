@@ -31,17 +31,6 @@ from .write_tools import (
 )
 
 
-def _append_text(existing, new: str) -> str:
-    """existing + blank line + new; new alone when nothing is stored,
-    existing unchanged when the new text is blank."""
-    existing = existing or ""
-    if not (new or "").strip():
-        return existing
-    if not existing.strip():
-        return new
-    return f"{existing}\n\n{new}"
-
-
 async def update_asset(
     asset_id: str,
     name: str = None,
@@ -98,7 +87,6 @@ async def update_asset(
     rcap_rto: int | str = None,
     rcap_rpo: int | str = None,
     rcap_mtd: int | str = None,
-    append_text: bool = False,
 ) -> str:
     """Update asset properties
 
@@ -107,8 +95,8 @@ async def update_asset(
     assets (primary ones aggregate them). Only the criteria you pass change:
     every other stored criterion is kept. A value without its _enabled flag
     means enabled; pass <param>_enabled=False to disable a criterion.
-    Not atomic: objectives/capabilities and append_text read the stored values
-    then write them back, so a concurrent edit between the two can be overwritten.
+    Not atomic: objectives/capabilities are read then written back, so a
+    concurrent edit between the two can be overwritten.
 
     Args:
         asset_id: Asset ID/name
@@ -166,7 +154,6 @@ async def update_asset(
         rcap_rto: Actual recovery time: seconds or duration; 0 = not set
         rcap_rpo: Actual recovery point: seconds or duration; 0 = not set
         rcap_mtd: Actual maximum downtime: seconds or duration; 0 = not set
-        append_text: Append description/observation to the stored text (blank line between) instead of replacing it
     """
     try:
         from ..resolvers import resolve_vulnerability_id
@@ -234,9 +221,8 @@ async def update_asset(
                 resolved_vulns.append(resolve_vulnerability_id(vuln))
             payload["vulnerabilities"] = resolved_vulns
 
-        appending = append_text and (description is not None or observation is not None)
         warning = ""
-        if changes or appending:
+        if changes:
             # /object/ returns the stored (write-format) objectives and type;
             # the detail endpoint only returns display lists.
             fetch_res = make_get_request(f"/assets/{resolved_asset_id}/object/")
@@ -246,22 +232,10 @@ async def update_asset(
                     f"({fetch_res.status_code} - {fetch_res.text}); nothing sent"
                 )
             current_asset = fetch_res.json() or {}
-
-            if changes:
-                payload.update(_build_asset_objectives(changes, current_asset))
-                warning = _ignored_fields_warning(
-                    changes, asset_type or current_asset.get("type")
-                )
-
-            if appending:
-                for field, new_text in (
-                    ("description", description),
-                    ("observation", observation),
-                ):
-                    if new_text is not None:
-                        payload[field] = _append_text(
-                            current_asset.get(field), new_text
-                        )
+            payload.update(_build_asset_objectives(changes, current_asset))
+            warning = _ignored_fields_warning(
+                changes, asset_type or current_asset.get("type")
+            )
 
         if not payload:
             return "Error: No fields provided to update"
@@ -1249,12 +1223,8 @@ async def update_task_template(
     compliance_assessments: list = None,
     risk_assessments: list = None,
     findings_assessment: list = None,
-    append_text: bool = False,
 ) -> str:
     """Update task template properties
-
-    Not atomic: append_text reads the stored text then writes it back, so a
-    concurrent edit between the two can be overwritten.
 
     Args:
         task_id: Task template ID/name (required)
@@ -1276,7 +1246,6 @@ async def update_task_template(
         compliance_assessments: Array of compliance assessment UUIDs
         risk_assessments: Array of risk assessment UUIDs
         findings_assessment: Array of finding assessment UUIDs
-        append_text: Append description/observation to the stored text (blank line between) instead of replacing it
     """
     try:
         # Build update payload with only provided fields
@@ -1338,21 +1307,6 @@ async def update_task_template(
 
         # Resolve task name to ID if needed
         resolved_task_id = resolve_task_template_id(task_id)
-
-        if append_text and (description is not None or observation is not None):
-            fetch_res = make_get_request(f"/task-templates/{resolved_task_id}/")
-            if fetch_res.status_code != 200:
-                return (
-                    "Error updating task template: could not read the stored task "
-                    f"template ({fetch_res.status_code} - {fetch_res.text}); nothing sent"
-                )
-            current_task = fetch_res.json() or {}
-            for field, new_text in (
-                ("description", description),
-                ("observation", observation),
-            ):
-                if new_text is not None:
-                    payload[field] = _append_text(current_task.get(field), new_text)
 
         res = make_patch_request(f"/task-templates/{resolved_task_id}/", payload)
 

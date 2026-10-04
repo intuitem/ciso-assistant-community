@@ -1,4 +1,4 @@
-"""Unit tests for the MCP task template update tool: asset resolution and append mode.
+"""Unit tests for the MCP task template update tool: asset resolution.
 
 Network calls are mocked at their import sites, as in
 test_risk_review_tools.py.
@@ -6,7 +6,7 @@ test_risk_review_tools.py.
 
 import sys
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 
 sys.path.insert(0, str(Path(__file__).parents[2]))
@@ -56,39 +56,3 @@ class TestUpdateTaskTemplate:
             run(update_tools.update_task_template(task_id=UUID_A, assets=["ERP"]))
         resolve_asset.assert_called_once_with("ERP", folder_id=None)
         assert patch_req.call_args.args[1] == {"assets": [UUID_C]}
-
-    def test_append_text(self):
-        get = Mock(
-            return_value=_response(200, {"description": "Old", "observation": ""})
-        )
-        with (
-            self._patch_ok() as patch_req,
-            patch.object(update_tools, "make_get_request", get),
-        ):
-            run(
-                update_tools.update_task_template(
-                    task_id=UUID_A,
-                    description="New",
-                    observation="Note",
-                    append_text=True,
-                )
-            )
-        get.assert_called_once_with(f"/task-templates/{UUID_A}/")
-        assert patch_req.call_args.args[1] == {
-            "description": "Old\n\nNew",
-            "observation": "Note",
-        }
-
-    def test_append_fetch_failure_sends_nothing(self):
-        get = Mock(return_value=_response(500, text="boom"))
-        with (
-            self._patch_ok() as patch_req,
-            patch.object(update_tools, "make_get_request", get),
-        ):
-            result = run(
-                update_tools.update_task_template(
-                    task_id=UUID_A, observation="Note", append_text=True
-                )
-            )
-        patch_req.assert_not_called()
-        assert "nothing sent" in result

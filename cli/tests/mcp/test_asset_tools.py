@@ -1,4 +1,4 @@
-"""Unit tests for the MCP asset tools: objectives/capabilities, durations, append mode, security gaps.
+"""Unit tests for the MCP asset tools: objectives/capabilities, durations, security gaps.
 
 Network calls are mocked at their import sites, as in
 test_risk_review_tools.py.
@@ -295,21 +295,7 @@ class TestUpdateAsset:
         get.assert_not_called()
         assert patch_req.call_args.args[1] == {"name": "ERP v2"}
 
-    def test_append_observation(self):
-        _, _, patch_req = self._call(observation="2026-10 review", append_text=True)
-        assert patch_req.call_args.args[1] == {
-            "observation": "Initial note\n\n2026-10 review"
-        }
-
-    def test_append_blank_text_keeps_existing(self):
-        _, _, patch_req = self._call(observation="  ", append_text=True)
-        assert patch_req.call_args.args[1] == {"observation": "Initial note"}
-
-    def test_append_on_empty_existing(self):
-        _, _, patch_req = self._call(description="First", append_text=True)
-        assert patch_req.call_args.args[1] == {"description": "First"}
-
-    def test_without_append_overwrites(self):
+    def test_text_field_sent_without_fetch(self):
         _, get, patch_req = self._call(observation="new")
         get.assert_not_called()
         assert patch_req.call_args.args[1] == {"observation": "new"}
@@ -477,19 +463,3 @@ class TestRegistration:
         names = {t.name for t in tools}
         assert "get_asset_security_gaps" in names
         assert "update_asset" not in names
-
-    def test_append_tools_not_idempotent(self):
-        from mcp.server.fastmcp import FastMCP
-
-        import ca_mcp.server as server
-
-        fresh = FastMCP("test")
-        with (
-            patch.object(server, "mcp", fresh),
-            patch.object(server, "_registered", False),
-        ):
-            server.register_tools(read_only=False)
-            tools = {t.name: t for t in asyncio.run(fresh.list_tools())}
-        assert tools["update_asset"].annotations.idempotentHint is False
-        assert tools["update_task_template"].annotations.idempotentHint is False
-        assert tools["update_entity"].annotations.idempotentHint is True
