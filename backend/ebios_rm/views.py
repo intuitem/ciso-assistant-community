@@ -1004,9 +1004,9 @@ class FearedEventViewSet(BaseModelViewSet):
             )
 
         except Exception as e:
-            logger.error("Error in batch create feared events", error=str(e))
+            logger.error("Error in batch create feared events", error=e)
             return Response(
-                {"error": f"An error occurred: {str(e)}"},
+                {"error": "An error occurred while creating feared events"},
                 status=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -1378,7 +1378,7 @@ class OperatingModeViewSet(BaseModelViewSet):
             default_ref_id = OperatingMode.get_default_ref_id(operational_scenario)
             return Response({"results": default_ref_id})
         except Exception as e:
-            logger.error("Error in default_ref_id: %s", str(e))
+            logger.error("Error in default_ref_id", error=e)
             return Response(
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
