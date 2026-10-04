@@ -20,7 +20,7 @@
 
 	const board = getContext<{
 		deleteEdge: (source: string, target: string) => void;
-	}>('assetBoard');
+	}>('assetGraph');
 
 	const [path, labelX, labelY] = $derived(
 		getBezierPath({
