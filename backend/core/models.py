@@ -1749,6 +1749,7 @@ class LibraryUpdater:
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
+                prev_outcomes = getattr(prev_fw, "outcomes_definition", None)
 
                 new_framework, _ = Framework.objects.update_or_create(
                     urn=framework_dict["urn"],
@@ -1803,6 +1804,19 @@ class LibraryUpdater:
                 self.prune_stale_implementation_groups(
                     new_framework, compliance_assessments
                 )
+
+                # New or changed outcome rules apply to existing audits too.
+                if new_framework.outcomes_definition != prev_outcomes:
+                    for ca in compliance_assessments:
+
+                        def _evaluate_outcomes(ca=ca):
+                            from core.cel_service import evaluate_outcomes
+
+                            evaluate_outcomes(ca)
+
+                        _defer_once(
+                            "_pending_cel_evaluations", ca.pk, _evaluate_outcomes
+                        )
 
                 existing_requirement_node_objects = {
                     rn.urn.lower(): rn
@@ -8995,6 +9009,19 @@ class ComplianceAssessment(Assessment):
 
         _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
 
+    # Settings outcomes depend on, through the audit's scope and scores.
+    _OUTCOME_FIELDS = frozenset(
+        {
+            "selected_implementation_groups",
+            "score_calculation_method",
+            "anchor_na_to_target",
+            "target_score",
+            "min_score",
+            "max_score",
+            "field_visibility",
+        }
+    )
+
     def save(self, *args, **kwargs) -> None:
         # No scale chosen: the framework's (the organisation scale is only
         # ever proposed by the form, so API/import behaviour never changes).
@@ -9005,6 +9032,17 @@ class ComplianceAssessment(Assessment):
             self.score_scale_preset = None
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
+        update_fields = kwargs.get("update_fields")
+        if self.framework.outcomes_definition and (
+            update_fields is None or self._OUTCOME_FIELDS & set(update_fields)
+        ):
+            # Outcomes read the audit's scores, which these settings change.
+            def _evaluate():
+                from core.cel_service import evaluate_outcomes
+
+                evaluate_outcomes(self)
+
+            _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
 
     def create_requirement_assessments(
         self, baseline: Self | None = None
@@ -9373,7 +9411,7 @@ class ComplianceAssessment(Assessment):
             if not leaf_ratios:
                 return -1
 
-            children_map, node_weights, roots = self._framework_node_tree
+            children_map, node_weights, roots = self.framework_node_tree
 
             computed_ratios = {}
             visiting = set()
@@ -9455,7 +9493,7 @@ class ComplianceAssessment(Assessment):
         return ca_min + avg_ratio * ca_range
 
     @cached_property
-    def _framework_node_tree(self):
+    def framework_node_tree(self):
         """(children, weights, roots) of the framework's nodes by URN, built
         once per instance: the radar scores each section separately."""
         all_nodes = RequirementNode.objects.filter(
@@ -11093,7 +11131,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         # Atomic update and save
         self.save(update_fields=["score", "result", "is_scored"])
 
-    _CEL_RELEVANT_FIELDS = frozenset({"score", "result", "status"})
+    _CEL_RELEVANT_FIELDS = frozenset(
+        {"score", "documentation_score", "is_scored", "result", "status"}
+    )
 
     @classmethod
     def from_db(cls, db, field_names, values, *, fetch_mode=None):

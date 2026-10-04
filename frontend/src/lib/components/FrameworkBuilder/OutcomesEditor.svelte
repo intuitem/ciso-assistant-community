@@ -96,17 +96,31 @@
 							['assessment.score_sum', m.builderCelScoreSum()],
 							['assessment.score_max', m.builderCelScoreMax()],
 							['assessment.answered_count', m.builderCelAnsweredCount()],
-							['assessment.total_count', m.builderCelTotalCount()]
+							['assessment.total_count', m.builderCelTotalCount()],
+							['assessment.implementation_score', m.builderCelImplementationScore()],
+							['assessment.documentation_score', m.builderCelDocumentationScore()],
+							['assessment.maturity_score', m.builderCelMaturityScore()],
+							['assessment.selected_implementation_groups', m.builderCelSelectedGroups()]
 						]
 					},
 					{
 						title: m.builderCelGroupRequirements(),
 						rows: [
 							['requirements["NODE_ID"].score', m.builderCelReqScore()],
+							['requirements["NODE_ID"].documentation_score', m.builderCelReqDocumentationScore()],
 							['requirements["NODE_ID"].max_score', m.builderCelReqMaxScore()],
 							['requirements["NODE_ID"].result', m.builderCelReqResult()],
-							['requirements["NODE_ID"].status', m.builderCelReqStatus()]
+							['requirements["NODE_ID"].status', m.builderCelReqStatus()],
+							[
+								'requirements["NODE_ID"].implementation_groups',
+								m.builderCelReqImplementationGroups()
+							]
 						],
+						hint: m.builderCelNodeIdHint()
+					},
+					{
+						title: m.builderCelGroupSections(),
+						rows: [['sections["NODE_ID"].maturity_score', m.builderCelSectionMaturityScore()]],
 						hint: m.builderCelNodeIdHint()
 					},
 					{

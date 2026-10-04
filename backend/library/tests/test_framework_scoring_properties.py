@@ -88,9 +88,10 @@ class TestFrameworkScoringProperties:
         assert framework.target_score is None
 
 
-def _convert(tmp_path, framework_meta, groups):
+def _convert(tmp_path, framework_meta, groups, *, outcomes=()):
     """YAML framework the v2 converter makes of a workbook with these framework
-    meta entries and implementation groups (ref_id, target_score)."""
+    meta entries, implementation groups (ref_id, target_score) and outcomes
+    (ref_id, expression, annotation, annotation[fr])."""
     import importlib.util
     from pathlib import Path
 
@@ -136,6 +137,13 @@ def _convert(tmp_path, framework_meta, groups):
         "IG_meta": [("type", "implementation_groups"), ("name", "IG")],
         "IG_content": [("ref_id", "name", "target_score"), *groups],
     }
+    if outcomes:
+        sheets["framework_meta"].append(("outcomes_definition", "outcomes"))
+        sheets["outcomes_meta"] = [("type", "outcomes"), ("name", "outcomes")]
+        sheets["outcomes_content"] = [
+            ("ref_id", "expression", "annotation", "annotation[fr]"),
+            *outcomes,
+        ]
     wb.remove(wb.active)
     for title, rows in sheets.items():
         ws = wb.create_sheet(title)
@@ -165,3 +173,30 @@ class TestConverter:
     def test_group_target_without_framework_target_is_rejected(self, tmp_path):
         with pytest.raises(ValueError, match="framework needs one too"):
             _convert(tmp_path, [], [("B", "basic", 2.5)])
+
+    def test_outcomes(self, tmp_path):
+        framework = _convert(
+            tmp_path,
+            [],
+            [("B", "basic", None)],
+            outcomes=[
+                ("passed", "assessment.maturity_score >= 3.0", "Passed", "Réussi")
+            ],
+        )
+        assert framework["outcomes_definition"] == [
+            {
+                "ref_id": "passed",
+                "expression": "assessment.maturity_score >= 3.0",
+                "annotation": "Passed",
+                "translations": {"fr": {"annotation": "Réussi"}},
+            }
+        ]
+
+    def test_outcome_without_expression_is_rejected(self, tmp_path):
+        with pytest.raises(ValueError, match="needs a ref_id and an expression"):
+            _convert(
+                tmp_path,
+                [],
+                [("B", "basic", None)],
+                outcomes=[("passed", None, "Passed", None)],
+            )

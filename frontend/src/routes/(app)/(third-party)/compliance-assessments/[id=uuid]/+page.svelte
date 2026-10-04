@@ -859,7 +859,7 @@
 										style="background-color: {rule.color ?? '#d1d5db'}"
 										class:opacity-40={!isActive}
 									></span>
-									{rule.annotation ?? rule.ref_id}
+									{rule.translations?.[getLocale()]?.annotation ?? rule.annotation ?? rule.ref_id}
 								</span>
 							{/each}
 						</div>

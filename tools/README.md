@@ -240,6 +240,7 @@ A `_meta` of type `framework` contains the following keys:
 - score_calculation_method: `average` (default), `sum` or `average_of_averages`. Calculation method proposed for new audits of the framework.
 - anchor_na_to_target: `x` (or `true`) to have new audits of the framework count not applicable requirements as the target score.
 - target_score: target score proposed for new audits of the framework, on its scale. Implementation groups can override it (see their `target_score` column).
+- outcomes_definition: name of an `outcomes` object
 - field_visibility: JSON object `{"field": {"role": "edit"|"read"|"hidden"}}`, roles `auditor` and `respondent`. Initial field visibility of new audits of the framework, merged per role over the defaults (scores are hidden unless the framework shows them), e.g. `{"score": {"auditor": "edit", "respondent": "edit"}}`.
 
 The `_content` tab for a `framework` object contains the following columns:
@@ -348,6 +349,18 @@ The `_content` tab for a `implementation_groups` object contains the following c
 - description
 - default_selected : Must be `x` or empty. If `x`, the Implementation Group (IG) is selected by default when creating an audit with the framework. If you're creating a questionnaire, we *STRONGLY* recommend selecting at least 1 IG, and assigning the selected IG to the main questions in your Framework Content sheet.
 - target_score: target score proposed for new audits that select this IG, instead of the framework's `target_score` (which is then required). When several IGs are selected, the highest target applies; an IG without one counts as the framework's.
+
+### Outcomes
+
+Outcomes are rules evaluated on each audit of the framework whenever its scores change; the audit shows the rules that hold. A `_meta` of type `outcomes` contains the following keys:
+- type (*): must be `outcomes`
+- name (*): the name of the object, will be used in framework objects
+
+The `_content` tab for an `outcomes` object contains the following columns:
+- ref_id (*)
+- expression (*): a [CEL](https://cel.dev) expression on the audit, e.g. `assessment.maturity_score >= 3.0`. It can read `assessment` (scores as displayed, `selected_implementation_groups`...), `requirements["NODE_ID"]` (`score`, `documentation_score`, `result`, `implementation_groups`...), `sections["NODE_ID"]` (scores of the requirements below a node) and `answers`. The framework builder lists them all.
+- annotation: label shown on the audit
+- color: color of the label, e.g. `#22c55e`
 
 ### Scores
 

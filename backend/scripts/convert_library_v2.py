@@ -830,6 +830,7 @@ def _per_choice_lines(data: dict, col: str, n_choices: int, answer_id: str):
 _SKIPPED_TYPES = {
     "answers",
     "implementation_groups",
+    "outcomes",
     "scores",
     "urn_prefix",
     "ttp_groups",  # consumed via ttp_catalog meta.grouping_definition
@@ -1303,6 +1304,31 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
             ig_defs.append(ig_entry)
 
         framework["implementation_groups_definition"] = ig_defs
+
+    # [CONTENT] Outcomes: CEL rules evaluated on the framework's audits
+    outcomes_name = meta.get("outcomes_definition")
+    if outcomes_name:
+        if outcomes_name not in object_blocks:
+            raise ValueError(
+                f"(framework) outcomes_definition {outcomes_name!r}: no such object"
+            )
+        outcomes_header, outcomes_rows = parse_content_rows(
+            object_blocks[outcomes_name]["content_sheet"]
+        )
+        outcomes = []
+        for row, data in outcomes_rows:
+            outcome = {
+                "ref_id": str(data.get("ref_id") or "").strip(),
+                "expression": str(data.get("expression") or "").strip(),
+            }
+            if not outcome["ref_id"] or not outcome["expression"]:
+                raise ValueError(
+                    "(outcomes) Each outcome needs a ref_id and an expression"
+                )
+            set_optional_fields(outcome, data, ["annotation", "color"])
+            attach_translations_from_row(outcome, outcomes_header, row)
+            outcomes.append(outcome)
+        framework["outcomes_definition"] = outcomes
 
     # NOTE: The requirement_nodes loop counts ALL rows (including empty) for its
     # counter logic, so we cannot use parse_content_rows here.

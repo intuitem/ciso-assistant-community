@@ -92,6 +92,7 @@ def _build_context_dict(
             answered_count += 1
             entry = {
                 "score": ra["score"] or 0,
+                "documentation_score": ra["documentation_score"] or 0,
                 "max_score": max_score,
                 "result": ra["result"],
                 "status": ra["status"],
@@ -99,10 +100,12 @@ def _build_context_dict(
         else:
             entry = {
                 "score": 0,
+                "documentation_score": 0,
                 "max_score": max_score,
                 "result": ra["result"] if ra else "not_assessed",
                 "status": ra["status"] if ra else "to_do",
             }
+        entry["implementation_groups"] = node.get("implementation_groups") or []
 
         if node_id:
             requirements[node_id] = entry
@@ -182,7 +185,14 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
         for row in RequirementAssessment.objects.filter(
             compliance_assessment=ca,
             requirement_id__in=in_scope_node_ids,
-        ).values("requirement__urn", "score", "result", "status", "is_scored")
+        ).values(
+            "requirement__urn",
+            "score",
+            "documentation_score",
+            "result",
+            "status",
+            "is_scored",
+        )
     }
 
     # Query 3: answer-level data for in-scope requirements
@@ -258,6 +268,58 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
     return final_context, hidden_urns
 
 
+_SCORE_LAYERS = ("implementation_score", "documentation_score", "maturity_score")
+
+
+def _layer(score) -> float:
+    """A score layer for CEL: 0.0 when nothing is scored."""
+    return 0.0 if score is None or score == -1 else float(score)
+
+
+def _assessment_scores(ca) -> dict:
+    """The audit's scores, as displayed (selected groups, calculation method,
+    N/A anchoring), and its selected implementation groups."""
+    scores = ca.get_global_score()
+    return {
+        **{layer: _layer(scores[layer]) for layer in _SCORE_LAYERS},
+        "selected_implementation_groups": list(ca.selected_implementation_groups or []),
+    }
+
+
+def _section_scores(ca) -> dict[str, dict]:
+    """Scores of each node with requirements below it in the audit's scope
+    (a function, a category...), by node id, aggregated like the audit's."""
+    from core.models import RequirementAssessment
+    from core.utils import extract_node_id
+
+    groups = set(ca.selected_implementation_groups or [])
+    in_scope = {
+        ra.requirement.urn: ra
+        for ra in RequirementAssessment.objects.filter(
+            compliance_assessment=ca, requirement__assessable=True
+        ).select_related("requirement")
+        if not groups or groups & set(ra.requirement.implementation_groups or [])
+    }
+    children, _weights, _roots = ca.framework_node_tree
+
+    def below(urn):
+        for child in children.get(urn, []):
+            if child in in_scope:
+                yield in_scope[child]
+            yield from below(child)
+
+    sections = {}
+    for urn in children:
+        node_id = extract_node_id(urn)
+        requirement_assessments = list(below(urn))
+        if node_id and requirement_assessments:
+            scores = ca.get_scores_for(requirement_assessments)
+            sections[node_id] = {
+                layer: _layer(scores[layer]) for layer in _SCORE_LAYERS
+            }
+    return sections
+
+
 def evaluate_outcomes(compliance_assessment) -> None:
     """Evaluate CEL outcome rules and store all matching results on the assessment."""
     from core.models import Framework
@@ -275,6 +337,11 @@ def evaluate_outcomes(compliance_assessment) -> None:
         return
 
     context, _hidden = build_cel_context(ca)
+    # Scores only serve outcomes, so they are added here rather than in
+    # build_cel_context, which visibility evaluation also uses.
+    context["assessment"] |= _assessment_scores(ca)
+    if any("sections" in rule.get("expression", "") for rule in outcomes_def):
+        context["sections"] = _section_scores(ca)
     cel_context = {k: _python_to_cel(v) for k, v in context.items()}
 
     computed = {}

@@ -60,6 +60,22 @@ The export writes each requirement's **score** into the official template, so a 
 - Observations from requirement assessments populate the comments column.
 - The official template scaffolding (cover page, formulas, summary sheet) is preserved untouched.
 
+## Checking the CCB conformity criteria
+
+CyFun 2025 audits show, under **Outcomes**, whether they meet the conditions of the CCB's Conformity Assessment Scheme for their assurance level. The check follows the scores as you go:
+
+|                                                                           | BASIC        | IMPORTANT    | ESSENTIAL                                                  |
+| ------------------------------------------------------------------------- | ------------ | ------------ | ---------------------------------------------------------- |
+| Total maturity                                                            | ≥ 2.5        | ≥ 3          | ≥ 3.5                                                      |
+| Each key measure, including those of the lower levels                     | ≥ 2.5        | ≥ 3          | ≥ 3                                                        |
+| Each category                                                             | –            | –            | ≥ 3                                                        |
+| Requirements marked **Not applicable** (measures excluded from the scope) | at most 1    | at most 3    | at most 5                                                  |
+| Never excluded                                                            | key measures | key measures | key measures and controls linked to the management aspects |
+
+A key measure's maturity is the average of its documentation and implementation scores; the total and the categories use the audit's maturity score, as displayed. Each condition lights up green when it holds (total maturity, key measures, categories, exclusions; the category condition holds by default below ESSENTIAL), and **CCB conformity criteria met** when they all do. A completed, conformant audit is therefore all green, and a greyed condition shows what is missing.
+
+This is a self-check: conformity is confirmed by the Conformity Assessment Body, from the official self-assessment tool's summary tab.
+
 ## Related
 
 - [CyFun framework on the CCB website](https://atwork.safeonweb.be/tools-resources/cyberfundamentals-framework)

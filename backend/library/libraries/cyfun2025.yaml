@@ -22,7 +22,7 @@ description: 'The CyberFundamentals Framework is a framework owned by the Centre
 
   Version 2025-10-01'
 copyright: "\u24B8 Centre for Cybersecurity Belgium (CCB)"
-version: 9
+version: 10
 publication_date: 2026-10-04
 provider: CCB
 packager: intuitem
@@ -21081,6 +21081,95 @@ objects:
           name: essential - managementaspecten
         fr:
           name: essential - aspects de management
+    outcomes_definition:
+    - ref_id: cyfun-conformity-criteria-met
+      expression: '(assessment.maturity_score >= ((assessment.selected_implementation_groups.size()
+        == 0 || assessment.selected_implementation_groups.exists(g, g in ["E", "EK",
+        "EG"])) ? 3.5 : (assessment.selected_implementation_groups.exists(g, g in
+        ["I", "IK", "IG"]) ? 3.0 : 2.5))) && (requirements.all(k, !(((assessment.selected_implementation_groups.size()
+        == 0 || assessment.selected_implementation_groups.exists(g, g in ["E", "EK",
+        "EG"])) ? "EK" : (assessment.selected_implementation_groups.exists(g, g in
+        ["I", "IK", "IG"]) ? "IK" : "BK")) in requirements[k].implementation_groups)
+        || double(requirements[k].score + requirements[k].documentation_score) / 2.0
+        >= ((assessment.selected_implementation_groups.size() == 0 || assessment.selected_implementation_groups.exists(g,
+        g in ["E", "EK", "EG"])) ? 3.0 : (assessment.selected_implementation_groups.exists(g,
+        g in ["I", "IK", "IG"]) ? 3.0 : 2.5)))) && (!(assessment.selected_implementation_groups.size()
+        == 0 || assessment.selected_implementation_groups.exists(g, g in ["E", "EK",
+        "EG"])) || sections.all(c, !c.matches("^[a-z][a-z][.][a-z][a-z]$") || sections[c].maturity_score
+        >= 3.0)) && (requirements.filter(k, requirements[k].result == "not_applicable").size()
+        <= ((assessment.selected_implementation_groups.size() == 0 || assessment.selected_implementation_groups.exists(g,
+        g in ["E", "EK", "EG"])) ? 5 : (assessment.selected_implementation_groups.exists(g,
+        g in ["I", "IK", "IG"]) ? 3 : 1)) && !requirements.exists(k, requirements[k].result
+        == "not_applicable" && (((assessment.selected_implementation_groups.size()
+        == 0 || assessment.selected_implementation_groups.exists(g, g in ["E", "EK",
+        "EG"])) ? "EK" : (assessment.selected_implementation_groups.exists(g, g in
+        ["I", "IK", "IG"]) ? "IK" : "BK")) in requirements[k].implementation_groups
+        || ((assessment.selected_implementation_groups.size() == 0 || assessment.selected_implementation_groups.exists(g,
+        g in ["E", "EK", "EG"])) && "EG" in requirements[k].implementation_groups))))'
+      annotation: CCB conformity criteria met
+      color: '#22c55e'
+      translations:
+        nl:
+          annotation: CCB-conformiteitscriteria behaald
+        fr:
+          annotation: "Crit\xE8res de conformit\xE9 du CCB atteints"
+    - ref_id: cyfun-total-maturity-target-met
+      expression: 'assessment.maturity_score >= ((assessment.selected_implementation_groups.size()
+        == 0 || assessment.selected_implementation_groups.exists(g, g in ["E", "EK",
+        "EG"])) ? 3.5 : (assessment.selected_implementation_groups.exists(g, g in
+        ["I", "IK", "IG"]) ? 3.0 : 2.5))'
+      annotation: Total maturity target met
+      color: '#22c55e'
+      translations:
+        nl:
+          annotation: Doel totale maturiteit behaald
+        fr:
+          annotation: "Cible de maturit\xE9 totale atteinte"
+    - ref_id: cyfun-key-measure-targets-met
+      expression: 'requirements.all(k, !(((assessment.selected_implementation_groups.size()
+        == 0 || assessment.selected_implementation_groups.exists(g, g in ["E", "EK",
+        "EG"])) ? "EK" : (assessment.selected_implementation_groups.exists(g, g in
+        ["I", "IK", "IG"]) ? "IK" : "BK")) in requirements[k].implementation_groups)
+        || double(requirements[k].score + requirements[k].documentation_score) / 2.0
+        >= ((assessment.selected_implementation_groups.size() == 0 || assessment.selected_implementation_groups.exists(g,
+        g in ["E", "EK", "EG"])) ? 3.0 : (assessment.selected_implementation_groups.exists(g,
+        g in ["I", "IK", "IG"]) ? 3.0 : 2.5)))'
+      annotation: Key measure targets met
+      color: '#22c55e'
+      translations:
+        nl:
+          annotation: Doelen kernmaatregelen behaald
+        fr:
+          annotation: "Cibles des mesures cl\xE9s atteintes"
+    - ref_id: cyfun-category-targets-met
+      expression: '!(assessment.selected_implementation_groups.size() == 0 || assessment.selected_implementation_groups.exists(g,
+        g in ["E", "EK", "EG"])) || sections.all(c, !c.matches("^[a-z][a-z][.][a-z][a-z]$")
+        || sections[c].maturity_score >= 3.0)'
+      annotation: Category targets met
+      color: '#22c55e'
+      translations:
+        nl:
+          annotation: "Doelen categorie\xEBn behaald"
+        fr:
+          annotation: "Cibles des cat\xE9gories atteintes"
+    - ref_id: cyfun-exclusions-within-rules
+      expression: 'requirements.filter(k, requirements[k].result == "not_applicable").size()
+        <= ((assessment.selected_implementation_groups.size() == 0 || assessment.selected_implementation_groups.exists(g,
+        g in ["E", "EK", "EG"])) ? 5 : (assessment.selected_implementation_groups.exists(g,
+        g in ["I", "IK", "IG"]) ? 3 : 1)) && !requirements.exists(k, requirements[k].result
+        == "not_applicable" && (((assessment.selected_implementation_groups.size()
+        == 0 || assessment.selected_implementation_groups.exists(g, g in ["E", "EK",
+        "EG"])) ? "EK" : (assessment.selected_implementation_groups.exists(g, g in
+        ["I", "IK", "IG"]) ? "IK" : "BK")) in requirements[k].implementation_groups
+        || ((assessment.selected_implementation_groups.size() == 0 || assessment.selected_implementation_groups.exists(g,
+        g in ["E", "EK", "EG"])) && "EG" in requirements[k].implementation_groups)))'
+      annotation: Exclusions within CCB rules
+      color: '#22c55e'
+      translations:
+        nl:
+          annotation: Uitsluitingen binnen de CCB-regels
+        fr:
+          annotation: "Exclusions conformes aux r\xE8gles du CCB"
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv
       assessable: false
