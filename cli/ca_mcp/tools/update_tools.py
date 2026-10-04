@@ -107,6 +107,8 @@ async def update_asset(
     assets (primary ones aggregate them). Only the criteria you pass change:
     every other stored criterion is kept. A value without its _enabled flag
     means enabled; pass <param>_enabled=False to disable a criterion.
+    Not atomic: objectives/capabilities and append_text read the stored values
+    then write them back, so a concurrent edit between the two can be overwritten.
 
     Args:
         asset_id: Asset ID/name
@@ -1250,6 +1252,9 @@ async def update_task_template(
     append_text: bool = False,
 ) -> str:
     """Update task template properties
+
+    Not atomic: append_text reads the stored text then writes it back, so a
+    concurrent edit between the two can be overwritten.
 
     Args:
         task_id: Task template ID/name (required)
