@@ -297,7 +297,7 @@ def _section_scores(ca) -> dict[str, dict]:
         ra.requirement.urn: ra
         for ra in RequirementAssessment.objects.filter(
             compliance_assessment=ca, requirement__assessable=True
-        ).select_related("requirement")
+        ).select_related("requirement", "compliance_assessment")
         if not groups or groups & set(ra.requirement.implementation_groups or [])
     }
     children, _weights, _roots = ca.framework_node_tree

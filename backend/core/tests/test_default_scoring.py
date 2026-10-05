@@ -145,3 +145,32 @@ class TestDefaultScoringOnCreate:
         data = _serializer(cyfun, baseline=str(baseline.id)).validated_data
         assert data["anchor_na_to_target"] is True
         assert data["target_score"] == 3
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("preset, target", [("0-5", 4), ("0-100", 80)])
+def test_framework_target_is_carried_to_the_audit_scale(preset, target):
+    """A 0-100 framework's target of 80 is 4 on a 0-5 audit, not 80 (refused)."""
+    folder = Folder.get_root_folder()
+    framework = Framework.objects.create(
+        name="Percent",
+        urn="urn:test:framework:percent",
+        folder=folder,
+        min_score=0,
+        max_score=100,
+        anchor_na_to_target=True,
+        target_score=80,
+    )
+    RequirementNode.objects.create(
+        urn="urn:test:percent:1", framework=framework, assessable=True, folder=folder
+    )
+    serializer = ComplianceAssessmentWriteSerializer(
+        data={
+            "name": "Audit",
+            "folder": str(folder.id),
+            "framework": str(framework.id),
+            "score_scale_preset": preset,
+        }
+    )
+    assert serializer.is_valid(), serializer.errors
+    assert serializer.validated_data["target_score"] == target

@@ -30,7 +30,7 @@ def copy_result_visibility_to_outcomes(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0191_roto_target_objective_category"),
+        ("core", "0192_backfill_evidencerevision_attachment_hash"),
     ]
 
     operations = [

@@ -3923,6 +3923,18 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         defaults = framework.default_scoring_for(
             attrs.get("selected_implementation_groups")
         )
+        # The framework's target is on the framework scale: carry it over to the
+        # audit's (resolved by _validate_score_scale).
+        framework_range = (framework.min_score, framework.max_score)
+        audit_range = getattr(self, "_effective_score_range", None)
+        if (
+            defaults.get("target_score") is not None
+            and audit_range
+            and tuple(audit_range) != framework_range
+        ):
+            defaults["target_score"] = rescale_score(
+                defaults["target_score"], framework_range, audit_range, integer=False
+            )
         for field, value in defaults.items():
             attrs.setdefault(field, value)
 

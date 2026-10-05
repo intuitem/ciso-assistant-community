@@ -68,17 +68,32 @@
 	// The target last proposed; it follows the selected groups until the user edits it.
 	let proposedTarget: number | null = null;
 
-	// Same rule as Framework.default_scoring_for: the highest selected group target applies.
+	// Same rule as Framework.default_scoring_for: the highest selected group target
+	// applies. Targets are on the framework scale: proposed on the audit's.
 	function defaultTarget(groups: string[] | undefined): number | null {
 		const target = defaultScoring?.target_score;
-		if (target === undefined) return null;
-		if (!groups?.length) return target;
-		return Math.max(...groups.map((g) => defaultScoring?.target_score_by_group?.[g] ?? target));
+		if (target === undefined || target === null) return null;
+		const byGroup = groups?.length
+			? Math.max(...groups.map((g) => defaultScoring?.target_score_by_group?.[g] ?? target))
+			: target;
+		return onAuditScale(byGroup);
 	}
 
+	// Same mapping as the backend's rescale_score (two decimals, halves up).
+	function onAuditScale(value: number): number {
+		const from = [frameworkScoring?.min_score ?? 0, frameworkScoring?.max_score ?? 100];
+		const option = scaleChoice?.options.find((o) => o.id === selectedScale);
+		if (!option || from[1] === from[0] || (option.min === from[0] && option.max === from[1]))
+			return value;
+		const ratio = Math.min(1, Math.max(0, (value - from[0]) / (from[1] - from[0])));
+		return Math.round((option.min + ratio * (option.max - option.min)) * 100) / 100;
+	}
+
+	// The proposed target follows the selected groups and scale until the user edits it.
 	$effect(() => {
 		const groups = $formData.selected_implementation_groups;
-		if (object?.id || initialData.baseline || !defaultScoring?.target_score_by_group) return;
+		void selectedScale;
+		if (object?.id || initialData.baseline || defaultScoring?.target_score == null) return;
 		untrack(() => {
 			const next = defaultTarget(groups);
 			if ($formData.target_score !== proposedTarget || next === proposedTarget) return;
