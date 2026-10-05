@@ -41,6 +41,8 @@ export const load: PageServerLoad = async (event) => {
 		console.error(`Failed to fetch data for likelihood: ${likelihoodChoicesResponse.statusText}`);
 	}
 
+	(detail.relatedModels['operating-modes'] as any).quotationMethod = detail.data.quotation_method;
+
 	return { ...detail, table };
 };
 

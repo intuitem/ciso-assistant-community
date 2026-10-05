@@ -62,7 +62,15 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: []
 	};
 
+	const stepBased = ['standard', 'advanced'].includes(object.quotation_method);
+	const ratingKitResponse = stepBased
+		? await fetch(`${BASE_API_URL}/ebios-rm/studies/${params.id}/rating-kit/`)
+		: null;
+	const ratingKit = ratingKitResponse?.ok ? await ratingKitResponse.json() : null;
+
 	return {
+		ratingKit,
+		quotationMethod: object.quotation_method,
 		createForm,
 		deleteForm,
 		model,
