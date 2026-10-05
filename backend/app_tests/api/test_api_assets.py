@@ -608,3 +608,100 @@ class TestCrossDomainAssetLinkPermissions:
         assert not self.sibling.parent_assets.exists()
         reused = {a["name"]: a["parent"] for a in r.json()["reused_assets"]}
         assert reused["sibling"] is None, r.content
+
+
+@pytest.mark.django_db
+class TestAssetDependencyGraph:
+    def _domain(self, label, parent=None):
+        return Folder.objects.create(
+            name=f"graph-{label}-{uuid.uuid4().hex[:6]}",
+            parent_folder=parent or Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+
+    def setup_method(self):
+        self.folder_a = self._domain("A")
+        self.folder_b = self._domain("B", parent=self.folder_a)
+        self.folder_c = self._domain("C")
+        self.process = Asset.objects.create(
+            folder=self.folder_a, name="process", type=Asset.Type.PRIMARY
+        )
+        self.app = Asset.objects.create(
+            folder=self.folder_b, name="app", type=Asset.Type.SUPPORT
+        )
+        self.db = Asset.objects.create(
+            folder=self.folder_c, name="secret-db", type=Asset.Type.SUPPORT
+        )
+        self.host = Asset.objects.create(
+            folder=self.folder_a, name="host", type=Asset.Type.SUPPORT
+        )
+        self.sibling = Asset.objects.create(
+            folder=self.folder_a, name="sibling", type=Asset.Type.SUPPORT
+        )
+        self.app.parent_assets.add(self.process)
+        self.db.parent_assets.add(self.app)
+        self.host.parent_assets.add(self.db)
+        self.sibling.parent_assets.add(self.process)
+        self.user = _make_scoped_user(self.folder_a)
+
+    def _get(self, asset, **params):
+        return _client_for(self.user).get(
+            f"/api/assets/{asset.id}/dependency-graph/", params
+        )
+
+    def test_chain_walks_through_and_redacts_unseen_assets(self):
+        r = self._get(self.host)
+        assert r.status_code == status.HTTP_200_OK, r.content
+        body = r.json()
+        by_id = {n["id"]: n for n in body["nodes"]}
+        hidden = [n for n in body["nodes"] if n["hidden"]]
+        assert len(hidden) == 1
+        assert set(hidden[0]) == {
+            "id",
+            "hops",
+            "side",
+            "omitted",
+            "elsewhere",
+            "hidden",
+        }
+        assert str(self.db.id) not in r.content.decode()
+        assert "secret-db" not in r.content.decode()
+        assert by_id[str(self.process.id)]["side"] == "up"
+        assert by_id[str(self.app.id)]["folder"]["path"].endswith(
+            f"{self.folder_a.name}/{self.folder_b.name}"
+        )
+        edges = {(e["source"], e["target"]) for e in body["edges"]}
+        assert (hidden[0]["id"], str(self.host.id)) in edges
+        assert (str(self.app.id), hidden[0]["id"]) in edges
+
+    def test_chain_excludes_siblings_but_connected_includes_them(self):
+        chain = {n["id"] for n in self._get(self.host).json()["nodes"]}
+        connected = {
+            n["id"] for n in self._get(self.host, mode="connected").json()["nodes"]
+        }
+        assert str(self.sibling.id) not in chain
+        assert str(self.sibling.id) in connected
+
+    def test_unseen_focus_is_not_found(self):
+        r = self._get(self.db)
+        assert r.status_code == status.HTTP_404_NOT_FOUND, r.content
+
+    def test_limit_marks_truncation(self):
+        body = self._get(self.host, limit=2).json()
+        assert body["truncated"]
+        assert len(body["nodes"]) == 2
+        assert any(n["omitted"] for n in body["nodes"])
+
+    def test_rejects_bad_parameters(self):
+        assert self._get(self.host, mode="everything").status_code == 400
+        assert self._get(self.host, max_hops=0).status_code == 400
+        assert self._get(self.host, expand="not-a-uuid").status_code == 400
+
+    def test_chain_counts_and_reveals_links_it_skips(self):
+        by_id = {n["id"]: n for n in self._get(self.host).json()["nodes"]}
+        assert by_id[str(self.process.id)]["elsewhere"] == 1
+        assert str(self.sibling.id) not in by_id
+        revealed = self._get(self.host, reveal=str(self.process.id)).json()
+        by_id = {n["id"]: n for n in revealed["nodes"]}
+        assert by_id[str(self.sibling.id)]["side"] == "down"
+        assert by_id[str(self.process.id)]["elsewhere"] == 0

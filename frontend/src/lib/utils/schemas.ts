@@ -1402,7 +1402,13 @@ export const ebiosRMSchema = z.object({
 	assets: z.string().uuid().optional().array().optional(),
 	folder: z.string(),
 	compliance_assessments: z.string().uuid().optional().array().optional(),
-	reference_entity: z.string().optional()
+	reference_entity: z.string().optional(),
+	classification: z.string().uuid().optional().nullable(),
+	objectives: z.string().optional(),
+	constraints_hypotheses: z.string().optional(),
+	responsibility_matrix: z.string().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const fearedEventsSchema = z.object({
@@ -1423,6 +1429,7 @@ export const roToSchema = z.object({
 	feared_events: z.string().uuid().optional().array().optional(),
 	risk_origin: z.string(),
 	target_objective: z.string(),
+	target_objective_category: z.string().uuid().optional().nullable(),
 	motivation: z.number().default(0).optional(),
 	resources: z.number().default(0).optional(),
 	activity: z.number().min(0).max(4).optional().default(0),
@@ -1455,6 +1462,7 @@ export const StrategicScenarioSchema = z.object({
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
 	focused_feared_event: z.string().uuid().nullable().optional(),
+	gravity_forced: z.number().int().nullable().optional(),
 	ref_id: z.string().optional(),
 	folder: z.string()
 });
@@ -1477,6 +1485,7 @@ export const operationalScenarioSchema = z.object({
 	techniques: z.string().uuid().optional().array().optional(),
 	operating_modes_description: z.string().optional(),
 	likelihood: z.number().optional().default(-1),
+	likelihood_forced: z.number().int().nullable().optional(),
 	is_selected: z.boolean().default(true),
 	justification: z.string().optional(),
 	folder: z.string(),
@@ -1810,6 +1819,7 @@ export const ElementaryActionSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	threat: z.string().uuid().optional().nullable(),
+	technique: z.string().uuid().optional().nullable(),
 	icon: z.string().optional().nullable(),
 	attack_stage: z.number().default(0),
 	operating_modes: z.string().uuid().optional().array().optional()
@@ -1829,6 +1839,7 @@ export const KillChainSchema = z.object({
 	// is_highlighted: z.boolean().default(false),
 	antecedents: z.string().uuid().optional().array().optional(),
 	logic_operator: z.string().optional().nullable(),
+	assets: z.string().uuid().optional().array().optional(),
 	folder: z.string()
 });
 

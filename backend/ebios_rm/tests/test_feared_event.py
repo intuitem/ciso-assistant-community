@@ -1,8 +1,6 @@
 import pytest
 from ebios_rm.models import EbiosRMStudy, FearedEvent
 
-from ebios_rm.tests.fixtures import *
-
 
 @pytest.mark.django_db
 class TestFearedEvent:
