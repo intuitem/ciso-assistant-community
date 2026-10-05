@@ -138,6 +138,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
                         "field_visibility": compliance_assessment.framework.field_visibility,
+                        "result_aggregation": compliance_assessment.framework.result_aggregation,
                         "str": str(compliance_assessment.framework),
                     },
                 },
@@ -240,6 +241,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
                         "field_visibility": compliance_assessment.framework.field_visibility,
+                        "result_aggregation": compliance_assessment.framework.result_aggregation,
                         "str": str(compliance_assessment.framework),
                     },
                 }
@@ -311,6 +313,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
                         "field_visibility": compliance_assessment.framework.field_visibility,
+                        "result_aggregation": compliance_assessment.framework.result_aggregation,
                         "str": str(compliance_assessment.framework),
                     },
                 },
