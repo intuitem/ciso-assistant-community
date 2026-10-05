@@ -108,6 +108,9 @@ async def create_asset(
     dro_rto: int = None,
     dro_rpo: int = None,
     dro_mtd: int = None,
+    rc_rto: int = None,
+    rc_rpo: int = None,
+    rc_mtd: int = None,
 ) -> str:
     """Create asset in folder
 
@@ -125,6 +128,12 @@ async def create_asset(
         dro_rto: Recovery Time Objective in seconds
         dro_rpo: Recovery Point Objective in seconds
         dro_mtd: Maximum Tolerable Downtime in seconds
+        rc_rto: Recovery capability RTO in seconds (actual achievable value; set on support assets)
+        rc_rpo: Recovery capability RPO in seconds (support assets)
+        rc_mtd: Recovery capability MTD in seconds (support assets)
+
+    Note: support assets inherit dro_* objectives from their primary assets, so
+    values set via dro_* on a support asset are not displayed. Use rc_* there.
     """
     try:
         # If no folder specified, try to get the default folder
@@ -186,6 +195,15 @@ async def create_asset(
                     "rto": {"value": dro_rto if dro_rto is not None else 0},
                     "rpo": {"value": dro_rpo if dro_rpo is not None else 0},
                     "mtd": {"value": dro_mtd if dro_mtd is not None else 0},
+                }
+            }
+
+        if any(p is not None for p in [rc_rto, rc_rpo, rc_mtd]):
+            payload["recovery_capabilities"] = {
+                "objectives": {
+                    "rto": {"value": rc_rto if rc_rto is not None else 0},
+                    "rpo": {"value": rc_rpo if rc_rpo is not None else 0},
+                    "mtd": {"value": rc_mtd if rc_mtd is not None else 0},
                 }
             }
 
