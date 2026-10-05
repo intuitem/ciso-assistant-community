@@ -6398,15 +6398,63 @@ class IncidentWriteSerializer(BaseModelSerializer):
 
         return super().validate(attrs)
 
+    def create(self, validated_data):
+        owner_data = validated_data.get("owners", [])
+        incident = super().create(validated_data)
+
+        # Notify newly assigned owners
+        if owner_data:
+            self._send_assignment_notifications(
+                incident, [actor.id for actor in owner_data]
+            )
+
+        return incident
+
     def update(self, instance, validated_data):
         old_folder_id = instance.folder_id
+        old_owner_ids = set(instance.owners.values_list("id", flat=True))
         with transaction.atomic():
             updated_instance = super().update(instance, validated_data)
             if old_folder_id != updated_instance.folder_id:
                 TimelineEntry.objects.filter(incident=updated_instance).update(
                     folder=updated_instance.folder
                 )
+
+        # Notify only newly assigned owners
+        new_owner_ids = set(updated_instance.owners.values_list("id", flat=True))
+        newly_assigned_ids = new_owner_ids - old_owner_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(
+                updated_instance, list(newly_assigned_ids)
+            )
+
         return updated_instance
+
+    def _send_assignment_notifications(self, incident, owner_ids):
+        """Send assignment notifications to the specified owners"""
+        if not owner_ids:
+            return
+
+        try:
+            from core.models import Actor
+            from .tasks import send_incident_assignment_notification
+
+            assigned_emails = []
+            for actor in Actor.objects.filter(id__in=owner_ids):
+                assigned_emails.extend(actor.get_emails())
+
+            # Dedupe (several actors can resolve to the same email) and defer until
+            # the transaction commits, so a rollback doesn't send spurious emails.
+            unique_emails = list(dict.fromkeys(filter(None, assigned_emails)))
+            if unique_emails:
+                incident_id = incident.id
+                transaction.on_commit(
+                    lambda: send_incident_assignment_notification(
+                        incident_id, unique_emails
+                    )
+                )
+        except Exception as e:
+            logger.error(f"Failed to send Incident assignment notification: {str(e)}")
 
 
 class IncidentReadSerializer(IncidentWriteSerializer):

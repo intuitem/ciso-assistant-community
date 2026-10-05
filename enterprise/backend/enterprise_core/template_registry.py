@@ -236,6 +236,19 @@ EMAIL_TEMPLATE_REGISTRY = {
             "ciso_assistant_url",
         ],
     },
+    "incident_assignment": {
+        "description": "Sent when an incident is assigned",
+        "category": "notification",
+        "variables": [
+            "incident_name",
+            "incident_description",
+            "incident_ref_id",
+            "incident_severity",
+            "incident_status",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
     "risk_scenario_assignment": {
         "description": "Sent when a risk scenario is assigned",
         "category": "notification",

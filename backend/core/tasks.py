@@ -8,6 +8,7 @@ from core.models import (
     AppliedControl,
     ComplianceAssessment,
     Evidence,
+    Incident,
     OrganisationIssue,
     RequirementAssignment,
     RiskAssessment,
@@ -843,6 +844,45 @@ def send_risk_scenario_assignment_notification(scenario_id, assigned_user_emails
         if email and check_email_configuration(email, [scenario]):
             rendered = render_email_template(
                 "risk_scenario_assignment", context, recipient_email=email
+            )
+            if rendered:
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
+
+
+@task()
+def send_incident_assignment_notification(incident_id, assigned_user_emails):
+    """Send notification when an Incident is assigned to owners"""
+    if not assigned_user_emails:
+        return
+
+    try:
+        incident = Incident.objects.get(id=incident_id)
+    except Incident.DoesNotExist:
+        logger.error(f"Incident with id {incident_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "incident_name": incident.name,
+        "incident_description": incident.description or "No description provided",
+        "incident_ref_id": incident.ref_id or "N/A",
+        "incident_severity": incident.get_severity_display(),
+        "incident_status": incident.get_status_display(),
+        "folder_name": incident.folder.name if incident.folder else "Default",
+    }
+
+    notify("incident_assignment", assigned_user_emails, incident, context)
+
+    for email in assigned_user_emails:
+        if email and check_email_configuration(email, [incident]):
+            rendered = render_email_template(
+                "incident_assignment", context, recipient_email=email
             )
             if rendered:
                 send_notification_email(
