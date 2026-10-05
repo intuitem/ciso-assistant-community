@@ -446,7 +446,7 @@ def check_task_nodes_overdue():
 @task()
 def send_task_node_due_soon_notification(actor_email, task_nodes, days):
     """Send notification when TaskNodes are due soon."""
-    if not check_email_configuration(actor_email, task_nodes):
+    if not check_email_configuration(actor_email):
         return
 
     from .email_utils import format_task_node_list, render_email_template
@@ -482,7 +482,7 @@ def send_task_node_due_soon_notification(actor_email, task_nodes, days):
 @task()
 def send_task_node_overdue_notification(actor_email, task_nodes):
     """Send notification for overdue TaskNodes."""
-    if not check_email_configuration(actor_email, task_nodes):
+    if not check_email_configuration(actor_email):
         return
 
     from .email_utils import render_email_template, format_task_node_list
@@ -530,7 +530,7 @@ def check_expired_organisation_issues():
 
 @task()
 def send_notification_email_expired_eta(owner_email, controls):
-    if not check_email_configuration(owner_email, controls):
+    if not check_email_configuration(owner_email):
         return
 
     from .email_utils import render_email_template, format_control_list
@@ -628,7 +628,10 @@ def get_missing_email_settings() -> list[str]:
     ]
 
 
-def check_email_configuration(owner_email, controls):
+def check_email_configuration(owner_email):
+    """Return True if an email can be sent: mailing is enabled in the general
+    settings, the SMTP settings are complete, and a recipient is given.
+    """
     notifications_enable_mailing = GlobalSettings.objects.get(name="general").value.get(
         "notifications_enable_mailing", False
     )
@@ -705,7 +708,7 @@ def send_applied_control_assignment_notification(control_id, assigned_user_email
     notify("applied_control_assignment", assigned_user_emails, control, context)
 
     for email in assigned_user_emails:
-        if email and check_email_configuration(email, [control]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "applied_control_assignment", context, recipient_email=email
             )
@@ -749,7 +752,7 @@ def send_task_template_assignment_notification(task_template_id, emails):
     notify("task_template_assignment", emails, task_template, context)
 
     for email in emails:
-        if email and check_email_configuration(email, [task_template]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "task_template_assignment", context, recipient_email=email
             )
@@ -800,7 +803,7 @@ def send_compliance_assessment_assignment_notification(
     )
 
     for email in assigned_user_emails:
-        if email and check_email_configuration(email, [assessment]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "compliance_assessment_assignment", context, recipient_email=email
             )
@@ -841,7 +844,7 @@ def send_risk_scenario_assignment_notification(scenario_id, assigned_user_emails
     notify("risk_scenario_assignment", assigned_user_emails, scenario, context)
 
     for email in assigned_user_emails:
-        if email and check_email_configuration(email, [scenario]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "risk_scenario_assignment", context, recipient_email=email
             )
@@ -880,7 +883,7 @@ def send_incident_assignment_notification(incident_id, assigned_user_emails):
     notify("incident_assignment", assigned_user_emails, incident, context)
 
     for email in assigned_user_emails:
-        if email and check_email_configuration(email, [incident]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "incident_assignment", context, recipient_email=email
             )
@@ -896,7 +899,7 @@ def send_incident_assignment_notification(incident_id, assigned_user_emails):
 @task()
 def send_compliance_assessment_due_soon_notification(author_email, assessments, days):
     """Send notification when ComplianceAssessment is due soon"""
-    if not check_email_configuration(author_email, assessments):
+    if not check_email_configuration(author_email):
         return
 
     from .email_utils import format_assessment_list, render_email_template
@@ -930,7 +933,7 @@ def send_compliance_assessment_due_soon_notification(author_email, assessments, 
 @task()
 def send_applied_control_expiring_soon_notification(owner_email, controls, days):
     """Send notification when AppliedControl is due soon"""
-    if not check_email_configuration(owner_email, controls):
+    if not check_email_configuration(owner_email):
         return
 
     from .email_utils import format_control_list, render_email_template
@@ -963,7 +966,7 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
 
 @task()
 def send_notification_email_expired_evidence(owner_email, evidences, days=0):
-    if not check_email_configuration(owner_email, evidences):
+    if not check_email_configuration(owner_email):
         return
 
     from .email_utils import format_evidence_list, render_email_template
@@ -996,7 +999,7 @@ def send_notification_email_expired_evidence(owner_email, evidences, days=0):
 @task()
 def send_evidence_expiring_soon_notification(owner_email, evidences, days):
     """Send notification when Evidence is expiring soon"""
-    if not check_email_configuration(owner_email, evidences):
+    if not check_email_configuration(owner_email):
         return
 
     from .email_utils import format_evidence_list, render_email_template
@@ -1032,7 +1035,7 @@ def send_security_exception_expiring_soon_notification(
     owner_email, security_exceptions, days
 ):
     """Send notification when SecurityException is expiring soon"""
-    if not check_email_configuration(owner_email, security_exceptions):
+    if not check_email_configuration(owner_email):
         return
 
     from .email_utils import format_security_exception_list, render_email_template
@@ -1068,7 +1071,7 @@ def send_notification_email_expired_security_exception(
     owner_email, security_exceptions, days=0
 ):
     """Send notification for expired SecurityExceptions"""
-    if not check_email_configuration(owner_email, security_exceptions):
+    if not check_email_configuration(owner_email):
         return
 
     from .email_utils import format_security_exception_list, render_email_template
@@ -1136,7 +1139,7 @@ def send_security_exception_assignment_notification(exception_id, assigned_user_
     )
 
     for email in assigned_user_emails:
-        if email and check_email_configuration(email, [security_exception]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "security_exception_assignment", context, recipient_email=email
             )
@@ -1183,7 +1186,7 @@ def send_security_exception_status_notification(
     )
 
     for email in set(recipient_emails):
-        if email and check_email_configuration(email, [security_exception]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "security_exception_status_changed", context, recipient_email=email
             )
@@ -1216,7 +1219,7 @@ def send_validation_flow_created_notification(validation_flow):
 
     # Below is the email channel only: it may be unusable while the inbox above still
     # works, so the guard must not come before the notify() call.
-    if not check_email_configuration(approver_email, [validation_flow]):
+    if not check_email_configuration(approver_email):
         return
 
     from .email_utils import render_email_template
@@ -1284,7 +1287,7 @@ def send_validation_flow_updated_notification(
     )
 
     # Email channel only, hence after the inbox write (see above).
-    if not check_email_configuration(recipient_email, [validation_flow_id]):
+    if not check_email_configuration(recipient_email):
         return
 
     from .email_utils import render_email_template
@@ -1319,7 +1322,7 @@ def send_validation_flow_updated_notification(
 @task()
 def send_validation_deadline_notification(approver_email, validations, days):
     """Send notification about validation deadlines approaching"""
-    if not check_email_configuration(approver_email, validations):
+    if not check_email_configuration(approver_email):
         return
 
     from .email_utils import format_validation_list, render_email_template
@@ -1584,7 +1587,7 @@ def send_assignment_activated_notification(assignment_id):
 
     for actor in assignment.actor.all():
         for email in actor.get_emails():
-            if email and check_email_configuration(email, [assignment]):
+            if email and check_email_configuration(email):
                 rendered = render_email_template(
                     "assignment_activated", context, recipient_email=email
                 )
@@ -1634,7 +1637,7 @@ def send_assignment_submitted_notification(assignment_id):
     notify("assignment_submitted", recipient_emails, ca, context)
 
     for email in recipient_emails:
-        if check_email_configuration(email, [assignment]):
+        if check_email_configuration(email):
             rendered = render_email_template(
                 "assignment_submitted", context, recipient_email=email
             )
@@ -1670,7 +1673,7 @@ def send_assignment_reopened_notification(assignment_id, observation=""):
 
     for actor in assignment.actor.all():
         for email in actor.get_emails():
-            if email and check_email_configuration(email, [assignment]):
+            if email and check_email_configuration(email):
                 rendered = render_email_template(
                     "assignment_reopened", context, recipient_email=email
                 )
@@ -1709,7 +1712,7 @@ def send_assignment_reviewed_notification(
 
     for actor in assignment.actor.all():
         for email in actor.get_emails():
-            if email and check_email_configuration(email, [assignment]):
+            if email and check_email_configuration(email):
                 locale, localized_decision = _localized_assignment_decision(
                     email, decision
                 )
@@ -1805,7 +1808,7 @@ def _notify_actors(actors, template_name, context, response) -> None:
     notify(template_name, recipient_emails, response, context)
 
     for email in sorted(recipient_emails):
-        if check_email_configuration(email, [response]):
+        if check_email_configuration(email):
             rendered = render_email_template(
                 template_name, context, recipient_email=email
             )

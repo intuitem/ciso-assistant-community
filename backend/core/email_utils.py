@@ -519,7 +519,7 @@ def send_templated_notification(
     """
     from .tasks import check_email_configuration, send_notification_email
 
-    if not check_email_configuration(recipient_email, []):
+    if not check_email_configuration(recipient_email):
         return False
 
     rendered = render_email_template(
