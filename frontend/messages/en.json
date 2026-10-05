@@ -1072,6 +1072,7 @@
 	"libraryLoadingError": "An error occurred during the load of your library",
 	"processingError": "Processing error",
 	"libraryAlreadyLoadedError": "This library has already been loaded",
+	"libraryOutdatedError": "A newer version of this library is already stored. Set a higher \"version\" in your file to import it.",
 	"invalidLibraryFileError": "Invalid library file. Please make sure the format is correct.",
 	"fileTooLarge": "File too large",
 	"invalidFileFormat": "Invalid file format",

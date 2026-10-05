@@ -641,23 +641,25 @@ def _resolve_owners(value: Any) -> list[UUID]:
 
 
 def build_matrix_mappings(risk_matrix: RiskMatrix) -> dict:
-    """Label-to-value mappings for probability and impact, translations included."""
+    """Label-to-value mappings for probability and impact, translations included.
+
+    A level's value is its position in the matrix definition, which is how
+    risk scenarios index levels everywhere else. Levels carry no reliable
+    "id": built-in libraries and builder-published matrices omit it.
+    """
     mappings: dict[str, dict[str, int]] = {"probability": {}, "impact": {}}
 
     try:
         matrix_definition = risk_matrix.json_definition
         for dimension in ("probability", "impact"):
-            for entry in matrix_definition.get(dimension, []):
-                entry_id = entry.get("id")
-                if entry_id is None:
-                    continue
+            for index, entry in enumerate(matrix_definition.get(dimension, [])):
                 name = entry.get("name", "")
                 if name:
-                    mappings[dimension][name.lower()] = entry_id
-                for translation in entry.get("translations", {}).values():
+                    mappings[dimension][name.strip().lower()] = index
+                for translation in (entry.get("translations") or {}).values():
                     translated = translation.get("name", "")
                     if translated:
-                        mappings[dimension][translated.lower()] = entry_id
+                        mappings[dimension][translated.strip().lower()] = index
     except Exception:
         logger.warning("matrix_mappings_build_failed", exc_info=True)
 
@@ -2036,6 +2038,14 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             "filtering_labels": ["filtering_labels", "labels", "label"],
         }
     )
+    RISK_LEVEL_FIELDS: ClassVar[tuple[str, ...]] = (
+        "inherent_impact",
+        "inherent_proba",
+        "current_impact",
+        "current_proba",
+        "residual_impact",
+        "residual_proba",
+    )
 
     def create_context(self) -> tuple[Optional[RiskAssessmentContext], Optional[Error]]:
         try:
@@ -2198,8 +2208,27 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             ),
         }
 
+        # A label absent from the matrix would silently leave the level
+        # unrated: report it, and drop the field so an update keeps the
+        # existing rating (a new scenario falls back to the -1 default).
+        unmapped = []
+        for field_name in self.RISK_LEVEL_FIELDS:
+            raw = next(
+                (
+                    value
+                    for key in self.SOURCE_KEY_MAP.get(field_name, [field_name])
+                    if (value := str(record.get(key) or "").strip())
+                ),
+                None,
+            )
+            if raw and scenario_data[field_name] == -1:
+                unmapped.append(f"{field_name} '{raw}'")
+                del scenario_data[field_name]
+
         unresolved = existing_controls.failed + additional_controls.failed
         messages = []
+        if unmapped:
+            messages.append(f"Not in the risk matrix: {', '.join(unmapped)}")
         if unresolved:
             messages.append(f"Could not resolve controls: {', '.join(unresolved)}")
         if assets.failed:

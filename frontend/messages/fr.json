@@ -1131,6 +1131,7 @@
 	"libraryLoadingError": "Une erreur a été détectée durant le chargement de votre librairie",
 	"processingError": "Erreur de traitement",
 	"libraryAlreadyLoadedError": "Cette librairie a déjà été chargée",
+	"libraryOutdatedError": "Une version plus récente de cette bibliothèque est déjà enregistrée. Indiquez une « version » plus élevée dans votre fichier pour l'importer.",
 	"invalidLibraryFileError": "Fichier de bibliothèque invalide. Veuillez vérifier le format du fichier.",
 	"taintedFormMessage": "Voulez-vous vraiment quitter cette page ? Toutes les données non enregistrées seront perdues.",
 	"riskScenariosStatus": "Statut des scénarios de risque",
