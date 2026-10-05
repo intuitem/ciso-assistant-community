@@ -532,7 +532,9 @@ def detect_sync_sources(ebios_rm_study):
 
     Returns a dict with keys: operational_scenarios, attack_paths,
     strategic_scenarios, feared_events. Each value is a list (may be empty).
-    Returns None if nothing is selected at all.
+    Returns None if nothing is selected at all. When every candidate was
+    deselected in workshop 4, returns the dict with all lists empty so the
+    sync still archives the risk scenarios it previously created.
     """
     result = {
         "operational_scenarios": [],
@@ -590,7 +592,7 @@ def detect_sync_sources(ebios_rm_study):
     if uncovered_fe:
         result["feared_events"] = uncovered_fe
 
-    if not any(result.values()):
+    if not any(result.values()) and not all_os:
         return None
 
     return result
@@ -638,7 +640,13 @@ def build_sync_preview(ebios_rm_study, sources):
 
     # Determine the sync mode label for the frontend
     active_modes = [k for k, v in sources.items() if v]
-    sync_mode = active_modes[0] if len(active_modes) == 1 else "mixed"
+    if not active_modes:
+        # Everything was deselected in workshop 4.
+        sync_mode = "operational_scenarios"
+    elif len(active_modes) == 1:
+        sync_mode = active_modes[0]
+    else:
+        sync_mode = "mixed"
 
     return {
         "sync_mode": sync_mode,

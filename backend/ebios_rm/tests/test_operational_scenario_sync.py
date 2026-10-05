@@ -69,26 +69,52 @@ class TestOperationalScenarioSync:
 
     def test_deselected_operational_scenario_is_not_synced(self):
         study = EbiosRMStudy.objects.get(name="test study")
-        operational_scenario = _build_scenario_chain(
+        _build_scenario_chain(
             study, attack_path_selected=True, operational_scenario_selected=False
         )
 
         sources = detect_sync_sources(study)
 
-        assert sources is None
+        assert sources == {
+            "operational_scenarios": [],
+            "attack_paths": [],
+            "strategic_scenarios": [],
+            "feared_events": [],
+        }
 
         risk_assessment = RiskAssessment.objects.create(
             name="test risk assessment",
             risk_matrix=study.risk_matrix,
             ebios_rm_study=study,
         )
-        # Even if a caller ignored the None guard, syncing whatever sources
-        # were found must not create a risk scenario for the deselected
-        # operational scenario or drag its stakeholder's applied control in.
-        sync_risk_assessment(risk_assessment, sources or {})
+        sync_risk_assessment(risk_assessment, sources)
 
         assert risk_assessment.risk_scenarios.count() == 0
-        assert operational_scenario.is_selected is False
+
+    def test_deselecting_synced_operational_scenario_archives_it(self):
+        study = EbiosRMStudy.objects.get(name="test study")
+        operational_scenario = _build_scenario_chain(
+            study, attack_path_selected=True, operational_scenario_selected=True
+        )
+        risk_assessment = RiskAssessment.objects.create(
+            name="test risk assessment",
+            risk_matrix=study.risk_matrix,
+            ebios_rm_study=study,
+        )
+        sync_risk_assessment(risk_assessment, detect_sync_sources(study))
+        assert risk_assessment.risk_scenarios.count() == 1
+
+        operational_scenario.is_selected = False
+        operational_scenario.save()
+
+        sources = detect_sync_sources(study)
+
+        assert sources is not None
+        result = sync_risk_assessment(risk_assessment, sources)
+
+        assert result["archived"] == 1
+        risk_scenario = risk_assessment.risk_scenarios.get()
+        assert risk_scenario.name.startswith("[ARCHIVED] ")
 
     def test_selected_operational_scenario_is_synced(self):
         study = EbiosRMStudy.objects.get(name="test study")
@@ -152,3 +178,5 @@ class TestOperationalScenarioSync:
         assert sources is not None
         assert sources["operational_scenarios"] == []
         assert sources["attack_paths"] == [other_attack_path]
+        assert sources["strategic_scenarios"] == []
+        assert sources["feared_events"] == []
