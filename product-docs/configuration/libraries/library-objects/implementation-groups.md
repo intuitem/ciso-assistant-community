@@ -79,7 +79,7 @@ The tables below show an example of an Implementation Groups object organized by
 
 ### `imp_grp_content`
 
-| `ref_id` | `name` | `description` |
+| ref_id | name | description |
 | --- | --- | --- |
 | `access` | Access management | Requirements about identities and permissions |
 | `incidents` | Incident response | Requirements about reporting and handling incidents |

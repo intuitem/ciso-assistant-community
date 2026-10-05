@@ -69,7 +69,7 @@ The tables below show an example of a Reference Controls object.
 
 ### `ref_ctrl_content`
 
-| `ref_id` | `name` | `category` | `csf_function` | `description` |
+| ref_id | name | category | csf_function | description |
 | --- | --- | --- | --- | --- |
 | `RC1` | Review access rights | `process` | `protect` | Review user access on a regular basis |
 | `RC2` | Test backups | `procedure` | `recover` | Check that backups can be restored |

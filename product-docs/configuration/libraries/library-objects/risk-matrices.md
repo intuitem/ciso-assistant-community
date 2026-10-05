@@ -78,7 +78,7 @@ The tables below show an example of a two-by-two Risk Matrix. In Excel, each `gr
 
 ### `matrix_content`
 
-| `type` | `id` | `color` | `abbreviation` | `name` | `description` | `grid` | `grid` |
+| type | id | color | abbreviation | name | description | grid | grid |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `probability` | `0` |  | L | Unlikely | Not expected often | `0` | `1` |
 | `probability` | `1` |  | H | Likely | Expected often | `1` | `2` |

@@ -65,7 +65,7 @@ The tables below show an example of a URN Prefixes object for two catalogues.
 
 ### `urn_pref_content`
 
-| `prefix_id` | `prefix_value` |
+| prefix_id | prefix_value |
 | --- | --- |
 | `1` | `urn:intuitem:risk:threat:sample-framework.1` |
 | `2` | `urn:intuitem:risk:function:sample-framework.1` |

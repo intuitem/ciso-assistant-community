@@ -67,7 +67,7 @@ The tables below show an example of a Threats object.
 
 ### `thrt_content`
 
-| `ref_id` | `name` | `description` |
+| ref_id | name | description |
 | --- | --- | --- |
 | `T1` | Unauthorized access | Someone gains access to a protected account |
 | `T2` | Data loss | Important data becomes unavailable |

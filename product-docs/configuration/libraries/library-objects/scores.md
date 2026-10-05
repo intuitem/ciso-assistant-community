@@ -69,7 +69,7 @@ The tables below show an example of a Scores object with three levels.
 
 ### `scr_content`
 
-| `score` | `name` | `description` |
+| score | name | description |
 | --- | --- | --- |
 | `0` | Not met | The requirement is not met |
 | `1` | Partly met | Some parts of the requirement are met |

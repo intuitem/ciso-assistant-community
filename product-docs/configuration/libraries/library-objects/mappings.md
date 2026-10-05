@@ -84,7 +84,7 @@ The tables below show an example of a Mapping from one Framework version to anot
 
 ### `mappings_content`
 
-| `source_node_id` | `target_node_id` | `relationship` | `rationale` |
+| source_node_id | target_node_id | relationship | rationale |
 | --- | --- | --- | --- |
 | `access.1` | `access.1` | `equal` | `semantic` |
 | `access.2` | `access.2` | `subset` | `semantic` |

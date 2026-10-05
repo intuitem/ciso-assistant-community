@@ -79,7 +79,7 @@ The tables below show an example of an Answers object for a single-choice questi
 
 ### `answ_content`
 
-| `id` | `question_type` | `question_choices` |
+| id | question_type | question_choices |
 | --- | --- | --- |
 | `yes_no` | `unique_choice` | Yes<br>No |
 

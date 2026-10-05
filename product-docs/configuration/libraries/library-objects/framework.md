@@ -105,7 +105,7 @@ The tables below show an example of a Framework with one section and one assessa
 
 ### `fwk_content`
 
-| `assessable` | `depth` | `ref_id` | `name` | `description` |
+| assessable | depth | ref_id | name | description |
 | --- | --- | --- | --- | --- |
 |  | `1` | `ACCESS` | Access management |  |
 | `x` | `2` | `ACCESS.1` | Review access rights | Review user access regularly |
