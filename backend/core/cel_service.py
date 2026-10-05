@@ -478,14 +478,12 @@ def _quick_form_score(response, context, snapshot, hidden_page_ids) -> int | Non
     if not context["response"]["complete"]:
         return None
     form = response.quick_form
-    scorable = [
+    in_scope = [
         e
         for e in snapshot["per_question"].values()
-        if e["scorable"]
-        and e["visible"]
-        and e["page_id"] not in hidden_page_ids
-        and e["answered"]
+        if e["scorable"] and e["visible"] and e["page_id"] not in hidden_page_ids
     ]
+    scorable = [e for e in in_scope if e["answered"]]
     if not scorable:
         return None
     total = sum(e["score"] for e in scorable)
@@ -495,14 +493,17 @@ def _quick_form_score(response, context, snapshot, hidden_page_ids) -> int | Non
     else:
         # Same projection as RequirementAssessment.recompute_assessment, so a
         # question weight means the same thing in a quick form and in an audit.
+        # The range spans every visible scorable question, answered or not: a
+        # skipped optional question counts as 0, as it does unweighted, instead of
+        # dropping out and inflating the answered ones' share.
         from core.utils import project_weighted_sum
 
         total = project_weighted_sum(
             total,
-            sum(e["lo"] * e["weight"] for e in scorable),
-            sum(e["hi"] * e["weight"] for e in scorable),
-            sum(e["lo"] for e in scorable),
-            sum(e["hi"] for e in scorable),
+            sum(e["lo"] * e["weight"] for e in in_scope),
+            sum(e["hi"] * e["weight"] for e in in_scope),
+            sum(e["lo"] for e in in_scope),
+            sum(e["hi"] for e in in_scope),
         )
     lo, hi = form.score_bounds
     return int(max(lo, min(hi, round(total))))
@@ -764,15 +765,16 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                     totals["missing"] += 1
                 if entry.get("type") in ("unique_choice", "multiple_choice"):
                     totals["max"] += max_score_of(entry)
-                    if answered and has_score(entry):
+                    if has_score(entry):
                         weight = weight_of(entry)
                         lo, hi = bounds_of(entry)
                         reach["lo"] += lo
                         reach["hi"] += hi
                         reach["weighted_lo"] += lo * weight
                         reach["weighted_hi"] += hi * weight
-                        totals["sum"] += score_of(entry)
-                        totals["weight"] += weight
+                        if answered:
+                            totals["sum"] += score_of(entry)
+                            totals["weight"] += weight
                 q_node_id = extract_node_id(entry["urn"])
                 if q_node_id:
                     answer_ctx[q_node_id] = {

@@ -1433,6 +1433,36 @@ def test_weighted_sum_scores_like_an_audit(app_config, heavy, light, expected):
     assert preview == expected
 
 
+@pytest.mark.django_db
+def test_weighted_sum_counts_a_skipped_optional_question_as_zero(app_config):
+    """On the live path too, skipping an optional heavy question scores like
+    answering its lowest choice instead of inflating the answered ones' share."""
+    from core.cel_service import evaluate_quick_form
+    from core.utils import apply_answers_dict
+
+    library = WEIGHTED_SUM_LIBRARY.replace(
+        "weight: 3\n", "weight: 3\n              required: false\n"
+    )
+    stored, error = StoredLibrary.store_library_content(library.encode("utf-8"))
+    assert error is None, error
+    assert stored.load() is None
+    form = QuickForm.objects.get(urn="urn:test:risk:quick_form:weighted-sum")
+    folder = Folder.objects.create(
+        name="qf-wsum-skip", parent_folder=Folder.get_root_folder()
+    )
+    response = QuickFormResponse.objects.create(
+        name="weighted", quick_form=form, folder=folder
+    )
+    base = "urn:test:risk:qf_page:weighted-sum:only:question"
+    questions = {q.urn: q for q in Question.objects.filter(page__quick_form=form)}
+    assert questions[f"{base}:heavy"].required is False
+    apply_answers_dict(
+        "response", response, questions, {f"{base}:light": f"{base}:light:choice:good"}
+    )
+
+    assert evaluate_quick_form(response, persist=False)["score"] == 25
+
+
 def _preview_form(questions):
     """A one-page quick form document, scored 0-100 as a weighted sum."""
     base = "urn:test:risk:qf_page:preview:only"
@@ -1491,11 +1521,13 @@ def test_preview_keeps_an_explicit_zero_weight():
     assert _preview_score(questions, {"ignored": "bad", "counted": "good"}) == 100
 
 
-def test_preview_ignores_an_unanswered_optional_question():
-    """Only answered questions widen the projection range, as on the live path:
-    a blank optional question used to shrink the answered ones' share."""
+def test_preview_counts_an_unanswered_optional_question_as_zero():
+    """A skipped optional question scores like its lowest choice, as it does
+    unweighted: skipping a heavy question must not beat answering it."""
     questions = {
         "optional": {"weight": 3, "required": False},
         "answered": {"weight": 1},
     }
-    assert _preview_score(questions, {"answered": "good"}) == 50
+    skipped = _preview_score(questions, {"answered": "good"})
+    assert skipped == _preview_score(questions, {"answered": "good", "optional": "bad"})
+    assert skipped == 25
