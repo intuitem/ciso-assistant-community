@@ -168,7 +168,10 @@ def format_email_date(value, locale: Optional[str], preference: str = "auto") ->
     if preference == "mmddyyyy":
         return value.strftime("%m/%d/%Y")
 
-    language = _language_code(locale)
+    language = (locale or "en").split("-")[0].lower()
+    configured_languages = {code for code, _ in settings.LANGUAGES}
+    if language not in configured_languages:
+        language = "en"
     with override(language):
         if preference == "long_dmy":
             return django_date_format(value, "j F Y")
@@ -551,7 +554,7 @@ def format_task_node_list(
             else labels["unknown"]
         )
         due_date = (
-            format_email_date(node.due_date, language, date_format)
+            format_email_date(node.due_date, locale, date_format)
             if node.due_date
             else labels["not_set"]
         )

@@ -138,3 +138,29 @@ def test_task_list_localizes_dynamic_details(locale, expected_due, expected_stat
 )
 def test_email_date_honors_recipient_preference(preference, expected):
     assert format_email_date(date(2026, 9, 30), "de", preference) == expected
+
+
+def test_task_list_keeps_recipient_locale_when_labels_fall_back():
+    task_template = SimpleNamespace(
+        id="template-id",
+        name="Review access",
+        is_recurrent=False,
+    )
+    task_node = SimpleNamespace(
+        id="node-id",
+        task_template=task_template,
+        due_date=date(2026, 9, 30),
+        status="pending",
+    )
+
+    task_list = format_task_node_list([task_node], locale="es", date_format="long_dmy")
+
+    assert "Due: 30 septiembre 2026" in task_list
+    assert "Status: Pending" in task_list
+
+
+def test_email_date_falls_back_to_english_for_unknown_locale():
+    assert (
+        format_email_date(date(2026, 9, 30), "unknown", "long_dmy")
+        == "30 September 2026"
+    )
