@@ -117,7 +117,7 @@
 				</div>
 			</div>
 		{/if}
-		<label class="w-full sm:w-72">
+		<label class="w-full sm:w-96">
 			<span class="sr-only">{m.search()}</span>
 			<input
 				type="search"
