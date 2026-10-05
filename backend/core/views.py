@@ -20980,10 +20980,11 @@ def quick_form_response_content(response, user=None):
                     "new": a.new_display,
                     "overridden": a.overridden,
                     "note": a.note,
-                    "applied_by": a.applied_by.email if a.applied_by_id else None,
+                    # No `applied_by`: this payload also reaches requesters, and
+                    # who decided is the reviewers' business (the log keeps it).
                     "applied_at": a.created_at,
                 }
-                for a in response.applications.select_related("applied_by")
+                for a in response.applications.all()
             ],
             "can_edit_answers": response.status == QuickFormResponse.Status.DRAFT
             and (user is None or response.is_requester(user)),

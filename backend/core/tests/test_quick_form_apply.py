@@ -381,6 +381,8 @@ class TestAccept:
 
         content = client.get(f"/api/quick-form-responses/{response.id}/content/").json()
         assert content["applications"][0]["new"] == "level 3"
+        # Requesters read this payload too: no decider email in it.
+        assert "applied_by" not in content["applications"][0]
 
     def test_reject_writes_nothing(self, setup):
         _user, client = _admin()

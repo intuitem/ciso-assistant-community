@@ -696,7 +696,8 @@ class TestReviewFeedback:
         hidden = Entity.objects.create(name="Hidden", folder=elsewhere)
         Entity.objects.filter(pk=hidden.pk).update(tier=vital)
         _user, admin = _admin()
-        assert admin.delete(f"/api/tiers/{vital.id}/").status_code == 409
+        result = admin.delete(f"/api/tiers/{vital.id}/")
+        assert result.status_code == 409
         assert Tier.objects.filter(pk=vital.pk).exists()
 
     def test_a_target_failing_to_plan_sends_the_submit_to_review(
