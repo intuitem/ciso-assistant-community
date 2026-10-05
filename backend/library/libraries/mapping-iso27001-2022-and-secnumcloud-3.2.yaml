@@ -2,14 +2,14 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any
   Mode}'
 urn: urn:protocolpaladin:risk:library:mapping-iso27001-2022-to-secnumcloud-3.2
 locale: fr
-ref_id: mapping-iso27001-2022-to-secnumcloud-3.2
-name: ISO/IEC 27001:2022 -> SecNumCloud v3.2
+ref_id: mapping-iso27001-2022-and-secnumcloud-3.2
+name: ISO/IEC 27001:2022 <-> SecNumCloud v3.2
 description: "Correspondance entre la norme internationale ISO/IEC 27001:2022 et le\
   \ r\xE9f\xE9rentiel d\u2019exigences de prestataires de services d\u2019informatique\
   \ en nuage (SecNumCloud 3.2)"
 copyright: https://www.iso.org/standard/27001 - ANSSI - ANS
-version: 2
-publication_date: 2026-09-24
+version: 3
+publication_date: 2026-10-05
 provider: ISO/IEC - ANSSI - ANS (annexe 1 du document HDS 2.0)
 packager: protocolpaladin
 dependencies:
@@ -18,8 +18,8 @@ dependencies:
 objects:
   requirement_mapping_sets:
   - urn: urn:protocolpaladin:risk:req_mapping_set:iso27001-2022
-    ref_id: mapping-iso27001-2022-to-secnumcloud-3.2
-    name: ISO/IEC 27001:2022 -> SecNumCloud v3.2
+    ref_id: mapping-iso27001-2022-and-secnumcloud-3.2
+    name: ISO/IEC 27001:2022 <-> SecNumCloud v3.2
     description: "Correspondance entre la norme internationale ISO/IEC 27001:2022\
       \ et le r\xE9f\xE9rentiel d\u2019exigences de prestataires de services d\u2019\
       informatique en nuage (SecNumCloud 3.2)"
@@ -1392,8 +1392,8 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.7.b
       relationship: intersect
   - urn: urn:protocolpaladin:risk:req_mapping_set:iso27001-2022-revert
-    ref_id: mapping-iso27001-2022-to-secnumcloud-3.2-revert
-    name: ISO/IEC 27001:2022 -> SecNumCloud v3.2
+    ref_id: mapping-iso27001-2022-and-secnumcloud-3.2-revert
+    name: ISO/IEC 27001:2022 <-> SecNumCloud v3.2
     description: "Correspondance entre la norme internationale ISO/IEC 27001:2022\
       \ et le r\xE9f\xE9rentiel d\u2019exigences de prestataires de services d\u2019\
       informatique en nuage (SecNumCloud 3.2)"
