@@ -1,5 +1,6 @@
 import csv
 import enum
+import importlib
 import io
 import logging
 import math
@@ -16,6 +17,7 @@ from uuid import UUID
 
 import pandas as pd
 import structlog
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.db import IntegrityError, models
@@ -917,6 +919,19 @@ class RecordConsumer[Context = None](ABC):
 
         assert is_serializer, f"Invalid serializer for class {cls.__name__}"
 
+    @classmethod
+    def get_serializer_class(cls) -> type[BaseModelSerializer]:
+        """Resolve the edition's serializer, mirroring what `SerializerFactory`
+        does for viewsets. `SERIALIZER_CLASS` is bound at import time, so without
+        this the enterprise override never reaches the importer and nested domains
+        are rejected with `subDomainsRequirePro` even on PRO.
+        """
+        override_module = settings.MODULE_PATHS.get("serializers")
+        if not override_module:
+            return cls.SERIALIZER_CLASS
+        module = importlib.import_module(override_module)
+        return getattr(module, cls.SERIALIZER_CLASS.__name__, cls.SERIALIZER_CLASS)
+
     @abstractmethod
     def create_context(self) -> tuple[Context, Optional[Error]]:
         pass
@@ -1056,7 +1071,7 @@ class RecordConsumer[Context = None](ABC):
                         break
                     case ConflictMode.UPDATE:
                         update_data = self._build_update_data(record, record_data)
-                        serializer = self.SERIALIZER_CLASS(
+                        serializer = self.get_serializer_class()(
                             instance=existing,
                             data=update_data,
                             partial=True,
@@ -1077,7 +1092,7 @@ class RecordConsumer[Context = None](ABC):
                             )
                         continue
 
-            serializer = self.SERIALIZER_CLASS(
+            serializer = self.get_serializer_class()(
                 data=record_data, context={"request": self.request}
             )
             if serializer.is_valid():

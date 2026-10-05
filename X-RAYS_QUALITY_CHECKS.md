@@ -109,6 +109,11 @@ Expiry is decided on the date rather than the status: `mark_expired_evidences`
 only runs under Huey, and applied controls are never marked expired at all
 (CA-1869).
 
+Whether a document is actually behind an evidence, and when it last moved, come
+from its revisions rather than from its status — `evidenceNoFile` sees the first
+of those but reports it against the evidence, where a reviewer reading a
+requirement never meets it.
+
 #### Error
 | Rule ID | Message | Description |
 |---------|---------|-------------|
@@ -118,15 +123,20 @@ only runs under Huey, and applied controls are never marked expired at all
 | Rule ID | Message | Description |
 |---------|---------|-------------|
 | `requirementAssessmentCompliantNoEvidence` | Requirement assessment is compliant but has no evidence attached | Assessable requirement marked compliant without supporting evidence |
+| `requirementAssessmentPartialNoEvidence` | Requirement assessment is partially compliant but has no evidence attached | A partial claim is still a claim, and nothing is attached to it |
+| `requirementAssessmentNoUsableEvidence` | No evidence supporting this requirement assessment is both attached and current | Evidence exists but none of it is a document that still counts — an empty record, a lapsed one, or a mix of the two. Suppressed when `EvidenceExpired` or `EvidenceAllDraft` already said it |
+| `requirementAssessmentEvidenceStale` | The most recent evidence supporting this requirement assessment has not been updated in over N days | Attached and unexpired, but untouched for a year. Most evidence carries no expiry date, so the newest revision's own date is the only thing that speaks to currency. N is `XRAYS_EVIDENCE_STALE_AFTER_DAYS`, 365 by default |
 | `requirementAssessmentNoAppliedControl` | Requirement assessment result is compliant or partially compliant with no applied control applied | Compliance claimed without any controls applied |
 | `requirementAssessmentCompliantNoActiveControl` | Requirement assessment is compliant but none of its applied controls is active | Controls exist, but nothing is live yet |
 | `requirementAssessmentControlDeprecatedOrDegraded` | Requirement assessment relies on a deprecated or degraded applied control | Compliance rests on a control that has been retired or is only partly working |
 | `requirementAssessmentPartialNoStartedControl` | Requirement assessment is partially compliant but none of its applied controls has started | "Partially compliant" with nothing under way is non-compliance with a plan |
 | `requirementAssessmentControlEtaMissed` | Requirement assessment depends on an applied control whose ETA has passed | The remediation this requirement depends on has slipped |
+| `requirementAssessmentPartialNoPlan` | Requirement assessment is partially compliant with no target date for closing the gap | A declared gap with work attached but no date on it, anywhere: not on the assessment, not on any of its controls. `ControlEtaMissed` catches a date that passed, never the absence of one. Silent when no control is attached, where `NoAppliedControl` is the finding |
 | `requirementAssessmentEvidenceExpired` | Every evidence supporting this requirement assessment has expired | Nothing current substantiates the verdict |
 | `requirementAssessmentEvidenceRejected` | Requirement assessment relies on an evidence that was rejected | A reviewer already refused this evidence |
 | `requirementAssessmentEvidenceAllDraft` | Requirement assessment is compliant but none of its evidence has left draft | Nothing supporting the verdict has been reviewed |
 | `requirementAssessmentNotApplicableNoJustification` | Requirement assessment is not applicable with no justification | An external auditor asks for this one every time |
+| `requirementAssessmentPartialNoObservation` | Requirement assessment is partially compliant with no observation | "Partially compliant" and "not applicable" are both declared deviations, and the observation is where the deviation is described, so the two sit together. Non-compliance describes itself and stays info |
 | `requirementAssessmentDoneNotAssessed` | Requirement assessment is marked done but has no result | Marked finished with no verdict recorded |
 
 #### Info
@@ -134,7 +144,6 @@ only runs under Huey, and applied controls are never marked expired at all
 |---------|---------|-------------|
 | `requirementAssessmentNonCompliantActiveControls` | Requirement assessment is non-compliant while all its applied controls are active | Either the verdict or the control statuses are out of date |
 | `requirementAssessmentNonCompliantNoObservation` | Requirement assessment is non-compliant with no observation | The gap is recorded without saying what it is |
-| `requirementAssessmentPartialNoObservation` | Requirement assessment is partially compliant with no observation | What is missing is not written down |
 | `requirementAssessmentResultWithoutProgress` | Requirement assessment has a result while still marked to do | The progress status contradicts the verdict |
 
 ### Applied Control Checks (Compliance Assessments)

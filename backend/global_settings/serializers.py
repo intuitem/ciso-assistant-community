@@ -1,3 +1,4 @@
+import copy
 import ipaddress
 import re
 import uuid
@@ -67,6 +68,7 @@ def validate_default_dashboard_value(value):
 
 GENERAL_SETTINGS_KEYS = [
     "security_objective_scale",
+    "organisation_score_scale",
     "ebios_radar_max",
     "ebios_radar_green_zone_radius",
     "ebios_radar_yellow_zone_radius",
@@ -115,6 +117,48 @@ LLM_URL_DEFAULTS = {
 }
 
 
+# Proposed on the audit form for frameworks without a scale of their own.
+DEFAULT_ORGANISATION_SCORE_SCALE = {
+    "score_scale_preset": "0-5",
+    "min_score": 0,
+    "max_score": 5,
+    "scores_definition": [],
+}
+
+
+def _normalize_organisation_score_scale(value):
+    from core.models import normalize_score_scale
+
+    if not isinstance(value, dict):
+        raise serializers.ValidationError(
+            {"organisation_score_scale": "scoreScaleErrorInvalid"}
+        )
+    levels = value.get("scores_definition")
+    if levels is not None and not isinstance(levels, list):
+        raise serializers.ValidationError(
+            {"organisation_score_scale": "scoreScaleErrorInvalid"}
+        )
+    try:
+        preset, min_score, max_score = normalize_score_scale(
+            value.get("score_scale_preset"),
+            value.get("min_score"),
+            value.get("max_score"),
+            levels,
+        )
+    except DjangoValidationError as e:
+        raise serializers.ValidationError({"organisation_score_scale": e.messages})
+    if min_score is None:
+        raise serializers.ValidationError(
+            {"organisation_score_scale": "scoreScaleErrorRangeRequired"}
+        )
+    return {
+        "score_scale_preset": preset,
+        "min_score": min_score,
+        "max_score": max_score,
+        "scores_definition": levels or [],
+    }
+
+
 class GeneralSettingsSerializer(serializers.ModelSerializer):
     conversion_rate = serializers.FloatField(
         write_only=True, required=False, default=1.0
@@ -125,6 +169,11 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         if "value" in ret and isinstance(ret["value"], dict):
             ret["value"].pop("openai_api_key", None)
+            # Always a value, so the audit form never re-implements the fallback.
+            if not ret["value"].get("organisation_score_scale"):
+                ret["value"]["organisation_score_scale"] = copy.deepcopy(
+                    DEFAULT_ORGANISATION_SCORE_SCALE
+                )
         return ret
 
     def update(self, instance, validated_data):
@@ -172,6 +221,10 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                             {key: "URL hostname could not be resolved."}
                         )
             # Validate builtin_metrics_retention_days minimum value
+            if key == "organisation_score_scale":
+                validated_data["value"][key] = _normalize_organisation_score_scale(
+                    value
+                )
             if key == "builtin_metrics_retention_days":
                 if not isinstance(value, int) or value < 1:
                     raise serializers.ValidationError(
@@ -353,6 +406,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     ebiosrm = serializers.BooleanField(
         source="value.ebiosrm", required=False, default=True
     )
+    risk_management = serializers.BooleanField(
+        source="value.risk_management", required=False, default=True
+    )
     scoring_assistant = serializers.BooleanField(
         source="value.scoring_assistant", required=False, default=True
     )
@@ -394,6 +450,20 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     bia = serializers.BooleanField(source="value.bia", required=False, default=True)
     project_management = serializers.BooleanField(
         source="value.project_management", required=False, default=False
+    )
+    # Per-entry switches inside the Project management menu, which
+    # `project_management` gates as a whole.
+    generic_collections = serializers.BooleanField(
+        source="value.generic_collections", required=False, default=True
+    )
+    accreditations = serializers.BooleanField(
+        source="value.accreditations", required=False, default=True
+    )
+    projects = serializers.BooleanField(
+        source="value.projects", required=False, default=True
+    )
+    responsibility_matrices = serializers.BooleanField(
+        source="value.responsibility_matrices", required=False, default=True
     )
     contracts = serializers.BooleanField(
         source="value.contracts", required=False, default=False
@@ -490,6 +560,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     # role behaviour or IAM config would make two users read different data.
     USER_HIDEABLE_FLAGS = frozenset(
         {
+            "accreditations",
             "bia",
             "commitment_management",
             "compliance",
@@ -502,6 +573,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "exceptions",
             "experimental",
             "follow_up",
+            "generic_collections",
             "incidents",
             "journeys",
             "metrology",
@@ -512,12 +584,15 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "posture_assessments",
             "privacy",
             "project_management",
+            "projects",
             "purposes",
             "quantitative_risk_studies",
             "quick_forms",
             "reports",
+            "responsibility_matrices",
             "right_requests",
             "risk_acceptances",
+            "risk_management",
             "scoring_assistant",
             "security_advisories",
             "cwes",

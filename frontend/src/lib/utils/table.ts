@@ -2339,7 +2339,6 @@ export const listViewFields = {
 		head: ['version', 'evidence', 'file', 'size', 'updatedAt'],
 		body: ['version', 'evidence', 'attachment', 'size', 'updated_at'],
 		filters: {
-			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
 		}
@@ -2886,12 +2885,17 @@ export const listViewFields = {
 			'description',
 			'folder',
 			'status',
-			'quotation_method',
+			'quotation_method_display',
 			'created_at',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['classification'],
+			body: ['classification']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
+			classification: CLASSIFICATION_FILTER,
 			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
 			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
 			status: ORGANISATION_ISSUE_STATUS_FILTER,
@@ -3022,8 +3026,8 @@ export const listViewFields = {
 		}
 	},
 	'elementary-actions': {
-		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'threat'],
-		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
+		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'technique', 'threat'],
+		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'technique', 'threat'],
 		filters: {
 			attack_stage: {
 				component: AutocompleteSelect,
@@ -3040,8 +3044,14 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'likelihood']
 	},
 	'kill-chains': {
-		head: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator'],
-		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
+		head: [
+			'elementary_action',
+			'attack_stage',
+			'antecedents',
+			'logic_operator',
+			'supportingAssets'
+		],
+		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator', 'assets']
 	},
 	notifications: {
 		head: ['read', 'category', 'title', 'created_at'],
@@ -3869,6 +3879,7 @@ export interface BatchActionConfig {
 	value?: string;
 	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
+	inputType?: 'date';
 	children?: BatchActionConfig[];
 	minSelection?: number;
 	maxSelection?: number;
@@ -3910,6 +3921,60 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	'document-templates': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'document-containers': [
+		{
+			type: 'group',
+			label: 'changeAttributes',
+			icon: 'fa-solid fa-sliders',
+			children: [
+				{
+					type: 'change_field',
+					label: 'changeDocumentType',
+					icon: 'fa-solid fa-file-lines',
+					field: 'document_type',
+					optionsEndpoint: 'document-containers/document_type'
+				},
+				{
+					type: 'change_field',
+					label: 'changeClassification',
+					icon: 'fa-solid fa-lock',
+					field: 'classification',
+					optionsEndpoint: 'classification-levels',
+					enableDoubleDash: true
+				}
+			]
+		},
+		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	'asset-assessments': [
 		{
 			type: 'delete',
@@ -3947,6 +4012,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 					field: 'priority',
 					optionsEndpoint: 'applied-controls/priority',
 					enableDoubleDash: true
+				},
+				{
+					type: 'change_field',
+					label: 'changeEta',
+					icon: 'fa-solid fa-calendar-day',
+					field: 'eta',
+					inputType: 'date'
 				},
 				{
 					type: 'change_field',

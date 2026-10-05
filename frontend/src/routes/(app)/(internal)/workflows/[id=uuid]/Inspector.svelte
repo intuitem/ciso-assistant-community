@@ -15,6 +15,8 @@
 	import { fetchHookSecret, publicHookUrl } from './hook-url';
 	import { postOps } from './ops';
 	import DataBrowser from './DataBrowser.svelte';
+	import CelInput from './CelInput.svelte';
+	import type { Scope as CelScope } from './compute-assist';
 	import { dig, renderTemplate } from './expressions';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 	import {
@@ -60,6 +62,7 @@
 		readableModels?: { key: string; fields: string[]; includable?: string[] }[];
 		fkOptions?: Record<string, Option[]>;
 		workflowId: string;
+		versionId?: string | null;
 		registrationsByRef?: Record<string, any>;
 		onRegistrationsChanged?: () => void;
 		referenceRunId?: string | null;
@@ -92,6 +95,7 @@
 		readableModels = [],
 		fkOptions = {},
 		workflowId,
+		versionId = null,
 		registrationsByRef = {},
 		onRegistrationsChanged,
 		referenceRunId = null,
@@ -129,6 +133,10 @@
 	let copiedExpression = $state(false);
 	function insertExpression(expression: string) {
 		const el = lastFocusedInput;
+		// A compute row is CEL: the same path, without the template braces.
+		if (el?.dataset.syntax === 'cel') {
+			expression = expression.replace(/^\{\{\s*(.*?)\s*\}\}$/, '$1');
+		}
 		if (el && document.contains(el)) {
 			const start = el.selectionStart ?? el.value.length;
 			const end = el.selectionEnd ?? start;
@@ -171,10 +179,18 @@
 		'manage_group_membership',
 		'set_variables',
 		'date_offset',
+		'compute',
 		'log'
 	];
 
+	// Functions the compute step adds on top of CEL's own, shown as a hint.
+	const COMPUTE_FUNCTIONS =
+		'sum avg min max round floor ceil abs size has int double string timestamp duration';
+
 	const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+
+	// Written as prose or markdown, so a one-line input is the wrong box.
+	const LONG_TEXT_FIELDS = ['description', 'content', 'observation'];
 
 	// 'choice' emits an enum, which is what a branch step can route on.
 	const AI_FIELD_TYPES = ['choice', 'string', 'number', 'boolean'];
@@ -195,6 +211,7 @@
 		log: { message: '' },
 		set_variables: { variables: {} },
 		date_offset: { base: '', days: 30, weeks: 0, output: '' },
+		compute: { expressions: [] },
 		create_object: { model: 'applied_control', fields: { name: '' }, upsert: false },
 		update_object: { model: 'applied_control', id: '', fields: {}, m2m: {} },
 		attach_evidence: {
@@ -788,6 +805,110 @@
 		onChange();
 	}
 
+	// Compute rows are an ordered list, not a key -> expression map: a row may
+	// read the rows above it, and PostgreSQL's jsonb reorders object keys.
+	type ComputeRow = { key: string; expression: string };
+
+	function computeRows(): ComputeRow[] {
+		return Array.isArray(actionConfig.expressions) ? actionConfig.expressions : [];
+	}
+
+	// Declared variables not computed by a sibling row, plus the row's own key.
+	function computeKeyOptions(current: string) {
+		const used = new Set(computeRows().map((row) => row.key));
+		const keys = variables.map((v) => v.key).filter((k) => k === current || !used.has(k));
+		if (!keys.includes(current)) keys.unshift(current);
+		return keys;
+	}
+
+	function addComputeRow() {
+		const used = new Set(computeRows().map((row) => row.key));
+		const candidate = variables.find((v) => !used.has(v.key));
+		if (!candidate) return;
+		actionConfig.expressions = [...computeRows(), { key: candidate.key, expression: '' }];
+		onChange();
+	}
+
+	function renameComputeRow(index: number, newKey: string) {
+		const rows = computeRows();
+		if (!newKey || rows[index]?.key === newKey || rows.some((row) => row.key === newKey)) return;
+		actionConfig.expressions = rows.map((row, i) => (i === index ? { ...row, key: newKey } : row));
+		onChange();
+	}
+
+	function removeComputeRow(index: number) {
+		actionConfig.expressions = computeRows().filter((_, i) => i !== index);
+		onChange();
+	}
+
+	// What the autocomplete can see from this node.
+	const celScope = $derived<CelScope>({
+		variables,
+		referenceVariables,
+		referenceNodes,
+		upstreamNodes
+	});
+
+	// Live result of each compute row, evaluated server-side against the
+	// reference run (or the draft's defaults): the editor shows what the engine
+	// will compute, with the engine's own error messages.
+	type ComputePreview = { ok: true; value: unknown; type: string } | { ok: false; error: string };
+	let computePreviews = $state<Record<number, ComputePreview>>({});
+	let computePreviewTimer: ReturnType<typeof setTimeout> | null = null;
+	let computePreviewSeq = 0;
+	let computePreviewNodeId: string | null = null;
+
+	// One request for the whole step: the backend evaluates the rows in a
+	// single pass and answers one result per row (null for a blank row).
+	async function refreshComputePreviews() {
+		if (!versionId) return;
+		const rows = computeRows();
+		const seq = computePreviewSeq;
+		if (!rows.some((row) => row.expression.trim())) {
+			computePreviews = {};
+			return;
+		}
+		try {
+			const res = await postOps(workflowId, 'preview-expression', {
+				version: versionId,
+				rows,
+				reference_run: referenceRunId
+			});
+			// A later edit, node change or run change bumped the sequence while
+			// this was in flight: its rows no longer match ours, drop it.
+			if (seq !== computePreviewSeq) return;
+			if (!res.ok) {
+				// The shown results belong to rows we no longer have an answer for.
+				computePreviews = {};
+				return;
+			}
+			const body = await res.json();
+			if (seq !== computePreviewSeq) return;
+			const results: Record<number, ComputePreview> = {};
+			(body.results ?? []).forEach((result: ComputePreview | null, index: number) => {
+				if (result) results[index] = result;
+			});
+			computePreviews = results;
+		} catch {
+			// Network hiccup: keep the previous preview rather than flash an error.
+		}
+	}
+
+	$effect(() => {
+		if (actionConfig?.type !== 'compute') return;
+		// Tracked: the rows, the reference run and the selected node.
+		const signature = JSON.stringify(computeRows()) + referenceRunId;
+		if (nodeDomain?.id !== computePreviewNodeId) {
+			computePreviewNodeId = nodeDomain?.id ?? null;
+			computePreviews = {};
+		}
+		void signature;
+		// Invalidate anything in flight now, not when the debounce fires.
+		computePreviewSeq += 1;
+		if (computePreviewTimer) clearTimeout(computePreviewTimer);
+		computePreviewTimer = setTimeout(refreshComputePreviews, 300);
+	});
+
 	// HTTP headers are a plain dict in the config, but editing keys in place
 	// would recreate the inputs on every keystroke. Edit an entries array
 	// instead and write the whole dict back on every change.
@@ -1111,7 +1232,7 @@
 	oninputcapture={trackInput}
 >
 	{#if selectedNode && nodeDomain}
-		<div class="p-3 space-y-3">
+		<div class="p-3 space-y-3 [&>label]:block">
 			<div class="flex items-center gap-2">
 				<span class="badge preset-tonal text-[10px] uppercase">
 					{safeTranslate(
@@ -1515,10 +1636,10 @@
 								safeTranslate(field) +
 									(creatableEntry?.required_fields?.includes(field) ? ' *' : '')
 							)}
-							{#if field === 'description'}
+							{#if LONG_TEXT_FIELDS.includes(field)}
 								<textarea
 									class="input w-full text-sm"
-									rows="2"
+									rows={field === 'content' ? 6 : 2}
 									bind:value={actionConfig.fields[field]}
 									oninput={onChange}
 								></textarea>
@@ -1573,7 +1694,16 @@
 										</optgroup>
 									{/if}
 								</select>
-								<span class="text-[10px] text-surface-500">{m.frameworkUrnOrId()}</span>
+								{#if paramName === 'framework'}
+									<span class="text-[10px] text-surface-500">{m.frameworkUrnOrId()}</span>
+								{/if}
+							{:else if LONG_TEXT_FIELDS.includes(paramName)}
+								<textarea
+									class="input w-full text-sm"
+									rows="6"
+									bind:value={actionConfig.fields[paramName]}
+									oninput={onChange}
+								></textarea>
 							{:else}
 								<input
 									type="text"
@@ -1581,7 +1711,9 @@
 									bind:value={actionConfig.fields[paramName]}
 									oninput={onChange}
 								/>
-								<span class="text-[10px] text-surface-500">{m.implementationGroupsHint()}</span>
+								{#if paramName === 'implementation_groups'}
+									<span class="text-[10px] text-surface-500">{m.implementationGroupsHint()}</span>
+								{/if}
 							{/if}
 						</label>
 					{/each}
@@ -1652,10 +1784,10 @@
 									{/each}
 								</select>
 								<span class="text-[10px] text-surface-500">{m.guardedFieldHint()}</span>
-							{:else if field === 'description' || field === 'observation'}
+							{:else if LONG_TEXT_FIELDS.includes(field)}
 								<textarea
 									class="input w-full text-sm"
-									rows="2"
+									rows={field === 'content' ? 6 : 2}
 									bind:value={actionConfig.fields[field]}
 									oninput={onChange}
 								></textarea>
@@ -2651,19 +2783,115 @@
 					<p class="text-[10px] text-surface-500 leading-relaxed">
 						<i class="fa-solid fa-calendar-day mr-1"></i>{m.dateOffsetHint()}
 					</p>
+				{:else if actionConfig.type === 'compute' && Array.isArray(actionConfig.expressions)}
+					<!-- Each row is a card: variable on top, the expression full width below,
+					     the live result as the card's last line. The card boundary is what
+					     makes the three read as one unit in a narrow panel; without it the
+					     gaps inside a row and between rows look alike. -->
+					<div>
+						<div class="flex items-center justify-between gap-1.5 mb-2">
+							{@render fieldLabel(m.computeExpressions())}
+							<div class="flex items-center gap-1.5">
+								<button
+									type="button"
+									class="btn-icon preset-tonal w-6 h-6 text-xs shrink-0 hover:preset-filled-primary-500"
+									onclick={addComputeRow}
+									disabled={!variables.length}
+									aria-label={m.computeAddRow()}
+									title={m.computeAddRow()}
+								>
+									<i class="fa-solid fa-plus"></i>
+								</button>
+							</div>
+						</div>
+						{#if !actionConfig.expressions.length}
+							<p
+								class="text-[10px] text-surface-500 leading-relaxed rounded border border-dashed border-surface-200-800 px-2 py-1.5"
+							>
+								{m.computeEmpty()}
+							</p>
+						{/if}
+						<div class="space-y-2">
+							{#each actionConfig.expressions as row, index (index)}
+								<div
+									class="rounded border border-surface-200-800 bg-surface-100-900/40 p-1.5 space-y-1"
+									data-testid="compute-row"
+								>
+									<div class="flex items-center gap-1">
+										<select
+											class="select text-xs font-mono flex-1 min-w-0 h-6 py-0 pl-1.5 pr-6"
+											value={row.key}
+											onchange={(e) => renameComputeRow(index, e.currentTarget.value)}
+											data-testid="compute-key"
+										>
+											{#each computeKeyOptions(row.key) as option (option)}
+												<option value={option}>{option}</option>
+											{/each}
+										</select>
+										<button
+											type="button"
+											aria-label="Remove"
+											class="btn-icon preset-tonal w-6 h-6 text-[10px] shrink-0 hover:preset-filled-error-500"
+											onclick={() => removeComputeRow(index)}
+										>
+											<i class="fa-solid fa-xmark"></i>
+										</button>
+									</div>
+									<CelInput
+										bind:value={row.expression}
+										scope={celScope}
+										placeholder="likelihood * impact"
+										oninput={onChange}
+										testid="compute-expression"
+									/>
+									{#if computePreviews[index]}
+										{@const preview = computePreviews[index]}
+										<p
+											class="text-[10px] font-mono flex items-baseline gap-1.5 px-0.5 break-all"
+											data-testid="compute-preview"
+										>
+											{#if preview.ok}
+												<span class="text-surface-500 shrink-0">=</span>
+												<span class="text-success-600 dark:text-success-400"
+													>{JSON.stringify(preview.value)}</span
+												>
+												<span
+													class="ml-auto shrink-0 text-[9px] uppercase tracking-wide text-surface-400-600"
+													>{preview.type}</span
+												>
+											{:else}
+												<i class="fa-solid fa-triangle-exclamation text-error-500 shrink-0"></i>
+												<span class="text-error-500">{preview.error}</span>
+											{/if}
+										</p>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					</div>
+					<div class="space-y-1">
+						<p class="text-[10px] text-surface-500 leading-relaxed">
+							<i class="fa-solid fa-calculator mr-1"></i>{m.computeHint()}
+						</p>
+						<p class="text-[10px] text-surface-400-600 leading-relaxed font-mono break-words">
+							{COMPUTE_FUNCTIONS}
+						</p>
+					</div>
 				{/if}
-				<p class="text-[10px] text-surface-500 leading-relaxed">
-					<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>{m.templatingHint({
-						syntax: '{{variable}}'
-					})}
-				</p>
+				{#if actionConfig.type !== 'compute'}
+					<p class="text-[10px] text-surface-500 leading-relaxed">
+						<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>{m.templatingHint({
+							syntax: '{{variable}}'
+						})}
+					</p>
+				{/if}
 			{/if}
 
-			<!-- set_variables already writes variables: offering "save results to
-			     variables" on it invites putting the value in the wrong place. Rows an
-			     older draft or an import already carries stay visible so they can be
-			     removed (publish rejects them). -->
-			{#if ['action', 'subprocess', 'loop'].includes(nodeDomain.type) && (actionConfig?.type !== 'set_variables' || Object.keys(nodeDomain.output_mapping ?? {}).length > 0)}
+			<!-- set_variables and compute already write variables: offering "save
+			     results to variables" on them invites putting the value in the wrong
+			     place. Rows an older draft or an import already carries stay visible
+			     so they can be removed (publish rejects them). -->
+			{#if ['action', 'subprocess', 'loop'].includes(nodeDomain.type) && (!['set_variables', 'compute'].includes(actionConfig?.type) || Object.keys(nodeDomain.output_mapping ?? {}).length > 0)}
 				<div>
 					<div class="flex items-center justify-between mb-1">
 						{@render fieldLabel(m.outputMapping())}
@@ -2671,7 +2899,8 @@
 							type="button"
 							class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold disabled:opacity-50"
 							onclick={addOutputMapping}
-							disabled={!variables.length || actionConfig?.type === 'set_variables'}
+							disabled={!variables.length ||
+								['set_variables', 'compute'].includes(actionConfig?.type)}
 						>
 							<i class="fa-solid fa-plus mr-0.5"></i>{m.addMapping()}
 						</button>
@@ -3085,7 +3314,7 @@
 			</div>
 		</div>
 	{:else if selectedEdge && edgeDomain}
-		<div class="p-3 space-y-3">
+		<div class="p-3 space-y-3 [&>label]:block">
 			<span class="badge preset-tonal text-[10px] uppercase">
 				<i class="fa-solid fa-arrow-right-long mr-1"></i>{m.edgeLabel()}
 			</span>

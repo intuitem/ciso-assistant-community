@@ -22,6 +22,8 @@ from ..resolvers import (
     resolve_risk_matrix_id,
     resolve_asset_id,
     resolve_entity_id,
+    _normalize_for_matching,
+    _find_terminology_match,
 )
 from ..utils.response_formatter import (
     success_response,
@@ -34,52 +36,6 @@ from ..utils.response_formatter import (
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
-
-
-def _normalize_for_matching(text: str) -> str:
-    """Normalize text for fuzzy matching: lowercase, strip, remove trailing 's' for plurals"""
-    normalized = text.lower().strip()
-    # Handle common plural forms
-    if normalized.endswith("s") and len(normalized) > 2:
-        normalized = normalized[:-1]
-    # Handle underscores vs spaces
-    normalized = normalized.replace("_", " ").replace("-", " ")
-    return normalized
-
-
-def _find_terminology_match(terminologies: list, user_input: str) -> dict | None:
-    """Find a terminology that matches the user input.
-
-    Matches against:
-    - Base name field (snake_case like "organized_crime")
-    - All translations in the translations dict
-
-    Uses case-insensitive, plural-insensitive matching.
-    """
-    normalized_input = _normalize_for_matching(user_input)
-
-    for term in terminologies:
-        # Match against the base name
-        if _normalize_for_matching(term.get("name", "")) == normalized_input:
-            return term
-
-        # Match against translations
-        translations = term.get("translations", {})
-        if isinstance(translations, dict):
-            for locale, locale_data in translations.items():
-                if isinstance(locale_data, dict):
-                    translated_name = locale_data.get("name", "")
-                    if (
-                        translated_name
-                        and _normalize_for_matching(translated_name) == normalized_input
-                    ):
-                        return term
-                elif isinstance(locale_data, str):
-                    # Some translations might be stored as direct strings
-                    if _normalize_for_matching(locale_data) == normalized_input:
-                        return term
-
-    return None
 
 
 def _resolve_or_create_risk_origin(risk_origin_input: str) -> tuple[str, bool]:
@@ -854,10 +810,7 @@ async def get_kill_chains(
 
             antecedents = kc.get("antecedents", [])
             if antecedents:
-                antecedent_names = [a.get("str", "?") for a in antecedents[:2]]
-                antecedents_str = ", ".join(antecedent_names)
-                if len(antecedents) > 2:
-                    antecedents_str += f" (+{len(antecedents) - 2})"
+                antecedents_str = ", ".join(a.get("id", "?") for a in antecedents)
             else:
                 antecedents_str = "-"
 
@@ -1523,15 +1476,16 @@ async def create_kill_chain_step(
     - Stage 2 (Discover/Discovery): Can have antecedents from Stage 0, 1, or 2
     - Stage 3 (Exploit/Exploitation): Can have antecedents from any stage
 
-    **Important:** Antecedents must already exist as kill chain steps in this operating mode.
+    **Important:** Antecedents are kill chain step IDs of this operating mode (see get_kill_chains).
+    The same elementary action may appear in several steps of one operating mode.
 
     Args:
         operating_mode_id: Operating mode ID (required)
         elementary_action_id: Elementary action ID/name to add as a step (required)
         is_highlighted: Whether to highlight this step in visualizations
         logic_operator: "AND" or "OR" - how to combine multiple antecedents
-        antecedents: List of elementary action IDs that must precede this action
-                     (Must already be kill chain steps, stage must be <= this action's stage)
+        antecedents: List of kill chain step IDs (from get_kill_chains) that precede this step
+                     (Steps of the same operating mode, stage must be <= this action's stage)
     """
     try:
         operating_mode_id = resolve_operating_mode_id(operating_mode_id)
@@ -1571,7 +1525,7 @@ async def create_kill_chain_step(
         if antecedents:
             resolved_antecedents = []
             for ant in antecedents:
-                resolved_antecedents.append(resolve_elementary_action_id(ant))
+                resolved_antecedents.append(resolve_kill_chain_id(ant))
             payload["antecedents"] = resolved_antecedents
 
         res = make_post_request("/ebios-rm/kill-chains/", payload)
@@ -2193,14 +2147,14 @@ async def update_kill_chain_step(
     - Stage 2 (Discover/Discovery): Can have antecedents from Stage 0, 1, or 2
     - Stage 3 (Exploit/Exploitation): Can have antecedents from any stage
 
-    **Important:** Antecedents must already exist as kill chain steps in the same operating mode.
+    **Important:** Antecedents are kill chain step IDs of the same operating mode (see get_kill_chains).
 
     Args:
         kill_chain_id: Kill chain step UUID (required)
         is_highlighted: Whether to highlight this step in visualizations
         logic_operator: "AND" or "OR" - how to combine multiple antecedents
-        antecedents: List of elementary action IDs that must precede this action
-                     (Must already be kill chain steps, stage must be <= this action's stage)
+        antecedents: List of kill chain step IDs (from get_kill_chains) that precede this step
+                     (Steps of the same operating mode, stage must be <= this action's stage)
     """
     try:
         resolved_kc_id = resolve_kill_chain_id(kill_chain_id)
@@ -2236,7 +2190,7 @@ async def update_kill_chain_step(
         if antecedents is not None:
             resolved_antecedents = []
             for ant in antecedents:
-                resolved_antecedents.append(resolve_elementary_action_id(ant))
+                resolved_antecedents.append(resolve_kill_chain_id(ant))
             payload["antecedents"] = resolved_antecedents
 
         if not payload:

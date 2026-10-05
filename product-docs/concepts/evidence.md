@@ -61,3 +61,4 @@ The current attachment shown on the evidence page is always the latest revision;
 - [Tasks](tasks.md)
 - [Evidence preview](../features/evidence-preview.md)
 - [Vocabulary → Evidence](../introduction/vocabulary.md)
+- [Security exceptions](security-exceptions.md)

@@ -25,6 +25,11 @@ type SidebarBackendKeys = {
 	custom_fields: boolean;
 	bia: boolean;
 	project_management: boolean;
+	generic_collections: boolean;
+	accreditations: boolean;
+	projects: boolean;
+	responsibility_matrices: boolean;
+	risk_management: boolean;
 	contracts: boolean;
 	reports: boolean;
 	validation_flows: boolean;
@@ -76,6 +81,11 @@ type SidebarFrontendKeys = {
 	customFields: boolean;
 	businessImpactAnalysis: boolean;
 	projectManagement: boolean;
+	genericCollections: boolean;
+	accreditations: boolean;
+	projects: boolean;
+	responsibilityMatrices: boolean;
+	risk: boolean;
 	contracts: boolean;
 	reports: boolean;
 	validationFlows: boolean;
@@ -132,6 +142,11 @@ export function getSidebarVisibleItems(
 		customFields: featureFlags?.custom_fields ?? false,
 		businessImpactAnalysis: featureFlags?.bia ?? true,
 		projectManagement: featureFlags?.project_management ?? false,
+		genericCollections: featureFlags?.generic_collections ?? true,
+		accreditations: featureFlags?.accreditations ?? true,
+		projects: featureFlags?.projects ?? true,
+		responsibilityMatrices: featureFlags?.responsibility_matrices ?? true,
+		risk: featureFlags?.risk_management ?? true,
 		contracts: featureFlags?.contracts ?? false,
 		reports: featureFlags?.reports ?? false,
 		validationFlows: featureFlags?.validation_flows ?? false,

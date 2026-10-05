@@ -7,6 +7,8 @@
  * collection must page through it.
  */
 
+import { discardBody } from './responses';
+
 /** Request the server's hard ceiling (PAGINATE_MAX default) per page — the
  * server clamps anything higher, so this stays correct if the ceiling moves,
  * and cuts round-trips 4× versus the 50-row default page size. */
@@ -49,6 +51,7 @@ export async function fetchAllPages<T = Record<string, any>>(
 	for (let page = 0; page < maxPages; page++) {
 		const res = await fetchFn(withPageParams(url, offset, pageSize));
 		if (!res.ok) {
+			await discardBody(res);
 			const err = new Error(
 				`fetchAllPages: ${res.status} ${res.statusText} for ${url}`
 			) as Error & { status: number };
