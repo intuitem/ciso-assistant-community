@@ -93,6 +93,11 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					description: m.findingsAssessmentsDescription()
 				},
 				{
+					field: 'workflows',
+					label: m.workflows(),
+					description: m.workflowsFlagDescription()
+				},
+				{
 					field: 'metrology',
 					label: m.metrology(),
 					description: m.metrologyDescription()
@@ -103,11 +108,6 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 			category: m.assetClassManagementAndGovernance(),
 			description: m.assetClassManagementAndGovernanceDescription(),
 			fields: [
-				{
-					field: 'project_management',
-					label: m.projectManagement(),
-					description: m.projectManagementDescription()
-				},
 				{
 					field: 'reports',
 					label: m.reports(),
@@ -134,11 +134,6 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					description: m.validationFlowsDescription()
 				},
 				{
-					field: 'workflows',
-					label: m.workflows(),
-					description: m.workflowsFlagDescription()
-				},
-				{
 					field: 'policy_documents',
 					label: m.policyDocumentsFlag(),
 					description: m.policyDocumentsFlagDescription()
@@ -152,6 +147,37 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					field: 'exceptions',
 					label: m.securityExceptions(),
 					description: m.securityExceptionsDescription()
+				}
+			].filter(({ field }) => availableKeys.includes(field))
+		},
+		{
+			category: m.projectManagement(),
+			description: m.projectManagementDescription(),
+			fields: [
+				{
+					field: 'project_management',
+					label: m.projectManagement(),
+					description: m.projectManagementDescription()
+				},
+				{
+					field: 'generic_collections',
+					label: m.genericCollections(),
+					description: m.genericCollectionsFlagDescription()
+				},
+				{
+					field: 'accreditations',
+					label: m.accreditations(),
+					description: m.accreditationsFlagDescription()
+				},
+				{
+					field: 'projects',
+					label: m.projects(),
+					description: m.projectsFlagDescription()
+				},
+				{
+					field: 'responsibility_matrices',
+					label: m.responsibilityMatrices(),
+					description: m.responsibilityMatricesFlagDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},
@@ -215,6 +241,11 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 			category: m.riskManagement(),
 			description: m.riskManagementDescription(),
 			fields: [
+				{
+					field: 'risk_management',
+					label: m.riskMenu(),
+					description: m.riskMenuFlagDescription()
+				},
 				{
 					field: 'risk_acceptances',
 					label: m.riskAcceptances(),

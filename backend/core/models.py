@@ -1,3 +1,6 @@
+import math
+from decimal import ROUND_HALF_UP, Decimal
+from fractions import Fraction
 import json
 import os
 import re
@@ -170,12 +173,21 @@ class RequirementAssessmentQualityContext:
     controls: dict
     # ra_id -> {evidence_id: (status, expiry_date)}, both attachment paths merged
     evidences: dict
+    # evidence_id -> (something is attached, newest revision's updated_at)
+    evidence_revisions: dict
+
+
+def _evidence_stale_after_days() -> int:
+    """A year by default: shorter turns every annual control into a finding."""
+    from django.conf import settings
+
+    return int(getattr(settings, "XRAYS_EVIDENCE_STALE_AFTER_DAYS", 365))
 
 
 def _build_requirement_assessment_quality_context(
     compliance_assessment, requirement_assessment_ids=None
 ) -> RequirementAssessmentQualityContext:
-    """Resolve the quality-check inputs for a whole audit in three queries.
+    """Resolve the quality-check inputs for a whole audit in four queries.
 
     Filtering on the audit rather than on a list of ids keeps the SQL constant
     when the caller wants every requirement: one audit-scoped join beats an IN
@@ -241,6 +253,26 @@ def _build_requirement_assessment_quality_context(
     ):
         evidences[ra_id][evidence_id] = (status, expiry)
 
+    # One pass over the revisions of every evidence in scope; annotating the
+    # two paths above would double the work.
+    evidence_revisions = {}
+    evidence_ids = {eid for per_ra in evidences.values() for eid in per_ra}
+    if evidence_ids:
+        EvidenceRevision = apps.get_model("core", "EvidenceRevision")
+        for (
+            evidence_id,
+            attachment,
+            link,
+            updated_at,
+        ) in EvidenceRevision.objects.filter(evidence_id__in=evidence_ids).values_list(
+            "evidence_id", "attachment", "link", "updated_at"
+        ):
+            attached, latest = evidence_revisions.get(evidence_id, (False, None))
+            evidence_revisions[evidence_id] = (
+                attached or bool(attachment) or bool(link),
+                updated_at if latest is None else max(latest, updated_at),
+            )
+
     return RequirementAssessmentQualityContext(
         today=date.today(),
         result_visible=_visible("result"),
@@ -250,6 +282,7 @@ def _build_requirement_assessment_quality_context(
         evidences_visible=_visible("evidences"),
         controls=controls,
         evidences=evidences,
+        evidence_revisions=evidence_revisions,
     )
 
 
@@ -343,6 +376,23 @@ def _requirement_assessment_quality_findings(
                 ).format(name),
                 "requirementAssessmentPartialNoStartedControl",
             )
+        # ControlEtaMissed catches a date that passed, never the absence of one.
+        # Gated on `controls` so a partial with nothing attached is reported once,
+        # by requirementAssessmentNoAppliedControl.
+        if (
+            result == Result.PARTIALLY_COMPLIANT
+            and controls
+            and not requirement_assessment.eta
+            and not requirement_assessment.due_date
+            and not any(eta for _status, eta, _expiry in controls.values())
+        ):
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment is partially compliant with no target date for closing the gap"
+                ).format(name),
+                "requirementAssessmentPartialNoPlan",
+            )
         if (
             result == Result.NON_COMPLIANT
             and controls
@@ -390,14 +440,25 @@ def _requirement_assessment_quality_findings(
                 ).format(name),
                 "requirementAssessmentCompliantNoEvidence",
             )
-        if (
+        # Its own msgid rather than widening the one above, which would change
+        # what every existing filter and translation means.
+        if result == Result.PARTIALLY_COMPLIANT and not evidences:
+            report(
+                warnings,
+                _(
+                    "{}: Requirement assessment is partially compliant but has no evidence attached"
+                ).format(name),
+                "requirementAssessmentPartialNoEvidence",
+            )
+        all_expired = bool(
             claims_compliance
             and evidences
             and all(
                 status == EvidenceStatus.EXPIRED or (expiry and expiry < context.today)
                 for status, expiry in evidences.values()
             )
-        ):
+        )
+        if all_expired:
             report(
                 warnings,
                 _(
@@ -415,13 +476,14 @@ def _requirement_assessment_quality_findings(
                 ).format(name),
                 "requirementAssessmentEvidenceRejected",
             )
-        if (
+        all_draft = bool(
             result == Result.COMPLIANT
             and evidences
             and all(
                 status == EvidenceStatus.DRAFT for status, _expiry in evidences.values()
             )
-        ):
+        )
+        if all_draft:
             report(
                 warnings,
                 _(
@@ -429,6 +491,49 @@ def _requirement_assessment_quality_findings(
                 ).format(name),
                 "requirementAssessmentEvidenceAllDraft",
             )
+
+        # `usable` is what a status cannot give: something is attached, and it
+        # has not lapsed. The two rules above catch only the pure cases, so one
+        # expired evidence plus one empty one passes both in silence.
+        if claims_compliance and evidences:
+            usable = [
+                evidence_id
+                for evidence_id, (status, expiry) in evidences.items()
+                if context.evidence_revisions.get(evidence_id, (False, None))[0]
+                and not (
+                    status == EvidenceStatus.EXPIRED
+                    or (expiry and expiry < context.today)
+                )
+            ]
+            if not usable:
+                # Suppressed when a narrower rule already said it.
+                if not (all_expired or all_draft):
+                    report(
+                        warnings,
+                        _(
+                            "{}: No evidence supporting this requirement assessment is both "
+                            "attached and current"
+                        ).format(name),
+                        "requirementAssessmentNoUsableEvidence",
+                    )
+            else:
+                # Most evidence carries no expiry date, so the newest revision is
+                # the only thing that speaks to currency.
+                latest = max(
+                    context.evidence_revisions[evidence_id][1]
+                    for evidence_id in usable
+                    if context.evidence_revisions[evidence_id][1] is not None
+                )
+                stale_after = _evidence_stale_after_days()
+                if (context.today - latest.date()).days > stale_after:
+                    report(
+                        warnings,
+                        _(
+                            "{}: The most recent evidence supporting this requirement assessment "
+                            "has not been updated in over {} days"
+                        ).format(name, stale_after),
+                        "requirementAssessmentEvidenceStale",
+                    )
 
     # --- did the auditor say why?
     if (
@@ -453,8 +558,11 @@ def _requirement_assessment_quality_findings(
                 "requirementAssessmentNonCompliantNoObservation",
             )
         elif result == Result.PARTIALLY_COMPLIANT:
+            # A warning like its sibling above: both are declared deviations and
+            # the observation is the whole description. Non-compliance describes
+            # itself, so it stays info.
             report(
-                info,
+                warnings,
                 _(
                     "{}: Requirement assessment is partially compliant with no observation"
                 ).format(name),
@@ -1046,12 +1154,14 @@ class StoredLibrary(LibraryMixin):
                 builtin=builtin,
                 hash_checksum=hash_checksum,
                 content=library_objects,
+                # autoload libraries with requirement mapping sets, or that ask for it
                 autoload=bool(
-                    library_objects.get(
+                    library_data.get("autoload")
+                    or library_objects.get(
                         "requirement_mapping_set",
                         library_objects.get("requirement_mapping_sets"),
                     )
-                ),  # autoload is true if the library contains requirement mapping sets
+                ),
             )
             new_library.filtering_labels.set(filtering_labels)
             return new_library, None
@@ -1757,7 +1867,11 @@ class LibraryUpdater:
                     scale_on_prev_defaults = (
                         ca.min_score == prev_min and ca.max_score == prev_max
                     )
-                    definition_on_prev_defaults = ca.scores_definition == prev_def
+                    # An empty definition means "no labels" whether stored as [] or None.
+                    definition_on_prev_defaults = (ca.scores_definition or None) == (
+                        prev_def or None
+                    )
+                    preset_dropped = False
 
                     needs_update = False
                     if scale_on_prev_defaults and score_boundaries_changed:
@@ -1765,7 +1879,23 @@ class LibraryUpdater:
                         ca.max_score = new_framework.max_score
                         needs_update = True
                         ca_with_scale_change.append(ca)
-                    if definition_on_prev_defaults and scores_definition_changed:
+                        # The audit follows the framework now; a preset's catalog
+                        # labels (and wording overrides) no longer apply.
+                        if ca.score_scale_preset:
+                            ca.score_scale_preset = None
+                            preset_dropped = True
+                    # Labels only follow the framework together with its range:
+                    # an audit on its own range keeps its own (possibly empty)
+                    # labels, even when that range matches the new framework's.
+                    range_follows = scale_on_prev_defaults
+                    if (
+                        (
+                            definition_on_prev_defaults
+                            and range_follows
+                            and not ca.score_scale_preset
+                        )
+                        or preset_dropped
+                    ) and (scores_definition_changed or preset_dropped):
                         ca.scores_definition = new_framework.scores_definition
                         needs_update = True
                     if needs_update:
@@ -1774,7 +1904,12 @@ class LibraryUpdater:
                 if compliance_assessments_to_update:
                     ComplianceAssessment.objects.bulk_update(
                         compliance_assessments_to_update,
-                        ["min_score", "max_score", "scores_definition"],
+                        [
+                            "min_score",
+                            "max_score",
+                            "scores_definition",
+                            "score_scale_preset",
+                        ],
                         batch_size=100,
                     )
                     ca_bounds = {
@@ -1892,10 +2027,16 @@ class LibraryUpdater:
                                 ra_pks_to_update.add(ra.pk)
                                 requirement_assessment_objects_to_update.append(ra)
 
+                        # Every stored value moves to the new range, ticked or not,
+                        # so none is left outside it.
                         if (
-                            ra.is_scored
-                            and ra.score is not None
-                            and ra.compliance_assessment in ca_with_scale_change
+                            ra.compliance_assessment in ca_with_scale_change
+                            and requirement_node_object.min_score is None
+                            and requirement_node_object.max_score is None
+                            and (
+                                ra.score is not None
+                                or ra.documentation_score is not None
+                            )
                         ):
                             default_min = (
                                 0
@@ -1929,17 +2070,10 @@ class LibraryUpdater:
                                         and prev_max is not None
                                         and prev_min != prev_max
                                     ):
-                                        # Normalize to 0-1 range
-                                        normalized = (value - prev_min) / (
-                                            prev_max - prev_min
-                                        )
-                                        # Scale to new range
-                                        scaled = ca_min + (
-                                            normalized * (ca_max - ca_min)
-                                        )
-                                        # Round + clamp
-                                        return max(
-                                            min(int(round(scaled)), ca_max), ca_min
+                                        return rescale_score(
+                                            value,
+                                            (prev_min, prev_max),
+                                            (ca_min, ca_max),
                                         )
                                     else:
                                         # Old range invalid → clamp
@@ -1954,9 +2088,12 @@ class LibraryUpdater:
 
                             if new_score != old_score:
                                 ra.score = new_score
-                                ra.is_scored = (
-                                    new_score is not None and self.strategy != "reset"
-                                )
+                                # An unticked (stale) score must not become scored.
+                                if ra.is_scored:
+                                    ra.is_scored = (
+                                        new_score is not None
+                                        and self.strategy != "reset"
+                                    )
                                 if ra.pk not in ra_pks_to_update:
                                     ra_pks_to_update.add(ra.pk)
                                     requirement_assessment_objects_to_update.append(ra)
@@ -2099,6 +2236,16 @@ class LibraryUpdater:
                         ],
                         batch_size=100,
                     )
+                    # bulk_update skips RequirementAssessment.save(), which
+                    # re-evaluates outcomes when a score changes.
+                    for ca in ca_with_scale_change:
+
+                        def _evaluate(ca=ca):
+                            from core.cel_service import evaluate_outcomes
+
+                            evaluate_outcomes(ca)
+
+                        _defer_once("_pending_cel_evaluations", ca.pk, _evaluate)
 
                 # Keep selected_implementation_groups consistent for dynamic frameworks
                 # This must run even if no RA scalar fields changed, because answer
@@ -2294,6 +2441,8 @@ class LibraryUpdater:
                 "probability",
                 "impact",
                 "risk",
+                "strength_of_knowledge",
+                "ebios_rm",
             }  # Store this as a constant somewhere (as a static attribute of the class)
             other_keys = set(matrix.keys()) - json_definition_keys
             matrix_dict = {key: matrix[key] for key in other_keys}
@@ -2302,7 +2451,7 @@ class LibraryUpdater:
                 if key in matrix:  # If all keys are mandatory this condition is useless
                     matrix_dict["json_definition"][key] = matrix[key]
 
-            RiskMatrix.objects.update_or_create(
+            risk_matrix, _ = RiskMatrix.objects.update_or_create(
                 urn=matrix["urn"].lower(),
                 defaults=matrix_dict,
                 create_defaults={
@@ -2312,6 +2461,8 @@ class LibraryUpdater:
                     "library": self.old_library,
                 },
             )
+            for study in risk_matrix.ebios_rm_studies.all():
+                study.refresh_ratings()
 
     def update_requirement_mapping_sets(self):
         for requirement_mapping_set in self.new_requirement_mapping_sets:
@@ -2505,6 +2656,8 @@ class LoadedLibrary(LibraryMixin):
             res["risk_matrix"]["impact"] = update_translations(matrix.impact)
             res["risk_matrix"]["risk"] = update_translations(matrix.risk)
             res["risk_matrix"]["grid"] = matrix.grid
+            if "ebios_rm" in matrix.json_definition:
+                res["risk_matrix"]["ebios_rm"] = matrix.json_definition["ebios_rm"]
             res["strength_of_knowledge"] = matrix.strength_of_knowledge
             res["risk_matrix"] = [res["risk_matrix"]]
         return res
@@ -2726,6 +2879,10 @@ class Terminology(NameDescriptionMixin, FolderMixin):
 
     class FieldPath(models.TextChoices):
         ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
+        ROTO_TARGET_OBJECTIVE_CATEGORY = (
+            "ro_to.target_objective_category",
+            "ro_to/target_objective_category",
+        )
         QUALIFICATIONS = "qualifications", "qualifications"
         ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
         ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
@@ -2790,6 +2947,46 @@ class Terminology(NameDescriptionMixin, FolderMixin):
             "name": "other",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+    ]
+
+    # Categories of target objectives from EBIOS RM fiche méthode 4.
+    DEFAULT_ROTO_TARGET_OBJECTIVE_CATEGORIES = [
+        {
+            "name": "espionage",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "strategic_prepositioning",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "influence",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "operational_disruption",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "lucrative",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "challenge_and_amusement",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
             "is_visible": True,
         },
     ]
@@ -3227,6 +3424,10 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         cls._seed_defaults(cls.DEFAULT_ROTO_RISK_ORIGINS)
 
     @classmethod
+    def create_default_roto_target_objective_categories(cls):
+        cls._seed_defaults(cls.DEFAULT_ROTO_TARGET_OBJECTIVE_CATEGORIES)
+
+    @classmethod
     def create_default_qualifications(cls):
         cls._seed_defaults(cls.DEFAULT_QUALIFICATIONS)
 
@@ -3594,6 +3795,30 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
                 .exists()
             )
         return self._is_dynamic_cache
+
+    @staticmethod
+    def scale_bound_querysets(framework):
+        return (
+            QuestionChoice.objects.filter(
+                question__requirement_node__framework=framework,
+                add_score__isnull=False,
+            ),
+            RequirementNode.objects.filter(framework=framework).filter(
+                Q(min_score__isnull=False)
+                | Q(max_score__isnull=False)
+                | Q(scores_definition_ref__gt="")
+            ),
+        )
+
+    @classmethod
+    def scale_bound_q(cls, framework):
+        """Boolean expression for annotating querysets (framework may be an OuterRef)."""
+        choices, nodes = cls.scale_bound_querysets(framework)
+        return Exists(choices) | Exists(nodes)
+
+    @property
+    def is_scale_bound(self) -> bool:
+        return any(qs.exists() for qs in self.scale_bound_querysets(self))
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.get_name_translated}"
@@ -8335,6 +8560,83 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         return data
 
 
+# Range is frozen per id: rewording lives in the frontend catalog, a new range needs a new id.
+SCORE_SCALE_PRESETS = {
+    "0-100": (0, 100),
+    "0-5": (0, 5),
+    "1-5": (1, 5),
+    "1-4": (1, 4),
+    "0-3": (0, 3),
+}
+MAX_LABELLED_LEVELS = 11
+
+
+def normalize_score_scale(preset, min_score, max_score, levels, default_range=None):
+    """Validate a score scale and return (preset, min_score, max_score).
+
+    A preset forces its range; min/max of None means "use the default".
+    """
+    if preset:
+        if preset not in SCORE_SCALE_PRESETS:
+            raise ValidationError(
+                {"score_scale_preset": "scoreScaleErrorUnknownPreset"}
+            )
+        for field, given, value in zip(
+            ("min_score", "max_score"),
+            (min_score, max_score),
+            SCORE_SCALE_PRESETS[preset],
+        ):
+            if given is not None and given != value:
+                raise ValidationError({field: "scoreScaleErrorPresetRange"})
+        min_score, max_score = SCORE_SCALE_PRESETS[preset]
+    if (min_score is None) != (max_score is None):
+        raise ValidationError({"max_score": "scoreScaleErrorMinMaxTogether"})
+    if min_score is not None:
+        if not all(
+            isinstance(v, int) and not isinstance(v, bool)
+            for v in (min_score, max_score)
+        ):
+            raise ValidationError({"max_score": "scoreScaleErrorIntegers"})
+        if min_score >= max_score:
+            raise ValidationError({"max_score": "scoreScaleRangeError"})
+    score_range = (min_score, max_score) if min_score is not None else default_range
+    if isinstance(levels, dict):
+        levels = levels.get("scale")
+    if levels is not None and not isinstance(levels, list):
+        raise ValidationError({"scores_definition": "scoreScaleErrorInvalid"})
+    if levels and score_range:
+        for level in levels:
+            score = level.get("score") if isinstance(level, dict) else None
+            if (
+                not isinstance(score, int)
+                or isinstance(score, bool)
+                or not score_range[0] <= score <= score_range[1]
+            ):
+                raise ValidationError(
+                    {"scores_definition": "scoreScaleErrorLevelOutOfRange"}
+                )
+    return preset or None, min_score, max_score
+
+
+def rescale_score(value, old_range, new_range, integer=True):
+    """Map a score proportionally from one range to another, clamped to the new one.
+
+    Exact arithmetic, halves rounded up: round() is half-to-even, which would
+    send 10/30/50/70/90 on 0-100 to 0/2/2/4/4 on 0-5 instead of 1/2/3/4/5.
+    """
+    (old_min, old_max), (new_min, new_max) = old_range, new_range
+    if old_max == old_min:
+        result = min(max(Fraction(value), Fraction(new_min)), Fraction(new_max))
+    else:
+        ratio = (Fraction(value) - old_min) / (old_max - old_min)
+        ratio = min(max(ratio, Fraction(0)), Fraction(1))
+        result = new_min + ratio * (new_max - new_min)
+    if integer:
+        return math.floor(result + Fraction(1, 2))
+    exact = Decimal(result.numerator) / Decimal(result.denominator)
+    return float(exact.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+
 class ComplianceAssessment(Assessment):
     class CalculationMethod(models.TextChoices):
         AVG = "average", "Average"
@@ -8355,6 +8657,13 @@ class ComplianceAssessment(Assessment):
     max_score = models.IntegerField(null=True, verbose_name=_("Maximum score"))
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
+    )
+    # One of SCORE_SCALE_PRESETS (validated in normalize_score_scale), or null.
+    score_scale_preset = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        verbose_name=_("Score scale preset"),
     )
     computed_outcome = models.JSONField(null=True, blank=True)
 
@@ -8545,11 +8854,70 @@ class ComplianceAssessment(Assessment):
             },
         )
 
+    def get_scale_levels(self) -> list | None:
+        """Bare list of level labels; a preset is expanded to every score in its
+        range, tagged with the preset id so clients can resolve the wording."""
+        sd = self.scores_definition
+        scale = sd.get("scale") if isinstance(sd, dict) else sd
+        preset = self.score_scale_preset
+        if not preset or self.max_score - self.min_score + 1 > MAX_LABELLED_LEVELS:
+            return scale
+        own = {
+            level["score"]: level
+            for level in scale or []
+            if isinstance(level, dict) and "score" in level
+        }
+        return [
+            {**own.get(score, {}), "score": score, "preset": preset}
+            for score in range(self.min_score, self.max_score + 1)
+        ]
+
+    def _rescalable_requirements(self):
+        # Requirements with their own scale keep it.
+        return self.requirement_assessments.filter(
+            requirement__min_score__isnull=True, requirement__max_score__isnull=True
+        )
+
+    def rescale_impact(self) -> dict:
+        own_range = self._rescalable_requirements()
+        scores = own_range.filter(score__isnull=False)
+        return {
+            # Same rule as the scoring engine for what counts as scored.
+            "scored": scores.filter(is_scored=True).count(),
+            "scores": scores.filter(is_scored=False).count(),
+            "documentation_scores": own_range.filter(
+                documentation_score__isnull=False
+            ).count(),
+        }
+
+    def rescale_requirement_scores(self, old_range, new_range) -> None:
+        """Carry stored scores over to a new range."""
+        own_range = self._rescalable_requirements()
+        for field in ("score", "documentation_score"):
+            rows = list(own_range.filter(**{f"{field}__isnull": False}))
+            for ra in rows:
+                setattr(
+                    ra, field, rescale_score(getattr(ra, field), old_range, new_range)
+                )
+            RequirementAssessment.objects.bulk_update(rows, [field])
+
+        # bulk_update skips RequirementAssessment.save(), which normally
+        # re-evaluates outcomes when a score changes.
+        def _evaluate():
+            from core.cel_service import evaluate_outcomes
+
+            evaluate_outcomes(self)
+
+        _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
+
     def save(self, *args, **kwargs) -> None:
+        # No scale chosen: the framework's (the organisation scale is only
+        # ever proposed by the form, so API/import behaviour never changes).
         if self.min_score is None:
             self.min_score = self.framework.min_score
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
+            self.score_scale_preset = None
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
 
@@ -8644,6 +9012,23 @@ class ComplianceAssessment(Assessment):
         if baseline_assessments:
             updates = []
             m2m_operations = []
+            baseline_range = (baseline.min_score, baseline.max_score)
+            own_range = (self.min_score, self.max_score)
+            convert = baseline_range != own_range and None not in (
+                *baseline_range,
+                *own_range,
+            )
+
+            def carried(value, requirement):
+                # A requirement with its own scale has it in both audits.
+                if (
+                    value is None
+                    or not convert
+                    or requirement.min_score is not None
+                    or requirement.max_score is not None
+                ):
+                    return value
+                return rescale_score(value, baseline_range, own_range)
 
             for assessment in created_assessments:
                 baseline_assessment = baseline_assessments.get(
@@ -8653,9 +9038,11 @@ class ComplianceAssessment(Assessment):
                     # Update scalar fields
                     assessment.result = baseline_assessment.result
                     assessment.status = baseline_assessment.status
-                    assessment.score = baseline_assessment.score
-                    assessment.documentation_score = (
-                        baseline_assessment.documentation_score
+                    assessment.score = carried(
+                        baseline_assessment.score, assessment.requirement
+                    )
+                    assessment.documentation_score = carried(
+                        baseline_assessment.documentation_score, assessment.requirement
                     )
                     assessment.is_scored = baseline_assessment.is_scored
                     assessment.is_score_overridden = (
@@ -9975,7 +10362,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 req.scores_definition_ref
             )
         else:
-            scores_definition = ca_sd.get("scale")
+            scores_definition = ca.get_scale_levels()
             # Inherited default may extend beyond the Node's overridden bounds.
             # Keep only entries that fall inside the resolved range (preserves
             # sparse scales like 0/25/50/75/100); drop the labels entirely if

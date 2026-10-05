@@ -43,6 +43,64 @@ Computes a date by adding days and weeks to a base date. Use it for due dates.
 
 Output: `result` (ISO date), `base`. No permission required.
 
+### Compute
+
+Set variables with operators. Each row names a variable and gives a [CEL](https://cel.dev) expression that computes it: a risk score from likelihood and impact, a ratio between two Read objects counts, a loop counter, an SLA picked by severity.
+
+| Setting | |
+|---|---|
+| Expressions | One row per variable: the variable key and its expression |
+
+#### A first Compute step
+
+Multiply two numbers and log the result:
+
+{% stepper %}
+{% step %}
+**Declare the inputs.** Open the **Variables** toggle, add `A` and `B` as `number`, and give each a **Default**, say `2`. Add `result` as `number` too.
+{% endstep %}
+
+{% step %}
+**Add the step.** Wire an **Action** after the trigger and pick **Compute** in the **Action** select.
+{% endstep %}
+
+{% step %}
+**Write the row.** Under **Expressions**, click **+** (**Add a row**), pick `result` in the key select and type `A * B`. The row shows `= 4` and `int` underneath: that is the value a run would compute, using the defaults.
+{% endstep %}
+
+{% step %}
+**Use the result.** Wire another **Action** after it, pick **Log** and set **Message** to `Result: {{result}}`, publish and run. The run log reads `Result: 4`.
+{% endstep %}
+{% endstepper %}
+
+Things people often ask:
+
+- **Do I have to declare the variable first?** Yes. The key of a row is picked from the declared variables, one row per variable, so **+** adds nothing while every declared variable already has a row. Declare one more in the **Variables** panel, intermediate values included.
+- **Two ways to read the result.** `{{result}}` reads the variable, which a later row, step or loop iteration may overwrite. `{{nodes.<ref>.result}}` reads what this step computed.
+- **Braces or not.** Inside an expression, write paths bare: `A * B`, not `{{A}} * {{B}}`. Braces are for the other steps' settings.
+- **Text.** Strings use single or double quotes, and `+` joins them: `'Score: ' + string(score)`. A number has to go through `string(...)` first.
+- **A field that may be missing.** Reading one fails the step. Guard it with `has(...)`: `has(payload.priority) ? payload.priority : 'medium'`.
+- **The preview shows an error.** It is the error the run would log, against the current data. Fix the row, or click **Use as reference data** on a run in the **Runs** panel whose data looks like what the step will see.
+
+Expressions read the same things `{{ }}` does, without the braces: a variable by its key, `payload.some.path`, `nodes.<ref>.<path>`, `item` and `index` inside a loop. Rows run in order and each can use the ones above it, so an intermediate value does not need its own step.
+
+```
+score        = likelihood * impact
+label        = score > 12 ? 'high' : 'low'
+coverage     = round(double(nodes.done.count) / double(nodes.total.count) * 100.0, 1)
+sla_days     = payload.severity == 'critical' ? 1 : 30
+worst        = max(nodes.fetch.results.map(r, r.score))
+total        = total + item
+```
+
+A `number` variable holds an int or a double depending on what wrote it, so unlike canonical CEL the two mix: when one side of an operator is a double, the other is promoted (`3 * 2.5` is `7.5`). An expression with only ints stays int, so dividing two ints drops the remainder as in CEL (`7 / 2` is `3`, `7 / 2.0` is `3.5`). A number and a string do not mix. The step fails with a message that names the row and the problem.
+
+On top of CEL's own `size`, `has`, `int`, `double`, `string`, `timestamp` and the `map`, `filter`, `exists`, `all` macros, these functions are available: `sum` and `avg` over a list of numbers; `min` and `max` over a list of numbers, of strings (ISO dates sort correctly) or of timestamps; `round(x)`, `round(x, digits)` (half up: `round(2.5)` is `3`), `floor`, `ceil`, `abs`. `%` takes two ints. The macros nest at most two deep: `a.map(x, b.filter(y, y > x))` is fine, a third level inside is refused, because each level multiplies the work.
+
+In the editor, each row shows its result as you type, `= 16` with the type, evaluated against the reference run shown under **Available data** or, before any run, against the variables' defaults. A row that cannot be evaluated shows the same error the run would log. Typing opens suggestions: variables with their current value, `nodes.<ref>.` paths, `item` and `index` inside a loop, functions, and list or string methods after a dot. Clicking a value under **Available data** inserts its path.
+
+Output: the computed values, keyed by variable. Refuses the reserved keys `now`, `today` and `payload`. Syntax errors are caught when you publish; type errors, missing fields and division by zero fail the step at run time and are not retried. No permission required.
+
 ### Read objects
 
 Queries objects of one kind inside the workflow's scope.
@@ -77,7 +135,10 @@ Each row carries `id`, `name`, `created_at`, `updated_at` plus the fields below.
 | `compliance_assessment` | description, ref_id, status, eta, due_date, plus computed `computed_outcome`, `scores`, `requirements` (total and count per result) |
 | `risk_assessment` | description, ref_id, status, eta, due_date |
 | `entity_assessment` | description, status, eta, due_date |
-| `requirement_assessment` | status, result, extended_result, score, is_scored, documentation_score, eta, due_date, compliance_assessment, plus `requirement` (id, ref_id, name). Only assessable requirements |
+| `document_container` | description, ref_id, document_type |
+| `managed_document` | description, locale, default_locale, container, plus `document_type` and `current_revision` (id, version number, status). A locale variant with no title of its own reads under the document's name |
+| `document_revision` | version_number, status, source, change_summary, content, published_at, document. `content` is the markdown itself, so a long one is truncated in `{{nodes.…}}`; map it to a variable to pass a whole document to an AI step |
+| `requirement_assessment` | status, result, extended_result, score, is_scored, documentation_score, eta, due_date, observation, compliance_assessment, plus `requirement` (id, ref_id, name, description), `applied_controls` (each with its own `evidences`) and `evidences` attached to the requirement itself, all narrowed to what the run may see. Every evidence says whether anything is `attached`. Only assessable requirements |
 | `risk_scenario` | description, ref_id, treatment, inherent_level, current_level, residual_level, risk_assessment. Level filters ignore unrated scenarios |
 | `risk_acceptance` | description, state, expiry_date, justification |
 | `validation_flow` | ref_id, status, validation_deadline |
@@ -98,15 +159,18 @@ Filter operators depend on the field type:
 
 #### Including the quality check
 
-**Audit** and **Requirement** offer `quality_check` under **Extra data to include** — the same findings the [X-rays](../x-rays.md) page shows, as `{errors, warnings, info, count}`. It is off by default because resolving it walks the whole audit with its controls and evidences, and it is computed for every row a step reads: ask for it on a **First match only** read, or on a short page.
+**Audit** and **Requirement** offer `quality_check` under **Extra data to include** — the same findings the [X-rays](../x-rays.md) page shows, as `{errors, warnings, info, count}`, plus three values for building on them: `flagged` (true when there is an error or a warning), `messages` (the finding sentences) and `text` (those sentences as an indented markdown list, ready to nest under a heading a document writes). It is off by default because resolving it walks the whole audit with its controls and evidences, and it is computed for every row a step reads: ask for it on a **First match only** read, or on a short page.
 
-A run can then branch on it. `{{nodes.<step>.object.quality_check.count}}` is the number of findings, and a condition on it routes the two outcomes:
+**Requirement** also offers `applied_controls` and `evidences`: what is claimed to satisfy the requirement, each control with the evidence attached to it, and each evidence saying whether anything is actually attached. Off by default for the same reason — they are the heaviest thing a row can carry, and a page of 500 rows holding all three is how a read outgrows what one step's output can hold.
+
+A run can then branch on it. Branch on `flagged` rather than on `count`: `count` includes the informational findings, which are observations rather than something to act on.
 
 | | |
 |---|---|
 | Trigger | Audit updated, condition on `status`, **Only when changed**, equals `done` |
 | Read objects | Audit, First match only, filter `id` equals `{{payload.object_id}}`, include `quality_check` |
-| Condition | `{{nodes.check.object.quality_check.count}}` greater than `0` |
+| Set variables | `flagged` = `{{nodes.check.object.quality_check.flagged}}` — a condition reads a declared variable, never a path |
+| Condition | `flagged` is `true` |
 | Send email | "This audit was closed with open quality findings" |
 
 Reading the audit's own quality check covers every requirement in one call, which is cheaper than reading the requirements and asking each for its own.
@@ -154,13 +218,17 @@ Some objects live in their parent's domain rather than the workflow's: a purpose
 | `data_recipient` | name, **category**, description | processing |
 | `data_contractor` | name, **relationship_type**, **country**, description, documentation_link | processing, entity |
 | `data_transfer` | name, **country**, description, transfer_mechanism, guarantees, documentation_link | processing, entity |
+| `document_container` | name, description, ref_id, document_type | |
+| `managed_document` | name, description, locale, template_used | **container**, content. The first draft revision is created with it, seeded from `content` or from the template named by `template_used`. One document per locale. Upsert not available |
+| `document_revision` | content, change_summary | **document**. Opens the next draft, numbered after the last revision and cloning the current content when `content` is left empty. Only one draft may be open at a time. Upsert not available |
 | `entity_assessment` | name, description | entity, perimeter, framework, implementation_groups. With a framework, the questionnaire and its enclave are built too. Upsert not available |
 | `entity_score` | **score**, **as_of**, scale_max, grade, url, observation | entity, provider |
 | `timeline_entry` | **entry**, entry_type, timestamp, observation | incident |
-| `task_template` | name, description, ref_id, task_date | |
+| `task_template` | name, description, ref_id | `assigned_to` (actors), `task_date`, and links to `applied_controls`, `compliance_assessments`, `evidences`, `documents`. Creates the occurrence with it, so the task shows on the board. **Update when it already exists** re-dates that occurrence rather than adding a second one |
+| `validation_flow` | request_notes | `approver` (actor), `validation_deadline`, and what is being validated — links to `compliance_assessments`, `evidences`, `policies`, `findings_assessments`, `security_exceptions`. Opens with its submission event. Upsert not available |
 | `right_request` | name, **requested_on**, description, ref_id, due_date, request_type, observation | |
 
-**Bold** marks a field the object cannot be stored without: publishing refuses a step that leaves one empty, rather than letting the run write a blank. Every object that has a name needs one too, unless **Update when it already exists** is on.
+**Bold** marks a field the object cannot be stored without: publishing refuses a step that leaves one empty, rather than letting the run write a blank. An object whose name the model requires needs one too, unless **Update when it already exists** is on — where the name is optional on the object itself (a managed document, a privacy record), the step may leave it empty.
 
 Choice fields (status, severity, type, legal_basis) must receive one of the object's accepted values. Anything else fails the step permanently. `timeline_entry` accepts only `detection`, `mitigation` and `observation` as its type: `severity_changed` and `status_changed` record a change someone made to the incident, so a run may not write them.
 
@@ -168,7 +236,8 @@ Four of these are where a run files what an external system reported, and each i
 
 * **External rating** (`entity_score`) is one reading per provider per day, dated. Turn on **Update when it already exists** and a re-run on the same day corrects that day's reading instead of failing on the duplicate.
 * **Timeline Entry** (`timeline_entry`) adds an observation to an incident without touching its status or severity.
-* **Task** (`task_template`) attaches work. A run creates a dated task; recurrence stays something you set up by hand.
+* **Task** (`task_template`) attaches work. A run creates a dated, assigned task and the occurrence that puts it on the board; recurrence stays something you set up by hand.
+* **Validation flow** (`validation_flow`) asks for sign-off. Name an `approver` and what is being validated — audits, evidences, policies, findings assessments or security exceptions. The requester is the run's own identity.
 * **Right Request** (`right_request`) opens a request in **New**. Closing it stays with whoever handles it.
 
 ### Update object
@@ -202,8 +271,13 @@ The object must be inside the workflow's subtree and changeable by the run ident
 | `entity_assessment` | status (planning states), eta, due_date, description, observation | |
 | `requirement_assessment` | status, eta, due_date, observation | applied_controls, evidences, security_exceptions |
 | `risk_scenario` | description, ref_id | applied_controls, owner, assets |
+| `document_container` | description, ref_id, document_type | applied_controls, assets, filtering_labels |
+| `managed_document` | description | |
+| `document_revision` | content, change_summary — while the revision is still being drafted | |
 
 Planning states are `planned`, `in_progress`, `in_review`, `done`, `deprecated`. Names are never writable. Results, scores, levels and decisions are never writable.
+
+A document revision's status is not writable either, and a submitted, validated or published revision's markdown cannot be touched at all — the same rule the document editor applies. Publishing deprecates the revision it replaces and repoints the document at the new one, which a field write would not do. A workflow writes the draft; someone publishes it, and the rewrite is recorded in the document's edit history under the identity the workflow runs as.
 
 **Replace** replaces the whole relation. It refuses to detach objects outside the workflow's scope, so a workflow cannot silently unlink a parent-domain object.
 
@@ -407,15 +481,17 @@ Asks the model for prose — a summary, a description, an explanatory note.
 
 Output: `text`, plus `_input_truncated` when the input was cut.
 
+For anything longer than a note — a drafted policy, say — map `text` to a variable in the step's outputs and write `{{that_variable}}` into the field. A `{{nodes.…}}` reference is shortened to 1 000 characters (it says so, in the value itself); a variable carries the whole text.
+
 ### What the model is and is not allowed to do
 
 {% hint style="warning" %}
-An AI answer cannot be written into a field that accepts a fixed set of values — a status, a severity, a result. Publishing refuses it, and routing the answer through a variable first does not get around the check: the builder follows where the value came from. Branch on the answer with a Condition and write the value you want on each branch.
+An AI answer cannot be written into a field that accepts a fixed set of values — a status, a severity, a result — whether the step creates the object or updates one. Publishing refuses it, and routing the answer through a variable first does not get around the check: the builder follows where the value came from. Branch on the answer with a Condition and write the value you want on each branch.
 
 The reason is the audit trail. A field with a fixed set of values is read as a decision someone made; letting a model fill it in would record a guess as a fact.
 {% endhint %}
 
-The input is capped at 20 000 characters and cut rather than refused, so a step never fails just because a document was long — check `_input_truncated` in the output if that matters to you. A generated text is stored up to 5 000 characters.
+The input is capped at 20 000 characters and cut rather than refused, so a step never fails just because a document was long — check `_input_truncated` in the output if that matters to you. A generated text is stored up to 20 000 characters, so the word limit is what actually bounds it.
 
 The step tells the model that its input is data and not instructions, so text inside a fetched document cannot redirect it. Treat that as a reduction in risk and not as a guarantee: do not let a model's answer reach anything you would not let the document's author write.
 

@@ -65,7 +65,7 @@
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
 	import type { FormDataShape } from '$lib/utils/schemas';
-	import { loadTableData } from './handler';
+	import { getParams, loadTableData } from './handler';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
 	import RowsPerPage from './RowsPerPage.svelte';
@@ -144,6 +144,7 @@
 		expectedCount?: number;
 		loading?: boolean;
 		onFilterChange?: (filters: Record<string, any>) => void;
+		onQueryChange?: (query: string) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
@@ -212,6 +213,7 @@
 		expectedCount = undefined,
 		loading = false,
 		onFilterChange = () => {},
+		onQueryChange = () => {},
 		quickFilters,
 		optButton,
 		selectButton,
@@ -328,7 +330,7 @@
 	 * Open the object a row points at, rather than the row itself. Returns true when it
 	 * handled the click. The PATCH is fire-and-forget so navigation never waits on it.
 	 */
-	function followRowNavigation(rowMetaData: Record<string, any>): boolean {
+	function followRowNavigation(rowMetaData: Record<string, any>, newTab: boolean): boolean {
 		const nav = listViewFields[URLModel]?.rowNavigation;
 		if (!nav) return false;
 
@@ -354,7 +356,10 @@
 			return true;
 		}
 
-		goto(`/${targetModel}/${targetId}`, { breadcrumbAction: 'push' });
+		if (newTab) {
+			window.open(`/${targetModel}/${targetId}`, '_blank', 'noopener');
+			marked.finally(() => handler.invalidate());
+		} else goto(`/${targetModel}/${targetId}`, { breadcrumbAction: 'push' });
 		return true;
 	}
 
@@ -365,7 +370,14 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
 
-		if (followRowNavigation(rowMetaData)) return;
+		const newTab = event.metaKey || event.ctrlKey;
+		if (followRowNavigation(rowMetaData, newTab)) return;
+
+		const detailURL = `/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`;
+		if (newTab) {
+			window.open(detailURL, '_blank', 'noopener');
+			return;
+		}
 
 		const preferredLabel =
 			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
@@ -377,7 +389,7 @@
 			rowMetaData.label ||
 			rowMetaData[identifierField];
 
-		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
+		goto(detailURL, {
 			label,
 			breadcrumbAction: 'push'
 		});
@@ -463,6 +475,10 @@
 			return currentLoad;
 		};
 		handler.onChange((state: State) => {
+			const query = getParams(state);
+			query.delete('offset');
+			query.delete('limit');
+			onQueryChange(query.toString());
 			inFlight += 1;
 			// Per request, so a failure cannot mask a success that overlapped it.
 			let failed = false;
@@ -789,6 +805,15 @@
 		delete next[filterStoreKey];
 		$tableFilterStates = next;
 	}
+
+	const APPLIED_CONTROL_STATUS_PRESETS: Record<string, string> = {
+		to_do: 'preset-tonal-primary',
+		in_progress: 'preset-tonal-warning',
+		on_hold: 'preset-tonal-secondary',
+		active: 'preset-tonal-success',
+		degraded: 'preset-tonal-error',
+		deprecated: 'preset-tonal-surface'
+	};
 
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
 		// The badge background is a fixed hex color, so the text must be a fixed color too
@@ -1178,6 +1203,14 @@
 																			{@const itemHref = getRelatedFieldHref(key, val.id, {
 																				fallbackToDashedField: true
 																			})}
+																			{#if key === 'applied_controls' && val.status && val.status !== '--'}
+																				<span
+																					class="badge text-xs {APPLIED_CONTROL_STATUS_PRESETS[
+																						val.status
+																					] ?? 'preset-tonal-surface'}"
+																					>{safeTranslate(val.status)}</span
+																				>
+																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
 																					>{safeTranslate(val.str)}</Anchor

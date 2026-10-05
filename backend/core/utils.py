@@ -198,6 +198,7 @@ class RoleCodename(Enum):
     THIRD_PARTY_RESPONDENT = "BI-RL-TPR"
     AUDITEE = "BI-RL-ADE"
     TECHNICAL_TESTER = "BI-RL-TST"
+    USER_CREATOR = "BI-RL-UCR"
 
     def __str__(self) -> str:
         return self.value
@@ -208,6 +209,7 @@ class UserGroupCodename(Enum):
     GLOBAL_READER = "BI-UG-GAD"
     GLOBAL_APPROVER = "BI-UG-GAP"
     GLOBAL_AUDITEE = "BI-UG-GAE"
+    GLOBAL_USER_CREATOR = "BI-UG-GUC"
     DOMAIN_MANAGER = "BI-UG-DMA"
     ANALYST = "BI-UG-ANA"
     APPROVER = "BI-UG-APP"
@@ -467,6 +469,33 @@ BUILTIN_ROLE_TRANSLATIONS = {
         "ur": {"name": "بنیادی ریڈر"},
         "zh": {"name": "基线阅读者"},
     },
+    "BI-RL-UCR": {
+        "en": {"name": "User creator"},
+        "ar": {"name": "منشئ المستخدمين"},
+        "cs": {"name": "Tvůrce uživatelů"},
+        "da": {"name": "Brugeropretter"},
+        "de": {"name": "Benutzerersteller"},
+        "el": {"name": "Δημιουργός χρηστών"},
+        "es": {"name": "Creador de usuarios"},
+        "et": {"name": "Kasutajate looja"},
+        "fr": {"name": "Créateur d'utilisateurs"},
+        "hi": {"name": "उपयोगकर्ता निर्माता"},
+        "hr": {"name": "Kreator korisnika"},
+        "hu": {"name": "Felhasználólétrehozó"},
+        "id": {"name": "Pembuat pengguna"},
+        "it": {"name": "Creatore di utenti"},
+        "ko": {"name": "사용자 생성자"},
+        "lt": {"name": "Naudotojų kūrėjas"},
+        "nl": {"name": "Gebruikersaanmaker"},
+        "pl": {"name": "Twórca użytkowników"},
+        "pt": {"name": "Criador de usuários"},
+        "ro": {"name": "Creator de utilizatori"},
+        "sv": {"name": "Användarskapare"},
+        "tr": {"name": "Kullanıcı oluşturucu"},
+        "uk": {"name": "Творець користувачів"},
+        "ur": {"name": "صارف تخلیق کار"},
+        "zh": {"name": "用户创建者"},
+    },
 }
 
 
@@ -493,6 +522,7 @@ BUILTIN_USERGROUP_CODENAMES = {
     str(UserGroupCodename.GLOBAL_READER): str(RoleCodename.READER),
     str(UserGroupCodename.GLOBAL_APPROVER): str(RoleCodename.APPROVER),
     str(UserGroupCodename.GLOBAL_AUDITEE): str(RoleCodename.AUDITEE),
+    str(UserGroupCodename.GLOBAL_USER_CREATOR): str(RoleCodename.USER_CREATOR),
     str(UserGroupCodename.DOMAIN_MANAGER): str(RoleCodename.DOMAIN_MANAGER),
     str(UserGroupCodename.ANALYST): str(RoleCodename.ANALYST),
     str(UserGroupCodename.APPROVER): str(RoleCodename.APPROVER),

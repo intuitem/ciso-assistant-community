@@ -754,6 +754,7 @@
 										{#key refreshKey}
 											<AutocompleteSelect
 												multiple
+												lazy
 												{form}
 												optionsEndpoint="applied-controls"
 												optionsDetailedUrlParameters={[
@@ -798,6 +799,7 @@
 										{#key refreshKey}
 											<AutocompleteSelect
 												multiple
+												lazy
 												{form}
 												optionsEndpoint="task-templates"
 												optionsExtraFields={[['folder', 'str']]}
@@ -835,6 +837,7 @@
 										{#key refreshKey}
 											<AutocompleteSelect
 												multiple
+												lazy
 												{form}
 												optionsEndpoint="evidences"
 												optionsExtraFields={[['folder', 'str']]}
@@ -869,6 +872,7 @@
 										{#key refreshKey}
 											<AutocompleteSelect
 												multiple
+												lazy
 												{form}
 												optionsEndpoint="security-exceptions"
 												optionsExtraFields={[['folder', 'str']]}
@@ -906,6 +910,7 @@
 											{#if canBindFinding}
 												<AutocompleteSelect
 													multiple
+													lazy
 													{form}
 													optionsEndpoint="findings"
 													optionsDetailedUrlParameters={[

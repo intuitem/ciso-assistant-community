@@ -119,6 +119,51 @@ def strip_thinking(text: str) -> str:
     return re.sub(r"<think>[\s\S]*?</think>\s*", "", text).lstrip()
 
 
+# Harmony-format models (gpt-oss and kin) tag their output with channels:
+# an `analysis` channel carrying the reasoning and a `final` channel carrying
+# the answer. A server that parses the format returns only the final channel,
+# but one that does not — or one pushed into constrained decoding — leaks the
+# analysis into `content`, where it reads as part of the answer. Leaks arrive
+# mangled as often as not (a stray `analysis<|message|>` with no opening
+# `<|channel|>`), so the markers are stripped wherever they appear rather than
+# only in well-formed pairs.
+# A final channel may carry headers of its own before the message, e.g.
+# `<|channel|>final <|constrain|>JSON<|message|>{...}`.
+_HARMONY_FINAL_RE = re.compile(
+    r"<\|channel\|>final[^<]*(?:<\|(?!message\|>)[^|]*\|>[^<]*)*"
+    r"<\|message\|>([\s\S]*?)(?:<\|(?:end|return)\|>|\Z)"
+)
+_HARMONY_ANALYSIS_RE = re.compile(
+    r"(?:<\|channel\|>)?(?:analysis|commentary)<\|message\|>[\s\S]*?"
+    r"(?:<\|(?:end|return)\|>|(?=<\|channel\|>)|\Z)"
+)
+_HARMONY_TOKENS_RE = re.compile(r"<\|(?:start|end|return|message|channel|constrain)\|>")
+
+
+def strip_reasoning(text: str) -> str:
+    """The answer, with a reasoning model's working-out removed.
+
+    Handles both conventions: `<think>` blocks, and harmony channels. When a
+    final channel is present it *is* the answer and everything else is
+    scaffolding; otherwise the analysis segments and any stray channel tokens
+    are cut. Text with neither convention comes back untouched.
+
+    This cannot rescue reasoning that landed *inside* a JSON field under
+    constrained decoding — nothing outside the model can. Give the schema its
+    own field for the working-out instead.
+    """
+    if not isinstance(text, str):
+        return text
+    text = strip_thinking(text)
+    if "<|" not in text and "analysis" not in text:
+        return text
+    final = _HARMONY_FINAL_RE.search(text)
+    if final:
+        return final.group(1).strip()
+    text = _HARMONY_ANALYSIS_RE.sub("", text)
+    return _HARMONY_TOKENS_RE.sub("", text).strip()
+
+
 def filter_thinking_tokens(
     token_stream: Iterator[str],
 ) -> Iterator[tuple[str, str]]:
@@ -210,6 +255,7 @@ class LLM(Protocol):
         directives: str = "",
         schema: dict | None = None,
         system_prompt: str | None = None,
+        max_output_tokens: int | None = None,
     ) -> str: ...
 
     def stream(
@@ -383,7 +429,7 @@ class OllamaLLM:
         self.system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
         self.temperature_enabled = temperature_enabled
         self.temperature = temperature
-        self.client = httpx.Client(timeout=120)
+        self.client = httpx.Client(timeout=llm_timeout())
 
     def _options(self) -> dict:
         return {"temperature": self.temperature} if self.temperature_enabled else {}
@@ -396,19 +442,30 @@ class OllamaLLM:
         directives: str = "",
         schema: dict | None = None,
         system_prompt: str | None = None,
+        max_output_tokens: int | None = None,
     ) -> str:
         messages = _build_messages(
             system_prompt or self.system_prompt, prompt, context, history, directives
         )
+        ceiling = max_output_tokens or llm_max_output_tokens()
         body: dict = {"model": self.model, "messages": messages, "stream": False}
-        if options := self._options():
-            body["options"] = options
+        body["options"] = {**self._options()}
+        if ceiling:
+            body["options"]["num_predict"] = ceiling
         if schema is not None:
             # Constrained decoding: valid JSON by construction.
             body["format"] = schema
         resp = self.client.post(f"{self.base_url}/api/chat", json=body)
         resp.raise_for_status()
-        return strip_thinking(resp.json()["message"]["content"])
+        payload = resp.json()
+        if _wants_whole_answer(schema, max_output_tokens) and (
+            payload.get("done_reason") == "length"
+        ):
+            raise TruncatedCompletion(
+                f"the model reached the {ceiling}-token ceiling "
+                "before finishing its answer"
+            )
+        return strip_reasoning(payload["message"]["content"])
 
     def _raw_stream(
         self,
@@ -429,7 +486,7 @@ class OllamaLLM:
             "POST",
             f"{self.base_url}/api/chat",
             json=body,
-            timeout=120,
+            timeout=llm_timeout(),
         ) as resp:
             for line in resp.iter_lines():
                 if line:
@@ -522,7 +579,7 @@ class OpenAICompatibleLLM:
         headers = {}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
-        self.client = httpx.Client(timeout=120, headers=headers)
+        self.client = httpx.Client(timeout=llm_timeout(), headers=headers)
         self._api_key = api_key
 
     def _chat_url(self) -> str:
@@ -536,11 +593,17 @@ class OpenAICompatibleLLM:
         directives: str = "",
         schema: dict | None = None,
         system_prompt: str | None = None,
+        max_output_tokens: int | None = None,
     ) -> str:
         messages = _build_messages(
             system_prompt or self.system_prompt, prompt, context, history, directives
         )
+        ceiling = max_output_tokens or llm_max_output_tokens()
         body: dict = {"messages": messages, "stream": False}
+        if ceiling:
+            # OpenAI's reasoning models reject `max_tokens` outright and take
+            # `max_completion_tokens`; everything else still wants the old name.
+            body[_token_limit_param(self.model)] = ceiling
         if self.model:
             body["model"] = self.model
         if self.temperature_enabled:
@@ -561,7 +624,17 @@ class OpenAICompatibleLLM:
             body["response_format"] = {"type": "json_object"}
             resp = self.client.post(self._chat_url(), json=body)
         resp.raise_for_status()
-        return strip_thinking(resp.json()["choices"][0]["message"]["content"])
+        choice = resp.json()["choices"][0]
+        if _wants_whole_answer(schema, max_output_tokens) and (
+            choice.get("finish_reason") == "length"
+        ):
+            raise TruncatedCompletion(
+                f"the model reached the {ceiling}-token ceiling "
+                "before finishing its answer"
+            )
+        return strip_reasoning(
+            _message_text(choice["message"], choice.get("finish_reason"))
+        )
 
     def _raw_stream(
         self,
@@ -589,7 +662,7 @@ class OpenAICompatibleLLM:
             self._chat_url(),
             json=body,
             headers=headers,
-            timeout=120,
+            timeout=llm_timeout(),
         ) as resp:
             for line in resp.iter_lines():
                 if not line or not line.startswith("data: "):
@@ -749,6 +822,7 @@ class StubLLM:
         directives: str = "",
         schema: dict | None = None,
         system_prompt: str | None = None,
+        max_output_tokens: int | None = None,
     ) -> str:
         return f"[No LLM configured — showing retrieved context]\n\n{context}"
 
@@ -938,6 +1012,82 @@ def get_llm() -> LLM:
     logger.info("no_llm_available", mode="retrieval-only")
     # Don't cache StubLLM — retry on next request in case LLM comes back
     return StubLLM()
+
+
+def _message_text(message: dict, finish_reason: str | None = None) -> str:
+    """The answer, wherever the server put it: some models return the whole
+    completion in `reasoning_content` and leave `content` empty. Beside an
+    answer the reasoning is thinking, so it is read only when `content` is —
+    and only when the model finished, since an interrupted run leaves
+    working-out there that no marker identifies as unfinished."""
+    content = (message.get("content") or "").strip()
+    if content:
+        return message["content"]
+    if finish_reason not in (None, "stop"):
+        return ""
+    return message.get("reasoning_content") or message.get("reasoning") or ""
+
+
+def llm_timeout() -> float:
+    """Seconds to wait on one generation. Read at call time, so a deployment
+    running a local reasoning model can raise it: with `stream: false` the
+    server sends nothing until the completion is finished, so this is the whole
+    generation, and an unbounded reasoning field can spend minutes on one
+    answer."""
+    from django.conf import settings
+
+    return float(getattr(settings, "LLM_REQUEST_TIMEOUT", 120))
+
+
+def _token_limit_param(model: str) -> str:
+    """OpenAI's o-series and GPT-5 reasoning models take `max_completion_tokens`
+    and reject `max_tokens`. Keyed on the model name because the endpoint is
+    "OpenAI-compatible": the same base URL serves both conventions."""
+    name = (model or "").rsplit("/", 1)[-1].lower()
+    reasoning = name.startswith(("o1", "o3", "o4", "gpt-5"))
+    return "max_completion_tokens" if reasoning else "max_tokens"
+
+
+#: What an unattended call asks for when nothing else says. A reasoning model
+#: on an unbounded field has no stopping condition of its own — one requirement
+#: here ran past 10,000 tokens — and a timeout only makes that a long wait.
+DEFAULT_MAX_OUTPUT_TOKENS = 2048
+
+
+def llm_max_output_tokens() -> int | None:
+    """The deployment's ceiling, if it set one; None leaves it to the provider.
+    Chat and the questionnaire are bounded by the conversation — a ceiling they
+    never asked for cuts a long answer, and on a reasoning model the thinking
+    alone can spend it."""
+    from django.conf import settings
+
+    configured = getattr(settings, "LLM_MAX_OUTPUT_TOKENS", None)
+    return int(configured) if configured else None
+
+
+def words_to_output_tokens(words: int) -> int:
+    """A ceiling that fits a word budget the caller already accepted: under two
+    tokens a word, plus slack for a preamble. A budget large enough to outrun
+    LLM_REQUEST_TIMEOUT fails on the timeout instead, which is why that bound is
+    configurable."""
+    return max(unattended_max_output_tokens(), words * 2 + 256)
+
+
+def unattended_max_output_tokens() -> int:
+    """For a call nobody is watching: the deployment's ceiling, else our own."""
+    return llm_max_output_tokens() or DEFAULT_MAX_OUTPUT_TOKENS
+
+
+def _wants_whole_answer(schema: dict | None, max_output_tokens: int | None) -> bool:
+    """Who hears about hitting the ceiling: a schema call, whose cut answer
+    cannot parse, and a caller that sized the ceiling itself."""
+    return schema is not None or max_output_tokens is not None
+
+
+class TruncatedCompletion(Exception):
+    """The model stopped because it ran out of tokens, not because it finished.
+    Raised only for schema-constrained calls, where a cut answer cannot parse
+    and would otherwise be reported as invalid JSON."""
 
 
 class NoLLMAvailable(Exception):

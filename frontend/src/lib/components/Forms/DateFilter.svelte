@@ -64,6 +64,10 @@
 
 	// Each preset returns the [from, to] pair it stands for; an empty bound is open-ended.
 	function presetRange(key: string): [string, string] {
+		if (key.startsWith('year:')) {
+			const year = Number(key.slice('year:'.length));
+			return [dayOf(year, 0, 1), dayOf(year, 11, 31)];
+		}
 		const now = new Date();
 		const [y, mo] = [now.getFullYear(), now.getMonth()];
 		switch (key) {
@@ -127,7 +131,15 @@
 		{ value: 'between', label: m.between() }
 	];
 
-	const PRESET_KEYS = new Set(PRESETS.map((p) => p.value));
+	// A one-click pick for any of the last few years, computed from today's date so the
+	// list never needs updating as time passes.
+	const CURRENT_YEAR = new Date().getFullYear();
+	const YEAR_PRESETS = Array.from({ length: 6 }, (_, i) => {
+		const year = CURRENT_YEAR - i;
+		return { value: `year:${year}`, label: String(year) };
+	});
+
+	const PRESET_KEYS = new Set([...PRESETS, ...YEAR_PRESETS].map((p) => p.value));
 	const needsFrom = $derived(['after', 'onOrAfter', 'on', 'between'].includes(op));
 	const needsTo = $derived(['before', 'onOrBefore', 'between'].includes(op));
 
@@ -170,6 +182,11 @@
 			<option value="any">{m.anyDate()}</option>
 			<optgroup label={m.dateQuickRanges()}>
 				{#each PRESETS as preset}
+					<option value={preset.value}>{preset.label}</option>
+				{/each}
+			</optgroup>
+			<optgroup label={m.year()}>
+				{#each YEAR_PRESETS as preset}
 					<option value={preset.value}>{preset.label}</option>
 				{/each}
 			</optgroup>

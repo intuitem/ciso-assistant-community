@@ -133,6 +133,11 @@ from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
+from core.domain_quality_checks import (
+    BLOCKS as DOMAIN_QUALITY_BLOCKS,
+    domain_quality_checks,
+    object_xrays,
+)
 from rest_framework import filters, generics, permissions, status, viewsets
 from custom_fields.filters import CustomFieldFilterBackend, CustomFieldSearchFilter
 from django.utils.translation import gettext_lazy as _, get_language
@@ -216,6 +221,10 @@ from .serializers import *
 
 from .models import Severity
 from . import dora
+from core.asset_graph import walk_asset_graph
+
+DEPENDENCY_GRAPH_LIMIT = 300
+DEPENDENCY_GRAPH_MAX_LIMIT = 2000
 from core.mappings.merge import compute_map_from_merge
 
 from serdes.utils import (
@@ -503,12 +512,14 @@ def escape_csv_row(row):
 
 
 ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+XLSX_MAX_CELL_CHARS = 32_767
 
 
 def sanitize_xlsx_value(value):
-    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)."""
+    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)
+    and cap strings at Excel's per-cell limit."""
     if isinstance(value, str):
-        return ILLEGAL_XLSX_CHARS_RE.sub("", value)
+        return ILLEGAL_XLSX_CHARS_RE.sub("", value)[:XLSX_MAX_CELL_CHARS]
     return value
 
 
@@ -1698,6 +1709,12 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         would succeed."""
         return []
 
+    def cascade_extra_deletions(self, instance):
+        """Objects a `destroy` override removes on top of the ORM cascade, for
+        links Django would only SET_NULL. Listed here so the cascade_info
+        preview reports them as deleted instead of "kept, loses a link"."""
+        return []
+
     def perform_destroy(self, instance):
         # resolve for "destroy" explicitly so batch_action can call this too
         serializer_class = self.get_serializer_class(action="destroy")
@@ -2096,6 +2113,17 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             return model is type(instance) and str(getattr(obj, "pk", "")) == str(
                 instance.pk
             )
+
+        # Roots a destroy override deletes explicitly cascade like the subject.
+        extra_roots = list(self.cascade_extra_deletions(instance))
+        if extra_roots:
+            extra_collector = NestedObjects(using=router.db_for_write(instance))
+            extra_collector.collect(extra_roots)
+            for model, objs in extra_collector.model_objs.items():
+                collector.model_objs.setdefault(model, set()).update(objs)
+            # PROTECT/RESTRICT blockers on the extra roots stop the real
+            # delete too, so they belong in the blocked bucket with the rest.
+            collector.protected.update(extra_collector.protected)
 
         deleted_index = set()
         for model, objs in collector.model_objs.items():
@@ -2769,6 +2797,7 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
     ] + [CustomFieldFilterBackend]
     search_fields = ["name", "description", "ref_id", "folder__name"]
     ordering = ["folder__name", "name"]
+    autocomplete_fields = ["type"]
 
     def get_queryset(self) -> models.query.QuerySet:
         qs = super().get_queryset().select_related("asset_class", "folder")
@@ -3127,6 +3156,110 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
             }
         )
 
+    @action(detail=True, methods=["get"], url_path="dependency-graph")
+    def dependency_graph(self, request, pk=None):
+        focus = self.get_object()
+        mode = request.query_params.get("mode", "chain")
+        if mode not in ("chain", "connected"):
+            return Response(
+                {"error": "mode must be chain or connected"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            max_hops = (
+                int(request.query_params["max_hops"])
+                if request.query_params.get("max_hops")
+                else None
+            )
+            limit = min(
+                int(request.query_params.get("limit", DEPENDENCY_GRAPH_LIMIT)),
+                DEPENDENCY_GRAPH_MAX_LIMIT,
+            )
+            expand = [uuid.UUID(v) for v in request.query_params.getlist("expand")]
+            reveal = [uuid.UUID(v) for v in request.query_params.getlist("reveal")]
+        except ValueError:
+            return Response(
+                {"error": "invalid max_hops, limit, expand or reveal"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if (max_hops is not None and max_hops < 1) or limit < 1:
+            return Response(
+                {"error": "max_hops and limit must be positive"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        walk = walk_asset_graph(
+            focus.id,
+            Asset.parent_assets.through.objects.values_list(
+                "from_asset_id", "to_asset_id"
+            ),
+            mode=mode,
+            max_hops=max_hops,
+            limit=limit,
+            expand=expand,
+            reveal=reveal,
+        )
+
+        viewable = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Asset).filter(
+                id__in=walk.order
+            )
+        )
+        assets = {
+            a.id: a
+            for a in Asset.objects.filter(id__in=viewable).select_related("folder")
+        }
+        placeholder = {}
+        for asset_id in walk.order:
+            if asset_id not in assets:
+                placeholder[asset_id] = f"hidden-{len(placeholder) + 1}"
+
+        def key(asset_id):
+            return placeholder.get(asset_id, str(asset_id))
+
+        folder_paths = {}
+        nodes = []
+        for asset_id in walk.order:
+            node = {
+                "id": key(asset_id),
+                "hops": walk.hops[asset_id],
+                "side": walk.side[asset_id],
+                "omitted": walk.omitted.get(asset_id, 0),
+                "elsewhere": walk.elsewhere.get(asset_id, 0),
+            }
+            asset = assets.get(asset_id)
+            if asset is None:
+                node["hidden"] = True
+            else:
+                folder = asset.folder
+                if folder.id not in folder_paths:
+                    folder_paths[folder.id] = folder.get_folder_full_path_string()
+                node.update(
+                    hidden=False,
+                    name=asset.name,
+                    ref_id=asset.ref_id,
+                    type=asset.type,
+                    folder={
+                        "id": str(folder.id),
+                        "str": folder.name,
+                        "path": folder_paths[folder.id],
+                    },
+                )
+            nodes.append(node)
+
+        return Response(
+            {
+                "focus": str(focus.id),
+                "mode": mode,
+                "truncated": walk.truncated,
+                "nodes": nodes,
+                "edges": [
+                    {"source": key(parent), "target": key(child)}
+                    for parent, child in walk.edges
+                ],
+            }
+        )
+
     @action(detail=False, name="Get assets graph")
     def graph(self, request):
         nodes = []
@@ -3392,6 +3525,16 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="add_asset"),
+                folder=folder,
+            ):
+                return Response(
+                    {"error": "You do not have permission to add assets here"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
             # Parse the assets text with indentation (2 spaces per level)
             lines = [line.rstrip() for line in assets_text.split("\n") if line.strip()]
             created_assets = []
@@ -3399,110 +3542,140 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
             errors = []
             depth_stack = []  # Stack of assets at each depth level
 
-            for line in lines:
-                # Count leading spaces and calculate depth (2 spaces = 1 level)
-                leading_spaces = len(line) - len(line.lstrip())
-                depth = leading_spaces // 2
-                line_content = line.strip()
+            try:
+                with transaction.atomic():
+                    for line in lines:
+                        # Count leading spaces and calculate depth (2 spaces = 1 level)
+                        leading_spaces = len(line) - len(line.lstrip())
+                        depth = leading_spaces // 2
+                        line_content = line.strip()
 
-                # Check for type prefix (SP: or PR:)
-                asset_type = Asset.Type.SUPPORT  # default
-                asset_name = line_content
+                        # Check for type prefix (SP: or PR:)
+                        asset_type = Asset.Type.SUPPORT  # default
+                        asset_name = line_content
 
-                if line_content.upper().startswith("SP:"):
-                    asset_type = Asset.Type.SUPPORT
-                    asset_name = line_content[3:].strip()
-                elif line_content.upper().startswith("PR:"):
-                    asset_type = Asset.Type.PRIMARY
-                    asset_name = line_content[3:].strip()
+                        if line_content.upper().startswith("SP:"):
+                            asset_type = Asset.Type.SUPPORT
+                            asset_name = line_content[3:].strip()
+                        elif line_content.upper().startswith("PR:"):
+                            asset_type = Asset.Type.PRIMARY
+                            asset_name = line_content[3:].strip()
 
-                if not asset_name:
-                    errors.append({"line": line_content, "error": "Empty asset name"})
-                    continue
+                        if not asset_name:
+                            errors.append(
+                                {"line": line_content, "error": "Empty asset name"}
+                            )
+                            continue
 
-                # Trim stack to current depth
-                depth_stack = depth_stack[:depth]
+                        # Trim stack to current depth
+                        depth_stack = depth_stack[:depth]
 
-                # Parent is the asset at the previous depth level (skip None entries from errors)
-                parent_asset = None
-                if depth_stack:
-                    # Find the last non-None entry in the stack
-                    for i in range(len(depth_stack) - 1, -1, -1):
-                        if depth_stack[i] is not None:
-                            parent_asset = depth_stack[i]
-                            break
+                        # Parent is the asset at the previous depth level (skip None entries from errors)
+                        parent_asset = None
+                        if depth_stack:
+                            # Find the last non-None entry in the stack
+                            for i in range(len(depth_stack) - 1, -1, -1):
+                                if depth_stack[i] is not None:
+                                    parent_asset = depth_stack[i]
+                                    break
 
-                # Check if asset already exists in the folder
-                existing_asset = Asset.objects.filter(
-                    name=asset_name, folder=folder
-                ).first()
+                        # Check if asset already exists in the folder
+                        existing_asset = Asset.objects.filter(
+                            name=asset_name, folder=folder
+                        ).first()
 
-                if existing_asset:
-                    # Reuse existing asset
-                    asset = existing_asset
+                        if existing_asset:
+                            # Reuse existing asset
+                            asset = existing_asset
 
-                    # Update parent relationship if needed and parent exists
-                    if parent_asset and parent_asset not in asset.parent_assets.all():
-                        asset.parent_assets.add(parent_asset)
+                            linked_parent = parent_asset
+                            # Update parent relationship if needed and parent exists
+                            if (
+                                parent_asset
+                                and parent_asset not in asset.parent_assets.all()
+                            ):
+                                link = AssetWriteSerializer(
+                                    asset,
+                                    data={
+                                        "parent_assets": [
+                                            *asset.parent_assets.values_list(
+                                                "id", flat=True
+                                            ),
+                                            parent_asset.id,
+                                        ]
+                                    },
+                                    partial=True,
+                                    context={"request": request},
+                                )
+                                if link.is_valid():
+                                    link.save()
+                                else:
+                                    linked_parent = None
+                                    errors.append(
+                                        {"line": line_content, "errors": link.errors}
+                                    )
 
-                    # Add to stack for potential children
-                    depth_stack.append(asset)
+                            # Add to stack for potential children
+                            depth_stack.append(asset)
 
-                    reused_assets.append(
-                        {
-                            "id": str(asset.id),
-                            "name": asset.name,
-                            "type": asset.get_type_display(),
-                            "parent": parent_asset.name if parent_asset else None,
-                            "depth": depth,
-                        }
-                    )
-                else:
-                    # Create new asset using the serializer to respect IAM
-                    asset_data = {
-                        "name": asset_name,
-                        "type": asset_type,
-                        "folder": str(folder.id),
-                    }
+                            reused_assets.append(
+                                {
+                                    "id": str(asset.id),
+                                    "name": asset.name,
+                                    "type": asset.get_type_display(),
+                                    "parent": linked_parent.name
+                                    if linked_parent
+                                    else None,
+                                    "depth": depth,
+                                }
+                            )
+                        else:
+                            # Create new asset using the serializer to respect IAM
+                            asset_data = {
+                                "name": asset_name,
+                                "type": asset_type,
+                                "folder": str(folder.id),
+                            }
 
-                    # Add parent relationship if exists
-                    if parent_asset:
-                        asset_data["parent_assets"] = [parent_asset.id]
+                            # Add parent relationship if exists
+                            if parent_asset:
+                                asset_data["parent_assets"] = [parent_asset.id]
 
-                    serializer = AssetWriteSerializer(
-                        data=asset_data, context={"request": request}
-                    )
-
-                    if serializer.is_valid():
-                        try:
-                            asset = serializer.save()
-                        except PermissionDenied as e:
-                            return Response(
-                                {"error": e.detail},
-                                status=status.HTTP_403_FORBIDDEN,
+                            serializer = AssetWriteSerializer(
+                                data=asset_data, context={"request": request}
                             )
 
-                        # Add to stack for potential children
-                        depth_stack.append(asset)
+                            if serializer.is_valid():
+                                asset = serializer.save()
 
-                        created_assets.append(
-                            {
-                                "id": str(asset.id),
-                                "name": asset.name,
-                                "type": asset.get_type_display(),
-                                "parent": parent_asset.name if parent_asset else None,
-                                "depth": depth,
-                            }
-                        )
-                    else:
-                        # Error creating asset - add None to stack to maintain depth
-                        depth_stack.append(None)
-                        errors.append(
-                            {
-                                "line": line_content,
-                                "errors": serializer.errors,
-                            }
-                        )
+                                # Add to stack for potential children
+                                depth_stack.append(asset)
+
+                                created_assets.append(
+                                    {
+                                        "id": str(asset.id),
+                                        "name": asset.name,
+                                        "type": asset.get_type_display(),
+                                        "parent": parent_asset.name
+                                        if parent_asset
+                                        else None,
+                                        "depth": depth,
+                                    }
+                                )
+                            else:
+                                # Error creating asset - add None to stack to maintain depth
+                                depth_stack.append(None)
+                                errors.append(
+                                    {
+                                        "line": line_content,
+                                        "errors": serializer.errors,
+                                    }
+                                )
+            except PermissionDenied as e:
+                return Response(
+                    {"error": e.detail},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
             return Response(
                 {
@@ -3520,7 +3693,7 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         except Exception as e:
             logger.error("Error in batch asset creation", error=e)
             return Response(
-                {"error": str(e)},
+                {"error": "Batch asset creation failed"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -3544,6 +3717,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
     """
 
     model = ReferenceControl
+    autocomplete_fields = ["category"]
     filterset_fields = [
         "folder",
         "category",
@@ -3819,6 +3993,10 @@ class RiskMatrixViewSet(BaseModelViewSet):
                 if not isinstance(val, int) or val < 0 or val >= len(risk):
                     errors.append(f"Grid cell [{i}][{j}] has invalid risk index {val}.")
 
+        from ebios_rm.rating_kit import validate as validate_ebios_rm
+
+        errors.extend(validate_ebios_rm(json_def.get("ebios_rm"), len(probability)))
+
         for category_name, levels in [
             ("probability", probability),
             ("impact", impact),
@@ -3862,36 +4040,20 @@ class VulnerabilityViewSet(BaseModelViewSet):
     }
     search_fields = ["name", "description", "ref_id"]
 
+    autocomplete_serializer_class = VulnerabilityAutocompleteSerializer
+
     def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .prefetch_related(
-                "applied_controls",
-                "assets",
-                "security_exceptions",
-                "security_advisories",
-                "cwes",
-                "filtering_labels__folder",
-            )
+        qs = super().get_queryset()
+        if self.action == "autocomplete":
+            return qs
+        return qs.prefetch_related(
+            "applied_controls",
+            "assets",
+            "security_exceptions",
+            "security_advisories",
+            "cwes",
+            "filtering_labels__folder",
         )
-
-    @action(detail=False, name="Lightweight autocomplete search")
-    def autocomplete(self, request):
-        from core.serializers import VulnerabilityReadSerializer
-
-        qs = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(qs)
-        objects = page if page is not None else qs
-        serializer = VulnerabilityReadSerializer(objects, many=True)
-        data = serializer.data
-        field_models = self._get_fieldsrelated_map(serializer)
-        if field_models:
-            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
-            data = self._filter_related_fields(data, field_models, allowed_ids)
-        if page is not None:
-            return self.get_paginated_response(data)
-        return Response(data)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -4178,7 +4340,18 @@ class RiskAssessmentFilterSet(GenericFilterSet):
         return queryset.filter(status__in=value)
 
 
-class RiskAssessmentViewSet(BaseModelViewSet):
+class XRaysMixin:
+    @action(detail=True, methods=["get"], url_path="x-rays")
+    def x_rays(self, request, pk):
+        obj = self.get_object()
+        if isinstance(
+            obj, ComplianceAssessment
+        ) and obj.folder_id in get_respondent_scoped_folder_ids(request.user):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return Response(object_xrays(obj, request.user))
+
+
+class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
     """
     API endpoint that allows risk assessments to be viewed or edited.
     """
@@ -4892,6 +5065,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     name=scenario.name,
                     description=scenario.description,
                     treatment=scenario.treatment,
+                    inherent_proba=scenario.inherent_proba,
+                    inherent_impact=scenario.inherent_impact,
                     current_proba=scenario.current_proba,
                     current_impact=scenario.current_impact,
                     residual_proba=scenario.residual_proba,
@@ -7549,6 +7724,7 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
     filterset_class = RiskScenarioFilter
     ordering = ["ref_id"]
     search_fields = ["name", "description", "ref_id"]
+    autocomplete_serializer_class = RiskScenarioAutocompleteSerializer
 
     export_config = {
         "fields": {
@@ -7689,6 +7865,8 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        if self.action == "autocomplete":
+            return queryset.select_related("risk_assessment")
         return queryset.select_related(
             "risk_assessment",
             "risk_assessment__risk_matrix",
@@ -8355,6 +8533,7 @@ class ActorViewSet(BaseModelViewSet):
     http_method_names = ["get", "head", "options"]
 
     model = Actor
+    autocomplete_fields = ["type"]
     # An actor is searched through whichever of user/team/entity it wraps: with no
     # search fields the lazy pickers returned an unfiltered, page-capped list.
     search_fields = [
@@ -9234,7 +9413,11 @@ class FolderViewSet(BaseModelViewSet):
             "include_enclaves", "False"
         ).lower() in ["true", "1", "yes"]
 
-        viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        # A set: the tree builders test membership once per folder, and `in` on a
+        # QuerySet scans its cached list, which is quadratic in the folder count.
+        viewable_objects = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        )
 
         children_by_parent, parent_of, perimeters_by_folder = build_folder_indexes(
             include_perimeters=include_perimeters
@@ -9348,11 +9531,13 @@ class FolderViewSet(BaseModelViewSet):
         )
         viewable_ra_ids = RoleAssignment.get_viewable_object_ids(user, RiskAssessment)
 
+        domain_checks = domain_quality_checks(folders, user)
         res = {
             str(f.id): {
                 "folder": {"id": f.id, "name": f.name},
                 "compliance_assessments": {"objects": {}},
                 "risk_assessments": {"objects": {}},
+                **domain_checks[str(f.id)],
             }
             for f in folders
         }
@@ -9375,6 +9560,8 @@ class FolderViewSet(BaseModelViewSet):
     @staticmethod
     def _has_findings(folder_entry) -> bool:
         return any(
+            folder_entry[block]["count"] for block in DOMAIN_QUALITY_BLOCKS
+        ) or any(
             assessment["quality_check"]["count"]
             for group in ("compliance_assessments", "risk_assessments")
             for assessment in folder_entry[group]["objects"].values()
@@ -9748,6 +9935,14 @@ class UserPreferencesView(APIView):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 ui_prefs["landing"] = new_landing
+            if "onboarding_dismissed" in new_ui:
+                new_dismissed = new_ui.get("onboarding_dismissed")
+                if not isinstance(new_dismissed, bool):
+                    return Response(
+                        {"error": "onboarding_dismissed must be a boolean."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                ui_prefs["onboarding_dismissed"] = new_dismissed
             prefs["ui"] = ui_prefs
 
         if "feature_flags" in request.data:
@@ -10214,6 +10409,10 @@ class FrameworkViewSet(BaseModelViewSet):
             has_compliance_assessments_flag=Exists(
                 ComplianceAssessment.objects.filter(framework=OuterRef("pk"))
             ),
+            scale_bound_flag=ExpressionWrapper(
+                Framework.scale_bound_q(OuterRef("pk")),
+                output_field=models.BooleanField(),
+            ),
         )
 
         return qs
@@ -10530,7 +10729,9 @@ class FrameworkViewSet(BaseModelViewSet):
         detail=True, methods=["get"], name="Get framework coverage data from mappings"
     )
     def mapping_stats(self, request, pk):
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         framework_urn = Framework.objects.filter(id=pk).values_list("urn")[0][0]
         res = engine.paths_and_coverages(framework_urn)
@@ -12304,7 +12505,7 @@ class ComplianceAssessmentFilterSet(GenericFilterSet):
         return queryset.exclude(entityassessment__isnull=False)
 
 
-class ComplianceAssessmentViewSet(BaseModelViewSet):
+class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
     """
@@ -12346,7 +12547,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ).get(id=has_mapping_path_to)
             except ComplianceAssessment.DoesNotExist, ValueError:
                 return qs.none()
-            from core.mappings.engine import engine
+            from core.mappings.engine import MappingEngine
+
+            engine = MappingEngine()
 
             max_depth = get_mapping_max_depth()
             source_urns = engine.get_source_framework_urns(
@@ -12368,6 +12571,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         replacing the Count(distinct=True) annotations dropped from the
         list queryset. Bounded by `len(queryset)` (≤ page size), so the
         cost is independent of the total RA table size.
+        """
+        optimized_data = super()._get_optimized_object_data(queryset)
+        audit_ids = [a.id for a in queryset]
+        if not audit_ids:
+            return optimized_data
+
+        total_map, assessed_map = self.get_requirement_counts(audit_ids)
+        optimized_data["total_requirements"] = total_map
+        optimized_data["assessed_requirements"] = assessed_map
+        return optimized_data
+
+    @staticmethod
+    def get_requirement_counts(audit_ids) -> tuple[dict, dict]:
+        """(total, assessed) assessable requirement counts per audit id.
 
         Audits without implementation groups go through per-mode GROUP BY
         buckets; audits with implementation groups share one scalar
@@ -12375,11 +12592,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         two JSON lists, which SQL can't do).
         """
         from core.models import Question
-
-        optimized_data = super()._get_optimized_object_data(queryset)
-        audit_ids = [a.id for a in queryset]
-        if not audit_ids:
-            return optimized_data
 
         # The progress mode (status visible = status-driven) and the content
         # branches are audit-level facts known before querying, so audits are
@@ -12536,9 +12748,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ):
                     assessed_map[ca_id] += 1
 
-        optimized_data["total_requirements"] = total_map
-        optimized_data["assessed_requirements"] = assessed_map
-        return optimized_data
+        return total_map, assessed_map
 
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
@@ -12631,7 +12841,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     )
     def frameworks(self, request, pk):
         audit = self.get_object()
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         audit_from_results = engine.load_audit_fields(audit)
         max_depth = get_mapping_max_depth()
@@ -13588,33 +13800,50 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         create_applied_controls = serializer.validated_data.pop(
             "create_applied_controls_from_suggestions", False
         )
-        from core.mappings.engine import engine
 
         with transaction.atomic():
             instance: ComplianceAssessment = serializer.save()
             instance.create_requirement_assessments(baseline)
 
             if baseline and baseline.framework != instance.framework:
+                # Built here rather than above: it reads the whole mapping
+                # graph, and most audits are created without a baseline.
+                from core.mappings.engine import MappingEngine
+
+                engine = MappingEngine()
+
                 source_urn = baseline.framework.urn
                 audit_from_results = engine.load_audit_fields(baseline)
                 dest_urn = serializer.validated_data["framework"].urn
                 max_depth = get_mapping_max_depth()
 
                 best_results, _ = engine.best_mapping_inferences(
-                    audit_from_results, source_urn, dest_urn, max_depth
+                    audit_from_results,
+                    source_urn,
+                    dest_urn,
+                    max_depth,
+                    target_range=(instance.min_score, instance.max_score),
                 )
+                # Empty when no mapping path exists between the two
+                # frameworks, which is a legitimate outcome: the audit is
+                # created, just not pre-filled.
+                inferences = best_results.get("requirement_assessments", {})
+                if not inferences:
+                    logger.warning(
+                        "No mapping path between the baseline and the target framework",
+                        source=source_urn,
+                        dest=dest_urn,
+                    )
 
                 requirement_assessments_to_update: list[RequirementAssessment] = []
 
                 target_requirement_assessments = RequirementAssessment.objects.filter(
                     compliance_assessment=instance,
-                    requirement__urn__in=best_results["requirement_assessments"],
+                    requirement__urn__in=inferences,
                 )
 
                 for req in target_requirement_assessments:
-                    source = best_results["requirement_assessments"][
-                        req.requirement.urn
-                    ]
+                    source = inferences[req.requirement.urn]
                     for field in [
                         "result",
                         "status",
@@ -13647,37 +13876,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for ra in requirement_assessments_to_update:
-                    if best_results["requirement_assessments"][ra.requirement.urn].get(
-                        "applied_controls"
-                    ):
+                    if inferences[ra.requirement.urn].get("applied_controls"):
                         ra.applied_controls.add(
                             *[
                                 control
-                                for control in best_results["requirement_assessments"][
-                                    ra.requirement.urn
-                                ]["applied_controls"]
+                                for control in inferences[ra.requirement.urn][
+                                    "applied_controls"
+                                ]
                             ]
                         )
-                    if best_results["requirement_assessments"][ra.requirement.urn].get(
-                        "evidences"
-                    ):
+                    if inferences[ra.requirement.urn].get("evidences"):
                         ra.evidences.add(
                             *[
                                 evidence
-                                for evidence in best_results["requirement_assessments"][
-                                    ra.requirement.urn
-                                ]["evidences"]
+                                for evidence in inferences[ra.requirement.urn][
+                                    "evidences"
+                                ]
                             ]
                         )
-                    if best_results["requirement_assessments"][ra.requirement.urn].get(
-                        "security_exceptions"
-                    ):
+                    if inferences[ra.requirement.urn].get("security_exceptions"):
                         ra.security_exceptions.add(
                             *[
                                 exception
-                                for exception in best_results[
-                                    "requirement_assessments"
-                                ][ra.requirement.urn]["security_exceptions"]
+                                for exception in inferences[ra.requirement.urn][
+                                    "security_exceptions"
+                                ]
                             ]
                         )
 
@@ -13785,16 +14008,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """Returns the global score of the compliance assessment"""
         compliance_assessment = self.get_object()
         scores = compliance_assessment.get_global_score()
-        # Source of truth is the CA copy (set at save() and customisable
-        # independently of the framework). Fall back to the framework's
-        # translated definition for the labels.
-        scores_definition = compliance_assessment.scores_definition
-        if not scores_definition:
-            scores_definition = get_referential_translation(
-                compliance_assessment.framework, "scores_definition", get_language()
-            )
-        if isinstance(scores_definition, dict) and "scale" in scores_definition:
-            scores_definition = scores_definition["scale"]
+        # The audit's own copy is the only source of labels (the framework's are
+        # copied once, at creation); an empty list means no labels.
+        scores_definition = compliance_assessment.get_scale_levels() or []
         return Response(
             {
                 **scores,
@@ -13802,6 +14018,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "min_score": compliance_assessment.min_score,
                 "total_max_score": compliance_assessment.get_total_max_score(),
                 "scores_definition": scores_definition,
+                "score_scale_preset": compliance_assessment.score_scale_preset,
+                "framework": str(compliance_assessment.framework_id),
                 "scoring_enabled": compliance_assessment.scoring_enabled,
                 "show_documentation_score": compliance_assessment.show_documentation_score,
                 "score_calculation_method": compliance_assessment.score_calculation_method,
@@ -14943,7 +15161,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         target_ras = target_data["requirement_assessments"]
         current_results = engine.summary_results(target_data)
@@ -16266,7 +16486,9 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="graph-data")
     def graph_data_list(self, request):
-        from core.mappings.engine import engine
+        from core.mappings.engine import MappingEngine
+
+        engine = MappingEngine()
 
         max_depth = get_mapping_max_depth()
 
