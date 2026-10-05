@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy, tick, untrack } from 'svelte';
+	import { get } from 'svelte/store';
 	import { beforeNavigate } from '$app/navigation';
 	import {
 		createBuilderState,
@@ -16,7 +17,8 @@
 	import {
 		localeLabel,
 		createCopyHandler,
-		createHandleGatedDragHandlers
+		createHandleGatedDragHandlers,
+		REFERENCEABLE_MODELS
 	} from './builder-utils.svelte';
 	import { locales as supportedLocales } from '$paraglide/runtime';
 	import { m } from '$paraglide/messages';
@@ -215,6 +217,23 @@
 			(q) => q.urn.toLowerCase() === ($frameworkStore.subject_question_urn ?? '').toLowerCase()
 		)?.config?.model as string | undefined) ?? null
 	);
+
+	// What a new subject question will point at; vendors first, the common case.
+	let newSubjectModel = $state<string>('entity');
+
+	/** Add a single-object question at the top of the first page and make it the
+	 * subject, so an author never has to know that a subject is a question. */
+	function addSubjectQuestion(model: string) {
+		if (!get(builder.rootNodes).length) builder.addNode({ parent: null });
+		const page = get(builder.rootNodes)[0]?.node;
+		if (!page) return;
+		const question = builder.addQuestion(page.id, 'object_reference' as Question['type']);
+		if (!question) return;
+		builder.updateQuestion(question.id, { text: safeTranslate(model), config: { model } });
+		const count = get(builder.rootNodes)[0].questions.length;
+		if (count > 1) builder.reorderQuestions(page.id, count - 1, 0);
+		builder.updateFramework({ subject_question_urn: question.urn });
+	}
 
 	// Pages as rules address them (`pages["<node id>"]`), named for the author.
 	let rulePages = $derived(
@@ -733,6 +752,30 @@
 										{/each}
 									</select>
 									<span class="text-xs text-surface-500">{m.builderSubjectQuestionHint()}</span>
+									{#if !subjectCandidates.length}
+										<span
+											class="mt-1.5 flex flex-wrap items-center gap-2"
+											data-testid="add-subject"
+										>
+											<select
+												class="text-xs border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
+												aria-label={m.builderReferenceModel()}
+												bind:value={newSubjectModel}
+											>
+												{#each REFERENCEABLE_MODELS as model}
+													<option value={model}>{safeTranslate(model)}</option>
+												{/each}
+											</select>
+											<button
+												type="button"
+												class="btn btn-sm preset-tonal-primary"
+												onclick={() => addSubjectQuestion(newSubjectModel)}
+												data-testid="add-subject-question"
+											>
+												<i class="fa-solid fa-plus mr-1"></i>{m.builderAddSubjectQuestion()}
+											</button>
+										</span>
+									{/if}
 								</label>
 							{/if}
 
@@ -967,6 +1010,7 @@
 									value={($frameworkStore.on_accept ?? []) as any[]}
 									rules={$frameworkStore.outcomes_definition ?? []}
 									{subjectModel}
+									onaddvendorsubject={() => addSubjectQuestion('entity')}
 									onupdate={(on_accept) => builder.updateFramework({ on_accept })}
 								/>
 							{/if}

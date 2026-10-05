@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
 	import { deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
@@ -7,6 +8,7 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { isDark } from '$lib/utils/helpers';
 	import { m } from '$paraglide/messages';
 	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import { urlModelForDjangoName, localNameForDjangoName } from '$lib/utils/crud';
@@ -181,6 +183,7 @@
 	}
 
 	const statusColor: Record<string, string> = {
+		draft: 'preset-tonal',
 		in_progress: 'preset-filled-primary-500',
 		submitted: 'preset-filled-warning-500',
 		closed: 'preset-filled-success-500'
@@ -199,7 +202,7 @@
 					· {response.folder?.str}
 				</p>
 			</div>
-			<span class="badge {statusColor[response.status] ?? 'preset-filled-surface-500'}">
+			<span class="badge {statusColor[response.status] ?? 'preset-tonal'}">
 				{safeTranslate(response.status)}
 			</span>
 		</div>
@@ -232,14 +235,23 @@
 		</div>
 
 		{#if canEditAnswers && missingRequired.length}
-			<aside
-				class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950/40"
+			<!-- Collapsed by default: the list shrinks with every answer, and an open
+			     list above the questions would move them under the cursor. -->
+			<details
+				class="group rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950/40"
+				data-testid="missing-required"
 			>
-				<div class="font-medium text-amber-900 dark:text-amber-200">
-					<i class="fa-solid fa-circle-exclamation mr-1"></i>
+				<summary
+					class="flex cursor-pointer list-none items-center gap-1.5 font-medium text-amber-900 dark:text-amber-200"
+				>
+					<i class="fa-solid fa-circle-exclamation"></i>
 					{m.quickFormMissingRequired({ count: missingRequired.length })}
-				</div>
-				<ul class="mt-1 list-inside list-disc text-xs text-amber-800 dark:text-amber-300">
+					<i
+						class="fa-solid fa-chevron-down ml-auto text-xs transition-transform group-open:rotate-180"
+						aria-hidden="true"
+					></i>
+				</summary>
+				<ul class="mt-2 list-inside list-disc text-xs text-amber-800 dark:text-amber-300">
 					{#each missingRequired as q (q.urn)}
 						<li>
 							{q.text}{#if q.page}<span class="text-amber-600 dark:text-amber-400">
@@ -248,7 +260,7 @@
 						</li>
 					{/each}
 				</ul>
-			</aside>
+			</details>
 		{/if}
 
 		{#if canEditAnswers}
@@ -280,11 +292,12 @@
 					>{m.computedOutcomes()}</span
 				>
 				{#each Object.entries(content.computed_outcome) as [refId, payload]}
+					{@const color = (payload as any)?.color}
 					<span
 						class="badge preset-tonal"
-						style={(payload as any)?.color ? `background:${(payload as any).color}` : ''}
+						style={color ? `background:${color};color:${isDark(color) ? 'white' : 'black'}` : ''}
 					>
-						{(payload as any)?.label ?? (payload as any)?.annotation ?? refId}
+						{ruleLabel(payload as any, refId)}
 					</span>
 				{/each}
 			</div>
@@ -299,7 +312,7 @@
 				{#each Object.entries(content.computed_values) as [refId, value]}
 					{@const rule = rules.find((r) => r.ref_id === refId)}
 					<span class="text-sm">
-						<span class="text-surface-600-400">{rule?.label ?? rule?.annotation ?? refId}</span>
+						<span class="text-surface-600-400">{ruleLabel(rule, refId)}</span>
 						<span class="font-mono font-semibold ml-1"
 							>{Number.isInteger(value) ? value : (value as number).toFixed(2)}</span
 						>

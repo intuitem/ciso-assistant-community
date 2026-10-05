@@ -1044,7 +1044,7 @@ export interface BuilderStore {
 	setDisplayMode: (nodeId: string, mode: 'default' | 'splash') => void;
 
 	updateNode: (nodeId: string, patch: Record<string, unknown>) => void;
-	addQuestion: (reqNodeId: string, type?: Question['type']) => void;
+	addQuestion: (reqNodeId: string, type?: Question['type']) => Question | undefined;
 	updateQuestion: (questionId: string, patch: Record<string, unknown>) => void;
 	deleteQuestion: (reqNodeId: string, qIndex: number) => void;
 	addChoice: (reqNodeId: string, qIndex: number) => void;
@@ -1572,7 +1572,7 @@ export function createBuilderState(
 
 	// --- Question CRUD (node ID-based) ---
 
-	function addQuestion(reqNodeId: string, type: Question['type'] = 'text') {
+	function addQuestion(reqNodeId: string, type: Question['type'] = 'text'): Question | undefined {
 		const req = findReqGlobal(reqNodeId);
 		if (!req) return;
 		const order = req.questions.length * 100;
@@ -1607,6 +1607,7 @@ export function createBuilderState(
 			}))
 		);
 		markDirty();
+		return newQuestion;
 	}
 
 	function updateQuestion(questionId: string, patch: Record<string, unknown>) {

@@ -14,9 +14,11 @@
 		/** Model of the form's subject question, e.g. "entity"; null without one. */
 		subjectModel: string | null;
 		onupdate: (value: Entry[]) => void;
+		/** Adds a vendor question and makes it the subject. */
+		onaddvendorsubject?: () => void;
 	}
 
-	let { value, rules, subjectModel, onupdate }: Props = $props();
+	let { value, rules, subjectModel, onupdate, onaddvendorsubject }: Props = $props();
 
 	const TIER_TARGET = 'entity.tier';
 
@@ -125,7 +127,19 @@
 		{m.onAcceptSetEntityTier()}
 	</label>
 	{#if !forVendors}
-		<p class="text-xs text-surface-500 pl-6">{m.onAcceptNeedsVendorSubject()}</p>
+		<div class="flex flex-wrap items-center gap-2 pl-6">
+			<p class="text-xs text-surface-500">{m.onAcceptNeedsVendorSubject()}</p>
+			{#if onaddvendorsubject}
+				<button
+					type="button"
+					class="btn btn-sm preset-tonal-primary"
+					onclick={onaddvendorsubject}
+					data-testid="on-accept-add-vendor-subject"
+				>
+					<i class="fa-solid fa-plus mr-1"></i>{m.onAcceptAddVendorSubject()}
+				</button>
+			{/if}
+		</div>
 	{/if}
 
 	{#if entry}

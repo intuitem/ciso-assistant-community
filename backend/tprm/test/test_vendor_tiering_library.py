@@ -109,6 +109,42 @@ def test_library_loads(form):
 
 
 @pytest.mark.django_db
+def test_french_reaches_every_text(form):
+    from django.utils import translation
+
+    # Every page, question, choice and rule carries French.
+    assert all(page["translations"]["fr"]["name"] for page in form["pages"])
+    for page in form["pages"]:
+        for question in page["questions"].values():
+            assert question["translations"]["fr"]["text"]
+            for choice in question.get("choices") or []:
+                assert choice["translations"]["fr"]["value"]
+    assert all(r["translations"]["fr"]["label"] for r in form["outcomes_definition"])
+
+    if not StoredLibrary.objects.filter(
+        urn="urn:intuitem:risk:library:vendor-tiering", is_loaded=True
+    ).exists():
+        stored = StoredLibrary.objects.filter(
+            urn="urn:intuitem:risk:library:vendor-tiering"
+        ).first()
+        if stored is None:
+            stored, error = StoredLibrary.store_library_content(LIBRARY.read_bytes())
+            assert error is None, error
+        assert stored.load() is None
+    quick_form = QuickForm.objects.get(
+        urn="urn:intuitem:risk:quick_form:vendor-tiering"
+    )
+    page = quick_form.pages.get(ref_id="data")
+    with translation.override("fr"):
+        assert quick_form.get_name_translated == "Criticité des fournisseurs"
+        assert page.get_name_translated == "Données, vie privée et sécurité"
+        questions = page.get_questions_translated()
+        d2 = questions[f"{P}:data:question:d2"]
+        assert d2["text"].startswith("Combien de personnes")
+        assert d2["choices"][1]["value"] == "Moins de 1 000"
+
+
+@pytest.mark.django_db
 def test_every_combination_matches_the_rules(form):
     Tier.objects.all().delete()
     Tier.create_default_tiers()

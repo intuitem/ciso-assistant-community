@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ruleLabel as labelOf } from './rule-label';
 	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
@@ -27,10 +28,11 @@
 	// Nothing resolved yet is the normal state of a form being filled, not an error.
 	const PENDING = new Set(['projectionPending', 'noTierResolved', 'valueMissing']);
 
-	const ruleLabel = (refId: string) => {
-		const rule = rules.find((r) => r.ref_id === refId);
-		return rule?.label ?? rule?.annotation ?? refId;
-	};
+	const ruleLabel = (refId: string) =>
+		labelOf(
+			rules.find((r) => r.ref_id === refId),
+			refId
+		);
 	const format = (value: number) => (Number.isInteger(value) ? String(value) : value.toFixed(2));
 </script>
 
@@ -40,17 +42,14 @@
 		: 'card bg-surface-50-950 shadow-sm p-4'}
 	data-testid="projection-card"
 >
-	<h3 class="text-xs font-semibold uppercase tracking-wide text-surface-500">
-		{m.projectedResult()}
-	</h3>
 	{#if note}
-		<p class="text-[11px] text-surface-500">{note}</p>
+		<p class="mb-2 text-[11px] text-surface-500">{note}</p>
 	{/if}
-	<div class="mt-3 space-y-3">
+	<div class="space-y-3">
 		{#each rows as row (row.target)}
 			<div class="space-y-1">
-				<div class="flex items-center justify-between gap-2 text-sm">
-					<span class="text-surface-600-400">{safeTranslate(row.label)}</span>
+				<div class="flex items-center justify-between gap-3 text-sm">
+					<span class="font-medium">{m.projectedTarget({ label: safeTranslate(row.label) })}</span>
 					{#if row.ok && row.extra?.hexcolor !== undefined}
 						<TierBadge cell={{ name: row.proposed ?? '', hexcolor: row.extra.hexcolor }} />
 					{:else if row.ok}

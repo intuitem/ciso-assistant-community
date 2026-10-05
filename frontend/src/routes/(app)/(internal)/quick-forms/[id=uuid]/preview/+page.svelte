@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
 	import { deserialize } from '$app/forms';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
@@ -76,7 +77,7 @@
 
 	const formatValue = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(2));
 
-	const label = (rule: any) => rule.label ?? rule.annotation ?? rule.ref_id;
+	const label = (rule: any) => ruleLabel(rule, rule.ref_id);
 </script>
 
 <!-- The fill view is a centred max-w-4xl column with page padding; the form column
