@@ -13,10 +13,18 @@ from .models import (
     WorkflowSecret,
     WorkflowVersion,
 )
-from .actions import AI_ACTION_TYPES, UPDATABLE_MODELS, _writable_values
+from .actions import (
+    AI_ACTION_TYPES,
+    CREATABLE_MODELS,
+    UPDATABLE_MODELS,
+    _creatable_values,
+    _writable_values,
+)
+from .actions import compute_rows as _compute_rows
 from .actions import validate_action_config as _validate_action_config
 from .actions import validate_read_config as _validate_read_config
 from .context import RESERVED_VARIABLE_KEYS
+from .expressions import referenced_paths
 from .triggers import validate_trigger_config
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
@@ -38,6 +46,9 @@ DISABLED_ACTION_TYPES = frozenset({"emit_event"})
 
 
 def validate_graph(version):
+    # Local: engine imports actions, actions is imported here.
+    from .engine import coerce_variable_value
+
     errors = []
     nodes = list(version.nodes.prefetch_related("branches"))
     edges = list(version.edges.all())
@@ -59,6 +70,21 @@ def validate_graph(version):
                     "rename this variable",
                 )
             )
+        # "" is how YAML and older graphs spell "no default".
+        if variable.default_value not in (None, ""):
+            # The editor writes typed defaults; YAML and older graphs may not.
+            # Same rule as the run dialog's seeds, so a default never fails
+            # where a seed would pass.
+            try:
+                coerce_variable_value(variable.default_value, variable.type)
+            except ValueError, TypeError:
+                errors.append(
+                    _error(
+                        "variable_default_invalid",
+                        f"'{variable.key}' has a default that is not a valid "
+                        f"{variable.type}",
+                    )
+                )
 
     loop_ids = {n.id for n in nodes if n.type == WorkflowNode.Type.LOOP}
     for edge in edges:
@@ -467,7 +493,26 @@ def _referenced_node_refs(node):
             node.loop_config or {},
         ]
     )
-    return set(NODE_REF_RE.findall(blob))
+    refs = set(NODE_REF_RE.findall(blob))
+    # compute expressions name outputs as bare `nodes.<ref>` paths, not
+    # {{...}} templates, so the regex above does not see them.
+    for path in _compute_paths(node):
+        segments = path.split(".")
+        if segments[0] == "nodes" and len(segments) > 1 and segments[1] != "*":
+            refs.add(segments[1])
+    return refs
+
+
+def _compute_paths(node):
+    """Every path a compute node's expressions read, or an empty set for any
+    other node."""
+    config = node.action_config or {}
+    if config.get("type") != "compute":
+        return set()
+    paths = set()
+    for _, expression in _compute_rows(config):
+        paths |= referenced_paths(expression)
+    return paths
 
 
 def _ai_sources(nodes):
@@ -490,37 +535,86 @@ def _ai_sources(nodes):
                 refs.add(node.ref)
             variables |= {str(key) for key in (node.output_mapping or {})}
         elif action_type == "set_variables":
-            setters.append(node)
+            setters.append((node, _set_variables_rows(node), _template_paths))
+        elif action_type == "compute":
+            # Same hop, other syntax: a compute row reads bare CEL paths
+            # instead of {{tokens}}, and a derived number is still a guess.
+            setters.append((node, _compute_rows(node.action_config), referenced_paths))
 
     changed = bool(setters)
     while changed:
         changed = False
-        for node in setters:
-            assigned = (node.action_config or {}).get("variables") or {}
-            if not isinstance(assigned, dict):
+        for node, rows, paths_of in setters:
+            tainted = {
+                key
+                for key, value in rows
+                if _ai_sources_among(paths_of(value), refs, variables)
+            }
+            if not tainted:
                 continue
-            for key, value in assigned.items():
-                if str(key) in variables:
-                    continue
-                if _ai_sources_in(value, refs, variables):
-                    variables.add(str(key))
+            # The step's own output carries the answer under those keys, so
+            # {{nodes.<ref>.<key>}} downstream is a source too. Only those
+            # keys: a clean sibling row stays writable to a fenced field.
+            for key in tainted:
+                output = f"{node.ref}.{key}"
+                if node.ref and output not in refs:
+                    refs.add(output)
+                    changed = True
+            for key in tainted - variables:
+                variables.add(key)
+                changed = True
+            # An output_mapping alias of a tainted row is the same value
+            # under another name.
+            for alias, source in (node.output_mapping or {}).items():
+                if str(source) in tainted and str(alias) not in variables:
+                    variables.add(str(alias))
                     changed = True
     return refs, variables
 
 
-def _ai_sources_in(value, ai_refs, ai_variables):
-    """AI-derived references a config value reads, as the author wrote them."""
+def _set_variables_rows(node):
+    assigned = (node.action_config or {}).get("variables") or {}
+    if not isinstance(assigned, dict):
+        return []
+    return [(str(key), value) for key, value in assigned.items()]
+
+
+def _template_paths(value):
+    """The {{token}} paths a config value reads, as the author wrote them."""
     if not isinstance(value, str):
         # set_variables may assign a dict or list; the tokens are in there.
         value = json.dumps(value, default=str)
+    return set(TEMPLATE_TOKEN_RE.findall(value))
+
+
+def _ai_sources_in(value, ai_refs, ai_variables):
+    """AI-derived references a config value reads, as the author wrote them."""
+    return _ai_sources_among(_template_paths(value), ai_refs, ai_variables)
+
+
+def _ai_sources_among(paths, ai_refs, ai_variables):
+    """`ai_refs` holds whole AI node refs (`classify`) and the tainted outputs
+    of setter steps (`score_step.score`)."""
     found = set()
-    for token in TEMPLATE_TOKEN_RE.findall(value):
-        segments = token.split(".")
+    for path in paths:
+        segments = path.split(".")
         if segments[0] == "nodes":
-            if len(segments) > 1 and segments[1] in ai_refs:
-                found.add(token)
+            # `nodes` alone or `nodes.*` (a computed index) can reach any
+            # step: read as every AI output rather than none.
+            if ai_refs and (len(segments) == 1 or segments[1] == "*"):
+                found.add(path)
+            elif len(segments) == 1:
+                continue
+            elif segments[1] in ai_refs:
+                found.add(path)
+            elif len(segments) == 2 or segments[2] == "*":
+                # The whole output, or any key of it.
+                if any(ref.startswith(segments[1] + ".") for ref in ai_refs):
+                    found.add(path)
+            elif f"{segments[1]}.{segments[2]}" in ai_refs:
+                found.add(path)
         elif segments[0] in ai_variables:
-            found.add(token)
+            found.add(path)
     return found
 
 
@@ -529,17 +623,35 @@ def _validate_ai_value_fencing(node, ai_refs, ai_variables):
     record a guess as fact, and the registry cannot tell a template from a
     literal at the write site. Branch on the output and write literals instead.
 
+    Creating a row is the same problem as updating one — a severity a model
+    guessed reads as a severity someone set, whichever verb wrote it — so both
+    write actions are checked, each against its own registry's fence.
+
     Provenance is followed through set_variables (see _ai_sources), so routing
     the answer through a variable first does not evade this."""
     config = node.action_config or {}
-    if config.get("type") != "update_object":
+    action_type = config.get("type")
+    if action_type == "update_object":
+        entry = UPDATABLE_MODELS.get(config.get("model"))
+        fields, fenced = (
+            (entry.fields, lambda key: _writable_values(entry, key))
+            if entry is not None
+            else (None, None)
+        )
+    elif action_type == "create_object":
+        entry = CREATABLE_MODELS.get(config.get("model"))
+        fields, fenced = (
+            (entry["fields"], lambda key: _creatable_values(entry, key))
+            if entry is not None
+            else (None, None)
+        )
+    else:
         return []
-    entry = UPDATABLE_MODELS.get(config.get("model"))
     if entry is None or not (ai_refs or ai_variables):
         return []
     errors = []
     for key, value in sorted((config.get("fields") or {}).items()):
-        if key not in entry.fields or _writable_values(entry, key) is None:
+        if key not in fields or fenced(key) is None:
             continue
         for source in sorted(_ai_sources_in(value, ai_refs, ai_variables)):
             errors.append(

@@ -1,6 +1,6 @@
 """
 Regression tests for the ARM importer against the sheet naming used by ARM
-exports without the "Base de" prefix (SUP-1624).
+exports without the "Base de" prefix.
 """
 
 import io

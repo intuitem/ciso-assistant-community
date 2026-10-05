@@ -103,7 +103,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 
 <!-- FEATURES:START -->
 <details>
-<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 59 features)</summary>
+<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 69 features)</summary>
 
 **Compliance & frameworks**
 - Audit and campaigns management
@@ -118,14 +118,20 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 **Risk management**
 - Risk assessments and registers
 - EBIOS RM module
+- Threat modeling
 - Risk acceptance workflows
 - Business Impact Analysis
 - Cyber Risk Quantification
 - Vulnerability management
 - Vulnerability enrichment
+- Security advisories & CWE
+- TTP catalogs
 
 **Third-party risk**
 - Third-party risk management
+- Contracts management
+- DORA register of information
+- External security ratings
 
 **Operations & remediation**
 - Action plan tracking and prioritization
@@ -138,6 +144,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Technical posture management
 - Exceptions tracking
 - Incidents management
+- DORA incident reporting
 - Validation & approval flows
 - Email reminders
 
@@ -150,11 +157,14 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 
 **Collaboration & productivity**
 - Assignments & respondent mode
+- Requests management
+- Quick forms
 - Comments & collaboration
 - Universal search
 - Command palette
 
 **Automation & integrations**
+- Workflow automation
 - Comprehensive REST API
 - CLI for automation
 - Data import wizard
@@ -907,18 +917,29 @@ Reference is `en.json`; coverage = share of reference keys present in each local
 
 ## Built With 💜
 
-- [Django](https://www.djangoproject.com/) - Python Web Development Framework
-- [SvelteKit](https://kit.svelte.dev/) - Frontend Framework
-- [eCharts](https://echarts.apache.org) - Charting library
-- [unovis](https://unovis.dev) - Complementary charting library
-- [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Caddy](https://caddyserver.com) - The coolest reverse Proxy
-- [Gitbook](https://www.gitbook.com) - Documentation platform
-- [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
-- [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
+- [Django](https://www.djangoproject.com/) - Python Web Development Framework
+- [Django REST Framework](https://www.django-rest-framework.org/) - Toolkit for building Web APIs
+- [django-allauth](https://allauth.org/) - Authentication, MFA and SSO
 - [Docker](https://www.docker.com/) - Container Engine
-- [inlang](https://inlang.com/) - The ecosystem to globalize your software
+- [eCharts](https://echarts.apache.org) - Charting library
+- [Font Awesome](https://fontawesome.com) - Icons
+- [Gitbook](https://www.gitbook.com) - Documentation platform
+- [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Huey](https://huey.readthedocs.io/en/latest/) - A lightweight task queue
+- [inlang](https://inlang.com/) - The ecosystem to globalize your software
+- [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
+- [Qdrant](https://qdrant.tech) - Vector database powering the AI features
+- [Sentence Transformers](https://sbert.net) - Embeddings for semantic search
+- [Skeleton](https://www.skeleton.dev) - UI toolkit for Svelte and Tailwind
+- [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
+- [Svelte](https://svelte.dev) & [SvelteKit](https://svelte.dev/docs/kit) - Frontend Framework
+- [Svelte Flow](https://svelteflow.dev) - Node-based graph editors
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- [Typst](https://typst.app) - The new foundation for documents
+- [unovis](https://unovis.dev) - Complementary charting library
+- [Vite](https://vite.dev) - Frontend build tool
+- [WeasyPrint](https://weasyprint.org/) - HTML to PDF rendering
 
 ## Security
 

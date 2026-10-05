@@ -397,6 +397,190 @@
         { "name": "created_at", "path": ["created_at"], "type": "datetime" },
         { "name": "updated_at", "path": ["updated_at"], "type": "datetime" }
       ]
+    },
+    "TaskNodes": {
+      "endpoint": "task-nodes",
+      "columns": [
+        { "name": "id", "path": ["id"], "type": "string" },
+        { "name": "name", "path": ["name"], "type": "string" },
+        { "name": "task_template_id", "path": ["task_template", "id"], "type": "string" },
+        { "name": "task_template_name", "path": ["task_template", "str"], "type": "string" },
+        { "name": "folder_id", "path": ["folder", "id"], "type": "string" },
+        { "name": "folder_name", "path": ["folder", "str"], "type": "string" },
+        { "name": "status", "path": ["status"], "type": "string" },
+        { "name": "due_date", "path": ["due_date"], "type": "date" },
+        { "name": "scheduled_date", "path": ["scheduled_date"], "type": "date" },
+        { "name": "is_recurrent", "path": ["is_recurrent"], "type": "boolean" },
+        { "name": "observation", "path": ["observation"], "type": "string" },
+        { "name": "created_at", "path": ["created_at"], "type": "datetime" },
+        { "name": "updated_at", "path": ["updated_at"], "type": "datetime" }
+      ]
+    },
+    "EntityAssessments": {
+      "endpoint": "entity-assessments",
+      "columns": [
+        { "name": "id", "path": ["id"], "type": "string" },
+        { "name": "name", "path": ["name"], "type": "string" },
+        { "name": "description", "path": ["description"], "type": "string" },
+        { "name": "folder_id", "path": ["folder", "id"], "type": "string" },
+        { "name": "folder_name", "path": ["folder", "str"], "type": "string" },
+        { "name": "entity_id", "path": ["entity", "id"], "type": "string" },
+        { "name": "entity_name", "path": ["entity", "str"], "type": "string" },
+        { "name": "perimeter_id", "path": ["perimeter", "id"], "type": "string" },
+        { "name": "perimeter_name", "path": ["perimeter", "str"], "type": "string" },
+        { "name": "compliance_assessment_id", "path": ["compliance_assessment", "id"], "type": "string" },
+        { "name": "compliance_assessment_name", "path": ["compliance_assessment", "str"], "type": "string" },
+        { "name": "status", "path": ["status"], "type": "string" },
+        { "name": "conclusion", "path": ["conclusion"], "type": "string" },
+        { "name": "criticality", "path": ["criticality"], "type": "integer" },
+        { "name": "completion", "path": ["completion"], "type": "integer" },
+        { "name": "review_progress", "path": ["review_progress"], "type": "integer" },
+        { "name": "version", "path": ["version"], "type": "string" },
+        { "name": "eta", "path": ["eta"], "type": "date" },
+        { "name": "due_date", "path": ["due_date"], "type": "date" },
+        { "name": "expiry_date", "path": ["expiry_date"], "type": "date" },
+        { "name": "is_locked", "path": ["is_locked"], "type": "boolean" },
+        { "name": "observation", "path": ["observation"], "type": "string" },
+        { "name": "created_at", "path": ["created_at"], "type": "datetime" },
+        { "name": "updated_at", "path": ["updated_at"], "type": "datetime" }
+      ]
+    },
+    "Contracts": {
+      "endpoint": "contracts",
+      "columns": [
+        { "name": "id", "path": ["id"], "type": "string" },
+        { "name": "name", "path": ["name"], "type": "string" },
+        { "name": "ref_id", "path": ["ref_id"], "type": "string" },
+        { "name": "description", "path": ["description"], "type": "string" },
+        { "name": "folder_id", "path": ["folder", "id"], "type": "string" },
+        { "name": "folder_name", "path": ["folder", "str"], "type": "string" },
+        { "name": "provider_entity_id", "path": ["provider_entity", "id"], "type": "string" },
+        { "name": "provider_entity_name", "path": ["provider_entity", "str"], "type": "string" },
+        { "name": "beneficiary_entity_id", "path": ["beneficiary_entity", "id"], "type": "string" },
+        { "name": "beneficiary_entity_name", "path": ["beneficiary_entity", "str"], "type": "string" },
+        { "name": "overarching_contract_id", "path": ["overarching_contract", "id"], "type": "string" },
+        { "name": "status", "path": ["status"], "type": "string" },
+        { "name": "start_date", "path": ["start_date"], "type": "date" },
+        { "name": "end_date", "path": ["end_date"], "type": "date" },
+        { "name": "annual_expense", "path": ["annual_expense"], "type": "number" },
+        { "name": "currency", "path": ["currency"], "type": "string" },
+        { "name": "is_intragroup", "path": ["is_intragroup"], "type": "boolean" },
+        { "name": "notice_period_entity", "path": ["notice_period_entity"], "type": "integer" },
+        { "name": "notice_period_provider", "path": ["notice_period_provider"], "type": "integer" },
+        { "name": "created_at", "path": ["created_at"], "type": "datetime" },
+        { "name": "updated_at", "path": ["updated_at"], "type": "datetime" }
+      ]
+    },
+    "RiskAcceptances": {
+      "endpoint": "risk-acceptances",
+      "columns": [
+        { "name": "id", "path": ["id"], "type": "string" },
+        { "name": "name", "path": ["name"], "type": "string" },
+        { "name": "description", "path": ["description"], "type": "string" },
+        { "name": "folder_id", "path": ["folder", "id"], "type": "string" },
+        { "name": "folder_name", "path": ["folder", "str"], "type": "string" },
+        { "name": "approver_id", "path": ["approver", "id"], "type": "string" },
+        { "name": "approver_name", "path": ["approver", "str"], "type": "string" },
+        { "name": "state", "path": ["state"], "type": "string" },
+        { "name": "expiry_date", "path": ["expiry_date"], "type": "date" },
+        { "name": "accepted_at", "path": ["accepted_at"], "type": "datetime" },
+        { "name": "rejected_at", "path": ["rejected_at"], "type": "datetime" },
+        { "name": "revoked_at", "path": ["revoked_at"], "type": "datetime" },
+        { "name": "justification", "path": ["justification"], "type": "string" },
+        { "name": "created_at", "path": ["created_at"], "type": "datetime" },
+        { "name": "updated_at", "path": ["updated_at"], "type": "datetime" }
+      ]
+    },
+    "Actors": {
+      "endpoint": "actors",
+      "columns": [
+        { "name": "id", "path": ["id"], "type": "string" },
+        { "name": "name", "path": ["str"], "type": "string" },
+        { "name": "type", "path": ["type"], "type": "string" },
+        { "name": "specific_id", "path": ["specific", "id"], "type": "string" },
+        { "name": "specific_name", "path": ["specific", "str"], "type": "string" }
+      ]
+    },
+    "Entities": {
+      "endpoint": "entities",
+      "columns": [
+        { "name": "id", "path": ["id"], "type": "string" },
+        { "name": "name", "path": ["name"], "type": "string" },
+        { "name": "ref_id", "path": ["ref_id"], "type": "string" },
+        { "name": "description", "path": ["description"], "type": "string" },
+        { "name": "folder_id", "path": ["folder", "id"], "type": "string" },
+        { "name": "folder_name", "path": ["folder", "str"], "type": "string" },
+        { "name": "parent_entity_id", "path": ["parent_entity", "id"], "type": "string" },
+        { "name": "parent_entity_name", "path": ["parent_entity", "str"], "type": "string" },
+        { "name": "is_active", "path": ["is_active"], "type": "boolean" },
+        { "name": "builtin", "path": ["builtin"], "type": "boolean" },
+        { "name": "mission", "path": ["mission"], "type": "string" },
+        { "name": "country", "path": ["country"], "type": "string" },
+        { "name": "currency", "path": ["currency"], "type": "string" },
+        { "name": "default_criticality", "path": ["default_criticality"], "type": "number" },
+        { "name": "last_assessment_status", "path": ["last_assessment_status"], "type": "string" },
+        { "name": "last_assessment_date", "path": ["last_assessment_date"], "type": "datetime" },
+        { "name": "subcontracts_count", "path": ["subcontracts_count"], "type": "integer" },
+        { "name": "created_at", "path": ["created_at"], "type": "datetime" },
+        { "name": "updated_at", "path": ["updated_at"], "type": "datetime" }
+      ]
+    },
+    "Solutions": {
+      "endpoint": "solutions",
+      "columns": [
+        { "name": "id", "path": ["id"], "type": "string" },
+        { "name": "name", "path": ["name"], "type": "string" },
+        { "name": "ref_id", "path": ["ref_id"], "type": "string" },
+        { "name": "description", "path": ["description"], "type": "string" },
+        { "name": "folder_id", "path": ["folder", "id"], "type": "string" },
+        { "name": "folder_name", "path": ["folder", "str"], "type": "string" },
+        { "name": "provider_entity_id", "path": ["provider_entity", "id"], "type": "string" },
+        { "name": "provider_entity_name", "path": ["provider_entity", "str"], "type": "string" },
+        { "name": "recipient_entity_id", "path": ["recipient_entity", "id"], "type": "string" },
+        { "name": "recipient_entity_name", "path": ["recipient_entity", "str"], "type": "string" },
+        { "name": "criticality", "path": ["criticality"], "type": "integer" },
+        { "name": "is_active", "path": ["is_active"], "type": "boolean" },
+        { "name": "created_at", "path": ["created_at"], "type": "datetime" },
+        { "name": "updated_at", "path": ["updated_at"], "type": "datetime" }
+      ]
+    },
+    "TaskTemplates": {
+      "endpoint": "task-templates",
+      "columns": [
+        { "name": "id", "path": ["id"], "type": "string" },
+        { "name": "name", "path": ["name"], "type": "string" },
+        { "name": "ref_id", "path": ["ref_id"], "type": "string" },
+        { "name": "description", "path": ["description"], "type": "string" },
+        { "name": "folder_id", "path": ["folder", "id"], "type": "string" },
+        { "name": "folder_name", "path": ["folder", "str"], "type": "string" },
+        { "name": "task_date", "path": ["task_date"], "type": "date" },
+        { "name": "is_recurrent", "path": ["is_recurrent"], "type": "boolean" },
+        { "name": "enabled", "path": ["enabled"], "type": "boolean" },
+        { "name": "status", "path": ["status"], "type": "string" },
+        { "name": "last_occurrence_status", "path": ["last_occurrence_status"], "type": "string" },
+        { "name": "next_occurrence_status", "path": ["next_occurrence_status"], "type": "string" },
+        { "name": "next_occurrence", "path": ["next_occurrence"], "type": "date" },
+        { "name": "link", "path": ["link"], "type": "string" },
+        { "name": "created_at", "path": ["created_at"], "type": "datetime" },
+        { "name": "updated_at", "path": ["updated_at"], "type": "datetime" }
+      ]
+    },
+    "Campaigns": {
+      "endpoint": "campaigns",
+      "columns": [
+        { "name": "id", "path": ["id"], "type": "string" },
+        { "name": "name", "path": ["name"], "type": "string" },
+        { "name": "description", "path": ["description"], "type": "string" },
+        { "name": "folder_id", "path": ["folder", "id"], "type": "string" },
+        { "name": "folder_name", "path": ["folder", "str"], "type": "string" },
+        { "name": "status", "path": ["status"], "type": "string" },
+        { "name": "kind", "path": ["kind"], "type": "string" },
+        { "name": "start_date", "path": ["start_date"], "type": "date" },
+        { "name": "eta", "path": ["eta"], "type": "date" },
+        { "name": "due_date", "path": ["due_date"], "type": "date" },
+        { "name": "created_at", "path": ["created_at"], "type": "datetime" },
+        { "name": "updated_at", "path": ["updated_at"], "type": "datetime" }
+      ]
     }
   },
   "bridges": [
@@ -419,7 +603,23 @@
     { "name": "Finding - Label", "endpoint": "findings", "parent_column": "finding_id", "list_field": "filtering_labels", "child_column": "label_id" },
     { "name": "Incident - Label", "endpoint": "incidents", "parent_column": "incident_id", "list_field": "filtering_labels", "child_column": "label_id" },
     { "name": "Risk Scenario - Label", "endpoint": "risk-scenarios", "parent_column": "risk_scenario_id", "list_field": "filtering_labels", "child_column": "label_id" },
-    { "name": "Vulnerability - Label", "endpoint": "vulnerabilities", "parent_column": "vulnerability_id", "list_field": "filtering_labels", "child_column": "label_id" }
+    { "name": "Vulnerability - Label", "endpoint": "vulnerabilities", "parent_column": "vulnerability_id", "list_field": "filtering_labels", "child_column": "label_id" },
+    { "name": "Applied Control - Owner", "endpoint": "applied-controls", "parent_column": "applied_control_id", "list_field": "owner", "child_column": "actor_id" },
+    { "name": "Finding - Owner", "endpoint": "findings", "parent_column": "finding_id", "list_field": "owner", "child_column": "actor_id" },
+    { "name": "Risk Scenario - Owner", "endpoint": "risk-scenarios", "parent_column": "risk_scenario_id", "list_field": "owner", "child_column": "actor_id" },
+    { "name": "Asset - Owner", "endpoint": "assets", "parent_column": "asset_id", "list_field": "owner", "child_column": "actor_id" },
+    { "name": "Incident - Owner", "endpoint": "incidents", "parent_column": "incident_id", "list_field": "owners", "child_column": "actor_id" },
+    { "name": "Contract - Owner", "endpoint": "contracts", "parent_column": "contract_id", "list_field": "owner", "child_column": "actor_id" },
+    { "name": "Task Node - Assignee", "endpoint": "task-nodes", "parent_column": "task_node_id", "list_field": "assigned_to", "child_column": "actor_id" },
+    { "name": "Task Template - Assignee", "endpoint": "task-templates", "parent_column": "task_template_id", "list_field": "assigned_to", "child_column": "actor_id" },
+    { "name": "Applied Control - Asset", "endpoint": "applied-controls", "parent_column": "applied_control_id", "list_field": "assets", "child_column": "asset_id" },
+    { "name": "Task Node - Applied Control", "endpoint": "task-nodes", "parent_column": "task_node_id", "list_field": "applied_controls", "child_column": "applied_control_id" },
+    { "name": "Task Template - Applied Control", "endpoint": "task-templates", "parent_column": "task_template_id", "list_field": "applied_controls", "child_column": "applied_control_id" },
+    { "name": "Risk Acceptance - Risk Scenario", "endpoint": "risk-acceptances", "parent_column": "risk_acceptance_id", "list_field": "risk_scenarios", "child_column": "risk_scenario_id" },
+    { "name": "Entity Assessment - Solution", "endpoint": "entity-assessments", "parent_column": "entity_assessment_id", "list_field": "solutions", "child_column": "solution_id" },
+    { "name": "Contract - Solution", "endpoint": "contracts", "parent_column": "contract_id", "list_field": "solutions", "child_column": "solution_id" },
+    { "name": "Solution - Asset", "endpoint": "solutions", "parent_column": "solution_id", "list_field": "assets", "child_column": "asset_id" },
+    { "name": "Campaign - Compliance Assessment", "endpoint": "campaigns", "parent_column": "campaign_id", "list_field": "compliance_assessments", "child_column": "compliance_assessment_id" }
   ],
   "incremental_refresh_params": ["created_at__gte", "created_at__lt", "updated_at__gte", "updated_at__lt"]
 }

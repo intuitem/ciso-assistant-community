@@ -63,7 +63,7 @@
 	});
 
 	onMount(async () => {
-		if (!model.selectOptions) {
+		if (!Object.keys(model.selectOptions ?? {}).length) {
 			const selectOptions = {
 				status: await fetch('/applied-controls/status').then((r) => r.json()),
 				priority: await fetch('/applied-controls/priority').then((r) => r.json()),
@@ -373,7 +373,6 @@
 						<AutocompleteSelect
 							{form}
 							lazy
-							minSearchLength={1}
 							optionsEndpoint="settings/integrations/configs/{$formStore.integration_config}/remote-objects"
 							optionsLabelField="summary"
 							optionsValueField="key"

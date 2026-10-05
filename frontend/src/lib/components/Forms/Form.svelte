@@ -3,9 +3,6 @@
 	import { superForm } from 'sveltekit-superforms';
 	import SuperDebug from 'sveltekit-superforms';
 	import type { FormDataShape } from '$lib/utils/schemas';
-	// import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
-	// const modalStore: ModalStore = getModalStore();
-
 	import { m } from '$paraglide/messages';
 	import type { ValidationAdapter } from 'sveltekit-superforms/adapters';
 

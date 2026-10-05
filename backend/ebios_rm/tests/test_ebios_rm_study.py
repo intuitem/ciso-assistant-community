@@ -17,7 +17,6 @@ from ebios_rm.models import (
 )
 from ebios_rm.serializers import EbiosRMStudyWriteSerializer
 
-from ebios_rm.tests.fixtures import *
 from tprm.models import Entity
 
 # Folder-scoped ebios_rm models that deliberately do not follow the study on a

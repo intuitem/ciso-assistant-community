@@ -1,6 +1,7 @@
 import uuid
 
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Count
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework import status
@@ -50,6 +51,15 @@ class MetricDefinitionViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id", "provider"]
 
+    def get_queryset(self):
+        # folder, library and unit are each rendered by FieldsRelatedField.
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "library", "unit")
+            .prefetch_related("filtering_labels")
+        )
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
@@ -82,6 +92,20 @@ class MetricInstanceViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id"]
 
+    def get_queryset(self):
+        # `samples` is prefetched so get_latest_sample() reads the cache instead of
+        # querying per row. It pulls every sample for the page's instances, which
+        # is the right trade at current volumes; if sample counts per instance grow
+        # large, swap it for a latest-sample Subquery annotation.
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "metric_definition__unit", "evidences")
+            .prefetch_related(
+                "owner", "organisation_objectives", "filtering_labels", "samples"
+            )
+        )
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -100,12 +124,39 @@ class CustomMetricSampleViewSet(BaseModelViewSet):
     search_fields = ["observation"]
     ordering = ["-timestamp"]  # Most recent first
 
+    def get_queryset(self):
+        # raw_value()/display_value() walk metric_instance -> metric_definition to
+        # decide how to read the JSON value, and the serializer nests the
+        # instance's evidence.
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                # EvidenceRevision.__str__ reads self.evidence.name, so the
+                # revision alone still costs a query per row.
+                "evidence_revision__evidence",
+                "metric_instance__metric_definition__unit",
+                "metric_instance__evidences",
+            )
+        )
+
 
 class DashboardViewSet(BaseModelViewSet):
     model = Dashboard
     serializers_module = "metrology.serializers"
     filterset_fields = ["folder", "filtering_labels"]
     search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self):
+        # widget_count would otherwise be one COUNT per dashboard.
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder")
+            .prefetch_related("filtering_labels")
+            .annotate(_widget_count=Count("widgets"))
+        )
 
 
 class DashboardWidgetViewSet(BaseModelViewSet):
@@ -121,6 +172,21 @@ class DashboardWidgetViewSet(BaseModelViewSet):
     ]
     search_fields = ["title"]
     ordering = ["position_y", "position_x"]
+
+    def get_queryset(self):
+        # The read serializer walks the metric's definition and unit for every
+        # widget and lists each widget's extra series, so a dashboard of N
+        # widgets is otherwise N+1 several times over.
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "dashboard",
+                "target_content_type",
+                "metric_instance__metric_definition__unit",
+            )
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get chart type choices")
@@ -209,9 +275,13 @@ class BuiltinMetricSampleViewSet(BaseModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        samples = BuiltinMetricSample.objects.filter(
-            content_type=content_type, object_id=object_id
-        ).order_by("-date")
+        samples = (
+            BuiltinMetricSample.objects.filter(
+                content_type=content_type, object_id=object_id
+            )
+            .select_related("content_type")
+            .order_by("-date")
+        )
 
         serializer = BuiltinMetricSampleReadSerializer(samples, many=True)
         return Response(serializer.data)

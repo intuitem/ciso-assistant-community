@@ -1,4 +1,5 @@
 <script lang="ts">
+	import MostLikelyOperatingMode from '$lib/components/EbiosRM/MostLikelyOperatingMode.svelte';
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
@@ -29,7 +30,10 @@
 
 	const operationalScenario = $derived(data.data);
 
-	pageTitle.set(m.operationalScenarioRefId({ refId: operationalScenario.ref_id }));
+	const scenarioLabel = $derived(
+		[operationalScenario.ref_id, operationalScenario.attack_path?.name].filter(Boolean).join(' · ')
+	);
+	pageTitle.set(m.operationalScenarioRefId({ refId: scenarioLabel }));
 
 	let activeActivity: string | null = $state(null);
 	page.url.searchParams.forEach((value, key) => {
@@ -91,11 +95,11 @@
 			<div class="flex font-bold text-2xl space-x-2">
 				<span
 					><a
-						class="text-primary-700 hover:text-primary-500"
+						class="text-primary-700-300 hover:text-primary-500"
 						href="/ebios-rm/{operationalScenario.ebios_rm_study.id}"
 						>{operationalScenario.ebios_rm_study.str}</a
 					>
-					- {m.operationalScenarioRefId({ refId: operationalScenario.ref_id })}</span
+					- {m.operationalScenarioRefId({ refId: scenarioLabel })}</span
 				>
 				<p class="flex items-center">
 					{#if operationalScenario.is_selected}
@@ -139,7 +143,9 @@
 				{m.ebiosWs4_1()}
 			</h1>
 			{#if operationalScenario.operating_modes_description}
-				<p class="text-surface-600-400">{operationalScenario.operating_modes_description}</p>
+				<p class="text-surface-600-400 max-w-prose text-left">
+					{operationalScenario.operating_modes_description}
+				</p>
 			{:else}
 				<p class="text-surface-600-400">{m.noDescription()}</p>
 			{/if}
@@ -147,13 +153,13 @@
 				<div class="flex items-center gap-4">
 					{#if operationalScenario.strategic_scenario}
 						<div
-							class="flex flex-col space-y-2 p-4 bg-amber-100 border-amber-400 dark:bg-amber-900 dark:border-amber-700 border rounded-md shadow-xs text-center min-w-48"
+							class="flex flex-col space-y-2 p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 border-t-4 border-t-amber-400 rounded-md shadow-xs text-center min-w-48"
 						>
 							<h4 class="font-semibold text-surface-600-400">{m.strategicScenario()}</h4>
-							<i class="fa-solid fa-chess text-3xl text-amber-600"></i>
+							<i class="fa-solid fa-chess text-3xl text-amber-600 self-center"></i>
 							<a
 								href="/strategic-scenarios/{operationalScenario.strategic_scenario.id}"
-								class="badge text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
+								class="badge self-center whitespace-normal text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
 								>{operationalScenario.strategic_scenario.name}</a
 							>
 							{#if operationalScenario.strategic_scenario.description}
@@ -168,13 +174,13 @@
 					{/if}
 					{#if operationalScenario.attack_path}
 						<div
-							class="flex flex-col space-y-2 p-4 bg-teal-100 border-teal-400 dark:bg-teal-900 dark:border-teal-700 border rounded-md shadow-xs text-center min-w-48"
+							class="flex flex-col space-y-2 p-4 bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 border-t-4 border-t-teal-400 rounded-md shadow-xs text-center min-w-48"
 						>
 							<h4 class="font-semibold text-surface-600-400">{m.attackPath()}</h4>
-							<i class="fa-solid fa-route text-3xl text-teal-600"></i>
+							<i class="fa-solid fa-route text-3xl text-teal-600 self-center"></i>
 							<a
 								href="/attack-paths/{operationalScenario.attack_path.id}"
-								class="badge text-white bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700"
+								class="badge self-center whitespace-normal text-white bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700"
 								>{operationalScenario.attack_path.name}</a
 							>
 							{#if operationalScenario.attack_path.description}
@@ -185,24 +191,29 @@
 						</div>
 					{/if}
 				</div>
-				<div class="grid grid-cols-3 gap-12 items-center">
+				<div class="grid grid-cols-[1fr_auto_1fr_auto_1fr] gap-4 items-center">
 					<div
-						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 dark:bg-red-900 dark:border-red-700 border rounded-md shadow-xs text-center"
+						class="flex flex-col space-y-4 p-4 h-full bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 border-t-4 border-t-red-400 rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-surface-600-400">{m.riskOrigin()}</h4>
-						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
-						<p class="badge whitespace-normal text-white bg-red-500 dark:bg-red-600 capitalize">
+						<i class="fa-solid fa-skull-crossbones text-3xl text-red-600 self-center"></i>
+						<p
+							class="badge self-center whitespace-normal text-white bg-red-500 dark:bg-red-600 capitalize"
+						>
 							{safeTranslate(operationalScenario.ro_to.risk_origin.str)}
 						</p>
 					</div>
+					<i class="fa-solid fa-arrow-right text-2xl text-surface-400-600"></i>
 					<div
-						class="flex flex-col space-y-4 p-4 bg-violet-200 dark:bg-violet-900 border-violet-400 border rounded-md shadow-xs text-center"
+						class="flex flex-col space-y-4 p-4 h-full bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 border-t-4 border-t-violet-400 rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-surface-600-400">{m.stakeholders()}</h4>
-						<i class="fa-solid fa-globe text-3xl"></i>
+						<i class="fa-solid fa-globe text-3xl text-violet-600 self-center"></i>
 						{#each operationalScenario.stakeholders as stakeholder}
-							<p class="badge whitespace-normal text-white bg-violet-500 dark:bg-violet-600">
-								<a class="anchor text-white" href="/stakeholders/{stakeholder.id}"
+							<p
+								class="badge self-center whitespace-normal text-white bg-violet-500 dark:bg-violet-600"
+							>
+								<a class="text-white hover:underline" href="/stakeholders/{stakeholder.id}"
 									>{stakeholder.str}</a
 								>
 							</p>
@@ -210,40 +221,82 @@
 							<p class="text-surface-600-400 italic">{m.noStakeholders()}</p>
 						{/each}
 					</div>
+					<i class="fa-solid fa-arrow-right text-2xl text-surface-400-600"></i>
 					<div
-						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 dark:bg-blue-900 dark:border-blue-700 border rounded-md shadow-xs text-center"
+						class="flex flex-col space-y-4 p-4 h-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 border-t-4 border-t-blue-400 rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-surface-600-400">{m.targetObjective()}</h4>
-						<i class="fa-solid fa-bullseye text-3xl"></i>
-						<p class="badge whitespace-normal text-white bg-blue-500 dark:bg-blue-600 break-all">
+						<i class="fa-solid fa-bullseye text-3xl text-blue-600 self-center"></i>
+						<p
+							class="badge self-center whitespace-normal text-white bg-blue-500 dark:bg-blue-600 break-words"
+						>
 							{operationalScenario.ro_to.target_objective}
 						</p>
 					</div>
 				</div>
 			</div>
-			<div class="w-full p-4 bg-surface-50-950 border rounded-md shadow-xs">
-				<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
-					<i class="fa-solid fa-biohazard text-red-500"></i>
-					<span>{m.threats()}</span>
-				</h3>
-				{#if operationalScenario.threats && countMasked(operationalScenario.threats) > 0}
-					<div class="alert preset-tonal-warning mb-2">
-						<i class="fa-solid fa-triangle-exclamation"></i>
-						<span>{m.objectsNotVisible({ count: countMasked(operationalScenario.threats) })}</span>
+			<div class="w-full grid gap-4 {page.data.featureflags?.ttps ? 'md:grid-cols-2' : ''}">
+				<div class="p-4 bg-surface-50-950 border rounded-md shadow-xs">
+					<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
+						<i class="fa-solid fa-biohazard text-red-500"></i>
+						<span>{m.threats()}</span>
+					</h3>
+					{#if operationalScenario.threats && countMasked(operationalScenario.threats) > 0}
+						<div class="alert preset-tonal-warning mb-2">
+							<i class="fa-solid fa-triangle-exclamation"></i>
+							<span>{m.objectsNotVisible({ count: countMasked(operationalScenario.threats) })}</span
+							>
+						</div>
+					{/if}
+					{#if operationalScenario.threats?.length}
+						<ul class="list-disc list-inside text-surface-600-400">
+							{#each operationalScenario.threats as threat}
+								{#if threat.id && threat.str}
+									<li><a class="anchor" href="/threats/{threat.id}">{threat.str}</a></li>
+								{/if}
+							{/each}
+						</ul>
+					{:else}
+						<p class="text-sm italic text-surface-500">{m.noThreat()}</p>
+					{/if}
+				</div>
+				{#if page.data.featureflags?.ttps}
+					<div class="p-4 bg-surface-50-950 border rounded-md shadow-xs">
+						<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
+							<i class="fa-solid fa-crosshairs text-orange-500"></i>
+							<span>{m.techniques()}</span>
+						</h3>
+						{#if operationalScenario.techniques && countMasked(operationalScenario.techniques) > 0}
+							<div class="alert preset-tonal-warning mb-2">
+								<i class="fa-solid fa-triangle-exclamation"></i>
+								<span
+									>{m.objectsNotVisible({
+										count: countMasked(operationalScenario.techniques)
+									})}</span
+								>
+							</div>
+						{/if}
+						{#if operationalScenario.techniques?.length}
+							<ul class="list-disc list-inside text-surface-600-400">
+								{#each operationalScenario.techniques as technique}
+									{#if technique.id && technique.str}
+										<li>
+											<a class="anchor" href="/techniques/{technique.id}">{technique.str}</a>
+										</li>
+									{/if}
+								{/each}
+							</ul>
+						{:else}
+							<p class="text-sm italic text-surface-500">{m.noTechnique()}</p>
+						{/if}
 					</div>
 				{/if}
-				<ul class="list-disc list-inside text-surface-600-400">
-					{#if operationalScenario.threats?.length}
-						{#each operationalScenario.threats as threat}
-							{#if threat.id && threat.str}
-								<li><a class="anchor" href="/threats/{threat.id}">{threat.str}</a></li>
-							{/if}
-						{/each}
-					{:else}
-						<li>{m.noThreat()}</li>
-					{/if}
-				</ul>
 			</div>
+			{#if operationalScenario.most_likely_operating_mode}
+				<div class="w-full mt-6">
+					<MostLikelyOperatingMode operatingMode={operationalScenario.most_likely_operating_mode} />
+				</div>
+			{/if}
 			{#if Object.keys(data.relatedModels).length > 0}
 				<div class="card shadow-lg mt-8 bg-surface-50-950 w-full">
 					<Tabs
@@ -333,13 +386,25 @@
 						positioning={{ placement: 'bottom' }}
 					>
 						<Popover.Trigger>
-							<h3 class="font-semibold text-lg flex items-center space-x-2">
+							<h3
+								class="text-xs font-semibold uppercase tracking-wide opacity-80 flex items-center justify-center space-x-2"
+							>
 								{#if operationalScenario.likelihood.description}
 									<i class="fa-solid fa-dice opacity-75"></i>
 								{/if}
 								<span>{m.likelihood()}</span>
 							</h3>
-							<span>{operationalScenario.likelihood.name}</span>
+							<span class="text-xl font-bold"
+								>{operationalScenario.likelihood.name}
+								{#if operationalScenario.likelihood_forced !== null && operationalScenario.likelihood_forced !== undefined}
+									<i
+										class="fa-solid fa-thumbtack ml-1 text-xs"
+										title={m.forcedValueTooltip({
+											value: operationalScenario.computed_likelihood?.name ?? '--'
+										})}
+									></i>
+								{/if}</span
+							>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
 						</Popover.Trigger>
 						<Popover.Positioner>
@@ -372,13 +437,25 @@
 						positioning={{ placement: 'bottom' }}
 					>
 						<Popover.Trigger>
-							<h3 class="font-semibold text-lg flex items-center space-x-2">
+							<h3
+								class="text-xs font-semibold uppercase tracking-wide opacity-80 flex items-center justify-center space-x-2"
+							>
 								{#if operationalScenario.gravity.description}
 									<i class="fa-solid fa-bomb opacity-75"></i>
 								{/if}
 								<span>{m.gravity()}</span>
 							</h3>
-							<span>{operationalScenario.gravity.name}</span>
+							<span class="text-xl font-bold"
+								>{operationalScenario.gravity.name}
+								{#if operationalScenario.gravity_forced !== null && operationalScenario.gravity_forced !== undefined}
+									<i
+										class="fa-solid fa-thumbtack ml-1 text-xs"
+										title={m.forcedValueTooltip({
+											value: operationalScenario.computed_gravity?.name ?? '--'
+										})}
+									></i>
+								{/if}</span
+							>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
 						</Popover.Trigger>
 						<Popover.Positioner>
@@ -411,13 +488,15 @@
 						positioning={{ placement: 'bottom' }}
 					>
 						<Popover.Trigger>
-							<h3 class="font-semibold text-lg flex items-center space-x-2">
+							<h3
+								class="text-xs font-semibold uppercase tracking-wide opacity-80 flex items-center justify-center space-x-2"
+							>
 								{#if operationalScenario.risk_level.description}
 									<i class="fa-solid fa-circle-radiation opacity-75"></i>
 								{/if}
 								<span>{m.riskLevel()}</span>
 							</h3>
-							<span>{operationalScenario.risk_level.name}</span>
+							<span class="text-xl font-bold">{operationalScenario.risk_level.name}</span>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
 						</Popover.Trigger>
 						<Popover.Positioner>

@@ -76,6 +76,7 @@
 
 <TextField
 	type="number"
+	step="1"
 	{form}
 	field="order"
 	cacheLock={cacheLocks['order']}

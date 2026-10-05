@@ -26,12 +26,13 @@
 		}
 	});
 
-	const pertinenceColor: Record<string, string> = {
-		undefined: 'bg-surface-200-800 text-surface-700-300',
-		irrelevant: 'bg-green-200 text-green-700',
-		partially_relevant: 'bg-yellow-200 text-yellow-700',
-		fairly_relevant: 'bg-orange-200 text-orange-700',
-		highly_relevant: 'bg-red-200 text-red-700'
+	// Keyed by level (0 = undefined): labels come from the study's matrix.
+	const pertinenceColor: Record<number, string> = {
+		0: 'bg-surface-200-800 text-surface-700-300',
+		1: 'bg-green-200 text-green-700',
+		2: 'bg-yellow-200 text-yellow-700',
+		3: 'bg-orange-200 text-orange-700',
+		4: 'bg-red-200 text-red-700'
 	};
 
 	const user = page.data.user;
@@ -133,7 +134,7 @@
 				<i class="fa-solid fa-equals"></i>
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-surface-600-400">{m.pertinence()}</span>
-					<span class="badge text-sm font-bold {pertinenceColor[roto.pertinence]}"
+					<span class="badge text-sm font-bold {pertinenceColor[roto.pertinence_level]}"
 						>{safeTranslate(roto.pertinence)}</span
 					>
 				</p>
