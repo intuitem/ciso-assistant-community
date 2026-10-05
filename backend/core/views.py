@@ -20804,6 +20804,21 @@ class _NotAllApplied(Exception):
     pass
 
 
+def _applies_on_submit(response, user, scored_complete) -> bool:
+    """`can_apply_on_submit`, failing to review: a target that cannot even be
+    planned (its current value unreadable…) must not turn a submit into a 500."""
+    from core.quick_form_apply import can_apply_on_submit
+
+    try:
+        with transaction.atomic():
+            return can_apply_on_submit(response, user, scored_complete=scored_complete)
+    except Exception as e:
+        logger.error(
+            "on_submit_plan_failed", response=str(response.pk), error=e, exc_info=True
+        )
+        return False
+
+
 def _close_on_submit(response, user) -> list[dict] | None:
     """Apply a just-submitted response at once when its submitter could make
     every change by hand (see `can_apply_on_submit`); None when it goes to
@@ -20812,7 +20827,7 @@ def _close_on_submit(response, user) -> list[dict] | None:
     All or nothing: if a target fails to write, nothing is kept and the
     response goes to review."""
     from core.cel_service import evaluate_quick_form
-    from core.quick_form_apply import apply_on_accept, can_apply_on_submit
+    from core.quick_form_apply import apply_on_accept
 
     publication = response.publication
     if not response.quick_form.on_accept or (
@@ -20821,7 +20836,7 @@ def _close_on_submit(response, user) -> list[dict] | None:
         return None
     evaluation = evaluate_quick_form(response, persist=True)
     scored_complete = evaluation["context"]["response"]["scored_complete"]
-    if not can_apply_on_submit(response, user, scored_complete=scored_complete):
+    if not _applies_on_submit(response, user, scored_complete):
         return None
     try:
         with transaction.atomic():
@@ -20837,6 +20852,12 @@ def _close_on_submit(response, user) -> list[dict] | None:
     except _NotAllApplied:
         response.refresh_from_db()
         return None
+    except Exception as e:
+        logger.error(
+            "on_submit_apply_failed", response=str(response.pk), error=e, exc_info=True
+        )
+        response.refresh_from_db()
+        return None
     emit_quick_form_event(response, "closed")
     return applied
 
@@ -20845,8 +20866,6 @@ def _on_submit_outcome(response, user, evaluation) -> str | None:
     """For a draft with on-accept targets: "apply" when submitting will write
     them at once, "review" when it goes to a reviewer. Read from the answers as
     they stand, not the last persisted evaluation."""
-    from core.quick_form_apply import can_apply_on_submit
-
     # Whoever submits decides the path, so only they get an answer.
     if (
         user is None
@@ -20858,11 +20877,7 @@ def _on_submit_outcome(response, user, evaluation) -> str | None:
     response.computed_values = evaluation["computed_values"]
     response.computed_outcome = evaluation["computed_outcome"]
     scored_complete = evaluation["context"]["response"]["scored_complete"]
-    return (
-        "apply"
-        if can_apply_on_submit(response, user, scored_complete=scored_complete)
-        else "review"
-    )
+    return "apply" if _applies_on_submit(response, user, scored_complete) else "review"
 
 
 def _self_validation_allowed(response) -> bool:

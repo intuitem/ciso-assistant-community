@@ -35,9 +35,15 @@
 	const canPublish = $derived(hasPermissionAnywhere(page.data.user, 'add_quickformpublication'));
 	$effect(() => {
 		if (entity.builtin) return;
-		fetch(`/entities/${entity.id}/assess-tier`)
+		// Aborted when the entity changes, so a late answer cannot land on another one.
+		const controller = new AbortController();
+		fetch(`/entities/${entity.id}/assess-tier`, { signal: controller.signal })
 			.then((res) => (res.ok ? res.json() : []))
-			.then((rows) => (assessments = rows));
+			.then((rows) => (assessments = Array.isArray(rows) ? rows : []))
+			.catch(() => {
+				if (!controller.signal.aborted) assessments = [];
+			});
+		return () => controller.abort();
 	});
 
 	function startAssessing() {
@@ -45,21 +51,32 @@
 		else choosing = !choosing;
 	}
 
+	// One start at a time: a double click must not open two drafts.
+	let starting = $state(false);
+
 	async function assess(option: Option) {
-		const res = await fetch(`/entities/${entity.id}/assess-tier`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ kind: option.kind, id: option.id })
-		});
-		const body = await res.json().catch(() => ({}));
-		if (!res.ok || !body.redirect) {
-			toastStore.trigger({
-				message: body.error ? safeTranslate(body.error) : m.anErrorOccurred(),
-				background: 'preset-filled-error-500'
+		if (starting) return;
+		starting = true;
+		try {
+			const res = await fetch(`/entities/${entity.id}/assess-tier`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ kind: option.kind, id: option.id })
 			});
-			return;
+			const body = await res.json().catch(() => ({}));
+			if (!res.ok || !body.redirect) {
+				toastStore.trigger({
+					message: body.error ? safeTranslate(body.error) : m.anErrorOccurred(),
+					background: 'preset-filled-error-500'
+				});
+				return;
+			}
+			await goto(body.redirect);
+		} catch {
+			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
+		} finally {
+			starting = false;
 		}
-		await goto(body.redirect);
 	}
 
 	// One sentence per source: who or what set the tier, and when.
@@ -126,6 +143,7 @@
 						type="button"
 						class="btn btn-sm preset-filled-primary-500"
 						onclick={startAssessing}
+						disabled={starting}
 						aria-expanded={assessments.length > 1 ? choosing : undefined}
 						data-testid="assess-tier-button"
 					>
@@ -155,6 +173,7 @@
 						type="button"
 						class="btn btn-sm w-full justify-start hover:preset-tonal"
 						onclick={() => assess(option)}
+						disabled={starting}
 						data-testid="assess-tier-option">{option.name}</button
 					>
 				</li>

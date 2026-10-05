@@ -28,6 +28,8 @@ def form_targets(quick_form) -> list[tuple[dict, object]]:
     pairs = []
     for entry in getattr(quick_form, "on_accept", None) or []:
         if not isinstance(entry, dict) or not isinstance(entry.get("config", {}), dict):
+            # Skipped, so it fails closed; logged, so the form can be found.
+            logger.warning("malformed_on_accept_entry", quick_form=str(quick_form.pk))
             continue
         target = get_target(str(entry.get("target") or ""))
         if target is None:

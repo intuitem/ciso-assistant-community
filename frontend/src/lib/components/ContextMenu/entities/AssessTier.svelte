@@ -22,25 +22,34 @@
 
 	onMount(async () => {
 		if (!row?.meta?.id || row.meta.builtin) return;
-		const res = await fetch(`/entities/${row.meta.id}/assess-tier`);
-		if (res.ok) options = await res.json();
+		try {
+			const res = await fetch(`/entities/${row.meta.id}/assess-tier`);
+			const rows = res.ok ? await res.json() : [];
+			options = Array.isArray(rows) ? rows : [];
+		} catch {
+			options = [];
+		}
 	});
 
 	async function assess(option: Option) {
-		const res = await fetch(`/entities/${row?.meta?.id}/assess-tier`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ kind: option.kind, id: option.id })
-		});
-		const body = await res.json().catch(() => ({}));
-		if (!res.ok || !body.redirect) {
-			flash.set({
-				type: 'error',
-				message: body.error ? safeTranslate(body.error) : m.anErrorOccurred()
+		try {
+			const res = await fetch(`/entities/${row?.meta?.id}/assess-tier`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ kind: option.kind, id: option.id })
 			});
-			return;
+			const body = await res.json().catch(() => ({}));
+			if (!res.ok || !body.redirect) {
+				flash.set({
+					type: 'error',
+					message: body.error ? safeTranslate(body.error) : m.anErrorOccurred()
+				});
+				return;
+			}
+			await goto(body.redirect);
+		} catch {
+			flash.set({ type: 'error', message: m.anErrorOccurred() });
 		}
-		await goto(body.redirect);
 	}
 
 	const itemClass =

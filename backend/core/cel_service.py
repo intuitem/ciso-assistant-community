@@ -988,7 +988,8 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         and not is_answered(entry)
     ]
 
-    score = _quick_form_score(context) if context["response"]["score_max"] else None
+    # Same rule as the live evaluator, so a preview cannot disagree with a response.
+    score = _quick_form_score(context)
 
     return {
         "hidden_pages": sorted(u for u in hidden if u),

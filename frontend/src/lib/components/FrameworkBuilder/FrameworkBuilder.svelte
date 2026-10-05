@@ -372,12 +372,22 @@
 	}
 
 	// Ctrl+S / Cmd+S keyboard shortcut
-	function handleKeydown(e: KeyboardEvent) {
+	// The fallback is for empty or invalid input only: 0 is a valid bound.
+	function intOr(raw: string, fallback: number): number {
+		const value = parseInt(raw);
+		return Number.isNaN(value) ? fallback : value;
+	}
+
+	async function handleKeydown(e: KeyboardEvent) {
 		if ((e.ctrlKey || e.metaKey) && e.key === 's') {
 			e.preventDefault();
 			const refocus = commitFocusedField();
-			builder.flushDraft();
-			refocus();
+			// After the save: a returned URN map re-renders the fields.
+			try {
+				await builder.flushDraft();
+			} finally {
+				refocus();
+			}
 		}
 	}
 
@@ -713,8 +723,7 @@
 												type="number"
 												value={quickFormScore().min}
 												class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1"
-												onblur={(e) =>
-													setQuickFormScore({ min: parseInt(e.currentTarget.value) || 0 })}
+												onblur={(e) => setQuickFormScore({ min: intOr(e.currentTarget.value, 0) })}
 											/>
 										</label>
 										<label class="block">
@@ -724,7 +733,7 @@
 												value={quickFormScore().max}
 												class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1"
 												onblur={(e) =>
-													setQuickFormScore({ max: parseInt(e.currentTarget.value) || 100 })}
+													setQuickFormScore({ max: intOr(e.currentTarget.value, 100) })}
 											/>
 										</label>
 									</div>

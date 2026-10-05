@@ -1746,12 +1746,21 @@ class TierViewSet(TierFedByMixin, BaseModelViewSet):
     ordering = ["-rank"]
 
     def get_queryset(self):
+        # Counts cover what the viewer may read: the scale itself is global,
+        # the entities on it are not.
+        visible = RoleAssignment.get_viewable_object_ids(self.request.user, Entity)
         qs = (
             super()
             .get_queryset()
             .annotate(
-                entities_count=Count("entities", distinct=True),
-                solutions_count=Count("solutions", distinct=True),
+                entities_count=Count(
+                    "entities", filter=Q(entities__id__in=visible), distinct=True
+                ),
+                solutions_count=Count(
+                    "solutions",
+                    filter=Q(solutions__provider_entity_id__in=visible),
+                    distinct=True,
+                ),
                 # The history keeps a hard link to every tier it names: such a
                 # tier can be hidden, never deleted.
                 in_history=Exists(
@@ -1777,7 +1786,8 @@ class TierViewSet(TierFedByMixin, BaseModelViewSet):
         Built-in tiers are refused by the base class (403) as before."""
         tier = self.get_object()
         if not tier.builtin:
-            if tier.entities_count or tier.solutions_count:
+            # Not the annotated counts: those only cover what the caller sees.
+            if tier.entities.exists() or tier.solutions.exists():
                 return Response(
                     {"error": "tierInUseCannotDelete"}, status=HTTP_409_CONFLICT
                 )

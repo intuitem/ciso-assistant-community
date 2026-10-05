@@ -642,3 +642,91 @@ def test_skipped_scored_questions_send_a_self_assessment_to_review(setup):
     assert response.status == QuickFormResponse.Status.SUBMITTED
     setup["acme"].refresh_from_db()
     assert setup["acme"].tier is None
+
+
+@pytest.mark.django_db
+class TestReviewFeedback:
+    def _reader_of(self, folder, email):
+        user = User.objects.create_user(email=email, is_published=True)
+        assignment = RoleAssignment.objects.create(
+            user=user,
+            role=Role.objects.get(name="BI-RL-AUD"),
+            folder=folder,
+            is_recursive=True,
+        )
+        assignment.perimeter_folders.add(folder)
+        # The scale lives in Global: reading it is a separate, narrow right.
+        from django.contrib.auth.models import Permission
+
+        scale_reader = Role.objects.create(name=f"scale-reader-{email}")
+        scale_reader.permissions.set(Permission.objects.filter(codename="view_tier"))
+        on_global = RoleAssignment.objects.create(
+            user=user, role=scale_reader, folder=Folder.get_root_folder()
+        )
+        on_global.perimeter_folders.add(Folder.get_root_folder())
+        client = APIClient()
+        client.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"
+        )
+        return client
+
+    def test_tier_counts_cover_only_what_the_viewer_sees(self, setup):
+        elsewhere = Folder.objects.create(
+            name="elsewhere",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=Folder.get_root_folder(),
+        )
+        vital = Tier.objects.create(name="Vital", rank=9)
+        set_entity_tier(setup["acme"], vital)
+        set_entity_tier(Entity.objects.create(name="Hidden", folder=elsewhere), vital)
+        client = self._reader_of(setup["domain"], "tier-reader@test.local")
+        rows = client.get("/api/tiers/").json()["results"]
+        assert next(r for r in rows if r["key"] == "vital")["entities_count"] == 1
+        _user, admin = _admin()
+        rows = admin.get("/api/tiers/").json()["results"]
+        assert next(r for r in rows if r["key"] == "vital")["entities_count"] == 2
+
+    def test_a_tier_used_out_of_sight_still_cannot_be_deleted(self, setup):
+        elsewhere = Folder.objects.create(
+            name="elsewhere",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=Folder.get_root_folder(),
+        )
+        vital = Tier.objects.create(name="Vital", rank=9)
+        hidden = Entity.objects.create(name="Hidden", folder=elsewhere)
+        Entity.objects.filter(pk=hidden.pk).update(tier=vital)
+        _user, admin = _admin()
+        assert admin.delete(f"/api/tiers/{vital.id}/").status_code == 409
+        assert Tier.objects.filter(pk=vital.pk).exists()
+
+    def test_a_target_failing_to_plan_sends_the_submit_to_review(
+        self, setup, monkeypatch
+    ):
+        def boom(*args, **kwargs):
+            raise RuntimeError("unreadable")
+
+        monkeypatch.setattr(EntityTierTarget, "current", boom)
+        user, client = _admin()
+        response = _response(setup, risk="three")
+        QuickFormResponse.objects.filter(pk=response.pk).update(
+            status=QuickFormResponse.Status.DRAFT, submitted_by=None
+        )
+        response.respondents.add(Actor.objects.get(user=user, entity__isnull=True))
+        content = client.get(f"/api/my-requests/{response.id}/content/").json()
+        assert content["on_submit"] == "review"
+        result = client.post(
+            f"/api/my-requests/{response.id}/submit/", {}, format="json"
+        )
+        assert result.status_code == 200, result.json()
+        response.refresh_from_db()
+        assert response.status == QuickFormResponse.Status.SUBMITTED
+
+    def test_a_rank_taken_meanwhile_is_a_400(self, setup, monkeypatch):
+        taken = Tier.objects.order_by("rank").first().rank
+        monkeypatch.setattr(
+            Tier, "make_room_at_the_bottom", classmethod(lambda cls: taken)
+        )
+        _user, client = _admin()
+        result = client.post("/api/tiers/", {"name": "Late"}, format="json")
+        assert result.status_code == 400
+        assert not Tier.objects.filter(name="Late").exists()

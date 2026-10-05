@@ -24,9 +24,17 @@
 
 	let tiers = $state<Tier[]>([]);
 	$effect(() => {
-		fetch('/tiers?is_visible=true')
+		const controller = new AbortController();
+		fetch('/tiers?is_visible=true', { signal: controller.signal })
 			.then((res) => (res.ok ? res.json() : { results: [] }))
-			.then((data) => (tiers = (data.results ?? data) as Tier[]));
+			.then((data) => {
+				const rows = data?.results ?? data;
+				tiers = Array.isArray(rows) ? (rows as Tier[]) : [];
+			})
+			.catch(() => {
+				if (!controller.signal.aborted) tiers = [];
+			});
+		return () => controller.abort();
 	});
 
 	const entry = $derived((value ?? []).find((e) => e?.target === TIER_TARGET));

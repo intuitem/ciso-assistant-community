@@ -74,9 +74,14 @@
 			return;
 		}
 		if (!overrideTiers.length) {
-			const res = await fetch('/tiers?is_visible=true');
-			const body = res.ok ? await res.json().catch(() => null) : null;
-			const tiers = body?.results ?? body;
+			let tiers: unknown = null;
+			try {
+				const res = await fetch('/tiers?is_visible=true');
+				const body = res.ok ? await res.json().catch(() => null) : null;
+				tiers = body?.results ?? body;
+			} catch {
+				tiers = null;
+			}
 			if (!Array.isArray(tiers) || !tiers.length) {
 				toastStore.trigger({
 					message: m.anErrorOccurred(),

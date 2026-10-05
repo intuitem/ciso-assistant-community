@@ -789,14 +789,30 @@ class TierWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(_("Another tier already has this rank"))
         return value
 
+    # A concurrent write can still take the rank (or key) between the check and
+    # the insert: answer 400, not 500. Caught outside the atomic block, once it
+    # has rolled back.
     def create(self, validated_data):
-        # New tiers go to the bottom: a scale is entered most critical first,
-        # so each addition lands below the previous one.
-        if "rank" in validated_data:
-            return super().create(validated_data)
-        with transaction.atomic():
-            validated_data["rank"] = Tier.make_room_at_the_bottom()
-            return super().create(validated_data)
+        try:
+            with transaction.atomic():
+                # New tiers go to the bottom: a scale is entered most critical
+                # first, so each addition lands below the previous one.
+                if "rank" not in validated_data:
+                    validated_data["rank"] = Tier.make_room_at_the_bottom()
+                return super().create(validated_data)
+        except IntegrityError:
+            raise serializers.ValidationError(
+                _("Another tier changed meanwhile, try again")
+            )
+
+    def update(self, instance, validated_data):
+        try:
+            with transaction.atomic():
+                return super().update(instance, validated_data)
+        except IntegrityError:
+            raise serializers.ValidationError(
+                _("Another tier changed meanwhile, try again")
+            )
 
 
 class EntityTierChangeReadSerializer(BaseModelSerializer):
