@@ -995,7 +995,7 @@ def validate_draft_document(draft, *, user=None) -> dict:
                 continue
             definition = {
                 key: matrix.get(key)
-                for key in ("probability", "impact", "risk", "grid")
+                for key in ("probability", "impact", "risk", "grid", "ebios_rm")
             }
             for matrix_error in RiskMatrixViewSet._validate_json_definition(definition):
                 errors.append(f"content.risk_matrices[{index}]: {matrix_error}")

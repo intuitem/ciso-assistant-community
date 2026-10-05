@@ -104,5 +104,3 @@ export function saveInstructionsOpen(open: boolean): void {
 		// ignore quota errors
 	}
 }
-
-export const idOf = (ref: any): string => (typeof ref === 'object' && ref !== null ? ref.id : ref);
