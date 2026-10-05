@@ -302,7 +302,9 @@ async def update_risk_scenario(
         vulnerabilities: List of vulnerability IDs/names exploited by this scenario (replaces existing)
         qualifications: List of qualifications: letters C/I/A(D)/T(P)
             (confidentiality/integrity/availability/proof), names or UUIDs (replaces existing)
-        owner: List of owners as actor UUIDs, emails or names (replaces existing)
+        owner: List of owners (users or teams) as actor UUIDs, emails or names
+            (replaces existing). Use get_users/get_teams to find a name, or
+            list_objects("actors") for the exact Actor UUID
     """
     try:
         # Resolve risk scenario name to ID if needed

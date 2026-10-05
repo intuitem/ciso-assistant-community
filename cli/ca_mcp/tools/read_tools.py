@@ -1690,3 +1690,74 @@ async def get_users(
             "Report this error to the user",
             retry_allowed=False,
         )
+
+
+async def get_teams(
+    search: str = None,
+    folder: str = None,
+):
+    """List teams with their UUIDs, names and members.
+
+    These are Team ids, NOT Actor ids: owner/assignee fields (owner,
+    assigned_to, default_assignee) expect Actor ids. Pass a team name
+    directly to those tools (it is resolved to the actor), or use
+    list_objects("actors") to get Actor UUIDs.
+
+    Args:
+        search: Search term (matches team name or description)
+        folder: Folder ID/name
+    """
+    try:
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+        filters = {}
+
+        if search:
+            params["search"] = search
+            filters["search"] = search
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
+
+        res = make_get_request("/teams/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        teams = get_paginated_results(data)
+
+        if not teams:
+            return empty_response("teams", filters)
+
+        result = found_line(teams, "teams")
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        result += "\n\n"
+        result += "|UUID|Name|Team Email|Leader|Members|\n"
+        result += "|---|---|---|---|---|\n"
+
+        for team in teams:
+            team_id = team.get("id", "N/A")
+            name = team.get("name", "N/A")
+            team_email = team.get("team_email") or ""
+            leader = team.get("leader") or {}
+            leader_str = leader.get("str", "") if isinstance(leader, dict) else ""
+            members = team.get("members") or []
+
+            result += f"|{team_id}|{name}|{team_email}|{leader_str}|{len(members)}|\n"
+
+        return success_response(
+            result,
+            "get_teams",
+            "These are Team ids, not Actor ids. To set owner/assigned_to/default_assignee, "
+            "pass the team name directly, or get Actor UUIDs with list_objects('actors')",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )

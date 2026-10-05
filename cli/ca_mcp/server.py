@@ -43,6 +43,7 @@ from .tools.read_tools import (
     get_vulnerability,
     get_asset_classes,
     get_users,
+    get_teams,
 )
 
 from .tools.aggregate_tools import count_objects
@@ -181,6 +182,7 @@ READ_TOOLS = [
     get_vulnerability,
     get_asset_classes,
     get_users,
+    get_teams,
     get_all_audits_with_metrics,
     get_audit_gap_analysis,
     get_audit_global_score,
