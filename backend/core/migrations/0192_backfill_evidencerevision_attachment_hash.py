@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("core", "0190_compliance_assessment_score_scale"),
+        ("core", "0191_roto_target_objective_category"),
     ]
 
     operations = [
