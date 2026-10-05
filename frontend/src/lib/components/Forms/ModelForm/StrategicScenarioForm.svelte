@@ -4,6 +4,7 @@
 	import { m } from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -35,6 +36,7 @@
 	cacheLock={cacheLocks['ro_to_couple']}
 	bind:cachedValue={formDataCache['ro_to_couple']}
 	label={m.roToCouple()}
+	helpText={m.strategicScenarioRoToHelpText()}
 />
 {#key formDataCache['ro_to_couple'] || initialData.ro_to_couple}
 	<AutocompleteSelect
@@ -49,6 +51,16 @@
 		cacheLock={cacheLocks['focused_feared_event']}
 		bind:cachedValue={formDataCache['focused_feared_event']}
 		label={m.focusedFearedEvent()}
+		helpText={m.strategicScenarioFocusedFearedEventHelpText()}
 		nullable
 	/>
 {/key}
+<Select
+	{form}
+	options={(model.selectOptions?.['gravity'] ?? []).filter((o) => o.value !== -1)}
+	field="gravity_forced"
+	label={m.forcedGravity()}
+	helpText={m.forcedGravityHelpText()}
+	cacheLock={cacheLocks['gravity_forced']}
+	bind:cachedValue={formDataCache['gravity_forced']}
+/>
