@@ -1610,7 +1610,12 @@ async def get_users(
     is_applied_control_owner: bool = None,
     exclude_current: bool = None,
 ):
-    """List users with their UUIDs, names and emails
+    """List user accounts with their User UUIDs, names and emails.
+
+    These are User ids, NOT Actor ids: owner/assignee fields (owner,
+    assigned_to, default_assignee) expect Actor ids. Pass an email or name
+    directly to those tools (it is resolved to the actor), or use
+    list_objects("actors") to get Actor UUIDs.
 
     Args:
         search: Search term (name or email)
@@ -1675,7 +1680,8 @@ async def get_users(
         return success_response(
             result,
             "get_users",
-            "Use the UUID column to set the owner field when calling update_applied_control or update_asset",
+            "These are User ids, not Actor ids. To set owner/assigned_to/default_assignee, "
+            "pass the email or name directly, or get Actor UUIDs with list_objects('actors')",
         )
     except Exception as e:
         return error_response(

@@ -34,6 +34,7 @@ An action does one thing: reads objects, creates one, sends an email, calls an e
 | Manage group membership | Adds a user to a group or removes them |
 | Set variables | Assigns variables |
 | Date offset | Computes a date from a base date and an offset |
+| Compute | Sets variables from arithmetic and logic expressions |
 | Log | Writes a line to the run log |
 
 Every action's settings, outputs and required permission are in the [action reference](actions.md).

@@ -35,7 +35,7 @@ A vulnerability sits inside a domain and points outward at what it affects (asse
 - **Severity** — the shared scale (undefined / info / low / medium / high / critical).
 - **Status** — undefined, potential, exploitable, mitigated, fixed, not exploitable, unaffected.
 - **Affected scope** — the assets exposed, and the entities (third parties) involved when relevant.
-- **Treatment** — linked applied controls (the remediations), security exceptions (formal deviations), CWE entries, and one or more security advisories.
+- **Treatment** — linked applied controls (the remediations), [security exceptions](security-exceptions.md) (formal deviations), CWE entries, and one or more security advisories.
 - **Timing** — detection date, publication date, ETA, and the SLA due date computed from the severity-driven policy.
 
 ## SLA-driven due dates
@@ -74,3 +74,4 @@ The status field captures where each vulnerability sits in that flow; the linked
 - [Vulnerability SLA policy](../configuration/settings/vulnerability-sla.md)
 - [Security intelligence feeds](../configuration/settings/sec-intel-feeds.md)
 - [Vocabulary → Vulnerability / Security advisory / CWE / Severity](../introduction/vocabulary.md)
+- [Security exceptions](security-exceptions.md)

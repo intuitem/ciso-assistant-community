@@ -2,8 +2,11 @@
 	import { BaseEdge, EdgeLabel, getSmoothStepPath, type EdgeProps } from '@xyflow/svelte';
 	import { getContext } from 'svelte';
 	import { m } from '$paraglide/messages';
+	import type { Quotation } from '$lib/utils/ebios-quotation';
 
 	let {
+		source,
+		target,
 		sourceX,
 		sourceY,
 		targetX,
@@ -18,7 +21,12 @@
 	const editor = getContext<{
 		toggleOperator: (id: string) => void;
 		readonly: boolean;
+		quotation: Quotation | null;
 	}>('killChainEditor');
+
+	const critical = $derived(
+		!!editor?.quotation?.steps[source]?.critical && !!editor?.quotation?.steps[target]?.critical
+	);
 
 	const STAGE_CLASSES: Record<number, { bg: string; border: string; text: string }> = {
 		0: { bg: 'bg-surface-50-950', border: 'border-pink-400', text: 'text-pink-700' },
@@ -34,7 +42,9 @@
 			targetX,
 			targetY,
 			sourcePosition,
-			targetPosition
+			targetPosition,
+			// Bend in the gap before the target column, so the crossing stays a straight line.
+			centerX: data?.skipsStage ? targetX - 40 : undefined
 		})
 	);
 
@@ -49,10 +59,17 @@
 	const cls = $derived(STAGE_CLASSES[targetStage] ?? STAGE_CLASSES[1]);
 </script>
 
+{#if data?.skipsStage}
+	<path d={path} fill="none" class="logic-edge-halo" />
+{/if}
 <BaseEdge
 	{path}
 	{markerEnd}
-	style={selected ? 'stroke: var(--color-secondary-500); stroke-width:3;' : ''}
+	style={selected
+		? 'stroke: var(--color-secondary-500); stroke-width:3;'
+		: critical
+			? 'stroke: var(--color-error-500); stroke-width:3;'
+			: ''}
 />
 {#if logicOp}
 	<EdgeLabel
@@ -81,3 +98,12 @@
 		{/if}
 	</EdgeLabel>
 {/if}
+
+<style>
+	.logic-edge-halo {
+		stroke: var(--xy-background-color);
+		stroke-width: 5;
+		stroke-linecap: round;
+		pointer-events: none;
+	}
+</style>
