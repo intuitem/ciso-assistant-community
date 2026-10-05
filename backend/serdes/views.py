@@ -36,10 +36,10 @@ class ExportBackupView(APIView):
     def get(self, request, *args, **kwargs):
         if not request.user.has_backup_permission:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        response = HttpResponse(content_type="application/json")
+        response = HttpResponse(content_type="application/gzip")
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         response["Content-Disposition"] = (
-            f'attachment; filename="ciso-assistant-db-{settings.VERSION}-{timestamp}.json"'
+            f'attachment; filename="ciso-assistant-db-{settings.VERSION}-{timestamp}.json.gz"'
         )
 
         buffer = io.StringIO()

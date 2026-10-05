@@ -166,3 +166,17 @@ function createPersistedAuditFilters() {
 }
 
 export const auditFiltersStore = createPersistedAuditFilters();
+
+// Unread notification count, shared between the app-bar bell and whatever changes it.
+// The bell's poll covers changes made elsewhere, but marking rows read inside the inbox
+// never navigates, so the mutation endpoints answer with the new count instead.
+export const unreadNotificationCount = writable<number>(0);
+
+/**
+ * Update the badge from any mutation response that reports a count. Shaped as "if the
+ * response mentions it, use it" so the generic callers stay model-agnostic.
+ */
+export function applyUnreadCount(payload: unknown): void {
+	const count = (payload as { unread_count?: unknown } | null)?.unread_count;
+	if (typeof count === 'number') unreadNotificationCount.set(count);
+}

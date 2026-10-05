@@ -23,6 +23,7 @@ from library.views import (
     LoadedLibraryViewSet,
 )
 from custom_fields.views import CustomFieldDefinitionViewSet
+from notifications.views import NotificationChannelsView, NotificationViewSet
 import importlib
 
 
@@ -33,6 +34,7 @@ from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r"folders", FolderViewSet, basename="folders")
+router.register(r"notifications", NotificationViewSet, basename="notifications")
 router.register(r"roles", RoleViewSet, basename="roles")
 router.register(
     r"custom-fields",
@@ -195,6 +197,11 @@ for route in ROUTES:
 
 
 urlpatterns = [
+    path(
+        "notification-channels/",
+        NotificationChannelsView.as_view(),
+        name="notification-channels",
+    ),
     path("", include(router.urls)),
     path("iam/", include("iam.urls")),
     path("serdes/", include("serdes.urls")),

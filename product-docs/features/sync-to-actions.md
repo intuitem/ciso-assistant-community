@@ -83,3 +83,4 @@ The applied control's **status field** is the input signal; the assessment's res
 - [Customize your audit](../guides/customize-audit.md) — for the `auto_sync` toggle in context.
 - [Applied controls](../concepts/applied-controls.md) — what gets read by sync.
 - [Risk assessments](../concepts/risk-assessments.md) — the three-tier risk model (inherent / current / residual) that scenario sync collapses.
+- [Risk trajectory](risk-trajectory.md) — preview when each scenario will reach residual risk.
