@@ -10,7 +10,6 @@ from ebios_rm.models import (
     Stakeholder,
     StrategicScenario,
 )
-from ebios_rm.tests.fixtures import *
 from tprm.models import Entity
 
 
