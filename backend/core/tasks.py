@@ -448,15 +448,26 @@ def send_task_node_due_soon_notification(actor_email, task_nodes, days):
     if not check_email_configuration(actor_email, task_nodes):
         return
 
-    from .email_utils import format_task_node_list, render_email_template
+    from .email_utils import (
+        format_task_node_list,
+        get_email_preferences,
+        localize_day_unit,
+        render_email_template,
+    )
 
-    locale, days_unit = _localized_day_unit(actor_email, days)
+    locale, date_format = get_email_preferences(actor_email)
+    days_unit = localize_day_unit(days, locale)
 
     context = {
         "task_count": len(task_nodes),
-        "task_list": format_task_node_list(task_nodes),
+        "task_list": format_task_node_list(
+            task_nodes, locale=locale, date_format=date_format
+        ),
         "task_list_detailed": format_task_node_list(
-            task_nodes, include_description=True
+            task_nodes,
+            include_description=True,
+            locale=locale,
+            date_format=date_format,
         ),
         "days_remaining": days,
         "days_remaining_unit": days_unit,
@@ -484,18 +495,32 @@ def send_task_node_overdue_notification(actor_email, task_nodes):
     if not check_email_configuration(actor_email, task_nodes):
         return
 
-    from .email_utils import render_email_template, format_task_node_list
+    from .email_utils import (
+        format_task_node_list,
+        get_email_preferences,
+        render_email_template,
+    )
+
+    locale, date_format = get_email_preferences(actor_email)
 
     context = {
         "task_count": len(task_nodes),
-        "task_list": format_task_node_list(task_nodes),
+        "task_list": format_task_node_list(
+            task_nodes, locale=locale, date_format=date_format
+        ),
         "task_list_detailed": format_task_node_list(
-            task_nodes, include_description=True
+            task_nodes,
+            include_description=True,
+            locale=locale,
+            date_format=date_format,
         ),
     }
 
     rendered = render_email_template(
-        "task_node_overdue", context, recipient_email=actor_email
+        "task_node_overdue",
+        context,
+        locale=locale,
+        recipient_email=actor_email,
     )
     if rendered:
         send_notification_email(

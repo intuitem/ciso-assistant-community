@@ -8,8 +8,9 @@ from pathlib import Path
 from string import Template
 from typing import Dict, Optional
 from django.conf import settings
+from django.utils.formats import date_format as django_date_format
 from django.utils.html import escape as html_escape
-from django.utils.translation import get_language
+from django.utils.translation import get_language, override
 from core.utils import yaml_safe_load
 from global_settings.models import GlobalSettings
 from iam.models import User
@@ -54,6 +55,48 @@ _ASSIGNMENT_DECISIONS = {
     },
 }
 
+_TASK_LIST_LABELS = {
+    "de": {
+        "due": "Fällig",
+        "status": "Status",
+        "not_set": "Nicht festgelegt",
+        "unknown": "Unbekannt",
+    },
+    "en": {
+        "due": "Due",
+        "status": "Status",
+        "not_set": "Not set",
+        "unknown": "Unknown",
+    },
+    "fr": {
+        "due": "Échéance",
+        "status": "Statut",
+        "not_set": "Non définie",
+        "unknown": "Inconnue",
+    },
+}
+
+_TASK_STATUSES = {
+    "de": {
+        "pending": "Ausstehend",
+        "in_progress": "In Bearbeitung",
+        "completed": "Abgeschlossen",
+        "cancelled": "Abgebrochen",
+    },
+    "en": {
+        "pending": "Pending",
+        "in_progress": "In progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+    },
+    "fr": {
+        "pending": "En attente",
+        "in_progress": "En cours",
+        "completed": "Terminé",
+        "cancelled": "Annulé",
+    },
+}
+
 
 def _language_code(locale: Optional[str]) -> str:
     """Normalize a locale such as ``de-DE`` to a supported language code."""
@@ -75,26 +118,63 @@ def localize_assignment_decision(decision: str, locale: Optional[str]) -> str:
     )
 
 
-def get_locale_for_email(email: str) -> str:
+def get_email_preferences(email: str) -> tuple[str, str]:
     """
-    Resolve the preferred locale for a given email address.
-    Looks up the user's preferences, falls back to admin default, then 'en'.
+    Resolve the recipient's language and date format preferences.
+
+    User preferences take precedence over the instance defaults. External email
+    recipients, who have no user record, receive the instance defaults.
     """
     try:
         user = User.objects.filter(email__iexact=email).first()
         if user:
-            return user.get_preferences().get("lang", "en")
+            preferences = user.get_preferences()
+            return (
+                preferences.get("lang", "en"),
+                preferences.get("date_format", "auto"),
+            )
     except Exception as e:
-        logger.warning("Failed to resolve user locale for email lookup: %s", e)
+        logger.warning("Failed to resolve user preferences for email lookup: %s", e)
 
     try:
         general = GlobalSettings.objects.filter(name="general").first()
         if general and isinstance(general.value, dict):
-            return general.value.get("default_language", "en")
+            locale = general.value.get("default_language", "en")
+            date_format = general.value.get("default_date_format", "auto")
+            if date_format not in User.DATE_FORMATS:
+                date_format = "auto"
+            return locale, date_format
     except Exception as e:
-        logger.warning("Failed to resolve default language from global settings: %s", e)
+        logger.warning("Failed to resolve defaults from global settings: %s", e)
 
-    return "en"
+    return "en", "auto"
+
+
+def get_locale_for_email(email: str) -> str:
+    """Resolve the preferred locale for a given email address."""
+    locale, _ = get_email_preferences(email)
+    return locale
+
+
+def format_email_date(value, locale: Optional[str], preference: str = "auto") -> str:
+    """Format a date for an email using the recipient's UI preference."""
+    if preference not in User.DATE_FORMATS:
+        preference = "auto"
+
+    if preference == "iso":
+        return value.strftime("%Y-%m-%d")
+    if preference == "ddmmyyyy":
+        return value.strftime("%d/%m/%Y")
+    if preference == "mmddyyyy":
+        return value.strftime("%m/%d/%Y")
+
+    language = _language_code(locale)
+    with override(language):
+        if preference == "long_dmy":
+            return django_date_format(value, "j F Y")
+        if preference == "long_mdy":
+            return django_date_format(value, "F j, Y")
+        return django_date_format(value, "SHORT_DATE_FORMAT")
 
 
 def get_disabled_email_templates() -> set:
@@ -438,7 +518,11 @@ def format_validation_list(validations) -> str:
 
 
 def format_task_node_list(
-    task_nodes, include_description: bool = False
+    task_nodes,
+    include_description: bool = False,
+    *,
+    locale: Optional[str] = "en",
+    date_format: str = "auto",
 ) -> MarkdownSafe:
     """
     Format a list of task nodes for email templates.
@@ -450,15 +534,30 @@ def format_task_node_list(
         task_nodes: List of TaskNode objects
         include_description: If True, include the task template description
             below each task entry
+        locale: Recipient language used for labels and status values
+        date_format: Recipient date format preference
 
     Returns:
         MarkdownSafe string with task node information (contains Markdown links)
     """
     base_url = getattr(settings, "CISO_ASSISTANT_URL", "http://localhost:5173")
+    language = _language_code(locale)
+    labels = _TASK_LIST_LABELS[language]
     items = []
     for node in task_nodes:
-        name = html_escape(node.task_template.name) if node.task_template else "Unknown"
-        due_date = node.due_date.strftime("%Y-%m-%d") if node.due_date else "Not set"
+        name = (
+            html_escape(node.task_template.name)
+            if node.task_template
+            else labels["unknown"]
+        )
+        due_date = (
+            format_email_date(node.due_date, language, date_format)
+            if node.due_date
+            else labels["not_set"]
+        )
+        status = _TASK_STATUSES[language].get(
+            node.status, node.status.replace("_", " ")
+        )
         # Recurrent tasks link to the task node (each occurrence is distinct),
         # non-recurrent tasks link to the task template (the main object).
         if node.task_template and node.task_template.is_recurrent:
@@ -469,7 +568,10 @@ def format_task_node_list(
         link = (
             f'<a target="_blank" rel="noopener noreferrer" href="{node_url}">{name}</a>'
         )
-        item = f"<li>{link}<br>Due: {due_date}<br>Status: {node.status}"
+        item = (
+            f"<li>{link}<br>{labels['due']}: {html_escape(due_date)}"
+            f"<br>{labels['status']}: {html_escape(status)}"
+        )
         if (
             include_description
             and node.task_template

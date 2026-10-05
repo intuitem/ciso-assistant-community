@@ -1,8 +1,12 @@
+from datetime import date
 from string import Template
+from types import SimpleNamespace
 
 import pytest
 
 from core.email_utils import (
+    format_email_date,
+    format_task_node_list,
     load_email_template,
     localize_assignment_decision,
     localize_day_unit,
@@ -93,3 +97,44 @@ def test_german_assignment_reviewed_subject_localizes_decision():
         "CISO Assistant: Ihre Aufgabe für 'ISO 27001' wurde zur Überarbeitung "
         "zurückgegeben"
     )
+
+
+@pytest.mark.parametrize(
+    ("locale", "expected_due", "expected_status"),
+    [
+        ("de", "Fällig: 30.09.2026", "Status: Ausstehend"),
+        ("en", "Due: 09/30/2026", "Status: Pending"),
+        ("fr", "Échéance: 30/09/2026", "Statut: En attente"),
+    ],
+)
+def test_task_list_localizes_dynamic_details(locale, expected_due, expected_status):
+    task_template = SimpleNamespace(
+        id="template-id",
+        name="Review access",
+        is_recurrent=False,
+    )
+    task_node = SimpleNamespace(
+        id="node-id",
+        task_template=task_template,
+        due_date=date(2026, 9, 30),
+        status="pending",
+    )
+
+    task_list = format_task_node_list([task_node], locale=locale)
+
+    assert expected_due in task_list
+    assert expected_status in task_list
+
+
+@pytest.mark.parametrize(
+    ("preference", "expected"),
+    [
+        ("iso", "2026-09-30"),
+        ("ddmmyyyy", "30/09/2026"),
+        ("mmddyyyy", "09/30/2026"),
+        ("long_dmy", "30 September 2026"),
+        ("long_mdy", "September 30, 2026"),
+    ],
+)
+def test_email_date_honors_recipient_preference(preference, expected):
+    assert format_email_date(date(2026, 9, 30), "de", preference) == expected
