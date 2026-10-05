@@ -457,6 +457,30 @@ def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
     return str(vulnerabilities[0]["id"])
 
 
+def resolve_team_id(team_name_or_id: str) -> str:
+    """Helper function to resolve team name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in team_name_or_id and len(team_name_or_id) == 36:
+        return team_name_or_id
+
+    teams, error = fetch_all_results("/teams/", params={"name": team_name_or_id})
+
+    if error:
+        raise ValueError(f"Team '{team_name_or_id}' API error: {error}")
+
+    if not teams:
+        raise ValueError(f"Team '{team_name_or_id}' not found")
+
+    if len(teams) > 1:
+        team_names = [t["name"] for t in teams[:3]]
+        raise ValueError(
+            f"Ambiguous team name '{team_name_or_id}', found {len(teams)}: {team_names}"
+        )
+
+    return str(teams[0]["id"])
+
+
 def resolve_task_template_id(task_name_or_id: str) -> str:
     """Helper function to resolve task template name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
@@ -959,6 +983,41 @@ def resolve_actor_ids(actor_refs) -> list:
     if isinstance(actor_refs, str):
         actor_refs = [actor_refs]
     return [resolve_actor_id(a) for a in actor_refs]
+
+
+def resolve_user_id(user_ref: str) -> str:
+    """Resolve a User (not an Actor) from a UUID, email or name.
+
+    Team.leader/deputies/members are plain User references, unlike
+    owner/assignee fields which reference Actor ids (see resolve_actor_id).
+    """
+    if _is_uuid(user_ref):
+        return user_ref
+
+    ref = str(user_ref).strip()
+    if not ref:
+        raise ValueError("User reference is empty")
+
+    params = {"email": ref} if "@" in ref else {"search": ref}
+    users, error = fetch_all_results("/users/", params=params)
+    if error:
+        raise ValueError(f"User '{ref}' API error: {error}")
+
+    if not users:
+        raise ValueError(f"User '{ref}' not found")
+
+    if len(users) > 1:
+        labels = [u.get("email") for u in users[:5]]
+        raise ValueError(f"Ambiguous user '{ref}', found {len(users)}: {labels}")
+
+    return str(users[0]["id"])
+
+
+def resolve_user_ids(user_refs) -> list:
+    """Resolve a list of user references (see resolve_user_id)."""
+    if isinstance(user_refs, str):
+        user_refs = [user_refs]
+    return [resolve_user_id(u) for u in user_refs]
 
 
 def resolve_reference_control_id(ref: str) -> str:

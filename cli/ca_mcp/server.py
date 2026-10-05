@@ -63,6 +63,7 @@ from .tools.library_tools import (
 
 from .tools.write_tools import (
     create_folder,
+    create_team,
     create_perimeter,
     create_asset,
     create_threat,
@@ -81,6 +82,7 @@ from .tools.write_tools import (
 )
 
 from .tools.update_tools import (
+    update_team,
     update_asset,
     update_risk_scenario,
     update_applied_control,
@@ -208,6 +210,8 @@ READ_TOOLS = [
 WRITE_TOOLS = [
     import_stored_library,
     create_folder,
+    create_team,
+    update_team,
     create_perimeter,
     create_asset,
     create_threat,
