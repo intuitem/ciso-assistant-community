@@ -27,9 +27,6 @@ def test_cyfun_frameworks_declare_their_scoring():
     cyfun2023 = yaml.safe_load(library)["objects"]["framework"]
     assert cyfun2023["score_scale_locked"] is True
     assert cyfun2023["score_calculation_method"] == "average_of_averages"
-    # Every control starts at the minimum in the CCB tools.
-    assert cyfun2025["score_defaults_to_minimum"] is True
-    assert cyfun2023["score_defaults_to_minimum"] is True
 
 
 @pytest.mark.parametrize(

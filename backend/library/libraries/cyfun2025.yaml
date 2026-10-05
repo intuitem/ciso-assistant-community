@@ -23,7 +23,7 @@ description: 'The CyberFundamentals Framework is a framework owned by the Centre
   Version 2025-10-01'
 copyright: "\u24B8 Centre for Cybersecurity Belgium (CCB)"
 version: 9
-publication_date: 2026-10-04
+publication_date: 2026-10-05
 provider: CCB
 packager: intuitem
 translations:
@@ -20872,7 +20872,6 @@ objects:
     score_calculation_method: average_of_averages
     anchor_na_to_target: true
     target_score: 3.0
-    score_defaults_to_minimum: true
     scores_definition:
     - score: 1
       name: Initial

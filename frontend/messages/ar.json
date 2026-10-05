@@ -638,7 +638,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "لا يمكنك حذف حساب المسؤول الوحيد في التطبيق.",
 	"attemptToRemoveOnlyAdminUserGroup": "لا يمكنك إزالة المستخدم الوحيد المسؤول في التطبيق من مجموعة المستخدمين المسؤولين.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "لا يمكنك إزالة نفسك من مجموعة مسؤولي النطاق. اطلب من مسؤول آخر القيام بذلك.",
-	"scoringHelpText": "حدد لتمكين التسجيل",
 	"overrideScore": "تجاوز الدرجة",
 	"overrideScoreHelpText": "تثبيت الدرجة يدويًا وإيقاف إعادة حسابها من الإجابات",
 	"automaticScore": "الدرجة التلقائية",

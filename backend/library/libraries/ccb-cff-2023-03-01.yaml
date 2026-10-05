@@ -51,7 +51,6 @@ objects:
         respondent: edit
     score_scale_locked: true
     score_calculation_method: average_of_averages
-    score_defaults_to_minimum: true
     scores_definition:
     - score: 1
       name: Initial

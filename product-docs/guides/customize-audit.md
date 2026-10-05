@@ -134,10 +134,6 @@ The **Anchor N/A to target score** checkbox controls how _Not Applicable_ requir
 - **Off** _(default)_ — N/A requirements are excluded from the score entirely.
 - **On** — N/A requirements are included with their score replaced by the **Target score**. Use this when "we're already at our target on this dimension" should count toward the overall maturity, rather than being ignored.
 
-### Scores default to the minimum
-
-With **Scores default to the minimum** on, every applicable requirement always has a score: one not assessed yet is at the bottom of its scale, on both the implementation and the documentation score, and the scoring switch is hidden. This is how the CCB CyFun tools work, where every control starts at the minimum. It applies to the audit's existing requirements as soon as it is turned on, and to requirements added later or made applicable again. _Not Applicable_ requirements and scores computed from questionnaire answers are left alone. Turning it off keeps the scores. The framework can propose it for new audits (CyFun does).
-
 ### Per-requirement scale override
 
 By default every requirement in an audit is scored on the audit's [score scale](#choosing-the-score-scale) (e.g. 0..5). When a framework needs a few requirements scored on a different scale — for example a binary "Yes / No" check inside an otherwise maturity-style framework — those requirements can ship their own scale:

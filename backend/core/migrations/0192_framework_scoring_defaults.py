@@ -1,5 +1,5 @@
-"""Scoring defaults declared by frameworks (and the audit's score default), and
-an outcomes field visibility of their own.
+"""Scoring defaults declared by frameworks, and an outcomes field visibility of
+their own.
 
 Outcomes used to follow the result's visibility: existing audits start from
 their result's visibility, so nothing changes until someone edits it. The
@@ -70,22 +70,6 @@ class Migration(migrations.Migration):
                 help_text="Target score proposed for new audits, on the framework scale. Implementation groups can override it.",
                 null=True,
                 verbose_name="Target score",
-            ),
-        ),
-        migrations.AddField(
-            model_name="framework",
-            name="score_defaults_to_minimum",
-            field=models.BooleanField(
-                default=False,
-                help_text="New audits give applicable requirements without a score the scale minimum.",
-                verbose_name="Scores default to the minimum",
-            ),
-        ),
-        migrations.AddField(
-            model_name="complianceassessment",
-            name="score_defaults_to_minimum",
-            field=models.BooleanField(
-                default=False, verbose_name="Scores default to the minimum"
             ),
         ),
         migrations.RunPython(

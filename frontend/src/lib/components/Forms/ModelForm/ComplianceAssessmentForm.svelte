@@ -61,7 +61,6 @@
 	interface DefaultScoring {
 		score_calculation_method?: string;
 		anchor_na_to_target?: boolean;
-		score_defaults_to_minimum?: boolean;
 		target_score?: number;
 		target_score_by_group?: Record<string, number>;
 	}
@@ -256,8 +255,7 @@
 				...d,
 				score_calculation_method: baseline.score_calculation_method,
 				anchor_na_to_target: baseline.anchor_na_to_target,
-				target_score: baseline.target_score,
-				score_defaults_to_minimum: baseline.score_defaults_to_minimum
+				target_score: baseline.target_score
 			}),
 			{ taint: false }
 		);
@@ -308,7 +306,6 @@
 							score_calculation_method:
 								defaultScoring?.score_calculation_method ?? currentData.score_calculation_method,
 							anchor_na_to_target: defaultScoring?.anchor_na_to_target ?? false,
-							score_defaults_to_minimum: defaultScoring?.score_defaults_to_minimum ?? false,
 							target_score: proposedTarget
 						}));
 					}
@@ -553,12 +550,6 @@
 				helpText={m.anchorNaToTargetHelpText()}
 				cacheLock={cacheLocks['anchor_na_to_target']}
 				bind:cachedValue={formDataCache['anchor_na_to_target']}
-			/>
-			<Checkbox
-				{form}
-				field="score_defaults_to_minimum"
-				label={m.scoreDefaultsToMinimum()}
-				helpText={m.scoreDefaultsToMinimumHelpText()}
 			/>
 		{/if}
 	</div>

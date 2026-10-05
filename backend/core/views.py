@@ -13837,8 +13837,6 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     RequirementAssessment.objects.bulk_update(ras_to_init, ["score"])
             else:
                 assessable_ras.update(is_scored=False)
-            # After the baseline and mapping copies, which can leave scores unset.
-            instance.apply_minimum_score_defaults()
 
             # Handle applied controls creation
             if create_applied_controls:
@@ -13930,7 +13928,6 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 "score_calculation_method": compliance_assessment.score_calculation_method,
                 "target_score": compliance_assessment.target_score,
                 "anchor_na_to_target": compliance_assessment.anchor_na_to_target,
-                "score_defaults_to_minimum": compliance_assessment.score_defaults_to_minimum,
             }
         )
 

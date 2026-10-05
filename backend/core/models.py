@@ -1742,7 +1742,6 @@ class LibraryUpdater:
                 framework_dict.setdefault("score_calculation_method", "average")
                 framework_dict.setdefault("anchor_na_to_target", False)
                 framework_dict.setdefault("target_score", None)
-                framework_dict.setdefault("score_defaults_to_minimum", False)
                 framework_dict.setdefault("field_visibility", {})
                 Framework.validate_score_calculation_method(
                     framework_dict["score_calculation_method"]
@@ -2325,13 +2324,6 @@ class LibraryUpdater:
 
                     if answers_to_create:
                         Answer.objects.bulk_create(answers_to_create, batch_size=500)
-
-                # New requirements, nodes that became assessable and scores
-                # reset by the update all leave scores unset.
-                for ca in ComplianceAssessment.objects.filter(
-                    framework=new_framework, score_defaults_to_minimum=True
-                ):
-                    ca.apply_minimum_score_defaults()
 
     def update_quick_forms(self):
         """Upsert quick forms, pages and questions by URN, prune what the new
@@ -3772,13 +3764,6 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             "Implementation groups can override it."
         ),
     )
-    score_defaults_to_minimum = models.BooleanField(
-        default=False,
-        verbose_name=_("Scores default to the minimum"),
-        help_text=_(
-            "New audits give applicable requirements without a score the scale minimum."
-        ),
-    )
     urn_namespace = models.CharField(
         max_length=50,
         default="custom",
@@ -3952,8 +3937,6 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         scoring = {"score_calculation_method": self.score_calculation_method}
         if self.anchor_na_to_target:
             scoring["anchor_na_to_target"] = True
-        if self.score_defaults_to_minimum:
-            scoring["score_defaults_to_minimum"] = True
         if self.target_score is not None:
             scoring["target_score"] = self.target_score
             by_group = {
@@ -8876,11 +8859,6 @@ class ComplianceAssessment(Assessment):
         default=False,
         verbose_name=_("Anchor N/A to target score"),
     )
-    # As in the CCB CyFun tools, where every control starts at the minimum.
-    score_defaults_to_minimum = models.BooleanField(
-        default=False,
-        verbose_name=_("Scores default to the minimum"),
-    )
     auto_sync = models.BooleanField(
         default=False,
         verbose_name=_("Automatic sync to actions"),
@@ -9077,7 +9055,6 @@ class ComplianceAssessment(Assessment):
             "selected_implementation_groups",
             "score_calculation_method",
             "anchor_na_to_target",
-            "score_defaults_to_minimum",
             "target_score",
             "min_score",
             "max_score",
@@ -9095,11 +9072,6 @@ class ComplianceAssessment(Assessment):
             self.score_scale_preset = None
         super().save(*args, **kwargs)
         update_fields = kwargs.get("update_fields")
-        if update_fields is None or {
-            "score_defaults_to_minimum",
-            "field_visibility",
-        } & set(update_fields):
-            self.apply_minimum_score_defaults()
         self.upsert_daily_metrics()
         if update_fields is None or self._OUTCOME_FIELDS & set(update_fields):
             # Outcomes read the audit's scores, which these settings change.
@@ -9116,43 +9088,6 @@ class ComplianceAssessment(Assessment):
             evaluate_outcomes(self)
 
         _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
-
-    def apply_minimum_score_defaults(self, requirement_assessments=None) -> None:
-        """With score_defaults_to_minimum, an applicable requirement always has
-        a score: unset scores become the scale minimum, on both layers
-        (RequirementAssessment.fill_minimum_scores). Applies to the given
-        requirement assessments, updated in place, or to all of the audit's.
-        Questionnaire-scored requirements keep their computed score.
-        """
-        if not (self.score_defaults_to_minimum and self.scoring_enabled):
-            return
-        if requirement_assessments is None:
-            requirement_assessments = RequirementAssessment.objects.filter(
-                Q(is_scored=False)
-                | Q(score__isnull=True)
-                | Q(documentation_score__isnull=True),
-                compliance_assessment=self,
-            ).select_related("requirement")
-        with_questions = set(
-            Question.objects.filter(
-                requirement_node__framework_id=self.framework_id
-            ).values_list("requirement_node_id", flat=True)
-        )
-        changed = []
-        for ra in requirement_assessments:
-            ra.compliance_assessment = self
-            if (
-                ra.requirement.assessable
-                and ra.requirement_id not in with_questions
-                and ra.fill_minimum_scores()
-            ):
-                changed.append(ra)
-        if changed:
-            # bulk_update skips RequirementAssessment.save().
-            RequirementAssessment.objects.bulk_update(
-                changed, ["is_scored", "score", "documentation_score"], batch_size=500
-            )
-            self.defer_outcomes_evaluation()
 
     def create_requirement_assessments(
         self, baseline: Self | None = None
@@ -9314,7 +9249,6 @@ class ComplianceAssessment(Assessment):
                 assessment.evidences.set(evidences)
                 assessment.applied_controls.set(controls)
 
-        self.apply_minimum_score_defaults(created_assessments)
         return created_assessments
 
     def sync_to_applied_controls(self, dry_run=True):
@@ -11272,49 +11206,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         _defer_once("_pending_cel_evaluations", ca.pk, _run)
 
-    def fill_minimum_scores(self) -> bool:
-        """Give an applicable requirement without a score the scale minimum, on
-        both layers (ComplianceAssessment.score_defaults_to_minimum). Stored
-        scores are kept, e.g. those preserved while scoring was turned off.
-        Returns whether anything changed."""
-        if self.result == self.Result.NOT_APPLICABLE:
-            return False
-        minimum = self.get_resolved_scoring()["min_score"]
-        if minimum is None:
-            return False
-        changed = False
-        if not self.is_scored:
-            self.is_scored = True
-            changed = True
-        if self.score is None:
-            self.score = minimum
-            changed = True
-        if self.documentation_score is None:
-            self.documentation_score = minimum
-            changed = True
-        return changed
-
-    def _fill_default_scores(self) -> bool:
-        if self.is_scored and None not in (self.score, self.documentation_score):
-            return False
-        if not (
-            self.compliance_assessment.score_defaults_to_minimum
-            and self.compliance_assessment.scoring_enabled
-            and self.requirement.assessable
-        ):
-            return False
-        if Question.objects.filter(requirement_node_id=self.requirement_id).exists():
-            return False
-        return self.fill_minimum_scores()
-
     def save(self, *args, **kwargs) -> None:
-        if self._fill_default_scores() and kwargs.get("update_fields") is not None:
-            kwargs["update_fields"] = {
-                *kwargs["update_fields"],
-                "is_scored",
-                "score",
-                "documentation_score",
-            }
         update_fields = kwargs.get("update_fields")
         cel_fields_touched = True
         if update_fields is not None:

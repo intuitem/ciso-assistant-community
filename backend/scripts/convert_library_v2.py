@@ -1248,11 +1248,6 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
         ).strip().lower() in ("1", "true", "yes", "x")
     if meta.get("target_score") not in (None, ""):
         framework["target_score"] = float(meta["target_score"])
-    # Applicable requirements without a score count as the scale minimum.
-    if "score_defaults_to_minimum" in meta:
-        framework["score_defaults_to_minimum"] = str(
-            meta["score_defaults_to_minimum"]
-        ).strip().lower() in ("1", "true", "yes", "x")
 
     score_name = meta.get("scores_definition")
     if score_name and score_name in object_blocks:

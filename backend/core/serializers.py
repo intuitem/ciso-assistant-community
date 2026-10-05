@@ -4099,8 +4099,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         old_scoring_enabled = instance.scoring_enabled
 
         with transaction.atomic():
-            # Stored scores move to the new scale first, so that save() fills
-            # unset scores (score_defaults_to_minimum) on the new scale and
+            # Stored scores move to the new scale first, so that save()
             # snapshots today's metrics after the move.
             if rescale := getattr(self, "_score_rescale", None):
                 instance.rescale_requirement_scores(*rescale)
