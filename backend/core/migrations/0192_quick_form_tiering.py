@@ -95,13 +95,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="quickformpublication",
-            name="on_accept",
-            field=models.JSONField(
-                blank=True, default=list, verbose_name="Apply on accept"
-            ),
-        ),
-        migrations.AddField(
             model_name="quickformresponse",
             name="computed_values",
             field=models.JSONField(
@@ -181,9 +174,9 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="quickform",
-            name="on_accept_suggestion",
+            name="on_accept",
             field=models.JSONField(
-                blank=True, default=list, verbose_name="Suggested apply on accept"
+                blank=True, default=list, verbose_name="Apply on accept"
             ),
         ),
         migrations.AddField(

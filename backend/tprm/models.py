@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.text import slugify
 from django.utils.translation import get_language, gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
 from core.base_models import (
@@ -50,13 +51,18 @@ class Tier(NameDescriptionMixin, FolderMixin):
     """One level of the organisation's vendor tier scale. Ordered by `rank`,
     higher meaning more critical; global, so it lives in the root folder."""
 
+    # Four levels, like the 1-4 criticality of entity assessments and solutions,
+    # named in the vocabulary of DORA / EBA outsourcing ("critical or important").
     DEFAULT_TIERS = [
         {"name": "critical", "rank": 4, "hexcolor": "#dc2626"},
-        {"name": "high", "rank": 3, "hexcolor": "#ea580c"},
-        {"name": "medium", "rank": 2, "hexcolor": "#ca8a04"},
-        {"name": "low", "rank": 1, "hexcolor": "#16a34a"},
+        {"name": "important", "rank": 3, "hexcolor": "#ea580c"},
+        {"name": "standard", "rank": 2, "hexcolor": "#ca8a04"},
+        {"name": "low-impact", "rank": 1, "hexcolor": "#16a34a"},
     ]
 
+    # What forms reference a tier by: set once from the name, never changed, so
+    # renaming or reordering the scale cannot repoint a form to another tier.
+    key = models.SlugField(max_length=100, unique=True, verbose_name=_("Key"))
     rank = models.PositiveIntegerField(unique=True, verbose_name=_("Rank"))
     hexcolor = models.CharField(
         max_length=9, blank=True, default="", verbose_name=_("Color")
@@ -80,7 +86,18 @@ class Tier(NameDescriptionMixin, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = Folder.get_root_folder()
+        if not self.key:
+            self.key = self.free_key(self.name)
         super().save(*args, **kwargs)
+
+    @classmethod
+    def free_key(cls, name: str) -> str:
+        base = slugify(name)[:90] or "tier"
+        key, n = base, 1
+        while cls.objects.filter(key=key).exists():
+            n += 1
+            key = f"{base}-{n}"
+        return key
 
     @classmethod
     def create_default_tiers(cls):
@@ -299,6 +316,8 @@ class EntityAssessment(Assessment):
         OK = "ok", _("Ok")
         NA = "not_applicable", _("Not applicable")
 
+    # Superseded by the entity's tier (qualification, not posture); kept, hidden
+    # in the UI, until integrations move over.
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))
     penetration = models.IntegerField(default=0, verbose_name=_("Penetration"))
     dependency = models.IntegerField(default=0, verbose_name=_("Dependency"))
@@ -401,7 +420,16 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
     ref_id = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
     reference_link = models.URLField(blank=True, null=True, max_length=2048)
+    # Superseded by `tier`; kept, hidden in the UI, until integrations move over.
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))
+    tier = models.ForeignKey(
+        Tier,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="solutions",
+        verbose_name=_("Tier"),
+    )
     owner = models.ManyToManyField(
         Actor,
         blank=True,

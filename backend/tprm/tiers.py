@@ -3,6 +3,19 @@ from django.utils import timezone
 
 from tprm.models import Entity, EntityTierChange, Tier, TierSource
 
+# The former 1-4 criticality, as default-scale tier keys.
+KEY_BY_CRITICALITY = {4: "critical", 3: "important", 2: "standard", 1: "low-impact"}
+
+
+def tier_for_criticality(value) -> Tier | None:
+    """The visible tier a former 1-4 criticality stands for, if the scale
+    still has it; None for 0, junk or a reshaped scale."""
+    try:
+        key = KEY_BY_CRITICALITY.get(int(value))
+    except TypeError, ValueError:
+        return None
+    return Tier.objects.filter(key=key, is_visible=True).first() if key else None
+
 
 @transaction.atomic
 def set_entity_tier(

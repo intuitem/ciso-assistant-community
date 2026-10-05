@@ -7301,7 +7301,7 @@ class QuickFormReadSerializer(BaseModelSerializer):
     pages_count = serializers.SerializerMethodField()
     responses_count = serializers.SerializerMethodField()
     is_deletable = serializers.SerializerMethodField()
-    suggested_on_accept = serializers.SerializerMethodField()
+    on_accept_health = serializers.SerializerMethodField()
 
     def get_pages_count(self, obj):
         return obj.pages.count()
@@ -7312,10 +7312,10 @@ class QuickFormReadSerializer(BaseModelSerializer):
     def get_is_deletable(self, obj):
         return obj.is_deletable()
 
-    def get_suggested_on_accept(self, obj) -> list[dict]:
-        from core.quick_form_apply import suggested_on_accept
+    def get_on_accept_health(self, obj) -> list[dict]:
+        from core.quick_form_apply import on_accept_health
 
-        return suggested_on_accept(obj) if obj.on_accept_suggestion else []
+        return on_accept_health(obj) if obj.on_accept else []
 
     class Meta:
         model = QuickForm
@@ -7326,6 +7326,8 @@ class QuickFormWriteSerializer(BaseModelSerializer):
     class Meta:
         model = QuickForm
         exclude = ["created_at", "updated_at"]
+        # Comes with the library, edited in the library builder.
+        read_only_fields = ["on_accept"]
 
 
 class QuickFormPageReadSerializer(BaseModelSerializer):
@@ -7366,21 +7368,6 @@ class QuickFormPublicationWriteSerializer(BaseModelSerializer):
     def validate_default_reviewers(self, value):
         return _reject_entity_actors(value)
 
-    def validate(self, attrs):
-        from core.quick_form_apply import validate_on_accept
-
-        attrs = super().validate(attrs)
-        if "on_accept" in attrs or "quick_form" in attrs:
-            quick_form = attrs.get("quick_form") or getattr(
-                self.instance, "quick_form", None
-            )
-            on_accept = attrs.get(
-                "on_accept", getattr(self.instance, "on_accept", None)
-            )
-            if errors := validate_on_accept(on_accept, quick_form):
-                raise serializers.ValidationError({"on_accept": errors})
-        return attrs
-
 
 class QuickFormPublicationReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
@@ -7389,15 +7376,9 @@ class QuickFormPublicationReadSerializer(BaseModelSerializer):
     audience_groups = FieldsRelatedField(many=True)
     default_reviewers = FieldsRelatedField(many=True)
     responses_count = serializers.SerializerMethodField()
-    on_accept_health = serializers.SerializerMethodField()
 
     def get_responses_count(self, obj) -> int:
         return obj.responses.count()
-
-    def get_on_accept_health(self, obj) -> list[dict]:
-        from core.quick_form_apply import on_accept_health
-
-        return on_accept_health(obj) if obj.on_accept else []
 
     class Meta:
         model = QuickFormPublication

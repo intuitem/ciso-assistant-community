@@ -16,10 +16,11 @@ from core.models import (
     StoredLibrary,
     User,
 )
-from core.quick_form_apply import plan, validate_on_accept
+from core.quick_form_apply import on_accept_health, plan
 from core.utils import apply_answers_dict
 from iam.models import Folder, Role, RoleAssignment, UserGroup
 from tprm.models import Entity, EntityTierChange, Tier, TierSource
+from tprm.testing import seed_four_level_scale
 from tprm.tier_target import EntityTierTarget
 from tprm.tiers import set_entity_tier
 
@@ -96,18 +97,25 @@ def _config():
         "bands": {
             "outcome": "risk",
             "thresholds": [
-                {"tier": str(_tier("high").id), "min": 3},
-                {"tier": str(_tier("medium").id), "min": 2},
-                {"tier": str(_tier("low").id)},
+                {"tier": "high", "min": 3},
+                {"tier": "medium", "min": 2},
+                {"tier": "low"},
             ],
         },
-        "mapping": [{"outcome": "pii", "tier": str(_tier("critical").id)}],
+        "mapping": [{"outcome": "pii", "tier": "critical"}],
     }
+
+
+def _set_config(setup, config):
+    QuickForm.objects.filter(pk=setup["form"].pk).update(
+        on_accept=[{"target": "entity.tier", "config": config}]
+    )
 
 
 @pytest.fixture
 def setup():
     startup(sender=None, **{})
+    seed_four_level_scale()
     stored, error = StoredLibrary.store_library_content(LIBRARY_YAML.encode("utf-8"))
     assert error is None, error
     assert stored.load() is None
@@ -118,13 +126,12 @@ def setup():
         parent_folder=Folder.get_root_folder(),
     )
     acme = Entity.objects.create(name="Acme", folder=domain)
-    publication = QuickFormPublication.objects.create(
-        name="Tier a vendor",
-        quick_form=form,
-        folder=domain,
-        on_accept=[{"target": "entity.tier", "config": _config()}],
+    setup = {"form": form, "domain": domain, "acme": acme}
+    _set_config(setup, _config())
+    setup["publication"] = QuickFormPublication.objects.create(
+        name="Tier a vendor", quick_form=form, folder=domain
     )
-    return {"form": form, "domain": domain, "acme": acme, "publication": publication}
+    return setup
 
 
 def _admin():
@@ -181,12 +188,10 @@ def _accept(client, response, **extra):
 @pytest.mark.django_db
 class TestConfig:
     def test_valid(self, setup):
-        assert (
-            validate_on_accept(
-                [{"target": "entity.tier", "config": _config()}], setup["form"]
-            )
-            == []
-        )
+        setup["form"].refresh_from_db()
+        assert on_accept_health(setup["form"]) == [
+            {"target": "entity.tier", "label": "tier", "problems": []}
+        ]
 
     def _errors(self, setup, config):
         return EntityTierTarget().validate_config(config, setup["form"])
@@ -202,21 +207,28 @@ class TestConfig:
     def test_thresholds_descend(self, setup):
         config = _config()
         config["bands"]["thresholds"] = [
-            {"tier": str(_tier("medium").id), "min": 2},
-            {"tier": str(_tier("high").id), "min": 3},
+            {"tier": "medium", "min": 2},
+            {"tier": "high", "min": 3},
         ]
-        errors = self._errors(setup, config)
-        assert "thresholdsMustDescendByRank" in errors
-        assert "thresholdsMustDescendByMin" in errors
+        assert "thresholdsMustDescendByMin" in self._errors(setup, config)
+        # Ranks are the instance's: checked against this scale, not on save.
+        assert "thresholdsMustDescendByRank" in EntityTierTarget().health(
+            config, setup["form"]
+        )
 
     def test_only_the_last_threshold_may_omit_min(self, setup):
         config = _config()
         config["bands"]["thresholds"][0].pop("min")
         assert "thresholdMinRequired" in self._errors(setup, config)
 
-    def test_mapping_needs_a_yes_no_rule_and_a_known_tier(self, setup):
+    def test_mapping_needs_a_yes_no_rule(self, setup):
         config = {"mapping": [{"outcome": "risk", "tier": "nope"}]}
-        assert self._errors(setup, config) == ["mappingOutcomeUnknown", "unknownTier"]
+        assert self._errors(setup, config) == ["mappingOutcomeUnknown"]
+
+    def test_a_key_missing_from_the_scale_is_a_health_problem(self, setup):
+        config = {"mapping": [{"outcome": "pii", "tier": "nope"}]}
+        assert self._errors(setup, config) == []
+        assert EntityTierTarget().health(config, setup["form"]) == ["unknownTier"]
 
 
 @pytest.mark.django_db
@@ -244,10 +256,8 @@ class TestResolution:
 
     def test_a_lower_mapped_outcome_is_not_the_reason(self, setup):
         config = _config()
-        config["mapping"] = [{"outcome": "pii", "tier": str(_tier("low").id)}]
-        QuickFormPublication.objects.filter(pk=setup["publication"].pk).update(
-            on_accept=[{"target": "entity.tier", "config": config}]
-        )
+        config["mapping"] = [{"outcome": "pii", "tier": "low"}]
+        _set_config(setup, config)
         proposal = self._proposal(setup, risk="three", pii="yes")
         assert (proposal.display, proposal.extra["outcomes"]) == ("high", [])
 
@@ -256,11 +266,20 @@ class TestResolution:
         assert self._proposal(setup, risk="three").reason == "tierHidden"
 
     def test_nothing_resolved_writes_nothing(self, setup):
-        config = {"mapping": [{"outcome": "pii", "tier": str(_tier("critical").id)}]}
-        QuickFormPublication.objects.filter(pk=setup["publication"].pk).update(
-            on_accept=[{"target": "entity.tier", "config": config}]
-        )
+        _set_config(setup, {"mapping": [{"outcome": "pii", "tier": "critical"}]})
         assert self._proposal(setup).reason == "noTierResolved"
+
+    def test_a_key_missing_from_the_scale_is_never_guessed(self, setup):
+        # Without "high", the "medium" band would match a 3: refused instead.
+        Tier.objects.filter(key="high").update(key="elevated")
+        assert self._proposal(setup, risk="three").reason == "unknownTier"
+
+    def test_renaming_and_reordering_the_scale_keep_the_form_pointing_right(
+        self, setup
+    ):
+        Tier.objects.filter(key="high").update(name="Vital", rank=9)
+        proposal = self._proposal(setup, risk="three")
+        assert (proposal.ok, proposal.display) == (True, "Vital")
 
 
 @pytest.mark.django_db
@@ -362,26 +381,29 @@ class TestAccept:
 
 @pytest.mark.django_db
 class TestEndpoints:
+    def _row(self, client, setup):
+        rows = client.get("/api/tiers/fed-by/").json()
+        return next(r for r in rows if r["id"] == str(setup["form"].id))
+
     def test_fed_by(self, setup):
         _user, client = _admin()
-        QuickFormPublication.objects.create(
-            name="Unrelated", quick_form=setup["form"], folder=setup["domain"]
-        )
-        rows = client.get("/api/tiers/fed-by/").json()
-        assert [(r["name"], r["problems"]) for r in rows] == [("Tier a vendor", [])]
+        row = self._row(client, setup)
+        assert (row["name"], row["problems"]) == ("Tiering", [])
 
     def test_fed_by_reports_a_hidden_tier(self, setup):
         Tier.objects.filter(name="critical").update(is_visible=False)
         _user, client = _admin()
-        rows = client.get("/api/tiers/fed-by/").json()
-        row = next(r for r in rows if r["id"] == str(setup["publication"].id))
-        assert row["problems"] == ["tierHidden"]
+        assert self._row(client, setup)["problems"] == ["tierHidden"]
+
+    def test_fed_by_reports_a_key_missing_from_the_scale(self, setup):
+        Tier.objects.filter(key="low").update(key="minor")
+        _user, client = _admin()
+        assert self._row(client, setup)["problems"] == ["unknownTier"]
 
     def test_fed_by_reports_a_broken_config(self, setup):
         _user, client = _admin()
         QuickForm.objects.filter(pk=setup["form"].pk).update(outcomes_definition=[])
-        rows = client.get("/api/tiers/fed-by/").json()
-        assert "bandsOutcomeNotNumeric" in rows[0]["problems"]
+        assert "bandsOutcomeNotNumeric" in self._row(client, setup)["problems"]
 
     def test_mine_lists_targets(self, setup):
         _user, client = _admin()
@@ -391,39 +413,134 @@ class TestEndpoints:
 
 
 @pytest.mark.django_db
-class TestMaterialize:
-    SUGGESTION = {
-        "bands": {
-            "outcome": "risk",
-            "thresholds": [
-                {"position": 2, "min": 3},
-                {"position": 3, "min": 2},
-                {"position": 4},
-            ],
-        },
-        "mapping": [{"outcome": "pii", "position": 1}],
-    }
+class TestKeys:
+    def test_a_new_tier_gets_a_key_from_its_name(self, setup):
+        _user, client = _admin()
+        for name in ("Tier 1", "Tier-1"):
+            assert (
+                client.post("/api/tiers/", {"name": name}, format="json").status_code
+                == 201
+            )
+        assert Tier.objects.get(name="Tier 1").key == "tier-1"
+        assert Tier.objects.get(name="Tier-1").key == "tier-1-2"
+        listed = client.get("/api/tiers/").json()["results"]
+        assert "tier-1" in [t["key"] for t in listed]
 
-    def test_positions_follow_the_scale(self, setup):
-        assert EntityTierTarget().materialize(self.SUGGESTION) == _config()
-
-    def test_hidden_tiers_are_not_counted(self, setup):
-        Tier.objects.filter(name="critical").update(is_visible=False)
-        config = EntityTierTarget().materialize(
-            {"mapping": [{"outcome": "pii", "position": 1}]}
+    def test_the_key_never_changes(self, setup):
+        _user, client = _admin()
+        tier = _tier("high")
+        client.patch(
+            f"/api/tiers/{tier.id}/", {"name": "Vital", "key": "vital"}, format="json"
         )
-        assert config == {
-            "mapping": [{"outcome": "pii", "tier": str(_tier("high").id)}]
+        tier.refresh_from_db()
+        assert (tier.name, tier.key) == ("Vital", "high")
+
+
+@pytest.mark.django_db
+class TestAssessFromTheObject:
+    def _options(self, client, setup):
+        return client.get(
+            "/api/quick-forms/assess-options/",
+            {"target": "entity.tier", "subject": str(setup["acme"].id)},
+        ).json()
+
+    def _start(self, client, setup):
+        return client.post(
+            f"/api/quick-forms/{setup['form'].id}/start/",
+            {"subject": str(setup["acme"].id)},
+            format="json",
+        )
+
+    def _auditor(self, setup):
+        user = User.objects.create_user(
+            email="tier-auditor@test.local", is_published=True
+        )
+        assignment = RoleAssignment.objects.create(
+            user=user,
+            role=Role.objects.get(name="BI-RL-AUD"),
+            folder=setup["domain"],
+            is_recursive=True,
+        )
+        assignment.perimeter_folders.add(setup["domain"])
+        client = APIClient()
+        client.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"
+        )
+        return client
+
+    def test_someone_who_may_create_responses_gets_the_form(self, setup):
+        _user, client = _admin()
+        assert self._options(client, setup) == [
+            {"kind": "form", "id": str(setup["form"].id), "name": "Tiering"}
+        ]
+
+    def test_start_files_in_the_subjects_domain_without_a_publication(self, setup):
+        user, client = _admin()
+        result = self._start(client, setup)
+        assert result.status_code == 200, result.json()
+        response = QuickFormResponse.objects.get(
+            pk=result.json()["redirect"].rsplit("/", 1)[1]
+        )
+        assert (response.publication, response.folder) == (None, setup["domain"])
+        assert str(response.subject_object_id) == str(setup["acme"].id)
+        # Same caller, same vendor: the draft is resumed, not duplicated.
+        assert self._start(client, setup).json()["resumed"] is True
+
+    def test_the_in_house_assessment_applies_on_submit(self, setup):
+        _user, client = _admin()
+        response_id = self._start(client, setup).json()["redirect"].rsplit("/", 1)[1]
+        response = QuickFormResponse.objects.get(pk=response_id)
+        questions = {
+            q.urn: q for q in Question.objects.filter(page__quick_form=setup["form"])
         }
+        apply_answers_dict(
+            "response",
+            response,
+            questions,
+            {Q_RISK: f"{Q_RISK}:choice:three", Q_PII: f"{Q_PII}:choice:no"},
+        )
+        response.recompute()
+        content = client.get(f"/api/my-requests/{response.id}/content/").json()
+        assert content["projection"][0]["proposed"] == "high"
+        assert content["on_submit"] == "apply"
+        result = client.post(
+            f"/api/my-requests/{response.id}/submit/", {}, format="json"
+        )
+        assert result.status_code == 200, result.json()
+        setup["acme"].refresh_from_db()
+        assert setup["acme"].tier == _tier("high")
 
-    def test_a_scale_too_short_gives_nothing(self, setup):
-        Tier.objects.filter(name="low").update(is_visible=False)
-        assert EntityTierTarget().materialize(self.SUGGESTION) is None
+    def test_a_reader_is_offered_the_publication_and_cannot_start_directly(self, setup):
+        client = self._auditor(setup)
+        assert self._options(client, setup) == [
+            {
+                "kind": "publication",
+                "id": str(setup["publication"].id),
+                "name": "Tier a vendor",
+            }
+        ]
+        # 404 when the form itself is out of sight, 403 when only the right
+        # to file in the vendor's domain is missing.
+        assert self._start(client, setup).status_code in (403, 404)
+        assert not QuickFormResponse.objects.filter(publication=None).exists()
 
-    @pytest.mark.parametrize("position", [0, "1", None, 1.0])
-    def test_malformed_positions_give_nothing(self, setup, position):
-        suggestion = {"mapping": [{"outcome": "pii", "position": position}]}
-        assert EntityTierTarget().materialize(suggestion) is None
+    def test_an_unreadable_subject_offers_nothing(self, setup):
+        hidden = Entity.objects.create(
+            name="Hidden",
+            folder=Folder.objects.create(
+                name="elsewhere",
+                content_type=Folder.ContentType.DOMAIN,
+                parent_folder=Folder.get_root_folder(),
+            ),
+        )
+        client = self._auditor(setup)
+        assert (
+            client.get(
+                "/api/quick-forms/assess-options/",
+                {"target": "entity.tier", "subject": str(hidden.id)},
+            ).json()
+            == []
+        )
 
 
 @pytest.mark.django_db

@@ -576,13 +576,6 @@
 								{/if}
 								{#if URLModel === 'entities'}
 									<Anchor
-										href="entities/tiers/"
-										class="inline-block p-3 btn-mini-quaternary w-12 focus:relative"
-										title={m.tierScale()}
-										label={m.tierScale()}
-										data-testid="tiers-button"><i class="fa-solid fa-layer-group"></i></Anchor
-									>
-									<Anchor
 										href="entities/graph/"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.exploreButton()}

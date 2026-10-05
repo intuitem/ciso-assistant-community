@@ -130,6 +130,8 @@ export interface Framework {
 	outcomes_definition: OutcomeRule[] | null;
 	/** Quick forms: the object-reference question naming what a response is about. */
 	subject_question_urn?: string | null;
+	/** Quick forms: what an accepted response writes, e.g. the vendor's tier. */
+	on_accept?: Record<string, unknown>[];
 	field_visibility: Record<string, string>;
 	locale?: string;
 	translations?: Translations | null;
@@ -768,6 +770,7 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 			implementation_groups_definition: fw.implementation_groups_definition,
 			outcomes_definition: fw.outcomes_definition as Record<string, unknown>[] | null,
 			subject_question_urn: fw.subject_question_urn ?? null,
+			on_accept: fw.on_accept ?? [],
 			field_visibility: fw.field_visibility,
 			urn_namespace: fw.urn_namespace,
 			ref_id: fw.ref_id
@@ -804,6 +807,7 @@ export function hydrateDraft(
 		implementation_groups_definition: meta.implementation_groups_definition,
 		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null,
 		subject_question_urn: (meta.subject_question_urn ?? null) as string | null,
+		on_accept: (meta.on_accept ?? []) as Record<string, unknown>[],
 		field_visibility: meta.field_visibility ?? {},
 		urn_namespace: meta.urn_namespace ?? 'custom',
 		ref_id: meta.ref_id ?? null

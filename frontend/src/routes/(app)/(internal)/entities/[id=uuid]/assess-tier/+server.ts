@@ -4,25 +4,22 @@ import type { RequestHandler } from './$types';
 
 const TIER_TARGET = 'entity.tier';
 
-// The publications the caller may file that set an entity's tier.
-export const GET: RequestHandler = async ({ fetch }) => {
-	const res = await fetch(`${BASE_API_URL}/quick-form-publications/mine/`);
-	if (!res.ok) return json([]);
-	const rows = (await res.json()) as { id: string; name: string; targets?: string[] }[];
-	return json(
-		rows
-			.filter((row) => (row.targets ?? []).includes(TIER_TARGET))
-			.map((row) => ({ id: row.id, name: row.name }))
-	);
+// What the caller can start to set this entity's tier: forms they may fill
+// in-house, else publications they may file against.
+export const GET: RequestHandler = async ({ fetch, params }) => {
+	const query = new URLSearchParams({ target: TIER_TARGET, subject: params.id });
+	const res = await fetch(`${BASE_API_URL}/quick-forms/assess-options/?${query}`);
+	return json(res.ok ? await res.json() : []);
 };
 
 // Start (or resume) an assessment of this entity through one of them.
 export const POST: RequestHandler = async ({ fetch, params, request }) => {
-	const { publication } = await request.json();
-	const res = await fetch(`${BASE_API_URL}/quick-form-publications/${publication}/start/`, {
+	const { kind, id } = await request.json();
+	const base = kind === 'form' ? 'quick-forms' : 'quick-form-publications';
+	const res = await fetch(`${BASE_API_URL}/${base}/${id}/start/`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ subject: params.id })
 	});
-	return json(await res.json(), { status: res.status });
+	return json(await res.json().catch(() => ({})), { status: res.status });
 };

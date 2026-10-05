@@ -1183,7 +1183,10 @@ class StoredLibrary(LibraryMixin):
     def get_loaded_library(self) -> Optional["LoadedLibrary"]:
         if not self.is_loaded:
             return
-        return LoadedLibrary.objects.filter(urn=self.urn).first()
+        # Read up to three times per row when listing (id, is_update, reference count).
+        if "_loaded_library" not in self.__dict__:
+            self._loaded_library = LoadedLibrary.objects.filter(urn=self.urn).first()
+        return self._loaded_library
 
     @property
     def is_update(self) -> bool:
@@ -2318,8 +2321,7 @@ class LibraryUpdater:
                     "subject_question_urn": (
                         new_quick_form.get("subject_question_urn") or ""
                     ).lower(),
-                    "on_accept_suggestion": new_quick_form.get("on_accept_suggestion")
-                    or [],
+                    "on_accept": new_quick_form.get("on_accept") or [],
                     "urn_namespace": urn.split(":")[1]
                     if urn.startswith("urn:")
                     else "custom",
@@ -4149,11 +4151,12 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
             "is about, e.g. the vendor being assessed."
         ),
     )
-    # What the library suggests a publication writes on accept, in
-    # instance-independent terms (e.g. tier positions, not ids). Pre-fills a
-    # publication's `on_accept`; never applied on its own.
-    on_accept_suggestion = models.JSONField(
-        default=list, blank=True, verbose_name=_("Suggested apply on accept")
+    # What an accepted response writes, and where: [{"target": key, "config": {}}],
+    # keys from core.quick_form_targets. Part of the form's method, so it travels
+    # with the library; configs name objects by stable keys (e.g. tier keys),
+    # never by instance ids.
+    on_accept = models.JSONField(
+        default=list, blank=True, verbose_name=_("Apply on accept")
     )
     ref_id_prefix = models.CharField(
         max_length=8,
@@ -4299,12 +4302,6 @@ class QuickFormPublication(NameDescriptionMixin, FolderMixin):
         max_length=64, blank=True, default="", verbose_name=_("Icon")
     )
     order = models.IntegerField(default=0, verbose_name=_("Order"))
-    # What an accepted response writes, and where: [{"target": key, "config": {}}],
-    # keys from core.quick_form_targets. On the publication, never on the
-    # library-upserted QuickForm, so an upgrade cannot rewrite it.
-    on_accept = models.JSONField(
-        default=list, blank=True, verbose_name=_("Apply on accept")
-    )
     # Off by default: a form sent to the vendor itself must not show the vendor
     # how it is about to be rated.
     show_projection = models.BooleanField(

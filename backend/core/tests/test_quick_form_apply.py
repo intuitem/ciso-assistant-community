@@ -1,5 +1,5 @@
 """Apply on accept: an accepted response writes through the targets its
-publication lists. Exercised with a test-only target that copies a numeric
+form lists. Exercised with a test-only target that copies a numeric
 rule's value into an entity's `mission`."""
 
 import pytest
@@ -23,8 +23,6 @@ from core.quick_form_apply import (
     plan,
     project,
     serialize_plan,
-    suggested_on_accept,
-    validate_on_accept,
 )
 from core.quick_form_targets import TARGETS, Proposal, Target, register
 from core.utils import apply_answers_dict
@@ -143,8 +141,10 @@ def setup():
         parent_folder=Folder.get_root_folder(),
     )
     acme = Entity.objects.create(name="Acme", folder=domain, mission="before")
+    form.on_accept = ON_ACCEPT
+    form.save()
     publication = QuickFormPublication.objects.create(
-        name="Assess", quick_form=form, folder=domain, on_accept=ON_ACCEPT
+        name="Assess", quick_form=form, folder=domain
     )
     return {"form": form, "domain": domain, "acme": acme, "publication": publication}
 
@@ -223,49 +223,51 @@ def _decide(client, response, resolution, **extra):
     )
 
 
+def _health(setup, on_accept):
+    QuickForm.objects.filter(pk=setup["form"].pk).update(on_accept=on_accept)
+    setup["form"].refresh_from_db()
+    return [row["problems"] for row in on_accept_health(setup["form"])]
+
+
 @pytest.mark.django_db
-class TestValidation:
+class TestHealth:
     def test_valid(self, setup):
-        assert validate_on_accept(ON_ACCEPT, setup["form"]) == []
+        assert _health(setup, ON_ACCEPT) == [[]]
 
     @pytest.mark.parametrize(
         "on_accept,expected",
         [
-            ("nope", ["onAcceptMustBeAList"]),
-            ([{"target": "nope"}], ["unknownOnAcceptTarget:nope"]),
-            (ON_ACCEPT + ON_ACCEPT, [f"duplicateOnAcceptTarget:{MissionTarget.key}"]),
+            ([{"target": "nope"}], [["unknownOnAcceptTarget"]]),
+            (["nope"], [["onAcceptEntryMalformed"]]),
             (
                 [{"target": MissionTarget.key, "config": {"value": "x"}}],
-                [f"{MissionTarget.key}:unknownValue"],
+                [["unknownValue"]],
             ),
         ],
     )
-    def test_invalid(self, setup, on_accept, expected):
-        assert validate_on_accept(on_accept, setup["form"]) == expected
+    def test_problems(self, setup, on_accept, expected):
+        assert _health(setup, on_accept) == expected
 
     def test_form_without_a_matching_subject(self, setup):
         QuickForm.objects.filter(pk=setup["form"].pk).update(subject_question_urn="")
-        setup["form"].refresh_from_db()
-        assert validate_on_accept(ON_ACCEPT, setup["form"]) == [
-            f"subjectModelMismatch:{MissionTarget.key}"
-        ]
+        assert _health(setup, ON_ACCEPT) == [["subjectModelMismatch"]]
 
-    def test_api_refuses_a_bad_config(self, setup):
-        _user, client = _admin()
-        response = client.patch(
-            f"/api/quick-form-publications/{setup['publication'].id}/",
-            {"on_accept": [{"target": "nope"}]},
-            format="json",
-        )
-        assert response.status_code == 400
-        assert response.json()["on_accept"] == ["unknownOnAcceptTarget:nope"]
-
-    def test_health_flags_what_an_upgrade_broke(self, setup):
-        assert on_accept_health(setup["publication"])[0]["problems"] == []
+    def test_flags_what_an_upgrade_broke(self, setup):
         QuickForm.objects.filter(pk=setup["form"].pk).update(outcomes_definition=[])
-        setup["publication"].quick_form.refresh_from_db()
-        health = on_accept_health(setup["publication"])
-        assert health[0]["problems"] == ["unknownValue"]
+        assert _health(setup, ON_ACCEPT) == [["unknownValue"]]
+
+    def test_the_form_endpoint_carries_setup_and_health(self, setup):
+        _user, client = _admin()
+        form = client.get(f"/api/quick-forms/{setup['form'].id}/").json()
+        assert form["on_accept"] == ON_ACCEPT
+        assert form["on_accept_health"][0]["problems"] == []
+
+    def test_a_publication_carries_no_setup(self, setup):
+        _user, client = _admin()
+        publication = client.get(
+            f"/api/quick-form-publications/{setup['publication'].id}/"
+        ).json()
+        assert "on_accept" not in publication
 
     def test_targets_are_listed(self, setup):
         _user, client = _admin()
@@ -296,11 +298,15 @@ class TestPlan:
             }
         ]
 
-    def test_no_publication_no_targets(self, setup):
+    def test_the_form_not_the_publication_lists_the_targets(self, setup):
         user, _ = _admin()
         response = _submitted_response(setup)
         QuickFormResponse.objects.filter(pk=response.pk).update(publication=None)
         response.refresh_from_db()
+        assert len(plan(response, user)) == 1
+        QuickForm.objects.filter(pk=setup["form"].pk).update(on_accept=[])
+        response.refresh_from_db()
+        response.quick_form.refresh_from_db()
         assert plan(response, user) == []
 
     def test_no_subject(self, setup):
@@ -478,6 +484,16 @@ class TestProjection:
             (MissionTarget.key, "level 3")
         ]
 
+    def test_shown_without_a_publication(self, setup):
+        # Started from the object itself: filled in-house, nothing to hide.
+        _user, client = _admin()
+        response = _submitted_response(setup)
+        QuickFormResponse.objects.filter(pk=response.pk).update(publication=None)
+        rows = client.get(f"/api/quick-form-responses/{response.id}/content/").json()[
+            "projection"
+        ]
+        assert rows[0]["proposed"] == "level 3"
+
     def test_reads_results_not_the_subject(self, setup):
         rows = project(ON_ACCEPT, {"level": 2.0}, {})
         assert (rows[0]["ok"], rows[0]["proposed"]) == (True, "level 2")
@@ -493,41 +509,24 @@ class TestProjection:
 
 
 @pytest.mark.django_db
-class TestSuggestion:
-    def test_fitting_entries_are_kept(self, setup):
-        form = setup["form"]
-        form.on_accept_suggestion = [
-            *ON_ACCEPT,
-            {"target": MissionTarget.key, "config": {"value": "unknown"}},
-            {"target": "nope", "config": {}},
-            "malformed",
-        ]
-        assert suggested_on_accept(form) == ON_ACCEPT
-
-    def test_carried_by_the_library(self, setup):
-        assert setup["form"].on_accept_suggestion == []
-        _user, client = _admin()
-        form = client.get(f"/api/quick-forms/{setup['form'].id}/").json()
-        assert form["suggested_on_accept"] == []
-
-    def test_form_preview_projects_with_the_suggestion(self, setup):
+class TestFormPreview:
+    def test_projects_with_the_forms_setup(self, setup):
         _user, client = _admin()
         url = f"/api/quick-forms/{setup['form'].id}/preview/"
-        answers = {Q_LEVEL: f"{Q_LEVEL}:choice:three"}
-        assert (
-            client.post(url, {"answers": answers}, format="json").json()["projection"]
-            == []
-        )
-
-        setup["form"].on_accept_suggestion = ON_ACCEPT
-        setup["form"].save()
         rows = client.post(url, {"answers": {}}, format="json").json()["projection"]
         assert rows[0]["reason"] == "projectionPending"
         # The vendor question is not scored: the projection does not wait for it.
+        answers = {Q_LEVEL: f"{Q_LEVEL}:choice:three"}
         rows = client.post(url, {"answers": answers}, format="json").json()[
             "projection"
         ]
         assert rows[0]["proposed"] == "level 3"
+
+        QuickForm.objects.filter(pk=setup["form"].pk).update(on_accept=[])
+        assert (
+            client.post(url, {"answers": answers}, format="json").json()["projection"]
+            == []
+        )
 
 
 def _draft_of(setup, user, answered=True):
@@ -631,8 +630,7 @@ class TestApplyOnSubmit:
         setup["publication"].save()
         assert client.get(url).json()["on_submit"] == "review"
 
-        setup["publication"].on_accept = []
-        setup["publication"].save()
+        QuickForm.objects.filter(pk=setup["form"].pk).update(on_accept=[])
         assert client.get(url).json()["on_submit"] is None
 
     def test_only_the_requester_is_told(self, setup):
@@ -646,21 +644,24 @@ class TestApplyOnSubmit:
 
 
 @pytest.mark.django_db
-class TestMalformedSuggestion:
+class TestMalformedSetup:
     @pytest.mark.parametrize(
         "config",
-        [{"bands": []}, {"mapping": ["x"]}, {"bands": {"thresholds": 3}}, "nope"],
+        [{"bands": []}, {"mapping": ["x"]}, {"bands": {"thresholds": 3}}],
     )
-    def test_a_bad_shape_is_no_suggestion(self, setup, config):
-        from tprm.tier_target import EntityTierTarget
-
-        assert EntityTierTarget().materialize(config) is None
+    def test_reported_and_never_applied(self, setup, config):
+        on_accept = [{"target": "entity.tier", "config": config}]
+        assert _health(setup, on_accept)[0]
+        user, _ = _admin()
+        response = _submitted_response(setup)
+        response.quick_form.refresh_from_db()
+        assert not any(item["proposal"].ok for item in plan(response, user))
 
     def test_the_form_endpoint_still_answers(self, setup):
-        form = setup["form"]
-        form.on_accept_suggestion = [{"target": "entity.tier", "config": {"bands": []}}]
-        form.save()
+        QuickForm.objects.filter(pk=setup["form"].pk).update(
+            on_accept=[{"target": "entity.tier", "config": {"bands": []}}, "nope"]
+        )
         _user, client = _admin()
-        result = client.get(f"/api/quick-forms/{form.id}/")
+        result = client.get(f"/api/quick-forms/{setup['form'].id}/")
         assert result.status_code == 200
-        assert result.json()["suggested_on_accept"] == []
+        assert all(row["problems"] for row in result.json()["on_accept_health"])

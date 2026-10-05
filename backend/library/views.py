@@ -6,7 +6,17 @@ import uuid
 import yaml
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
-from django.db.models import F, Q, IntegerField, OuterRef, Subquery, Exists
+from django.db.models import (
+    Case,
+    Exists,
+    F,
+    IntegerField,
+    OuterRef,
+    Q,
+    Subquery,
+    Value,
+    When,
+)
 from django.db import models
 from django.utils.timezone import now
 from django_filters.rest_framework import DjangoFilterBackend
@@ -191,7 +201,19 @@ class StoredLibraryViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "urn", "ref_id"]
 
     def get_queryset(self) -> models.query.QuerySet:
-        return super().get_queryset().prefetch_related("filtering_labels")
+        qs = super().get_queryset().prefetch_related("filtering_labels")
+        if self.action != "list":
+            return qs
+        # `content` is the whole library (megabytes for the larger ones): the
+        # list reads it for presets only, so it is left behind and the preset
+        # check runs in SQL.
+        return qs.defer("content").annotate(
+            _is_preset=Case(
+                When(content__preset__isnull=False, then=Value(True)),
+                default=Value(False),
+                output_field=models.BooleanField(),
+            )
+        )
 
     def get_serializer_class(self, **kwargs):
         if self.action == "list":
@@ -1728,6 +1750,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
         stored — the answers live in the request body.
         """
         from core.cel_service import evaluate_quick_form_document
+        from core.quick_form_apply import project
 
         draft = self.get_object()
         content = builder.normalize_objects(draft.content or {})
@@ -1775,6 +1798,12 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 "scored_complete": evaluation["context"]["response"]["scored_complete"],
                 "computed_outcome": evaluation["computed_outcome"],
                 "computed_values": evaluation["computed_values"],
+                "projection": project(
+                    quick_form.get("on_accept") or [],
+                    evaluation["computed_values"],
+                    evaluation["computed_outcome"],
+                    ready=evaluation["context"]["response"]["scored_complete"],
+                ),
             }
         )
 

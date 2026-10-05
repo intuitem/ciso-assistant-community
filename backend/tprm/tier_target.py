@@ -1,17 +1,19 @@
 """`entity.tier`: an accepted response sets its vendor's tier.
 
-Config (on the publication's `on_accept` entry):
+Config (on the form's `on_accept` entry), tiers named by their stable key:
 
     bands:                       # optional
       outcome: <ref_id of a numeric rule>
       thresholds:                # highest tier first; the last may omit `min`
-        - {tier: <tier id>, min: 18}
-        - {tier: <tier id>}
+        - {tier: critical, min: 3.3}
+        - {tier: low-impact}
     mapping:                     # optional
-      - {outcome: <ref_id of a yes/no rule>, tier: <tier id>}
+      - {outcome: <ref_id of a yes/no rule>, tier: critical}
 
 The tier is the highest, by rank, of the band the value reaches and the tiers
-of every mapped outcome that fired. Nothing resolved means nothing written.
+of every mapped outcome that fired. Nothing resolved means nothing written. A
+key this scale does not have, or a hidden tier, is never replaced by a guess:
+the response goes to review with the reason.
 """
 
 from core.quick_form_targets import Proposal, Target, register
@@ -38,6 +40,22 @@ def _number(value) -> float | None:
         return None
 
 
+def _rows(config) -> tuple[dict, list, list]:
+    """(bands, thresholds, mapping), each empty when absent or malformed."""
+    bands = config.get("bands") if isinstance(config.get("bands"), dict) else {}
+    thresholds = bands.get("thresholds")
+    mapping = config.get("mapping")
+    return (
+        bands,
+        [r for r in thresholds if isinstance(r, dict)]
+        if isinstance(thresholds, list)
+        else [],
+        [r for r in mapping if isinstance(r, dict)]
+        if isinstance(mapping, list)
+        else [],
+    )
+
+
 @register
 class EntityTierTarget(Target):
     key = "entity.tier"
@@ -46,12 +64,13 @@ class EntityTierTarget(Target):
     label = "tier"
 
     def validate_config(self, config, quick_form) -> list[str]:
+        """The config's own shape against the form's rules. Which tiers exist
+        is the instance's business: see `health`."""
         bands = config.get("bands")
         mapping = config.get("mapping")
         if not bands and not mapping:
             return ["bandsOrMappingRequired"]
         numeric, boolean = _rules(quick_form)
-        tiers = {str(t.id): t for t in Tier.objects.all()}
         errors = []
 
         if bands:
@@ -63,93 +82,50 @@ class EntityTierTarget(Target):
             if not isinstance(thresholds, list) or not thresholds:
                 errors.append("thresholdsRequired")
                 thresholds = []
-            previous_rank = previous_min = None
+            previous_min = None
             for index, row in enumerate(thresholds):
-                if not isinstance(row, dict):
+                if not isinstance(row, dict) or not row.get("tier"):
                     errors.append("thresholdMalformed")
                     continue
-                tier = tiers.get(str(row.get("tier")))
-                if tier is None:
-                    errors.append("unknownTier")
-                    continue
-                is_last = index == len(thresholds) - 1
                 minimum = _number(row.get("min"))
-                if minimum is None and not is_last:
+                if minimum is None and index != len(thresholds) - 1:
                     errors.append("thresholdMinRequired")
-                if previous_rank is not None and tier.rank >= previous_rank:
-                    errors.append("thresholdsMustDescendByRank")
                 if (
                     previous_min is not None
                     and minimum is not None
                     and minimum >= previous_min
                 ):
                     errors.append("thresholdsMustDescendByMin")
-                previous_rank = tier.rank
                 previous_min = minimum
 
         if mapping:
             if not isinstance(mapping, list):
                 return errors + ["mappingMalformed"]
             for row in mapping:
-                if not isinstance(row, dict):
+                if not isinstance(row, dict) or not row.get("tier"):
                     errors.append("mappingMalformed")
                     continue
                 if row.get("outcome") not in boolean:
                     errors.append("mappingOutcomeUnknown")
-                if str(row.get("tier")) not in tiers:
-                    errors.append("unknownTier")
         return sorted(set(errors), key=errors.index)
 
     def health(self, config, quick_form) -> list[str]:
-        """Also flags tiers hidden since the config was saved: accepting would
-        set a tier that is no longer on the scale."""
         problems = self.validate_config(config, quick_form)
-        bands = config.get("bands") if isinstance(config.get("bands"), dict) else {}
-        mapping = (
-            config.get("mapping") if isinstance(config.get("mapping"), list) else []
-        )
-        used = {
-            str(row.get("tier"))
-            for row in [*(bands.get("thresholds") or []), *mapping]
-            if isinstance(row, dict) and row.get("tier")
-        }
-        if Tier.objects.filter(id__in=used, is_visible=False).exists():
+        _, thresholds, mapping = _rows(config)
+        tiers = {t.key: t for t in Tier.objects.all()}
+        used = [str(row.get("tier")) for row in [*thresholds, *mapping]]
+        if any(key not in tiers for key in used):
+            problems.append("unknownTier")
+        if any(key in tiers and not tiers[key].is_visible for key in used):
             problems.append("tierHidden")
+        ranks = [
+            tiers[str(r.get("tier"))].rank
+            for r in thresholds
+            if str(r.get("tier")) in tiers
+        ]
+        if any(a <= b for a, b in zip(ranks, ranks[1:])):
+            problems.append("thresholdsMustDescendByRank")
         return problems
-
-    def materialize(self, suggestion):
-        """Positions (1 = the most critical visible tier) to this instance's
-        tier ids; None when the scale is shorter than the suggestion needs."""
-        scale = [str(t.id) for t in Tier.objects.filter(is_visible=True)]
-
-        def tier_at(row):
-            position = row.get("position") if isinstance(row, dict) else None
-            if not isinstance(position, int) or not 1 <= position <= len(scale):
-                raise LookupError
-            return scale[position - 1]
-
-        if not isinstance(suggestion, dict):
-            return None
-        config = {}
-        try:
-            if bands := suggestion.get("bands"):
-                config["bands"] = {
-                    "outcome": bands.get("outcome"),
-                    "thresholds": [
-                        {"tier": tier_at(row)}
-                        | ({"min": row["min"]} if "min" in row else {})
-                        for row in bands.get("thresholds") or []
-                    ],
-                }
-            if mapping := suggestion.get("mapping"):
-                config["mapping"] = [
-                    {"outcome": row.get("outcome"), "tier": tier_at(row)}
-                    for row in mapping
-                ]
-        # A library is outside input: any shape it got wrong means no suggestion.
-        except LookupError, TypeError, AttributeError:
-            return None
-        return config or None
 
     def current(self, subject):
         tier = subject.tier
@@ -174,13 +150,18 @@ class EntityTierTarget(Target):
                 return Proposal.refuse("unknownTier")
             return self._proposal(tier, overridden=True, note=note)
 
-        tiers = {str(t.id): t for t in Tier.objects.all()}
+        tiers = {t.key: t for t in Tier.objects.all()}
+        _, thresholds, mapping = _rows(config)
+        # A key this scale lacks would let a lower band or mapping win: the
+        # tier written would not be the one the form asked for.
+        if any(str(row.get("tier")) not in tiers for row in [*thresholds, *mapping]):
+            return Proposal.refuse("unknownTier")
         candidates: list[tuple[Tier, float | None]] = []
 
         bands = config.get("bands") or {}
         value = _number((response.computed_values or {}).get(bands.get("outcome")))
         if bands and value is not None:
-            for row in bands.get("thresholds") or []:
+            for row in thresholds:
                 tier = tiers.get(str(row.get("tier")))
                 minimum = _number(row.get("min"))
                 if tier is not None and (minimum is None or value >= minimum):
@@ -189,7 +170,7 @@ class EntityTierTarget(Target):
 
         fired = set((response.computed_outcome or {}).keys())
         mapped: list[tuple[Tier, str]] = []
-        for row in config.get("mapping") or []:
+        for row in mapping:
             tier = tiers.get(str(row.get("tier")))
             if tier is not None and row.get("outcome") in fired:
                 candidates.append((tier, None))

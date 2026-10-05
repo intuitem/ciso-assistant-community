@@ -377,6 +377,16 @@ def import_terminologies(
     return result_qs
 
 
+def _imported_tier(ref: str, **context) -> Tier | None:
+    """The tier an export names: by key, or by name for exports made before
+    tiers had keys. A missing one is not created: a tier without a rank would
+    break the ordering of the scale."""
+    tier = Tier.objects.filter(key=ref).first() or Tier.objects.filter(name=ref).first()
+    if tier is None:
+        logger.warning("Import: tier not found on this instance", tier=ref, **context)
+    return tier
+
+
 def import_asset_class(
     full_path: str | None, create_missing: bool = True
 ) -> AssetClass | None:
@@ -1048,17 +1058,10 @@ def process_model_relationships(
             # Create with no parent and wire it up in the post-pass
             # resolve_self_referencing_fks once every entity exists.
             _fields["parent_entity"] = None
-            # The tier travels by name. A missing one is not created: a tier
-            # without a rank would break the ordering of the scale.
-            if tier_name := _fields.pop("tier", None):
-                tier = Tier.objects.filter(name=tier_name).first()
-                if tier is None:
-                    logger.warning(
-                        "Entity import: tier not found on this instance",
-                        tier=tier_name,
-                        entity=_fields.get("name"),
-                    )
-                many_to_many_map_ids["tier"] = tier
+            if tier_ref := _fields.pop("tier", None):
+                many_to_many_map_ids["tier"] = _imported_tier(
+                    tier_ref, entity=_fields.get("name")
+                )
             many_to_many_map_ids["relationship_ids"] = import_terminologies(
                 _fields.pop("relationship", []),
                 Terminology.FieldPath.ENTITY_RELATIONSHIP,
@@ -1074,6 +1077,12 @@ def process_model_relationships(
             )
             many_to_many_map_ids["asset_ids"] = get_mapped_ids(
                 _fields.pop("assets", []), link_dump_database_ids
+            )
+            tier_ref = _fields.pop("tier", None)
+            _fields["tier"] = (
+                _imported_tier(tier_ref, solution=_fields.get("name"))
+                if tier_ref
+                else None
             )
 
         case "solutionsubcontractor":

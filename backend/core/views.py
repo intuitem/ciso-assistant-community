@@ -250,7 +250,7 @@ from core import commitment
 
 import structlog
 
-from core.quick_form_apply import project, suggested_on_accept
+from core.quick_form_apply import project, targets_of
 from core.quick_form_targets import get_target
 
 logger = structlog.get_logger(__name__)
@@ -20489,6 +20489,111 @@ class QuickFormViewSet(BaseModelViewSet):
     def create(self, request, *args, **kwargs):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    @staticmethod
+    def _assessable(request, target_key, subject_id):
+        """(target, subject, may_start): the object a form would assess, and
+        whether the caller may file a response in its domain. None when the
+        target is unknown or the subject is out of the caller's sight."""
+        from core.quick_form_targets import get_target
+
+        target = get_target(str(target_key or ""))
+        if target is None or not subject_id:
+            return None
+        model = apps.get_model(target.subject_model)
+        try:
+            subject = model.objects.filter(pk=subject_id).first()
+        except ValueError, ValidationError:
+            return None
+        if subject is None or not RoleAssignment.is_object_readable(
+            request.user, model, subject.pk
+        ):
+            return None
+        permission = Permission.objects.get(codename="add_quickformresponse")
+        may_start = RoleAssignment.is_access_allowed(
+            user=request.user, perm=permission, folder=Folder.get_folder(subject)
+        )
+        return target, subject, may_start
+
+    @action(detail=False, url_path="assess-options", name="Forms that assess an object")
+    def assess_options(self, request):
+        """What the caller can start to assess an object through `target`:
+        forms they may fill straight from the object, else the publications
+        they may file against. `?target=entity.tier&subject=<id>`."""
+        found = self._assessable(
+            request,
+            request.query_params.get("target"),
+            request.query_params.get("subject"),
+        )
+        if found is None:
+            return Response([])
+        target, _, may_start = found
+        options, seen = [], set()
+        if may_start:
+            for quick_form in self.get_queryset().order_by("name"):
+                if target.key in targets_of(quick_form):
+                    seen.add(quick_form.id)
+                    options.append(
+                        {
+                            "kind": "form",
+                            "id": str(quick_form.id),
+                            "name": quick_form.get_name_translated,
+                        }
+                    )
+        for publication in entitled_quick_form_publications(request.user):
+            if publication.quick_form_id not in seen and target.key in targets_of(
+                publication.quick_form
+            ):
+                options.append(
+                    {
+                        "kind": "publication",
+                        "id": str(publication.id),
+                        "name": publication.name,
+                    }
+                )
+        return Response(options)
+
+    @action(detail=True, methods=["post"], name="Assess an object with this form")
+    def start(self, request, pk):
+        """Start (or resume) the caller's response about `subject`, filed in the
+        subject's domain under the caller's own rights there. No publication:
+        this is the in-house path, for those who may create responses."""
+        from core.object_references import ReferenceError_
+
+        quick_form = self.get_object()
+        subject_id = request.data.get("subject")
+        found = next(
+            (
+                f
+                for key in targets_of(quick_form)
+                if (f := self._assessable(request, key, subject_id)) is not None
+            ),
+            None,
+        )
+        if found is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        _, subject, may_start = found
+        if not may_start:
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        try:
+            response_object, resumed = start_quick_form_response(
+                request.user,
+                subject_id=subject.pk,
+                quick_form=quick_form,
+                folder=Folder.get_folder(subject),
+            )
+        except ReferenceError_ as e:
+            logger.info("Rejected assessment subject", error=e.detail or e.code)
+            return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {
+                "redirect": f"/quick-form-responses/{response_object.id}",
+                "resumed": resumed,
+                "ref_id": response_object.ref_id,
+            }
+        )
+
     @action(detail=True, methods=["post"], name="Preview a published form")
     def preview(self, request, pk):
         """Answer a published form without creating a response.
@@ -20541,15 +20646,14 @@ class QuickFormViewSet(BaseModelViewSet):
                 "computed_outcome": evaluation["computed_outcome"],
                 "computed_values": evaluation["computed_values"],
                 "scored_complete": evaluation["context"]["response"]["scored_complete"],
-                # With the library's suggested setup: the form has no
-                # publication here, and authors want to see where answers lead.
+                # Authors want to see where answers lead.
                 "projection": project(
-                    suggested_on_accept(quick_form),
+                    quick_form.on_accept,
                     evaluation["computed_values"],
                     evaluation["computed_outcome"],
                     ready=evaluation["context"]["response"]["scored_complete"],
                 )
-                if quick_form.on_accept_suggestion
+                if quick_form.on_accept
                 else [],
             }
         )
@@ -20674,7 +20778,9 @@ def _close_on_submit(response, user) -> list[dict] | None:
     from core.quick_form_apply import apply_on_accept, can_apply_on_submit
 
     publication = response.publication
-    if publication is None or not publication.on_accept or publication.always_review:
+    if not response.quick_form.on_accept or (
+        publication is not None and publication.always_review
+    ):
         return None
     evaluation = evaluate_quick_form(response, persist=True)
     scored_complete = evaluation["context"]["response"]["scored_complete"]
@@ -20704,13 +20810,11 @@ def _on_submit_outcome(response, user, evaluation) -> str | None:
     they stand, not the last persisted evaluation."""
     from core.quick_form_apply import can_apply_on_submit
 
-    publication = response.publication
     # Whoever submits decides the path, so only they get an answer.
     if (
         user is None
         or response.status != QuickFormResponse.Status.DRAFT
-        or publication is None
-        or not publication.on_accept
+        or not response.quick_form.on_accept
         or not response.is_requester(user)
     ):
         return None
@@ -20804,13 +20908,16 @@ def quick_form_response_content(response, user=None):
             "computed_values": evaluation["computed_values"],
             # Until then an unanswered page scores 0: values read as results.
             "scored_complete": evaluation["context"]["response"]["scored_complete"],
+            # Off on a publication by default (it may reach the vendor itself);
+            # always on for an assessment started from the object, filled in-house.
             "projection": project(
-                response.publication.on_accept,
+                response.quick_form.on_accept,
                 evaluation["computed_values"],
                 evaluation["computed_outcome"],
                 ready=evaluation["context"]["response"]["scored_complete"],
             )
-            if response.publication and response.publication.show_projection
+            if response.quick_form.on_accept
+            and (response.publication is None or response.publication.show_projection)
             else [],
             "subject": response.subject_summary(user),
             "applications": [
@@ -20885,9 +20992,15 @@ def entitled_quick_form_publications(user):
     )
 
 
-def start_quick_form_response(user, publication, subject_id=None):
+def start_quick_form_response(
+    user, publication=None, subject_id=None, *, quick_form=None, folder=None
+):
     """Create `user`'s response for `publication`, or hand back the draft they
     already have. Returns (response, resumed).
+
+    Without a publication, `quick_form` and `folder` say what is filled and where
+    it lands: an assessment started from the object itself, under the caller's
+    own rights on that folder (checked by the caller).
 
     With `subject_id`, the form's subject question is pre-answered with it, checked
     like any answer the requester could give, and only a draft about that same
@@ -20902,24 +21015,25 @@ def start_quick_form_response(user, publication, subject_id=None):
     """
     from core.object_references import ReferenceError_, validate_ids
 
+    if publication is not None:
+        quick_form, folder = publication.quick_form, publication.target_folder
     requester = Actor.objects.filter(user=user, entity__isnull=True).first()
     subject_question = None
     if subject_id is not None:
-        probe = QuickFormResponse(
-            quick_form=publication.quick_form, folder=publication.target_folder
-        )
+        probe = QuickFormResponse(quick_form=quick_form, folder=folder)
         subject_question = probe.subject_question()
         if subject_question is None:
             raise ReferenceError_("formHasNoSubjectQuestion")
         validate_ids(
             subject_question,
-            publication.target_folder,
+            folder,
             [str(subject_id)],
             user=user,
         )
 
     with transaction.atomic():
-        if requester is not None and not publication.allow_multiple_drafts:
+        multiple = publication is not None and publication.allow_multiple_drafts
+        if requester is not None and not multiple:
             # Inside the transaction, and serialised on the requester's own Actor row.
             # A double click, or a tile clicked in two tabs, otherwise has both requests
             # find no draft and create one each — and `respondents` is an M2M, so no
@@ -20927,6 +21041,7 @@ def start_quick_form_response(user, publication, subject_id=None):
             Actor.objects.select_for_update().filter(pk=requester.pk).first()
             drafts = QuickFormResponse.objects.filter(
                 publication=publication,
+                quick_form=quick_form,
                 status=QuickFormResponse.Status.DRAFT,
                 respondents=requester,
             )
@@ -20938,9 +21053,9 @@ def start_quick_form_response(user, publication, subject_id=None):
                 return draft, True
 
         response = QuickFormResponse.objects.create(
-            name=publication.name,
-            quick_form=publication.quick_form,
-            folder=publication.target_folder,
+            name=publication.name if publication else quick_form.name,
+            quick_form=quick_form,
+            folder=folder,
             publication=publication,
             # Self-service has no "not started yet": the requester is filling it now,
             # and there are no respondents to notify — they are the respondent.
@@ -20949,7 +21064,7 @@ def start_quick_form_response(user, publication, subject_id=None):
         response.seed_answers()
         if requester is not None:
             response.respondents.set([requester])
-        reviewers = list(publication.default_reviewers.all())
+        reviewers = list(publication.default_reviewers.all()) if publication else []
         if reviewers:
             response.reviewers.set(reviewers)
         if subject_question is not None:
@@ -21377,10 +21492,7 @@ class QuickFormPublicationViewSet(BaseModelViewSet):
                     "domain": str(publication.target_folder),
                     # Lets an object page offer "assess" for the publications
                     # that write to it.
-                    "targets": [
-                        str((entry or {}).get("target") or "")
-                        for entry in publication.on_accept or []
-                    ],
+                    "targets": targets_of(publication.quick_form),
                 }
                 for publication in self._entitled_queryset(request)
             ]

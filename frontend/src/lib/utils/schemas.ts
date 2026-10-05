@@ -991,7 +991,6 @@ export const EntityAssessmentSchema = z.object({
 	solutions: z.array(z.string().optional()).optional(),
 	compliance_assessment: z.string().optional(),
 	evidence: z.string().optional(),
-	criticality: z.number().optional().nullable(),
 	conclusion: z.string().optional().nullable(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	penetration: z.number().optional(),
@@ -1011,7 +1010,7 @@ export const solutionSchema = z.object({
 	...NameDescriptionMixin,
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
-	criticality: z.number().optional(),
+	tier: z.string().uuid().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
@@ -1529,7 +1528,6 @@ export const QuickFormPublicationSchema = z.object({
 	allow_multiple_drafts: z.boolean().default(false).optional(),
 	icon: z.string().optional(),
 	order: z.number().default(0).optional(),
-	on_accept: z.array(z.any()).default([]).optional(),
 	show_projection: z.boolean().default(false).optional(),
 	always_review: z.boolean().default(false).optional()
 });

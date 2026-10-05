@@ -4,8 +4,8 @@ ref_id: vendor-tiering
 name: Vendor tiering
 description: >
   A short starter form to tier a vendor by its inherent risk: three questions on business
-  and operations impact, three on data, privacy and security. Publish it with the "Set the
-  vendor's tier" step to write the tier onto the vendor.
+  and operations impact, three on data, privacy and security. Start it from a vendor with
+  "Assess tier"; an accepted response writes the tier onto the vendor.
 copyright: © intuitem
 version: 1
 publication_date: 2026-10-04
@@ -22,29 +22,30 @@ objects:
       Each scored answer runs from 1 (low) to 4 (critical). Business impact and data exposure are each the average of their three answers, and the inherent risk is the higher of the two: a vendor that runs a critical process matters even if it holds no data, and the reverse.
 
       Some answers raise the tier on their own: a regulated critical function, a sole supplier behind a critical process, special-category data, or privileged access to your systems.
-    annotation: 'Publishing it with "Set the vendor''s tier" pre-fills the suggested setup below: score
-      bands on Inherent risk (most critical tier from 3.3, then 2.6, then 2.0, the least critical for
-      the rest), Regulated critical function and Single point of failure to the most critical tier,
-      Special-category data and Privileged access to the next one. The tier is the highest of the band
-      and the mapped outcomes. Each dimension averages three answers, so it moves in steps of a third:
-      3.3 is reached by 4-4-2 or 3-3-4, 2.6 by 3-3-2.'
+    annotation: 'An accepted response sets the vendor''s tier on the default scale: Critical from
+      an inherent risk of 3.3, Important from 2.6, Standard from 2.0, Low impact below. A regulated
+      critical function or a single point of failure makes the vendor at least Critical;
+      special-category data or privileged access at least Important. The tier is the highest of
+      these. Each dimension averages three answers, so it moves in steps of a third: 3.3 is
+      reached by 4-4-2 or 3-3-4, 2.6 by 3-3-2. The tiers are named by key, so a renamed or
+      reordered scale keeps working; a scale without these keys sends responses to review.'
     ref_id_prefix: VT
     subject_question_urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:vendor
-    on_accept_suggestion:
+    on_accept:
     - target: entity.tier
       config:
         bands:
           outcome: inherent
           thresholds:
-          - {position: 1, min: 3.3}
-          - {position: 2, min: 2.6}
-          - {position: 3, min: 2.0}
-          - {position: 4}
+          - {tier: critical, min: 3.3}
+          - {tier: important, min: 2.6}
+          - {tier: standard, min: 2.0}
+          - {tier: low-impact}
         mapping:
-        - {outcome: regulated_function, position: 1}
-        - {outcome: single_point_of_failure, position: 1}
-        - {outcome: special_data, position: 2}
-        - {outcome: privileged_access, position: 2}
+        - {outcome: regulated_function, tier: critical}
+        - {outcome: single_point_of_failure, tier: critical}
+        - {outcome: special_data, tier: important}
+        - {outcome: privileged_access, tier: important}
     scores_definition:
       min: 0
       max: 4

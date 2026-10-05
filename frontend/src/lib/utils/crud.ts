@@ -1692,7 +1692,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entity' },
 			{ field: 'status' },
 			{ field: 'conclusion' },
-			{ field: 'criticality' },
 			{ field: 'due_date', type: 'date' },
 			{ field: 'representatives' },
 			{ field: 'reviewers' },
@@ -1763,7 +1762,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'provider_entity' },
 			{ field: 'recipient_entity' },
 			{ field: 'is_active' },
-			{ field: 'criticality' },
+			{ field: 'tier' },
 			{ field: 'owner' },
 			{ field: 'assets' },
 			{ field: 'dora_ict_service_type' },
@@ -4127,6 +4126,9 @@ const FIELD_COMPONENT_MAP = {
 		trigger_types: TriggerTypesDisplay
 	},
 	entities: {
+		tier: TierBadge
+	},
+	solutions: {
 		tier: TierBadge
 	},
 	'entity-tier-changes': {

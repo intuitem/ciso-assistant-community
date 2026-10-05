@@ -4,6 +4,7 @@ from rest_framework import status
 from api.test_utils import EndpointTestsUtils
 from iam.models import Folder
 from tprm.models import Entity, EntityTierChange, Tier, TierSource
+from tprm.testing import seed_four_level_scale
 from tprm.tiers import set_entity_tier
 
 TIERS_URL = "/api/tiers/"
@@ -12,6 +13,11 @@ ENTITIES_URL = "/api/entities/"
 
 def _tier(name):
     return Tier.objects.get(name=name)
+
+
+@pytest.fixture(autouse=True)
+def four_level_scale(db):
+    seed_four_level_scale()
 
 
 @pytest.fixture
@@ -27,10 +33,17 @@ def entity(authenticated_client):
 @pytest.mark.django_db
 class TestTierScale:
     def test_default_scale_is_seeded_most_critical_first(self, authenticated_client):
+        Tier.objects.all().delete()
+        Tier.create_default_tiers()
         response = authenticated_client.get(TIERS_URL)
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
-        assert [t["name"] for t in results] == ["critical", "high", "medium", "low"]
+        assert [t["name"] for t in results] == [
+            "critical",
+            "important",
+            "standard",
+            "low-impact",
+        ]
         assert [t["rank"] for t in results] == [4, 3, 2, 1]
         assert all(t["builtin"] for t in results)
 
@@ -125,7 +138,30 @@ class TestTierScale:
         set_entity_tier(entity, custom)
         response = authenticated_client.delete(f"{TIERS_URL}{custom.id}/")
         assert response.status_code == status.HTTP_409_CONFLICT
+        assert response.json() == {"error": "tierInUseCannotDelete"}
         assert Tier.objects.filter(id=custom.id).exists()
+
+    def test_tier_in_the_history_cannot_be_deleted(self, authenticated_client, entity):
+        custom = Tier.objects.create(name="Vital", rank=Tier.next_rank())
+        set_entity_tier(entity, custom)
+        set_entity_tier(entity, None)
+        row = next(
+            t
+            for t in authenticated_client.get(TIERS_URL).json()["results"]
+            if t["id"] == str(custom.id)
+        )
+        assert (row["entities_count"], row["in_history"]) == (0, True)
+
+        response = authenticated_client.delete(f"{TIERS_URL}{custom.id}/")
+        assert response.status_code == status.HTTP_409_CONFLICT
+        assert response.json() == {"error": "tierInHistoryCannotDelete"}
+        assert Tier.objects.filter(id=custom.id).exists()
+
+    def test_an_unused_custom_tier_can_be_deleted(self, authenticated_client):
+        custom = Tier.objects.create(name="Spare", rank=Tier.next_rank())
+        response = authenticated_client.delete(f"{TIERS_URL}{custom.id}/")
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not Tier.objects.filter(id=custom.id).exists()
 
     def test_entities_count(self, authenticated_client, entity):
         set_entity_tier(entity, _tier("high"))

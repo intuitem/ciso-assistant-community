@@ -1,11 +1,11 @@
 """The shipped `quick-form-vendor-tiering` starter: each dimension is the mean
-of its three 1-4 answers, the inherent risk is the higher of the two, banded
-Critical >= 3.3 / High >= 2.6 / Medium >= 2.0 / Low, and four answers act as
-floors (regulated function and single point of failure to Critical,
-special-category data and privileged access to High).
+of its three 1-4 answers, the inherent risk is the higher of the two, banded on
+the default scale Critical >= 3.3 / Important >= 2.6 / Standard >= 2.0 /
+Low impact, and four answers act as floors (regulated function and single point of failure to
+Critical, special-category data and privileged access to Important).
 
-The tier goes through the real `entity.tier` resolution, with the publication
-setup the library suggests."""
+The tier goes through the real `entity.tier` resolution, with the setup the
+form carries."""
 
 import itertools
 from pathlib import Path
@@ -19,7 +19,7 @@ from core.cel_service import (
     validate_quick_form_expressions,
 )
 from core.models import QuickForm, StoredLibrary
-from core.quick_form_apply import suggested_on_accept
+from core.quick_form_apply import on_accept_health
 from tprm.models import Tier
 from tprm.tier_target import EntityTierTarget
 
@@ -38,7 +38,7 @@ CHOICES = {
     "data:question:d2": ["none", "small", "medium", "large"],
     "data:question:d3": ["none", "portal", "integration", "privileged"],
 }
-RANKS = {"low": 1, "medium": 2, "high": 3, "critical": 4}
+RANKS = {"low-impact": 1, "standard": 2, "important": 3, "critical": 4}
 
 
 @pytest.fixture(scope="module")
@@ -46,25 +46,8 @@ def form() -> dict:
     return yaml.safe_load(LIBRARY.read_text())["objects"]["quick_forms"][0]
 
 
-def _config():
-    tier = {t.name: str(t.id) for t in Tier.objects.all()}
-    return {
-        "bands": {
-            "outcome": "inherent",
-            "thresholds": [
-                {"tier": tier["critical"], "min": 3.3},
-                {"tier": tier["high"], "min": 2.6},
-                {"tier": tier["medium"], "min": 2.0},
-                {"tier": tier["low"]},
-            ],
-        },
-        "mapping": [
-            {"outcome": "regulated_function", "tier": tier["critical"]},
-            {"outcome": "single_point_of_failure", "tier": tier["critical"]},
-            {"outcome": "special_data", "tier": tier["high"]},
-            {"outcome": "privileged_access", "tier": tier["high"]},
-        ],
-    }
+def _config(form) -> dict:
+    return form["on_accept"][0]["config"]
 
 
 def _expected_tier(levels: tuple[int, ...], regulated: str) -> str:
@@ -73,16 +56,16 @@ def _expected_tier(levels: tuple[int, ...], regulated: str) -> str:
     if inherent >= 10 / 3:
         tier = "critical"
     elif inherent >= 8 / 3:
-        tier = "high"
+        tier = "important"
     elif inherent >= 2:
-        tier = "medium"
+        tier = "standard"
     else:
-        tier = "low"
+        tier = "low-impact"
     floors = []
     if regulated == "yes" or (b1 == 4 and b3 == 4):
         floors.append("critical")
     if d1 == 4 or d3 == 4:
-        floors.append("high")
+        floors.append("important")
     return max([tier, *floors], key=RANKS.__getitem__)
 
 
@@ -102,7 +85,7 @@ def test_rules_pass_the_builder_check(form):
 
 
 @pytest.mark.django_db
-def test_library_loads():
+def test_library_loads(form):
     # Shipped libraries are stored at setup; storing it again is refused.
     stored = StoredLibrary.objects.filter(
         urn="urn:intuitem:risk:library:vendor-tiering"
@@ -118,17 +101,18 @@ def test_library_loads():
     assert list(
         quick_form.pages.order_by("order").values_list("aggregation", flat=True)
     ) == ["sum", "mean", "mean"]
-    # The suggestion, made concrete on the default scale, is the setup the
-    # combinations below are checked against.
-    assert suggested_on_accept(quick_form) == [
-        {"target": "entity.tier", "config": _config()}
-    ]
+    assert quick_form.on_accept == [{"target": "entity.tier", "config": _config(form)}]
+    # Every tier it names is on the default scale.
+    Tier.objects.all().delete()
+    Tier.create_default_tiers()
+    assert on_accept_health(quick_form)[0]["problems"] == []
 
 
 @pytest.mark.django_db
 def test_every_combination_matches_the_rules(form):
+    Tier.objects.all().delete()
     Tier.create_default_tiers()
-    config = _config()
+    config = _config(form)
     target = EntityTierTarget()
     mismatches = []
     count = 0

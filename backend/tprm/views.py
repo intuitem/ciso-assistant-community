@@ -12,6 +12,7 @@ from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
+    HTTP_409_CONFLICT,
 )
 from iam.models import Folder, Permission, RoleAssignment, User
 from core.views import (
@@ -34,6 +35,7 @@ from core.utils import compute_respondent_progress
 from django.db.models import (
     Case,
     Count,
+    Exists,
     IntegerField,
     OuterRef,
     Q,
@@ -1688,43 +1690,36 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
 
 
 class TierFedByMixin:
-    @action(detail=False, url_path="fed-by", name="Publications that set tiers")
+    @action(detail=False, url_path="fed-by", name="Forms that set tiers")
     def fed_by(self, request):
-        """Publications the caller can see whose accepted responses set an
-        entity's tier, with their health."""
-        from core.models import QuickFormPublication
+        """Forms the caller can see whose accepted responses set an entity's
+        tier, with what keeps them from applying on this scale."""
+        from core.models import QuickForm
         from core.quick_form_apply import on_accept_health
         from iam.models import RoleAssignment
 
-        viewable = RoleAssignment.get_viewable_object_ids(
-            request.user, QuickFormPublication
-        )
+        viewable = RoleAssignment.get_viewable_object_ids(request.user, QuickForm)
         rows = []
-        for publication in (
-            QuickFormPublication.objects.filter(id__in=viewable)
-            .select_related("quick_form", "folder")
+        for quick_form in (
+            QuickForm.objects.filter(id__in=viewable)
+            .select_related("library")
             .order_by("name")
         ):
-            if not any(
-                (entry or {}).get("target") == "entity.tier"
-                for entry in publication.on_accept or []
-            ):
-                continue
             health = next(
                 (
                     h
-                    for h in on_accept_health(publication)
+                    for h in on_accept_health(quick_form)
                     if h["target"] == "entity.tier"
                 ),
-                {"problems": []},
+                None,
             )
+            if health is None:
+                continue
             rows.append(
                 {
-                    "id": str(publication.id),
-                    "name": publication.name,
-                    "enabled": publication.enabled,
-                    "quick_form": publication.quick_form.name,
-                    "domain": str(publication.folder),
+                    "id": str(quick_form.id),
+                    "name": quick_form.get_name_translated,
+                    "library": quick_form.library.name if quick_form.library else None,
                     "problems": health["problems"],
                 }
             )
@@ -1740,7 +1735,21 @@ class TierViewSet(TierFedByMixin, BaseModelViewSet):
     ordering = ["-rank"]
 
     def get_queryset(self):
-        qs = super().get_queryset().annotate(entities_count=Count("entities"))
+        qs = (
+            super()
+            .get_queryset()
+            .annotate(
+                entities_count=Count("entities", distinct=True),
+                solutions_count=Count("solutions", distinct=True),
+                # The history keeps a hard link to every tier it names: such a
+                # tier can be hidden, never deleted.
+                in_history=Exists(
+                    EntityTierChange.objects.filter(
+                        Q(tier=OuterRef("pk")) | Q(previous_tier=OuterRef("pk"))
+                    )
+                ),
+            )
+        )
         # `?selectable=<tier id>`: what a picker may offer for an entity whose
         # current tier is that one — the visible tiers plus the current tier even
         # when hidden, so opening and saving the entity does not clear it.
@@ -1751,6 +1760,21 @@ class TierViewSet(TierFedByMixin, BaseModelViewSet):
                 current = None
             qs = qs.filter(Q(is_visible=True) | Q(id=current))
         return qs
+
+    def destroy(self, request, *args, **kwargs):
+        """Say why a tier cannot go, instead of a bare integrity conflict.
+        Built-in tiers are refused by the base class (403) as before."""
+        tier = self.get_object()
+        if not tier.builtin:
+            if tier.entities_count or tier.solutions_count:
+                return Response(
+                    {"error": "tierInUseCannotDelete"}, status=HTTP_409_CONFLICT
+                )
+            if tier.in_history:
+                return Response(
+                    {"error": "tierInHistoryCannotDelete"}, status=HTTP_409_CONFLICT
+                )
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=False, methods=["post"], name="Reorder tiers")
     def reorder(self, request):
@@ -1906,6 +1930,41 @@ class RepresentativeViewSet(ExportMixin, BaseModelViewSet):
         return super().get_queryset().select_related("entity__folder")
 
 
+SOLUTION_FILTERSET_FIELDS = [
+    "name",
+    "ref_id",
+    "is_active",
+    "provider_entity",
+    "assets",
+    "criticality",
+    "tier",
+    "contracts",
+    "owner",
+    "dora_ict_service_type",
+    "storage_of_data",
+    "data_location_storage",
+    "data_location_processing",
+    "dora_data_sensitiveness",
+    "dora_reliance_level",
+    "dora_substitutability",
+    "dora_non_substitutability_reason",
+    "dora_has_exit_plan",
+    "dora_reintegration_possibility",
+    "dora_discontinuing_impact",
+    "dora_alternative_providers_identified",
+    "filtering_labels",
+]
+
+
+class SolutionFilterSet(GenericFilterSet):
+    # "--" lists the solutions not tiered yet.
+    tier = NullableModelChoiceFilter(queryset=Tier.objects.all())
+
+    class Meta:
+        model = Solution
+        fields = SOLUTION_FILTERSET_FIELDS
+
+
 class SolutionViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows solutions to be viewed or edited.
@@ -1938,29 +1997,8 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
         "select_related": ["provider_entity"],
         "wrap_columns": ["name", "description"],
     }
-    filterset_fields = [
-        "name",
-        "ref_id",
-        "is_active",
-        "provider_entity",
-        "assets",
-        "criticality",
-        "contracts",
-        "owner",
-        "dora_ict_service_type",
-        "storage_of_data",
-        "data_location_storage",
-        "data_location_processing",
-        "dora_data_sensitiveness",
-        "dora_reliance_level",
-        "dora_substitutability",
-        "dora_non_substitutability_reason",
-        "dora_has_exit_plan",
-        "dora_reintegration_possibility",
-        "dora_discontinuing_impact",
-        "dora_alternative_providers_identified",
-        "filtering_labels",
-    ]
+    filterset_class = SolutionFilterSet
+    filterset_fields = SOLUTION_FILTERSET_FIELDS
 
     def get_autocomplete_serializer_class(self):
         from tprm.serializers import SolutionAutocompleteSerializer

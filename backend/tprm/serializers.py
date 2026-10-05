@@ -4,6 +4,7 @@ import structlog
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
@@ -200,7 +201,8 @@ class EntityImportExportSerializer(BaseModelSerializer):
     relationship = serializers.SlugRelatedField(
         slug_field="name", read_only=True, many=True
     )
-    tier = serializers.SlugRelatedField(slug_field="name", read_only=True)
+    # By key: names are free to change, keys never do.
+    tier = serializers.SlugRelatedField(slug_field="key", read_only=True)
 
     class Meta:
         model = Entity
@@ -298,6 +300,7 @@ class SolutionImportExportSerializer(BaseModelSerializer):
     provider_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
     recipient_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
     assets = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    tier = serializers.SlugRelatedField(slug_field="key", read_only=True)
 
     class Meta:
         model = Solution
@@ -311,6 +314,7 @@ class SolutionImportExportSerializer(BaseModelSerializer):
             "is_active",
             "reference_link",
             "criticality",
+            "tier",
             "assets",
             "dora_ict_service_type",
             "storage_of_data",
@@ -742,10 +746,24 @@ class EntityScoreWriteSerializer(BaseModelSerializer):
 class TierReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     entities_count = serializers.SerializerMethodField()
+    solutions_count = serializers.SerializerMethodField()
+    in_history = serializers.SerializerMethodField()
 
     def get_entities_count(self, obj):
         annotated = getattr(obj, "entities_count", None)
         return annotated if annotated is not None else obj.entities.count()
+
+    def get_solutions_count(self, obj):
+        annotated = getattr(obj, "solutions_count", None)
+        return annotated if annotated is not None else obj.solutions.count()
+
+    def get_in_history(self, obj) -> bool:
+        annotated = getattr(obj, "in_history", None)
+        if annotated is not None:
+            return annotated
+        return EntityTierChange.objects.filter(
+            Q(tier=obj) | Q(previous_tier=obj)
+        ).exists()
 
     class Meta:
         model = Tier
@@ -761,7 +779,7 @@ class TierWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Tier
-        exclude = ["folder", "builtin"]
+        exclude = ["folder", "builtin", "key"]
 
     def validate_rank(self, value):
         clash = Tier.objects.filter(rank=value)
@@ -980,6 +998,7 @@ class SolutionReadSerializer(BaseModelSerializer):
     contracts = FieldsRelatedField(many=True)
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
+    tier = FieldsRelatedField(["id", "key", "name", "rank", "hexcolor"])
     subcontracting_chain = SolutionSubcontractorReadSerializer(
         many=True, read_only=True
     )
@@ -1032,6 +1051,14 @@ class SolutionWriteSerializer(BaseModelSerializer):
 
     def validate_provider_entity(self, value):
         self._ensure_immutable("provider_entity", value)
+        return value
+
+    def validate_tier(self, value):
+        # A hidden tier stays on the solution that has it, never picked anew.
+        if value is not None and not value.is_visible:
+            current = self.instance.tier_id if self.instance else None
+            if value.id != current:
+                raise serializers.ValidationError(_("This tier is hidden"))
         return value
 
     def validate_subcontracting_chain(self, value):

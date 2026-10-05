@@ -34,6 +34,7 @@
 	import AddNodeMenu from './AddNodeMenu.svelte';
 	import EmptyState from './EmptyState.svelte';
 	import OutcomesEditor from './OutcomesEditor.svelte';
+	import OnAcceptEditor from './OnAcceptEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 	import { initReferentialCatalog } from './referential-catalog';
@@ -207,6 +208,12 @@
 					!!q.urn &&
 					!(q.config as Record<string, unknown> | null)?.multiple
 			)
+	);
+
+	let subjectModel = $derived(
+		(subjectCandidates.find(
+			(q) => q.urn.toLowerCase() === ($frameworkStore.subject_question_urn ?? '').toLowerCase()
+		)?.config?.model as string | undefined) ?? null
 	);
 
 	// Pages as rules address them (`pages["<node id>"]`), named for the author.
@@ -954,6 +961,15 @@
 								{mode}
 								pages={rulePages}
 							/>
+
+							{#if mode === 'quick_form'}
+								<OnAcceptEditor
+									value={($frameworkStore.on_accept ?? []) as any[]}
+									rules={$frameworkStore.outcomes_definition ?? []}
+									{subjectModel}
+									onupdate={(on_accept) => builder.updateFramework({ on_accept })}
+								/>
+							{/if}
 
 							{#if mode === 'framework'}
 								<!-- Implementation groups -->

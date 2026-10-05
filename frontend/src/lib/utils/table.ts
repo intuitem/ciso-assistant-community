@@ -19,6 +19,7 @@ import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWit
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
+import EntityAssessTier from '$lib/components/ContextMenu/entities/AssessTier.svelte';
 import EntityChangeTier from '$lib/components/ContextMenu/entities/ChangeTier.svelte';
 import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
 import ToggleBooleanField from '$lib/components/ContextMenu/ToggleBooleanField.svelte';
@@ -82,20 +83,6 @@ const TRIGGER_TYPE_OPTIONS = [
 	{ label: 'triggerWebhook', value: 'webhook' },
 	{ label: 'triggerSchedule', value: 'schedule' },
 	{ label: 'triggerInternalEvent', value: 'internal_event' }
-];
-
-const SOLUTION_CRITICALITY_OPTIONS = [
-	{ label: '1', value: '1' },
-	{ label: '2', value: '2' },
-	{ label: '3', value: '3' },
-	{ label: '4', value: '4' }
-];
-
-const ENTITY_CRITICALITY_OPTIONS = [
-	{ label: '1', value: '1' },
-	{ label: '2', value: '2' },
-	{ label: '3', value: '3' },
-	{ label: '4', value: '4' }
 ];
 
 // Labels are the tokens the API serialises for `content_type`, so the column and this
@@ -923,15 +910,6 @@ export const DATA_SUBJECT_CATEGORY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-export const SOLUTION_CRITICALITY_FILTER: ListViewFilterConfig = {
-	component: AutocompleteSelect,
-	props: {
-		label: 'criticality',
-		options: SOLUTION_CRITICALITY_OPTIONS,
-		multiple: true
-	}
-};
-
 export const SOLUTION_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -943,14 +921,6 @@ export const SOLUTION_OWNER_FILTER: ListViewFilterConfig = {
 	}
 };
 
-export const ENTITY_CRITICALITY_FILTER: ListViewFilterConfig = {
-	component: AutocompleteSelect,
-	props: {
-		label: 'criticality',
-		options: ENTITY_CRITICALITY_OPTIONS,
-		multiple: true
-	}
-};
 export const RISK_IMPACT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2551,7 +2521,6 @@ export const listViewFields = {
 			// ambiguous next to Completion; the audits table keeps that wording.
 			'auditReviewProgress',
 			'dueDate',
-			'criticality',
 			'conclusion',
 			'folder'
 		],
@@ -2564,7 +2533,6 @@ export const listViewFields = {
 			'completion',
 			'review_progress',
 			'due_date',
-			'criticality',
 			'conclusion',
 			'folder'
 		],
@@ -2576,22 +2544,21 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			entity: ENTITY_FILTER,
 			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
-			criticality: ENTITY_CRITICALITY_FILTER,
 			conclusion: ENTITY_ASSESSMENT_CONCLUSION_FILTER,
 			due_date: dateFilter('due_date'),
 			expiry_date: dateFilter('expiry_date')
 		}
 	},
 	solutions: {
-		head: ['refId', 'name', 'description', 'providerEntity', 'criticality', 'labels'],
-		body: ['ref_id', 'name', 'description', 'provider_entity', 'criticality', 'filtering_labels'],
+		head: ['refId', 'name', 'description', 'providerEntity', 'tier', 'labels'],
+		body: ['ref_id', 'name', 'description', 'provider_entity', 'tier', 'filtering_labels'],
 		optionalFields: {
 			head: ['createdAt', 'updatedAt'],
 			body: ['created_at', 'updated_at']
 		},
 		filters: {
 			provider_entity: ENTITY_FILTER,
-			criticality: SOLUTION_CRITICALITY_FILTER,
+			tier: ENTITY_TIER_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
@@ -3906,7 +3873,10 @@ export const contextMenuActions = {
 	],
 	'asset-assessments': [{ component: ToggleRecoveryFlags, props: {} }],
 	'metric-instances': [{ component: MetricInstanceEditValue, props: {} }],
-	entities: [{ component: EntityChangeTier, props: {} }]
+	entities: [
+		{ component: EntityAssessTier, props: {} },
+		{ component: EntityChangeTier, props: {} }
+	]
 };
 
 // Batch action configuration.

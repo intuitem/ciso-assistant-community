@@ -111,6 +111,7 @@ def quick_form_to_editor_doc(quick_form: dict, *, locale: str = "en") -> dict:
     doc["framework_meta"]["subject_question_urn"] = (
         quick_form.get("subject_question_urn") or None
     )
+    doc["framework_meta"]["on_accept"] = quick_form.get("on_accept") or []
     for key in FRAMEWORK_ONLY_META_KEYS:
         doc["framework_meta"].pop(key, None)
     return doc
@@ -163,6 +164,11 @@ def editor_doc_to_quick_form_object(
             result["subject_question_urn"] = subject
         else:
             result.pop("subject_question_urn", None)
+    if "on_accept" in meta:
+        if meta.get("on_accept"):
+            result["on_accept"] = meta["on_accept"]
+        else:
+            result.pop("on_accept", None)
     # Rules and conditions written before the first save name the editor's ids.
     maps = node_id_maps(urn_map)
     if any(maps):

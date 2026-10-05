@@ -4,7 +4,6 @@
 	import NumberField from '../NumberField.svelte';
 	import TextArea from '../TextArea.svelte';
 	import TextField from '../TextField.svelte';
-	import OnAcceptEditor from './OnAcceptEditor.svelte';
 	import { m } from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -109,7 +108,6 @@
 	label={m.allowMultipleDrafts()}
 	helpText={m.quickFormAllowMultipleDraftsHelpText()}
 />
-<OnAcceptEditor {form} isNew={context !== 'edit'} />
 <Checkbox
 	{form}
 	field="always_review"

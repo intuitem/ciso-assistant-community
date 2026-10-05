@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
+	import { canPerformActionOnObject, hasPermissionAnywhere } from '$lib/utils/access-control';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { getLocale } from '$paraglide/runtime';
@@ -27,8 +27,12 @@
 			})
 	);
 
-	// Publications the viewer may file that set this entity's tier.
-	let assessments: { id: string; name: string }[] = $state([]);
+	// Forms the viewer may fill in-house, else publications they may file,
+	// that set this entity's tier.
+	type Option = { kind: 'form' | 'publication'; id: string; name: string };
+	let assessments: Option[] | null = $state(null);
+	let choosing = $state(false);
+	const canPublish = $derived(hasPermissionAnywhere(page.data.user, 'add_quickformpublication'));
 	$effect(() => {
 		if (entity.builtin) return;
 		fetch(`/entities/${entity.id}/assess-tier`)
@@ -36,11 +40,16 @@
 			.then((rows) => (assessments = rows));
 	});
 
-	async function assess(publication: string) {
+	function startAssessing() {
+		if (assessments?.length === 1) assess(assessments[0]);
+		else choosing = !choosing;
+	}
+
+	async function assess(option: Option) {
 		const res = await fetch(`/entities/${entity.id}/assess-tier`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ publication })
+			body: JSON.stringify({ kind: option.kind, id: option.id })
 		});
 		const body = await res.json().catch(() => ({}));
 		if (!res.ok || !body.redirect) {
@@ -101,17 +110,48 @@
 		<h3 class="font-semibold text-surface-950-50">
 			<i class="fa-solid fa-layer-group mr-2"></i>{m.tier()}
 		</h3>
-		{#if canChange && !editing}
-			<button
-				type="button"
-				class="btn btn-sm preset-tonal-primary"
-				onclick={startEditing}
-				data-testid="change-tier-button"
-			>
-				<i class="fa-solid fa-pen mr-1"></i>{m.changeTier()}
-			</button>
+		{#if !editing}
+			<div class="flex flex-wrap justify-end gap-2">
+				{#if assessments?.length}
+					<button
+						type="button"
+						class="btn btn-sm preset-filled-primary-500"
+						onclick={startAssessing}
+						aria-expanded={assessments.length > 1 ? choosing : undefined}
+						data-testid="assess-tier-button"
+					>
+						<i class="fa-solid fa-clipboard-check mr-1"></i>{m.assessTier()}
+						{#if assessments.length > 1}<i class="fa-solid fa-caret-down ml-1"></i>{/if}
+					</button>
+				{/if}
+				{#if canChange}
+					<button
+						type="button"
+						class="btn btn-sm preset-tonal-primary"
+						onclick={startEditing}
+						data-testid="change-tier-button"
+					>
+						<i class="fa-solid fa-hand-point-up mr-1"></i>{m.changeTier()}
+					</button>
+				{/if}
+			</div>
 		{/if}
 	</div>
+
+	{#if choosing && !editing && assessments}
+		<ul class="flex flex-col gap-1 rounded-base border border-surface-200-800 p-1">
+			{#each assessments as option (option.id)}
+				<li>
+					<button
+						type="button"
+						class="btn btn-sm w-full justify-start hover:preset-tonal"
+						onclick={() => assess(option)}
+						data-testid="assess-tier-option">{option.name}</button
+					>
+				</li>
+			{/each}
+		</ul>
+	{/if}
 
 	{#if editing}
 		<label class="label">
@@ -169,20 +209,12 @@
 		<p class="text-sm text-surface-600-400">{m.noTierYet()}</p>
 	{/if}
 
-	{#if !editing && assessments.length}
-		<div class="flex flex-wrap gap-2 border-t border-surface-200-800 pt-3">
-			{#each assessments as publication (publication.id)}
-				<button
-					type="button"
-					class="btn btn-sm preset-tonal-secondary"
-					onclick={() => assess(publication.id)}
-					data-testid="assess-tier-button"
-				>
-					<i class="fa-solid fa-clipboard-check mr-1"></i>{assessments.length === 1
-						? m.assessTier()
-						: publication.name}
-				</button>
-			{/each}
-		</div>
+	{#if !editing && assessments?.length === 0}
+		<p class="border-t border-surface-200-800 pt-3 text-xs text-surface-500">
+			{m.noTierFormPublished()}
+			{#if canPublish}
+				<a class="anchor" href="/entities/tiers">{m.setOneUp()}</a>
+			{/if}
+		</p>
 	{/if}
 </div>

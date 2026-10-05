@@ -664,7 +664,7 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'solutions'}
-			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {...rest} />
 		{:else if URLModel === 'contracts'}
 			<ContractsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'entity-scores'}

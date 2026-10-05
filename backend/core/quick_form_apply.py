@@ -1,5 +1,5 @@
 """Apply on accept: write an accepted response's results onto its subject,
-through the targets its publication lists in `on_accept`.
+through the targets its form lists in `on_accept`.
 
 Rules shared by every target:
 - only on the accepting transition (closed + accepted);
@@ -22,24 +22,31 @@ from core.quick_form_targets import Proposal, get_target
 logger = structlog.get_logger(__name__)
 
 
-def configured_targets(response) -> list[tuple[dict, object]]:
-    """(entry, target) pairs from the response's publication, unknown keys
-    skipped (they were refused on save; a later code change may drop one)."""
-    publication = getattr(response, "publication", None)
-    if publication is None:
-        return []
+def form_targets(quick_form) -> list[tuple[dict, object]]:
+    """(entry, target) pairs from the form's `on_accept`, unknown keys skipped
+    (a library may name a target this version does not have)."""
     pairs = []
-    for entry in publication.on_accept or []:
-        target = get_target(str((entry or {}).get("target") or ""))
+    for entry in getattr(quick_form, "on_accept", None) or []:
+        if not isinstance(entry, dict) or not isinstance(entry.get("config", {}), dict):
+            continue
+        target = get_target(str(entry.get("target") or ""))
         if target is None:
             logger.warning(
                 "unknown_on_accept_target",
-                target=(entry or {}).get("target"),
-                publication=str(publication.pk),
+                target=entry.get("target"),
+                quick_form=str(quick_form.pk),
             )
             continue
         pairs.append((entry, target))
     return pairs
+
+
+def targets_of(quick_form) -> list[str]:
+    return [target.key for _, target in form_targets(quick_form)]
+
+
+def configured_targets(response) -> list[tuple[dict, object]]:
+    return form_targets(response.quick_form)
 
 
 def _subject_for(response, target):
@@ -216,73 +223,32 @@ def _subject_model_of(quick_form) -> str | None:
     return REFERENCEABLE[question.config["model"]]["model"]
 
 
-def validate_on_accept(on_accept, quick_form) -> list[str]:
-    """Errors that refuse saving a publication's `on_accept`."""
-    if on_accept in (None, []):
-        return []
-    if not isinstance(on_accept, list):
-        return ["onAcceptMustBeAList"]
-    errors = []
-    seen = set()
-    subject_model = _subject_model_of(quick_form) if quick_form else None
-    for entry in on_accept:
+def on_accept_health(quick_form) -> list[dict]:
+    """Per target, what keeps the form's setup from applying on this instance:
+    a target this version lacks, a config the form's rules no longer support,
+    or objects it names that are missing here (e.g. a tier key not on this
+    scale)."""
+    rows = []
+    subject_model = _subject_model_of(quick_form)
+    for entry in quick_form.on_accept or []:
         if not isinstance(entry, dict) or not isinstance(entry.get("config", {}), dict):
-            errors.append("onAcceptEntryMalformed")
+            rows.append(
+                {"target": "", "label": "", "problems": ["onAcceptEntryMalformed"]}
+            )
             continue
         key = str(entry.get("target") or "")
         target = get_target(key)
         if target is None:
-            errors.append(f"unknownOnAcceptTarget:{key}")
+            rows.append(
+                {"target": key, "label": key, "problems": ["unknownOnAcceptTarget"]}
+            )
             continue
-        if key in seen:
-            errors.append(f"duplicateOnAcceptTarget:{key}")
-            continue
-        seen.add(key)
-        if subject_model != target.subject_model:
-            errors.append(f"subjectModelMismatch:{key}")
-            continue
-        errors += [
-            f"{key}:{error}"
-            for error in target.validate_config(entry.get("config") or {}, quick_form)
-        ]
-    return errors
-
-
-def on_accept_health(publication) -> list[dict]:
-    """Per target, what a library upgrade broke since the config was saved."""
-    from core.models import QuickFormResponse
-
-    rows = []
-    subject_model = _subject_model_of(publication.quick_form)
-    probe = QuickFormResponse(
-        quick_form=publication.quick_form, publication=publication
-    )
-    for entry, target in configured_targets(probe):
         problems = []
         if subject_model != target.subject_model:
             problems.append("subjectModelMismatch")
-        problems += target.health(entry.get("config") or {}, publication.quick_form)
+        problems += target.health(entry.get("config") or {}, quick_form)
         rows.append({"target": target.key, "label": target.label, "problems": problems})
     return rows
-
-
-def suggested_on_accept(quick_form) -> list[dict]:
-    """The form's library-suggested `on_accept`, made concrete for this
-    instance. Entries that do not fit (unknown target, other subject model,
-    scale too short, config refused) are left out."""
-    entries = []
-    subject_model = _subject_model_of(quick_form)
-    for entry in quick_form.on_accept_suggestion or []:
-        if not isinstance(entry, dict) or not isinstance(entry.get("config"), dict):
-            continue
-        target = get_target(str(entry.get("target") or ""))
-        if target is None or target.subject_model != subject_model:
-            continue
-        config = target.materialize(entry["config"])
-        if config is None or target.validate_config(config, quick_form):
-            continue
-        entries.append({"target": target.key, "config": config})
-    return entries
 
 
 def project(
@@ -299,7 +265,9 @@ def project(
     )
     rows = []
     for entry in entries:
-        target = get_target(str((entry or {}).get("target") or ""))
+        if not isinstance(entry, dict) or not isinstance(entry.get("config", {}), dict):
+            continue
+        target = get_target(str(entry.get("target") or ""))
         if target is None:
             continue
         try:
@@ -328,7 +296,7 @@ def project(
 
 
 def can_apply_on_submit(response, user, *, scored_complete: bool = True) -> bool:
-    """Whether submitting can apply the publication's targets at once: every
+    """Whether submitting can apply the form's targets at once: every
     target is ready and its permission on the subject is the submitter's own,
     so a review would grant nothing they do not already have. Anything less
     (no subject, nothing resolved, a missing right, scored questions left
@@ -337,9 +305,8 @@ def can_apply_on_submit(response, user, *, scored_complete: bool = True) -> bool
     publication = getattr(response, "publication", None)
     if (
         not scored_complete
-        or publication is None
-        or publication.always_review
-        or not publication.on_accept
+        or (publication is not None and publication.always_review)
+        or not configured_targets(response)
     ):
         return False
     items = plan(response, user)

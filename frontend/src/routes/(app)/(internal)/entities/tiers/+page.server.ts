@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { m } from '$paraglide/messages';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -15,7 +16,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const data = await res.json();
 	return {
 		tiers: data.results ?? data,
-		fedBy: fedByRes.ok ? await fedByRes.json() : []
+		fedBy: fedByRes.ok ? await fedByRes.json() : [],
+		// Same words as the menu and the breadcrumb.
+		title: m.criticality()
 	};
 };
 

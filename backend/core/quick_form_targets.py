@@ -3,7 +3,7 @@
 A fixed list, never "write any field": each target knows its subject model,
 the permission the reviewer needs on the subject, how to check its config
 against the form, how to work out the value from a response, and how to write
-it. Publications reference targets by key in `on_accept`.
+it. Forms reference targets by key in `on_accept`.
 """
 
 from dataclasses import dataclass, field
@@ -41,13 +41,9 @@ class Target:
         return []
 
     def health(self, config: dict, quick_form) -> list[str]:
-        """Problems a library upgrade may introduce after the config was saved."""
+        """Why the config cannot apply on this instance: its own errors, plus
+        what it names that is missing here."""
         return self.validate_config(config, quick_form)
-
-    def materialize(self, suggestion: dict) -> dict | None:
-        """A library's instance-independent suggested config turned into a
-        config for this instance, or None when it cannot be."""
-        return suggestion
 
     def current(self, subject) -> tuple[Any, str]:
         """The subject's current value and its display."""
