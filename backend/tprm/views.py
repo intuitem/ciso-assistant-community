@@ -6,6 +6,7 @@ from django.db import transaction
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_201_CREATED,
@@ -29,6 +30,7 @@ from core.models import (
     Terminology,
 )
 from core.utils import compute_respondent_progress
+from custom_fields.filters import CustomFieldFilterBackend, CustomFieldSearchFilter
 from django.db.models import Case, IntegerField, OuterRef, Q, Subquery, Value, When
 from tprm.models import (
     Entity,
@@ -1191,6 +1193,12 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
                 "format": lambda objs: _join_lines(s.name for s in objs),
                 "escape": True,
             },
+            "filtering_labels": {
+                "source": "_export_filtering_labels",
+                "label": "filtering_labels",
+                "format": lambda objs: _join_lines(lbl.label for lbl in objs),
+                "escape": True,
+            },
             "compliance_assessment": {
                 "source": "_export_compliance_assessment.name",
                 "label": "questionnaire",
@@ -1277,9 +1285,13 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             "entity",
             "compliance_assessment__framework",
         ],
-        "prefetch_related": ["solutions", "representatives"],
+        "prefetch_related": ["solutions", "representatives", "filtering_labels"],
         "wrap_columns": ["name", "description", "observation"],
     }
+    filter_backends = [
+        CustomFieldSearchFilter if backend is SearchFilter else backend
+        for backend in BaseModelViewSet.filter_backends
+    ] + [CustomFieldFilterBackend]
     filterset_fields = [
         "name",
         "status",
@@ -1295,6 +1307,7 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
         "compliance_assessment__campaign",
         "due_date",
         "expiry_date",
+        "filtering_labels",
     ]
 
     # Ordering the raw string would be alphabetical; the annotation ranks it by
@@ -1320,7 +1333,9 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             .order_by("rank")
             .values("rank")[:1]
         )
-        return qs.annotate(assignment_status_rank=Subquery(least_advanced))
+        return qs.annotate(
+            assignment_status_rank=Subquery(least_advanced)
+        ).prefetch_related("filtering_labels", "custom_field_values__definition")
 
     @staticmethod
     def _prefetched_requirement_assessments(audit):
@@ -1442,7 +1457,13 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
                         f"_export_{field}",
                         obj if obj and visible(obj, field_models[field]) else None,
                     )
-                for field in ("solutions", "authors", "reviewers", "representatives"):
+                for field in (
+                    "solutions",
+                    "authors",
+                    "reviewers",
+                    "representatives",
+                    "filtering_labels",
+                ):
                     setattr(
                         ea,
                         f"_export_{field}",
@@ -1548,6 +1569,7 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             clone.reviewers.set(source.reviewers.all())
             clone.authors.set(source.authors.all())
             clone.representatives.set(source.representatives.all())
+            clone.filtering_labels.set(source.filtering_labels.all())
             audit = create_enclave_audit(
                 clone,
                 source.compliance_assessment.framework,

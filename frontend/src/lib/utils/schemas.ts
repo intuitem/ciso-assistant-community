@@ -996,7 +996,9 @@ export const EntityAssessmentSchema = z.object({
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
-		.optional()
+		.optional(),
+	filtering_labels: z.string().optional().array().optional(),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const solutionSchema = z.object({

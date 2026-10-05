@@ -2521,8 +2521,8 @@ export const listViewFields = {
 			'folder'
 		],
 		optionalFields: {
-			head: ['perimeter', 'expiryDate'],
-			body: ['perimeter', 'expiry_date']
+			head: ['perimeter', 'expiryDate', 'labels'],
+			body: ['perimeter', 'expiry_date', 'filtering_labels']
 		},
 		filters: {
 			perimeter: PERIMETER_FILTER,
@@ -2530,6 +2530,7 @@ export const listViewFields = {
 			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
 			criticality: ENTITY_CRITICALITY_FILTER,
 			conclusion: ENTITY_ASSESSMENT_CONCLUSION_FILTER,
+			filtering_labels: LABELS_FILTER,
 			due_date: dateFilter('due_date'),
 			expiry_date: dateFilter('expiry_date')
 		}
@@ -4508,6 +4509,29 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			icon: 'fa-solid fa-flag-checkered',
 			field: 'conclusion',
 			optionsEndpoint: 'entity-assessments/conclusion'
+		},
+		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],

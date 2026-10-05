@@ -18,6 +18,7 @@ from core.models import (
     FilteringLabelMixin,
 )
 from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES
+from custom_fields.host import CustomFieldsMixin
 from core.dora import (
     DORA_ENTITY_TYPE_CHOICES,
     DORA_ENTITY_HIERARCHY_CHOICES,
@@ -190,7 +191,7 @@ class Entity(
         return sorted({e.strip() for e in emails if e and e.strip()})
 
 
-class EntityAssessment(Assessment):
+class EntityAssessment(Assessment, FilteringLabelMixin, CustomFieldsMixin):
     class Conclusion(models.TextChoices):
         BLOCKER = "blocker", _("Blocker")
         WARNING = "warning", _("Warning")

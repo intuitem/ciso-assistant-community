@@ -17,6 +17,7 @@ from core.models import (
 )
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
+from custom_fields.serializers import CustomFieldsSerializerMixin
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import Folder, Role, RoleAssignment, UserGroup
 from pmbok.models import GenericCollection
@@ -337,7 +338,7 @@ class ContractImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class EntityAssessmentReadSerializer(BaseModelSerializer):
+class EntityAssessmentReadSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     # Bare, so the value carries `str` and the table can render it as a link to the
     # audit. Only `.id` is read elsewhere.
     compliance_assessment = FieldsRelatedField()
@@ -352,6 +353,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
     representatives = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(many=True)
     validation_flows = FieldsRelatedField(
         many=True,
         fields=[
@@ -412,7 +414,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
         exclude = ["penetration", "dependency", "maturity", "trust"]
 
 
-class EntityAssessmentWriteSerializer(BaseModelSerializer):
+class EntityAssessmentWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
