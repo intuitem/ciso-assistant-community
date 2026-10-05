@@ -2,7 +2,6 @@
 	// Stores
 	import * as m from '$paraglide/messages';
 	import type { ModelInfo } from '$lib/utils/types';
-	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	const modalStore: ModalStore = getModalStore();
 
 	let closeModal = true;
@@ -15,7 +14,7 @@
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { FormDataShape } from '$lib/utils/schemas';
-	import { getModalStore } from './stores';
+	import { getModalStore, type ModalStore } from './stores';
 	import { ensureSelectOptions } from '$lib/utils/select-options';
 	import { onMount, tick } from 'svelte';
 	interface Props {

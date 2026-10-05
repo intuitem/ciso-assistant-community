@@ -6,13 +6,22 @@
 	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '$lib/utils/constants';
 	import {
 		CUSTOM_ACTIONS_COMPONENT,
 		getFieldComponentMap,
 		isFieldFlagEnabled,
-		URL_MODEL_MAP
+		URL_MODEL_MAP,
+		urlModelForDjangoName
 	} from '$lib/utils/crud';
+
+	// Presentational row weighting, declared per model in listViewFields.rowEmphasis.
+	function rowEmphasisClass(row: TableSource): string {
+		const config = listViewFields[URLModel]?.rowEmphasis;
+		if (!config) return '';
+		const expected = 'equals' in config ? config.equals : true;
+		return row.meta?.[config.field] === expected ? (config.class ?? 'font-semibold') : '';
+	}
 
 	// A filter on a flag-gated field must go away with its flag, like its column does.
 	function filtersForActiveFlags(urlModel: string) {
@@ -30,6 +39,7 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount, tick, untrack } from 'svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import { applyUnreadCount } from '$lib/utils/stores';
 
 	// Types
 	import { browser } from '$app/environment';
@@ -49,13 +59,13 @@
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
-	import type { SvelteEvent } from '@skeletonlabs/skeleton-svelte';
+	import type { SvelteEvent } from '$lib/utils/types';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
 	import type { FormDataShape } from '$lib/utils/schemas';
-	import { loadTableData } from './handler';
+	import { getParams, loadTableData } from './handler';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
 	import RowsPerPage from './RowsPerPage.svelte';
@@ -109,6 +119,10 @@
 		displayActions?: boolean;
 		disableCreate?: boolean;
 		disableEdit?: boolean;
+		// A model with no edit form can still have a field worth changing in bulk (an
+		// inbox's read flag), so this is separable from `disableEdit` -- which it
+		// defaults to, leaving existing callers unaffected.
+		disableBatchEdit?: boolean;
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
@@ -130,6 +144,7 @@
 		expectedCount?: number;
 		loading?: boolean;
 		onFilterChange?: (filters: Record<string, any>) => void;
+		onQueryChange?: (query: string) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
@@ -172,6 +187,7 @@
 		displayActions = true,
 		disableCreate = false,
 		disableEdit = false,
+		disableBatchEdit = undefined,
 		disableDelete = false,
 		disableView = false,
 		identifierField = 'id',
@@ -197,6 +213,7 @@
 		expectedCount = undefined,
 		loading = false,
 		onFilterChange = () => {},
+		onQueryChange = () => {},
 		quickFilters,
 		optButton,
 		selectButton,
@@ -213,7 +230,13 @@
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
-	const BUILTIN_EDITABLE_URL_MODELS = ['terminologies', 'entities', 'asset-class', 'folders'];
+	const BUILTIN_EDITABLE_URL_MODELS = [
+		'terminologies',
+		'entities',
+		'asset-class',
+		'folders',
+		'object-classifications'
+	];
 	// A field's flag(s) can be a single flag name or a list (shown if ANY is on).
 	// Hidden only once every listed flag is a known, explicitly-false feature flag.
 	function isFieldHiddenByFeatureFlags(
@@ -303,12 +326,58 @@
 		$tableColumnStates = next;
 	}
 
+	/**
+	 * Open the object a row points at, rather than the row itself. Returns true when it
+	 * handled the click. The PATCH is fire-and-forget so navigation never waits on it.
+	 */
+	function followRowNavigation(rowMetaData: Record<string, any>, newTab: boolean): boolean {
+		const nav = listViewFields[URLModel]?.rowNavigation;
+		if (!nav) return false;
+
+		const marked =
+			nav.markField && rowMetaData[nav.markField] === false
+				? fetch(`/${URLModel}/${rowMetaData[identifierField]}/${nav.markField}`, {
+						method: 'PATCH',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ [nav.markField]: true })
+					})
+						.then((res) => (res.ok ? res.json() : null))
+						.then(applyUnreadCount)
+						.catch((error) => console.error(`Could not mark ${nav.markField}:`, error))
+				: Promise.resolve();
+
+		const targetModel = urlModelForDjangoName(rowMetaData[nav.modelField]);
+		const targetId = rowMetaData[nav.idField];
+		if (!targetModel || !targetId) {
+			// Unmapped model, or a target deleted under the row: still counts as read, so
+			// only the navigation is skipped. Refetching before the PATCH lands would
+			// bring the row back unread.
+			marked.finally(() => handler.invalidate());
+			return true;
+		}
+
+		if (newTab) {
+			window.open(`/${targetModel}/${targetId}`, '_blank', 'noopener');
+			marked.finally(() => handler.invalidate());
+		} else goto(`/${targetModel}/${targetId}`, { breadcrumbAction: 'push' });
+		return true;
+	}
+
 	function onRowClick(event: SvelteEvent<MouseEvent, HTMLTableRowElement>, rowIndex: number): void {
 		if (!interactive) return;
 		event.preventDefault();
 		event.stopPropagation();
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
+
+		const newTab = event.metaKey || event.ctrlKey;
+		if (followRowNavigation(rowMetaData, newTab)) return;
+
+		const detailURL = `/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`;
+		if (newTab) {
+			window.open(detailURL, '_blank', 'noopener');
+			return;
+		}
 
 		const preferredLabel =
 			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
@@ -320,7 +389,7 @@
 			rowMetaData.label ||
 			rowMetaData[identifierField];
 
-		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
+		goto(detailURL, {
 			label,
 			breadcrumbAction: 'push'
 		});
@@ -406,6 +475,10 @@
 			return currentLoad;
 		};
 		handler.onChange((state: State) => {
+			const query = getParams(state);
+			query.delete('offset');
+			query.delete('limit');
+			onQueryChange(query.toString());
 			inFlight += 1;
 			// Per request, so a failure cannot mask a success that overlapped it.
 			let failed = false;
@@ -478,80 +551,66 @@
 	// A filter emits one query param per key by default; `params` lets one widget drive several
 	// (a date range emits both bounds).
 	const paramsOf = (field: string): string[] => filters[field]?.params ?? [field];
-	// Only persist filters on standalone list pages, not embedded sub-tables
-	const isStandaloneTable = hasRemoteSource && baseEndpoint === `/${URLModel}`;
-	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
-	const storedFilters = isStandaloneTable ? ($tableFilterStates[filterStoreKey] ?? {}) : {};
-	// Check if any filter-related URL params exist
-	const hasUrlFilterParams = filteredFields.some((field) =>
-		paramsOf(field).some((param: string) => page.url.searchParams.getAll(param).length > 0)
-	);
-	const filterValues: { [key: string]: any } = $state(
-		Object.fromEntries(
+	// Standalone list pages only: offer the column selector (embedded tables pass
+	// a curated `fields` prop) and sync filters with the URL.
+	const isStandaloneTable = $derived(hasRemoteSource && baseEndpoint === `/${URLModel}`);
+	// Embedded tables share the page URL with sibling tables (DetailView keeps
+	// visited tabs mounted) and their filter names overlap (status, owner, ...):
+	// syncing them would leak one table's filters into another. They persist
+	// through the filter store only.
+	const syncFiltersToUrl = $derived(isStandaloneTable);
+	// Unique per parent object + tab (baseEndpoint carries the parent id).
+	// $derived so it updates when this instance is reused for a different
+	// object (DetailView.svelte keys tabs by model name, not by parent id).
+	const filterStoreKey = $derived(`${page.url.pathname}::${baseEndpoint}`);
+	// Order-insensitive fingerprint of one field's selection. Values are
+	// `{ value, param? }` objects or bare strings (defaultFilters allows both).
+	const filterFingerprint = (field: string, values: any[] = []) =>
+		values
+			.map((v) =>
+				typeof v === 'object' && v !== null ? `${v.param ?? field}=${v.value}` : `${field}=${v}`
+			)
+			.sort()
+			.join('&');
+	const isDefaultFilterState = (state: Record<string, any[]>) =>
+		filteredFields.every(
+			(field) =>
+				filterFingerprint(field, state[field]) === filterFingerprint(field, defaultFilters[field])
+		);
+
+	function seedFilterValues() {
+		const stored = $tableFilterStates[filterStoreKey] ?? {};
+		const urlParams = syncFiltersToUrl ? page.url.searchParams : new URLSearchParams();
+		// Check if any filter-related URL params exist
+		const hasUrlFilterParams = filteredFields.some((field) =>
+			paramsOf(field).some((param: string) => urlParams.getAll(param).length > 0)
+		);
+		return Object.fromEntries(
 			filteredFields.map((field: string) => {
 				const urlValues = paramsOf(field).flatMap((param: string) =>
-					page.url.searchParams.getAll(param).map((value) => ({ value, param }))
+					urlParams.getAll(param).map((value) => ({ value, param }))
 				);
 				if (urlValues.length > 0) return [field, urlValues];
 				// Restore persisted filters only when no URL filter params exist at all
-				if (!hasUrlFilterParams && field in storedFilters) {
-					return [field, storedFilters[field] ?? []];
+				if (!hasUrlFilterParams && field in stored) {
+					return [field, stored[field] ?? []];
 				}
 				const defaultValue = defaultFilters[field] || [];
 				return [field, defaultValue];
 			})
-		)
-	);
+		);
+	}
+
+	const filterValues: { [key: string]: any } = $state(seedFilterValues());
 	$effect(() => onFilterChange(filterValues));
 
 	run(() => {
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter?.hide);
 	});
 
-	$effect(() => {
-		for (const field of filteredFields) {
-			const finalFilterValue = overrideFilters[field] || filterValues[field] || [];
-
-			const buckets: Record<string, any> = Object.fromEntries(
-				paramsOf(field).map((param: string) => [param, []])
-			);
-			for (const v of finalFilterValue) {
-				(buckets[v.param ?? field] ??= []).push(v.value);
-			}
-			for (const [param, values] of Object.entries(buckets)) {
-				handler.filter(values, param);
-				page.url.searchParams.delete(param);
-				values.forEach((value: string) => page.url.searchParams.append(param, value));
-			}
-		}
-		history.replaceState(history.state, '', page.url.pathname + page.url.search);
-		// Sync the current crumb's href with the new filter query.
-		breadcrumbs.update((crumbs) => {
-			if (crumbs.length < 2) return crumbs;
-			const last = crumbs[crumbs.length - 1];
-			const lastPath = last.href?.split('?')[0];
-			if (lastPath !== page.url.pathname) return crumbs;
-			const newHref = page.url.pathname + page.url.search;
-			if (last.href === newHref) return crumbs;
-			const next = crumbs.slice();
-			next[next.length - 1] = { ...last, href: newHref };
-			return next;
-		});
-		// untracked so resetFilters can delete the entry without retriggering us
-		if (isStandaloneTable) {
-			untrack(() => {
-				$tableFilterStates[filterStoreKey] = { ...filterValues };
-			});
-		}
-		if (hasRemoteSource)
-			setTimeout(() => {
-				handler.invalidate();
-			}, 10);
-	});
-
 	const filterInitialData: Record<string, string[]> = {};
-	// convert URL search params and default filters to filter initial data
-	for (const [key, value] of page.url.searchParams) {
+	// convert URL search params (standalone only) and seeded filters to filter initial data
+	for (const [key, value] of syncFiltersToUrl ? page.url.searchParams : []) {
 		filterInitialData[key] ??= [];
 		filterInitialData[key].push(value);
 	}
@@ -574,6 +633,85 @@
 		resetForm: false,
 		taintedMessage: false,
 		validationMethod: 'auto'
+	});
+
+	// Reseed + sync/persist in one effect: a scope change (instance reused for
+	// a different object) must finish reseeding before anything is written
+	// under the new key -- two separate effects can't guarantee that order.
+	let previousFilterStoreKey = filterStoreKey;
+	$effect(() => {
+		if (filterStoreKey !== previousFilterStoreKey) {
+			previousFilterStoreKey = filterStoreKey;
+			const fresh = seedFilterValues();
+			Object.assign(filterValues, fresh);
+			_form.form.update((data) => ({
+				...data,
+				...Object.fromEntries(
+					Object.entries(fresh).map(([f, v]: [string, any]) => [
+						f,
+						(v ?? []).map((x: any) => x.value)
+					])
+				)
+			}));
+		}
+
+		for (const field of filteredFields) {
+			const finalFilterValue = overrideFilters[field] || filterValues[field] || [];
+
+			const buckets: Record<string, any> = Object.fromEntries(
+				paramsOf(field).map((param: string) => [param, []])
+			);
+			for (const v of finalFilterValue) {
+				(buckets[v.param ?? field] ??= []).push(v.value);
+			}
+			for (const [param, values] of Object.entries(buckets)) {
+				handler.filter(values, param);
+				if (!syncFiltersToUrl) continue;
+				page.url.searchParams.delete(param);
+				values.forEach((value: string) => page.url.searchParams.append(param, value));
+			}
+		}
+		if (syncFiltersToUrl) {
+			history.replaceState(history.state, '', page.url.pathname + page.url.search);
+			// Sync the current crumb's href with the new filter query.
+			breadcrumbs.update((crumbs) => {
+				if (crumbs.length < 2) return crumbs;
+				const last = crumbs[crumbs.length - 1];
+				const lastPath = last.href?.split('?')[0];
+				if (lastPath !== page.url.pathname) return crumbs;
+				const newHref = page.url.pathname + page.url.search;
+				if (last.href === newHref) return crumbs;
+				const next = crumbs.slice();
+				next[next.length - 1] = { ...last, href: newHref };
+				return next;
+			});
+		}
+		// untracked so resetFilters can delete the entry without retriggering us.
+		// A default selection isn't stored: seeding falls back to defaultFilters
+		// anyway, so untouched tables leave no entry behind in localStorage.
+		untrack(() => {
+			if (!isDefaultFilterState(filterValues)) {
+				$tableFilterStates[filterStoreKey] = { ...filterValues };
+			} else if (filterStoreKey in $tableFilterStates) {
+				const next = { ...$tableFilterStates };
+				delete next[filterStoreKey];
+				$tableFilterStates = next;
+			}
+		});
+		if (hasRemoteSource)
+			setTimeout(() => {
+				handler.invalidate();
+			}, 10);
+	});
+
+	// Refetch when the page reloads its data (invalidateAll() swaps page.url for a
+	// new URL object). Standalone tables get this from syncing filters with the
+	// URL above; embedded ones no longer touch it, so track it here.
+	let pageUrlSeen = false;
+	$effect(() => {
+		page.url;
+		if (!pageUrlSeen) return void (pageUrlSeen = true);
+		if (hasRemoteSource && !syncFiltersToUrl) untrack(() => handler.invalidate());
 	});
 
 	$effect(() => {
@@ -620,8 +758,14 @@
 	let contextMenuDisplayEdit = $derived(
 		contextMenuCanEditObject &&
 			URLModel &&
+			!disableEdit &&
 			!['frameworks', 'risk-matrices', 'ebios-rm', ...LIBRARY_MANAGED_URL_MODELS].includes(URLModel)
 	);
+
+	// The context menu ignored disableEdit/disableView entirely, so a model that
+	// suppressed them in the row actions still offered them on right-click. View
+	// matches TableRowActions: builtin/urn restricts editing, never reading.
+	let contextMenuDisplayView = $derived(!disableView);
 
 	let contextMenuCanDeleteObject = $derived(
 		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&
@@ -720,12 +864,20 @@
 			}
 			return data;
 		});
-		if (!isStandaloneTable) return;
 		await tick();
 		const next = { ...$tableFilterStates };
 		delete next[filterStoreKey];
 		$tableFilterStates = next;
 	}
+
+	const APPLIED_CONTROL_STATUS_PRESETS: Record<string, string> = {
+		to_do: 'preset-tonal-primary',
+		in_progress: 'preset-tonal-warning',
+		on_hold: 'preset-tonal-secondary',
+		active: 'preset-tonal-success',
+		degraded: 'preset-tonal-error',
+		deprecated: 'preset-tonal-surface'
+	};
 
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
 		// The badge background is a fixed hex color, so the text must be a fixed color too
@@ -811,12 +963,14 @@
 	// Batch selection state
 	let selectedIds: Set<string> = $state(new Set());
 
+	const noBatchFieldEdit = $derived(disableBatchEdit ?? disableEdit);
+
 	const currentBatchActions: BatchActionConfig[] = $derived(
 		URLModel && model
 			? getBatchActions(URLModel, page.data?.featureflags ?? {}).filter((a) =>
 					a.type === 'delete'
 						? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
-						: !disableEdit && hasPermissionAnywhere(user, `change_${model.name}`)
+						: !noBatchFieldEdit && hasPermissionAnywhere(user, `change_${model.name}`)
 				)
 			: []
 	);
@@ -824,7 +978,7 @@
 	// only the lock/disable filters apply here — the child-model permission
 	// filter above would ask the wrong question for parent_action entries.
 	const extraActions = $derived(
-		extraBatchActions.filter((a) => (a.type === 'delete' ? !disableDelete : !disableEdit))
+		extraBatchActions.filter((a) => (a.type === 'delete' ? !disableDelete : !noBatchFieldEdit))
 	);
 	const allBatchActions = $derived([...currentBatchActions, ...extraActions]);
 	const hasBatchActions = $derived(
@@ -1047,7 +1201,9 @@
 							<tr
 								onclick={(e) => onRowClick(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
-								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
+								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer {rowEmphasisClass(
+									row
+								)}"
 							>
 								{#if hasBatchActions}
 									<td
@@ -1087,7 +1243,7 @@
 											{:else}
 												<div
 													data-testid="model-table-td-array-elem"
-													class="base-font-family whitespace-pre-line break-words"
+													class="font-typo-base whitespace-pre-line break-words"
 												>
 													{#if Array.isArray(value)}
 														{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
@@ -1111,6 +1267,14 @@
 																			{@const itemHref = getRelatedFieldHref(key, val.id, {
 																				fallbackToDashedField: true
 																			})}
+																			{#if key === 'applied_controls' && val.status && val.status !== '--'}
+																				<span
+																					class="badge text-xs {APPLIED_CONTROL_STATUS_PRESETS[
+																						val.status
+																					] ?? 'preset-tonal-surface'}"
+																					>{safeTranslate(val.status)}</span
+																				>
+																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
 																					>{safeTranslate(val.str)}</Anchor
@@ -1188,7 +1352,7 @@
 														>
 															{safeTranslate(value.name ?? value.str) ?? '-'}
 														</p>
-													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'end_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on' || key === 'last_assessment_date')}
+													{:else if ISO_8601_REGEX.test(value) && DATE_FIELDS_TO_FORMAT.includes(key)}
 														{formatDateOrDateTime(value, getLocale())}
 													{:else if [true, false].includes(value)}
 														{@const bd = booleanDisplay(value, key, URLModel)}
@@ -1357,7 +1521,7 @@
 					</tbody>
 				{/snippet}
 			</ContextMenu.Trigger>
-			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
+			{#if contextMenuDisplayEdit || contextMenuDisplayView || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
 					class="z-50 min-w-[180px] outline-hidden bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200-800 rounded-md"
 				>
@@ -1367,7 +1531,7 @@
 						{/each}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 					{/if}
-					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) || URLModel === 'terminologies' || URLModel === 'entities'}
+					{#if contextMenuDisplayEdit}
 						<ContextMenu.Item
 							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
@@ -1381,6 +1545,8 @@
 						>
 							{m.edit()}
 						</ContextMenu.Item>
+					{/if}
+					{#if contextMenuDisplayView}
 						<ContextMenu.Item
 							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {

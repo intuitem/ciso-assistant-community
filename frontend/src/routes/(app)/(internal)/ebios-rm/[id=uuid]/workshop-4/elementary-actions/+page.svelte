@@ -6,6 +6,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import RatingKitCard from '$lib/components/EbiosRM/RatingKitCard.svelte';
 
 	import {
 		getModalStore,
@@ -52,6 +53,12 @@
 		<p>{m.goBackToEbiosRmStudy()}</p>
 	</Anchor>
 </div>
+
+{#if data.ratingKit}
+	<div class="mb-4">
+		<RatingKitCard kit={data.ratingKit} advanced={data.quotationMethod === 'advanced'} />
+	</div>
+{/if}
 
 <ModelTable
 	source={data.table}

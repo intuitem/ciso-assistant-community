@@ -49,6 +49,8 @@ from ebios_rm.models import (
     AttackPath,
 )
 
+from sec_intel.models import Technique
+
 from tprm.models import (
     Entity,
     EntityAssessment,
@@ -96,6 +98,8 @@ from ebios_rm.serializers import (
     StrategicScenarioImportExportSerializer,
     AttackPathImportExportSerializer,
 )
+
+from sec_intel.serializers import TechniqueImportExportSerializer
 
 from tprm.serializers import (
     EntityImportExportSerializer,
@@ -205,6 +209,7 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
         TaskTemplate: TaskTemplateImportExportSerializer,
         Vulnerability: VulnerabilityImportExportSerializer,
         Threat: ThreatImportExportSerializer,
+        Technique: TechniqueImportExportSerializer,
         ReferenceControl: ReferenceControlImportExportSerializer,
         EbiosRMStudy: EbiosRMStudyImportExportSerializer,
         FearedEvent: FearedEventImportExportSerializer,
@@ -540,6 +545,10 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(operational_scenarios__in=operational_scenarios)
     ).distinct()
 
+    techniques = Technique.objects.filter(
+        Q(folder__in=folders) | Q(operational_scenarios__in=operational_scenarios)
+    ).distinct()
+
     findings_assessments = FindingsAssessment.objects.filter(
         Q(perimeter__in=perimeters)
         | Q(folder__in=folders)
@@ -681,6 +690,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(risk_matrices__in=risk_matrices)
         | Q(frameworks__in=frameworks)
         | Q(quick_forms__in=quick_forms)
+        | Q(techniques__in=techniques)
         | Q(
             pk__in=LoadedLibrary.objects.filter(
                 Q(folder__in=folders)
@@ -689,6 +699,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
                 | Q(risk_matrices__in=risk_matrices)
                 | Q(frameworks__in=frameworks)
                 | Q(quick_forms__in=quick_forms)
+                | Q(techniques__in=techniques)
             ).values_list("dependencies", flat=True)
         )
     ).distinct()
@@ -706,6 +717,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         "riskmatrix": risk_matrices,
         "referencecontrol": reference_controls,
         "threat": threats,
+        "technique": techniques,
         "asset": assets,
         "appliedcontrol": applied_controls,
         "entity": entities,

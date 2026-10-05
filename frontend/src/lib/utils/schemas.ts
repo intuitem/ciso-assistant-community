@@ -340,6 +340,7 @@ export const AppliedControlSchema = z.object({
 	findings: z.string().uuid().optional().array().optional(),
 	task_templates: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
+	control_documents: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	integration_config: z.string().optional().nullable(),
 	remote_object_id: z.string().optional().nullable(),
@@ -585,6 +586,31 @@ export const ComplianceAssessmentSchema = z.object({
 		.optional()
 		.default({}),
 	score_calculation_method: z.string().optional().default('average'),
+	score_scale_preset: z.string().optional().nullable(),
+	confirm_rescale: z.boolean().optional().default(false),
+	min_score: z.number().int().optional().nullable(),
+	max_score: z.number().int().optional().nullable(),
+	scores_definition: z
+		.array(
+			z.looseObject({
+				score: z.number().int(),
+				name: z.string().optional().nullable(),
+				description: z.string().optional().nullable(),
+				description_doc: z.string().optional().nullable(),
+				translations: z
+					.record(
+						z.string(),
+						z.looseObject({
+							name: z.string().optional(),
+							description: z.string().optional(),
+							description_doc: z.string().optional()
+						})
+					)
+					.optional()
+			})
+		)
+		.optional()
+		.nullable(),
 	target_score: z.number().optional().nullable(),
 	anchor_na_to_target: z.boolean().optional().default(false),
 	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
@@ -629,6 +655,7 @@ export const EvidenceSchema = z.object({
 	security_exceptions: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	timeline_entries: z.string().optional().array().optional(),
 	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
+	task_templates: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	link: z
 		.string()
@@ -658,6 +685,14 @@ export const EvidenceRevisionSchema = z.object({
 
 export const GeneralSettingsSchema = z.object({
 	security_objective_scale: z.string(),
+	organisation_score_scale: z
+		.object({
+			score_scale_preset: z.string().nullable(),
+			min_score: z.number().int(),
+			max_score: z.number().int(),
+			scores_definition: z.array(z.any())
+		})
+		.optional(),
 	ebios_radar_green_zone_radius: z.number(),
 	ebios_radar_yellow_zone_radius: z.number(),
 	ebios_radar_red_zone_radius: z.number(),
@@ -746,6 +781,11 @@ export const FeatureFlagsSchema = z.object({
 	custom_fields: z.boolean().optional(),
 	bia: z.boolean().optional(),
 	project_management: z.boolean().optional(),
+	generic_collections: z.boolean().optional(),
+	accreditations: z.boolean().optional(),
+	projects: z.boolean().optional(),
+	responsibility_matrices: z.boolean().optional(),
+	risk_management: z.boolean().optional(),
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
@@ -765,6 +805,7 @@ export const FeatureFlagsSchema = z.object({
 	quick_forms: z.boolean().optional(),
 	advanced_analytics: z.boolean().optional(),
 	comments: z.boolean().optional(),
+	notification_center: z.boolean().optional(),
 	relations_graph: z.boolean().optional(),
 	journeys: z.boolean().optional(),
 	policy_documents: z.boolean().optional(),
@@ -1360,7 +1401,13 @@ export const ebiosRMSchema = z.object({
 	assets: z.string().uuid().optional().array().optional(),
 	folder: z.string(),
 	compliance_assessments: z.string().uuid().optional().array().optional(),
-	reference_entity: z.string().optional()
+	reference_entity: z.string().optional(),
+	classification: z.string().uuid().optional().nullable(),
+	objectives: z.string().optional(),
+	constraints_hypotheses: z.string().optional(),
+	responsibility_matrix: z.string().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const fearedEventsSchema = z.object({
@@ -1381,6 +1428,7 @@ export const roToSchema = z.object({
 	feared_events: z.string().uuid().optional().array().optional(),
 	risk_origin: z.string(),
 	target_objective: z.string(),
+	target_objective_category: z.string().uuid().optional().nullable(),
 	motivation: z.number().default(0).optional(),
 	resources: z.number().default(0).optional(),
 	activity: z.number().min(0).max(4).optional().default(0),
@@ -1413,6 +1461,7 @@ export const StrategicScenarioSchema = z.object({
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
 	focused_feared_event: z.string().uuid().nullable().optional(),
+	gravity_forced: z.number().int().nullable().optional(),
 	ref_id: z.string().optional(),
 	folder: z.string()
 });
@@ -1432,8 +1481,10 @@ export const operationalScenarioSchema = z.object({
 	ebios_rm_study: z.string(),
 	attack_path: z.string().uuid(),
 	threats: z.string().uuid().optional().array().optional(),
+	techniques: z.string().uuid().optional().array().optional(),
 	operating_modes_description: z.string().optional(),
 	likelihood: z.number().optional().default(-1),
+	likelihood_forced: z.number().int().nullable().optional(),
 	is_selected: z.boolean().default(true),
 	justification: z.string().optional(),
 	folder: z.string(),
@@ -1766,7 +1817,8 @@ export const ElementaryActionSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	threat: z.string().uuid().optional(),
+	threat: z.string().uuid().optional().nullable(),
+	technique: z.string().uuid().optional().nullable(),
 	icon: z.string().optional().nullable(),
 	attack_stage: z.number().default(0),
 	operating_modes: z.string().uuid().optional().array().optional()
@@ -1786,6 +1838,7 @@ export const KillChainSchema = z.object({
 	// is_highlighted: z.boolean().default(false),
 	antecedents: z.string().uuid().optional().array().optional(),
 	logic_operator: z.string().optional().nullable(),
+	assets: z.string().uuid().optional().array().optional(),
 	folder: z.string()
 });
 
@@ -1844,7 +1897,7 @@ export const ObjectClassificationSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
 	is_visible: z.boolean().default(true),
-	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+	translations: z.record(z.string().min(1), z.any()).optional()
 });
 
 export const ClassificationLevelSchema = z.object({
@@ -1854,7 +1907,7 @@ export const ClassificationLevelSchema = z.object({
 	abbreviation: z.string().optional().default(''),
 	hexcolor: z.string().optional().default(''),
 	is_visible: z.boolean().default(true),
-	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+	translations: z.record(z.string().min(1), z.any()).optional()
 });
 
 export const AssetClassSchema = z.object({

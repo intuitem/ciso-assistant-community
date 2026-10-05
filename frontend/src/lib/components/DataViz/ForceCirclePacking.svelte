@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { escapeHtml } from '$lib/utils/helpers';
 	import { onMount } from 'svelte';
 
 	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
@@ -44,14 +45,6 @@
 	let currentEmphasisNodeId: number | null = null;
 	const chart_id = `${name}_div`;
 	let resizeTimeout: ReturnType<typeof setTimeout>;
-
-	function escapeHtml(str: string): string {
-		return str
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;');
-	}
 
 	// Translate node names
 	const translatedData = $derived({

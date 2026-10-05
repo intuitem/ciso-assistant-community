@@ -24,7 +24,10 @@ export interface User {
 	is_superuser: boolean;
 	has_mfa_enabled: boolean;
 	accessible_domains: string[];
-	domain_permissions: Record<string, string[]>;
+	/** Distinct codename sets, each sent once; `domain_permissions` points into it. */
+	permission_sets: string[][];
+	/** Folder ID → index in `permission_sets` of the codenames the user holds there. */
+	domain_permissions: Record<string, number>;
 	root_folder_id: string;
 	preferences: {
 		lang?: string;
@@ -43,6 +46,7 @@ export interface LoginRequestBody {
 }
 
 export const URL_MODEL = [
+	'notifications',
 	'folders',
 	'perimeters',
 	'risk-matrices',
@@ -284,3 +288,8 @@ export interface CacheLock {
 	promise: Promise<any>;
 	resolve: (_: any) => any;
 }
+
+/** A DOM event with `currentTarget` narrowed to the element the handler is bound to. */
+export type SvelteEvent<E extends Event = Event, T extends EventTarget = Element> = E & {
+	currentTarget: EventTarget & T;
+};

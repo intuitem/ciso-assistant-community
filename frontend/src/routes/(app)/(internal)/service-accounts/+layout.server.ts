@@ -1,5 +1,5 @@
 import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { type TableSource } from '$lib/components/ModelTable/types';
 import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '$lib/utils/crud';
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';

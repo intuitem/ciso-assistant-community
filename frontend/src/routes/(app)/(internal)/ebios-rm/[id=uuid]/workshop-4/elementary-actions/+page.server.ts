@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { m } from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
 import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { type TableSource } from '$lib/components/ModelTable/types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
@@ -62,7 +62,15 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: []
 	};
 
+	const stepBased = ['standard', 'advanced'].includes(object.quotation_method);
+	const ratingKitResponse = stepBased
+		? await fetch(`${BASE_API_URL}/ebios-rm/studies/${params.id}/rating-kit/`)
+		: null;
+	const ratingKit = ratingKitResponse?.ok ? await ratingKitResponse.json() : null;
+
 	return {
+		ratingKit,
+		quotationMethod: object.quotation_method,
 		createForm,
 		deleteForm,
 		model,

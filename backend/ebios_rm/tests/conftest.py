@@ -1,7 +1,11 @@
 import pytest
+from knox.models import AuthToken
+from rest_framework.test import APIClient
 
-from core.models import RiskMatrix, StoredLibrary, Asset
-from ebios_rm.models import RoTo, EbiosRMStudy, FearedEvent
+from core.apps import startup
+from core.models import Asset, RiskMatrix, StoredLibrary
+from ebios_rm.models import EbiosRMStudy, ElementaryAction, FearedEvent, RoTo
+from iam.models import User, UserGroup
 
 
 @pytest.fixture
@@ -58,3 +62,31 @@ def basic_roto_fixture(basic_ebios_rm_study_fixture, basic_feared_event_fixture)
     )
     roto.feared_events.set(FearedEvent.objects.filter(name="test feared event"))
     return roto
+
+
+@pytest.fixture
+def admin_client():
+    startup(sender=None)
+    admin = User.objects.create_superuser("admin@kill-chain-steps-tests.com")
+    admin_group = UserGroup.objects.get(name="BI-UG-ADM")
+    admin.folder = admin_group.folder
+    admin.save()
+    admin_group.user_set.add(admin)
+    client = APIClient()
+    token = AuthToken.objects.create(user=admin)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token[1]}")
+    return client
+
+
+@pytest.fixture
+def elementary_actions_fixture():
+    know = ElementaryAction.objects.create(
+        name="Reconnaissance", attack_stage=ElementaryAction.AttackStage.KNOW
+    )
+    enter = ElementaryAction.objects.create(
+        name="Phishing", attack_stage=ElementaryAction.AttackStage.ENTER
+    )
+    exploit = ElementaryAction.objects.create(
+        name="Exfiltration", attack_stage=ElementaryAction.AttackStage.EXPLOIT
+    )
+    return know, enter, exploit
