@@ -88,14 +88,17 @@ class TestFrameworkScoringProperties:
         from core.serializers import FrameworkWriteSerializer
 
         framework = load(library(1))
-        for data, field in (
-            ({"score_calculation_method": "median"}, "score_calculation_method"),
-            ({"anchor_na_to_target": True}, "target_score"),
-            ({"target_score": 9}, "target_score"),
+        for data, field, error in (
+            ({"score_calculation_method": "median"}, "score_calculation_method", None),
+            ({"anchor_na_to_target": True}, "target_score", "targetScoreRequired"),
+            ({"target_score": 9}, "target_score", "targetScoreOutOfRange"),
         ):
             serializer = FrameworkWriteSerializer(framework, data=data, partial=True)
             assert not serializer.is_valid()
             assert field in serializer.errors
+            # A translation key, not an exception message.
+            if error:
+                assert serializer.errors[field] == [error]
 
     def test_update_resets_properties_removed_from_the_framework(self):
         load(library(1, PROPERTIES))

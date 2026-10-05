@@ -5947,6 +5947,7 @@
 	"scoreScaleErrorLevelOutOfRange": "Chaque niveau doit avoir un score entier compris dans la plage de l'échelle.",
 	"scoreScaleErrorInvalid": "Échelle de notation invalide.",
 	"scoreScaleErrorRangeRequired": "Choisissez une échelle prédéfinie ou renseignez un score minimum et maximum.",
+	"targetScoreRequired": "Un score cible est requis pour ancrer les exigences N/A ou pour définir des cibles par groupe d'implémentation.",
 	"targetScoreOutOfRange": "Le score cible doit être compris dans la plage de l'échelle.",
 	"scoreScaleConfirmScored": "Exigences notées : {count}",
 	"scoreScaleConfirmHistory": "L'historique des scores antérieur à aujourd'hui reste sur l'ancienne échelle.",

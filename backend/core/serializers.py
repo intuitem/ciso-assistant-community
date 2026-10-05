@@ -3183,10 +3183,9 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
                 )
                 for field in self.SCORING_DEFAULT_FIELDS
             }
-            try:
-                Framework.validate_scoring_defaults(**current)
-            except ValueError as e:
-                raise serializers.ValidationError({"target_score": str(e)})
+            if problem := Framework.scoring_defaults_problem(**current):
+                error_key, _detail = problem
+                raise serializers.ValidationError({"target_score": error_key})
         return attrs
 
     def create(self, validated_data):

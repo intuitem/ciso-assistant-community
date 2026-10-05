@@ -3896,17 +3896,17 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             )
 
     @staticmethod
-    def validate_scoring_defaults(
+    def scoring_defaults_problem(
         *,
         min_score,
         max_score,
         anchor_na_to_target,
         target_score,
         implementation_groups_definition,
-    ):
-        """Audits must accept what the framework proposes: N/A anchoring needs a
-        target, implementation group targets fall back on the framework's, and
-        every target lies on the framework scale."""
+    ) -> tuple[str, str] | None:
+        """(error key, detail) when audits would refuse what the framework
+        proposes: N/A anchoring needs a target, implementation group targets fall
+        back on the framework's, and every target lies on the framework scale."""
         group_targets = [
             (f"implementation group {group.get('ref_id')!r} target_score", target)
             for group in implementation_groups_definition or []
@@ -3914,16 +3914,25 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             and (target := group.get("target_score")) is not None
         ]
         if target_score is None and (anchor_na_to_target or group_targets):
-            raise ValueError(
+            return (
+                "targetScoreRequired",
                 "target_score is required with anchor_na_to_target or "
-                "implementation group target scores"
+                "implementation group target scores",
             )
         for label, target in [("target_score", target_score), *group_targets]:
             if target is not None and not min_score <= target <= max_score:
-                raise ValueError(
+                return (
+                    "targetScoreOutOfRange",
                     f"{label} {target} is outside the framework scale "
-                    f"{min_score}-{max_score}"
+                    f"{min_score}-{max_score}",
                 )
+        return None
+
+    @staticmethod
+    def validate_scoring_defaults(**scoring) -> None:
+        """Library loading: fail loudly, with details for the library author."""
+        if problem := Framework.scoring_defaults_problem(**scoring):
+            raise ValueError(problem[1])
 
     @property
     def default_scoring(self) -> dict:

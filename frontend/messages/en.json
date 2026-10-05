@@ -5937,6 +5937,7 @@
 	"scoreScaleErrorLevelOutOfRange": "Each level needs a whole-number score within the scale's range.",
 	"scoreScaleErrorInvalid": "Invalid score scale.",
 	"scoreScaleErrorRangeRequired": "Choose a preset or set a minimum and maximum score.",
+	"targetScoreRequired": "A target score is required to anchor N/A requirements or to set implementation group targets.",
 	"targetScoreOutOfRange": "The target score must be within the scale's range.",
 	"scoreScaleConfirmScored": "Scored requirements: {count}",
 	"scoreScaleConfirmHistory": "The score history before today stays on the previous scale.",
