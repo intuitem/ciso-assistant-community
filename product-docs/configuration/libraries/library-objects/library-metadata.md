@@ -17,7 +17,7 @@ An asterisk (<mark style="color:$danger;">*</mark>) marks a required property. (
 | `type`<mark style="color:$danger;">*</mark> | Identifies this as library metadata | Enter `library` |
 | `urn`<mark style="color:$danger;">*</mark> | The library's unique URN. Keep it unchanged when publishing a new version of the same library. | A library URN starting with `urn:`; use lowercase letters, numbers, `:`, `.`, `_`, or `-` only; no spaces |
 | `version`<mark style="color:$danger;">*</mark> | The library version. Increase it whenever you publish an update | Positive whole number > 0 |
-| `locale`<mark style="color:$danger;">*</mark> | The primary language of the library | Two lowercase letters from [ISO 639 Set 1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes#Table) (e.g. `en`, `fr`) |
+| `locale`<mark style="color:$danger;">*</mark> | The primary language of the library | Two lowercase letters from [ISO 639 Set 1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes#Table) (e.g., `en`, `fr`) |
 | `ref_id`<mark style="color:$danger;">*</mark> | The library reference identifier | Letters, numbers, `.`, `_`, or `-` only; no spaces |
 | `name`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | The library name | Text |
 | `description`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | The library description | Text |
@@ -106,6 +106,7 @@ Label order may differ in the converted YAML.
 - [Library objects](README.md)
 - [Excel examples](../examples.md)
 - [Excel file anatomy](../excel-file-anatomy.md)
+- [Translate library content](../translations.md)
 - [Create a library with Excel](../create-library-with-excel.md)
 - [Import a library](../import-library.md)
 - [Update a library](../update-library.md)
