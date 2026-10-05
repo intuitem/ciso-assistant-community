@@ -664,9 +664,10 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
     answers = answers or {}
     pages = []
     questions_by_urn = {}
-    # Reachable range of the visible scorable questions, weighted and not, filled
-    # by build_context and kept out of the CEL context: rules never see it.
-    reach = {"lo": 0, "hi": 0, "weighted_lo": 0, "weighted_hi": 0}
+    # Reachable range of the visible scorable questions, weighted and not, and how
+    # many of them are answered, filled by build_context and kept out of the CEL
+    # context: rules never see it.
+    reach = {"lo": 0, "hi": 0, "weighted_lo": 0, "weighted_hi": 0, "answered": 0}
     for page in quick_form.get("pages") or []:
         entries = []
         for urn, question in (page.get("questions") or {}).items():
@@ -746,7 +747,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
             "missing": 0,
             "weight": 0,
         }
-        reach.update(lo=0, hi=0, weighted_lo=0, weighted_hi=0)
+        reach.update(lo=0, hi=0, weighted_lo=0, weighted_hi=0, answered=0)
         for page in pages:
             node_id = extract_node_id(str(page.get("urn") or "")) or page.get("ref_id")
             stats = {"answered_count": 0, "total_count": 0}
@@ -773,6 +774,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                         reach["weighted_lo"] += lo * weight
                         reach["weighted_hi"] += hi * weight
                         if answered:
+                            reach["answered"] += 1
                             totals["sum"] += score_of(entry)
                             totals["weight"] += weight
                 q_node_id = extract_node_id(entry["urn"])
@@ -869,9 +871,12 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
             reach["lo"],
             reach["hi"],
         )
+    # Same gate as `_quick_form_score`: a complete response with at least one
+    # answered scorable question. score_max can be 0 (all weights 0, or no positive
+    # choice) while the live response still stores a score.
     score = (
         int(max(lo, min(hi, round(raw))))
-        if context["response"]["complete"] and context["response"]["score_max"]
+        if context["response"]["complete"] and reach["answered"]
         else None
     )
 

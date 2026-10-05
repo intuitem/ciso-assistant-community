@@ -1521,6 +1521,14 @@ def test_preview_keeps_an_explicit_zero_weight():
     assert _preview_score(questions, {"ignored": "bad", "counted": "good"}) == 100
 
 
+def test_preview_scores_a_form_whose_weights_are_all_zero():
+    """Weights all at 0 leave score_max at 0, but the live response still stores
+    a score once complete: the preview must not fall back to None."""
+    questions = {"first": {"weight": 0}, "second": {"weight": 0}}
+    assert _preview_score(questions, {"first": "good", "second": "good"}) == 0
+    assert _preview_score(questions, {"first": "good"}) is None
+
+
 def test_preview_counts_an_unanswered_optional_question_as_zero():
     """A skipped optional question scores like its lowest choice, as it does
     unweighted: skipping a heavy question must not beat answering it."""
