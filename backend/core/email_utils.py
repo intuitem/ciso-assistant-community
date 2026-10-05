@@ -13,7 +13,7 @@ from django.utils.html import escape as html_escape
 from django.utils.translation import get_language, override
 from core.utils import yaml_safe_load
 from global_settings.models import GlobalSettings
-from iam.models import User
+from iam.models import User, is_supported_language
 import structlog
 
 logger = structlog.getLogger(__name__)
@@ -141,7 +141,9 @@ def get_email_preferences(email: str) -> tuple[str, str]:
         if general and isinstance(general.value, dict):
             locale = general.value.get("default_language", "en")
             date_format = general.value.get("default_date_format", "auto")
-            if date_format not in User.DATE_FORMATS:
+            if not is_supported_language(locale):
+                locale = "en"
+            if not isinstance(date_format, str) or date_format not in User.DATE_FORMATS:
                 date_format = "auto"
             return locale, date_format
     except Exception as e:
