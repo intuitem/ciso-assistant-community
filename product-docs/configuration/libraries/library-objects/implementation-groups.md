@@ -1,5 +1,5 @@
 ---
-description: Define groups for organizing a framework's elements
+description: Define groups for organizing a framework's requirements
 ---
 
 # Implementation Groups
