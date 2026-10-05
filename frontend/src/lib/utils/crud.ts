@@ -11,6 +11,7 @@ import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupName
 import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
 import TriggerTypesDisplay from '$lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
 import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
+import TierSource from '$lib/components/ModelTable/field/TierSource.svelte';
 import { listViewFields } from './table';
 import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
@@ -1634,16 +1635,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'entity', urlModel: 'entity-assessments' },
+			{ field: 'entity', urlModel: 'representatives' },
+			{ field: 'provider_entity', urlModel: 'solutions' },
+			{ field: 'provider_entity', urlModel: 'contracts' },
 			{ field: 'entity', urlModel: 'entity-scores' },
 			{
 				field: 'entity',
 				urlModel: 'entity-tier-changes',
 				disableCreate: true,
 				disableDelete: true
-			},
-			{ field: 'entity', urlModel: 'representatives' },
-			{ field: 'provider_entity', urlModel: 'solutions' },
-			{ field: 'provider_entity', urlModel: 'contracts' }
+			}
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
@@ -4133,7 +4134,8 @@ const FIELD_COMPONENT_MAP = {
 	},
 	'entity-tier-changes': {
 		tier: TierBadge,
-		previous_tier: TierBadge
+		previous_tier: TierBadge,
+		source: TierSource
 	}
 };
 

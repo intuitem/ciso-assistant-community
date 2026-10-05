@@ -4,7 +4,7 @@
 	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { canPerformActionOnObject, hasPermissionAnywhere } from '$lib/utils/access-control';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { formatDate } from '$lib/utils/datetime';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { getLocale } from '$paraglide/runtime';
 	import { m } from '$paraglide/messages';
@@ -60,6 +60,15 @@
 			return;
 		}
 		await goto(body.redirect);
+	}
+
+	// One sentence per source: who or what set the tier, and when.
+	function tierOrigin(e: Record<string, any>): string {
+		const date = e.tier_set_at ? formatDate(new Date(e.tier_set_at), false, getLocale()) : '';
+		if (!date) return safeTranslate(e.tier_source);
+		if (e.tier_source === 'assessment') return m.tierAssessedOn({ date });
+		if (e.tier_source === 'override') return m.tierAdjustedOn({ date });
+		return m.tierSetManuallyOn({ date });
 	}
 
 	let editing = $state(false);
@@ -186,18 +195,8 @@
 	{:else if entity.tier}
 		<div class="flex flex-wrap items-center gap-3">
 			<TierBadge cell={entity.tier} />
-			{#if entity.tier_value !== null && entity.tier_value !== undefined}
-				<span class="font-mono text-sm" title={m.tierValue()}
-					>{Number.isInteger(entity.tier_value)
-						? entity.tier_value
-						: entity.tier_value.toFixed(2)}</span
-				>
-			{/if}
 			<span class="text-sm text-surface-600-400">
-				{safeTranslate(entity.tier_source)}
-				{#if entity.tier_set_at}
-					· {formatDateOrDateTime(entity.tier_set_at, getLocale())}
-				{/if}
+				{tierOrigin(entity)}
 				{#if entity.tier_response?.id}
 					· <a class="anchor" href={`/quick-form-responses/${entity.tier_response.id}`}
 						>{entity.tier_response.ref_id ?? m.tierAssessment()}</a

@@ -1,3 +1,4 @@
+import { m } from '$paraglide/messages';
 import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 import DateFilter from '$lib/components/Forms/DateFilter.svelte';
 import type { ComponentType } from 'svelte';
@@ -1187,11 +1188,30 @@ export const ENTITY_TIER_FILTER: ListViewFilterConfig = {
 export const TIER_SOURCE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'entity-tier-changes/source',
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
+		// Labelled on purpose: the raw values translate as generic words
+		// ("assessment" reads "Audit" in French). Getters follow the current language.
+		options: [
+			{
+				get label() {
+					return m.tierSourceAssessment();
+				},
+				value: 'assessment'
+			},
+			{
+				get label() {
+					return m.tierSourceOverride();
+				},
+				value: 'override'
+			},
+			{
+				get label() {
+					return m.tierSourceManual();
+				},
+				value: 'manual'
+			}
+		],
+		translateOptions: false,
 		label: 'source',
-		browserCache: 'force-cache',
 		multiple: true
 	}
 };

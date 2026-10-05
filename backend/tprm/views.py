@@ -1636,14 +1636,25 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
         }
 
         for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(
-            "folder", "entity"
+            "folder", "entity", "entity__tier"
         ):
             audit = audits_by_id.get(ea.compliance_assessment_id)
             # Use entity assessment's folder for grouping
             folder = ea.folder
             entry = {
                 "entity_assessment_id": ea.id,
+                "entity_id": str(ea.entity_id),
                 "provider": ea.entity.name,
+                # The vendor's criticality, for context: the assessment itself
+                # measures posture, not criticality.
+                "tier": {
+                    "id": str(ea.entity.tier.id),
+                    "name": ea.entity.tier.name,
+                    "hexcolor": ea.entity.tier.hexcolor,
+                    "rank": ea.entity.tier.rank,
+                }
+                if ea.entity.tier_id
+                else None,
                 "folder_id": str(folder.id) if folder else None,
                 "folder_name": folder.name if folder else None,
                 "solutions": ",".join([sol.name for sol in ea.solutions.all()])
