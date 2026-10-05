@@ -51,8 +51,10 @@ def _build_answer_data(ca, in_scope_node_ids) -> dict[str, dict]:
     for answer in answers:
         q = answer.question
         selected = list(answer.selected_choices.all())
+        # A negative weight has no defined meaning; treat it as 0.
+        weight = max(q.weight, 0)
         score = sum(
-            (c.add_score or 0) * q.weight for c in selected if c.add_score is not None
+            (c.add_score or 0) * weight for c in selected if c.add_score is not None
         )
         entry = {
             "value": answer.value,
@@ -60,7 +62,7 @@ def _build_answer_data(ca, in_scope_node_ids) -> dict[str, dict]:
             "selected_choices": [
                 extract_node_id(c.urn) for c in selected if extract_node_id(c.urn)
             ],
-            "weight": q.weight,
+            "weight": weight,
             "type": q.type,
         }
         q_node_id = extract_node_id(q.urn)
@@ -314,8 +316,10 @@ def evaluate_outcomes(compliance_assessment) -> None:
 def _question_max_score(question) -> int:
     """Best achievable score on a choice question: the top choice for a
     unique choice, every positive choice for a multiple choice."""
+    # A negative weight has no defined meaning; treat it as 0.
+    weight = max(question.weight, 0)
     scores = [
-        (c.add_score or 0) * question.weight
+        (c.add_score or 0) * weight
         for c in question.choices.all()
         if c.add_score is not None
     ]

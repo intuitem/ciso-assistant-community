@@ -16,7 +16,9 @@ unweighted scale instead of saturating, so scores stored before that are
 stale. Other score-only or questionnaire-only audits are left alone, and
 `recompute_assessment` never touches `result` on a requirement without a
 compute_result-bearing choice, so a stored manual result is not silently reset
-to `not_assessed`.
+to `not_assessed`. `score` is another matter: a weighted requirement whose
+questionnaire is not complete gets its score cleared (score=None,
+is_scored=False) unless is_score_overridden pins it, so run with --dry-run first.
 
 Post-processing
 ---------------
