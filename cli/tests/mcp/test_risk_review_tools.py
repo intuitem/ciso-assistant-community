@@ -518,7 +518,13 @@ class TestCreateTeam:
             patch.object(
                 resolvers, "resolve_user_id", return_value=UUID_D
             ) as resolve_leader,
-            patch.object(resolvers, "resolve_user_ids", return_value=[UUID_B, UUID_C]),
+            patch.object(
+                resolvers,
+                "resolve_user_ids",
+                side_effect=lambda refs: (
+                    [UUID_B] if refs == ["Jo"] else [UUID_B, UUID_C]
+                ),
+            ),
         ):
             result = run(
                 write_tools.create_team(
@@ -541,7 +547,7 @@ class TestCreateTeam:
                 "folder": UUID_PE,
                 "team_email": "soc@acme.io",
                 "leader": UUID_D,
-                "deputies": [UUID_B, UUID_C],
+                "deputies": [UUID_B],
                 "members": [UUID_B, UUID_C],
             },
         )

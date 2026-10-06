@@ -276,7 +276,7 @@ async def update_team(
         description: New description
         folder_id: Folder ID/name
         team_email: Team contact email
-        leader: Leader as User UUID, email or name
+        leader: Leader as User UUID, email or name ("" to remove the leader)
         deputies: List of deputies as User UUIDs, emails or names (replaces existing)
         members: List of members as User UUIDs, emails or names (replaces existing)
     """
@@ -294,7 +294,7 @@ async def update_team(
         if team_email is not None:
             payload["team_email"] = team_email
         if leader is not None:
-            payload["leader"] = resolve_user_id(leader)
+            payload["leader"] = resolve_user_id(leader) if leader else None
         if deputies is not None:
             payload["deputies"] = resolve_user_ids(deputies)
         if members is not None:
