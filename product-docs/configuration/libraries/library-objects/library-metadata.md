@@ -45,60 +45,53 @@ The `dependencies` property lists the URNs of other libraries this library relie
 
 ## Example
 
-The table below shows an example of a completed `library_meta` sheet. Each row contains one property and its value.
+The table below shows an example of a `library_meta` sheet for a security operations library.
 
 | Property | Value |
 | --- | --- |
 | `type` | `library` |
-| `urn` | `urn:intuitem:risk:library:my-framework_example.1` |
+| `urn` | `urn:intuitem:risk:library:security-operations.1` |
 | `version` | `1` |
 | `locale` | `en` |
-| `ref_id` | `My-Framework_Example.1` |
-| `name` | Example Framework |
-| `description` | This is a demonstration framework. It outlines example policies, controls, and requirements. Designed for illustration. |
-| `copyright` | © 2025 Example Organization |
+| `ref_id` | `security-operations.1` |
+| `name` | Security Operations Library |
+| `description` | A framework and supporting content for assessing access management and incident response. |
+| `copyright` | © 2026 intuitem |
 | `provider` | intuitem |
 | `packager` | intuitem |
-| `labels` | `example_framework, framework1, my-very-cool-framework, I-LOVE-MY-FRAMEWORK` |
-| `dependencies` | `urn:intuitem:risk:library:doc-pol` |
-| `name[fr]` | Exemple de Framework |
-| `description[fr]` | Il s'agit d'un framework de démonstration. Il présente des exemples de règles, de contrôles et d'exigences. Il est conçu pour illustrer. |
-
-To inspect this example in Excel, download [`example_framework.xlsx`](https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/example_framework.xlsx) and open its `library_meta` sheet.
+| `labels` | `security-operations, access_management, incident.response, 24x7-monitoring` |
+| `name[fr]` | Bibliothèque des opérations de sécurité |
+| `description[fr]` | Un référentiel et des contenus complémentaires pour évaluer la gestion des accès et la réponse aux incidents. |
 
 ## Advanced: YAML representation of this object
 
-This section is mainly for advanced users and debugging. You usually only have to edit the Excel file and import it. CISO Assistant will converts it to YAML automatically during import.
+This section is mainly for advanced users and debugging. The excerpt below shows how the Library metadata from the table above can appear after import.
 
 <details>
 <summary>Show YAML</summary>
 
-The YAML representation of the example above looks like this. The Excel `type` marker is not included. The converter will also add `convert_library_version` and generates a `publication_date` corresponding to the date the library was converted.
-
 ```yaml
-urn: urn:intuitem:risk:library:my-framework_example.1
+urn: urn:intuitem:risk:library:security-operations.1
 locale: en
-ref_id: My-Framework_Example.1
-name: Example Framework
-description: 'This is a demonstration framework. It outlines example policies, controls, and requirements. Designed for illustration.'
-copyright: © 2025 Example Organization
+ref_id: security-operations.1
+name: Security Operations Library
+description: A framework and supporting content for assessing access management and incident response.
+copyright: © 2026 intuitem
 version: 1
 provider: intuitem
 packager: intuitem
 labels:
-  - MY-VERY-COOL-FRAMEWORK
-  - FRAMEWORK1
-  - EXAMPLE_FRAMEWORK
-  - I-LOVE-MY-FRAMEWORK
+  - SECURITY-OPERATIONS
+  - ACCESS_MANAGEMENT
+  - INCIDENT.RESPONSE
+  - 24X7-MONITORING
 translations:
   fr:
-    name: Exemple de Framework
-    description: Il s'agit d'un framework de démonstration. Il présente des exemples de règles, de contrôles et d'exigences. Il est conçu pour illustrer.
-dependencies:
-  - urn:intuitem:risk:library:doc-pol
+    name: Bibliothèque des opérations de sécurité
+    description: Un référentiel et des contenus complémentaires pour évaluer la gestion des accès et la réponse aux incidents.
 ```
 
-Label order may differ in the converted YAML.
+The Excel `type` marker is not included. The converter also adds `convert_library_version` and a `publication_date` when converting the file. Label order may differ in the converted YAML.
 </details>
 
 ## Related pages
