@@ -41,7 +41,7 @@
 		class="space-y-4"
 	>
 		{#each items as item}
-			{#if sideBarVisibleItems && sideBarVisibleItems[item.name] !== false}
+			{#if sideBarVisibleItems && sideBarVisibleItems[item.name] !== false && item.items.some((subItem) => sideBarVisibleItems[subItem.name] !== false)}
 				<Accordion.Item value={item.name} id={item.name.toLowerCase().replace(' ', '-')}>
 					<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
 						<SideBarCategory {item} />

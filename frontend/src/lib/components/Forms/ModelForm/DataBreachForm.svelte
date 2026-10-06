@@ -107,6 +107,7 @@
 					{form}
 					field="affected_subjects_count"
 					type="number"
+					step="1"
 					label={m.affectedSubjectsCount()}
 					cacheLock={cacheLocks['affected_subjects_count']}
 					bind:cachedValue={formDataCache['affected_subjects_count']}
@@ -138,6 +139,7 @@
 					{form}
 					field="affected_personal_data_count"
 					type="number"
+					step="1"
 					label={m.affectedPersonalDataCount()}
 					cacheLock={cacheLocks['affected_personal_data_count']}
 					bind:cachedValue={formDataCache['affected_personal_data_count']}

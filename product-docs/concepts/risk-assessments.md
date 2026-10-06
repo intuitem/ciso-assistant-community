@@ -53,6 +53,8 @@ CISO Assistant tracks three risk levels for each scenario, reflecting where the 
 
 Each level has its own probability, impact, and overall level fields. The assessment's consistency check flags a scenario whose **residual** risk exceeds its **current** risk (on level, probability, or impact), and also flags a residual lowered below current when no applied control justifies the reduction.
 
+To watch scenarios move through these three levels on the matrix, and project when each will reach its residual level from the ETAs of its extra controls, open [Risk trajectory](../features/risk-trajectory.md) from the assessment.
+
 ## Risk acceptance
 
 Risk acceptance is when an organisation or individual decides to tolerate a certain level of risk without taking further action to reduce it. CISO Assistant provides a workflow to capture formal approval of risk acceptances by management — the approver must hold the **Approver** role.
@@ -70,3 +72,5 @@ Most organisations define an official matrix to be used for all risk assessments
 - [Assets](assets.md)
 - [Applied controls](applied-controls.md)
 - [Vocabulary → Threat / Risk assessment](../introduction/vocabulary.md)
+- [Security exceptions](security-exceptions.md)
+- [Risk trajectory](../features/risk-trajectory.md)

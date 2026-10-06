@@ -9,6 +9,11 @@ from ..resolvers import (
     resolve_framework_id,
     resolve_risk_assessment_id,
     resolve_applied_control_id,
+    resolve_asset_id,
+    resolve_actor_ids,
+    resolve_reference_control_id,
+    resolve_qualification_ids,
+    resolve_risk_level_index,
 )
 from ..config import GLOBAL_FOLDER_ID
 from ..utils.response_formatter import (
@@ -245,13 +250,41 @@ async def create_threat(
         return f"Error in create_threat: {str(e)}"
 
 
+APPLIED_CONTROL_STATUSES = [
+    "to_do",
+    "in_progress",
+    "on_hold",
+    "active",
+    "degraded",
+    "deprecated",
+    "--",
+]
+# Values the tool used to advertise, which the backend rejects
+LEGACY_APPLIED_CONTROL_STATUSES = {"planned": "to_do", "inactive": "deprecated"}
+
+
+def _normalize_applied_control_status(status: str) -> str:
+    status = LEGACY_APPLIED_CONTROL_STATUSES.get(status, status)
+    if status not in APPLIED_CONTROL_STATUSES:
+        raise ValueError(
+            f"Invalid status. Must be one of: {', '.join(APPLIED_CONTROL_STATUSES)}"
+        )
+    return status
+
+
 async def create_applied_control(
     name: str,
     description: str = "",
     eta: str = None,
     folder_id: str = None,
     category: str = "technical",
-    status: str = "planned",
+    status: str = None,
+    reference_control: str = None,
+    assets: list = None,
+    owner: list = None,
+    priority: int = None,
+    ref_id: str = None,
+    csf_function: str = None,
 ) -> str:
     """Create applied control (security measure)
 
@@ -260,8 +293,15 @@ async def create_applied_control(
         description: Description
         eta: Completion date YYYY-MM-DD
         folder_id: Folder ID/name
-        category: technical | physical | organizational | procedural
-        status: planned | active | inactive
+        category: policy | process | technical | physical | procedure
+        status: to_do | in_progress | on_hold | active | degraded | deprecated | --
+            (omitted = backend default "--"; legacy planned -> to_do, inactive -> deprecated)
+        reference_control: Reference control UUID, URN, ref_id (e.g. "POL.AI") or name
+        assets: List of asset IDs/names
+        owner: List of owners as actor UUIDs, emails or names (users, teams, entities)
+        priority: 1-4 (1=P1, 4=P4)
+        ref_id: Reference ID
+        csf_function: identify | protect | detect | respond | recover | govern
     """
     try:
         if not folder_id and GLOBAL_FOLDER_ID:
@@ -275,14 +315,33 @@ async def create_applied_control(
             "name": name,
             "description": description,
             "category": category,
-            "status": status,
         }
+
+        if status is not None:
+            payload["status"] = _normalize_applied_control_status(status)
 
         if folder_id:
             payload["folder"] = folder_id
 
         if eta:
             payload["eta"] = eta
+
+        if reference_control is not None:
+            payload["reference_control"] = resolve_reference_control_id(
+                reference_control
+            )
+        if assets is not None:
+            payload["assets"] = [
+                resolve_asset_id(asset, folder_id=folder_id) for asset in assets
+            ]
+        if owner is not None:
+            payload["owner"] = resolve_actor_ids(owner)
+        if priority is not None:
+            payload["priority"] = priority
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+        if csf_function is not None:
+            payload["csf_function"] = csf_function
 
         res = make_post_request("/applied-controls/", payload)
 
@@ -304,6 +363,7 @@ async def create_risk_assessment(
     status: str = "planned",
     folder_id: str = None,
     ebios_rm_study_id: str = None,
+    risk_tolerance: int | str = None,
 ) -> str:
     """Create risk assessment with risk matrix and perimeter
 
@@ -319,6 +379,8 @@ async def create_risk_assessment(
         ebios_rm_study_id: EBIOS RM study ID/name to attach it to (workshop 5).
             Generates one risk scenario per selected operational scenario.
             Refuses if the study already has one; sync that instead.
+        risk_tolerance: Risk level index of the matrix (-1 = unset), or a risk
+            level name/abbreviation (e.g. "High") resolved against the matrix
     """
     try:
         if ebios_rm_study_id:
@@ -388,6 +450,11 @@ async def create_risk_assessment(
         if ebios_rm_study_id:
             payload["ebios_rm_study"] = ebios_rm_study_id
 
+        if risk_tolerance is not None:
+            payload["risk_tolerance"] = resolve_risk_level_index(
+                risk_tolerance, risk_matrix_id
+            )
+
         res = make_post_request("/risk-assessments/", payload)
 
         if res.status_code == 201:
@@ -422,6 +489,15 @@ async def create_risk_scenario(
     threat_library: str = None,
     applied_controls: list = None,
     existing_applied_controls: list = None,
+    qualifications: list = None,
+    owner: list = None,
+    inherent_proba: int = None,
+    inherent_impact: int = None,
+    residual_proba: int = None,
+    residual_impact: int = None,
+    treatment: str = None,
+    ref_id: str = None,
+    justification: str = None,
 ) -> str:
     """Create risk scenario with linked assets/threats/controls
 
@@ -438,6 +514,16 @@ async def create_risk_scenario(
         threat_library: Library URN to filter threats (e.g. "urn:intuitem:risk:library:intuitem-common-catalog")
         applied_controls: List of planned control IDs/names
         existing_applied_controls: List of existing control IDs/names
+        qualifications: List of qualifications: letters C/I/A(D)/T(P)
+            (confidentiality/integrity/availability/proof), names or UUIDs
+        owner: List of owners as actor UUIDs, emails or names
+        inherent_proba: Inherent probability index (from risk matrix)
+        inherent_impact: Inherent impact index (from risk matrix)
+        residual_proba: Residual probability index (from risk matrix)
+        residual_impact: Residual impact index (from risk matrix)
+        treatment: open | mitigate | accept | avoid | transfer | cancelled
+        ref_id: Reference ID
+        justification: Justification text
     """
     try:
         from ..resolvers import resolve_asset_id, resolve_applied_control_id
@@ -472,6 +558,24 @@ async def create_risk_scenario(
 
         if current_impact is not None:
             payload["current_impact"] = current_impact
+
+        for field, value in (
+            ("inherent_proba", inherent_proba),
+            ("inherent_impact", inherent_impact),
+            ("residual_proba", residual_proba),
+            ("residual_impact", residual_impact),
+            ("treatment", treatment),
+            ("ref_id", ref_id),
+            ("justification", justification),
+        ):
+            if value is not None:
+                payload[field] = value
+
+        if qualifications is not None:
+            payload["qualifications"] = resolve_qualification_ids(qualifications)
+
+        if owner is not None:
+            payload["owner"] = resolve_actor_ids(owner)
 
         # Resolve asset names to IDs if provided (pass folder_id to scope lookup)
         if assets:
@@ -1075,8 +1179,8 @@ async def create_task_template(
         schedule: Schedule definition
         enabled: Enabled flag
         link: Link to evidence (e.g. Jira ticket)
-        assigned_to: Array of user UUIDs
-        assets: Array of asset UUIDs
+        assigned_to: List of assignees as actor UUIDs, emails or names
+        assets: List of asset IDs/names
         applied_controls: List of applied control IDs/names
         compliance_assessments: Array of compliance assessment UUIDs
         risk_assessments: Array of risk assessment UUIDs
@@ -1114,9 +1218,11 @@ async def create_task_template(
         if link is not None:
             payload["link"] = link
         if assigned_to is not None:
-            payload["assigned_to"] = assigned_to
+            payload["assigned_to"] = resolve_actor_ids(assigned_to)
         if assets is not None:
-            payload["assets"] = assets
+            payload["assets"] = [
+                resolve_asset_id(asset, folder_id=folder_id) for asset in assets
+            ]
         if applied_controls is not None:
             resolved_controls = []
             for control in applied_controls:

@@ -831,6 +831,155 @@ class TestAssessmentScoping:
 
 
 @pytest.mark.django_db
+class TestRequirementBacking:
+    """Asked for it, a requirement assessment read carries what is claimed to
+    satisfy the requirement — enough to weigh a result against its support
+    without a second read per row. Opt-in, because it is also the heaviest
+    thing the read can carry: see test_read_quality_check."""
+
+    def make_audit(self, domain, rows=1, with_backing=True):
+        from core.models import (
+            AppliedControl,
+            ComplianceAssessment,
+            Evidence,
+            EvidenceRevision,
+            Framework,
+            Perimeter,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        suffix = uuid.uuid4().hex[:8]
+        framework = Framework.objects.create(
+            name="FW", urn=f"urn:test:fw-{suffix}", folder=Folder.get_root_folder()
+        )
+        perimeter = Perimeter.objects.create(name=f"P {suffix}", folder=domain)
+        audit = ComplianceAssessment.objects.create(
+            name="Audit", framework=framework, perimeter=perimeter, folder=domain
+        )
+        for index in range(rows):
+            requirement = RequirementNode.objects.create(
+                name=f"Access control {index}",
+                description="Access to systems is restricted to authorised users.",
+                urn=f"urn:test:fw-{suffix}:req{index}",
+                framework=framework,
+                assessable=True,
+                folder=Folder.get_root_folder(),
+            )
+            assessment = RequirementAssessment.objects.create(
+                compliance_assessment=audit,
+                requirement=requirement,
+                folder=domain,
+                result="compliant",
+                observation="Reviewed with the platform team.",
+            )
+            if not with_backing:
+                continue
+            control = AppliedControl.objects.create(
+                name=f"SSO enforced {index}", ref_id="AC-1", folder=domain
+            )
+            # Attached to the control, not to the requirement: the indirect
+            # side of the question.
+            indirect = Evidence.objects.create(
+                name=f"SSO config {index}", folder=domain
+            )
+            EvidenceRevision.objects.create(
+                evidence=indirect, version=1, link="https://example.test/sso"
+            )
+            control.evidences.add(indirect)
+            # Attached to the requirement itself, and with nothing behind it.
+            direct = Evidence.objects.create(
+                name=f"Access review {index}", folder=domain
+            )
+            assessment.applied_controls.add(control)
+            assessment.evidences.add(direct)
+        return audit
+
+    def read(self, domain, mode="first"):
+        version = read_flow(
+            domain,
+            {
+                "model": "requirement_assessment",
+                "mode": mode,
+                "limit": 50,
+                "include": ["applied_controls", "evidences"],
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        output = read_output(instance)
+        return output["object"] if mode == "first" else output["results"]
+
+    def test_the_row_carries_the_expectation_and_the_note(self):
+        domain = make_domain("Backing expectation")
+        self.make_audit(domain)
+        row = self.read(domain)
+        assert (
+            row["requirement"]["description"]
+            == "Access to systems is restricted to authorised users."
+        )
+        assert row["observation"] == "Reviewed with the platform team."
+
+    def test_evidence_reaches_the_row_directly_and_through_a_control(self):
+        domain = make_domain("Backing evidence")
+        self.make_audit(domain)
+        row = self.read(domain)
+        assert [e["name"] for e in row["evidences"]] == ["Access review 0"]
+        control = row["applied_controls"][0]
+        assert (control["ref_id"], control["name"]) == ("AC-1", "SSO enforced 0")
+        assert [e["name"] for e in control["evidences"]] == ["SSO config 0"]
+
+    def test_an_evidence_with_nothing_behind_it_says_so(self):
+        """An evidence row can exist with no file and no link — the difference
+        between a claim and its support."""
+        domain = make_domain("Backing empty")
+        self.make_audit(domain)
+        row = self.read(domain)
+        assert row["evidences"][0]["attached"] is False
+        assert row["applied_controls"][0]["evidences"][0]["attached"] is True
+
+    def test_a_requirement_with_no_backing_reads_as_empty_not_missing(self):
+        domain = make_domain("Backing none")
+        self.make_audit(domain, with_backing=False)
+        row = self.read(domain)
+        assert row["applied_controls"] == []
+        assert row["evidences"] == []
+
+    def test_the_relations_are_not_filterable(self):
+        """They are computed, so they never become a filter surface — the
+        field list is concrete columns only."""
+        from automation.workflows.actions import READABLE_MODELS
+
+        readable = READABLE_MODELS["requirement_assessment"].readable_fields()
+        assert "applied_controls" not in readable
+        assert "evidences" not in readable
+        assert "observation" in readable
+
+    def test_more_rows_do_not_cost_more_queries(self):
+        """Without the entry's prefetch every row walks its controls, their
+        evidences and each one's revisions on its own.
+
+        Measured as the delta between two sizes, not an absolute count: a run
+        is an engine, an authorization kernel and a log, and none of that is
+        what this is about.
+        """
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        def queries_for(rows):
+            domain = make_domain(f"Backing queries {rows}")
+            self.make_audit(domain, rows=rows)
+            with CaptureQueriesContext(connection) as captured:
+                assert len(self.read(domain, mode="list")) == rows
+            return len(captured)
+
+        small = queries_for(2)
+        large = queries_for(6)
+        # Four more rows, each with a control, two evidences and a revision.
+        assert large - small <= 2, f"{small} queries for 2 rows, {large} for 6"
+
+
+@pytest.mark.django_db
 class TestOperatorTypeGating:
     def _flow(self, op, value):
         domain = make_domain(f"Domain op gate {op}")

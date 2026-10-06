@@ -1,0 +1,380 @@
+<script lang="ts">
+	// Organisation score scale (general settings): one of the presets, or a
+	// custom range with its own labels and translations.
+	import * as m from '$paraglide/messages';
+	import { getLocale, locales } from '$paraglide/runtime';
+	import { defaultLangLabels } from '$lib/utils/locales';
+	import {
+		SCORE_SCALE_PRESETS,
+		MAX_LABELLED_LEVELS,
+		getPreset,
+		hasLabelledLevels,
+		previewLevels,
+		scaleLevels,
+		seedLevels,
+		type ScoreLevel,
+		type ScoreScaleValue
+	} from '$lib/utils/score-scales';
+
+	interface Props {
+		value: ScoreScaleValue;
+		onChange: (value: ScoreScaleValue) => void;
+		helpText?: string;
+	}
+
+	let { value, onChange, helpText }: Props = $props();
+
+	const initial = $state.snapshot(value);
+	const initialLevels = scaleLevels(initial?.scores_definition);
+	const storedLocales = new Set(initialLevels.flatMap((l) => Object.keys(l.translations ?? {})));
+
+	let selection = $state<string>(
+		getPreset(initial?.score_scale_preset) ? initial.score_scale_preset! : 'custom'
+	);
+	let min = $state(initial?.min_score ?? 0);
+	let max = $state(initial?.max_score ?? 5);
+	let levels = $state<ScoreLevel[]>(initialLevels);
+	let languages = $state<string[]>([
+		getLocale(),
+		...[...storedLocales].filter((l) => l !== getLocale())
+	]);
+	let pendingSelection = $state<string | null>(null);
+
+	let preset = $derived(getPreset(selection));
+	let rangeError = $derived(selection === 'custom' && !(max > min));
+	let scores = $derived(
+		selection === 'custom' && hasLabelledLevels(min, max)
+			? Array.from({ length: max - min + 1 }, (_, i) => min + i)
+			: []
+	);
+	let unusedLocales = $derived(
+		(locales as readonly string[]).filter((l) => !languages.includes(l))
+	);
+	let hasLabels = $derived(
+		levels.some((l) => l.name || Object.values(l.translations ?? {}).some((t) => t.name))
+	);
+	let presetPreview = $derived(
+		preset ? previewLevels({ min, max, preset, levels: [] }, getLocale()) : []
+	);
+
+	function commit() {
+		onChange({
+			score_scale_preset: preset?.id ?? null,
+			min_score: min,
+			max_score: max,
+			scores_definition: $state.snapshot(levels)
+		});
+	}
+
+	function select(id: string) {
+		if (id === selection) return;
+		if (id !== 'custom' && hasLabels) {
+			pendingSelection = id;
+			return;
+		}
+		applySelection(id);
+	}
+
+	function confirmPending() {
+		const id = pendingSelection;
+		pendingSelection = null;
+		if (id) applySelection(id);
+	}
+
+	function applySelection(id: string) {
+		if (id === 'custom') {
+			// Start from the preset's labels so there is something to edit.
+			levels = seedLevels($state.snapshot(levels), preset, min, max, languages);
+			selection = 'custom';
+		} else {
+			const next = getPreset(id);
+			if (!next) return;
+			selection = id;
+			min = next.min;
+			max = next.max;
+			levels = [];
+		}
+		commit();
+	}
+
+	function setRange(nextMin: number, nextMax: number) {
+		min = nextMin;
+		max = nextMax;
+		// Past MAX_LABELLED_LEVELS the grid is hidden: don't keep labels nobody sees.
+		if (max > min)
+			levels = hasLabelledLevels(min, max)
+				? levels.filter((l) => l.score >= min && l.score <= max)
+				: [];
+		commit();
+	}
+
+	function cellValue(score: number, loc: string) {
+		const level = levels.find((l) => l.score === score);
+		return level?.translations?.[loc]?.name ?? (loc === languages[0] ? (level?.name ?? '') : '');
+	}
+
+	function setCell(score: number, loc: string, text: string) {
+		const name = text.trim();
+		const level = levels.find((l) => l.score === score) ?? { score, translations: {} };
+		const translations = { ...level.translations };
+		if (name) translations[loc] = { ...translations[loc], name };
+		else delete translations[loc];
+		const fallback =
+			translations[languages[0]]?.name ?? Object.values(translations).find((t) => t.name)?.name;
+		levels = [
+			...levels.filter((l) => l.score !== score),
+			{ ...level, score, name: fallback ?? '', translations }
+		].sort((a, b) => a.score - b.score);
+		commit();
+	}
+
+	function clearLabels() {
+		levels = [];
+		commit();
+	}
+
+	function addLanguage() {
+		const next = unusedLocales[0];
+		if (next) languages = [...languages, next];
+	}
+
+	function changeLanguage(idx: number, loc: string) {
+		const old = languages[idx];
+		languages = languages.map((l, i) => (i === idx ? loc : l));
+		levels = levels.map((level) => {
+			const translations = { ...level.translations };
+			if (translations[old]) {
+				translations[loc] = translations[old];
+				delete translations[old];
+			}
+			return { ...level, translations };
+		});
+		refreshFallbacks();
+	}
+
+	function removeLanguage(idx: number) {
+		const loc = languages[idx];
+		languages = languages.filter((_, i) => i !== idx);
+		levels = levels.map((level) => {
+			const translations = { ...level.translations };
+			delete translations[loc];
+			return { ...level, translations };
+		});
+		refreshFallbacks();
+	}
+
+	function refreshFallbacks() {
+		levels = levels.map((l) => ({
+			...l,
+			name: l.translations?.[languages[0]]?.name ?? l.name ?? ''
+		}));
+		commit();
+	}
+
+	const chipClass = (active: boolean) =>
+		`flex flex-col items-start rounded-md border px-3 py-1.5 text-left transition-colors ${
+			active
+				? 'border-primary-500 bg-primary-50-950 shadow-sm'
+				: 'border-surface-200-800 hover:border-surface-400-600'
+		}`;
+</script>
+
+<div class="space-y-3" data-testid="score-scale-editor">
+	<div>
+		<h3 class="font-semibold text-sm">{m.scoreScale()}</h3>
+		{#if helpText}
+			<p class="text-xs text-surface-600-400">{helpText}</p>
+		{/if}
+	</div>
+
+	<div class="flex flex-wrap gap-2" role="radiogroup" aria-label={m.scoreScale()}>
+		{#each SCORE_SCALE_PRESETS as p (p.id)}
+			<button
+				type="button"
+				role="radio"
+				aria-checked={selection === p.id}
+				class={chipClass(selection === p.id)}
+				data-testid={`score-scale-${p.id}`}
+				onclick={() => select(p.id)}
+			>
+				<span class="text-sm font-medium font-mono">{p.min}–{p.max}</span>
+				<span class="text-xs text-surface-600-400">{p.label()}</span>
+			</button>
+		{/each}
+		<button
+			type="button"
+			role="radio"
+			aria-checked={selection === 'custom'}
+			class={chipClass(selection === 'custom')}
+			data-testid="score-scale-custom"
+			onclick={() => select('custom')}
+		>
+			<span class="text-sm font-medium">{m.custom()}</span>
+			<span class="text-xs text-surface-600-400">{m.scoreScaleCustomHint()}</span>
+		</button>
+	</div>
+
+	{#if pendingSelection}
+		<div
+			class="flex flex-wrap items-center gap-2 rounded-md border border-warning-500 bg-warning-50-950 px-3 py-2 text-xs"
+			role="alert"
+			data-testid="score-scale-discard-warning"
+		>
+			<i class="fa-solid fa-triangle-exclamation"></i>
+			<span class="flex-1">{m.scoreScaleDiscardWording()}</span>
+			<button
+				type="button"
+				class="btn btn-sm preset-filled-warning-500"
+				onclick={confirmPending}
+				data-testid="score-scale-discard-confirm">{m.scoreScaleDiscardConfirm()}</button
+			>
+			<button
+				type="button"
+				class="btn btn-sm preset-tonal-surface"
+				onclick={() => (pendingSelection = null)}>{m.scoreScaleKeepEditing()}</button
+			>
+		</div>
+	{/if}
+
+	{#if preset}
+		<p class="text-xs text-surface-600-400" data-testid="score-scale-preview">
+			{#if presetPreview.length}
+				<span class="font-medium">{m.scoreScaleLevels()}</span>
+				{#each presetPreview as level, idx (level.score)}
+					<span class="font-mono text-surface-500">{level.score}</span>
+					{level.name}{idx < presetPreview.length - 1 ? ' · ' : ''}
+				{/each}
+			{:else}
+				<span class="italic">{m.scoreScaleNoLabels()}</span>
+			{/if}
+		</p>
+	{:else}
+		<div class="flex items-end gap-3">
+			<label class="block">
+				<span class="text-xs text-surface-600-400">{m.minScore()}</span>
+				<input
+					type="number"
+					step="1"
+					class="input w-24 text-sm"
+					value={min}
+					onchange={(e) => setRange(parseInt(e.currentTarget.value) || 0, max)}
+					data-testid="score-scale-custom-min"
+				/>
+			</label>
+			<label class="block">
+				<span class="text-xs text-surface-600-400">{m.maxScore()}</span>
+				<input
+					type="number"
+					step="1"
+					class="input w-24 text-sm"
+					value={max}
+					onchange={(e) => setRange(min, parseInt(e.currentTarget.value) || 0)}
+					data-testid="score-scale-custom-max"
+				/>
+			</label>
+		</div>
+		{#if rangeError}
+			<p class="text-xs text-error-500">{m.scoreScaleRangeError()}</p>
+		{:else if scores.length > 0}
+			<div class="max-w-4xl space-y-1.5">
+				<div class="flex items-center justify-between">
+					<span class="text-xs font-medium text-surface-600-400">{m.scoreScaleLevels()}</span>
+					<div class="flex gap-2">
+						{#if levels.length > 0}
+							<button
+								type="button"
+								class="btn btn-sm preset-tonal-surface"
+								onclick={clearLabels}
+								data-testid="score-scale-clear-labels"
+							>
+								<i class="fa-solid fa-eraser mr-1"></i>{m.scoreScaleClearLabels()}
+							</button>
+						{/if}
+						<button
+							type="button"
+							class="btn btn-sm preset-tonal-primary"
+							onclick={addLanguage}
+							disabled={unusedLocales.length === 0}
+							data-testid="score-scale-add-language"
+						>
+							<i class="fa-solid fa-plus mr-1"></i>{m.addTranslation()}
+						</button>
+					</div>
+				</div>
+				<div class="overflow-x-auto rounded-md border border-surface-200-800">
+					<table class="w-full text-sm">
+						<thead class="bg-surface-50-950">
+							<tr>
+								<th class="w-10 px-2 py-1 text-right font-mono text-xs text-surface-500">#</th>
+								{#each languages as loc, idx (loc)}
+									<th class="min-w-40 px-2 py-1 text-left font-normal">
+										<div class="flex items-center gap-1">
+											<select
+												class="select w-auto py-0.5 text-xs"
+												value={loc}
+												onchange={(e) => changeLanguage(idx, e.currentTarget.value)}
+												aria-label={m.language()}
+											>
+												{#each [loc, ...unusedLocales] as l (l)}
+													<option value={l}
+														>{(defaultLangLabels as Record<string, string>)[l] ?? l}</option
+													>
+												{/each}
+											</select>
+											{#if idx === 0}
+												<i
+													class="fa-solid fa-star text-[10px] text-primary-500"
+													title={m.scoreScaleFallbackHelp()}
+													aria-label={m.scoreScaleFallback()}
+												></i>
+											{/if}
+											{#if languages.length > 1}
+												<button
+													type="button"
+													class="ml-auto text-surface-500 hover:text-error-500"
+													title={m.remove()}
+													aria-label={m.remove()}
+													onclick={() => removeLanguage(idx)}
+												>
+													<i class="fa-solid fa-xmark text-xs"></i>
+												</button>
+											{/if}
+										</div>
+									</th>
+								{/each}
+							</tr>
+						</thead>
+						<tbody>
+							{#each scores as score (score)}
+								<tr class="border-t border-surface-200-800">
+									<td class="px-2 py-1 text-right font-mono text-xs text-surface-600-400"
+										>{score}</td
+									>
+									{#each languages as loc (loc)}
+										<td class="px-1 py-1">
+											<input
+												type="text"
+												class="input w-full py-0.5 text-sm"
+												value={cellValue(score, loc)}
+												placeholder={loc !== languages[0]
+													? cellValue(score, languages[0])
+													: m.builderScaleNamePlaceholder()}
+												onchange={(e) => setCell(score, loc, e.currentTarget.value)}
+												data-testid={`score-scale-level-${score}-${loc}`}
+											/>
+										</td>
+									{/each}
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+				<p class="text-xs text-surface-500">{m.scoreScaleFallbackHelp()}</p>
+			</div>
+		{:else}
+			<p class="text-xs text-surface-500 italic">
+				{m.scoreScaleContinuous({ count: MAX_LABELLED_LEVELS })}
+			</p>
+		{/if}
+	{/if}
+</div>

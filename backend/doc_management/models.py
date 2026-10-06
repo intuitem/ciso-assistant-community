@@ -5,6 +5,8 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from auditlog.registry import auditlog
+
 from core.base_models import AbstractBaseModel
 from core.models import FilteringLabelMixin, I18nObjectMixin
 from core.validators import validate_file_name, validate_file_size
@@ -368,6 +370,29 @@ class DocumentEdit(AbstractBaseModel, FolderMixin):
         return f"Edit by {editor_str} on {self.created_at}"
 
 
+MAX_EDITS_PER_REVISION = 20
+
+
+def record_document_edit(revision, editor, previous_content):
+    """Snapshot a draft's content change, keeping the most recent entries. One
+    place, so the editor's PATCH and a workflow leave the same history."""
+    if (
+        revision.status != DocumentRevision.Status.DRAFT
+        or revision.content == previous_content
+    ):
+        return
+    DocumentEdit.objects.create(
+        revision=revision,
+        editor=editor,
+        summary=revision.change_summary or "",
+        content_snapshot=revision.content,
+    )
+    keep = revision.edits.order_by("-created_at").values_list("pk", flat=True)[
+        :MAX_EDITS_PER_REVISION
+    ]
+    revision.edits.exclude(pk__in=list(keep)).delete()
+
+
 class DocumentTemplate(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     """A reusable content skeleton for seeding a document's markdown.
 
@@ -483,3 +508,29 @@ def recompute_references(container) -> None:
             ],
             ignore_conflicts=True,
         )
+
+
+common_exclude = ["created_at", "updated_at"]
+
+# Registered so document work leaves an audit trail — and, through it, fires the
+# engine's internal-event triggers, which derive their model list from this
+# registry.
+auditlog.register(
+    DocumentContainer,
+    m2m_fields={"policies", "applied_controls", "task_templates", "assets"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(ManagedDocument, exclude_fields=common_exclude)
+auditlog.register(
+    DocumentRevision,
+    # `content` is excluded, so a content-only save writes no log row: DocumentEdit
+    # already snapshots every save of a draft, and mirroring whole markdown diffs
+    # here would make these the largest rows in the log by far. The editing lock
+    # goes too: the editor renews it every few minutes, and each renewal would
+    # otherwise be a log row and a `documentrevision.updated` event evaluated
+    # against every enabled trigger. What remains — the revision appearing, and
+    # its status moving through review to published — is the lifecycle a reader
+    # (or a trigger) is after.
+    exclude_fields=common_exclude
+    + ["content", "file", "pdf_snapshot", "editing_user", "editing_since"],
+)
