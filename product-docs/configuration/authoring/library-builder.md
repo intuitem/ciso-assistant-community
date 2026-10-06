@@ -107,7 +107,7 @@ On a requirement node, click **Add question**:
 
 The order in the editor is the order respondents see. Keep conditional (`depends_on`) chains shallow — a single hop is easy to reason about; chains are expensive to debug.
 
-Questions are numbered under their requirement, as in libraries built from Excel: `…:question:1`, `…:question:2`, and choices `…:question:1:choice:1`. A new question takes the number after the highest one on its requirement, and a saved question keeps its number when you reorder. In CEL expressions, refer to a question as `answers["<requirement>:question:<n>"]`, where `<requirement>` is the requirement's ref_id in lowercase — e.g. `answers["5.3.2:question:1"].value`.
+By default, questions are numbered under their requirement — `1`, `2`, … — as in libraries built from Excel: their URN ends with `…:question:1`, and their choices with `…:question:1:choice:1`. To refer to a question by name in CEL, give it a ref_id such as `headcount` before its first save: its URN then ends with `:question:headcount`, and a rule reads `answers["<requirement>:question:headcount"].value`, where `<requirement>` is the requirement's ref_id in lowercase.
 
 ### Add outcome rules
 

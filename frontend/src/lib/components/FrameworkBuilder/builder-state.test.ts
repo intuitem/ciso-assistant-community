@@ -81,12 +81,20 @@ describe('computeRefId', () => {
 		expect(computeRefId(['foo', 'bar', null], null, 'section')).toBe('4');
 	});
 
-	it('computes question ref_id', () => {
-		expect(computeRefId(['2.1-q1', '2.1-q3'], '2.1', 'question')).toBe('2.1-q4');
+	it('numbers questions without repeating the parent ref_id', () => {
+		expect(computeRefId(['1', '3'], '2.1', 'question')).toBe('4');
+	});
+
+	it('numbers questions after legacy "<parent>-qN" ref_ids', () => {
+		expect(computeRefId(['2.1-q1', '2.1-q3'], '2.1', 'question')).toBe('4');
 	});
 
 	it('computes first question ref_id', () => {
-		expect(computeRefId([], '2.1', 'question')).toBe('2.1-q1');
+		expect(computeRefId([], '2.1', 'question')).toBe('1');
+	});
+
+	it('skips named questions when numbering', () => {
+		expect(computeRefId(['headcount', '2'], '2.1', 'question')).toBe('3');
 	});
 
 	it('computes choice ref_id', () => {

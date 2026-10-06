@@ -58,11 +58,11 @@ loader keeps recognizing it for existing libraries; the builder mints only
 Object URNs are pinned to `ref_id`, **never derived from the display name** —
 this is what eliminates rename/slug drift.
 
-Question and choice URNs extend their owner's and are numbered as in the Excel
-converter: `{node_urn}:question:{n}`, then `{question_urn}:choice:{n}`. A new
-question takes the highest number already used under its node + 1, so a removed
-question's number only comes back if it was the last; the question's `ref_id`
-in the editor does not shape its URN. URNs already in the document are kept
+A question URN is `{node_urn}:question:{ref_id}` and a choice URN
+`{question_urn}:choice:{n}`. The editor's default question ref_id is the next
+number under its node (`1`, `2`…, as in the Excel converter), so the node's
+ref_id is no longer repeated in it; a ref_id typed by the author is kept, so CEL
+rules can refer to the question by name. URNs already in the document are kept
 verbatim.
 
 `packager`/`ref_id` are **freely chosen** — no scoping or namespace restriction.
