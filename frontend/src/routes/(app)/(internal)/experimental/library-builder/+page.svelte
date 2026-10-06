@@ -35,11 +35,14 @@
 	let checkTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	const IDENTITY_RE = /^[a-z0-9_-]+$/;
+	// Packagers are also capped at 32 characters (LibraryDraft.PACKAGER_MAX_LENGTH):
+	// maxlength doesn't catch a prefilled (remembered or default) value.
+	const PACKAGER_RE = /^[a-z0-9_-]{1,32}$/;
 
 	function scheduleIdentityCheck() {
 		identityCheck = null;
 		if (checkTimeout) clearTimeout(checkTimeout);
-		if (!IDENTITY_RE.test(newPackager) || !IDENTITY_RE.test(newRefId)) return;
+		if (!PACKAGER_RE.test(newPackager) || !IDENTITY_RE.test(newRefId)) return;
 		checkTimeout = setTimeout(async () => {
 			const params = new URLSearchParams({ packager: newPackager, ref_id: newRefId });
 			const res = await fetch(`/experimental/library-builder?${params}`);
@@ -237,7 +240,7 @@
 		const kind = quickKind;
 		const slugBase = identitySlug(quickName);
 		const packager = quickPackager.trim();
-		if (!kind || !slugBase || !IDENTITY_RE.test(packager)) return;
+		if (!kind || !slugBase || !PACKAGER_RE.test(packager)) return;
 		quickCreating = true;
 		try {
 			rememberPackager(packager);
@@ -459,7 +462,7 @@
 						onclick={createQuick}
 						disabled={quickCreating ||
 							!identitySlug(quickName) ||
-							!IDENTITY_RE.test(quickPackager.trim())}
+							!PACKAGER_RE.test(quickPackager.trim())}
 					>
 						{#if quickCreating}
 							<i class="fa-solid fa-spinner fa-spin mr-1"></i>
@@ -470,10 +473,10 @@
 					</button>
 				</div>
 				<div class="md:col-span-4 text-xs space-y-1">
-					{#if quickPackager && !IDENTITY_RE.test(quickPackager.trim())}
+					{#if quickPackager && !PACKAGER_RE.test(quickPackager.trim())}
 						<p class="text-red-600">{m.lbListPackagerPattern()}</p>
 					{/if}
-					{#if identitySlug(quickName) && IDENTITY_RE.test(quickPackager.trim())}
+					{#if identitySlug(quickName) && PACKAGER_RE.test(quickPackager.trim())}
 						<p class="text-surface-500 font-mono">
 							urn:{quickPackager.trim()}:risk:{quickKind}:{identitySlug(quickName)}
 						</p>
@@ -522,7 +525,7 @@
 						type="button"
 						class="btn btn-sm preset-filled-primary-500"
 						onclick={createDraft}
-						disabled={creating || !IDENTITY_RE.test(newPackager) || !IDENTITY_RE.test(newRefId)}
+						disabled={creating || !PACKAGER_RE.test(newPackager) || !IDENTITY_RE.test(newRefId)}
 					>
 						{#if creating}
 							<i class="fa-solid fa-spinner fa-spin mr-1"></i>
@@ -531,7 +534,7 @@
 					</button>
 				</div>
 				<div class="md:col-span-4 text-xs space-y-1">
-					{#if newPackager && !IDENTITY_RE.test(newPackager)}
+					{#if newPackager && !PACKAGER_RE.test(newPackager)}
 						<p class="text-red-600">{m.lbListPackagerPattern()}</p>
 					{/if}
 					{#if newRefId && !IDENTITY_RE.test(newRefId)}

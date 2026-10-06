@@ -723,7 +723,6 @@ export const GeneralSettingsSchema = z.object({
 	default_packager: z
 		.string()
 		.regex(/^[a-z0-9_-]+$/)
-		.max(32)
 		.default('custom')
 		.optional(),
 	llm_provider: z.string().default('ollama').optional(),

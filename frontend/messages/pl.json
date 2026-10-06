@@ -6307,7 +6307,7 @@
 	"lbListFrameworkNamePlaceholder": "Mój standard SOC 2",
 	"lbListMatrixNamePlaceholder": "Moja macierz 4x4",
 	"lbListCreateAndEdit": "Utwórz i edytuj",
-	"lbListPackagerPattern": "Wydawca pakietu musi pasować do wzorca [a-z0-9_-]+",
+	"lbListPackagerPattern": "Wydawca pakietu musi pasować do wzorca [a-z0-9_-]{1,32}",
 	"lbListQuickHelpFramework": "Nazwa i wydawca pakietu określają wszystkie URN standardu. Wydawca jest zapamiętywany na przyszłość; biblioteka nadrzędna pozostaje w tle i do pierwszej publikacji można ją edytować w pełnym widoku wersji roboczej.",
 	"lbListQuickHelpMatrix": "Nazwa i wydawca pakietu określają wszystkie URN macierzy. Wydawca jest zapamiętywany na przyszłość; biblioteka nadrzędna pozostaje w tle i do pierwszej publikacji można ją edytować w pełnym widoku wersji roboczej.",
 	"lbListReferenceId": "Identyfikator referencyjny",

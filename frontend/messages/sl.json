@@ -5332,7 +5332,7 @@
 	"lbListFrameworkNamePlaceholder": "Moj SOC 2 okvir",
 	"lbListMatrixNamePlaceholder": "Moja 4x4 matrika",
 	"lbListCreateAndEdit": "Ustvari in uredi",
-	"lbListPackagerPattern": "Pakirnik se mora ujemati z vzorcem [a-z0-9_-]+",
+	"lbListPackagerPattern": "Pakirnik se mora ujemati z vzorcem [a-z0-9_-]{1,32}",
 	"lbListQuickHelpFramework": "Ime in pakirnik določata vsak URN okvira. Pakirnik si sistem zapomni za naslednjič; krovna knjižnica ostane neopazna in jo je mogoče urejati v polnem pregledu osnutka do prve objave.",
 	"lbListQuickHelpMatrix": "Ime in pakirnik določata vsak URN matrike. Pakirnik si sistem zapomni za naslednjič; krovna knjižnica ostane neopazna in jo je mogoče urejati v polnem pregledu osnutka do prve objave.",
 	"lbListReferenceId": "ID reference",

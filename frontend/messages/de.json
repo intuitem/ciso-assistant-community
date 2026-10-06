@@ -5901,7 +5901,7 @@
 	"lbListFrameworkNamePlaceholder": "Mein SOC 2-Framework",
 	"lbListMatrixNamePlaceholder": "Meine 4x4-Matrix",
 	"lbListCreateAndEdit": "Erstellen und bearbeiten",
-	"lbListPackagerPattern": "Packager muss mit [a-z0-9_-]+ übereinstimmen",
+	"lbListPackagerPattern": "Packager muss mit [a-z0-9_-]{1,32} übereinstimmen",
 	"lbListQuickHelpFramework": "Name und Packager bestimmen alle URNs des Referenzwerks. Der Packager wird für die nächste Verwendung gespeichert. Die zugehörige Bibliothek bleibt bis zur ersten Veröffentlichung in der Vollansicht des Entwurfs bearbeitbar.",
 	"lbListQuickHelpMatrix": "Name und Packager bestimmen alle URNs der Matrix. Der Packager wird für die nächste Verwendung gespeichert. Die zugehörige Bibliothek bleibt bis zur ersten Veröffentlichung in der Vollansicht des Entwurfs bearbeitbar.",
 	"lbListReferenceId": "Referenz-ID",

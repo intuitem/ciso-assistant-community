@@ -253,9 +253,11 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 # Identity alphabet and length of library packagers
                 # (core.LibraryDraft.IDENTITY_REGEX / PACKAGER_MAX_LENGTH).
                 # fullmatch, not match: `$` would still accept a trailing newline.
-                if not isinstance(value, str) or not re.fullmatch(
-                    r"[a-z0-9_-]{1,32}", value
-                ):
+                # The length cap applies to a new value only: the settings form
+                # resubmits one predating it unchanged.
+                unchanged = value == (instance.value or {}).get("default_packager")
+                pattern = r"[a-z0-9_-]+" if unchanged else r"[a-z0-9_-]{1,32}"
+                if not isinstance(value, str) or not re.fullmatch(pattern, value):
                     raise serializers.ValidationError(
                         {"default_packager": "Must match [a-z0-9_-]{1,32}."}
                     )
