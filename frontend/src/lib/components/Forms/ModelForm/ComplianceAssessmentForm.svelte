@@ -93,7 +93,9 @@
 	$effect(() => {
 		const groups = $formData.selected_implementation_groups;
 		void selectedScale;
-		if (object?.id || initialData.baseline || defaultScoring?.target_score == null) return;
+		// A copy on the same framework keeps the baseline's settings (baselineScale is
+		// only set then); a copy from another framework follows the framework's defaults.
+		if (object?.id || baselineScale || defaultScoring?.target_score == null) return;
 		untrack(() => {
 			const next = defaultTarget(groups);
 			if ($formData.target_score !== proposedTarget || next === proposedTarget) return;

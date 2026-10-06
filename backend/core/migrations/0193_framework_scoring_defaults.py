@@ -1,6 +1,31 @@
 from django.db import migrations, models
 
 
+def count_switched_off_scores(apps, schema_editor):
+    """The per-requirement scoring switch is gone: requirements it switched off
+    count again where their audit scores, as when scoring is turned on.
+    Questionnaire requirements keep is_scored (it means "questionnaire complete")."""
+    ComplianceAssessment = apps.get_model("core", "ComplianceAssessment")
+    RequirementAssessment = apps.get_model("core", "RequirementAssessment")
+    # scoring_enabled: score visible to auditors (a missing key is hidden by
+    # default). A malformed map only skips its audit, never the deployment.
+    scoring = [
+        ca.pk
+        for ca in ComplianceAssessment.objects.only("pk", "field_visibility")
+        if isinstance(ca.field_visibility, dict)
+        and isinstance(pair := ca.field_visibility.get("score"), dict)
+        and pair.get("auditor", "edit") != "hidden"
+    ]
+    for start in range(0, len(scoring), 500):
+        RequirementAssessment.objects.filter(
+            compliance_assessment_id__in=scoring[start : start + 500],
+            is_scored=False,
+            score__isnull=False,
+            requirement__assessable=True,
+            requirement__questions__isnull=True,
+        ).exclude(result="not_applicable").update(is_scored=True)
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0192_backfill_evidencerevision_attachment_hash"),
@@ -45,4 +70,6 @@ class Migration(migrations.Migration):
                 verbose_name="Target score",
             ),
         ),
+        # Last: no schema change follows the data update (PostgreSQL).
+        migrations.RunPython(count_switched_off_scores, migrations.RunPython.noop),
     ]
