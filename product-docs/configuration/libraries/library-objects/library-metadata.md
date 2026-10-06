@@ -15,7 +15,7 @@ An asterisk (<mark style="color:$danger;">*</mark>) marks a required property. (
 | Property | Meaning | Format / allowed values |
 | --- | --- | --- |
 | `type`<mark style="color:$danger;">*</mark> | Identifies this as library metadata | Enter `library` |
-| `urn`<mark style="color:$danger;">*</mark> | The library's unique URN. Keep it unchanged when publishing a new version of the same library. | A library URN starting with `urn:`; use lowercase letters, numbers, `:`, `.`, `_`, or `-` only; no spaces |
+| `urn`<mark style="color:$danger;">*</mark> | The library's unique URN. Keep it unchanged when publishing a new version of the same library. | `urn:<packager>:risk:library:<identifier>`; use lowercase letters, numbers, `:`, `.`, `_`, or `-` only; no spaces |
 | `version`<mark style="color:$danger;">*</mark> | The library version. Increase it whenever you publish an update | Positive whole number > 0 |
 | `locale`<mark style="color:$danger;">*</mark> | The primary language of the library | Two lowercase letters from [ISO 639 Set 1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes#Table) (e.g., `en`, `fr`) |
 | `ref_id`<mark style="color:$danger;">*</mark> | The library reference identifier | Letters, numbers, `.`, `_`, or `-` only; no spaces |
