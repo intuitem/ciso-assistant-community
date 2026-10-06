@@ -4,12 +4,11 @@
 
 	// Renders an implementation score and a documentation score (rings, inputs,
 	// badges...) in the order set in the general settings: implementation first
-	// unless "documentation_score_first" is on, as in the CCB CyFun tools. Each
-	// snippet is told whether it comes first (e.g. to carry the scoring switch).
+	// unless "documentation_score_first" is on, as in the CCB CyFun tools.
 	// No wrapper element, so the parent layout is unchanged.
 	interface Props {
-		implementation?: Snippet<[boolean]>;
-		documentation?: Snippet<[boolean]>;
+		implementation?: Snippet;
+		documentation?: Snippet;
 	}
 
 	let { implementation, documentation }: Props = $props();
@@ -18,9 +17,9 @@
 </script>
 
 {#if documentationFirst}
-	{@render documentation?.(true)}
-	{@render implementation?.(false)}
+	{@render documentation?.()}
+	{@render implementation?.()}
 {:else}
-	{@render implementation?.(true)}
-	{@render documentation?.(false)}
+	{@render implementation?.()}
+	{@render documentation?.()}
 {/if}

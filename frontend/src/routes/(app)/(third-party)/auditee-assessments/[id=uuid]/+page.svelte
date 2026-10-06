@@ -3,7 +3,6 @@
 
 	import { applyAction, deserialize } from '$app/forms';
 	import { getToastStore } from '$lib/components/Toast/stores';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
@@ -647,9 +646,15 @@
 	}
 
 	// --- Score forms ---
+	// Entering a score is what makes a requirement scored (as in table mode).
+	function markScored(requirementAssessment: Record<string, any>) {
+		if (!requirementAssessment.is_scored) {
+			requirementAssessment.is_scored = true;
+			update(requirementAssessment, 'is_scored');
+		}
+	}
 	let scoreForms = $state({});
 	let docScoreForms = $state({});
-	let isScoredForms = $state({});
 
 	run(() => {
 		requirementAssessments.forEach((requirementAssessment, index) => {
@@ -662,11 +667,6 @@
 			if (!docScoreForms[id]) {
 				docScoreForms[id] = superForm(requirementAssessment.scoreForm, {
 					id: `requirement-documentation-score-${id}-${index}`
-				});
-			}
-			if (!isScoredForms[id]) {
-				isScoredForms[id] = superForm(requirementAssessment.scoreForm, {
-					id: `requirement-is-scored-${id}-${index}`
 				});
 			}
 		});
@@ -1425,26 +1425,8 @@
 										{@const raScoresDef =
 											requirementAssessment.effective_scores_definition ??
 											complianceAssessment.scores_definition}
-										{#snippet scoringToggle()}
-											<div>
-												<Checkbox
-													form={isScoredForms[requirementAssessment.id]}
-													field="is_scored"
-													disabled={!canEditScore}
-													label={''}
-													helpText={m.scoringHelpText()}
-													checkboxComponent="switch"
-													classes="h-full flex flex-row items-center justify-center my-1"
-													classesContainer="h-full flex flex-row items-center space-x-4"
-													onChange={async (newValue) => {
-														requirementAssessment.is_scored = newValue;
-														await update(requirementAssessment, 'is_scored');
-													}}
-												/>
-											</div>
-										{/snippet}
 										<ScorePair>
-											{#snippet implementation(first: boolean)}
+											{#snippet implementation()}
 												<Score
 													form={scoreForms[requirementAssessment.id]}
 													min_score={raMin}
@@ -1457,13 +1439,13 @@
 													styles="w-full p-1"
 													onChange={(newScore) => {
 														requirementAssessment.score = newScore;
+														markScored(requirementAssessment);
 														updateScore(requirementAssessment);
 													}}
-													disabled={!canEditScore || !requirementAssessment.is_scored}
-													left={first || !showDocumentationScore ? scoringToggle : undefined}
+													disabled={!canEditScore}
 												/>
 											{/snippet}
-											{#snippet documentation(first: boolean)}
+											{#snippet documentation()}
 												{#if showDocumentationScore}
 													<Score
 														form={docScoreForms[requirementAssessment.id]}
@@ -1476,11 +1458,10 @@
 														styles="w-full p-1"
 														onChange={(newScore) => {
 															requirementAssessment.documentation_score = newScore;
+															markScored(requirementAssessment);
 															updateScore(requirementAssessment);
 														}}
-														disabled={!canEditDocumentationScore ||
-															!requirementAssessment.is_scored}
-														left={first ? scoringToggle : undefined}
+														disabled={!canEditDocumentationScore}
 													/>
 												{/if}
 											{/snippet}

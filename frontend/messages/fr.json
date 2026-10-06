@@ -1156,7 +1156,6 @@
 	"emailChangeRequiresUserGroupManagementRights": "Modifier l'adresse e-mail d'un utilisateur membre de groupes nécessite les droits de gestion de tous ses groupes.",
 	"isScimManaged": "Géré par SCIM",
 	"isJitProvisioned": "Provisionné à la première connexion",
-	"scoringHelpText": "Cocher pour activer le score",
 	"overrideScore": "Déroger au score",
 	"overrideScoreHelpText": "Fixer manuellement le score et cesser de le recalculer à partir des réponses",
 	"automaticScore": "Score automatique",

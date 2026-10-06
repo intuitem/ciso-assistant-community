@@ -428,6 +428,10 @@
 	let refreshKey = $state(false);
 
 	let formStore = $derived(requirementAssessmentForm.form);
+	// Entering a score is what makes a requirement scored (as in table mode).
+	function markScored() {
+		requirementAssessmentForm.form.update((d) => ({ ...d, is_scored: true }));
+	}
 
 	$effect(() => {
 		if (form?.newControls) {
@@ -1076,21 +1080,8 @@
 							{@const docScoreShown =
 								showDocumentationScore &&
 								page.data.compliance_assessment_score.show_documentation_score}
-							{#snippet scoringToggle()}
-								<div>
-									<Checkbox
-										{form}
-										field="is_scored"
-										label={''}
-										helpText={m.scoringHelpText()}
-										checkboxComponent="switch"
-										classes="h-full flex flex-row items-center justify-center my-1"
-										classesContainer="h-full flex flex-row items-center space-x-4"
-									/>
-								</div>
-							{/snippet}
 							<ScorePair>
-								{#snippet implementation(first: boolean)}
+								{#snippet implementation()}
 									{#if showScore}
 										<div class="flex flex-col" data-testid="score-field">
 											<Score
@@ -1102,13 +1093,12 @@
 												label={page.data.compliance_assessment_score.show_documentation_score
 													? m.implementationScore()
 													: m.score()}
-												disabled={!data.is_scored}
-												left={first || !docScoreShown ? scoringToggle : undefined}
+												onChange={markScored}
 											/>
 										</div>
 									{/if}
 								{/snippet}
-								{#snippet documentation(first: boolean)}
+								{#snippet documentation()}
 									{#if docScoreShown}
 										<Score
 											{form}
@@ -1118,8 +1108,7 @@
 											field="documentation_score"
 											label={m.documentationScore()}
 											isDoc={true}
-											disabled={!data.is_scored}
-											left={first ? scoringToggle : undefined}
+											onChange={markScored}
 										/>
 									{/if}
 								{/snippet}
