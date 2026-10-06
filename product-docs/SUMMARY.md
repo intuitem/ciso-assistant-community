@@ -124,6 +124,7 @@
     * [Risk matrices](configuration/libraries/library-objects/risk-matrices.md)
     * [Mappings](configuration/libraries/library-objects/mappings.md)
   * [Create a library with Excel](configuration/libraries/create-library-with-excel.md)
+  * [Create a Mapping](configuration/libraries/create-mapping.md)
   * [Translate library content](configuration/libraries/translations.md)
   * [Import a library](configuration/libraries/import-library.md)
   * [Test a library](configuration/libraries/test-library.md)
