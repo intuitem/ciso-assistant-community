@@ -7,7 +7,7 @@ description: Understand libraries and choose the right path to create, import, t
 Libraries package reusable governance content for CISO Assistant. A library can contain a framework, a threat catalogue, reference controls, a risk matrix, mappings, and many other object types.
 
 {% hint style="info" %}
-**New to libraries?** Start with [Excel file anatomy](excel-file-anatomy.md) to understand the workbook structure, then follow [Create a library with Excel](create-library-with-excel.md) to build your first one.
+**New to libraries?** Start with [Excel file anatomy](excel-file-anatomy.md) to understand the workbook structure, then follow [Create a library with Excel](create-library-with-excel.md) to build your first one. You can also create a library directly in CISO Assistant with the [Library builder](../authoring/library-builder.md).
 {% endhint %}
 
 ## What is a library?
