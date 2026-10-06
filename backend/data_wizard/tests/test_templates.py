@@ -486,7 +486,17 @@ class TestAssessmentTemplates:
         template_perimeter,
         ebios_4x4_matrix,
         all_accessible,
+        root_folder,
     ):
+        # The template references the INTUITEM Common Catalog threats.
+        threats = {
+            ref_id: Threat.objects.create(ref_id=ref_id, name=name, folder=root_folder)
+            for ref_id, name in [
+                ("ICT-001", "Ransomware"),
+                ("ICT-002", "Phishing"),
+                ("ICT-003", "Malware"),
+            ]
+        }
         resp = _post_template(
             api_client,
             "risk_assessment_template.xlsx",
@@ -510,6 +520,12 @@ class TestAssessmentTemplates:
         ) == ["erp"]
         assert not scenarios.get(ref_id="R03").assets.exists()
         assert results["details"]["assets_created"] == 3
+        assert set(scenarios.get(ref_id="R01").threats.all()) == {
+            threats["ICT-001"],
+            threats["ICT-002"],
+        }
+        assert list(scenarios.get(ref_id="R04").threats.all()) == [threats["ICT-003"]]
+        assert not scenarios.get(ref_id="R02").threats.exists()
 
     def test_business_impact_analysis_template(
         self,
