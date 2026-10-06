@@ -1,5 +1,8 @@
 """The findings report, rendered by Typst."""
 
+import io
+
+import openpyxl
 import pymupdf
 import pytest
 from django.urls import reverse
@@ -38,6 +41,8 @@ def _findings(assessment_obj, severities, rich=False):
                 severity=severity,
                 status="identified",
                 observation="Confirmed with the owner." if rich else "",
+                recommendation="Rotate the key." if rich else "",
+                priority=1 if rich else None,
             )
         )
     if rich:
@@ -223,3 +228,48 @@ def test_assessment_category_and_status_are_localised(
 
     text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
     assert category in text and status in text
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("lang", ["en", "fr"])
+def test_recommendation_and_priority_reach_the_report(assessment, lang):
+    """Issue #4944: the report dropped the recommendation and the priority."""
+    _findings(assessment, [3], rich=True)
+    pdf, payload = _render(assessment, lang)
+
+    finding = payload["groups"][0]["findings"][0]
+    assert finding["recommendation"] == "Rotate the key."
+    assert finding["priority"] == "P1"
+
+    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    assert "Rotate the key." in text
+    assert "P1" in text
+
+
+@pytest.mark.django_db
+def test_markdown_export_carries_recommendation_and_priority(
+    admin_client,  # noqa: F811
+    assessment,
+):
+    _findings(assessment, [3], rich=True)
+    url = reverse("findings-assessments-md", kwargs={"pk": str(assessment.pk)})
+    response = admin_client.get(url)
+    assert response.status_code == http.HTTP_200_OK
+
+    content = response.content.decode()
+    assert "- **Priority**: P1" in content
+    assert "- **Recommendation**: Rotate the key." in content
+
+
+@pytest.mark.django_db
+def test_xlsx_export_carries_recommendation(admin_client, assessment):  # noqa: F811
+    _findings(assessment, [3], rich=True)
+    url = reverse("findings-assessments-xlsx", kwargs={"pk": str(assessment.pk)})
+    response = admin_client.get(url)
+    assert response.status_code == http.HTTP_200_OK
+
+    sheet = openpyxl.load_workbook(io.BytesIO(response.content))["Findings"]
+    rows = list(sheet.iter_rows(values_only=True))
+    header, first = rows[0], rows[1]
+    assert "recommendation" in header
+    assert first[header.index("recommendation")] == "Rotate the key."
