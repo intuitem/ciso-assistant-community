@@ -23,8 +23,10 @@ Rules:
 """
 
 import copy
+import re
 
 from core.quick_form_scoring import PAGE_AGGREGATIONS
+from core.utils import extract_node_id
 from library.builder import BuilderError, rebase_tree, urn_safe_leaf
 
 # Node keys owned by the editor: everything else on an existing node is
@@ -77,6 +79,50 @@ QUESTION_KEYS = {
     "translations",
     "choices",
 }
+
+
+# Where a rule names a node (a quick-form page, a framework requirement), a
+# question or a choice by node id. Only these positions are rewritten: a bare
+# string elsewhere (`value == "2"`) is data.
+_SUBSCRIPT = re.compile(r"""\b(pages|requirements|answers)\[\s*(["'])(.*?)\2\s*\]""")
+_CHOICE_IN = re.compile(r"""(["'])([^"'\\]*)\1(\s+in\s+answers\s*\[)""")
+
+
+def node_id_maps(urn_map: dict) -> tuple[dict, dict, dict]:
+    """(nodes, questions, choices) node-id renames implied by a save's URN map:
+    a rule written before the first save names the editor's ids."""
+    pages, questions, choices = {}, {}, {}
+    for old, new in urn_map.items():
+        if ":" not in old:  # editor-local ids, not URNs
+            continue
+        old_id, new_id = extract_node_id(old), extract_node_id(new)
+        if not old_id or not new_id or old_id == new_id:
+            continue
+        if ":choice:" in new:
+            choices[old_id] = new_id
+        elif ":question:" in new:
+            questions[old_id] = new_id
+        else:
+            pages[old_id] = new_id
+    return pages, questions, choices
+
+
+def rebase_expression(expression, maps):
+    """The expression with renamed node/question/choice ids, in reference
+    positions only. Mirrored by `rebaseExpression` in the builder."""
+    if not expression:
+        return expression
+    pages, questions, choices = maps
+
+    def subscript(match):
+        new = (questions if match[1] == "answers" else pages).get(match[3])
+        return match[0] if new is None else f"{match[1]}[{match[2]}{new}{match[2]}]"
+
+    def choice(match):
+        new = choices.get(match[2])
+        return match[0] if new is None else f"{match[1]}{new}{match[1]}{match[3]}"
+
+    return _CHOICE_IN.sub(choice, _SUBSCRIPT.sub(subscript, expression))
 
 
 def node_base_urn(framework_urn: str) -> str:
@@ -552,5 +598,16 @@ def editor_doc_to_framework_object(
     if not framework.get("ref_id"):
         # migrated pre-LibraryDraft drafts may lack it; a save heals them
         framework["ref_id"] = framework_urn.rsplit(":", 1)[-1]
+    # Rules and conditions written before the first save name the editor's ids.
+    maps = node_id_maps({**choice_id_to_urn, **urn_map})
+    if any(maps):
+        for rule in framework.get("outcomes_definition") or []:
+            if isinstance(rule, dict) and rule.get("expression"):
+                rule["expression"] = rebase_expression(rule["expression"], maps)
+        for node in requirement_nodes:
+            if node.get("visibility_expression"):
+                node["visibility_expression"] = rebase_expression(
+                    node["visibility_expression"], maps
+                )
     framework["requirement_nodes"] = requirement_nodes
     return framework

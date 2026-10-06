@@ -1172,6 +1172,19 @@ describe('rebaseExpression', () => {
 		expect(rebaseExpression('pages["other"].score', urnMap)).toBe('pages["other"].score');
 		expect(rebaseExpression('pages["1"].score', {})).toBe('pages["1"].score');
 	});
+
+	it('follows renamed framework requirements', () => {
+		const frameworkMap = {
+			'urn:x:risk:req_node:fw:b-draft': 'urn:x:risk:req_node:fw:b',
+			'urn:x:risk:req_node:fw:b-draft:question:q7': 'urn:x:risk:req_node:fw:b:question:1'
+		};
+		expect(
+			rebaseExpression(
+				'requirements["b-draft"].score > 1 && answers["b-draft:question:q7"].answered',
+				frameworkMap
+			)
+		).toBe('requirements["b"].score > 1 && answers["b:question:1"].answered');
+	});
 });
 
 describe('describeSaveError', () => {

@@ -651,6 +651,127 @@ def _quick_form_probe(quick_form: dict) -> dict:
     }
 
 
+def _explain(expression, error, raw_probe, scopes, container) -> str:
+    """The evaluator's text, or for the usual mistake (an id that does not
+    exist) the key and the ids that do."""
+    text = str(error).split("\n")[0]
+    member = re.search(r"no such member in mapping: '([^']*)'", text)
+    if member and f"values.{member[1]}" in expression:
+        return (
+            f"No number rule '{member[1]}' above this one: a rule reads only "
+            "the number rules listed before it"
+        )
+    key = re.search(r"no such key.*StringType\('([^']*)'\)", text)
+    if key is None:
+        return text[:300]
+    singular = {"pages": "page", "answers": "answer", "requirements": "requirement"}
+    for scope in scopes:
+        if f'{scope}["{key[1]}"]' in expression or f"{scope}['{key[1]}']" in expression:
+            known = ", ".join(sorted(raw_probe.get(scope) or {})) or "none"
+            return (
+                f"No {singular[scope]} '{key[1]}' in this {container}. Known: {known}"
+            )[:300]
+    return f"Unknown key '{key[1]}'"
+
+
+def _framework_probe(framework: dict) -> dict:
+    """A context with the real shape of a framework's audits but empty values:
+    every assessable requirement and every question, so an id that exists is
+    never flagged and one that does not always is."""
+    from core.utils import extract_node_id
+
+    requirements, answers = {}, {}
+    for node in framework.get("requirement_nodes") or []:
+        node_id = extract_node_id(str(node.get("urn") or ""))
+        if node_id and node.get("assessable"):
+            requirements[node_id] = {
+                "score": 0,
+                "max_score": 100,
+                "result": "not_assessed",
+                "status": "to_do",
+            }
+        for q_urn, question in (node.get("questions") or {}).items():
+            q_node_id = extract_node_id(str(q_urn))
+            if not q_node_id:
+                continue
+            q_type = str((question or {}).get("type") or "text")
+            answers[q_node_id] = {
+                "value": _PROBE_VALUE_BY_TYPE.get(q_type, ""),
+                "score": 0,
+                "selected_choices": [],
+                "weight": int((question or {}).get("weight") or 1),
+                "type": q_type,
+            }
+    return {
+        "assessment": {
+            "score_sum": 0,
+            "score_max": 0,
+            "answered_count": 0,
+            "total_count": 0,
+        },
+        "requirements": requirements,
+        "answers": answers,
+        "computed_outcomes": {
+            str(rule.get("ref_id")): {}
+            for rule in framework.get("outcomes_definition") or []
+            if rule.get("ref_id")
+        },
+        "hidden_requirements": [],
+    }
+
+
+def validate_framework_expressions(framework: dict) -> list[dict]:
+    """Check every requirement visibility expression and outcome rule of a
+    framework, as `validate_quick_form_expressions` does for forms: an
+    expression against the wrong context, or naming an id that does not exist,
+    compiles but raises when an audit is evaluated, where it is only logged."""
+    raw_probe = _framework_probe(framework)
+    # Visibility runs before the hidden requirements are known, as at runtime.
+    visibility_probe = {
+        k: _python_to_cel(v) for k, v in raw_probe.items() if k != "hidden_requirements"
+    }
+    probe = {k: _python_to_cel(v) for k, v in raw_probe.items()}
+    env = celpy.Environment()
+    errors = []
+
+    def _check(where, ref_id, expression, context):
+        if not expression:
+            return
+        try:
+            env.program(env.compile(expression)).evaluate(context)
+        except Exception as e:
+            errors.append(
+                {
+                    "where": where,
+                    "ref_id": ref_id,
+                    "expression": expression,
+                    "error": _explain(
+                        expression,
+                        e,
+                        raw_probe,
+                        ("requirements", "answers"),
+                        "framework",
+                    ),
+                }
+            )
+
+    for node in framework.get("requirement_nodes") or []:
+        _check(
+            "requirement_visibility",
+            str(node.get("ref_id") or node.get("urn") or ""),
+            str(node.get("visibility_expression") or ""),
+            visibility_probe,
+        )
+    for rule in framework.get("outcomes_definition") or []:
+        _check(
+            "outcome",
+            str(rule.get("ref_id") or ""),
+            str(rule.get("expression") or ""),
+            probe,
+        )
+    return errors
+
+
 def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
     """Check every page visibility expression and outcome rule of a quick form.
 
@@ -674,35 +795,18 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
             }
         )
 
-    def _message(expression, error) -> str:
-        """The evaluator's text, or for the usual mistake (a page or question
-        id that does not exist) the key and the ids that do."""
-        text = str(error).split("\n")[0]
-        member = re.search(r"no such member in mapping: '([^']*)'", text)
-        if member and f"values.{member[1]}" in expression:
-            return (
-                f"No number rule '{member[1]}' above this one: a rule reads only "
-                "the number rules listed before it"
-            )
-        key = re.search(r"no such key.*StringType\('([^']*)'\)", text)
-        if key is None:
-            return text[:300]
-        for scope in ("pages", "answers"):
-            if (
-                f'{scope}["{key[1]}"]' in expression
-                or f"{scope}['{key[1]}']" in expression
-            ):
-                known = ", ".join(sorted(raw_probe.get(scope) or {})) or "none"
-                return f"No {scope[:-1]} '{key[1]}' in this form. Known: {known}"[:300]
-        return f"Unknown key '{key[1]}'"
-
     def _check(where, ref_id, expression, context=None):
         if not expression:
             return None
         try:
             return env.program(env.compile(expression)).evaluate(context or probe)
         except Exception as e:
-            _error(where, ref_id, expression, _message(expression, e))
+            _error(
+                where,
+                ref_id,
+                expression,
+                _explain(expression, e, raw_probe, ("pages", "answers"), "form"),
+            )
             return None
 
     from core.object_references import subject_question_error

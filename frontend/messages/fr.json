@@ -7029,6 +7029,7 @@
 	"projectionSuggestedNote": "Avec la configuration proposée par le formulaire",
 	"invalidExpressions": "Certaines règles ne peuvent pas être évaluées : le brouillon n'a pas été enregistré. Corrigez-les puis enregistrez à nouveau.",
 	"builderErrorPage": "Page {ref}",
+	"builderErrorRequirement": "Exigence {ref}",
 	"builderErrorRule": "Règle {ref}",
 	"tierHidden": "Utilise un niveau masqué : l'acceptation attribuerait un niveau qui ne figure plus dans l'échelle",
 	"builderFormDescriptionPlaceholder": "Description du formulaire (facultatif)",

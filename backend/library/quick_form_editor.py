@@ -15,57 +15,11 @@ pseudo-framework whose requirement_nodes are its pages, then strips the
 framework-only vocabulary on the way back.
 """
 
-import re
-
-from core.utils import extract_node_id
 from library.builder import BuilderError
 from library.framework_editor import (
     editor_doc_to_framework_object,
     framework_to_editor_doc,
 )
-
-# Where a rule names a page, a question or a choice by node id. Only these
-# positions are rewritten: a bare string elsewhere (`value == "2"`) is data.
-_SUBSCRIPT = re.compile(r"""\b(pages|answers)\[\s*(["'])(.*?)\2\s*\]""")
-_CHOICE_IN = re.compile(r"""(["'])([^"'\\]*)\1(\s+in\s+answers\s*\[)""")
-
-
-def node_id_maps(urn_map: dict) -> tuple[dict, dict, dict]:
-    """(pages, questions, choices) node-id renames implied by a save's URN map:
-    a rule written before the first save names the editor's ids."""
-    pages, questions, choices = {}, {}, {}
-    for old, new in urn_map.items():
-        if ":" not in old:  # editor-local ids, not URNs
-            continue
-        old_id, new_id = extract_node_id(old), extract_node_id(new)
-        if not old_id or not new_id or old_id == new_id:
-            continue
-        if ":choice:" in new:
-            choices[old_id] = new_id
-        elif ":question:" in new:
-            questions[old_id] = new_id
-        else:
-            pages[old_id] = new_id
-    return pages, questions, choices
-
-
-def rebase_expression(expression, maps):
-    """The expression with renamed page/question/choice ids, in reference
-    positions only. Mirrored by `rebaseExpression` in the builder."""
-    if not expression:
-        return expression
-    pages, questions, choices = maps
-
-    def subscript(match):
-        new = (pages if match[1] == "pages" else questions).get(match[3])
-        return match[0] if new is None else f"{match[1]}[{match[2]}{new}{match[2]}]"
-
-    def choice(match):
-        new = choices.get(match[2])
-        return match[0] if new is None else f"{match[1]}{new}{match[1]}{match[3]}"
-
-    return _CHOICE_IN.sub(choice, _SUBSCRIPT.sub(subscript, expression))
-
 
 # Node-level keys that only make sense on requirement nodes.
 FRAMEWORK_ONLY_NODE_KEYS = {
@@ -169,16 +123,7 @@ def editor_doc_to_quick_form_object(
             result["on_accept"] = meta["on_accept"]
         else:
             result.pop("on_accept", None)
-    # Rules and conditions written before the first save name the editor's ids.
-    maps = node_id_maps(urn_map)
-    if any(maps):
-        for rule in result.get("outcomes_definition") or []:
-            if isinstance(rule, dict) and rule.get("expression"):
-                rule["expression"] = rebase_expression(rule["expression"], maps)
-        for page in pages:
-            if page.get("visibility_expression"):
-                page["visibility_expression"] = rebase_expression(
-                    page["visibility_expression"], maps
-                )
+    # Rules and conditions were rebased onto the saved ids by the framework
+    # conversion (pages are its requirement nodes).
     result["pages"] = pages
     return result

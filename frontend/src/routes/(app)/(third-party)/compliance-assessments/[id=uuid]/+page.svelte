@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
 	import { run } from 'svelte/legacy';
 
 	import { page } from '$app/state';
@@ -851,7 +852,7 @@
 										style="background-color: {rule.color ?? '#d1d5db'}"
 										class:opacity-40={!isActive}
 									></span>
-									{rule.annotation ?? rule.ref_id}
+									{ruleLabel(rule, rule.ref_id)}
 								</span>
 							{/each}
 						</div>

@@ -44,7 +44,10 @@ from rest_framework.parsers import (
 from django.http import HttpResponse
 
 import django_filters as df
-from core.cel_service import validate_quick_form_expressions
+from core.cel_service import (
+    validate_framework_expressions,
+    validate_quick_form_expressions,
+)
 from core.excel import ExcelUploadHandler
 from core.helpers import get_sorted_requirement_nodes
 from core.models import (
@@ -1964,6 +1967,13 @@ class LibraryDraftViewSet(BaseModelViewSet):
             # Author-facing validation text by construction — see BuilderError.
             logger.warning("Builder rejected the draft", error=e)
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+        # Same gate as quick forms: a rule that cannot evaluate would only be
+        # logged when an audit runs, and never fire.
+        if expression_errors := validate_framework_expressions(new_framework):
+            return Response(
+                {"error": "invalidExpressions", "details": expression_errors},
+                status=HTTP_400_BAD_REQUEST,
+            )
         frameworks = content["frameworks"]
         frameworks[frameworks.index(framework)] = new_framework
         # Shape gate before persisting, like every other content door: the

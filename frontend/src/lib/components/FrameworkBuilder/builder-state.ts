@@ -365,15 +365,21 @@ export function rebaseExpression(
 		);
 	}
 	if (!pages.size && !questions.size && !choices.size) return expression;
-	return expression
-		.replace(/\b(pages|answers)\[\s*(["'])(.*?)\2\s*\]/g, (match, scope, quote, id) => {
-			const to = (scope === 'pages' ? pages : questions).get(id);
-			return to ? `${scope}[${quote}${to}${quote}]` : match;
-		})
-		.replace(/(["'])([^"'\\]*)\1(\s+in\s+answers\s*\[)/g, (match, quote, id, rest) => {
-			const to = choices.get(id);
-			return to ? `${quote}${to}${quote}${rest}` : match;
-		});
+	return (
+		expression
+			// `pages` (quick forms) and `requirements` (frameworks) both name nodes.
+			.replace(
+				/\b(pages|requirements|answers)\[\s*(["'])(.*?)\2\s*\]/g,
+				(match, scope, quote, id) => {
+					const to = (scope === 'answers' ? questions : pages).get(id);
+					return to ? `${scope}[${quote}${to}${quote}]` : match;
+				}
+			)
+			.replace(/(["'])([^"'\\]*)\1(\s+in\s+answers\s*\[)/g, (match, quote, id, rest) => {
+				const to = choices.get(id);
+				return to ? `${quote}${to}${quote}${rest}` : match;
+			})
+	);
 }
 
 /** A refused save as the author should read it: what failed, then where. */
@@ -384,6 +390,7 @@ export function describeSaveError(error: unknown): string {
 		const ref = String(detail.ref_id ?? '');
 		if (detail.where === 'subject_question') return m.builderSubjectQuestion();
 		if (detail.where === 'page_visibility') return m.builderErrorPage({ ref });
+		if (detail.where === 'requirement_visibility') return m.builderErrorRequirement({ ref });
 		if (detail.where === 'outcome') return m.builderErrorRule({ ref });
 		return ref;
 	};
@@ -433,6 +440,21 @@ export function applyUrnMap(nodes: BuilderNode[], urnMap: Record<string, string>
 			}
 		})),
 		children: applyUrnMap(bn.children, urnMap)
+	}));
+}
+
+/** Node conditions rebased on a save's URN map, through the whole tree. */
+export function rebaseNodeConditions(
+	nodes: BuilderNode[],
+	urnMap: Record<string, string>
+): BuilderNode[] {
+	return nodes.map((bn) => ({
+		...bn,
+		node: {
+			...bn.node,
+			visibility_expression: rebaseExpression(bn.node.visibility_expression, urnMap) ?? null
+		},
+		children: rebaseNodeConditions(bn.children, urnMap)
 	}));
 }
 
@@ -1185,28 +1207,18 @@ export function createBuilderState(
 				const { urn_map: urnMap } = await apiSaveDraft(apiTarget, draft);
 				if (urnMap && Object.keys(urnMap).length) {
 					rootNodes.update((nodes) => {
-						const remapped = applyUrnMap(nodes, urnMap);
-						if (mode !== 'quick_form') return remapped;
-						// The server rewrote the page conditions it stored; keep in step.
-						return remapped.map((bn) => ({
-							...bn,
-							node: {
-								...bn.node,
-								visibility_expression:
-									rebaseExpression(bn.node.visibility_expression, urnMap) ?? null
-							}
-						}));
+						// The server rewrote the conditions it stored; keep in step.
+						return rebaseNodeConditions(applyUrnMap(nodes, urnMap), urnMap);
 					});
 					framework.update((fw) => {
 						const subject = fw.subject_question_urn;
 						const mapped = subject ? urnMap[subject.toLowerCase()] : undefined;
-						const outcomes =
-							mode === 'quick_form' && Array.isArray(fw.outcomes_definition)
-								? fw.outcomes_definition.map((rule) => ({
-										...rule,
-										expression: rebaseExpression(rule.expression, urnMap) ?? rule.expression
-									}))
-								: fw.outcomes_definition;
+						const outcomes = Array.isArray(fw.outcomes_definition)
+							? fw.outcomes_definition.map((rule) => ({
+									...rule,
+									expression: rebaseExpression(rule.expression, urnMap) ?? rule.expression
+								}))
+							: fw.outcomes_definition;
 						return {
 							...fw,
 							...(mapped ? { subject_question_urn: mapped } : {}),

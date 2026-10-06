@@ -7050,6 +7050,7 @@
 	"projectionSuggestedNote": "With the form's suggested setup",
 	"invalidExpressions": "Some rules cannot be evaluated, so the draft was not saved. Fix them and save again.",
 	"builderErrorPage": "Page {ref}",
+	"builderErrorRequirement": "Requirement {ref}",
 	"builderErrorRule": "Rule {ref}",
 	"tierHidden": "Uses a hidden tier: accepting would set a tier that is no longer on the scale",
 	"builderFormDescriptionPlaceholder": "Form description (optional)",
