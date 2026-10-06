@@ -1008,6 +1008,19 @@ def resolve_user_id(user_ref: str) -> str:
         raise ValueError(f"User '{ref}' not found")
 
     if len(users) > 1:
+        needle = ref.lower()
+        exact = [
+            u
+            for u in users
+            if needle
+            in {
+                (u.get("first_name") or "").lower(),
+                (u.get("last_name") or "").lower(),
+                f"{u.get('first_name') or ''} {u.get('last_name') or ''}".strip().lower(),
+            }
+        ]
+        if len(exact) == 1:
+            return str(exact[0]["id"])
         labels = [u.get("email") for u in users[:5]]
         raise ValueError(f"Ambiguous user '{ref}', found {len(users)}: {labels}")
 
