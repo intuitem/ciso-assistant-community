@@ -79,7 +79,33 @@ class TestFrameworkExportRegistry:
         assert response.content == b"# Audit"
         assert response["Content-Type"] == "text/markdown"
         # Non-ASCII file names are encoded, not dropped.
-        assert "filename*=utf-8''r%C3%A9sum%C3%A9.md" in response["Content-Disposition"]
+        assert "filename*=UTF-8''r%C3%A9sum%C3%A9.md" in response["Content-Disposition"]
+
+    def test_audit_name_cannot_break_the_filename_header(
+        self, admin_client, monkeypatch
+    ):
+        named = FrameworkExport(
+            ref_id="named",
+            title="exportNamed",
+            description="exportNamedDesc",
+            format="MD",
+            supports=lambda audit: True,
+            build=lambda audit: ExportFile(b"", f"{audit.name}.md", "text/markdown"),
+        )
+        monkeypatch.setitem(framework_exports._registry, named.ref_id, named)
+        audit = _audit("urn:test:framework:named")
+        audit.name = 'Q3 "final"\r\nSet-Cookie: x=1'
+        audit.save()
+        response = admin_client.get(
+            reverse(
+                "compliance-assessments-framework-export",
+                kwargs={"pk": str(audit.pk), "export_id": "named"},
+            )
+        )
+        assert response.status_code == 200
+        header = response["Content-Disposition"]
+        assert "\r" not in header and "\n" not in header
+        assert 'filename="Q3 finalSet-Cookie: x=1.md"' in header
 
     def test_export_is_only_offered_to_audits_it_supports(
         self, admin_client, plain_text_export

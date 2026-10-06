@@ -223,7 +223,6 @@ from .serializers import *
 
 from .models import Severity
 from . import dora, framework_exports
-from django.utils.http import content_disposition_header
 from core.asset_graph import walk_asset_graph
 
 DEPENDENCY_GRAPH_LIMIT = 300
@@ -13084,8 +13083,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
         file = export.build(audit)
         response = HttpResponse(file.content, content_type=file.content_type)
-        response["Content-Disposition"] = content_disposition_header(
-            as_attachment=True, filename=file.filename
+        # The filename carries the audit's name, which may hold control characters.
+        response["Content-Disposition"] = safe_filename_header(
+            "attachment", file.filename
         )
         return response
 
@@ -14784,9 +14784,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 audit.requirement_assessments.select_related("requirement").all()
             )
 
-            # Build mapping of requirement_id to assessment
+            # Build mapping of requirement_id to assessment, limited to the
+            # audit's selected implementation groups like its global score.
+            selected_groups = set(audit.selected_implementation_groups or [])
             req_assessment_map = {
-                str(ra.requirement_id): ra for ra in requirement_assessments
+                str(ra.requirement_id): ra
+                for ra in requirement_assessments
+                if not selected_groups
+                or selected_groups & set(ra.requirement.implementation_groups or [])
             }
 
             # Build children dictionary for quick lookup

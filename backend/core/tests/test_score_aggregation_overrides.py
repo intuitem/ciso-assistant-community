@@ -663,6 +663,43 @@ class TestRadarDataNormalizesMixedScales:
         # Radar slice and global score agree (only section A is scored).
         assert body["base"]["global_score"] == 3.0
 
+    def test_compare_endpoint_radar_follows_selected_groups(
+        self, admin_client, mixed_scale_setup
+    ):
+        """Requirements outside the selected implementation groups are left out
+        of the radar slice, as they are of the global score: A1 (G1) = 4/5 alone
+        gives 4.0 and 100% compliant; counting A2 (G2, 0/1) would give 2.0, 50%.
+        """
+        for key, group in (("a1", "G1"), ("a2", "G2")):
+            node = mixed_scale_setup[key]
+            node.implementation_groups = [group]
+            node.save()
+        ca = mixed_scale_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.selected_implementation_groups = ["G1"]
+        ca.save()
+        _score(mixed_scale_setup, "a1", 4, result="compliant")
+        _score(mixed_scale_setup, "a2", 0, result="non_compliant")
+
+        other = ComplianceAssessment.objects.create(
+            name="Mixed Scoring CA (compare)",
+            framework=ca.framework,
+            folder=mixed_scale_setup["folder"],
+            perimeter=ca.perimeter,
+            min_score=0,
+            max_score=5,
+        )
+
+        url = reverse("compliance-assessments-compare", kwargs={"pk": str(ca.pk)})
+        response = admin_client.get(url, {"compare_id": str(other.pk)})
+        assert response.status_code == 200
+        body = response.json()
+        radar = body["base"]["radar_data"]
+        assert radar["labels"] == ["A", "B"]
+        assert radar["maturity_scores"][0] == 4.0
+        assert radar["compliance_percentages"][0] == 100.0
+        assert body["base"]["global_score"] == 4.0
+
     def test_section_compliance_anchors_na_to_target(
         self, admin_client, mixed_scale_setup
     ):
