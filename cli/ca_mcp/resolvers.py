@@ -1,6 +1,7 @@
 """Helper functions to resolve names to UUIDs"""
 
 import json
+import re
 import uuid
 
 from .client import fetch_all_results, make_get_request
@@ -1112,46 +1113,12 @@ def resolve_qualification_ids(qualifications) -> list:
     if isinstance(qualifications, str):
         qualifications = [qualifications]
 
-    terminologies = None
-    resolved = []
+    lookups = []
     for item in qualifications:
-        if _is_uuid(item):
-            term_id = item
-        else:
-            value = str(item).strip()
-            lookup = (
-                QUALIFICATION_LETTERS.get(value.upper()) if len(value) == 1 else None
-            )
-            lookup = lookup or _QUALIFICATION_ALIASES.get(value.lower()) or value
-
-            if terminologies is None:
-                terminologies, error = fetch_all_results(
-                    "/terminologies/",
-                    params={"field_path": "qualifications", "is_visible": "true"},
-                )
-                if error:
-                    raise ValueError(f"Failed to fetch qualifications: {error}")
-                terminologies = terminologies or []
-
-            match = next(
-                (
-                    t
-                    for t in terminologies
-                    if str(t.get("name") or "").lower() == lookup.lower()
-                    or str(t.get("translated_name") or "").lower() == lookup.lower()
-                ),
-                None,
-            ) or _find_terminology_match(terminologies, lookup)
-
-            if not match:
-                names = sorted({str(t.get("name")) for t in terminologies})
-                raise ValueError(
-                    f"Qualification '{value}' not found. Visible qualifications: {names}"
-                )
-            term_id = str(match["id"])
-        if term_id not in resolved:
-            resolved.append(term_id)
-    return resolved
+        value = str(item).strip()
+        lookup = QUALIFICATION_LETTERS.get(value.upper()) if len(value) == 1 else None
+        lookups.append(lookup or _QUALIFICATION_ALIASES.get(value.lower()) or item)
+    return resolve_terminology_ids(lookups, "qualifications")
 
 
 def _matrix_risk_levels(risk_matrix_id: str) -> list:
@@ -1211,3 +1178,100 @@ def resolve_risk_level_index(value, risk_matrix_id: str = None) -> int:
         for idx, level in enumerate(levels)
     ]
     raise ValueError(f"Risk level '{text}' not found. Valid levels: {labels}")
+
+
+def resolve_terminology_ids(values, field_path: str) -> list:
+    """Resolve terminology names/UUIDs of one field_path to Terminology ids.
+
+    Matches every visible terminology of that field_path, builtin or custom,
+    on its name, translated name or any translation (case- and
+    plural-insensitive). UUIDs are passed through. Never creates a terminology.
+    """
+    if isinstance(values, str):
+        values = [values]
+
+    terminologies = None
+    resolved = []
+    for item in values:
+        if _is_uuid(item):
+            term_id = item
+        else:
+            value = str(item).strip()
+            if not value:
+                raise ValueError(f"Empty {field_path} value")
+            if terminologies is None:
+                terminologies, error = fetch_all_results(
+                    "/terminologies/",
+                    params={"field_path": field_path, "is_visible": "true"},
+                    max_items=None,
+                )
+                if error:
+                    raise ValueError(
+                        f"Failed to fetch {field_path} terminologies: {error}"
+                    )
+                terminologies = terminologies or []
+
+            match = next(
+                (
+                    t
+                    for t in terminologies
+                    if str(t.get("name") or "").lower() == value.lower()
+                    or str(t.get("translated_name") or "").lower() == value.lower()
+                ),
+                None,
+            ) or _find_terminology_match(terminologies, value)
+
+            if not match:
+                names = sorted(
+                    {
+                        str(t.get("translated_name") or t.get("name"))
+                        for t in terminologies
+                    }
+                )
+                raise ValueError(
+                    f"'{value}' not found among visible {field_path} terminologies: "
+                    f"{names}"
+                )
+            term_id = str(match["id"])
+        if term_id not in resolved:
+            resolved.append(term_id)
+    return resolved
+
+
+_DURATION_RE = re.compile(
+    r"^(?:(?P<d>\d+)d)?(?:(?P<h>\d+)h)?(?:(?P<m>\d+)m)?(?:(?P<s>\d+)s)?$"
+)
+DURATION_FORMATS = (
+    "an integer number of seconds, or a written duration made of "
+    "<n>d, <n>h, <n>m, <n>s in that order (e.g. '90s', '30m', '2h', '1d', '1h30m')"
+)
+
+
+def parse_duration(value) -> int:
+    """Parse a duration into seconds.
+
+    Accepts a non-negative int (seconds, unchanged), a digit-only string, or a
+    written duration such as "90s", "30m", "2h", "1d", "1h30m". Anything else
+    raises ValueError naming the accepted formats.
+    """
+    if isinstance(value, bool):
+        raise ValueError(f"Invalid duration {value!r}: expected {DURATION_FORMATS}")
+    if isinstance(value, int):
+        if value < 0:
+            raise ValueError(f"Invalid duration {value!r}: expected {DURATION_FORMATS}")
+        return value
+    if isinstance(value, str):
+        # "1h 30m" == "1h30m"; "2 hours" still fails the pattern
+        text = re.sub(r"\s+", "", value).lower()
+        if text.isdigit():
+            return int(text)
+        match = _DURATION_RE.match(text)
+        if text and match:
+            parts = match.groupdict()
+            return (
+                int(parts["d"] or 0) * 86400
+                + int(parts["h"] or 0) * 3600
+                + int(parts["m"] or 0) * 60
+                + int(parts["s"] or 0)
+            )
+    raise ValueError(f"Invalid duration {value!r}: expected {DURATION_FORMATS}")

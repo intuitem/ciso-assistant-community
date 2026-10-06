@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parents[2]))
 
 from ca_mcp import resolvers  # noqa: E402
 from ca_mcp.tools import update_tools, write_tools  # noqa: E402
@@ -518,9 +518,7 @@ class TestCreateTeam:
             patch.object(
                 resolvers, "resolve_user_id", return_value=UUID_D
             ) as resolve_leader,
-            patch.object(
-                resolvers, "resolve_user_ids", return_value=[UUID_B, UUID_C]
-            ),
+            patch.object(resolvers, "resolve_user_ids", return_value=[UUID_B, UUID_C]),
         ):
             result = run(
                 write_tools.create_team(
