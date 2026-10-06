@@ -1,5 +1,5 @@
 ---
-description: Unload a library or remove a custom library from CISO Assistant
+description: Unload or remove a library from CISO Assistant
 ---
 
 # Unload or delete a library
