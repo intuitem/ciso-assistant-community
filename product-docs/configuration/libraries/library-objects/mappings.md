@@ -15,7 +15,7 @@ A Mapping object uses two sheets:
 For example, if `mappings` is the object prefix, the sheets are `mappings_meta` and `mappings_content`.
 
 {% hint style="warning" %}
-The base Excel file for mappings is normally generated rather than created from scratch. Use [`prepare_mapping_v2.py`](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/prepare_mapping_v2.py) with the two Framework YAML files, then complete the generated Excel file. See [Create a Mapping](../create-mapping.md) for more information.
+The base Excel file for mappings is normally generated rather than created from scratch. Use [`prepare_mapping_v2.py`](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/prepare_mapping_v2.py) with two Framework YAML files, then complete the generated Excel file. See [Create a Mapping](../create-mapping.md) for more information.
 {% endhint %}
 
 An asterisk (<mark style="color:$danger;">*</mark>) marks a required field.
