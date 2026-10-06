@@ -15,7 +15,7 @@ Tested MCP clients: Claude Desktop, Claude Code, LM Studio, OpenWebUI
 
 MCP (Model Context Protocol) allows AI assistants like Claude to interact with external tools and services. Think of it as giving your AI a set of capabilities to read and write data in CISO Assistant.
 
-The CISO Assistant MCP server provides **105 tools** covering:
+The CISO Assistant MCP server provides **109 tools** covering:
 
 * Risk management (assessments, scenarios, matrices)
 * Compliance audits (frameworks, requirements)
@@ -511,7 +511,7 @@ Use `X-CISO-Token` if the client reserves or rewrites `Authorization`.
 
 #### Read-only by default
 
-The HTTP endpoint exposes **only read tools (48)**. Set
+The HTTP endpoint exposes **only read tools (49)**. Set
 `CA_MCP_READ_ONLY=false` to expose the write tools as well — a deliberate choice,
 since an agent driven by a third-party orchestrator would then be able to modify
 your GRC data.
