@@ -34,7 +34,10 @@ class CustomFieldsMixin(models.Model):
         choice → slug; multi_choice → list of slugs; others → typed python value.
         """
         result: dict = {}
-        for value in self.custom_field_values.select_related("definition").all():
+        values = self.custom_field_values.all()
+        if "custom_field_values" not in getattr(self, "_prefetched_objects_cache", {}):
+            values = values.select_related("definition")
+        for value in values:
             definition = value.definition
             if definition.field_type == FieldType.MULTI_CHOICE:
                 result.setdefault(definition.key, []).append(value.value)
