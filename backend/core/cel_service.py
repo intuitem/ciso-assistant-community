@@ -651,27 +651,38 @@ def _quick_form_probe(quick_form: dict) -> dict:
     }
 
 
-def _explain(expression, error, raw_probe, scopes, container) -> str:
-    """The evaluator's text, or for the usual mistake (an id that does not
-    exist) the key and the ids that do."""
-    text = str(error).split("\n")[0]
-    member = re.search(r"no such member in mapping: '([^']*)'", text)
-    if member and f"values.{member[1]}" in expression:
-        return (
-            f"No number rule '{member[1]}' above this one: a rule reads only "
-            "the number rules listed before it"
-        )
-    key = re.search(r"no such key.*StringType\('([^']*)'\)", text)
-    if key is None:
-        return text[:300]
-    singular = {"pages": "page", "answers": "answer", "requirements": "requirement"}
+_STRINGS = re.compile(r"""\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'""")
+_ROOT = re.compile(r"(?<![\w.])([A-Za-z_]\w*)\s*[.\[]")
+_SINGULAR = {"pages": "page", "answers": "answer", "requirements": "requirement"}
+
+
+def _explain(expression, error, context, scopes, container) -> str:
+    """Why `expression` failed against `context`, for its author.
+
+    Built from the expression and the names the context offers, never from the
+    exception's text: that reaches API responses, and must not carry internals.
+    """
+    if isinstance(error, celpy.CELParseError):
+        return "Syntax error in this expression"
     for scope in scopes:
-        if f'{scope}["{key[1]}"]' in expression or f"{scope}['{key[1]}']" in expression:
-            known = ", ".join(sorted(raw_probe.get(scope) or {})) or "none"
-            return (
-                f"No {singular[scope]} '{key[1]}' in this {container}. Known: {known}"
-            )[:300]
-    return f"Unknown key '{key[1]}'"
+        for ref in re.findall(rf"""\b{scope}\[\s*["']([^"']*)["']\s*\]""", expression):
+            if ref not in (context.get(scope) or {}):
+                known = ", ".join(sorted(context.get(scope) or {})) or "none"
+                return (
+                    f"No {_SINGULAR[scope]} '{ref}' in this {container}. Known: {known}"
+                )[:300]
+    if "values" in context:
+        for name in re.findall(r"\bvalues\.(\w+)", expression):
+            if name not in context["values"]:
+                return (
+                    f"No number rule '{name}' above this one: a rule reads only "
+                    "the number rules listed before it"
+                )
+    for root in _ROOT.findall(_STRINGS.sub('""', expression)):
+        if root not in context:
+            available = ", ".join(sorted(context))
+            return f"Unknown name '{root}'. Available: {available}"[:300]
+    return f"This expression cannot be evaluated against this {container}'s data"
 
 
 def _framework_probe(framework: dict) -> dict:
@@ -725,12 +736,9 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
     framework, as `validate_quick_form_expressions` does for forms: an
     expression against the wrong context, or naming an id that does not exist,
     compiles but raises when an audit is evaluated, where it is only logged."""
-    raw_probe = _framework_probe(framework)
+    probe = _framework_probe(framework)
     # Visibility runs before the hidden requirements are known, as at runtime.
-    visibility_probe = {
-        k: _python_to_cel(v) for k, v in raw_probe.items() if k != "hidden_requirements"
-    }
-    probe = {k: _python_to_cel(v) for k, v in raw_probe.items()}
+    visibility_probe = {k: v for k, v in probe.items() if k != "hidden_requirements"}
     env = celpy.Environment()
     errors = []
 
@@ -738,7 +746,9 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
         if not expression:
             return
         try:
-            env.program(env.compile(expression)).evaluate(context)
+            env.program(env.compile(expression)).evaluate(
+                {k: _python_to_cel(v) for k, v in context.items()}
+            )
         except Exception as e:
             errors.append(
                 {
@@ -746,11 +756,7 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
                     "ref_id": ref_id,
                     "expression": expression,
                     "error": _explain(
-                        expression,
-                        e,
-                        raw_probe,
-                        ("requirements", "answers"),
-                        "framework",
+                        expression, e, context, ("requirements", "answers"), "framework"
                     ),
                 }
             )
@@ -781,7 +787,6 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
     instead of `response.*`), which raises at evaluation and is swallowed there.
     """
     raw_probe = _quick_form_probe(quick_form)
-    probe = {k: _python_to_cel(v) for k, v in raw_probe.items()}
     env = celpy.Environment()
     errors = []
 
@@ -798,14 +803,17 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
     def _check(where, ref_id, expression, context=None):
         if not expression:
             return None
+        context = raw_probe if context is None else context
         try:
-            return env.program(env.compile(expression)).evaluate(context or probe)
+            return env.program(env.compile(expression)).evaluate(
+                {k: _python_to_cel(v) for k, v in context.items()}
+            )
         except Exception as e:
             _error(
                 where,
                 ref_id,
                 expression,
-                _explain(expression, e, raw_probe, ("pages", "answers"), "form"),
+                _explain(expression, e, context, ("pages", "answers"), "form"),
             )
             return None
 
@@ -820,7 +828,7 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
         )
 
     # Visibility is resolved before any rule runs, so it cannot read `values`.
-    visibility_probe = {k: v for k, v in probe.items() if k != "values"}
+    visibility_probe = {k: v for k, v in raw_probe.items() if k != "values"}
     for page in quick_form.get("pages") or []:
         _check(
             "page_visibility",
@@ -843,10 +851,7 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
     for rule in [r for r in rules if is_numeric_rule(r)]:
         ref_id = str(rule.get("ref_id") or "")
         expression = str(rule.get("expression") or "")
-        context = {
-            k: _python_to_cel(v) for k, v in {**raw_probe, "values": earlier}.items()
-        }
-        result = _check("outcome", ref_id, expression, context)
+        result = _check("outcome", ref_id, expression, {**raw_probe, "values": earlier})
         if expression and result is not None and _as_number(result) is None:
             _error("outcome", ref_id, expression, "A numeric rule must return a number")
         earlier = {**earlier, ref_id: 0.0}
