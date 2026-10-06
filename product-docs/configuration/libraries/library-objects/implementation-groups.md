@@ -35,7 +35,7 @@ The content sheet contains one row per implementation group.
 
 | Field | Meaning | Format / allowed values |
 | --- | --- | --- |
-| `ref_id`<mark style="color:$danger;">*</mark> | Unique identifier used to assign the group to framework elements | Letters, numbers, `.`, `_`, or `-` only; no spaces. Keep it consistent with the references in the framework. |
+| `ref_id`<mark style="color:$danger;">*</mark> | Unique identifier used to assign the group to framework requirements | Letters, numbers, `.`, `_`, or `-` only; no spaces. Keep it consistent with the references in the framework. |
 | `name`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | Name shown to users when selecting Implementation Groups | Text |
 | `description` <mark style="color:$info;">T</mark> | Optional explanation of what the group includes | Text |
 | `default_selected` | Rarely used. Sets the initial group selection for a questionnaire with dynamic questions. | Enter `x` for a group that should be selected when the audit is created. Otherwise, leave the cell empty. |
