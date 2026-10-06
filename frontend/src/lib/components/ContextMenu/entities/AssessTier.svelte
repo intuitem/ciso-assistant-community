@@ -31,7 +31,12 @@
 		}
 	});
 
+	// One start at a time: repeated clicks must not open several drafts.
+	let starting = $state(false);
+
 	async function assess(option: Option) {
+		if (starting) return;
+		starting = true;
 		try {
 			const res = await fetch(`/entities/${row?.meta?.id}/assess-tier`, {
 				method: 'POST',
@@ -49,6 +54,8 @@
 			await goto(body.redirect);
 		} catch {
 			flash.set({ type: 'error', message: m.anErrorOccurred() });
+		} finally {
+			starting = false;
 		}
 	}
 
@@ -57,7 +64,7 @@
 </script>
 
 {#if options.length === 1}
-	<ContextMenu.Item class={itemClass} onclick={() => assess(options[0])}>
+	<ContextMenu.Item class={itemClass} disabled={starting} onclick={() => assess(options[0])}>
 		{m.assessTier()}
 	</ContextMenu.Item>
 {:else if options.length > 1}
@@ -72,7 +79,7 @@
 			sideOffset={10}
 		>
 			{#each options as option (option.id)}
-				<ContextMenu.Item class={itemClass} onclick={() => assess(option)}>
+				<ContextMenu.Item class={itemClass} disabled={starting} onclick={() => assess(option)}>
 					{option.name}
 				</ContextMenu.Item>
 			{/each}
