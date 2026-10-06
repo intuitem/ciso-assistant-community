@@ -666,11 +666,21 @@ def build_matrix_mappings(risk_matrix: RiskMatrix) -> dict:
     return mappings
 
 
+# Label the exports write for an unrated level (see RiskScenario._get_risk_data).
+NOT_RATED_LABEL = "--"
+
+
+def is_blank_cell(value: Any) -> bool:
+    return value is None or (isinstance(value, str) and not value.strip())
+
+
 def map_risk_value(value: Any, mapping_dict: dict) -> int:
     """Map a probability/impact label to its matrix value, -1 when undefined."""
-    if value is None or value == "":
+    if is_blank_cell(value):
         return -1
     clean_value = str(value).strip().lower()
+    if clean_value == NOT_RATED_LABEL:
+        return -1
     if clean_value in mapping_dict:
         return mapping_dict[clean_value]
     logger.warning(
@@ -2180,21 +2190,6 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             "ref_id": record.get("ref_id", ""),
             "description": record.get("description", ""),
             "risk_assessment": context.risk_assessment.id,
-            "inherent_impact": map_risk_value(record.get("inherent_impact"), impact),
-            "inherent_proba": map_risk_value(
-                record.get("inherent_proba") or record.get("inherent_probability"),
-                probability,
-            ),
-            "current_impact": map_risk_value(record.get("current_impact"), impact),
-            "current_proba": map_risk_value(
-                record.get("current_proba") or record.get("current_probability"),
-                probability,
-            ),
-            "residual_impact": map_risk_value(record.get("residual_impact"), impact),
-            "residual_proba": map_risk_value(
-                record.get("residual_proba") or record.get("residual_probability"),
-                probability,
-            ),
             "treatment": next(
                 (opt for opt, _ in RiskScenario.TREATMENT_OPTIONS if treatment == opt),
                 "open",
@@ -2208,22 +2203,28 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             ),
         }
 
-        # A label absent from the matrix would silently leave the level
-        # unrated: report it, and drop the field so an update keeps the
-        # existing rating (a new scenario falls back to the -1 default).
+        # A level is only written when its cell holds a matrix label or the
+        # explicit "--" (unrated). Blank cells and unknown labels leave the
+        # field out: a new scenario gets the -1 default, an update keeps the
+        # existing rating. Unknown labels are reported on the row.
         unmapped = []
         for field_name in self.RISK_LEVEL_FIELDS:
             raw = next(
                 (
-                    value
+                    record[key]
                     for key in self.SOURCE_KEY_MAP.get(field_name, [field_name])
-                    if (value := str(record.get(key) or "").strip())
+                    if not is_blank_cell(record.get(key))
                 ),
                 None,
             )
-            if raw and scenario_data[field_name] == -1:
-                unmapped.append(f"{field_name} '{raw}'")
-                del scenario_data[field_name]
+            if raw is None:
+                continue
+            mapping = impact if field_name.endswith("_impact") else probability
+            value = map_risk_value(raw, mapping)
+            if value == -1 and str(raw).strip() != NOT_RATED_LABEL:
+                unmapped.append(f"{field_name} '{str(raw).strip()}'")
+                continue
+            scenario_data[field_name] = value
 
         unresolved = existing_controls.failed + additional_controls.failed
         messages = []

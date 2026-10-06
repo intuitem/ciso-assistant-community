@@ -151,3 +151,60 @@ class TestRiskScenarioLevels:
         scenario = RiskScenario.objects.get(ref_id="R01a")
         assert scenario.current_impact == 3
         assert scenario.current_proba == 1
+
+    @pytest.mark.parametrize(
+        "cell, warns",
+        [("   ", False), ("", False), (None, False), (0, True), ("0", True)],
+    )
+    def test_blank_or_numeric_cell_keeps_the_existing_rating(
+        self, admin_user, risk_assessment, cell, warns
+    ):
+        RiskScenario.objects.create(
+            ref_id="R01a",
+            name="Phishing",
+            risk_assessment=risk_assessment,
+            current_impact=3,
+        )
+
+        result = _consumer(admin_user, risk_assessment).process_records(
+            [{"ref_id": "R01a", "name": "Phishing", "current_impact": cell}]
+        )
+
+        assert result.updated == 1
+        assert bool(result.warnings) is warns
+        assert RiskScenario.objects.get(ref_id="R01a").current_impact == 3
+
+    def test_not_rated_marker_clears_the_rating_without_warning(
+        self, admin_user, risk_assessment
+    ):
+        RiskScenario.objects.create(
+            ref_id="R01a",
+            name="Phishing",
+            risk_assessment=risk_assessment,
+            current_impact=3,
+        )
+
+        result = _consumer(admin_user, risk_assessment).process_records(
+            [{"ref_id": "R01a", "name": "Phishing", "current_impact": "--"}]
+        )
+
+        assert result.updated == 1
+        assert result.warnings == []
+        assert RiskScenario.objects.get(ref_id="R01a").current_impact == -1
+
+    def test_blank_primary_column_falls_back_to_its_alias(
+        self, admin_user, risk_assessment
+    ):
+        result = _consumer(admin_user, risk_assessment).process_records(
+            [
+                {
+                    "ref_id": "R01a",
+                    "name": "Phishing",
+                    "current_proba": "  ",
+                    "current_probability": "Probable",
+                }
+            ]
+        )
+
+        assert result.warnings == []
+        assert RiskScenario.objects.get(ref_id="R01a").current_proba == 2

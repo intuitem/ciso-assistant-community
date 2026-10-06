@@ -327,7 +327,7 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
   Newline-, semicolon- or comma-separated asset names or ref\_ids. Missing assets are auto-created in the domain folder with the default type Support, provided you may add assets there — otherwise the name is reported as a warning on the row.
 * **justification**: String
 
-1: The string must be the name of a level of the chosen risk matrix, or one of its translations. Matching ignores case and surrounding spaces. A value that matches no level is reported as a warning on the row and left unrated; when updating an existing scenario, its current rating is kept.
+1: The string must be the name of a level of the chosen risk matrix, or one of its translations. Matching ignores case and surrounding spaces. Use `--` to mark a level as not rated. An empty cell leaves the level untouched. A value that matches no level is reported as a warning on the row and leaves the level untouched. Untouched levels are unrated on a new scenario and keep their current rating when updating an existing one.
 
 
 
