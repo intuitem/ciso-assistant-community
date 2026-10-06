@@ -14,7 +14,7 @@ A Threats object uses two sheets:
 
 For example, if `thrt` is the object prefix, the sheets are `thrt_meta` and `thrt_content`.
 
-An asterisk (<mark style="color:$danger;">*</mark>) marks a required field. <mark style="color:$info;">T</mark> marks a field that supports translations.
+An asterisk (<mark style="color:$danger;">*</mark>) marks a required field. (<mark style="color:$info;">T</mark>) marks a field that supports translations.
 
 ### `<object>_meta`
 

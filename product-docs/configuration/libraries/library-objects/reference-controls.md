@@ -14,7 +14,7 @@ A Reference Controls object uses two sheets:
 
 For example, if `ref_ctrl` is the object prefix, the sheets are `ref_ctrl_meta` and `ref_ctrl_content`.
 
-An asterisk (<mark style="color:$danger;">*</mark>) marks a required field. <mark style="color:$info;">T</mark> marks a field that supports translations.
+An asterisk (<mark style="color:$danger;">*</mark>) marks a required field. (<mark style="color:$info;">T</mark>) marks a field that supports translations.
 
 ### `<object>_meta`
 

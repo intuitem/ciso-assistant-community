@@ -16,7 +16,7 @@ An Implementation Groups object uses two sheets:
 
 For example, if `imp_grp` is the object prefix, the sheets are `imp_grp_meta` and `imp_grp_content`.
 
-An asterisk (<mark style="color:$danger;">*</mark>) marks a required field. <mark style="color:$info;">T</mark> marks a field that supports translations.
+An asterisk (<mark style="color:$danger;">*</mark>) marks a required field. (<mark style="color:$info;">T</mark>) marks a field that supports translations.
 
 ### `<object>_meta`
 

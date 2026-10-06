@@ -14,7 +14,7 @@ A Framework object uses two sheets:
 
 For example, if `fwk` is the object prefix, the sheets are `fwk_meta` and `fwk_content`.
 
-An asterisk (<mark style="color:$danger;">*</mark>) marks a required field. <mark style="color:$info;">T</mark> marks a field that supports translations.
+An asterisk (<mark style="color:$danger;">*</mark>) marks a required field. (<mark style="color:$info;">T</mark>) marks a field that supports translations.
 
 ### `<object>_meta`
 
