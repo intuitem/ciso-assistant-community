@@ -641,7 +641,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Du kan inte radera det enda administratörskontot för din applikation.",
 	"attemptToRemoveOnlyAdminUserGroup": "Du kan inte ta bort den enda administratörsanvändaren från administratörsgruppen.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Du kan inte ta bort dig själv från en domänadministratörsgrupp. Be en annan administratör att göra det.",
-	"scoringHelpText": "Markera för att aktivera poängsättning",
 	"overrideScore": "Åsidosätt poäng",
 	"overrideScoreHelpText": "Lås poängen manuellt och sluta räkna om den utifrån svaren",
 	"automaticScore": "Automatisk poäng",
