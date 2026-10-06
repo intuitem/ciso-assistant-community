@@ -91,7 +91,7 @@ In Excel, `Yes` and `No` occupy separate lines in the same cell. To see an examp
 
 ## Advanced: YAML representation of this object
 
-This section is mainly for advanced users and debugging. The excerpt below shows how the Answers from the tables above can appear inside a [Framework](framework.md) after import.
+This section is mainly for advanced users and debugging. The excerpt below shows how the Answers from the tables above can appear within a [Framework](framework.md) in the converted YAML.
 
 <details>
 <summary>Show YAML</summary>

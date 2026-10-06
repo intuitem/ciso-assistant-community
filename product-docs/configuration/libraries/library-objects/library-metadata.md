@@ -65,7 +65,7 @@ The table below shows an example of a `library_meta` sheet for a security operat
 
 ## Advanced: YAML representation of this object
 
-This section is mainly for advanced users and debugging. The excerpt below shows how the Library metadata from the table above can appear after import.
+This section is mainly for advanced users and debugging. The excerpt below shows how the Library metadata from the table above can appear in the converted YAML.
 
 <details>
 <summary>Show YAML</summary>

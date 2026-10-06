@@ -88,7 +88,7 @@ To see an example of Implementation Groups in a complete Excel file, download [`
 
 ## Advanced: YAML representation of this object
 
-This section is mainly for advanced users and debugging. The excerpt below shows how the Implementation Groups from the tables above can appear inside a [Framework](framework.md) after import.
+This section is mainly for advanced users and debugging. The excerpt below shows how the Implementation Groups from the tables above can appear within a [Framework](framework.md) in the converted YAML.
 
 <details>
 <summary>Show YAML</summary>
