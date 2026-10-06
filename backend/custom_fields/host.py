@@ -45,6 +45,9 @@ class CustomFieldsMixin(models.Model):
                 result[definition.key] = value.value
         return result
 
+    def clear_custom_field_cache(self):
+        getattr(self, "_prefetched_objects_cache", {}).pop("custom_field_values", None)
+
     @transaction.atomic
     def set_custom_field(self, definition: CustomFieldDefinition, raw):
         """Upsert the value(s) of one definition on this object.
@@ -55,6 +58,7 @@ class CustomFieldsMixin(models.Model):
         content_type = ContentType.objects.get_for_model(self.__class__)
         if definition.content_type_id != content_type.id:
             raise ValueError("Custom field definition model does not match host model.")
+        self.clear_custom_field_cache()
         base = self.custom_field_values.filter(definition=definition)
 
         if definition.field_type == FieldType.MULTI_CHOICE:
