@@ -435,6 +435,14 @@ class EntityAssessmentWriteSerializer(CustomFieldsSerializerMixin, BaseModelSeri
     # visibility here instead of opening the audit afterwards.
     field_visibility = serializers.JSONField(required=False)
 
+    def validate(self, attrs):
+        # Before super(): custom fields are scoped against attrs["folder"].
+        if self.instance is not None and "perimeter" in attrs:
+            perimeter = attrs["perimeter"]
+            if perimeter and perimeter.folder:
+                attrs["folder"] = perimeter.folder
+        return super().validate(attrs)
+
     def _extract_audit_data(self, validated_data):
         audit_data = {
             "create_audit": validated_data.pop("create_audit", False),
@@ -593,12 +601,6 @@ class EntityAssessmentWriteSerializer(CustomFieldsSerializerMixin, BaseModelSeri
         old_representatives = set(instance.representatives.all()) - set(
             validated_data.get("representatives", [])
         )
-
-        # If perimeter is being changed, update folder to match the new perimeter's folder
-        if "perimeter" in validated_data:
-            new_perimeter = validated_data["perimeter"]
-            if new_perimeter and new_perimeter.folder:
-                validated_data["folder"] = new_perimeter.folder
 
         with transaction.atomic():
             instance = super().update(instance, validated_data)
