@@ -6,7 +6,7 @@ from pathlib import Path
 import json
 
 # Add the parent directory to the path to import ca_mcp
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parents[2]))
 import ca_mcp
 
 
