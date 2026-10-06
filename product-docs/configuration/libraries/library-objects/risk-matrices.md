@@ -92,7 +92,7 @@ To see an example of a Risk Matrix in a complete Excel file, download [`risk-mat
 
 ## Advanced: YAML representation of this object
 
-This section is mainly for advanced users and debugging. The excerpt below shows how the Risk Matrix from the tables above can appear after import.
+This section is mainly for advanced users and debugging. The excerpt below shows how the Risk Matrix from the tables above can appear in the converted YAML.
 
 <details>
 <summary>Show YAML</summary>

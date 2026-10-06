@@ -78,7 +78,7 @@ To see an example of Reference Controls in a complete Excel file, download [`exa
 
 ## Advanced: YAML representation of this object
 
-This section is mainly for advanced users and debugging. The excerpt below shows how the Reference Controls from the tables above can appear after import.
+This section is mainly for advanced users and debugging. The excerpt below shows how the Reference Controls from the tables above can appear in the converted YAML.
 
 <details>
 <summary>Show YAML</summary>

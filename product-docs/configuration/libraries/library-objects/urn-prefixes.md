@@ -74,7 +74,7 @@ With these prefixes, `1:t1` in a framework becomes `urn:intuitem:risk:threat:sam
 
 ## Advanced: YAML representation of this object
 
-This section is mainly for advanced users and debugging. The excerpt below shows how URN Prefixes from the tables above can appear inside a [Framework](framework.md) after import. They do not become a separate YAML object.
+This section is mainly for advanced users and debugging. The excerpt below shows how references using the prefixes from the tables above appear within a [Framework](framework.md) in the converted YAML. The prefixes themselves do not become a separate YAML object.
 
 <details>
 <summary>Show YAML</summary>

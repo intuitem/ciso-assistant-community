@@ -76,7 +76,7 @@ To see an example of Threats in a complete Excel file, download [`example_framew
 
 ## Advanced: YAML representation of this object
 
-This section is mainly for advanced users and debugging. The excerpt below shows how the Threats from the tables above can appear after import.
+This section is mainly for advanced users and debugging. The excerpt below shows how the Threats from the tables above can appear in the converted YAML.
 
 <details>
 <summary>Show YAML</summary>

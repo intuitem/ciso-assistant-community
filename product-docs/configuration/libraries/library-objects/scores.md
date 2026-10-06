@@ -1,16 +1,16 @@
 ---
-description: Define score levels for a framework
+description: Define scores for a framework
 ---
 
 # Scores
 
-Scores give names and descriptions to the numeric levels used by a [Framework](framework.md). They are optional: a framework can set `min_score` and `max_score` without a Scores sheet.
+A Scores object names and describes the scores used by a [Framework](framework.md). It is optional: a framework can set a `min_score` and a `max_score` value without a Scores sheet linked to it.
 
 ## Excel structure and fields
 
 A Scores object uses two sheets:
 * `<object>_meta` describes the object.
-* `<object>_content` lists its levels.
+* `<object>_content` lists the scores.
 
 For example, if `scr` is the object prefix, the sheets are `scr_meta` and `scr_content`.
 
@@ -29,14 +29,14 @@ For example, if `name` is `scr`, the object is defined by `scr_meta` and `scr_co
 
 ### `<object>_content`
 
-The content sheet contains one row per score level.
+The content sheet contains one row per score.
 
 | Field | Meaning | Format / allowed values |
 | --- | --- | --- |
-| `score`<mark style="color:$danger;">*</mark> | Numeric value of the level | Unique whole number, zero or greater |
-| `name`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | Label shown for that value | Text |
-| `description` <mark style="color:$info;">T</mark> | Short explanation of the level | Text |
-| `description_doc` <mark style="color:$info;">T</mark> | Additional explanation associated with the level | Text |
+| `score`<mark style="color:$danger;">*</mark> | Numeric value assigned to the score | Unique whole number, zero or greater |
+| `name`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | Label shown for the score | Text |
+| `description` <mark style="color:$info;">T</mark> | What the score means | Text |
+| `description_doc` <mark style="color:$info;">T</mark> | Rarely used. Description for the documentation score. | Text |
 
 See [Translate library content](../translations.md) for how to add translations.
 
@@ -45,7 +45,8 @@ See [Translate library content](../translations.md) for how to add translations.
 A Scores object can be linked to a [Framework](framework.md) in two places:
 
 1. In the framework's metadata sheet, set `scores_definition` to the Scores object prefix (e.g., `scr`) to define the default scale.
-2. In the framework's content sheet, use the `scores_definition` column to assign a different Scores object prefix to an individual requirement.
+2. Less commonly, in the framework's content sheet, use `scores_definition` to assign a separate Scores object to a requirement that needs its own scoring scale.
+A library can therefore contain multiple Scores objects.
 
 Answer choices in [Answers](answers.md) can contribute points through `add_score`.
 
@@ -53,7 +54,7 @@ Answer choices in [Answers](answers.md) can contribute points through `add_score
 
 ### When creating a library
 
-- Define the numeric range in the framework's `min_score` and `max_score` properties, then add labels for the levels users need to interpret.
+- Define the numeric range in the framework's `min_score` and `max_score` properties, then add labels that help users interpret each score.
 - Use a separate Scores object for a requirement only when its scale genuinely differs from the framework's main scale.
 
 ### When updating a library
@@ -63,7 +64,7 @@ Answer choices in [Answers](answers.md) can contribute points through `add_score
 
 ## Example
 
-The tables below show an example of a Scores object with three levels.
+The tables below show an example of a Scores object with three possible scores.
 
 ### `scr_meta`
 
@@ -84,7 +85,7 @@ To see an example of Scores in a complete Excel file, download [`example_framewo
 
 ## Advanced: YAML representation of this object
 
-This section is mainly for advanced users and debugging. The excerpt below shows how the Scores from the tables above can appear inside a [Framework](framework.md) after import.
+This section is mainly for advanced users and debugging. The excerpt below shows how the Scores from the tables above can appear within a [Framework](framework.md) in the converted YAML.
 
 <details>
 <summary>Show YAML</summary>

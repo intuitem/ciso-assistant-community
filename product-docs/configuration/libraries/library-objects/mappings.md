@@ -93,7 +93,7 @@ To see an example of Mappings in a complete Excel file, download [`mapping-iso27
 
 ## Advanced: YAML representation of this object
 
-This section is mainly for advanced users and debugging. The excerpt below shows how the Mappings from the tables above can appear after import. Conversion creates a forward and a reverse Mapping.
+This section is mainly for advanced users and debugging. The excerpt below shows how the Mappings from the tables above can appear in the converted YAML, including the generated reverse Mapping.
 
 <details>
 <summary>Show YAML</summary>
