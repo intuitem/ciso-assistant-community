@@ -10,7 +10,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
-        ("core", "0192_backfill_evidencerevision_attachment_hash"),
+        ("core", "0193_framework_scoring_defaults"),
         ("iam", "0031_remove_iam_is_published_fields"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
