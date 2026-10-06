@@ -12,9 +12,13 @@ Keep the original field for the library's primary language, which is defined in 
 
 In a `_meta` sheet, add a new key and its translated value on a separate row. In a `_content` sheet, add a new column and fill it for the rows you want to translate.
 
+{% hint style="warning" %}
+Only fields marked (<mark style="color:$info;">T</mark>) support translations. If you translate a key or column that does not support translations, CISO Assistant will not display the translated value, even if you add it manually to the final YAML.
+{% endhint %}
+
 ## Example
 
-This example adds French translations to the example Framework shown on the [Framework](library-objects/framework.md) page. Only the fields relevant to translation are shown.
+This example adds French translations to the example Framework shown on the [Framework](library-objects/framework.md#example) page. Only the fields relevant to translation are shown.
 
 ### `fwk_meta`
 
@@ -31,7 +35,3 @@ This example adds French translations to the example Framework shown on the [Fra
 | --- | --- | --- | --- | --- |
 | `ACCESS` | Access management |  | Gestion des accès |  |
 | `ACCESS.1` | Review access rights | Review user access regularly | Revoir les droits d'accès | Revoir régulièrement les droits d'accès des utilisateurs |
-
-{% hint style="warning" %}
-Only fields marked (<mark style="color:$info;">T</mark>) support translations. If you translate a key or column that does not support translations, CISO Assistant will not display the translated value, even if you add it manually to the final YAML.
-{% endhint %}
