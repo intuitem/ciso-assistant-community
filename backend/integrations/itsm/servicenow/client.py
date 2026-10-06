@@ -33,6 +33,76 @@ LIST_PAGE_SIZE = 100
 # in base_query simply becomes the primary sort with these as tiebreakers.
 LIST_ORDERING = "ORDERBYDESCsys_created_on^ORDERBYsys_id"
 
+# Rows requested per page when listing sys_db_object.
+TABLES_PAGE_SIZE = 1000
+
+# Ceiling on sys_db_object rows scanned when listing tables. Large instances
+# carry several thousand tables; this only guards against a runaway loop.
+MAX_TABLES_FETCH = 50000
+
+# Table name prefixes hidden from the table picker as noise:
+# sys_ (metadata), ts_ (text search), v_ (views), imp_ (import sets),
+# var_ (catalog variables), wf_ (workflow contexts), pa_ (performance
+# analytics), ecc_ (queue), metric_ (metric definitions), and so on.
+# sn_ is deliberately absent: it is the namespace of every scoped Store app
+# (Customer Service, Security Incident Response, GRC/IRM, HR...).
+EXCLUDED_TABLE_PREFIXES = (
+    "sys_",
+    "sysevent",
+    "syslog",
+    "ts_",
+    "v_",
+    "imp_",
+    "var_",
+    "wf_",
+    "pa_",
+    "ecc_",
+    "metric_",
+    "ais_",
+    "protected_",
+    "ml_",
+    "expert_panel",
+    "ua_",
+    "usageanalytics_",
+    "automation_pipeline_",
+    "cdc_",
+    "cmn_",
+    "cxs_",
+    "discovery_",
+    "hermes_",
+    "ip_",
+    "license_",
+    "licensing_",
+    "nlq_",
+    "nlu_",
+    "oauth_",
+    "oidc_",
+    "open_nlu_predict_",
+    "par_",
+    "proactive_analytics_",
+    "promin_",
+    "proposed_change_verification_",
+    "pwd_",
+    "qb_",
+    "sc_cart_",
+    "sc_cat_",
+    "sc_catalog_",
+    "sc_category_",
+    "sc_item_",
+    "sc_layout_",
+    "sc_service_",
+    "sc_wizard_",
+    "scan_log_",
+    "scan_mute_",
+    "sla_repair_",
+    "stagemgmt_",
+)
+
+
+def is_excluded_table(name: str) -> bool:
+    # Link tables come as both m2m_* and *_m2m*.
+    return name.startswith(EXCLUDED_TABLE_PREFIXES) or "m2m" in name
+
 
 class ServiceNowClient(BaseIntegrationClient):
     def __init__(self, configuration, model_key="applied_control"):
@@ -334,111 +404,54 @@ class ServiceNowClient(BaseIntegrationClient):
     def get_available_tables(self) -> list[dict]:
         """
         Fetches 'user-facing' tables (Incidents, Controls, etc).
-        Aggressively filters out system internals, import sets, and link tables.
+        Filters out system internals, import sets, and link tables.
         """
-        # Noise filters:
-        # imp_  -> Import Sets (Temporary data buffers, usually hundreds of them)
-        # m2m_  -> Many-to-Many link tables (Internal relationship storage)
-        # sys_  -> System tables (Metadata)
-        # ts_   -> Text Search indices
-        # v_    -> Database Views
-        # var_  -> Variables (Service Catalog internals)
-        # wf_   -> Workflow contexts
-        # pa_   -> Performance Analytics
-        # ecc_  -> External Communication Channel (Queue)
-        # metric_ -> Metric definitions
-        # etc.
-
-        exclusions = [
-            "nameNOT LIKEsys_",
-            "nameNOT LIKEts_",
-            "nameNOT LIKEv_",
-            "nameNOT LIKEimp_",
-            "nameNOT LIKEm2m",  # Catch m2m_ and ..._m2m
-            "nameNOT LIKEvar_",
-            "nameNOT LIKEwf_",
-            "nameNOT LIKEpa_",
-            "nameNOT LIKEecc_",
-            "nameNOT LIKEmetric_",
-            "nameNOT LIKEais_",
-            "nameNOT LIKEsyslog_",
-            "nameNOT LIKEsysevent_",
-            "nameNOT LIKEsn_",
-            "nameNOT LIKEprotected_",
-            "nameNOT LIKEml_",
-            "nameNOT LIKEexpert_panel",
-            "nameNOT LIKEua_",
-            "nameNOT LIKEusageanalytics_",
-            "nameNOT LIKEautomation_pipeline_",
-            "nameNOT LIKEcdc_",
-            "nameNOT LIKEcmn_",
-            "nameNOT LIKEcxs_",
-            "nameNOT LIKEdiscovery_",
-            "nameNOT LIKEhermes_",
-            "nameNOT LIKEip_",
-            "nameNOT LIKElicense_",
-            "nameNOT LIKElicensing_",
-            "nameNOT LIKEnlq_",
-            "nameNOT LIKEnlu_",
-            "nameNOT LIKEoauth_",
-            "nameNOT LIKEoidc_",
-            "nameNOT LIKEopen_nlu_predict_",
-            "nameNOT LIKEpar_",
-            "nameNOT LIKEproactive_analytics_",
-            "nameNOT LIKEpromin_",
-            "nameNOT LIKEproposed_change_verification_",
-            "nameNOT LIKEpwd_",
-            "nameNOT LIKEqb_",
-            "nameNOT LIKEsc_cart_",
-            "nameNOT LIKEsc_cat_",
-            "nameNOT LIKEsc_catalog_",
-            "nameNOT LIKEsc_category_",
-            "nameNOT LIKEsc_item_",
-            "nameNOT LIKEsc_layout_",
-            "nameNOT LIKEsc_service_",
-            "nameNOT LIKEsc_wizard_",
-            "nameNOT LIKEscan_log_",
-            "nameNOT LIKEscan_mute_",
-            "nameNOT LIKEsla_repair_",
-            "nameNOT LIKEstagemgmt_",
-            "nameNOT LIKEsysevent",
-            "nameNOT LIKEsyslog",
-        ]
-
-        # Combine with OR operator logic if needed, but here we need AND logic (exclusion)
-        # In ServiceNow query syntax, separating with ^ acts as AND.
-
-        # 'sys_update_nameISNOTEMPTY' ensures the table is a tracked system object (excludes some temp tables)
-        base_query = "sys_update_nameISNOTEMPTY"
-
-        query = f"{base_query}^{'^'.join(exclusions)}"
-
+        # Prefixes are matched here rather than in the encoded query:
+        # ServiceNow's NOT LIKE means "does not contain", so a server-side
+        # "v_" or "ip_" also drops tables like cmdb_ci_hyper_v_server or
+        # cmdb_ci_ip_router, and there is no "does not start with" operator.
+        # 'sys_update_nameISNOTEMPTY' keeps tracked objects (drops some temp tables).
         url = f"{self.base_url}/api/now/table/sys_db_object"
-        params = {
-            "sysparm_query": query,
-            "sysparm_fields": "name,label",
-            "sysparm_limit": 5000,  # Safety limit
-            "sysparm_exclude_reference_link": "true",
-        }
-
+        tables = []
+        offset = 0
         try:
-            response = requests.get(
-                url,
-                auth=self.auth,
-                headers=self._get_headers(),
-                params=params,
-                timeout=30,
-                allow_redirects=False,
-            )
-            response.raise_for_status()
-            results = response.json().get("result", [])
+            while True:
+                params = {
+                    "sysparm_query": "sys_update_nameISNOTEMPTY^ORDERBYname",
+                    "sysparm_fields": "name,label",
+                    "sysparm_limit": TABLES_PAGE_SIZE,
+                    "sysparm_offset": offset,
+                    "sysparm_exclude_reference_link": "true",
+                }
+                response = requests.get(
+                    url,
+                    auth=self.auth,
+                    headers=self._get_headers(),
+                    params=params,
+                    timeout=30,
+                    allow_redirects=False,
+                )
+                response.raise_for_status()
+                records = response.json().get("result", [])
+                tables.extend(
+                    t for t in records if not is_excluded_table(t.get("name", ""))
+                )
 
-            # Sort by Label for UX
-            return sorted(results, key=lambda x: x.get("label", ""))
+                offset += len(records)
+                if len(records) < TABLES_PAGE_SIZE:
+                    break
+                if offset >= MAX_TABLES_FETCH:
+                    logger.warning(
+                        "ServiceNow table scan budget exhausted", scanned=offset
+                    )
+                    break
 
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             logger.error("Failed to fetch tables", exc_info=True)
             raise
+
+        # Sort by Label for UX
+        return sorted(tables, key=lambda x: x.get("label", ""))
 
     def get_table_columns(self, table_name: str) -> list[dict]:
         """
