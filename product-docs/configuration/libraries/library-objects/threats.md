@@ -23,11 +23,11 @@ The metadata sheet is a key-value table with one property per row.
 | Property | Meaning | Format / allowed values |
 | --- | --- | --- |
 | `type`<mark style="color:$danger;">*</mark> | Identifies the object type | Enter `threats` |
-| `base_urn`<mark style="color:$danger;">*</mark> | Prefix used to build each threat's URN | `urn:<packager>:risk:threat:<identifier>` |
+| `base_urn`<mark style="color:$danger;">*</mark> | Prefix used to build each threat's URN | `urn:<packager>:risk:threat:<identifier>`; use lowercase letters, numbers, `.`, `_`, or `-` only; no spaces |
 
 ### `<object>_content`
 
-The content sheet contains one row per threat. Its URN is built from `base_urn` and the lowercase `ref_id`.
+The content sheet contains one row per threat.
 
 | Field | Meaning | Format / allowed values |
 | --- | --- | --- |
@@ -40,18 +40,20 @@ See [Translate library content](../translations.md) for how to add translations.
 
 ## Relationships with other objects
 
-A [Framework](framework.md) can list threat URNs in the `threats` column of its content sheet. [URN Prefixes](urn-prefixes.md) can shorten those references in Excel, while the imported YAML stores full URNs. Threats can also be packaged in a different library; add that library to the current [Library metadata](library-metadata.md) `dependencies` when referencing it.
+A [Framework](framework.md) can list threat URNs in the `threats` column of its content sheet. [URN Prefixes](urn-prefixes.md) can shorten these URNs in the framework's content sheet in the Excel, while the imported YAML stores full URNs.
+
+Threats can be packaged in a library without a Framework. If a Framework in another library references them, add the Threats library's URN to `dependencies` in the Framework library's [Library metadata](library-metadata.md) object.
 
 ## Tips
 
 ### When creating a library
 
-- Choose a `base_urn` for the catalogue and give each threat a stable `ref_id`.
-- Use one row per distinct threat rather than repeating it across requirements.
+- Choose a stable `base_urn` for the catalogue and give each threat a stable `ref_id`.
+- As a best practice, reuse the identifier at the end of the library's `urn` for the `<identifier>` part of `base_urn`. This keeps the URNs consistent.
 
 ### When updating a library
 
-- Keep `base_urn` and existing `ref_id` values stable so framework references still point to the same threats.
+- Keep `base_urn` and existing `ref_id` values stable.
 - Update names and descriptions without changing identifiers when only the wording changes.
 
 ## Example
@@ -94,7 +96,9 @@ objects:
     description: Important data becomes unavailable
 ```
 
-The Excel `type` marker and `base_urn` do not become separate YAML fields; `base_urn` is part of each threat's `urn`.
+The Excel `type` marker and `base_urn` do not become separate YAML fields. `base_urn` is part of each threat's `urn`.
+
+When a requirement references a threat, its `threats` list in the converted YAML contains the threat's full URN. The requirement stores this reference, not a copy of the threat's details.
 </details>
 
 ## Related pages
