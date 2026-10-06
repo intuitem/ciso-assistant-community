@@ -29,28 +29,31 @@ For example, if `name` is `answ`, the object is defined by `answ_meta` and `answ
 
 ### `<object>_content`
 
-The content sheet contains one row per answer set. For choice questions, put one choice per line in the `question_choices` cell. Use the same line order in columns that describe each choice; enter `/` for a choice that has no value in an optional column.
+The content sheet contains one row per answer set. For choice questions, put one choice per line in the `question_choices` cell. Use the same line order in columns that describe each choice. Use `/` for a choice that has no value in an optional column.
 
 | Field | Meaning | Format / allowed values |
 | --- | --- | --- |
-| `id`<mark style="color:$danger;">*</mark> | Identifier used by questions in the framework | Unique text identifier within this sheet |
+| `id`<mark style="color:$danger;">*</mark> | Identifier used by questions in a framework | Letters, numbers, `.`, `_`, or `-` only; no spaces. Keep it consistent with the references in the framework. |
 | `question_type`<mark style="color:$danger;">*</mark> | How the user answers | `unique_choice`, `multiple_choice`, `text`, or `date` |
-| `question_choices` <mark style="color:$info;">T</mark> | Choices offered for a choice question | One choice per line; required for `unique_choice` and `multiple_choice`. Start a continuation line with a vertical bar to keep a line break inside one choice |
-| `description` <mark style="color:$info;">T</mark> | Explanation for each choice | One value per choice, on separate lines; `/` for none |
-| `select_implementation_groups` | Groups selected when a choice is chosen | Group `ref_id` values separated by commas within a choice; one line per choice, `/` for none |
+| `question_choices` <mark style="color:$info;">T</mark> | Choices offered for a choice question | Text. One choice per line. Required for `unique_choice` and `multiple_choice`. Start a continuation line with a vertical bar `\|` to keep a line break inside one choice. |
+| `description` <mark style="color:$info;">T</mark> | Explanation for each choice | Text. One value per choice, on separate lines; `/` for none |
+| `select_implementation_groups` | Groups selected when a choice is chosen | Implementation Group `ref_id` values separated by commas within a choice; one line per choice, `/` for none |
 | `add_score` | Points contributed by each choice | Whole number, zero or greater, per choice; one line per choice |
 | `compute_result` | Compliance result contributed by each choice | `compliant`, `partially_compliant`, `non_compliant`, or `not_applicable`; one line per choice, `/` for none |
-| `color` | Color shown for each choice | `#RRGGBB` per choice, one line per choice, `/` for none |
+| `color` | Color shown for each choice | Hex color `#RRGGBB` per choice, one line per choice, `/` for none |
 
-The `question_choices` cell can be empty for `text` and `date`. See [Translate library content](../translations.md) for how to add translations.
+The `question_choices` cell must be empty for a `text` or `date` question. See [Translate library content](../translations.md) for how to add translations.
 
 {% hint style="info" %}
-Use `select_implementation_groups` only for a questionnaire that reveals additional requirements based on an answer. It selects groups defined in [Implementation Groups](implementation-groups.md).
+For a basic choice based questionnaire, `id`, `question_type`, and `question_choices` are usually enough. The other columns are optional and add advanced features such as scoring or dynamic questions.
 {% endhint %}
 
 ## Relationships with other objects
 
-Set `answers_definition` in the [Framework](framework.md) metadata sheet to the Answers object prefix. In the framework content, `questions` contains the question text and `answer` contains an `id` from this sheet. One answer ID can be used for every question in a requirement, or each question can have its own ID on a separate line.
+An Answers object is linked to a [Framework](framework.md) in two places:
+
+1. In the framework's metadata sheet, set `answers_definition` to the Answers object prefix (e.g., `answ`).
+2. In the framework's content sheet, write the questions in `questions` and use the `answer` column to assign an Answers `id` to each question. Use one answer ID for all questions in a requirement, or one ID per question on separate lines.
 
 Answer choices can select [Implementation Groups](implementation-groups.md) or add points to the framework's [Scores](scores.md). Their `compute_result` values can also contribute to a requirement's compliance result.
 
@@ -58,17 +61,18 @@ Answer choices can select [Implementation Groups](implementation-groups.md) or a
 
 ### When creating a library
 
-- Reuse an answer `id` when several questions have the same type and choices
-- Keep choice lines aligned across `question_choices` and any per-choice columns you use
+- Use short, stable `id` values.
+- Reuse an answer `id` when several questions have the same type and choices.
+- Keep choice lines aligned across `question_choices` and any per-choice columns you use.
 
 ### When updating a library
 
-- Keep existing answer IDs and choice order stable when possible; choice URNs use their position in the list
-- Review questions that reuse an answer set before changing its choices or scoring
+- Keep existing answer IDs and choice order stable when possible. Choice URNs use their position in the list.
+- Review questions that reuse an answer set before changing its choices or scoring.
 
 ## Example
 
-The tables below show an example of an Answers object for a single-choice question.
+The tables below show an example of an Answers object for a single choice question.
 
 ### `answ_meta`
 
@@ -114,7 +118,7 @@ objects:
             value: 'No'
 ```
 
-The question text comes from `fwk_content`. Its type and choices come from `answ_content`.
+The question `text` comes from `fwk_content`. Its `type` and `choices` come from `answ_content`.
 </details>
 
 ## Related pages
