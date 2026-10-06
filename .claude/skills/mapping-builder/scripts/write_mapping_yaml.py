@@ -132,8 +132,15 @@ def _build_mapping_set(
                 m["strength_of_relationship"] = int(v["strength_of_relationship"])
             except (TypeError, ValueError):
                 pass
-        if v.get("rationale"):
-            m["rationale"] = v["rationale"]
+        # RequirementMapping.rationale is a CharField(max_length=20) enum;
+        # free-text explanations go to annotation.
+        rationale = v.get("rationale")
+        if rationale in ("syntactic", "semantic", "functional"):
+            m["rationale"] = rationale
+        else:
+            m["rationale"] = v.get("rationale_type", "semantic")
+            if rationale:
+                m["annotation"] = rationale
         mappings.append(m)
 
     return {
