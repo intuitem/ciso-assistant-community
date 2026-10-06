@@ -31,8 +31,8 @@ The metadata sheet is a key-value table with one property per row.
 | `implementation_groups_definition` | Links an [Implementation Groups](implementation-groups.md) object | The `name` value in the Implementation Groups object's metadata sheet |
 | `answers_definition` | Links an [Answers](answers.md) object | The `name` value in the Answers object's metadata sheet |
 | `scores_definition` | Links a [Scores](scores.md) object | The `name` value in the Scores object's metadata sheet |
-| `min_score` | Lowest score available when assessing requirements | Whole number |
-| `max_score` | Highest score available when assessing requirements | Whole number |
+| `min_score` | Lowest score available when assessing requirements | Integer |
+| `max_score` | Highest score available when assessing requirements | Integer |
 
 For example, if `implementation_groups_definition` is `imp_grp`, the framework uses the sheets `imp_grp_meta` and `imp_grp_content`.
 
@@ -45,16 +45,16 @@ The content sheet contains one row per section or requirement. Rows follow the o
 | Field | Meaning | Format / allowed values |
 | --- | --- | --- |
 | `assessable`<mark style="color:$danger;">*</mark> | Whether users assess this element | Enter `x` for an assessable requirement, leave empty for a heading |
-| `depth`<mark style="color:$danger;">*</mark> | Level in the hierarchy | Positive whole number. Start with `1` and do not skip any levels (except when returning to a lower level). |
+| `depth`<mark style="color:$danger;">*</mark> | Level in the hierarchy | Positive integer. Start with `1` and do not skip any levels (except when returning to a lower level). |
 | `ref_id` | Identifier used to recognize the element| Letters, numbers, `.`, `_`, or `-` only; no spaces. Keep it stable across versions. |
 | `name` <mark style="color:$info;">T</mark> | Short title | Text |
 | `description` <mark style="color:$info;">T</mark> | Requirement text or explanation | Text |
 | `annotation` <mark style="color:$info;">T</mark> | Additional guidance | Text |
 | `typical_evidence` <mark style="color:$info;">T</mark> | Examples of evidence to look for | Text |
 | `importance` | Priority of the requirement | `mandatory`, `recommended`, or `nice_to_have` |
-| `weight` | Relative weight of the requirement | Positive whole number |
-| `min_score` | Lowest score for a specific requirement, overriding the framework value | Whole number |
-| `max_score` | Highest score for a specific requirement, overriding the framework value | Whole number |
+| `weight` | Relative weight of the requirement | Positive integer |
+| `min_score` | Lowest score for a specific requirement, overriding the framework value | Integer |
+| `max_score` | Highest score for a specific requirement, overriding the framework value | Integer |
 | `scores_definition` | Alternative score scale for this requirement | Prefix of a [Scores](scores.md) sheet pair |
 | `implementation_groups` | Implementation Groups used to filter the requirement | One or more [Implementation Groups](implementation-groups.md) `ref_id` values, separated by commas |
 | `questions` <mark style="color:$info;">T</mark> | Questions asked when assessing a requirement | One question per line in a cell |

@@ -33,7 +33,7 @@ The content sheet contains one row per score.
 
 | Field | Meaning | Format / allowed values |
 | --- | --- | --- |
-| `score`<mark style="color:$danger;">*</mark> | Numeric value assigned to the score | Unique whole number, zero or greater |
+| `score`<mark style="color:$danger;">*</mark> | Numeric value assigned to the score | Unique non-negative integer |
 | `name`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | Label shown for the score | Text |
 | `description` <mark style="color:$info;">T</mark> | What the score means | Text |
 | `description_doc` <mark style="color:$info;">T</mark> | Rarely used. Description for the documentation score. | Text |

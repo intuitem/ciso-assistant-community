@@ -46,7 +46,7 @@ The content sheet contains one row per requirement link.
 | `target_node_id`<mark style="color:$danger;">*</mark> | Requirement identifier in the target Framework | URN suffix of the target requirement, without its `base_urn` |
 | `relationship`<mark style="color:$danger;">*</mark> | How the source requirement compares with the target | `subset`, `intersect`, `equal`, `superset`, or `not_related` |
 | `rationale` | Basis for the comparison | `syntactic`, `semantic`, or `functional` |
-| `strength_of_relationship` | Optional strength assigned to the link | Whole number |
+| `strength_of_relationship` | Optional strength assigned to the link | Integer |
 
 {% hint style="info" %}
 Use the identifier that appears at the end of the requirement's URN. It is often based on its `ref_id`, but the two can differ, so check the Framework you are mapping.

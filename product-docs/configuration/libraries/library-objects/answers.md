@@ -38,7 +38,7 @@ The content sheet contains one row per answer set. For choice questions, put one
 | `question_choices` <mark style="color:$info;">T</mark> | Choices offered for a choice question | Text. One choice per line. Required for `unique_choice` and `multiple_choice`. Start a continuation line with a vertical bar `\|` to keep a line break inside one choice. |
 | `description` <mark style="color:$info;">T</mark> | Explanation for each choice | Text. One value per choice, on separate lines; `/` for none |
 | `select_implementation_groups` | Groups selected when a choice is chosen | Implementation Group `ref_id` values separated by commas within a choice; one line per choice, `/` for none |
-| `add_score` | Points contributed by each choice | Whole number, zero or greater, per choice; one line per choice |
+| `add_score` | Points contributed by each choice | Non-negative integer per choice; one line per choice |
 | `compute_result` | Compliance result contributed by each choice | `compliant`, `partially_compliant`, `non_compliant`, or `not_applicable`; one line per choice, `/` for none |
 | `color` | Color shown for each choice | Hex color `#RRGGBB` per choice, one line per choice, `/` for none |
 
