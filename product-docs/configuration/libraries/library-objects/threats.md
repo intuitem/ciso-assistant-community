@@ -46,13 +46,13 @@ A [Framework](framework.md) can list threat URNs in the `threats` column of its 
 
 ### When creating a library
 
-- Choose a `base_urn` for the catalogue and give each threat a stable `ref_id`
-- Use one row per distinct threat rather than repeating it across requirements
+- Choose a `base_urn` for the catalogue and give each threat a stable `ref_id`.
+- Use one row per distinct threat rather than repeating it across requirements.
 
 ### When updating a library
 
-- Keep `base_urn` and existing `ref_id` values stable so framework references still point to the same threats
-- Update names and descriptions without changing identifiers when only the wording changes
+- Keep `base_urn` and existing `ref_id` values stable so framework references still point to the same threats.
+- Update names and descriptions without changing identifiers when only the wording changes.
 
 ## Example
 

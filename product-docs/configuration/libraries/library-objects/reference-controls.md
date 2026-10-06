@@ -48,13 +48,13 @@ A [Framework](framework.md) can reference controls in its `reference_controls` c
 
 ### When creating a library
 
-- Give each control a stable `ref_id` and use the same `base_urn` throughout its catalogue
-- Use `category` and `csf_function` only when those classifications help users find or group controls
+- Give each control a stable `ref_id` and use the same `base_urn` throughout its catalogue.
+- Use `category` and `csf_function` only when those classifications help users find or group controls.
 
 ### When updating a library
 
-- Keep `base_urn` and existing `ref_id` values unchanged when editing the wording of a control
-- Review framework references if you replace or remove a control
+- Keep `base_urn` and existing `ref_id` values unchanged when editing the wording of a control.
+- Review framework references if you replace or remove a control.
 
 ## Example
 

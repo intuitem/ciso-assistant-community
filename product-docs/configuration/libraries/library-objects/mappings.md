@@ -56,13 +56,13 @@ A Mapping refers to two [Frameworks](framework.md) by URN and links their requir
 
 ### When creating a library
 
-- Check the source and target Framework URNs and node base URNs before entering requirement links
-- Write each relationship from source to target; the reverse Mapping is generated during conversion
+- Check the source and target Framework URNs and node base URNs before entering requirement links.
+- Write each relationship from source to target; the reverse Mapping is generated during conversion.
 
 ### When updating a library
 
-- Keep the Mapping `urn` and `ref_id` stable when only its wording changes
-- Review requirement links if either Framework changes a requirement URN
+- Keep the Mapping `urn` and `ref_id` stable when only its wording changes.
+- Review requirement links if either Framework changes a requirement URN.
 
 ## Example
 

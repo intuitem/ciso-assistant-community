@@ -54,13 +54,13 @@ A Risk Matrix is an independent library object. It does not need a [Framework](f
 
 ### When creating a library
 
-- List the probability and impact IDs before filling the grid, so every intersection points to a defined risk ID
-- Set colors through the Excel cell fills, not by typing a color code into the `color` column
+- List the probability and impact IDs before filling the grid, so every intersection points to a defined risk ID.
+- Set colors through the Excel cell fills, not by typing a color code into the `color` column.
 
 ### When updating a library
 
-- Keep the matrix `urn` and existing level IDs stable when only labels or colors change
-- Check every grid cell if you add, remove, or reorder a probability, impact, or risk level
+- Keep the matrix `urn` and existing level IDs stable when only labels or colors change.
+- Check every grid cell if you add, remove, or reorder a probability, impact, or risk level.
 
 ## Example
 

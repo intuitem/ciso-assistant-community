@@ -45,13 +45,13 @@ The referenced object does not have to be in the same library. If it belongs to 
 
 ### When creating a library
 
-- Add prefixes only for catalogues you actually reference from the framework
-- Choose short, distinct `prefix_id` values so references remain easy to read
+- Add prefixes only for catalogues you actually reference from the framework.
+- Choose short, distinct `prefix_id` values so references remain easy to read.
 
 ### When updating a library
 
-- Keep existing prefix values stable unless you also update every framework reference that uses them
-- Check that an external catalogue still uses the same URN prefix before changing its references
+- Keep existing prefix values stable unless you also update every framework reference that uses them.
+- Check that an external catalogue still uses the same URN prefix before changing its references.
 
 ## Example
 

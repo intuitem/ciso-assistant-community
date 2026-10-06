@@ -42,19 +42,24 @@ See [Translate library content](../translations.md) for how to add translations.
 
 ## Relationships with other objects
 
-Set `scores_definition` in a [Framework](framework.md) metadata sheet to the Scores object prefix. A framework requirement can use another scale by putting its prefix in the framework content's `scores_definition` column. Answer choices in [Answers](answers.md) can contribute points through `add_score`.
+A Scores object can be linked to a [Framework](framework.md) in two places:
+
+1. In the framework's metadata sheet, set `scores_definition` to the Scores object prefix (e.g., `scr`) to define the default scale.
+2. In the framework's content sheet, use the `scores_definition` column to assign a different Scores object prefix to an individual requirement.
+
+Answer choices in [Answers](answers.md) can contribute points through `add_score`.
 
 ## Tips
 
 ### When creating a library
 
-- Define the numeric range in the framework's `min_score` and `max_score` properties, then add labels for the levels users need to interpret
-- Use a separate Scores object for a requirement only when its scale genuinely differs from the framework's main scale
+- Define the numeric range in the framework's `min_score` and `max_score` properties, then add labels for the levels users need to interpret.
+- Use a separate Scores object for a requirement only when its scale genuinely differs from the framework's main scale.
 
 ### When updating a library
 
-- Keep score numbers stable when changing their names or descriptions
-- Review existing audits before changing the range or the meaning of a score
+- Keep score numbers stable when changing their names or descriptions.
+- Review existing audits before changing the range or the meaning of a score.
 
 ## Example
 

@@ -80,13 +80,13 @@ A Framework can use [Implementation Groups](implementation-groups.md), [Answers]
 
 ### When creating a library
 
-- Start with the sections and requirements you want users to assess, then set their `depth` and `assessable` values
-- Give requirements stable `ref_id` values before linking them to groups, questions, Threats, or Reference Controls
+- Start with the sections and requirements you want users to assess, then set their `depth` and `assessable` values.
+- Give requirements stable `ref_id` values before linking them to groups, questions, Threats, or Reference Controls.
 
 ### When updating a library
 
-- Keep the framework `urn`, `base_urn`, and existing requirement `ref_id` values when possible
-- Review linked objects and existing audits before changing the hierarchy, questions, or scoring
+- Keep the framework `urn`, `base_urn`, and existing requirement `ref_id` values when possible.
+- Review linked objects and existing audits before changing the hierarchy, questions, or scoring.
 
 ## Example
 
