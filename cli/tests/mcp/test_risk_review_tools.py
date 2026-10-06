@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parents[2]))
 
 from ca_mcp import resolvers  # noqa: E402
 from ca_mcp.tools import update_tools, write_tools  # noqa: E402
