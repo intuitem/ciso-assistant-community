@@ -17305,7 +17305,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 if finding.due_date
                 else "",
             }
-            entries.append(entry)
+            entries.append({k: sanitize_xlsx_value(v) for k, v in entry.items()})
 
         df = pd.DataFrame(entries)
         buffer = io.BytesIO()

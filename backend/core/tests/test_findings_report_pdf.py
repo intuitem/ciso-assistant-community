@@ -273,3 +273,19 @@ def test_xlsx_export_carries_recommendation(admin_client, assessment):  # noqa: 
     header, first = rows[0], rows[1]
     assert "recommendation" in header
     assert first[header.index("recommendation")] == "Rotate the key."
+
+
+@pytest.mark.django_db
+def test_xlsx_export_strips_control_characters(admin_client, assessment):  # noqa: F811
+    """openpyxl refuses control characters, which used to fail the whole export."""
+    (finding,) = _findings(assessment, [3], rich=True)
+    finding.recommendation = "Rotate\x0b the key."
+    finding.save()
+    url = reverse("findings-assessments-xlsx", kwargs={"pk": str(assessment.pk)})
+    response = admin_client.get(url)
+    assert response.status_code == http.HTTP_200_OK
+
+    sheet = openpyxl.load_workbook(io.BytesIO(response.content))["Findings"]
+    rows = list(sheet.iter_rows(values_only=True))
+    header, first = rows[0], rows[1]
+    assert first[header.index("recommendation")] == "Rotate the key."
