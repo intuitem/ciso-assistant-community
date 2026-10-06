@@ -50,7 +50,7 @@ See [Designing your own libraries](../configuration/libraries/custom-libraries.m
 
 ## Lifecycle
 
-Libraries are versioned. When a newer version is available, you can upgrade in place — your existing audits keep using the version they were created with until you migrate them explicitly. See [Update a library](../configuration/libraries/update-library.md) and [Library clean-up](../configuration/libraries/library-cleanup.md).
+Libraries are versioned. When a newer version is available, you can upgrade in place — your existing audits keep using the version they were created with until you migrate them explicitly. See [Update a library](../configuration/libraries/update-library.md) and [Unload or delete a library](../configuration/libraries/unload-or-delete-library.md).
 
 ## Related
 

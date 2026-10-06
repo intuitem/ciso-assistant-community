@@ -129,7 +129,7 @@
   * [Import a library](configuration/libraries/import-library.md)
   * [Test a library](configuration/libraries/test-library.md)
   * [Update a library](configuration/libraries/update-library.md)
-  * [Unload or delete a library](configuration/libraries/library-cleanup.md)
+  * [Unload or delete a library](configuration/libraries/unload-or-delete-library.md)
   * [Migrate a library from v1 to v2](configuration/libraries/migrate-v1-to-v2.md)
   * [Examples](configuration/libraries/examples.md)
   * [Guided example: create your first framework](configuration/libraries/guided-example.md)
