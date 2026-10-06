@@ -4,7 +4,7 @@ description: Define reusable reference controls in a library
 
 # Reference Controls
 
-Reference Controls describe measures an organization can put in place. A library can collect them for reuse in a [Framework](framework.md) or elsewhere in CISO Assistant.
+Reference Controls describe measures an organization can put in place. A library can provide a catalogue of reference controls that a [Framework](framework.md) can reference from its requirements.
 
 ## Excel structure and fields
 
@@ -23,11 +23,11 @@ The metadata sheet is a key-value table with one property per row.
 | Property | Meaning | Format / allowed values |
 | --- | --- | --- |
 | `type`<mark style="color:$danger;">*</mark> | Identifies the object type | Enter `reference_controls` |
-| `base_urn`<mark style="color:$danger;">*</mark> | Prefix used to build each control's URN | `urn:<packager>:risk:function:<identifier>` |
+| `base_urn`<mark style="color:$danger;">*</mark> | Prefix used to build each control's URN | `urn:<packager>:risk:function:<identifier>`; use lowercase letters, numbers, `.`, `_`, or `-` only; no spaces |
 
 ### `<object>_content`
 
-The content sheet contains one row per reference control. Its URN is built from `base_urn` and the lowercase `ref_id`.
+The content sheet contains one row per reference control.
 
 | Field | Meaning | Format / allowed values |
 | --- | --- | --- |
@@ -42,19 +42,22 @@ See [Translate library content](../translations.md) for how to add translations.
 
 ## Relationships with other objects
 
-A [Framework](framework.md) can reference controls in its `reference_controls` column. Use full URNs or define [URN Prefixes](urn-prefixes.md) for shorter Excel references. If a control comes from another library, list that library's URN in [Library metadata](library-metadata.md) under `dependencies`.
+A [Framework](framework.md) can list reference control URNs in the `reference_controls` column of its content sheet. [URN Prefixes](urn-prefixes.md) can shorten these URNs in the framework's content sheet in the Excel, while the imported YAML stores full URNs.
+
+Reference Controls can be packaged in a library without a Framework. If a Framework in another library references them, add the Reference Controls library's URN to `dependencies` in the Framework library's [Library metadata](library-metadata.md) object.
 
 ## Tips
 
 ### When creating a library
 
-- Give each control a stable `ref_id` and use the same `base_urn` throughout its catalogue.
+- Choose a stable `base_urn` for the catalogue and give each reference control a stable `ref_id`.
+- As a best practice, reuse the identifier at the end of the library's `urn` for the `<identifier>` part of `base_urn`. This keeps the URNs consistent.
 - Use `category` and `csf_function` only when those classifications help users find or group controls.
 
 ### When updating a library
 
-- Keep `base_urn` and existing `ref_id` values unchanged when editing the wording of a control.
-- Review framework references if you replace or remove a control.
+- Keep `base_urn` and existing `ref_id` values stable.
+- Update names and descriptions without changing identifiers when only the wording changes.
 
 ## Example
 
@@ -100,7 +103,9 @@ objects:
     description: Check that backups can be restored
 ```
 
-The Excel `base_urn` is included in each generated `urn`.
+The Excel `type` marker and `base_urn` do not become separate YAML fields. `base_urn` is part of each reference control's `urn`.
+
+When a requirement references a Reference Control, its `reference_controls` list in the converted YAML contains the control's full URN. The requirement stores this reference, not a copy of the control's details.
 </details>
 
 ## Related pages
