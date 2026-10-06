@@ -37,14 +37,6 @@
 		);
 	}
 
-	interface QuickFilters {
-		[key: string]: Set<string> | boolean;
-	}
-	let quickFilterValues: QuickFilters = {
-		object_type: new Set(),
-		is_update: false
-	};
-
 	type FilterConfig = {
 		type: 'string' | 'boolean';
 		field: string;
@@ -149,23 +141,16 @@
 		URLModel="stored-libraries"
 		deleteForm={data.deleteForm}
 		onFilterChange={(filters) => {
-			// Reset all quickFilterSelected states
-			Object.keys(quickFilterSelected).forEach((key) => (quickFilterSelected[key] = false));
-
+			// Assign each key once: resetting every key to false before setting it back
+			// writes state this effect reads, which loops until Svelte aborts the update.
 			for (const key in filterConfiguration) {
 				const config = filterConfiguration[key];
 				const filterValues = filters[config.field] ?? [];
 
-				if (config.type === 'string') {
-					const filteredValues = filterValues.map((filter) => filter.value);
-					if (filteredValues.includes(key)) {
-						quickFilterSelected[key] = true;
-					}
-				} else if (config.type === 'boolean') {
-					if (filterValues.some((f) => f.value === 'true')) {
-						quickFilterSelected[key] = true;
-					}
-				}
+				quickFilterSelected[key] =
+					config.type === 'string'
+						? filterValues.some((f) => f.value === key)
+						: filterValues.some((f) => f.value === 'true');
 			}
 		}}
 	>
@@ -195,14 +180,10 @@
 								const newValues = Array.from(currentValues);
 								filterValues[config.field] = newValues.map((v) => ({ value: v }));
 							} else if (config.type === 'boolean') {
-								const currentValue = quickFilterValues[config.field] as boolean;
-								const newValue = !currentValue;
-								quickFilterValues[config.field] = newValue;
-
-								if (newValue) {
-									filterValues[config.field] = [{ value: 'true' }];
+								if (quickFilterSelected[key]) {
+									filterValues[config.field] = [];
 								} else {
-									delete filterValues[config.field];
+									filterValues[config.field] = [{ value: 'true' }];
 								}
 							}
 						}}
