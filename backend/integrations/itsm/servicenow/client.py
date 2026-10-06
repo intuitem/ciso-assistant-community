@@ -41,18 +41,18 @@ TABLES_PAGE_SIZE = 1000
 MAX_TABLES_FETCH = 50000
 
 # Table name prefixes hidden from the table picker as noise:
-# sys_ (metadata), ts_ (text search), v_ (views), imp_ (import sets),
-# var_ (catalog variables), wf_ (workflow contexts), pa_ (performance
-# analytics), ecc_ (queue), metric_ (metric definitions), and so on.
+# sys_ (metadata), ts_ (text search), v_ (views), var_ (catalog variables),
+# wf_ (workflow contexts), pa_ (performance analytics), ecc_ (queue),
+# metric_ (metric definitions), and so on.
 # sn_ is deliberately absent: it is the namespace of every scoped Store app
-# (Customer Service, Security Incident Response, GRC/IRM, HR...).
+# (Customer Service, Security Incident Response, GRC/IRM, HR...). So is
+# cmn_, which holds reference tables like cmn_location or cmn_department.
 EXCLUDED_TABLE_PREFIXES = (
     "sys_",
     "sysevent",
     "syslog",
     "ts_",
     "v_",
-    "imp_",
     "var_",
     "wf_",
     "pa_",
@@ -66,7 +66,6 @@ EXCLUDED_TABLE_PREFIXES = (
     "usageanalytics_",
     "automation_pipeline_",
     "cdc_",
-    "cmn_",
     "cxs_",
     "discovery_",
     "hermes_",
@@ -99,9 +98,15 @@ EXCLUDED_TABLE_PREFIXES = (
 )
 
 
+# Matched anywhere in the name: link tables come as both m2m_* and *_m2m*,
+# and import sets as imp_*, u_imp_* or x_<scope>_imp_*.
+EXCLUDED_TABLE_SUBSTRINGS = ("m2m", "imp_")
+
+
 def is_excluded_table(name: str) -> bool:
-    # Link tables come as both m2m_* and *_m2m*.
-    return name.startswith(EXCLUDED_TABLE_PREFIXES) or "m2m" in name
+    return name.startswith(EXCLUDED_TABLE_PREFIXES) or any(
+        s in name for s in EXCLUDED_TABLE_SUBSTRINGS
+    )
 
 
 class ServiceNowClient(BaseIntegrationClient):
@@ -437,8 +442,16 @@ class ServiceNowClient(BaseIntegrationClient):
                     t for t in records if not is_excluded_table(t.get("name", ""))
                 )
 
-                offset += len(records)
-                if len(records) < TABLES_PAGE_SIZE:
+                # ACLs drop rows after sysparm_limit is applied, so a short
+                # page does not mean the end: step by the requested size and
+                # let the Link header say whether another page exists. Fall
+                # back to the page length if something stripped the header.
+                offset += TABLES_PAGE_SIZE
+                if response.links:
+                    has_next = "next" in response.links
+                else:
+                    has_next = len(records) >= TABLES_PAGE_SIZE
+                if not has_next:
                     break
                 if offset >= MAX_TABLES_FETCH:
                     logger.warning(
@@ -451,7 +464,7 @@ class ServiceNowClient(BaseIntegrationClient):
             raise
 
         # Sort by Label for UX
-        return sorted(tables, key=lambda x: x.get("label", ""))
+        return sorted(tables, key=lambda x: (x.get("label") or "").casefold())
 
     def get_table_columns(self, table_name: str) -> list[dict]:
         """
