@@ -1,5 +1,5 @@
 ---
-description: Unload or remove a library from CISO Assistant
+description: Unload or delete a library from CISO Assistant
 ---
 
 # Unload or delete a library
@@ -19,10 +19,10 @@ If existing audits use a Framework from the library you want to unload, the unlo
 If you only want to update the library, follow [Update a library](update-library.md) instead.
 {% endhint %}
 
-## Delete a custom library
+## Delete a library
 
 1. If the library is loaded, unload it first using the steps above.
-2. In **Governance > Libraries**, find the library you want to remove.
+2. In **Governance > Libraries**, find the library you want to delete.
 3. In the relevant row, click the <img src="../../.gitbook/assets/delete_library_button.png" alt="Trash can: Delete library" data-size="line"> button at the far right.
 
 ![Libraries page with the Delete button highlighted for an unloaded custom library](../../.gitbook/assets/delete_library.png)
