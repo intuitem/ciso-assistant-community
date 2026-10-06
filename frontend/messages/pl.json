@@ -1104,7 +1104,6 @@
 	"emailChangeRequiresUserGroupManagementRights": "Zmiana adresu e-mail użytkownika należącego do grup wymaga uprawnień do zarządzania wszystkimi jego grupami użytkowników.",
 	"isScimManaged": "Zarządzane przez SCIM",
 	"isJitProvisioned": "Utworzone w trybie just-in-time",
-	"scoringHelpText": "Zaznacz, aby włączyć punktację",
 	"overrideScore": "Zastąp wynik",
 	"overrideScoreHelpText": "Ręcznie ustal wynik i wyłącz jego przeliczanie na podstawie odpowiedzi",
 	"automaticScore": "Wynik automatyczny",

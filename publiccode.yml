@@ -2,8 +2,8 @@ publiccodeYmlVersion: 0.5.0
 name: CISO Assistant
 url: https://github.com/intuitem/ciso-assistant-community
 landingURL: https://intuitem.com
-softwareVersion: 3.15.9
-releaseDate: 2026-04-16
+softwareVersion: 4.1.0
+releaseDate: 2026-10-04
 logo: https://intuitem.com/ciso-assistant.png
 platforms:
   - web
@@ -26,12 +26,15 @@ softwareType: standalone/web
 description:
   en:
     shortDescription: CISO Assistant is a one-stop-shop GRC platform covering all
-      cybersecurity managment activities
+      cybersecurity management activities
     longDescription: CISO Assistant is a one-stop-shop GRC platform for Risk
       Management, AppSec, Compliance & Audit, TPRM, Privacy, and Reporting. It
-      supports 130+ global frameworks with automatic control mapping, including
-      ISO 27001, NIST CSF, SOC 2, CIS, PCI DSS, NIS2, DORA, GDPR, HIPAA, CMMC,
-      and more.
+      supports 220+ global frameworks and 45+ mapping sets with automatic
+      control mapping, including ISO 27001, NIST CSF, SOC 2, CIS, PCI DSS,
+      NIS2, DORA, GDPR, HIPAA, CMMC, and more. It also covers EBIOS RM,
+      business impact analysis, cyber risk quantification, incident and
+      vulnerability management, workflow automation, a REST API, MCP support
+      and an AI assistant.
     documentation: https://intuitem.gitbook.io/ciso-assistant
     apiDocumentation: https://ca-api-doc.pages.dev
     features:
@@ -40,8 +43,13 @@ description:
       - GDPR-management
       - risk-quantification
       - frameworks-mapping
+      - third-party-risk-management
+      - business-impact-analysis
+      - incident-management
       - dora
       - vulnerabilities
+      - workflow-automation
+      - ai-assistant
       - mcp
       - api
 legal:
@@ -55,19 +63,30 @@ maintenance:
 localisation:
   localisationReady: true
   availableLanguages:
-    - fr
-    - nl
-    - de
-    - it
     - en
+    - fr
     - ar
     - pt
     - es
-    - ko
-    - lt
-    - zh
-    - id
-    - tr
+    - de
+    - nl
+    - it
     - pl
     - ro
+    - hi
+    - ur
+    - cs
+    - sv
+    - id
+    - da
+    - hu
+    - uk
     - el
+    - tr
+    - hr
+    - zh
+    - lt
+    - ko
+    - et
+    - sk
+    - sl

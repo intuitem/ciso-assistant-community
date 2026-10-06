@@ -89,19 +89,24 @@ from .validators import (
     JSONSchemaInstanceValidator,
 )
 from . import dora
+from .framework_exports import available_for as available_framework_exports
 from collections import defaultdict, deque
 from dataclasses import dataclass
 
 logger = get_logger(__name__)
 
 
-def _truncate_one_decimal(value: float) -> float:
-    """Truncate *value* to one decimal, matching the JS frontend display.
+def round_score(value: float) -> float:
+    """Round an aggregated score to two decimals, half up.
 
-    A tiny epsilon absorbs float-precision noise introduced by ratio-based
-    aggregation (e.g. 77.49999999999 should still truncate to 77.5).
+    Matches the precision of reference tools such as the CCB CyFun
+    self-assessment workbook. Rounding to 9 decimals first absorbs
+    float-precision noise from ratio-based aggregation (e.g. 2.69499999999
+    must round to 2.70, not 2.69).
     """
-    return int(value * 10 + 1e-9) / 10
+    return float(
+        Decimal(repr(round(value, 9))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    )
 
 
 def _defer_once(conn_attr: str, key, callback):
@@ -1740,6 +1745,23 @@ class LibraryUpdater:
                     framework_dict["outcomes_definition"] = []
                 # An omitted IG definition means that the framework no longer defines implementation groups.
                 framework_dict.setdefault("implementation_groups_definition", None)
+                # Same for the scoring properties: omitted means back to the defaults.
+                framework_dict.setdefault("score_scale_locked", False)
+                framework_dict.setdefault("score_calculation_method", "average")
+                framework_dict.setdefault("anchor_na_to_target", False)
+                framework_dict.setdefault("target_score", None)
+                Framework.validate_score_calculation_method(
+                    framework_dict["score_calculation_method"]
+                )
+                Framework.validate_scoring_defaults(
+                    min_score=framework_dict.get("min_score", 0),
+                    max_score=framework_dict.get("max_score", 100),
+                    anchor_na_to_target=framework_dict["anchor_na_to_target"],
+                    target_score=framework_dict["target_score"],
+                    implementation_groups_definition=framework_dict[
+                        "implementation_groups_definition"
+                    ],
+                )
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
@@ -3715,6 +3737,33 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             "{field_name: {role: 'edit' | 'read' | 'hidden'}}."
         ),
     )
+    score_scale_locked = models.BooleanField(
+        default=False,
+        verbose_name=_("Score scale locked"),
+        help_text=_("The standard defines the score scale: audits cannot change it."),
+    )
+    score_calculation_method = models.CharField(
+        max_length=30,
+        default="average",
+        verbose_name=_("Score calculation method"),
+        help_text=_("Calculation method proposed for new audits."),
+    )
+    anchor_na_to_target = models.BooleanField(
+        default=False,
+        verbose_name=_("Anchor N/A to target score"),
+        help_text=_(
+            "New audits count not applicable requirements as the target score."
+        ),
+    )
+    target_score = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_("Target score"),
+        help_text=_(
+            "Target score proposed for new audits, on the framework scale. "
+            "Implementation groups can override it."
+        ),
+    )
     urn_namespace = models.CharField(
         max_length=50,
         default="custom",
@@ -3827,13 +3876,98 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
 
     @classmethod
     def scale_bound_q(cls, framework):
-        """Boolean expression for annotating querysets (framework may be an OuterRef)."""
+        """Boolean expression for annotating framework querysets (framework may
+        be an OuterRef)."""
         choices, nodes = cls.scale_bound_querysets(framework)
-        return Exists(choices) | Exists(nodes)
+        return Q(score_scale_locked=True) | Exists(choices) | Exists(nodes)
 
     @property
     def is_scale_bound(self) -> bool:
-        return any(qs.exists() for qs in self.scale_bound_querysets(self))
+        return self.score_scale_locked or any(
+            qs.exists() for qs in self.scale_bound_querysets(self)
+        )
+
+    @staticmethod
+    def validate_score_calculation_method(method):
+        """A library may only declare a calculation method audits support."""
+        if method not in ComplianceAssessment.CalculationMethod.values:
+            raise ValueError(
+                f"invalid score_calculation_method {method!r}: expected one of "
+                f"{', '.join(ComplianceAssessment.CalculationMethod.values)}"
+            )
+
+    @staticmethod
+    def scoring_defaults_problem(
+        *,
+        min_score,
+        max_score,
+        anchor_na_to_target,
+        target_score,
+        implementation_groups_definition,
+    ) -> tuple[str, str] | None:
+        """(error key, detail) when audits would refuse what the framework
+        proposes: N/A anchoring needs a target, implementation group targets fall
+        back on the framework's, and every target lies on the framework scale."""
+        group_targets = [
+            (f"implementation group {group.get('ref_id')!r} target_score", target)
+            for group in implementation_groups_definition or []
+            if isinstance(group, dict)
+            and (target := group.get("target_score")) is not None
+        ]
+        if target_score is None and (anchor_na_to_target or group_targets):
+            return (
+                "targetScoreRequired",
+                "target_score is required with anchor_na_to_target or "
+                "implementation group target scores",
+            )
+        for label, target in [("target_score", target_score), *group_targets]:
+            if target is not None and not min_score <= target <= max_score:
+                return (
+                    "targetScoreOutOfRange",
+                    f"{label} {target} is outside the framework scale "
+                    f"{min_score}-{max_score}",
+                )
+        return None
+
+    @staticmethod
+    def validate_scoring_defaults(**scoring) -> None:
+        """Library loading: fail loudly, with details for the library author."""
+        if problem := Framework.scoring_defaults_problem(**scoring):
+            raise ValueError(problem[1])
+
+    @property
+    def default_scoring(self) -> dict:
+        """Scoring settings proposed when creating an audit on this framework.
+
+        `target_score` is expressed on the framework's scale. Implementation
+        groups can set their own `target_score`: with groups selected, the
+        highest of their targets applies (a group without one counts as the
+        framework's).
+        """
+        scoring = {"score_calculation_method": self.score_calculation_method}
+        if self.anchor_na_to_target:
+            scoring["anchor_na_to_target"] = True
+        if self.target_score is not None:
+            scoring["target_score"] = self.target_score
+            by_group = {
+                group["ref_id"]: group["target_score"]
+                for group in self.implementation_groups_definition or []
+                if group.get("target_score") is not None
+            }
+            if by_group:
+                scoring["target_score_by_group"] = by_group
+        return scoring
+
+    def default_scoring_for(self, selected_implementation_groups) -> dict:
+        """default_scoring resolved for an audit's implementation groups."""
+        scoring = self.default_scoring
+        by_group = scoring.pop("target_score_by_group", {})
+        if selected_implementation_groups and "target_score" in scoring:
+            scoring["target_score"] = max(
+                by_group.get(group, scoring["target_score"])
+                for group in selected_implementation_groups
+            )
+        return scoring
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.get_name_translated}"
@@ -9231,7 +9365,26 @@ class ComplianceAssessment(Assessment):
 
         return changes
 
-    def _compute_score_for_field(
+    def na_anchor_score(self, ra_min, ra_max):
+        """Score an N/A requirement counts for when anchor_na_to_target is on.
+
+        The CA-wide target is projected onto the requirement's own scale, so
+        mixed scales stay coherent; without a target it counts as its max.
+        """
+        ca_min, ca_max = self.min_score, self.max_score
+        if (
+            self.target_score is not None
+            and ca_min is not None
+            and ca_max is not None
+            and ca_max > ca_min
+            and ra_max > ra_min
+        ):
+            ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
+            ca_ratio = (ca_target_clamped - ca_min) / (ca_max - ca_min)
+            return ra_min + ca_ratio * (ra_max - ra_min)
+        return ra_max
+
+    def _compute_raw_score_for_field(
         self, requirement_assessments, ig, score_field, anchor_na_to_target=False
     ):
         """
@@ -9250,7 +9403,7 @@ class ComplianceAssessment(Assessment):
         When anchor_na_to_target is True, N/A RAs contribute their resolved
         target (or resolved max if no target is set).
 
-        Returns the computed score, or -1 if no scored requirements exist.
+        Returns the unrounded score, or -1 if no scored requirements exist.
         """
         ca_min = self.min_score
         ca_max = self.max_score
@@ -9273,22 +9426,10 @@ class ComplianceAssessment(Assessment):
                     resolved = ras.get_resolved_scoring()
                     ra_min = resolved["min_score"]
                     ra_max = resolved["max_score"]
-                    if (
-                        self.target_score is not None
-                        and ra_min is not None
-                        and ra_max is not None
-                        and ra_max > ra_min
-                    ):
-                        # Project the CA-wide target score onto the RA scale as a
-                        # ratio so summing across mixed scales stays coherent
-                        # (raw injection would add 80/100 onto a 0-5 RA).
-                        ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
-                        ca_ratio = (ca_target_clamped - ca_min) / ca_range
-                        score = ra_min + ca_ratio * (ra_max - ra_min)
-                    elif ra_max is not None:
-                        score = ra_max
+                    if ra_min is None or ra_max is None:
+                        score = ra_max or 0
                     else:
-                        score = 0
+                        score = self.na_anchor_score(ra_min, ra_max)
                 else:
                     raw = getattr(ras, score_field)
                     if raw is None:
@@ -9300,7 +9441,7 @@ class ComplianceAssessment(Assessment):
                 total_weight += weight
             if total_weight == 0:
                 return -1
-            return _truncate_one_decimal(total)
+            return total
 
         def _ra_ratio_weight(ras):
             if ig and not (ig & set(ras.requirement.implementation_groups or [])):
@@ -9315,21 +9456,15 @@ class ComplianceAssessment(Assessment):
 
             is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
             if is_na and anchor_na_to_target:
-                # Project the CA-wide target onto the RA scale as a ratio so
-                # mixed scales stay coherent (CA target 80/100 contributes
-                # 80% of the RA range, not 80 raw).
-                if self.target_score is not None:
-                    ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
-                    ca_ratio = (ca_target_clamped - ca_min) / ca_range
-                    raw = ra_min + ca_ratio * ra_range
-                else:
-                    raw = ra_max
+                raw = self.na_anchor_score(ra_min, ra_max)
             else:
                 raw = getattr(ras, score_field)
                 if raw is None:
                     if score_field == "score":
                         return None
-                    raw = 0
+                    # A missing documentation score is the bottom of the scale
+                    # (0 on 0-based scales), never below it.
+                    raw = ra_min
 
             ratio = (raw - ra_min) / ra_range
             return ratio, (ras.requirement.weight or 1)
@@ -9346,25 +9481,7 @@ class ComplianceAssessment(Assessment):
             if not leaf_ratios:
                 return -1
 
-            all_nodes = RequirementNode.objects.filter(
-                framework=self.framework
-            ).values_list("urn", "parent_urn", "weight")
-
-            children_map = defaultdict(list)
-            node_weights = {}
-            roots = []
-            all_urns = set()
-            parent_links = {}
-            for urn, parent_urn, weight in all_nodes:
-                node_weights[urn] = weight or 1
-                all_urns.add(urn)
-                parent_links[urn] = parent_urn
-            for urn, parent_urn in parent_links.items():
-                if parent_urn and parent_urn in all_urns:
-                    children_map[parent_urn].append(urn)
-                else:
-                    # Orphan or root: keep reachable as a tree root.
-                    roots.append(urn)
+            children_map, node_weights, roots = self.framework_node_tree
 
             computed_ratios = {}
             visiting = set()
@@ -9426,7 +9543,7 @@ class ComplianceAssessment(Assessment):
                 return -1
 
             global_ratio = sum(category_ratios) / len(category_ratios)
-            return _truncate_one_decimal(ca_min + global_ratio * ca_range)
+            return ca_min + global_ratio * ca_range
 
         total_ratio_weighted = 0
         total_weight = 0
@@ -9443,7 +9560,29 @@ class ComplianceAssessment(Assessment):
 
         # AVG: average of weighted ratios, denormalized onto the CA scale.
         avg_ratio = total_ratio_weighted / total_weight
-        return _truncate_one_decimal(ca_min + avg_ratio * ca_range)
+        return ca_min + avg_ratio * ca_range
+
+    @cached_property
+    def framework_node_tree(self):
+        """(children, weights, roots) of the framework's nodes by URN, built
+        once per instance: the radar scores each section separately."""
+        all_nodes = RequirementNode.objects.filter(
+            framework=self.framework
+        ).values_list("urn", "parent_urn", "weight")
+        children_map = defaultdict(list)
+        node_weights = {}
+        roots = []
+        parent_links = {}
+        for urn, parent_urn, weight in all_nodes:
+            node_weights[urn] = weight or 1
+            parent_links[urn] = parent_urn
+        for urn, parent_urn in parent_links.items():
+            if parent_urn and parent_urn in parent_links:
+                children_map[parent_urn].append(urn)
+            else:
+                # Orphan or root: keep reachable as a tree root.
+                roots.append(urn)
+        return children_map, node_weights, roots
 
     def get_global_score(
         self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
@@ -9512,30 +9651,73 @@ class ComplianceAssessment(Assessment):
             else None
         )
 
-        impl_score = self._compute_score_for_field(
+        impl_score = self._compute_raw_score_for_field(
             requirement_assessments_scored, ig, "score", self.anchor_na_to_target
         )
 
         doc_score = None
         if self.show_documentation_score:
-            doc_score = self._compute_score_for_field(
+            doc_score = self._compute_raw_score_for_field(
                 requirement_assessments_scored,
                 ig,
                 "documentation_score",
                 self.anchor_na_to_target,
             )
 
-        # Maturity is the average of the enabled layers (ignore -1 / None)
+        # Maturity is the average of the enabled layers (ignore -1 / None),
+        # computed on unrounded layers so rounding only happens once.
         enabled = [s for s in [impl_score, doc_score] if s is not None and s != -1]
         if enabled:
-            maturity_score = _truncate_one_decimal(sum(enabled) / len(enabled))
+            maturity_score = round_score(sum(enabled) / len(enabled))
         else:
             maturity_score = impl_score  # -1 if nothing scored
 
+        def _display(score):
+            return score if score is None or score == -1 else round_score(score)
+
         return {
-            "implementation_score": impl_score,
-            "documentation_score": doc_score,
+            "implementation_score": _display(impl_score),
+            "documentation_score": _display(doc_score),
             "maturity_score": maturity_score,
+        }
+
+    def get_scores_for(self, requirement_assessments) -> dict:
+        """Scores of a subset of RAs (a section, an implementation group),
+        filtered and aggregated like get_global_score so they stay consistent
+        with the tree and the global score. Layers with nothing scored are None.
+        """
+        na = RequirementAssessment.Result.NOT_APPLICABLE
+        scored = [
+            ra
+            for ra in requirement_assessments
+            if (self.anchor_na_to_target and ra.result == na)
+            or (ra.is_scored and ra.score is not None and ra.result != na)
+        ]
+        impl_score = doc_score = None
+        if scored:
+            impl_score = self._compute_raw_score_for_field(
+                scored, None, "score", self.anchor_na_to_target
+            )
+            if self.show_documentation_score:
+                doc_score = self._compute_raw_score_for_field(
+                    scored, None, "documentation_score", self.anchor_na_to_target
+                )
+        impl_score = None if impl_score == -1 else impl_score
+        doc_score = None if doc_score == -1 else doc_score
+        # Maturity uses the unrounded layers so rounding only happens once.
+        enabled = [s for s in [impl_score, doc_score] if s is not None]
+        return {
+            "implementation_score": round_score(impl_score)
+            if impl_score is not None
+            else None,
+            "documentation_score": round_score(doc_score)
+            if doc_score is not None
+            else None,
+            "maturity_score": round_score(sum(enabled) / len(enabled))
+            if enabled
+            else None,
+            "scored_count": len(scored),
+            "total_weight": sum(ra.requirement.weight or 1 for ra in scored),
         }
 
     def get_total_max_score(self):
@@ -9594,6 +9776,20 @@ class ComplianceAssessment(Assessment):
         else:
             # For AVG and AVG_OF_AVG, the score is bounded by max_score
             return self.max_score
+
+    @property
+    def framework_exports(self) -> list[dict]:
+        """Exports specific to the audit's framework (core.framework_exports),
+        such as a publisher's official self-assessment template."""
+        return [
+            {
+                "ref_id": export.ref_id,
+                "title": export.title,
+                "description": export.description,
+                "format": export.format,
+            }
+            for export in available_framework_exports(self)
+        ]
 
     def get_selected_implementation_groups(self):
         framework = self.framework

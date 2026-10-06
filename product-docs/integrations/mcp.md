@@ -15,16 +15,16 @@ Tested MCP clients: Claude Desktop, Claude Code, LM Studio, OpenWebUI
 
 MCP (Model Context Protocol) allows AI assistants like Claude to interact with external tools and services. Think of it as giving your AI a set of capabilities to read and write data in CISO Assistant.
 
-The CISO Assistant MCP server provides **105 tools** covering:
+The CISO Assistant MCP server provides **111 tools** covering:
 
-* Risk management (assessments, scenarios, matrices)
-* Compliance audits (frameworks, requirements)
-* Asset management
-* Third-party risk management (TPRM)
-* EBIOS RM methodology
-* Privacy / GDPR records (processings, personal data, data subjects, breaches, right requests)
-* Findings, evidences, policies and managed documents
-* Threat models, TTP catalogs (tactics, techniques) and CWEs
+- Risk management (assessments, scenarios, matrices)
+- Compliance audits (frameworks, requirements)
+- Asset management
+- Third-party risk management (TPRM)
+- EBIOS RM methodology
+- Privacy / GDPR records (processings, personal data, data subjects, breaches, right requests)
+- Findings, evidences, policies and managed documents
+- Threat models, TTP catalogs (tactics, techniques) and CWEs
 
 Most tools are dedicated to one object type. Three are generic and work across
 every supported type: `list_objects`, `get_object` and `count_objects`.
@@ -74,7 +74,7 @@ This makes it easy to update later with `git pull`.
 
 #### Option B: Download as ZIP
 
-1. Go to https://github.com/intuitem/ciso-assistant-community
+1. Go to <https://github.com/intuitem/ciso-assistant-community>
 2. Click the green **Code** button
 3. Select **Download ZIP**
 4. Extract the ZIP file to a folder of your choice
@@ -82,7 +82,7 @@ This makes it easy to update later with `git pull`.
 
 > **Note:** The MCP server lives in the `cli` folder. You'll need the full path to this folder for the configuration steps below.
 
-***
+---
 
 ### Prerequisites
 
@@ -90,15 +90,15 @@ Before you begin, make sure you have:
 
 1. **CISO Assistant running** - Either locally or on a server (can be the same machine or a remote server). The API must be reachable from the machine running the MCP server, which means that machine's IP must be in the [Allowed IP whitelist](../configuration/settings/infra-config-allowed-ip.md). On **SaaS**, IP filtering is already enabled — just add your IP under **Settings → Infrastructure**. **On-premises** administrators should enable it first (`ENABLE_INFRA_CONFIG_MANAGEMENT=True`) and add their IPs. Remember that allowlist changes take about 10 minutes to apply.
 2. **Python 3.14+** installed
-3.  **uv** package manager (recommended) - Install with:
+3. **uv** package manager (recommended) - Install with:
 
-    ```bash
-    # macOS/Linux
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```bash
+   # macOS/Linux
+   curl -LsSf https://astral.sh/uv/install.sh | sh
 
-    # Windows
-    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-    ```
+   # Windows
+   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+   ```
 
 ### Step 1: Generate a Personal Access Token (PAT)
 
@@ -143,11 +143,11 @@ VERIFY_CERTIFICATE=false
 
 **Common API URLs:**
 
-* Local Docker setup: `http://localhost:8000/api`
-* Local development: `http://127.0.0.1:8000/api`
-* Production server: `https://your-server.com/api`
+- Local Docker setup: `http://localhost:8000/api`
+- Local development: `http://127.0.0.1:8000/api`
+- Production server: `https://your-server.com/api`
 
-***
+---
 
 ### Setup for Claude Desktop
 
@@ -276,7 +276,7 @@ In Claude Desktop, try asking:
 
 If configured correctly, Claude will use the MCP tools to query your CISO Assistant instance.
 
-***
+---
 
 ### Setup for Claude Code (CLI)
 
@@ -342,7 +342,7 @@ Start Claude Code and ask:
 
 > "List all risk assessments in CISO Assistant"
 
-***
+---
 
 ### Setup for LM Studio
 
@@ -384,9 +384,9 @@ Add the following configuration to your `mcp.json`:
 
 **Replace:**
 
-* `/path/to/uv` with your actual uv path (find it with `which uv` on macOS/Linux)
-* `/path/to/ciso-assistant-community/cli` with your actual cli folder path
-* `your-personal-access-token` with the token from Step 1
+- `/path/to/uv` with your actual uv path (find it with `which uv` on macOS/Linux)
+- `/path/to/ciso-assistant-community/cli` with your actual cli folder path
+- `your-personal-access-token` with the token from Step 1
 
 #### Example (macOS)
 
@@ -415,7 +415,7 @@ Add the following configuration to your `mcp.json`:
 
 Save the `mcp.json` file and restart LM Studio for the changes to take effect
 
-***
+---
 
 ### Streamable HTTP transport
 
@@ -511,7 +511,7 @@ Use `X-CISO-Token` if the client reserves or rewrites `Authorization`.
 
 #### Read-only by default
 
-The HTTP endpoint exposes **only read tools (48)**. Set
+The HTTP endpoint exposes **only read tools (49)**. Set
 `CA_MCP_READ_ONLY=false` to expose the write tools as well — a deliberate choice,
 since an agent driven by a third-party orchestrator would then be able to modify
 your GRC data.
@@ -543,27 +543,27 @@ Making it reachable above. Set `CA_MCP_ALLOWED_HOSTS` to the hostname the client
 will use; requests arriving with any other `Host` header are refused. Loopback
 addresses stay allowed so local tools keep working.
 
-***
+---
 
 ### Troubleshooting
 
 #### "Connection refused" or "Cannot connect to API"
 
-* Make sure CISO Assistant is running
-* Verify the `API_URL` is correct
-* Check if you can access the API in your browser: `http://localhost:8000/api/`
+- Make sure CISO Assistant is running
+- Verify the `API_URL` is correct
+- Check if you can access the API in your browser: `http://localhost:8000/api/`
 
 #### "Authentication failed" or "401 Unauthorized"
 
-* Verify your token is correct in `.mcp.env`
-* Make sure the token hasn't expired
-* Generate a new token if needed
+- Verify your token is correct in `.mcp.env`
+- Make sure the token hasn't expired
+- Generate a new token if needed
 
 #### "Certificate verification failed"
 
-* For local development, set `VERIFY_CERTIFICATE=false`
-* For production with self-signed certs, also set to `false`
-* For production with valid SSL, set to `true`
+- For local development, set `VERIFY_CERTIFICATE=false`
+- For production with self-signed certs, also set to `false`
+- For production with valid SSL, set to `true`
 
 #### MCP server not appearing in Claude Desktop
 
@@ -574,9 +574,9 @@ addresses stay allowed so local tools keep working.
 
 #### "uv: command not found"
 
-* Install uv (see Prerequisites section)
-* Use the full path to uv in your config
-* On macOS/Linux, you may need to add `~/.cargo/bin` to your PATH
+- Install uv (see Prerequisites section)
+- Use the full path to uv in your config
+- On macOS/Linux, you may need to add `~/.cargo/bin` to your PATH
 
 #### Check MCP server logs
 
@@ -589,7 +589,7 @@ uv run ca_mcp.py
 
 If there are configuration errors, they'll appear here.
 
-***
+---
 
 ### What Can You Do With It?
 
@@ -597,46 +597,46 @@ Once connected, try these example prompts:
 
 **Explore your data:**
 
-* "Show me all risk assessments"
-* "List the compliance frameworks I have imported"
-* "What assets are in the Production folder?"
+- "Show me all risk assessments"
+- "List the compliance frameworks I have imported"
+- "What assets are in the Production folder?"
 
 **Create new items:**
 
-* "Create a new folder called 'IT Security'"
-* "Add a risk scenario for ransomware affecting the CRM system"
-* "Create an audit for ISO 27001"
+- "Create a new folder called 'IT Security'"
+- "Add a risk scenario for ransomware affecting the CRM system"
+- "Create an audit for ISO 27001"
 
 **Analyze and report:**
 
-* "Show me the gap analysis for my SOC2 audit"
-* "What are the high-risk scenarios in my assessment?"
-* "List all controls that are not yet implemented"
+- "Show me the gap analysis for my SOC2 audit"
+- "What are the high-risk scenarios in my assessment?"
+- "List all controls that are not yet implemented"
 
 **Manage third parties:**
 
-* "List all our vendors"
-* "Create an entity assessment for Acme Corp"
-* "What contracts are expiring soon?"
+- "List all our vendors"
+- "Create an entity assessment for Acme Corp"
+- "What contracts are expiring soon?"
 
 **Count and measure:**
 
-* "How many vulnerabilities do we have?"
-* "Give me a breakdown of applied controls by status"
-* "What proportion of our risk scenarios are still open?"
+- "How many vulnerabilities do we have?"
+- "Give me a breakdown of applied controls by status"
+- "What proportion of our risk scenarios are still open?"
 
 **Privacy and GDPR:**
 
-* "List our processing activities"
-* "What personal data categories do we hold?"
-* "Show the open data subject right requests"
+- "List our processing activities"
+- "What personal data categories do we hold?"
+- "Show the open data subject right requests"
 
 **EBIOS RM:**
 
-* "List our EBIOS RM studies"
-* "What feared events are in the SuperNova study?"
-* "Show the operational scenarios for that study"
-* "Generate the risk assessment for workshop 5"
+- "List our EBIOS RM studies"
+- "What feared events are in the SuperNova study?"
+- "Show the operational scenarios for that study"
+- "Generate the risk assessment for workshop 5"
 
 ### The EBIOS RM workflow
 
@@ -649,6 +649,7 @@ register.
 
 {% stepper %}
 {% step %}
+
 #### Create the risk assessment
 
 Ask for a risk assessment on the study and the assistant calls `create_risk_assessment` with the
@@ -661,6 +662,7 @@ scenarios are scored on the scale they were quoted against.
 {% endstep %}
 
 {% step %}
+
 #### Re-run it later with a sync
 
 A study holds **one** risk assessment. Asking for a second would detach the first, so the assistant
@@ -681,50 +683,50 @@ Writing requires the write tools. Over HTTP the server is read-only unless
 risk assessment.
 {% endhint %}
 
-***
+---
 
 ### FAQ
 
-* What about ChatGPT compatibility?
-  * Supported, via the [Streamable HTTP transport](#streamable-http-transport). It needs developer mode enabled in ChatGPT, and because ChatGPT calls from OpenAI's cloud the server must be reachable from there — either published behind an HTTPS reverse proxy, or connected through OpenAI's Secure MCP Tunnel, which reaches a private server without a public listener. The endpoint is read-only by default and every request carries its own token. For a single user on their own machine, stdio remains simpler and exposes nothing.
-* What about Microsoft Copilot Studio?
-  * The same HTTP transport applies. Beyond reachability, the Power Platform environment needs Copilot Credits allocated to it, and tenant data policies covering connectors also cover MCP access.
+- What about ChatGPT compatibility?
+  - Supported, via the [Streamable HTTP transport](#streamable-http-transport). It needs developer mode enabled in ChatGPT, and because ChatGPT calls from OpenAI's cloud the server must be reachable from there — either published behind an HTTPS reverse proxy, or connected through OpenAI's Secure MCP Tunnel, which reaches a private server without a public listener. The endpoint is read-only by default and every request carries its own token. For a single user on their own machine, stdio remains simpler and exposes nothing.
+- What about Microsoft Copilot Studio?
+  - The same HTTP transport applies. Beyond reachability, the Power Platform environment needs Copilot Credits allocated to it, and tenant data policies covering connectors also cover MCP access.
 
 ### Need Help?
 
-* **CISO Assistant Documentation:** https://intuitem.gitbook.io&#x20;
-* **GitHub:** https://github.com/intuitem/ciso-assistant-community
-* **Discord:** [https://discord.gg/qvkaMdQ8da](https://discord.gg/qvkaMdQ8da)
+- **CISO Assistant Documentation:** <https://intuitem.gitbook.io&#x20>;
+- **GitHub:** <https://github.com/intuitem/ciso-assistant-community>
+- **Discord:** [https://discord.gg/qvkaMdQ8da](https://discord.gg/qvkaMdQ8da)
 
-***
+---
 
 ### Quick Reference: Environment Variables
 
-| Variable             | Required | Default                     | Description                               |
-| -------------------- | -------- | --------------------------- | ----------------------------------------- |
-| `TOKEN`              | stdio only | -                         | Personal Access Token. Unused in HTTP mode by default, where each request carries its own; used as a shared fallback if `CA_MCP_ALLOW_ENV_TOKEN=true` |
-| `API_URL`            | No       | `http://localhost:8000/api` | CISO Assistant API endpoint               |
-| `VERIFY_CERTIFICATE` | No       | `true`                      | SSL certificate verification. Set to `false` for self-signed certificates |
+| Variable             | Required   | Default                     | Description                                                                                                                                           |
+| -------------------- | ---------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TOKEN`              | stdio only | -                           | Personal Access Token. Unused in HTTP mode by default, where each request carries its own; used as a shared fallback if `CA_MCP_ALLOW_ENV_TOKEN=true` |
+| `API_URL`            | No         | `http://localhost:8000/api` | CISO Assistant API endpoint                                                                                                                           |
+| `VERIFY_CERTIFICATE` | No         | `true`                      | SSL certificate verification. Set to `false` for self-signed certificates                                                                             |
 
 Additional variables for the HTTP transport:
 
-| Variable                    | Default     | Description                                     |
-| --------------------------- | ----------- | ----------------------------------------------- |
-| `CA_MCP_TRANSPORT`          | `stdio`     | Set to `http` for Streamable HTTP               |
-| `CA_MCP_READ_ONLY`          | `true`      | Expose only read tools                          |
-| `CA_MCP_HOST`               | `127.0.0.1` | Listen address                                  |
-| `CA_MCP_PORT`               | `8001`      | Listen port                                     |
-| `CA_MCP_PATH`               | `/mcp`      | Endpoint path                                   |
-| `CA_MCP_ALLOWED_HOSTS`      | -           | Comma-separated hostnames accepted in the `Host` header, port included. Validates `Host`; does **not** set the listen address. Loopback is always allowed |
-| `CA_MCP_ALLOW_ENV_TOKEN`    | `false`     | Allow HTTP callers with no token to be served using `TOKEN`. Collapses every caller into one identity |
+| Variable                 | Default     | Description                                                                                                                                               |
+| ------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CA_MCP_TRANSPORT`       | `stdio`     | Set to `http` for Streamable HTTP                                                                                                                         |
+| `CA_MCP_READ_ONLY`       | `true`      | Expose only read tools                                                                                                                                    |
+| `CA_MCP_HOST`            | `127.0.0.1` | Listen address                                                                                                                                            |
+| `CA_MCP_PORT`            | `8001`      | Listen port                                                                                                                                               |
+| `CA_MCP_PATH`            | `/mcp`      | Endpoint path                                                                                                                                             |
+| `CA_MCP_ALLOWED_HOSTS`   | -           | Comma-separated hostnames accepted in the `Host` header, port included. Validates `Host`; does **not** set the listen address. Loopback is always allowed |
+| `CA_MCP_ALLOW_ENV_TOKEN` | `false`     | Allow HTTP callers with no token to be served using `TOKEN`. Collapses every caller into one identity                                                     |
 
 Response size limits, which apply to both transports:
 
-| Variable                     | Default | Description                                |
-| ---------------------------- | ------- | ------------------------------------------ |
-| `CA_MCP_PAGE_LIMIT`          | `100`   | Rows returned per list call                |
-| `CA_MCP_MAX_ITEMS`           | `200`   | Cap when a tool follows pagination itself  |
-| `CA_MCP_MAX_RESPONSE_CHARS`  | `20000` | Cap on a single tool response              |
+| Variable                    | Default | Description                               |
+| --------------------------- | ------- | ----------------------------------------- |
+| `CA_MCP_PAGE_LIMIT`         | `100`   | Rows returned per list call               |
+| `CA_MCP_MAX_ITEMS`          | `200`   | Cap when a tool follows pagination itself |
+| `CA_MCP_MAX_RESPONSE_CHARS` | `20000` | Cap on a single tool response             |
 
 Lists say how much they are showing — `Found 100 of 1592 vulnerabilities (rows
 1-100; pass offset=100 for the next page)` — so a truncated answer is never

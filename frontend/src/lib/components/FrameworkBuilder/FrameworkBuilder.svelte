@@ -1034,6 +1034,8 @@
 											name: (rec.name as string) ?? '',
 											description: (rec.description as string) ?? '',
 											default_selected: (rec.default_selected as boolean) ?? false,
+											// Not edited here, but kept: audits of the group are proposed it.
+											target_score: (rec.target_score as number | null | undefined) ?? undefined,
 											translations:
 												(rec.translations as Record<string, Record<string, string>>) ?? null
 										};
