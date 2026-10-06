@@ -94,7 +94,7 @@ class TestFrameworkExportRegistry:
         )
         monkeypatch.setitem(framework_exports._registry, named.ref_id, named)
         audit = _audit("urn:test:framework:named")
-        audit.name = 'Q3 "final"\r\nSet-Cookie: x=1'
+        audit.name = 'Q3/"final"\r\nSet-Cookie: x=1'
         audit.save()
         response = admin_client.get(
             reverse(
@@ -105,7 +105,8 @@ class TestFrameworkExportRegistry:
         assert response.status_code == 200
         header = response["Content-Disposition"]
         assert "\r" not in header and "\n" not in header
-        assert 'filename="Q3 finalSet-Cookie: x=1.md"' in header
+        assert 'filename="Q3_finalSet-Cookie: x=1.md"' in header
+        assert "filename*=UTF-8''Q3_%22final%22Set-Cookie%3A%20x%3D1.md" in header
 
     def test_export_is_only_offered_to_audits_it_supports(
         self, admin_client, plain_text_export
