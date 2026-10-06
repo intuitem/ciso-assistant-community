@@ -4,7 +4,7 @@ description: Shorten threat and reference control URNs in a framework workbook
 
 # URN Prefixes
 
-URN Prefixes let you use short references in a [Framework](framework.md) instead of repeating a full URN for every Threat or Reference Control. They help when several requirements refer to objects from the same catalogue. A URN Prefixes object is optional and has no use on its own without those references.
+URN Prefixes let you use short references in a [Framework](framework.md) instead of repeating a full URN for every Threat or Reference Control. They help when several requirements refer to objects from the same catalogue. A URN Prefixes object is optional and has no use on its own.
 
 ## Excel structure and fields
 
@@ -37,7 +37,7 @@ The content sheet contains one row per URN prefix. Each row pairs a short identi
 
 ## Relationships with other objects
 
-In the `threats` or `reference_controls` column of a [Framework](framework.md), write `prefix_id:object-id`. The converter replaces the prefix with `prefix_value`, producing the full URN for a [Threat](threats.md) or [Reference Control](reference-controls.md). You may also write a full URN directly, without defining a prefix.
+In the `threats` or `reference_controls` column of a [Framework](framework.md), write `prefix_id:ref_id`. Here, `prefix_id` identifies the catalogue's URN prefix, and `ref_id` identifies a Threat or Reference Control in that catalogue. The converter combines them into the object's full URN.
 
 The referenced object does not have to be in the same library. If it belongs to another library, add that library under `dependencies` in [Library metadata](library-metadata.md).
 
@@ -45,13 +45,12 @@ The referenced object does not have to be in the same library. If it belongs to 
 
 ### When creating a library
 
-- Add prefixes only for catalogues you actually reference from the framework.
+- Add prefixes only for catalogues you actually reference in the framework.
 - Choose short, distinct `prefix_id` values so references remain easy to read.
 
 ### When updating a library
 
-- Keep existing prefix values stable unless you also update every framework reference that uses them.
-- Check that an external catalogue still uses the same URN prefix before changing its references.
+- Check that an external catalogue still uses the same URN before changing its reference.
 
 ## Example
 
@@ -74,7 +73,7 @@ With these prefixes, `1:t1` in a framework becomes `urn:intuitem:risk:threat:sam
 
 ## Advanced: YAML representation of this object
 
-This section is mainly for advanced users and debugging. The excerpt below shows how references using the prefixes from the tables above appear within a [Framework](framework.md) in the converted YAML. The prefixes themselves do not become a separate YAML object.
+This section is mainly for advanced users and debugging. The excerpt below shows how references using the prefixes from the tables above appear within a [Framework](framework.md) in the converted YAML.
 
 <details>
 <summary>Show YAML</summary>
@@ -95,6 +94,8 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:sample-framework.1:rc1
 ```
+
+The prefixes themselves do not become a separate YAML object.
 
 </details>
 
