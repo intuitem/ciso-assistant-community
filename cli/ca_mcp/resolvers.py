@@ -1054,46 +1054,12 @@ def resolve_qualification_ids(qualifications) -> list:
     if isinstance(qualifications, str):
         qualifications = [qualifications]
 
-    terminologies = None
-    resolved = []
+    lookups = []
     for item in qualifications:
-        if _is_uuid(item):
-            term_id = item
-        else:
-            value = str(item).strip()
-            lookup = (
-                QUALIFICATION_LETTERS.get(value.upper()) if len(value) == 1 else None
-            )
-            lookup = lookup or _QUALIFICATION_ALIASES.get(value.lower()) or value
-
-            if terminologies is None:
-                terminologies, error = fetch_all_results(
-                    "/terminologies/",
-                    params={"field_path": "qualifications", "is_visible": "true"},
-                )
-                if error:
-                    raise ValueError(f"Failed to fetch qualifications: {error}")
-                terminologies = terminologies or []
-
-            match = next(
-                (
-                    t
-                    for t in terminologies
-                    if str(t.get("name") or "").lower() == lookup.lower()
-                    or str(t.get("translated_name") or "").lower() == lookup.lower()
-                ),
-                None,
-            ) or _find_terminology_match(terminologies, lookup)
-
-            if not match:
-                names = sorted({str(t.get("name")) for t in terminologies})
-                raise ValueError(
-                    f"Qualification '{value}' not found. Visible qualifications: {names}"
-                )
-            term_id = str(match["id"])
-        if term_id not in resolved:
-            resolved.append(term_id)
-    return resolved
+        value = str(item).strip()
+        lookup = QUALIFICATION_LETTERS.get(value.upper()) if len(value) == 1 else None
+        lookups.append(lookup or _QUALIFICATION_ALIASES.get(value.lower()) or item)
+    return resolve_terminology_ids(lookups, "qualifications")
 
 
 def _matrix_risk_levels(risk_matrix_id: str) -> list:

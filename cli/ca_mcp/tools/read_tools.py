@@ -873,50 +873,46 @@ async def get_asset_security_gaps(
 
         truncation = ""
         if asset:
-            asset_ids = [resolve_asset_id(asset, folder_id=folder_id)]
             filters["asset"] = asset
+            asset_id = resolve_asset_id(asset, folder_id=folder_id)
+            res = make_get_request(f"/assets/{asset_id}/")
+            if res.status_code != 200:
+                return http_error_response(res.status_code, res.text)
+            detail = res.json() or {}
+            if folder_id and (detail.get("folder") or {}).get("id") != folder_id:
+                return error_response(
+                    "Not Found",
+                    f"Asset '{asset}' is not in folder '{folder}'",
+                    "Check the asset and folder, then report to the user",
+                    retry_allowed=False,
+                )
+            assets = [detail]
         else:
             params = {"limit": GAPS_MAX_ASSETS}
             if folder_id:
                 params["folder"] = folder_id
-            res = make_get_request("/assets/", params=params)
+            res = make_get_request("/assets/full/", params=params)
             if res.status_code != 200:
                 return http_error_response(res.status_code, res.text)
-            listed = get_paginated_results(res.json())
-            total = getattr(listed, "total", None) or len(listed)
-            asset_ids = [a.get("id") for a in listed if a.get("id")][:GAPS_MAX_ASSETS]
-            if total > len(asset_ids):
+            assets = get_paginated_results(res.json())
+            total = getattr(assets, "total", None) or len(assets)
+            if total > len(assets):
                 truncation = (
-                    f"Truncated: {len(asset_ids)} of {total} assets checked "
+                    f"Truncated: {len(assets)} of {total} assets checked "
                     f"(max {GAPS_MAX_ASSETS}). Narrow with folder or asset.\n\n"
                 )
 
-        if not asset_ids:
+        if not assets:
             return empty_response("assets", filters)
 
-        # The list endpoint skips capabilities: fetch each asset's detail
         sections = []
-        errors = []
-        for asset_id in asset_ids:
-            detail = make_get_request(f"/assets/{asset_id}/")
-            if detail.status_code != 200:
-                errors.append(f"{asset_id}: {detail.status_code}")
-                continue
-            table, unmet = _asset_gap_table(detail.json() or {})
+        for item in assets:
+            table, unmet = _asset_gap_table(item)
             if only_unmet and not unmet:
                 continue
             sections.append(table)
 
-        if errors and len(errors) == len(asset_ids):
-            return error_response(
-                "Read Error",
-                f"Could not read any asset: {', '.join(errors)}",
-                "Check the asset IDs and your permissions, then report to the user",
-                retry_allowed=False,
-            )
-
-        if not sections and not errors:
-            # Keep the truncation notice: unchecked assets may still have gaps
+        if not sections:
             return truncation + empty_response(
                 "assets with unmet objectives" if only_unmet else "assets", filters
             )
@@ -926,8 +922,6 @@ async def get_asset_security_gaps(
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n" + "\n".join(sections)
-        if errors:
-            result += f"\nCould not read {len(errors)} asset(s): {', '.join(errors)}\n"
 
         return success_response(
             result,

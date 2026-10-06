@@ -347,19 +347,17 @@ CRM = _detail(UUID_B, "CRM", [("confidentiality", 1, 2, True)])
 
 
 class TestAssetSecurityGaps:
-    def _get(self, details, listing=None, list_count=None):
+    def _get(self, details=None, listing=None, list_count=None, status=200):
         def fake(endpoint, params=None):
-            if endpoint == "/assets/":
+            if endpoint == "/assets/full/":
+                if status != 200:
+                    return _response(status, text="Forbidden")
                 results = listing or []
                 return _response(
                     200,
                     {"count": list_count or len(results), "results": results},
                 )
-            asset_id = endpoint.split("/")[2]
-            detail = details[asset_id]
-            if isinstance(detail, int):
-                return _response(detail, text="Forbidden")
-            return _response(200, detail)
+            return _response(200, details[endpoint.split("/")[2]])
 
         return Mock(side_effect=fake)
 
@@ -370,6 +368,7 @@ class TestAssetSecurityGaps:
             patch.object(resolvers, "fetch_all_results", _router({"/assets/": [ERP]})),
         ):
             result = run(read_tools.get_asset_security_gaps(asset="ERP"))
+        get.assert_called_once_with(f"/assets/{UUID_A}/")
         assert "|security|confidentiality|3|2|no|" in result
         assert "|security|integrity|2|2|yes|" in result
         assert "|security|availability|1|--|?|" in result
@@ -387,55 +386,53 @@ class TestAssetSecurityGaps:
         assert "Asset 'Nope' not found" in result
 
     def test_folder_only_unmet(self):
-        listing = [{"id": UUID_A}, {"id": UUID_B}]
-        get = self._get({UUID_A: ERP, UUID_B: CRM}, listing=listing, list_count=120)
+        get = self._get(listing=[ERP, CRM], list_count=120)
         with patch.object(read_tools, "make_get_request", get):
             result = run(
                 read_tools.get_asset_security_gaps(folder=UUID_F, only_unmet=True)
             )
-        list_call = get.call_args_list[0]
-        assert list_call.args[0] == "/assets/"
-        assert list_call.kwargs["params"] == {"limit": 50, "folder": UUID_F}
+        get.assert_called_once_with(
+            "/assets/full/", params={"limit": 50, "folder": UUID_F}
+        )
         assert "### ERP" in result
         assert "### CRM" not in result
         assert "2 of 120" in result
 
     def test_asset_scoped_to_folder(self):
-        get = self._get({UUID_A: ERP})
+        get = self._get({UUID_A: {**ERP, "folder": {"id": UUID_F}}})
         fake = _router({"/assets/": [ERP]})
         with (
             patch.object(read_tools, "make_get_request", get),
             patch.object(resolvers, "fetch_all_results", fake),
         ):
-            run(read_tools.get_asset_security_gaps(asset="ERP", folder=UUID_F))
+            result = run(read_tools.get_asset_security_gaps(asset="ERP", folder=UUID_F))
         assert fake.calls == [("/assets/", {"name": "ERP", "folder": UUID_F})]
-
-    def test_partial_detail_failure(self):
-        listing = [{"id": UUID_A}, {"id": UUID_B}]
-        get = self._get({UUID_A: ERP, UUID_B: 403}, listing=listing)
-        with patch.object(read_tools, "make_get_request", get):
-            result = run(read_tools.get_asset_security_gaps(folder=UUID_F))
-        assert "[SUCCESS]" in result
         assert "### ERP" in result
-        assert "Could not read 1 asset(s)" in result
 
-    def test_all_details_failed(self):
-        listing = [{"id": UUID_A}, {"id": UUID_B}]
-        get = self._get({UUID_A: 403, UUID_B: 500}, listing=listing)
+    def test_asset_uuid_outside_folder(self):
+        get = self._get({UUID_A: {**ERP, "folder": {"id": UUID_D}}})
+        with patch.object(read_tools, "make_get_request", get):
+            result = run(
+                read_tools.get_asset_security_gaps(asset=UUID_A, folder=UUID_F)
+            )
+        assert "[ERROR]" in result
+        assert "is not in folder" in result
+        assert "### ERP" not in result
+
+    def test_folder_read_error(self):
+        get = self._get(status=403)
         with patch.object(read_tools, "make_get_request", get):
             result = run(read_tools.get_asset_security_gaps(folder=UUID_F))
-        assert "[ERROR]" in result
         assert "[SUCCESS]" not in result
-        assert "0 asset(s)" not in result
 
     def test_folder_empty(self):
-        get = self._get({}, listing=[])
+        get = self._get(listing=[])
         with patch.object(read_tools, "make_get_request", get):
             result = run(read_tools.get_asset_security_gaps(folder=UUID_F))
         assert "No assets found" in result
 
     def test_only_unmet_none_unmet(self):
-        get = self._get({UUID_B: CRM}, listing=[{"id": UUID_B}])
+        get = self._get(listing=[CRM])
         with patch.object(read_tools, "make_get_request", get):
             result = run(
                 read_tools.get_asset_security_gaps(folder=UUID_F, only_unmet=True)
@@ -443,7 +440,7 @@ class TestAssetSecurityGaps:
         assert "No assets with unmet objectives found" in result
 
     def test_only_unmet_none_unmet_keeps_truncation(self):
-        get = self._get({UUID_B: CRM}, listing=[{"id": UUID_B}], list_count=120)
+        get = self._get(listing=[CRM], list_count=120)
         with patch.object(read_tools, "make_get_request", get):
             result = run(
                 read_tools.get_asset_security_gaps(folder=UUID_F, only_unmet=True)
