@@ -14,6 +14,10 @@ A Mapping object uses two sheets:
 
 For example, if `mappings` is the object prefix, the sheets are `mappings_meta` and `mappings_content`.
 
+{% hint style="warning" %}
+The base Excel file for mappings is normally generated rather than created from scratch. Use [`prepare_mapping_v2.py`](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/prepare_mapping_v2.py) with the two Framework YAML files, then complete the generated Excel file. See [Create a Mapping](../create-mapping.md) for more information.
+{% endhint %}
+
 An asterisk (<mark style="color:$danger;">*</mark>) marks a required field.
 
 ### `<object>_meta`
@@ -23,18 +27,18 @@ The metadata sheet is a key-value table with one property per row.
 | Property | Meaning | Format / allowed values |
 | --- | --- | --- |
 | `type`<mark style="color:$danger;">*</mark> | Identifies the object type | Enter `requirement_mapping_set` |
-| `urn`<mark style="color:$danger;">*</mark> | Unique identifier of the Mapping | `urn:<packager>:risk:req_mapping_set:<identifier>` |
-| `ref_id`<mark style="color:$danger;">*</mark> | Short identifier of the Mapping | Letters, numbers, `.`, `_`, or `-` only; no spaces. Keep it stable across versions |
+| `urn`<mark style="color:$danger;">*</mark> | Unique identifier of the Mapping | `urn:<packager>:risk:req_mapping_set:<identifier>`; use lowercase letters, numbers, `.`, `_`, or `-` only; no spaces |
+| `ref_id`<mark style="color:$danger;">*</mark> | Short identifier of the Mapping | Letters, numbers, `.`, `_`, or `-` only; no spaces |
 | `name`<mark style="color:$danger;">*</mark> | Name shown to users | Text |
 | `description`<mark style="color:$danger;">*</mark> | What the Mapping covers | Text |
 | `source_framework_urn`<mark style="color:$danger;">*</mark> | Framework being mapped from | Full Framework URN: `urn:<packager>:risk:framework:<identifier>` |
 | `target_framework_urn`<mark style="color:$danger;">*</mark> | Framework being mapped to | Full Framework URN: `urn:<packager>:risk:framework:<identifier>` |
-| `source_node_base_urn`<mark style="color:$danger;">*</mark> | Prefix for source requirement URNs | The source Framework's `base_urn` |
-| `target_node_base_urn`<mark style="color:$danger;">*</mark> | Prefix for target requirement URNs | The target Framework's `base_urn` |
+| `source_node_base_urn`<mark style="color:$danger;">*</mark> | Prefix for source requirement URNs | The source Framework's `base_urn`: `urn:<packager>:risk:req_node:<identifier>` |
+| `target_node_base_urn`<mark style="color:$danger;">*</mark> | Prefix for target requirement URNs | The target Framework's `base_urn`: `urn:<packager>:risk:req_node:<identifier>` |
 
 ### `<object>_content`
 
-The content sheet contains one row per requirement link. The converter combines each node ID with the corresponding node base URN from the metadata sheet.
+The content sheet contains one row per requirement link.
 
 | Field | Meaning | Format / allowed values |
 | --- | --- | --- |
@@ -50,46 +54,45 @@ Use the identifier that appears at the end of the requirement's URN. It is often
 
 ## Relationships with other objects
 
-A Mapping refers to two [Frameworks](framework.md) by URN and links their requirement nodes. It is independent of their sheet pairs: neither Framework has to be defined in the Mapping library. If those Frameworks come from other libraries, list the libraries under `dependencies` in [Library metadata](library-metadata.md).
+A Mapping refers to two [Frameworks](framework.md) by URN and links their requirement nodes. It is independent of their sheet pairs: neither Framework has to be defined in the Mapping library. Since those Frameworks will come from other libraries, list the libraries under `dependencies` in [Library metadata](library-metadata.md).
 
 ## Tips
 
 ### When creating a library
 
-- Check the source and target Framework URNs and node base URNs before entering requirement links.
-- Write each relationship from source to target; the reverse Mapping is generated during conversion.
+- Write each relationship from source to target. The reverse Mapping is generated during conversion.
 
 ### When updating a library
 
-- Keep the Mapping `urn` and `ref_id` stable when only its wording changes.
 - Review requirement links if either Framework changes a requirement URN.
 
 ## Example
 
-The tables below show an example of a Mapping from one Framework version to another.
+The tables below show an illustrative Mapping from a sample Framework to ISO/IEC 27001:2022. The sample requirements are fictional.
 
 ### `mappings_meta`
 
 | Property | Value |
 | --- | --- |
 | `type` | `requirement_mapping_set` |
-| `urn` | `urn:intuitem:risk:req_mapping_set:sample-framework.1-to-2` |
-| `ref_id` | `sample-framework.1-to-2` |
-| `name` | Sample framework version mapping |
-| `description` | Links selected requirements from version 1 to version 2 |
+| `urn` | `urn:intuitem:risk:req_mapping_set:sample-framework.1-to-iso27001-2022` |
+| `ref_id` | `sample-framework.1-to-iso27001-2022` |
+| `name` | Sample framework to ISO/IEC 27001:2022 |
+| `description` | Links selected access management requirements to ISO/IEC 27001:2022 |
 | `source_framework_urn` | `urn:intuitem:risk:framework:sample-framework.1` |
-| `target_framework_urn` | `urn:intuitem:risk:framework:sample-framework.2` |
+| `target_framework_urn` | `urn:intuitem:risk:framework:iso27001-2022` |
 | `source_node_base_urn` | `urn:intuitem:risk:req_node:sample-framework.1` |
-| `target_node_base_urn` | `urn:intuitem:risk:req_node:sample-framework.2` |
+| `target_node_base_urn` | `urn:intuitem:risk:req_node:iso27001-2022` |
 
 ### `mappings_content`
 
 | source_node_id | target_node_id | relationship | rationale |
 | --- | --- | --- | --- |
-| `access.1` | `access.1` | `equal` | `semantic` |
-| `access.2` | `access.2` | `subset` | `semantic` |
+| `access.1` | `a.5.18` | `subset` | `semantic` |
+| `identity.1` | `a.5.16` | `intersect` |  |
+| `auth.1` | `a.5.17` | `subset` | `semantic` |
 
-To see an example of Mappings in a complete Excel file, download [`mapping-iso27001-2013-to-iso27001-2022.xlsx`](https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/excel/iso27001/mapping-iso27001-2013-to-iso27001-2022.xlsx) and open its `mappings_meta` and `mappings_content` sheets.
+For a concrete and complete Mapping example, download [`mapping-iso27001-2013-to-iso27001-2022.xlsx`](https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/excel/iso27001/mapping-iso27001-2013-to-iso27001-2022.xlsx) and open its `mappings_meta` and `mappings_content` sheets.
 
 ## Advanced: YAML representation of this object
 
@@ -101,36 +104,45 @@ This section is mainly for advanced users and debugging. The excerpt below shows
 ```yaml
 objects:
   requirement_mapping_sets:
-  - urn: urn:intuitem:risk:req_mapping_set:sample-framework.1-to-2
-    ref_id: sample-framework.1-to-2
-    name: Sample framework version mapping
-    description: Links selected requirements from version 1 to version 2
+  - urn: urn:intuitem:risk:req_mapping_set:sample-framework.1-to-iso27001-2022
+    ref_id: sample-framework.1-to-iso27001-2022
+    name: Sample framework to ISO/IEC 27001:2022
+    description: Links selected access management requirements to ISO/IEC 27001:2022
     source_framework_urn: urn:intuitem:risk:framework:sample-framework.1
-    target_framework_urn: urn:intuitem:risk:framework:sample-framework.2
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
     requirement_mappings:
     - source_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:access.1
-      target_requirement_urn: urn:intuitem:risk:req_node:sample-framework.2:access.1
-      relationship: equal
-      rationale: semantic
-    - source_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:access.2
-      target_requirement_urn: urn:intuitem:risk:req_node:sample-framework.2:access.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
       relationship: subset
       rationale: semantic
-  - urn: urn:intuitem:risk:req_mapping_set:sample-framework.1-to-2-revert
-    ref_id: sample-framework.1-to-2-revert
-    name: Sample framework version mapping
-    description: Links selected requirements from version 1 to version 2
-    source_framework_urn: urn:intuitem:risk:framework:sample-framework.2
+    - source_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:identity.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:auth.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: subset
+      rationale: semantic
+  - urn: urn:intuitem:risk:req_mapping_set:sample-framework.1-to-iso27001-2022-revert
+    ref_id: sample-framework.1-to-iso27001-2022-revert
+    name: Sample framework to ISO/IEC 27001:2022
+    description: Links selected access management requirements to ISO/IEC 27001:2022
+    source_framework_urn: urn:intuitem:risk:framework:iso27001-2022
     target_framework_urn: urn:intuitem:risk:framework:sample-framework.1
     requirement_mappings:
-    # ...
-    - source_requirement_urn: urn:intuitem:risk:req_node:sample-framework.2:access.2
-      target_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:access.2
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:access.1
+      relationship: superset
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      target_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:identity.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:auth.1
       relationship: superset
       rationale: semantic
 ```
 
-The reverse Mapping swaps source and target. A `subset` relationship becomes `superset` in that direction.
+The reverse Mapping swaps source and target. A `subset` becomes `superset`, while `intersect` stays the same.
 </details>
 
 ## Related pages
