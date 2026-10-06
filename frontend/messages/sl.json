@@ -966,6 +966,7 @@
 	"libraryLoadingError": "Med nalaganjem knjižnice je prišlo do napake",
 	"processingError": "Napaka pri obdelavi",
 	"libraryAlreadyLoadedError": "Ta knjižnica je že bila naložena",
+	"libraryOutdatedError": "Novejša različica te knjižnice je že shranjena. Za uvoz v datoteki nastavite višjo vrednost \"version\".",
 	"invalidLibraryFileError": "Neveljavna datoteka knjižnice. Prepričajte se, da je format pravilen.",
 	"fileTooLarge": "Datoteka je prevelika",
 	"invalidFileFormat": "Neveljavna oblika datoteke",

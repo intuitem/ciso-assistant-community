@@ -594,6 +594,7 @@
 	"libraryLoadingError": "Beim Laden Ihrer Bibliothek ist ein Fehler aufgetreten",
 	"processingError": "Verarbeitungsfehler",
 	"libraryAlreadyLoadedError": "Diese Bibliothek wurde bereits geladen",
+	"libraryOutdatedError": "Eine neuere Version dieser Bibliothek ist bereits gespeichert. Geben Sie in Ihrer Datei eine höhere \"version\" an, um sie zu importieren.",
 	"invalidLibraryFileError": "Ungültige Bibliotheksdatei. Stellen Sie sicher, dass das Format korrekt ist.",
 	"taintedFormMessage": "Möchten Sie diese Seite verlassen? Änderungen werden möglicherweise nicht gespeichert.",
 	"riskScenariosStatus": "Status der Risikoszenarien",

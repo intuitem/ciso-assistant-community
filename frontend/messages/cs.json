@@ -626,6 +626,7 @@
 	"libraryLoadingError": "Došlo k chybě během načítání vaší knihovny",
 	"processingError": "Chyba zpracování",
 	"libraryAlreadyLoadedError": "Tato knihovna již byla načtena",
+	"libraryOutdatedError": "Novější verze této knihovny je již uložena. Pro import zadejte v souboru vyšší hodnotu \"version\".",
 	"invalidLibraryFileError": "Neplatný soubor knihovny. Ujistěte se, že formát je správný.",
 	"taintedFormMessage": "Chcete opustit tuto stránku? Změny, které jste provedli, nemusí být uloženy.",
 	"riskScenariosStatus": "Stav rizikových scénářů",

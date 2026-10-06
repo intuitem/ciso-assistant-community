@@ -597,6 +597,7 @@
 	"libraryLoadingError": "Se produjo un error durante la carga de su biblioteca.",
 	"processingError": "Error de procesamiento",
 	"libraryAlreadyLoadedError": "Esta biblioteca ya está cargada.",
+	"libraryOutdatedError": "Ya hay guardada una versión más reciente de esta biblioteca. Indique una \"version\" más alta en su archivo para importarlo.",
 	"invalidLibraryFileError": "Archivo de biblioteca no válido. Asegúrese de que el formato sea correcto.",
 	"taintedFormMessage": "¿Desea abandonar esta página? Es posible que no se guarden los cambios que haya realizado.",
 	"riskScenariosStatus": "Estado de los escenarios de riesgo",

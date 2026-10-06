@@ -895,6 +895,7 @@
 	"libraryLoadingError": "Počas načítania vašej knižnice sa vyskytla chyba",
 	"processingError": "Chyba spracovania",
 	"libraryAlreadyLoadedError": "Táto knižnica už bola načítaná",
+	"libraryOutdatedError": "Novšia verzia tejto knižnice je už uložená. Na import zadajte v súbore vyššiu hodnotu \"version\".",
 	"invalidLibraryFileError": "Neplatný súbor knižnice. Uistite sa, že je formát správny.",
 	"fileTooLarge": "Súbor je príliš veľký",
 	"invalidFileFormat": "Neplatný formát súboru",

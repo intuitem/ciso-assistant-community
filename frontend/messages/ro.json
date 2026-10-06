@@ -628,6 +628,7 @@
 	"libraryLoadingError": "A apărut o eroare în timpul încărcării bibliotecii",
 	"processingError": "Eroare de procesare",
 	"libraryAlreadyLoadedError": "Această bibliotecă a fost deja încărcată",
+	"libraryOutdatedError": "O versiune mai nouă a acestei biblioteci este deja stocată. Setați o valoare \"version\" mai mare în fișier pentru a-l importa.",
 	"invalidLibraryFileError": "Fișier de bibliotecă invalid. Vă rugăm să vă asigurați că formatul este corect.",
 	"taintedFormMessage": "Doriți să părăsiți această pagină? Modificările pe care le-ați făcut este posibil să nu fie salvate.",
 	"riskScenariosStatus": "Starea scenariilor de risc",

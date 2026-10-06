@@ -888,6 +888,7 @@
 	"libraryLoadingError": "Įkeliant jūsų biblioteką įvyko klaida",
 	"processingError": "Apdorojimo klaida",
 	"libraryAlreadyLoadedError": "Ši biblioteka jau įkelta",
+	"libraryOutdatedError": "Naujesnė šios bibliotekos versija jau išsaugota. Norėdami importuoti, faile nurodykite didesnę \"version\" reikšmę.",
 	"invalidLibraryFileError": "Neteisingas bibliotekos failas. Įsitikinkite, kad formatas yra teisingas.",
 	"fileTooLarge": "Failas per didelis",
 	"invalidFileFormat": "Neteisingas failo formatas",
