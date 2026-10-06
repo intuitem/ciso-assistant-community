@@ -384,12 +384,16 @@ def render_email_template(
         return {}
 
 
-def format_control_list(controls) -> str:
+def format_control_list(
+    controls, *, locale: Optional[str] = "en", date_format: str = "auto"
+) -> str:
     """
     Format a list of controls for email templates
 
     Args:
         controls: List of AppliedControl objects
+        locale: Recipient language used for dates
+        date_format: Recipient date format preference
 
     Returns:
         Formatted string with control information
@@ -397,7 +401,8 @@ def format_control_list(controls) -> str:
     control_lines = []
     for control in controls:
         if hasattr(control, "eta") and control.eta:
-            control_lines.append(f"- {control.name} (ETA: {control.eta})")
+            eta = format_email_date(control.eta, locale, date_format)
+            control_lines.append(f"- {control.name} (ETA: {eta})")
         else:
             control_lines.append(f"- {control.name}")
 

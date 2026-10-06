@@ -557,15 +557,26 @@ def send_notification_email_expired_eta(owner_email, controls):
     if not check_email_configuration(owner_email, controls):
         return
 
-    from .email_utils import render_email_template, format_control_list
+    from .email_utils import (
+        format_control_list,
+        get_email_preferences,
+        render_email_template,
+    )
+
+    locale, date_format = get_email_preferences(owner_email)
 
     context = {
         "control_count": len(controls),
-        "control_list": format_control_list(controls),
+        "control_list": format_control_list(
+            controls, locale=locale, date_format=date_format
+        ),
     }
 
     rendered = render_email_template(
-        "expired_controls", context, recipient_email=owner_email
+        "expired_controls",
+        context,
+        locale=locale,
+        recipient_email=owner_email,
     )
     if rendered:
         send_notification_email(
@@ -918,13 +929,21 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
     if not check_email_configuration(owner_email, controls):
         return
 
-    from .email_utils import format_control_list, render_email_template
+    from .email_utils import (
+        format_control_list,
+        get_email_preferences,
+        localize_day_unit,
+        render_email_template,
+    )
 
-    locale, days_unit = _localized_day_unit(owner_email, days)
+    locale, date_format = get_email_preferences(owner_email)
+    days_unit = localize_day_unit(days, locale)
 
     context = {
         "control_count": len(controls),
-        "control_list": format_control_list(controls),
+        "control_list": format_control_list(
+            controls, locale=locale, date_format=date_format
+        ),
         "days_remaining": days,
         "days_remaining_unit": days_unit,
     }

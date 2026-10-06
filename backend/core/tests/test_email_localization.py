@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import pytest
 
 from core.email_utils import (
+    format_control_list,
     format_email_date,
     format_task_node_list,
     get_email_preferences,
@@ -169,6 +170,14 @@ def test_email_date_falls_back_to_english_for_unknown_locale():
     )
 
 
+def test_control_list_uses_german_short_date_for_auto_format():
+    control = SimpleNamespace(name="Zugangssteuerung", eta=date(2026, 9, 30))
+
+    control_list = format_control_list([control], locale="de")
+
+    assert control_list == "- Zugangssteuerung (ETA: 30.09.2026)"
+
+
 @pytest.mark.django_db
 def test_email_preferences_use_user_values_before_instance_defaults():
     GlobalSettings.objects.update_or_create(
@@ -275,3 +284,51 @@ def test_task_email_senders_forward_recipient_preferences(
     assert "Échéance: 30 septembre 2026" in body
     assert "Statut: En attente" in body
     assert "Échéance: 30 septembre 2026" in html_body
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("sender_name", "sender_kwargs", "expected_subject"),
+    [
+        ("send_notification_email_expired_eta", {}, "Überfällige Maßnahmen"),
+        (
+            "send_applied_control_expiring_soon_notification",
+            {"days": 7},
+            "Maßnahmen in 7 Tagen fällig",
+        ),
+    ],
+)
+def test_control_email_senders_forward_recipient_preferences(
+    monkeypatch, sender_name, sender_kwargs, expected_subject
+):
+    from core import tasks as core_tasks
+
+    GlobalSettings.objects.update_or_create(
+        name="general",
+        defaults={"value": {"default_language": "en", "default_date_format": "iso"}},
+    )
+    user = User.objects.create_user(email=f"{sender_name}@tests.com")
+    user.preferences = {"lang": "de", "date_format": "long_dmy"}
+    user.save(update_fields=["preferences"])
+
+    control = SimpleNamespace(name="Zugangssteuerung", eta=date(2026, 10, 5))
+    sent_messages = []
+
+    monkeypatch.setattr(core_tasks, "check_email_configuration", lambda *_: True)
+    monkeypatch.setattr(
+        core_tasks,
+        "send_notification_email",
+        lambda subject, body, recipient, html_body=None: sent_messages.append(
+            (subject, body, recipient, html_body)
+        ),
+    )
+
+    sender = getattr(core_tasks, sender_name)
+    sender.call_local(user.email, [control], **sender_kwargs)
+
+    assert len(sent_messages) == 1
+    subject, body, recipient, html_body = sent_messages[0]
+    assert expected_subject in subject
+    assert recipient == user.email
+    assert "Zugangssteuerung (ETA: 5 Oktober 2026)" in body
+    assert "Zugangssteuerung (ETA: 5 Oktober 2026)" in html_body
