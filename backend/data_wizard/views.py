@@ -31,6 +31,7 @@ from rest_framework.views import APIView
 
 from core.base_models import AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
+from core.cyfun import CYFUN_2025_URN
 from core.models import (
     Actor,
     AppliedControl,
@@ -82,14 +83,12 @@ from core.serializers import (
     VulnerabilityWriteSerializer,
 )
 from core.utils import (
-    AUDITOR_ONLY,
     build_questions_dict,
     get_global_currency,
     parse_answers_cell,
 )
 from data_wizard.arm_helpers import process_arm_file
 from data_wizard.cyfun_helpers import (
-    CYFUN_FRAMEWORK_URN,
     CYFUN_LIBRARY_URN,
     LEVEL_TO_GROUP,
     process_cyfun_file,
@@ -4513,7 +4512,16 @@ class LoadFileView(APIView):
         except ValueError as e:
             return fail(e.args[0] if e.args else "UnrecognizedCyfunWorkbook")
 
-        if not LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).exists():
+        loaded_library = LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+        if loaded_library is not None and (
+            StoredLibrary.objects.filter(
+                urn=CYFUN_LIBRARY_URN, version__gt=loaded_library.version
+            ).exists()
+        ):
+            # The import relies on the scoring settings of the current library
+            # (calculation method, visibility...): update the library first.
+            return fail("CyfunLibraryOutdated")
+        if loaded_library is None:
             stored_library = StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
             if stored_library is None:
                 return fail("CyfunLibraryNotFound")
@@ -4522,7 +4530,7 @@ class LoadFileView(APIView):
                 logger.error("CyFun library import failed", error=error)
                 return fail("CyfunLibraryImportFailed")
         try:
-            framework = Framework.objects.get(urn=CYFUN_FRAMEWORK_URN)
+            framework = Framework.objects.get(urn=CYFUN_2025_URN)
         except Framework.DoesNotExist:
             return fail("CyfunFrameworkNotFound")
 
@@ -4546,12 +4554,6 @@ class LoadFileView(APIView):
             "perimeter": perimeter_id,
             "framework": framework.id,
             "folder": folder_id,
-            "score_calculation_method": ComplianceAssessment.CalculationMethod.AVG_OF_AVG,
-            "field_visibility": {
-                "score": dict(AUDITOR_ONLY),
-                "is_scored": dict(AUDITOR_ONLY),
-                "documentation_score": dict(AUDITOR_ONLY),
-            },
         }
         level = parsed["assurance_level"]
         if level:

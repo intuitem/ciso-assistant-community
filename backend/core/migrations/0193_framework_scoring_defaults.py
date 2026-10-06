@@ -1,0 +1,48 @@
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ("core", "0192_backfill_evidencerevision_attachment_hash"),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name="framework",
+            name="anchor_na_to_target",
+            field=models.BooleanField(
+                default=False,
+                help_text="New audits count not applicable requirements as the target score.",
+                verbose_name="Anchor N/A to target score",
+            ),
+        ),
+        migrations.AddField(
+            model_name="framework",
+            name="score_calculation_method",
+            field=models.CharField(
+                default="average",
+                help_text="Calculation method proposed for new audits.",
+                max_length=30,
+                verbose_name="Score calculation method",
+            ),
+        ),
+        migrations.AddField(
+            model_name="framework",
+            name="score_scale_locked",
+            field=models.BooleanField(
+                default=False,
+                help_text="The standard defines the score scale: audits cannot change it.",
+                verbose_name="Score scale locked",
+            ),
+        ),
+        migrations.AddField(
+            model_name="framework",
+            name="target_score",
+            field=models.FloatField(
+                blank=True,
+                help_text="Target score proposed for new audits, on the framework scale. Implementation groups can override it.",
+                null=True,
+                verbose_name="Target score",
+            ),
+        ),
+    ]
