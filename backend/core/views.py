@@ -8566,6 +8566,7 @@ class ActorViewSet(BaseModelViewSet):
 
 class TeamViewSet(BaseModelViewSet):
     model = Team
+    filterset_fields = ["name", "folder"]
 
     def get_queryset(self):
         return (

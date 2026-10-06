@@ -22,6 +22,9 @@ from ..resolvers import (
     resolve_reference_control_id,
     resolve_qualification_ids,
     resolve_risk_level_index,
+    resolve_team_id,
+    resolve_user_id,
+    resolve_user_ids,
 )
 from .write_tools import (
     _normalize_applied_control_status,
@@ -255,6 +258,62 @@ async def update_asset(
         return f"Error in update_asset: {str(e)}"
 
 
+async def update_team(
+    team_id: str,
+    name: str = None,
+    description: str = None,
+    folder_id: str = None,
+    team_email: str = None,
+    leader: str = None,
+    deputies: list = None,
+    members: list = None,
+) -> str:
+    """Update team properties
+
+    Args:
+        team_id: Team ID/name
+        name: New name
+        description: New description
+        folder_id: Folder ID/name
+        team_email: Team contact email
+        leader: Leader as User UUID, email or name ("" to remove the leader)
+        deputies: List of deputies as User UUIDs, emails or names (replaces existing)
+        members: List of members as User UUIDs, emails or names (replaces existing)
+    """
+    try:
+        resolved_team_id = resolve_team_id(team_id)
+
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if folder_id is not None:
+            payload["folder"] = resolve_folder_id(folder_id)
+        if team_email is not None:
+            payload["team_email"] = team_email
+        if leader is not None:
+            payload["leader"] = resolve_user_id(leader) if leader else None
+        if deputies is not None:
+            payload["deputies"] = resolve_user_ids(deputies)
+        if members is not None:
+            payload["members"] = resolve_user_ids(members)
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/teams/{resolved_team_id}/", payload)
+
+        if res.status_code == 200:
+            team = res.json()
+            return f"Updated team: {team.get('name')} (ID: {team.get('id')})"
+        else:
+            return f"Error updating team: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_team: {str(e)}"
+
+
 async def update_risk_scenario(
     risk_scenario_id: str,
     name: str = None,
@@ -304,7 +363,9 @@ async def update_risk_scenario(
         vulnerabilities: List of vulnerability IDs/names exploited by this scenario (replaces existing)
         qualifications: List of qualifications: letters C/I/A(D)/T(P)
             (confidentiality/integrity/availability/proof), names or UUIDs (replaces existing)
-        owner: List of owners as actor UUIDs, emails or names (replaces existing)
+        owner: List of owners (users or teams) as actor UUIDs, emails or names
+            (replaces existing). Use get_users/get_teams to find a name, or
+            list_objects("actors") for the exact Actor UUID
     """
     try:
         # Resolve risk scenario name to ID if needed
