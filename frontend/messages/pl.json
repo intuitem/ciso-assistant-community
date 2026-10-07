@@ -1073,6 +1073,7 @@
 	"libraryLoadingError": "Wystąpił błąd podczas ładowania biblioteki",
 	"processingError": "Błąd przetwarzania",
 	"libraryAlreadyLoadedError": "Ta biblioteka już została załadowana",
+	"libraryOutdatedError": "Nowsza wersja tej biblioteki jest już zapisana. Aby ją zaimportować, ustaw w pliku wyższą wartość \"version\".",
 	"invalidLibraryFileError": "Nieprawidłowy plik biblioteki. Upewnij się, że format jest poprawny.",
 	"fileTooLarge": "Plik jest zbyt duży",
 	"invalidFileFormat": "Nieprawidłowy format pliku",
@@ -6900,5 +6901,7 @@
 	"teamDeputy": "Zastępca",
 	"teamMember": "Członek",
 	"noTeams": "Nie należysz do żadnego zespołu.",
-	"lazyResultsCount": "Wyniki: {count} · przewiń lub pisz, aby zawęzić"
+	"lazyResultsCount": "Wyniki: {count} · przewiń lub pisz, aby zawęzić",
+	"includeNotApplicableRequirements": "Uwzględnij wymagania niemające zastosowania",
+	"excludeNotApplicableRequirements": "Wyklucz wymagania niemające zastosowania"
 }

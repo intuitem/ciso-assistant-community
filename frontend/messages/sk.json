@@ -895,6 +895,7 @@
 	"libraryLoadingError": "Počas načítania vašej knižnice sa vyskytla chyba",
 	"processingError": "Chyba spracovania",
 	"libraryAlreadyLoadedError": "Táto knižnica už bola načítaná",
+	"libraryOutdatedError": "Novšia verzia tejto knižnice je už uložená. Na import zadajte v súbore vyššiu hodnotu \"version\".",
 	"invalidLibraryFileError": "Neplatný súbor knižnice. Uistite sa, že je formát správny.",
 	"fileTooLarge": "Súbor je príliš veľký",
 	"invalidFileFormat": "Neplatný formát súboru",
@@ -5740,5 +5741,7 @@
 	"attributeMappingGroups": "Mapovanie atribútu skupín",
 	"attributeMappingGroupsHelpText": "Názov(y) nároku (claim) obsahujúceho členstvá používateľa v skupinách IdP. Skupiny nájdené tu sa synchronizujú so skupinami IdP pri každom prihlásení a udeľujú tie skupiny používateľov CISO Assistant, na ktoré ich administrátor namapoval.",
 	"jitProvisioning": "Automatické zriaďovanie SSO (JIT)",
-	"jitProvisioningDescription": "Umožňuje automatické vytváranie účtov pri prvom prihlásení cez SSO a synchronizáciu ich členstiev v skupinách IdP, bez potreby SCIM."
+	"jitProvisioningDescription": "Umožňuje automatické vytváranie účtov pri prvom prihlásení cez SSO a synchronizáciu ich členstiev v skupinách IdP, bez potreby SCIM.",
+	"includeNotApplicableRequirements": "Zahrnúť neuplatniteľné požiadavky",
+	"excludeNotApplicableRequirements": "Vylúčiť neuplatniteľné požiadavky"
 }

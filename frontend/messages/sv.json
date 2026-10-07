@@ -631,6 +631,7 @@
 	"libraryLoadingError": "Ett fel inträffade vid laddning av biblioteket",
 	"processingError": "Bearbetningsfel",
 	"libraryAlreadyLoadedError": "Detta bibliotek har redan laddats",
+	"libraryOutdatedError": "En nyare version av detta bibliotek finns redan sparad. Ange en högre \"version\" i din fil för att importera den.",
 	"invalidLibraryFileError": "Ogiltig biblioteksfil. Kontrollera att formatet är korrekt.",
 	"taintedFormMessage": "Vill du lämna denna sida? Ändringar du gjort kan gå förlorade.",
 	"riskScenariosStatus": "Status för riskscenarier",
@@ -1629,5 +1630,7 @@
 	"attributeMappingGroups": "Attributmappning för grupper",
 	"attributeMappingGroupsHelpText": "Namn på anspråket (claim) som bär användarens IdP-gruppmedlemskap. Grupper som hittas här synkroniseras med IdP-grupper vid varje inloggning och beviljar de CISO Assistant-användargrupper som en administratör har mappat dem till.",
 	"jitProvisioning": "SSO-automatisk provisionering (JIT)",
-	"jitProvisioningDescription": "Aktiverar automatiskt skapande av konton vid första SSO-inloggningen och synkronisering av deras IdP-gruppmedlemskap, utan krav på SCIM."
+	"jitProvisioningDescription": "Aktiverar automatiskt skapande av konton vid första SSO-inloggningen och synkronisering av deras IdP-gruppmedlemskap, utan krav på SCIM.",
+	"includeNotApplicableRequirements": "Inkludera ej tillämpliga krav",
+	"excludeNotApplicableRequirements": "Exkludera ej tillämpliga krav"
 }

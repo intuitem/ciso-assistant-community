@@ -628,6 +628,7 @@
 	"libraryLoadingError": "حدث خطأ أثناء تحميل المكتبة",
 	"processingError": "خطأ في المعالجة",
 	"libraryAlreadyLoadedError": "تم تحميل هذه المكتبة بالفعل",
+	"libraryOutdatedError": "توجد بالفعل نسخة أحدث من هذه المكتبة. عيّن قيمة أعلى للحقل \"version\" في ملفك لاستيراده.",
 	"invalidLibraryFileError": "ملف مكتبة غير صالح. يرجى التأكد من أن التنسيق صحيح.",
 	"taintedFormMessage": "هل تريد مغادرة هذه الصفحة؟ قد لا يتم حفظ التغييرات التي أجريتها.",
 	"riskScenariosStatus": "حالة سيناريوهات المخاطر",
@@ -6621,5 +6622,7 @@
 				"countPlural=other": "صفحة · {count} سؤال"
 			}
 		}
-	]
+	],
+	"includeNotApplicableRequirements": "تضمين المتطلبات غير القابلة للتطبيق",
+	"excludeNotApplicableRequirements": "استبعاد المتطلبات غير القابلة للتطبيق"
 }
