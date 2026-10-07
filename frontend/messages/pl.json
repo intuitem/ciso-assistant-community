@@ -6900,5 +6900,7 @@
 	"teamDeputy": "Zastępca",
 	"teamMember": "Członek",
 	"noTeams": "Nie należysz do żadnego zespołu.",
-	"lazyResultsCount": "Wyniki: {count} · przewiń lub pisz, aby zawęzić"
+	"lazyResultsCount": "Wyniki: {count} · przewiń lub pisz, aby zawęzić",
+	"includeNotApplicableRequirements": "Uwzględnij wymagania niemające zastosowania",
+	"excludeNotApplicableRequirements": "Wyklucz wymagania niemające zastosowania"
 }

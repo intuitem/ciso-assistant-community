@@ -6757,5 +6757,7 @@
 	"teamLeader": "Vedoucí",
 	"teamDeputy": "Zástupce vedoucího",
 	"teamMember": "Člen",
-	"noTeams": "Nejste členem žádného týmu."
+	"noTeams": "Nejste členem žádného týmu.",
+	"includeNotApplicableRequirements": "Zahrnout nepoužitelné požadavky",
+	"excludeNotApplicableRequirements": "Vyloučit nepoužitelné požadavky"
 }
