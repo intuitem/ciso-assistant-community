@@ -1711,6 +1711,7 @@ class TierFedByMixin:
 
         viewable = RoleAssignment.get_viewable_object_ids(request.user, QuickForm)
         rows = []
+        cache: dict = {}
         for quick_form in (
             QuickForm.objects.filter(id__in=viewable)
             .select_related("library")
@@ -1719,7 +1720,7 @@ class TierFedByMixin:
             health = next(
                 (
                     h
-                    for h in on_accept_health(quick_form)
+                    for h in on_accept_health(quick_form, cache)
                     if h["target"] == "entity.tier"
                 ),
                 None,
@@ -1824,7 +1825,8 @@ class TierViewSet(TierFedByMixin, BaseModelViewSet):
             # Park every rank above the current maximum first, so no
             # intermediate state violates the unique constraint (SQLite cannot
             # defer it).
-            offset = max(t.rank for t in tiers.values()) + len(ids)
+            # `default`: an empty scale (or one emptied meanwhile) has no maximum.
+            offset = max((t.rank for t in tiers.values()), default=0) + len(ids)
             for position, tier_id in enumerate(ids):
                 Tier.objects.filter(pk=tier_id).update(rank=offset + position + 1)
             for position, tier_id in enumerate(ids):

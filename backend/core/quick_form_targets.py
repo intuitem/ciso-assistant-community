@@ -40,9 +40,10 @@ class Target:
         """Errors that make the config unusable with this form."""
         return []
 
-    def health(self, config: dict, quick_form) -> list[str]:
+    def health(self, config: dict, quick_form, cache: dict | None = None) -> list[str]:
         """Why the config cannot apply on this instance: its own errors, plus
-        what it names that is missing here."""
+        what it names that is missing here. `cache` is shared across the forms
+        of one request, for lookups that do not depend on the form."""
         return self.validate_config(config, quick_form)
 
     def current(self, subject) -> tuple[Any, str]:

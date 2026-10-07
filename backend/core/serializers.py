@@ -7376,7 +7376,9 @@ class QuickFormReadSerializer(BaseModelSerializer):
     def get_on_accept_health(self, obj) -> list[dict]:
         from core.quick_form_apply import on_accept_health
 
-        return on_accept_health(obj) if obj.on_accept else []
+        # One tier scale per request, not per listed form.
+        cache = self.context.setdefault("on_accept_health_cache", {})
+        return on_accept_health(obj, cache) if obj.on_accept else []
 
     class Meta:
         model = QuickForm

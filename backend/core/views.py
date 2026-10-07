@@ -20407,7 +20407,13 @@ class QuickFormViewSet(BaseModelViewSet):
         this is the in-house path, for those who may create responses."""
         from core.object_references import ReferenceError_
 
-        quick_form = self.get_object()
+        # Not `get_object()`: as a POST it would demand `add_quickform` on the
+        # form's folder (library content, in Global), which analysts — the
+        # people assessing — do not hold. Reading the form is enough; the right
+        # that matters is filing a response in the subject's domain (may_start).
+        quick_form = self.get_queryset().filter(pk=pk).first()
+        if quick_form is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         subject_id = request.data.get("subject")
         found = next(
             (
@@ -20683,6 +20689,8 @@ def _on_submit_outcome(response, user, evaluation) -> str | None:
         or response.status != QuickFormResponse.Status.DRAFT
         or not response.quick_form.on_accept
         or not response.is_requester(user)
+        # Planning costs queries: worth it only once Submit can be clicked.
+        or not evaluation["progress"]["complete"]
     ):
         return None
     response.computed_values = evaluation["computed_values"]

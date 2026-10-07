@@ -48,6 +48,7 @@ from core.cel_service import (
     validate_framework_expressions,
     validate_quick_form_expressions,
 )
+from core.quick_form_apply import validate_on_accept_document
 from core.excel import ExcelUploadHandler
 from core.helpers import get_sorted_requirement_nodes
 from core.models import (
@@ -1720,7 +1721,10 @@ class LibraryDraftViewSet(BaseModelViewSet):
         # An outcome rule written against the wrong context compiles but raises at
         # evaluation, where it is swallowed and logged — the rule would just never
         # fire. Catch it while the author is still looking at it.
-        if expression_errors := validate_quick_form_expressions(new_quick_form):
+        if expression_errors := [
+            *validate_quick_form_expressions(new_quick_form),
+            *validate_on_accept_document(new_quick_form),
+        ]:
             return Response(
                 {"error": "invalidExpressions", "details": expression_errors},
                 status=HTTP_400_BAD_REQUEST,

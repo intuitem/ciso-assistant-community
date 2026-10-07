@@ -7056,6 +7056,7 @@
 	"builderErrorRequirement": "Requirement {ref}",
 	"builderErrorRule": "Rule {ref}",
 	"tierHidden": "Uses a hidden tier: accepting would set a tier that is no longer on the scale",
+	"tierSetupInvalid": "The tier setup is out of order: bands must go from the most to the least critical tier, with decreasing minimums.",
 	"builderFormDescriptionPlaceholder": "Form description (optional)",
 	"builderFormAnnotationPlaceholder": "Form annotation (optional guidance text)",
 	"builderFormSettings": "Form settings",

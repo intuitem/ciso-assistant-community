@@ -7035,6 +7035,7 @@
 	"builderErrorRequirement": "Exigence {ref}",
 	"builderErrorRule": "Règle {ref}",
 	"tierHidden": "Utilise un niveau masqué : l'acceptation attribuerait un niveau qui ne figure plus dans l'échelle",
+	"tierSetupInvalid": "La configuration des niveaux est dans le désordre : les tranches doivent aller du niveau le plus au moins critique, avec des minimums décroissants.",
 	"builderFormDescriptionPlaceholder": "Description du formulaire (facultatif)",
 	"builderFormAnnotationPlaceholder": "Annotation du formulaire (texte d'aide facultatif)",
 	"builderFormSettings": "Paramètres du formulaire",

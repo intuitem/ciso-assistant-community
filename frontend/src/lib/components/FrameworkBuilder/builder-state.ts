@@ -393,11 +393,12 @@ export function describeSaveError(error: unknown): string {
 		if (detail.where === 'page_visibility') return m.builderErrorPage({ ref });
 		if (detail.where === 'requirement_visibility') return m.builderErrorRequirement({ ref });
 		if (detail.where === 'outcome') return m.builderErrorRule({ ref });
+		if (detail.where === 'on_accept') return m.onAcceptSection();
 		return ref;
 	};
 	const lines = details.map((detail) =>
 		detail && typeof detail === 'object'
-			? `${where(detail as Record<string, unknown>)}: ${(detail as Record<string, unknown>).error ?? ''}`
+			? `${where(detail as Record<string, unknown>)}: ${safeTranslate(String((detail as Record<string, unknown>).error ?? ''))}`
 			: String(detail)
 	);
 	return [safeTranslate(message), ...lines].join('\n');

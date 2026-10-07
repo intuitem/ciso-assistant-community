@@ -815,3 +815,125 @@ class TestSubjectLock:
             format="json",
         )
         assert changed.status_code == 200, changed.json()
+
+
+@pytest.mark.django_db
+class TestReviewFeedbackRoundTwo:
+    def _role_on_domain(self, setup, role_name, email):
+        user = User.objects.create_user(email=email, is_published=True)
+        assignment = RoleAssignment.objects.create(
+            user=user,
+            role=Role.objects.get(name=role_name),
+            folder=setup["domain"],
+            is_recursive=True,
+        )
+        assignment.perimeter_folders.add(setup["domain"])
+        client = APIClient()
+        client.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"
+        )
+        return client
+
+    def test_an_analyst_can_assess_without_add_quickform(self, setup):
+        """Analysts hold no `add_quickform`: starting needs only to read the
+        form and to file a response in the vendor's domain."""
+        user = User.objects.create_user(
+            email="tier-analyst@test.local", is_published=True
+        )
+        assignment = RoleAssignment.objects.create(
+            user=user,
+            role=Role.objects.get(name="BI-RL-ANA"),
+            folder=Folder.get_root_folder(),
+            is_recursive=True,
+        )
+        assignment.perimeter_folders.add(Folder.get_root_folder())
+        client = APIClient()
+        client.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"
+        )
+        result = client.post(
+            f"/api/quick-forms/{setup['form'].id}/start/",
+            {"subject": str(setup["acme"].id)},
+            format="json",
+        )
+        assert result.status_code == 200, result.content
+
+    @pytest.mark.parametrize(
+        "thresholds",
+        [
+            # ascending: a high score would stop at the lowest band
+            [{"tier": "low", "min": 0}, {"tier": "medium", "min": 2}, {"tier": "high"}],
+            # a missing minimum before the last band catches everything
+            [{"tier": "high"}, {"tier": "medium", "min": 2}, {"tier": "low"}],
+        ],
+    )
+    def test_misordered_bands_are_refused_not_applied(self, setup, thresholds):
+        _set_config(setup, {"bands": {"outcome": "risk", "thresholds": thresholds}})
+        user, _ = _admin()
+        proposal = plan(_response(setup, risk="three"), user)[0]["proposal"]
+        assert (proposal.ok, proposal.reason) == (False, "tierSetupInvalid")
+
+    def test_an_incomplete_draft_reports_no_submit_outcome(self, setup):
+        user, client = _admin()
+        result = client.post(
+            f"/api/quick-forms/{setup['form'].id}/start/",
+            {"subject": str(setup["acme"].id)},
+            format="json",
+        )
+        response_id = result.json()["redirect"].rsplit("/", 1)[1]
+        content = client.get(f"/api/my-requests/{response_id}/content/").json()
+        assert content["progress"]["complete"] is False
+        assert content["on_submit"] is None
+
+    def test_reordering_an_empty_scale_does_not_crash(self, setup):
+        Entity.objects.update(tier=None)
+        EntityTierChange.objects.all().delete()
+        Tier.objects.all().delete()
+        _user, client = _admin()
+        result = client.post("/api/tiers/reorder/", {"ids": []}, format="json")
+        assert result.status_code < 500
+
+    def test_the_same_subject_in_upper_case_is_not_a_change(self, setup):
+        _user, client = _admin()
+        result = client.post(
+            f"/api/quick-forms/{setup['form'].id}/start/",
+            {"subject": str(setup["acme"].id)},
+            format="json",
+        )
+        response_id = result.json()["redirect"].rsplit("/", 1)[1]
+        kept = client.patch(
+            f"/api/my-requests/{response_id}/answers/",
+            {"answers": {Q_VENDOR: [str(setup["acme"].id).upper()]}},
+            format="json",
+        )
+        assert kept.status_code == 200, kept.json()
+
+
+def test_the_builder_refuses_a_misordered_setup():
+    from core.quick_form_apply import validate_on_accept_document
+
+    form = {
+        "outcomes_definition": [
+            {"ref_id": "risk", "kind": "number", "expression": "1.0"}
+        ],
+        "on_accept": [
+            {
+                "target": "entity.tier",
+                "config": {
+                    "bands": {
+                        "outcome": "risk",
+                        "thresholds": [
+                            {"tier": "low", "min": 1},
+                            {"tier": "high", "min": 3},
+                        ],
+                    }
+                },
+            }
+        ],
+    }
+    errors = validate_on_accept_document(form)
+    assert [(e["where"], e["error"]) for e in errors] == [
+        ("on_accept", "thresholdsMustDescendByMin")
+    ]
+    form["on_accept"][0]["config"]["bands"]["thresholds"].reverse()
+    assert validate_on_accept_document(form) == []

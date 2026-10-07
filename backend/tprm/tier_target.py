@@ -109,10 +109,14 @@ class EntityTierTarget(Target):
                     errors.append("mappingOutcomeUnknown")
         return sorted(set(errors), key=errors.index)
 
-    def health(self, config, quick_form) -> list[str]:
+    def health(self, config, quick_form, cache=None) -> list[str]:
         problems = self.validate_config(config, quick_form)
         _, thresholds, mapping = _rows(config)
-        tiers = {t.key: t for t in Tier.objects.all()}
+        if cache is None:
+            cache = {}
+        if "tiers_by_key" not in cache:
+            cache["tiers_by_key"] = {t.key: t for t in Tier.objects.all()}
+        tiers = cache["tiers_by_key"]
         used = [str(row.get("tier")) for row in [*thresholds, *mapping]]
         if any(key not in tiers for key in used):
             problems.append("unknownTier")
@@ -156,6 +160,16 @@ class EntityTierTarget(Target):
         # tier written would not be the one the form asked for.
         if any(str(row.get("tier")) not in tiers for row in [*thresholds, *mapping]):
             return Proposal.refuse("unknownTier")
+        # Bands are read top-down, the first minimum reached wins: out of order,
+        # a high score would stop at a low band. Refused, never reordered.
+        mins = [_number(row.get("min")) for row in thresholds]
+        ranks = [tiers[str(row.get("tier"))].rank for row in thresholds]
+        if (
+            any(a <= b for a, b in zip(ranks, ranks[1:]))
+            or None in mins[:-1]
+            or any(a <= b for a, b in zip(mins, mins[1:]) if b is not None)
+        ):
+            return Proposal.refuse("tierSetupInvalid")
         candidates: list[tuple[Tier, float | None]] = []
 
         bands = config.get("bands") or {}

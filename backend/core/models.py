@@ -4,6 +4,7 @@ from fractions import Fraction
 import json
 import os
 import re
+import uuid
 import hashlib
 import operator
 from datetime import date, datetime
@@ -11448,6 +11449,15 @@ class ProducedObjectLink(AbstractBaseModel):
         }
 
 
+def _uuid_or_text(value) -> str:
+    """A UUID in its canonical (lowercase) form, anything else as text: the same
+    id sent in another case is the same id."""
+    try:
+        return str(uuid.UUID(str(value)))
+    except ValueError:
+        return str(value)
+
+
 class QuickFormResponse(
     NameDescriptionMixin, ETADueDateMixin, FolderMixin, AbstractBaseModel
 ):
@@ -11799,7 +11809,7 @@ class QuickFormResponse(
             if str(key).lower() != urn:
                 continue
             ids = value if isinstance(value, list) else [value]
-            if {str(v) for v in ids if v} != {str(self.subject_object_id)}:
+            if {_uuid_or_text(v) for v in ids if v} != {str(self.subject_object_id)}:
                 return True
         return False
 

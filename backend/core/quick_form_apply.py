@@ -225,7 +225,35 @@ def _subject_model_of(quick_form) -> str | None:
     return REFERENCEABLE[question.config["model"]]["model"]
 
 
-def on_accept_health(quick_form) -> list[dict]:
+def validate_on_accept_document(quick_form: dict) -> list[dict]:
+    """Shape errors in a form document's `on_accept`, reported like rule
+    errors when the builder saves: {where, ref_id, expression, error}. Which
+    objects exist (tier keys…) is the instance's business: see the health."""
+    from types import SimpleNamespace
+
+    form = SimpleNamespace(
+        outcomes_definition=quick_form.get("outcomes_definition") or []
+    )
+    errors = []
+    for entry in quick_form.get("on_accept") or []:
+        if not isinstance(entry, dict) or not isinstance(entry.get("config", {}), dict):
+            errors.append(_setup_error("", "onAcceptEntryMalformed"))
+            continue
+        key = str(entry.get("target") or "")
+        target = get_target(key)
+        if target is None:
+            errors.append(_setup_error(key, "unknownOnAcceptTarget"))
+            continue
+        for problem in target.validate_config(entry.get("config") or {}, form):
+            errors.append(_setup_error(key, problem))
+    return errors
+
+
+def _setup_error(target: str, code: str) -> dict:
+    return {"where": "on_accept", "ref_id": target, "expression": "", "error": code}
+
+
+def on_accept_health(quick_form, cache: dict | None = None) -> list[dict]:
     """Per target, what keeps the form's setup from applying on this instance:
     a target this version lacks, a config the form's rules no longer support,
     or objects it names that are missing here (e.g. a tier key not on this
@@ -248,7 +276,7 @@ def on_accept_health(quick_form) -> list[dict]:
         problems = []
         if subject_model != target.subject_model:
             problems.append("subjectModelMismatch")
-        problems += target.health(entry.get("config") or {}, quick_form)
+        problems += target.health(entry.get("config") or {}, quick_form, cache)
         rows.append({"target": target.key, "label": target.label, "problems": problems})
     return rows
 
