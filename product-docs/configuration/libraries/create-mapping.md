@@ -42,7 +42,7 @@ For example, an illustrative Mapping from a sample Framework to ISO/IEC 27001:20
 | `access.1` | `a.5.16` | `intersect` |
 | `identity.1` | `a.5.16` | `intersect` |
 
-Here, `access.1` links to two target requirements, and `a.5.16` links to two source requirements. Each link has its own row. Remove or leave empty any unused rows. Every row with content must have all three fields.
+Here, `access.1` links to two target requirements, and `a.5.16` links to two source requirements. Each link has its own row. Remove any unused rows. Every row with content must have all three fields.
 
 See [Mappings](library-objects/mappings.md) for the meaning and accepted values of each field, including the optional `rationale` and `strength_of_relationship`.
 
