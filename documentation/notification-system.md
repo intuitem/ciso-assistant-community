@@ -27,7 +27,7 @@ Event Trigger (serializer / periodic cron)
   - Primary server -> Rescue server (fallback)
 ```
 
-There is **no notification model** in the database. Notifications are fire-and-forget emails. Frontend toast notifications are independent and handled client-side only.
+This document covers the email path. Most notification tasks also write an **in-app** inbox row by calling `notify()` (`backend/notifications/service.py`) before sending their emails. Types, channels and title context are declared in `backend/notifications/registry.py`, and rows are stored in the `Notification` model. Frontend toast notifications are independent and handled client-side only.
 
 ---
 
