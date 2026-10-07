@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getTranslation, withTranslation, type ImplementationGroup } from './builder-state';
-	import { createDragHandlers } from './builder-utils.svelte';
+	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import { m } from '$paraglide/messages';
 
@@ -36,7 +36,7 @@
 		persist();
 	}
 
-	const drag = createDragHandlers((from, to) => {
+	const drag = createHandleGatedDragHandlers((from, to) => {
 		const copy = [...items];
 		const [moved] = copy.splice(from, 1);
 		copy.splice(to, 0, moved);
@@ -66,7 +66,8 @@
 				? 'opacity-50'
 				: ''}"
 			draggable="true"
-			ondragstart={() => drag.handleDragStart(index)}
+			onmousedown={drag.recordMousedown}
+			ondragstart={(e) => drag.handleDragStart(e, index)}
 			ondragover={drag.handleDragOver}
 			ondrop={(e) => drag.handleDrop(e, index)}
 			ondragend={drag.handleDragEnd}
@@ -74,7 +75,7 @@
 		>
 			<!-- Collapsed row -->
 			<div class="flex items-center gap-2 px-3 py-2">
-				<span class="cursor-grab text-gray-300 hover:text-surface-600-400">
+				<span class="cursor-grab text-gray-300 hover:text-surface-600-400" data-drag-handle>
 					<i class="fa-solid fa-grip-vertical text-xs"></i>
 				</span>
 
