@@ -61,7 +61,7 @@ flowchart TD
 
 This page is an overview. Each object page explains its purpose, how it relates to the other objects, and the Excel sheets, fields, and values used to author it.
 
-For the full authoring journey, see [Create a library with Excel](../create-library-with-excel.md).
+For the full authoring journey, see [Create a Library](../create-library.md).
 
 ## Related
 

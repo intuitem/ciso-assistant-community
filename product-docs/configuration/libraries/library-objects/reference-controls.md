@@ -115,6 +115,6 @@ When a requirement references a Reference Control, its `reference_controls` list
 - [URN Prefixes](urn-prefixes.md)
 - [Excel examples](../examples.md)
 - [Translate library content](../translations.md)
-- [Create a library with Excel](../create-library-with-excel.md)
+- [Create a Library](../create-library.md)
 - [Import a library](../import-library.md)
 - [Update a library](../update-library.md)

@@ -122,7 +122,7 @@
     * [URN prefixes](configuration/libraries/library-objects/urn-prefixes.md)
     * [Risk matrices](configuration/libraries/library-objects/risk-matrices.md)
     * [Mappings](configuration/libraries/library-objects/mappings.md)
-  * [Create a library with Excel](configuration/libraries/create-library-with-excel.md)
+  * [Create a Library](configuration/libraries/create-library.md)
   * [Create a Mapping](configuration/libraries/create-mapping.md)
   * [Translate library content](configuration/libraries/translations.md)
   * [Import a library](configuration/libraries/import-library.md)

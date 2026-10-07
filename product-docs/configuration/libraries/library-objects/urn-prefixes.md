@@ -106,6 +106,6 @@ The prefixes themselves do not become a separate YAML object.
 - [Threats](threats.md)
 - [Reference Controls](reference-controls.md)
 - [Excel examples](../examples.md)
-- [Create a library with Excel](../create-library-with-excel.md)
+- [Create a Library](../create-library.md)
 - [Import a library](../import-library.md)
 - [Update a library](../update-library.md)

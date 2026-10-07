@@ -16,7 +16,7 @@ You can upload an Excel workbook directly. CISO Assistant converts it during imp
 
 If the file is valid, CISO Assistant confirms the import. The loaded frameworks become available under **Catalog > Frameworks**. Other loaded library objects are available in their corresponding areas.
 
-If the import reports an error, correct the source file and try again. See [Create a library with Excel](create-library-with-excel.md) for help preparing the Excel file.
+If the import reports an error, correct the source file and try again. See [Create a Library](create-library.md) for help preparing the Excel file.
 
 ### Optional: convert Excel to YAML first
 

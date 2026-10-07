@@ -99,6 +99,6 @@ The Excel `type` marker is not included. The converter also adds `convert_librar
 - [Library objects](README.md)
 - [Excel examples](../examples.md)
 - [Translate library content](../translations.md)
-- [Create a library with Excel](../create-library-with-excel.md)
+- [Create a Library](../create-library.md)
 - [Import a library](../import-library.md)
 - [Update a library](../update-library.md)
