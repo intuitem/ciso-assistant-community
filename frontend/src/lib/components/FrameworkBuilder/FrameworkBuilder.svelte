@@ -36,6 +36,8 @@
 	import AddNodeMenu from './AddNodeMenu.svelte';
 	import EmptyState from './EmptyState.svelte';
 	import OutcomesEditor from './OutcomesEditor.svelte';
+	import { SECTION_CARD, SECTION_ICON, SECTION_TITLE } from './section-style';
+	import { buildCelCatalog, setCelCatalogContext } from './cel-complete';
 	import OnAcceptEditor from './OnAcceptEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
@@ -234,6 +236,24 @@
 		if (count > 1) builder.reorderQuestions(page.id, count - 1, 0);
 		builder.updateFramework({ subject_question_urn: question.urn });
 	}
+
+	// The form score only moves when a choice question gives points, as on the server.
+	const formGivesPoints = $derived.by(() => {
+		const walk = (nodes: BuilderNode[]): boolean =>
+			nodes.some(
+				(bn) =>
+					bn.questions.some(
+						({ question }) =>
+							(question.type === 'unique_choice' || question.type === 'multiple_choice') &&
+							question.choices.some((c) => c.add_score !== null && c.add_score !== undefined)
+					) || walk(bn.children)
+			);
+		return walk($rootNodesStore);
+	});
+
+	// What the expression fields suggest: every page, requirement, question and choice.
+	const celCatalog = $derived(buildCelCatalog($rootNodesStore, mode));
+	setCelCatalogContext(() => celCatalog);
 
 	// Pages as rules address them (`pages["<node id>"]`), named for the author.
 	let rulePages = $derived(
@@ -698,12 +718,10 @@
 							</div>
 
 							{#if mode === 'quick_form'}
-								<div
-									class="border border-surface-200-800 rounded-lg bg-surface-50-950/50 px-3 py-3 space-y-2"
-									data-testid="quick-form-score-settings"
-								>
-									<p class="text-xs font-medium text-surface-600-400 uppercase tracking-wider">
-										{m.builderQuickFormScore()}
+								<div class={SECTION_CARD} data-testid="quick-form-score-settings">
+									<p class={SECTION_TITLE}>
+										<i class="{SECTION_ICON} fa-calculator" aria-hidden="true"
+										></i>{m.builderQuickFormScore()}
 									</p>
 									<div class="grid grid-cols-3 gap-3">
 										<label class="block">
@@ -741,12 +759,14 @@
 									</div>
 									<p class="text-xs text-surface-500">{m.builderQuickFormScoreHint()}</p>
 								</div>
-								<label class="block" data-testid="subject-question">
-									<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
-										>{m.builderSubjectQuestion()}</span
-									>
+								<div class={SECTION_CARD} data-testid="subject-question">
+									<p class={SECTION_TITLE}>
+										<i class="{SECTION_ICON} fa-crosshairs" aria-hidden="true"
+										></i>{m.builderSubjectQuestion()}
+									</p>
 									<select
 										value={$frameworkStore.subject_question_urn ?? ''}
+										aria-label={m.builderSubjectQuestion()}
 										class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
 										onchange={(e) =>
 											builder.updateFramework({
@@ -762,7 +782,7 @@
 											>
 										{/each}
 									</select>
-									<span class="text-xs text-surface-500">{m.builderSubjectQuestionHint()}</span>
+									<p class="text-xs text-surface-500">{m.builderSubjectQuestionHint()}</p>
 									{#if !subjectCandidates.length}
 										<span
 											class="mt-1.5 flex flex-wrap items-center gap-2"
@@ -787,23 +807,24 @@
 											</button>
 										</span>
 									{/if}
-								</label>
+								</div>
 							{/if}
 
 							{#if mode === 'framework'}
 								<!-- Scoring settings -->
-								<div class="space-y-1.5">
+								<div class={SECTION_CARD}>
 									<button
 										type="button"
-										class="flex items-center gap-1.5 text-xs font-medium text-surface-600-400 uppercase tracking-wider hover:text-surface-700-300 transition-colors"
+										class="{SECTION_TITLE} hover:text-primary-600 transition-colors"
 										onclick={() => (showScoringSettings = !showScoringSettings)}
 									>
+										<i class="{SECTION_ICON} fa-gauge" aria-hidden="true"></i>
+										{m.builderScoringSettings()}
 										<i
 											class="fa-solid {showScoringSettings
 												? 'fa-chevron-down'
-												: 'fa-chevron-right'} text-[9px]"
+												: 'fa-chevron-right'} text-[9px] text-surface-500"
 										></i>
-										{m.builderScoringSettings()}
 									</button>
 									{#if showScoringSettings}
 										<div
@@ -1008,56 +1029,67 @@
 								</div>
 							{/if}
 							<!-- Outcome rules -->
-							<OutcomesEditor
-								outcomes={$frameworkStore.outcomes_definition ?? []}
-								onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
-								activeLanguage={$activeLanguageStore}
-								{mode}
-								pages={rulePages}
-							/>
+							<div class={SECTION_CARD}>
+								<OutcomesEditor
+									outcomes={$frameworkStore.outcomes_definition ?? []}
+									onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
+									activeLanguage={$activeLanguageStore}
+									{mode}
+									pages={rulePages}
+									catalog={celCatalog}
+								/>
+							</div>
 
 							{#if mode === 'quick_form'}
-								<OnAcceptEditor
-									value={($frameworkStore.on_accept ?? []) as any[]}
-									rules={$frameworkStore.outcomes_definition ?? []}
-									{subjectModel}
-									onaddvendorsubject={() => addSubjectQuestion('entity')}
-									onupdate={(on_accept) => builder.updateFramework({ on_accept })}
-								/>
+								<div class={SECTION_CARD}>
+									<OnAcceptEditor
+										value={($frameworkStore.on_accept ?? []) as any[]}
+										rules={$frameworkStore.outcomes_definition ?? []}
+										{subjectModel}
+										onaddvendorsubject={() => addSubjectQuestion('entity')}
+										scored={formGivesPoints}
+										onupdate={(on_accept) => builder.updateFramework({ on_accept })}
+									/>
+								</div>
 							{/if}
 
 							{#if mode === 'framework'}
 								<!-- Implementation groups -->
-								<ImplementationGroupsEditor
-									groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => {
-										const rec = g as Record<string, unknown>;
-										return {
-											ref_id: (rec.ref_id as string) ?? '',
-											name: (rec.name as string) ?? '',
-											description: (rec.description as string) ?? '',
-											default_selected: (rec.default_selected as boolean) ?? false,
-											// Not edited here, but kept: audits of the group are proposed it.
-											target_score: (rec.target_score as number | null | undefined) ?? undefined,
-											translations:
-												(rec.translations as Record<string, Record<string, string>>) ?? null
-										};
-									})}
-									onupdate={(groups) =>
-										builder.updateFramework({ implementation_groups_definition: groups })}
-									activeLanguage={$activeLanguageStore}
-								/>
+								<div class={SECTION_CARD}>
+									<ImplementationGroupsEditor
+										groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => {
+											const rec = g as Record<string, unknown>;
+											return {
+												ref_id: (rec.ref_id as string) ?? '',
+												name: (rec.name as string) ?? '',
+												description: (rec.description as string) ?? '',
+												default_selected: (rec.default_selected as boolean) ?? false,
+												// Not edited here, but kept: audits of the group are proposed it.
+												target_score: (rec.target_score as number | null | undefined) ?? undefined,
+												translations:
+													(rec.translations as Record<string, Record<string, string>>) ?? null
+											};
+										})}
+										onupdate={(groups) =>
+											builder.updateFramework({ implementation_groups_definition: groups })}
+										activeLanguage={$activeLanguageStore}
+									/>
+								</div>
 
 								<!-- Field Visibility -->
-								<VisibilityEditor
-									value={$frameworkStore.field_visibility}
-									onChange={(next) => builder.updateFramework({ field_visibility: next })}
-								/>
+								<div class={SECTION_CARD}>
+									<VisibilityEditor
+										value={$frameworkStore.field_visibility}
+										onChange={(next) => builder.updateFramework({ field_visibility: next })}
+									/>
+								</div>
 							{/if}
 							<!-- Languages -->
-							<div class="space-y-1.5">
-								<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
-									>{m.builderLanguagesSection()}</span
-								>
+							<div class={SECTION_CARD}>
+								<p class={SECTION_TITLE}>
+									<i class="{SECTION_ICON} fa-language" aria-hidden="true"
+									></i>{m.builderLanguagesSection()}
+								</p>
 								<p class="text-xs text-surface-500">
 									{m.builderLanguagesHint()}
 								</p>

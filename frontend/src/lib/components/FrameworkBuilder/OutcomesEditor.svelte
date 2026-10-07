@@ -2,6 +2,9 @@
 	import { getTranslation, withTranslation, type OutcomeRule } from './builder-state';
 	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
+	import CelInput from './CelInput.svelte';
+	import { SECTION_ICON, SECTION_TITLE } from './section-style';
+	import { readableValues, type CelCatalog } from './cel-complete';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -13,6 +16,8 @@
 		mode?: 'framework' | 'quick_form';
 		/** Quick forms: pages a number rule can read the score of. */
 		pages?: { id: string; label: string }[];
+		/** What the expression field suggests. */
+		catalog?: CelCatalog;
 	}
 
 	let {
@@ -20,7 +25,8 @@
 		onupdate,
 		activeLanguage = null,
 		mode = 'framework',
-		pages = []
+		pages = [],
+		catalog = { mode: 'framework', nodes: [], questions: [] }
 	}: Props = $props();
 
 	// The picker writes, and only ever replaces, a bare page score: a hand-written
@@ -157,8 +163,9 @@
 
 <div class="space-y-1.5">
 	<div class="flex items-center justify-between">
-		<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
-			>{m.builderOutcomeRules()}</span
+		<span class={SECTION_TITLE}
+			><i class="{SECTION_ICON} fa-code-branch" aria-hidden="true"
+			></i>{m.builderOutcomeRules()}</span
 		>
 		<button
 			type="button"
@@ -279,21 +286,24 @@
 						</label>
 					{/if}
 
-					<label class="block">
+					<div class="block">
 						<span class="text-xs text-surface-600-400">{m.builderCelExpression()}</span>
-						<textarea
+						<CelInput
+							multiline
 							value={rule.expression}
 							placeholder={mode === 'quick_form'
 								? m.builderCelExpressionPlaceholderQuickForm()
 								: m.builderCelExpressionPlaceholder()}
-							rows="2"
 							class="input w-full text-sm font-mono border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
-							onblur={(e) => {
-								rules[index].expression = e.currentTarget.value;
+							{catalog}
+							place={{ where: 'outcome', values: readableValues(rules, index) }}
+							oncommit={(value) => {
+								rules[index].expression = value;
 								persist();
 							}}
-						></textarea>
-					</label>
+							testid="outcome-rule-expression"
+						/>
+					</div>
 
 					{#if mode === 'quick_form' && rule.kind === 'number' && pages.length && pagePickable(rule.expression)}
 						<label class="block">

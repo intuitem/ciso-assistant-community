@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import { SECTION_ICON, SECTION_TITLE } from './section-style';
 	import type { OutcomeRule } from './builder-state';
 
 	type Entry = { target: string; config: Record<string, any> };
@@ -16,11 +17,15 @@
 		onupdate: (value: Entry[]) => void;
 		/** Adds a vendor question and makes it the subject. */
 		onaddvendorsubject?: () => void;
+		/** Whether any question gives points: without, the form score is always 0. */
+		scored?: boolean;
 	}
 
-	let { value, rules, subjectModel, onupdate, onaddvendorsubject }: Props = $props();
+	let { value, rules, subjectModel, onupdate, onaddvendorsubject, scored = true }: Props = $props();
 
 	const TIER_TARGET = 'entity.tier';
+	// The select's value for the form score; a rule ref_id never starts with '@'.
+	const FORM_SCORE = '@score';
 
 	let tiers = $state<Tier[]>([]);
 	$effect(() => {
@@ -55,6 +60,23 @@
 		onupdate(next === null ? others : [...others, { target: TIER_TARGET, config: next }]);
 	}
 
+	const bandSource = $derived(
+		config.bands?.source === 'score' ? FORM_SCORE : (config.bands?.outcome ?? '')
+	);
+	const bandRuleMissing = $derived(
+		bandSource !== '' &&
+			bandSource !== FORM_SCORE &&
+			!numericRules.some((r) => r.ref_id === bandSource)
+	);
+
+	function setBandSource(source: string) {
+		const { source: _, outcome: __, ...bands } = config.bands ?? {};
+		write({
+			...config,
+			bands: source === FORM_SCORE ? { ...bands, source: 'score' } : { ...bands, outcome: source }
+		});
+	}
+
 	function setBands(patch: Record<string, any> | null) {
 		const { bands, ...rest } = config;
 		write(patch === null ? rest : { ...rest, bands: { ...bands, ...patch } });
@@ -68,15 +90,12 @@
 	// One band per tier, most critical first, the last catching the rest: the
 	// shape almost every setup takes, left to the author to score.
 	function defaultBands() {
-		return {
-			outcome: numericRules.length === 1 ? numericRules[0].ref_id : '',
-			thresholds: tiers.map((tier) => ({ tier: tier.key }))
-		};
+		return { source: 'score', thresholds: tiers.map((tier) => ({ tier: tier.key })) };
 	}
 
 	function enable(on: boolean) {
 		if (!on) return write(null);
-		write(numericRules.length ? { bands: defaultBands() } : { mapping: [] });
+		write({ bands: defaultBands() });
 	}
 
 	function updateThreshold(index: number, patch: Partial<Threshold>) {
@@ -117,8 +136,8 @@
 
 <div class="space-y-2" data-testid="on-accept-editor">
 	<div>
-		<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
-			>{m.onAcceptSection()}</span
+		<span class={SECTION_TITLE}
+			><i class="{SECTION_ICON} fa-circle-check" aria-hidden="true"></i>{m.onAcceptSection()}</span
 		>
 		<p class="text-xs text-surface-500">{m.onAcceptSectionHelpText()}</p>
 	</div>
@@ -167,16 +186,34 @@
 						<span class="text-xs text-surface-600-400">{m.tierBandsValue()}</span>
 						<select
 							class="select text-sm"
-							value={config.bands.outcome ?? ''}
-							onchange={(e) => setBands({ outcome: e.currentTarget.value })}
+							value={bandSource}
+							onchange={(e) => setBandSource(e.currentTarget.value)}
+							data-testid="on-accept-band-source"
 						>
-							<option value="">--</option>
-							{#each numericRules as rule (rule.ref_id)}
-								<option value={rule.ref_id}>{ruleLabel(rule)}</option>
-							{/each}
+							{#if bandSource === ''}
+								<option value="" disabled>--</option>
+							{/if}
+							<option value={FORM_SCORE}>{m.tierBandsFormScore()}</option>
+							{#if numericRules.length}
+								<optgroup label={m.tierBandsNumberRules()}>
+									{#each numericRules as rule (rule.ref_id)}
+										<option value={rule.ref_id}>{ruleLabel(rule)}</option>
+									{/each}
+								</optgroup>
+							{/if}
+							{#if bandRuleMissing}
+								<option value={bandSource}>{bandSource}</option>
+							{/if}
 						</select>
-						{#if numericRules.length === 0}
-							<span class="text-xs text-warning-700">{m.tierBandsNoNumericRule()}</span>
+						{#if bandRuleMissing}
+							<span class="text-xs text-warning-700 dark:text-warning-400"
+								>{m.tierBandsRuleMissing()}</span
+							>
+						{:else if bandSource === FORM_SCORE && !scored}
+							<span
+								class="text-xs text-warning-700 dark:text-warning-400"
+								data-testid="on-accept-no-points">{m.tierBandsNoPoints()}</span
+							>
 						{/if}
 					</label>
 					{#each thresholds as row, index (index)}

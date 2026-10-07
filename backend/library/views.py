@@ -1810,6 +1810,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                     evaluation["computed_values"],
                     evaluation["computed_outcome"],
                     ready=evaluation["context"]["response"]["scored_complete"],
+                    score=evaluation["score"],
                 ),
             }
         )

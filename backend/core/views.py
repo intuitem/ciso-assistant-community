@@ -20506,6 +20506,7 @@ class QuickFormViewSet(BaseModelViewSet):
                     evaluation["computed_values"],
                     evaluation["computed_outcome"],
                     ready=evaluation["context"]["response"]["scored_complete"],
+                    score=evaluation["score"],
                 )
                 if quick_form.on_accept
                 else [],
@@ -20787,6 +20788,7 @@ def quick_form_response_content(response, user=None):
                 evaluation["computed_values"],
                 evaluation["computed_outcome"],
                 ready=evaluation["context"]["response"]["scored_complete"],
+                score=evaluation["score"],
             )
             if response.quick_form.on_accept
             and (response.publication is None or response.publication.show_projection)

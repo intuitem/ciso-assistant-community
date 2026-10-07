@@ -61,9 +61,16 @@
 				{#if row.ok}
 					<p class="text-xs text-surface-500">
 						{[
-							...(row.extra?.band && row.value !== null
-								? [m.projectionFrom({ rule: ruleLabel(row.extra.band), value: format(row.value) })]
-								: []),
+							...(row.extra?.band_source === 'score' && row.value !== null
+								? [m.projectionFromScore({ value: format(row.value) })]
+								: row.extra?.band && row.value !== null
+									? [
+											m.projectionFrom({
+												rule: ruleLabel(row.extra.band),
+												value: format(row.value)
+											})
+										]
+									: []),
 							...(row.extra?.outcomes ?? []).map(ruleLabel)
 						].join(' · ')}
 					</p>

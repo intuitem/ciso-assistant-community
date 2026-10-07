@@ -282,7 +282,12 @@ def on_accept_health(quick_form, cache: dict | None = None) -> list[dict]:
 
 
 def project(
-    entries: list[dict], computed_values, computed_outcome, *, ready: bool = True
+    entries: list[dict],
+    computed_values,
+    computed_outcome,
+    *,
+    ready: bool = True,
+    score: float | None = None,
 ) -> list[dict]:
     """What each target would propose from these results. No subject and no
     permission involved: it reads the answers' results, never the object.
@@ -291,7 +296,9 @@ def project(
     from types import SimpleNamespace
 
     results = SimpleNamespace(
-        computed_values=computed_values or {}, computed_outcome=computed_outcome or {}
+        computed_values=computed_values or {},
+        computed_outcome=computed_outcome or {},
+        score=score,
     )
     rows = []
     for entry in entries:

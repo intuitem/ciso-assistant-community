@@ -10,6 +10,8 @@
 	import { getCardCollapsedContext } from './collapse-state';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import QuestionEditor from './QuestionEditor.svelte';
+	import CelInput from './CelInput.svelte';
+	import { getCelCatalogContext } from './cel-complete';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import AddNodeMenu from './AddNodeMenu.svelte';
 	import ReferentialLinks from './ReferentialLinks.svelte';
@@ -31,6 +33,7 @@
 		activeLanguage: activeLanguageStore
 	} = builder;
 	const urnCopy = createCopyHandler();
+	const celCatalog = getCelCatalogContext();
 
 	// --- Splash-specific state (only used when display_mode === 'splash') ---
 	let splashMode: 'edit' | 'preview' = $state('edit');
@@ -891,14 +894,15 @@
 						title={m.builderVisibilityExpressionTooltip()}>&#9432;</span
 					>
 				</label>
-				<input
-					type="text"
+				<CelInput
 					class="w-full text-xs px-2 py-1 border border-surface-200-800 rounded font-mono bg-surface-50-950 focus:bg-surface-50-950 focus:{isSplash
 						? 'border-purple-300'
 						: 'border-blue-300'} focus:outline-none"
 					placeholder={m.builderVisibilityExpressionPlaceholder()}
 					value={node.node.visibility_expression ?? ''}
-					onblur={(e) => saveField('visibility_expression', e.currentTarget.value || null)}
+					catalog={celCatalog()}
+					place={{ where: 'visibility' }}
+					oncommit={(value) => saveField('visibility_expression', value || null)}
 				/>
 			</div>
 		{/if}

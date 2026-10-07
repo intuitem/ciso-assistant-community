@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getTranslation, withTranslation, type ImplementationGroup } from './builder-state';
 	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
+	import { SECTION_ICON, SECTION_TITLE } from './section-style';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import { m } from '$paraglide/messages';
 
@@ -47,8 +48,9 @@
 
 <div class="space-y-1.5">
 	<div class="flex items-center justify-between">
-		<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
-			>{m.builderImplementationGroupsTitle()}</span
+		<span class={SECTION_TITLE}
+			><i class="{SECTION_ICON} fa-layer-group" aria-hidden="true"
+			></i>{m.builderImplementationGroupsTitle()}</span
 		>
 		<button
 			type="button"

@@ -16,7 +16,7 @@ from core.models import (
     StoredLibrary,
     User,
 )
-from core.quick_form_apply import on_accept_health, plan
+from core.quick_form_apply import on_accept_health, plan, project
 from core.utils import apply_answers_dict
 from iam.models import Folder, Role, RoleAssignment, UserGroup
 from tprm.models import Entity, EntityTierChange, Tier, TierSource
@@ -204,6 +204,16 @@ class TestConfig:
         config["bands"]["outcome"] = "pii"
         assert "bandsOutcomeNotNumeric" in self._errors(setup, config)
 
+    def test_bands_may_read_the_form_score(self, setup):
+        config = _config()
+        config["bands"] = {"source": "score", "thresholds": [{"tier": "low"}]}
+        assert self._errors(setup, config) == []
+
+    def test_an_unknown_band_source_is_refused(self, setup):
+        config = _config()
+        config["bands"]["source"] = "average"
+        assert self._errors(setup, config) == ["bandsSourceUnknown"]
+
     def test_thresholds_descend(self, setup):
         config = _config()
         config["bands"]["thresholds"] = [
@@ -242,6 +252,26 @@ class TestResolution:
         assert proposal.display == "high"
         assert proposal.value == {"tier": str(_tier("high").id), "value": 3.0}
         assert (proposal.extra["band"], proposal.extra["outcomes"]) == ("risk", [])
+
+    def test_band_from_the_form_score(self, setup):
+        config = _config()
+        config["bands"] = {**config["bands"], "source": "score"}
+        del config["bands"]["outcome"]
+        _set_config(setup, config)
+        user, _ = _admin()
+        response = _response(setup, risk="three")
+        proposal = plan(response, user)[0]["proposal"]
+        assert response.score == 3.0
+        assert proposal.display == "high"
+        assert proposal.value["value"] == 3.0
+        assert proposal.extra["band_source"] == "score"
+        assert "band" not in proposal.extra
+
+    def test_the_preview_reads_the_form_score(self, setup):
+        bands = {"source": "score", "thresholds": _config()["bands"]["thresholds"]}
+        entries = [{"target": "entity.tier", "config": {"bands": bands}}]
+        assert project(entries, {}, {}, score=2.5)[0]["proposed"] == "medium"
+        assert project(entries, {}, {})[0]["reason"] == "noTierResolved"
 
     def test_lowest_band_catches_the_rest(self, setup):
         assert self._proposal(setup, risk="one").display == "low"

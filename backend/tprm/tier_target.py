@@ -2,8 +2,9 @@
 
 Config (on the form's `on_accept` entry), tiers named by their stable key:
 
-    bands:                       # optional
-      outcome: <ref_id of a numeric rule>
+    bands:                       # optional; reads one of:
+      source: score              #   the form score
+      outcome: <ref_id of a numeric rule>  # or a number rule
       thresholds:                # highest tier first; the last may omit `min`
         - {tier: critical, min: 3.3}
         - {tier: low-impact}
@@ -29,6 +30,15 @@ def _rules(quick_form) -> tuple[set[str], set[str]]:
             continue
         (numeric if rule.get("kind") == "number" else boolean).add(ref_id)
     return numeric, boolean
+
+
+SCORE_SOURCE = "score"
+
+
+def _band_value(response, bands) -> float | None:
+    if bands.get("source") == SCORE_SOURCE:
+        return _number(getattr(response, "score", None))
+    return _number((response.computed_values or {}).get(bands.get("outcome")))
 
 
 def _number(value) -> float | None:
@@ -76,7 +86,10 @@ class EntityTierTarget(Target):
         if bands:
             if not isinstance(bands, dict):
                 return ["bandsMalformed"]
-            if bands.get("outcome") not in numeric:
+            source = bands.get("source")
+            if source not in (None, "", SCORE_SOURCE):
+                errors.append("bandsSourceUnknown")
+            elif source != SCORE_SOURCE and bands.get("outcome") not in numeric:
                 errors.append("bandsOutcomeNotNumeric")
             thresholds = bands.get("thresholds")
             if not isinstance(thresholds, list) or not thresholds:
@@ -173,8 +186,8 @@ class EntityTierTarget(Target):
         candidates: list[tuple[Tier, float | None]] = []
 
         bands = config.get("bands") or {}
-        value = _number((response.computed_values or {}).get(bands.get("outcome")))
-        if bands and value is not None:
+        value = _band_value(response, bands) if bands else None
+        if value is not None:
             for row in thresholds:
                 tier = tiers.get(str(row.get("tier")))
                 minimum = _number(row.get("min"))
@@ -204,7 +217,10 @@ class EntityTierTarget(Target):
         proposal = self._proposal(tier, band_value)
         proposal.extra["outcomes"] = [o for t, o in mapped if t.id == tier.id]
         if band_value is not None:
-            proposal.extra["band"] = bands.get("outcome")
+            if bands.get("source") == SCORE_SOURCE:
+                proposal.extra["band_source"] = SCORE_SOURCE
+            else:
+                proposal.extra["band"] = bands.get("outcome")
         return proposal
 
     def apply(self, subject, proposal, *, response, user) -> None:
