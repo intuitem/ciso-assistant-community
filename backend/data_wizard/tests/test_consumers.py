@@ -1096,10 +1096,71 @@ class TestFolderConsumer:
             {"name": "Labelled", "labels": "Corporate|Finance"}, None
         )
         assert error is None
-        assert set(record_data["filtering_labels"]) == {
+        # Nothing is created until the row is written.
+        assert not FilteringLabel.objects.filter(label="Finance").exists()
+        resolved = consumer.resolve_deferred(record_data)
+        assert set(resolved["filtering_labels"]) == {
             existing.id,
             FilteringLabel.objects.get(label="Finance").id,
         }
+
+    def test_skipped_row_creates_no_label(
+        self, skip_context, domain_folder, all_accessible
+    ):
+        from core.models import FilteringLabel
+
+        result = FolderRecordConsumer(skip_context).process_records(
+            [{"name": domain_folder.name, "labels": "Orphan"}]
+        )
+        assert result.skipped == 1
+        assert not FilteringLabel.objects.filter(label="Orphan").exists()
+
+    def test_rejected_row_creates_no_label(
+        self, base_context, domain_folder, all_accessible
+    ):
+        """Nesting is rejected on Community, after the labels were resolved."""
+        from core.models import FilteringLabel
+
+        result = FolderRecordConsumer(base_context).process_records(
+            [{"name": "Child", "domain": domain_folder.name, "labels": "Orphan"}]
+        )
+        assert result.failed == 1
+        assert not FilteringLabel.objects.filter(label="Orphan").exists()
+
+    def test_internal_id_keeps_parent_with_shared_name(self, base_context, root_folder):
+        acme = Folder.objects.create(name="ACME", parent_folder=root_folder)
+        beta = Folder.objects.create(name="Beta", parent_folder=root_folder)
+        ops = Folder.objects.create(name="Ops", parent_folder=acme)
+        Folder.objects.create(name="Ops", parent_folder=beta)
+        child = Folder.objects.create(name="Servers", parent_folder=ops)
+        consumer = FolderRecordConsumer(base_context)
+
+        record_data, error = consumer.prepare_create(
+            {"name": "Servers", "domain": "Ops", "internal_id": str(child.id)}, None
+        )
+        assert error is None
+        assert record_data["parent_folder"] == ops.id
+
+        # Without the id, the shared name stays ambiguous.
+        _, error = consumer.prepare_create({"name": "Servers", "domain": "Ops"}, None)
+        assert "Multiple" in error.error
+
+    def test_parent_lookup_ignores_non_domain_folders(self, base_context, root_folder):
+        domain = Folder.objects.create(
+            name="Ops",
+            parent_folder=root_folder,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        Folder.objects.create(
+            name="Ops",
+            parent_folder=domain,
+            content_type=Folder.ContentType.ENCLAVE,
+        )
+        record_data, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "Child", "domain": "Ops"}, None
+        )
+        assert error is None
+        assert record_data["parent_folder"] == domain.id
 
     def test_invalid_label_fails_the_row_clearly(self, base_context):
         from core.models import FilteringLabel

@@ -20,7 +20,7 @@ import structlog
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
-from django.db import IntegrityError, models
+from django.db import IntegrityError, models, transaction
 from django.db.models import Q
 from django.http import FileResponse, HttpRequest
 from django.utils import timezone
@@ -1105,44 +1105,21 @@ class RecordConsumer[Context = None](ABC):
                         break
                     case ConflictMode.UPDATE:
                         update_data = self._build_update_data(record, record_data)
-                        serializer = self.get_serializer_class()(
-                            instance=existing,
-                            data=update_data,
-                            partial=True,
-                            context={"request": self.request},
-                        )
-                        if serializer.is_valid():
-                            try:
-                                serializer.save()
-                                results.add_updated()
-                            except Exception as e:
-                                results.add_error(Error(record=record, error=str(e)))
+                        error = self._write_record(update_data, instance=existing)
+                        if error:
+                            results.add_error(Error(record=record, error=error))
                         else:
-                            results.add_error(
-                                Error(
-                                    record=record,
-                                    error=str(serializer.errors),
-                                )
-                            )
+                            results.add_updated()
                         continue
 
-            serializer = self.get_serializer_class()(
-                data=record_data, context={"request": self.request}
-            )
-            if serializer.is_valid():
-                try:
-                    serializer.save()
-                    results.add_created()
-                except Exception as e:
-                    results.add_error(Error(record=record, error=str(e)))
-                    if self.on_conflict == ConflictMode.STOP:
-                        results.stopped = True
-                        break
-            else:
-                results.add_error(Error(record=record, error=str(serializer.errors)))
+            error = self._write_record(record_data)
+            if error:
+                results.add_error(Error(record=record, error=error))
                 if self.on_conflict == ConflictMode.STOP:
                     results.stopped = True
                     break
+            else:
+                results.add_created()
 
         for key, names in self.side_effects.items():
             if names:
@@ -1154,6 +1131,33 @@ class RecordConsumer[Context = None](ABC):
             f"Skipped: {results.skipped}, Failed: {results.failed}"
         )
         return results
+
+    def resolve_deferred(self, data: dict) -> dict:
+        """Resolve values whose resolution writes to the database.
+
+        Runs only once a row is known to be written, inside the transaction of
+        that write, so a skipped or rejected row leaves nothing behind.
+        """
+        return data
+
+    def _write_record(self, data: dict, instance=None) -> Optional[str]:
+        """Create, or update *instance*, from *data*; return an error or None."""
+        with transaction.atomic():
+            serializer = self.get_serializer_class()(
+                instance=instance,
+                data=self.resolve_deferred(data),
+                partial=instance is not None,
+                context={"request": self.request},
+            )
+            if not serializer.is_valid():
+                transaction.set_rollback(True)
+                return str(serializer.errors)
+            try:
+                serializer.save()
+            except Exception as e:
+                transaction.set_rollback(True)
+                return str(e)
+        return None
 
     def _record_side_effects(self, key: str, resolved: SideObjects) -> None:
         self.side_effects.setdefault(key, []).extend(resolved.created)
@@ -2839,6 +2843,43 @@ class FolderRecordConsumer(RecordConsumer):
     def create_context(self):
         return None, None
 
+    def _resolve_parent(self, record: dict) -> tuple[Optional[UUID], Optional[Error]]:
+        """Resolve the `domain` column, a parent domain given by name."""
+        domain_name = str(record.get("domain", "")).strip()
+        if not domain_name:
+            return Folder.get_root_folder().id, None
+
+        # Names are not unique: a row exported with its internal_id keeps its
+        # current parent while that parent's name is unchanged.
+        internal_id = record.get("internal_id")
+        if internal_id:
+            try:
+                current = (
+                    Folder.objects.filter(id=internal_id)
+                    .select_related("parent_folder")
+                    .first()
+                )
+            except ValidationError, ValueError:
+                current = None  # reported when the row is matched
+            parent = current.parent_folder if current else None
+            if parent and parent.name.lower() == domain_name.lower():
+                return parent.id, None
+
+        matching_folders = Folder.objects.filter(
+            name__iexact=domain_name, content_type=Folder.ContentType.DOMAIN
+        )
+        count = matching_folders.count()
+        if count == 0:
+            return None, Error(
+                record=record, error=f"Parent folder '{domain_name}' not found"
+            )
+        if count > 1:
+            return None, Error(
+                record=record,
+                error=f"Multiple folders named '{domain_name}' found; please use a unique name",
+            )
+        return matching_folders.first().id, None
+
     def find_existing(self, record_data: dict) -> Optional[Folder]:
         name = record_data.get("name")
         if not name:
@@ -2858,23 +2899,9 @@ class FolderRecordConsumer(RecordConsumer):
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
 
-        domain_name = str(record.get("domain", "")).strip()
-        if domain_name:
-            matching_folders = Folder.objects.filter(name__iexact=domain_name)
-            count = matching_folders.count()
-            if count == 0:
-                return {}, Error(
-                    record=record,
-                    error=f"Parent folder '{domain_name}' not found",
-                )
-            if count > 1:
-                return {}, Error(
-                    record=record,
-                    error=f"Multiple folders named '{domain_name}' found; please use a unique name",
-                )
-            parent_folder_id = matching_folders.first().id
-        else:
-            parent_folder_id = Folder.get_root_folder().id
+        parent_folder_id, error = self._resolve_parent(record)
+        if error is not None:
+            return {}, error
 
         data = {
             "name": name,
@@ -2895,11 +2922,19 @@ class FolderRecordConsumer(RecordConsumer):
                 error=f"Invalid labels {', '.join(invalid_labels)}: use only "
                 "letters, digits, '_' or '-', 36 characters at most",
             )
-        filtering_labels = _resolve_filtering_labels(raw_labels)
-        if filtering_labels:
-            data["filtering_labels"] = filtering_labels
+        # Kept as names: missing labels are created only when the row is written.
+        if _split_label_names(raw_labels):
+            data["filtering_labels"] = raw_labels
 
         return data, None
+
+    def resolve_deferred(self, data: dict) -> dict:
+        if "filtering_labels" not in data:
+            return data
+        return {
+            **data,
+            "filtering_labels": _resolve_filtering_labels(data["filtering_labels"]),
+        }
 
 
 class VulnerabilityRecordConsumer(RecordConsumer[None]):
