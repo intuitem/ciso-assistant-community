@@ -20637,7 +20637,7 @@ def _applies_on_submit(response, user, scored_complete) -> bool:
         return False
 
 
-def _close_on_submit(response, user) -> list[dict] | None:
+def _close_on_submit(response, user, evaluation=None) -> list[dict] | None:
     """Apply a just-submitted response at once when its submitter could make
     every change by hand (see `can_apply_on_submit`); None when it goes to
     review. Accepted with the submitter as decider, so workflows and reports
@@ -20652,7 +20652,8 @@ def _close_on_submit(response, user) -> list[dict] | None:
         publication is not None and publication.always_review
     ):
         return None
-    evaluation = evaluate_quick_form(response, persist=True)
+    if evaluation is None:
+        evaluation = evaluate_quick_form(response, persist=True)
     scored_complete = evaluation["context"]["response"]["scored_complete"]
     if not _applies_on_submit(response, user, scored_complete):
         return None
@@ -21073,7 +21074,7 @@ class MyRequestViewSet(viewsets.ViewSet):
             update_fields.append("due_date")
         response.save(update_fields=update_fields)
         emit_quick_form_submitted(response)
-        applied = _close_on_submit(response, request.user)
+        applied = _close_on_submit(response, request.user, evaluation)
         if applied is None:
             # Nobody to notify when nothing is left to review.
             transaction.on_commit(
@@ -21842,6 +21843,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             return Response(
                 {"error": "onlyRequesterCanSubmit"}, status=status.HTTP_403_FORBIDDEN
             )
+        evaluation = None
         if config.get("check_completion"):
             evaluation = evaluate_quick_form(response, persist=True)
             if not evaluation["progress"]["complete"]:
@@ -21955,7 +21957,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
 
         if is_real_submission:
             emit_quick_form_submitted(response)
-            on_accept = _close_on_submit(response, request.user)
+            on_accept = _close_on_submit(response, request.user, evaluation)
             if on_accept is None:
                 transaction.on_commit(
                     lambda pk=response.pk: send_quick_form_submitted_notification(pk)

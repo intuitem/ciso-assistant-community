@@ -395,6 +395,35 @@ class TestSubjectFromAnswers:
         assert summary["id"] == str(setup["acme"].id)
         assert summary["str"] is None
 
+    def test_a_list_labels_every_subject(self, setup):
+        _user, client = _admin()
+        for entity in ("acme", "globex"):
+            _answer(self._response(setup), [str(setup[entity].id)])
+        listed = client.get("/api/quick-form-responses/").json()["results"]
+        assert sorted(r["subject"]["str"] for r in listed) == ["Acme", "Globex"]
+
+    def test_labelling_a_page_does_not_grow_with_its_rows(self, setup):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        user, _client = _admin()
+        responses = []
+        for entity in ("acme", "globex", "acme", "globex"):
+            response = self._response(setup)
+            _answer(response, [str(setup[entity].id)])
+            responses.append(response)
+
+        def queries(rows):
+            with CaptureQueriesContext(connection) as captured:
+                labels = QuickFormResponse.subject_labels(rows, user)
+            return len(captured), labels
+
+        queries(responses)  # warms the content type and role caches
+        one, _ = queries(responses[:1])
+        four, labels = queries(responses)
+        assert four == one
+        assert sorted(labels.values()) == ["Acme", "Globex"]
+
 
 @pytest.mark.django_db
 class TestStartWithSubject:

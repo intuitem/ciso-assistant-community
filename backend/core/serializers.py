@@ -7462,8 +7462,16 @@ class QuickFormResponseReadSerializer(BaseModelSerializer):
     subject = serializers.SerializerMethodField()
 
     def get_subject(self, obj):
-        request = self.context.get("request")
-        return obj.subject_summary(getattr(request, "user", None))
+        user = getattr(self.context.get("request"), "user", None)
+        # Listed: every subject on the page is labelled at once.
+        page = getattr(self.parent, "instance", None)
+        if page is None or isinstance(page, QuickFormResponse):
+            return obj.subject_summary(user)
+        if "_subject_labels" not in self.context:
+            self.context["_subject_labels"] = QuickFormResponse.subject_labels(
+                page, user
+            )
+        return obj.subject_summary(user, self.context["_subject_labels"])
 
     def get_is_deletable(self, obj) -> bool:
         # Answered per caller: a closed request is administrator-only.

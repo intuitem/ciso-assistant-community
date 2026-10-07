@@ -11770,34 +11770,59 @@ class QuickFormResponse(
             return None
         return question
 
-    def subject_summary(self, user=None) -> dict | None:
+    def subject_summary(self, user=None, labels: dict | None = None) -> dict | None:
         """What the response is about, as {id, model, str}. The label is filled in
-        only for a caller who may view that object, like answer labels."""
+        only for a caller who may view that object, like answer labels. A list
+        passes `labels` from `subject_labels`, so a row costs no query."""
+        from django.contrib.contenttypes.models import ContentType
+
         from core.object_references import REFERENCEABLE
-        from iam.models import RoleAssignment
 
         if not self.subject_content_type_id or not self.subject_object_id:
             return None
-        model_class = self.subject_content_type.model_class()
+        model_class = ContentType.objects.get_for_id(
+            self.subject_content_type_id
+        ).model_class()
         label = model_class._meta.label if model_class else ""
-        data = {
+        if labels is None:
+            labels = QuickFormResponse.subject_labels([self], user)
+        return {
             "id": str(self.subject_object_id),
             "model": next(
                 (k for k, v in REFERENCEABLE.items() if v["model"] == label), None
             ),
-            "str": None,
+            "str": labels.get((self.subject_content_type_id, self.subject_object_id)),
         }
-        if (
-            model_class
-            and user is not None
-            and user.is_authenticated
-            and RoleAssignment.is_object_readable(
-                user, model_class, self.subject_object_id
-            )
-        ):
-            target = model_class.objects.filter(pk=self.subject_object_id).first()
-            data["str"] = str(target) if target else None
-        return data
+
+    @staticmethod
+    def subject_labels(responses, user) -> dict:
+        """{(content type id, object id): label} for the subjects of `responses`
+        that `user` may view: one permission lookup and one query per model."""
+        from collections import defaultdict
+
+        from django.contrib.contenttypes.models import ContentType
+
+        from iam.models import RoleAssignment
+
+        if user is None or not user.is_authenticated:
+            return {}
+        ids_by_type = defaultdict(set)
+        for response in responses:
+            if response.subject_content_type_id and response.subject_object_id:
+                ids_by_type[response.subject_content_type_id].add(
+                    response.subject_object_id
+                )
+        labels = {}
+        for type_id, ids in ids_by_type.items():
+            model_class = ContentType.objects.get_for_id(type_id).model_class()
+            if model_class is None:
+                continue
+            viewable = RoleAssignment.get_viewable_object_ids(user, model_class)
+            for target in model_class.objects.filter(pk__in=ids).filter(
+                pk__in=viewable
+            ):
+                labels[(type_id, target.pk)] = str(target)
+        return labels
 
     def changes_locked_subject(self, answers: dict) -> bool:
         """Whether `answers` would point a locked response at another object.

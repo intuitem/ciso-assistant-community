@@ -258,9 +258,11 @@ def on_accept_health(quick_form, cache: dict | None = None) -> list[dict]:
     a target this version lacks, a config the form's rules no longer support,
     or objects it names that are missing here (e.g. a tier key not on this
     scale)."""
+    if not quick_form.on_accept:
+        return []
     rows = []
     subject_model = _subject_model_of(quick_form)
-    for entry in quick_form.on_accept or []:
+    for entry in quick_form.on_accept:
         if not isinstance(entry, dict) or not isinstance(entry.get("config", {}), dict):
             rows.append(
                 {"target": "", "label": "", "problems": ["onAcceptEntryMalformed"]}

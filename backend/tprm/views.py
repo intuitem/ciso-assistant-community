@@ -1714,6 +1714,7 @@ class TierFedByMixin:
         cache: dict = {}
         for quick_form in (
             QuickForm.objects.filter(id__in=viewable)
+            .exclude(on_accept=[])
             .select_related("library")
             .order_by("name")
         ):
