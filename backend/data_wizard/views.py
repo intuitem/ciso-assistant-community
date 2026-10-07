@@ -2843,6 +2843,15 @@ class FolderRecordConsumer(RecordConsumer):
     def create_context(self):
         return None, None
 
+    @cached_property
+    def may_add_labels(self) -> bool:
+        # New labels are created in the root folder (FolderMixin's default).
+        return RoleAssignment.is_access_allowed(
+            user=self.request.user,
+            perm=Permission.objects.get(codename="add_filteringlabel"),
+            folder=Folder.get_root_folder(),
+        )
+
     def _resolve_parent(self, record: dict) -> tuple[Optional[UUID], Optional[Error]]:
         """Resolve the `domain` column, a parent domain given by name."""
         domain_name = str(record.get("domain", "")).strip()
@@ -2915,15 +2924,28 @@ class FolderRecordConsumer(RecordConsumer):
             or record.get("étiquette")
             or record.get("label")
         )
-        invalid_labels = _invalid_label_names(_split_label_names(raw_labels))
+        label_names = _split_label_names(raw_labels)
+        invalid_labels = _invalid_label_names(label_names)
         if invalid_labels:
             return {}, Error(
                 record=record,
                 error=f"Invalid labels {', '.join(invalid_labels)}: use only "
                 "letters, digits, '_' or '-', 36 characters at most",
             )
+        if label_names and not self.may_add_labels:
+            existing = set(
+                FilteringLabel.objects.filter(label__in=label_names).values_list(
+                    "label", flat=True
+                )
+            )
+            missing = sorted(label_names - existing)
+            if missing:
+                return {}, Error(
+                    record=record,
+                    error=f"You are not allowed to create labels: {', '.join(missing)}",
+                )
         # Kept as names: missing labels are created only when the row is written.
-        if _split_label_names(raw_labels):
+        if label_names:
             data["filtering_labels"] = raw_labels
 
         return data, None

@@ -1104,6 +1104,27 @@ class TestFolderConsumer:
             FilteringLabel.objects.get(label="Finance").id,
         }
 
+    def test_label_creation_requires_permission(self, domain_folder):
+        from core.models import FilteringLabel
+
+        FilteringLabel.objects.create(label="Corporate")
+        request = MagicMock()
+        request.user = User.objects.create_user("no-labels@datawizard.test")
+        consumer = FolderRecordConsumer(
+            BaseContext(request=request, folders_map={}, on_conflict=ConflictMode.STOP)
+        )
+
+        # Existing labels can still be linked.
+        _, error = consumer.prepare_create({"name": "A", "labels": "Corporate"}, None)
+        assert error is None
+
+        _, error = consumer.prepare_create(
+            {"name": "B", "labels": "Corporate,Secret"}, None
+        )
+        assert error is not None
+        assert "not allowed to create labels: Secret" in error.error
+        assert not FilteringLabel.objects.filter(label="Secret").exists()
+
     def test_skipped_row_creates_no_label(
         self, skip_context, domain_folder, all_accessible
     ):
