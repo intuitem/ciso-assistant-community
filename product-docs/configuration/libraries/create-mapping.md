@@ -8,7 +8,7 @@ A Mapping links requirements from two Frameworks. Start with the YAML file versi
 
 ## 1. Get the two Framework YAML files
 
-Choose which Framework is the **source** and which is the **target**. The preparation script needs a YAML library containing each Framework and its requirement nodes. If you only have Excel files, convert them to YAML first as explained in [Create a Library](create-library.md). These YAML files are inputs to the preparation script. Nonetheless, you can still import the finished Mapping as Excel.
+Choose which Framework is the **source** and which is the **target**. The preparation script needs a YAML library containing each Framework and its requirement nodes. If you only have Excel files, convert them to YAML first as explained in [the optional conversion step](create-library.md#5-optional-convert-the-workbook-to-yaml). These YAML files are inputs to the preparation script. Nonetheless, you can still import the finished Mapping as Excel.
 
 ## 2. Generate the Mapping workbook
 

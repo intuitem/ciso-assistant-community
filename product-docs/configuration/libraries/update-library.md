@@ -14,7 +14,7 @@ Before updating a library, it is strongly recommended to keep a backup copy of t
 
 1. Edit the library's Excel (`.xlsx`) file.
 2. Increase `version` in the `library_meta` sheet. Keep the library's `urn` and every other type of identifiers (e.g. `ref_id`) of existing content stable so CISO Assistant can recognize the library and preserve references to its existing requirements.
-3. Upload the updated Excel (`.xlsx`) file as described in [Import a library](import-library.md). If you prefer, convert it to YAML first with [`convert_library_v2.py`](https://github.com/intuitem/ciso-assistant-community/blob/main/backend/scripts/convert_library_v2.py), then upload the generated `.yaml` file.
+3. Upload the updated Excel (`.xlsx`) file as described in [Import a library](import-library.md). If you prefer, [convert it to YAML first](create-library.md#5-optional-convert-the-workbook-to-yaml), then upload the generated `.yaml` file.
 4. After the upload, follow [Update a library from the catalog](#update-a-library-from-the-catalog) below to load the new version in your instance.
 
 ## Update a library from the Catalog

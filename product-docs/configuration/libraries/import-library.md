@@ -20,10 +20,6 @@ If the import reports an error, correct the source file and try again. See [Crea
 
 ### Optional: convert Excel to YAML first
 
-Pre-conversion is not required, but if you want to generate or inspect the YAML yourself, run [`convert_library_v2.py`](https://github.com/intuitem/ciso-assistant-community/blob/main/backend/scripts/convert_library_v2.py) from the repository root:
-
-```shell
-python backend/scripts/convert_library_v2.py path/to/library.xlsx
-```
+Pre-conversion is not required. If you want to generate or inspect the YAML yourself, follow [the optional conversion step](create-library.md#5-optional-convert-the-workbook-to-yaml).
 
 Then upload the generated `.yaml` file using the same <img src="../../.gitbook/assets/import_library_button.png" alt="Purple button with a white file in it and a &#x22;+&#x22; sign" data-size="line"> button.
