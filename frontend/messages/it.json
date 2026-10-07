@@ -601,6 +601,7 @@
 	"libraryLoadingError": "Si è verificato un errore durante il caricamento della libreria",
 	"processingError": "Errore di elaborazione",
 	"libraryAlreadyLoadedError": "Questa libreria è già stata caricata",
+	"libraryOutdatedError": "Una versione più recente di questa libreria è già memorizzata. Imposta una \"version\" più alta nel file per importarlo.",
 	"invalidLibraryFileError": "File della libreria non valido. Assicurati che il formato sia corretto.",
 	"taintedFormMessage": "Vuoi lasciare questa pagina? Le modifiche apportate potrebbero non essere salvate.",
 	"riskScenariosStatus": "Stato degli scenari di rischio",

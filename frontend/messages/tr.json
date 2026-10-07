@@ -668,6 +668,7 @@
 	"libraryLoadingError": "Kütüphanenizi yüklerken bir hata oluştu",
 	"processingError": "İşleme hatası",
 	"libraryAlreadyLoadedError": "Bu kütüphane zaten yüklü",
+	"libraryOutdatedError": "Bu kütüphanenin daha yeni bir sürümü zaten kayıtlı. İçe aktarmak için dosyanızda daha yüksek bir \"version\" belirtin.",
 	"invalidLibraryFileError": "Geçersiz kütüphane dosyası. Lütfen formatın doğru olduğundan emin olun.",
 	"taintedFormMessage": "Bu sayfadan ayrılmak istiyor musunuz? Yaptığınız değişiklikler kaydedilmemiş olabilir.",
 	"riskScenariosStatus": "Risk senaryoları durumu",

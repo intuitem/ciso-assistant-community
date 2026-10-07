@@ -630,6 +630,7 @@
 	"libraryLoadingError": "Terjadi kesalahan saat memuat pustaka Anda",
 	"processingError": "Kesalahan pemrosesan",
 	"libraryAlreadyLoadedError": "Pustaka ini sudah dimuat",
+	"libraryOutdatedError": "Versi yang lebih baru dari pustaka ini sudah tersimpan. Tetapkan \"version\" yang lebih tinggi di file Anda untuk mengimpornya.",
 	"invalidLibraryFileError": "File pustaka tidak valid. Pastikan formatnya benar.",
 	"taintedFormMessage": "Apakah Anda ingin meninggalkan halaman ini? Perubahan yang Anda buat mungkin tidak akan disimpan.",
 	"riskScenariosStatus": "Status skenario risiko",

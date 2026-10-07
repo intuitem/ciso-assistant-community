@@ -631,6 +631,7 @@
 	"libraryLoadingError": "Ett fel inträffade vid laddning av biblioteket",
 	"processingError": "Bearbetningsfel",
 	"libraryAlreadyLoadedError": "Detta bibliotek har redan laddats",
+	"libraryOutdatedError": "En nyare version av detta bibliotek finns redan sparad. Ange en högre \"version\" i din fil för att importera den.",
 	"invalidLibraryFileError": "Ogiltig biblioteksfil. Kontrollera att formatet är korrekt.",
 	"taintedFormMessage": "Vill du lämna denna sida? Ändringar du gjort kan gå förlorade.",
 	"riskScenariosStatus": "Status för riskscenarier",

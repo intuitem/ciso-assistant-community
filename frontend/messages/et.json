@@ -992,6 +992,7 @@
 	"libraryLoadingError": "Teegi laadimisel ilmnes viga",
 	"processingError": "Töötlemisviga",
 	"libraryAlreadyLoadedError": "See teek on juba laaditud",
+	"libraryOutdatedError": "Selle teegi uuem versioon on juba salvestatud. Importimiseks määrake failis kõrgem \"version\".",
 	"invalidLibraryFileError": "Vigane teegifail. Veendu, et failivorming on korrektne.",
 	"fileTooLarge": "Fail on liiga suur",
 	"invalidFileFormat": "Vigane failivorming",

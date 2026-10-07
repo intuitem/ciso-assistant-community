@@ -675,6 +675,7 @@
 	"libraryLoadingError": "Došlo je do pogreške pri učitavanju vaše knjižnice",
 	"processingError": "Pogreška obrade",
 	"libraryAlreadyLoadedError": "Ova knjižnica je već učitana",
+	"libraryOutdatedError": "Novija verzija ove biblioteke već je pohranjena. Za uvoz postavite višu vrijednost \"version\" u svojoj datoteci.",
 	"invalidLibraryFileError": "Neispravna datoteka knjižnice. Molimo provjerite da je format točan.",
 	"taintedFormMessage": "Želite li napustiti ovu stranicu? Promjene možda nisu spremljene.",
 	"riskScenariosStatus": "Status scenarija rizika",

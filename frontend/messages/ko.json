@@ -837,6 +837,7 @@
 	"libraryLoadingError": "라이브러리를 로드하는 중 오류가 발생했습니다",
 	"processingError": "처리 오류",
 	"libraryAlreadyLoadedError": "이 라이브러리는 이미 로드되었습니다",
+	"libraryOutdatedError": "이 라이브러리의 최신 버전이 이미 저장되어 있습니다. 가져오려면 파일의 \"version\" 값을 더 높게 설정하세요.",
 	"invalidLibraryFileError": "잘못된 라이브러리 파일입니다. 형식이 올바른지 확인하세요.",
 	"fileTooLarge": "파일이 너무 큽니다",
 	"invalidFileFormat": "잘못된 파일 형식",
