@@ -812,7 +812,7 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'ebios-rm'}
-			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {object} {...rest} />
 		{:else if URLModel === 'feared-events'}
 			<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'ro-to'}
@@ -955,6 +955,7 @@
 				{formDataCache}
 				initialData={model.initialData}
 				{context}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'kill-chains'}

@@ -108,6 +108,7 @@ export interface ImplementationGroup {
 	name: string;
 	description: string;
 	default_selected?: boolean;
+	target_score?: number;
 	translations?: Translations | null;
 }
 

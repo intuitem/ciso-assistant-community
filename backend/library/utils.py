@@ -403,6 +403,22 @@ class FrameworkImporter:
         if isinstance(scores_definition, list):
             scores_definition = {"scale": scores_definition}
 
+        score_calculation_method = self.framework_data.get(
+            "score_calculation_method", "average"
+        )
+        Framework.validate_score_calculation_method(score_calculation_method)
+        Framework.validate_scoring_defaults(
+            min_score=min_score,
+            max_score=max_score,
+            anchor_na_to_target=bool(
+                self.framework_data.get("anchor_na_to_target", False)
+            ),
+            target_score=self.framework_data.get("target_score"),
+            implementation_groups_definition=self.framework_data.get(
+                "implementation_groups_definition"
+            ),
+        )
+
         # update_or_create: identical to create() for normal loads (no row
         # exists yet) and adopts a pre-existing library-less framework in
         # place — same URN family, same rows, audits untouched (the adopted
@@ -438,6 +454,14 @@ class FrameworkImporter:
                 ),
                 outcomes_definition=self.framework_data.get("outcomes_definition", []),
                 field_visibility=self.framework_data.get("field_visibility") or {},
+                score_scale_locked=bool(
+                    self.framework_data.get("score_scale_locked", False)
+                ),
+                score_calculation_method=score_calculation_method,
+                anchor_na_to_target=bool(
+                    self.framework_data.get("anchor_na_to_target", False)
+                ),
+                target_score=self.framework_data.get("target_score"),
                 provider=library_object.provider,
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,
@@ -700,7 +724,8 @@ def init_portal_preset_importers(
 
 
 class ReferentialImporterMixin:
-    REQUIRED_FIELDS = {"ref_id", "urn"}
+    # ref_id is optional: some publishers (e.g. ANSSI fiches méthode) number nothing.
+    REQUIRED_FIELDS = {"urn"}
 
     def __init__(self, data: dict, index: int = 0):
         self.data = data
@@ -715,7 +740,7 @@ class ReferentialImporterMixin:
         return dict(
             library=library_object,
             urn=self.data["urn"].lower(),
-            ref_id=self.data["ref_id"],
+            ref_id=self.data.get("ref_id"),
             name=self.data.get("name"),
             description=self.data.get("description"),
             annotation=self.data.get("annotation"),
@@ -748,7 +773,7 @@ class TTPCatalogImporter(ReferentialImporterMixin):
 
 
 class TacticImporter(ReferentialImporterMixin):
-    REQUIRED_FIELDS = {"ref_id", "urn", "catalog_urn"}
+    REQUIRED_FIELDS = {"urn", "catalog_urn"}
 
     def import_object(self, library_object: LoadedLibrary):
         self._object = Tactic.objects.create(
@@ -923,7 +948,14 @@ class MetricDefinitionImporter:
 # The couple (URN, locale) is unique. ===> Check this in the future
 class RiskMatrixImporter:
     REQUIRED_FIELDS = {"ref_id", "urn", "json_definition"}
-    MATRIX_FIELDS = {"probability", "impact", "risk", "grid", "strength_of_knowledge"}
+    MATRIX_FIELDS = {
+        "probability",
+        "impact",
+        "risk",
+        "grid",
+        "strength_of_knowledge",
+        "ebios_rm",
+    }
 
     def __init__(self, risk_matrix_data: dict):
         self.risk_matrix_data = risk_matrix_data

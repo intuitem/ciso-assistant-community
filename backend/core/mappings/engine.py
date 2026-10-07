@@ -3,6 +3,8 @@ from core.models import (
     Framework,
     StoredLibrary,
     ComplianceAssessment,
+    RequirementNode,
+    rescale_score,
 )
 from django.db.models.query import QuerySet
 from collections import defaultdict, deque
@@ -26,6 +28,12 @@ class MappingEngine:
             self._framework_mappings,
             self._direct_mappings,
         ) = self.load_rms_data()
+        self.own_scales = {
+            urn: (min_score, max_score)
+            for urn, min_score, max_score in RequirementNode.objects.exclude(
+                min_score__isnull=True, max_score__isnull=True
+            ).values_list("urn", "min_score", "max_score")
+        }
 
         self.fields_to_map: list[str] = [
             "result",
@@ -345,6 +353,7 @@ class MappingEngine:
         requirement_mapping_set: dict,
         hop_index: int,
         path: list[str],
+        target_range: Optional[tuple[int, int]] = None,
     ) -> dict[str, str | dict[str, str]]:
         # Hop_index allows us to know if the source_audit is the 'real' source, or a transition audit.
         # The first hop in 1.
@@ -360,12 +369,27 @@ class MappingEngine:
         target_framework_urn = requirement_mapping_set.get("target_framework_urn", "")
         target_framework = self.frameworks.get(target_framework_urn)
 
-        # Check if score ranges match between source and target frameworks
-        scores_compatible = (
-            target_framework
-            and target_framework.get("min_score") == source_audit.get("min_score")
-            and target_framework.get("max_score") == source_audit.get("max_score")
-        )
+        source_range = (source_audit.get("min_score"), source_audit.get("max_score"))
+        if target_range is not None:
+            target_range = tuple(target_range)
+            scores_compatible = None not in (*source_range, *target_range)
+        else:
+            scores_compatible = (
+                target_framework
+                and target_framework.get("min_score") == source_range[0]
+                and target_framework.get("max_score") == source_range[1]
+            )
+
+        def scaled(field, value, own_scale):
+            if (
+                own_scale is None
+                and field in ("score", "documentation_score")
+                and value is not None
+                and target_range is not None
+                and source_range != target_range
+            ):
+                return rescale_score(value, source_range, target_range)
+            return value
 
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
@@ -377,15 +401,20 @@ class MappingEngine:
             src_assessment = source_audit["requirement_assessments"].get(src)
             if src_assessment is None:
                 continue
+            own_scale = self.own_scales.get(src)
+            copy_scores = own_scale == self.own_scales.get(dst) and (
+                own_scale is not None or scores_compatible
+            )
 
             # Track whether this mapping entry actually wrote data.
             mapped = False
 
             if rel in ("equal", "superset"):
-                # If we have matching score ranges on the target framework, copy
-                # the whole assessment (including score fields). Otherwise only
-                # copy non-score fields to avoid misrepresenting scores.
-                if scores_compatible:
+                # Scores are copied when both sides are comparable: converted
+                # into the target audit's range, or kept as-is on a requirement
+                # scale shared by source and target. Otherwise only non-score
+                # fields are copied, to avoid misrepresenting scores.
+                if copy_scores:
                     # Fix 2: Use .get() for collision detection instead of
                     # defaultdict auto-creation.  An empty dict {} (from a
                     # previous defaultdict miss) is falsy, so this is safe.
@@ -405,9 +434,10 @@ class MappingEngine:
                                 existing_result, new_result
                             )
                     else:
-                        target_audit["requirement_assessments"][dst] = (
-                            src_assessment.copy()
-                        )
+                        target_audit["requirement_assessments"][dst] = {
+                            k: scaled(k, v, own_scale)
+                            for k, v in src_assessment.items()
+                        }
                     mapped = True
                 else:
                     target_assessment = target_audit["requirement_assessments"][dst]
@@ -474,16 +504,18 @@ class MappingEngine:
                         else:
                             target_assessment[m2m_field] = src_values
 
-                # Copy score fields if scores are compatible
-                if scores_compatible:
+                # Copy score fields (converted if needed) when comparable
+                if copy_scores:
                     for score_field in [
                         "score",
                         "is_scored",
                         "documentation_score",
                     ]:
                         if score_field in src_assessment:
-                            target_assessment[score_field] = src_assessment.get(
-                                score_field
+                            target_assessment[score_field] = scaled(
+                                score_field,
+                                src_assessment.get(score_field),
+                                own_scale,
                             )
 
                 # Handle result: keep the most restrictive
@@ -656,6 +688,7 @@ class MappingEngine:
         source_urn: str,
         dest_urn: str,
         max_depth: Optional[int] = None,
+        target_range: Optional[tuple[int, int]] = None,
     ) -> tuple[dict, list[str]]:
         paths = self.all_paths_between(source_urn, dest_urn, max_depth)
         inferences = {}
@@ -674,6 +707,7 @@ class MappingEngine:
                     rms,
                     hop_index=hop_index,
                     path=path,
+                    target_range=target_range if urn == path[-1] else None,
                 )
                 hop_index += 1
                 tmp_urn = urn

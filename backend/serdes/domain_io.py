@@ -852,6 +852,22 @@ def create_batch(
             raise ValidationError(f"Error creating {model._meta.model_name}: {str(e)}")
 
 
+def adopt_framework_labels(fields: dict[str, Any]) -> None:
+    """Exports predating score_scale_preset relied on the framework's labels at
+    display time; give such audits a copy, as migration 0190 does."""
+    if "score_scale_preset" in fields:
+        return
+    framework = fields["framework"]
+    definition = fields.get("scores_definition")
+    own = definition.get("scale") if isinstance(definition, dict) else definition
+    if own or (fields.get("min_score"), fields.get("max_score")) != (
+        framework.min_score,
+        framework.max_score,
+    ):
+        return
+    fields["scores_definition"] = framework.scores_definition
+
+
 def process_model_relationships(
     model: type[models.Model],
     fields: dict[str, Any],
@@ -906,6 +922,7 @@ def process_model_relationships(
                 id=link_dump_database_ids.get(_fields["perimeter"])
             ).first()
             _fields["framework"] = Framework.objects.get(urn=_fields["framework"])
+            adopt_framework_labels(_fields)
             many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
                 _fields.pop("evidences", []), link_dump_database_ids
             )
@@ -1158,6 +1175,10 @@ def process_model_relationships(
             _fields["risk_origin"] = import_terminologies(
                 _fields["risk_origin"],
                 Terminology.FieldPath.ROTO_RISK_ORIGIN,
+            )
+            _fields["target_objective_category"] = import_terminologies(
+                _fields.get("target_objective_category"),
+                Terminology.FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
             )
 
         case "stakeholder":

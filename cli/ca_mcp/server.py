@@ -29,6 +29,7 @@ from .tools.read_tools import (
     get_risk_assessments,
     get_threats,
     get_assets,
+    get_asset_security_gaps,
     get_incidents,
     get_security_exceptions,
     get_frameworks,
@@ -43,6 +44,7 @@ from .tools.read_tools import (
     get_vulnerability,
     get_asset_classes,
     get_users,
+    get_teams,
 )
 
 from .tools.aggregate_tools import count_objects
@@ -62,6 +64,7 @@ from .tools.library_tools import (
 
 from .tools.write_tools import (
     create_folder,
+    create_team,
     create_perimeter,
     create_asset,
     create_threat,
@@ -80,9 +83,12 @@ from .tools.write_tools import (
 )
 
 from .tools.update_tools import (
+    update_team,
     update_asset,
     update_risk_scenario,
     update_applied_control,
+    update_risk_assessment,
+    update_perimeter,
     update_requirement_assessment,
     update_requirement_assessments,
     update_quantitative_risk_study,
@@ -165,6 +171,7 @@ READ_TOOLS = [
     get_risk_assessments,
     get_threats,
     get_assets,
+    get_asset_security_gaps,
     get_incidents,
     get_security_exceptions,
     get_frameworks,
@@ -179,6 +186,7 @@ READ_TOOLS = [
     get_vulnerability,
     get_asset_classes,
     get_users,
+    get_teams,
     get_all_audits_with_metrics,
     get_audit_gap_analysis,
     get_audit_global_score,
@@ -204,6 +212,8 @@ READ_TOOLS = [
 WRITE_TOOLS = [
     import_stored_library,
     create_folder,
+    create_team,
+    update_team,
     create_perimeter,
     create_asset,
     create_threat,
@@ -224,6 +234,8 @@ WRITE_TOOLS = [
     update_asset,
     update_risk_scenario,
     update_applied_control,
+    update_risk_assessment,
+    update_perimeter,
     update_requirement_assessment,
     update_requirement_assessments,
     update_quantitative_risk_study,
