@@ -351,11 +351,13 @@
 					{#each content.applications as application (application.target)}
 						<li class="flex flex-wrap items-baseline gap-2">
 							<span class="font-medium">{safeTranslate(application.label)}</span>
-							<span class="font-mono"
-								>{safeTranslate(application.previous || '—')} → {safeTranslate(
-									application.new
-								)}</span
-							>
+							{#if application.new != null}
+								<span class="font-mono"
+									>{safeTranslate(application.previous || '—')} → {safeTranslate(
+										application.new
+									)}</span
+								>
+							{/if}
 							{#if application.overridden}
 								<span class="badge preset-tonal-warning text-xs">{m.override()}</span>
 							{/if}

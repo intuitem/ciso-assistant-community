@@ -580,6 +580,11 @@ class QuickFormImporter:
             return f"[QUICK_FORM_ERROR] {error}"
         if error := outcome_rule_id_error(self.quick_form_data):
             return f"[QUICK_FORM_ERROR] {error}"
+        from core.quick_form_apply import validate_on_accept_document
+
+        if errors := validate_on_accept_document(self.quick_form_data):
+            first = errors[0]
+            return f"[QUICK_FORM_ERROR] on_accept {first['ref_id']}: {first['error']}"
         return None
 
     def import_quick_form(self, library_object: LoadedLibrary):

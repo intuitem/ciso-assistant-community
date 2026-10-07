@@ -149,12 +149,16 @@ def serialize_plan(items: list[dict]) -> list[dict]:
     return rows
 
 
-def apply_on_accept(response, user, overrides: dict | None = None) -> list[dict]:
+def apply_on_accept(
+    response, user, overrides: dict | None = None, items: list[dict] | None = None
+) -> list[dict]:
     """Write every ready target of an accepted response. Returns the serialized
-    plan with an `applied` flag per target."""
+    plan with an `applied` flag per target. `items`: a plan already made for
+    these overrides, not made again."""
     from core.models import QuickFormApplication
 
-    items = plan(response, user, overrides)
+    if items is None:
+        items = plan(response, user, overrides)
     for item in items:
         item["applied"] = False
         proposal = item["proposal"]

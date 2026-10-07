@@ -4895,6 +4895,12 @@ class AnswerWriteSerializer(BaseModelSerializer):
                 raise serializers.ValidationError(
                     "Answers can only be modified while the response is in progress."
                 )
+            if (
+                question
+                and "value" in attrs
+                and response.changes_locked_subject({question.urn: attrs["value"]})
+            ):
+                raise serializers.ValidationError({"value": "subjectLocked"})
             # Same rule as the `answers` dict on the response itself: folder-level rights
             # on Answer are not rights over someone else's request.
             request = self.context.get("request")

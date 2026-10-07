@@ -994,3 +994,88 @@ def test_the_builder_refuses_a_misordered_setup():
     ]
     form["on_accept"][0]["config"]["mapping"][0]["thresholds"].reverse()
     assert validate_on_accept_document(form) == []
+
+
+@pytest.mark.django_db
+class TestReviewFeedbackRoundThree:
+    def test_the_answers_endpoint_keeps_a_locked_subject(self, setup):
+        from core.models import Answer
+
+        _user, client = _admin()
+        started = client.post(
+            f"/api/quick-forms/{setup['form'].id}/start/",
+            {"subject": str(setup["acme"].id)},
+            format="json",
+        )
+        response = QuickFormResponse.objects.get(
+            pk=started.json()["redirect"].rsplit("/", 1)[1]
+        )
+        other = Entity.objects.create(name="Other", folder=setup["domain"])
+        answer = Answer.objects.get(response=response, question__urn=Q_VENDOR)
+        refused = client.patch(
+            f"/api/answers/{answer.id}/", {"value": [str(other.id)]}, format="json"
+        )
+        assert refused.status_code == 400
+        assert "subjectLocked" in str(refused.json())
+        response.refresh_from_db()
+        assert str(response.subject_object_id) == str(setup["acme"].id)
+
+    def test_applied_values_only_for_who_may_see_the_vendor(self, setup):
+        from core.views import quick_form_response_content
+
+        admin, client = _admin()
+        response = _response(setup, risk="one")
+        result = _accept(
+            client,
+            response,
+            overrides={
+                "entity.tier": {"tier": str(_tier("critical").id), "note": "Why"}
+            },
+        )
+        assert result.status_code == 200, result.json()
+        response.refresh_from_db()
+        seen = quick_form_response_content(response, admin)["applications"][0]
+        assert (seen["new"], seen["note"]) == ("critical", "Why")
+        stranger = User.objects.create_user(email="tier-stranger@test.local")
+        hidden = quick_form_response_content(response, stranger)["applications"][0]
+        assert (hidden["previous"], hidden["new"], hidden["note"]) == (
+            None,
+            None,
+            None,
+        )
+        assert hidden["applied_at"]
+
+    def test_a_setup_the_rules_no_longer_support_is_refused(self, setup):
+        config = _config()
+        config["mapping"].append({"outcome": "renamed_away", "tier": "critical"})
+        _set_config(setup, config)
+        user, _ = _admin()
+        proposal = plan(_response(setup, risk="three"), user)[0]["proposal"]
+        assert (proposal.ok, proposal.reason) == (False, "tierSetupInvalid")
+
+    def test_applied_responses_are_not_awaiting_conversion(self, setup):
+        _user, client = _admin()
+        response = _response(setup)
+        assert _accept(client, response).status_code == 200
+        waiting = client.get("/api/quick-form-responses/awaiting-conversion/").json()
+        assert str(response.id) not in [r["id"] for r in waiting["results"]]
+
+
+@pytest.mark.django_db
+def test_a_library_with_an_invalid_on_accept_does_not_load():
+    startup(sender=None, **{})
+    seed_four_level_scale()
+    content = LIBRARY_YAML.replace(
+        f"      subject_question_urn: {Q_VENDOR}\n",
+        f"      subject_question_urn: {Q_VENDOR}\n"
+        "      on_accept:\n"
+        "      - target: entity.tier\n"
+        "        config:\n"
+        "          mapping:\n"
+        "          - outcome: nope\n"
+        "            tier: critical\n",
+    )
+    assert content != LIBRARY_YAML
+    stored, error = StoredLibrary.store_library_content(content.encode("utf-8"))
+    assert error is None, error
+    assert "mappingOutcomeUnknown" in str(stored.load())

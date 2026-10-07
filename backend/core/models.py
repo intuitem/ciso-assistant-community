@@ -11841,12 +11841,15 @@ class QuickFormResponse(
     def refresh_subject_from_answers(self) -> None:
         """Point the response at the object its subject question names.
 
-        Locked once closed: a decided response keeps the subject it was decided
-        about. The id was checked as reachable when the answer was written.
+        Locked once closed, or when started about an object: a response keeps
+        the subject it was decided, or started, about. The id was checked as
+        reachable when the answer was written.
         """
         from core.object_references import REFERENCEABLE
 
-        if self.status == self.Status.CLOSED:
+        if self.status == self.Status.CLOSED or (
+            self.subject_locked and self.subject_object_id
+        ):
             return
         question = self.subject_question()
         if question is None:

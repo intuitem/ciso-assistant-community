@@ -198,6 +198,11 @@ class EntityTierTarget(Target):
                 return Proposal.refuse("unknownTier")
             return self._proposal(tier, overridden=True, note=note)
 
+        # A setup the form's rules no longer support (a renamed rule…) would
+        # apply only the part that still matches: refused, never half-read.
+        quick_form = getattr(response, "quick_form", None)
+        if quick_form is not None and self.validate_config(config, quick_form):
+            return Proposal.refuse("tierSetupInvalid")
         tiers = {t.key: t for t in Tier.objects.all()}
         # A key this scale lacks would let a lower band or mapping win: the
         # tier written would not be the one the form asked for.

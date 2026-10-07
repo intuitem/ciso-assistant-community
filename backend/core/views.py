@@ -20804,6 +20804,8 @@ def quick_form_response_content(response, user=None):
     from core.utils import build_answers_dict
 
     evaluation = evaluate_quick_form(response, persist=False)
+    subject = response.subject_summary(user)
+    subject_readable = bool(subject and subject["str"] is not None)
     hidden = set(evaluation["hidden_pages"])
     pages = []
     for page in (
@@ -20866,15 +20868,16 @@ def quick_form_response_content(response, user=None):
             if response.quick_form.on_accept
             and (response.publication is None or response.publication.show_projection)
             else [],
-            "subject": response.subject_summary(user),
+            "subject": subject,
             "applications": [
                 {
                     "target": a.target,
                     "label": getattr(get_target(a.target), "label", a.target),
-                    "previous": a.previous_display,
-                    "new": a.new_display,
+                    # Values and note only for a caller who may view the subject.
+                    "previous": a.previous_display if subject_readable else None,
+                    "new": a.new_display if subject_readable else None,
                     "overridden": a.overridden,
-                    "note": a.note,
+                    "note": a.note if subject_readable else None,
                     # No `applied_by`: this payload also reaches requesters, and
                     # who decided is the reviewers' business (the log keeps it).
                     "applied_at": a.created_at,
@@ -21704,6 +21707,8 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             )
             .annotate(has_produced=Exists(produced))
             .filter(has_produced=False)
+            # Applying on accept (a vendor's tier…) is the conversion.
+            .exclude(applications__isnull=False)
             .select_related("quick_form", "folder")
             .order_by("-updated_at")
         )
@@ -21935,6 +21940,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
 
         resolution = request.data.get("resolution") or ""
         overrides = request.data.get("overrides") or {}
+        planned = None
         if new_status == QuickFormResponse.Status.CLOSED:
             if resolution not in self.REVIEWER_RESOLUTIONS:
                 return Response(
@@ -21952,7 +21958,8 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                         {"error": "invalidOverride"},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
-                for item in plan(response, request.user, overrides):
+                planned = plan(response, request.user, overrides)
+                for item in planned:
                     proposal = item["proposal"]
                     if item["target"] in overrides and not proposal.ok:
                         return Response(
@@ -22025,7 +22032,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         ):
             from core.quick_form_apply import apply_on_accept
 
-            on_accept = apply_on_accept(response, request.user, overrides)
+            on_accept = apply_on_accept(response, request.user, overrides, planned)
 
         if is_real_submission:
             emit_quick_form_submitted(response)
