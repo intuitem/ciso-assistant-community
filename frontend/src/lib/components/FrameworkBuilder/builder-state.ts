@@ -383,6 +383,33 @@ export function rebaseExpression(
 	);
 }
 
+/** A rule ID as CEL reads it (`values.<id>`): letters, digits and _, not starting with a digit. */
+export const RULE_ID = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+/** What is wrong with a rule's ID, as the server's code, or null. */
+export function ruleIdProblem(ref: string, others: string[]): string | null {
+	if (!ref.trim()) return 'outcomeRuleIdRequired';
+	if (!RULE_ID.test(ref)) return 'outcomeRuleIdInvalid';
+	if (others.includes(ref)) return 'outcomeRuleIdDuplicate';
+	return null;
+}
+
+/** A rule ID from its label, e.g. "Inherent risk" → inherent_risk, free among `taken`. */
+export function ruleIdFromLabel(label: string, taken: string[]): string {
+	const base =
+		label
+			.normalize('NFKD')
+			.replace(/[\u0300-\u036f]/g, '')
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, '_')
+			.replace(/^_+|_+$/g, '') || 'rule';
+	const name = /^[0-9]/.test(base) ? `rule_${base}` : base;
+	if (!taken.includes(name)) return name;
+	let n = 2;
+	while (taken.includes(`${name}_${n}`)) n++;
+	return `${name}_${n}`;
+}
+
 /** A refused save as the author should read it: what failed, then where. */
 export function describeSaveError(error: unknown): string {
 	const message = error instanceof Error ? error.message : String(error);

@@ -32,8 +32,8 @@ objects:
     on_accept:
     - target: entity.tier
       config:
-        bands:
-          outcome: inherent
+        mapping:
+        - outcome: inherent
           thresholds:
           - tier: critical
             min: 3.3
@@ -42,7 +42,6 @@ objects:
           - tier: standard
             min: 2.0
           - tier: low-impact
-        mapping:
         - outcome: regulated_function
           tier: critical
         - outcome: single_point_of_failure

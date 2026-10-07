@@ -358,3 +358,43 @@ class TestLiveValues:
         )
         response.refresh_from_db()
         assert response.computed_values != {"risk": 99}
+
+
+class TestRuleIds:
+    """A rule without an ID never runs, a duplicate hides the other, and a
+    number rule must be readable as `values.<ref_id>`."""
+
+    def _errors(self, refs):
+        rules = [{"ref_id": r, "expression": "true"} for r in refs]
+        return [
+            (e["ref_id"], e["error"])
+            for e in validate_quick_form_expressions(_with_rules(rules))
+        ]
+
+    def test_an_id_is_required(self):
+        assert self._errors(["ok", ""]) == [("#2", "outcomeRuleIdRequired")]
+
+    def test_an_id_is_a_cel_name(self):
+        assert self._errors(["inherent-risk", "2nd"]) == [
+            ("inherent-risk", "outcomeRuleIdInvalid"),
+            ("2nd", "outcomeRuleIdInvalid"),
+        ]
+
+    def test_an_id_is_unique(self):
+        assert self._errors(["high", "high"]) == [("high", "outcomeRuleIdDuplicate")]
+
+    def test_frameworks_are_checked_too(self):
+        from core.cel_service import validate_framework_expressions
+
+        errors = validate_framework_expressions(
+            {"outcomes_definition": [{"ref_id": "", "expression": "true"}]}
+        )
+        assert [e["error"] for e in errors] == ["outcomeRuleIdRequired"]
+
+    @pytest.mark.django_db
+    def test_a_library_with_a_bad_id_does_not_load(self):
+        startup(sender=None, **{})
+        content = LIBRARY_YAML.replace("ref_id: high", "ref_id: risk")
+        stored, error = StoredLibrary.store_library_content(content.encode("utf-8"))
+        assert error is None, error
+        assert "ID is already used by another rule" in str(stored.load())

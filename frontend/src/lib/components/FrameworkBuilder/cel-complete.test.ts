@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { BuilderNode } from './builder-state';
+import { ruleIdFromLabel, ruleIdProblem, type BuilderNode } from './builder-state';
 import {
 	buildCelCatalog,
 	celSuggestions,
@@ -172,5 +172,22 @@ describe('insert condition', () => {
 		expect(joinCondition('', 'b', '&&')).toBe('b');
 		expect(joinCondition('a', 'b', '||')).toBe('a || b');
 		expect(joinCondition('a || b', 'c', '&&')).toBe('(a || b) && c');
+	});
+});
+
+describe('rule ids', () => {
+	test('come from the label, as a name CEL can read, free among the others', () => {
+		expect(ruleIdFromLabel('Inherent risk', [])).toBe('inherent_risk');
+		expect(ruleIdFromLabel('Données sensibles !', [])).toBe('donnees_sensibles');
+		expect(ruleIdFromLabel('3rd party', [])).toBe('rule_3rd_party');
+		expect(ruleIdFromLabel('', ['rule'])).toBe('rule_2');
+		expect(ruleIdFromLabel('High', ['high', 'high_2'])).toBe('high_3');
+	});
+
+	test('report what the server would refuse', () => {
+		expect(ruleIdProblem('', [])).toBe('outcomeRuleIdRequired');
+		expect(ruleIdProblem('inherent-risk', [])).toBe('outcomeRuleIdInvalid');
+		expect(ruleIdProblem('high', ['high'])).toBe('outcomeRuleIdDuplicate');
+		expect(ruleIdProblem('high', ['low'])).toBeNull();
 	});
 });

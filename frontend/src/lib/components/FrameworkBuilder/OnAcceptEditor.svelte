@@ -6,7 +6,8 @@
 
 	type Entry = { target: string; config: Record<string, any> };
 	type Threshold = { tier: string; min?: number };
-	type MappingRow = { outcome: string; tier: string };
+	/** A yes/no rule gives a tier; a number rule carries its own bands. */
+	type MappingRow = { outcome: string; tier?: string; thresholds?: Threshold[] };
 	type Tier = { id: string; key: string; name: string };
 
 	interface Props {
@@ -24,8 +25,6 @@
 	let { value, rules, subjectModel, onupdate, onaddvendorsubject, scored = true }: Props = $props();
 
 	const TIER_TARGET = 'entity.tier';
-	// The select's value for the form score; a rule ref_id never starts with '@'.
-	const FORM_SCORE = '@score';
 
 	let tiers = $state<Tier[]>([]);
 	$effect(() => {
@@ -44,7 +43,7 @@
 
 	const entry = $derived((value ?? []).find((e) => e?.target === TIER_TARGET));
 	const config = $derived(entry?.config ?? {});
-	const thresholds = $derived<Threshold[]>(config.bands?.thresholds ?? []);
+	const scoreThresholds = $derived<Threshold[]>(config.bands?.thresholds ?? []);
 	const mapping = $derived<MappingRow[]>(config.mapping ?? []);
 	const numericRules = $derived(rules.filter((r) => r.kind === 'number'));
 	const yesNoRules = $derived(rules.filter((r) => r.kind !== 'number'));
@@ -60,26 +59,12 @@
 		onupdate(next === null ? others : [...others, { target: TIER_TARGET, config: next }]);
 	}
 
-	const bandSource = $derived(
-		config.bands?.source === 'score' ? FORM_SCORE : (config.bands?.outcome ?? '')
-	);
-	const bandRuleMissing = $derived(
-		bandSource !== '' &&
-			bandSource !== FORM_SCORE &&
-			!numericRules.some((r) => r.ref_id === bandSource)
-	);
+	const isNumber = (ref: string) => numericRules.some((r) => r.ref_id === ref);
+	const isKnownRule = (ref: string) => rules.some((r) => r.ref_id === ref);
 
-	function setBandSource(source: string) {
-		const { source: _, outcome: __, ...bands } = config.bands ?? {};
-		write({
-			...config,
-			bands: source === FORM_SCORE ? { ...bands, source: 'score' } : { ...bands, outcome: source }
-		});
-	}
-
-	function setBands(patch: Record<string, any> | null) {
-		const { bands, ...rest } = config;
-		write(patch === null ? rest : { ...rest, bands: { ...bands, ...patch } });
+	function setScoreBands(rows: Threshold[] | null) {
+		const { bands: _, ...rest } = config;
+		write(rows === null ? rest : { ...rest, bands: { thresholds: rows } });
 	}
 
 	function setMapping(rows: MappingRow[] | null) {
@@ -87,25 +72,39 @@
 		write(rows === null ? rest : { ...rest, mapping: rows });
 	}
 
+	function updateRow(index: number, next: MappingRow) {
+		setMapping(mapping.map((row, i) => (i === index ? next : row)));
+	}
+
+	// Picking a rule settles the row's shape: bands for a number, a tier for yes/no.
+	function pickRule(index: number, outcome: string) {
+		const row = mapping[index];
+		updateRow(
+			index,
+			isNumber(outcome)
+				? { outcome, thresholds: row.thresholds ?? defaultThresholds() }
+				: { outcome, tier: row.tier ?? '' }
+		);
+	}
+
 	// One band per tier, most critical first, the last catching the rest: the
 	// shape almost every setup takes, left to the author to score.
-	function defaultBands() {
-		return { source: 'score', thresholds: tiers.map((tier) => ({ tier: tier.key })) };
+	function defaultThresholds(): Threshold[] {
+		return tiers.map((tier) => ({ tier: tier.key }));
 	}
 
 	function enable(on: boolean) {
 		if (!on) return write(null);
-		write({ bands: defaultBands() });
+		write(scored ? { bands: { thresholds: defaultThresholds() } } : { mapping: [] });
 	}
 
-	function updateThreshold(index: number, patch: Partial<Threshold>) {
-		const rows = thresholds.map((row, i) => {
+	function withThreshold(rows: Threshold[], index: number, patch: Partial<Threshold>) {
+		return rows.map((row, i) => {
 			if (i !== index) return row;
 			const next = { ...row, ...patch };
 			if (next.min === undefined || Number.isNaN(next.min)) delete next.min;
 			return next;
 		});
-		setBands({ thresholds: rows });
 	}
 </script>
 
@@ -132,6 +131,41 @@
 			<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.tierKeyNotOnScale({ key: current })}
 		</span>
 	{/if}
+{/snippet}
+
+{#snippet bandRows(rows: Threshold[], onchange: (rows: Threshold[] | null) => void)}
+	{#each rows as row, index (index)}
+		<div class="flex flex-wrap items-center gap-2 text-sm">
+			{@render tierSelect(row.tier, (key) => onchange(withThreshold(rows, index, { tier: key })))}
+			<span class="text-surface-500">{m.tierBandsFrom()}</span>
+			<input
+				type="number"
+				step="any"
+				class="input w-28 text-sm"
+				value={row.min ?? ''}
+				placeholder={index === rows.length - 1 ? m.tierBandsRest() : ''}
+				onchange={(e) => {
+					const v = e.currentTarget.value;
+					onchange(withThreshold(rows, index, { min: v === '' ? undefined : Number(v) }));
+				}}
+			/>
+			<button
+				type="button"
+				class="btn-icon btn-icon-sm text-error-500"
+				aria-label={m.delete()}
+				onclick={() => onchange(rows.filter((_, i) => i !== index))}
+				><i class="fa-solid fa-trash"></i></button
+			>
+		</div>
+	{/each}
+	<button
+		type="button"
+		class="btn btn-sm preset-tonal w-fit"
+		onclick={() => onchange([...rows, { tier: '' }])}
+	>
+		<i class="fa-solid fa-plus mr-1"></i>{m.tierBandsAdd()}
+	</button>
+	<p class="text-xs text-surface-500">{m.tierBandsHelpText()}</p>
 {/snippet}
 
 <div class="space-y-2" data-testid="on-accept-editor">
@@ -176,78 +210,20 @@
 					type="checkbox"
 					class="checkbox"
 					checked={!!config.bands}
-					onchange={(e) => setBands(e.currentTarget.checked ? defaultBands() : null)}
+					onchange={(e) => setScoreBands(e.currentTarget.checked ? defaultThresholds() : null)}
+					data-testid="on-accept-score-bands"
 				/>
 				{m.tierBands()}
 			</label>
 			{#if config.bands}
 				<div class="flex flex-col gap-2 pl-6">
-					<label class="label">
-						<span class="text-xs text-surface-600-400">{m.tierBandsValue()}</span>
-						<select
-							class="select text-sm"
-							value={bandSource}
-							onchange={(e) => setBandSource(e.currentTarget.value)}
-							data-testid="on-accept-band-source"
+					{#if !scored}
+						<span
+							class="text-xs text-warning-700 dark:text-warning-400"
+							data-testid="on-accept-no-points">{m.tierBandsNoPoints()}</span
 						>
-							{#if bandSource === ''}
-								<option value="" disabled>--</option>
-							{/if}
-							<option value={FORM_SCORE}>{m.tierBandsFormScore()}</option>
-							{#if numericRules.length}
-								<optgroup label={m.tierBandsNumberRules()}>
-									{#each numericRules as rule (rule.ref_id)}
-										<option value={rule.ref_id}>{ruleLabel(rule)}</option>
-									{/each}
-								</optgroup>
-							{/if}
-							{#if bandRuleMissing}
-								<option value={bandSource}>{bandSource}</option>
-							{/if}
-						</select>
-						{#if bandRuleMissing}
-							<span class="text-xs text-warning-700 dark:text-warning-400"
-								>{m.tierBandsRuleMissing()}</span
-							>
-						{:else if bandSource === FORM_SCORE && !scored}
-							<span
-								class="text-xs text-warning-700 dark:text-warning-400"
-								data-testid="on-accept-no-points">{m.tierBandsNoPoints()}</span
-							>
-						{/if}
-					</label>
-					{#each thresholds as row, index (index)}
-						<div class="flex flex-wrap items-center gap-2 text-sm">
-							{@render tierSelect(row.tier, (key) => updateThreshold(index, { tier: key }))}
-							<span class="text-surface-500">{m.tierBandsFrom()}</span>
-							<input
-								type="number"
-								step="any"
-								class="input w-28 text-sm"
-								value={row.min ?? ''}
-								placeholder={index === thresholds.length - 1 ? m.tierBandsRest() : ''}
-								onchange={(e) => {
-									const v = e.currentTarget.value;
-									updateThreshold(index, { min: v === '' ? undefined : Number(v) });
-								}}
-							/>
-							<button
-								type="button"
-								class="btn-icon btn-icon-sm text-error-500"
-								aria-label={m.delete()}
-								onclick={() => setBands({ thresholds: thresholds.filter((_, i) => i !== index) })}
-								><i class="fa-solid fa-trash"></i></button
-							>
-						</div>
-					{/each}
-					<button
-						type="button"
-						class="btn btn-sm preset-tonal w-fit"
-						onclick={() => setBands({ thresholds: [...thresholds, { tier: '' }] })}
-					>
-						<i class="fa-solid fa-plus mr-1"></i>{m.tierBandsAdd()}
-					</button>
-					<p class="text-xs text-surface-500">{m.tierBandsHelpText()}</p>
+					{/if}
+					{@render bandRows(scoreThresholds, setScoreBands)}
 				</div>
 			{/if}
 
@@ -257,43 +233,75 @@
 					class="checkbox"
 					checked={Array.isArray(config.mapping)}
 					onchange={(e) => setMapping(e.currentTarget.checked ? [] : null)}
+					data-testid="on-accept-rules"
 				/>
 				{m.tierMapping()}
 			</label>
 			{#if Array.isArray(config.mapping)}
 				<div class="flex flex-col gap-2 pl-6">
 					{#each mapping as row, index (index)}
-						<div class="flex flex-wrap items-center gap-2 text-sm">
-							<select
-								class="select text-sm w-56"
-								value={row.outcome}
-								onchange={(e) => {
-									const outcome = e.currentTarget.value;
-									setMapping(mapping.map((r, i) => (i === index ? { ...r, outcome } : r)));
-								}}
-							>
-								<option value="">--</option>
-								{#each yesNoRules as rule (rule.ref_id)}
-									<option value={rule.ref_id}>{ruleLabel(rule)}</option>
-								{/each}
-							</select>
-							<span class="text-surface-500">→</span>
-							{@render tierSelect(row.tier, (tier) =>
-								setMapping(mapping.map((r, i) => (i === index ? { ...r, tier } : r)))
-							)}
-							<button
-								type="button"
-								class="btn-icon btn-icon-sm text-error-500"
-								aria-label={m.delete()}
-								onclick={() => setMapping(mapping.filter((_, i) => i !== index))}
-								><i class="fa-solid fa-trash"></i></button
-							>
+						<div
+							class="flex flex-col gap-2 {row.thresholds
+								? 'rounded-md border border-surface-200-800 p-2'
+								: ''}"
+							data-testid="on-accept-rule-row"
+						>
+							<div class="flex flex-wrap items-center gap-2 text-sm">
+								<select
+									class="select text-sm w-56"
+									value={row.outcome}
+									onchange={(e) => pickRule(index, e.currentTarget.value)}
+									data-testid="on-accept-rule-select"
+								>
+									<option value="">--</option>
+									{#if yesNoRules.length}
+										<optgroup label={m.tierMappingYesNoRules()}>
+											{#each yesNoRules as rule (rule.ref_id)}
+												<option value={rule.ref_id}>{ruleLabel(rule)}</option>
+											{/each}
+										</optgroup>
+									{/if}
+									{#if numericRules.length}
+										<optgroup label={m.tierBandsNumberRules()}>
+											{#each numericRules as rule (rule.ref_id)}
+												<option value={rule.ref_id}>{ruleLabel(rule)}</option>
+											{/each}
+										</optgroup>
+									{/if}
+									{#if row.outcome && !isKnownRule(row.outcome)}
+										<option value={row.outcome}>{row.outcome}</option>
+									{/if}
+								</select>
+								{#if !row.thresholds}
+									<span class="text-surface-500">→</span>
+									{@render tierSelect(row.tier ?? '', (tier) => updateRow(index, { ...row, tier }))}
+								{/if}
+								<button
+									type="button"
+									class="btn-icon btn-icon-sm text-error-500"
+									aria-label={m.delete()}
+									onclick={() => setMapping(mapping.filter((_, i) => i !== index))}
+									><i class="fa-solid fa-trash"></i></button
+								>
+							</div>
+							{#if row.outcome && !isKnownRule(row.outcome)}
+								<span class="text-xs text-warning-700 dark:text-warning-400"
+									>{m.mappingOutcomeUnknown()}</span
+								>
+							{/if}
+							{#if row.thresholds}
+								<div class="flex flex-col gap-2 pl-4">
+									{@render bandRows(row.thresholds, (rows) =>
+										updateRow(index, { ...row, thresholds: rows })
+									)}
+								</div>
+							{/if}
 						</div>
 					{/each}
 					<button
 						type="button"
 						class="btn btn-sm preset-tonal w-fit"
-						onclick={() => setMapping([...mapping, { outcome: '', tier: '' }])}
+						onclick={() => setMapping([...mapping, { outcome: '' }])}
 					>
 						<i class="fa-solid fa-plus mr-1"></i>{m.tierMappingAdd()}
 					</button>

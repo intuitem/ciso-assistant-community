@@ -518,6 +518,49 @@ _PROBE_VALUE_BY_TYPE = {
 }
 
 
+RULE_ID = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+RULE_ID_MESSAGES = {
+    "outcomeRuleIdRequired": "needs an ID",
+    "outcomeRuleIdInvalid": "ID must use letters, digits and _, not starting with a digit",
+    "outcomeRuleIdDuplicate": "ID is already used by another rule",
+}
+
+
+def outcome_rule_id_errors(rules) -> list[dict]:
+    """{index, ref_id, error} per outcome rule whose ref_id is missing, not a
+    CEL name, or taken by an earlier rule. Results are keyed by ref_id and a
+    number rule is read as `values.<ref_id>`: a rule without one never runs,
+    a duplicate hides the other, and a hyphen reads as a minus."""
+    errors, seen = [], set()
+    for index, rule in enumerate(rules or []):
+        ref_id = str((rule or {}).get("ref_id") or "").strip()
+        if not ref_id:
+            code = "outcomeRuleIdRequired"
+        elif not RULE_ID.match(ref_id):
+            code = "outcomeRuleIdInvalid"
+        elif ref_id in seen:
+            code = "outcomeRuleIdDuplicate"
+        else:
+            code = None
+        if code:
+            errors.append({"index": index, "ref_id": ref_id, "error": code})
+        seen.add(ref_id)
+    return errors
+
+
+def _rule_id_problems(rules) -> list[dict]:
+    return [
+        {
+            "where": "outcome",
+            "ref_id": e["ref_id"] or f"#{e['index'] + 1}",
+            "expression": str((rules[e["index"]] or {}).get("expression") or ""),
+            "error": e["error"],
+        }
+        for e in outcome_rule_id_errors(rules)
+    ]
+
+
 def is_numeric_rule(rule: dict) -> bool:
     return (rule or {}).get("kind") == "number"
 
@@ -740,7 +783,7 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
     # Visibility runs before the hidden requirements are known, as at runtime.
     visibility_probe = {k: v for k, v in probe.items() if k != "hidden_requirements"}
     env = celpy.Environment()
-    errors = []
+    errors = _rule_id_problems(framework.get("outcomes_definition") or [])
 
     def _check(where, ref_id, expression, context):
         if not expression:
@@ -788,7 +831,7 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
     """
     raw_probe = _quick_form_probe(quick_form)
     env = celpy.Environment()
-    errors = []
+    errors = _rule_id_problems(quick_form.get("outcomes_definition") or [])
 
     def _error(where, ref_id, expression, message):
         errors.append(

@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { getTranslation, withTranslation, type OutcomeRule } from './builder-state';
+	import {
+		getTranslation,
+		ruleIdFromLabel,
+		ruleIdProblem,
+		withTranslation,
+		type OutcomeRule
+	} from './builder-state';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import CelInput from './CelInput.svelte';
@@ -50,8 +57,25 @@
 		onupdate(rules.map((r) => ({ ...r })));
 	}
 
+	const otherIds = (index: number) => rules.filter((_, i) => i !== index).map((r) => r.ref_id);
+
+	// The ID follows the label until the author types one of their own.
+	function setLabel(index: number, label: string) {
+		const rule = rules[index];
+		const others = otherIds(index);
+		if (rule.ref_id === ruleIdFromLabel(rule.annotation ?? '', others)) {
+			rule.ref_id = ruleIdFromLabel(label, others);
+		}
+		rule.annotation = label;
+		persist();
+	}
+
 	function addRule() {
-		rules = [...rules, { ref_id: '', annotation: '', color: null, expression: '' }];
+		const ref_id = ruleIdFromLabel(
+			'',
+			rules.map((r) => r.ref_id)
+		);
+		rules = [...rules, { ref_id, annotation: '', color: null, expression: '' }];
 		expandedIndex = rules.length - 1;
 		persist();
 	}
@@ -233,6 +257,7 @@
 
 			<!-- Expanded details -->
 			{#if expandedIndex === index}
+				{@const idProblem = ruleIdProblem(rule.ref_id ?? '', otherIds(index))}
 				<div class="px-3 pb-3 pt-1 border-t border-surface-200-800 space-y-2">
 					<div class="grid grid-cols-2 gap-2">
 						<label class="block">
@@ -240,12 +265,19 @@
 							<input
 								type="text"
 								value={rule.ref_id}
+								aria-invalid={!!idProblem}
+								data-testid="outcome-rule-id"
 								class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) => {
-									rules[index].ref_id = e.currentTarget.value;
+									rules[index].ref_id = e.currentTarget.value.trim();
 									persist();
 								}}
 							/>
+							{#if idProblem}
+								<span class="text-xs text-error-600 dark:text-error-400"
+									>{safeTranslate(idProblem)}</span
+								>
+							{/if}
 						</label>
 						<label class="block">
 							<span class="text-xs text-surface-600-400">{m.builderLabel()}</span>
@@ -254,10 +286,7 @@
 								value={rule.annotation}
 								placeholder={m.builderLabelHint()}
 								class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-								onblur={(e) => {
-									rules[index].annotation = e.currentTarget.value;
-									persist();
-								}}
+								onblur={(e) => setLabel(index, e.currentTarget.value)}
 							/>
 						</label>
 					</div>

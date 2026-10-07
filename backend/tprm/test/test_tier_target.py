@@ -1,5 +1,5 @@
-"""`entity.tier`: an accepted response sets its vendor's tier through score
-bands and/or outcome mapping, highest tier winning."""
+"""`entity.tier`: an accepted response sets its vendor's tier through bands on
+the form score or on number rules, and yes/no rules, highest tier winning."""
 
 import pytest
 from knox.models import AuthToken
@@ -92,17 +92,19 @@ def _tier(name):
     return Tier.objects.get(name=name)
 
 
+THRESHOLDS = [
+    {"tier": "high", "min": 3},
+    {"tier": "medium", "min": 2},
+    {"tier": "low"},
+]
+
+
 def _config():
     return {
-        "bands": {
-            "outcome": "risk",
-            "thresholds": [
-                {"tier": "high", "min": 3},
-                {"tier": "medium", "min": 2},
-                {"tier": "low"},
-            ],
-        },
-        "mapping": [{"outcome": "pii", "tier": "critical"}],
+        "mapping": [
+            {"outcome": "risk", "thresholds": [dict(t) for t in THRESHOLDS]},
+            {"outcome": "pii", "tier": "critical"},
+        ],
     }
 
 
@@ -201,22 +203,20 @@ class TestConfig:
 
     def test_band_outcome_must_be_numeric(self, setup):
         config = _config()
-        config["bands"]["outcome"] = "pii"
+        config["mapping"][0]["outcome"] = "pii"
         assert "bandsOutcomeNotNumeric" in self._errors(setup, config)
 
-    def test_bands_may_read_the_form_score(self, setup):
-        config = _config()
-        config["bands"] = {"source": "score", "thresholds": [{"tier": "low"}]}
+    def test_bands_on_the_form_score(self, setup):
+        config = {"bands": {"thresholds": [{"tier": "low"}]}}
         assert self._errors(setup, config) == []
 
-    def test_an_unknown_band_source_is_refused(self, setup):
-        config = _config()
-        config["bands"]["source"] = "average"
-        assert self._errors(setup, config) == ["bandsSourceUnknown"]
+    def test_score_bands_read_nothing_else(self, setup):
+        config = {"bands": {"outcome": "risk", "thresholds": [{"tier": "low"}]}}
+        assert self._errors(setup, config) == ["bandsReadTheScore"]
 
     def test_thresholds_descend(self, setup):
         config = _config()
-        config["bands"]["thresholds"] = [
+        config["mapping"][0]["thresholds"] = [
             {"tier": "medium", "min": 2},
             {"tier": "high", "min": 3},
         ]
@@ -228,7 +228,7 @@ class TestConfig:
 
     def test_only_the_last_threshold_may_omit_min(self, setup):
         config = _config()
-        config["bands"]["thresholds"][0].pop("min")
+        config["mapping"][0]["thresholds"][0].pop("min")
         assert "thresholdMinRequired" in self._errors(setup, config)
 
     def test_mapping_needs_a_yes_no_rule(self, setup):
@@ -254,9 +254,7 @@ class TestResolution:
         assert (proposal.extra["band"], proposal.extra["outcomes"]) == ("risk", [])
 
     def test_band_from_the_form_score(self, setup):
-        config = _config()
-        config["bands"] = {**config["bands"], "source": "score"}
-        del config["bands"]["outcome"]
+        config = {"bands": {"thresholds": THRESHOLDS}}
         _set_config(setup, config)
         user, _ = _admin()
         response = _response(setup, risk="three")
@@ -268,10 +266,31 @@ class TestResolution:
         assert "band" not in proposal.extra
 
     def test_the_preview_reads_the_form_score(self, setup):
-        bands = {"source": "score", "thresholds": _config()["bands"]["thresholds"]}
+        bands = {"thresholds": THRESHOLDS}
         entries = [{"target": "entity.tier", "config": {"bands": bands}}]
         assert project(entries, {}, {}, score=2.5)[0]["proposed"] == "medium"
         assert project(entries, {}, {})[0]["reason"] == "noTierResolved"
+
+    def test_score_and_rule_bands_combine_highest_wins(self, setup):
+        config = _config()
+        config["bands"] = {
+            "thresholds": [{"tier": "critical", "min": 4}, {"tier": "low"}]
+        }
+        _set_config(setup, config)
+        proposal = self._proposal(setup, risk="three")
+        assert (proposal.display, proposal.extra["band"]) == ("high", "risk")
+
+    def test_several_number_rules_each_have_bands(self, setup):
+        config = _config()
+        config["mapping"].append(
+            {"outcome": "risk", "thresholds": [{"tier": "critical", "min": 3}]}
+        )
+        _set_config(setup, config)
+        user, _ = _admin()
+        assert plan(_response(setup, risk="three"), user)[0]["proposal"].display == (
+            "critical"
+        )
+        assert plan(_response(setup, risk="one"), user)[0]["proposal"].display == "low"
 
     def test_lowest_band_catches_the_rest(self, setup):
         assert self._proposal(setup, risk="one").display == "low"
@@ -286,7 +305,7 @@ class TestResolution:
 
     def test_a_lower_mapped_outcome_is_not_the_reason(self, setup):
         config = _config()
-        config["mapping"] = [{"outcome": "pii", "tier": "low"}]
+        config["mapping"][1] = {"outcome": "pii", "tier": "low"}
         _set_config(setup, config)
         proposal = self._proposal(setup, risk="three", pii="yes")
         assert (proposal.display, proposal.extra["outcomes"]) == ("high", [])
@@ -898,7 +917,13 @@ class TestReviewFeedbackRoundTwo:
         ],
     )
     def test_misordered_bands_are_refused_not_applied(self, setup, thresholds):
-        _set_config(setup, {"bands": {"outcome": "risk", "thresholds": thresholds}})
+        _set_config(setup, {"mapping": [{"outcome": "risk", "thresholds": thresholds}]})
+        user, _ = _admin()
+        proposal = plan(_response(setup, risk="three"), user)[0]["proposal"]
+        assert (proposal.ok, proposal.reason) == (False, "tierSetupInvalid")
+
+    def test_score_bands_naming_a_rule_are_refused_not_read_as_the_score(self, setup):
+        _set_config(setup, {"bands": {"outcome": "risk", "thresholds": THRESHOLDS}})
         user, _ = _admin()
         proposal = plan(_response(setup, risk="three"), user)[0]["proposal"]
         assert (proposal.ok, proposal.reason) == (False, "tierSetupInvalid")
@@ -950,13 +975,15 @@ def test_the_builder_refuses_a_misordered_setup():
             {
                 "target": "entity.tier",
                 "config": {
-                    "bands": {
-                        "outcome": "risk",
-                        "thresholds": [
-                            {"tier": "low", "min": 1},
-                            {"tier": "high", "min": 3},
-                        ],
-                    }
+                    "mapping": [
+                        {
+                            "outcome": "risk",
+                            "thresholds": [
+                                {"tier": "low", "min": 1},
+                                {"tier": "high", "min": 3},
+                            ],
+                        }
+                    ]
                 },
             }
         ],
@@ -965,5 +992,5 @@ def test_the_builder_refuses_a_misordered_setup():
     assert [(e["where"], e["error"]) for e in errors] == [
         ("on_accept", "thresholdsMustDescendByMin")
     ]
-    form["on_accept"][0]["config"]["bands"]["thresholds"].reverse()
+    form["on_accept"][0]["config"]["mapping"][0]["thresholds"].reverse()
     assert validate_on_accept_document(form) == []

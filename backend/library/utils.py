@@ -105,6 +105,20 @@ def preview_library(framework: dict) -> dict[str, list]:
     return preview
 
 
+def outcome_rule_id_error(data: dict) -> str | None:
+    """The first outcome rule whose ref_id cannot be used, as a load error."""
+    from core.cel_service import RULE_ID_MESSAGES, outcome_rule_id_errors
+
+    rules = data.get("outcomes_definition") or []
+    if errors := outcome_rule_id_errors(rules):
+        first = errors[0]
+        return (
+            f"Outcome rule {first['index'] + 1} ({first['ref_id'] or 'no ID'}): "
+            f"{RULE_ID_MESSAGES[first['error']]}"
+        )
+    return None
+
+
 class RequirementNodeImporter:
     REQUIRED_FIELDS = {"urn"}
 
@@ -378,6 +392,9 @@ class FrameworkImporter:
                 ", ".join(detected_object_fields)
             )
 
+        if error := outcome_rule_id_error(self.framework_data):
+            return error
+
         if "requirement_nodes" in self.framework_data:
             requirement_node_data = self.framework_data["requirement_nodes"]
             if (
@@ -560,6 +577,8 @@ class QuickFormImporter:
                 f"has the following error : {error}"
             )
         if (error := subject_question_error(self.quick_form_data)) is not None:
+            return f"[QUICK_FORM_ERROR] {error}"
+        if error := outcome_rule_id_error(self.quick_form_data):
             return f"[QUICK_FORM_ERROR] {error}"
         return None
 
