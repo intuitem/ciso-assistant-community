@@ -216,6 +216,7 @@ def safe_filename_header(disposition, filename):
     """A Content-Disposition value that a filename cannot break out of."""
     from urllib.parse import quote
 
+    filename = "".join("_" if c in "/\\" else c for c in filename if c.isprintable())
     ascii_name = "".join(
         c
         for c in filename.encode("ascii", "ignore").decode("ascii")

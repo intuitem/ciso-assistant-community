@@ -323,6 +323,10 @@ def live_framework_to_object(framework) -> dict:
             "implementation_groups_definition": framework.implementation_groups_definition,
             "outcomes_definition": framework.outcomes_definition,
             "field_visibility": framework.field_visibility or None,
+            "score_scale_locked": framework.score_scale_locked,
+            "score_calculation_method": framework.score_calculation_method,
+            "anchor_na_to_target": framework.anchor_na_to_target,
+            "target_score": framework.target_score,
             "translations": framework.translations or None,
             "requirement_nodes": requirement_nodes,
         }

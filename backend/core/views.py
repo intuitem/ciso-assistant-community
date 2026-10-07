@@ -194,6 +194,8 @@ from core.pagination import CustomLimitOffsetPagination
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     build_answers_dict,
+    escape_excel_formula,
+    sanitize_xlsx_value,
     bulk_update_with_log,
     compare_schema_versions,
     get_respondent_scoped_folder_ids,
@@ -220,7 +222,7 @@ from .models import *
 from .serializers import *
 
 from .models import Severity
-from . import dora
+from . import dora, framework_exports
 from core.asset_graph import walk_asset_graph
 
 DEPENDENCY_GRAPH_LIMIT = 300
@@ -487,40 +489,12 @@ def get_mapping_max_depth():
         return MAPPING_MAX_DEPTH
 
 
-def escape_excel_formula(value):
-    """
-    Escape Excel formula injection by prefixing dangerous characters.
-    Prevents CSV/Formula injection (OWASP) when values start with =+-@
-    """
-    if value is None:
-        return ""
-    s = str(value)
-    if not s:
-        return ""
-    stripped = s.lstrip()
-    if stripped and stripped[0] in ("=", "+", "-", "@"):
-        return "'" + s
-    return s
-
-
 def escape_csv_row(row):
     """Apply formula-injection escaping to every string cell of a CSV row."""
     return [
         escape_excel_formula(value) if isinstance(value, str) else value
         for value in row
     ]
-
-
-ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
-XLSX_MAX_CELL_CHARS = 32_767
-
-
-def sanitize_xlsx_value(value):
-    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)
-    and cap strings at Excel's per-cell limit."""
-    if isinstance(value, str):
-        return ILLEGAL_XLSX_CHARS_RE.sub("", value)[:XLSX_MAX_CELL_CHARS]
-    return value
 
 
 def create_xlsx_response(entries, filename, wrap_columns=None):
@@ -7513,8 +7487,52 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update({"pk": self.kwargs["pk"]})
+        context.update(
+            {
+                "pk": self.kwargs["pk"],
+                "indirect_evidence_links": self._get_indirect_evidence_links(),
+            }
+        )
         return context
+
+    def _get_indirect_evidence_links(self):
+        """Map (requirement_assessment_id, evidence_id) -> [names] of the applied
+        controls and task templates linking that evidence to that requirement assessment.
+        Computed once per request to avoid per-evidence queries.
+        TaskNode.evidences is deprecated (evidences live on the task template)."""
+        pk = self.kwargs["pk"]
+        links = defaultdict(list)
+
+        # Only expose applied controls and task templates the caller is allowed to view
+        applied_controls = AppliedControl.objects.filter(
+            requirement_assessments__compliance_assessment_id=pk,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, AppliedControl
+            ),
+        ).distinct()
+        task_templates = TaskTemplate.objects.filter(
+            requirement_assessments__compliance_assessment_id=pk,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, TaskTemplate
+            ),
+        ).distinct()
+
+        for queryset in (applied_controls, task_templates):
+            queryset = queryset.prefetch_related(
+                "evidences",
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.filter(
+                        compliance_assessment_id=pk
+                    ),
+                ),
+            )
+            for via in queryset:
+                evidence_ids = {e.id for e in via.evidences.all()}
+                for req_assessment in via.requirement_assessments.all():
+                    for evidence_id in evidence_ids:
+                        links[(req_assessment.id, evidence_id)].append(via.name)
+        return links
 
     def get_queryset(self):
         """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
@@ -7529,18 +7547,30 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
 
         compliance_assessment = ComplianceAssessment.objects.get(id=compliance_id)
 
-        # Get all requirement assessments for this compliance assessment
-        requirement_assessments = RequirementAssessment.objects.filter(
-            compliance_assessment=compliance_assessment
-        ).prefetch_related("evidences", "applied_controls__evidences")
-
         # Get visible evidences to filter result
         viewable_evidences = RoleAssignment.get_viewable_object_ids(
             self.request.user, Evidence
         )
 
-        # Collect evidence IDs from both direct and indirect relationships
+        # Get all requirement assessments for this compliance assessment,
+        # only walking through applied controls the caller is allowed to view
+        viewable_applied_controls = AppliedControl.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, AppliedControl
+            )
+        ).prefetch_related("evidences")
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment
+        ).prefetch_related(
+            "evidences",
+            Prefetch("applied_controls", queryset=viewable_applied_controls),
+        )
+
+        # Collect evidence IDs from global, direct and indirect relationships
         evidence_ids = set()
+        for evidence in compliance_assessment.evidences.all():
+            if evidence.id in viewable_evidences:
+                evidence_ids.add(evidence.id)
         for req_assessment in requirement_assessments:
             for evidence in req_assessment.evidences.all():
                 if evidence.id in viewable_evidences:
@@ -7549,6 +7579,22 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
                 for evidence in applied_control.evidences.all():
                     if evidence.id in viewable_evidences:
                         evidence_ids.add(evidence.id)
+
+        # Evidences linked through viewable task templates attached to the
+        # compliance assessment or its requirement assessments
+        task_templates = TaskTemplate.objects.filter(
+            Q(compliance_assessments=compliance_assessment)
+            | Q(requirement_assessments__compliance_assessment=compliance_assessment),
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, TaskTemplate
+            ),
+        ).distinct()
+        task_evidence_ids = set(
+            Evidence.objects.filter(task_templates__in=task_templates).values_list(
+                "id", flat=True
+            )
+        )
+        evidence_ids.update(task_evidence_ids & set(viewable_evidences))
 
         return Evidence.objects.filter(id__in=evidence_ids).distinct()
 
@@ -8592,6 +8638,7 @@ class ActorViewSet(BaseModelViewSet):
 
 class TeamViewSet(BaseModelViewSet):
     model = Team
+    filterset_fields = ["name", "folder"]
 
     def get_queryset(self):
         return (
@@ -13071,8 +13118,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
         return response
 
-    @action(detail=True, methods=["get"], name="CyFun Excel Export")
-    def cyfun_xlsx(self, request, pk):
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=r"framework-exports/(?P<export_id>[\w-]+)",
+        name="Framework export",
+    )
+    def framework_export(self, request, pk, export_id):
+        """An export specific to the audit's framework (core.framework_exports)."""
         if not RoleAssignment.is_object_accessible(
             request.user, "view", ComplianceAssessment, UUID(pk)
         ):
@@ -13080,89 +13133,32 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
 
-        audit = ComplianceAssessment.objects.get(id=pk)
-        CYFUN_FRAMEWORK_URN = "urn:intuitem:risk:framework:ccb-cyfun2025"
-        if audit.framework.urn != CYFUN_FRAMEWORK_URN:
+        export = framework_exports.get(export_id)
+        if export is None:
             return Response(
-                {"error": "This export is only available for CyFun 2025 assessments"},
+                {"error": "Unknown export"}, status=status.HTTP_404_NOT_FOUND
+            )
+        audit = ComplianceAssessment.objects.get(id=pk)
+        # An export holds the whole audit: only users with the full view of it,
+        # not respondents scoped to their part.
+        if not RoleAssignment.is_access_allowed(
+            request.user,
+            Permission.objects.get(codename="view_compliance_assessment_full"),
+            audit.folder,
+        ):
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        if not export.supports(audit):
+            return Response(
+                {"error": "This export is not available for this audit"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        template_path = (
-            Path(__file__).resolve().parent
-            / "templates"
-            / "core"
-            / "CyFun2025_Self-Assessment_tool_ESSENTIAL_v3.1.xlsx"
-        )
-        wb = load_workbook(template_path)
-
-        SHEET_MAP = {
-            "GV": "GOVERN",
-            "ID": "IDENTIFY",
-            "PR": "PROTECT",
-            "DE": "DETECT",
-            "RS": "RESPOND",
-            "RC": "RECOVER",
-        }
-
-        # Build ref_id → row lookup for each function sheet
-        sheet_row_maps = {}
-        for sheet_name in SHEET_MAP.values():
-            ws = wb[sheet_name]
-            row_map = {}
-            for row in range(1, ws.max_row + 1):
-                cell_value = ws.cell(row=row, column=6).value  # Column F
-                if cell_value and isinstance(cell_value, str):
-                    ref_id = cell_value.split(":")[0].strip().rstrip(".")
-                    if ref_id:
-                        row_map[ref_id] = row
-            sheet_row_maps[sheet_name] = row_map
-
-        # Fetch all requirement assessments
-        requirement_assessments = (
-            RequirementAssessment.objects.filter(compliance_assessment=audit)
-            .select_related("requirement")
-            .filter(requirement__assessable=True)
-        )
-
-        for ra in requirement_assessments:
-            ref_id = ra.requirement.ref_id
-            if not ref_id:
-                continue
-
-            prefix = ref_id.split(".")[0]
-            sheet_name = SHEET_MAP.get(prefix)
-            if not sheet_name:
-                continue
-
-            row = sheet_row_maps.get(sheet_name, {}).get(ref_id)
-            if row is None:
-                continue
-
-            ws = wb[sheet_name]
-            if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
-                ws.cell(row=row, column=7, value="N/A")  # Column G: doc score
-                ws.cell(row=row, column=8, value="N/A")  # Column H: impl score
-            else:
-                if ra.documentation_score is not None:
-                    ws.cell(row=row, column=7, value=ra.documentation_score)
-                if ra.score is not None:
-                    ws.cell(row=row, column=8, value=ra.score)
-            if ra.observation:
-                ws.cell(
-                    row=row, column=13, value=escape_excel_formula(ra.observation)
-                )  # Column M: comments
-
-        buffer = io.BytesIO()
-        wb.save(buffer)
-        buffer.seek(0)
-
-        response = HttpResponse(
-            buffer.getvalue(),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-        response["Content-Disposition"] = (
-            f'attachment; filename="{audit.name}_CyFun_Self-Assessment.xlsx"'
+        file = export.build(audit)
+        response = HttpResponse(file.content, content_type=file.content_type)
+        # The filename carries the audit's name, which may hold control characters.
+        response["Content-Disposition"] = safe_filename_header(
+            "attachment", file.filename
         )
         return response
 
@@ -14861,9 +14857,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 audit.requirement_assessments.select_related("requirement").all()
             )
 
-            # Build mapping of requirement_id to assessment
+            # Build mapping of requirement_id to assessment, limited to the
+            # audit's selected implementation groups like its global score.
+            selected_groups = set(audit.selected_implementation_groups or [])
             req_assessment_map = {
-                str(ra.requirement_id): ra for ra in requirement_assessments
+                str(ra.requirement_id): ra
+                for ra in requirement_assessments
+                if not selected_groups
+                or selected_groups & set(ra.requirement.implementation_groups or [])
             }
 
             # Build children dictionary for quick lookup
@@ -14937,41 +14938,17 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 else:
                     compliance_percentage = 0
 
-                # Maturity score for the radar slice. Reuse the audit's
-                # configured aggregation so per-RA scale overrides are
-                # normalised the same way as the global score (e.g. a binary
-                # 0..1 requirement contributes 100% at 1, not 1 raw).
-                # Mirror get_global_score's filtering: when anchor_na_to_target
-                # is on, N/A RAs stay in so they anchor to the target; off,
-                # they are excluded along with unscored RAs.
-                # `_compute_score_for_field` returns -1 when nothing is scored.
-                if audit.anchor_na_to_target:
-                    scored_list = [
-                        ra
-                        for ra in assessable_list
-                        if ra.result == "not_applicable" or ra.is_scored
-                    ]
-                else:
-                    scored_list = [
-                        ra
-                        for ra in assessable_list
-                        if ra.is_scored and ra.result != "not_applicable"
-                    ]
-                if scored_list:
-                    computed = audit._compute_score_for_field(
-                        scored_list,
-                        None,
-                        "score",
-                        audit.anchor_na_to_target,
-                    )
-                    maturity_score = 0 if computed == -1 else computed
-                else:
-                    maturity_score = 0
+                # Maturity score for the radar slice: the section's
+                # implementation score, filtered and aggregated like the global
+                # score (per-RA scales normalised, N/A anchored when enabled).
+                maturity_score = audit.get_scores_for(assessable_list)[
+                    "implementation_score"
+                ]
 
                 radar_data["compliance_percentages"].append(
                     round(compliance_percentage, 1)
                 )
-                radar_data["maturity_scores"].append(round(maturity_score, 1))
+                radar_data["maturity_scores"].append(maturity_score or 0)
 
             return radar_data
 
@@ -15542,7 +15519,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         ras = RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment,
             requirement__assessable=True,
-        ).select_related("requirement")
+        ).select_related("requirement", "compliance_assessment")
 
         # Auditee filtering
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
@@ -15586,44 +15563,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 continue
 
             results = defaultdict(int)
-            weighted_score = 0
-            total_weight = 0
-            doc_weighted_score = 0
-            doc_total_weight = 0
-            scored_count = 0
-            is_sum = (
-                compliance_assessment.score_calculation_method
-                == compliance_assessment.CalculationMethod.SUM
-            )
             for ra in assessable_list:
                 results[ra.result] += 1
-                if ra.is_scored and ra.result != "not_applicable":
-                    weight = ra.requirement.weight if ra.requirement.weight else 1
-                    weighted_score += (ra.score or 0) * weight
-                    total_weight += weight
-                    scored_count += 1
-                    if compliance_assessment.show_documentation_score:
-                        doc_weighted_score += (ra.documentation_score or 0) * weight
-                        doc_total_weight += weight
-
-            if is_sum:
-                section_score = (
-                    int(weighted_score * 10) / 10 if total_weight > 0 else None
-                )
-                section_doc_score = (
-                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
-                )
-            else:
-                section_score = (
-                    int((weighted_score / total_weight) * 10) / 10
-                    if total_weight > 0
-                    else None
-                )
-                section_doc_score = (
-                    int((doc_weighted_score / doc_total_weight) * 10) / 10
-                    if doc_total_weight > 0
-                    else None
-                )
+            scores = compliance_assessment.get_scores_for(assessable_list)
 
             node_name = (
                 get_referential_translation(node, "name")
@@ -15631,27 +15573,13 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 or node.ref_id
                 or str(node.id)
             )
-            # Compute maturity as average of enabled layers
-            enabled_scores = [
-                s for s in [section_score, section_doc_score] if s is not None
-            ]
-            section_maturity = (
-                int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
-                if enabled_scores
-                else None
-            )
-
             sections.append(
                 {
                     "ref_id": node.ref_id,
                     "name": node_name,
                     "total_assessable": len(assessable_list),
                     "results": dict(results),
-                    "implementation_score": section_score,
-                    "documentation_score": section_doc_score,
-                    "maturity_score": section_maturity,
-                    "scored_count": scored_count,
-                    "total_weight": total_weight,
+                    **scores,
                 }
             )
 
@@ -15989,7 +15917,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         ras = RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment,
             requirement__assessable=True,
-        ).select_related("requirement")
+        ).select_related("requirement", "compliance_assessment")
 
         # Auditee filtering
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
@@ -16039,57 +15967,12 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
             results = defaultdict(int)
             assessed = 0
-            weighted_score = 0
-            total_weight = 0
-            doc_weighted_score = 0
-            doc_total_weight = 0
-            scored_count = 0
-            is_sum = (
-                compliance_assessment.score_calculation_method
-                == compliance_assessment.CalculationMethod.SUM
-            )
-
             for ra in matching_ras:
                 results[ra.result] += 1
                 if ra.result != "not_assessed":
                     assessed += 1
-                if ra.is_scored and ra.result != "not_applicable":
-                    weight = ra.requirement.weight if ra.requirement.weight else 1
-                    weighted_score += (ra.score or 0) * weight
-                    total_weight += weight
-                    scored_count += 1
-                    if compliance_assessment.show_documentation_score:
-                        doc_weighted_score += (ra.documentation_score or 0) * weight
-                        doc_total_weight += weight
-
             total = len(matching_ras)
-            if is_sum:
-                group_score = (
-                    int(weighted_score * 10) / 10 if total_weight > 0 else None
-                )
-                group_doc_score = (
-                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
-                )
-            else:
-                group_score = (
-                    int((weighted_score / total_weight) * 10) / 10
-                    if total_weight > 0
-                    else None
-                )
-                group_doc_score = (
-                    int((doc_weighted_score / doc_total_weight) * 10) / 10
-                    if doc_total_weight > 0
-                    else None
-                )
-
-            enabled_scores = [
-                s for s in [group_score, group_doc_score] if s is not None
-            ]
-            group_maturity = (
-                int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
-                if enabled_scores
-                else None
-            )
+            scores = compliance_assessment.get_scores_for(matching_ras)
 
             groups.append(
                 {
@@ -16100,10 +15983,10 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "progress_percent": round(assessed / total * 100)
                     if total > 0
                     else 0,
-                    "implementation_score": group_score,
-                    "documentation_score": group_doc_score,
-                    "maturity_score": group_maturity,
-                    "scored_count": scored_count,
+                    "implementation_score": scores["implementation_score"],
+                    "documentation_score": scores["documentation_score"],
+                    "maturity_score": scores["maturity_score"],
+                    "scored_count": scores["scored_count"],
                 }
             )
 
