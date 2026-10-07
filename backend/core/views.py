@@ -9212,16 +9212,30 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         },
         "filename": "domains_export",
         "select_related": ["parent_folder"],
+        # Replaced by a visibility-scoped Prefetch in _get_export_queryset; kept so
+        # the CSV export iterates the prefetched queryset rather than .iterator().
         "prefetch_related": ["filtering_labels"],
     }
 
     def _get_export_queryset(self):
         # Only domains round-trip through the import: the root folder is implicit,
         # and enclaves or personal folders are not created there.
+        # Labels are prefetched here, limited to the ones the user may view: the
+        # list view masks the others, and the export must not reveal them either.
+        viewable_labels = RoleAssignment.get_viewable_object_ids(
+            self.request.user, FilteringLabel
+        )
         return (
             super()
             ._get_export_queryset()
             .filter(content_type=Folder.ContentType.DOMAIN)
+            .prefetch_related(None)
+            .prefetch_related(
+                Prefetch(
+                    "filtering_labels",
+                    queryset=FilteringLabel.objects.filter(id__in=viewable_labels),
+                )
+            )
         )
 
     def perform_create(self, serializer):
