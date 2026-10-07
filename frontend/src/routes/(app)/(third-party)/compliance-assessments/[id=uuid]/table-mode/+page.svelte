@@ -40,6 +40,7 @@
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import type { Actions, PageData } from './$types';
 	import { onMount, tick } from 'svelte';
@@ -521,7 +522,7 @@
 
 	// Compact score formatting for the header analytics.
 	function fmtScore(v: number | null | undefined) {
-		return v == null ? '--' : Math.round(Number(v) * 10) / 10;
+		return v == null ? '--' : Math.round(Number(v) * 100) / 100;
 	}
 
 	const assessableTOCSections = $derived(
@@ -706,71 +707,83 @@
 			</div>
 		{:else if ra.result !== 'not_applicable'}
 			<div class="flex flex-row flex-wrap items-start gap-x-6 gap-y-2">
-				<div class="flex flex-col gap-1">
-					<span class="text-xs font-semibold text-surface-500 italic"
-						>{complianceAssessment.show_documentation_score
-							? m.implementationScore()
-							: m.score()}</span
-					>
-					<ScoreControl
-						value={ra.score}
-						min={raMin}
-						max={raMax}
-						scoresDefinition={raScoresDef}
-						disabled={isReadOnly}
-						onChange={(v) => {
-							ra.score = v;
-							if (!ra.is_scored) {
-								ra.is_scored = true;
-								update(ra, 'is_scored');
-							}
-							updateScore(ra);
-						}}
-					/>
-				</div>
-				{#if complianceAssessment.show_documentation_score}
-					<div class="flex flex-col gap-1">
-						<span class="text-xs font-semibold text-surface-500 italic"
-							>{m.documentationScore()}</span
-						>
-						<ScoreControl
-							value={ra.documentation_score}
-							min={raMin}
-							max={raMax}
-							scoresDefinition={raScoresDef}
-							isDoc
-							disabled={isReadOnly}
-							onChange={(v) => {
-								ra.documentation_score = v;
-								if (!ra.is_scored) {
-									ra.is_scored = true;
-									update(ra, 'is_scored');
-								}
-								updateScore(ra);
-							}}
-						/>
-					</div>
-				{/if}
+				<ScorePair>
+					{#snippet implementation()}
+						<div class="flex flex-col gap-1">
+							<span class="text-xs font-semibold text-surface-500 italic"
+								>{complianceAssessment.show_documentation_score
+									? m.implementationScore()
+									: m.score()}</span
+							>
+							<ScoreControl
+								value={ra.score}
+								min={raMin}
+								max={raMax}
+								scoresDefinition={raScoresDef}
+								disabled={isReadOnly}
+								onChange={(v) => {
+									ra.score = v;
+									if (!ra.is_scored) {
+										ra.is_scored = true;
+										update(ra, 'is_scored');
+									}
+									updateScore(ra);
+								}}
+							/>
+						</div>
+					{/snippet}
+					{#snippet documentation()}
+						{#if complianceAssessment.show_documentation_score}
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-surface-500 italic"
+									>{m.documentationScore()}</span
+								>
+								<ScoreControl
+									value={ra.documentation_score}
+									min={raMin}
+									max={raMax}
+									scoresDefinition={raScoresDef}
+									isDoc
+									disabled={isReadOnly}
+									onChange={(v) => {
+										ra.documentation_score = v;
+										if (!ra.is_scored) {
+											ra.is_scored = true;
+											update(ra, 'is_scored');
+										}
+										updateScore(ra);
+									}}
+								/>
+							</div>
+						{/if}
+					{/snippet}
+				</ScorePair>
 			</div>
 		{/if}
 	{:else if showScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
 		{@const raMax = ra.effective_max_score ?? complianceAssessment.max_score}
 		<div class="flex items-center gap-4 flex-wrap">
-			<ScoreControl
-				editable={false}
-				value={ra.score}
-				min={raMin}
-				max={raMax}
-				label={m.implementationScoreResult()}
-			/>
-			<ScoreControl
-				editable={false}
-				value={ra.documentation_score}
-				min={raMin}
-				max={raMax}
-				label={m.documentationScoreResult()}
-			/>
+			<ScorePair>
+				{#snippet implementation()}
+					<ScoreControl
+						editable={false}
+						value={ra.score}
+						min={raMin}
+						max={raMax}
+						label={m.implementationScoreResult()}
+					/>
+				{/snippet}
+				{#snippet documentation()}
+					<ScoreControl
+						editable={false}
+						value={ra.documentation_score}
+						min={raMin}
+						max={raMax}
+						label={m.documentationScoreResult()}
+					/>
+				{/snippet}
+			</ScorePair>
 		</div>
 	{:else if showScore && complianceAssessment.scoring_enabled && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
@@ -918,26 +931,38 @@
 						{/if}
 						{#if showScore && complianceAssessment.scoring_enabled}
 							<div class="flex items-center gap-2 shrink-0 text-xs font-medium">
-								<span
-									class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
-								>
-									{m.score()}:
-									<span class="font-semibold">{fmtScore(auditScores?.implementation_score)}</span>
-									{#if auditScores?.max_score}<span class="text-surface-400-600"
-											>/{auditScores.max_score}</span
-										>{/if}
-								</span>
-								{#if complianceAssessment.show_documentation_score}
-									<span
-										class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
-									>
-										{m.documentationScore()}:
-										<span class="font-semibold">{fmtScore(auditScores?.documentation_score)}</span>
-										{#if auditScores?.max_score}<span class="text-surface-400-600"
-												>/{auditScores.max_score}</span
-											>{/if}
-									</span>
-								{/if}
+								<ScorePair>
+									{#snippet implementation()}
+										<span
+											class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
+										>
+											{complianceAssessment.show_documentation_score
+												? m.implementationScore()
+												: m.score()}:
+											<span class="font-semibold"
+												>{fmtScore(auditScores?.implementation_score)}</span
+											>
+											{#if auditScores?.max_score}<span class="text-surface-400-600"
+													>/{auditScores.max_score}</span
+												>{/if}
+										</span>
+									{/snippet}
+									{#snippet documentation()}
+										{#if complianceAssessment.show_documentation_score}
+											<span
+												class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
+											>
+												{m.documentationScore()}:
+												<span class="font-semibold"
+													>{fmtScore(auditScores?.documentation_score)}</span
+												>
+												{#if auditScores?.max_score}<span class="text-surface-400-600"
+														>/{auditScores.max_score}</span
+													>{/if}
+											</span>
+										{/if}
+									{/snippet}
+								</ScorePair>
 							</div>
 						{/if}
 					</div>

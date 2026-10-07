@@ -604,7 +604,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Sie können das einzige Administratorkonto der Anwendung nicht löschen.",
 	"attemptToRemoveOnlyAdminUserGroup": "Sie können den einzigen Administratorbenutzer nicht aus der Administrator-Benutzergruppe entfernen.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Sie können sich nicht selbst aus einer Domänenadministratoren-Gruppe entfernen. Bitten Sie einen anderen Administrator darum.",
-	"scoringHelpText": "Aktivieren, um die Bewertung zu ermöglichen",
 	"overrideScore": "Bewertung überschreiben",
 	"overrideScoreHelpText": "Die Bewertung manuell festsetzen und nicht mehr aus den Antworten neu berechnen",
 	"automaticScore": "Automatische Bewertung",

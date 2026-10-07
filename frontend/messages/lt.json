@@ -906,7 +906,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Negalite ištrinti vienintelės administatoriaus paskyros savo programoje.",
 	"attemptToRemoveOnlyAdminUserGroup": "Negalite pašalinti vienintelio programos administratoriaus vartotojo iš administratoriaus vartotojų grupės.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Negalite pašalinti savęs iš domeno administratorių grupės. Paprašykite kito administratoriaus tai padaryti.",
-	"scoringHelpText": "Pažymėkite, kad įgalintumėte vertinimą",
 	"overrideScore": "Nepaisyti balo",
 	"overrideScoreHelpText": "Rankiniu būdu fiksuoti balą ir nustoti jį perskaičiuoti pagal atsakymus",
 	"automaticScore": "Automatinis balas",

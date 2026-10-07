@@ -1223,6 +1223,31 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
             )
         framework["field_visibility"] = field_visibility
 
+    # The standard defines the score scale: audits of the framework keep it.
+    if "score_scale_locked" in meta:
+        framework["score_scale_locked"] = str(
+            meta["score_scale_locked"]
+        ).strip().lower() in ("1", "true", "yes", "x")
+
+    # Calculation method proposed for new audits (defaults to "average").
+    if meta.get("score_calculation_method"):
+        method = str(meta["score_calculation_method"]).strip()
+        if method not in ("average", "sum", "average_of_averages"):
+            raise ValueError(
+                f"(framework) Invalid score_calculation_method {method!r}: "
+                "expected average, sum or average_of_averages"
+            )
+        framework["score_calculation_method"] = method
+
+    # Scoring proposed for new audits: N/A requirements counted as the target
+    # score, which implementation groups can override (see below).
+    if "anchor_na_to_target" in meta:
+        framework["anchor_na_to_target"] = str(
+            meta["anchor_na_to_target"]
+        ).strip().lower() in ("1", "true", "yes", "x")
+    if meta.get("target_score") not in (None, ""):
+        framework["target_score"] = float(meta["target_score"])
+
     score_name = meta.get("scores_definition")
     if score_name and score_name in object_blocks:
         score_header, score_rows_data = parse_content_rows(
@@ -1266,11 +1291,33 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
 
             if data.get("default_selected") is not None:
                 ig_entry["default_selected"] = bool(data.get("default_selected"))
+            if data.get("target_score") not in (None, ""):
+                if "target_score" not in framework:
+                    raise ValueError(
+                        f"(framework) Implementation group {ig_entry['ref_id']!r} "
+                        "sets a target_score: the framework needs one too"
+                    )
+                ig_entry["target_score"] = float(data["target_score"])
 
             attach_translations_from_row(ig_entry, ig_header, row)
             ig_defs.append(ig_entry)
 
         framework["implementation_groups_definition"] = ig_defs
+
+    # Audits must accept what the framework proposes (same rules as the loader).
+    if framework.get("anchor_na_to_target") and "target_score" not in framework:
+        raise ValueError("(framework) anchor_na_to_target needs a target_score")
+    scale = (framework.get("min_score", 0), framework.get("max_score", 100))
+    targets = [("target_score", framework.get("target_score"))] + [
+        (f"implementation group {ig['ref_id']!r} target_score", ig.get("target_score"))
+        for ig in framework.get("implementation_groups_definition") or []
+    ]
+    for label, target in targets:
+        if target is not None and not scale[0] <= target <= scale[1]:
+            raise ValueError(
+                f"(framework) {label} {target} is outside the scale "
+                f"{scale[0]}-{scale[1]}"
+            )
 
     # NOTE: The requirement_nodes loop counts ALL rows (including empty) for its
     # counter logic, so we cannot use parse_content_rows here.
