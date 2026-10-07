@@ -11,20 +11,20 @@ from iam.models import Folder
 URL = "/api/data-wizard/load-file/"
 
 
-def _export(client) -> bytes:
-    resp = client.get("/api/folders/export_xlsx/")
+def _export(client, fmt: str = "xlsx") -> bytes:
+    resp = client.get(f"/api/folders/export_{fmt}/")
     assert resp.status_code == 200, resp.content
     return resp.content
 
 
-def _import(client, content: bytes, on_conflict: str):
+def _import(client, content: bytes, on_conflict: str, fmt: str = "xlsx"):
     return client.post(
         URL,
         data=content,
         content_type="application/octet-stream",
         HTTP_X_MODEL_TYPE="Folder",
         HTTP_X_ON_CONFLICT=on_conflict,
-        HTTP_CONTENT_DISPOSITION="attachment; filename=domains_export.xlsx",
+        HTTP_CONTENT_DISPOSITION=f"attachment; filename=domains_export.{fmt}",
     )
 
 
@@ -105,3 +105,58 @@ class TestFolderRoundTrip:
         assert _labels(Folder.objects.get(name="Delta")) == {"New", "Corporate"}
         # Existing labels are reused, not duplicated.
         assert FilteringLabel.objects.filter(label="Corporate").count() == 1
+
+    @pytest.mark.parametrize("fmt", ["xlsx", "csv"])
+    def test_formula_like_values_survive_the_round_trip(
+        self, api_client, root_folder, all_accessible, fmt
+    ):
+        """The export escapes cells starting with = + - @; the import undoes it."""
+        folder = Folder.objects.create(
+            name="-Ops", description="- first item", parent_folder=root_folder
+        )
+        folder.filtering_labels.set(
+            [
+                FilteringLabel.objects.create(label="-dash"),
+                FilteringLabel.objects.create(label="plain"),
+            ]
+        )
+
+        resp = _import(api_client, _export(api_client, fmt), "update", fmt)
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["failed"] == 0, results["errors"]
+        assert results["updated"] == 1
+
+        folder.refresh_from_db()
+        assert folder.name == "-Ops"
+        assert folder.description == "- first item"
+        assert _labels(folder) == {"-dash", "plain"}
+        assert FilteringLabel.objects.count() == 2
+
+    def test_csv_export_reimports(self, api_client, domains, all_accessible):
+        resp = _import(api_client, _export(api_client, "csv"), "update", "csv")
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["failed"] == 0, results["errors"]
+        assert results["updated"] == 3
+        assert _labels(Folder.objects.get(name="Beta")) == {"Finance", "IT"}
+
+    def test_malformed_internal_id_fails_only_its_row(
+        self, api_client, domains, all_accessible
+    ):
+        wb = load_workbook(io.BytesIO(_export(api_client)))
+        ws = wb.worksheets[0]
+        for row in ws.iter_rows(min_row=2):
+            if row[1].value == "Alpha":
+                row[0].value = "not-a-uuid"
+        ws.append([None, "Delta", None, None, None])
+        edited = io.BytesIO()
+        wb.save(edited)
+
+        resp = _import(api_client, edited.getvalue(), "skip")
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["failed"] == 1
+        assert "Invalid internal_id" in str(results["errors"])
+        assert results["created"] == 1
+        assert Folder.objects.filter(name="Delta").exists()

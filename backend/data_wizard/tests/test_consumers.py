@@ -1101,6 +1101,26 @@ class TestFolderConsumer:
             FilteringLabel.objects.get(label="Finance").id,
         }
 
+    def test_invalid_label_fails_the_row_clearly(self, base_context):
+        from core.models import FilteringLabel
+
+        consumer = FolderRecordConsumer(base_context)
+        _, error = consumer.prepare_create(
+            {"name": "Labelled", "labels": "Corporate,Mon label"}, None
+        )
+        assert error is not None
+        assert "Invalid labels Mon label" in error.error
+        assert not FilteringLabel.objects.exists()
+
+    def test_export_escaping_is_undone(self, base_context):
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "'=Ops", "description": "'- item", "labels": "'-dash"}, None
+        )
+        assert error is None
+        assert record_data["name"] == "=Ops"
+        assert record_data["description"] == "- item"
+
     def test_no_labels_leaves_field_unset(self, base_context):
         consumer = FolderRecordConsumer(base_context)
         record_data, error = consumer.prepare_create({"name": "Plain"}, None)

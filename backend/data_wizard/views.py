@@ -86,6 +86,7 @@ from core.utils import (
     build_questions_dict,
     get_global_currency,
     parse_answers_cell,
+    unescape_excel_formula,
 )
 from data_wizard.arm_helpers import process_arm_file
 from data_wizard.cyfun_helpers import (
@@ -426,21 +427,31 @@ def _resolve_asset_class(value: Any, path_index: dict) -> Optional[AssetClass]:
     return candidates[0] if len(candidates) == 1 else None
 
 
+def _split_label_names(value: Any) -> set[str]:
+    """Split a pipe-, comma- or newline-separated cell into label names."""
+    if not isinstance(value, str):
+        return set()
+    return {name.strip() for name in re.split(r"[|,\n]", value) if name.strip()}
+
+
+def _invalid_label_names(names: set[str]) -> list[str]:
+    """Names FilteringLabel would reject, so a row can fail with a clear message."""
+    field = FilteringLabel._meta.get_field("label")
+    invalid = []
+    for name in names:
+        try:
+            field.run_validators(name)
+        except ValidationError:
+            invalid.append(name)
+    return sorted(invalid)
+
+
 def _resolve_filtering_labels(value: Any) -> list[UUID]:
     """Parse pipe- or comma-separated label names and return list of FilteringLabel IDs.
 
     Labels that do not yet exist are created on the fly.
     """
-    if not isinstance(value, str):
-        return []
-
-    value = value.strip()
-    if not value:
-        return []
-
-    label_names = set(
-        name.strip() for name in re.split(r"[|,\n]", value) if name.strip()
-    )
+    label_names = _split_label_names(value)
     label_ids: list[UUID] = []
     for label_name in label_names:
         label = FilteringLabel.objects.filter(label=label_name).first()
@@ -1056,9 +1067,21 @@ class RecordConsumer[Context = None](ABC):
             existing = None
             internal_id = record.get("internal_id")
             if internal_id:
-                existing = model_class.objects.filter(
-                    pk=internal_id, id__in=viewable_ids
-                ).first()
+                try:
+                    existing = model_class.objects.filter(
+                        pk=internal_id, id__in=viewable_ids
+                    ).first()
+                except ValidationError, ValueError:
+                    # A hand-edited id would otherwise abort the whole file.
+                    results.add_error(
+                        Error(
+                            record=record, error=f"Invalid internal_id '{internal_id}'"
+                        )
+                    )
+                    if self.on_conflict == ConflictMode.STOP:
+                        results.stopped = True
+                        break
+                    continue
             if existing is None:
                 try:
                     existing = self.find_existing(record_data)
@@ -2829,6 +2852,8 @@ class FolderRecordConsumer(RecordConsumer):
     def prepare_create(
         self, record: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
+        # A domains export escapes formula-like cells; undo it so they round-trip.
+        record = {key: unescape_excel_formula(value) for key, value in record.items()}
         name = record.get("name")
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
@@ -2863,6 +2888,13 @@ class FolderRecordConsumer(RecordConsumer):
             or record.get("étiquette")
             or record.get("label")
         )
+        invalid_labels = _invalid_label_names(_split_label_names(raw_labels))
+        if invalid_labels:
+            return {}, Error(
+                record=record,
+                error=f"Invalid labels {', '.join(invalid_labels)}: use only "
+                "letters, digits, '_' or '-', 36 characters at most",
+            )
         filtering_labels = _resolve_filtering_labels(raw_labels)
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
@@ -4272,9 +4304,8 @@ class LoadFileView(APIView):
                         ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
-                        # utf-8-sig transparently strips a leading BOM (added to our
-                        # CSV exports for Excel) so the first column header is not corrupted.
-                        df = pd.read_csv(record_file, encoding="utf-8-sig").fillna("")
+                        # Detects the delimiter: our table exports use ';'.
+                        df = read_csv_file(record_file)
 
                     try:
                         df = normalize_df_columns(df)

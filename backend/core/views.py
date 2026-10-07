@@ -9192,12 +9192,14 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
                 "label": "description",
                 "escape": True,
             },
+            # Only the start of a cell can trigger a formula, and the default
+            # escaping covers it; escaping each label would corrupt the list.
             "domain": {
                 "source": "parent_folder",
                 "label": "domain",
                 # The import places a blank parent at the root.
                 "format": lambda parent: (
-                    escape_excel_formula(parent.name)
+                    parent.name
                     if parent and parent.content_type != Folder.ContentType.ROOT
                     else ""
                 ),
@@ -9205,9 +9207,7 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
             "labels": {
                 "source": "filtering_labels",
                 "label": "labels",
-                "format": lambda qs: ",".join(
-                    escape_excel_formula(o.label) for o in qs.all()
-                ),
+                "format": lambda qs: ",".join(o.label for o in qs.all()),
             },
         },
         "filename": "domains_export",
