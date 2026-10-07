@@ -60,7 +60,6 @@ Not sure where to start? Use the table below to find the page that matches your 
 | Import a finished library into CISO Assistant | [Import a library](import-library.md) |
 | Check that an imported library works as expected | [Test a library](test-library.md) |
 | Publish a new version of a custom library | [Update a library](update-library.md) |
-| Migrate an existing v1 workbook | [Migrate a library from v1 to v2](migrate-v1-to-v2.md) |
 | Handle a standard with its own import workflow | [Special cases](special-cases/README.md) |
 
 ## Related concepts
