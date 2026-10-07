@@ -3,19 +3,11 @@
 
 	import { displayScoreColor } from '$lib/utils/helpers';
 	import { getLocale } from '$paraglide/runtime.js';
+	import { localizedLevelField, type ScoreLevel } from '$lib/utils/score-scales';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
-	interface ScoresDefinition {
-		score: number;
-		name: string;
-		description: string;
-		description_doc?: string;
-		translations?: Record<
-			string,
-			Partial<Record<'name' | 'description' | 'description_doc', string>>
-		>;
-	}
+	type ScoresDefinition = ScoreLevel;
 
 	interface Props {
 		label?: string | undefined;
@@ -72,9 +64,7 @@
 		definition: ScoresDefinition,
 		field: 'name' | 'description' | 'description_doc'
 	) {
-		const locale = getLocale();
-		const language = locale.split('-')[0];
-		return definition.translations?.[language]?.[field] ?? definition[field];
+		return localizedLevelField(definition, field, getLocale().split('-')[0]);
 	}
 </script>
 

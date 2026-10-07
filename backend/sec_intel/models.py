@@ -202,7 +202,5 @@ class Technique(
     def display_short(self) -> str:
         if self.parent_id is None:
             return super().display_short
-        return (
-            f"{self.ref_id} - {self.parent.get_name_translated}: "
-            f"{self.get_name_translated}"
-        )
+        label = f"{self.parent.get_name_translated}: {self.get_name_translated}"
+        return f"{self.ref_id} - {label}" if self.ref_id else label

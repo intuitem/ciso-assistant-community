@@ -1,3 +1,6 @@
+import math
+from decimal import ROUND_HALF_UP, Decimal
+from fractions import Fraction
 import json
 import os
 import re
@@ -81,19 +84,24 @@ from .validators import (
     JSONSchemaInstanceValidator,
 )
 from . import dora
+from .framework_exports import available_for as available_framework_exports
 from collections import defaultdict, deque
 from dataclasses import dataclass
 
 logger = get_logger(__name__)
 
 
-def _truncate_one_decimal(value: float) -> float:
-    """Truncate *value* to one decimal, matching the JS frontend display.
+def round_score(value: float) -> float:
+    """Round an aggregated score to two decimals, half up.
 
-    A tiny epsilon absorbs float-precision noise introduced by ratio-based
-    aggregation (e.g. 77.49999999999 should still truncate to 77.5).
+    Matches the precision of reference tools such as the CCB CyFun
+    self-assessment workbook. Rounding to 9 decimals first absorbs
+    float-precision noise from ratio-based aggregation (e.g. 2.69499999999
+    must round to 2.70, not 2.69).
     """
-    return int(value * 10 + 1e-9) / 10
+    return float(
+        Decimal(repr(round(value, 9))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    )
 
 
 def _defer_once(conn_attr: str, key, callback):
@@ -1151,12 +1159,14 @@ class StoredLibrary(LibraryMixin):
                 builtin=builtin,
                 hash_checksum=hash_checksum,
                 content=library_objects,
+                # autoload libraries with requirement mapping sets, or that ask for it
                 autoload=bool(
-                    library_objects.get(
+                    library_data.get("autoload")
+                    or library_objects.get(
                         "requirement_mapping_set",
                         library_objects.get("requirement_mapping_sets"),
                     )
-                ),  # autoload is true if the library contains requirement mapping sets
+                ),
             )
             new_library.filtering_labels.set(filtering_labels)
             return new_library, None
@@ -1727,6 +1737,23 @@ class LibraryUpdater:
                     framework_dict["outcomes_definition"] = []
                 # An omitted IG definition means that the framework no longer defines implementation groups.
                 framework_dict.setdefault("implementation_groups_definition", None)
+                # Same for the scoring properties: omitted means back to the defaults.
+                framework_dict.setdefault("score_scale_locked", False)
+                framework_dict.setdefault("score_calculation_method", "average")
+                framework_dict.setdefault("anchor_na_to_target", False)
+                framework_dict.setdefault("target_score", None)
+                Framework.validate_score_calculation_method(
+                    framework_dict["score_calculation_method"]
+                )
+                Framework.validate_scoring_defaults(
+                    min_score=framework_dict.get("min_score", 0),
+                    max_score=framework_dict.get("max_score", 100),
+                    anchor_na_to_target=framework_dict["anchor_na_to_target"],
+                    target_score=framework_dict["target_score"],
+                    implementation_groups_definition=framework_dict[
+                        "implementation_groups_definition"
+                    ],
+                )
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
@@ -1862,7 +1889,11 @@ class LibraryUpdater:
                     scale_on_prev_defaults = (
                         ca.min_score == prev_min and ca.max_score == prev_max
                     )
-                    definition_on_prev_defaults = ca.scores_definition == prev_def
+                    # An empty definition means "no labels" whether stored as [] or None.
+                    definition_on_prev_defaults = (ca.scores_definition or None) == (
+                        prev_def or None
+                    )
+                    preset_dropped = False
 
                     needs_update = False
                     if scale_on_prev_defaults and score_boundaries_changed:
@@ -1870,7 +1901,23 @@ class LibraryUpdater:
                         ca.max_score = new_framework.max_score
                         needs_update = True
                         ca_with_scale_change.append(ca)
-                    if definition_on_prev_defaults and scores_definition_changed:
+                        # The audit follows the framework now; a preset's catalog
+                        # labels (and wording overrides) no longer apply.
+                        if ca.score_scale_preset:
+                            ca.score_scale_preset = None
+                            preset_dropped = True
+                    # Labels only follow the framework together with its range:
+                    # an audit on its own range keeps its own (possibly empty)
+                    # labels, even when that range matches the new framework's.
+                    range_follows = scale_on_prev_defaults
+                    if (
+                        (
+                            definition_on_prev_defaults
+                            and range_follows
+                            and not ca.score_scale_preset
+                        )
+                        or preset_dropped
+                    ) and (scores_definition_changed or preset_dropped):
                         ca.scores_definition = new_framework.scores_definition
                         needs_update = True
                     if needs_update:
@@ -1879,7 +1926,12 @@ class LibraryUpdater:
                 if compliance_assessments_to_update:
                     ComplianceAssessment.objects.bulk_update(
                         compliance_assessments_to_update,
-                        ["min_score", "max_score", "scores_definition"],
+                        [
+                            "min_score",
+                            "max_score",
+                            "scores_definition",
+                            "score_scale_preset",
+                        ],
                         batch_size=100,
                     )
                     ca_bounds = {
@@ -1997,10 +2049,16 @@ class LibraryUpdater:
                                 ra_pks_to_update.add(ra.pk)
                                 requirement_assessment_objects_to_update.append(ra)
 
+                        # Every stored value moves to the new range, ticked or not,
+                        # so none is left outside it.
                         if (
-                            ra.is_scored
-                            and ra.score is not None
-                            and ra.compliance_assessment in ca_with_scale_change
+                            ra.compliance_assessment in ca_with_scale_change
+                            and requirement_node_object.min_score is None
+                            and requirement_node_object.max_score is None
+                            and (
+                                ra.score is not None
+                                or ra.documentation_score is not None
+                            )
                         ):
                             default_min = (
                                 0
@@ -2034,17 +2092,10 @@ class LibraryUpdater:
                                         and prev_max is not None
                                         and prev_min != prev_max
                                     ):
-                                        # Normalize to 0-1 range
-                                        normalized = (value - prev_min) / (
-                                            prev_max - prev_min
-                                        )
-                                        # Scale to new range
-                                        scaled = ca_min + (
-                                            normalized * (ca_max - ca_min)
-                                        )
-                                        # Round + clamp
-                                        return max(
-                                            min(int(round(scaled)), ca_max), ca_min
+                                        return rescale_score(
+                                            value,
+                                            (prev_min, prev_max),
+                                            (ca_min, ca_max),
                                         )
                                     else:
                                         # Old range invalid → clamp
@@ -2059,9 +2110,12 @@ class LibraryUpdater:
 
                             if new_score != old_score:
                                 ra.score = new_score
-                                ra.is_scored = (
-                                    new_score is not None and self.strategy != "reset"
-                                )
+                                # An unticked (stale) score must not become scored.
+                                if ra.is_scored:
+                                    ra.is_scored = (
+                                        new_score is not None
+                                        and self.strategy != "reset"
+                                    )
                                 if ra.pk not in ra_pks_to_update:
                                     ra_pks_to_update.add(ra.pk)
                                     requirement_assessment_objects_to_update.append(ra)
@@ -2204,6 +2258,16 @@ class LibraryUpdater:
                         ],
                         batch_size=100,
                     )
+                    # bulk_update skips RequirementAssessment.save(), which
+                    # re-evaluates outcomes when a score changes.
+                    for ca in ca_with_scale_change:
+
+                        def _evaluate(ca=ca):
+                            from core.cel_service import evaluate_outcomes
+
+                            evaluate_outcomes(ca)
+
+                        _defer_once("_pending_cel_evaluations", ca.pk, _evaluate)
 
                 # Keep selected_implementation_groups consistent for dynamic frameworks
                 # This must run even if no RA scalar fields changed, because answer
@@ -2399,6 +2463,8 @@ class LibraryUpdater:
                 "probability",
                 "impact",
                 "risk",
+                "strength_of_knowledge",
+                "ebios_rm",
             }  # Store this as a constant somewhere (as a static attribute of the class)
             other_keys = set(matrix.keys()) - json_definition_keys
             matrix_dict = {key: matrix[key] for key in other_keys}
@@ -2407,7 +2473,7 @@ class LibraryUpdater:
                 if key in matrix:  # If all keys are mandatory this condition is useless
                     matrix_dict["json_definition"][key] = matrix[key]
 
-            RiskMatrix.objects.update_or_create(
+            risk_matrix, _ = RiskMatrix.objects.update_or_create(
                 urn=matrix["urn"].lower(),
                 defaults=matrix_dict,
                 create_defaults={
@@ -2417,6 +2483,8 @@ class LibraryUpdater:
                     "library": self.old_library,
                 },
             )
+            for study in risk_matrix.ebios_rm_studies.all():
+                study.refresh_ratings()
 
     def update_requirement_mapping_sets(self):
         for requirement_mapping_set in self.new_requirement_mapping_sets:
@@ -2610,6 +2678,8 @@ class LoadedLibrary(LibraryMixin):
             res["risk_matrix"]["impact"] = update_translations(matrix.impact)
             res["risk_matrix"]["risk"] = update_translations(matrix.risk)
             res["risk_matrix"]["grid"] = matrix.grid
+            if "ebios_rm" in matrix.json_definition:
+                res["risk_matrix"]["ebios_rm"] = matrix.json_definition["ebios_rm"]
             res["strength_of_knowledge"] = matrix.strength_of_knowledge
             res["risk_matrix"] = [res["risk_matrix"]]
         return res
@@ -2831,6 +2901,10 @@ class Terminology(NameDescriptionMixin, FolderMixin):
 
     class FieldPath(models.TextChoices):
         ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
+        ROTO_TARGET_OBJECTIVE_CATEGORY = (
+            "ro_to.target_objective_category",
+            "ro_to/target_objective_category",
+        )
         QUALIFICATIONS = "qualifications", "qualifications"
         ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
         ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
@@ -2895,6 +2969,46 @@ class Terminology(NameDescriptionMixin, FolderMixin):
             "name": "other",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+    ]
+
+    # Categories of target objectives from EBIOS RM fiche méthode 4.
+    DEFAULT_ROTO_TARGET_OBJECTIVE_CATEGORIES = [
+        {
+            "name": "espionage",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "strategic_prepositioning",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "influence",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "operational_disruption",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "lucrative",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "challenge_and_amusement",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
             "is_visible": True,
         },
     ]
@@ -3332,6 +3446,10 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         cls._seed_defaults(cls.DEFAULT_ROTO_RISK_ORIGINS)
 
     @classmethod
+    def create_default_roto_target_objective_categories(cls):
+        cls._seed_defaults(cls.DEFAULT_ROTO_TARGET_OBJECTIVE_CATEGORIES)
+
+    @classmethod
     def create_default_qualifications(cls):
         cls._seed_defaults(cls.DEFAULT_QUALIFICATIONS)
 
@@ -3604,6 +3722,33 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             "{field_name: {role: 'edit' | 'read' | 'hidden'}}."
         ),
     )
+    score_scale_locked = models.BooleanField(
+        default=False,
+        verbose_name=_("Score scale locked"),
+        help_text=_("The standard defines the score scale: audits cannot change it."),
+    )
+    score_calculation_method = models.CharField(
+        max_length=30,
+        default="average",
+        verbose_name=_("Score calculation method"),
+        help_text=_("Calculation method proposed for new audits."),
+    )
+    anchor_na_to_target = models.BooleanField(
+        default=False,
+        verbose_name=_("Anchor N/A to target score"),
+        help_text=_(
+            "New audits count not applicable requirements as the target score."
+        ),
+    )
+    target_score = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_("Target score"),
+        help_text=_(
+            "Target score proposed for new audits, on the framework scale. "
+            "Implementation groups can override it."
+        ),
+    )
     urn_namespace = models.CharField(
         max_length=50,
         default="custom",
@@ -3699,6 +3844,115 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
                 .exists()
             )
         return self._is_dynamic_cache
+
+    @staticmethod
+    def scale_bound_querysets(framework):
+        return (
+            QuestionChoice.objects.filter(
+                question__requirement_node__framework=framework,
+                add_score__isnull=False,
+            ),
+            RequirementNode.objects.filter(framework=framework).filter(
+                Q(min_score__isnull=False)
+                | Q(max_score__isnull=False)
+                | Q(scores_definition_ref__gt="")
+            ),
+        )
+
+    @classmethod
+    def scale_bound_q(cls, framework):
+        """Boolean expression for annotating framework querysets (framework may
+        be an OuterRef)."""
+        choices, nodes = cls.scale_bound_querysets(framework)
+        return Q(score_scale_locked=True) | Exists(choices) | Exists(nodes)
+
+    @property
+    def is_scale_bound(self) -> bool:
+        return self.score_scale_locked or any(
+            qs.exists() for qs in self.scale_bound_querysets(self)
+        )
+
+    @staticmethod
+    def validate_score_calculation_method(method):
+        """A library may only declare a calculation method audits support."""
+        if method not in ComplianceAssessment.CalculationMethod.values:
+            raise ValueError(
+                f"invalid score_calculation_method {method!r}: expected one of "
+                f"{', '.join(ComplianceAssessment.CalculationMethod.values)}"
+            )
+
+    @staticmethod
+    def scoring_defaults_problem(
+        *,
+        min_score,
+        max_score,
+        anchor_na_to_target,
+        target_score,
+        implementation_groups_definition,
+    ) -> tuple[str, str] | None:
+        """(error key, detail) when audits would refuse what the framework
+        proposes: N/A anchoring needs a target, implementation group targets fall
+        back on the framework's, and every target lies on the framework scale."""
+        group_targets = [
+            (f"implementation group {group.get('ref_id')!r} target_score", target)
+            for group in implementation_groups_definition or []
+            if isinstance(group, dict)
+            and (target := group.get("target_score")) is not None
+        ]
+        if target_score is None and (anchor_na_to_target or group_targets):
+            return (
+                "targetScoreRequired",
+                "target_score is required with anchor_na_to_target or "
+                "implementation group target scores",
+            )
+        for label, target in [("target_score", target_score), *group_targets]:
+            if target is not None and not min_score <= target <= max_score:
+                return (
+                    "targetScoreOutOfRange",
+                    f"{label} {target} is outside the framework scale "
+                    f"{min_score}-{max_score}",
+                )
+        return None
+
+    @staticmethod
+    def validate_scoring_defaults(**scoring) -> None:
+        """Library loading: fail loudly, with details for the library author."""
+        if problem := Framework.scoring_defaults_problem(**scoring):
+            raise ValueError(problem[1])
+
+    @property
+    def default_scoring(self) -> dict:
+        """Scoring settings proposed when creating an audit on this framework.
+
+        `target_score` is expressed on the framework's scale. Implementation
+        groups can set their own `target_score`: with groups selected, the
+        highest of their targets applies (a group without one counts as the
+        framework's).
+        """
+        scoring = {"score_calculation_method": self.score_calculation_method}
+        if self.anchor_na_to_target:
+            scoring["anchor_na_to_target"] = True
+        if self.target_score is not None:
+            scoring["target_score"] = self.target_score
+            by_group = {
+                group["ref_id"]: group["target_score"]
+                for group in self.implementation_groups_definition or []
+                if group.get("target_score") is not None
+            }
+            if by_group:
+                scoring["target_score_by_group"] = by_group
+        return scoring
+
+    def default_scoring_for(self, selected_implementation_groups) -> dict:
+        """default_scoring resolved for an audit's implementation groups."""
+        scoring = self.default_scoring
+        by_group = scoring.pop("target_score_by_group", {})
+        if selected_implementation_groups and "target_score" in scoring:
+            scoring["target_score"] = max(
+                by_group.get(group, scoring["target_score"])
+                for group in selected_implementation_groups
+            )
+        return scoring
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.get_name_translated}"
@@ -8440,6 +8694,83 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         return data
 
 
+# Range is frozen per id: rewording lives in the frontend catalog, a new range needs a new id.
+SCORE_SCALE_PRESETS = {
+    "0-100": (0, 100),
+    "0-5": (0, 5),
+    "1-5": (1, 5),
+    "1-4": (1, 4),
+    "0-3": (0, 3),
+}
+MAX_LABELLED_LEVELS = 11
+
+
+def normalize_score_scale(preset, min_score, max_score, levels, default_range=None):
+    """Validate a score scale and return (preset, min_score, max_score).
+
+    A preset forces its range; min/max of None means "use the default".
+    """
+    if preset:
+        if preset not in SCORE_SCALE_PRESETS:
+            raise ValidationError(
+                {"score_scale_preset": "scoreScaleErrorUnknownPreset"}
+            )
+        for field, given, value in zip(
+            ("min_score", "max_score"),
+            (min_score, max_score),
+            SCORE_SCALE_PRESETS[preset],
+        ):
+            if given is not None and given != value:
+                raise ValidationError({field: "scoreScaleErrorPresetRange"})
+        min_score, max_score = SCORE_SCALE_PRESETS[preset]
+    if (min_score is None) != (max_score is None):
+        raise ValidationError({"max_score": "scoreScaleErrorMinMaxTogether"})
+    if min_score is not None:
+        if not all(
+            isinstance(v, int) and not isinstance(v, bool)
+            for v in (min_score, max_score)
+        ):
+            raise ValidationError({"max_score": "scoreScaleErrorIntegers"})
+        if min_score >= max_score:
+            raise ValidationError({"max_score": "scoreScaleRangeError"})
+    score_range = (min_score, max_score) if min_score is not None else default_range
+    if isinstance(levels, dict):
+        levels = levels.get("scale")
+    if levels is not None and not isinstance(levels, list):
+        raise ValidationError({"scores_definition": "scoreScaleErrorInvalid"})
+    if levels and score_range:
+        for level in levels:
+            score = level.get("score") if isinstance(level, dict) else None
+            if (
+                not isinstance(score, int)
+                or isinstance(score, bool)
+                or not score_range[0] <= score <= score_range[1]
+            ):
+                raise ValidationError(
+                    {"scores_definition": "scoreScaleErrorLevelOutOfRange"}
+                )
+    return preset or None, min_score, max_score
+
+
+def rescale_score(value, old_range, new_range, integer=True):
+    """Map a score proportionally from one range to another, clamped to the new one.
+
+    Exact arithmetic, halves rounded up: round() is half-to-even, which would
+    send 10/30/50/70/90 on 0-100 to 0/2/2/4/4 on 0-5 instead of 1/2/3/4/5.
+    """
+    (old_min, old_max), (new_min, new_max) = old_range, new_range
+    if old_max == old_min:
+        result = min(max(Fraction(value), Fraction(new_min)), Fraction(new_max))
+    else:
+        ratio = (Fraction(value) - old_min) / (old_max - old_min)
+        ratio = min(max(ratio, Fraction(0)), Fraction(1))
+        result = new_min + ratio * (new_max - new_min)
+    if integer:
+        return math.floor(result + Fraction(1, 2))
+    exact = Decimal(result.numerator) / Decimal(result.denominator)
+    return float(exact.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+
 class ComplianceAssessment(Assessment):
     class CalculationMethod(models.TextChoices):
         AVG = "average", "Average"
@@ -8460,6 +8791,13 @@ class ComplianceAssessment(Assessment):
     max_score = models.IntegerField(null=True, verbose_name=_("Maximum score"))
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
+    )
+    # One of SCORE_SCALE_PRESETS (validated in normalize_score_scale), or null.
+    score_scale_preset = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        verbose_name=_("Score scale preset"),
     )
     computed_outcome = models.JSONField(null=True, blank=True)
 
@@ -8650,11 +8988,70 @@ class ComplianceAssessment(Assessment):
             },
         )
 
+    def get_scale_levels(self) -> list | None:
+        """Bare list of level labels; a preset is expanded to every score in its
+        range, tagged with the preset id so clients can resolve the wording."""
+        sd = self.scores_definition
+        scale = sd.get("scale") if isinstance(sd, dict) else sd
+        preset = self.score_scale_preset
+        if not preset or self.max_score - self.min_score + 1 > MAX_LABELLED_LEVELS:
+            return scale
+        own = {
+            level["score"]: level
+            for level in scale or []
+            if isinstance(level, dict) and "score" in level
+        }
+        return [
+            {**own.get(score, {}), "score": score, "preset": preset}
+            for score in range(self.min_score, self.max_score + 1)
+        ]
+
+    def _rescalable_requirements(self):
+        # Requirements with their own scale keep it.
+        return self.requirement_assessments.filter(
+            requirement__min_score__isnull=True, requirement__max_score__isnull=True
+        )
+
+    def rescale_impact(self) -> dict:
+        own_range = self._rescalable_requirements()
+        scores = own_range.filter(score__isnull=False)
+        return {
+            # Same rule as the scoring engine for what counts as scored.
+            "scored": scores.filter(is_scored=True).count(),
+            "scores": scores.filter(is_scored=False).count(),
+            "documentation_scores": own_range.filter(
+                documentation_score__isnull=False
+            ).count(),
+        }
+
+    def rescale_requirement_scores(self, old_range, new_range) -> None:
+        """Carry stored scores over to a new range."""
+        own_range = self._rescalable_requirements()
+        for field in ("score", "documentation_score"):
+            rows = list(own_range.filter(**{f"{field}__isnull": False}))
+            for ra in rows:
+                setattr(
+                    ra, field, rescale_score(getattr(ra, field), old_range, new_range)
+                )
+            RequirementAssessment.objects.bulk_update(rows, [field])
+
+        # bulk_update skips RequirementAssessment.save(), which normally
+        # re-evaluates outcomes when a score changes.
+        def _evaluate():
+            from core.cel_service import evaluate_outcomes
+
+            evaluate_outcomes(self)
+
+        _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
+
     def save(self, *args, **kwargs) -> None:
+        # No scale chosen: the framework's (the organisation scale is only
+        # ever proposed by the form, so API/import behaviour never changes).
         if self.min_score is None:
             self.min_score = self.framework.min_score
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
+            self.score_scale_preset = None
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
 
@@ -8749,6 +9146,23 @@ class ComplianceAssessment(Assessment):
         if baseline_assessments:
             updates = []
             m2m_operations = []
+            baseline_range = (baseline.min_score, baseline.max_score)
+            own_range = (self.min_score, self.max_score)
+            convert = baseline_range != own_range and None not in (
+                *baseline_range,
+                *own_range,
+            )
+
+            def carried(value, requirement):
+                # A requirement with its own scale has it in both audits.
+                if (
+                    value is None
+                    or not convert
+                    or requirement.min_score is not None
+                    or requirement.max_score is not None
+                ):
+                    return value
+                return rescale_score(value, baseline_range, own_range)
 
             for assessment in created_assessments:
                 baseline_assessment = baseline_assessments.get(
@@ -8758,9 +9172,11 @@ class ComplianceAssessment(Assessment):
                     # Update scalar fields
                     assessment.result = baseline_assessment.result
                     assessment.status = baseline_assessment.status
-                    assessment.score = baseline_assessment.score
-                    assessment.documentation_score = (
-                        baseline_assessment.documentation_score
+                    assessment.score = carried(
+                        baseline_assessment.score, assessment.requirement
+                    )
+                    assessment.documentation_score = carried(
+                        baseline_assessment.documentation_score, assessment.requirement
                     )
                     assessment.is_scored = baseline_assessment.is_scored
                     assessment.is_score_overridden = (
@@ -8890,7 +9306,26 @@ class ComplianceAssessment(Assessment):
 
         return changes
 
-    def _compute_score_for_field(
+    def na_anchor_score(self, ra_min, ra_max):
+        """Score an N/A requirement counts for when anchor_na_to_target is on.
+
+        The CA-wide target is projected onto the requirement's own scale, so
+        mixed scales stay coherent; without a target it counts as its max.
+        """
+        ca_min, ca_max = self.min_score, self.max_score
+        if (
+            self.target_score is not None
+            and ca_min is not None
+            and ca_max is not None
+            and ca_max > ca_min
+            and ra_max > ra_min
+        ):
+            ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
+            ca_ratio = (ca_target_clamped - ca_min) / (ca_max - ca_min)
+            return ra_min + ca_ratio * (ra_max - ra_min)
+        return ra_max
+
+    def _compute_raw_score_for_field(
         self, requirement_assessments, ig, score_field, anchor_na_to_target=False
     ):
         """
@@ -8909,7 +9344,7 @@ class ComplianceAssessment(Assessment):
         When anchor_na_to_target is True, N/A RAs contribute their resolved
         target (or resolved max if no target is set).
 
-        Returns the computed score, or -1 if no scored requirements exist.
+        Returns the unrounded score, or -1 if no scored requirements exist.
         """
         ca_min = self.min_score
         ca_max = self.max_score
@@ -8932,22 +9367,10 @@ class ComplianceAssessment(Assessment):
                     resolved = ras.get_resolved_scoring()
                     ra_min = resolved["min_score"]
                     ra_max = resolved["max_score"]
-                    if (
-                        self.target_score is not None
-                        and ra_min is not None
-                        and ra_max is not None
-                        and ra_max > ra_min
-                    ):
-                        # Project the CA-wide target score onto the RA scale as a
-                        # ratio so summing across mixed scales stays coherent
-                        # (raw injection would add 80/100 onto a 0-5 RA).
-                        ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
-                        ca_ratio = (ca_target_clamped - ca_min) / ca_range
-                        score = ra_min + ca_ratio * (ra_max - ra_min)
-                    elif ra_max is not None:
-                        score = ra_max
+                    if ra_min is None or ra_max is None:
+                        score = ra_max or 0
                     else:
-                        score = 0
+                        score = self.na_anchor_score(ra_min, ra_max)
                 else:
                     raw = getattr(ras, score_field)
                     if raw is None:
@@ -8959,7 +9382,7 @@ class ComplianceAssessment(Assessment):
                 total_weight += weight
             if total_weight == 0:
                 return -1
-            return _truncate_one_decimal(total)
+            return total
 
         def _ra_ratio_weight(ras):
             if ig and not (ig & set(ras.requirement.implementation_groups or [])):
@@ -8974,21 +9397,15 @@ class ComplianceAssessment(Assessment):
 
             is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
             if is_na and anchor_na_to_target:
-                # Project the CA-wide target onto the RA scale as a ratio so
-                # mixed scales stay coherent (CA target 80/100 contributes
-                # 80% of the RA range, not 80 raw).
-                if self.target_score is not None:
-                    ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
-                    ca_ratio = (ca_target_clamped - ca_min) / ca_range
-                    raw = ra_min + ca_ratio * ra_range
-                else:
-                    raw = ra_max
+                raw = self.na_anchor_score(ra_min, ra_max)
             else:
                 raw = getattr(ras, score_field)
                 if raw is None:
                     if score_field == "score":
                         return None
-                    raw = 0
+                    # A missing documentation score is the bottom of the scale
+                    # (0 on 0-based scales), never below it.
+                    raw = ra_min
 
             ratio = (raw - ra_min) / ra_range
             return ratio, (ras.requirement.weight or 1)
@@ -9005,25 +9422,7 @@ class ComplianceAssessment(Assessment):
             if not leaf_ratios:
                 return -1
 
-            all_nodes = RequirementNode.objects.filter(
-                framework=self.framework
-            ).values_list("urn", "parent_urn", "weight")
-
-            children_map = defaultdict(list)
-            node_weights = {}
-            roots = []
-            all_urns = set()
-            parent_links = {}
-            for urn, parent_urn, weight in all_nodes:
-                node_weights[urn] = weight or 1
-                all_urns.add(urn)
-                parent_links[urn] = parent_urn
-            for urn, parent_urn in parent_links.items():
-                if parent_urn and parent_urn in all_urns:
-                    children_map[parent_urn].append(urn)
-                else:
-                    # Orphan or root: keep reachable as a tree root.
-                    roots.append(urn)
+            children_map, node_weights, roots = self.framework_node_tree
 
             computed_ratios = {}
             visiting = set()
@@ -9085,7 +9484,7 @@ class ComplianceAssessment(Assessment):
                 return -1
 
             global_ratio = sum(category_ratios) / len(category_ratios)
-            return _truncate_one_decimal(ca_min + global_ratio * ca_range)
+            return ca_min + global_ratio * ca_range
 
         total_ratio_weighted = 0
         total_weight = 0
@@ -9102,7 +9501,29 @@ class ComplianceAssessment(Assessment):
 
         # AVG: average of weighted ratios, denormalized onto the CA scale.
         avg_ratio = total_ratio_weighted / total_weight
-        return _truncate_one_decimal(ca_min + avg_ratio * ca_range)
+        return ca_min + avg_ratio * ca_range
+
+    @cached_property
+    def framework_node_tree(self):
+        """(children, weights, roots) of the framework's nodes by URN, built
+        once per instance: the radar scores each section separately."""
+        all_nodes = RequirementNode.objects.filter(
+            framework=self.framework
+        ).values_list("urn", "parent_urn", "weight")
+        children_map = defaultdict(list)
+        node_weights = {}
+        roots = []
+        parent_links = {}
+        for urn, parent_urn, weight in all_nodes:
+            node_weights[urn] = weight or 1
+            parent_links[urn] = parent_urn
+        for urn, parent_urn in parent_links.items():
+            if parent_urn and parent_urn in parent_links:
+                children_map[parent_urn].append(urn)
+            else:
+                # Orphan or root: keep reachable as a tree root.
+                roots.append(urn)
+        return children_map, node_weights, roots
 
     def get_global_score(
         self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
@@ -9171,30 +9592,73 @@ class ComplianceAssessment(Assessment):
             else None
         )
 
-        impl_score = self._compute_score_for_field(
+        impl_score = self._compute_raw_score_for_field(
             requirement_assessments_scored, ig, "score", self.anchor_na_to_target
         )
 
         doc_score = None
         if self.show_documentation_score:
-            doc_score = self._compute_score_for_field(
+            doc_score = self._compute_raw_score_for_field(
                 requirement_assessments_scored,
                 ig,
                 "documentation_score",
                 self.anchor_na_to_target,
             )
 
-        # Maturity is the average of the enabled layers (ignore -1 / None)
+        # Maturity is the average of the enabled layers (ignore -1 / None),
+        # computed on unrounded layers so rounding only happens once.
         enabled = [s for s in [impl_score, doc_score] if s is not None and s != -1]
         if enabled:
-            maturity_score = _truncate_one_decimal(sum(enabled) / len(enabled))
+            maturity_score = round_score(sum(enabled) / len(enabled))
         else:
             maturity_score = impl_score  # -1 if nothing scored
 
+        def _display(score):
+            return score if score is None or score == -1 else round_score(score)
+
         return {
-            "implementation_score": impl_score,
-            "documentation_score": doc_score,
+            "implementation_score": _display(impl_score),
+            "documentation_score": _display(doc_score),
             "maturity_score": maturity_score,
+        }
+
+    def get_scores_for(self, requirement_assessments) -> dict:
+        """Scores of a subset of RAs (a section, an implementation group),
+        filtered and aggregated like get_global_score so they stay consistent
+        with the tree and the global score. Layers with nothing scored are None.
+        """
+        na = RequirementAssessment.Result.NOT_APPLICABLE
+        scored = [
+            ra
+            for ra in requirement_assessments
+            if (self.anchor_na_to_target and ra.result == na)
+            or (ra.is_scored and ra.score is not None and ra.result != na)
+        ]
+        impl_score = doc_score = None
+        if scored:
+            impl_score = self._compute_raw_score_for_field(
+                scored, None, "score", self.anchor_na_to_target
+            )
+            if self.show_documentation_score:
+                doc_score = self._compute_raw_score_for_field(
+                    scored, None, "documentation_score", self.anchor_na_to_target
+                )
+        impl_score = None if impl_score == -1 else impl_score
+        doc_score = None if doc_score == -1 else doc_score
+        # Maturity uses the unrounded layers so rounding only happens once.
+        enabled = [s for s in [impl_score, doc_score] if s is not None]
+        return {
+            "implementation_score": round_score(impl_score)
+            if impl_score is not None
+            else None,
+            "documentation_score": round_score(doc_score)
+            if doc_score is not None
+            else None,
+            "maturity_score": round_score(sum(enabled) / len(enabled))
+            if enabled
+            else None,
+            "scored_count": len(scored),
+            "total_weight": sum(ra.requirement.weight or 1 for ra in scored),
         }
 
     def get_total_max_score(self):
@@ -9253,6 +9717,20 @@ class ComplianceAssessment(Assessment):
         else:
             # For AVG and AVG_OF_AVG, the score is bounded by max_score
             return self.max_score
+
+    @property
+    def framework_exports(self) -> list[dict]:
+        """Exports specific to the audit's framework (core.framework_exports),
+        such as a publisher's official self-assessment template."""
+        return [
+            {
+                "ref_id": export.ref_id,
+                "title": export.title,
+                "description": export.description,
+                "format": export.format,
+            }
+            for export in available_framework_exports(self)
+        ]
 
     def get_selected_implementation_groups(self):
         framework = self.framework
@@ -10080,7 +10558,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 req.scores_definition_ref
             )
         else:
-            scores_definition = ca_sd.get("scale")
+            scores_definition = ca.get_scale_levels()
             # Inherited default may extend beyond the Node's overridden bounds.
             # Keep only entries that fall inside the resolved range (preserves
             # sparse scales like 0/25/50/75/100); drop the labels entirely if

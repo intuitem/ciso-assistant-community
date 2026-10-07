@@ -2,8 +2,8 @@ apiVersion: v2
 name: ciso-assistant
 description: A Helm chart for CISO Assistant k8s's deployment
 type: application
-version: 0.13.0
-appVersion: "v4.0.4"
+version: 0.13.2
+appVersion: "v4.1.0"
 icon: https://intuitem.com/ciso-assistant.svg
 home: https://intuitem.com
 sources:
@@ -14,6 +14,6 @@ dependencies:
     repository: "oci://registry-1.docker.io/bitnamicharts"
     condition: postgresql.enabled
   - name: qdrant
-    version: "1.18.2"
+    version: "1.19.1"
     repository: "https://qdrant.github.io/qdrant-helm"
     condition: qdrant.enabled

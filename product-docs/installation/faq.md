@@ -68,6 +68,33 @@ If you want to trigger the migration to make sure that all increments have been 
 docker compose exec backend uv run python manage.py migrate
 ```
 
+### `poetry: command not found` after upgrading
+
+Since v3.18.0, the backend image uses [uv](https://docs.astral.sh/uv/) instead of Poetry to manage Python dependencies, and Poetry is no longer installed. If your `docker-compose.yml` predates that release, the `huey` service (or any custom command) still calls `poetry run` and keeps restarting:
+
+```
+huey      | /bin/sh: line 1: poetry: command not found
+huey exited with code 127 (restarting)
+```
+
+In your `docker-compose.yml`, replace `poetry run` with `uv run` in the `entrypoint` of the `huey` service:
+
+```yaml
+entrypoint:
+  - /bin/sh
+  - -c
+  - |
+    uv run python manage.py run_huey -w 2 --scheduler-interval 60
+```
+
+then run `docker compose up -d`.
+
+The same applies to any command you run by hand, for example:
+
+```
+docker compose exec backend uv run python manage.py migrate
+```
+
 ### Healthcheck fails during the installation
 
 most likely because the initialization took longer than expected. Make sure you provide the expected specs or tune the docker compose to give the app more time to finish the init phase.

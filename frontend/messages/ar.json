@@ -628,6 +628,7 @@
 	"libraryLoadingError": "حدث خطأ أثناء تحميل المكتبة",
 	"processingError": "خطأ في المعالجة",
 	"libraryAlreadyLoadedError": "تم تحميل هذه المكتبة بالفعل",
+	"libraryOutdatedError": "توجد بالفعل نسخة أحدث من هذه المكتبة. عيّن قيمة أعلى للحقل \"version\" في ملفك لاستيراده.",
 	"invalidLibraryFileError": "ملف مكتبة غير صالح. يرجى التأكد من أن التنسيق صحيح.",
 	"taintedFormMessage": "هل تريد مغادرة هذه الصفحة؟ قد لا يتم حفظ التغييرات التي أجريتها.",
 	"riskScenariosStatus": "حالة سيناريوهات المخاطر",
@@ -638,7 +639,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "لا يمكنك حذف حساب المسؤول الوحيد في التطبيق.",
 	"attemptToRemoveOnlyAdminUserGroup": "لا يمكنك إزالة المستخدم الوحيد المسؤول في التطبيق من مجموعة المستخدمين المسؤولين.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "لا يمكنك إزالة نفسك من مجموعة مسؤولي النطاق. اطلب من مسؤول آخر القيام بذلك.",
-	"scoringHelpText": "حدد لتمكين التسجيل",
 	"overrideScore": "تجاوز الدرجة",
 	"overrideScoreHelpText": "تثبيت الدرجة يدويًا وإيقاف إعادة حسابها من الإجابات",
 	"automaticScore": "الدرجة التلقائية",
@@ -6623,5 +6623,7 @@
 				"countPlural=other": "صفحة · {count} سؤال"
 			}
 		}
-	]
+	],
+	"includeNotApplicableRequirements": "تضمين المتطلبات غير القابلة للتطبيق",
+	"excludeNotApplicableRequirements": "استبعاد المتطلبات غير القابلة للتطبيق"
 }

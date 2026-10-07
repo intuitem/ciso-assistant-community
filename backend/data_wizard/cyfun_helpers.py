@@ -1,20 +1,13 @@
 import io
-import re
 
 import openpyxl
 
+from core.cyfun import LEVELS, normalize_ref_id
+
 CYFUN_LIBRARY_URN = "urn:intuitem:risk:library:ccb-cyfun2025"
-CYFUN_FRAMEWORK_URN = "urn:intuitem:risk:framework:ccb-cyfun2025"
 
 FUNCTION_SHEETS = ("GOVERN", "IDENTIFY", "PROTECT", "DETECT", "RESPOND", "RECOVER")
-LEVELS = ("basic", "important", "essential")
 LEVEL_TO_GROUP = {"basic": "B", "important": "I", "essential": "E"}
-
-REF_ID_PATTERN = re.compile(r"^[A-Z]{2}\.[A-Z]{2}-\d+(\.\d+)?$")
-
-# The framework zero-pads subcategory numbers (ID.AM-05) but some workbook
-# editions don't (ID.AM-5.1 in the BASIC tool).
-SUBCATEGORY_PAD_PATTERN = re.compile(r"-(\d)(?=\.|$)")
 
 HEADER_ROW = 2
 DATA_START_ROW = 3
@@ -87,12 +80,9 @@ def process_cyfun_file(file_content: bytes) -> dict:
             if marker in LEVELS:
                 level = marker
         for row in sheet.iter_rows(min_row=DATA_START_ROW, values_only=True):
-            ref_id = (
-                _cell_text(row, cols["requirement"]).split(":")[0].strip().rstrip(".")
-            )
-            if not REF_ID_PATTERN.match(ref_id):
+            ref_id = normalize_ref_id(_cell_text(row, cols["requirement"]))
+            if not ref_id:
                 continue
-            ref_id = SUBCATEGORY_PAD_PATTERN.sub(r"-0\1", ref_id)
             row_level = _cell_text(row, cols["level"]).lower()
             if row_level in LEVELS:
                 levels_seen.add(row_level)

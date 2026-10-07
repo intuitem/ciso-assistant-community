@@ -43,6 +43,64 @@ Computes a date by adding days and weeks to a base date. Use it for due dates.
 
 Output: `result` (ISO date), `base`. No permission required.
 
+### Compute
+
+Set variables with operators. Each row names a variable and gives a [CEL](https://cel.dev) expression that computes it: a risk score from likelihood and impact, a ratio between two Read objects counts, a loop counter, an SLA picked by severity.
+
+| Setting | |
+|---|---|
+| Expressions | One row per variable: the variable key and its expression |
+
+#### A first Compute step
+
+Multiply two numbers and log the result:
+
+{% stepper %}
+{% step %}
+**Declare the inputs.** Open the **Variables** toggle, add `A` and `B` as `number`, and give each a **Default**, say `2`. Add `result` as `number` too.
+{% endstep %}
+
+{% step %}
+**Add the step.** Wire an **Action** after the trigger and pick **Compute** in the **Action** select.
+{% endstep %}
+
+{% step %}
+**Write the row.** Under **Expressions**, click **+** (**Add a row**), pick `result` in the key select and type `A * B`. The row shows `= 4` and `int` underneath: that is the value a run would compute, using the defaults.
+{% endstep %}
+
+{% step %}
+**Use the result.** Wire another **Action** after it, pick **Log** and set **Message** to `Result: {{result}}`, publish and run. The run log reads `Result: 4`.
+{% endstep %}
+{% endstepper %}
+
+Things people often ask:
+
+- **Do I have to declare the variable first?** Yes. The key of a row is picked from the declared variables, one row per variable, so **+** adds nothing while every declared variable already has a row. Declare one more in the **Variables** panel, intermediate values included.
+- **Two ways to read the result.** `{{result}}` reads the variable, which a later row, step or loop iteration may overwrite. `{{nodes.<ref>.result}}` reads what this step computed.
+- **Braces or not.** Inside an expression, write paths bare: `A * B`, not `{{A}} * {{B}}`. Braces are for the other steps' settings.
+- **Text.** Strings use single or double quotes, and `+` joins them: `'Score: ' + string(score)`. A number has to go through `string(...)` first.
+- **A field that may be missing.** Reading one fails the step. Guard it with `has(...)`: `has(payload.priority) ? payload.priority : 'medium'`.
+- **The preview shows an error.** It is the error the run would log, against the current data. Fix the row, or click **Use as reference data** on a run in the **Runs** panel whose data looks like what the step will see.
+
+Expressions read the same things `{{ }}` does, without the braces: a variable by its key, `payload.some.path`, `nodes.<ref>.<path>`, `item` and `index` inside a loop. Rows run in order and each can use the ones above it, so an intermediate value does not need its own step.
+
+```
+score        = likelihood * impact
+label        = score > 12 ? 'high' : 'low'
+coverage     = round(double(nodes.done.count) / double(nodes.total.count) * 100.0, 1)
+sla_days     = payload.severity == 'critical' ? 1 : 30
+worst        = max(nodes.fetch.results.map(r, r.score))
+total        = total + item
+```
+
+A `number` variable holds an int or a double depending on what wrote it, so unlike canonical CEL the two mix: when one side of an operator is a double, the other is promoted (`3 * 2.5` is `7.5`). An expression with only ints stays int, so dividing two ints drops the remainder as in CEL (`7 / 2` is `3`, `7 / 2.0` is `3.5`). A number and a string do not mix. The step fails with a message that names the row and the problem.
+
+On top of CEL's own `size`, `has`, `int`, `double`, `string`, `timestamp` and the `map`, `filter`, `exists`, `all` macros, these functions are available: `sum` and `avg` over a list of numbers; `min` and `max` over a list of numbers, of strings (ISO dates sort correctly) or of timestamps; `round(x)`, `round(x, digits)` (half up: `round(2.5)` is `3`), `floor`, `ceil`, `abs`. `%` takes two ints. The macros nest at most two deep: `a.map(x, b.filter(y, y > x))` is fine, a third level inside is refused, because each level multiplies the work.
+
+In the editor, each row shows its result as you type, `= 16` with the type, evaluated against the reference run shown under **Available data** or, before any run, against the variables' defaults. A row that cannot be evaluated shows the same error the run would log. Typing opens suggestions: variables with their current value, `nodes.<ref>.` paths, `item` and `index` inside a loop, functions, and list or string methods after a dot. Clicking a value under **Available data** inserts its path.
+
+Output: the computed values, keyed by variable. Refuses the reserved keys `now`, `today` and `payload`. Syntax errors are caught when you publish; type errors, missing fields and division by zero fail the step at run time and are not retried. No permission required.
+
 ### Read objects
 
 Queries objects of one kind inside the workflow's scope.

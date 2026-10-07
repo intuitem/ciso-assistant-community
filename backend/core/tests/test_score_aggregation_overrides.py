@@ -157,7 +157,7 @@ class TestMixedScaleAggregation:
 
         Ratios: A1=4/5=0.8, A2=1/1=1.0, B1=2/5=0.4, B2=5/5=1.0 (w=3)
         Weighted avg ratio = (0.8 + 1.0 + 0.4 + 3.0) / 6 = 5.2 / 6 ≈ 0.8667
-        Denormalized on CA (0-5): 0.8667 * 5 = 4.333 → 4.3 (truncated to .1)
+        Denormalized on CA (0-5): 0.8667 * 5 = 4.333 → 4.33 (rounded to .01)
         """
         _score(mixed_scale_setup, "a1", 4)
         _score(mixed_scale_setup, "a2", 1)
@@ -168,7 +168,7 @@ class TestMixedScaleAggregation:
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
         ca.save()
 
-        assert ca.get_global_score()["implementation_score"] == 4.3
+        assert ca.get_global_score()["implementation_score"] == 4.33
 
     def test_avg_full_top_of_each_scale_returns_max(self, mixed_scale_setup):
         """Every RA at its own max → global ratio 1.0 → CA max."""
@@ -188,7 +188,7 @@ class TestMixedScaleAggregation:
         Section A: weighted avg of ratios (A1=0.8, A2=1.0) = 0.9
         Section B: weighted avg of ratios (B1=0.4 w1, B2=1.0 w3) = 3.4/4 = 0.85
         Global ratio = (0.9 + 0.85) / 2 = 0.875
-        Denormalized = 0.875 * 5 = 4.375 → 4.3 (int(x*10)/10)
+        Denormalized = 0.875 * 5 = 4.375 → 4.38 (rounded half up)
         """
         _score(mixed_scale_setup, "a1", 4)
         _score(mixed_scale_setup, "a2", 1)
@@ -199,7 +199,7 @@ class TestMixedScaleAggregation:
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
         ca.save()
 
-        assert ca.get_global_score()["implementation_score"] == 4.3
+        assert ca.get_global_score()["implementation_score"] == 4.38
 
     def test_sum_uses_raw_weighted_sum(self, mixed_scale_setup):
         """SUM is intentionally simple: Σ(raw_score × weight), no scale
@@ -247,8 +247,8 @@ class TestAnchorNAToTargetWithMixedScales:
 
         # Ratios: A1=1.0, A2=1.0, B1=4/5=0.8, B2=1.0 (w=3)
         # Weighted avg = (1.0 + 1.0 + 0.8 + 3.0) / 6 = 5.8/6 ≈ 0.9667
-        # Denormalized: 0.9667 * 5 = 4.833 → 4.8
-        assert ca.get_global_score()["implementation_score"] == 4.8
+        # Denormalized: 0.9667 * 5 = 4.833 → 4.83
+        assert ca.get_global_score()["implementation_score"] == 4.83
 
 
 @pytest.fixture
@@ -308,7 +308,7 @@ class TestTreeAggregationNoneScoreOnOffsetScale:
     not pull the parent below the audit's min via a negative ratio. Covers
     both the tree path (helpers.annotate_tree_with_aggregated_scores) and
     the shared path used by the radar and global score
-    (models._compute_score_for_field)."""
+    (models._compute_raw_score_for_field)."""
 
     def test_none_score_does_not_produce_negative_aggregate(self):
         from core.helpers import (
@@ -412,9 +412,10 @@ class TestTreeAggregationNoneScoreOnOffsetScale:
 
 @pytest.mark.django_db
 class TestDocumentationScoreNoneLegacySemantic:
-    """documentation_score=None is a legitimate 'no doc' state and must keep
-    its legacy semantic of contributing 0 to the maturity rollup. The strict
-    'exclude None' guard only applies to score-field aggregation."""
+    """documentation_score=None is a legitimate 'no doc' state: it contributes
+    the bottom of the scale to the maturity rollup (0 on 0-based scales, as it
+    always did). The strict 'exclude None' guard only applies to score-field
+    aggregation."""
 
     def test_doc_none_counts_as_zero(self):
         from core.models import RequirementAssessment as RA
@@ -456,23 +457,21 @@ class TestDocumentationScoreNoneLegacySemantic:
         ras = list(RA.objects.filter(compliance_assessment=ca))
         # Implementation: both leaves contribute 4 -> avg 4.
         assert (
-            ca._compute_score_for_field(ras, None, "score", ca.anchor_na_to_target)
+            ca._compute_raw_score_for_field(ras, None, "score", ca.anchor_na_to_target)
             == 4.0
         )
-        # Documentation: r1=4, r2=None counted as 0 -> avg 2 (legacy semantic).
+        # Documentation: r1=4, r2=None counted as the scale min 0 -> avg 2.
         assert (
-            ca._compute_score_for_field(
+            ca._compute_raw_score_for_field(
                 ras, None, "documentation_score", ca.anchor_na_to_target
             )
             == 2.0
         )
 
     def test_doc_none_tree_matches_global_on_offset_scale(self):
-        """On an offset scale (1..4) the tree must also treat documentation_score
-        =None as 0, so its documentation rollup matches the global score. The
-        tree previously neutralised None as ratio 0, which diverged from the
-        global on non-zero-min scales and left the leaf without an explicit
-        aggregated_documentation_score (blank frontend ring instead of 0)."""
+        """On an offset scale (1..4) the tree and the global score both treat
+        documentation_score=None as the scale min (1), never below it, and the
+        leaf carries it explicitly (a blank frontend ring otherwise)."""
         from core.helpers import (
             annotate_tree_with_aggregated_scores,
             get_sorted_requirement_nodes,
@@ -543,15 +542,15 @@ class TestDocumentationScoreNoneLegacySemantic:
                     return f
             return None
 
-        # The None-doc leaf carries an explicit 0, not a missing key.
+        # The None-doc leaf carries an explicit scale min, not a missing key.
         d2_node = _find(tree, leaves["d2"].urn)
-        assert d2_node["aggregated_documentation_score"] == 0
+        assert d2_node["aggregated_documentation_score"] == 1
 
-        # doc avg ratio = ((3-1)/3 + (0-1)/3) / 2 = 1/6 -> 1 + 1/6*3 = 1.5,
+        # doc avg ratio = ((3-1)/3 + (1-1)/3) / 2 = 1/3 -> 1 + 1/3*3 = 2.0,
         # and the tree must agree with the global score's doc layer.
         section_node = _find(tree, section.urn)
         global_doc = ca.get_global_score()["documentation_score"]
-        assert section_node["aggregated_documentation_score"] == global_doc == 1.5
+        assert section_node["aggregated_documentation_score"] == global_doc == 2.0
 
 
 @pytest.mark.django_db
@@ -580,10 +579,7 @@ class TestRadarDataNormalizesMixedScales:
                 compliance_assessment=ca, requirement__in=[a1, a2]
             )
         )
-        result = ca._compute_score_for_field(
-            scored, None, "score", ca.anchor_na_to_target
-        )
-        assert result == 4.5
+        assert ca.get_scores_for(scored)["implementation_score"] == 4.5
 
     def test_sum_radar_keeps_raw_weighted_sum(self, mixed_scale_setup):
         """SUM stays raw — operator's responsibility to interpret across scales."""
@@ -600,10 +596,7 @@ class TestRadarDataNormalizesMixedScales:
             )
         )
         # raw weighted: 4*1 + 1*1 = 5
-        assert (
-            ca._compute_score_for_field(scored, None, "score", ca.anchor_na_to_target)
-            == 5.0
-        )
+        assert ca.get_scores_for(scored)["implementation_score"] == 5.0
 
     def test_compare_endpoint_radar_normalises_mixed_scales(
         self, admin_client, mixed_scale_setup
@@ -669,3 +662,91 @@ class TestRadarDataNormalizesMixedScales:
         assert radar["maturity_scores"][0] == 3.0
         # Radar slice and global score agree (only section A is scored).
         assert body["base"]["global_score"] == 3.0
+
+    def test_compare_endpoint_radar_follows_selected_groups(
+        self, admin_client, mixed_scale_setup
+    ):
+        """Requirements outside the selected implementation groups are left out
+        of the radar slice, as they are of the global score: A1 (G1) = 4/5 alone
+        gives 4.0 and 100% compliant; counting A2 (G2, 0/1) would give 2.0, 50%.
+        """
+        for key, group in (("a1", "G1"), ("a2", "G2")):
+            node = mixed_scale_setup[key]
+            node.implementation_groups = [group]
+            node.save()
+        ca = mixed_scale_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.selected_implementation_groups = ["G1"]
+        ca.save()
+        _score(mixed_scale_setup, "a1", 4, result="compliant")
+        _score(mixed_scale_setup, "a2", 0, result="non_compliant")
+
+        other = ComplianceAssessment.objects.create(
+            name="Mixed Scoring CA (compare)",
+            framework=ca.framework,
+            folder=mixed_scale_setup["folder"],
+            perimeter=ca.perimeter,
+            min_score=0,
+            max_score=5,
+        )
+
+        url = reverse("compliance-assessments-compare", kwargs={"pk": str(ca.pk)})
+        response = admin_client.get(url, {"compare_id": str(other.pk)})
+        assert response.status_code == 200
+        body = response.json()
+        radar = body["base"]["radar_data"]
+        assert radar["labels"] == ["A", "B"]
+        assert radar["maturity_scores"][0] == 4.0
+        assert radar["compliance_percentages"][0] == 100.0
+        assert body["base"]["global_score"] == 4.0
+
+    def test_section_compliance_anchors_na_to_target(
+        self, admin_client, mixed_scale_setup
+    ):
+        """With anchor_na_to_target on, the analytics section scores count an
+        N/A RA as the CA target projected onto its own scale, on both layers,
+        like the global score: A1 = 4/5 (0.8), A2 N/A -> target 2/5 (0.4).
+        Section A = 0.6 * 5 = 3.0 (excluding A2 would yield 4).
+        """
+        ca = mixed_scale_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.anchor_na_to_target = True
+        ca.target_score = 2
+        ca.show_documentation_score = True
+        ca.save()
+        ra_a1 = _score(mixed_scale_setup, "a1", 4)
+        ra_a1.documentation_score = 4
+        ra_a1.save()
+        _score(mixed_scale_setup, "a2", None, is_scored=False, result="not_applicable")
+
+        url = reverse(
+            "compliance-assessments-section-compliance", kwargs={"pk": str(ca.pk)}
+        )
+        response = admin_client.get(url)
+        assert response.status_code == 200
+        section_a = next(s for s in response.json()["sections"] if s["ref_id"] == "A")
+        assert section_a["implementation_score"] == 3.0
+        assert section_a["documentation_score"] == 3.0
+        assert section_a["maturity_score"] == 3.0
+
+    def test_section_compliance_matches_tree_aggregation(
+        self, admin_client, mixed_scale_setup
+    ):
+        """Analytics section scores follow the audit's method and scale
+        normalisation, like the tree: A1 = 4/5 (0.8), A2 = 1/1 (1.0), so
+        section A = 0.9 * 5 = 4.5. A raw average would give (4 + 1) / 2 = 2.5.
+        """
+        ca = mixed_scale_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.save()
+        _score(mixed_scale_setup, "a1", 4)
+        _score(mixed_scale_setup, "a2", 1)
+
+        url = reverse(
+            "compliance-assessments-section-compliance", kwargs={"pk": str(ca.pk)}
+        )
+        response = admin_client.get(url)
+        assert response.status_code == 200
+        section_a = next(s for s in response.json()["sections"] if s["ref_id"] == "A")
+        assert section_a["implementation_score"] == 4.5
+        assert section_a["maturity_score"] == 4.5

@@ -194,6 +194,8 @@ from core.pagination import CustomLimitOffsetPagination
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     build_answers_dict,
+    escape_excel_formula,
+    sanitize_xlsx_value,
     bulk_update_with_log,
     compare_schema_versions,
     get_respondent_scoped_folder_ids,
@@ -220,7 +222,11 @@ from .models import *
 from .serializers import *
 
 from .models import Severity
-from . import dora
+from . import dora, framework_exports
+from core.asset_graph import walk_asset_graph
+
+DEPENDENCY_GRAPH_LIMIT = 300
+DEPENDENCY_GRAPH_MAX_LIMIT = 2000
 from core.mappings.merge import compute_map_from_merge
 
 from serdes.utils import (
@@ -483,40 +489,12 @@ def get_mapping_max_depth():
         return MAPPING_MAX_DEPTH
 
 
-def escape_excel_formula(value):
-    """
-    Escape Excel formula injection by prefixing dangerous characters.
-    Prevents CSV/Formula injection (OWASP) when values start with =+-@
-    """
-    if value is None:
-        return ""
-    s = str(value)
-    if not s:
-        return ""
-    stripped = s.lstrip()
-    if stripped and stripped[0] in ("=", "+", "-", "@"):
-        return "'" + s
-    return s
-
-
 def escape_csv_row(row):
     """Apply formula-injection escaping to every string cell of a CSV row."""
     return [
         escape_excel_formula(value) if isinstance(value, str) else value
         for value in row
     ]
-
-
-ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
-XLSX_MAX_CELL_CHARS = 32_767
-
-
-def sanitize_xlsx_value(value):
-    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)
-    and cap strings at Excel's per-cell limit."""
-    if isinstance(value, str):
-        return ILLEGAL_XLSX_CHARS_RE.sub("", value)[:XLSX_MAX_CELL_CHARS]
-    return value
 
 
 def create_xlsx_response(entries, filename, wrap_columns=None):
@@ -1705,6 +1683,12 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         would succeed."""
         return []
 
+    def cascade_extra_deletions(self, instance):
+        """Objects a `destroy` override removes on top of the ORM cascade, for
+        links Django would only SET_NULL. Listed here so the cascade_info
+        preview reports them as deleted instead of "kept, loses a link"."""
+        return []
+
     def perform_destroy(self, instance):
         # resolve for "destroy" explicitly so batch_action can call this too
         serializer_class = self.get_serializer_class(action="destroy")
@@ -2103,6 +2087,17 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             return model is type(instance) and str(getattr(obj, "pk", "")) == str(
                 instance.pk
             )
+
+        # Roots a destroy override deletes explicitly cascade like the subject.
+        extra_roots = list(self.cascade_extra_deletions(instance))
+        if extra_roots:
+            extra_collector = NestedObjects(using=router.db_for_write(instance))
+            extra_collector.collect(extra_roots)
+            for model, objs in extra_collector.model_objs.items():
+                collector.model_objs.setdefault(model, set()).update(objs)
+            # PROTECT/RESTRICT blockers on the extra roots stop the real
+            # delete too, so they belong in the blocked bucket with the rest.
+            collector.protected.update(extra_collector.protected)
 
         deleted_index = set()
         for model, objs in collector.model_objs.items():
@@ -2776,6 +2771,7 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
     ] + [CustomFieldFilterBackend]
     search_fields = ["name", "description", "ref_id", "folder__name"]
     ordering = ["folder__name", "name"]
+    autocomplete_fields = ["type"]
 
     def get_queryset(self) -> models.query.QuerySet:
         qs = super().get_queryset().select_related("asset_class", "folder")
@@ -3131,6 +3127,110 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
                 "tree": annotate(AssetClass.build_tree()),
                 "unclassified_count": direct_counts.get(None, 0),
                 "total_count": sum(direct_counts.values()),
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="dependency-graph")
+    def dependency_graph(self, request, pk=None):
+        focus = self.get_object()
+        mode = request.query_params.get("mode", "chain")
+        if mode not in ("chain", "connected"):
+            return Response(
+                {"error": "mode must be chain or connected"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            max_hops = (
+                int(request.query_params["max_hops"])
+                if request.query_params.get("max_hops")
+                else None
+            )
+            limit = min(
+                int(request.query_params.get("limit", DEPENDENCY_GRAPH_LIMIT)),
+                DEPENDENCY_GRAPH_MAX_LIMIT,
+            )
+            expand = [uuid.UUID(v) for v in request.query_params.getlist("expand")]
+            reveal = [uuid.UUID(v) for v in request.query_params.getlist("reveal")]
+        except ValueError:
+            return Response(
+                {"error": "invalid max_hops, limit, expand or reveal"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if (max_hops is not None and max_hops < 1) or limit < 1:
+            return Response(
+                {"error": "max_hops and limit must be positive"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        walk = walk_asset_graph(
+            focus.id,
+            Asset.parent_assets.through.objects.values_list(
+                "from_asset_id", "to_asset_id"
+            ),
+            mode=mode,
+            max_hops=max_hops,
+            limit=limit,
+            expand=expand,
+            reveal=reveal,
+        )
+
+        viewable = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Asset).filter(
+                id__in=walk.order
+            )
+        )
+        assets = {
+            a.id: a
+            for a in Asset.objects.filter(id__in=viewable).select_related("folder")
+        }
+        placeholder = {}
+        for asset_id in walk.order:
+            if asset_id not in assets:
+                placeholder[asset_id] = f"hidden-{len(placeholder) + 1}"
+
+        def key(asset_id):
+            return placeholder.get(asset_id, str(asset_id))
+
+        folder_paths = {}
+        nodes = []
+        for asset_id in walk.order:
+            node = {
+                "id": key(asset_id),
+                "hops": walk.hops[asset_id],
+                "side": walk.side[asset_id],
+                "omitted": walk.omitted.get(asset_id, 0),
+                "elsewhere": walk.elsewhere.get(asset_id, 0),
+            }
+            asset = assets.get(asset_id)
+            if asset is None:
+                node["hidden"] = True
+            else:
+                folder = asset.folder
+                if folder.id not in folder_paths:
+                    folder_paths[folder.id] = folder.get_folder_full_path_string()
+                node.update(
+                    hidden=False,
+                    name=asset.name,
+                    ref_id=asset.ref_id,
+                    type=asset.type,
+                    folder={
+                        "id": str(folder.id),
+                        "str": folder.name,
+                        "path": folder_paths[folder.id],
+                    },
+                )
+            nodes.append(node)
+
+        return Response(
+            {
+                "focus": str(focus.id),
+                "mode": mode,
+                "truncated": walk.truncated,
+                "nodes": nodes,
+                "edges": [
+                    {"source": key(parent), "target": key(child)}
+                    for parent, child in walk.edges
+                ],
             }
         )
 
@@ -3866,6 +3966,10 @@ class RiskMatrixViewSet(BaseModelViewSet):
             for j, val in enumerate(row):
                 if not isinstance(val, int) or val < 0 or val >= len(risk):
                     errors.append(f"Grid cell [{i}][{j}] has invalid risk index {val}.")
+
+        from ebios_rm.rating_kit import validate as validate_ebios_rm
+
+        errors.extend(validate_ebios_rm(json_def.get("ebios_rm"), len(probability)))
 
         for category_name, levels in [
             ("probability", probability),
@@ -7383,8 +7487,52 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update({"pk": self.kwargs["pk"]})
+        context.update(
+            {
+                "pk": self.kwargs["pk"],
+                "indirect_evidence_links": self._get_indirect_evidence_links(),
+            }
+        )
         return context
+
+    def _get_indirect_evidence_links(self):
+        """Map (requirement_assessment_id, evidence_id) -> [names] of the applied
+        controls and task templates linking that evidence to that requirement assessment.
+        Computed once per request to avoid per-evidence queries.
+        TaskNode.evidences is deprecated (evidences live on the task template)."""
+        pk = self.kwargs["pk"]
+        links = defaultdict(list)
+
+        # Only expose applied controls and task templates the caller is allowed to view
+        applied_controls = AppliedControl.objects.filter(
+            requirement_assessments__compliance_assessment_id=pk,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, AppliedControl
+            ),
+        ).distinct()
+        task_templates = TaskTemplate.objects.filter(
+            requirement_assessments__compliance_assessment_id=pk,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, TaskTemplate
+            ),
+        ).distinct()
+
+        for queryset in (applied_controls, task_templates):
+            queryset = queryset.prefetch_related(
+                "evidences",
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.filter(
+                        compliance_assessment_id=pk
+                    ),
+                ),
+            )
+            for via in queryset:
+                evidence_ids = {e.id for e in via.evidences.all()}
+                for req_assessment in via.requirement_assessments.all():
+                    for evidence_id in evidence_ids:
+                        links[(req_assessment.id, evidence_id)].append(via.name)
+        return links
 
     def get_queryset(self):
         """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
@@ -7399,18 +7547,30 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
 
         compliance_assessment = ComplianceAssessment.objects.get(id=compliance_id)
 
-        # Get all requirement assessments for this compliance assessment
-        requirement_assessments = RequirementAssessment.objects.filter(
-            compliance_assessment=compliance_assessment
-        ).prefetch_related("evidences", "applied_controls__evidences")
-
         # Get visible evidences to filter result
         viewable_evidences = RoleAssignment.get_viewable_object_ids(
             self.request.user, Evidence
         )
 
-        # Collect evidence IDs from both direct and indirect relationships
+        # Get all requirement assessments for this compliance assessment,
+        # only walking through applied controls the caller is allowed to view
+        viewable_applied_controls = AppliedControl.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, AppliedControl
+            )
+        ).prefetch_related("evidences")
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment
+        ).prefetch_related(
+            "evidences",
+            Prefetch("applied_controls", queryset=viewable_applied_controls),
+        )
+
+        # Collect evidence IDs from global, direct and indirect relationships
         evidence_ids = set()
+        for evidence in compliance_assessment.evidences.all():
+            if evidence.id in viewable_evidences:
+                evidence_ids.add(evidence.id)
         for req_assessment in requirement_assessments:
             for evidence in req_assessment.evidences.all():
                 if evidence.id in viewable_evidences:
@@ -7419,6 +7579,22 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
                 for evidence in applied_control.evidences.all():
                     if evidence.id in viewable_evidences:
                         evidence_ids.add(evidence.id)
+
+        # Evidences linked through viewable task templates attached to the
+        # compliance assessment or its requirement assessments
+        task_templates = TaskTemplate.objects.filter(
+            Q(compliance_assessments=compliance_assessment)
+            | Q(requirement_assessments__compliance_assessment=compliance_assessment),
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, TaskTemplate
+            ),
+        ).distinct()
+        task_evidence_ids = set(
+            Evidence.objects.filter(task_templates__in=task_templates).values_list(
+                "id", flat=True
+            )
+        )
+        evidence_ids.update(task_evidence_ids & set(viewable_evidences))
 
         return Evidence.objects.filter(id__in=evidence_ids).distinct()
 
@@ -8462,6 +8638,7 @@ class ActorViewSet(BaseModelViewSet):
 
 class TeamViewSet(BaseModelViewSet):
     model = Team
+    filterset_fields = ["name", "folder"]
 
     def get_queryset(self):
         return (
@@ -9283,7 +9460,11 @@ class FolderViewSet(BaseModelViewSet):
             "include_enclaves", "False"
         ).lower() in ["true", "1", "yes"]
 
-        viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        # A set: the tree builders test membership once per folder, and `in` on a
+        # QuerySet scans its cached list, which is quadratic in the folder count.
+        viewable_objects = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        )
 
         children_by_parent, parent_of, perimeters_by_folder = build_folder_indexes(
             include_perimeters=include_perimeters
@@ -10275,6 +10456,10 @@ class FrameworkViewSet(BaseModelViewSet):
             has_compliance_assessments_flag=Exists(
                 ComplianceAssessment.objects.filter(framework=OuterRef("pk"))
             ),
+            scale_bound_flag=ExpressionWrapper(
+                Framework.scale_bound_q(OuterRef("pk")),
+                output_field=models.BooleanField(),
+            ),
         )
 
         return qs
@@ -10385,7 +10570,22 @@ class FrameworkViewSet(BaseModelViewSet):
         # Domain-tree inheritance overlay. Computed per live CA (column) against
         # its ancestor audits when the org-wide strategy is enabled; gated so the
         # default (none) adds no query cost.
-        from core.audit_inheritance import build_overlay_map, get_strategy
+        from core.audit_inheritance import (
+            build_overlay_map,
+            get_strategy,
+            make_overlay_redactor,
+            redact_overlay,
+        )
+
+        # The overlay carries values from other audits; they follow the same
+        # per-CA field visibility as the row's own fields. Hidden verdicts are
+        # kept out of the chain before the winner is picked, and the remaining
+        # hidden values are redacted from the result. Ancestors are viewable
+        # live audits on this framework, so they are in all_visible_cas unless
+        # a campaign filter narrowed it; the redactor fetches those lazily.
+        hidden_for_ca = make_overlay_redactor(
+            all_visible_cas, respondent_folders, viewable_ca_ids=viewable_ca_ids
+        )
 
         aggregation_strategy = get_strategy()
         overlays_by_ca: Dict[Any, Dict[str, Any]] = {}
@@ -10395,6 +10595,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     ca,
                     viewable_ca_ids=viewable_ca_ids,
                     strategy=aggregation_strategy,
+                    hidden_for_ca=hidden_for_ca,
                 )["overlay"]
 
         ras = (
@@ -10488,7 +10689,11 @@ class FrameworkViewSet(BaseModelViewSet):
                     ),
                     # Inheritance overlay for this (audit, requirement); None when
                     # no ancestor audit covers it or the feature is off.
-                    "inheritance": overlays_by_ca.get(ca.id, {}).get(str(req.id)),
+                    "inheritance": redact_overlay(
+                        overlays_by_ca.get(ca.id, {}).get(str(req.id)),
+                        str(ca.id),
+                        hidden_for_ca,
+                    ),
                 }
             )
 
@@ -12413,6 +12618,20 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         replacing the Count(distinct=True) annotations dropped from the
         list queryset. Bounded by `len(queryset)` (≤ page size), so the
         cost is independent of the total RA table size.
+        """
+        optimized_data = super()._get_optimized_object_data(queryset)
+        audit_ids = [a.id for a in queryset]
+        if not audit_ids:
+            return optimized_data
+
+        total_map, assessed_map = self.get_requirement_counts(audit_ids)
+        optimized_data["total_requirements"] = total_map
+        optimized_data["assessed_requirements"] = assessed_map
+        return optimized_data
+
+    @staticmethod
+    def get_requirement_counts(audit_ids) -> tuple[dict, dict]:
+        """(total, assessed) assessable requirement counts per audit id.
 
         Audits without implementation groups go through per-mode GROUP BY
         buckets; audits with implementation groups share one scalar
@@ -12420,11 +12639,6 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         two JSON lists, which SQL can't do).
         """
         from core.models import Question
-
-        optimized_data = super()._get_optimized_object_data(queryset)
-        audit_ids = [a.id for a in queryset]
-        if not audit_ids:
-            return optimized_data
 
         # The progress mode (status visible = status-driven) and the content
         # branches are audit-level facts known before querying, so audits are
@@ -12581,9 +12795,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 ):
                     assessed_map[ca_id] += 1
 
-        optimized_data["total_requirements"] = total_map
-        optimized_data["assessed_requirements"] = assessed_map
-        return optimized_data
+        return total_map, assessed_map
 
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
@@ -12906,8 +13118,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
         return response
 
-    @action(detail=True, methods=["get"], name="CyFun Excel Export")
-    def cyfun_xlsx(self, request, pk):
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=r"framework-exports/(?P<export_id>[\w-]+)",
+        name="Framework export",
+    )
+    def framework_export(self, request, pk, export_id):
+        """An export specific to the audit's framework (core.framework_exports)."""
         if not RoleAssignment.is_object_accessible(
             request.user, "view", ComplianceAssessment, UUID(pk)
         ):
@@ -12915,89 +13133,32 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
 
-        audit = ComplianceAssessment.objects.get(id=pk)
-        CYFUN_FRAMEWORK_URN = "urn:intuitem:risk:framework:ccb-cyfun2025"
-        if audit.framework.urn != CYFUN_FRAMEWORK_URN:
+        export = framework_exports.get(export_id)
+        if export is None:
             return Response(
-                {"error": "This export is only available for CyFun 2025 assessments"},
+                {"error": "Unknown export"}, status=status.HTTP_404_NOT_FOUND
+            )
+        audit = ComplianceAssessment.objects.get(id=pk)
+        # An export holds the whole audit: only users with the full view of it,
+        # not respondents scoped to their part.
+        if not RoleAssignment.is_access_allowed(
+            request.user,
+            Permission.objects.get(codename="view_compliance_assessment_full"),
+            audit.folder,
+        ):
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        if not export.supports(audit):
+            return Response(
+                {"error": "This export is not available for this audit"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        template_path = (
-            Path(__file__).resolve().parent
-            / "templates"
-            / "core"
-            / "CyFun2025_Self-Assessment_tool_ESSENTIAL_v3.1.xlsx"
-        )
-        wb = load_workbook(template_path)
-
-        SHEET_MAP = {
-            "GV": "GOVERN",
-            "ID": "IDENTIFY",
-            "PR": "PROTECT",
-            "DE": "DETECT",
-            "RS": "RESPOND",
-            "RC": "RECOVER",
-        }
-
-        # Build ref_id → row lookup for each function sheet
-        sheet_row_maps = {}
-        for sheet_name in SHEET_MAP.values():
-            ws = wb[sheet_name]
-            row_map = {}
-            for row in range(1, ws.max_row + 1):
-                cell_value = ws.cell(row=row, column=6).value  # Column F
-                if cell_value and isinstance(cell_value, str):
-                    ref_id = cell_value.split(":")[0].strip().rstrip(".")
-                    if ref_id:
-                        row_map[ref_id] = row
-            sheet_row_maps[sheet_name] = row_map
-
-        # Fetch all requirement assessments
-        requirement_assessments = (
-            RequirementAssessment.objects.filter(compliance_assessment=audit)
-            .select_related("requirement")
-            .filter(requirement__assessable=True)
-        )
-
-        for ra in requirement_assessments:
-            ref_id = ra.requirement.ref_id
-            if not ref_id:
-                continue
-
-            prefix = ref_id.split(".")[0]
-            sheet_name = SHEET_MAP.get(prefix)
-            if not sheet_name:
-                continue
-
-            row = sheet_row_maps.get(sheet_name, {}).get(ref_id)
-            if row is None:
-                continue
-
-            ws = wb[sheet_name]
-            if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
-                ws.cell(row=row, column=7, value="N/A")  # Column G: doc score
-                ws.cell(row=row, column=8, value="N/A")  # Column H: impl score
-            else:
-                if ra.documentation_score is not None:
-                    ws.cell(row=row, column=7, value=ra.documentation_score)
-                if ra.score is not None:
-                    ws.cell(row=row, column=8, value=ra.score)
-            if ra.observation:
-                ws.cell(
-                    row=row, column=13, value=escape_excel_formula(ra.observation)
-                )  # Column M: comments
-
-        buffer = io.BytesIO()
-        wb.save(buffer)
-        buffer.seek(0)
-
-        response = HttpResponse(
-            buffer.getvalue(),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-        response["Content-Disposition"] = (
-            f'attachment; filename="{audit.name}_CyFun_Self-Assessment.xlsx"'
+        file = export.build(audit)
+        response = HttpResponse(file.content, content_type=file.content_type)
+        # The filename carries the audit's name, which may hold control characters.
+        response["Content-Disposition"] = safe_filename_header(
+            "attachment", file.filename
         )
         return response
 
@@ -13653,7 +13814,11 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 max_depth = get_mapping_max_depth()
 
                 best_results, _ = engine.best_mapping_inferences(
-                    audit_from_results, source_urn, dest_urn, max_depth
+                    audit_from_results,
+                    source_urn,
+                    dest_urn,
+                    max_depth,
+                    target_range=(instance.min_score, instance.max_score),
                 )
                 # Empty when no mapping path exists between the two
                 # frameworks, which is a legitimate outcome: the audit is
@@ -13839,16 +14004,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         """Returns the global score of the compliance assessment"""
         compliance_assessment = self.get_object()
         scores = compliance_assessment.get_global_score()
-        # Source of truth is the CA copy (set at save() and customisable
-        # independently of the framework). Fall back to the framework's
-        # translated definition for the labels.
-        scores_definition = compliance_assessment.scores_definition
-        if not scores_definition:
-            scores_definition = get_referential_translation(
-                compliance_assessment.framework, "scores_definition", get_language()
-            )
-        if isinstance(scores_definition, dict) and "scale" in scores_definition:
-            scores_definition = scores_definition["scale"]
+        # The audit's own copy is the only source of labels (the framework's are
+        # copied once, at creation); an empty list means no labels.
+        scores_definition = compliance_assessment.get_scale_levels() or []
         return Response(
             {
                 **scores,
@@ -13856,6 +14014,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 "min_score": compliance_assessment.min_score,
                 "total_max_score": compliance_assessment.get_total_max_score(),
                 "scores_definition": scores_definition,
+                "score_scale_preset": compliance_assessment.score_scale_preset,
+                "framework": str(compliance_assessment.framework_id),
                 "scoring_enabled": compliance_assessment.scoring_enabled,
                 "show_documentation_score": compliance_assessment.show_documentation_score,
                 "score_calculation_method": compliance_assessment.score_calculation_method,
@@ -13956,7 +14116,11 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         when it is ``none`` the overlay map is empty and this behaves like
         ``tree``.
         """
-        from core.audit_inheritance import build_overlay_map
+        from core.audit_inheritance import (
+            build_overlay_map,
+            make_overlay_redactor,
+            redact_overlay,
+        )
 
         compliance_assessment = self.get_object()
         _framework = compliance_assessment.framework
@@ -14010,16 +14174,29 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
         )
+        # Same per-CA field visibility as the report: hidden verdicts never
+        # take part in the selection, hidden values are redacted from the
+        # result, each for the viewer's role on the audit it came from.
+        hidden_for_ca = make_overlay_redactor(
+            [compliance_assessment],
+            get_respondent_scoped_folder_ids(request.user),
+            viewable_ca_ids=viewable_ca_ids,
+        )
         result = build_overlay_map(
-            compliance_assessment, viewable_ca_ids=viewable_ca_ids
+            compliance_assessment,
+            viewable_ca_ids=viewable_ca_ids,
+            hidden_for_ca=hidden_for_ca,
         )
         overlay = result["overlay"]
+        target_ca_id = str(compliance_assessment.id)
 
         def attach(nodes: dict):
             for req_id, node in nodes.items():
                 ov = overlay.get(str(req_id))
                 if ov is not None:
-                    node["inheritance"] = ov
+                    node["inheritance"] = redact_overlay(
+                        ov, target_ca_id, hidden_for_ca
+                    )
                 children = node.get("children")
                 if children:
                     attach(children)
@@ -14680,9 +14857,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 audit.requirement_assessments.select_related("requirement").all()
             )
 
-            # Build mapping of requirement_id to assessment
+            # Build mapping of requirement_id to assessment, limited to the
+            # audit's selected implementation groups like its global score.
+            selected_groups = set(audit.selected_implementation_groups or [])
             req_assessment_map = {
-                str(ra.requirement_id): ra for ra in requirement_assessments
+                str(ra.requirement_id): ra
+                for ra in requirement_assessments
+                if not selected_groups
+                or selected_groups & set(ra.requirement.implementation_groups or [])
             }
 
             # Build children dictionary for quick lookup
@@ -14756,41 +14938,17 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 else:
                     compliance_percentage = 0
 
-                # Maturity score for the radar slice. Reuse the audit's
-                # configured aggregation so per-RA scale overrides are
-                # normalised the same way as the global score (e.g. a binary
-                # 0..1 requirement contributes 100% at 1, not 1 raw).
-                # Mirror get_global_score's filtering: when anchor_na_to_target
-                # is on, N/A RAs stay in so they anchor to the target; off,
-                # they are excluded along with unscored RAs.
-                # `_compute_score_for_field` returns -1 when nothing is scored.
-                if audit.anchor_na_to_target:
-                    scored_list = [
-                        ra
-                        for ra in assessable_list
-                        if ra.result == "not_applicable" or ra.is_scored
-                    ]
-                else:
-                    scored_list = [
-                        ra
-                        for ra in assessable_list
-                        if ra.is_scored and ra.result != "not_applicable"
-                    ]
-                if scored_list:
-                    computed = audit._compute_score_for_field(
-                        scored_list,
-                        None,
-                        "score",
-                        audit.anchor_na_to_target,
-                    )
-                    maturity_score = 0 if computed == -1 else computed
-                else:
-                    maturity_score = 0
+                # Maturity score for the radar slice: the section's
+                # implementation score, filtered and aggregated like the global
+                # score (per-RA scales normalised, N/A anchored when enabled).
+                maturity_score = audit.get_scores_for(assessable_list)[
+                    "implementation_score"
+                ]
 
                 radar_data["compliance_percentages"].append(
                     round(compliance_percentage, 1)
                 )
-                radar_data["maturity_scores"].append(round(maturity_score, 1))
+                radar_data["maturity_scores"].append(maturity_score or 0)
 
             return radar_data
 
@@ -15361,7 +15519,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         ras = RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment,
             requirement__assessable=True,
-        ).select_related("requirement")
+        ).select_related("requirement", "compliance_assessment")
 
         # Auditee filtering
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
@@ -15405,44 +15563,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 continue
 
             results = defaultdict(int)
-            weighted_score = 0
-            total_weight = 0
-            doc_weighted_score = 0
-            doc_total_weight = 0
-            scored_count = 0
-            is_sum = (
-                compliance_assessment.score_calculation_method
-                == compliance_assessment.CalculationMethod.SUM
-            )
             for ra in assessable_list:
                 results[ra.result] += 1
-                if ra.is_scored and ra.result != "not_applicable":
-                    weight = ra.requirement.weight if ra.requirement.weight else 1
-                    weighted_score += (ra.score or 0) * weight
-                    total_weight += weight
-                    scored_count += 1
-                    if compliance_assessment.show_documentation_score:
-                        doc_weighted_score += (ra.documentation_score or 0) * weight
-                        doc_total_weight += weight
-
-            if is_sum:
-                section_score = (
-                    int(weighted_score * 10) / 10 if total_weight > 0 else None
-                )
-                section_doc_score = (
-                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
-                )
-            else:
-                section_score = (
-                    int((weighted_score / total_weight) * 10) / 10
-                    if total_weight > 0
-                    else None
-                )
-                section_doc_score = (
-                    int((doc_weighted_score / doc_total_weight) * 10) / 10
-                    if doc_total_weight > 0
-                    else None
-                )
+            scores = compliance_assessment.get_scores_for(assessable_list)
 
             node_name = (
                 get_referential_translation(node, "name")
@@ -15450,27 +15573,13 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 or node.ref_id
                 or str(node.id)
             )
-            # Compute maturity as average of enabled layers
-            enabled_scores = [
-                s for s in [section_score, section_doc_score] if s is not None
-            ]
-            section_maturity = (
-                int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
-                if enabled_scores
-                else None
-            )
-
             sections.append(
                 {
                     "ref_id": node.ref_id,
                     "name": node_name,
                     "total_assessable": len(assessable_list),
                     "results": dict(results),
-                    "implementation_score": section_score,
-                    "documentation_score": section_doc_score,
-                    "maturity_score": section_maturity,
-                    "scored_count": scored_count,
-                    "total_weight": total_weight,
+                    **scores,
                 }
             )
 
@@ -15808,7 +15917,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         ras = RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment,
             requirement__assessable=True,
-        ).select_related("requirement")
+        ).select_related("requirement", "compliance_assessment")
 
         # Auditee filtering
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
@@ -15858,57 +15967,12 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
             results = defaultdict(int)
             assessed = 0
-            weighted_score = 0
-            total_weight = 0
-            doc_weighted_score = 0
-            doc_total_weight = 0
-            scored_count = 0
-            is_sum = (
-                compliance_assessment.score_calculation_method
-                == compliance_assessment.CalculationMethod.SUM
-            )
-
             for ra in matching_ras:
                 results[ra.result] += 1
                 if ra.result != "not_assessed":
                     assessed += 1
-                if ra.is_scored and ra.result != "not_applicable":
-                    weight = ra.requirement.weight if ra.requirement.weight else 1
-                    weighted_score += (ra.score or 0) * weight
-                    total_weight += weight
-                    scored_count += 1
-                    if compliance_assessment.show_documentation_score:
-                        doc_weighted_score += (ra.documentation_score or 0) * weight
-                        doc_total_weight += weight
-
             total = len(matching_ras)
-            if is_sum:
-                group_score = (
-                    int(weighted_score * 10) / 10 if total_weight > 0 else None
-                )
-                group_doc_score = (
-                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
-                )
-            else:
-                group_score = (
-                    int((weighted_score / total_weight) * 10) / 10
-                    if total_weight > 0
-                    else None
-                )
-                group_doc_score = (
-                    int((doc_weighted_score / doc_total_weight) * 10) / 10
-                    if doc_total_weight > 0
-                    else None
-                )
-
-            enabled_scores = [
-                s for s in [group_score, group_doc_score] if s is not None
-            ]
-            group_maturity = (
-                int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
-                if enabled_scores
-                else None
-            )
+            scores = compliance_assessment.get_scores_for(matching_ras)
 
             groups.append(
                 {
@@ -15919,10 +15983,10 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "progress_percent": round(assessed / total * 100)
                     if total > 0
                     else 0,
-                    "implementation_score": group_score,
-                    "documentation_score": group_doc_score,
-                    "maturity_score": group_maturity,
-                    "scored_count": scored_count,
+                    "implementation_score": scores["implementation_score"],
+                    "documentation_score": scores["documentation_score"],
+                    "maturity_score": scores["maturity_score"],
+                    "scored_count": scores["scored_count"],
                 }
             )
 

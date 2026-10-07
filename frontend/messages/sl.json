@@ -966,6 +966,7 @@
 	"libraryLoadingError": "Med nalaganjem knjižnice je prišlo do napake",
 	"processingError": "Napaka pri obdelavi",
 	"libraryAlreadyLoadedError": "Ta knjižnica je že bila naložena",
+	"libraryOutdatedError": "Novejša različica te knjižnice je že shranjena. Za uvoz v datoteki nastavite višjo vrednost \"version\".",
 	"invalidLibraryFileError": "Neveljavna datoteka knjižnice. Prepričajte se, da je format pravilen.",
 	"fileTooLarge": "Datoteka je prevelika",
 	"invalidFileFormat": "Neveljavna oblika datoteke",
@@ -983,7 +984,6 @@
 	"missingMandatoyObjects2": "Prosimo, dodajte jih pred nadaljevanjem",
 	"attemptToDeleteOnlyAdminAccountError": "Ne morete izbrisati edinega skrbniškega računa v vaši aplikaciji.",
 	"attemptToRemoveOnlyAdminUserGroup": "Edinega skrbniškega uporabnika aplikacije ne morete odstraniti iz skrbniške skupine uporabnikov.",
-	"scoringHelpText": "Označite za omogočanje točkovanja",
 	"overrideScore": "Preglasi oceno",
 	"overrideScoreHelpText": "Ročno določi oceno in jo prenehaj preračunavati iz odgovorov",
 	"automaticScore": "Samodejna ocena",
@@ -5640,5 +5640,7 @@
 	"attributeMappingGroups": "Preslikava atributa skupin",
 	"attributeMappingGroupsHelpText": "Ime(na) zahtevka (claim), ki vsebuje uporabnikova članstva v skupinah IdP. Tukaj najdene skupine se ob vsaki prijavi sinhronizirajo s skupinami IdP in dodelijo tiste uporabniške skupine CISO Assistant, na katere jih je preslikal skrbnik.",
 	"jitProvisioning": "Samodejno zagotavljanje SSO (JIT)",
-	"jitProvisioningDescription": "Omogoči samodejno ustvarjanje računov ob prvi prijavi prek SSO in sinhronizacijo njihovih članstev v skupinah IdP, brez potrebe po SCIM."
+	"jitProvisioningDescription": "Omogoči samodejno ustvarjanje računov ob prvi prijavi prek SSO in sinhronizacijo njihovih članstev v skupinah IdP, brez potrebe po SCIM.",
+	"includeNotApplicableRequirements": "Vključi neprimerne zahteve",
+	"excludeNotApplicableRequirements": "Izključi neprimerne zahteve"
 }

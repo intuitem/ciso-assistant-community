@@ -11,6 +11,15 @@
 	import { page } from '$app/state';
 	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import ScoreScalePicker from '$lib/components/ComplianceAssessment/ScoreScalePicker.svelte';
+	import {
+		scaleLevels,
+		scaleOptions,
+		type FrameworkScale,
+		type ScaleOption,
+		type ScoreScaleValue
+	} from '$lib/utils/score-scales';
+	import { untrack } from 'svelte';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -46,11 +55,241 @@
 
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
 
+	let frameworkScoring = $state<FrameworkScale | null>(null);
+
+	// Scoring settings the framework proposes for a new audit (Framework.default_scoring).
+	interface DefaultScoring {
+		score_calculation_method?: string;
+		anchor_na_to_target?: boolean;
+		target_score?: number;
+		target_score_by_group?: Record<string, number>;
+	}
+	let defaultScoring = $state<DefaultScoring | null>(null);
+	// The target last proposed; it follows the selected groups until the user edits it.
+	let proposedTarget: number | null = null;
+
+	// Same rule as Framework.default_scoring_for: the highest selected group target
+	// applies. Targets are on the framework scale: proposed on the audit's.
+	function defaultTarget(groups: string[] | undefined): number | null {
+		const target = defaultScoring?.target_score;
+		if (target === undefined || target === null) return null;
+		const byGroup = groups?.length
+			? Math.max(...groups.map((g) => defaultScoring?.target_score_by_group?.[g] ?? target))
+			: target;
+		return onAuditScale(byGroup);
+	}
+
+	// Same mapping as the backend's rescale_score (two decimals, halves up).
+	function onAuditScale(value: number): number {
+		const from = [frameworkScoring?.min_score ?? 0, frameworkScoring?.max_score ?? 100];
+		const option = scaleChoice?.options.find((o) => o.id === selectedScale);
+		if (!option || from[1] === from[0] || (option.min === from[0] && option.max === from[1]))
+			return value;
+		const ratio = Math.min(1, Math.max(0, (value - from[0]) / (from[1] - from[0])));
+		return Math.round((option.min + ratio * (option.max - option.min)) * 100) / 100;
+	}
+
+	// The proposed target follows the selected groups and scale until the user edits it.
+	$effect(() => {
+		const groups = $formData.selected_implementation_groups;
+		void selectedScale;
+		// A copy on the same framework keeps the baseline's settings (baselineScale is
+		// only set then); a copy from another framework follows the framework's defaults.
+		if (object?.id || baselineScale || defaultScoring?.target_score == null) return;
+		untrack(() => {
+			const next = defaultTarget(groups);
+			if ($formData.target_score !== proposedTarget || next === proposedTarget) return;
+			proposedTarget = next;
+			form.form.update((d) => ({ ...d, target_score: next }), { taint: false });
+		});
+	});
+
+	let baselineScale = $state<ScoreScaleValue | null>(null);
+	// The option the user picked; until then the proposed one applies.
+	let pickedScale = $state<string | null>(null);
+
+	const SCALE_FIELDS = ['score_scale_preset', 'min_score', 'max_score', 'scores_definition'];
+	let scaleDirty = $state(false);
+
+	let organisationScale = $derived(
+		(page.data.settings?.organisation_score_scale ?? null) as ScoreScaleValue | null
+	);
+	let currentScale = $derived<ScoreScaleValue | null>(
+		object?.id
+			? {
+					score_scale_preset: object.score_scale_preset ?? null,
+					min_score: object.min_score,
+					max_score: object.max_score,
+					scores_definition: scaleLevels(object.scores_definition)
+				}
+			: null
+	);
+	let scaleChoice = $derived(
+		frameworkScoring
+			? scaleOptions({
+					framework: frameworkScoring,
+					organisation: organisationScale,
+					baseline: baselineScale,
+					current: currentScale
+				})
+			: null
+	);
+	let selectedScale = $derived(
+		pickedScale && scaleChoice?.options.some((o) => o.id === pickedScale)
+			? pickedScale
+			: (scaleChoice?.selected ?? '')
+	);
+
+	const formErrors = form.errors;
+	let rescalePanel = $state<HTMLElement | null>(null);
+	let rescaleConfirmButton = $state<HTMLButtonElement | null>(null);
+	const formMessage = form.message;
+	interface RescaleImpact {
+		from?: [number, number];
+		to?: [number, number];
+		scored?: number;
+		scores?: number;
+		documentation_scores?: number;
+		target?: [number, number];
+	}
+	let rescaleImpact = $derived.by((): RescaleImpact | null => {
+		const pending = ($formErrors as Record<string, string[] | undefined>)?.confirm_rescale?.length;
+		if (!pending) return null;
+		return (
+			($formMessage as { data?: { rescale_impact?: RescaleImpact } } | undefined)?.data
+				?.rescale_impact ?? {}
+		);
+	});
+
+	$effect(() => {
+		if (!rescaleImpact || !rescalePanel) return;
+		rescalePanel.scrollIntoView({ block: 'center' });
+		rescaleConfirmButton?.focus();
+	});
+
+	// The confirmation is single-use: whatever the outcome of the submission it
+	// was sent with, the next one has to be confirmed again.
+	const submitting = form.submitting;
+	let wasSubmitting = false;
+	$effect(() => {
+		const busy = $submitting;
+		untrack(() => {
+			if (wasSubmitting && !busy && $formData.confirm_rescale) {
+				form.form.update((d) => ({ ...d, confirm_rescale: false }), { taint: false });
+			}
+			wasSubmitting = busy;
+		});
+	});
+
+	const SCALE_ERROR_FIELDS = [...SCALE_FIELDS, 'target_score'];
+	let scaleErrors = $derived(
+		SCALE_ERROR_FIELDS.flatMap(
+			(f) => ($formErrors as Record<string, string[] | undefined>)?.[f] ?? []
+		)
+	);
+
+	function confirmRescale() {
+		form.form.update((d) => ({ ...d, confirm_rescale: true }), { taint: false });
+		form.submit();
+	}
+
+	function dismissRescale() {
+		const saveButton = rescalePanel
+			?.closest('form')
+			?.querySelector<HTMLButtonElement>('[data-testid="save-button"]');
+		form.errors.update((e) => ({ ...e, confirm_rescale: undefined }));
+		saveButton?.focus();
+	}
+
+	// null lets the backend copy the framework's scale.
+	function writeScale(value: ScoreScaleValue | null, taint = true) {
+		form.form.update(
+			(d) => ({
+				...d,
+				confirm_rescale: false,
+				score_scale_preset: value?.score_scale_preset ?? null,
+				min_score: value?.min_score ?? null,
+				max_score: value?.max_score ?? null,
+				scores_definition: value?.scores_definition ?? null
+			}),
+			{ taint }
+		);
+	}
+
+	function onScaleSelect(option: ScaleOption) {
+		pickedScale = option.id;
+		scaleDirty = true;
+		writeScale(option.value);
+	}
+
+	// New audit: the proposed option is sent explicitly, because the backend
+	// never applies the organisation scale on its own.
+	$effect(() => {
+		if (object?.id || !scaleChoice || pickedScale) return;
+		const proposed = scaleChoice.options.find((o) => o.id === scaleChoice.selected);
+		untrack(() => writeScale(proposed?.value ?? null, false));
+	});
+
+	$effect(() => {
+		if (!object?.id || scaleDirty) return;
+		untrack(() => {
+			if (SCALE_FIELDS.every((f) => $formData[f] === undefined)) return;
+			form.form.update(
+				(d) => {
+					const next = { ...d };
+					for (const f of SCALE_FIELDS) delete next[f];
+					return next;
+				},
+				{ taint: false }
+			);
+		});
+	});
+
+	let scoringEnabled = $derived(
+		($formData.field_visibility?.score ?? frameworkDefaults?.score)?.auditor !== 'hidden'
+	);
+
+	let frameworkRequest = 0;
+
+	// Copies propose the baseline audit's scale and scoring settings when it is on
+	// the same framework; otherwise the framework's defaults apply.
+	async function loadBaselineScale(frameworkId: string, request: number) {
+		if (!initialData.baseline) return;
+		// The audit detail URL is a page (HTML); global-score is its JSON scale summary.
+		const baseline = await fetch(`/compliance-assessments/${initialData.baseline}/global-score`)
+			.then((r) => (r.ok ? r.json() : null))
+			.catch(() => null);
+		if (request !== frameworkRequest || baseline?.framework !== frameworkId) return;
+		baselineScale = {
+			score_scale_preset: baseline.score_scale_preset ?? null,
+			min_score: baseline.min_score,
+			max_score: baseline.max_score,
+			// A preset's labels come from the catalog.
+			scores_definition: baseline.score_scale_preset ? [] : scaleLevels(baseline.scores_definition)
+		};
+		form.form.update(
+			(d) => ({
+				...d,
+				score_calculation_method: baseline.score_calculation_method,
+				anchor_na_to_target: baseline.anchor_na_to_target,
+				target_score: baseline.target_score
+			}),
+			{ taint: false }
+		);
+	}
+
 	async function handleFrameworkChange(id: string) {
+		const request = ++frameworkRequest;
+		if (!object?.id) {
+			pickedScale = null;
+			baselineScale = null;
+		}
+		if (!id) frameworkScoring = null;
 		if (id) {
 			await fetch(`/frameworks/${id}`)
 				.then((r) => r.json())
 				.then((r) => {
+					if (request !== frameworkRequest) return;
 					is_dynamic = r['is_dynamic'] || false;
 					const implementation_groups = r['implementation_groups_definition'] || [];
 					implementationGroupsChoices = implementation_groups.map((group) => ({
@@ -60,15 +299,31 @@
 					suggestions = r['reference_controls'].length > 0;
 
 					frameworkDefaults = r['effective_field_visibility'] ?? null;
+					defaultScoring = r['default_scoring'] ?? null;
+
+					frameworkScoring = {
+						min_score: r['min_score'],
+						max_score: r['max_score'],
+						scores_definition: r['scores_definition'],
+						is_scale_bound: r['is_scale_bound']
+					};
+					if (!object.id) loadBaselineScale(id, request);
 
 					defaultImplementationGroups = implementation_groups
 						.filter((group) => group.default_selected)
 						.map((group) => group.ref_id);
 
 					if (!object.id) {
+						proposedTarget = defaultTarget(defaultImplementationGroups);
+						// A copy on the same framework then takes the baseline's settings
+						// (loadBaselineScale).
 						form.form.update((currentData) => ({
 							...currentData,
-							selected_implementation_groups: defaultImplementationGroups
+							selected_implementation_groups: defaultImplementationGroups,
+							score_calculation_method:
+								defaultScoring?.score_calculation_method ?? currentData.score_calculation_method,
+							anchor_na_to_target: defaultScoring?.anchor_na_to_target ?? false,
+							target_score: proposedTarget
 						}));
 					}
 				});
@@ -174,6 +429,76 @@
 	cacheLock={cacheLocks['eta']}
 	bind:cachedValue={formDataCache['eta']}
 />
+{#if scaleErrors.length && !rescaleImpact}
+	<div
+		class="flex gap-2 rounded-md border border-error-500 bg-error-50-950 px-3 py-2 text-sm"
+		role="alert"
+		data-testid="score-scale-errors"
+	>
+		<i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+		<ul>
+			{#each scaleErrors as error (error)}
+				<li>{error}</li>
+			{/each}
+		</ul>
+	</div>
+{/if}
+{#if rescaleImpact}
+	<div
+		bind:this={rescalePanel}
+		class="space-y-2 rounded-md border border-warning-500 bg-warning-50-950 px-3 py-2 text-sm"
+		role="alertdialog"
+		aria-labelledby="score-rescale-title"
+		data-testid="score-rescale-confirmation"
+	>
+		<p id="score-rescale-title" class="flex gap-2 font-medium">
+			<i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+			{rescaleImpact.from && rescaleImpact.to
+				? m.scoreScaleConfirmTitle({
+						from: rescaleImpact.from.join('–'),
+						to: rescaleImpact.to.join('–')
+					})
+				: m.scoreScaleConfirmTitleGeneric()}
+		</p>
+		<ul class="list-disc pl-8 text-xs">
+			{#if rescaleImpact.scored}
+				<li>{m.scoreScaleConfirmScored({ count: rescaleImpact.scored })}</li>
+			{/if}
+			{#if rescaleImpact.scores}
+				<li>{m.scoreScaleConfirmScores({ count: rescaleImpact.scores })}</li>
+			{/if}
+			{#if rescaleImpact.documentation_scores}
+				<li>
+					{m.scoreScaleConfirmDocScores({ count: rescaleImpact.documentation_scores })}
+				</li>
+			{/if}
+			{#if rescaleImpact.target}
+				<li>
+					{m.scoreScaleConfirmTarget({
+						from: rescaleImpact.target[0],
+						to: rescaleImpact.target[1]
+					})}
+				</li>
+			{/if}
+		</ul>
+		<p class="text-xs text-surface-600-400">{m.scoreScaleConfirmIrreversible()}</p>
+		{#if rescaleImpact.scored}
+			<p class="text-xs text-surface-600-400">{m.scoreScaleConfirmHistory()}</p>
+		{/if}
+		<div class="flex gap-2">
+			<button
+				type="button"
+				class="btn btn-sm preset-filled-warning-500"
+				onclick={confirmRescale}
+				bind:this={rescaleConfirmButton}
+				data-testid="score-rescale-confirm">{m.scoreScaleConfirmSave()}</button
+			>
+			<button type="button" class="btn btn-sm preset-tonal-surface" onclick={dismissRescale}
+				>{m.cancel()}</button
+			>
+		</div>
+	</div>
+{/if}
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<div class="space-y-4">
 		{#if context === 'create' && suggestions}
@@ -197,34 +522,53 @@
 			{frameworkDefaults}
 		/>
 
-		<Select
-			{form}
-			options={model.selectOptions['score_calculation_method']}
-			field="score_calculation_method"
-			label={m.scoreCalculationMethod()}
-			helpText={m.scoreCalculationMethodHelpText()}
-			cacheLock={cacheLocks['score_calculation_method']}
-			bind:cachedValue={formDataCache['score_calculation_method']}
-			disableDoubleDash
-		/>
-		<TextField
-			{form}
-			type="number"
-			step="any"
-			field="target_score"
-			label={m.targetScore()}
-			helpText={m.targetScoreHelpText()}
-			cacheLock={cacheLocks['target_score']}
-			bind:cachedValue={formDataCache['target_score']}
-		/>
-		<Checkbox
-			{form}
-			field="anchor_na_to_target"
-			label={m.anchorNaToTarget()}
-			helpText={m.anchorNaToTargetHelpText()}
-			cacheLock={cacheLocks['anchor_na_to_target']}
-			bind:cachedValue={formDataCache['anchor_na_to_target']}
-		/>
+		{#if scaleChoice}
+			<ScoreScalePicker
+				options={scaleChoice.options}
+				selected={selectedScale}
+				onSelect={onScaleSelect}
+				isScaleBound={frameworkScoring?.is_scale_bound}
+				currentRange={object?.id
+					? { min: object.min_score, max: object.max_score }
+					: baselineScale
+						? { min: baselineScale.min_score, max: baselineScale.max_score }
+						: null}
+				{scoringEnabled}
+			/>
+		{/if}
+
+		{#if scoringEnabled}
+			<!-- On create (copies too) the method and target follow the framework or the
+			     baseline: restoring a value cached by an earlier modal would override them. -->
+			<Select
+				{form}
+				options={model.selectOptions['score_calculation_method']}
+				field="score_calculation_method"
+				label={m.scoreCalculationMethod()}
+				helpText={m.scoreCalculationMethodHelpText()}
+				cacheLock={object?.id ? cacheLocks['score_calculation_method'] : undefined}
+				bind:cachedValue={formDataCache['score_calculation_method']}
+				disableDoubleDash
+			/>
+			<TextField
+				{form}
+				type="number"
+				step="any"
+				field="target_score"
+				label={m.targetScore()}
+				helpText={m.targetScoreHelpText()}
+				cacheLock={object?.id ? cacheLocks['target_score'] : undefined}
+				bind:cachedValue={formDataCache['target_score']}
+			/>
+			<Checkbox
+				{form}
+				field="anchor_na_to_target"
+				label={m.anchorNaToTarget()}
+				helpText={m.anchorNaToTargetHelpText()}
+				cacheLock={cacheLocks['anchor_na_to_target']}
+				bind:cachedValue={formDataCache['anchor_na_to_target']}
+			/>
+		{/if}
 	</div>
 	<AutocompleteSelect
 		multiple
