@@ -43,7 +43,10 @@
 		const range = max - min;
 		return range > 0 ? Math.min(100, Math.max(0, ((value - min) / range) * 100)) : 0;
 	});
-	const displayValue = $derived(Math.round(value * 10) / 10);
+	// Scores keep two decimals (CyFun and similar tools grade at that precision).
+	const displayValue = $derived(
+		isPercentage ? Math.round(value * 10) / 10 : Math.round(value * 100) / 100
+	);
 
 	function buildOption() {
 		// Recomputed on every theme flip so the value and track stay readable on both surfaces.

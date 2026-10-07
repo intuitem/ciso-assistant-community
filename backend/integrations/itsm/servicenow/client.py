@@ -303,8 +303,16 @@ class ServiceNowClient(BaseIntegrationClient):
                         if len(results) >= limit:
                             return results
 
-                offset += len(records)
-                if len(records) < LIST_PAGE_SIZE:
+                # ACLs drop rows after sysparm_limit is applied, so a short
+                # page does not mean the end: step by the requested size and
+                # let the Link header say whether another page exists. Fall
+                # back to the page length if something stripped the header.
+                offset += LIST_PAGE_SIZE
+                if response.links:
+                    has_next = "next" in response.links
+                else:
+                    has_next = len(records) >= LIST_PAGE_SIZE
+                if not has_next:
                     return results
                 if offset >= MAX_LIST_FETCH:
                     logger.warning(
