@@ -133,6 +133,7 @@ from .tools.ebios_rm_tools import (
     get_elementary_actions,
     get_operating_modes,
     get_kill_chains,
+    get_operating_mode_quotation,
     # Write tools
     create_ebios_rm_study,
     create_feared_event,
@@ -207,6 +208,7 @@ READ_TOOLS = [
     get_elementary_actions,
     get_operating_modes,
     get_kill_chains,
+    get_operating_mode_quotation,
 ]
 
 WRITE_TOOLS = [

@@ -628,6 +628,7 @@
 	"libraryLoadingError": "A apărut o eroare în timpul încărcării bibliotecii",
 	"processingError": "Eroare de procesare",
 	"libraryAlreadyLoadedError": "Această bibliotecă a fost deja încărcată",
+	"libraryOutdatedError": "O versiune mai nouă a acestei biblioteci este deja stocată. Setați o valoare \"version\" mai mare în fișier pentru a-l importa.",
 	"invalidLibraryFileError": "Fișier de bibliotecă invalid. Vă rugăm să vă asigurați că formatul este corect.",
 	"taintedFormMessage": "Doriți să părăsiți această pagină? Modificările pe care le-ați făcut este posibil să nu fie salvate.",
 	"riskScenariosStatus": "Starea scenariilor de risc",
@@ -1631,5 +1632,7 @@
 	"attributeMappingGroups": "Maparea atributului de grupuri",
 	"attributeMappingGroupsHelpText": "Numele (numele) revendicării (claim) care conține apartenențele la grupuri IdP ale utilizatorului. Grupurile găsite aici sunt sincronizate cu grupurile IdP la fiecare autentificare și acordă grupurile de utilizatori CISO Assistant la care un administrator le-a mapat.",
 	"jitProvisioning": "Provizionare automată SSO (JIT)",
-	"jitProvisioningDescription": "Activează crearea automată a conturilor la prima autentificare SSO și sincronizarea apartenențelor lor la grupuri IdP, fără a necesita SCIM."
+	"jitProvisioningDescription": "Activează crearea automată a conturilor la prima autentificare SSO și sincronizarea apartenențelor lor la grupuri IdP, fără a necesita SCIM.",
+	"includeNotApplicableRequirements": "Includeți cerințele neaplicabile",
+	"excludeNotApplicableRequirements": "Excludeți cerințele neaplicabile"
 }

@@ -594,6 +594,7 @@
 	"libraryLoadingError": "Er is een fout opgetreden tijdens het laden van uw bibliotheek",
 	"processingError": "Verwerkingsfout",
 	"libraryAlreadyLoadedError": "Deze bibliotheek is al geladen.",
+	"libraryOutdatedError": "Er is al een nieuwere versie van deze bibliotheek opgeslagen. Stel een hogere \"version\" in uw bestand in om het te importeren.",
 	"invalidLibraryFileError": "Ongeldig bibliotheekbestand. Zorg ervoor dat het formaat correct is.",
 	"taintedFormMessage": "Wil je deze pagina verlaten? Wijzigingen die je hebt aangebracht, worden mogelijk niet opgeslagen.",
 	"riskScenariosStatus": "Status risicoscenario's",
@@ -6080,5 +6081,7 @@
 	"workflowVariables": "Variabelen",
 	"workflowVersion": "Workflowversie",
 	"workflowVersions": "Workflowversies",
-	"workflowYamlFile": "Workflow-YAML-bestand"
+	"workflowYamlFile": "Workflow-YAML-bestand",
+	"includeNotApplicableRequirements": "Niet-toepasselijke vereisten opnemen",
+	"excludeNotApplicableRequirements": "Niet-toepasselijke vereisten uitsluiten"
 }
