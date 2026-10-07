@@ -103,14 +103,14 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 
 <!-- FEATURES:START -->
 <details>
-<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 69 features)</summary>
+<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 73 features)</summary>
 
 **Compliance & frameworks**
 - Audit and campaigns management
 - Automatic mapping
 - Mapping explorer
 - Custom frameworks supported
-- +200 frameworks included
+- +220 frameworks included
 - Policies management
 - Document management
 - Evidence management
@@ -122,6 +122,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Risk acceptance workflows
 - Business Impact Analysis
 - Cyber Risk Quantification
+- Risk trajectory & projection
 - Vulnerability management
 - Vulnerability enrichment
 - Security advisories & CWE
@@ -154,6 +155,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Automated quality checks
 - Advanced insights
 - Custom metrics tracking
+- Power BI connector
 
 **Collaboration & productivity**
 - Assignments & respondent mode
@@ -162,6 +164,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Comments & collaboration
 - Universal search
 - Command palette
+- In-app notifications center
 
 **Automation & integrations**
 - Workflow automation
@@ -170,6 +173,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Data import wizard
 - Kafka integration
 - MCP support
+- AI assistant with RAG
 - Outgoing webhooks
 - Jira & ServiceNow integrations
 - Consultant features (e.g. single-domain export/import)
@@ -194,7 +198,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Multi-level domains
 - Kubernetes (Helm) deployment
 - Open Source
-- Available in +26 languages
+- Available in +27 languages
 
 </details>
 <!-- FEATURES:END -->
@@ -251,7 +255,7 @@ Read more here: [AI engine](backend/chat/README.md)
 7. CMMC v2 🇺🇸
 8. PSPF 🇦🇺
 9. General Data Protection Regulation (GDPR): Full text and checklist from GDPR.EU 🇪🇺
-10. Essential Eight 🇦🇺
+10. Essential Eight (Maturity Model, November 2023) 🇦🇺
 11. NYDFS 500 with 2023-11 amendments 🇺🇸
 12. DORA (Act, RTS, ITS and GL) 🇪🇺
 13. NIST AI Risk Management Framework 🇺🇸🤖
@@ -289,7 +293,7 @@ Read more here: [AI engine](backend/chat/README.md)
 45. EU AI Act 🇪🇺🤖
 46. FBI CJIS 🇺🇸👮
 47. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
-48. Secure Controls Framework (SCF) 🇺🇸🌐
+48. Secure Controls Framework (SCF) 2026.3 🇺🇸🌐
 49. NCSC - Cyber Assessment Framework (CAF) v3.2 🇬🇧
 50. California Consumer Privacy Act (CCPA) 🇺🇸
 51. California Consumer Privacy Act Regulations 🇺🇸
@@ -300,7 +304,7 @@ Read more here: [AI engine](backend/chat/README.md)
 56. Korea ISA ISMS-P 🇰🇷
 57. Swiss ICT minimum standard 🇨🇭
 58. Adobe Common Controls Framework (CCF) v5 🌐
-59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
+59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 2020 and 2026 🇩🇪
 60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
 61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
 62. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
@@ -368,6 +372,7 @@ Read more here: [AI engine](backend/chat/README.md)
 124. ISO 27701:2025 outline - Privacy Information Management System, including Annex A 🌐
 125. Plumber CI/CD Security Checks 🖥️
 126. UNESCO AI Maturity Framework 🤖🌐
+127. OWASP Top 10 for Agentic Applications 2026 🐝🤖
 
 ### Community contributions
 
