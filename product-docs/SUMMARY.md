@@ -111,7 +111,6 @@
     * [Keycloak](configuration/sso/identity-providers/keycloak.md)
 * [Multi-Factor Authentication (MFA)](configuration/mfa.md)
 * [Libraries](configuration/libraries/README.md)
-  * [Excel file anatomy](configuration/libraries/excel-file-anatomy.md)
   * [Library objects](configuration/libraries/library-objects/README.md)
     * [Library metadata](configuration/libraries/library-objects/library-metadata.md)
     * [Framework](configuration/libraries/library-objects/framework.md)

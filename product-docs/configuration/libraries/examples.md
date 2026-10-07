@@ -6,7 +6,7 @@ description: Explore the available library Excel examples
 
 If the workbook structure feels unfamiliar, start by exploring one of these completed examples. Download a file and open it in Excel or LibreOffice to see how its sheets fit together.
 
-Both workbooks include an `info` sheet that explains the example. It is for reference only and is not required library content. For the shared workbook structure, see [Excel file anatomy](excel-file-anatomy.md).
+Both workbooks include an `info` sheet that explains the example. It is for reference only and is not required library content.
 
 ## Example framework
 

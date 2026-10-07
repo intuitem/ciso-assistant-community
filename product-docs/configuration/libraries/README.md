@@ -7,7 +7,7 @@ description: Understand libraries and choose the right path to create, import, t
 Libraries package reusable governance content for CISO Assistant. A library can contain a framework, a threat catalogue, reference controls, a risk matrix, mappings, and many other object types.
 
 {% hint style="info" %}
-**New to libraries?** Start with [Excel file anatomy](excel-file-anatomy.md) to understand the workbook structure, then follow [Create a library with Excel](create-library-with-excel.md) to build your first one. You can also create a library directly in CISO Assistant with the [Library builder](../authoring/library-builder.md).
+**New to libraries?** Explore the [Library objects](library-objects/README.md), then create your first library directly in CISO Assistant with the [Library builder](../authoring/library-builder.md). You can also follow [Create a library with Excel](create-library-with-excel.md) if you prefer working with a spreadsheet.
 {% endhint %}
 
 ## What is a library?
@@ -18,7 +18,7 @@ One library may contain only one object, such as an internal framework. It can a
 
 Libraries use two file formats: **Excel** *(.xlsx)* and **YAML** *(.yaml)*. Excel is the human-editable source format. YAML is the format CISO Assistant reads. When you import an Excel workbook through the Library catalog, CISO Assistant converts it to YAML automatically.
 
-You normally do not edit YAML directly, including when updating a library. You'll just need to Update the Excel workbook instead. For the workbook structure, see [Excel file anatomy](excel-file-anatomy.md).
+You normally do not edit YAML directly, including when updating a library. You'll just need to Update the Excel workbook instead.
 
 ## What can a library contain?
 
@@ -53,7 +53,6 @@ Not sure where to start? Use the table below to find the page that matches your 
 
 | If you want to... | Start here |
 | --- | --- |
-| Understand an Excel library workbook | [Excel file anatomy](excel-file-anatomy.md) |
 | Create your first framework from an Excel file | [Create a library with Excel](create-library-with-excel.md) |
 | Follow a complete small example | [Guided example: create your first framework](guided-example.md) |
 | Browse the available sample workbooks | [Examples](examples.md) |
