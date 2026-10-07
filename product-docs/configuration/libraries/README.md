@@ -16,9 +16,9 @@ A library is a portable package of objects. It gives those objects a stable iden
 
 One library may contain only one object, such as an internal framework. It can also bundle several related objects, such as a framework together with its reference controls and threats.
 
-Libraries use two file formats: **Excel** *(.xlsx)* and **YAML** *(.yaml)*. Excel is the human-editable source format. YAML is the format CISO Assistant reads. When you import an Excel workbook through the Library catalog, CISO Assistant converts it to YAML automatically.
+You can create a library directly in the [Library builder](../authoring/library-builder.md). The library is stored on the CISO Assistant instance where you create it. Outside the instance, libraries use two file formats: **Excel** *(.xlsx)* and **YAML** *(.yaml)*. Excel is the human-editable source format. YAML is the format CISO Assistant reads. When you import an Excel workbook through the Library catalog, CISO Assistant converts it to YAML automatically.
 
-You normally do not edit YAML directly, including when updating a library. You'll just need to Update the Excel workbook instead.
+You normally do not edit YAML directly, including when updating a library. Instead, update the Excel workbook or edit the library in the Library builder.
 
 ## What can a library contain?
 
