@@ -783,7 +783,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "您不能删除应用程序中唯一的管理员账户。",
 	"attemptToRemoveOnlyAdminUserGroup": "您不能将应用程序中唯一的管理员用户从管理员用户组中移除。",
 	"attemptToRemoveSelfFromDomainAdminGroup": "您不能将自己从域管理员组中移除。请让其他管理员来操作。",
-	"scoringHelpText": "勾选以启用评分",
 	"overrideScore": "覆盖评分",
 	"overrideScoreHelpText": "手动固定评分，不再根据答案重新计算",
 	"automaticScore": "自动评分",

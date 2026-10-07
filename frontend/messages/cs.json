@@ -637,7 +637,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Nemůžete smazat jediný admin účet vaší aplikace.",
 	"attemptToRemoveOnlyAdminUserGroup": "Nemůžete odstranit jediného admin uživatele aplikace z admin uživatelské skupiny.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Nemůžete se sami odebrat ze skupiny správců domény. Požádejte o to jiného správce.",
-	"scoringHelpText": "Zaškrtněte pro povolení skórování",
 	"overrideScore": "Přepsat skóre",
 	"overrideScoreHelpText": "Ručně zafixovat skóre a přestat ho přepočítávat z odpovědí",
 	"automaticScore": "Automatické skóre",

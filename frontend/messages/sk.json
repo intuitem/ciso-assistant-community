@@ -914,7 +914,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Nemôžete odstrániť jediný účet správcu vašej aplikácie.",
 	"attemptToRemoveOnlyAdminUserGroup": "Zo skupiny administrátorov nemôžete odstrániť jediného administrátora aplikácie.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Nemôžete sa sami odstrániť zo skupiny správcov organizačnej oblasti. Požiadajte iného správcu, aby to vykonal.",
-	"scoringHelpText": "Začiarknutím aktivujete bodovanie",
 	"overrideScore": "Prepísať skóre",
 	"overrideScoreHelpText": "Ručne zafixovať skóre a prestať ho prepočítavať z odpovedí",
 	"automaticScore": "Automatické skóre",

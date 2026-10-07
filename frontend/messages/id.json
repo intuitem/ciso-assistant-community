@@ -641,7 +641,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Anda tidak dapat menghapus satu-satunya akun admin dalam aplikasi Anda.",
 	"attemptToRemoveOnlyAdminUserGroup": "Anda tidak dapat menghapus satu-satunya pengguna admin dari grup pengguna admin aplikasi.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Anda tidak dapat menghapus diri sendiri dari grup administrator domain. Minta administrator lain untuk melakukannya.",
-	"scoringHelpText": "Centang untuk mengaktifkan penilaian",
 	"overrideScore": "Timpa skor",
 	"overrideScoreHelpText": "Tetapkan skor secara manual dan hentikan penghitungan ulang dari jawaban",
 	"automaticScore": "Skor otomatis",

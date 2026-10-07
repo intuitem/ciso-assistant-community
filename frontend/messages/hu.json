@@ -644,7 +644,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Nem törölheti az alkalmazás egyetlen adminisztrátori fiókját.",
 	"attemptToRemoveOnlyAdminUserGroup": "Nem távolíthatja el az alkalmazás egyetlen adminisztrátor felhasználóját az adminisztrátor csoportból.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Nem távolíthatja el önmagát egy tartományi rendszergazda-csoportból. Kérjen meg egy másik rendszergazdát.",
-	"scoringHelpText": "Aktiválja, hogy engedélyezze a pontozást",
 	"overrideScore": "Pontszám felülbírálása",
 	"overrideScoreHelpText": "A pontszám kézi rögzítése és újraszámításának leállítása a válaszok alapján",
 	"automaticScore": "Automatikus pontszám",

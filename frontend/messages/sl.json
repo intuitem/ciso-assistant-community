@@ -984,7 +984,6 @@
 	"missingMandatoyObjects2": "Prosimo, dodajte jih pred nadaljevanjem",
 	"attemptToDeleteOnlyAdminAccountError": "Ne morete izbrisati edinega skrbniškega računa v vaši aplikaciji.",
 	"attemptToRemoveOnlyAdminUserGroup": "Edinega skrbniškega uporabnika aplikacije ne morete odstraniti iz skrbniške skupine uporabnikov.",
-	"scoringHelpText": "Označite za omogočanje točkovanja",
 	"overrideScore": "Preglasi oceno",
 	"overrideScoreHelpText": "Ročno določi oceno in jo prenehaj preračunavati iz odgovorov",
 	"automaticScore": "Samodejna ocena",

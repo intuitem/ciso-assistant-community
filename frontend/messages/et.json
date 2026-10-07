@@ -1011,7 +1011,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Rakenduse ainust administraatorikontot ei saa kustutada.",
 	"attemptToRemoveOnlyAdminUserGroup": "Rakenduse ainsat administraatorit ei saa admin-rühmast eemaldada.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Te ei saa ennast domeeni administraatorite grupist eemaldada. Paluge seda teha teisel administraatoril.",
-	"scoringHelpText": "Märgi hindamise lubamiseks",
 	"overrideScore": "Alista skoor",
 	"overrideScoreHelpText": "Määra skoor käsitsi ja lõpeta selle ümberarvutamine vastuste põhjal",
 	"automaticScore": "Automaatne skoor",

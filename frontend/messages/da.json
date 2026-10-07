@@ -643,7 +643,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Du kan ikke slette den eneste administrator-konto i din applikation",
 	"attemptToRemoveOnlyAdminUserGroup": "Du kan ikke fjerne den eneste admin-bruger fra admin-brugergruppen",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Du kan ikke fjerne dig selv fra en domæneadministratorgruppe. Bed en anden administrator om at gøre det.",
-	"scoringHelpText": "Marker for at aktivere scoring",
 	"overrideScore": "Tilsidesæt score",
 	"overrideScoreHelpText": "Fastlås scoren manuelt og stop genberegning ud fra svarene",
 	"automaticScore": "Automatisk score",

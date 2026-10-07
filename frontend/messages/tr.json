@@ -679,7 +679,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Uygulamanızın tek yönetici hesabını silemezsiniz.",
 	"attemptToRemoveOnlyAdminUserGroup": "Uygulamanın tek yönetici kullanıcısını yönetici kullanıcı grubundan kaldıramazsınız.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Kendinizi bir alan yöneticisi grubundan çıkaramazsınız. Başka bir yöneticiden bunu yapmasını isteyin.",
-	"scoringHelpText": "Puanlamayı etkinleştirmek için işaretleyin",
 	"overrideScore": "Puanı geçersiz kıl",
 	"overrideScoreHelpText": "Puanı elle sabitleyin ve yanıtlardan yeniden hesaplanmasını durdurun",
 	"automaticScore": "Otomatik puan",

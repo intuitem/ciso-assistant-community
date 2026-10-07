@@ -639,7 +639,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Nu puteți șterge singurul cont de administrator al aplicației dvs.",
 	"attemptToRemoveOnlyAdminUserGroup": "Nu puteți elimina singurul administrator al aplicației din grupul de utilizatori administratori.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Nu vă puteți elimina singur dintr-un grup de administratori de domeniu. Cereți altui administrator să o facă.",
-	"scoringHelpText": "Bifați pentru a activa scorarea",
 	"overrideScore": "Suprascrie scorul",
 	"overrideScoreHelpText": "Fixează manual scorul și oprește recalcularea acestuia din răspunsuri",
 	"automaticScore": "Scor automat",

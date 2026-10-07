@@ -15,6 +15,9 @@ class CoreConfig(AppConfig):
         import core.webhooks
         import core.signals
 
+        # Framework-specific exports register themselves on import
+        import core.cyfun  # noqa: F401
+
         # avoid post_migrate handler if we are in the main, as it interferes with restore
         if not os.environ.get("RUN_MAIN"):
             # No sender filter: startup() waits for the last app's
