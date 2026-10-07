@@ -685,7 +685,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Ne možete obrisati jedini admin račun u vašoj aplikaciji.",
 	"attemptToRemoveOnlyAdminUserGroup": "Ne možete ukloniti jedini admin račun u aplikaciji iz admin korisničke grupe.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Ne možete sami sebe ukloniti iz grupe administratora domene. Zamolite drugog administratora da to učini.",
-	"scoringHelpText": "Odaberite za omogućavanje ocjenjivanja",
 	"overrideScore": "Nadjačaj rezultat",
 	"overrideScoreHelpText": "Ručno fiksiraj rezultat i prestani ga preračunavati iz odgovora",
 	"automaticScore": "Automatski rezultat",
