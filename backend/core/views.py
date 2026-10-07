@@ -9173,7 +9173,7 @@ class FolderFilter(GenericFilterSet):
         ]
 
 
-class FolderViewSet(BaseModelViewSet):
+class FolderViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows folders to be viewed or edited.
     """
@@ -9181,6 +9181,48 @@ class FolderViewSet(BaseModelViewSet):
     model = Folder
     filterset_class = FolderFilter
     search_fields = ["name"]
+
+    # Columns mirror the domains import template, so an export can be re-imported.
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "domain": {
+                "source": "parent_folder",
+                "label": "domain",
+                # The import places a blank parent at the root.
+                "format": lambda parent: (
+                    escape_excel_formula(parent.name)
+                    if parent and parent.content_type != Folder.ContentType.ROOT
+                    else ""
+                ),
+            },
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.label) for o in qs.all()
+                ),
+            },
+        },
+        "filename": "domains_export",
+        "select_related": ["parent_folder"],
+        "prefetch_related": ["filtering_labels"],
+    }
+
+    def _get_export_queryset(self):
+        # Only domains round-trip through the import: the root folder is implicit,
+        # and enclaves or personal folders are not created there.
+        return (
+            super()
+            ._get_export_queryset()
+            .filter(content_type=Folder.ContentType.DOMAIN)
+        )
 
     def perform_create(self, serializer):
         """

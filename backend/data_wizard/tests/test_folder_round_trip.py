@@ -1,0 +1,107 @@
+"""A domains export re-imports as is: same columns, matched back by internal_id."""
+
+import io
+
+import pytest
+from openpyxl import load_workbook
+
+from core.models import FilteringLabel
+from iam.models import Folder
+
+URL = "/api/data-wizard/load-file/"
+
+
+def _export(client) -> bytes:
+    resp = client.get("/api/folders/export_xlsx/")
+    assert resp.status_code == 200, resp.content
+    return resp.content
+
+
+def _import(client, content: bytes, on_conflict: str):
+    return client.post(
+        URL,
+        data=content,
+        content_type="application/octet-stream",
+        HTTP_X_MODEL_TYPE="Folder",
+        HTTP_X_ON_CONFLICT=on_conflict,
+        HTTP_CONTENT_DISPOSITION="attachment; filename=domains_export.xlsx",
+    )
+
+
+@pytest.fixture
+def domains(root_folder):
+    alpha = Folder.objects.create(name="Alpha", parent_folder=root_folder)
+    alpha.filtering_labels.set([FilteringLabel.objects.create(label="Corporate")])
+    beta = Folder.objects.create(name="Beta", parent_folder=root_folder)
+    beta.filtering_labels.set(
+        [
+            FilteringLabel.objects.create(label="Finance"),
+            FilteringLabel.objects.create(label="IT"),
+        ]
+    )
+    gamma = Folder.objects.create(name="Gamma", parent_folder=root_folder)
+    return alpha, beta, gamma
+
+
+def _labels(folder) -> set[str]:
+    return set(folder.filtering_labels.values_list("label", flat=True))
+
+
+@pytest.mark.django_db
+class TestFolderRoundTrip:
+    def test_export_columns_match_import(self, api_client, domains, all_accessible):
+        ws = load_workbook(io.BytesIO(_export(api_client))).worksheets[0]
+        rows = list(ws.iter_rows(values_only=True))
+        assert rows[0] == ("internal_id", "name", "description", "domain", "labels")
+        exported = {row[1]: row for row in rows[1:]}
+        # The root folder is implicit in the import, so it is not exported.
+        assert set(exported) == {"Alpha", "Beta", "Gamma"}
+        assert exported["Alpha"][3] is None  # blank parent: placed at the root
+        assert set(exported["Beta"][4].split(",")) == {"Finance", "IT"}
+
+    def test_unchanged_export_reimports_without_changes(
+        self, api_client, domains, all_accessible
+    ):
+        resp = _import(api_client, _export(api_client), "update")
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["failed"] == 0, results["errors"]
+        assert results["created"] == 0
+        assert results["updated"] == 3
+
+        alpha, beta, gamma = (Folder.objects.get(id=f.id) for f in domains)
+        assert _labels(alpha) == {"Corporate"}
+        assert _labels(beta) == {"Finance", "IT"}
+        assert _labels(gamma) == set()
+        assert (
+            Folder.objects.filter(content_type=Folder.ContentType.DOMAIN).count() == 3
+        )
+
+    def test_edited_export_updates_and_creates(
+        self, api_client, domains, all_accessible
+    ):
+        alpha, beta, _ = domains
+        wb = load_workbook(io.BytesIO(_export(api_client)))
+        ws = wb.worksheets[0]
+        for row in ws.iter_rows(min_row=2):
+            if row[1].value == "Alpha":
+                row[2].value = "edited"
+            if row[1].value == "Beta":
+                row[4].value = "Audit"
+        ws.append([None, "Delta", None, None, "New,Corporate"])
+        edited = io.BytesIO()
+        wb.save(edited)
+
+        resp = _import(api_client, edited.getvalue(), "update")
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["failed"] == 0, results["errors"]
+        assert results["created"] == 1
+        assert results["updated"] == 3
+
+        alpha.refresh_from_db()
+        assert alpha.description == "edited"
+        assert _labels(beta) == {"Audit"}
+        assert _labels(Folder.objects.get(name="Delta")) == {"New", "Corporate"}
+        # Existing labels are reused, not duplicated.
+        assert FilteringLabel.objects.filter(label="Corporate").count() == 1

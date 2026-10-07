@@ -2809,6 +2809,7 @@ class FolderRecordConsumer(RecordConsumer):
     SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
         {
             "parent_folder": ["domain"],
+            "filtering_labels": ["filtering_labels", "labels", "étiquette", "label"],
         }
     )
 
@@ -2850,11 +2851,23 @@ class FolderRecordConsumer(RecordConsumer):
         else:
             parent_folder_id = Folder.get_root_folder().id
 
-        return {
+        data = {
             "name": name,
             "description": record.get("description", ""),
             "parent_folder": parent_folder_id,
-        }, None
+        }
+
+        raw_labels = (
+            record.get("filtering_labels")
+            or record.get("labels")
+            or record.get("étiquette")
+            or record.get("label")
+        )
+        filtering_labels = _resolve_filtering_labels(raw_labels)
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
 
 
 class VulnerabilityRecordConsumer(RecordConsumer[None]):

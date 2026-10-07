@@ -1087,6 +1087,26 @@ class TestFolderConsumer:
         consumer = FolderRecordConsumer(base_context)
         assert consumer.find_existing({"name": "Ghost"}) is None
 
+    def test_labels_are_resolved(self, base_context):
+        from core.models import FilteringLabel
+
+        existing = FilteringLabel.objects.create(label="Corporate")
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "Labelled", "labels": "Corporate|Finance"}, None
+        )
+        assert error is None
+        assert set(record_data["filtering_labels"]) == {
+            existing.id,
+            FilteringLabel.objects.get(label="Finance").id,
+        }
+
+    def test_no_labels_leaves_field_unset(self, base_context):
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create({"name": "Plain"}, None)
+        assert error is None
+        assert "filtering_labels" not in record_data
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FindingsAssessmentRecordConsumer
