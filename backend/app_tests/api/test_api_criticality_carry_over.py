@@ -11,7 +11,9 @@ from iam.models import Folder
 from tprm.models import Entity, EntityAssessment, EntityTierChange, Solution, Tier
 from tprm.tiers import set_entity_tier, tier_for_criticality
 
-carry_over = importlib.import_module("tprm.migrations.0024_entity_tier").carry_over
+carry_over = importlib.import_module(
+    "tprm.migrations.0025_criticality_carry_over"
+).carry_over
 
 SOLUTIONS_URL = "/api/solutions/"
 

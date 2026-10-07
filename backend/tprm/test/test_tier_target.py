@@ -1034,10 +1034,10 @@ class TestReviewFeedbackRoundThree:
         )
         assert result.status_code == 200, result.json()
         response.refresh_from_db()
-        seen = quick_form_response_content(response, admin)["applications"][0]
+        seen = quick_form_response_content(response, admin).data["applications"][0]
         assert (seen["new"], seen["note"]) == ("critical", "Why")
         stranger = User.objects.create_user(email="tier-stranger@test.local")
-        hidden = quick_form_response_content(response, stranger)["applications"][0]
+        hidden = quick_form_response_content(response, stranger).data["applications"][0]
         assert (hidden["previous"], hidden["new"], hidden["note"]) == (
             None,
             None,
