@@ -16,17 +16,17 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
+from core.reads import page_limit, subtree_folder_ids
+
 from .actions import (
     MISSING,
     ActionError,
     DeferredTask,
     FatalActionError,
-    _read_scope_folder_ids,
     _render_context,
     dig,
     execute_action,
     read_page,
-    read_page_limit,
     read_snapshot_ids,
     render,
 )
@@ -508,7 +508,7 @@ def abort_token(token):
 def broadcast_event(event_key, emitting_instance):
     """Wake every waiting event token matching the key within the emitting
     instance's folder SUBTREE (spec §7), not just its exact folder."""
-    scope_ids = _read_scope_folder_ids(emitting_instance.folder)
+    scope_ids = subtree_folder_ids(emitting_instance.folder)
     waiting = list(
         WorkflowToken.objects.filter(
             status=WorkflowToken.Status.WAITING,
@@ -939,7 +939,7 @@ def _read_snapshot_page(node, instance, read_config, snapshot, start):
     A slice can come back short or empty (rows deleted, or no longer visible,
     since the snapshot); keep sliding until rows turn up or the snapshot is
     exhausted. Returns (items, next_start), next_start 0 when exhausted."""
-    limit = read_page_limit(read_config)
+    limit = page_limit(read_config)
     items = []
     while not items and start < len(snapshot):
         ids = snapshot[start : start + limit]
@@ -1039,7 +1039,7 @@ def _start_subprocess(token):
     # piping its outputs back — a cross-domain confused deputy. Subprocess
     # authoring is disabled for users, so this only backstops seeded/legacy
     # graphs, but it stays as the load-bearing runtime boundary.
-    if version.folder_id not in _read_scope_folder_ids(instance.folder):
+    if version.folder_id not in subtree_folder_ids(instance.folder):
         raise EngineError("Subprocess workflow is outside this workflow's scope")
     if not version.is_active:
         # Automatic execution must not tunnel through a paused child;

@@ -1008,19 +1008,14 @@ class TestOperatorTypeGating:
     def test_boolean_contains_is_rejected_at_run_time(self):
         # Published configs predate the publish gate: the same check must
         # fail loud at execution instead of diverging across databases.
-        from automation.workflows.actions import (
-            READABLE_MODELS,
-            ActionError,
-            _read_condition_to_q,
-        )
+        from core.reads import READABLE_MODELS, ReadError, condition_to_q
 
         entry = READABLE_MODELS["requirement_assessment"]
-        with pytest.raises(ActionError, match="not valid for field"):
-            _read_condition_to_q(
+        with pytest.raises(ReadError, match="not valid for field"):
+            condition_to_q(
                 {"field": "is_scored", "op": "contains", "value": "tru"},
                 entry,
                 {"is_scored"},
-                {},
             )
 
 

@@ -197,7 +197,7 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     def readable_models(self, request):
         """The read_objects registry: field lists double as the
         filter/order whitelist the builder offers."""
-        from .actions import READABLE_MODELS
+        from core.reads import READABLE_MODELS
 
         return Response(
             [
