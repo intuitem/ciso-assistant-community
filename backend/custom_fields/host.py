@@ -45,6 +45,22 @@ class CustomFieldsMixin(models.Model):
                 result[definition.key] = value.value
         return result
 
+    def copy_custom_fields_to(self, target):
+        """Copy every stored value onto ``target``, a host of the same model."""
+        CustomFieldValue.objects.bulk_create(
+            CustomFieldValue(
+                definition_id=value.definition_id,
+                content_type_id=value.content_type_id,
+                object_id=target.pk,
+                value_text=value.value_text,
+                value_number=value.value_number,
+                value_date=value.value_date,
+                value_boolean=value.value_boolean,
+            )
+            for value in self.custom_field_values.all()
+        )
+        target.clear_custom_field_cache()
+
     def clear_custom_field_cache(self):
         getattr(self, "_prefetched_objects_cache", {}).pop("custom_field_values", None)
 

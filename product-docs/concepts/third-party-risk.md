@@ -35,7 +35,7 @@ Instances created before this rule was introduced gave each *assessment* its own
 
 ### Revisions
 
-Reassessing a vendor is a **New revision**, from the entity assessment's page. It creates a fresh assessment for the same third party in the same workspace, with a questionnaire that carries over the previous round's answers, results and evidences — so the vendor confirms or corrects rather than starting from a blank form. Solutions, reviewers, authors, representatives and labels come across too; custom field values do not.
+Reassessing a vendor is a **New revision**, from the entity assessment's page. It creates a fresh assessment for the same third party in the same workspace, with a questionnaire that carries over the previous round's answers, results and evidences — so the vendor confirms or corrects rather than starting from a blank form. Solutions, reviewers, authors, representatives, labels and custom field values come across too.
 
 Two things deliberately do not: the **criticality** rating and its inputs, which are a judgement to be made again each round, and the source assessment itself, which is left untouched as the record of the previous round.
 

@@ -1570,6 +1570,7 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             clone.authors.set(source.authors.all())
             clone.representatives.set(source.representatives.all())
             clone.filtering_labels.set(source.filtering_labels.all())
+            source.copy_custom_fields_to(clone)
             audit = create_enclave_audit(
                 clone,
                 source.compliance_assessment.framework,
