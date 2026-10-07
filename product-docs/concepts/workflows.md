@@ -27,7 +27,7 @@ You build workflows visually, on a canvas. No code is involved, and everything a
 | Outbound | When a control goes live, post to your ITSM or chat tool |
 | Provisioning | Create a domain, its groups and its first user in one run |
 
-Thirty ready-made workflows ship as [templates](../features/workflows/templates.md). Most people start by installing one and adapting it.
+Thirty-four ready-made workflows ship as [templates](../features/workflows/templates.md). Most people start by installing one and adapting it.
 
 
 ## A workflow is a graph

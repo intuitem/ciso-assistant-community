@@ -638,7 +638,7 @@ def _validate_ai_value_fencing(node, ai_refs, ai_variables):
             if entry is not None
             else (None, None)
         )
-    elif action_type == "create_object":
+    elif action_type in ("create_object", "upsert_objects"):
         entry = CREATABLE_MODELS.get(config.get("model"))
         fields, fenced = (
             (entry["fields"], lambda key: _creatable_values(entry, key))

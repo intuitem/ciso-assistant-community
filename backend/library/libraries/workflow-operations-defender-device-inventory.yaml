@@ -1,0 +1,93 @@
+urn: urn:intuitem:risk:library:workflow-operations-defender-device-inventory
+locale: en
+ref_id: workflow-operations-defender-device-inventory
+name: Microsoft Defender for Endpoint — device inventory
+description: 'Pulls the active devices Microsoft Defender for Endpoint knows about every night and keeps
+  one supporting asset per device, matched on its name so a second run updates rather than duplicates.
+  Each asset carries the Defender device id as its reference and the platform, exposure level and risk
+  score in its description. After importing: set tenant_id and client_id from an Entra app registration
+  that has the WindowsDefenderATP application permission Machine.Read.All with admin consent, and add its
+  client secret as the defender_client_secret secret. A run records up to 2000 devices; the log says
+  when the inventory was larger than that.'
+copyright: © intuitem
+version: 1
+publication_date: 2026-10-07
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-defender-device-inventory:workflow:defender-device-inventory
+    schema_version: 1
+    ref_id: defender-device-inventory
+    name: Microsoft Defender for Endpoint — device inventory
+    description: 'Every night: list the active devices in Microsoft Defender for Endpoint, page by page,
+      and create or update one supporting asset per device.'
+    requires:
+      secrets:
+      - defender_client_secret
+    graph:
+      variables:
+      - key: tenant_id
+        type: string
+        default_value: ''
+      - key: client_id
+        type: string
+        default_value: ''
+      nodes:
+      - ref: every_night
+        type: trigger
+        label: Every night
+        trigger_config:
+          type: schedule
+          cron_expression: 0 2 * * *
+          timezone: UTC
+      - ref: list_devices
+        type: action
+        label: List active devices
+        action_config:
+          type: http_request
+          method: GET
+          url: https://api.securitycenter.microsoft.com/api/machines?$filter=healthStatus eq 'Active'
+          timeout: 30
+          oauth:
+            token_url: https://login.microsoftonline.com/{{tenant_id}}/oauth2/v2.0/token
+            client_id: '{{client_id}}'
+            client_secret: '{{secrets.defender_client_secret}}'
+            scope: https://api.securitycenter.microsoft.com/.default
+          paginate:
+            items: value
+            next: '@odata.nextLink'
+            max_pages: 50
+      - ref: keep_assets
+        type: action
+        label: Keep one asset per device
+        action_config:
+          type: upsert_objects
+          model: asset
+          items: '{{nodes.list_devices.items}}'
+          fields:
+            name: '{{item.computerDnsName}}'
+            ref_id: '{{item.id}}'
+            type: SP
+            description: '{{item.osPlatform}} {{item.version}} — exposure {{item.exposureLevel}}, risk
+              {{item.riskScore}}, last seen {{item.lastSeen}}'
+      - ref: report
+        type: action
+        label: Log what came in
+        action_config:
+          type: log
+          message: 'Defender listed {{nodes.keep_assets.received}} device(s) over {{nodes.list_devices.pages}}
+            page(s) on {{today}}: {{nodes.keep_assets.created}} new, {{nodes.keep_assets.updated}} updated,
+            {{nodes.keep_assets.failed}} refused {{nodes.keep_assets.errors}}. Inventory cut short:
+            {{nodes.list_devices.truncated}}.'
+      - ref: done
+        type: end
+      edges:
+      - source: every_night
+        target: list_devices
+      - source: list_devices
+        target: keep_assets
+      - source: keep_assets
+        target: report
+      - source: report
+        target: done

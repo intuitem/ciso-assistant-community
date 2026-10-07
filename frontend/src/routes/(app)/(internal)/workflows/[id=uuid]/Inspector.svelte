@@ -165,6 +165,7 @@
 	// buffering); the engine still executes it for graphs that carry it.
 	const ACTION_TYPES = [
 		'create_object',
+		'upsert_objects',
 		'update_object',
 		'attach_evidence',
 		'record_measurement',
@@ -213,6 +214,7 @@
 		date_offset: { base: '', days: 30, weeks: 0, output: '' },
 		compute: { expressions: [] },
 		create_object: { model: 'applied_control', fields: { name: '' }, upsert: false },
+		upsert_objects: { model: 'asset', items: '', fields: { name: '' }, on_item_error: 'continue' },
 		update_object: { model: 'applied_control', id: '', fields: {}, m2m: {} },
 		attach_evidence: {
 			evidence: '',
@@ -326,6 +328,20 @@
 		onChange();
 	}
 
+	const upsertableModels = $derived(creatableModels.filter((entry) => entry.upsert !== false));
+
+	function togglePaginate(on: boolean) {
+		if (on) actionConfig.paginate = { items: '', next: '', cursor_param: '', max_pages: 10 };
+		else delete actionConfig.paginate;
+		onChange();
+	}
+
+	function toggleOauth(on: boolean) {
+		if (on) actionConfig.oauth = { token_url: '', client_id: '', client_secret: '', scope: '' };
+		else delete actionConfig.oauth;
+		onChange();
+	}
+
 	function resetCreateFields() {
 		actionConfig.fields = { name: actionConfig.fields?.name ?? '' };
 		onChange();
@@ -372,6 +388,7 @@
 	const OUTPUT_EXAMPLES: Record<string, string> = {
 		http_request: 'body.summary',
 		create_object: 'created_object_id',
+		upsert_objects: 'created',
 		update_object: 'object_id',
 		create_audit: 'created_object_id',
 		attach_evidence: 'filename',
@@ -1745,6 +1762,73 @@
 							</select>
 						</label>
 					{/each}
+				{:else if actionConfig.type === 'upsert_objects' && actionConfig.fields}
+					<label>
+						{@render fieldLabel(m.objectToCreate())}
+						<select
+							class="select w-full text-sm"
+							bind:value={actionConfig.model}
+							onchange={resetCreateFields}
+						>
+							{#each upsertableModels as entry (entry.key)}
+								<option value={entry.key}>{safeTranslate(entry.key)}</option>
+							{/each}
+						</select>
+						{#if creatableEntry?.match_on}
+							<span class="text-[10px] text-surface-500">(match on {creatableEntry.match_on})</span>
+						{/if}
+					</label>
+					<label>
+						{@render fieldLabel(m.upsertItems())}
+						<input
+							type="text"
+							class="input w-full text-sm font-mono"
+							placeholder={'{{nodes.list.items}}'}
+							bind:value={actionConfig.items}
+							oninput={onChange}
+						/>
+						<span class="text-[10px] text-surface-500">{m.upsertItemsHint()}</span>
+					</label>
+					{#each [...(creatableEntry?.fields ?? []), ...Object.keys(creatableEntry?.fk_fields ?? {})] as field (field)}
+						{@const narrowed = creatableEntry?.allowed_values?.[field]}
+						<label>
+							{@render fieldLabel(
+								safeTranslate(field) +
+									(field === 'name' || creatableEntry?.required_fields?.includes(field) ? ' *' : '')
+							)}
+							{#if narrowed?.length}
+								<select
+									class="select w-full text-sm"
+									bind:value={actionConfig.fields[field]}
+									onchange={onChange}
+								>
+									<option value={''}>—</option>
+									{#each narrowed as choice (choice)}
+										<option value={choice}>{safeTranslate(choice)}</option>
+									{/each}
+								</select>
+							{:else}
+								<input
+									type="text"
+									class="input w-full text-sm"
+									placeholder={field === 'name' ? '{{item.name}}' : ''}
+									bind:value={actionConfig.fields[field]}
+									oninput={onChange}
+								/>
+							{/if}
+						</label>
+					{/each}
+					<label>
+						{@render fieldLabel(m.onItemFailure())}
+						<select
+							class="select w-full text-sm"
+							bind:value={actionConfig.on_item_error}
+							onchange={onChange}
+						>
+							<option value="continue">{m.continueCollectErrors()}</option>
+							<option value="stop">{m.stopTheRun()}</option>
+						</select>
+					</label>
 				{:else if actionConfig.type === 'update_object'}
 					<label>
 						{@render fieldLabel(m.objectToUpdate())}
@@ -2391,6 +2475,109 @@
 						{m.httpAllowConnectionError()}
 					</label>
 					<span class="text-[10px] text-surface-500">{m.httpErrorHandlingHint()}</span>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							checked={!!actionConfig.paginate}
+							onchange={(e) => togglePaginate(e.currentTarget.checked)}
+						/>
+						{m.httpPaginate()}
+					</label>
+					{#if actionConfig.paginate}
+						<label>
+							{@render fieldLabel(m.httpPaginateItems())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="value"
+								bind:value={actionConfig.paginate.items}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpPaginateNext())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="@odata.nextLink"
+								bind:value={actionConfig.paginate.next}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpPaginateCursorParam())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="cursor"
+								bind:value={actionConfig.paginate.cursor_param}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpPaginateMaxPages())}
+							<input
+								type="number"
+								class="input w-full text-sm"
+								min="1"
+								max="50"
+								bind:value={actionConfig.paginate.max_pages}
+								oninput={onChange}
+							/>
+						</label>
+						<span class="text-[10px] text-surface-500">{m.httpPaginateHint()}</span>
+					{/if}
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							checked={!!actionConfig.oauth}
+							onchange={(e) => toggleOauth(e.currentTarget.checked)}
+						/>
+						{m.httpOauth()}
+					</label>
+					{#if actionConfig.oauth}
+						<label>
+							{@render fieldLabel(m.httpOauthTokenUrl())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="https://login.microsoftonline.com/tenant-id/oauth2/v2.0/token"
+								bind:value={actionConfig.oauth.token_url}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpOauthClientId())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								bind:value={actionConfig.oauth.client_id}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpOauthClientSecret())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder={'{{secrets.client_secret}}'}
+								bind:value={actionConfig.oauth.client_secret}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpOauthScope())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="https://graph.microsoft.com/.default"
+								bind:value={actionConfig.oauth.scope}
+								oninput={onChange}
+							/>
+						</label>
+					{/if}
 					<p class="text-[10px] text-surface-500 leading-relaxed">
 						<i class="fa-solid fa-key mr-1"></i>{m.secretsHint({ syntax: '{{secrets.name}}' })}
 					</p>

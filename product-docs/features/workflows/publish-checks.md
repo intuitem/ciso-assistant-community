@@ -76,7 +76,12 @@ A draft can be saved in any state. Publishing requires a sound graph, so the bui
 | `'X' is not one of DELETE, GET, PATCH, POST, PUT` | Pick a method from the list |
 | Headers must be name/value pairs | Rebuild the headers. A single pasted line is not a header table |
 | The timeout must be between 1 and 30 seconds | Use a value in range. The step no longer accepts one it would silently shorten |
-| Credentials may only travel over `https` | The URL is `http` and the step carries a secret or an `Authorization` header. Use `https` |
+| Credentials may only travel over `https` | The URL is `http` and the step carries a secret, an `Authorization` header or OAuth. Use `https` |
+| The token URL must be https | Use the `https` address of the token endpoint |
+| OAuth needs a token url / client id / client secret | Fill the missing OAuth setting |
+| Paging needs the path to the items / to the next page | Fill both paths, or turn **Follow pages** off |
+| The page limit must be between 1 and 50 | Use a value in range |
+| A list of items is required | Point **Items** at a list, for example `{{nodes.fetch.items}}` |
 | A recipient is required | Set at least one address on the Send email step |
 | `'x' is not an email address` | Fix the address. Expressions are left alone and checked on the run |
 | A name is required | Set the folder name on the Provision domain step |
