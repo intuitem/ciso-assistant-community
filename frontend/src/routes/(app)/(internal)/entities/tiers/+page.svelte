@@ -184,10 +184,11 @@
 							data-testid="tier-row"
 						>
 							<span
-								class="rank absolute -left-16 top-1/2 -translate-y-1/2 grid place-items-center size-11 rounded-full border-2 bg-surface-50-950 text-sm font-semibold tabular-nums text-surface-800-200 {tier.is_visible
+								class="rank absolute -left-16 top-1/2 -translate-y-1/2 grid place-items-center size-11 rounded-full border-2 bg-surface-50-950 {tier.is_visible
 									? ''
 									: 'border-dashed opacity-60'}"
-								aria-hidden="true">{index + 1}</span
+								aria-hidden="true"
+								><span class="size-3.5 rounded-full" style="background: var(--tier)"></span></span
 							>
 
 							<div
