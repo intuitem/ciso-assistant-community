@@ -5,7 +5,6 @@ body: |
   You have been assigned to the following Incident:
 
   - Name: ${incident_name}
-  - Description: ${incident_description}
   - Reference ID: ${incident_ref_id}
   - Severity: ${incident_severity}
   - Status: ${incident_status}

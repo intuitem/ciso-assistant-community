@@ -5,7 +5,6 @@ body: |
   Vous avez été affecté à l'incident suivant :
 
   - Nom : ${incident_name}
-  - Description : ${incident_description}
   - ID : ${incident_ref_id}
   - Sévérité : ${incident_severity}
   - Statut : ${incident_status}

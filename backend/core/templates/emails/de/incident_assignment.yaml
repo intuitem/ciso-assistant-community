@@ -5,7 +5,6 @@ body: |
   Ihnen wurde folgender Vorfall zugewiesen:
 
   - Name: ${incident_name}
-  - Beschreibung: ${incident_description}
   - Referenz-ID: ${incident_ref_id}
   - Schweregrad: ${incident_severity}
   - Status: ${incident_status}

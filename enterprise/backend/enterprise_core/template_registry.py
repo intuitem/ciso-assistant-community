@@ -241,7 +241,6 @@ EMAIL_TEMPLATE_REGISTRY = {
         "category": "notification",
         "variables": [
             "incident_name",
-            "incident_description",
             "incident_ref_id",
             "incident_severity",
             "incident_status",

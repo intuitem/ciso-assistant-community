@@ -873,7 +873,6 @@ def send_incident_assignment_notification(incident_id, assigned_user_emails):
 
     context = {
         "incident_name": incident.name,
-        "incident_description": incident.description or "No description provided",
         "incident_ref_id": incident.ref_id or "N/A",
         "incident_severity": incident.get_severity_display(),
         "incident_status": incident.get_status_display(),
