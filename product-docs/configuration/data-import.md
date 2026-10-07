@@ -850,9 +850,11 @@ Folders (domains) are the top-level organisational units in CISO Assistant. Impo
 
 #### Supported fields
 
+* `internal_id` - id of an existing folder, filled in by the domains export; used to match the row in update mode, even if the folder was renamed
 * `name`\*
 * `description`
 * `domain` - name of the parent folder, must match exactly one existing folder name (case-insensitive)
+* `labels` - pipe- or comma-separated label names (created if missing); also accepted as `label` or `filtering_labels`
 
 ### Template
 
@@ -860,9 +862,11 @@ Folders (domains) are the top-level organisational units in CISO Assistant. Impo
 
 #### Special considerations
 
-* Conflict detection is performed by `name` + parent folder.
+* Conflict detection is performed by `internal_id` when present, otherwise by `name` + parent folder.
 * When `domain` is left blank the folder is attached to the root of the tenant.
 * An error is returned if `domain` matches more than one folder name.
+* Label names may only contain letters, digits, `_` or `-` (36 characters at most); a row with an invalid label is rejected.
+* The domains list can be exported to Excel or CSV with the same columns, so an export can be edited and re-imported with the **Update** strategy. In update mode, a blank cell leaves the field untouched.
 
 ***
 
