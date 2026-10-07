@@ -35,19 +35,19 @@ There is **no notification model** in the database. Notifications are fire-and-f
 
 ### Environment Variables
 
-| Variable                     | Required | Description                                         |
-| ---------------------------- | -------- | --------------------------------------------------- |
-| `EMAIL_HOST`                 | Yes      | SMTP server hostname                                |
-| `EMAIL_PORT`                 | Yes      | SMTP server port                                    |
-| `EMAIL_HOST_USER`            | No       | SMTP username                                       |
-| `EMAIL_HOST_PASSWORD`        | No       | SMTP password                                       |
-| `EMAIL_USE_TLS`              | No       | Enable TLS (`true`/`false`, default `false`)        |
-| `DEFAULT_FROM_EMAIL`         | Yes      | Sender address (fallback: `noreply@ciso.assistant`) |
-| `EMAIL_HOST_RESCUE`          | No       | Fallback SMTP server                                |
-| `EMAIL_PORT_RESCUE`          | No       | Fallback SMTP port                                  |
-| `EMAIL_HOST_USER_RESCUE`     | No       | Fallback SMTP username                              |
-| `EMAIL_HOST_PASSWORD_RESCUE` | No       | Fallback SMTP password                              |
-| `EMAIL_USE_TLS_RESCUE`       | No       | Fallback TLS setting                                |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `EMAIL_HOST` | Yes | SMTP server hostname |
+| `EMAIL_PORT` | Yes | SMTP server port |
+| `EMAIL_HOST_USER` | No | SMTP username |
+| `EMAIL_HOST_PASSWORD` | No | SMTP password |
+| `EMAIL_USE_TLS` | No | Enable TLS (`true`/`false`, default `false`) |
+| `DEFAULT_FROM_EMAIL` | Yes | Sender address (fallback: `noreply@ciso.assistant`) |
+| `EMAIL_HOST_RESCUE` | No | Fallback SMTP server |
+| `EMAIL_PORT_RESCUE` | No | Fallback SMTP port |
+| `EMAIL_HOST_USER_RESCUE` | No | Fallback SMTP username |
+| `EMAIL_HOST_PASSWORD_RESCUE` | No | Fallback SMTP password |
+| `EMAIL_USE_TLS_RESCUE` | No | Fallback TLS setting |
 
 Source: `backend/ciso_assistant/settings.py` (lines 258-275)
 
@@ -77,18 +77,18 @@ Worker command: `uv run python manage.py run_huey -w 2 -k process`
 
 ## Key Files
 
-| File                                   | Role                                                                           |
-| -------------------------------------- | ------------------------------------------------------------------------------ |
-| `backend/core/tasks.py`                | All Huey tasks: periodic crons + async notification senders                    |
-| `backend/core/email_utils.py`          | Template loading, rendering, formatting helpers                                |
-| `backend/core/serializers.py`          | Where assignment notifications are triggered (in serializer `create`/`update`) |
-| `backend/iam/models.py`                | `User.mailing()` for password reset / welcome emails                           |
-| `backend/iam/views.py`                 | `PasswordResetView` triggers password reset email                              |
-| `backend/ciso_assistant/settings.py`   | Email + Huey configuration                                                     |
-| `backend/global_settings/models.py`    | `GlobalSettings` stores `notifications_enable_mailing`                         |
-| `backend/core/templates/emails/en/`    | English YAML email templates                                                   |
-| `backend/core/templates/emails/fr/`    | French YAML email templates                                                    |
-| `backend/core/templates/registration/` | HTML templates for password reset / welcome emails                             |
+| File | Role |
+|------|------|
+| `backend/core/tasks.py` | All Huey tasks: periodic crons + async notification senders |
+| `backend/core/email_utils.py` | Template loading, rendering, formatting helpers |
+| `backend/core/serializers.py` | Where assignment notifications are triggered (in serializer `create`/`update`) |
+| `backend/iam/models.py` | `User.mailing()` for password reset / welcome emails |
+| `backend/iam/views.py` | `PasswordResetView` triggers password reset email |
+| `backend/ciso_assistant/settings.py` | Email + Huey configuration |
+| `backend/global_settings/models.py` | `GlobalSettings` stores `notifications_enable_mailing` |
+| `backend/core/templates/emails/en/` | English YAML email templates |
+| `backend/core/templates/emails/fr/` | French YAML email templates |
+| `backend/core/templates/registration/` | HTML templates for password reset / welcome emails |
 
 ---
 
@@ -145,45 +145,46 @@ The `ciso_assistant_url` variable is always injected via `get_default_context()`
 
 These run daily as `@db_periodic_task` Huey tasks. They query the database, group results by recipient, and send personalized emails.
 
-| Task                                          | Schedule | Condition                                                                                                                              | Recipients         | Template                           |
-| --------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ---------------------------------- |
-| `check_controls_with_expired_eta`             | 06:00    | AppliedControl ETA < today, status not `active`/`deprecated`                                                                           | Control owners     | `expired_controls`                 |
-| `check_compliance_assessments_due_in_month`   | 06:05    | ComplianceAssessment due_date = today + 30d, status not `done`/`deprecated`                                                            | Assessment authors | `compliance_assessment_due_soon`   |
-| `check_compliance_assessments_due_in_week`    | 06:10    | ComplianceAssessment due_date = today + 7d, status not `done`/`deprecated`                                                             | Assessment authors | `compliance_assessment_due_soon`   |
-| `check_compliance_assessments_due_tomorrow`   | 06:15    | ComplianceAssessment due_date = today + 1d, status not `done`/`deprecated`                                                             | Assessment authors | `compliance_assessment_due_soon`   |
-| `check_applied_controls_expiring_in_month`    | 06:17    | AppliedControl expiry_date = today + 30d, status not `deprecated`                                                                      | Control owners     | `applied_control_expiring_soon`    |
-| `check_applied_controls_expiring_in_week`     | 06:20    | AppliedControl expiry_date = today + 7d, status not `deprecated`                                                                       | Control owners     | `applied_control_expiring_soon`    |
-| `check_applied_controls_expiring_tomorrow`    | 06:25    | AppliedControl expiry_date = today + 1d, status not `deprecated`                                                                       | Control owners     | `applied_control_expiring_soon`    |
-| `check_evidences_expiring_in_month`           | 06:27    | Evidence expiry_date = today + 30d, status not `expired`                                                                               | Evidence owners    | `evidence_expiring_soon`           |
-| `check_evidences_expiring_in_week`            | 06:30    | Evidence expiry_date = today + 7d, status not `expired`                                                                                | Evidence owners    | `evidence_expiring_soon`           |
-| `check_evidences_expiring_tomorrow`           | 06:35    | Evidence expiry_date = today + 1d, status not `expired`                                                                                | Evidence owners    | `evidence_expiring_soon`           |
-| `check_evidences_expired`                     | 06:40    | Evidence expiry_date < today                                                                                                           | Evidence owners    | `expired_evidences`                |
-| `check_validation_flows_deadline_in_month`    | 06:37    | ValidationFlow deadline = today + 30d, status = `submitted`                                                                            | Approvers          | `validation_deadline`              |
-| `check_validation_flows_deadline_in_week`     | 06:40    | ValidationFlow deadline = today + 7d, status = `submitted`                                                                             | Approvers          | `validation_deadline`              |
-| `check_validation_flows_deadline_tomorrow`    | 06:45    | ValidationFlow deadline = today + 1d, status = `submitted`                                                                             | Approvers          | `validation_deadline`              |
-| `check_task_nodes_due_in_month`               | 06:55    | TaskNode due_date = today + 30d, status `pending`/`in_progress`, template enabled. Skipped for recurrent tasks with interval < 30 days | Assigned actors    | `task_node_due_soon`               |
-| `check_task_nodes_due_in_week`                | 07:00    | TaskNode due_date = today + 7d, status `pending`/`in_progress`, template enabled. Skipped for recurrent tasks with interval < 7 days   | Assigned actors    | `task_node_due_soon`               |
-| `check_task_nodes_due_tomorrow`               | 07:05    | TaskNode due_date = today + 1d, status `pending`/`in_progress`, template enabled                                                       | Assigned actors    | `task_node_due_soon`               |
-| `check_task_nodes_overdue`                    | 07:10    | TaskNode due_date < today, status `pending`, template enabled                                                                          | Assigned actors    | `task_node_overdue`                |
-| `check_security_exceptions_expiring_in_month` | 07:15    | SecurityException expiration_date = today + 30d, status not `resolved`/`expired`/`deprecated`                                          | Exception owners   | `security_exception_expiring_soon` |
-| `check_security_exceptions_expiring_in_week`  | 07:20    | SecurityException expiration_date = today + 7d, status not `resolved`/`expired`/`deprecated`                                           | Exception owners   | `security_exception_expiring_soon` |
-| `check_security_exceptions_expiring_tomorrow` | 07:25    | SecurityException expiration_date = today + 1d, status not `resolved`/`expired`/`deprecated`                                           | Exception owners   | `security_exception_expiring_soon` |
-| `check_security_exceptions_expired`           | 07:30    | SecurityException expiration_date < today, status not `resolved`/`expired`/`deprecated`                                                | Exception owners   | `expired_security_exceptions`      |
+| Task | Schedule | Condition | Recipients | Template |
+|------|----------|-----------|------------|----------|
+| `check_controls_with_expired_eta` | 06:00 | AppliedControl ETA < today, status not `active`/`deprecated` | Control owners | `expired_controls` |
+| `check_compliance_assessments_due_in_month` | 06:05 | ComplianceAssessment due_date = today + 30d, status not `done`/`deprecated` | Assessment authors | `compliance_assessment_due_soon` |
+| `check_compliance_assessments_due_in_week` | 06:10 | ComplianceAssessment due_date = today + 7d, status not `done`/`deprecated` | Assessment authors | `compliance_assessment_due_soon` |
+| `check_compliance_assessments_due_tomorrow` | 06:15 | ComplianceAssessment due_date = today + 1d, status not `done`/`deprecated` | Assessment authors | `compliance_assessment_due_soon` |
+| `check_applied_controls_expiring_in_month` | 06:17 | AppliedControl expiry_date = today + 30d, status not `deprecated` | Control owners | `applied_control_expiring_soon` |
+| `check_applied_controls_expiring_in_week` | 06:20 | AppliedControl expiry_date = today + 7d, status not `deprecated` | Control owners | `applied_control_expiring_soon` |
+| `check_applied_controls_expiring_tomorrow` | 06:25 | AppliedControl expiry_date = today + 1d, status not `deprecated` | Control owners | `applied_control_expiring_soon` |
+| `check_evidences_expiring_in_month` | 06:27 | Evidence expiry_date = today + 30d, status not `expired` | Evidence owners | `evidence_expiring_soon` |
+| `check_evidences_expiring_in_week` | 06:30 | Evidence expiry_date = today + 7d, status not `expired` | Evidence owners | `evidence_expiring_soon` |
+| `check_evidences_expiring_tomorrow` | 06:35 | Evidence expiry_date = today + 1d, status not `expired` | Evidence owners | `evidence_expiring_soon` |
+| `check_evidences_expired` | 06:40 | Evidence expiry_date < today | Evidence owners | `expired_evidences` |
+| `check_validation_flows_deadline_in_month` | 06:37 | ValidationFlow deadline = today + 30d, status = `submitted` | Approvers | `validation_deadline` |
+| `check_validation_flows_deadline_in_week` | 06:40 | ValidationFlow deadline = today + 7d, status = `submitted` | Approvers | `validation_deadline` |
+| `check_validation_flows_deadline_tomorrow` | 06:45 | ValidationFlow deadline = today + 1d, status = `submitted` | Approvers | `validation_deadline` |
+| `check_task_nodes_due_in_month` | 06:55 | TaskNode due_date = today + 30d, status `pending`/`in_progress`, template enabled. Skipped for recurrent tasks with interval < 30 days | Assigned actors | `task_node_due_soon` |
+| `check_task_nodes_due_in_week` | 07:00 | TaskNode due_date = today + 7d, status `pending`/`in_progress`, template enabled. Skipped for recurrent tasks with interval < 7 days | Assigned actors | `task_node_due_soon` |
+| `check_task_nodes_due_tomorrow` | 07:05 | TaskNode due_date = today + 1d, status `pending`/`in_progress`, template enabled | Assigned actors | `task_node_due_soon` |
+| `check_task_nodes_overdue` | 07:10 | TaskNode due_date < today, status `pending`, template enabled | Assigned actors | `task_node_overdue` |
+| `check_security_exceptions_expiring_in_month` | 07:15 | SecurityException expiration_date = today + 30d, status not `resolved`/`expired`/`deprecated` | Exception owners | `security_exception_expiring_soon` |
+| `check_security_exceptions_expiring_in_week` | 07:20 | SecurityException expiration_date = today + 7d, status not `resolved`/`expired`/`deprecated` | Exception owners | `security_exception_expiring_soon` |
+| `check_security_exceptions_expiring_tomorrow` | 07:25 | SecurityException expiration_date = today + 1d, status not `resolved`/`expired`/`deprecated` | Exception owners | `security_exception_expiring_soon` |
+| `check_security_exceptions_expired` | 07:30 | SecurityException expiration_date < today, status not `resolved`/`expired`/`deprecated` | Exception owners | `expired_security_exceptions` |
 
 ### 2. Assignment Notifications (Event-Triggered)
 
 These are triggered from serializer `create()` / `update()` methods when users are newly assigned. They use the `@task()` decorator (async, not periodic).
 
-| Event                                | Trigger Location                                    | Task Function                                        | Template                            |
-| ------------------------------------ | --------------------------------------------------- | ---------------------------------------------------- | ----------------------------------- |
-| AppliedControl owner assigned        | `AppliedControlWriteSerializer.create/update`       | `send_applied_control_assignment_notification`       | `applied_control_assignment`        |
-| ComplianceAssessment author assigned | `ComplianceAssessmentWriteSerializer.create/update` | `send_compliance_assessment_assignment_notification` | `compliance_assessment_assignment`  |
-| TaskTemplate assigned_to set         | `TaskTemplateWriteSerializer.create/update`         | `send_task_template_assignment_notification`         | `task_template_assignment`          |
-| RiskScenario owner assigned          | `RiskScenarioWriteSerializer.create/update`         | `send_risk_scenario_assignment_notification`         | `risk_scenario_assignment`          |
-| ValidationFlow created               | `ValidationFlowWriteSerializer.create`              | `send_validation_flow_created_notification`          | `validation_flow_created`           |
-| ValidationFlow status changed        | `ValidationFlowWriteSerializer.update`              | `send_validation_flow_updated_notification`          | `validation_flow_updated`           |
-| SecurityException owner assigned     | `SecurityExceptionWriteSerializer.create/update`    | `send_security_exception_assignment_notification`    | `security_exception_assignment`     |
-| SecurityException status changed     | `SecurityExceptionWriteSerializer.update`           | `send_security_exception_status_notification`        | `security_exception_status_changed` |
+| Event | Trigger Location | Task Function | Template |
+|-------|-----------------|---------------|----------|
+| AppliedControl owner assigned | `AppliedControlWriteSerializer.create/update` | `send_applied_control_assignment_notification` | `applied_control_assignment` |
+| ComplianceAssessment author assigned | `ComplianceAssessmentWriteSerializer.create/update` | `send_compliance_assessment_assignment_notification` | `compliance_assessment_assignment` |
+| TaskTemplate assigned_to set | `TaskTemplateWriteSerializer.create/update` | `send_task_template_assignment_notification` | `task_template_assignment` |
+| RiskScenario owner assigned | `RiskScenarioWriteSerializer.create/update` | `send_risk_scenario_assignment_notification` | `risk_scenario_assignment` |
+| ValidationFlow created | `ValidationFlowWriteSerializer.create` | `send_validation_flow_created_notification` | `validation_flow_created` |
+| ValidationFlow status changed | `ValidationFlowWriteSerializer.update` | `send_validation_flow_updated_notification` | `validation_flow_updated` |
+| SecurityException owner assigned | `SecurityExceptionWriteSerializer.create/update` | `send_security_exception_assignment_notification` | `security_exception_assignment` |
+| SecurityException status changed | `SecurityExceptionWriteSerializer.update` | `send_security_exception_status_notification` | `security_exception_status_changed` |
+| Incident owner assigned | `IncidentWriteSerializer.create/update` | `send_incident_assignment_notification` | `incident_assignment` |
 
 **Pattern for assignment notifications in serializers:**
 
@@ -217,12 +218,12 @@ Note: `ComplianceAssessmentWriteSerializer.update` and `SecurityExceptionWriteSe
 
 These are triggered from a ViewSet action rather than from a serializer's `create()`/`update()`. Every call to `set_status` validates the `(from_status, to_status)` pair against `TRANSITIONS`, then `_send_transition_notification` (`backend/core/views.py:18676`) dispatches the matching task.
 
-| Transition                                                                  | Task Function                                                                                | Template               | Recipient                         |
-| --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------- | --------------------------------- |
-| `* → in_progress`                                                           | `send_assignment_activated_notification`                                                     | `assignment_activated` | Assignee                          |
-| `in_progress/changes_requested → submitted`                                 | `send_assignment_submitted_notification`                                                     | `assignment_submitted` | Reviewers (falls back to authors) |
-| `submitted → closed`, `submitted → changes_requested`, `closed → submitted` | `send_assignment_reviewed_notification` (decision = `closed`/`changes_requested`/`reopened`) | `assignment_reviewed`  | Assignee                          |
-| `in_progress → draft`, `changes_requested → draft`                          | `send_assignment_reopened_notification`                                                      | `assignment_reopened`  | Assignee                          |
+| Transition | Task Function | Template | Recipient |
+|------------|---------------|----------|-----------|
+| `* → in_progress` | `send_assignment_activated_notification` | `assignment_activated` | Assignee |
+| `in_progress/changes_requested → submitted` | `send_assignment_submitted_notification` | `assignment_submitted` | Reviewers (falls back to authors) |
+| `submitted → closed`, `submitted → changes_requested`, `closed → submitted` | `send_assignment_reviewed_notification` (decision = `closed`/`changes_requested`/`reopened`) | `assignment_reviewed` | Assignee |
+| `in_progress → draft`, `changes_requested → draft` | `send_assignment_reopened_notification` | `assignment_reopened` | Assignee |
 
 `submitted → draft` and `closed → draft` are valid transitions but send **no** notification: the assignee had already handed the work back or finished, so a reopening only notifies when it interrupts active work (`in_progress` or `changes_requested`).
 
@@ -230,11 +231,11 @@ These are triggered from a ViewSet action rather than from a serializer's `creat
 
 These use a separate mechanism (`User.mailing()` in `backend/iam/models.py`) with Django HTML templates instead of YAML.
 
-| Event                   | Template                                      | Triggered By                                      |
-| ----------------------- | --------------------------------------------- | ------------------------------------------------- |
-| Password reset          | `registration/password_reset_email.html`      | `PasswordResetView.post()`                        |
-| User creation (welcome) | `registration/first_connexion_email.html`     | `User.save()` / management command `welcome_mail` |
-| User creation (SSO)     | `registration/first_connexion_email_sso.html` | SSO user provisioning                             |
+| Event | Template | Triggered By |
+|-------|----------|-------------|
+| Password reset | `registration/password_reset_email.html` | `PasswordResetView.post()` |
+| User creation (welcome) | `registration/first_connexion_email.html` | `User.save()` / management command `welcome_mail` |
+| User creation (SSO) | `registration/first_connexion_email_sso.html` | SSO user provisioning |
 
 These emails support the **rescue (fallback) email server**. Notification emails (from `tasks.py`) currently use only the primary server.
 
@@ -242,14 +243,14 @@ These emails support the **rescue (fallback) email server**. Notification emails
 
 These tasks perform automated actions without sending emails:
 
-| Task                                  | Schedule | Action                                                                     |
-| ------------------------------------- | -------- | -------------------------------------------------------------------------- |
-| `lock_overdue_compliance_assessments` | 02:30    | Lock overdue assessments (with campaign/entity), set status to `in_review` |
-| `deactivate_expired_users`            | 03:00    | Deactivate users past `expiry_date` (except superusers)                    |
-| `mark_expired_evidences`              | 03:35    | Set evidence status to `expired`                                           |
-| `check_expired_organisation_issues`   | 06:50    | Set expired OrganisationIssue status to `inactive`                         |
-| `auditlog_retention_cleanup`          | 22:30    | Flush old audit log entries                                                |
-| `auditlog_prune`                      | Every 3h | Prune audit log                                                            |
+| Task | Schedule | Action |
+|------|----------|--------|
+| `lock_overdue_compliance_assessments` | 02:30 | Lock overdue assessments (with campaign/entity), set status to `in_review` |
+| `deactivate_expired_users` | 03:00 | Deactivate users past `expiry_date` (except superusers) |
+| `mark_expired_evidences` | 03:35 | Set evidence status to `expired` |
+| `check_expired_organisation_issues` | 06:50 | Set expired OrganisationIssue status to `inactive` |
+| `auditlog_retention_cleanup` | 22:30 | Flush old audit log entries |
+| `auditlog_prune` | Every 3h | Prune audit log |
 
 ---
 
@@ -269,30 +270,31 @@ This means assigning a Team as owner of a control can notify multiple people in 
 
 ### English (`en/`)
 
-| Template File                            | Used By                                                              |
-| ---------------------------------------- | -------------------------------------------------------------------- |
-| `expired_controls.yaml`                  | `send_notification_email_expired_eta`                                |
-| `applied_control_assignment.yaml`        | `send_applied_control_assignment_notification`                       |
-| `applied_control_expiring_soon.yaml`     | `send_applied_control_expiring_soon_notification`                    |
-| `compliance_assessment_assignment.yaml`  | `send_compliance_assessment_assignment_notification`                 |
-| `compliance_assessment_due_soon.yaml`    | `send_compliance_assessment_due_soon_notification`                   |
-| `risk_scenario_assignment.yaml`          | `send_risk_scenario_assignment_notification`                         |
-| `evidence_expiring_soon.yaml`            | `send_evidence_expiring_soon_notification`                           |
-| `expired_evidences.yaml`                 | `send_notification_email_expired_evidence`                           |
-| `task_template_assignment.yaml`          | `send_task_template_assignment_notification`                         |
-| `validation_flow_created.yaml`           | `send_validation_flow_created_notification`                          |
-| `validation_flow_updated.yaml`           | `send_validation_flow_updated_notification`                          |
-| `validation_deadline.yaml`               | `send_validation_deadline_notification` (parametric, uses `${days}`) |
-| `task_node_due_soon.yaml`                | `send_task_node_due_soon_notification`                               |
-| `task_node_overdue.yaml`                 | `send_task_node_overdue_notification`                                |
-| `security_exception_assignment.yaml`     | `send_security_exception_assignment_notification`                    |
-| `security_exception_status_changed.yaml` | `send_security_exception_status_notification`                        |
-| `security_exception_expiring_soon.yaml`  | `send_security_exception_expiring_soon_notification`                 |
-| `expired_security_exceptions.yaml`       | `send_notification_email_expired_security_exception`                 |
-| `assignment_activated.yaml`              | `send_assignment_activated_notification`                             |
-| `assignment_submitted.yaml`              | `send_assignment_submitted_notification`                             |
-| `assignment_reviewed.yaml`               | `send_assignment_reviewed_notification`                              |
-| `assignment_reopened.yaml`               | `send_assignment_reopened_notification`                              |
+| Template File | Used By |
+|--------------|---------|
+| `expired_controls.yaml` | `send_notification_email_expired_eta` |
+| `applied_control_assignment.yaml` | `send_applied_control_assignment_notification` |
+| `applied_control_expiring_soon.yaml` | `send_applied_control_expiring_soon_notification` |
+| `compliance_assessment_assignment.yaml` | `send_compliance_assessment_assignment_notification` |
+| `compliance_assessment_due_soon.yaml` | `send_compliance_assessment_due_soon_notification` |
+| `risk_scenario_assignment.yaml` | `send_risk_scenario_assignment_notification` |
+| `evidence_expiring_soon.yaml` | `send_evidence_expiring_soon_notification` |
+| `expired_evidences.yaml` | `send_notification_email_expired_evidence` |
+| `task_template_assignment.yaml` | `send_task_template_assignment_notification` |
+| `validation_flow_created.yaml` | `send_validation_flow_created_notification` |
+| `validation_flow_updated.yaml` | `send_validation_flow_updated_notification` |
+| `validation_deadline.yaml` | `send_validation_deadline_notification` (parametric, uses `${days}`) |
+| `task_node_due_soon.yaml` | `send_task_node_due_soon_notification` |
+| `task_node_overdue.yaml` | `send_task_node_overdue_notification` |
+| `security_exception_assignment.yaml` | `send_security_exception_assignment_notification` |
+| `security_exception_status_changed.yaml` | `send_security_exception_status_notification` |
+| `security_exception_expiring_soon.yaml` | `send_security_exception_expiring_soon_notification` |
+| `expired_security_exceptions.yaml` | `send_notification_email_expired_security_exception` |
+| `incident_assignment.yaml` | `send_incident_assignment_notification` |
+| `assignment_activated.yaml` | `send_assignment_activated_notification` |
+| `assignment_submitted.yaml` | `send_assignment_submitted_notification` |
+| `assignment_reviewed.yaml` | `send_assignment_reviewed_notification` |
+| `assignment_reopened.yaml` | `send_assignment_reopened_notification` |
 
 ### French (`fr/`)
 
@@ -309,7 +311,6 @@ All English templates have a matching French translation. Both directories conta
    - `backend/core/templates/emails/fr/{template_name}.yaml`
 
 2. **Add a Huey task** in `backend/core/tasks.py`:
-
    ```python
    @task()
    def send_my_new_notification(object_id, recipient_emails):
@@ -334,7 +335,6 @@ All English templates have a matching French translation. Both directories conta
    ```
 
 3. **Trigger from serializer** (in `backend/core/serializers.py`):
-
    ```python
    def _send_assignment_notifications(self, instance, actor_ids):
        if not actor_ids:
@@ -360,7 +360,6 @@ All English templates have a matching French translation. Both directories conta
 1. **Create email templates** (same as above).
 
 2. **Add a periodic task** in `backend/core/tasks.py`:
-
    ```python
    @db_periodic_task(crontab(hour="6", minute="55"))
    def check_my_condition():
@@ -403,7 +402,7 @@ All English templates have a matching French translation. Both directories conta
 
 1. **Requirement assessment status change**: Notify assigned actors when a requirement assessment result changes (e.g., from `non_compliant` to `partially_compliant`). Useful for audit workflows.
 
-2. **Incident notifications**: When a new incident is created or its severity changes, notify relevant stakeholders. The `Incident` model has owners who should be alerted.
+2. **Incident status/severity notifications**: Owners are already notified when assigned (`incident_assignment`). Notifying them when an incident's severity or status changes is still missing.
 
 3. **Compliance assessment status transitions**: Notify authors when an assessment moves to `in_review` or `done` status, especially when auto-locked by `lock_overdue_compliance_assessments`.
 
