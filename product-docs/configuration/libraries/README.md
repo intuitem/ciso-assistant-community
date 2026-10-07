@@ -58,7 +58,6 @@ Not sure where to start? Use the table below to find the page that matches your 
 | Follow a complete small example | [Guided example: create your first framework](guided-example.md) |
 | Browse the available sample workbooks | [Examples](examples.md) |
 | Import a finished library into CISO Assistant | [Import a library](import-library.md) |
-| Check that an imported library works as expected | [Test a library](test-library.md) |
 | Publish a new version of a custom library | [Update a library](update-library.md) |
 | Handle a standard with its own import workflow | [Special cases](special-cases/README.md) |
 

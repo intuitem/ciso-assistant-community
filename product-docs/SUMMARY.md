@@ -127,7 +127,6 @@
   * [Create a Mapping](configuration/libraries/create-mapping.md)
   * [Translate library content](configuration/libraries/translations.md)
   * [Import a library](configuration/libraries/import-library.md)
-  * [Test a library](configuration/libraries/test-library.md)
   * [Update a library](configuration/libraries/update-library.md)
   * [Unload or delete a library](configuration/libraries/unload-or-delete-library.md)
   * [Examples](configuration/libraries/examples.md)
