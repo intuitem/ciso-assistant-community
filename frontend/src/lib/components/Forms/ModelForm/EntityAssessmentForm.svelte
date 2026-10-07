@@ -11,7 +11,8 @@
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
-	import type { SuperForm } from 'sveltekit-superforms';
+	import CustomFieldsSection from '../CustomFieldsSection.svelte';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -34,6 +35,7 @@
 	}: Props = $props();
 
 	const { form: formData } = form;
+	const { value: folderId } = formFieldProxy(form, 'folder');
 
 	// Creating almost always means sending a questionnaire, so the audit is on by
 	// default; on edit it stays off. `??` would keep the schema's `false`.
@@ -232,6 +234,18 @@
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
 />
+<AutocompleteSelect
+	multiple
+	{form}
+	createFromSelection={true}
+	optionsEndpoint="filtering-labels"
+	optionsLabelField="label"
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
+	translateOptions={false}
+	allowUserOptions="append"
+/>
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<Score
 		{form}
@@ -337,3 +351,4 @@
 		bind:cachedValue={formDataCache['reference_link']}
 	/>
 </Dropdown>
+<CustomFieldsSection {form} model="tprm.entityassessment" folderId={$folderId} />

@@ -34,13 +34,35 @@ class CustomFieldsMixin(models.Model):
         choice → slug; multi_choice → list of slugs; others → typed python value.
         """
         result: dict = {}
-        for value in self.custom_field_values.select_related("definition").all():
+        values = self.custom_field_values.all()
+        if "custom_field_values" not in getattr(self, "_prefetched_objects_cache", {}):
+            values = values.select_related("definition")
+        for value in values:
             definition = value.definition
             if definition.field_type == FieldType.MULTI_CHOICE:
                 result.setdefault(definition.key, []).append(value.value)
             else:
                 result[definition.key] = value.value
         return result
+
+    def copy_custom_fields_to(self, target):
+        """Copy every stored value onto ``target``, a host of the same model."""
+        CustomFieldValue.objects.bulk_create(
+            CustomFieldValue(
+                definition_id=value.definition_id,
+                content_type_id=value.content_type_id,
+                object_id=target.pk,
+                value_text=value.value_text,
+                value_number=value.value_number,
+                value_date=value.value_date,
+                value_boolean=value.value_boolean,
+            )
+            for value in self.custom_field_values.all()
+        )
+        target.clear_custom_field_cache()
+
+    def clear_custom_field_cache(self):
+        getattr(self, "_prefetched_objects_cache", {}).pop("custom_field_values", None)
 
     @transaction.atomic
     def set_custom_field(self, definition: CustomFieldDefinition, raw):
@@ -52,6 +74,7 @@ class CustomFieldsMixin(models.Model):
         content_type = ContentType.objects.get_for_model(self.__class__)
         if definition.content_type_id != content_type.id:
             raise ValueError("Custom field definition model does not match host model.")
+        self.clear_custom_field_cache()
         base = self.custom_field_values.filter(definition=definition)
 
         if definition.field_type == FieldType.MULTI_CHOICE:

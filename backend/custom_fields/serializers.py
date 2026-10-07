@@ -318,6 +318,7 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
         # discards values whose definition no longer applies, so they don't
         # linger unreadable in forms while still matching cf__ filters.
         if RoleAssignment.get_iam_folder_id(instance) != old_folder_id:
+            instance.clear_custom_field_cache()
             instance.custom_field_values.exclude(
                 definition__in=CustomFieldDefinition.for_object(instance)
             ).delete()
