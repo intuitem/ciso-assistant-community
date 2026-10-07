@@ -3452,8 +3452,6 @@
 	"remoteObjectHelpText": "Pasirinkite nuotolinį objektą sinchronizavimui",
 	"webhookEndpointUrl": "Webhook galinio taško URL",
 	"webhookEndpointUrlHelpText": "URL, kuriuo programa gaus gaunamuosius webhook iš trečiosios šalies paslaugos.",
-	"createRemoteObject": "Kurti nuotolinį objektą",
-	"createRemoteObjectHelpText": "Kai įjungta, kuriant šį elementą trečiosios šalies paslaugoje bus sukurtas atitinkamas objektas.",
 	"metricDefinition": "Metrikos apibrėžimas",
 	"metricDefinitions": "Metrikų apibrėžimai",
 	"addMetricDefinition": "Pridėti metrikos apibrėžimą",

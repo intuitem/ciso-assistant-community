@@ -1568,8 +1568,6 @@
 	"createComplianceAssessment": "U heeft nog geen audits of heeft er geen toegang toe.",
 	"createIncident": "Incident aanmaken",
 	"createIncidents": "Maak incidenten aan om analyses te zien",
-	"createRemoteObject": "Extern object aanmaken",
-	"createRemoteObjectHelpText": "Indien ingeschakeld wordt een corresponderend object aangemaakt in de externe dienst wanneer dit item wordt aangemaakt.",
 	"createRiskAssessment": "Start ook een risicobeoordeling",
 	"createWebhookEndpoint": "Webhook-eindpunt aanmaken",
 	"createdUserWillHaveNoRights": "Gebruikers hebben geen standaardrechten; vergeet niet hun gebruikersgroepen te bewerken",

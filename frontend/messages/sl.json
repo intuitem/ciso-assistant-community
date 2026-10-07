@@ -3938,8 +3938,6 @@
 	"remoteObjectHelpText": "Izberite oddaljeni objekt za sinhronizacijo",
 	"webhookEndpointUrl": "Končna točka za Webhook URL",
 	"webhookEndpointUrlHelpText": "URL naslov, na katerem bo aplikacija prejemala vhodne webhooke iz zunanje storitve.",
-	"createRemoteObject": "Ustvari oddaljeni objekt",
-	"createRemoteObjectHelpText": "Ko je omogočeno, se bo ob ustvarjanju tega elementa ustvaril ustrezen objekt v zunanji storitvi.",
 	"metricDefinition": "Definicija metrike",
 	"metricDefinitions": "Definicije metrik",
 	"addMetricDefinition": "Dodaj definicijo metrike",

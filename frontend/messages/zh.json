@@ -2567,8 +2567,6 @@
 	"remoteObjectHelpText": "选择要同步的远程对象",
 	"webhookEndpointUrl": "Webhook端点URL",
 	"webhookEndpointUrlHelpText": "应用程序接收第三方服务传入webhook的URL。",
-	"createRemoteObject": "创建远程对象",
-	"createRemoteObjectHelpText": "启用后，当创建此项目时，将在第三方服务中创建相应的对象。",
 	"addMetricInstance": "添加指标实例",
 	"customMetricSample": "自定义指标样本",
 	"customMetricSamples": "自定义指标样本",

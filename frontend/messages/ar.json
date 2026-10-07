@@ -4736,8 +4736,6 @@
 	"remoteObjectHelpText": "اختر الكائن البعيد المراد المزامنة معه",
 	"webhookEndpointUrl": "عنوان نقطة نهاية الـ webhook",
 	"webhookEndpointUrlHelpText": "العنوان الذي سيستقبل عليه التطبيق الـ webhooks الواردة من خدمة الطرف الخارجي.",
-	"createRemoteObject": "إنشاء كائن بعيد",
-	"createRemoteObjectHelpText": "عند التفعيل، سيُنشأ كائن مقابل في خدمة الطرف الخارجي عند إنشاء هذا العنصر.",
 	"metricDefinition": "تعريف المؤشر",
 	"metricDefinitions": "تعريفات المؤشرات",
 	"addMetricDefinition": "إضافة تعريف مؤشر",

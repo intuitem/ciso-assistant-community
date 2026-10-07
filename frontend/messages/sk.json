@@ -3560,8 +3560,6 @@
 	"remoteObjectHelpText": "Zvoliť vzdialený objekt, s ktorým chcete synchronizovať",
 	"webhookEndpointUrl": "Webová adresa koncového bodu webhooku",
 	"webhookEndpointUrlHelpText": "Adresa URL, na ktorú bude aplikácia prijímať prichádzajúce webhooky zo služby tretej strany.",
-	"createRemoteObject": "Vytvoriť vzdialený objekt",
-	"createRemoteObjectHelpText": "Keď je táto možnosť povolená, pri vytvorení tejto položky sa v službe tretej strany vytvorí zodpovedajúci objekt.",
 	"metricDefinition": "Definícia ukazovateľa",
 	"metricDefinitions": "Definície ukazovateľov",
 	"addMetricDefinition": "Pridať definíciu ukazovateľa",

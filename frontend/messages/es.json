@@ -1574,8 +1574,6 @@
 	"createComplianceAssessment": "Aún no tiene auditorías o no tiene acceso a ellas.",
 	"createIncident": "Crear incidente",
 	"createIncidents": "Cree incidentes para ver análisis",
-	"createRemoteObject": "Crear objeto remoto",
-	"createRemoteObjectHelpText": "Cuando está habilitado, se creará un objeto correspondiente en el servicio de terceros cuando se cree este elemento.",
 	"createRiskAssessment": "Iniciar también una evaluación de riesgos",
 	"createWebhookEndpoint": "Crear punto de conexión de webhook",
 	"createdUserWillHaveNoRights": "Los usuarios no tienen permisos predeterminados; recuerde editar sus grupos de usuarios",
