@@ -60,10 +60,11 @@ export function unsafeTranslate(
 		if (Object.hasOwn(m, key) && typeof m[key] === 'function') {
 			return m[key](params, options);
 		}
-		// Choice labels containing a colon (e.g. DORA termination reasons) would be
-		// captured by the prefix:suffix branch below before reaching the camelCase
-		// lookup; try a punctuation-stripped camelCase key first so they can translate.
-		if (typeof key === 'string' && key.includes(':')) {
+		// Choice labels containing a colon (e.g. DORA termination reasons) or a slash
+		// (e.g. "Company culture / communication") would be captured by the prefix:suffix
+		// or per-part split branches below; try a punctuation-stripped camelCase key
+		// first so a label with a whole-label message translates as one.
+		if (typeof key === 'string' && (key.includes(':') || key.includes('/'))) {
 			const sanitizedKey = toCamelCase(
 				key
 					.replace(/[^\w\s]/g, ' ')
@@ -111,10 +112,7 @@ export function unsafeTranslate(
 			const parts = key.split('/');
 			const translatedParts = parts.map((part) => {
 				const camelCasePart = toCamelCase(part);
-				if (!m[camelCasePart]) return part;
-				const lead = part.slice(0, part.length - part.trimStart().length);
-				const trail = part.slice(part.trimEnd().length);
-				return lead + m[camelCasePart](params, options) + trail;
+				return m[camelCasePart] ? m[camelCasePart](params, options) : part;
 			});
 			return translatedParts.join('/');
 		}
