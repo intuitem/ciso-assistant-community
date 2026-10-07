@@ -6826,6 +6826,8 @@
 	"membershipOperation": "Opération",
 	"operationAdd": "Ajouter",
 	"operationRemove": "Retirer",
+	"includeNotApplicableRequirements": "Inclure les exigences non applicables",
+	"excludeNotApplicableRequirements": "Exclure les exigences non applicables",
 	"table": "Tableau",
 	"oneToOne": "Un à un",
 	"aggregatePerSource": "Agrégé par source",

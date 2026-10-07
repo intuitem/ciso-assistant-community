@@ -8,6 +8,11 @@
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
+		setContextRecursiveTreeView,
+		DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW
+	} from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	import ExcludeNotApplicableRequirements from '$lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
+	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
@@ -494,6 +499,19 @@
 			count: tocSections.filter((s) => s.result === opt.value).length
 		}))
 	);
+
+	const contextTreeView = $state(structuredClone(DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW));
+	setContextRecursiveTreeView(contextTreeView);
+
+	const filteredResultCounts = $derived(
+		resultCounts.filter(({ value }) => {
+			if (contextTreeView.excludeNotApplicableRequirements && value === 'not_applicable') {
+				return false;
+			}
+			return true;
+		})
+	);
+
 	const filteredTocSections = $derived(
 		tocFilterResult
 			? tocSections.filter(
@@ -507,14 +525,32 @@
 		return v == null ? '--' : Math.round(Number(v) * 100) / 100;
 	}
 
-	// Audit progress analytics (assessable requirements only).
-	const assessableTotal = $derived(
-		tocSections.filter((s) => s.result !== '__section__' && s.result !== '__splash__').length
-	);
-	const assessedCount = $derived(
+	const assessableTOCSections = $derived(
 		tocSections.filter(
-			(s) => s.result !== '__section__' && s.result !== '__splash__' && s.result !== 'not_assessed'
-		).length
+			(section) => section.result !== '__section__' && section.result !== '__splash__'
+		)
+	);
+
+	// Audit progress analytics (assessable requirements only).
+	const assessableTotal = $derived(assessableTOCSections.length);
+	const filteredAssessableTotal = $derived(
+		assessableTOCSections.filter((section) => {
+			if (contextTreeView.excludeNotApplicableRequirements && section.result === 'not_applicable') {
+				return false;
+			}
+			return true;
+		}).length
+	);
+	const filteredAssessedCount = $derived(
+		assessableTOCSections.filter((section) => {
+			if (section.result === 'not_assessed') {
+				return false;
+			}
+			if (contextTreeView.excludeNotApplicableRequirements && section.result === 'not_applicable') {
+				return false;
+			}
+			return true;
+		}).length
 	);
 
 	// Scroll to a requirement, expanding any collapsed parent section first.
@@ -811,6 +847,11 @@
 								<i class="fa-solid {allExpanded ? 'fa-compress' : 'fa-expand'} mr-2"></i>
 								{allExpanded ? m.collapseAll() : m.expandAll()}
 							</button>
+							<ExcludeNotApplicableRequirements
+								bind:excludeNotApplicableRequirements={
+									contextTreeView.excludeNotApplicableRequirements
+								}
+							/>
 						{/if}
 						{#if hasQuestions}
 							<div class="flex items-center justify-center space-x-4">
@@ -855,19 +896,19 @@
 								{m.tableOfContents()}
 							</button>
 						{/if}
-						{#if showResult && assessableTotal > 0}
+						{#if showResult && filteredAssessableTotal > 0}
 							<div class="flex flex-1 items-center gap-3 min-w-[200px]">
 								<span class="text-xs font-medium text-surface-500 shrink-0">
-									{m.progress()}: {assessedCount}/{assessableTotal}
+									{m.progress()}: {filteredAssessedCount}/{filteredAssessableTotal}
 								</span>
 								<div
 									class="flex flex-1 h-5 overflow-hidden rounded-sm border border-surface-200-800 bg-surface-100-900"
 									role="img"
-									aria-label="{m.progress()}: {assessedCount}/{assessableTotal}"
+									aria-label="{m.progress()}: {filteredAssessedCount}/{filteredAssessableTotal}"
 								>
-									{#each resultCounts as opt (opt.value)}
+									{#each filteredResultCounts as opt (opt.value)}
 										{#if opt.count > 0}
-											{@const pct = (opt.count / assessableTotal) * 100}
+											{@const pct = (opt.count / filteredAssessableTotal) * 100}
 											<div
 												class="flex h-full items-center justify-center overflow-hidden"
 												style="width: {pct}%; background-color: {complianceResultColorMap[

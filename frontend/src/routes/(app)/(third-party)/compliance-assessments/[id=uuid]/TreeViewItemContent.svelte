@@ -17,6 +17,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { isQuestionVisible } from '$lib/utils/helpers';
+	import { getContextRecursiveTreeView } from '$lib/components/TreeView/RecursiveTreeView.svelte';
 
 	interface Props {
 		ref_id: string;
@@ -165,6 +166,44 @@
 			};
 			return { result: result, percentage };
 		}
+	);
+
+	// Sum of the percentages for every non-`"not_applicable"` requirement result (including not_assessed).
+	// (Used for the `applicableOrderedResultPercentages` calculation).
+	const applicablePercentageSum: number = orderedResultPercentages.reduce(
+		(acc, { result, percentage }) => {
+			if (result === 'not_applicable') {
+				acc -= percentage.value;
+			}
+			return acc;
+		},
+		100
+	);
+
+	const ctx = getContextRecursiveTreeView();
+
+	// New percentages re-computed(re-calculated) after excluding the `"not_applicable"` requirements.
+	// a 25%("partially_compliant"), 50%("compliant") 25%("not_applicable") would become 33%("partially_compliant") 67%("compliant").
+	const applicableOrderedResultPercentages = orderedResultPercentages
+		.map(({ result, percentage }) => {
+			const newPercentageValue =
+				applicablePercentageSum === 0 ? 0 : percentage.value * (100 / applicablePercentageSum);
+
+			const resultPercentage = {
+				result,
+				percentage: {
+					value: newPercentageValue,
+					display: newPercentageValue.toFixed(0)
+				}
+			};
+			return resultPercentage;
+		})
+		.filter(({ result }) => result !== 'not_applicable');
+
+	const displayedOrderedResultPercentages = $derived(
+		ctx.excludeNotApplicableRequirements
+			? applicableOrderedResultPercentages
+			: orderedResultPercentages
 	);
 
 	// Aggregated scores are computed on the backend (see
@@ -513,7 +552,7 @@
 					<div
 						class="flex max-w-96 grow bg-surface-200-800 rounded-full overflow-hidden h-4 shrink self-center"
 					>
-						{#each orderedResultPercentages as rp}
+						{#each displayedOrderedResultPercentages as rp}
 							<div
 								class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
 									complianceResultColorMap[rp.result]
