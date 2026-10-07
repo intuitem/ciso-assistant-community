@@ -474,7 +474,9 @@
 	<div class="flex">
 		<BuilderToC />
 
-		<div class="flex-1 min-w-0">
+		<!-- An edit in progress counts as unsaved even before its field commits
+		     (on blur): the Save button shows and leaving the page warns. -->
+		<div class="flex-1 min-w-0" oninput={() => unsavedStore.set(true)}>
 			<div class="max-w-5xl mx-auto px-6 py-8 space-y-8">
 				{#if $errorsStore.has('save-draft')}
 					<div

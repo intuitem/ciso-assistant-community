@@ -3214,3 +3214,33 @@ def test_framework_editor_refuses_rules_that_cannot_evaluate(admin_client):
     assert (
         admin_client.put(url, {"editing_draft": doc}, format="json").status_code == 200
     )
+
+
+def test_a_new_choice_without_text_is_not_saved():
+    """Clicking the empty "choice text" row adds a choice: saved as is, it
+    becomes an empty option. An existing choice emptied by the author stays,
+    since answers may point at it."""
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    question_id = doc["questions"][0]["id"]
+    doc["choices"].append(
+        {
+            "id": "tmp-empty",
+            "urn": None,
+            "value": "  ",
+            "order": 9,
+            "question_id": question_id,
+        }
+    )
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    node = next(n for n in rebuilt["requirement_nodes"] if n["ref_id"] == "A.1")
+    choices = next(iter(node["questions"].values()))["choices"]
+    assert [c["value"] for c in choices] == ["Yes"]
+
+    doc["choices"] = [c for c in doc["choices"] if c["id"] != "tmp-empty"]
+    doc["choices"][0]["value"] = ""
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    node = next(n for n in rebuilt["requirement_nodes"] if n["ref_id"] == "A.1")
+    assert len(next(iter(node["questions"].values()))["choices"]) == 1

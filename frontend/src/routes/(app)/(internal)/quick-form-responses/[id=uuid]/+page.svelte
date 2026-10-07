@@ -416,7 +416,8 @@
 					>
 						<i class="fa-solid fa-paper-plane mr-1"></i>{m.quickFormSubmit()}
 					</button>
-					{#if content.on_submit}
+					<!-- Only once Submit can be clicked: before that it describes nothing. -->
+					{#if content.on_submit && content.progress?.complete}
 						<span class="text-xs text-surface-500" data-testid="on-submit-hint">
 							<i class="fa-solid {content.on_submit === 'apply' ? 'fa-bolt' : 'fa-user-check'} mr-1"
 							></i>{content.on_submit === 'apply' ? m.onSubmitApplies() : m.onSubmitGoesToReview()}
@@ -432,14 +433,17 @@
 						<i class="fa-solid fa-ban mr-1"></i>{m.quickFormDrop()}
 					</button>
 				{/if}
-				<button
-					type="button"
-					class="btn btn-sm preset-tonal"
-					disabled={busy}
-					onclick={() => post('clone', {})}
-				>
-					<i class="fa-solid fa-copy mr-1"></i>{m.quickFormClone()}
-				</button>
+				<!-- To re-run a sent or decided response, not the draft being filled. -->
+				{#if response.status !== 'draft'}
+					<button
+						type="button"
+						class="btn btn-sm preset-tonal"
+						disabled={busy}
+						onclick={() => post('clone', {})}
+					>
+						<i class="fa-solid fa-copy mr-1"></i>{m.quickFormClone()}
+					</button>
+				{/if}
 			</div>
 		{/if}
 		<!-- Independent of the block above: being the requester and being able to decide
@@ -523,7 +527,8 @@
 			{/if}
 			<!-- The reviewer. Claiming is optional; a decision always carries a resolution. -->
 			<div class="flex flex-wrap items-center gap-2 pt-1">
-				{#if response.status === 'draft'}
+				{#if response.status === 'draft' && !canEditAnswers}
+					<!-- Not to the requester themselves: an analyst assessing in-house is both. -->
 					<span class="text-sm text-surface-500">
 						<i class="fa-solid fa-hourglass-half mr-1"></i>{m.quickFormAwaitingRequester()}
 					</span>
@@ -637,30 +642,35 @@
 						initialValue={content.answers ?? {}}
 						field="answers"
 						disabled={!canEditAnswers}
+						lockedUrns={response.subject_locked && content.quick_form?.subject_question_urn
+							? [content.quick_form.subject_question_urn]
+							: []}
 						onChange={saveAnswer}
 					/>
 				</div>
 			{/key}
 
-			<div class="flex items-center justify-between">
-				<button
-					type="button"
-					class="btn preset-outlined-surface-500"
-					disabled={pageIndex === 0}
-					onclick={() => (pageIndex = Math.max(0, pageIndex - 1))}
-				>
-					<i class="fa-solid fa-chevron-left mr-1"></i>{m.previous()}
-				</button>
-				<span class="text-sm text-surface-500">{pageIndex + 1} / {visiblePages.length}</span>
-				<button
-					type="button"
-					class="btn preset-filled-primary-500"
-					disabled={pageIndex >= visiblePages.length - 1}
-					onclick={() => (pageIndex = Math.min(visiblePages.length - 1, pageIndex + 1))}
-				>
-					{m.next()}<i class="fa-solid fa-chevron-right ml-1"></i>
-				</button>
-			</div>
+			{#if visiblePages.length > 1}
+				<div class="flex items-center justify-between">
+					<button
+						type="button"
+						class="btn preset-outlined-surface-500 enabled:hover:bg-surface-200-800"
+						disabled={pageIndex === 0}
+						onclick={() => (pageIndex = Math.max(0, pageIndex - 1))}
+					>
+						<i class="fa-solid fa-chevron-left mr-1"></i>{m.previous()}
+					</button>
+					<span class="text-sm text-surface-500">{pageIndex + 1} / {visiblePages.length}</span>
+					<button
+						type="button"
+						class="btn preset-filled-primary-500"
+						disabled={pageIndex >= visiblePages.length - 1}
+						onclick={() => (pageIndex = Math.min(visiblePages.length - 1, pageIndex + 1))}
+					>
+						{m.next()}<i class="fa-solid fa-chevron-right ml-1"></i>
+					</button>
+				</div>
+			{/if}
 		{/if}
 	{/if}
 </div>

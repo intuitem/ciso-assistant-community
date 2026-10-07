@@ -408,6 +408,13 @@ def editor_doc_to_framework_object(
                 continue
             seen_choice_ids.add(choice_key)
             c_urn = str(choice.get("urn") or "").lower()
+            # A choice added in the editor and never given a text is not content.
+            # An existing one emptied by the author stays: dropping it would
+            # cascade into the answers that picked it.
+            if not str(choice.get("value") or "").strip() and (
+                c_urn not in existing_choice_urns
+            ):
+                continue
             if c_urn and c_urn in existing_choice_urns and c_urn not in claimed_choices:
                 claimed_choices.add(c_urn)
             else:

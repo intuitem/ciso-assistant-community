@@ -20757,6 +20757,7 @@ def quick_form_response_content(response, user=None):
                 "description": response.quick_form.get_description_translated,
                 "outcomes_definition": response.quick_form.outcomes_definition,
                 "scores_definition": response.quick_form.scores_definition,
+                "subject_question_urn": response.quick_form.subject_question_urn,
             },
             "pages": pages,
             "answers": answers,
@@ -20921,6 +20922,7 @@ def start_quick_form_response(
             quick_form=quick_form,
             folder=folder,
             publication=publication,
+            subject_locked=subject_question is not None,
             # Self-service has no "not started yet": the requester is filling it now,
             # and there are no respondents to notify — they are the respondent.
             started_at=timezone.now(),
@@ -21006,6 +21008,10 @@ class MyRequestViewSet(viewsets.ViewSet):
             return Response(
                 {"answers": f"unknown question urn(s): {sorted(unknown)[:3]}"},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        if response.changes_locked_subject(answers):
+            return Response(
+                {"error": "subjectLocked"}, status=status.HTTP_400_BAD_REQUEST
             )
         with transaction.atomic():
             apply_answers_dict(
@@ -21234,6 +21240,8 @@ class MyRequestViewSet(viewsets.ViewSet):
                 folder=source.folder,
                 publication=source.publication,
                 cloned_from=source,
+                # A copy is about the same object.
+                subject_locked=source.subject_locked,
             )
             clone.seed_answers()
             clone.respondents.set(source.respondents.all())

@@ -7536,6 +7536,8 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
                 raise serializers.ValidationError(
                     {"answers": "Only the requester can change the answers."}
                 )
+            if self.instance.changes_locked_subject(attrs["answers"]):
+                raise serializers.ValidationError({"answers": "subjectLocked"})
         if self.instance and "quick_form" in attrs:
             if attrs["quick_form"] != self.instance.quick_form:
                 raise serializers.ValidationError(

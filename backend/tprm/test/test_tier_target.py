@@ -731,3 +731,87 @@ class TestReviewFeedback:
         result = client.post("/api/tiers/", {"name": "Late"}, format="json")
         assert result.status_code == 400
         assert not Tier.objects.filter(name="Late").exists()
+
+
+@pytest.mark.django_db
+class TestSubjectLock:
+    def _started(self, client, setup):
+        result = client.post(
+            f"/api/quick-forms/{setup['form'].id}/start/",
+            {"subject": str(setup["acme"].id)},
+            format="json",
+        )
+        return QuickFormResponse.objects.get(
+            pk=result.json()["redirect"].rsplit("/", 1)[1]
+        )
+
+    def _other_vendor(self, setup):
+        return Entity.objects.create(name="Other", folder=setup["domain"])
+
+    def test_starting_from_the_vendor_locks_the_subject(self, setup):
+        _user, client = _admin()
+        response = self._started(client, setup)
+        assert response.subject_locked
+        other = self._other_vendor(setup)
+        url = f"/api/my-requests/{response.id}/answers/"
+        refused = client.patch(
+            url, {"answers": {Q_VENDOR: [str(other.id)]}}, format="json"
+        )
+        assert refused.status_code == 400
+        assert refused.json()["error"] == "subjectLocked"
+        # Re-sending the same vendor, alongside other answers, is not a change.
+        kept = client.patch(
+            url,
+            {
+                "answers": {
+                    Q_VENDOR: [str(setup["acme"].id)],
+                    Q_RISK: f"{Q_RISK}:choice:one",
+                }
+            },
+            format="json",
+        )
+        assert kept.status_code == 200, kept.json()
+        response.refresh_from_db()
+        assert str(response.subject_object_id) == str(setup["acme"].id)
+
+    def test_the_folder_rights_path_is_locked_too(self, setup):
+        _user, client = _admin()
+        response = self._started(client, setup)
+        other = self._other_vendor(setup)
+        refused = client.patch(
+            f"/api/quick-form-responses/{response.id}/",
+            {"answers": {Q_VENDOR: [str(other.id)]}},
+            format="json",
+        )
+        assert refused.status_code == 400
+        assert "subjectLocked" in str(refused.json())
+
+    def test_a_clone_keeps_the_lock(self, setup):
+        _user, client = _admin()
+        response = self._started(client, setup)
+        result = client.post(
+            f"/api/my-requests/{response.id}/clone/", {}, format="json"
+        )
+        assert result.status_code in (200, 201), result.json()
+        clone = QuickFormResponse.objects.get(cloned_from=response)
+        assert clone.subject_locked
+
+    def test_a_response_started_without_a_subject_stays_free(self, setup):
+        user, client = _admin()
+        result = client.post(
+            f"/api/quick-form-publications/{setup['publication'].id}/start/",
+            {},
+            format="json",
+        )
+        assert result.status_code == 200, result.json()
+        response = QuickFormResponse.objects.get(
+            pk=result.json()["redirect"].rsplit("/", 1)[1]
+        )
+        assert not response.subject_locked
+        other = self._other_vendor(setup)
+        changed = client.patch(
+            f"/api/my-requests/{response.id}/answers/",
+            {"answers": {Q_VENDOR: [str(other.id)]}},
+            format="json",
+        )
+        assert changed.status_code == 200, changed.json()

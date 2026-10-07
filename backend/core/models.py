@@ -11565,6 +11565,11 @@ class QuickFormResponse(
         null=True, blank=True, verbose_name=_("Subject")
     )
     subject = GenericForeignKey("subject_content_type", "subject_object_id")
+    # Started from the object itself ("Assess tier"): the subject answer is
+    # fixed, so the assessment cannot drift to another object mid-way.
+    subject_locked = models.BooleanField(
+        default=False, verbose_name=_("Subject locked")
+    )
     # Denormalized mirror of the fired outcome ref_ids, comma-joined and sorted.
     # `computed_outcome` is a JSON blob: the API cannot filter it and the workflow
     # engine only filters concrete columns, so routing and reporting need this.
@@ -11783,6 +11788,20 @@ class QuickFormResponse(
             target = model_class.objects.filter(pk=self.subject_object_id).first()
             data["str"] = str(target) if target else None
         return data
+
+    def changes_locked_subject(self, answers: dict) -> bool:
+        """Whether `answers` would point a locked response at another object.
+        Re-sending the current subject is not a change."""
+        if not self.subject_locked or not isinstance(answers, dict):
+            return False
+        urn = (self.quick_form.subject_question_urn or "").lower()
+        for key, value in answers.items():
+            if str(key).lower() != urn:
+                continue
+            ids = value if isinstance(value, list) else [value]
+            if {str(v) for v in ids if v} != {str(self.subject_object_id)}:
+                return True
+        return False
 
     def refresh_subject_from_answers(self) -> None:
         """Point the response at the object its subject question names.

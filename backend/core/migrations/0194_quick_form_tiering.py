@@ -197,4 +197,9 @@ class Migration(migrations.Migration):
                 verbose_name="Always require review",
             ),
         ),
+        migrations.AddField(
+            model_name="quickformresponse",
+            name="subject_locked",
+            field=models.BooleanField(default=False, verbose_name="Subject locked"),
+        ),
     ]

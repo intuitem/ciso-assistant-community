@@ -1197,6 +1197,12 @@ export function createBuilderState(
 	let currentSave: Promise<boolean> | null = null;
 
 	async function flushDraft(): Promise<boolean> {
+		// Fields commit on blur. Whatever triggered the save (a button some
+		// browsers do not focus on click, a publish), commit the field being
+		// edited first, or its value is not in what gets saved.
+		if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
 		// Coalesce concurrent calls: a publish clicked while a Ctrl+S save is
 		// still in flight must await that save's outcome rather than fail.
 		if (currentSave) return currentSave;
