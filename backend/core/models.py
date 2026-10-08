@@ -9163,17 +9163,18 @@ class ComplianceAssessment(Assessment):
             self.score_scale_preset = None
         creating = self._state.adding
         loaded = getattr(self, "_loaded_cel_values", {})
-        cel_changed = creating or any(
+        cel_changed = any(
             getattr(self, f) != value
             for f, value in loaded.items()
             if f in (kwargs.get("update_fields") or self._CEL_RELEVANT_FIELDS)
         )
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
-        if cel_changed:
+        if creating or cel_changed:
             self._loaded_cel_values = self._cel_snapshot(
                 self._CEL_RELEVANT_FIELDS if creating else loaded
             )
+        if cel_changed or (creating and self.framework.outcomes_definition):
             defer_outcome_evaluation(self.pk)
 
     def create_requirement_assessments(

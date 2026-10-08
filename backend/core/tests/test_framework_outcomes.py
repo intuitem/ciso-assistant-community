@@ -336,10 +336,15 @@ class TestReEvaluation:
         _rules(levels, self.RULES)
         assert "on_b" in _evaluate(levels).computed_outcome
         ca = ComplianceAssessment.objects.get(pk=levels["ca"].pk)
-        with pytest.raises(RuntimeError), transaction.atomic():
-            ca.selected_implementation_groups = ["B"]
-            ca.save()
-            raise RuntimeError
+
+        def change_then_fail():
+            with transaction.atomic():
+                ca.selected_implementation_groups = ["B"]
+                ca.save()
+                raise RuntimeError
+
+        with pytest.raises(RuntimeError):
+            change_then_fail()
         ca = ComplianceAssessment.objects.get(pk=levels["ca"].pk)
         with django_capture_on_commit_callbacks(execute=True):
             ca.selected_implementation_groups = ["A"]
