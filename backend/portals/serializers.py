@@ -1,4 +1,5 @@
 import re
+import uuid
 
 from django.contrib.auth.models import Permission
 from rest_framework import serializers
@@ -9,9 +10,19 @@ from core.serializers import BaseModelSerializer
 from iam.models import Folder, RoleAssignment
 
 from .models import FrameworkSnapshot, Portal, PortalPreset, PublicDocument
+from .references import content_shape_error, iter_items
 
 # accent_color goes verbatim into an inline style on the public trust page; constrain it.
 _COLOR_RE = re.compile(r"^#[0-9a-fA-F]{3,8}$|^rgba?\([\d.,\s/%]+\)$", re.IGNORECASE)
+
+# Tiles the launch endpoints look up by id (PortalViewSet._find_item).
+LAUNCHABLE_KINDS = ("assessment", "quickForm")
+
+
+def _validate_content_shape(value):
+    if error := content_shape_error(value):
+        raise serializers.ValidationError(error)
+    return value
 
 
 class PortalPresetReadSerializer(BaseModelSerializer):
@@ -44,6 +55,9 @@ class PortalPresetWriteSerializer(BaseModelSerializer):
     class Meta:
         model = PortalPreset
         fields = ["name", "description", "folder", "translations", "content"]
+
+    def validate_content(self, value):
+        return _validate_content_shape(value)
 
 
 class PortalReadSerializer(BaseModelSerializer):
@@ -94,29 +108,37 @@ class PortalWriteSerializer(BaseModelSerializer):
         return value
 
     def validate_content(self, value):
-        if not isinstance(value, dict):
-            raise serializers.ValidationError("must be an object")
-        sections = value.get("sections", [])
-        if not isinstance(sections, list):
-            raise serializers.ValidationError("sections must be a list")
-        for section in sections:
-            if not isinstance(section, dict):
-                raise serializers.ValidationError("each section must be an object")
-            items = section.get("items", [])
-            if not isinstance(items, list) or any(
-                not isinstance(i, dict) for i in items
-            ):
-                raise serializers.ValidationError("section items must be objects")
-            for item in items:
-                missing = _tile_missing_target(item)
-                if missing:
-                    title = item.get("title") or item.get("kind") or "tile"
-                    raise serializers.ValidationError(
-                        f"'{title}' has no {missing}; it would fail when clicked."
-                    )
+        value = _validate_content_shape(value)
+        for item in iter_items(value):
+            # A click finds its tile by id. The editor mints one, but a design
+            # can arrive without it (a library preset, the API), and a portal
+            # published before its first save would 404 on every click.
+            if item.get("kind") in LAUNCHABLE_KINDS and not item.get("id"):
+                item["id"] = str(uuid.uuid4())
         return value
 
+    def _incomplete_tiles(self, content):
+        for item in iter_items(content):
+            if missing := _tile_missing_target(item):
+                yield (item.get("title") or item.get("kind") or "tile"), missing
+
     def validate(self, data):
+        # Publishing is the gate, not saving: a design loaded from a library can land
+        # half-wired, and the author has to be able to save while wiring it up.
+        status_now = data.get(
+            "status", getattr(self.instance, "status", Portal.Status.DRAFT)
+        )
+        if status_now == Portal.Status.PUBLISHED:
+            content = data.get("content", getattr(self.instance, "content", None))
+            if incomplete := list(self._incomplete_tiles(content)):
+                title, missing = incomplete[0]
+                raise serializers.ValidationError(
+                    {
+                        "status": f"'{title}' has no {missing}; it would fail when "
+                        f"clicked. {len(incomplete)} tile(s) still need wiring up."
+                    }
+                )
+
         # Claiming the single global primary trust-center URL is an instance-wide effect,
         # so it takes settings-level rights — not just folder-scoped change_portal.
         if data.get("is_primary"):

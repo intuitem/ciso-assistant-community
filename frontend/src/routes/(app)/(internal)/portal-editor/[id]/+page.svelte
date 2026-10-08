@@ -9,7 +9,7 @@
 	import { SCAFFOLDABLE_MODELS } from '$lib/utils/modelTargets';
 	import { urlParamModelVerboseName } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { savedToast, savedToastEnhance } from '$lib/utils/portalActions';
+	import { failureToast, savedToast, savedToastEnhance } from '$lib/utils/portalActions';
 	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
@@ -176,9 +176,33 @@
 	});
 
 	const payload = $derived(JSON.stringify({ sections }));
-	// A tile with no target 400s for every clicker, so saving one is never what the
-	// author meant. The backend rejects it too; this is what stops them getting there.
+	// Incomplete tiles gate publishing, not saving: a design cloned from a library can
+	// land half-wired and the author has to be able to save while wiring it up. Once the
+	// portal is live, though, saving is publishing, so the same gate applies to Save.
 	const incompleteTiles = $derived(countIncompleteTiles(sections));
+	const isPublished = $derived(data.portal.status === 'published');
+	const publishBlocked = $derived(!isPublished && incompleteTiles > 0);
+	const saveBlocked = $derived(isPublished && incompleteTiles > 0);
+
+	const templateSavedEnhance =
+		() =>
+		async ({ result, update }: { result: any; update: () => Promise<void> }) => {
+			await update();
+			if (result.type !== 'success') return failureToast(toast, result);
+			const unwired: string[] = result.data?.unwired ?? [];
+			if (unwired.length === 0) {
+				toast.trigger({
+					message: m.portalSavedAsTemplate(),
+					background: 'preset-filled-success-500'
+				});
+				return;
+			}
+			toast.trigger({
+				message: `${m.portalTemplateUnwired({ count: unwired.length })} ${unwired.join(' ')}`,
+				background: 'preset-filled-warning-500',
+				timeout: 10000
+			});
+		};
 
 	// 'navigate' targets a model (mandatory) — backfill any tile that lacks one so the
 	// select is never silently empty. 'assessment' tiles need a stable id so a click can
@@ -309,6 +333,21 @@
 					title={m.duplicate()}><i class="fa-solid fa-copy"></i></button
 				>
 			</form>
+			<form method="POST" action="?/saveAsTemplate" use:enhance={templateSavedEnhance}>
+				<button
+					class="btn-icon btn-sm preset-tonal"
+					aria-label={m.saveAsTemplate()}
+					title={m.saveAsTemplate()}><i class="fa-solid fa-clone"></i></button
+				>
+			</form>
+			<!-- No use:enhance: a native POST lets the browser take the attachment. -->
+			<form method="POST" action="/portal-editor/{data.portal.id}/export">
+				<button
+					class="btn-icon btn-sm preset-tonal"
+					aria-label={m.exportAsLibrary()}
+					title={m.exportAsLibrary()}><i class="fa-solid fa-file-export"></i></button
+				>
+			</form>
 		</div>
 	</div>
 
@@ -369,7 +408,16 @@
 				name="status"
 				value={data.portal.status === 'published' ? 'draft' : 'published'}
 			/>
-			<button class="btn preset-tonal">
+			{#if !isPublished}
+				<!-- Publish what the author sees: the gate above ran on these tiles, so the
+				     backend has to judge the same ones, not the last saved design. -->
+				<input type="hidden" name="payload" value={payload} />
+			{/if}
+			<button
+				class="btn preset-tonal"
+				disabled={publishBlocked}
+				title={publishBlocked ? m.portalTileIncompleteCount({ count: incompleteTiles }) : undefined}
+			>
 				{data.portal.status === 'published' ? m.unpublish() : m.publish()}
 			</button>
 		</form>
@@ -381,10 +429,8 @@
 			<input type="hidden" name="payload" value={payload} />
 			<button
 				class="btn preset-filled-primary-500"
-				disabled={incompleteTiles > 0}
-				title={incompleteTiles > 0
-					? m.portalTileIncompleteCount({ count: incompleteTiles })
-					: undefined}
+				disabled={saveBlocked}
+				title={saveBlocked ? m.portalTileIncompleteCount({ count: incompleteTiles }) : undefined}
 			>
 				<i class="fa-solid fa-floppy-disk mr-1"></i>{m.save()}
 			</button>

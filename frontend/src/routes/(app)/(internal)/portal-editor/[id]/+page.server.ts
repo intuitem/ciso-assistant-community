@@ -108,8 +108,20 @@ export const actions: Actions = {
 		return { success: true };
 	},
 	setStatus: async ({ params, request, fetch }) => {
-		const status = (await request.formData()).get('status');
-		const res = await patchPortal(fetch, params.id!, { status });
+		const data = await request.formData();
+		const status = data.get('status');
+		const body: Record<string, unknown> = { status };
+		// Publishing sends the editor's design along, so it is saved and judged in the
+		// same request instead of publishing whatever was saved last.
+		const payload = data.get('payload');
+		if (typeof payload === 'string') {
+			try {
+				body.content = JSON.parse(payload);
+			} catch {
+				return fail(400, { error: 'Invalid payload' });
+			}
+		}
+		const res = await patchPortal(fetch, params.id!, body);
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},
@@ -137,6 +149,16 @@ export const actions: Actions = {
 		});
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
+	},
+	saveAsTemplate: async ({ params, fetch }) => {
+		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/save-as-preset/`, {
+			method: 'POST'
+		});
+		if (!res.ok) return fail(res.status, { error: await res.text() });
+		// Tiles the template could not keep wired (snapshots, uploads): the author has
+		// to hear about it, or the template silently ships dead tiles.
+		const { unwired } = await res.json();
+		return { success: true, unwired: (unwired ?? []) as string[] };
 	},
 	duplicate: async ({ params, fetch }) => {
 		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/duplicate/`, { method: 'POST' });
