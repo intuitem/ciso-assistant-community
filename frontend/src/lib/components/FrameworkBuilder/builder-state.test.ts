@@ -8,13 +8,18 @@ import {
 	validateDraft,
 	buildTree,
 	serializeDraft,
+	hydrateDraft,
 	createBuilderState,
 	nodePassesIgFilter,
+	applyUrnMap,
+	describeSaveError,
+	rebaseExpression,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
 	type Question
 } from './builder-state';
+import { BuilderRequestError } from './builder-api';
 
 const FW_ID = 'a1b2c3d4-0000-0000-0000-000000000000';
 
@@ -559,6 +564,36 @@ describe('serializeDraft round-trip', () => {
 		expect(new Set(ids).size).toBe(ids.length);
 		expect(ids).toEqual(['n1']);
 	});
+
+	it('keeps a page score aggregation through serialize and hydrate', () => {
+		const fw = makeFramework();
+		const page: RequirementNode = {
+			id: 'p1',
+			urn: 'urn:x:qf_page:form:p1',
+			ref_id: 'p1',
+			name: 'Data access',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: 0,
+			assessable: true,
+			implementation_groups: null,
+			visibility_expression: null,
+			aggregation: 'max',
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: 'fw-1',
+			folder: 'folder-1',
+			threats: [],
+			reference_controls: []
+		};
+		const draft = serializeDraft(fw, buildTree([page], []));
+		expect(draft.nodes[0].aggregation).toBe('max');
+		const { nodes } = hydrateDraft(draft, 'fw-1');
+		expect(nodes[0].aggregation).toBe('max');
+	});
 });
 
 describe('indentNode', () => {
@@ -1071,6 +1106,107 @@ describe('node_id repair on draft load', () => {
 		// Beta (duplicate) got a fresh node_id and is now a standalone leaf.
 		expect(extractNodeId(beta.node.urn)).not.toBe('2.1');
 		expect(beta.children).toHaveLength(0);
+	});
+});
+
+describe('applyUrnMap', () => {
+	it('adopts canonical URNs by editor URN or id, keeping ids', () => {
+		const node = makeNode({ urn: null, ref_id: '2', parent_urn: null });
+		const q: Question = {
+			...makeQuestion({ requirement_node: node.id }),
+			id: 'tmp-q',
+			urn: 'urn:custom:risk:question:form:2-q1',
+			depends_on: {
+				question: 'urn:custom:risk:question:form:2-q0',
+				answers: ['urn:custom:risk:question_choice:form:2-q0-c1']
+			},
+			choices: [{ ...makeChoice('tmp-c', 1), urn: null, question: 'tmp-q' }]
+		};
+		const page = 'urn:custom:risk:qf_page:form:2';
+		const [mapped] = applyUrnMap(buildTree([node], [q]), {
+			[node.id.toLowerCase()]: page,
+			'urn:custom:risk:question:form:2-q1': `${page}:question:2-q1`,
+			'urn:custom:risk:question:form:2-q0': `${page}:question:2-q0`,
+			'urn:custom:risk:question_choice:form:2-q0-c1': `${page}:question:2-q0:choice:1`,
+			'tmp-c': `${page}:question:2-q1:choice:1`
+		});
+		expect(mapped.node.urn).toBe(page);
+		expect(mapped.node.id).toBe(node.id);
+		const question = mapped.questions[0].question;
+		expect(question.id).toBe('tmp-q');
+		expect(question.urn).toBe(`${page}:question:2-q1`);
+		expect(question.depends_on).toEqual({
+			question: `${page}:question:2-q0`,
+			answers: [`${page}:question:2-q0:choice:1`]
+		});
+		expect(question.choices[0].urn).toBe(`${page}:question:2-q1:choice:1`);
+	});
+
+	it('leaves unmapped URNs alone', () => {
+		const node = makeNode({ urn: 'urn:custom:risk:qf_page:form:1', parent_urn: null });
+		const [mapped] = applyUrnMap(buildTree([node], []), {});
+		expect(mapped.node.urn).toBe('urn:custom:risk:qf_page:form:1');
+	});
+});
+
+describe('rebaseExpression', () => {
+	const urnMap = {
+		'urn:x:risk:qf_page:f:1': 'urn:x:risk:qf_page:f:intro',
+		'urn:x:risk:question:f:1-q1': 'urn:x:risk:qf_page:f:intro:question:1-q1',
+		'urn:x:risk:question_choice:f:1-q1-c1': 'urn:x:risk:qf_page:f:intro:question:1-q1:choice:1',
+		'tmp-id': 'urn:x:risk:qf_page:f:intro:question:1-q1'
+	};
+
+	it('follows renamed pages, questions and choices', () => {
+		expect(rebaseExpression('pages["1"].score', urnMap)).toBe('pages["intro"].score');
+		expect(rebaseExpression("pages['1'].score > 2.0", urnMap)).toBe("pages['intro'].score > 2.0");
+		expect(rebaseExpression('"1-q1-c1" in answers["1-q1"].selected_choices', urnMap)).toBe(
+			'"intro:question:1-q1:choice:1" in answers["intro:question:1-q1"].selected_choices'
+		);
+	});
+
+	it('leaves plain values and unknown ids alone', () => {
+		expect(rebaseExpression('answers["1-q1"].value == "1"', urnMap)).toBe(
+			'answers["intro:question:1-q1"].value == "1"'
+		);
+		expect(rebaseExpression('pages["other"].score', urnMap)).toBe('pages["other"].score');
+		expect(rebaseExpression('pages["1"].score', {})).toBe('pages["1"].score');
+	});
+
+	it('follows renamed framework requirements', () => {
+		const frameworkMap = {
+			'urn:x:risk:req_node:fw:b-draft': 'urn:x:risk:req_node:fw:b',
+			'urn:x:risk:req_node:fw:b-draft:question:q7': 'urn:x:risk:req_node:fw:b:question:1'
+		};
+		expect(
+			rebaseExpression(
+				'requirements["b-draft"].score > 1 && answers["b-draft:question:q7"].answered',
+				frameworkMap
+			)
+		).toBe('requirements["b"].score > 1 && answers["b:question:1"].answered');
+	});
+});
+
+describe('describeSaveError', () => {
+	it('lists where each expression failed', () => {
+		const text = describeSaveError(
+			new BuilderRequestError('invalidExpressions', [
+				{ where: 'outcome', ref_id: 'criticality', error: 'no such key' },
+				{ where: 'page_visibility', ref_id: 'security', error: 'bad' },
+				'urn:x is duplicated'
+			])
+		);
+		const [summary, ...lines] = text.split('\n');
+		expect(summary).not.toBe('invalidExpressions');
+		expect(lines).toEqual([
+			'Rule criticality: no such key',
+			'Page security: bad',
+			'urn:x is duplicated'
+		]);
+	});
+
+	it('falls back to the message alone', () => {
+		expect(describeSaveError(new Error('boom'))).toBe('boom');
 	});
 });
 
