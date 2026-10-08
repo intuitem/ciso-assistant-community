@@ -232,4 +232,45 @@ The two IDs for `OH.2.2` must be on separate lines **in the same cell**, in the 
 
 In our case, when an auditor will assess `OH.2.2` on CISO Assistant, they will see **"Are both alerts enabled?"** with a single choice between **"Yes"** and **"No"**, followed by **"Which alerts were tested in the past month?"** where they can select **"Strong current"**, **"Intrusion"**, or both. These questions complement the requirement.
 
+## Add the assessment scores
+
+The PDF defines a score from `0` to `2` for every requirement. We will add its labels and descriptions so auditors know what each score means. Unlike questions, this scale applies to the whole Framework, so we do not need to change `fwk_content`.
+
+### Create the Scores sheets
+
+Create `scr_meta` and `scr_content`. We chose `scr` as the prefix for this [Scores](library-objects/scores.md) object.
+
+Fill `scr_meta` with one property per row:
+
+| Property | Value |
+| --- | --- |
+| `type` | `scores` |
+| `name` | `scr` |
+
+### Link Scores in `fwk_meta`
+
+Add these properties to the existing `fwk_meta` sheet without removing the metadata already there:
+
+| Property | Value |
+| --- | --- |
+| `scores_definition` | `scr` |
+| `min_score` | `0` |
+| `max_score` | `2` |
+
+The `scores_definition` value matches `name` in `scr_meta`. The minimum and maximum set the range used to assess this Framework.
+
+### Fill `scr_content`
+
+Add one row for each score in the PDF:
+
+| score | name | description |
+| --- | --- | --- |
+| `0` | Not met | No reliable evidence that the requirement is met. |
+| `1` | Partly met | The safeguard exists but is incomplete, untested or inconsistently applied. |
+| `2` | Met | The safeguard is in place and supported by current evidence. |
+
+The score numbers must match the range defined in `fwk_meta`. See [Scores](library-objects/scores.md) for the available fields and for cases where a requirement needs a different scale.
+
+In our case, when an auditor will assess a requirement such as `OH.2.2`, they can use the **"Not met"**, **"Partly met"**, or **"Met"** score and read its meaning. The questions help to gather information, but the score is based on the requirement and its evidence. For this standard, certification requires a score of `2` for every requirement.
+
 [TO BE CONTINUED]
