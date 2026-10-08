@@ -107,7 +107,9 @@ On a requirement node, click **Add question**:
 
 The order in the editor is the order respondents see. Keep conditional (`depends_on`) chains shallow — a single hop is easy to reason about; chains are expensive to debug.
 
-By default, questions are numbered under their requirement — `1`, `2`, … — as in libraries built from Excel: their URN ends with `…:question:1`, and their choices with `…:question:1:choice:1`. To refer to a question by name in CEL, give it a ref_id such as `headcount` before its first save: its URN then ends with `:question:headcount`, and a rule reads `answers["<requirement>:question:headcount"].value`, where `<requirement>` is the requirement's ref_id in lowercase.
+By default, questions are numbered under their requirement — `1`, `2`, …, a new question taking the next number after the highest one used: their URN ends with `…:question:1`, and their choices with `…:question:1:choice:1`. To refer to a question by name in CEL, give it a ref_id such as `headcount` before its first save: its URN then ends with `:question:headcount`, and a rule reads `answers["<requirement>:question:headcount"].value`.
+
+`<requirement>` is the requirement's id inside its URN, set when the requirement is first saved: its ref_id lowercased, with each run of characters other than `a`–`z`, `0`–`9` and `[]()._-` replaced by a single `-` (accented letters included) (`A 1/Access` gives `a-1-access`), and a `-2`, `-3`, … suffix when that id is already taken. A requirement without ref_id gets a generated id, and imported requirements keep the id already in their URN.
 
 ### Add outcome rules
 

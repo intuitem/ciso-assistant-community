@@ -59,11 +59,12 @@ Object URNs are pinned to `ref_id`, **never derived from the display name** —
 this is what eliminates rename/slug drift.
 
 A question URN is `{node_urn}:question:{ref_id}` and a choice URN
-`{question_urn}:choice:{n}`. The editor's default question ref_id is the next
-number under its node (`1`, `2`…, as in the Excel converter), so the node's
-ref_id is no longer repeated in it; a ref_id typed by the author is kept, so CEL
-rules can refer to the question by name. URNs already in the document are kept
-verbatim.
+`{question_urn}:choice:{n}`. The editor's default question ref_id is a number
+(`1`, `2`…), the highest one already used under its node plus one, so the
+node's ref_id is no longer repeated in it; a ref_id typed by the author is kept,
+so CEL rules can refer to the question by name. URNs already in the document are
+kept verbatim. The full scheme, its scope and its CEL key contract are in the
+[URN scheme ADR](architecture/decisions/library-builder-urn-scheme.md).
 
 `packager`/`ref_id` are **freely chosen** — no scoping or namespace restriction.
 Loading a library is an act of trust in its packager (you choose to load it),

@@ -16,7 +16,9 @@ This ADR covers the URNs built by the library builder: the framework and quick f
 
 ## Decision
 
-We will keep one minting rule for every builder path: segments come from ref_ids cleaned by `urn_safe_leaf`, default ids take the highest number already used plus one, and only the packager gets a new length cap (32 characters). We do not guarantee URN length at save time, and we never rewrite the end of an existing URN: only renaming an unpublished draft changes its start.
+We will keep one minting rule for every builder path: segments come from ref_ids cleaned by `urn_safe_leaf`, default ids take the highest number already used plus one (except when adopting a live framework, see below), and only the packager gets a new length cap (32 characters). We do not guarantee URN length at save time, and we never rewrite the end of an existing URN: only renaming an unpublished draft changes its start.
+
+This scheme deliberately binds the builder paths only, not every URN producer: the Excel converter, the `tools/excel` scripts and the workflow export keep their own rules (Annex A). Their shipped content stays far below the limit (Annex B), and aligning the converter would affect the compatibility modes it keeps for existing files; that is a separate decision (see Alternatives).
 
 ### Scheme
 
@@ -30,17 +32,19 @@ choice       {question URN}:choice:{n}
 
 The object segment is omitted for the only object of its kind in the library (framework, quick form, risk matrix).
 
-| Segment | Comes from | Length |
+| Segment | Comes from | Max length |
 |---|---|---|
-| `packager` | the draft's packager, `[a-z0-9_-]` | at most 32 characters (new) |
-| `type` | the canonical token (`framework`, `req_node`, `threat`, `reference_control`, …). Legacy spellings (`function`, `reference-controls`) are read, never minted | — |
-| `library` | the draft's ref_id, `[a-z0-9_-]` | unchanged (100) |
-| `object` | the object's ref_id, cleaned | unchanged (ref_id ≤ 100) |
-| `requirement` | the requirement's ref_id, cleaned; `node{N}` when it has none | unchanged |
-| `question` | the question's ref_id, cleaned: the editor's default is a number, an author may type a name (`headcount`) | unchanged |
-| `choice` | a number | — |
+| `packager` | the draft's packager, `[a-z0-9_-]` | 32 characters (new) |
+| `type` | the canonical token (`framework`, `req_node`, `threat`, `reference_control`, …). Legacy spellings (`function`, `reference-controls`) are read, never minted | 17 characters (`reference_control`), fixed tokens |
+| `library` | the draft's ref_id, `[a-z0-9_-]` | 100 characters (unchanged) |
+| `object` | the object's ref_id, cleaned | 100 characters, plus `-N` when an import renames it on collision (unchanged) |
+| `requirement` | the requirement's ref_id, cleaned; `node{N}` when it has none | 100 characters, plus `-N` on collision (unchanged). Imported and legacy ids may span several `:`-separated segments; they are kept as is, with no cap |
+| `question` | the question's ref_id, cleaned: the editor's default is a number, an author may type a name (`headcount`) | 100 characters (the ref_id column), plus `-N` on collision (unchanged) |
+| `choice` | a number | a number; `live.py` may add `-N` on collision |
 
-Cleaning is `urn_safe_leaf`: lowercase, every character outside `[0-9a-z[]()._-]` becomes `-`, leading and trailing `-` are trimmed. A segment never contains `:`.
+These caps do not add up to 255: the total can still exceed the limit (see Length).
+
+Cleaning is `urn_safe_leaf`: surrounding whitespace is dropped, the value is lowercased, each run of characters outside `[0-9a-z[]()._-]` becomes a single `-`, and leading and trailing `-` are trimmed (`A  1/Access` gives `a-1-access`). A segment never contains `:`.
 
 ### Default ids and collisions
 
@@ -50,8 +54,8 @@ Cleaning is `urn_safe_leaf`: lowercase, every character outside `[0-9a-z[]()._-]
   - a question reaching the backend without ref_id;
   - a choice: `:choice:{n}`.
 - A deleted id therefore comes back only when it was the highest one.
-- When a generated id is already taken, it gets a `-2`, `-3`, … suffix. When an author creates an object whose ref_id is already used in the draft, it is refused (`objectUrnAlreadyExists`, HTTP 409).
-- `live.py` fills question and choice URNs missing on a live framework by position, as before.
+- When a generated id is already taken, it gets a `-2`, `-3`, … suffix. Every path uses this same form, but the check is implemented separately: the editor (`framework_editor.py`) and the draft paths (`builder.py`) look for taken ids in the draft, `live.py` among the sibling rows already in the database. When an author creates an object whose ref_id is already used in the draft, it is refused (`objectUrnAlreadyExists`, HTTP 409).
+- Exception to the highest-number rule: `live.py` fills the question and choice URNs missing on a live framework by position (`:question:{position}`, `:choice:{position}`), as before. It only completes rows that already exist, in their stored order.
 
 ### Length
 
@@ -59,7 +63,13 @@ The builder does not check URN length at save time. URNs over 255 characters are
 
 ### Packager
 
-The packager is the URN namespace: according to RFC 8141, a URN namespace identifier (NID) is at most 32 characters. The cap applies to every new or changed identity: draft creation and update, the `default_packager` setting, and the frontend inputs, including prefilled values. A YAML import whose packager is longer is refused. Adopting a stored library or a live framework keeps its identity unchanged. A value predating the cap keeps saving while it is resubmitted unchanged.
+The packager is the URN namespace. RFC 8141 limits a URN namespace identifier (NID) to 32 characters, and only that length is borrowed: the packager alphabet stays `[a-z0-9_-]`, which also allows `_` and a leading or trailing `-`, unlike an RFC NID.
+
+The cap applies to every new or changed identity: draft creation and update, the `default_packager` setting, and the frontend inputs, including prefilled values. A YAML import whose packager is longer is refused. Adopting a stored library or a live framework keeps its identity unchanged. A value predating the cap keeps saving while it is resubmitted unchanged, both on a draft and in the setting.
+
+A `default_packager` longer than 32 characters is still prefilled in both create forms (framework and quick form): the form flags it (`lbListPackagerPattern`) and keeps the create button disabled until the author types a packager of at most 32 characters. Drafts can still be created; they just can't take the old default as is.
+
+The Excel converter and the `tools/excel` scripts take the packager from the library's metadata and do not cap it; the longest shipped packager is 18 characters (Annex B).
 
 ### Existing URNs
 
@@ -84,7 +94,7 @@ The requirement part is the requirement's ref_id cleaned by `urn_safe_leaf` when
 
 ## Consequences
 
-- Every builder path that mints a URN must clean segments with `urn_safe_leaf`, take default ids as the highest number + 1, and suffix generated ids with `-N` on collision.
+- Every builder path that mints a URN must clean segments with `urn_safe_leaf`, take default ids as the highest number + 1, and suffix generated ids with `-N` on collision. The one exception is live framework adoption, which keeps filling missing question and choice ids by position.
 - A default question id must never repeat the requirement's ref_id.
 - The end of an existing URN must never be rewritten; only renaming an unpublished draft may change its start. Any change to this scheme applies to new URNs only.
 - Every new way of creating a draft identity must enforce the 32-character packager, except adoption, which keeps the original identity.
