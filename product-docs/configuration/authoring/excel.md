@@ -6,9 +6,9 @@ description: Authoring frameworks, matrices, and other library content from Exce
 
 > _Stub — to be expanded._
 
-**Excel is the recommended authoring format** for most CISO Assistant content. Once an Excel file is written it gets converted to YAML by a single command, and the resulting `.yaml` is what the platform actually loads. The Excel route is faster than hand-writing YAML, much easier to review with non-engineers, and the converter tooling validates the structure for you before it ever reaches your instance.
+Excel is one way to author library content, especially when adapting a source spreadsheet or preparing a file to share. CISO Assistant accepts the workbook directly and converts it to YAML during import. To create and edit a library on your instance without a spreadsheet, use the [Library builder](library-builder.md).
 
-This page captures the editorial conventions for Excel-driven authoring; the full v2 Excel format reference and the converter command-line are in [Designing your own libraries](../libraries/custom-libraries.md).
+This page introduces Excel-driven authoring. For the workbook creation and optional conversion steps, see [Create a Library](../libraries/create-library.md). The [Library objects](../libraries/library-objects/README.md) pages describe the sheets and fields for each object.
 
 For framework scoring, the framework `_meta` tab defines the default `min_score`, `max_score`, and `scores_definition` used when audits are created. Individual requirement rows can override those values with their own `min_score`, `max_score`, and `scores_definition_ref` (a named entry in the framework's `scores_definition.alternatives` registry) when a framework mixes scoring ranges. Leave those cells blank to inherit the audit-level scale at runtime.
 
@@ -24,7 +24,7 @@ For framework scoring, the framework `_meta` tab defines the default `min_score`
 
 ## Existing material
 
-- [Designing your own libraries](../libraries/custom-libraries.md) — the full Excel-to-YAML reference, including the v2 format spec and the converter usage.
+- [Create a Library](../libraries/create-library.md) — the step-by-step Excel workflow and optional YAML conversion.
 - [`tools/example_framework.xlsx`](https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/example_framework.xlsx) — annotated reference Excel that converts cleanly.
 - [`tools/excel/`](https://github.com/intuitem/ciso-assistant-community/tree/main/tools/excel) — repository of real Excel sources used to produce the built-in libraries (CIS, CCB, e-ITS, CMMC, …).
 
