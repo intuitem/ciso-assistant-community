@@ -1337,3 +1337,50 @@ class TestGlobalScoreScaleSummary:
         assert body["framework"] == str(setup["fw"].id)
         assert body["score_scale_preset"] == "1-4"
         assert (body["min_score"], body["max_score"]) == (1, 4)
+
+
+@pytest.mark.django_db
+class TestEditKeepsTheScale:
+    """The edit form resends the audit's stored scale; all nulls would mean
+    "the framework's scale" and rescale the audit."""
+
+    def _custom(self, setup):
+        ca = setup["ca"]
+        ca.min_score, ca.max_score = 0, 3
+        ca.scores_definition = {"scale": _levels(0, 1, 2, 3)}
+        ca.save()
+        setup["ra"].score = 2
+        setup["ra"].is_scored = True
+        setup["ra"].save()
+        return ca
+
+    def test_the_stored_scale_resent_is_no_change(self, setup):
+        ca = self._custom(setup)
+        serializer, valid = _update(
+            ca,
+            {
+                "name": "renamed",
+                "score_scale_preset": None,
+                "min_score": 0,
+                "max_score": 3,
+                "scores_definition": _levels(0, 1, 2, 3),
+            },
+            confirm=False,
+        )
+        assert valid, serializer.errors
+        saved = serializer.save()
+        assert (saved.min_score, saved.max_score) == (0, 3)
+        setup["ra"].refresh_from_db()
+        assert setup["ra"].score == 2
+
+    def test_nulls_ask_to_rescale_to_the_framework(self, setup):
+        from core.serializers import ScoreRescaleConfirmationRequired
+
+        ca = self._custom(setup)
+        nulls = dict.fromkeys(
+            ("score_scale_preset", "min_score", "max_score", "scores_definition")
+        )
+        with pytest.raises(ScoreRescaleConfirmationRequired) as refused:
+            _update(ca, nulls, confirm=False)
+        impact = refused.value.detail["rescale_impact"]
+        assert (impact["from"], impact["to"]) == ([0, 3], [0, 100])
