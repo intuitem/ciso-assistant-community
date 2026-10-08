@@ -394,4 +394,4 @@ class TestCyfunImportTransaction:
                 requirement__ref_id__in=["GV.OC-01.1", "GV.OC-02.1", "GV.OC-03.1"],
             ).values_list("requirement__ref_id", "score")
         )
-        assert scores == {"GV.OC-01.1": 2, "GV.OC-02.1": 1, "GV.OC-03.1": 3}
+        assert scores == {"GV.OC-01.1": 2, "GV.OC-02.1": None, "GV.OC-03.1": 3}

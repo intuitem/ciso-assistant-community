@@ -14,6 +14,7 @@ from core.cel_service import (
     validate_framework_expressions,
 )
 from core.models import (
+    AppliedControl,
     ComplianceAssessment,
     Framework,
     LoadedLibrary,
@@ -358,6 +359,31 @@ class TestReEvaluation:
             ra.save(update_fields=["documentation_score"])
         levels["ca"].refresh_from_db()
         assert "documented" in levels["ca"].computed_outcome
+
+    def test_a_sync_from_applied_controls(
+        self, levels, django_capture_on_commit_callbacks
+    ):
+        _rules(
+            levels,
+            [
+                {
+                    "ref_id": "r1_compliant",
+                    "expression": 'requirements["r1"].result == "compliant"',
+                }
+            ],
+        )
+        assert _evaluate(levels).computed_outcome == {}
+        control = AppliedControl.objects.create(
+            name="Control",
+            folder=levels["ca"].folder,
+            status=AppliedControl.Status.ACTIVE,
+        )
+        _ra(levels, "r1").applied_controls.add(control)
+        ca = ComplianceAssessment.objects.get(pk=levels["ca"].pk)
+        with django_capture_on_commit_callbacks(execute=True):
+            ca.sync_to_applied_controls(dry_run=False)
+        ca.refresh_from_db()
+        assert ca.computed_outcome == {"r1_compliant": {}}
 
     def test_a_scope_change(self, levels, django_capture_on_commit_callbacks):
         _rules(levels, self.RULES)

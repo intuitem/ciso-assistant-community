@@ -55,7 +55,7 @@ const CHOICE_TYPES = new Set(['unique_choice', 'multiple_choice']);
 export function buildCelCatalog(
 	nodes: BuilderNode[],
 	mode: CelMode,
-	groups: { id: string; label: string }[] = []
+	groups: { id: string; label: string }[]
 ): CelCatalog {
 	const catalog: CelCatalog = {
 		mode,

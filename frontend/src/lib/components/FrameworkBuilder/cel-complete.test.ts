@@ -48,7 +48,8 @@ const catalog: CelCatalog = buildCelCatalog(
 		]),
 		node('notes', [question('comment', 'text', 'Comment', [], 'notes')])
 	],
-	'quick_form'
+	'quick_form',
+	[]
 );
 const RULE = { where: 'outcome' as const, values: ['risk'] };
 

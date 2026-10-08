@@ -9446,6 +9446,9 @@ class ComplianceAssessment(Assessment):
             # Ensure metrics are refreshed once after the bulk update.
             self.refresh_from_db(fields=["updated_at"])
             self.upsert_daily_metrics()
+            # bulk_update skips RequirementAssessment.save(), which normally
+            # re-evaluates outcomes when a result changes.
+            defer_outcome_evaluation(self.pk)
 
         return changes
 
@@ -9485,7 +9488,8 @@ class ComplianceAssessment(Assessment):
         contribution; no scale normalization.
 
         When anchor_na_to_target is True, N/A RAs contribute their resolved
-        target (or resolved max if no target is set).
+        target (or resolved max if no target is set). With every method, a
+        missing documentation score counts as the RA's resolved minimum.
 
         Returns the unrounded score, or -1 if no scored requirements exist.
         """
@@ -9519,7 +9523,9 @@ class ComplianceAssessment(Assessment):
                     if raw is None:
                         if score_field == "score":
                             continue
-                        raw = 0
+                        # A missing documentation score is the bottom of the
+                        # scale, as for the averages.
+                        raw = ras.get_resolved_scoring()["min_score"] or 0
                     score = raw
                 total += score * weight
                 total_weight += weight
