@@ -4632,7 +4632,8 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     [m.name for m in scenario.existing_applied_controls.all()]
                 )
 
-                threats = ",".join([t.name for t in scenario.threats.all()])
+                # ref_id first: names may hold the import's separators
+                threats = ",".join([t.ref_id or t.name for t in scenario.threats.all()])
                 assets = ",".join([t.name for t in scenario.assets.all()])
 
                 row = [
@@ -4728,8 +4729,9 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 escape_excel_formula(m.name)
                 for m in scenario.existing_applied_controls.all()
             )
+            # ref_id first: names may hold the import's separators
             threats = ", ".join(
-                escape_excel_formula(t.name) for t in scenario.threats.all()
+                escape_excel_formula(t.ref_id or t.name) for t in scenario.threats.all()
             )
             assets = ", ".join(
                 escape_excel_formula(t.name) for t in scenario.assets.all()
