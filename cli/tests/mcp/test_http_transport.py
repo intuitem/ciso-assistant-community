@@ -37,7 +37,7 @@ def _app(allowed_hosts=()):
             config,
             IS_HTTP=True,
             READ_ONLY=True,
-            HTTP_HOST="0.0.0.0",
+            HTTP_HOST="0.0.0.0",  # nosec B104 - nothing binds; asserts the host guard
             HTTP_PATH="/mcp",
             STATELESS=True,
             JSON_RESPONSE=False,
