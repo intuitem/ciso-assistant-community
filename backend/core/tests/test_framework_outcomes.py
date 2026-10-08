@@ -189,7 +189,21 @@ class TestScoresInTheContext:
         # An unset documentation score counts as the bottom of the scale.
         assert context["requirements"]["r2"]["maturity_score"] == 2.5
         assert context["requirements"]["r2"]["implementation_groups"] == ["A", "B"]
-        assert context["requirements"]["r3"]["maturity_score"] == 0.0
+        # Unscored counts for nothing, as in the audit's aggregates.
+        assert context["requirements"]["r3"]["maturity_score"] == -1.0
+
+    def test_not_applicable_counts_at_the_target_when_the_audit_says_so(self, levels):
+        _score(levels, "r1", 2, 2, result="not_applicable")
+        ComplianceAssessment.objects.filter(pk=levels["ca"].pk).update(
+            anchor_na_to_target=True, target_score=3
+        )
+        _, context = self._context(levels, "true")
+        assert context["requirements"]["r1"]["maturity_score"] == 3.0
+        ComplianceAssessment.objects.filter(pk=levels["ca"].pk).update(
+            anchor_na_to_target=False
+        )
+        _, context = self._context(levels, "true")
+        assert context["requirements"]["r1"]["maturity_score"] == -1.0
 
     def test_the_audit_scores_are_the_ones_it_shows(self, levels):
         _score(levels, "r1", 4, 2)
@@ -242,8 +256,29 @@ class TestScoresInTheContext:
             selected_implementation_groups=["A"]
         )
         _, context = self._context(levels, "sections.size() + groups.size()")
-        assert set(context["sections"]) == {"one"}
         assert context["groups"]["B"]["total_count"] == 1
+        # Present like in the builder's checks, scoring nothing.
+        assert context["sections"]["two"]["total_count"] == 0
+        assert context["sections"]["two"]["maturity_score"] == -1.0
+
+    def test_a_rule_on_an_empty_group_fails_instead_of_erroring(self, levels):
+        ComplianceAssessment.objects.filter(pk=levels["ca"].pk).update(
+            selected_implementation_groups=["A"]
+        )
+        _rules(
+            levels,
+            [
+                {
+                    "ref_id": "n",
+                    "kind": "number",
+                    "expression": 'sections["two"].maturity_score',
+                },
+                {"ref_id": "low", "expression": "values.n < 0.0"},
+            ],
+        )
+        ca = _evaluate(levels)
+        assert ca.computed_values == {"n": -1.0}
+        assert set(ca.computed_outcome) == {"low"}
 
     def test_the_names_are_the_ones_the_builder_suggests(self, levels):
         if not FIELDS.exists():
@@ -351,6 +386,18 @@ class TestReEvaluation:
             ca.save()
         ca.refresh_from_db()
         assert "on_b" not in ca.computed_outcome
+
+    def test_a_library_update_with_a_broken_rule_is_refused(self):
+        StoredLibrary.store_library_content(_library(1, "before").encode())[0].load()
+        StoredLibrary.store_library_content(
+            _library(2, "after")
+            .replace('"true"', 'requirements["missing"].score > 0')
+            .encode()
+        )
+        error = LoadedLibrary.objects.get(urn="urn:test:risk:library:updated").update()
+        assert error and "No requirement 'missing'" in error
+        framework = Framework.objects.get(urn="urn:test:risk:framework:updated")
+        assert [rule["ref_id"] for rule in framework.outcomes_definition] == ["before"]
 
     def test_a_library_update(self, django_capture_on_commit_callbacks):
         StoredLibrary.store_library_content(_library(1, "before").encode())[0].load()

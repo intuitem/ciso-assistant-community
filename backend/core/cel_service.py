@@ -79,15 +79,44 @@ def _build_answer_data(ca, in_scope_node_ids) -> dict[str, dict]:
     return result
 
 
+def _requirement_layers(ca, node, ra) -> dict:
+    """A requirement's documentation and maturity scores on its own scale,
+    counted as the audit's aggregates count it: -1 when it does not count (or
+    the audit has no documentation score), N/A at the target when the audit
+    anchors N/A, a missing documentation score at the bottom of the scale."""
+    none = {"documentation_score": -1.0, "maturity_score": -1.0}
+    if ca is None or not ra:
+        return none
+    low = node.get("min_score")
+    low = ca.min_score if low is None else low
+    high = node.get("max_score")
+    high = ca.max_score if high is None else high
+    if ra["result"] == "not_applicable":
+        if not ca.anchor_na_to_target or low is None or high is None:
+            return none
+        implementation = documentation = ca.na_anchor_score(low, high)
+    elif ra["is_scored"] and ra["score"] is not None:
+        implementation = ra["score"]
+        documentation = ra.get("documentation_score")
+        if documentation is None:
+            documentation = low or 0
+    else:
+        return none
+    if not ca.show_documentation_score:
+        return {"documentation_score": -1.0, "maturity_score": float(implementation)}
+    return {
+        "documentation_score": float(documentation),
+        "maturity_score": (implementation + documentation) / 2,
+    }
+
+
 def _build_context_dict(
     in_scope,
     ra_rows,
     answer_data,
     max_score,
     computed_outcomes=None,
-    min_score=0,
-    with_documentation=False,
-    selected_groups=None,
+    ca=None,
 ) -> dict:
     """Build the raw context dict from in-scope nodes, RA rows, and answer data."""
     from core.utils import extract_node_id
@@ -107,18 +136,11 @@ def _build_context_dict(
         if ra and ra["is_scored"] and ra["result"] != "not_applicable":
             score_sum += ra["score"] or 0
             answered_count += 1
-            score = ra["score"] or 0
-            documentation = ra.get("documentation_score")
-            documentation = min_score if documentation is None else documentation
             entry = {
-                "score": score,
+                "score": ra["score"] or 0,
                 "max_score": max_score,
                 "result": ra["result"],
                 "status": ra["status"],
-                "documentation_score": documentation,
-                "maturity_score": float(
-                    (score + documentation) / 2 if with_documentation else score
-                ),
             }
         else:
             entry = {
@@ -126,9 +148,8 @@ def _build_context_dict(
                 "max_score": max_score,
                 "result": ra["result"] if ra else "not_assessed",
                 "status": ra["status"] if ra else "to_do",
-                "documentation_score": 0,
-                "maturity_score": 0.0,
             }
+        entry.update(_requirement_layers(ca, node, ra))
         entry["implementation_groups"] = list(node.get("implementation_groups") or [])
 
         if node_id:
@@ -140,7 +161,9 @@ def _build_context_dict(
             "score_max": score_max,
             "answered_count": answered_count,
             "total_count": total_count,
-            "selected_implementation_groups": list(selected_groups or []),
+            "selected_implementation_groups": list(
+                (ca.selected_implementation_groups if ca else None) or []
+            ),
         },
         "requirements": requirements,
         "answers": answer_data,
@@ -171,7 +194,13 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
             framework=framework,
             assessable=True,
         ).values(
-            "id", "urn", "ref_id", "implementation_groups", "visibility_expression"
+            "id",
+            "urn",
+            "ref_id",
+            "implementation_groups",
+            "visibility_expression",
+            "min_score",
+            "max_score",
         )
     )
 
@@ -225,11 +254,7 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
 
     max_score = ca.max_score or 100
     computed_outcomes = ca.computed_outcome if ca.computed_outcome else {}
-    scale = {
-        "min_score": ca.min_score or 0,
-        "with_documentation": bool(ca.show_documentation_score),
-        "selected_groups": ca.selected_implementation_groups,
-    }
+    scale = {"ca": ca}
 
     # Phase 1: build initial context with assessable in-scope nodes
     initial_context = _build_context_dict(
@@ -325,11 +350,15 @@ def _group_scores(ca, framework, ras) -> dict:
     groups = {}
     for group in framework.implementation_groups_definition or []:
         ref_id = (group or {}).get("ref_id")
-        members = [
-            ra for ra in ras if ref_id in (ra.requirement.implementation_groups or [])
-        ]
-        if ref_id and members:
-            groups[ref_id] = _subset_scores(ca, members)
+        if ref_id:
+            groups[ref_id] = _subset_scores(
+                ca,
+                [
+                    ra
+                    for ra in ras
+                    if ref_id in (ra.requirement.implementation_groups or [])
+                ],
+            )
     return groups
 
 
@@ -363,7 +392,9 @@ def _section_scores(ca, framework, ras) -> dict:
         )
     }
     depths = _node_depths({urn: row["parent_urn"] for urn, row in nodes.items()})
-    members: dict[str, list] = {}
+    members: dict[str, list] = {
+        row["parent_urn"]: [] for row in nodes.values() if row["parent_urn"] in nodes
+    }
     for ra in ras:
         parent, seen = ra.requirement.parent_urn, set()
         while parent in nodes and parent not in seen:
@@ -383,16 +414,19 @@ def _section_scores(ca, framework, ras) -> dict:
 
 
 def _add_scores(context: dict, ca, framework, rules) -> None:
-    """The audit's scores, unrounded like its page computes them; section and group scores
-    only when a rule reads them, over the requirements in `context`."""
+    """The audit's scores, unrounded, as its page computes them. Section and
+    group scores only when a rule reads them, over the same requirements: those
+    in the audit's scope. Every group and section is present; one without
+    requirements in scope scores -1."""
     from core.models import RequirementAssessment
-    from core.utils import extract_node_id
 
     ras = list(
         RequirementAssessment.objects.filter(
             compliance_assessment=ca, requirement__assessable=True
-        ).select_related("requirement", "compliance_assessment")
+        ).select_related("requirement")
     )
+    for ra in ras:
+        ra.compliance_assessment = ca
     context["assessment"].update(
         {
             **_layers(ca.get_global_score(prefetched_requirements=ras)),
@@ -402,15 +436,16 @@ def _add_scores(context: dict, ca, framework, rules) -> None:
         }
     )
     expressions = " ".join(str(rule.get("expression") or "") for rule in rules)
-    visible = [
+    selected = set(ca.selected_implementation_groups or [])
+    in_scope = [
         ra
         for ra in ras
-        if extract_node_id(ra.requirement.urn) in context["requirements"]
+        if not selected or selected & set(ra.requirement.implementation_groups or [])
     ]
     if re.search(r"\bgroups\b", expressions):
-        context["groups"] = _group_scores(ca, framework, visible)
+        context["groups"] = _group_scores(ca, framework, in_scope)
     if re.search(r"\bsections\b", expressions):
-        context["sections"] = _section_scores(ca, framework, visible)
+        context["sections"] = _section_scores(ca, framework, in_scope)
 
 
 def rule_applies(rule: dict, selected_groups) -> bool:
@@ -418,6 +453,15 @@ def rule_applies(rule: dict, selected_groups) -> bool:
     includes one of them, or covers the whole framework, as for requirements."""
     groups = (rule or {}).get("implementation_groups") or []
     return not groups or not selected_groups or bool(set(groups) & set(selected_groups))
+
+
+def applicable_rules(framework, selected_groups) -> list[dict]:
+    """The framework's outcome rules that apply to an audit's scope."""
+    return [
+        rule
+        for rule in framework.outcomes_definition or []
+        if rule_applies(rule, selected_groups)
+    ]
 
 
 def evaluate_outcomes(compliance_assessment) -> None:
@@ -429,11 +473,7 @@ def evaluate_outcomes(compliance_assessment) -> None:
     # Refresh framework from DB to pick up any changes to outcomes_definition
     # (the FK cache may be stale when called from deferred on_commit hooks)
     framework = Framework.objects.get(pk=ca.framework_id)
-    rules = [
-        rule
-        for rule in framework.outcomes_definition or []
-        if rule_applies(rule, ca.selected_implementation_groups)
-    ]
+    rules = applicable_rules(framework, ca.selected_implementation_groups)
 
     computed = values = None
     if rules:
@@ -919,7 +959,7 @@ def _framework_probe(framework: dict) -> dict:
                 "max_score": 100,
                 "result": "not_assessed",
                 "status": "to_do",
-                "documentation_score": 0,
+                "documentation_score": 0.0,
                 "maturity_score": 0.0,
                 "implementation_groups": [],
             }

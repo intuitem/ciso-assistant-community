@@ -50,7 +50,8 @@
 		displayScoreColor,
 		darkenColor,
 		getScoreHexColor,
-		getFieldVisibility
+		getFieldVisibility,
+		roundScore
 	} from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
@@ -1544,10 +1545,9 @@
 									<li class="flex items-baseline justify-between gap-3 text-sm">
 										<span class="text-surface-700-300">{ruleLabel(rule, rule.ref_id)}</span>
 										<span class="font-semibold tabular-nums"
-											>{Number(compliance_assessment.computed_values[rule.ref_id]).toLocaleString(
-												getLocale(),
-												{ maximumFractionDigits: 2 }
-											)}</span
+											>{roundScore(
+												Number(compliance_assessment.computed_values[rule.ref_id])
+											).toLocaleString(getLocale(), { maximumFractionDigits: 2 })}</span
 										>
 									</li>
 								{:else}

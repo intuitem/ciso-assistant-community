@@ -117,18 +117,23 @@ def round_score(value: float) -> float:
 
 
 def _defer_once(conn_attr: str, key, callback):
-    """Schedule *callback* via on_commit, once per *key* among the callbacks
-    still pending on the connection.
+    """Schedule *callback* via on_commit, once per *key* while the first one is
+    still pending.
 
-    Pending callbacks are looked up in Django's own on_commit queue, which a
-    rollback clears, so a rolled-back schedule never blocks a later one.
+    Django replaces its on_commit list on every commit, rollback and savepoint
+    rollback, so a schedule is pending only while the list it went into is still
+    the connection's: a rolled-back schedule never blocks a later one.
     """
     conn = transaction.get_connection()
-    tag = (conn_attr, key)
-    if any(
-        getattr(entry[1], "_defer_tag", None) == tag
-        and not getattr(entry[1], "_done", False)
-        for entry in conn.run_on_commit
+    pending = getattr(conn, conn_attr, None)
+    if pending is None:
+        pending = {}
+        setattr(conn, conn_attr, pending)
+    scheduled = pending.get(key)
+    if (
+        scheduled is not None
+        and scheduled[0] is conn.run_on_commit
+        and not scheduled[1]._done
     ):
         return
 
@@ -136,10 +141,13 @@ def _defer_once(conn_attr: str, key, callback):
         # Marked so a callback run early (tests capturing on_commit) no
         # longer counts as pending.
         _on_commit._done = True
+        pending.pop(key, None)
         cb()
 
-    _on_commit._defer_tag = tag
+    _on_commit._done = False
     transaction.on_commit(_on_commit)
+    if conn.in_atomic_block:
+        pending[key] = (conn.run_on_commit, _on_commit)
 
 
 def defer_outcome_evaluation(compliance_assessment_pk) -> None:
@@ -2602,8 +2610,27 @@ class LibraryUpdater:
                     **requirement_mapping_dict,
                 )
 
+    def framework_rules_error(self) -> str | None:
+        """The checks library import runs on outcome rules and visibility
+        expressions, so an update cannot bring in what a load refuses."""
+        from core.cel_service import validate_framework_expressions
+        from library.utils import outcome_rule_id_error
+
+        for framework in self.new_frameworks or []:
+            if error := outcome_rule_id_error(framework):
+                return error
+            if errors := validate_framework_expressions(framework):
+                first = errors[0]
+                return (
+                    f"[FRAMEWORK_ERROR] {first['where']} {first['ref_id']}: "
+                    f"{first['error']}"
+                )
+        return None
+
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
     def update_library(self) -> Union[str, None]:
+        if (error_msg := self.framework_rules_error()) is not None:
+            return error_msg
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
 
@@ -9140,12 +9167,8 @@ class ComplianceAssessment(Assessment):
     )
 
     def _cel_snapshot(self, fields) -> dict:
-        # JSON fields are mutated in place by their setters (field_visibility).
-        return {
-            f: copy.deepcopy(getattr(self, f))
-            for f in self._CEL_RELEVANT_FIELDS
-            if f in fields
-        }
+        # References, not copies: field_visibility's setters assign a new dict.
+        return {f: getattr(self, f) for f in self._CEL_RELEVANT_FIELDS if f in fields}
 
     @classmethod
     def from_db(cls, db, field_names, values, *, fetch_mode=None):
@@ -9855,13 +9878,9 @@ class ComplianceAssessment(Assessment):
     @property
     def outcome_rules(self) -> list[dict]:
         """The framework's outcome rules that apply to the audit's scope."""
-        from core.cel_service import rule_applies
+        from core.cel_service import applicable_rules
 
-        return [
-            rule
-            for rule in self.framework.outcomes_definition or []
-            if rule_applies(rule, self.selected_implementation_groups)
-        ]
+        return applicable_rules(self.framework, self.selected_implementation_groups)
 
     def get_selected_implementation_groups(self):
         framework = self.framework
