@@ -47,6 +47,14 @@ Libraries keep content reusable and consistent. Instead of rebuilding the same f
 
 They also make change manageable. A library version records the content that was published, while stable identifiers let CISO Assistant recognise the same objects when you publish a later version.
 
+## How an Excel library is organized?
+
+When a library is stored as an Excel file, the workbook itself is the library. Imagine it as a large box. The `library_meta` sheet is the label on that box: it gives the library its name, identifier, version, and other properties.
+
+Each `_content` sheet is a smaller box inside the workbook: it holds the entries of one object. Its matching `_meta` sheet is the label on that box, telling CISO Assistant what the object is. For example, if we use `fwk` as the sheet prefix, `fwk_content` is the box holding the Framework's sections and requirements, while `fwk_meta` is its label. The shared `fwk` prefix shows that the two sheets belong together.
+
+`library_meta` is special. It describes the entire library, so it does not need a matching `library_content` sheet.
+
 ## Choose your path
 
 Not sure where to start? Use the table below to find the page that matches your goal.
