@@ -390,4 +390,16 @@ If the `python` command is not recognized, use `python3` instead in the commands
 
 The script creates a `.yaml` file in the current directory with the same base name as the Excel workbook you chose. For example, `octopus-habitat-security-standard.xlsx` becomes `octopus-habitat-security-standard.yaml`. You can open it in a text editor to inspect the result. If the script reports an error, correct the Excel workbook and run the command again.
 
+## Import the library into CISO Assistant
+
+Your workbook is now ready to import. If you generated a YAML version with the previous step, you can upload that instead.
+
+1. In CISO Assistant, open **Governance > Libraries**.
+2. Click on the <img src="../../.gitbook/assets/import_library_button.png" alt="Purple button with a white file in it and a &#x22;+&#x22; sign" data-size="line"> button.
+3. Select your Excel (`.xlsx`) workbook or `.yaml` library and upload it. Your library will be automatically loaded into your instance.
+
+![Libraries page with Governance > Libraries selected and the upload button highlighted in the upper right](../../.gitbook/assets/import_library.png)
+
+If the file is valid, CISO Assistant confirms the import. The OHSS Framework becomes available under **Catalog > Frameworks**. If the import reports an error, correct the source file and try again. See [Import a library](import-library.md) for more details.
+
 [TO BE CONTINUED]
