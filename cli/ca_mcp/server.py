@@ -6,15 +6,15 @@ import functools
 import logging
 
 import anyio.to_thread
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 from . import config
+from .auth import capture_headers
 from .utils.response_formatter import _cap
 
 logger = logging.getLogger(__name__)
 
-# Initialize FastMCP server
-mcp = FastMCP("ciso-assistant")
+mcp = MCPServer("ciso-assistant", middleware=[capture_headers])
 
 # Import all tools to register them with the MCP server
 from .tools.read_tools import (
@@ -294,27 +294,27 @@ def _annotations(fn, is_read):
 
     if is_read:
         return ToolAnnotations(
-            readOnlyHint=True, destructiveHint=False, idempotentHint=True
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True
         )
     name = fn.__name__
     if name.startswith("delete_"):
         return ToolAnnotations(
-            readOnlyHint=False, destructiveHint=True, idempotentHint=True
+            read_only_hint=False, destructive_hint=True, idempotent_hint=True
         )
     if name.startswith(("update_", "sync_")):
         return ToolAnnotations(
-            readOnlyHint=False, destructiveHint=True, idempotentHint=True
+            read_only_hint=False, destructive_hint=True, idempotent_hint=True
         )
     # create_/import_/refresh_: additive, and not idempotent
     return ToolAnnotations(
-        readOnlyHint=False, destructiveHint=False, idempotentHint=False
+        read_only_hint=False, destructive_hint=False, idempotent_hint=False
     )
 
 
 def _offload(fn):
     """Run a tool in a worker thread: tools are `async def` but do blocking I/O,
     which under HTTP stalls every other caller. Converting them to `def` would not
-    help -- FastMCP calls sync tools inline on the loop too.
+    help -- MCPServer calls sync tools inline on the loop too.
     """
 
     @functools.wraps(fn)
@@ -359,21 +359,14 @@ def run_server():
     mcp.run(transport="stdio")
 
 
-def run_http():
-    """Run the MCP server over Streamable HTTP"""
-    import uvicorn
+def build_http_app():
+    """Streamable HTTP ASGI app, configured from the environment."""
     from mcp.server.transport_security import TransportSecuritySettings
 
     register_tools(read_only=config.READ_ONLY)
 
-    mcp.settings.stateless_http = config.STATELESS
-    mcp.settings.json_response = config.JSON_RESPONSE
-    mcp.settings.streamable_http_path = config.HTTP_PATH
-
     if config.ALLOWED_HOSTS == ["*"]:
-        mcp.settings.transport_security = TransportSecuritySettings(
-            enable_dns_rebinding_protection=False
-        )
+        security = TransportSecuritySettings(enable_dns_rebinding_protection=False)
         logger.warning(
             "CA_MCP_ALLOWED_HOSTS='*': DNS rebinding protection DISABLED. "
             "Acceptable for tunnel testing, never for a real deployment."
@@ -386,13 +379,19 @@ def run_http():
         origins = config.ALLOWED_ORIGINS or [
             f"https://{host}" for host in config.ALLOWED_HOSTS
         ]
-        mcp.settings.transport_security = TransportSecuritySettings(
+        security = TransportSecuritySettings(
             enable_dns_rebinding_protection=True,
             allowed_hosts=config.ALLOWED_HOSTS + LOOPBACK_HOSTS,
             allowed_origins=origins + LOOPBACK_ORIGINS,
         )
         logger.info("Allowed hosts: %s", config.ALLOWED_HOSTS + LOOPBACK_HOSTS)
     else:
+        # explicit: the SDK only defaults to this when bound to a loopback host
+        security = TransportSecuritySettings(
+            enable_dns_rebinding_protection=True,
+            allowed_hosts=LOOPBACK_HOSTS,
+            allowed_origins=LOOPBACK_ORIGINS,
+        )
         logger.warning(
             "CA_MCP_ALLOWED_HOSTS unset: only loopback hosts are accepted. "
             "Set it to the public hostname before exposing this server."
@@ -407,7 +406,20 @@ def run_http():
         config.JSON_RESPONSE,
         config.ALLOW_ENV_TOKEN,
     )
-    uvicorn.run(mcp.streamable_http_app(), host=config.HTTP_HOST, port=config.HTTP_PORT)
+    return mcp.streamable_http_app(
+        streamable_http_path=config.HTTP_PATH,
+        json_response=config.JSON_RESPONSE,
+        stateless_http=config.STATELESS,
+        transport_security=security,
+        host=config.HTTP_HOST,
+    )
+
+
+def run_http():
+    """Run the MCP server over Streamable HTTP"""
+    import uvicorn
+
+    uvicorn.run(build_http_app(), host=config.HTTP_HOST, port=config.HTTP_PORT)
 
 
 def main():
