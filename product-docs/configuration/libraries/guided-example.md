@@ -25,14 +25,35 @@ We will use these observations to decide what to create in the library, then bui
 For this example, we assume that the workbook already contains `library_meta`, `framework_meta`, and `framework_content`. We will fill the metadata sheets first, then outline the Framework's sections and requirements.
 
 {% hint style="info" %}
-You can generate these sheets already filled with `prepare_framework_v2.py`. Enter the shared values in the `base` sheet of its configuration workbook, with `octopus-habitat-security-standard` as `urn_root` to obtain the URNs below. [Create a Library](create-library.md#generate-a-framework-workbook) explains how to run the script.
+To generate these sheets already filled, use the `prepare_framework_v2_config.xlsx` Excel workbook with `prepare_framework_v2.py`. Open the collapsed section below to see what to enter in its `base` sheet, then [run the script as explained here](create-library.md#generate-a-framework-workbook).
+
+<details>
+<summary>Show the values to enter in the configuration workbook</summary>
+
+In the `base` sheet of `prepare_framework_v2_config.xlsx`, replace the example values with these ones:
+
+| Property | Value | Why this value? |
+| --- | --- | --- |
+| `urn_root` | `octopus-habitat-security-standard` | A stable identifier for this standard, without a version number, so minor updates can keep the same URNs. |
+| `locale` | `en` | The source standard is in English. |
+| `ref_id` | `OHSS.v1` | The standard's abbreviation and edition, useful for readers without making it part of the URNs. |
+| `framework_name` | Octopus Habitat Security Standard | The title used in the source document. |
+| `description` | The Octopus Habitat Security Standard (OHSS) sets baseline safeguards for an octopus-managed home that remains submerged beneath the reef. To qualify for certification by the Mermaid Authority, the owner must show that access is controlled, essential habitat systems remain safe, and incidents can be handled. | The opening two sentences of the standard describe its scope. A shorter summary would also be fine. |
+| `copyright` | © 2026 intuitem | The attribution chosen for this example. |
+| `provider` | Mermaid Authority | The fictional authority behind the standard and its certification criteria. |
+| `packager` | `intuitem` | The organization preparing the library for CISO Assistant. |
+| `framework_sheet_base_name` | `framework` | This produces the `framework_meta` and `framework_content` sheets used below. |
+
+Leave the optional entries beginning with `#` disabled for now. We will add other objects only when we need them. The script uses these shared values to fill both metadata sheets.
+
+</details>
 {% endhint %}
 
 Both metadata sheets use one property per row, with its name in column A and its value in column B. The table headers below are only here to make the examples easier to read.
 
 ### Fill `library_meta`
 
-This sheet identifies the library that will contain our Framework. For this example, intuitem provides and packages the fictional content.
+This sheet identifies the library that will contain our Framework. For this example, the Mermaid Authority provides the standard, while intuitem packages it for CISO Assistant.
 
 | Property | Value |
 | --- | --- |
@@ -42,17 +63,16 @@ This sheet identifies the library that will contain our Framework. For this exam
 | `locale` | `en` |
 | `ref_id` | `OHSS.v1` |
 | `name` | Octopus Habitat Security Standard |
-| `description` | Safeguards for an octopus-managed home permanently submerged beneath the reef. |
+| `description` | The Octopus Habitat Security Standard (OHSS) sets baseline safeguards for an octopus-managed home that remains submerged beneath the reef. To qualify for certification by the Mermaid Authority, the owner must show that access is controlled, essential habitat systems remain safe, and incidents can be handled. |
 | `copyright` | © 2026 intuitem |
-| `provider` | intuitem |
+| `provider` | Mermaid Authority |
 | `packager` | intuitem |
 
 Here is how we chose the values:
 
-- `name` is the title on the PDF. `description` summarizes its opening paragraph, and `locale` is `en` because the source is in English.
+- `name` is the title on the PDF. We copied the opening two sentences into `description`, though a shorter summary would also work. `locale` is `en` because the source is in English.
 - `ref_id` combines the standard's acronym, `OHSS`, with `v1` to identify this edition.
 - `urn` follows `urn:<packager>:risk:library:<identifier>`. Here, `intuitem` is the packager, `library` identifies the object type, and the final part is a lowercase identifier based on the title. It has no version suffix, so the same URN can identify later updates to this library.
-- For this example, intuitem provides and packages the library. The Mermaid Authority is the fictional certifying body in the PDF.
 
 {% hint style="warning" %}
 The `v1` in `ref_id` marks this edition of the standard, while `library_meta.version` tracks updates to the library. For a correction or minor addition, keep the library and Framework URNs and the identifiers of existing requirements, then increase `library_meta.version` from `1` to `2`. If a new edition substantially changes the Framework's structure or requirements, create a separate library with a distinct URN and new Framework and requirement URNs. Replacing the existing structure under the same identifiers can break existing audits.
@@ -71,7 +91,7 @@ For a library built around one Framework, `ref_id`, `name`, and `description` ar
 | `base_urn` | `urn:intuitem:risk:req_node:octopus-habitat-security-standard` |
 | `ref_id` | `OHSS.v1` |
 | `name` | Octopus Habitat Security Standard |
-| `description` | Safeguards for an octopus-managed home permanently submerged beneath the reef. |
+| `description` | The Octopus Habitat Security Standard (OHSS) sets baseline safeguards for an octopus-managed home that remains submerged beneath the reef. To qualify for certification by the Mermaid Authority, the owner must show that access is controlled, essential habitat systems remain safe, and incidents can be handled. |
 
 We will add links to other objects here when we introduce them. For the full list of fields, see [Framework](library-objects/framework.md).
 
