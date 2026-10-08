@@ -273,4 +273,65 @@ The score numbers must match the range defined in `fwk_meta`. See [Scores](libra
 
 In our case, when an auditor will assess a requirement such as `OH.2.2`, they can use the **"Not met"**, **"Partly met"**, or **"Met"** score and read its meaning. The questions help to gather information, but the score is based on the requirement and its evidence. For this standard, certification requires a score of `2` for every requirement.
 
+## Add Review Themes as Implementation Groups
+
+The PDF uses **Review Themes** to help inspectors focus on a topic. They are optional filters, not requirements or levels of compliance. A requirement can have several themes or none. This is why we can represent them as [Implementation Groups](library-objects/implementation-groups.md). CISO Assistant can use these groups to show the requirements relevant to a selected topic without changing the framework's structure.
+
+### Create the Implementation Groups sheets
+
+Create `imp_grp_meta` and `imp_grp_content`. We chose `imp_grp` as the prefix for this object, following the same naming principle as `answ` and `scr`.
+
+Fill `imp_grp_meta` with one property per row:
+
+| Property | Value |
+| --- | --- |
+| `type` | `implementation_groups` |
+| `name` | `imp_grp` |
+
+### Link Implementation Groups in `fwk_meta`
+
+Add this property to the existing `fwk_meta` sheet:
+
+| Property | Value |
+| --- | --- |
+| `implementation_groups_definition` | `imp_grp` |
+
+The value matches `name` in `imp_grp_meta`, so the Framework knows which implementation groups it can use.
+
+### Fill `imp_grp_content`
+
+Add one row for each Review Theme named in the PDF:
+
+| ref_id | name |
+| --- | --- |
+| `access` | Access |
+| `operations` | Operations |
+| `habitat` | Habitat |
+| `monitoring` | Monitoring |
+| `response` | Response |
+
+We use short `ref_id` values to assign the implementation groups to requirements. The `name` values preserve the theme labels readers will recognize from the PDF. See [Implementation Groups](library-objects/implementation-groups.md) for the other available fields.
+
+### Assign the groups in `fwk_content`
+
+Add an `implementation_groups` column to `fwk_content`. For each assessable requirement, enter the `ref_id` of its Review Theme. Separate multiple IDs with commas. Leave the cell empty for non-assessable headings or when the PDF gives no theme.
+
+The table below lists all assessable requirements that have a Review Theme. It keeps every column introduced in `fwk_content` so far:
+
+| assessable | depth | ref_id | name | description | questions | answer | implementation_groups |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `x` | `2` | `OH.1.1` |  | Maintain an inventory of permanent residents and authorized visitors, including the areas each may enter. |  |  | `access` |
+| `x` | `2` | `OH.1.2` |  | Use a controlled entry procedure for visitors. Record the host, entry and exit times, and review the log at least monthly. |  |  | `access,operations` |
+| `x` | `2` | `OH.1.3` |  | Revoke access within one tide cycle when a resident or contractor no longer needs it. |  |  | `access` |
+| `x` | `3` | `OH.2.1.1` |  | Inspect structural supports, anchoring points and entry hatches at least quarterly. |  |  | `habitat` |
+| `x` | `3` | `OH.2.1.2` |  | Record and repair defects that could destabilize the habitat or permit unauthorized entry. |  |  | `habitat` |
+| `x` | `2` | `OH.2.2` |  | Equip the habitat with alerts for strong currents and unauthorized entry, and test both alerts at least monthly. | Are both alerts enabled?<br>Which alerts were tested in the past month? | `alerts_enabled`<br>`alerts_tested` | `habitat,monitoring` |
+| `x` | `2` | `OH.3.1` |  | Maintain an emergency contact route and a safe evacuation path from each occupied chamber. |  |  | `response` |
+| `x` | `2` | `OH.3.2` |  | Record security and safety incidents, including the time, affected area, actions taken and outcome. | Where is the latest incident record stored, and how can it be retrieved? | `incident_record` | `response,monitoring` |
+| `x` | `2` | `OH.3.3` |  | Review every incident within seven days and track corrective actions to closure. |  |  | `response` |
+
+The PDF assigns **"Habitat"** to `OH.2.1` and both of its subrequirements. Since `OH.2.1` is not assessable, we assign `habitat` only to its two children. `OH.2.3` remains assessable even though it has no theme.
+
+In our case, In CISO Assistant, an inspector can filter by **"Monitoring"** to focus on `OH.2.2` and `OH.3.2` instead of viewing every requirement at once, for example. A requirement with several groups can appear under each relevant filter, but it remains a single requirement to assess.
+
 [TO BE CONTINUED]
