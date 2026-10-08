@@ -402,4 +402,100 @@ Your workbook is now ready to import. If you generated a YAML version with the p
 
 If the file is valid, CISO Assistant confirms the import. The OHSS Framework becomes available under **Catalog > Frameworks**. If the import reports an error, correct the source file and try again. See [Import a library](import-library.md) for more details.
 
+## Check the Framework in a test audit
+
+An import can succeed even if the Framework does not look or behave as you intended. Before using OHSS in a real audit, create a test audit with it. If you need help creating one, follow [Creating your first Audit](../../guides/first-audit.md).
+
+Open the test audit and check that:
+
+- The three main sections appear in order. Under **"Habitat and equipment"**, `OH.2.1` is a heading with two assessable subrequirements, not a requirement to score itself.
+- `OH.2.2` shows both questions with the expected single-choice and multiple-choice answers, while `OH.3.2` accepts free text.
+- Assessable requirements use the `0` to `2` score scale and display the labels and meanings from the standard.
+- The Review Themes are available as Implementation Groups. For example, selecting **"Monitoring"** should let you focus on `OH.2.2` and `OH.3.2`. Also check that `OH.2.3`, which has no theme, is still present when viewing the full Framework.
+
+If something is missing or misplaced, correct the workbook before using the library for real audits. If no audit uses this Framework yet, or you have removed the test audit, you can [unload and delete the library](unload-or-delete-library.md) and import the corrected workbook as a replacement. If you need to keep an existing audit, [update the library](update-library.md) instead.
+
+## Extra: Add a French translation
+
+We have built, imported and checked the English version of OHSS. Congratulations!  Now, let's imagine that you are working with a French-speaking colleague who has a little trouble understanding technical terms of the framework in English. We can use the [French version of OHSS](../../.gitbook/assets/octopus-habitat-security-standard-fr.pdf) to add that language to the same Framework, rather than creating a second one. Keep `locale` as `en`, leave the English values in place, and do not change the URNs, `ref_id` values, answer IDs, score numbers, or Implementation Group IDs.
+
+{% hint style="info" %}
+We are adding French after completing the English version to make this example easier to follow. You can add both languages to the Excel workbook before its first import. There is no need to import an English-only library and then update it just to add French or any other language.
+{% endhint %}
+
+For each field that supports translation, add a row or column with `[fr]` appended to its name. The [translation guide](translations.md) explains this rule in detail. The tables below show only the new French fields and an identifier to locate each row. Keep all the original columns and values in your workbook.
+
+### Translate `library_meta`
+
+Add these two properties as new rows. The description uses the opening two sentences of the French standard, just as we did for the English description.
+
+| Property | Value |
+| --- | --- |
+| `name[fr]` | Référentiel de Sécurité de l'Habitat du Poulpe |
+| `description[fr]` | Le Référentiel de Sécurité de l'Habitat du Poulpe (RSHP) fixe les protections de base d'une maison de poulpe immergée en permanence sous le récif. Pour être certifié par l'Autorité des Sirènes, son propriétaire doit démontrer que les accès sont maîtrisés, que les systèmes essentiels de l'habitat restent sûrs et que les incidents peuvent être traités. |
+
+The French document calls the authority **"Autorité des Sirènes"**, but do not add `provider[fr]`: `provider` does not support translations.
+
+### Translate `fwk_meta`
+
+Add `name[fr]` and `description[fr]` as new rows here too, using the same French values as in `library_meta`. The existing `name` and `description` remain in English. The Framework identifiers and its links to Answers, Scores, and Implementation Groups do not change.
+
+### Translate `fwk_content`
+
+Add `name[fr]`, `description[fr]`, and `questions[fr]` as new columns. Fill each translated cell from the French PDF. As before, put two questions on separate lines in the **same cell** for `OH.2.2`, in the same order as the English questions.
+
+| ref_id | name[fr] | description[fr] | questions[fr] |
+| --- | --- | --- | --- |
+| `OH.1` | Accès et Identités |  |  |
+| `OH.1.1` |  | Tenir un inventaire des résidents permanents et des visiteurs autorisés, avec les zones auxquelles chacun peut accéder. |  |
+| `OH.1.2` |  | Appliquer une procédure d'entrée contrôlée pour les visiteurs. Noter l'hôte ainsi que les heures d'entrée et de sortie, puis vérifier le registre au moins chaque mois. |  |
+| `OH.1.3` |  | Révoquer les accès dans un délai d'un cycle de marée lorsqu'un résident ou un prestataire n'en a plus besoin. |  |
+| `OH.2` | Habitat et Équipements |  |  |
+| `OH.2.1` | Inspecter et entretenir la structure et les points d'accès de l'habitat. |  |  |
+| `OH.2.1.1` |  | Inspecter les supports de la structure, les points d'ancrage et les sas au moins une fois par trimestre. |  |
+| `OH.2.1.2` |  | Consigner et réparer les défauts pouvant déstabiliser l'habitat ou permettre une intrusion. |  |
+| `OH.2.2` |  | Équiper l'habitat d'alertes en cas de forts courants ou d'intrusion, puis tester les deux alertes au moins chaque mois. | Les deux alertes sont-elles actives ?<br>Quelles alertes ont été testées au cours du dernier mois ? |
+| `OH.2.3` |  | Disposer d'une alimentation de secours testée pour l'éclairage, les alertes et les équipements de communication critiques. |  |
+| `OH.3` | Surveillance et Réponse |  |  |
+| `OH.3.1` |  | Maintenir un moyen de contacter les secours et un chemin d'évacuation sûr depuis chaque pièce occupée. |  |
+| `OH.3.2` |  | Consigner les incidents de sécurité et de sûreté, avec l'heure, la zone touchée, les actions menées et le résultat. | Où est conservé le dernier compte rendu d'incident et comment peut-on le retrouver ? |
+| `OH.3.3` |  | Examiner chaque incident dans les sept jours et suivre les actions correctives jusqu'à leur clôture. |  |
+
+Only the text changes. The `answer` column still uses the same IDs, so each translated question keeps its answer type.
+
+### Translate `answ_content`
+
+Add a `question_choices[fr]` column for the two choice-based answer sets. Keep each choice on a separate line, in the same order as `question_choices`.
+
+| id | question_choices[fr] |
+| --- | --- |
+| `alerts_enabled` | Oui<br>Non |
+| `alerts_tested` | Forts courants<br>Intrusion |
+
+Leave `question_choices[fr]` empty for `incident_record`, because it is a free-text answer.
+
+### Translate `scr_content`
+
+Add `name[fr]` and `description[fr]` to the existing score rows. The numeric `score` values stay the same.
+
+| score | name[fr] | description[fr] |
+| --- | --- | --- |
+| `0` | Non atteint | Aucune preuve fiable ne montre que l'exigence est satisfaite. |
+| `1` | Partiellement atteint | La protection existe, mais elle est incomplète, non testée ou appliquée de façon irrégulière. |
+| `2` | Atteint | La protection est en place et appuyée par des preuves récentes. |
+
+### Translate `imp_grp_content`
+
+Add a `name[fr]` column to the Review Themes. Keep each `ref_id` unchanged so the requirements still point to the right group.
+
+| ref_id | name[fr] |
+| --- | --- |
+| `access` | Accès |
+| `operations` | Exploitation |
+| `habitat` | Habitat |
+| `monitoring` | Surveillance |
+| `response` | Réponse |
+
+If you already imported the English library, use [Update a library](update-library.md) to publish these translations as a new version. Then check the French display in a test audit as you did for the English version.
+
 [TO BE CONTINUED]
