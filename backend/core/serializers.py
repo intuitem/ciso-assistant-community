@@ -491,14 +491,16 @@ class RiskAcceptanceWriteSerializer(BaseModelSerializer):
             )
         approver = data.get("approver")
         folder = data.get("folder") or getattr(self.instance, "folder", None)
-        if (
-            approver
-            and folder
-            and not RoleAssignment.is_access_allowed(
-                approver,
-                Permission.objects.get(codename="approve_riskacceptance"),
-                folder,
+        scenarios = data.get("risk_scenarios")
+        if scenarios is None and self.instance:
+            scenarios = self.instance.risk_scenarios.select_related(
+                "risk_assessment__folder"
             )
+        folders = {folder} if folder else set()
+        folders |= {s.risk_assessment.folder for s in scenarios or []}
+        perm = Permission.objects.get(codename="approve_riskacceptance")
+        if approver and any(
+            not RoleAssignment.is_access_allowed(approver, perm, f) for f in folders
         ):
             raise serializers.ValidationError(
                 {
