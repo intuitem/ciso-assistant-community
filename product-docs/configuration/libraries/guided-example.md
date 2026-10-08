@@ -22,7 +22,7 @@ We will use these observations to decide what to create in the library, then bui
 
 ## Start small, then build up
 
-For this example, we assume that the workbook already contains `library_meta`, `framework_meta`, and `framework_content`. We will fill the metadata sheets first, then outline the Framework's sections and requirements.
+For this example, we assume that the workbook already contains `library_meta`, `fwk_meta`, and `fwk_content`. We will fill the metadata sheets first, then outline the Framework's sections and requirements.
 
 {% hint style="info" %}
 To generate these sheets already filled, use the `prepare_framework_v2_config.xlsx` Excel workbook with `prepare_framework_v2.py`. Open the collapsed section below to see what to enter in its `base` sheet, then [run the script as explained here](create-library.md#generate-a-framework-workbook).
@@ -42,7 +42,7 @@ In the `base` sheet of `prepare_framework_v2_config.xlsx`, replace the example v
 | `copyright` | © 2026 intuitem | The attribution chosen for this example. |
 | `provider` | Mermaid Authority | The fictional authority behind the standard and its certification criteria. |
 | `packager` | `intuitem` | The organization preparing the library for CISO Assistant. |
-| `framework_sheet_base_name` | `framework` | This produces the `framework_meta` and `framework_content` sheets used below. |
+| `framework_sheet_base_name` | `fwk` | This produces the `fwk_meta` and `fwk_content` sheets used below. |
 
 Leave the optional entries beginning with `#` disabled for now. We will add other objects only when we need them. The script uses these shared values to fill both metadata sheets.
 
@@ -84,7 +84,7 @@ The `v1` in `ref_id` marks this edition of the standard, while `library_meta.ver
 
 See [Library metadata](library-objects/library-metadata.md) for what each property means.
 
-### Fill `framework_meta`
+### Fill `fwk_meta`
 
 For a library built around one Framework, `ref_id`, `name`, and `description` are generally the same in both metadata sheets. We keep them identical here. The `type` and `urn` differ because they identify two different objects. The Framework also needs a `base_urn` for its sections and requirements.
 
@@ -101,7 +101,7 @@ We will add links to other objects here when we introduce them. For the full lis
 
 ## Plan the Framework structure
 
-Before filling `framework_content`, make a simple outline of the standard. The sheet will have one row per section or requirement, in the same order as the source document.
+Before filling `fwk_content`, make a simple outline of the standard. The sheet will have one row per section or requirement, in the same order as the source document.
 The `depth` column expresses the hierarchy. Often, `1` marks a main section, `2` its requirements, and `3` their subrequirements, but the meaning of each level depends on the source Framework. In `assessable`, leave headings empty and enter `x` for requirements users will assess. Use `name` for a short title and `description` for the full requirement text. See [Framework](library-objects/framework.md) for the fields in this sheet.
 
 For OHSS, identify the three main sections, then list the numbered requirements beneath each one. Decide which rows are headings and which are assessable before copying the text into Excel. Keep the source identifiers at hand: they will help us choose stable `ref_id` values.
@@ -112,11 +112,11 @@ This planning step matters. If the hierarchy turns out to be wrong after you hav
 Some Frameworks can have sections or requirements without an identifier. In that case, leave `ref_id` empty for those rows and fill in `name`, `description`, or both.
 {% endhint %}
 
-## Add the first section to `framework_content`
+## Add the first section to `fwk_content`
 
 Start with **Access and identity**. Add its heading at `depth` `1` with an empty `assessable` cell, then add its requirements at `depth` `2` with `x` in `assessable`. For now, fill only `ref_id`, `name`, and `description` alongside these two columns.
 
-Here is the first section in `framework_content`:
+Here is the first section in `fwk_content`:
 
 | assessable | depth | ref_id | name | description |
 | --- | --- | --- | --- | --- |
@@ -129,7 +129,7 @@ The PDF uses identifiers such as `OH 1.1`. As a best practice, we avoid spaces i
 
 If you are still unsure about the outline, you can enter just the three main section headings in Excel first and check whether the structure makes sense. Then add their requirements. Leave the questions, review themes, and score scale for later. The goal here is to establish the Framework's hierarchy before adding more objects.
 
-## Add the second section to `framework_content`
+## Add the second section to `fwk_content`
 
 Continue in the same sheet with **Habitat and equipment**. Its heading is at `depth` `1`, just like the first section.
 
@@ -150,7 +150,7 @@ The source also includes assessment questions under `OH 2.2`. We keep only the r
 If you want a reminder, you can add the `questions` column now and put a temporary `x` in the `OH.2.2` row.
 {% endhint %}
 
-## Add the third section to `framework_content`
+## Add the third section to `fwk_content`
 
 The final section, **Monitoring and response**, follows the simpler pattern we used for the first one: one heading at `depth` `1`, followed by three assessable requirements at `depth` `2`.
 
