@@ -56,6 +56,10 @@ There is **no notification model** in the database. Notifications are fire-and-f
 
 The variables are turned into Django's `MAILERS` setting by `backend/ciso_assistant/mailers.py`. Every send goes through `backend/core/mailer.py`.
 
+### Testing the configuration
+
+`python manage.py send_test_email <address>` sends a test message through `core.mailer.send_test()`, which reports the mailer that delivered and the ones skipped on the way instead of raising. The same function is meant to back a test button in the UI later.
+
 ### Global Setting (UI toggle)
 
 The master switch is `notifications_enable_mailing` in the `GlobalSettings` model (`name="general"`). It must be set to `true` in **Extra > Settings** for any notification email to be sent.

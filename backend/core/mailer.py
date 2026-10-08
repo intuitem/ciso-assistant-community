@@ -12,10 +12,12 @@ action). Nothing here swallows errors.
 """
 
 from contextlib import contextmanager
+from dataclasses import dataclass, field
 
 import structlog
 from django.conf import settings
 from django.core.mail import EmailMessage, mailers
+from django.utils import timezone
 
 logger = structlog.get_logger(__name__)
 
@@ -45,8 +47,11 @@ def mailing_enabled() -> bool:
 
 
 @contextmanager
-def open_connection():
+def open_connection(attempts: list | None = None):
     """Yield the first mailer that accepts a connection, closed on exit.
+
+    ``attempts``, when given, collects ``(alias, error)`` for every mailer
+    that could not be opened, so a caller can report the failover path.
 
     This is the only place failover happens. An exception raised by the
     caller while the connection is open propagates unchanged: the next
@@ -67,6 +72,8 @@ def open_connection():
                 backend=type(backend).__name__,
                 error=str(error),
             )
+            if attempts is not None:
+                attempts.append((alias, str(error)))
             last_error = error
             continue
         try:
@@ -122,3 +129,61 @@ def send(
     # backends); that is a delivery failure, not a success.
     if sent != 1:
         raise RuntimeError(f"email backend reported {sent} of 1 messages sent")
+
+
+@dataclass
+class TestSendResult:
+    """Outcome of a test send, for the management command and the UI."""
+
+    ok: bool
+    recipient: str
+    mailer: str | None = None
+    backend: str | None = None
+    error: str | None = None
+    skipped: list[tuple[str, str]] = field(default_factory=list)
+
+    @property
+    def summary(self) -> str:
+        if self.ok:
+            return f"test email sent to {self.recipient} through mailer {self.mailer}"
+        return f"test email to {self.recipient} failed: {self.error}"
+
+
+def send_test(recipient: str) -> TestSendResult:
+    """Send a test message and report what happened instead of raising.
+
+    The service's other entry points raise; this one is for a person who is
+    checking the configuration and wants the answer, including which mailer
+    delivered and which ones were skipped on the way."""
+    missing = missing_configuration()
+    if missing:
+        return TestSendResult(
+            ok=False,
+            recipient=recipient,
+            error=f"mail is not configured (missing {', '.join(missing)})",
+        )
+    skipped: list[tuple[str, str]] = []
+    now = timezone.now().strftime("%Y-%m-%d %H:%M:%S %Z")
+    try:
+        with open_connection(attempts=skipped) as backend:
+            alias = getattr(backend, "alias", None)
+            backend_name = type(backend).__name__
+            send(
+                "CISO Assistant test email",
+                f"This is a test email from CISO Assistant ({settings.CISO_ASSISTANT_URL}).\n"
+                f"Sent on {now} through mailer '{alias}' ({backend_name}).\n"
+                "If you received it, outgoing mail is configured correctly.",
+                recipient,
+                connection=backend,
+            )
+    except Exception as error:
+        return TestSendResult(
+            ok=False, recipient=recipient, error=str(error), skipped=skipped
+        )
+    return TestSendResult(
+        ok=True,
+        recipient=recipient,
+        mailer=alias,
+        backend=backend_name,
+        skipped=skipped,
+    )

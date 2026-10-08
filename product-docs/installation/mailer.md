@@ -27,6 +27,16 @@ EMAIL_USE_TLS=True    # STARTTLS (typically port 587)
 
 For local development you can run [Mailpit](https://github.com/axllent/mailpit) and point `EMAIL_HOST` at it with both flags set to `False`.
 
+### Checking the configuration
+
+Send a test email through the configured mailers and see which one delivered:
+
+```bash
+python manage.py send_test_email you@example.com
+```
+
+With Docker Compose: `docker compose exec backend python manage.py send_test_email you@example.com`. The command prints the mailers it found, warns about any it had to skip, and exits non-zero with the reason when nothing was sent.
+
 ### TLS certificate requirements (3.16+)
 
 {% hint style="info" %}
