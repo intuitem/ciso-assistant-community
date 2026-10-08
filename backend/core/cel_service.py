@@ -878,7 +878,7 @@ def _quick_form_probe(quick_form: dict) -> dict:
             if rule.get("ref_id") and not is_numeric_rule(rule)
         },
         "values": {
-            str(rule.get("ref_id")): 0.0
+            str(rule.get("ref_id")): 1.0
             for rule in quick_form.get("outcomes_definition") or []
             if rule.get("ref_id") and is_numeric_rule(rule)
         },
@@ -1000,7 +1000,7 @@ def _framework_probe(framework: dict) -> dict:
         },
         "answers": answers,
         "values": {
-            str(rule.get("ref_id")): 0.0
+            str(rule.get("ref_id")): 1.0
             for rule in rules
             if rule.get("ref_id") and is_numeric_rule(rule)
         },
@@ -1056,7 +1056,7 @@ def _check_rules(rules, probe: dict, check, error) -> None:
         )
         if expression and result is not None and _as_number(result) is None:
             error(ref_id, expression, "A numeric rule must return a number")
-        values = {**values, ref_id: 0.0}
+        values = {**values, ref_id: 1.0}
     above: dict[str, dict] = {}
     for rule in [r for r in rules if not is_numeric_rule(r)]:
         ref_id = str(rule.get("ref_id") or "")

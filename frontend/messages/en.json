@@ -7045,6 +7045,7 @@
 	"formHasNoSubjectQuestion": "This form does not name a subject question.",
 	"responseSubject": "About",
 	"onAcceptPreview": "On accept, this will write",
+	"onAcceptReplacesAnotherForm": "The current tier comes from “{form}” ({date}). Accepting replaces it with this form's result.",
 	"appliedOnAccept": "Applied on accept",
 	"noSubject": "The response is not about an object of the right kind",
 	"subjectPermissionRequired": "You cannot edit this object, so nothing will be written",

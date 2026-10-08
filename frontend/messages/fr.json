@@ -7024,6 +7024,7 @@
 	"formHasNoSubjectQuestion": "Ce formulaire ne désigne pas de question sujet.",
 	"responseSubject": "Sujet",
 	"onAcceptPreview": "À l'acceptation, ceci sera enregistré",
+	"onAcceptReplacesAnotherForm": "Le niveau actuel vient de « {form} » ({date}). Accepter le remplace par le résultat de ce formulaire.",
 	"appliedOnAccept": "Enregistré à l'acceptation",
 	"noSubject": "La réponse ne porte pas sur un objet du bon type",
 	"subjectPermissionRequired": "Vous ne pouvez pas modifier cet objet : rien ne sera enregistré",
