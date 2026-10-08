@@ -1,8 +1,11 @@
 <script lang="ts">
+	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
 	import { deserialize } from '$app/forms';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
+	import ProjectionCard from '$lib/components/QuickForms/ProjectionCard.svelte';
 	import { m } from '$paraglide/messages';
+	import { isDark } from '$lib/utils/helpers';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -22,6 +25,8 @@
 			'bg-violet-100 text-violet-800 ring-violet-300 dark:bg-violet-950 dark:text-violet-200 dark:ring-violet-800',
 		blue: 'bg-sky-100 text-sky-800 ring-sky-300 dark:bg-sky-950 dark:text-sky-200 dark:ring-sky-800'
 	};
+	// Library data reaches an inline style: only a bare hex colour gets through.
+	const HEX_COLOR = /^#[0-9a-fA-F]{3,8}$/;
 	const NEUTRAL =
 		'bg-surface-100 text-surface-700 ring-surface-300 dark:bg-surface-900 dark:text-surface-300 dark:ring-surface-700';
 
@@ -34,8 +39,12 @@
 		visiblePages[Math.min(pageIndex, Math.max(0, visiblePages.length - 1))]
 	);
 	const hiddenPages = $derived((view?.pages ?? []).filter((p: any) => p.hidden));
-	const rules = $derived((view?.outcomes_definition ?? []) as any[]);
+	const allRules = $derived((view?.outcomes_definition ?? []) as any[]);
+	// Numeric rules never fire; they are listed with their value instead.
+	const rules = $derived(allRules.filter((r) => r.kind !== 'number'));
+	const valueRules = $derived(allRules.filter((r) => r.kind === 'number'));
 	const fired = $derived((view?.computed_outcome ?? {}) as Record<string, any>);
+	const values = $derived((view?.computed_values ?? {}) as Record<string, number>);
 
 	// Every change is re-evaluated by the same engine the live form uses, so the
 	// preview cannot quietly disagree with what respondents will get.
@@ -66,7 +75,9 @@
 		evaluate();
 	}
 
-	const label = (rule: any) => rule.label ?? rule.annotation ?? rule.ref_id;
+	const formatValue = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(2));
+
+	const label = (rule: any) => ruleLabel(rule, rule.ref_id);
 </script>
 
 <!-- The fill view is a centred max-w-4xl column with page padding; the form column
@@ -195,6 +206,14 @@
 				</div>
 			</div>
 
+			{#if view?.projection?.length}
+				<ProjectionCard
+					rows={view.projection}
+					rules={allRules}
+					note={m.projectionSuggestedNote()}
+				/>
+			{/if}
+
 			{#if rules.length}
 				<div class="card bg-surface-50-950 shadow-sm p-4">
 					<h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-surface-500">
@@ -209,10 +228,34 @@
 										? 'fa-circle-check text-emerald-500'
 										: 'fa-circle text-surface-300'} mt-0.5 text-xs"
 								></i>
+								<!-- The builder stores a hex colour; the named ones are older forms. -->
 								<span
 									class="rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset {COLORS[
 										rule.color ?? ''
-									] ?? NEUTRAL}">{label(rule)}</span
+									] ?? NEUTRAL}"
+									style={HEX_COLOR.test(rule.color ?? '') && on
+										? `background-color: ${rule.color}; color: ${isDark(rule.color) ? 'white' : 'inherit'}`
+										: ''}>{label(rule)}</span
+								>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			{#if valueRules.length}
+				<div class="card bg-surface-50-950 shadow-sm p-4" data-testid="computed-values">
+					<h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-surface-500">
+						{m.computedValues()}
+					</h3>
+					<div class="space-y-1 text-sm">
+						{#each valueRules as rule (rule.ref_id)}
+							<div class="flex justify-between gap-2">
+								<span class="text-surface-600-400">{label(rule)}</span>
+								<span class="font-mono"
+									>{view?.scored_complete !== false && rule.ref_id in values
+										? formatValue(values[rule.ref_id])
+										: '—'}</span
 								>
 							</div>
 						{/each}
