@@ -1,8 +1,12 @@
 <script lang="ts">
+	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
 	import { run } from 'svelte/legacy';
 
 	import { page } from '$app/state';
-	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	import RecursiveTreeView, {
+		setContextRecursiveTreeView,
+		DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW
+	} from '$lib/components/TreeView/RecursiveTreeView.svelte';
 
 	import { onMount } from 'svelte';
 
@@ -18,7 +22,10 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
+	import ExportModal, {
+		type ExportFormat,
+		type ExportGroup
+	} from '$lib/components/Modals/ExportModal.svelte';
 
 	import {
 		complianceResultColorMap,
@@ -47,13 +54,14 @@
 	} from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import ExcludeNotApplicableRequirements from '$lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
+
 	import { derived } from 'svelte/store';
 	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 
-	const CYFUN_2025_FRAMEWORK_URN = 'urn:intuitem:risk:framework:ccb-cyfun2025';
 	const ISO27001_FRAMEWORK_URN_PREFIX = 'urn:intuitem:risk:framework:iso27001';
 
 	interface Props {
@@ -142,7 +150,6 @@
 	import CompareAuditModal from '$lib/components/Modals/CompareAuditModal.svelte';
 	import MapFromAuditModal from '$lib/components/Modals/MapFromAuditModal.svelte';
 	import MappingDirectionModal from '$lib/components/Modals/MappingDirectionModal.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -316,6 +323,9 @@
 
 	let expandedNodes: string[] = $state([]);
 
+	const contextTreeView = $state(structuredClone(DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW));
+	setContextRecursiveTreeView(contextTreeView);
+
 	expandedNodes = $expandedNodesState;
 
 	const modalStore: ModalStore = getModalStore();
@@ -409,11 +419,16 @@
 		const id = ca.id;
 		const isInternal = !page.data.user.is_third_party;
 		const frameworkUrn = ca.framework?.urn ?? '';
-		// CyFun stays exact: backend cyfun_xlsx (views.py) hardcodes the 2025
-		// sheet layout, so other versions would 400. Bump both when a new CyFun
-		// ships. ISO27001 is prefix-matched — SoA only navigates to a page
-		// whose semantics carry across 27001 versions.
-		const isCyFun = frameworkUrn === CYFUN_2025_FRAMEWORK_URN;
+		// Framework-specific exports (e.g. a publisher's official self-assessment
+		// template) come from the backend, which knows which audits support them.
+		// ISO27001 is prefix-matched — SoA only navigates to a page whose
+		// semantics carry across 27001 versions.
+		const frameworkExports: {
+			ref_id: string;
+			title: string;
+			description: string;
+			format: ExportFormat;
+		}[] = ca.framework_exports ?? [];
 		const isIso27001 = frameworkUrn.startsWith(ISO27001_FRAMEWORK_URN_PREFIX);
 
 		const auditOptions = [
@@ -453,14 +468,15 @@
 				href: `/compliance-assessments/${id}/export/posture-pdf?profile=attestation`,
 				testId: 'export-option-attestation-pdf'
 			},
-			isInternal &&
-				isCyFun && {
-					titleKey: 'exportCyFunAssessment',
-					descriptionKey: 'exportCyFunAssessmentDesc',
-					format: 'XLSX' as const,
-					href: `/compliance-assessments/${id}/export/cyfun-xlsx`,
-					testId: 'export-option-cyfun-xlsx'
-				},
+			...(isInternal
+				? frameworkExports.map((frameworkExport) => ({
+						titleKey: frameworkExport.title,
+						descriptionKey: frameworkExport.description,
+						format: frameworkExport.format,
+						href: `/compliance-assessments/${id}/export/framework/${frameworkExport.ref_id}`,
+						testId: `export-option-${frameworkExport.ref_id}`
+					}))
+				: []),
 			{
 				titleKey: 'exportBundleWithEvidences',
 				descriptionKey: 'exportBundleWithEvidencesDesc',
@@ -851,7 +867,7 @@
 										style="background-color: {rule.color ?? '#d1d5db'}"
 										class:opacity-40={!isActive}
 									></span>
-									{rule.annotation ?? rule.ref_id}
+									{ruleLabel(rule, rule.ref_id)}
 								</span>
 							{/each}
 						</div>
@@ -1220,6 +1236,9 @@
 			<div class="flex items-center gap-2">
 				{#if treeViewNodes}
 					<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
+					<ExcludeNotApplicableRequirements
+						bind:excludeNotApplicableRequirements={contextTreeView.excludeNotApplicableRequirements}
+					/>
 				{/if}
 				<Popover
 					open={filterPopupOpen}

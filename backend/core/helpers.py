@@ -394,7 +394,9 @@ def annotate_tree_with_aggregated_scores(
     contribute their own ceiling; 100% stays achievable.
 
     Leaves are included only when is_scored is True, the node is assessable,
-    and the result is not N/A.
+    and the result is not N/A. When the audit anchors N/A to its target, N/A
+    leaves are included with both layers set to the target projected onto
+    their scale (or their max when no target is set), like get_global_score.
     """
     method = compliance_assessment.score_calculation_method
     show_doc = compliance_assessment.show_documentation_score
@@ -409,14 +411,14 @@ def annotate_tree_with_aggregated_scores(
         else 100
     )
     ca_range = ca_max - ca_min if ca_max > ca_min else 1
+    anchor_na = compliance_assessment.anchor_na_to_target
 
     def _clean(value):
-        """Trim float-precision noise (~1e-9) from denormalized display values
-        without losing precision for upstream rollups, which use the raw
-        _aggregated_ratio."""
+        """Round a parent's display value like the global score (round_score).
+        Upstream rollups use the raw _aggregated_ratio, so no precision is lost."""
         if value is None:
             return None
-        return round(value, 9)
+        return round_score(value)
 
     def walk(node: dict) -> None:
         children = node.get("children") or {}
@@ -425,11 +427,9 @@ def annotate_tree_with_aggregated_scores(
             walk(child)
 
         if not children:
-            is_assessed = (
-                node.get("is_scored")
-                and node.get("assessable")
-                and node.get("result") != "not_applicable"
-            )
+            is_na = node.get("result") == "not_applicable"
+            anchored = bool(anchor_na and is_na and node.get("assessable"))
+            is_assessed = node.get("is_scored") and node.get("assessable") and not is_na
             score_val = node.get("score")
             # `is_scored` with `score is None` is a data inconsistency; treat
             # it as unscored to avoid producing a negative ratio on offset
@@ -437,18 +437,19 @@ def annotate_tree_with_aggregated_scores(
             if is_assessed and score_val is None:
                 is_assessed = False
             weight = node.get("weight") or 1
+            ra_min = (
+                node.get("min_score") if node.get("min_score") is not None else ca_min
+            )
+            ra_max = (
+                node.get("max_score") if node.get("max_score") is not None else ca_max
+            )
+            ra_range = ra_max - ra_min if ra_max > ra_min else 1
+            doc_val = node.get("documentation_score")
+            if anchored:
+                score_val = compliance_assessment.na_anchor_score(ra_min, ra_max)
+                doc_val = score_val
+                is_assessed = True
             if is_assessed:
-                ra_min = (
-                    node.get("min_score")
-                    if node.get("min_score") is not None
-                    else ca_min
-                )
-                ra_max = (
-                    node.get("max_score")
-                    if node.get("max_score") is not None
-                    else ca_max
-                )
-                ra_range = ra_max - ra_min if ra_max > ra_min else 1
                 ratio = (score_val - ra_min) / ra_range
                 node["aggregated_score"] = score_val
                 node["aggregated_min_score"] = ra_min
@@ -461,13 +462,15 @@ def annotate_tree_with_aggregated_scores(
                 node["_leaf_weighted_max"] = ra_max * weight
                 node["_leaf_weight"] = weight
                 if show_doc:
-                    # documentation_score=None keeps its legacy "no doc -> 0"
-                    # semantic so the tree matches the global score and radar,
-                    # which also map doc None -> 0 in _compute_score_for_field.
-                    # (score=None is excluded above; doc is not.)
-                    doc_val = node.get("documentation_score")
+                    # documentation_score=None counts as the bottom of the
+                    # scale, like _compute_raw_score_for_field (SUM keeps its
+                    # raw 0). (score=None is excluded above; doc is not.)
                     if doc_val is None:
-                        doc_val = 0
+                        doc_val = (
+                            0
+                            if method == ComplianceAssessment.CalculationMethod.SUM
+                            else ra_min
+                        )
                     doc_ratio = (doc_val - ra_min) / ra_range
                     node["aggregated_documentation_score"] = doc_val
                     node["_aggregated_doc_ratio"] = doc_ratio
@@ -540,7 +543,7 @@ def annotate_tree_with_aggregated_scores(
                 node["_aggregated_doc_ratio"] = None
         elif method == ComplianceAssessment.CalculationMethod.SUM:
             if leaf_weight > 0:
-                node["aggregated_score"] = leaf_weighted_score
+                node["aggregated_score"] = _clean(leaf_weighted_score)
                 node["aggregated_max_score"] = leaf_weighted_max
                 node["aggregated_min_score"] = 0
                 # Ratio in [0, 1] for any future consumer (e.g. nested SUM).
@@ -550,7 +553,7 @@ def annotate_tree_with_aggregated_scores(
                     else None
                 )
                 if show_doc:
-                    node["aggregated_documentation_score"] = leaf_weighted_doc
+                    node["aggregated_documentation_score"] = _clean(leaf_weighted_doc)
                     node["_aggregated_doc_ratio"] = (
                         leaf_weighted_doc / leaf_weighted_max
                         if leaf_weighted_max

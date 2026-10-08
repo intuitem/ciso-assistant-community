@@ -4,14 +4,15 @@ from pathlib import Path
 import openpyxl
 import pytest
 
+from core.cyfun import CYFUN_2025_URN
 from core.models import (
     ComplianceAssessment,
     LoadedLibrary,
     RequirementAssessment,
     StoredLibrary,
 )
+from core.utils import EVERYONE_EDIT
 from data_wizard.cyfun_helpers import (
-    CYFUN_FRAMEWORK_URN,
     CYFUN_LIBRARY_URN,
     FUNCTION_SHEETS,
     process_cyfun_file,
@@ -179,6 +180,18 @@ class TestProcessCyfunFile:
         )
         assert parsed["records"][1]["compliance_result"] == "not_applicable"
 
+    def test_parses_hyphenated_requirement_numbers(self):
+        """The BASIC and IMPORTANT tools write a few ids with a hyphen before the
+        requirement number (DE.CM-03-1); those rows are imported too."""
+        content = build_workbook(
+            {
+                "IDENTIFY": [{6: "ID.AM-03-2: Data flows are mapped.", 7: 2, 8: 3}],
+                "DETECT": [{6: "DE.CM-03-1: Personnel activity.", 7: 1, 8: 2}],
+            }
+        )
+        records = process_cyfun_file(content)["records"]
+        assert [r["ref_id"] for r in records] == ["ID.AM-03.2", "DE.CM-03.1"]
+
     def test_rejects_workbook_with_unrecognized_sheet_headers(self):
         content = build_workbook(
             {"GOVERN": [{6: "GV.RM-01.1: Objectives.", 7: 1, 8: 1}]}
@@ -267,10 +280,13 @@ class TestCyfunEndpoint:
 
         assert LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).exists()
         ca = ComplianceAssessment.objects.get(name="CyFun test")
-        assert ca.framework.urn == CYFUN_FRAMEWORK_URN
+        assert ca.framework.urn == CYFUN_2025_URN
         assert ca.selected_implementation_groups == ["E"]
         assert ca.scoring_enabled
         assert ca.show_documentation_score
+        # Visibility follows the library: respondents score too.
+        for field in ("score", "is_scored", "documentation_score"):
+            assert ca.field_visibility[field] == EVERYONE_EDIT
         assert ca.min_score == 1 and ca.max_score == 5
         assert ca.score_calculation_method == "average_of_averages"
 
@@ -286,6 +302,23 @@ class TestCyfunEndpoint:
             compliance_assessment=ca, requirement__ref_id="GV.OC-02.1"
         )
         assert na.result == "not_applicable"
+
+    def test_outdated_loaded_library_is_reported(
+        self, knox_admin_client, domain_folder, cyfun_stored_library
+    ):
+        """An older loaded version lacks the scoring settings the import uses."""
+        assert StoredLibrary.objects.get(urn=CYFUN_LIBRARY_URN).load() is None
+        LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).update(version=1)
+        content = build_workbook(
+            {"GOVERN": [{5: "Essential", 6: "GV.OC-01.1: Mission.", 7: 3, 8: 2}]}
+        )
+        resp = self._post(knox_admin_client, content, domain_folder.id)
+        assert resp.status_code == 200
+        results = resp.json()["results"]
+        assert results["errors"][0]["error"] == "CyfunLibraryOutdated"
+        assert not ComplianceAssessment.objects.filter(
+            framework__urn=CYFUN_2025_URN
+        ).exists()
 
     def test_unknown_workbook_reports_error(self, knox_admin_client, domain_folder):
         wb = openpyxl.Workbook()

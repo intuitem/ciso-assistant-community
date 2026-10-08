@@ -333,7 +333,7 @@
 					aria-current={$activeSectionStore === FRAMEWORK_ID ? 'location' : undefined}
 				>
 					<i class="fa-solid fa-file-lines text-surface-500 text-[10px]"></i>
-					<span>{m.framework()}</span>
+					<span>{builder.mode === 'quick_form' ? m.quickForm() : m.framework()}</span>
 				</button>
 
 				<hr class="my-1 border-surface-100-900" />
@@ -344,6 +344,10 @@
 				{@const n = entry.node.node}
 				{@const hasChildren = entry.node.children.length > 0}
 				{@const isCollapsed = tocCollapsedSet.has(n.id)}
+				<!-- Frameworks are navigated by ref_id; quick form pages by their name. -->
+				{@const label =
+					(builder.mode === 'quick_form' ? n.name || n.ref_id : n.ref_id || n.name) ||
+					m.builderUntitled()}
 				{@const icon =
 					n.display_mode === 'splash'
 						? 'fa-display text-purple-400'
@@ -387,11 +391,11 @@
 						onkeydown={(e) => handleButtonKeydown(e, index)}
 						onfocus={() => (focusedIndex = index)}
 						aria-current={$activeSectionStore === n.id ? 'location' : undefined}
-						aria-label={m.builderJumpTo({ label: n.ref_id || n.name || m.builderUntitled() })}
+						aria-label={m.builderJumpTo({ label })}
 						tabindex={focusedIndex === index ? 0 : -1}
 					>
 						<i class="fa-solid {icon} text-[10px] flex-shrink-0"></i>
-						<span class="truncate flex-1">{n.ref_id || n.name || m.builderUntitled()}</span>
+						<span class="truncate flex-1">{label}</span>
 						{#if $activeLanguageStore && hasUntranslated([entry.node], $activeLanguageStore)}
 							<span
 								class="text-amber-500 text-[8px] flex-shrink-0"

@@ -456,6 +456,12 @@
 					label={m.disablePartiallyCompliantResult()}
 					helpText={m.disablePartiallyCompliantResultHelpText()}
 				/>
+				<Checkbox
+					{form}
+					field="documentation_score_first"
+					label={m.documentationScoreFirst()}
+					helpText={m.documentationScoreFirstHelpText()}
+				/>
 				{#if $page.data.featureflags?.audit_tree_inheritance}
 					<Select
 						{form}

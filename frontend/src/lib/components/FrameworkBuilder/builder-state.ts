@@ -1,7 +1,8 @@
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
-import { apiSaveDraft, type DraftJSON } from './builder-api';
+import { apiSaveDraft, BuilderRequestError, type DraftJSON } from './builder-api';
 import { m } from '$paraglide/messages';
+import { safeTranslate } from '$lib/utils/i18n';
 import { resolveComputeResult } from '$lib/utils/helpers';
 
 // --- Types ---
@@ -83,6 +84,8 @@ export interface RequirementNode {
 	assessable: boolean;
 	implementation_groups: string[] | null;
 	visibility_expression: string | null;
+	/** Quick-form pages only: how question scores combine into the page score. */
+	aggregation?: 'sum' | 'max' | 'mean' | null;
 	typical_evidence: string | null;
 	weight: number;
 	importance: string;
@@ -100,6 +103,8 @@ export interface OutcomeRule {
 	annotation: string;
 	color: string | null;
 	expression: string;
+	/** Quick forms: 'number' rules compute a value instead of firing. */
+	kind?: 'number';
 	translations?: Translations | null;
 }
 
@@ -108,6 +113,7 @@ export interface ImplementationGroup {
 	name: string;
 	description: string;
 	default_selected?: boolean;
+	target_score?: number;
 	translations?: Translations | null;
 }
 
@@ -123,6 +129,10 @@ export interface Framework {
 	scores_definition: Record<string, unknown> | null;
 	implementation_groups_definition: Record<string, unknown>[] | null;
 	outcomes_definition: OutcomeRule[] | null;
+	/** Quick forms: the object-reference question naming what a response is about. */
+	subject_question_urn?: string | null;
+	/** Quick forms: what an accepted response writes, e.g. the vendor's tier. */
+	on_accept?: Record<string, unknown>[];
 	field_visibility: Record<string, string>;
 	locale?: string;
 	translations?: Translations | null;
@@ -234,7 +244,7 @@ export function computeRefId(
  * Generate a URN for a framework item.
  */
 export function generateUrn(
-	type: 'req_node' | 'question' | 'question_choice',
+	type: 'req_node' | 'qf_page' | 'question' | 'question_choice',
 	slug: string,
 	refId: string,
 	urnNamespace: string = 'custom'
@@ -330,6 +340,152 @@ function rewriteTreeUrns(nodes: BuilderNode[], newNs: string, newSlug: string): 
 			}
 		})),
 		children: rewriteTreeUrns(bn.children, newNs, newSlug)
+	}));
+}
+
+/**
+ * Rewrite page/question/choice node ids a rule names, after a save renamed
+ * them (see the urn map). Only reference positions are touched: `pages[...]`,
+ * `answers[...]` and a choice id before `in answers[`. Mirrors
+ * `rebase_expression` on the server, which already applied it to what it stored.
+ */
+export function rebaseExpression(
+	expression: string | null | undefined,
+	urnMap: Record<string, string>
+): string | null | undefined {
+	if (!expression) return expression;
+	const pages = new Map<string, string>();
+	const questions = new Map<string, string>();
+	const choices = new Map<string, string>();
+	for (const [oldUrn, newUrn] of Object.entries(urnMap)) {
+		if (!oldUrn.includes(':')) continue;
+		const from = extractNodeId(oldUrn);
+		const to = extractNodeId(newUrn);
+		if (!from || !to || from === to) continue;
+		(newUrn.includes(':choice:') ? choices : newUrn.includes(':question:') ? questions : pages).set(
+			from,
+			to
+		);
+	}
+	if (!pages.size && !questions.size && !choices.size) return expression;
+	return (
+		expression
+			// `pages` (quick forms) and `requirements` (frameworks) both name nodes.
+			.replace(
+				/\b(pages|requirements|answers)\[\s*(["'])(.*?)\2\s*\]/g,
+				(match, scope, quote, id) => {
+					const to = (scope === 'answers' ? questions : pages).get(id);
+					return to ? `${scope}[${quote}${to}${quote}]` : match;
+				}
+			)
+			.replace(/(["'])([^"'\\]*)\1(\s+in\s+answers\s*\[)/g, (match, quote, id, rest) => {
+				const to = choices.get(id);
+				return to ? `${quote}${to}${quote}${rest}` : match;
+			})
+	);
+}
+
+/** A rule ID as CEL reads it (`values.<id>`): letters, digits and _, not starting with a digit. */
+export const RULE_ID = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+/** What is wrong with a rule's ID, as the server's code, or null. */
+export function ruleIdProblem(ref: string, others: string[]): string | null {
+	if (!ref.trim()) return 'outcomeRuleIdRequired';
+	if (!RULE_ID.test(ref)) return 'outcomeRuleIdInvalid';
+	if (others.includes(ref)) return 'outcomeRuleIdDuplicate';
+	return null;
+}
+
+/** A rule ID from its label, e.g. "Inherent risk" → inherent_risk, free among `taken`. */
+export function ruleIdFromLabel(label: string, taken: string[]): string {
+	const base =
+		label
+			.normalize('NFKD')
+			.replace(/[\u0300-\u036f]/g, '')
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, '_')
+			.replace(/^_+|_+$/g, '') || 'rule';
+	const name = /^[0-9]/.test(base) ? `rule_${base}` : base;
+	if (!taken.includes(name)) return name;
+	let n = 2;
+	while (taken.includes(`${name}_${n}`)) n++;
+	return `${name}_${n}`;
+}
+
+/** A refused save as the author should read it: what failed, then where. */
+export function describeSaveError(error: unknown): string {
+	const message = error instanceof Error ? error.message : String(error);
+	const details = error instanceof BuilderRequestError ? error.details : [];
+	const where = (detail: Record<string, unknown>) => {
+		const ref = String(detail.ref_id ?? '');
+		if (detail.where === 'subject_question') return m.builderSubjectQuestion();
+		if (detail.where === 'page_visibility') return m.builderErrorPage({ ref });
+		if (detail.where === 'requirement_visibility') return m.builderErrorRequirement({ ref });
+		if (detail.where === 'outcome') return m.builderErrorRule({ ref });
+		if (detail.where === 'on_accept') return m.onAcceptSection();
+		return ref;
+	};
+	const lines = details.map((detail) =>
+		detail && typeof detail === 'object'
+			? `${where(detail as Record<string, unknown>)}: ${safeTranslate(String((detail as Record<string, unknown>).error ?? ''))}`
+			: String(detail)
+	);
+	return [safeTranslate(message), ...lines].join('\n');
+}
+
+/**
+ * Adopt the URNs the server settled on at save. Keys are the editor's URNs or
+ * ids (lowercased), values the canonical URNs. Ids are untouched, so open
+ * panels and selections survive; without this every later save re-mints new
+ * content and references to it (subject, depends_on) point at nothing.
+ */
+export function applyUrnMap(nodes: BuilderNode[], urnMap: Record<string, string>): BuilderNode[] {
+	const map = (value: string | null | undefined, id?: string): string | null => {
+		const byUrn = value ? urnMap[value.toLowerCase()] : undefined;
+		const byId = id ? urnMap[id.toLowerCase()] : undefined;
+		return byUrn ?? (value ? value : (byId ?? null));
+	};
+	const mapDependsOn = (dependsOn: Record<string, unknown> | null) => {
+		if (!dependsOn || typeof dependsOn !== 'object') return dependsOn;
+		const result: Record<string, unknown> = { ...dependsOn };
+		if (typeof result.question === 'string') result.question = map(result.question);
+		if (Array.isArray(result.answers)) {
+			result.answers = result.answers.map((a) => (typeof a === 'string' ? map(a) : a));
+		}
+		return result;
+	};
+	return nodes.map((bn) => ({
+		...bn,
+		node: {
+			...bn.node,
+			urn: map(bn.node.urn, bn.node.id),
+			parent_urn: map(bn.node.parent_urn)
+		},
+		questions: bn.questions.map((bq) => ({
+			...bq,
+			question: {
+				...bq.question,
+				urn: map(bq.question.urn, bq.question.id) ?? bq.question.urn,
+				depends_on: mapDependsOn(bq.question.depends_on),
+				choices: bq.question.choices.map((c) => ({ ...c, urn: map(c.urn, c.id) }))
+			}
+		})),
+		children: applyUrnMap(bn.children, urnMap)
+	}));
+}
+
+/** Node conditions rebased on a save's URN map, through the whole tree. */
+export function rebaseNodeConditions(
+	nodes: BuilderNode[],
+	urnMap: Record<string, string>
+): BuilderNode[] {
+	return nodes.map((bn) => ({
+		...bn,
+		node: {
+			...bn.node,
+			visibility_expression: rebaseExpression(bn.node.visibility_expression, urnMap) ?? null
+		},
+		children: rebaseNodeConditions(bn.children, urnMap)
 	}));
 }
 
@@ -577,6 +733,7 @@ export function serializeNode(n: RequirementNode): Record<string, unknown> {
 		assessable: n.assessable,
 		implementation_groups: n.implementation_groups,
 		visibility_expression: n.visibility_expression,
+		aggregation: n.aggregation ?? null,
 		typical_evidence: n.typical_evidence,
 		weight: n.weight,
 		importance: n.importance,
@@ -665,6 +822,8 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 			scores_definition: fw.scores_definition,
 			implementation_groups_definition: fw.implementation_groups_definition,
 			outcomes_definition: fw.outcomes_definition as Record<string, unknown>[] | null,
+			subject_question_urn: fw.subject_question_urn ?? null,
+			on_accept: fw.on_accept ?? [],
 			field_visibility: fw.field_visibility,
 			urn_namespace: fw.urn_namespace,
 			ref_id: fw.ref_id
@@ -700,6 +859,8 @@ export function hydrateDraft(
 		scores_definition: meta.scores_definition,
 		implementation_groups_definition: meta.implementation_groups_definition,
 		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null,
+		subject_question_urn: (meta.subject_question_urn ?? null) as string | null,
+		on_accept: (meta.on_accept ?? []) as Record<string, unknown>[],
 		field_visibility: meta.field_visibility ?? {},
 		urn_namespace: meta.urn_namespace ?? 'custom',
 		ref_id: meta.ref_id ?? null
@@ -762,6 +923,7 @@ export function hydrateDraft(
 		assessable: (n.assessable ?? false) as boolean,
 		implementation_groups: (n.implementation_groups ?? null) as string[] | null,
 		visibility_expression: (n.visibility_expression ?? null) as string | null,
+		aggregation: (n.aggregation ?? null) as RequirementNode['aggregation'],
 		typical_evidence: (n.typical_evidence ?? null) as string | null,
 		weight: (n.weight ?? 1) as number,
 		importance: (n.importance ?? '') as string,
@@ -935,7 +1097,7 @@ export interface BuilderStore {
 	setDisplayMode: (nodeId: string, mode: 'default' | 'splash') => void;
 
 	updateNode: (nodeId: string, patch: Record<string, unknown>) => void;
-	addQuestion: (reqNodeId: string, type?: Question['type']) => void;
+	addQuestion: (reqNodeId: string, type?: Question['type']) => Question | undefined;
 	updateQuestion: (questionId: string, patch: Record<string, unknown>) => void;
 	deleteQuestion: (reqNodeId: string, qIndex: number) => void;
 	addChoice: (reqNodeId: string, qIndex: number) => void;
@@ -1065,6 +1227,12 @@ export function createBuilderState(
 	let currentSave: Promise<boolean> | null = null;
 
 	async function flushDraft(): Promise<boolean> {
+		// Fields commit on blur. Whatever triggered the save (a button some
+		// browsers do not focus on click, a publish), commit the field being
+		// edited first, or its value is not in what gets saved.
+		if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
 		// Coalesce concurrent calls: a publish clicked while a Ctrl+S save is
 		// still in flight must await that save's outcome rather than fail.
 		if (currentSave) return currentSave;
@@ -1073,13 +1241,34 @@ export function createBuilderState(
 			try {
 				const draft = serializeDraft(get(framework), get(rootNodes));
 				(draft as any)._dirty = true; // mark draft as having user changes
-				await apiSaveDraft(apiTarget, draft);
+				const { urn_map: urnMap } = await apiSaveDraft(apiTarget, draft);
+				if (urnMap && Object.keys(urnMap).length) {
+					rootNodes.update((nodes) => {
+						// The server rewrote the conditions it stored; keep in step.
+						return rebaseNodeConditions(applyUrnMap(nodes, urnMap), urnMap);
+					});
+					framework.update((fw) => {
+						const subject = fw.subject_question_urn;
+						const mapped = subject ? urnMap[subject.toLowerCase()] : undefined;
+						const outcomes = Array.isArray(fw.outcomes_definition)
+							? fw.outcomes_definition.map((rule) => ({
+									...rule,
+									expression: rebaseExpression(rule.expression, urnMap) ?? rule.expression
+								}))
+							: fw.outcomes_definition;
+						return {
+							...fw,
+							...(mapped ? { subject_question_urn: mapped } : {}),
+							outcomes_definition: outcomes
+						};
+					});
+				}
 				unsaved.set(false); // saved to draft, but still unpublished
 				clearError('save-draft');
 				return true;
 			} catch (e) {
 				console.error('[FrameworkBuilder] Draft save failed:', e);
-				setError('save-draft', (e as Error).message);
+				setError('save-draft', describeSaveError(e));
 				return false;
 			} finally {
 				saving.set(false);
@@ -1145,7 +1334,13 @@ export function createBuilderState(
 		const newId = crypto.randomUUID();
 		const newNode: RequirementNode = {
 			id: newId,
-			urn: generateUrn('req_node', getFwSlug(), nodeId, getUrnNs()),
+			// Quick form pages live under qf_page, as the server stores them.
+			urn: generateUrn(
+				mode === 'quick_form' ? 'qf_page' : 'req_node',
+				getFwSlug(),
+				nodeId,
+				getUrnNs()
+			),
 			ref_id: refId,
 			name: null,
 			description: null,
@@ -1426,7 +1621,7 @@ export function createBuilderState(
 
 	// --- Question CRUD (node ID-based) ---
 
-	function addQuestion(reqNodeId: string, type: Question['type'] = 'text') {
+	function addQuestion(reqNodeId: string, type: Question['type'] = 'text'): Question | undefined {
 		const req = findReqGlobal(reqNodeId);
 		if (!req) return;
 		const order = req.questions.length * 100;
@@ -1461,6 +1656,7 @@ export function createBuilderState(
 			}))
 		);
 		markDirty();
+		return newQuestion;
 	}
 
 	function updateQuestion(questionId: string, patch: Record<string, unknown>) {
@@ -1630,6 +1826,12 @@ export function createBuilderState(
 		// compliance assessments exist, when URNs are locked.
 		if ((newNs !== oldNs || newSlug !== oldSlug) && !get(framework).has_compliance_assessments) {
 			rootNodes.update((nodes) => rewriteTreeUrns(nodes, newNs, newSlug));
+			// The subject names a question by URN: it follows its question.
+			framework.update((f) =>
+				f.subject_question_urn
+					? { ...f, subject_question_urn: rewriteUrnNsSlug(f.subject_question_urn, newNs, newSlug) }
+					: f
+			);
 		}
 		markDirty();
 	}
