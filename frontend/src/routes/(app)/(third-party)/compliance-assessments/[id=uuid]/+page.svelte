@@ -121,14 +121,45 @@
 	const outcomeRules = $derived(
 		(compliance_assessment.outcome_rules ?? []) as Record<string, any>[]
 	);
-	const verdictRules = $derived(outcomeRules.filter((rule) => rule.kind !== 'number'));
-	const shownValues = $derived(
+	const shownRules = $derived(
 		outcomeRules.filter(
 			(rule) =>
-				rule.kind === 'number' &&
-				(rule.annotation || rule.label) &&
-				compliance_assessment.computed_values?.[rule.ref_id] != null
+				rule.kind !== 'number' ||
+				((rule.annotation || rule.label) &&
+					compliance_assessment.computed_values?.[rule.ref_id] != null)
 		)
+	);
+	const outcomeMet = (rule: Record<string, any>) =>
+		!!compliance_assessment.computed_outcome &&
+		rule.ref_id in compliance_assessment.computed_outcome;
+
+	// One column per implementation-group scope, in rule order; rules without
+	// a scope get a column of their own, titled only when there are others.
+	const outcomeColumns = $derived.by(() => {
+		const definitions = (compliance_assessment.framework.implementation_groups_definition ??
+			[]) as Record<string, any>[];
+		const groupName = (id: string) => {
+			const group = definitions.find((g) => g.ref_id === id);
+			return group?.translations?.[getLocale()]?.name || group?.name || id;
+		};
+		const columns = new Map<string, { key: string; title: string; rules: Record<string, any>[] }>();
+		for (const rule of shownRules) {
+			const ids: string[] = rule.implementation_groups ?? [];
+			const key = ids.join(',');
+			if (!columns.has(key)) {
+				columns.set(key, { key, title: ids.map(groupName).join(', '), rules: [] });
+			}
+			columns.get(key)!.rules.push(rule);
+		}
+		const list = [...columns.values()];
+		const general = columns.get('');
+		if (general && list.length > 1) general.title = m.general();
+		return list;
+	});
+	const showVerdicts = $derived(showResult && outcomeColumns.length > 0);
+	const verdictCount = $derived(shownRules.filter((rule) => rule.kind !== 'number').length);
+	const verdictsMet = $derived(
+		shownRules.filter((rule) => rule.kind !== 'number' && outcomeMet(rule)).length
 	);
 
 	const has_threats = data.threats.total_unique_threats > 0;
@@ -136,6 +167,14 @@
 	const objectsNotVisibleLabel = (count: number): string => {
 		return m.objectsNotVisible({ count });
 	};
+
+	let verdictsDialogOpen = $state(false);
+	let verdictsDialog: HTMLDialogElement | undefined = $state();
+
+	function openVerdictsDialog() {
+		verdictsDialogOpen = true;
+		setTimeout(() => verdictsDialog?.showModal(), 0);
+	}
 
 	let threatDialogOpen = $state(false);
 	let dialogElement = $state();
@@ -762,6 +801,7 @@
 				{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
 					const fieldsToShow = ['ref_id', 'name', 'description', 'observation', 'version', 'folder', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'campaign'];
 					if (!fieldsToShow.includes(key)) return false;
+					if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) return false;
 					// Hide selected_implementation_groups if framework doesn't support implementation groups
 					if (key === 'selected_implementation_groups' && (!data.compliance_assessment.framework.implementation_groups_definition || !Array.isArray(data.compliance_assessment.framework.implementation_groups_definition) || data.compliance_assessment.framework.implementation_groups_definition.length === 0)) return false;
 					return true;
@@ -854,135 +894,95 @@
 					<div class="font-medium">{m.createdAt()}</div>
 					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
 				</div>
-				{#if showResult && (verdictRules.length || shownValues.length)}
-					<div>
-						<div class="text-sm font-medium text-surface-800-200">{safeTranslate('outcomes')}</div>
-						<div class="flex flex-wrap gap-1.5 mt-1">
-							{#each verdictRules as rule (rule.ref_id)}
-								{@const isActive =
-									compliance_assessment.computed_outcome &&
-									rule.ref_id in compliance_assessment.computed_outcome}
-								<span
-									class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border"
-									class:font-semibold={isActive}
-									class:text-surface-800-200={isActive}
-									class:bg-surface-50-950={isActive}
-									class:border-surface-300-700={isActive}
-									class:shadow-sm={isActive}
-									class:font-normal={!isActive}
-									class:text-surface-400-600={!isActive}
-									class:bg-surface-100-900={!isActive}
-									class:border-surface-200-800={!isActive}
-									class:opacity-50={!isActive}
-								>
-									<span
-										class="w-2 h-2 rounded-full shrink-0 translate-y-px"
-										style="background-color: {rule.color ?? '#d1d5db'}"
-										class:opacity-40={!isActive}
-									></span>
-									{ruleLabel(rule, rule.ref_id)}
-								</span>
-							{/each}
-							{#each shownValues as rule (rule.ref_id)}
-								<span
-									class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border border-surface-300-700 bg-surface-50-950 text-surface-800-200"
-								>
-									{ruleLabel(rule, rule.ref_id)}
-									<span class="font-semibold tabular-nums"
-										>{Number(compliance_assessment.computed_values[rule.ref_id]).toLocaleString(
-											getLocale(),
-											{ maximumFractionDigits: 2 }
-										)}</span
-									>
-								</span>
-							{/each}
-						</div>
-					</div>
-				{/if}
 				{#if page.data?.featureflags?.validation_flows}
 					{#key compliance_assessment.validation_flows}
 						<ValidationFlowsSection validationFlows={compliance_assessment.validation_flows} />
 					{/key}
 				{/if}
 			</div>
-			{#key compliance_assessment_donut_values}
-				{#if showScore && data.global_score && data.global_score.maturity_score >= 0}
-					<div class="w-1/4">
-						<RingProgress
-							name="global_maturity"
-							value={data.global_score.maturity_score}
-							max={data.global_score.total_max_score}
-							min={scoreFloor}
-							color={getScoreHexColor(
-								data.global_score.maturity_score,
-								data.global_score.total_max_score,
-								false,
-								scoreFloor
-							)}
-							strokeWidth={35}
-							fontSize={36}
-							title={m.maturity()}
-						/>
+			<div
+				class="flex-1 min-w-0 grid gap-2 content-start"
+				style="grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));"
+			>
+				{#key compliance_assessment_donut_values}
+					{#if showScore && data.global_score && data.global_score.maturity_score >= 0}
+						<div class="min-w-0 h-72">
+							<RingProgress
+								name="global_maturity"
+								value={data.global_score.maturity_score}
+								max={data.global_score.total_max_score}
+								min={scoreFloor}
+								color={getScoreHexColor(
+									data.global_score.maturity_score,
+									data.global_score.total_max_score,
+									false,
+									scoreFloor
+								)}
+								strokeWidth={35}
+								fontSize={36}
+								title={m.maturity()}
+							/>
+						</div>
+					{/if}
+					{#if showResult}
+						<div class="min-w-0 h-72">
+							<DonutChart
+								s_label="Result"
+								name="compliance_result"
+								title={m.compliance()}
+								orientation="horizontal"
+								values={compliance_assessment_donut_values.result.values}
+								colors={compliance_assessment_donut_values.result.values.map(
+									(object) => object.itemStyle.color
+								)}
+								showPercentage={true}
+							/>
+						</div>
+					{/if}
+					{#if showExtendedResult && compliance_assessment_donut_values.extended_result?.values?.length > 0}
+						<div class="min-w-0 h-72">
+							<DonutChart
+								s_label="Extended Result"
+								name="compliance_extended_result"
+								title={m.extendedResult()}
+								orientation="horizontal"
+								values={compliance_assessment_donut_values.extended_result.values}
+								colors={compliance_assessment_donut_values.extended_result.values.map(
+									(object) => object.itemStyle.color
+								)}
+								showPercentage={true}
+							/>
+						</div>
+					{/if}
+					{#if showStatus}
+						<div class="min-w-0 h-72">
+							<DonutChart
+								s_label="Status"
+								name="compliance_status"
+								title={m.progress()}
+								orientation="horizontal"
+								values={compliance_assessment_donut_values.status.values}
+								colors={compliance_assessment_donut_values.status.values.map(
+									(object) => object.itemStyle.color
+								)}
+								showPercentage={true}
+							/>
+						</div>
+					{/if}
+				{/key}
+				{#if showAnswers && data.compliance_assessment.answers_progress != null}
+					<div class="col-span-full flex items-center gap-2 text-sm text-surface-600-400">
+						<i class="fa-solid fa-clipboard-question text-primary-500"></i>
+						<span>{m.questions()}: {data.compliance_assessment.answers_progress}%</span>
+						<div class="flex-1 bg-surface-200-800 rounded-full h-1.5 max-w-32">
+							<div
+								class="h-1.5 rounded-full bg-primary-400 transition-all"
+								style="width: {data.compliance_assessment.answers_progress}%;"
+							></div>
+						</div>
 					</div>
 				{/if}
-				{#if showResult}
-					<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
-						<DonutChart
-							s_label="Result"
-							name="compliance_result"
-							title={m.compliance()}
-							orientation="horizontal"
-							values={compliance_assessment_donut_values.result.values}
-							colors={compliance_assessment_donut_values.result.values.map(
-								(object) => object.itemStyle.color
-							)}
-							showPercentage={true}
-						/>
-					</div>
-				{/if}
-				{#if showExtendedResult && compliance_assessment_donut_values.extended_result?.values?.length > 0}
-					<div class="w-1/4">
-						<DonutChart
-							s_label="Extended Result"
-							name="compliance_extended_result"
-							title={m.extendedResult()}
-							orientation="horizontal"
-							values={compliance_assessment_donut_values.extended_result.values}
-							colors={compliance_assessment_donut_values.extended_result.values.map(
-								(object) => object.itemStyle.color
-							)}
-							showPercentage={true}
-						/>
-					</div>
-				{/if}
-				{#if showStatus}
-					<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
-						<DonutChart
-							s_label="Status"
-							name="compliance_status"
-							title={m.progress()}
-							orientation="horizontal"
-							values={compliance_assessment_donut_values.status.values}
-							colors={compliance_assessment_donut_values.status.values.map(
-								(object) => object.itemStyle.color
-							)}
-							showPercentage={true}
-						/>
-					</div>
-				{/if}
-			{/key}
-			{#if showAnswers && data.compliance_assessment.answers_progress != null}
-				<div class="flex items-center gap-2 text-sm text-surface-600-400 mt-2">
-					<i class="fa-solid fa-clipboard-question text-primary-500"></i>
-					<span>{m.questions()}: {data.compliance_assessment.answers_progress}%</span>
-					<div class="flex-1 bg-surface-200-800 rounded-full h-1.5 max-w-32">
-						<div
-							class="h-1.5 rounded-full bg-primary-400 transition-all"
-							style="width: {data.compliance_assessment.answers_progress}%;"
-						></div>
-					</div>
-				</div>
-			{/if}
+			</div>
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
 					<button
@@ -1198,13 +1198,46 @@
 					{/if}
 
 					<!-- Insights -->
-					{#if (has_threats || page.data?.featureflags?.advanced_analytics) && !page.data.user.is_third_party}
+					{#if showVerdicts || ((has_threats || page.data?.featureflags?.advanced_analytics) && !page.data.user.is_third_party)}
 						<div>
 							<span
 								class="text-[11px] font-medium text-surface-400-600 uppercase tracking-wider mb-1.5 block"
 								>{m.insights()}</span
 							>
 							<div class="grid grid-cols-2 gap-2">
+								{#if showVerdicts}
+									{@const allMet = verdictCount > 0 && verdictsMet === verdictCount}
+									<button
+										type="button"
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-colors cursor-pointer text-left {allMet
+											? 'bg-success-50-950 border-success-200-800 text-success-800-200 hover:bg-success-100-900'
+											: 'bg-surface-50-950 border-surface-200-800 text-surface-700-300 hover:bg-surface-100-900'}"
+										onclick={openVerdictsDialog}
+										data-testid="verdicts-tile"
+									>
+										<div
+											class="flex items-center justify-center w-8 h-8 rounded-lg text-white shrink-0 {allMet
+												? 'bg-success-500 dark:bg-success-600'
+												: 'bg-violet-500 dark:bg-violet-600'}"
+										>
+											<i class="fa-solid fa-scale-balanced text-sm"></i>
+										</div>
+										{#if verdictCount}
+											<div class="flex flex-col">
+												<span class="text-lg font-bold leading-tight tabular-nums"
+													>{verdictsMet}<span class="text-sm font-medium opacity-70"
+														>{` / ${verdictCount}`}</span
+													></span
+												>
+												<span class="text-xs opacity-80"
+													>{m.verdictsMet({ count: verdictCount })}</span
+												>
+											</div>
+										{:else}
+											<span class="text-sm font-semibold">{m.computedOutcomes()}</span>
+										{/if}
+									</button>
+								{/if}
 								{#if has_threats && !page.data.user.is_third_party}
 									<button
 										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 transition-colors cursor-pointer text-left"
@@ -1444,6 +1477,83 @@
 		{/key}
 	</div>
 </div>
+{#if verdictsDialogOpen}
+	<dialog
+		bind:this={verdictsDialog}
+		class="fixed inset-0 m-auto w-[90vw] max-w-5xl max-h-[85vh] rounded-2xl bg-surface-50-950 shadow-2xl border border-surface-200-800 p-0 overflow-hidden backdrop:bg-black/40"
+		aria-labelledby="verdicts-dialog-title"
+		onclose={() => (verdictsDialogOpen = false)}
+	>
+		<div class="flex justify-between items-center px-6 py-4 border-b border-surface-100-900">
+			<h3 id="verdicts-dialog-title" class="text-lg font-bold text-surface-900-100">
+				{m.computedOutcomes()}
+			</h3>
+			<button
+				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-200-800 transition-colors text-surface-600-400 hover:text-surface-700-300"
+				aria-label={m.close()}
+				onclick={() => verdictsDialog?.close()}
+			>
+				<i class="fa-solid fa-times"></i>
+			</button>
+		</div>
+		<div class="p-4 max-h-[calc(85vh-64px)] overflow-auto">
+			<div class="grid gap-3" style="grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));">
+				{#each outcomeColumns as column (column.key)}
+					{@const verdicts = column.rules.filter((rule) => rule.kind !== 'number')}
+					{@const met = verdicts.filter((rule) => outcomeMet(rule)).length}
+					<div class="rounded-lg border border-surface-200-800 bg-surface-50-950 p-3">
+						{#if column.title}
+							<div class="flex items-baseline justify-between gap-2 mb-2">
+								<span
+									class="text-xs font-semibold uppercase tracking-wide text-surface-600-400 truncate"
+									>{column.title}</span
+								>
+								{#if verdicts.length}
+									<span
+										class="text-xs tabular-nums font-medium {met === verdicts.length
+											? 'text-success-700-300'
+											: 'text-surface-500'}">{met} / {verdicts.length}</span
+									>
+								{/if}
+							</div>
+						{/if}
+						<ul class="space-y-1.5">
+							{#each column.rules as rule (rule.ref_id)}
+								{#if rule.kind === 'number'}
+									<li class="flex items-baseline justify-between gap-3 text-sm">
+										<span class="text-surface-700-300">{ruleLabel(rule, rule.ref_id)}</span>
+										<span class="font-semibold tabular-nums"
+											>{Number(compliance_assessment.computed_values[rule.ref_id]).toLocaleString(
+												getLocale(),
+												{ maximumFractionDigits: 2 }
+											)}</span
+										>
+									</li>
+								{:else}
+									{@const isMet = outcomeMet(rule)}
+									<li class="flex items-start gap-2 text-sm">
+										<i
+											class="{isMet
+												? 'fa-solid fa-circle-check'
+												: 'fa-regular fa-circle text-surface-400-600'} mt-0.5 shrink-0"
+											style={isMet ? `color: ${rule.color ?? 'var(--color-success-500)'}` : ''}
+											aria-hidden="true"
+										></i>
+										<span class={isMet ? 'text-surface-900-50 font-medium' : 'text-surface-600-400'}
+											>{ruleLabel(rule, rule.ref_id)}<span class="sr-only"
+												>: {isMet ? m.outcomeMet() : m.outcomeNotMet()}</span
+											></span
+										>
+									</li>
+								{/if}
+							{/each}
+						</ul>
+					</div>
+				{/each}
+			</div>
+		</div>
+	</dialog>
+{/if}
 {#if threatDialogOpen}
 	<dialog
 		bind:this={dialogElement}

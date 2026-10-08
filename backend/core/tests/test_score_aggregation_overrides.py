@@ -168,7 +168,7 @@ class TestMixedScaleAggregation:
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
         ca.save()
 
-        assert ca.get_global_score()["implementation_score"] == 4.33
+        assert ca.get_global_score()["implementation_score"] == pytest.approx(13 / 3)
 
     def test_avg_full_top_of_each_scale_returns_max(self, mixed_scale_setup):
         """Every RA at its own max → global ratio 1.0 → CA max."""
@@ -199,7 +199,7 @@ class TestMixedScaleAggregation:
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
         ca.save()
 
-        assert ca.get_global_score()["implementation_score"] == 4.38
+        assert ca.get_global_score()["implementation_score"] == 4.375
 
     def test_sum_uses_raw_weighted_sum(self, mixed_scale_setup):
         """SUM is intentionally simple: Σ(raw_score × weight), no scale
@@ -248,7 +248,7 @@ class TestAnchorNAToTargetWithMixedScales:
         # Ratios: A1=1.0, A2=1.0, B1=4/5=0.8, B2=1.0 (w=3)
         # Weighted avg = (1.0 + 1.0 + 0.8 + 3.0) / 6 = 5.8/6 ≈ 0.9667
         # Denormalized: 0.9667 * 5 = 4.833 → 4.83
-        assert ca.get_global_score()["implementation_score"] == 4.83
+        assert ca.get_global_score()["implementation_score"] == pytest.approx(29 / 6)
 
 
 @pytest.fixture

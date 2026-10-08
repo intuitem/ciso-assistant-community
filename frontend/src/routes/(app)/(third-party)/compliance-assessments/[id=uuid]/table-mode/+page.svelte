@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { roundScore } from '$lib/utils/helpers';
 	import { page } from '$app/state';
 	import Question from '$lib/components/Forms/Question.svelte';
 	import SegmentedControl from '$lib/components/Forms/SegmentedControl.svelte';
@@ -522,7 +523,7 @@
 
 	// Compact score formatting for the header analytics.
 	function fmtScore(v: number | null | undefined) {
-		return v == null ? '--' : Math.round(Number(v) * 100) / 100;
+		return v == null ? '--' : roundScore(Number(v));
 	}
 
 	const assessableTOCSections = $derived(

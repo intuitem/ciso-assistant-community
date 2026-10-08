@@ -414,11 +414,11 @@ def annotate_tree_with_aggregated_scores(
     anchor_na = compliance_assessment.anchor_na_to_target
 
     def _clean(value):
-        """Round a parent's display value like the global score (round_score).
-        Upstream rollups use the raw _aggregated_ratio, so no precision is lost."""
+        """A parent's value like the global score (clean_score): unrounded,
+        rendering rounds it."""
         if value is None:
             return None
-        return round_score(value)
+        return clean_score(value)
 
     def walk(node: dict) -> None:
         children = node.get("children") or {}

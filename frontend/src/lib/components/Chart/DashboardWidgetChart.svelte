@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { roundScore } from '$lib/utils/helpers';
 	import { onMount } from 'svelte';
 
 	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
@@ -128,7 +129,8 @@
 				if (builtinMetricType === 'breakdown') {
 					return [sample.date, value ?? {}];
 				}
-				return [sample.date, value ?? null];
+				// Audit scores are stored unrounded; the widget shows them like the audit.
+				return [sample.date, typeof value === 'number' ? roundScore(value) : (value ?? null)];
 			})
 			.filter((item) => item[1] !== null)
 			.sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())

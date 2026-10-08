@@ -196,6 +196,21 @@ class TestScoresInTheContext:
             assert context["assessment"][layer] == pytest.approx(shown[layer])
         assert context["assessment"]["target_score"] == 5.0
 
+    def test_rules_read_unrounded_scores(self, levels):
+        # As in the CCB tools, where 2.997 shows as 3.00 but misses a 3.0 target.
+        for key, score in (("r1", 4), ("r2", 4), ("r3", 5)):
+            _score(levels, key, score)
+        _rules(
+            levels,
+            [
+                {
+                    "ref_id": "above",
+                    "expression": "assessment.implementation_score > 4.333",
+                }
+            ],
+        )
+        assert _evaluate(levels).computed_outcome == {"above": {}}
+
     def test_nothing_scored_reads_minus_one(self, levels):
         _, context = self._context(levels, "sections")
         assert context["assessment"]["maturity_score"] == -1.0

@@ -6795,6 +6795,18 @@
 	"quickFormHiddenPagesHint": "Some pages are hidden by earlier answers.",
 	"quickFormNoPages": "This form has no visible page.",
 	"computedOutcomes": "Outcomes",
+	"outcomeMet": "met",
+	"outcomeNotMet": "not met",
+	"verdictsMet": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "outcome met",
+				"countPlural=other": "outcomes met"
+			}
+		}
+	],
 	"quickFormReadOnly": "This response is read-only in its current status.",
 	"pagesCount": "Pages",
 	"responsesCount": "Responses",

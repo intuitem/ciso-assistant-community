@@ -98,16 +98,21 @@ from dataclasses import dataclass
 logger = get_logger(__name__)
 
 
-def round_score(value: float) -> float:
-    """Round an aggregated score to two decimals, half up.
+def clean_score(value: float) -> float:
+    """An aggregated score without the float noise of ratio-based aggregation
+    (2.69499999999 is 2.695), as spreadsheets keep 15 significant digits.
+    Scores are computed and compared unrounded, like in the CCB CyFun tools;
+    rounding is for display (round_score)."""
+    return round(value, 9)
 
-    Matches the precision of reference tools such as the CCB CyFun
-    self-assessment workbook. Rounding to 9 decimals first absorbs
-    float-precision noise from ratio-based aggregation (e.g. 2.69499999999
-    must round to 2.70, not 2.69).
-    """
+
+def round_score(value: float) -> float:
+    """A score as displayed: two decimals, half up, like the CCB CyFun tools'
+    0.00 format (2.695 shows as 2.70)."""
     return float(
-        Decimal(repr(round(value, 9))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        Decimal(repr(clean_score(value))).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
     )
 
 
@@ -9722,20 +9727,19 @@ class ComplianceAssessment(Assessment):
                 self.anchor_na_to_target,
             )
 
-        # Maturity is the average of the enabled layers (ignore -1 / None),
-        # computed on unrounded layers so rounding only happens once.
+        # Maturity is the average of the enabled layers (ignore -1 / None).
         enabled = [s for s in [impl_score, doc_score] if s is not None and s != -1]
         if enabled:
-            maturity_score = round_score(sum(enabled) / len(enabled))
+            maturity_score = clean_score(sum(enabled) / len(enabled))
         else:
             maturity_score = impl_score  # -1 if nothing scored
 
-        def _display(score):
-            return score if score is None or score == -1 else round_score(score)
+        def _clean(score):
+            return score if score is None or score == -1 else clean_score(score)
 
         return {
-            "implementation_score": _display(impl_score),
-            "documentation_score": _display(doc_score),
+            "implementation_score": _clean(impl_score),
+            "documentation_score": _clean(doc_score),
             "maturity_score": maturity_score,
         }
 
@@ -9762,16 +9766,15 @@ class ComplianceAssessment(Assessment):
                 )
         impl_score = None if impl_score == -1 else impl_score
         doc_score = None if doc_score == -1 else doc_score
-        # Maturity uses the unrounded layers so rounding only happens once.
         enabled = [s for s in [impl_score, doc_score] if s is not None]
         return {
-            "implementation_score": round_score(impl_score)
+            "implementation_score": clean_score(impl_score)
             if impl_score is not None
             else None,
-            "documentation_score": round_score(doc_score)
+            "documentation_score": clean_score(doc_score)
             if doc_score is not None
             else None,
-            "maturity_score": round_score(sum(enabled) / len(enabled))
+            "maturity_score": clean_score(sum(enabled) / len(enabled))
             if enabled
             else None,
             "scored_count": len(scored),

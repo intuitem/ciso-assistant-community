@@ -383,7 +383,7 @@ def _section_scores(ca, framework, ras) -> dict:
 
 
 def _add_scores(context: dict, ca, framework, rules) -> None:
-    """The audit's scores as its page shows them; section and group scores
+    """The audit's scores, unrounded like its page computes them; section and group scores
     only when a rule reads them, over the requirements in `context`."""
     from core.models import RequirementAssessment
     from core.utils import extract_node_id
