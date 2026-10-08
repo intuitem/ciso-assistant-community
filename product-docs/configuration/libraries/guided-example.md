@@ -20,7 +20,7 @@ First, look at how the standard is organized. You do not need to decide on every
 
 We will use these observations to decide what to create in the library, then build it one part at a time.
 
-## Start small, then build up
+## 1. Start small, then build up
 
 For this example, we assume that the workbook already contains `library_meta`, `fwk_meta`, and `fwk_content`. We will fill the metadata sheets first, then outline the Framework's sections and requirements.
 
@@ -49,13 +49,13 @@ Leave the optional entries beginning with `#` disabled for now. We will add othe
 </details>
 {% endhint %}
 
-## Fill in the metadata
+## 2. Fill in the metadata
 
 We start with the metadata because it is usually quick to fill in. It also establishes the library's identity and the Framework's identifiers before we add content, helping us keep those values consistent later.
 
 Both metadata sheets use one property per row, with its name in column A and its value in column B. The table headers below are only here to make the examples easier to read.
 
-### Fill `library_meta`
+### 2.1 Fill `library_meta`
 
 This sheet identifies the library that will contain our Framework. For this example, the Mermaid Authority provides the standard, while intuitem packages it for CISO Assistant.
 
@@ -84,7 +84,7 @@ The `v1` in `ref_id` marks this edition of the standard, while `library_meta.ver
 
 See [Library metadata](library-objects/library-metadata.md) for what each property means.
 
-### Fill `fwk_meta`
+### 2.2 Fill `fwk_meta`
 
 For a library built around one Framework, `ref_id`, `name`, and `description` are generally the same in both metadata sheets. We keep them identical here. The `type` and `urn` differ because they identify two different objects. The Framework also needs a `base_urn` for its sections and requirements.
 
@@ -99,7 +99,7 @@ For a library built around one Framework, `ref_id`, `name`, and `description` ar
 
 We will add links to other objects here when we introduce them. For the full list of fields, see [Framework](library-objects/framework.md).
 
-## Plan the Framework structure
+## 3. Plan the Framework structure
 
 Before filling `fwk_content`, make a simple outline of the standard. The sheet will have one row per section or requirement, in the same order as the source document.
 The `depth` column expresses the hierarchy. Often, `1` marks a main section, `2` its requirements, and `3` their subrequirements, but the meaning of each level depends on the source Framework. In `assessable`, leave headings empty and enter `x` for requirements users will assess. Use `name` for a short title and `description` for the full requirement text. See [Framework](library-objects/framework.md) for the fields in this sheet.
@@ -112,9 +112,9 @@ This planning step matters. If the hierarchy turns out to be wrong after you hav
 Some Frameworks can have sections or requirements without an identifier. In that case, leave `ref_id` empty for those rows and fill in `name`, `description`, or both.
 {% endhint %}
 
-## Build the Framework hierarchy in `fwk_content`
+## 4. Build the Framework hierarchy in `fwk_content`
 
-### Add the first section
+### 4.1 Add the first section
 
 Start with **Access and identity**. Add its heading at `depth` `1` with an empty `assessable` cell, then add its requirements at `depth` `2` with `x` in `assessable`. For now, fill only `ref_id`, `name`, and `description` alongside these two columns.
 
@@ -131,7 +131,7 @@ The PDF uses identifiers such as `OH 1.1`. As a best practice, we avoid spaces i
 
 If you are still unsure about the outline, you can enter just the three main section headings in Excel first and check whether the structure makes sense. Then add their requirements. Leave the questions, review themes, and score scale for later. The goal here is to establish the Framework's hierarchy before adding more objects.
 
-### Add the second section
+### 4.2 Add the second section
 
 Continue in the same sheet with **Habitat and equipment**. Its heading is at `depth` `1`, just like the first section.
 
@@ -152,7 +152,7 @@ The source also includes assessment questions under `OH 2.2`. We keep only the r
 If you want a reminder, you can add the `questions` column now and put a temporary `x` in the `OH.2.2` row.
 {% endhint %}
 
-### Add the third section
+### 4.3 Add the third section
 
 The final section, **Monitoring and response**, follows the simpler pattern we used for the first one: one heading at `depth` `1`, followed by three assessable requirements at `depth` `2`.
 
@@ -165,11 +165,11 @@ The final section, **Monitoring and response**, follows the simpler pattern we u
 
 The question attached to `OH 3.2` will be added next, alongside the questions under `OH 2.2`.
 
-## Add the assessment questions
+## 5. Add the assessment questions
 
 The structure is now in place. The PDF includes two questions under `OH 2.2` and one under `OH 3.2`. We will write those questions in the Framework first, then define how users can answer them.
 
-### Write the questions in `fwk_content`
+### 5.1 Write the questions in `fwk_content`
 
 Add a `questions` column to `fwk_content`. In the rows for `OH.2.2` and `OH.3.2`, copy the questions from the PDF.
 
@@ -182,7 +182,7 @@ The table below shows only these two rows:
 
 For `OH.2.2`, the two questions go on separate lines **in the same cell**. If you placed a temporary `x` there earlier, replace it with these questions. Leave `questions` empty for rows without questions.
 
-### Create the Answers sheets
+### 5.2 Create the Answers sheets
 
 The `questions` column contains only the question text. CISO Assistant also needs to know the expected answer type (single choice, multiple choices, or free text) and, where applicable, the possible answers users can select. An [Answers](library-objects/answers.md) object defines both.
 
@@ -195,7 +195,7 @@ Fill `answ_meta` with one property per row:
 | `type` | `answers` |
 | `name` | `answ` |
 
-### Link Answers in `fwk_meta`
+### 5.3 Link Answers in `fwk_meta`
 
 Add this property to the existing `fwk_meta` sheet, beneath its other metadata:
 
@@ -205,7 +205,7 @@ Add this property to the existing `fwk_meta` sheet, beneath its other metadata:
 
 The value must match `name` in `answ_meta`. This tells the Framework where its answer sets are defined.
 
-### Fill `answ_content`
+### 5.4 Fill `answ_content`
 
 Create one row for each kind of answer needed by the PDF. Add the `id`, `question_type`, and `question_choices` columns:
 
@@ -217,7 +217,7 @@ Create one row for each kind of answer needed by the PDF. Add the `id`, `questio
 
 For the first two rows, enter each choice on a separate line **in the same cell**. Leave `question_choices` empty for the free-text answer. The `id` values are identifiers we choose so the Framework can refer to these answer sets. See [Answers](library-objects/answers.md) for other answer types and optional fields.
 
-### Assign answer IDs in `fwk_content`
+### 5.5 Assign answer IDs in `fwk_content`
 
 Add an `answer` column to `fwk_content`. In each row that has questions, enter the matching IDs from `answ_content`.
 
@@ -232,11 +232,11 @@ The two IDs for `OH.2.2` must be on separate lines **in the same cell**, in the 
 
 In our case, when an auditor will assess `OH.2.2` on CISO Assistant, they will see **"Are both alerts enabled?"** with a single choice between **"Yes"** and **"No"**, followed by **"Which alerts were tested in the past month?"** where they can select **"Strong current"**, **"Intrusion"**, or both. These questions complement the requirement.
 
-## Add the assessment scores
+## 6. Add the assessment scores
 
 The PDF defines a score from `0` to `2` for every requirement. We will add its labels and descriptions so auditors know what each score means. Unlike questions, this scale applies to the whole Framework, so we do not need to change `fwk_content`.
 
-### Create the Scores sheets
+### 6.1 Create the Scores sheets
 
 Create `scr_meta` and `scr_content`. We chose `scr` as the prefix for this [Scores](library-objects/scores.md) object.
 
@@ -247,7 +247,7 @@ Fill `scr_meta` with one property per row:
 | `type` | `scores` |
 | `name` | `scr` |
 
-### Link Scores in `fwk_meta`
+### 6.2 Link Scores in `fwk_meta`
 
 Add these properties to the existing `fwk_meta` sheet without removing the metadata already there:
 
@@ -259,7 +259,7 @@ Add these properties to the existing `fwk_meta` sheet without removing the metad
 
 The `scores_definition` value matches `name` in `scr_meta`. The minimum and maximum set the range used to assess this Framework.
 
-### Fill `scr_content`
+### 6.3 Fill `scr_content`
 
 Add one row for each score in the PDF:
 
@@ -273,11 +273,11 @@ The score numbers must match the range defined in `fwk_meta`. See [Scores](libra
 
 In our case, when an auditor will assess a requirement such as `OH.2.2`, they can use the **"Not met"**, **"Partly met"**, or **"Met"** score and read its meaning. The questions help to gather information, but the score is based on the requirement and its evidence. For this standard, certification requires a score of `2` for every requirement.
 
-## Add Review Themes as Implementation Groups
+## 7. Add Review Themes as Implementation Groups
 
 The PDF uses **Review Themes** to help inspectors focus on a topic. They are optional filters, not requirements or levels of compliance. A requirement can have several themes or none. This is why we can represent them as [Implementation Groups](library-objects/implementation-groups.md). CISO Assistant can use these groups to show the requirements relevant to a selected topic without changing the framework's structure.
 
-### Create the Implementation Groups sheets
+### 7.1 Create the Implementation Groups sheets
 
 Create `imp_grp_meta` and `imp_grp_content`. We chose `imp_grp` as the prefix for this object, following the same naming principle as `answ` and `scr`.
 
@@ -288,7 +288,7 @@ Fill `imp_grp_meta` with one property per row:
 | `type` | `implementation_groups` |
 | `name` | `imp_grp` |
 
-### Link Implementation Groups in `fwk_meta`
+### 7.2 Link Implementation Groups in `fwk_meta`
 
 Add this property to the existing `fwk_meta` sheet:
 
@@ -298,7 +298,7 @@ Add this property to the existing `fwk_meta` sheet:
 
 The value matches `name` in `imp_grp_meta`, so the Framework knows which implementation groups it can use.
 
-### Fill `imp_grp_content`
+### 7.3 Fill `imp_grp_content`
 
 Add one row for each Review Theme named in the PDF:
 
@@ -312,7 +312,7 @@ Add one row for each Review Theme named in the PDF:
 
 We use short `ref_id` values to assign the implementation groups to requirements. The `name` values preserve the theme labels readers will recognize from the PDF. See [Implementation Groups](library-objects/implementation-groups.md) for the other available fields.
 
-### Assign the groups in `fwk_content`
+### 7.4 Assign the groups in `fwk_content`
 
 Add an `implementation_groups` column to `fwk_content`. For each assessable requirement, enter the `ref_id` of its Review Theme. Separate multiple IDs with commas. Leave the cell empty for non-assessable headings or when the PDF gives no theme.
 
@@ -334,7 +334,7 @@ The PDF assigns **"Habitat"** to `OH.2.1` and both of its subrequirements. Since
 
 In our example, an inspector can filter by **"Monitoring"** in CISO Assistant to focus on `OH.2.2` and `OH.3.2` instead of viewing every requirement at once. A requirement with several groups can appear under each relevant filter, but it remains a single requirement to assess.
 
-## Review the workbook against the source
+## 8. Review the workbook against the source
 
 Well done! You have now transferred the standard's requirements, questions, answer sets, scores, and Review Themes into the workbook. Before importing it, compare the Excel sheets with the original PDF. Check that the sections and requirements are in the right order, the hierarchy and assessable rows make sense, and the questions, answers, scores, and themes match the source. This is the right time to catch a missing requirement or a detail placed on the wrong row.
 
@@ -342,7 +342,7 @@ Well done! You have now transferred the standard's requirements, questions, answ
 For a framework with hundreds of requirements, focus the review on the overall structure and spot-check representative rows. Excel's column filters can help you inspect `depth`, `assessable`, and other fields in groups, making inconsistent values or unexpected gaps easier to find.
 {% endhint %}
 
-## Optional: Convert the workbook to YAML
+## 9. Optional: Convert the workbook to YAML
 
 This step is only for obtaining the YAML version of your workbook. If you do not want one, skip this section and continue with the next step. When you import the Excel file through the Library catalog, CISO Assistant converts it to YAML during the import and loads the library for you. You do not need to run the script or upload a YAML version. The [conversion step in Create a Library](create-library.md#5-optional-convert-the-workbook-to-yaml) also explains this option.
 
@@ -390,7 +390,7 @@ If the `python` command is not recognized, use `python3` instead in the commands
 
 The script creates a `.yaml` file in the current directory with the same base name as the Excel workbook you chose. For example, `octopus-habitat-security-standard.xlsx` becomes `octopus-habitat-security-standard.yaml`. You can open it in a text editor to inspect the result. If the script reports an error, correct the Excel workbook and run the command again.
 
-## Import the library into CISO Assistant
+## 10. Import the library into CISO Assistant
 
 Your workbook is now ready to import. If you generated a YAML version with the previous step, you can upload that instead.
 
@@ -402,7 +402,7 @@ Your workbook is now ready to import. If you generated a YAML version with the p
 
 If the file is valid, CISO Assistant confirms the import. The OHSS Framework becomes available under **Catalog > Frameworks**. If the import reports an error, correct the source file and try again. See [Import a library](import-library.md) for more details.
 
-## Check the Framework in a test audit
+## 11. Check the Framework in a test audit
 
 An import can succeed even if the Framework does not look or behave as you intended. Before using OHSS in a real audit, create a test audit with it. If you need help creating one, follow [Creating your first Audit](../../guides/first-audit.md).
 
