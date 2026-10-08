@@ -332,6 +332,14 @@ The table below lists all assessable requirements that have a Review Theme. It k
 
 The PDF assigns **"Habitat"** to `OH.2.1` and both of its subrequirements. Since `OH.2.1` is not assessable, we assign `habitat` only to its two children. `OH.2.3` remains assessable even though it has no theme.
 
-In our case, In CISO Assistant, an inspector can filter by **"Monitoring"** to focus on `OH.2.2` and `OH.3.2` instead of viewing every requirement at once, for example. A requirement with several groups can appear under each relevant filter, but it remains a single requirement to assess.
+In our example, an inspector can filter by **"Monitoring"** in CISO Assistant to focus on `OH.2.2` and `OH.3.2` instead of viewing every requirement at once. A requirement with several groups can appear under each relevant filter, but it remains a single requirement to assess.
+
+## Review the workbook against the source
+
+Well done! You have now transferred the standard's requirements, questions, answer sets, scores, and Review Themes into the workbook. Before importing it, compare the Excel sheets with the original PDF. Check that the sections and requirements are in the right order, the hierarchy and assessable rows make sense, and the questions, answers, scores, and themes match the source. This is the right time to catch a missing requirement or a detail placed on the wrong row.
+
+{% hint style="info" %}
+For a framework with hundreds of requirements, focus the review on the overall structure and spot-check representative rows. Excel's column filters can help you inspect `depth`, `assessable`, and other fields in groups, making inconsistent values or unexpected gaps easier to find.
+{% endhint %}
 
 [TO BE CONTINUED]
