@@ -128,10 +128,19 @@ class Command(BaseCommand):
         self, scoped_ca: "ComplianceAssessment | None"
     ) -> set:
         """Return requirement node IDs carrying a question weighted other than 1,
-        whose stored score predates the weighted SUM projection."""
-        questions_qs = Question.objects.filter(requirement_node__isnull=False).exclude(
-            weight=1
-        )
+        whose stored score predates the weighted SUM projection.
+
+        Only a choice question with a scored choice can move a weighted score, so
+        the others stay out of scope and keep their stored values.
+        """
+        questions_qs = Question.objects.filter(
+            requirement_node__isnull=False,
+            type__in=(
+                Question.Type.UNIQUE_CHOICE,
+                Question.Type.MULTIPLE_CHOICE,
+            ),
+            choices__add_score__isnull=False,
+        ).exclude(weight=1)
         if scoped_ca is not None:
             questions_qs = questions_qs.filter(
                 requirement_node_id__in=RequirementAssessment.objects.filter(
