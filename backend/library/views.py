@@ -6,7 +6,17 @@ import uuid
 import yaml
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
-from django.db.models import F, Q, IntegerField, OuterRef, Subquery, Exists
+from django.db.models import (
+    Case,
+    Exists,
+    F,
+    IntegerField,
+    OuterRef,
+    Q,
+    Subquery,
+    Value,
+    When,
+)
 from django.db import models
 from django.utils.timezone import now
 from django_filters.rest_framework import DjangoFilterBackend
@@ -34,7 +44,11 @@ from rest_framework.parsers import (
 from django.http import HttpResponse
 
 import django_filters as df
-from core.cel_service import validate_quick_form_expressions
+from core.cel_service import (
+    validate_framework_expressions,
+    validate_quick_form_expressions,
+)
+from core.quick_form_apply import validate_on_accept_document
 from core.excel import ExcelUploadHandler
 from core.helpers import get_sorted_requirement_nodes
 from core.models import (
@@ -191,7 +205,19 @@ class StoredLibraryViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "urn", "ref_id"]
 
     def get_queryset(self) -> models.query.QuerySet:
-        return super().get_queryset().prefetch_related("filtering_labels")
+        qs = super().get_queryset().prefetch_related("filtering_labels")
+        if self.action != "list":
+            return qs
+        # `content` is the whole library (megabytes for the larger ones): the
+        # list reads it for presets only, so it is left behind and the preset
+        # check runs in SQL.
+        return qs.defer("content").annotate(
+            _is_preset=Case(
+                When(content__preset__isnull=False, then=Value(True)),
+                default=Value(False),
+                output_field=models.BooleanField(),
+            )
+        )
 
     def get_serializer_class(self, **kwargs):
         if self.action == "list":
@@ -1683,9 +1709,10 @@ class LibraryDraftViewSet(BaseModelViewSet):
         )
         if error is not None:
             return error
+        urn_map: dict = {}
         try:
             new_quick_form = qf_editor.editor_doc_to_quick_form_object(
-                editor_doc, existing=quick_form
+                editor_doc, existing=quick_form, urn_map_out=urn_map
             )
         except builder.BuilderError as e:
             # Author-facing validation text by construction — see BuilderError.
@@ -1694,7 +1721,10 @@ class LibraryDraftViewSet(BaseModelViewSet):
         # An outcome rule written against the wrong context compiles but raises at
         # evaluation, where it is swallowed and logged — the rule would just never
         # fire. Catch it while the author is still looking at it.
-        if expression_errors := validate_quick_form_expressions(new_quick_form):
+        if expression_errors := [
+            *validate_quick_form_expressions(new_quick_form),
+            *validate_on_accept_document(new_quick_form),
+        ]:
             return Response(
                 {"error": "invalidExpressions", "details": expression_errors},
                 status=HTTP_400_BAD_REQUEST,
@@ -1708,7 +1738,13 @@ class LibraryDraftViewSet(BaseModelViewSet):
             )
         draft.content = content
         draft.save(update_fields=["content", "updated_at"])
-        return Response({"status": "ok", "quick_form_urn": new_quick_form["urn"]})
+        return Response(
+            {
+                "status": "ok",
+                "quick_form_urn": new_quick_form["urn"],
+                "urn_map": urn_map,
+            }
+        )
 
     @action(detail=True, methods=["post"], url_path="quick-form-fill-preview")
     def quick_form_fill_preview(self, request, pk):
@@ -1721,6 +1757,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
         stored — the answers live in the request body.
         """
         from core.cel_service import evaluate_quick_form_document
+        from core.quick_form_apply import project
 
         draft = self.get_object()
         content = builder.normalize_objects(draft.content or {})
@@ -1765,7 +1802,16 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 "missing_required": evaluation["missing_required"],
                 "progress": evaluation["progress"],
                 "score": evaluation["score"],
+                "scored_complete": evaluation["context"]["response"]["scored_complete"],
                 "computed_outcome": evaluation["computed_outcome"],
+                "computed_values": evaluation["computed_values"],
+                "projection": project(
+                    quick_form.get("on_accept") or [],
+                    evaluation["computed_values"],
+                    evaluation["computed_outcome"],
+                    ready=evaluation["context"]["response"]["scored_complete"],
+                    score=evaluation["score"],
+                ),
             }
         )
 
@@ -1917,14 +1963,22 @@ class LibraryDraftViewSet(BaseModelViewSet):
         )
         if error is not None:
             return error
+        urn_map: dict = {}
         try:
             new_framework = fw_editor.editor_doc_to_framework_object(
-                editor_doc, existing=framework
+                editor_doc, existing=framework, urn_map_out=urn_map
             )
         except builder.BuilderError as e:
             # Author-facing validation text by construction — see BuilderError.
             logger.warning("Builder rejected the draft", error=e)
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+        # Same gate as quick forms: a rule that cannot evaluate would only be
+        # logged when an audit runs, and never fire.
+        if expression_errors := validate_framework_expressions(new_framework):
+            return Response(
+                {"error": "invalidExpressions", "details": expression_errors},
+                status=HTTP_400_BAD_REQUEST,
+            )
         frameworks = content["frameworks"]
         frameworks[frameworks.index(framework)] = new_framework
         # Shape gate before persisting, like every other content door: the
@@ -1940,7 +1994,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
         if self._sync_link_dependencies(draft, content, new_framework, request.user):
             update_fields.append("dependencies")
         draft.save(update_fields=update_fields)
-        return Response({"status": "ok", "framework_urn": new_framework["urn"]})
+        return Response(
+            {"status": "ok", "framework_urn": new_framework["urn"], "urn_map": urn_map}
+        )
 
     @staticmethod
     def _sync_link_dependencies(draft, content, framework, user) -> bool:

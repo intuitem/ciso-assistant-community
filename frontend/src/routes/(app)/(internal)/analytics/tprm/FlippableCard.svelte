@@ -1,4 +1,5 @@
 <script lang="ts">
+	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
 	// State to track if the card is flipped
 	let isFlipped = $state(false);
 
@@ -11,6 +12,7 @@
 		// Accept entity_assessment.data as a prop
 		entity_assessment: {
 			provider: string;
+			tier?: { id: string; name: string; hexcolor: string } | null;
 			entity_assessment_id: string;
 			compliance_assessment_id: string;
 			review_assignment_id: string | null;
@@ -127,14 +129,19 @@
 		<div class="p-4 h-full flex flex-col">
 			<!-- Card header with provider name and conclusion -->
 			<div class="flex justify-between items-center pb-3 border-b border-surface-200-800 mb-3">
-				<h3 class="font-bold text-lg text-surface-950-50" data-testid="provider">
-					<a
-						href="/entity-assessments/{entity_assessment.entity_assessment_id}"
-						class="hover:text-primary-600 hover:underline"
-					>
-						{entity_assessment.provider}
-					</a>
-				</h3>
+				<div class="flex min-w-0 flex-col items-start gap-1">
+					<h3 class="font-bold text-lg text-surface-950-50" data-testid="provider">
+						<a
+							href="/entity-assessments/{entity_assessment.entity_assessment_id}"
+							class="hover:text-primary-600 hover:underline"
+						>
+							{entity_assessment.provider}
+						</a>
+					</h3>
+					{#if entity_assessment.tier}
+						<TierBadge cell={entity_assessment.tier} data-testid="card-tier" />
+					{/if}
+				</div>
 				<span
 					data-testid="conclusion-badge"
 					class="px-2 py-1 rounded-full text-xs font-medium mr-10 {getConclusionColor(

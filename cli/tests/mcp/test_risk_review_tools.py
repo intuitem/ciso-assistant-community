@@ -211,6 +211,51 @@ class TestResolveActor:
 
 
 # ---------------------------------------------------------------------------
+# resolve_user_id / resolve_user_ids
+# ---------------------------------------------------------------------------
+
+
+class TestResolveUser:
+    def test_uuid_passthrough(self):
+        with patch.object(resolvers, "fetch_all_results") as fetch:
+            assert resolvers.resolve_user_id(UUID_A) == UUID_A
+            fetch.assert_not_called()
+
+    def test_by_email_uses_email_param(self):
+        users = [{"id": UUID_A, "email": "enzo@acme.io"}]
+        fake = _router({"/users/": users})
+        with patch.object(resolvers, "fetch_all_results", fake):
+            assert resolvers.resolve_user_id("enzo@acme.io") == UUID_A
+        assert fake.calls == [("/users/", {"email": "enzo@acme.io"})]
+
+    def test_by_name_uses_search_param(self):
+        users = [{"id": UUID_A, "email": "enzo@acme.io"}]
+        fake = _router({"/users/": users})
+        with patch.object(resolvers, "fetch_all_results", fake):
+            assert resolvers.resolve_user_id("Enzo") == UUID_A
+        assert fake.calls == [("/users/", {"search": "Enzo"})]
+
+    def test_ambiguous(self):
+        users = [
+            {"id": UUID_A, "email": "a@acme.io"},
+            {"id": UUID_B, "email": "b@acme.io"},
+        ]
+        with patch.object(resolvers, "fetch_all_results", _router({"/users/": users})):
+            with pytest.raises(ValueError, match="Ambiguous"):
+                resolvers.resolve_user_id("enzo")
+
+    def test_not_found(self):
+        with patch.object(resolvers, "fetch_all_results", _router({"/users/": []})):
+            with pytest.raises(ValueError, match="not found"):
+                resolvers.resolve_user_id("nobody")
+
+    def test_resolve_user_ids_accepts_single_string(self):
+        with patch.object(resolvers, "fetch_all_results") as fetch:
+            assert resolvers.resolve_user_ids(UUID_A) == [UUID_A]
+            fetch.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
 # resolve_reference_control_id
 # ---------------------------------------------------------------------------
 
@@ -456,6 +501,68 @@ class TestCreateAppliedControl:
         assert payload["csf_function"] == "govern"
         assert payload["category"] == "policy"
         assert payload["status"] == "to_do"
+
+
+# ---------------------------------------------------------------------------
+# create_team
+# ---------------------------------------------------------------------------
+
+
+class TestCreateTeam:
+    def test_full_payload_resolved(self):
+        post = Mock(return_value=_response(201, {"id": UUID_A, "name": "SOC"}))
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            patch.object(write_tools, "GLOBAL_FOLDER_ID", None),
+            patch.object(write_tools, "resolve_folder_id", return_value=UUID_PE),
+            patch.object(
+                resolvers, "resolve_user_id", return_value=UUID_D
+            ) as resolve_leader,
+            patch.object(
+                resolvers,
+                "resolve_user_ids",
+                side_effect=lambda refs: (
+                    [UUID_B] if refs == ["Jo"] else [UUID_B, UUID_C]
+                ),
+            ),
+        ):
+            result = run(
+                write_tools.create_team(
+                    name="SOC",
+                    description="d",
+                    folder_id="Engineering",
+                    team_email="soc@acme.io",
+                    leader="enzo@acme.io",
+                    deputies=["Jo"],
+                    members=["Jo", "Ann"],
+                )
+            )
+        assert "Created team" in result
+        resolve_leader.assert_called_once_with("enzo@acme.io")
+        assert post.call_args.args == (
+            "/teams/",
+            {
+                "name": "SOC",
+                "description": "d",
+                "folder": UUID_PE,
+                "team_email": "soc@acme.io",
+                "leader": UUID_D,
+                "deputies": [UUID_B],
+                "members": [UUID_B, UUID_C],
+            },
+        )
+
+    def test_minimal_payload(self):
+        post = Mock(return_value=_response(201, {"id": UUID_A, "name": "SOC"}))
+        with (
+            patch.object(write_tools, "make_post_request", post),
+            patch.object(write_tools, "GLOBAL_FOLDER_ID", None),
+        ):
+            run(write_tools.create_team(name="SOC"))
+        assert post.call_args.args == (
+            "/teams/",
+            {"name": "SOC", "description": ""},
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -759,6 +866,42 @@ class TestUpdateTools:
             assert "Error" in run(update_tools.update_perimeter(UUID_PE, lc_status="x"))
         patch_req.assert_not_called()
 
+    def test_update_team_payload(self):
+        with (
+            self._patch_ok({"id": UUID_A, "name": "SOC v2"}) as patch_req,
+            patch.object(update_tools, "resolve_team_id", return_value=UUID_A),
+            patch.object(update_tools, "resolve_user_id", return_value=UUID_D),
+            patch.object(update_tools, "resolve_user_ids", return_value=[UUID_B]),
+        ):
+            result = run(
+                update_tools.update_team(
+                    team_id="SOC",
+                    name="SOC v2",
+                    team_email="soc@acme.io",
+                    leader="enzo@acme.io",
+                    members=["Jo"],
+                )
+            )
+        assert "Updated team" in result
+        assert patch_req.call_args.args == (
+            f"/teams/{UUID_A}/",
+            {
+                "name": "SOC v2",
+                "team_email": "soc@acme.io",
+                "leader": UUID_D,
+                "members": [UUID_B],
+            },
+        )
+
+    def test_update_team_no_fields(self):
+        with (
+            self._patch_ok() as patch_req,
+            patch.object(update_tools, "resolve_team_id", return_value=UUID_A),
+        ):
+            result = run(update_tools.update_team(team_id=UUID_A))
+        patch_req.assert_not_called()
+        assert "No fields" in result
+
 
 # ---------------------------------------------------------------------------
 # server registration
@@ -782,10 +925,19 @@ class TestRegistration:
 
     def test_full_profile_has_new_tools(self):
         names = self._tool_names(read_only=False)
-        assert {"update_risk_assessment", "update_perimeter"} <= names
+        assert {
+            "update_risk_assessment",
+            "update_perimeter",
+            "get_teams",
+            "create_team",
+            "update_team",
+        } <= names
 
     def test_read_only_profile_hides_new_tools(self):
         names = self._tool_names(read_only=True)
         assert "update_risk_assessment" not in names
         assert "update_perimeter" not in names
+        assert "create_team" not in names
+        assert "update_team" not in names
         assert "get_users" in names
+        assert "get_teams" in names

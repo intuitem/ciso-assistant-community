@@ -244,6 +244,59 @@ async def create_folder(
         return f"Error in create_folder: {str(e)}"
 
 
+async def create_team(
+    name: str,
+    description: str = "",
+    folder_id: str = None,
+    team_email: str = None,
+    leader: str = None,
+    deputies: list = None,
+    members: list = None,
+) -> str:
+    """Create a team
+
+    Args:
+        name: Team name
+        description: Description
+        folder_id: Folder ID/name
+        team_email: Team contact email
+        leader: Leader as User UUID, email or name
+        deputies: List of deputies as User UUIDs, emails or names
+        members: List of members as User UUIDs, emails or names
+    """
+    try:
+        from ..resolvers import resolve_user_id, resolve_user_ids
+
+        if not folder_id and GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        payload = {
+            "name": name,
+            "description": description,
+        }
+
+        if folder_id:
+            payload["folder"] = resolve_folder_id(folder_id)
+        if team_email is not None:
+            payload["team_email"] = team_email
+        if leader is not None:
+            payload["leader"] = resolve_user_id(leader)
+        if deputies is not None:
+            payload["deputies"] = resolve_user_ids(deputies)
+        if members is not None:
+            payload["members"] = resolve_user_ids(members)
+
+        res = make_post_request("/teams/", payload)
+
+        if res.status_code == 201:
+            team = res.json()
+            return f"Created team: {team.get('name')} (ID: {team.get('id')})"
+        else:
+            return f"Error creating team: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_team: {str(e)}"
+
+
 async def create_perimeter(
     name: str,
     description: str = "",

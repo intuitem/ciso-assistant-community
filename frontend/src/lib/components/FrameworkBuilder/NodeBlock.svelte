@@ -10,6 +10,8 @@
 	import { getCardCollapsedContext } from './collapse-state';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import QuestionEditor from './QuestionEditor.svelte';
+	import CelInput from './CelInput.svelte';
+	import { getCelCatalogContext } from './cel-complete';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import AddNodeMenu from './AddNodeMenu.svelte';
 	import ReferentialLinks from './ReferentialLinks.svelte';
@@ -31,6 +33,7 @@
 		activeLanguage: activeLanguageStore
 	} = builder;
 	const urnCopy = createCopyHandler();
+	const celCatalog = getCelCatalogContext();
 
 	// --- Splash-specific state (only used when display_mode === 'splash') ---
 	let splashMode: 'edit' | 'preview' = $state('edit');
@@ -523,7 +526,9 @@
 									: node.node.description
 										? node.node.description.slice(0, 60) +
 											(node.node.description.length > 60 ? '...' : '')
-										: m.builderNodeNamePlaceholder()}
+										: isQuickForm
+											? m.builderPageNamePlaceholder()
+											: m.builderNodeNamePlaceholder()}
 								class="w-full text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:{isSplash
 									? 'border-purple-500'
 									: 'border-blue-500'} px-0.5 py-0.5 outline-none focus-visible:ring-2 {isSplash
@@ -889,15 +894,45 @@
 						title={m.builderVisibilityExpressionTooltip()}>&#9432;</span
 					>
 				</label>
-				<input
-					type="text"
+				<CelInput
 					class="w-full text-xs px-2 py-1 border border-surface-200-800 rounded font-mono bg-surface-50-950 focus:bg-surface-50-950 focus:{isSplash
 						? 'border-purple-300'
 						: 'border-blue-300'} focus:outline-none"
 					placeholder={m.builderVisibilityExpressionPlaceholder()}
 					value={node.node.visibility_expression ?? ''}
-					onblur={(e) => saveField('visibility_expression', e.currentTarget.value || null)}
+					catalog={celCatalog()}
+					place={{ where: 'visibility' }}
+					oncommit={(value) => saveField('visibility_expression', value || null)}
 				/>
+			</div>
+		{/if}
+
+		{#if isQuickForm}
+			<div class="px-4 py-2 flex items-center gap-2">
+				<label
+					class="text-[10px] font-semibold uppercase tracking-wider text-surface-500"
+					for="page-aggregation-{node.node.id}"
+				>
+					{m.builderPageScore()}
+					<span class="text-surface-500 ml-1 normal-case" title={m.builderPageScoreTooltip()}
+						>&#9432;</span
+					>
+				</label>
+				<select
+					id="page-aggregation-{node.node.id}"
+					class="text-xs border border-surface-200-800 rounded px-2 py-0.5 bg-surface-50-950"
+					value={node.node.aggregation ?? 'sum'}
+					onchange={(e) =>
+						saveField(
+							'aggregation',
+							e.currentTarget.value === 'sum' ? null : e.currentTarget.value
+						)}
+					data-testid="page-aggregation"
+				>
+					<option value="sum">{m.sum()}</option>
+					<option value="max">{m.maximum()}</option>
+					<option value="mean">{m.average()}</option>
+				</select>
 			</div>
 		{/if}
 

@@ -1,0 +1,24 @@
+{
+	"quick_form": {
+		"roots": ["response", "pages", "answers", "values", "computed_outcomes", "hidden_pages"],
+		"visibility_roots": ["response", "pages", "answers", "computed_outcomes", "hidden_pages"],
+		"response": [
+			"score",
+			"score_sum",
+			"score_max",
+			"answered_count",
+			"total_count",
+			"complete",
+			"scored_complete"
+		],
+		"pages": ["visible", "score", "score_max", "answered_count", "total_count"],
+		"answers": ["value", "score", "selected_choices", "weight", "type", "answered"]
+	},
+	"framework": {
+		"roots": ["assessment", "requirements", "answers", "computed_outcomes", "hidden_requirements"],
+		"visibility_roots": ["assessment", "requirements", "answers", "computed_outcomes"],
+		"assessment": ["score_sum", "score_max", "answered_count", "total_count"],
+		"requirements": ["score", "max_score", "result", "status"],
+		"answers": ["value", "score", "selected_choices", "weight", "type"]
+	}
+}
