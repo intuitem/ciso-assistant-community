@@ -52,6 +52,24 @@ OP_LOOKUPS = {
 
 GROUP_OPERATORS = ("and", "or", "not")
 
+# What a column (or an annotation) holds, as far as filtering and
+# aggregating are concerned. The kind decides the operators and the
+# aggregate functions a field may carry.
+KIND_BOOL = "bool"
+KIND_RELATION = "relation"
+KIND_NUMERIC = "numeric"
+KIND_DATE = "date"
+KIND_TEXT = "text"
+KINDS = (KIND_BOOL, KIND_RELATION, KIND_NUMERIC, KIND_DATE, KIND_TEXT)
+
+_KIND_OPS = {
+    KIND_BOOL: {"eq", "neq", "is_null"},
+    KIND_RELATION: {"eq", "neq", "in", "not_in", "is_null"},
+    KIND_NUMERIC: set(OP_LOOKUPS) - {"contains"},
+    KIND_DATE: set(OP_LOOKUPS) - {"contains"},
+    KIND_TEXT: set(OP_LOOKUPS),
+}
+
 
 # ---------- shape ----------
 
@@ -96,7 +114,7 @@ def walk_conditions(group):
         yield from walk_conditions(child)
 
 
-# ---------- columns and operators ----------
+# ---------- columns, kinds and operators ----------
 
 
 def get_model_field(model: type[Model], name: str) -> Field | None:
@@ -107,21 +125,43 @@ def get_model_field(model: type[Model], name: str) -> Field | None:
     return None
 
 
-def allowed_ops(field: Field | None) -> set[str]:
-    """Return the operators valid for ``field``'s column type; none for an
-    unknown column (fail closed). An untyped op either crashes at query time
-    or — worse — compiles on both databases with different rows: 'contains'
-    on a boolean LIKEs against 'true'/'false' on PostgreSQL (casts to text)
-    but against 0/1 on SQLite."""
+def column_kind(field: Field | None) -> str | None:
+    """The kind of a concrete column; None for an unknown column (fail
+    closed). Boolean before integer: BooleanField is not an IntegerField in
+    Django, but the order documents the intent."""
     if isinstance(field, BooleanField):
-        return {"eq", "neq", "is_null"}
+        return KIND_BOOL
     if isinstance(field, (ForeignKey, UUIDField)):
-        return {"eq", "neq", "in", "not_in", "is_null"}
-    if isinstance(field, (DateField, IntegerField, FloatField, DecimalField)):
-        return set(OP_LOOKUPS) - {"contains"}
+        return KIND_RELATION
+    if isinstance(field, (IntegerField, FloatField, DecimalField)):
+        return KIND_NUMERIC
+    if isinstance(field, DateField):  # DateTimeField subclasses DateField
+        return KIND_DATE
     if isinstance(field, Field):
-        return set(OP_LOOKUPS)
-    return set()
+        return KIND_TEXT
+    return None
+
+
+def field_kind(entry, name: str) -> str | None:
+    """The kind of a readable field of ``entry``: a concrete column's, or an
+    annotation's declared one. None when the entry has no such field."""
+    annotation = entry.annotations.get(name)
+    if annotation is not None:
+        return annotation.kind
+    return column_kind(get_model_field(entry.model, name))
+
+
+def ops_for_kind(kind: str | None) -> set[str]:
+    """The operators a kind can carry; none for an unknown kind. An untyped
+    op either crashes at query time or — worse — compiles on both databases
+    with different rows: 'contains' on a boolean LIKEs against 'true'/'false'
+    on PostgreSQL (casts to text) but against 0/1 on SQLite."""
+    return set(_KIND_OPS.get(kind, ()))
+
+
+def allowed_ops(field: Field | None) -> set[str]:
+    """The operators valid for a concrete column."""
+    return ops_for_kind(column_kind(field))
 
 
 # ---------- compilation ----------
@@ -184,7 +224,7 @@ def condition_to_q(condition, entry, allowed_fields, resolve=_identity):
     lookup = OP_LOOKUPS.get(op)
     if lookup is None:
         raise ReadError(f"unknown operator {op!r}")
-    if op not in allowed_ops(get_model_field(entry.model, field)):
+    if op not in ops_for_kind(field_kind(entry, field)):
         raise ReadError(f"operator {op!r} is not valid for field {field!r}")
     value = resolve(condition.get("value"))
     if op == "is_null":
@@ -240,3 +280,15 @@ def filters_to_q(tree, entry, allowed_fields, resolve=_identity):
     if tree in (None, {}):
         return Q()
     return group_to_q(tree, entry, allowed_fields, resolve)
+
+
+def referenced_fields(tree) -> set[str]:
+    """The field names a tree reads, so a caller can annotate only what a
+    read actually touches."""
+    if tree in (None, {}):
+        return set()
+    return {
+        condition.get("field")
+        for condition in walk_conditions(tree)
+        if condition.get("field")
+    }

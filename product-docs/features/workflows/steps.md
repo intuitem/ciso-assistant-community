@@ -24,7 +24,7 @@ An action does one thing: reads objects, creates one, sends an email, calls an e
 | Attach a file to an evidence | Adds a file, typed or downloaded, to an evidence |
 | Record a measurement | Files a number against a metric instance |
 | Post scan results | Files a batch of results against a technical posture |
-| Read objects | Queries objects with filters, as a page or a single match |
+| Read objects | Queries objects with filters, as a page, a single match or numbers about the matches |
 | HTTP request | Calls an external URL |
 | Send email | Sends plain-text email |
 | Ask AI for values | Asks the AI provider for named values, in the shape you define |
@@ -42,7 +42,7 @@ Every action's settings, outputs and required permission are in the [action refe
 
 ### Outputs
 
-Each action produces an output, a small structure other steps can reference as `{{nodes.<ref>.<path>}}`. A Read objects step exposes `count` and `results`, a Create object step exposes `created_object_id`, an HTTP request exposes `status` and `body`. **Save results to variables** copies chosen paths into variables, which is what a Condition needs.
+Each action produces an output, a small structure other steps can reference as `{{nodes.<ref>.<path>}}`. A Read objects step exposes `count` and `results` (or one value per aggregate), a Create object step exposes `created_object_id`, an HTTP request exposes `status` and `body`. **Save results to variables** copies chosen paths into variables, which is what a Condition needs.
 
 ### Failures
 

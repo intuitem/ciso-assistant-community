@@ -108,14 +108,14 @@ Queries objects of one kind inside the workflow's scope.
 | Setting | |
 |---|---|
 | Object to read | One of the readable objects below |
-| Mode | **List matching objects** returns a page, **First match only** returns a single object |
+| Mode | **List matching objects** returns a page, **First match only** returns a single object, **Numbers about the matches** returns aggregates and no rows (see below) |
 | Filters | A tree of conditions on the object's fields. Values are *expr* |
 | Order by | A field. Tick **Newest / highest first** for descending. Default: newest first |
 | Max results | Page size, default 25, capped by the instance (500 by default) |
 | Start at *expr* | Offset of the page, for manual paging |
 | Extra data to include | Values costly enough that they are only computed when asked for. Offered for the objects that have any |
 
-Output in list mode: `count` (total matches, not just this page), `results` (list of rows), `offset`, `next_offset` (0 when there is no further page). Output in first mode: `found` (boolean), `object` (a row or null). A miss is not an error.
+Output in list mode: `count` (total matches, not just this page), `results` (list of rows), `offset`, `next_offset` (0 when there is no further page). Output in first mode: `found` (boolean), `object` (a row or null). A miss is not an error. Output in aggregate mode: one value per aggregate, under its alias.
 
 Only objects inside the workflow's domain and sub-domains are returned, further narrowed to what the run identity may view. Permission: `view_<model>`.
 
@@ -123,7 +123,7 @@ Each row carries `id`, `name`, `created_at`, `updated_at` plus the fields below.
 
 | Model | Fields |
 |---|---|
-| `applied_control` | description, ref_id, status, eta, expiry_date, priority, link |
+| `applied_control` | description, ref_id, status, eta, expiry_date, priority, link, `evidences_count` |
 | `evidence` | description, status |
 | `incident` | description, ref_id, status, severity, link |
 | `asset` | description, ref_id, type, reference_link |
@@ -132,19 +132,21 @@ Each row carries `id`, `name`, `created_at`, `updated_at` plus the fields below.
 | `entity` | description, ref_id, mission, reference_link, is_active, default_dependency, default_penetration, default_maturity, default_trust |
 | `findings_assessment` | description, ref_id, status, eta, due_date |
 | `finding` | description, ref_id, status, severity, eta, due_date, priority |
-| `compliance_assessment` | description, ref_id, status, eta, due_date, plus computed `computed_outcome`, `scores`, `requirements` (total and count per result) |
+| `compliance_assessment` | description, ref_id, status, eta, due_date, framework, perimeter, plus computed `computed_outcome`, `progress`, `scores`, `requirements` (total and count per result) |
 | `risk_assessment` | description, ref_id, status, eta, due_date |
 | `entity_assessment` | description, status, eta, due_date |
 | `document_container` | description, ref_id, document_type |
 | `managed_document` | description, locale, default_locale, container, plus `document_type` and `current_revision` (id, version number, status). A locale variant with no title of its own reads under the document's name |
 | `document_revision` | version_number, status, source, change_summary, content, published_at, document. `content` is the markdown itself, so a long one is truncated in `{{nodes.…}}`; map it to a variable to pass a whole document to an AI step |
-| `requirement_assessment` | status, result, extended_result, score, is_scored, documentation_score, eta, due_date, observation, compliance_assessment, plus `requirement` (id, ref_id, name, description), `applied_controls` (each with its own `evidences`) and `evidences` attached to the requirement itself, all narrowed to what the run may see. Every evidence says whether anything is `attached`. Only assessable requirements |
-| `risk_scenario` | description, ref_id, treatment, inherent_level, current_level, residual_level, risk_assessment. Level filters ignore unrated scenarios |
+| `requirement_assessment` | status, result, extended_result, score, is_scored, documentation_score, eta, due_date, observation, compliance_assessment, `applied_controls_count`, `evidences_count`, plus `requirement` (id, ref_id, name, description), `applied_controls` (each with its own `evidences`) and `evidences` attached to the requirement itself, all narrowed to what the run may see. Every evidence says whether anything is `attached`. Only assessable requirements |
+| `risk_scenario` | description, ref_id, treatment, inherent_level, current_level, residual_level, risk_assessment, `applied_controls_count`. Level filters ignore unrated scenarios |
 | `risk_acceptance` | description, state, expiry_date, justification |
 | `validation_flow` | ref_id, status, validation_deadline |
 | `task_node` | status, due_date, scheduled_date, observation, task_template. One occurrence of a task. It has no name of its own, so `name` reads as the task's name with the occurrence's date |
 
 Fields with display labels (status, severity, priority, type) filter on the stored value and render as the label. Filter on `active`, read back `Active`.
+
+The `…_count` fields are computed by the database on every row: how many evidences back a control, how many controls and evidences a requirement claims, how many controls treat a scenario. They filter, order and aggregate like any number, so "controls with no evidence" is `evidences_count` equals `0`.
 
 Filter operators depend on the field type:
 
@@ -156,6 +158,31 @@ Filter operators depend on the field type:
 | Reference (another object) | equals, not equals, in, not in, is null |
 
 `in` and `not in` take a comma-separated list.
+
+#### Numbers about the matches
+
+In **Numbers about the matches** mode the step answers aggregates over every object the filters match, and no rows. Each aggregate names a function, usually a field, optionally a field to group by, and an alias; the output is one flat map keyed by alias.
+
+| Function | Over | Answers |
+|---|---|---|
+| Count | nothing | How many objects match |
+| Count distinct | any field | How many different values the field holds |
+| Sum, Average | a number | The total or the mean, ignoring empty values |
+| Minimum, Maximum | a number or a date | The smallest or largest value |
+| Median, Percentile, Standard deviation | a number | Computed in the worker (see below). Percentile takes `p` between 0 and 100 |
+
+**Group by** turns the answer into a breakdown keyed by the field's value: `{"active": 8, "to_do": 4}`. A count grouped by a field with fixed choices lists every choice, zeroes included, so a later expression never meets a missing key. Empty values group under `null`.
+
+The alias defaults to the function, the field and the grouping: `count`, `avg_priority`, `by_status`, `sum_score_by_result`. Set your own to read better in `{{nodes.<ref>.<alias>}}` and in a Compute expression.
+
+Count, count distinct, sum, average, minimum and maximum run in the database, as one query however many objects match. Median, percentile and standard deviation, and any function over a computed value such as an audit's `progress`, run in the worker: the step streams the matching rows, up to a ceiling the instance sets (10,000 by default), and fails rather than answer a number computed over some of them. Narrow the filters when that happens.
+
+A read in this mode carries no page, ordering or extra data: publishing refuses them. A Loop cannot page an aggregate read.
+
+| | |
+|---|---|
+| Read objects | Applied control, Numbers about the matches, aggregates: Count as `total`; Count with filter on `status` equals `active` as a second step, or Count grouped by `status` as `by_status` |
+| Compute | `active_share` = `by_status.active * 100.0 / total` |
 
 #### Including the quality check
 

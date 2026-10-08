@@ -1,11 +1,13 @@
-"""Turning a read configuration into rows.
+"""Turning a read configuration into rows, or into numbers about rows.
 
-A read configuration is ``{"model", "filters", "order_by", "mode", "limit",
-"offset", "include"}``. ``build_queryset`` compiles it against a
-``ReadScope`` — where the caller may look — into a queryset; ``serialize_row``
-turns a row into the JSON shape every consumer sees. The scope is explicit so
-the same code serves a workflow run (its folder subtree, narrowed to what its
-identity may view) and a system-side consumer with no identity at all.
+A read configuration is ``{"model", "mode", "filters", "order_by", "limit",
+"offset", "include", "aggregates"}``. ``build_queryset`` compiles it against
+a ``ReadScope`` — where the caller may look — into a queryset;
+``serialize_row`` turns a row into the JSON shape every consumer sees;
+``run_aggregates`` (in aggregates.py) answers an aggregate-mode read. The
+scope is explicit so the same code serves a workflow run (its folder subtree,
+narrowed to what its identity may view) and a system-side consumer with no
+identity at all.
 """
 
 from __future__ import annotations
@@ -19,19 +21,27 @@ from dataclasses import dataclass
 from django.conf import settings
 from django.db.models import Model, Prefetch, Q
 
+from . import aggregates as _aggregates
 from .entries import READABLE_MODELS, ReadEntry
 from .filters import (
     OP_LOOKUPS,
     ReadError,
-    allowed_ops,
+    field_kind,
     filters_to_q,
     get_model_field,
+    ops_for_kind,
+    referenced_fields,
     validate_filter_tree,
     walk_conditions,
 )
 
 READ_DEFAULT_LIMIT = 25
-READ_MODES = ("list", "first")
+MODE_LIST = "list"
+MODE_FIRST = "first"
+MODE_AGGREGATE = "aggregate"
+READ_MODES = (MODE_LIST, MODE_FIRST, MODE_AGGREGATE)
+# Keys that describe rows, meaningless when a read answers numbers.
+ROW_ONLY_KEYS = ("limit", "offset", "order_by", "include")
 
 
 def read_max_limit():
@@ -46,6 +56,10 @@ def page_limit(config):
         max(int(config.get("limit") or READ_DEFAULT_LIMIT), 1),
         read_max_limit(),
     )
+
+
+def read_mode(config):
+    return config.get("mode") or MODE_LIST
 
 
 # ---------- scope ----------
@@ -192,6 +206,25 @@ def _identity(value):
     return value
 
 
+def aggregate_specs(config, entry: ReadEntry):
+    """The normalized aggregates of an aggregate-mode config."""
+    return _aggregates.normalize_aggregates(config.get("aggregates"), entry, config)
+
+
+def _needed_annotations(entry, config, specs):
+    """Every annotation when rows are returned (they are part of the row);
+    only the referenced ones in aggregate mode, so a correlated subquery is
+    never paid for, nor dragged into a GROUP BY, without a reason."""
+    if read_mode(config) != MODE_AGGREGATE:
+        return dict(entry.annotations)
+    wanted = referenced_fields(config.get("filters")) | _aggregates.referenced_fields(
+        specs
+    )
+    return {
+        name: entry.annotations[name] for name in wanted if name in entry.annotations
+    }
+
+
 def build_queryset(config, scope: ReadScope, resolve=_identity):
     """``(entry, fields, queryset)`` for a read config within ``scope``.
     ``resolve`` maps a stored filter value to the one compared at run time.
@@ -201,19 +234,28 @@ def build_queryset(config, scope: ReadScope, resolve=_identity):
     entry = READABLE_MODELS.get(config.get("model"))
     if entry is None:
         raise ReadError(f"unknown model '{config.get('model')}'")
+    mode = read_mode(config)
+    if mode not in READ_MODES:
+        raise ReadError(f"unknown mode '{mode}'")
     fields = entry.readable_fields()
     computed = effective_computed(entry, config)
+    specs = aggregate_specs(config, entry) if mode == MODE_AGGREGATE else []
     query = filters_to_q(config.get("filters"), entry, set(fields), resolve)
 
     order_by = config.get("order_by") or "-created_at"
-    if order_by.lstrip("-") not in fields:
+    if mode != MODE_AGGREGATE and order_by.lstrip("-") not in fields:
         raise ReadError(f"'{order_by}' is not an orderable field")
 
-    queryset = (
-        scope.narrow(entry.model, entry.model.objects.filter(entry.base_filter or Q()))
-        .filter(query)
-        .order_by(order_by, "id")  # id tie-break keeps pagination stable
-    )
+    annotations = _needed_annotations(entry, config, specs)
+    queryset = entry.model.objects.filter(entry.base_filter or Q())
+    if annotations:
+        queryset = queryset.annotate(
+            **{name: annotation.expression for name, annotation in annotations.items()}
+        )
+    queryset = scope.narrow(entry.model, queryset).filter(query)
+    if mode == MODE_AGGREGATE:
+        return entry, fields, queryset.order_by()
+    queryset = queryset.order_by(order_by, "id")  # id tie-break keeps paging stable
     # Computed callables dereference these per row otherwise.
     if entry.prefetch_scoped:
         queryset = queryset.prefetch_related(*scoped_prefetches(entry, scope, computed))
@@ -222,6 +264,25 @@ def build_queryset(config, scope: ReadScope, resolve=_identity):
     if entry.prefetch_related:
         queryset = queryset.prefetch_related(*entry.prefetch_related)
     return entry, fields, queryset
+
+
+def run_aggregate_read(config, scope: ReadScope, resolve=_identity):
+    """An aggregate-mode read, start to finish: ``{alias: value}``."""
+    entry, _fields, queryset = build_queryset(config, scope, resolve)
+    specs = aggregate_specs(config, entry)
+    computed = effective_computed(entry, config)
+    if any(spec.computed is not None for spec in specs):
+        # The worker pass instantiates rows: give the computed callables the
+        # relations they walk, narrowed as a row read would narrow them.
+        if entry.prefetch_scoped:
+            queryset = queryset.prefetch_related(
+                *scoped_prefetches(entry, scope, computed)
+            )
+        if entry.select_related:
+            queryset = queryset.select_related(*entry.select_related)
+        if entry.prefetch_related:
+            queryset = queryset.prefetch_related(*entry.prefetch_related)
+    return _aggregates.run_aggregates(entry, queryset, specs, computed)
 
 
 # ---------- validation ----------
@@ -266,7 +327,7 @@ def validate_read_config(config, *, ops=None, modes=READ_MODES):
                 errors.append(
                     ("action_read_invalid_filters", f"Unknown operator {op!r}")
                 )
-            elif op not in allowed_ops(get_model_field(entry.model, field)):
+            elif op not in ops_for_kind(field_kind(entry, field)):
                 errors.append(
                     (
                         "action_read_invalid_filters",
@@ -281,9 +342,19 @@ def validate_read_config(config, *, ops=None, modes=READ_MODES):
                     )
                 )
 
-    if config.get("mode", "list") not in modes:
+    mode = read_mode(config)
+    if mode not in modes:
         errors.append(
             ("action_read_invalid_mode", f"Unknown mode '{config.get('mode')}'")
+        )
+    if mode == MODE_AGGREGATE:
+        return errors + _validate_aggregate_mode(config, entry)
+    if config.get("aggregates"):
+        errors.append(
+            (
+                "action_read_invalid_aggregate",
+                "'aggregates' only applies in aggregate mode",
+            )
         )
     order_by = config.get("order_by") or "-created_at"
     if not isinstance(order_by, str) or order_by.lstrip("-") not in fields:
@@ -306,4 +377,44 @@ def validate_read_config(config, *, ops=None, modes=READ_MODES):
                     f"Limit must be between 1 and {read_max_limit()}",
                 )
             )
+    return errors
+
+
+def _validate_aggregate_mode(config, entry):
+    """Aggregate mode: a non-empty, well-formed aggregates list and none of
+    the row-only keys. Each aggregate reports its own error so an author
+    sees them all."""
+    errors = []
+    for key in ROW_ONLY_KEYS:
+        if config.get(key) not in (None, "", []):
+            errors.append(
+                (
+                    "action_read_invalid_aggregate",
+                    f"'{key}' does not apply in aggregate mode",
+                )
+            )
+    raw = config.get("aggregates")
+    if not isinstance(raw, list) or not raw:
+        errors.append(
+            (
+                "action_read_invalid_aggregate",
+                "Aggregate mode needs at least one aggregate",
+            )
+        )
+        return errors
+    if len(raw) > _aggregates.MAX_AGGREGATES:
+        errors.append(
+            (
+                "action_read_invalid_aggregate",
+                f"At most {_aggregates.MAX_AGGREGATES} aggregates per read",
+            )
+        )
+    taken = []
+    for spec in raw:
+        try:
+            normalized = _aggregates.normalize_aggregate(spec, entry, config, taken)
+        except ReadError as e:
+            errors.append(("action_read_invalid_aggregate", str(e)))
+            continue
+        taken.append(normalized.alias)
     return errors

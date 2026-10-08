@@ -77,6 +77,7 @@ from tprm.models import Entity, EntityAssessment, EntityScore
 from .context import RESERVED_VARIABLE_KEYS, VARIABLE_KEY_RE, temporal_seeds
 from core.expressions import ExpressionError, compile_expression, evaluate
 from core.reads import (
+    MODE_AGGREGATE,
     READABLE_MODELS,
     ReadError,
     ReadScope,
@@ -85,6 +86,8 @@ from core.reads import (
     effective_computed,
     get_model_field,
     page_limit,
+    read_mode,
+    run_aggregate_read,
     serialize_row,
     subtree_folder_ids,
 )
@@ -1329,6 +1332,8 @@ class ReadObjectsAction(BaseAction):
 
     def execute(self, config, instance):
         context = _render_context(instance)
+        if read_mode(config) == MODE_AGGREGATE:
+            return self._aggregate(config, instance, context)
         try:
             entry, fields, queryset = self._queryset(config, instance)
             computed = _computed_for(entry, config)
@@ -1360,6 +1365,25 @@ class ReadObjectsAction(BaseAction):
             # A library update can shrink a matrix while scenarios keep
             # their old level indices; the computed cell lookups then
             # index past the new lists.
+            raise ActionError(
+                "read_objects: a stored level no longer exists in the risk matrix"
+            )
+
+    def _aggregate(self, config, instance, context):
+        """Numbers about the matching rows, keyed by alias. A worker-side
+        aggregate past its row ceiling is a config problem, not a transient
+        one: retrying would scan the same rows."""
+        try:
+            return run_aggregate_read(
+                config,
+                _read_scope(instance),
+                resolve=lambda value: render(value, context),
+            )
+        except ReadError as e:
+            raise FatalActionError(f"read_objects: {e}")
+        except (ValidationError, ValueError, TypeError) as e:
+            raise ActionError(f"read_objects: invalid filter value ({e})")
+        except IndexError:
             raise ActionError(
                 "read_objects: a stored level no longer exists in the risk matrix"
             )

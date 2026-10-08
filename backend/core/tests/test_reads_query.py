@@ -307,7 +307,8 @@ class TestBuildQueryset:
         config = {"model": key, "include": sorted(entry.optional_computed)}
         _entry, fields, queryset = build_queryset(config, scope)
         assert list(queryset) == []
-        assert set(fields) <= {f.name for f in entry.model._meta.concrete_fields}
+        columns = {f.name for f in entry.model._meta.concrete_fields}
+        assert set(fields) - set(entry.annotations) <= columns
 
 
 @pytest.mark.django_db

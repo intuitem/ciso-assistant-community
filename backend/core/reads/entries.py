@@ -13,7 +13,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 
-from django.db.models import Model, Q
+from django.db.models import Count, Model, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
 
 from core.models import (
     AppliedControl,
@@ -39,6 +40,19 @@ from tprm.models import Entity, EntityAssessment
 
 # Columns every readable model exposes, when it has them.
 BASE_READ_FIELDS = ["id", "name", "created_at", "updated_at"]
+
+
+@dataclass(frozen=True)
+class Annotation:
+    """A database-side value a read may filter, order and aggregate on as if
+    it were a column. ``expression`` must be a correlated subquery or a
+    scalar expression, never an aggregate over a join: an outer aggregate
+    would drag every row into a GROUP BY and poison aggregate mode. ``kind``
+    is one of filters.KINDS and decides the operators and functions offered.
+    """
+
+    expression: object
+    kind: str
 
 
 @dataclass(frozen=True)
@@ -78,13 +92,40 @@ class ReadEntry:
     #: The same, for the to-many relations a computed walks — without it a
     #: read pays one query per row per relation.
     prefetch_related: list[str] = dataclass_field(default_factory=list)
+    #: Database-side values, name -> Annotation: readable, filterable,
+    #: orderable and aggregatable like a column, computed by the database.
+    annotations: dict[str, Annotation] = dataclass_field(default_factory=dict)
 
     def readable_fields(self) -> list[str]:
         """Return the field names a read node may output, filter and order
         by: BASE_READ_FIELDS trimmed to columns the model actually has (e.g.
-        RequirementAssessment has no name column), plus ``fields``."""
+        RequirementAssessment has no name column), plus ``fields``, plus the
+        annotations."""
         columns = {field.name for field in self.model._meta.concrete_fields}
-        return [field for field in BASE_READ_FIELDS if field in columns] + self.fields
+        return (
+            [field for field in BASE_READ_FIELDS if field in columns]
+            + self.fields
+            + list(self.annotations)
+        )
+
+
+def related_count(model, relation):
+    """How many rows of ``model`` point at the outer row through
+    ``relation`` (a field of ``model``), as a correlated subquery: zero when
+    none do, and never a GROUP BY on the outer query."""
+    return Annotation(
+        expression=Coalesce(
+            Subquery(
+                model.objects.filter(**{relation: OuterRef("pk")})
+                .order_by()
+                .values(relation)
+                .annotate(n=Count("pk"))
+                .values("n")[:1]
+            ),
+            0,
+        ),
+        kind="numeric",
+    )
 
 
 def _quick_form_answers(response):
@@ -196,6 +237,7 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "link",
         ],
         computed={"priority": lambda o: o.get_priority_display()},
+        annotations={"evidences_count": related_count(Evidence, "applied_controls")},
     ),
     "evidence": ReadEntry(
         model=Evidence,
@@ -272,12 +314,24 @@ READABLE_MODELS: dict[str, ReadEntry] = {
     ),
     "compliance_assessment": ReadEntry(
         model=ComplianceAssessment,
-        fields=["description", "ref_id", "status", "eta", "due_date"],
+        fields=[
+            "description",
+            "ref_id",
+            "status",
+            "eta",
+            "due_date",
+            "framework",
+            "perimeter",
+        ],
         # Output-only values (never filterable/orderable — they don't exist as
         # queryable columns). Each callable may run its own queries per row,
         # which the list cap bounds.
         computed={
             "computed_outcome": lambda ca: ca.computed_outcome,
+            # The audit's own progress rule: per-audit modes (status-driven,
+            # result-visible, questions, implementation groups) make it a
+            # Python value, so an aggregate over it runs in the worker.
+            "progress": lambda ca: ca.progress,
             "scores": lambda ca: ca.get_global_score(),
             "requirements": _requirements_breakdown,
             # Actor ids, the shape task_template's assignees take.
@@ -442,6 +496,12 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             ],
         },
         select_related=["requirement", "compliance_assessment"],
+        annotations={
+            "applied_controls_count": related_count(
+                AppliedControl, "requirement_assessments"
+            ),
+            "evidences_count": related_count(Evidence, "requirement_assessments"),
+        },
         # Keyed by the computed value that needs it: unasked, unqueried.
         prefetch_scoped={
             "applied_controls": {
@@ -483,6 +543,9 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             },
         },
         select_related=["risk_assessment__risk_matrix"],
+        annotations={
+            "applied_controls_count": related_count(AppliedControl, "risk_scenarios")
+        },
     ),
     "risk_acceptance": ReadEntry(
         model=RiskAcceptance,

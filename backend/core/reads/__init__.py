@@ -1,32 +1,64 @@
 """Reading objects through a declared surface.
 
 ``READABLE_MODELS`` says which models may be read and how; the filter tree
-says which rows; ``ReadScope`` says where the caller may look. The workflow
-engine's ``read_objects`` action is one consumer; derived metrics are another.
+says which rows; ``ReadScope`` says where the caller may look; aggregate mode
+answers numbers about the rows instead of the rows. The workflow engine's
+``read_objects`` action is one consumer; derived metrics are another.
 """
 
-from .entries import BASE_READ_FIELDS, READABLE_MODELS, ReadEntry
+from .aggregates import (
+    AGGREGATES,
+    ENGINE_DB,
+    ENGINE_PYTHON,
+    MAX_AGGREGATES,
+    AggregateFn,
+    AggregateSpec,
+    aggregate_max_rows,
+    function_catalog,
+    normalize_aggregate,
+    normalize_aggregates,
+    run_aggregates,
+)
+from .entries import (
+    BASE_READ_FIELDS,
+    READABLE_MODELS,
+    Annotation,
+    ReadEntry,
+    related_count,
+)
 from .filters import (
+    KINDS,
     MAX_FILTER_DEPTH,
     OP_LOOKUPS,
     ReadError,
     allowed_ops,
+    column_kind,
     condition_to_q,
+    field_kind,
     filters_to_q,
     get_model_field,
     group_to_q,
+    ops_for_kind,
+    referenced_fields,
     validate_filter_tree,
     walk_conditions,
 )
 from .query import (
+    MODE_AGGREGATE,
+    MODE_FIRST,
+    MODE_LIST,
     READ_DEFAULT_LIMIT,
     READ_MODES,
+    ROW_ONLY_KEYS,
     ReadScope,
     accessible_folder_ids,
+    aggregate_specs,
     build_queryset,
     effective_computed,
     page_limit,
     read_max_limit,
+    read_mode,
+    run_aggregate_read,
     scoped_prefetches,
     serialize_row,
     subtree_folder_ids,
@@ -34,25 +66,50 @@ from .query import (
 )
 
 __all__ = [
+    "AGGREGATES",
     "BASE_READ_FIELDS",
+    "ENGINE_DB",
+    "ENGINE_PYTHON",
+    "KINDS",
+    "MAX_AGGREGATES",
     "MAX_FILTER_DEPTH",
+    "MODE_AGGREGATE",
+    "MODE_FIRST",
+    "MODE_LIST",
     "OP_LOOKUPS",
     "READABLE_MODELS",
     "READ_DEFAULT_LIMIT",
     "READ_MODES",
+    "ROW_ONLY_KEYS",
+    "AggregateFn",
+    "AggregateSpec",
+    "Annotation",
     "ReadEntry",
     "ReadError",
     "ReadScope",
     "accessible_folder_ids",
+    "aggregate_max_rows",
+    "aggregate_specs",
     "allowed_ops",
     "build_queryset",
+    "column_kind",
     "condition_to_q",
     "effective_computed",
+    "field_kind",
     "filters_to_q",
+    "function_catalog",
     "get_model_field",
     "group_to_q",
+    "normalize_aggregate",
+    "normalize_aggregates",
+    "ops_for_kind",
     "page_limit",
     "read_max_limit",
+    "read_mode",
+    "referenced_fields",
+    "related_count",
+    "run_aggregate_read",
+    "run_aggregates",
     "scoped_prefetches",
     "serialize_row",
     "subtree_folder_ids",

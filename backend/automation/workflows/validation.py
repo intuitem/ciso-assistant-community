@@ -360,6 +360,13 @@ def _validate_loop_read(node):
                 "A loop reads its own pages or iterates a collection, not both",
             )
         ]
+    if read_config.get("mode") == "aggregate":
+        return [
+            (
+                "loop_read_invalid",
+                "A loop pages rows; aggregate mode returns none",
+            )
+        ]
     probe = WorkflowNode(action_config={**read_config, "type": "read_objects"})
     return _validate_read_config(probe)
 

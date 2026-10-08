@@ -44,8 +44,22 @@ class TestEveryEntry:
         columns = {f.name for f in entry.model._meta.concrete_fields}
         for base in BASE_READ_FIELDS:
             assert (base in readable) == (base in columns), f"{key}.{base}"
-        assert readable[len(readable) - len(entry.fields) :] == entry.fields
+        tail = len(entry.fields) + len(entry.annotations)
+        assert readable[-tail:] == entry.fields + list(entry.annotations)
         assert len(readable) == len(set(readable)), f"{key} lists a column twice"
+
+    def test_annotations_are_not_columns_and_declare_a_kind(self, key, entry):
+        from core.reads import KINDS, Annotation
+
+        for name, annotation in entry.annotations.items():
+            assert isinstance(annotation, Annotation), f"{key}.{name}"
+            assert annotation.kind in KINDS, f"{key}.{name}"
+            assert get_model_field(entry.model, name) is None, (
+                f"{key}.{name} shadows a column"
+            )
+            assert name not in entry.fields and name not in entry.computed, (
+                f"{key}.{name}"
+            )
 
     def test_the_model_is_folder_scoped(self, key, entry):
         assert get_model_field(entry.model, "folder") is not None, key
