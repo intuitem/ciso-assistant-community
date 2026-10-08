@@ -125,3 +125,19 @@ After the import, open the library in the Catalog and check that its objects and
 If the library contains a Framework, create a test audit before using it for a real one. Check the hierarchy and assessable requirements, then try any questions, answer choices, scores, Implementation Groups, and translations you added. See [Creating your first Audit](../../guides/first-audit.md) if you need help setting one up.
 
 If something is missing or misplaced, correct the source workbook. You can then [update the library](update-library.md), or [unload and delete it](unload-or-delete-library.md) before importing the corrected file if no audit depends on it.
+
+## (Old) Videos
+
+{% hint style="danger" %}
+**IMPORTANT NOTICE**: The following sections contain information that is no longer up to date, but some parts are still useful today. Please consult them with caution.
+{% endhint %}
+
+### Testing your custom framework
+
+{% embed url="https://vimeo.com/948010642?fe=cm&fl=pl" %}
+{% endembed %}
+
+### Full guide (French)
+
+{% embed url="https://youtu.be/Ze8fp4_F0I4" %}
+{% endembed %}
