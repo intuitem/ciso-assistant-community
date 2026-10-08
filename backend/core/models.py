@@ -1,4 +1,3 @@
-import copy
 import math
 from decimal import ROUND_HALF_UP, Decimal
 from fractions import Fraction
@@ -9186,17 +9185,16 @@ class ComplianceAssessment(Assessment):
             self.score_scale_preset = None
         creating = self._state.adding
         loaded = getattr(self, "_loaded_cel_values", {})
-        cel_changed = any(
-            getattr(self, f) != value
-            for f, value in loaded.items()
-            if f in (kwargs.get("update_fields") or self._CEL_RELEVANT_FIELDS)
+        update_fields = kwargs.get("update_fields")
+        saved = self._CEL_RELEVANT_FIELDS & set(
+            update_fields if update_fields is not None else self._CEL_RELEVANT_FIELDS
+        )
+        cel_changed = not creating and any(
+            f not in loaded or getattr(self, f) != loaded[f] for f in saved
         )
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
-        if creating or cel_changed:
-            self._loaded_cel_values = self._cel_snapshot(
-                self._CEL_RELEVANT_FIELDS if creating else loaded
-            )
+        self._loaded_cel_values = {**loaded, **self._cel_snapshot(saved)}
         if cel_changed or (creating and self.framework.outcomes_definition):
             defer_outcome_evaluation(self.pk)
 

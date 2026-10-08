@@ -365,6 +365,21 @@ class TestReEvaluation:
         ca.refresh_from_db()
         assert "on_b" not in ca.computed_outcome
 
+    def test_a_field_left_out_of_a_partial_save_is_still_detected(
+        self, levels, django_capture_on_commit_callbacks
+    ):
+        _rules(levels, self.RULES)
+        assert "on_b" in _evaluate(levels).computed_outcome
+        ca = ComplianceAssessment.objects.get(pk=levels["ca"].pk)
+        ca.selected_implementation_groups = ["A"]
+        ca.target_score = 4
+        with django_capture_on_commit_callbacks(execute=True):
+            ca.save(update_fields=["target_score"])
+        with django_capture_on_commit_callbacks(execute=True):
+            ca.save(update_fields=["selected_implementation_groups"])
+        ca.refresh_from_db()
+        assert "on_b" not in ca.computed_outcome
+
     def test_a_rolled_back_change_does_not_block_the_next(
         self, levels, django_capture_on_commit_callbacks
     ):
