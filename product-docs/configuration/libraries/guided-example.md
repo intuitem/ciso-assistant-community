@@ -112,7 +112,9 @@ This planning step matters. If the hierarchy turns out to be wrong after you hav
 Some Frameworks can have sections or requirements without an identifier. In that case, leave `ref_id` empty for those rows and fill in `name`, `description`, or both.
 {% endhint %}
 
-## Add the first section to `fwk_content`
+## Build the Framework hierarchy in `fwk_content`
+
+### Add the first section
 
 Start with **Access and identity**. Add its heading at `depth` `1` with an empty `assessable` cell, then add its requirements at `depth` `2` with `x` in `assessable`. For now, fill only `ref_id`, `name`, and `description` alongside these two columns.
 
@@ -129,7 +131,7 @@ The PDF uses identifiers such as `OH 1.1`. As a best practice, we avoid spaces i
 
 If you are still unsure about the outline, you can enter just the three main section headings in Excel first and check whether the structure makes sense. Then add their requirements. Leave the questions, review themes, and score scale for later. The goal here is to establish the Framework's hierarchy before adding more objects.
 
-## Add the second section to `fwk_content`
+### Add the second section
 
 Continue in the same sheet with **Habitat and equipment**. Its heading is at `depth` `1`, just like the first section.
 
@@ -150,7 +152,7 @@ The source also includes assessment questions under `OH 2.2`. We keep only the r
 If you want a reminder, you can add the `questions` column now and put a temporary `x` in the `OH.2.2` row.
 {% endhint %}
 
-## Add the third section to `fwk_content`
+### Add the third section
 
 The final section, **Monitoring and response**, follows the simpler pattern we used for the first one: one heading at `depth` `1`, followed by three assessable requirements at `depth` `2`.
 
